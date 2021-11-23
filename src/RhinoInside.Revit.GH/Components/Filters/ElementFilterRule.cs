@@ -5,7 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Components.Filters
@@ -29,39 +29,39 @@ namespace RhinoInside.Revit.GH.Components.Filters
       manager.AddParameter(new Parameters.FilterRule(), "Rule", "R", string.Empty, GH_ParamAccess.item);
     }
 
-    static readonly Dictionary<DB.BuiltInParameter, EDBS.DataType> BuiltInParametersTypes = new Dictionary<DB.BuiltInParameter, EDBS.DataType>();
+    static readonly Dictionary<ARDB.BuiltInParameter, EDBS.DataType> BuiltInParametersTypes = new Dictionary<ARDB.BuiltInParameter, EDBS.DataType>();
 
-    internal static bool TryGetParameterDefinition(DB.Document doc, DB.ElementId id, out DB.StorageType storageType, out EDBS.DataType dataType)
+    internal static bool TryGetParameterDefinition(ARDB.Document doc, ARDB.ElementId id, out ARDB.StorageType storageType, out EDBS.DataType dataType)
     {
       if (id.TryGetBuiltInParameter(out var builtInParameter))
       {
         storageType = doc.get_TypeOfStorage(builtInParameter);
 
-        if (storageType == DB.StorageType.ElementId)
+        if (storageType == ARDB.StorageType.ElementId)
         {
           dataType = EDBS.SpecType.Int.Integer;
           return true;
         }
 
-        if (storageType == DB.StorageType.Double)
+        if (storageType == ARDB.StorageType.Double)
         {
           if (BuiltInParametersTypes.TryGetValue(builtInParameter, out dataType))
             return true;
 
           var categoriesWhereDefined = doc.GetBuiltInCategoriesWithParameters().
-            Select(bic => new DB.ElementId(bic)).
-            Where(cid => DB.TableView.GetAvailableParameters(doc, cid).Contains(id)).
+            Select(bic => new ARDB.ElementId(bic)).
+            Where(cid => ARDB.TableView.GetAvailableParameters(doc, cid).Contains(id)).
             ToArray();
 
-          using (var collector = new DB.FilteredElementCollector(doc))
+          using (var collector = new ARDB.FilteredElementCollector(doc))
           {
             using
             (
               var filteredCollector = categoriesWhereDefined.Length == 0 ?
-              collector.WherePasses(new DB.ElementClassFilter(typeof(DB.ParameterElement), false)) :
+              collector.WherePasses(new ARDB.ElementClassFilter(typeof(ARDB.ParameterElement), false)) :
               categoriesWhereDefined.Length > 1 ?
-                collector.WherePasses(new DB.ElementMulticategoryFilter(categoriesWhereDefined)) :
-                collector.WherePasses(new DB.ElementCategoryFilter(categoriesWhereDefined[0]))
+                collector.WherePasses(new ARDB.ElementMulticategoryFilter(categoriesWhereDefined)) :
+                collector.WherePasses(new ARDB.ElementCategoryFilter(categoriesWhereDefined[0]))
             )
             {
               foreach (var element in filteredCollector)
@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       {
         try
         {
-          if (doc?.GetElement(id) is DB.ParameterElement parameter)
+          if (doc?.GetElement(id) is ARDB.ParameterElement parameter)
           {
             dataType = parameter.GetDefinition().GetDataType();
             storageType = dataType.ToStorageType();
@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
       }
 
-      storageType = DB.StorageType.None;
+      storageType = ARDB.StorageType.None;
       dataType = EDBS.SpecType.Empty;
       return false;
     }
@@ -127,7 +127,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!TryGetParameterDefinition(parameterKey.Document, parameterKey.Id, out var storageType, out var dataType))
       {
         if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
         else
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Name}' in Revit document.");
 
@@ -135,75 +135,75 @@ namespace RhinoInside.Revit.GH.Components.Filters
       }
 
       // Do a guess based on the Value content
-      if (storageType == DB.StorageType.None)
+      if (storageType == ARDB.StorageType.None)
       {
         var goo = default(IGH_Goo);
         if (!DA.GetData("Value", ref goo)) return;
 
         switch (goo)
         {
-          case GH_Boolean _:          storageType = DB.StorageType.Integer; break;
-          case GH_Integer _:          storageType = DB.StorageType.Integer; break;
-          case GH_Number _:           storageType = DB.StorageType.Double; break;
-          case GH_String _:           storageType = DB.StorageType.String; break;
-          case Types.IGH_ElementId _: storageType = DB.StorageType.ElementId; break;
+          case GH_Boolean _:          storageType = ARDB.StorageType.Integer; break;
+          case GH_Integer _:          storageType = ARDB.StorageType.Integer; break;
+          case GH_Number _:           storageType = ARDB.StorageType.Double; break;
+          case GH_String _:           storageType = ARDB.StorageType.String; break;
+          case Types.IGH_ElementId _: storageType = ARDB.StorageType.ElementId; break;
           default:
             switch (goo.ScriptVariable())
             {
-              case bool _: storageType = DB.StorageType.Integer; break;
-              case int _: storageType = DB.StorageType.Integer; break;
-              case double _: storageType = DB.StorageType.Double; break;
-              case string _: storageType = DB.StorageType.String; break;
-              case DB.Element _: storageType = DB.StorageType.ElementId; break;
+              case bool _: storageType = ARDB.StorageType.Integer; break;
+              case int _: storageType = ARDB.StorageType.Integer; break;
+              case double _: storageType = ARDB.StorageType.Double; break;
+              case string _: storageType = ARDB.StorageType.String; break;
+              case ARDB.Element _: storageType = ARDB.StorageType.ElementId; break;
             }
             break;
         }
       }
 
-      var provider = new DB.ParameterValueProvider(parameterKey.Id);
+      var provider = new ARDB.ParameterValueProvider(parameterKey.Id);
 
-      DB.FilterRule rule = null;
-      if (storageType == DB.StorageType.String)
+      ARDB.FilterRule rule = null;
+      if (storageType == ARDB.StorageType.String)
       {
-        DB.FilterStringRuleEvaluator ruleEvaluator = null;
+        ARDB.FilterStringRuleEvaluator ruleEvaluator = null;
         switch (Condition)
         {
           case ConditionType.NotEquals:
-          case ConditionType.Equals:          ruleEvaluator = new DB.FilterStringEquals();          break;
-          case ConditionType.Greater:         ruleEvaluator = new DB.FilterStringGreater();         break;
-          case ConditionType.GreaterOrEqual:  ruleEvaluator = new DB.FilterStringGreaterOrEqual();  break;
-          case ConditionType.Less:            ruleEvaluator = new DB.FilterStringLess();            break;
-          case ConditionType.LessOrEqual:     ruleEvaluator = new DB.FilterStringLessOrEqual();     break;
+          case ConditionType.Equals:          ruleEvaluator = new ARDB.FilterStringEquals();          break;
+          case ConditionType.Greater:         ruleEvaluator = new ARDB.FilterStringGreater();         break;
+          case ConditionType.GreaterOrEqual:  ruleEvaluator = new ARDB.FilterStringGreaterOrEqual();  break;
+          case ConditionType.Less:            ruleEvaluator = new ARDB.FilterStringLess();            break;
+          case ConditionType.LessOrEqual:     ruleEvaluator = new ARDB.FilterStringLessOrEqual();     break;
         }
 
         var goo = default(GH_String);
         if (DA.GetData("Value", ref goo) && goo.Value is string value)
-          rule = new DB.FilterStringRule(provider, ruleEvaluator, value, true);
+          rule = new ARDB.FilterStringRule(provider, ruleEvaluator, value, true);
       }
       else
       {
-        DB.FilterNumericRuleEvaluator ruleEvaluator = null;
+        ARDB.FilterNumericRuleEvaluator ruleEvaluator = null;
         switch (Condition)
         {
           case ConditionType.NotEquals:
-          case ConditionType.Equals:          ruleEvaluator = new DB.FilterNumericEquals();         break;
-          case ConditionType.Greater:         ruleEvaluator = new DB.FilterNumericGreater();        break;
-          case ConditionType.GreaterOrEqual:  ruleEvaluator = new DB.FilterNumericGreaterOrEqual(); break;
-          case ConditionType.Less:            ruleEvaluator = new DB.FilterNumericLess();           break;
-          case ConditionType.LessOrEqual:     ruleEvaluator = new DB.FilterNumericLessOrEqual();    break;
+          case ConditionType.Equals:          ruleEvaluator = new ARDB.FilterNumericEquals();         break;
+          case ConditionType.Greater:         ruleEvaluator = new ARDB.FilterNumericGreater();        break;
+          case ConditionType.GreaterOrEqual:  ruleEvaluator = new ARDB.FilterNumericGreaterOrEqual(); break;
+          case ConditionType.Less:            ruleEvaluator = new ARDB.FilterNumericLess();           break;
+          case ConditionType.LessOrEqual:     ruleEvaluator = new ARDB.FilterNumericLessOrEqual();    break;
         }
 
         switch (storageType)
         {
-          case DB.StorageType.Integer:
+          case ARDB.StorageType.Integer:
           {
             var goo = default(GH_Integer);
             if (DA.GetData("Value", ref goo))
-              rule = new DB.FilterIntegerRule(provider, ruleEvaluator, goo.Value);
+              rule = new ARDB.FilterIntegerRule(provider, ruleEvaluator, goo.Value);
           }
           break;
 
-          case DB.StorageType.Double:
+          case ARDB.StorageType.Double:
           {
             var goo = default(GH_Number);
             if (DA.GetData("Value", ref goo))
@@ -241,16 +241,16 @@ namespace RhinoInside.Revit.GH.Components.Filters
                 }
               }
 
-              rule = new DB.FilterDoubleRule(provider, ruleEvaluator, value, tol);
+              rule = new ARDB.FilterDoubleRule(provider, ruleEvaluator, value, tol);
             }
           }
           break;
 
-          case DB.StorageType.ElementId:
+          case ARDB.StorageType.ElementId:
           {
-            var value = default(DB.ElementId);
+            var value = default(ARDB.ElementId);
             if (DA.GetData("Value", ref value))
-              rule = new DB.FilterElementIdRule(provider, ruleEvaluator, value);
+              rule = new ARDB.FilterElementIdRule(provider, ruleEvaluator, value);
           }
           break;
         }
@@ -259,7 +259,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (rule is object)
       {
         if (Condition == ConditionType.NotEquals)
-          DA.SetData("Rule", new DB.FilterInverseRule(rule));
+          DA.SetData("Rule", new ARDB.FilterInverseRule(rule));
         else
           DA.SetData("Rule", rule);
       }
@@ -377,45 +377,45 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!ElementFilterRule.TryGetParameterDefinition(parameterKey.Document, parameterKey.Id, out var storageType, out var dataType))
       {
         if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
         else
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Name}' in Revit document.");
 
         return;
       }
 
-      if (storageType != DB.StorageType.String)
+      if (storageType != ARDB.StorageType.String)
       {
         if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' is not a text parameter.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not a text parameter.");
         else
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterKey.Id.IntegerValue}' is not a text parameter.");
 
         return;
       }
 
-      var provider = new DB.ParameterValueProvider(parameterKey.Id);
+      var provider = new ARDB.ParameterValueProvider(parameterKey.Id);
 
-      DB.FilterRule rule = null;
-      if (storageType == DB.StorageType.String)
+      ARDB.FilterRule rule = null;
+      if (storageType == ARDB.StorageType.String)
       {
-        DB.FilterStringRuleEvaluator ruleEvaluator = null;
+        ARDB.FilterStringRuleEvaluator ruleEvaluator = null;
         switch (Condition)
         {
-          case ConditionType.Contains: ruleEvaluator = new DB.FilterStringContains(); break;
-          case ConditionType.BeginsWith: ruleEvaluator = new DB.FilterStringBeginsWith(); break;
-          case ConditionType.EndsWith: ruleEvaluator = new DB.FilterStringEndsWith(); break;
+          case ConditionType.Contains: ruleEvaluator = new ARDB.FilterStringContains(); break;
+          case ConditionType.BeginsWith: ruleEvaluator = new ARDB.FilterStringBeginsWith(); break;
+          case ConditionType.EndsWith: ruleEvaluator = new ARDB.FilterStringEndsWith(); break;
         }
 
         var goo = default(GH_String);
         if (DA.GetData("Value", ref goo))
-          rule = new DB.FilterStringRule(provider, ruleEvaluator, goo.Value, true);
+          rule = new ARDB.FilterStringRule(provider, ruleEvaluator, goo.Value, true);
       }
 
       if (rule is object)
       {
         if (inverted)
-          DA.SetData("Rule", new DB.FilterInverseRule(rule));
+          DA.SetData("Rule", new ARDB.FilterInverseRule(rule));
         else
           DA.SetData("Rule", rule);
       }
@@ -483,7 +483,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         return;
 
       var categoryIds = categories.Select(x => x.Id).ToList();
-      var rule = new DB.FilterCategoryRule(categoryIds);
+      var rule = new ARDB.FilterCategoryRule(categoryIds);
 
       DA.SetData("Rule", rule);
     }

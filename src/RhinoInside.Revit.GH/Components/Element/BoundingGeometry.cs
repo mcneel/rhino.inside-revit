@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Geometry
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   public class ElementBoundingGeometry : Component
   {
     public override Guid ComponentGuid => new Guid("3396DBC4-0E8F-4402-969A-EF5A0E30E093");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override string IconTag => "EBG";
+    protected override string IconTag => "BG";
 
     public ElementBoundingGeometry() : base
     (
@@ -51,13 +52,13 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // grab input wall type
-      DB.Element element = default;
+      ARDB.Element element = default;
       if (!DA.GetData("Element", ref element))
         return;
 
       switch (element)
       {
-        case DB.Wall wall:
+        case ARDB.Wall wall:
           // extract the bounding geometry of the wall and set on output
           DA.SetData("Bounding Geometry", ComputeWallBoundingGeometry(wall));
           break;
@@ -72,17 +73,17 @@ namespace RhinoInside.Revit.GH.Components
     /// For Basic Walls the bounding geometry is identical to the default wall geometry
     /// </summary>
     /// <returns>Bounding geometry of a wall</returns>
-    static Brep ComputeWallBoundingGeometry(DB.Wall wall)
+    static Brep ComputeWallBoundingGeometry(ARDB.Wall wall)
     {
       // TODO: brep creation might be crude and could use performance improvements
 
       // extract global properties
       // e.g. base height, thickness, ...
-      var height = wall.get_Parameter(DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble() * Revit.ModelUnits;
+      var height = wall.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble() * Revit.ModelUnits;
       var thickness = wall.GetWidth() * Revit.ModelUnits;
       // construct a base offset plane that is used later to offset base curves
       var offsetPlane = Plane.WorldXY;
-      var baseElevation = wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
+      var baseElevation = wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
 
       // calculate slant
       double topOffset = double.NaN;
@@ -109,7 +110,7 @@ namespace RhinoInside.Revit.GH.Components
 
       // get the base curve of wall (center curve), and wall thickness
       // this will be used to create a bottom-profile of the wall
-      var baseCurve = ((DB.LocationCurve) wall.Location).Curve.ToCurve();
+      var baseCurve = ((ARDB.LocationCurve) wall.Location).Curve.ToCurve();
       // transform to where the wall base is
       baseCurve.Translate(0, 0, baseElevation);
 

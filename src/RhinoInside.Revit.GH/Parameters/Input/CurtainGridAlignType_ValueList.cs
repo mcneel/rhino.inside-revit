@@ -1,7 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -20,10 +20,10 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
 
-      ListItems.Add(new GH_ValueListItem("No Justify", ((int) DB.CurtainGridAlignType.NoJustify).ToString()));
-      ListItems.Add(new GH_ValueListItem("Beginning", ((int) DB.CurtainGridAlignType.Beginning).ToString()));
-      ListItems.Add(new GH_ValueListItem("Center", ((int) DB.CurtainGridAlignType.Center).ToString()));
-      ListItems.Add(new GH_ValueListItem("End", ((int) DB.CurtainGridAlignType.End).ToString()));
+      ListItems.Add(new GH_ValueListItem("No Justify", ((int) ARDB.CurtainGridAlignType.NoJustify).ToString()));
+      ListItems.Add(new GH_ValueListItem("Beginning", ((int) ARDB.CurtainGridAlignType.Beginning).ToString()));
+      ListItems.Add(new GH_ValueListItem("Center", ((int) ARDB.CurtainGridAlignType.Center).ToString()));
+      ListItems.Add(new GH_ValueListItem("End", ((int) ARDB.CurtainGridAlignType.End).ToString()));
     }
   }
 }

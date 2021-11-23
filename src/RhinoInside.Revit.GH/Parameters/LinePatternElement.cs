@@ -4,12 +4,11 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class LinePatternElement : Element<Types.LinePatternElement, DB.LinePatternElement>
+  public class LinePatternElement : Element<Types.LinePatternElement, ARDB.LinePatternElement>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("EB5AB657-AE01-42F0-BF98-071DA6D7A2D2");
@@ -56,14 +55,14 @@ namespace RhinoInside.Revit.GH.Parameters
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
       listBox.Items.Clear();
 
-      using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.LinePatternElement)))
+      using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.LinePatternElement)))
       {
         var patterns = collector.
-                        Cast<DB.LinePatternElement>();
+                        Cast<ARDB.LinePatternElement>();
 
         listBox.DisplayMember = "DisplayName";
 
-        listBox.Items.Add(new Types.LinePatternElement(doc, new DB.ElementId((int) DBX.BuiltInLinePattern.Solid)));
+        listBox.Items.Add(new Types.LinePatternElement(doc, new ARDB.ElementId((int) External.DB.BuiltInLinePattern.Solid)));
         foreach (var pattern in patterns)
           listBox.Items.Add(new Types.LinePatternElement(pattern));
       }

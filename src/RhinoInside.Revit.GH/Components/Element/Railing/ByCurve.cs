@@ -1,13 +1,14 @@
 using System;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+  using Kernel.Attributes;
+
   public class RailingByCurve : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("601AC666-E369-464E-AE6F-34E01B9DBA3B");
@@ -26,19 +27,19 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructRailingByCurve
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New Railing"), ParamType(typeof(Parameters.GraphicalElement))]
-      ref DB.Architecture.Railing railing,
+      ref ARDB.Architecture.Railing railing,
 
       Rhino.Geometry.Curve curve,
-      Optional<DB.Architecture.RailingType> type,
-      Optional<DB.Level> level,
-      [Optional] DB.Element host,
+      Optional<ARDB.Architecture.RailingType> type,
+      Optional<ARDB.Level> level,
+      [Optional] ARDB.Element host,
       [Optional] bool flipped
     )
     {
-      SolveOptionalType(document, ref type, DB.ElementTypeGroup.StairsRailingType, nameof(type));
+      SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.StairsRailingType, nameof(type));
       SolveOptionalLevel(document, curve, ref level, out var bbox);
 
       // Axis
@@ -49,8 +50,8 @@ namespace RhinoInside.Revit.GH.Components
       // Type
       ChangeElementTypeId(ref railing, type.Value.Id);
 
-      DB.Architecture.Railing newRail = null;
-      if (railing is DB.Architecture.Railing previousRail)
+      ARDB.Architecture.Railing newRail = null;
+      if (railing is ARDB.Architecture.Railing previousRail)
       {
         newRail = previousRail;
 
@@ -58,7 +59,7 @@ namespace RhinoInside.Revit.GH.Components
       }
       else
       {
-        newRail = DB.Architecture.Railing.Create
+        newRail = ARDB.Architecture.Railing.Create
         (
           document,
           curve.ToCurveLoop(),
@@ -66,13 +67,13 @@ namespace RhinoInside.Revit.GH.Components
           level.Value.Id
         );
 
-        var parametersMask = new DB.BuiltInParameter[]
+        var parametersMask = new ARDB.BuiltInParameter[]
         {
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.STAIRS_RAILING_BASE_LEVEL_PARAM,
-          DB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET,
+          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+          ARDB.BuiltInParameter.STAIRS_RAILING_BASE_LEVEL_PARAM,
+          ARDB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET,
         };
 
         ReplaceElement(ref railing, newRail, parametersMask);
@@ -80,18 +81,18 @@ namespace RhinoInside.Revit.GH.Components
 
       if (newRail is object)
       {
-        using (var baseLevel = newRail.get_Parameter(DB.BuiltInParameter.STAIRS_RAILING_BASE_LEVEL_PARAM))
+        using (var baseLevel = newRail.get_Parameter(ARDB.BuiltInParameter.STAIRS_RAILING_BASE_LEVEL_PARAM))
         {
           if (!baseLevel.IsReadOnly)
             baseLevel.Update(level.Value.Id);
         }
-        using (var heightOffset = newRail.get_Parameter(DB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET))
+        using (var heightOffset = newRail.get_Parameter(ARDB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET))
         {
           if (!heightOffset.IsReadOnly)
             heightOffset.Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
         }
 
-        newRail.HostId = host?.Id ?? DB.ElementId.InvalidElementId;
+        newRail.HostId = host?.Id ?? ARDB.ElementId.InvalidElementId;
 
         if (newRail.Flipped != flipped)
           newRail.Flip();

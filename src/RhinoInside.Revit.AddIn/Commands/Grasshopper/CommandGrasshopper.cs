@@ -1,6 +1,6 @@
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using DB = Autodesk.Revit.DB;
+using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       // Check to see if any document path is provided in journal data
       // if yes, open the document.

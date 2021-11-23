@@ -5,20 +5,20 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Autodesk.Revit.DB.Events;
-using Autodesk.Revit.UI;
 using Grasshopper;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Plugin;
 using Rhino;
-using RhinoInside.Revit.Convert.Units;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
+using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH
 {
+  using Convert.Units;
+  using External.DB;
+  using External.DB.Extensions;
+
   [GuestPlugInId("B45A29B1-4343-4035-989E-044E8580D9CF")]
   class Guest : IGuest
   {
@@ -442,7 +442,7 @@ namespace RhinoInside.Revit.GH
         {
           using
           (
-            var taskDialog = new TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
+            var taskDialog = new ARUI.TaskDialog(MethodBase.GetCurrentMethod().DeclaringType.FullName)
             {
               Title = "Grasshopper Assembly Failure",
               MainIcon = External.UI.TaskDialogIcons.IconError,
@@ -478,7 +478,7 @@ namespace RhinoInside.Revit.GH
     {
       var revitUS = UnitSystem.Unset;
 
-      if (Revit.ActiveUIDocument?.Document is DB.Document revitDoc)
+      if (Revit.ActiveUIDocument?.Document is ARDB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
         revitUS = units.ToUnitSystem(out var _);
@@ -512,7 +512,7 @@ namespace RhinoInside.Revit.GH
     #endregion
 
     #region DocumentChanged
-    void OnDocumentChanged(object sender, DocumentChangedEventArgs e)
+    void OnDocumentChanged(object sender, ARDB.Events.DocumentChangedEventArgs e)
     {
 #if DEBUG
       var transactions = e.GetTransactionNames();
@@ -563,11 +563,11 @@ namespace RhinoInside.Revit.GH
     {
       public static bool EnableSolutions { get; set; } = true;
 
-      static readonly ExternalEvent FlushQueue = ExternalEvent.Create(new FlushQueueHandler());
+      static readonly ARUI.ExternalEvent FlushQueue = ARUI.ExternalEvent.Create(new FlushQueueHandler());
       class FlushQueueHandler : External.UI.ExternalEventHandler
       {
         public override string GetName() => nameof(FlushQueue);
-        protected override void Execute(UIApplication app)
+        protected override void Execute(ARUI.UIApplication app)
         {
           var solutions = new List<GH_Document>();
           while (changeQueue.Count > 0)
@@ -601,8 +601,8 @@ namespace RhinoInside.Revit.GH
         }
       }
 
-      public UndoOperation Operation;
-      public DB.Document Document;
+      public ARDB.Events.UndoOperation Operation;
+      public ARDB.Document Document;
       public GH_Document Definition;
       public readonly List<IGH_ActiveObject> ExpiredObjects = new List<IGH_ActiveObject>();
 
@@ -613,13 +613,13 @@ namespace RhinoInside.Revit.GH
         foreach (var obj in ExpiredObjects)
           obj.ExpireSolution(false);
 
-        return Operation == UndoOperation.TransactionCommitted ? Definition : default;
+        return Operation == ARDB.Events.UndoOperation.TransactionCommitted ? Definition : default;
       }
     }
     #endregion
 
     #region Transaction Groups
-    readonly Queue<DB.TransactionGroup> ActiveTransactionGroups = new Queue<DB.TransactionGroup>();
+    readonly Queue<ARDB.TransactionGroup> ActiveTransactionGroups = new Queue<ARDB.TransactionGroup>();
     readonly Stack<GH_Document> ActiveDocumentStack = new Stack<GH_Document>();
 
     internal void StartTransactionGroups()
@@ -634,7 +634,7 @@ namespace RhinoInside.Revit.GH
     {
       using (var documents = Revit.ActiveDBApplication.Documents)
       {
-        foreach (var doc in documents.Cast<DB.Document>())
+        foreach (var doc in documents.Cast<ARDB.Document>())
         {
           // Linked document do not allow transactions.
           if (doc.IsLinked)
@@ -648,7 +648,7 @@ namespace RhinoInside.Revit.GH
           if (doc.IsModifiable)
             continue;
 
-          var group = new DB.TransactionGroup(doc, name)
+          var group = new ARDB.TransactionGroup(doc, name)
           {
             IsFailureHandlingForcedModal = forcedModal
           };
@@ -755,13 +755,13 @@ namespace RhinoInside.Revit.GH
 
       bool rolledback = false;
       var allowModelessHandling = System.Windows.Forms.Control.ModifierKeys != System.Windows.Forms.Keys.Shift;
-      var transactionGroups = new Queue<(DB.Document Document, DB.TransactionGroup Group)>();
+      var transactionGroups = new Queue<(ARDB.Document Document, ARDB.TransactionGroup Group)>();
       try
       {
         if (canvasModifiersEnabled.HasValue) canvas.ModifiersEnabled = false;
         if (grasshopperDocumentEnabled.HasValue) grasshopperDocument.Enabled = false;
 
-        var revitDocuments = Revit.ActiveDBApplication.Documents.Cast<DB.Document>();
+        var revitDocuments = Revit.ActiveDBApplication.Documents.Cast<ARDB.Document>();
         foreach (var revitDocument in revitDocuments)
         {
           if (rolledback) break;
@@ -777,28 +777,28 @@ namespace RhinoInside.Revit.GH
           }
 
           {
-            var transactionGroup = new DB.TransactionGroup(revitDocument, "Release Elements")
+            var transactionGroup = new ARDB.TransactionGroup(revitDocument, "Release Elements")
             {
               IsFailureHandlingForcedModal = false
             };
 
-            if (transactionGroup.Start() == DB.TransactionStatus.Started)
+            if (transactionGroup.Start() == ARDB.TransactionStatus.Started)
               transactionGroups.Enqueue((revitDocument, transactionGroup));
           }
 
-          var elementIds = new HashSet<DB.ElementId>(elements.Select(x => x.Id));
-          var deletedIds = default(ICollection<DB.ElementId>);
-          var modifiedIds = default(ICollection<DB.ElementId>);
+          var elementIds = new HashSet<ARDB.ElementId>(elements.Select(x => x.Id));
+          var deletedIds = default(ICollection<ARDB.ElementId>);
+          var modifiedIds = default(ICollection<ARDB.ElementId>);
 
           if (allowModelessHandling)
           {
             try { deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, CompoundElementFilter.ElementIsNotInternalFilter(revitDocument)); }
-            catch (Autodesk.Revit.Exceptions.ArgumentException) { deletedIds = elementIds; modifiedIds = new DB.ElementId[0]; }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { deletedIds = elementIds; modifiedIds = new ARDB.ElementId[0]; }
           }
 
-          using (var tx = new DB.Transaction(revitDocument, "Release Elements"))
+          using (var tx = new ARDB.Transaction(revitDocument, "Release Elements"))
           {
-            if (tx.Start() == DB.TransactionStatus.Started)
+            if (tx.Start() == ARDB.TransactionStatus.Started)
             {
               // Untrack elements on revitDocument owned by deleted callSites
               foreach (var element in elements)
@@ -809,10 +809,10 @@ namespace RhinoInside.Revit.GH
 
               if (allowModelessHandling)
               {
-                using (var message = new DB.FailureMessage(ExternalFailures.ElementFailures.TrackedElementReleased))
+                using (var message = new ARDB.FailureMessage(ExternalFailures.ElementFailures.TrackedElementReleased))
                 {
-                  var resolution = DB.DeleteElements.Create(revitDocument, elementIds);
-                  message.AddResolution(DB.FailureResolutionType.DeleteElements, resolution);
+                  var resolution = ARDB.DeleteElements.Create(revitDocument, elementIds);
+                  message.AddResolution(ARDB.FailureResolutionType.DeleteElements, resolution);
 
                   message.SetFailingElements(elementIds);
 
@@ -828,7 +828,7 @@ namespace RhinoInside.Revit.GH
                 revitDocument.Delete(elementIds);
               }
 
-              rolledback |= await tx.CommitAsync() != DB.TransactionStatus.Committed;
+              rolledback |= await tx.CommitAsync() != ARDB.TransactionStatus.Committed;
             }
             else rolledback = true;
           }

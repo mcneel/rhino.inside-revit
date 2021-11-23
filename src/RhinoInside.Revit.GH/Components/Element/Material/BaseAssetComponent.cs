@@ -4,14 +4,15 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.Units;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Material
+namespace RhinoInside.Revit.GH.Components.Materials
 {
 #if REVIT_2018
+  using Convert.Geometry;
+  using Convert.Units;
+  using External.DB.Extensions;
+
   public abstract class BaseAssetComponent<T>
     : TransactionalChainComponent where T : AppearanceAssetData, new()
   {
@@ -97,7 +98,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       }
     }
 
-    protected void SetOutputsFromAsset(IGH_DataAccess DA, DB.Visual.Asset asset)
+    protected void SetOutputsFromAsset(IGH_DataAccess DA, ARDB.Visual.Asset asset)
     {
       // make sure the schemas match
       if (asset.Name.Replace("Schema", "") != _assetData.Schema)
@@ -195,7 +196,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       return output;
     }
 
-    private void UpdateAssetFromData(DB.Visual.Asset editableAsset, T assetData)
+    private void UpdateAssetFromData(ARDB.Visual.Asset editableAsset, T assetData)
     {
       foreach (var assetPropInfo in _assetData.GetAssetProperties())
       {
@@ -262,10 +263,10 @@ namespace RhinoInside.Revit.GH.Components.Material
       }
     }
 
-    protected void UpdateAssetElementFromInputs(DB.AppearanceAssetElement assetElement, T assetData)
+    protected void UpdateAssetElementFromInputs(ARDB.AppearanceAssetElement assetElement, T assetData)
     {
       // open asset for editing
-      using (var scope = new DB.Visual.AppearanceAssetEditScope(assetElement.Document))
+      using (var scope = new ARDB.Visual.AppearanceAssetEditScope(assetElement.Document))
       {
         var editableAsset = scope.Start(assetElement.Id);
 
@@ -313,26 +314,26 @@ namespace RhinoInside.Revit.GH.Components.Material
     }
 
     public static object
-    ConvertFromAssetPropertyValue(DB.Visual.AssetProperty prop)
+    ConvertFromAssetPropertyValue(ARDB.Visual.AssetProperty prop)
     {
       // TODO: implement all prop types
       switch (prop)
       {
-        case DB.Visual.AssetPropertyBoolean boolProp:
+        case ARDB.Visual.AssetPropertyBoolean boolProp:
           return boolProp.Value;
 
-        case DB.Visual.AssetPropertyDistance distProp:
-          return DB.UnitUtils.Convert
+        case ARDB.Visual.AssetPropertyDistance distProp:
+          return ARDB.UnitUtils.Convert
           (
             distProp.Value,
             distProp.GetUnitTypeId(),
             (Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters).ToUnitType()
           );
 
-        case DB.Visual.AssetPropertyDouble doubleProp:
+        case ARDB.Visual.AssetPropertyDouble doubleProp:
           return doubleProp.Value;
 
-        case DB.Visual.AssetPropertyDoubleArray2d d2dProp:
+        case ARDB.Visual.AssetPropertyDoubleArray2d d2dProp:
           if (d2dProp.Value.Size == 2)
             return new Vector2d(
               d2dProp.Value.get_Item(0),
@@ -340,29 +341,29 @@ namespace RhinoInside.Revit.GH.Components.Material
             );
           break;
 
-        case DB.Visual.AssetPropertyDoubleArray3d d3dProp:
+        case ARDB.Visual.AssetPropertyDoubleArray3d d3dProp:
           return d3dProp.GetValueAsXYZ().ToVector3d();
 
-        case DB.Visual.AssetPropertyDoubleArray4d colorProp:
+        case ARDB.Visual.AssetPropertyDoubleArray4d colorProp:
           var list = colorProp.GetValueAsDoubles();
           return new Rhino.Display.ColorRGBA(list[0], list[1], list[2], list[3]);
 
         //case DB.Visual.AssetPropertyDoubleMatrix44 matrixProp:
         //  break;
 
-        case DB.Visual.AssetPropertyEnum enumProp:
+        case ARDB.Visual.AssetPropertyEnum enumProp:
           return enumProp.Value;
 
-        case DB.Visual.AssetPropertyFloat floatProp:
+        case ARDB.Visual.AssetPropertyFloat floatProp:
           return floatProp.Value;
 
         //case DB.Visual.AssetPropertyFloatArray floatArray:
         //  break;
 
-        case DB.Visual.AssetPropertyInt64 int64Prop:
+        case ARDB.Visual.AssetPropertyInt64 int64Prop:
           return int64Prop.Value;
 
-        case DB.Visual.AssetPropertyInteger intProp:
+        case ARDB.Visual.AssetPropertyInteger intProp:
           return intProp.Value;
 
         //case DB.Visual.AssetPropertyList listProp:
@@ -371,72 +372,72 @@ namespace RhinoInside.Revit.GH.Components.Material
         //case DB.Visual.AssetPropertyReference refProp:
         //  break;
 
-        case DB.Visual.AssetPropertyString textProp:
+        case ARDB.Visual.AssetPropertyString textProp:
           return textProp.Value;
 
-        case DB.Visual.AssetPropertyTime timeProp:
+        case ARDB.Visual.AssetPropertyTime timeProp:
           return timeProp.Value;
 
-        case DB.Visual.AssetPropertyUInt64 uint64Prop:
+        case ARDB.Visual.AssetPropertyUInt64 uint64Prop:
           return uint64Prop.Value;
       }
       return null;
     }
 
-    static DB.Visual.Asset FindLibraryAsset
+    static ARDB.Visual.Asset FindLibraryAsset
     (
       Autodesk.Revit.ApplicationServices.Application app,
-      DB.Visual.AssetType assetType,
+      ARDB.Visual.AssetType assetType,
       string schema
     )
     {
       return app.GetAssets(assetType).Where(x => x.Name == schema).FirstOrDefault();
     }
 
-    public static List<DB.AppearanceAssetElement> QueryAppearanceAssetElements(DB.Document doc)
+    public static List<ARDB.AppearanceAssetElement> QueryAppearanceAssetElements(ARDB.Document doc)
     {
-      return new DB.FilteredElementCollector(doc).
-        OfClass(typeof(DB.AppearanceAssetElement)).
-        Cast<DB.AppearanceAssetElement>().
+      return new ARDB.FilteredElementCollector(doc).
+        OfClass(typeof(ARDB.AppearanceAssetElement)).
+        Cast<ARDB.AppearanceAssetElement>().
         ToList();
     }
 
-    public static DB.AppearanceAssetElement
-    EnsureAsset(string schemaName, DB.Document doc, string name)
+    public static ARDB.AppearanceAssetElement
+    EnsureAsset(string schemaName, ARDB.Document doc, string name)
     {
-      var existingAsset = DB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name);
+      var existingAsset = ARDB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name);
       if (existingAsset != null)
         return existingAsset;
 
-      var baseAsset = FindLibraryAsset(doc.Application, DB.Visual.AssetType.Appearance, schemaName);
-      return DB.AppearanceAssetElement.Create(doc, name, baseAsset);
+      var baseAsset = FindLibraryAsset(doc.Application, ARDB.Visual.AssetType.Appearance, schemaName);
+      return ARDB.AppearanceAssetElement.Create(doc, name, baseAsset);
     }
 
-    public DB.AppearanceAssetElement EnsureThisAsset(DB.Document doc, string name)
+    public ARDB.AppearanceAssetElement EnsureThisAsset(ARDB.Document doc, string name)
      => EnsureAsset(_assetData.Schema, doc, name);
 
-    public static bool AssetParamHasNestedAsset(DB.Visual.Asset asset, string name)
+    public static bool AssetParamHasNestedAsset(ARDB.Visual.Asset asset, string name)
     {
       // find param
       var prop = asset.FindByName(name);
       return prop != null && prop.GetSingleConnectedAsset() != null;
     }
 
-    public static object GetAssetParamValue(DB.Visual.Asset asset, string name)
+    public static object GetAssetParamValue(ARDB.Visual.Asset asset, string name)
     {
       // find param
-      if(asset.FindByName(name) is DB.Visual.AssetProperty prop)
+      if(asset.FindByName(name) is ARDB.Visual.AssetProperty prop)
         return ConvertFromAssetPropertyValue(prop);
 
       return null;
     }
 
-    public static void SetAssetParamValue(DB.Visual.Asset asset, string name, bool value, bool removeAsset = true)
+    public static void SetAssetParamValue(ARDB.Visual.Asset asset, string name, bool value, bool removeAsset = true)
     {
       var prop = asset.FindByName(name);
       switch (prop)
       {
-        case DB.Visual.AssetPropertyBoolean boolProp:
+        case ARDB.Visual.AssetPropertyBoolean boolProp:
           if (removeAsset) boolProp.RemoveConnectedAsset();
 
           boolProp.Value = value;
@@ -444,12 +445,12 @@ namespace RhinoInside.Revit.GH.Components.Material
       }
     }
 
-    public static void SetAssetParamValue(DB.Visual.Asset asset, string name, string value, bool removeAsset = true)
+    public static void SetAssetParamValue(ARDB.Visual.Asset asset, string name, string value, bool removeAsset = true)
     {
       var prop = asset.FindByName(name);
       switch (prop)
       {
-        case DB.Visual.AssetPropertyString stringProp:
+        case ARDB.Visual.AssetPropertyString stringProp:
           if (removeAsset) stringProp.RemoveConnectedAsset();
 
           stringProp.Value = value;
@@ -458,21 +459,21 @@ namespace RhinoInside.Revit.GH.Components.Material
     }
 
     public static void
-    SetAssetParamValue(DB.Visual.Asset asset, string name, double value, bool removeAsset = true)
+    SetAssetParamValue(ARDB.Visual.Asset asset, string name, double value, bool removeAsset = true)
     {
       var prop = asset.FindByName(name);
       switch (prop)
       {
-        case DB.Visual.AssetPropertyDouble doubleProp:
+        case ARDB.Visual.AssetPropertyDouble doubleProp:
           if (removeAsset) doubleProp.RemoveConnectedAsset();
 
           doubleProp.Value = value;
           break;
 
-        case DB.Visual.AssetPropertyDistance distProp:
+        case ARDB.Visual.AssetPropertyDistance distProp:
           if (removeAsset) distProp.RemoveConnectedAsset();
 
-          distProp.Value = DB.UnitUtils.Convert
+          distProp.Value = ARDB.UnitUtils.Convert
           (
             value,
             (Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters).ToUnitType(),
@@ -483,21 +484,21 @@ namespace RhinoInside.Revit.GH.Components.Material
     }
 
     public static void
-    SetAssetParamValue(DB.Visual.Asset asset, string name, Rhino.Display.ColorRGBA value, bool removeAsset = true)
+    SetAssetParamValue(ARDB.Visual.Asset asset, string name, Rhino.Display.ColorRGBA value, bool removeAsset = true)
     {
       var prop = asset.FindByName(name);
       switch (prop)
       {
-        case DB.Visual.AssetPropertyDoubleArray3d tdProp:
+        case ARDB.Visual.AssetPropertyDoubleArray3d tdProp:
           if (removeAsset) tdProp.RemoveConnectedAsset();
 
-          tdProp.SetValueAsXYZ(new DB.XYZ(
+          tdProp.SetValueAsXYZ(new ARDB.XYZ(
             value.R,
             value.G,
             value.B
           ));
           break;
-        case DB.Visual.AssetPropertyDoubleArray4d fdProp:
+        case ARDB.Visual.AssetPropertyDoubleArray4d fdProp:
           if (removeAsset) fdProp.RemoveConnectedAsset();
 
           fdProp.SetValueAsDoubles(new double[] {
@@ -511,7 +512,7 @@ namespace RhinoInside.Revit.GH.Components.Material
     }
 
     public static void
-    SetAssetParamTexture(DB.Visual.Asset asset, string name, TextureData value)
+    SetAssetParamTexture(ARDB.Visual.Asset asset, string name, TextureData value)
     {
       var prop = asset.FindByName(name);
       prop.RemoveConnectedAsset();
@@ -544,10 +545,10 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     public static void
     SetDataFromAssetParam(IGH_DataAccess DA, string paramName,
-                          DB.Visual.Asset asset, string schemaPropName)
+                          ARDB.Visual.Asset asset, string schemaPropName)
     {
       // find param
-      if (asset.FindByName(schemaPropName) is DB.Visual.AssetProperty prop)
+      if (asset.FindByName(schemaPropName) is ARDB.Visual.AssetProperty prop)
       {
         // determine data type, and set output
         DA.SetData(paramName, ConvertFromAssetPropertyValue(prop));
@@ -556,10 +557,10 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     public static void
     SetTextureDataFromAssetParam(IGH_DataAccess DA, string paramName,
-                                 DB.Visual.Asset asset, string schemaPropName)
+                                 ARDB.Visual.Asset asset, string schemaPropName)
     {
       // find param
-      if (asset.FindByName(schemaPropName) is DB.Visual.AssetProperty prop)
+      if (asset.FindByName(schemaPropName) is ARDB.Visual.AssetProperty prop)
       {
         var connectedAsset = prop.GetSingleConnectedAsset();
         if (connectedAsset != null)
@@ -582,7 +583,7 @@ namespace RhinoInside.Revit.GH.Components.Material
     }
 
     private static void
-    SetAssetDataFromAsset(AssetData assetData, DB.Visual.Asset asset)
+    SetAssetDataFromAsset(AssetData assetData, ARDB.Visual.Asset asset)
     {
       foreach (var assetPropInfo in assetData.GetAssetProperties())
       {

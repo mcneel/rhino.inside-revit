@@ -3,13 +3,14 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.ElementTracking;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Grids
 {
+  using Convert.Geometry;
+  using ElementTracking;
+  using Kernel.Attributes;
+
   public class GridByCurve : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("CEC2B3DF-C6BA-414F-BECE-E3DAEE2A3F2C");
@@ -25,14 +26,14 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    public override void OnStarted(DB.Document document)
+    public override void OnStarted(ARDB.Document document)
     {
       base.OnStarted(document);
 
       if (Params.Input<IGH_Param>("Name").DataType != GH_ParamData.@void)
       {
         // Rename all previous grids to avoid name conflicts
-        var grids = Params.TrackedElements<DB.Grid>("Grid", document);
+        var grids = Params.TrackedElements<ARDB.Grid>("Grid", document);
         var pinnedGrids = grids.Where(x => x.Pinned);
 
         foreach (var grid in pinnedGrids)
@@ -43,17 +44,17 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructGridByCurve
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New Grid")]
-      ref DB.Grid grid,
+      ref ARDB.Grid grid,
 
       Curve curve,
-      Optional<DB.GridType> type,
+      Optional<ARDB.GridType> type,
       Optional<string> name
     )
     {
-      SolveOptionalType(document, ref type, DB.ElementTypeGroup.GridType, nameof(type));
+      SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.GridType, nameof(type));
       if (name.HasValue && name.Value == default) return;
 
       if
@@ -70,23 +71,23 @@ namespace RhinoInside.Revit.GH.Components
         var newLine = line.ToLine();
         if
         (
-          !(grid?.Curve is DB.Line oldLine) ||
+          !(grid?.Curve is ARDB.Line oldLine) ||
           !oldLine.GetEndPoint(0).IsAlmostEqualTo(newLine.GetEndPoint(0)) ||
           !oldLine.GetEndPoint(1).IsAlmostEqualTo(newLine.GetEndPoint(1))
         )
-          newGrid = DB.Grid.Create(document, line.ToLine());
+          newGrid = ARDB.Grid.Create(document, line.ToLine());
       }
       else if (curve.TryGetArc(out var arc, Revit.VertexTolerance * Revit.ModelUnits))
       {
         var newArc = arc.ToArc();
         if
         (
-          !(grid?.Curve is DB.Arc oldArc) ||
+          !(grid?.Curve is ARDB.Arc oldArc) ||
           !oldArc.GetEndPoint(0).IsAlmostEqualTo(newArc.GetEndPoint(0)) ||
           !oldArc.GetEndPoint(1).IsAlmostEqualTo(newArc.GetEndPoint(1)) ||
           !oldArc.Evaluate(0.5, true).IsAlmostEqualTo(newArc.Evaluate(0.5, true))
         )
-          newGrid = DB.Grid.Create(document, newArc);
+          newGrid = ARDB.Grid.Create(document, newArc);
       }
       else
       {
@@ -99,18 +100,18 @@ namespace RhinoInside.Revit.GH.Components
         newGrid.Name = name.Value;
 
       var parametersMask = name.IsMissing ?
-        new DB.BuiltInParameter[]
+        new ARDB.BuiltInParameter[]
         {
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM
+          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          ARDB.BuiltInParameter.ELEM_TYPE_PARAM
         } :
-        new DB.BuiltInParameter[]
+        new ARDB.BuiltInParameter[]
         {
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.DATUM_TEXT
+          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+          ARDB.BuiltInParameter.DATUM_TEXT
         };
 
       ReplaceElement(ref grid, newGrid, parametersMask);

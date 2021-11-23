@@ -1,21 +1,18 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.LinePatternElement
+namespace RhinoInside.Revit.GH.Components.LinePatternElements
 {
   public class QueryLinePatterns : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("A94000FD-8BCD-49D5-9F00-09BEDB88A123");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.LinePatternElement));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.LinePatternElement));
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -65,9 +62,9 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElement
       string name = null;
       DA.GetData("Name", ref name);
 
-      Params.TryGetData(DA, "Filter", out DB.ElementFilter filter);
+      Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var patternsCollector = collector.WherePasses(ElementFilter);
 
@@ -75,8 +72,8 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElement
           patternsCollector = patternsCollector.WherePasses(filter);
 
         var patterns =
-          Enumerable.Repeat(new Types.LinePatternElement(doc, DB.LinePatternElement.GetSolidPatternId()), 1).
-          Concat(collector.Cast<DB.LinePatternElement>().Select(x => new Types.LinePatternElement(x)));
+          Enumerable.Repeat(new Types.LinePatternElement(doc, ARDB.LinePatternElement.GetSolidPatternId()), 1).
+          Concat(collector.Cast<ARDB.LinePatternElement>().Select(x => new Types.LinePatternElement(x)));
 
         if (!string.IsNullOrEmpty(name))
           patterns = patterns.Where(x => x.Name.IsSymbolNameLike(name));

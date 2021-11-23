@@ -2,7 +2,7 @@ using System;
 
 using Grasshopper.Kernel;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Materials
 {
   public class QueryAssetsOfMaterial : AnalysisComponent
   {

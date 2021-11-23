@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
   public class FamilyTypes : Component
   {
@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Family family = null;
+      ARDB.Family family = null;
       if (!DA.GetData("Family", ref family))
         return;
 

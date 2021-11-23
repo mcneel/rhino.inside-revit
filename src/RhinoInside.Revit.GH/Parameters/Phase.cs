@@ -4,12 +4,12 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
   [ComponentVersion(introduced: "1.2")]
-  public class Phase : Element<Types.Phase, DB.Phase>
+  public class Phase : Element<Types.Phase, ARDB.Phase>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("353FFB47-46D6-4FEE-8DBD-40E683416531");
@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Parameters
       listBox.Items.Add(new Types.Phase());
 
       {
-        var phases = doc.Phases.Cast<DB.Phase>();
+        var phases = doc.Phases.Cast<ARDB.Phase>();
 
         listBox.DisplayMember = "DisplayName";
         foreach (var phase in phases)

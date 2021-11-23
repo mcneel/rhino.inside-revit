@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -30,51 +30,51 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
     static readonly HashSet<Type> NonFilterableClasses = new HashSet<Type>
     {
-      typeof(DB.AreaTagType),
-      typeof(DB.AnnotationSymbol),
-      typeof(DB.AnnotationSymbolType),
-      typeof(DB.CombinableElement),
-      typeof(DB.CurveByPoints),
-      typeof(DB.DetailCurve),
-      typeof(DB.DetailArc),
-      typeof(DB.DetailEllipse),
-      typeof(DB.DetailLine),
-      typeof(DB.DetailNurbSpline),
-      typeof(DB.ModelCurve),
-      typeof(DB.ModelArc),
-      typeof(DB.ModelEllipse),
-      typeof(DB.ModelLine),
-      typeof(DB.ModelNurbSpline),
-      typeof(DB.ModelHermiteSpline),
-      typeof(DB.SymbolicCurve),
-      typeof(DB.DetailCurve),
-      typeof(DB.Mullion),
-      typeof(DB.Panel),
-      typeof(DB.SlabEdge),
+      typeof(ARDB.AreaTagType),
+      typeof(ARDB.AnnotationSymbol),
+      typeof(ARDB.AnnotationSymbolType),
+      typeof(ARDB.CombinableElement),
+      typeof(ARDB.CurveByPoints),
+      typeof(ARDB.DetailCurve),
+      typeof(ARDB.DetailArc),
+      typeof(ARDB.DetailEllipse),
+      typeof(ARDB.DetailLine),
+      typeof(ARDB.DetailNurbSpline),
+      typeof(ARDB.ModelCurve),
+      typeof(ARDB.ModelArc),
+      typeof(ARDB.ModelEllipse),
+      typeof(ARDB.ModelLine),
+      typeof(ARDB.ModelNurbSpline),
+      typeof(ARDB.ModelHermiteSpline),
+      typeof(ARDB.SymbolicCurve),
+      typeof(ARDB.DetailCurve),
+      typeof(ARDB.Mullion),
+      typeof(ARDB.Panel),
+      typeof(ARDB.SlabEdge),
 
-      typeof(DB.Architecture.RoomTagType),
-      typeof(DB.Architecture.Fascia),
-      typeof(DB.Architecture.Gutter),
+      typeof(ARDB.Architecture.RoomTagType),
+      typeof(ARDB.Architecture.Fascia),
+      typeof(ARDB.Architecture.Gutter),
 
-      typeof(DB.Mechanical.SpaceTagType),
+      typeof(ARDB.Mechanical.SpaceTagType),
 
-      typeof(DB.Structure.TrussType),
-      typeof(DB.Structure.AreaReinforcementCurve),
+      typeof(ARDB.Structure.TrussType),
+      typeof(ARDB.Structure.AreaReinforcementCurve),
     };
 
     static readonly HashSet<Type> SpecialClasses = new HashSet<Type>
     {
-      typeof(DB.Area),
-      typeof(DB.AreaTag),
+      typeof(ARDB.Area),
+      typeof(ARDB.AreaTag),
 
-      typeof(DB.Architecture.Room),
-      typeof(DB.Architecture.RoomTag),
+      typeof(ARDB.Architecture.Room),
+      typeof(ARDB.Architecture.RoomTag),
 
-      typeof(DB.Mechanical.Space),
-      typeof(DB.Mechanical.SpaceTag),
+      typeof(ARDB.Mechanical.Space),
+      typeof(ARDB.Mechanical.SpaceTag),
     };
 
-    static readonly Type[] FilterableClasses = typeof(DB.Element).
+    static readonly Type[] FilterableClasses = typeof(ARDB.Element).
       Assembly.ExportedTypes.
       Where
       (
@@ -82,9 +82,9 @@ namespace RhinoInside.Revit.GH.Parameters.Input
         {
           if (NonFilterableClasses.Contains(x)) return false;
           if (SpecialClasses.Contains(x)) return true;
-          if (x.IsSubclassOf(typeof(DB.Element)))
+          if (x.IsSubclassOf(typeof(ARDB.Element)))
           {
-            try { using (new DB.ElementClassFilter(x)) return true; }
+            try { using (new ARDB.ElementClassFilter(x)) return true; }
             catch { }
           }
           return false;

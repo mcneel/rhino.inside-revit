@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Worksets
 {
@@ -17,10 +17,10 @@ namespace RhinoInside.Revit.GH.Components.Worksets
 
     public override bool NeedsToBeExpired
     (
-      DB.Document document,
-      ICollection<DB.ElementId> added,
-      ICollection<DB.ElementId> deleted,
-      ICollection<DB.ElementId> modified
+      ARDB.Document document,
+      ICollection<ARDB.ElementId> added,
+      ICollection<ARDB.ElementId> deleted,
+      ICollection<ARDB.ElementId> modified
     ) => false;
 
     #region UI
@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
       ParamDefinition.Create<Param_String>
         ("Name", "N", "Workset name", optional: true),
       ParamDefinition.Create<Parameters.Param_Enum<Types.WorksetKind>>
-        ("Kind", "K", "Workset kind", defaultValue: DB.WorksetKind.UserWorkset, optional: true),
+        ("Kind", "K", "Workset kind", defaultValue: ARDB.WorksetKind.UserWorkset, optional: true),
     };
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
@@ -70,14 +70,14 @@ namespace RhinoInside.Revit.GH.Components.Worksets
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Kind", out Types.WorksetKind kind)) return;
 
-      using (var collector = new DB.FilteredWorksetCollector(doc))
+      using (var collector = new ARDB.FilteredWorksetCollector(doc))
       {
         var worksetCollector = collector;
 
         if (kind is object)
           worksetCollector = worksetCollector.OfKind(kind.Value);
 
-        var worksets = worksetCollector.Cast<DB.Workset>();
+        var worksets = worksetCollector.Cast<ARDB.Workset>();
 
         if (name is object)
           worksets = worksets.Where(x => x.Name.IsSymbolNameLike(name));

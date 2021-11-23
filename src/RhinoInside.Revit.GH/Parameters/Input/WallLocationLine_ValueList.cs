@@ -1,10 +1,7 @@
 using System;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-
-using DB = Autodesk.Revit.DB;
-
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -23,22 +20,22 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
       ListItems.Add(
-        new GH_ValueListItem("Wall Centerline", ((int) DB.WallLocationLine.WallCenterline).ToString())
+        new GH_ValueListItem("Wall Centerline", ((int) ARDB.WallLocationLine.WallCenterline).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Core Centerline", ((int) DB.WallLocationLine.CoreCenterline).ToString())
+        new GH_ValueListItem("Core Centerline", ((int) ARDB.WallLocationLine.CoreCenterline).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Finish (Exterior Face)", ((int) DB.WallLocationLine.FinishFaceExterior).ToString())
+        new GH_ValueListItem("Finish (Exterior Face)", ((int) ARDB.WallLocationLine.FinishFaceExterior).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Finish (Interior Face)", ((int) DB.WallLocationLine.FinishFaceInterior).ToString())
+        new GH_ValueListItem("Finish (Interior Face)", ((int) ARDB.WallLocationLine.FinishFaceInterior).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Core (Exterior Face)", ((int) DB.WallLocationLine.CoreExterior).ToString())
+        new GH_ValueListItem("Core (Exterior Face)", ((int) ARDB.WallLocationLine.CoreExterior).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Core (Interior Face)", ((int) DB.WallLocationLine.CoreInterior).ToString())
+        new GH_ValueListItem("Core (Interior Face)", ((int) ARDB.WallLocationLine.CoreInterior).ToString())
         );
     }
   }

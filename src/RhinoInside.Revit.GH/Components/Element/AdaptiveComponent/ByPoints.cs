@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+  using Kernel.Attributes;
+
   public class AdaptiveComponentByPoints : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("E8DDC0E4-97E9-4659-9945-E8C77114273D");
@@ -29,14 +29,14 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructAdaptiveComponentByPoints
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New Adaptive Component element")]
-      ref DB.FamilyInstance component,
+      ref ARDB.FamilyInstance component,
 
       IList<Rhino.Geometry.Point3d> points,
 
-      DB.FamilySymbol type
+      ARDB.FamilySymbol type
     )
     {
       var adaptivePoints = points.ConvertAll(GeometryEncoder.ToXYZ);
@@ -47,13 +47,13 @@ namespace RhinoInside.Revit.GH.Components
       // Type
       ChangeElementTypeId(ref component, type.Id);
 
-      if (component is object && DB.AdaptiveComponentInstanceUtils.IsAdaptiveComponentInstance(component))
+      if (component is object && ARDB.AdaptiveComponentInstanceUtils.IsAdaptiveComponentInstance(component))
       {
-        var adaptivePointIds = DB.AdaptiveComponentInstanceUtils.GetInstancePlacementPointElementRefIds(component);
+        var adaptivePointIds = ARDB.AdaptiveComponentInstanceUtils.GetInstancePlacementPointElementRefIds(component);
         if (adaptivePointIds.Count == adaptivePoints.Length)
         {
           int index = 0;
-          foreach (var vertex in adaptivePointIds.Select(id => document.GetElement(id)).Cast<DB.ReferencePoint>())
+          foreach (var vertex in adaptivePointIds.Select(id => document.GetElement(id)).Cast<ARDB.ReferencePoint>())
           {
             var position = adaptivePoints[index++];
             if (!vertex.Position.IsAlmostEqualTo(position))
@@ -80,14 +80,14 @@ namespace RhinoInside.Revit.GH.Components
           throw new InvalidOperationException();
         }
 
-        var parametersMask = new DB.BuiltInParameter[]
+        var parametersMask = new ARDB.BuiltInParameter[]
         {
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM
+          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          ARDB.BuiltInParameter.ELEM_TYPE_PARAM
         };
 
-        ReplaceElement(ref component, document.GetElement(newElementIds.First()) as DB.FamilyInstance, parametersMask);
+        ReplaceElement(ref component, document.GetElement(newElementIds.First()) as ARDB.FamilyInstance, parametersMask);
       }
     }
   }

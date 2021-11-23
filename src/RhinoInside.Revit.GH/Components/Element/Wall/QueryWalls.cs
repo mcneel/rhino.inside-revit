@@ -1,17 +1,16 @@
 using System;
 using System.Linq;
-using System.Collections.Generic;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class QueryWalls : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("118F5744-292F-4BEC-9213-8073219D8563");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "W";
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Wall));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.Wall));
 
     public QueryWalls() : base
     (
@@ -54,17 +53,17 @@ namespace RhinoInside.Revit.GH.Components
         return;
 
       // grab wall system family from input
-      var wallKind = DB.WallKind.Unknown;
+      var wallKind = ARDB.WallKind.Unknown;
       if (!DA.GetData("Wall System Family", ref wallKind))
         return;
 
       // collect wall instances based on the given wallkind
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var wallsCollector = collector.WherePasses(ElementFilter);
-        var walls = wallsCollector.Cast<DB.Wall>();
+        var walls = wallsCollector.Cast<ARDB.Wall>();
 
-        if (wallKind == DB.WallKind.Basic)
+        if (wallKind == ARDB.WallKind.Basic)
           walls = walls.Where(x => x.WallType.Kind == wallKind && !x.IsStackedWallMember);
         else
           walls = walls.Where(x => x.WallType.Kind == wallKind);

@@ -2,13 +2,13 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.Convert.System.Drawing;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Material
+namespace RhinoInside.Revit.GH.Components.Materials
 {
+  using External.DB.Extensions;
+  using ElementTracking;
+
   public class MaterialByName : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("3AEDBA3C-1B77-4C52-A7FC-7CA7095F730E");
@@ -76,9 +76,9 @@ namespace RhinoInside.Revit.GH.Components.Material
     };
 
     const string _Material_ = "Material";
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
-      DB.BuiltInParameter.MATERIAL_NAME
+      ARDB.BuiltInParameter.MATERIAL_NAME
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -86,10 +86,10 @@ namespace RhinoInside.Revit.GH.Components.Material
       // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      Params.TryGetData(DA, "Template", out DB.Material template);
+      Params.TryGetData(DA, "Template", out ARDB.Material template);
 
       // Previous Output
-      Params.ReadTrackedElement(_Material_, doc.Value, out DB.Material material);
+      Params.ReadTrackedElement(_Material_, doc.Value, out ARDB.Material material);
 
       StartTransaction(doc.Value);
       {
@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       }
     }
 
-    bool Reuse(DB.Material material, string name, DB.Material template)
+    bool Reuse(ARDB.Material material, string name, ARDB.Material template)
     {
       if (material is null) return false;
       if (name is object) material.Name = name;
@@ -109,9 +109,9 @@ namespace RhinoInside.Revit.GH.Components.Material
       return true;
     }
 
-    DB.Material Create(DB.Document doc, string name, DB.Material template)
+    ARDB.Material Create(ARDB.Document doc, string name, ARDB.Material template)
     {
-      var material = default(DB.Material);
+      var material = default(ARDB.Material);
 
       // Make sure the name is unique
       {
@@ -120,7 +120,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
         name = doc.GetNamesakeElements
         (
-          typeof(DB.Material), name, categoryId: DB.BuiltInCategory.OST_Materials
+          typeof(ARDB.Material), name, categoryId: ARDB.BuiltInCategory.OST_Materials
         ).
         Select(x => x.Name).
         WhereNamePrefixedWith(name).
@@ -136,27 +136,27 @@ namespace RhinoInside.Revit.GH.Components.Material
         }
         else
         {
-          var ids = DB.ElementTransformUtils.CopyElements
+          var ids = ARDB.ElementTransformUtils.CopyElements
           (
             template.Document,
-            new DB.ElementId[] { template.Id },
+            new ARDB.ElementId[] { template.Id },
             doc,
             default,
             default
           );
 
-          material = ids.Select(x => doc.GetElement(x)).OfType<DB.Material>().FirstOrDefault();
+          material = ids.Select(x => doc.GetElement(x)).OfType<ARDB.Material>().FirstOrDefault();
           material.Name = name;
         }
       }
 
       if (material is null)
-        material = doc.GetElement(DB.Material.Create(doc, name)) as DB.Material;
+        material = doc.GetElement(ARDB.Material.Create(doc, name)) as ARDB.Material;
 
       return material;
     }
 
-    DB.Material Reconstruct(DB.Material material, DB.Document doc, string name, DB.Material template)
+    ARDB.Material Reconstruct(ARDB.Material material, ARDB.Document doc, string name, ARDB.Material template)
     {
       if (!Reuse(material, name, template))
       {
@@ -172,8 +172,11 @@ namespace RhinoInside.Revit.GH.Components.Material
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Material.Obsolete
+namespace RhinoInside.Revit.GH.Components.Materials.Obsolete
 {
+  using Convert.System.Drawing;
+  using External.DB.Extensions;
+
   [Obsolete("Since 2020-09-24")]
   public class MaterialByName : TransactionalChainComponent
   {
@@ -245,19 +248,19 @@ namespace RhinoInside.Revit.GH.Components.Material.Obsolete
       DA.GetData("Color", ref color);
 
       // Query for an existing material with the requested name
-      var material = default(DB.Material);
-      using (var collector = new DB.FilteredElementCollector(doc.Value))
+      var material = default(ARDB.Material);
+      using (var collector = new ARDB.FilteredElementCollector(doc.Value))
       {
-        material = collector.OfClass(typeof(DB.Material)).
-                WhereParameterEqualsTo(DB.BuiltInParameter.MATERIAL_NAME, name).
-                FirstElement() as DB.Material;
+        material = collector.OfClass(typeof(ARDB.Material)).
+                WhereParameterEqualsTo(ARDB.BuiltInParameter.MATERIAL_NAME, name).
+                FirstElement() as ARDB.Material;
       }
 
       StartTransaction(doc.Value);
 
       bool materialIsNew = material is null;
       if (materialIsNew)
-        material = doc.Value.GetElement(DB.Material.Create(doc.Value, name)) as DB.Material;
+        material = doc.Value.GetElement(ARDB.Material.Create(doc.Value, name)) as ARDB.Material;
 
       if (materialIsNew || overrideMaterial)
       {

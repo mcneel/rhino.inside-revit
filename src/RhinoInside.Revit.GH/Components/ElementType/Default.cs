@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ElementTypes
 {
+  using External.DB.Extensions;
+
   public class ElementTypeDefault : Component
   {
     public override Guid ComponentGuid => new Guid("D67B341F-46E4-4532-980E-42CE035470CF");
@@ -32,34 +33,33 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddParameter(new Parameters.ElementType(), "Type", "T", "Default type on specified category", GH_ParamAccess.item);
     }
 
-    public static DB.ElementId GetDefaultElementTypeId(DB.Document doc, DB.ElementId categoryId)
+    static ARDB.ElementId GetDefaultElementTypeId(ARDB.Document doc, ARDB.ElementId categoryId)
     {
       var elementTypeId = doc.GetDefaultFamilyTypeId(categoryId);
       if (elementTypeId.IsValid())
         return elementTypeId;
 
-      if (categoryId.TryGetBuiltInCategory(out var cat))
+      if (categoryId.TryGetBuiltInCategory(out var _))
       {
-        foreach (var elementTypeGroup in Enum.GetValues(typeof(DB.ElementTypeGroup)).Cast<DB.ElementTypeGroup>())
+        foreach (var elementTypeGroup in Enum.GetValues(typeof(ARDB.ElementTypeGroup)).Cast<ARDB.ElementTypeGroup>())
         {
-          var type = doc.GetElement(doc.GetDefaultElementTypeId(elementTypeGroup)) as DB.ElementType;
-          if (type?.Category?.Id.IntegerValue == (int) cat || type?.Category?.Parent?.Id.IntegerValue == (int) cat)
+          var type = doc.GetElement(doc.GetDefaultElementTypeId(elementTypeGroup)) as ARDB.ElementType;
+          if (type?.Category?.Id == categoryId || type?.Category?.Parent?.Id == categoryId)
             return type.Id;
         }
       }
 
-      return DB.ElementId.InvalidElementId;
+      return ARDB.ElementId.InvalidElementId;
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var category = default(DB.Category);
-      if (!DA.GetData("Category", ref category))
+      var category = default(Types.Category);
+      if (!DA.GetData("Category", ref category) || !category.IsValid)
         return;
 
-      var doc = category.Document();
-      var elementTypeId = GetDefaultElementTypeId(doc, category.Id);
-      DA.SetData("Type", doc.GetElement(elementTypeId) as DB.ElementType);
+      var typeId = GetDefaultElementTypeId(category.Document, category.Id);
+      DA.SetData("Type", Types.ElementType.FromElementId(category.Document, typeId));
     }
   }
 }

@@ -1,33 +1,34 @@
 using System;
 using System.Linq;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Floor")]
   public class Floor : HostObject
   {
-    protected override Type ValueType => typeof(DB.Floor);
-    public static explicit operator DB.Floor(Floor value) => value?.Value;
-    public new DB.Floor Value => base.Value as DB.Floor;
+    protected override Type ValueType => typeof(ARDB.Floor);
+    public static explicit operator ARDB.Floor(Floor value) => value?.Value;
+    public new ARDB.Floor Value => base.Value as ARDB.Floor;
 
     public Floor() { }
-    public Floor(DB.Floor floor) : base(floor) { }
+    public Floor(ARDB.Floor floor) : base(floor) { }
 
     public override Plane Location
     {
       get
       {
-        if (Value is DB.Floor floor && floor.GetSketch() is DB.Sketch sketch)
+        if (Value is ARDB.Floor floor && floor.GetSketch() is ARDB.Sketch sketch)
         {
           var center = Point3d.Origin;
           var count = 0;
-          foreach (var curveArray in sketch.Profile.Cast<DB.CurveArray>())
+          foreach (var curveArray in sketch.Profile.Cast<ARDB.CurveArray>())
           {
-            foreach (var curve in curveArray.Cast<DB.Curve>())
+            foreach (var curve in curveArray.Cast<ARDB.Curve>())
             {
               count++;
               center += curve.Evaluate(0.0, normalized: true).ToPoint3d();
@@ -37,10 +38,10 @@ namespace RhinoInside.Revit.GH.Types
           }
           center /= count;
 
-          if (floor.Document.GetElement(floor.LevelId) is DB.Level level)
+          if (floor.Document.GetElement(floor.LevelId) is ARDB.Level level)
             center.Z = level.GetHeight() * Revit.ModelUnits;
 
-          center.Z += Revit.ModelUnits * floor.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
+          center.Z += Revit.ModelUnits * floor.get_Parameter(ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
 
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
           var origin = center;

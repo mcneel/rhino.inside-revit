@@ -1,9 +1,9 @@
 using System;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
   public class FamilyGeometryByBrep : Component
   {
@@ -40,19 +40,19 @@ namespace RhinoInside.Revit.GH.Components
 
       var visible = default(bool);
       if (DA.GetData("Visible", ref visible))
-        brep.TrySetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), visible, true);
+        brep.TrySetUserString(ARDB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), visible, true);
 
-      var subCategoryId = default(DB.ElementId);
+      var subCategoryId = default(ARDB.ElementId);
       if (DA.GetData("Subcategory", ref subCategoryId))
-        brep.TrySetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), subCategoryId);
+        brep.TrySetUserString(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), subCategoryId);
 
       var visibility = default(int);
       if (DA.GetData("Visibility", ref visibility))
-        brep.TrySetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), visibility, 57406);
+        brep.TrySetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), visibility, 57406);
 
-      var materialId = default(DB.ElementId);
+      var materialId = default(ARDB.ElementId);
       if (DA.GetData("Material", ref materialId))
-        brep.TrySetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), materialId);
+        brep.TrySetUserString(ARDB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), materialId);
 
       DA.SetData("Brep", brep);
     }

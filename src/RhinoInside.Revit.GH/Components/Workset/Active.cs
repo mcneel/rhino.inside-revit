@@ -1,7 +1,6 @@
 using System;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Worksets
 {
@@ -39,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
 
-      if (doc.Value.GetWorksetTable() is DB.WorksetTable table)
+      if (doc.Value.GetWorksetTable() is ARDB.WorksetTable table)
       {
         if (Params.GetData(DA, "Active Workset", out Types.Workset active))
         {

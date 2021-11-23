@@ -2,11 +2,12 @@ using System;
 using System.IO;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
+  using External.DB.Extensions;
+
   public class FamilySave : Component
   {
     public override Guid ComponentGuid => new Guid("C2B9B045-8FD2-4124-9294-D9BA809B44B1");
@@ -44,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Family family = null;
+      ARDB.Family family = null;
       if (!DA.GetData("Family", ref family))
         return;
 
@@ -63,9 +64,9 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Backups", ref backups))
         return;
 
-      if (Revit.ActiveDBDocument.EditFamily(family) is DB.Document familyDoc) using (familyDoc)
+      if (Revit.ActiveDBDocument.EditFamily(family) is ARDB.Document familyDoc) using (familyDoc)
         {
-          var view = default(DB.View);
+          var view = default(ARDB.View);
           if (DA.GetData("Preview View", ref view))
           {
             if (!view.Document.Equals(familyDoc))
@@ -78,7 +79,7 @@ namespace RhinoInside.Revit.GH.Components
             {
               if (overwrite)
               {
-                using (var saveOptions = new DB.SaveOptions() { Compact = compact })
+                using (var saveOptions = new ARDB.SaveOptions() { Compact = compact })
                 {
                   if (view is object)
                     saveOptions.PreviewViewId = view.Id;
@@ -99,7 +100,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (!Path.HasExtension(filePath))
                   filePath += ".rfa";
 
-                using (var saveAsOptions = new DB.SaveAsOptions() { OverwriteExistingFile = overwrite, Compact = compact })
+                using (var saveAsOptions = new ARDB.SaveAsOptions() { OverwriteExistingFile = overwrite, Compact = compact })
                 {
                   if (backups > -1)
                     saveAsOptions.MaximumBackups = backups;

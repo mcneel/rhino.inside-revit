@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
+  using External.DB.Extensions;
+
   public class SelectionElements : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("E90F2139-FA13-4EE2-BFD3-6642FA9053AB");
@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Selection Filter", out DB.SelectionFilterElement selection, x => x.IsValid())) return;
+      if (!Params.GetData(DA, "Selection Filter", out ARDB.SelectionFilterElement selection, x => x.IsValid())) return;
 
       if (Params.GetDataList(DA, "Elements", out IList<Types.Element> elements))
       {

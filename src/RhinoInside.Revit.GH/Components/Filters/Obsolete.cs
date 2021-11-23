@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Filters.Obsolete
 {
+  using Convert.Geometry;
+  using External.DB;
+
   [Obsolete("Obsolete since 2020-10-15")]
   public class ElementBoundingBoxFilter : Filters.ElementFilterComponent
   {
@@ -56,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
         return;
 
       var targets = new List<Rhino.Geometry.Box>();
-      DB.ElementFilter filter = null;
+      ARDB.ElementFilter filter = null;
 
       if (boundingBox)
       {
@@ -68,13 +69,13 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
         }
 
         if (strict)
-          filter = new DB.BoundingBoxIsInsideFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+          filter = new ARDB.BoundingBoxIsInsideFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
         else
-          filter = new DB.BoundingBoxIntersectsFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+          filter = new ARDB.BoundingBoxIntersectsFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
       }
       else
       {
-        var filters = points.ConvertAll<DB.ElementFilter>
+        var filters = points.ConvertAll<ARDB.ElementFilter>
         (
           x =>
           {
@@ -87,11 +88,11 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
 
             if (strict)
             {
-              return new DB.BoundingBoxIsInsideFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+              return new ARDB.BoundingBoxIsInsideFilter(pointsBBox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
             }
             else
             {
-              return new DB.BoundingBoxContainsPointFilter(x.ToXYZ(), tolerance / Revit.ModelUnits, inverted);
+              return new ARDB.BoundingBoxContainsPointFilter(x.ToXYZ(), tolerance / Revit.ModelUnits, inverted);
             }
           }
         );

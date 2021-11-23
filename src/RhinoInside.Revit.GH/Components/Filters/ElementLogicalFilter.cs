@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
+  using External.DB;
+
   public abstract class ElementLogicalFilter : Component, IGH_VariableParameterComponent
   {
     protected ElementLogicalFilter(string name, string nickname, string description, string category, string subCategory)
@@ -99,10 +100,10 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var filters = new List<DB.ElementFilter>(Params.Input.Count);
+      var filters = new List<ARDB.ElementFilter>(Params.Input.Count);
       for (int i = 0; i < Params.Input.Count; ++i)
       {
-        DB.ElementFilter filter = default;
+        ARDB.ElementFilter filter = default;
         if (DA.GetData(i, ref filter) && filter is object)
           filters.Add(filter);
       }
@@ -123,10 +124,10 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var filters = new List<DB.ElementFilter>(Params.Input.Count);
+      var filters = new List<ARDB.ElementFilter>(Params.Input.Count);
       for (int i = 0; i < Params.Input.Count; ++i)
       {
-        DB.ElementFilter filter = default;
+        ARDB.ElementFilter filter = default;
         if (DA.GetData(i, ref filter) && filter is object)
           filters.Add(filter);
       }
@@ -152,7 +153,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var filters = new List<DB.ElementFilter>();
+      var filters = new List<ARDB.ElementFilter>();
       if (!DA.GetDataList("Filters", filters))
         return;
 
@@ -177,7 +178,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var filters = new List<DB.ElementFilter>();
+      var filters = new List<ARDB.ElementFilter>();
       if (!DA.GetDataList("Filters", filters))
         return;
 
@@ -203,7 +204,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var elementIds = new List<DB.ElementId>();
+      var elementIds = new List<ARDB.ElementId>();
       if (!DA.GetDataList("Elements", elementIds))
         return;
 

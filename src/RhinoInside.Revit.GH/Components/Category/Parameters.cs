@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Categories
 {
+  using External.DB.Extensions;
+
   public class CategoryParameters : Component
   {
     public override Guid ComponentGuid => new Guid("189F0A94-D077-4B96-8A92-6D5334EF7157");
@@ -37,9 +38,9 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Category", ref category))
         return;
 
-      if(category.Document is DB.Document doc)
+      if(category.Document is ARDB.Document doc)
       {
-        var parameterKeys = DB.TableView.GetAvailableParameters(doc, category.Id);
+        var parameterKeys = ARDB.TableView.GetAvailableParameters(doc, category.Id);
         DA.SetDataList("Parameters", parameterKeys.Select(paramId => Types.ParameterKey.FromElementId(doc, paramId)));
       }
     }

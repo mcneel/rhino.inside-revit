@@ -1,33 +1,34 @@
 using System;
 using System.Linq;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Ceiling")]
   public class Ceiling : HostObject
   {
-    protected override Type ValueType => typeof(DB.Ceiling);
-    public static explicit operator DB.Ceiling(Ceiling value) => value?.Value;
-    public new DB.Ceiling Value => base.Value as DB.Ceiling;
+    protected override Type ValueType => typeof(ARDB.Ceiling);
+    public static explicit operator ARDB.Ceiling(Ceiling value) => value?.Value;
+    public new ARDB.Ceiling Value => base.Value as ARDB.Ceiling;
 
     public Ceiling() { }
-    public Ceiling(DB.Ceiling ceiling) : base(ceiling) { }
+    public Ceiling(ARDB.Ceiling ceiling) : base(ceiling) { }
 
     public override Plane Location
     {
       get
       {
-        if (Value is DB.Ceiling ceiling && ceiling.GetSketch() is DB.Sketch sketch)
+        if (Value is ARDB.Ceiling ceiling && ceiling.GetSketch() is ARDB.Sketch sketch)
         {
           var center = Point3d.Origin;
           var count = 0;
-          foreach (var curveArray in sketch.Profile.Cast<DB.CurveArray>())
+          foreach (var curveArray in sketch.Profile.Cast<ARDB.CurveArray>())
           {
-            foreach (var curve in curveArray.Cast<DB.Curve>())
+            foreach (var curve in curveArray.Cast<ARDB.Curve>())
             {
               count++;
               center += curve.Evaluate(0.0, normalized: true).ToPoint3d();
@@ -37,10 +38,10 @@ namespace RhinoInside.Revit.GH.Types
           }
           center /= count;
 
-          if (ceiling.Document.GetElement(ceiling.LevelId) is DB.Level level)
+          if (ceiling.Document.GetElement(ceiling.LevelId) is ARDB.Level level)
             center.Z = level.GetHeight() * Revit.ModelUnits;
 
-          center.Z += Revit.ModelUnits * ceiling.get_Parameter(DB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
+          center.Z += Revit.ModelUnits * ceiling.get_Parameter(ARDB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
 
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
           var origin = center;

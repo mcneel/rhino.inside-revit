@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   [Obsolete("Obsolete since 2020-06-01")]
   public class QueryWallTypes : ElementCollectorComponent
@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     protected override string IconTag => "W";
 
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.WallType));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.WallType));
 
     public QueryWallTypes() : base
     (
@@ -46,50 +46,50 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      var wallKind = DB.WallKind.Unknown;
+      var wallKind = ARDB.WallKind.Unknown;
       DA.GetData("Family", ref wallKind);
 
       string name = null;
       DA.GetData("Name", ref name);
 
-      var wallFunction = DB.WallFunction.Interior;
+      var wallFunction = ARDB.WallFunction.Interior;
       bool filterFunction = DA.GetData("Function", ref wallFunction);
 
       var width = Rhino.Geometry.Interval.Unset;
       DA.GetData("Width", ref width);
 
-      var filter = default(DB.ElementFilter);
+      var filter = default(ARDB.ElementFilter);
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
 
         if (filterFunction)
         {
-          if (TryGetFilterIntegerParam(DB.BuiltInParameter.FUNCTION_PARAM, (int) wallFunction, out var functionFilter))
+          if (TryGetFilterIntegerParam(ARDB.BuiltInParameter.FUNCTION_PARAM, (int) wallFunction, out var functionFilter))
             elementCollector = elementCollector.WherePasses(functionFilter);
         }
 
         // DB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM only works with Basic wall types
-        if (width.IsValid && wallKind == DB.WallKind.Basic && TryGetFilterDoubleParam(DB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM, width.Mid / Revit.ModelUnits, Revit.VertexTolerance + (width.Length * 0.5 / Revit.ModelUnits), out var widthFilter))
+        if (width.IsValid && wallKind == ARDB.WallKind.Basic && TryGetFilterDoubleParam(ARDB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM, width.Mid / Revit.ModelUnits, Revit.VertexTolerance + (width.Length * 0.5 / Revit.ModelUnits), out var widthFilter))
           elementCollector = elementCollector.WherePasses(widthFilter);
 
-        var elements = collector.Cast<DB.WallType>();
+        var elements = collector.Cast<ARDB.WallType>();
 
-        if (wallKind != DB.WallKind.Unknown)
+        if (wallKind != ARDB.WallKind.Unknown)
           elements = elements.Where(x => x.Kind == wallKind);
 
         if (!string.IsNullOrEmpty(name))
           elements = elements.Where(x => x.Name.IsSymbolNameLike(name));
 
-        if (width.IsValid && wallKind != DB.WallKind.Basic)
+        if (width.IsValid && wallKind != ARDB.WallKind.Basic)
           elements = elements.Where(x => width.IncludesParameter(x.Width * Revit.ModelUnits));
 
         DA.SetDataList

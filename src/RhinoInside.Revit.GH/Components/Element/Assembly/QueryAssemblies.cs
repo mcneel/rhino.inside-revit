@@ -2,19 +2,16 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using ARDB = Autodesk.Revit.DB;
 
-using RhinoInside.Revit.GH.Kernel.Attributes;
-
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components.Element.Assembly
+namespace RhinoInside.Revit.GH.Components.Assemblies
 {
   [ComponentVersion(introduced: "1.2")]
   public class QueryAssemblies : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("fd5b45c3-7f55-4ad8-abbe-e871f95b4988");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.AssemblyInstance));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.AssemblyInstance));
 
     public QueryAssemblies() : base
     (
@@ -48,10 +45,10 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
       string name = null;
       DA.GetData("Name", ref name);
 
-      DB.ElementFilter filter = null;
+      ARDB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var assemblyCollector = collector.WherePasses(ElementFilter);
 
@@ -60,10 +57,10 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
 
         // DB.BuiltInParameter.ASSEMBLY_NAME does not return a parameter
         // using the type name instead
-        if (TryGetFilterStringParam(DB.BuiltInParameter.ELEM_TYPE_PARAM, ref name, out var assemblyNameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ELEM_TYPE_PARAM, ref name, out var assemblyNameFilter))
           assemblyCollector = assemblyCollector.WherePasses(assemblyNameFilter);
 
-        var assemblies = assemblyCollector.Cast<DB.AssemblyInstance>();
+        var assemblies = assemblyCollector.Cast<ARDB.AssemblyInstance>();
 
         if (!string.IsNullOrEmpty(name))
           assemblies = assemblies.Where(x => x.Name.IsSymbolNameLike(name));

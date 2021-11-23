@@ -1,7 +1,6 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -20,11 +19,11 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
 
-      ListItems.Add(new GH_ValueListItem("None", ((int) DBX.CurtainGridLayout.None).ToString()));
-      ListItems.Add(new GH_ValueListItem("Fixed Distance", ((int) DBX.CurtainGridLayout.FixedDistance).ToString()));
-      ListItems.Add(new GH_ValueListItem("Fixed Number", ((int) DBX.CurtainGridLayout.FixedNumber).ToString()));
-      ListItems.Add(new GH_ValueListItem("Maximum Spacing", ((int) DBX.CurtainGridLayout.MaximumSpacing).ToString()));
-      ListItems.Add(new GH_ValueListItem("Minimum Spacing", ((int) DBX.CurtainGridLayout.MinimumSpacing).ToString()));
+      ListItems.Add(new GH_ValueListItem("None", ((int) External.DB.CurtainGridLayout.None).ToString()));
+      ListItems.Add(new GH_ValueListItem("Fixed Distance", ((int) External.DB.CurtainGridLayout.FixedDistance).ToString()));
+      ListItems.Add(new GH_ValueListItem("Fixed Number", ((int) External.DB.CurtainGridLayout.FixedNumber).ToString()));
+      ListItems.Add(new GH_ValueListItem("Maximum Spacing", ((int) External.DB.CurtainGridLayout.MaximumSpacing).ToString()));
+      ListItems.Add(new GH_ValueListItem("Minimum Spacing", ((int) External.DB.CurtainGridLayout.MinimumSpacing).ToString()));
     }
   }
 }

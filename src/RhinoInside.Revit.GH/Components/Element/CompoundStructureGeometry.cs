@@ -5,17 +5,18 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Geometry
 {
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+
   public class CompoundStructureGeometry : Component
   {
     public override Guid ComponentGuid => new Guid("3DBAAAE8-90D2-465E-A88B-FCC2B64E3BB3");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override string IconTag => "PG";
+    protected override string IconTag => "SG";
 
     public CompoundStructureGeometry() : base
     (
@@ -25,8 +26,7 @@ namespace RhinoInside.Revit.GH.Components
       category: "Revit",
       subCategory: "Element"
     )
-    {
-    }
+    { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
@@ -54,29 +54,29 @@ namespace RhinoInside.Revit.GH.Components
 
     private void GetCompoundStructureGeometry
     (
-      DB.HostObject element,
+      ARDB.HostObject element,
       GH_Path basePath,
       out GH_Structure<IGH_GeometricGoo> geometries
     )
     {
       geometries = new GH_Structure<IGH_GeometricGoo>();
-      var elementIds = new List<DB.ElementId>() { element.Id };
+      var elementIds = new List<ARDB.ElementId>() { element.Id };
 
-      bool createParts = DB.PartUtils.AreElementsValidForCreateParts(element.Document, elementIds);
+      bool createParts = ARDB.PartUtils.AreElementsValidForCreateParts(element.Document, elementIds);
       try
       {
-        using (var transaction = new DB.Transaction(element.Document, nameof(GetCompoundStructureGeometry)))
+        using (var transaction = new ARDB.Transaction(element.Document, nameof(GetCompoundStructureGeometry)))
         {
           transaction.Start();
 
-          var type = element.Document.GetElement(element.GetTypeId()) as DB.HostObjAttributes;
+          var type = element.Document.GetElement(element.GetTypeId()) as ARDB.HostObjAttributes;
           using (var structure = type.GetCompoundStructure())
           {
             var count = structure.LayerCount;
-            var materials = new Dictionary<DB.ElementId, int>();
+            var materials = new Dictionary<ARDB.ElementId, int>();
             for (int l = 0; l < count; ++l)
             {
-              var material = DB.Material.Create(element.Document, Guid.NewGuid().ToString("N"));
+              var material = ARDB.Material.Create(element.Document, Guid.NewGuid().ToString("N"));
               materials.Add(material, l);
               structure.SetMaterialId(l, material);
             }
@@ -84,25 +84,25 @@ namespace RhinoInside.Revit.GH.Components
             type.SetCompoundStructure(structure);
 
             if (createParts)
-              DB.PartUtils.CreateParts(element.Document, elementIds);
+              ARDB.PartUtils.CreateParts(element.Document, elementIds);
 
             element.Document.Regenerate();
 
             // get the exploded parts
-            foreach (var partId in DB.PartUtils.GetAssociatedParts(element.Document, element.Id, includePartsWithAssociatedParts: true, includeAllChildren: true))
+            foreach (var partId in ARDB.PartUtils.GetAssociatedParts(element.Document, element.Id, includePartsWithAssociatedParts: true, includeAllChildren: true))
             {
-              if (element.Document.GetElement(partId) is DB.Part part)
+              if (element.Document.GetElement(partId) is ARDB.Part part)
               {
-                var materialId = part.get_Parameter(DB.BuiltInParameter.DPART_MATERIAL_ID_PARAM).AsElementId();
+                var materialId = part.get_Parameter(ARDB.BuiltInParameter.DPART_MATERIAL_ID_PARAM).AsElementId();
                 if (!materials.TryGetValue(materialId, out var layerIndex))
                   layerIndex = -1;
 
                 var path = basePath.AppendElement(layerIndex);
 
-                using (var options = new DB.Options())
+                using (var options = new ARDB.Options())
                 {
                   // extract geometry for each part
-                  if (part.get_Geometry(options) is DB.GeometryElement geometryElement)
+                  if (part.get_Geometry(options) is ARDB.GeometryElement geometryElement)
                   {
                     var list = geometryElement?.
                       ToGeometryBaseMany().
@@ -125,38 +125,38 @@ namespace RhinoInside.Revit.GH.Components
 
     private void GetCompoundStructureGeometry
     (
-      DB.Element element,
+      ARDB.Element element,
       GH_Path basePath,
       out GH_Structure<IGH_GeometricGoo> geometries
     )
     {
       geometries = new GH_Structure<IGH_GeometricGoo>();
-      var elementIds = new List<DB.ElementId>() { element.Id };
+      var elementIds = new List<ARDB.ElementId>() { element.Id };
 
-      bool createParts = DB.PartUtils.AreElementsValidForCreateParts(element.Document, elementIds);
+      bool createParts = ARDB.PartUtils.AreElementsValidForCreateParts(element.Document, elementIds);
       try
       {
         // start a dry transaction that will be rolled back automatically
         // when execution goes out of next using statment
-        using (var transaction = createParts ? new DB.Transaction(element.Document, nameof(GetCompoundStructureGeometry)) : default)
+        using (var transaction = createParts ? new ARDB.Transaction(element.Document, nameof(GetCompoundStructureGeometry)) : default)
         {
           transaction?.Start();
 
           // explode the element into parts
           if (createParts)
           {
-            DB.PartUtils.CreateParts(element.Document, elementIds);
+            ARDB.PartUtils.CreateParts(element.Document, elementIds);
             element.Document.Regenerate();
           }
 
-          foreach (var partId in DB.PartUtils.GetAssociatedParts(element.Document, element.Id, includePartsWithAssociatedParts: true, includeAllChildren: true))
+          foreach (var partId in ARDB.PartUtils.GetAssociatedParts(element.Document, element.Id, includePartsWithAssociatedParts: true, includeAllChildren: true))
           {
-            if (element.Document.GetElement(partId) is DB.Element part)
+            if (element.Document.GetElement(partId) is ARDB.Element part)
             {
-              using (var options = new DB.Options())
+              using (var options = new ARDB.Options())
               {
                 // extract geometry for each part
-                if (part.get_Geometry(options) is DB.GeometryElement geometryElement)
+                if (part.get_Geometry(options) is ARDB.GeometryElement geometryElement)
                 {
                   var list = geometryElement?.
                     ToGeometryBaseMany().
@@ -177,7 +177,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = default;
+      ARDB.Element element = default;
       if (!DA.GetData("Element", ref element))
         return;
 
@@ -185,8 +185,8 @@ namespace RhinoInside.Revit.GH.Components
       var _Geometry_ = Params.IndexOfOutputParam("Geometry");
       switch (element)
       {
-        case DB.HostObject h: GetCompoundStructureGeometry(h, DA.ParameterTargetPath(_Geometry_), out geometry); break;
-        case DB.Element e: GetCompoundStructureGeometry(e, DA.ParameterTargetPath(_Geometry_), out geometry); break;
+        case ARDB.HostObject h: GetCompoundStructureGeometry(h, DA.ParameterTargetPath(_Geometry_), out geometry); break;
+        case ARDB.Element e: GetCompoundStructureGeometry(e, DA.ParameterTargetPath(_Geometry_), out geometry); break;
       }
 
       DA.SetDataTree(_Geometry_, geometry);

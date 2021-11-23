@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Parameters
         if (Document.TryGetCurrentDocument(this, out var doc))
         {
           var categories = Types.CategoryId.EnumValues.
-            Where(x => DB.DirectShape.IsValidCategoryId(new DB.ElementId(x.Value), doc.Value));
+            Where(x => ARDB.DirectShape.IsValidCategoryId(new ARDB.ElementId(x.Value), doc.Value));
           m_data.AppendRange(categories);
         }
       }

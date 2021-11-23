@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
+  using External.DB;
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.0", updated: "1.4")]
   public class ElementDependents : ZuiComponent
   {
@@ -87,15 +88,15 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Element", out Types.Element element)) return;
-      Params.GetData(DA, "Filter", out DB.ElementFilter filter);
+      Params.GetData(DA, "Filter", out ARDB.ElementFilter filter);
 
       filter = CompoundElementFilter.Intersect
       (
-        new DB.ExclusionFilter(new DB.ElementId[] { element.Id }),
+        new ARDB.ExclusionFilter(new ARDB.ElementId[] { element.Id }),
         filter ?? CompoundElementFilter.Union
         (
           CompoundElementFilter.ElementIsNotInternalFilter(element.Document),
-          new DB.ElementClassFilter(typeof(DB.ExtensibleStorage.DataStorage))
+          new ARDB.ElementClassFilter(typeof(ARDB.ExtensibleStorage.DataStorage))
         )
       );
 
@@ -108,7 +109,7 @@ namespace RhinoInside.Revit.GH.Components
           {
             var dependents = element.Document.GetDependentElements
             (
-              new DB.ElementId[] { element.Id },
+              new ARDB.ElementId[] { element.Id },
               out var relateds,
               filter
             );

@@ -1,29 +1,25 @@
 using System;
-using System.Linq;
-using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Direct Shape")]
   public class DirectShape : GeometricElement
   {
-    protected override Type ValueType => typeof(DB.DirectShape);
-    public new DB.DirectShape Value => base.Value as DB.DirectShape;
+    protected override Type ValueType => typeof(ARDB.DirectShape);
+    public new ARDB.DirectShape Value => base.Value as ARDB.DirectShape;
 
     public DirectShape() { }
-    public DirectShape(DB.DirectShape value) : base(value) { }
+    public DirectShape(ARDB.DirectShape value) : base(value) { }
   }
 
   [Kernel.Attributes.Name("Direct Shape Type")]
   public class DirectShapeType : ElementType
   {
-    protected override Type ValueType => typeof(DB.DirectShapeType);
-    public new DB.DirectShapeType Value => base.Value as DB.DirectShapeType;
+    protected override Type ValueType => typeof(ARDB.DirectShapeType);
+    public new ARDB.DirectShapeType Value => base.Value as ARDB.DirectShapeType;
 
     public DirectShapeType() { }
-    public DirectShapeType(DB.DirectShapeType value) : base(value) { }
+    public DirectShapeType(ARDB.DirectShapeType value) : base(value) { }
   }
 }

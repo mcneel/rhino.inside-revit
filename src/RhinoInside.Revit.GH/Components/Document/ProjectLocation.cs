@@ -2,7 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.External.DB.Extensions;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Documents
 {
   public class ProjectLocation : TransactionalChainComponent
   {

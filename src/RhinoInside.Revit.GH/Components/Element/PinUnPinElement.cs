@@ -2,7 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
   public class PinUnPinElement: TransactionalChainComponent
   {

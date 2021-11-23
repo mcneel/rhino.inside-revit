@@ -2,7 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
-namespace RhinoInside.Revit.GH.Components.ParameterElement
+namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
   public class ParameterFormula : TransactionalChainComponent
   {

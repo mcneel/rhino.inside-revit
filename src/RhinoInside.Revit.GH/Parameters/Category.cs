@@ -4,11 +4,11 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Category : Element<Types.Category, DB.Element>
+  public class Category : Element<Types.Category, ARDB.Element>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("6722C7A5-EFD3-4119-A7FD-6C8BE892FD04");
@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Parameters
       categoriesTypeBox.Items.Add("Internal");
       categoriesTypeBox.Items.Add("Analytical");
 
-      if(PersistentValue?.APIObject is DB.Category current)
+      if(PersistentValue?.APIObject is ARDB.Category current)
       {
         if (current.IsTagCategory)
           categoriesTypeBox.SelectedIndex = 2;
@@ -75,11 +75,11 @@ namespace RhinoInside.Revit.GH.Parameters
       if(sender is ComboBox comboBox)
       {
         if(comboBox.Tag is ListBox listBox)
-          RefreshCategoryList(listBox, (DB.CategoryType) comboBox.SelectedIndex + 1);
+          RefreshCategoryList(listBox, (ARDB.CategoryType) comboBox.SelectedIndex + 1);
       }
     }
 
-    private void RefreshCategoryList(ListBox listBox, DB.CategoryType categoryType)
+    private void RefreshCategoryList(ListBox listBox, ARDB.CategoryType categoryType)
     {
       var doc = Revit.ActiveUIDocument?.Document;
       if (doc is null)
@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.GH.Parameters
       using (var collector = doc.Settings.Categories)
       {
         var categories = collector.
-          Cast<DB.Category>().
+          Cast<ARDB.Category>().
           Where(x => 3 == (int) categoryType ? x.IsTagCategory : x.CategoryType == categoryType && !x.IsTagCategory);
 
         listBox.DisplayMember = "DisplayName";
@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class GraphicsStyle : Element<Types.GraphicsStyle, DB.GraphicsStyle>
+  public class GraphicsStyle : Element<Types.GraphicsStyle, ARDB.GraphicsStyle>
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("833E6207-BA60-4C6B-AB8B-96FDA0F91822");

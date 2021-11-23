@@ -1,7 +1,6 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -20,8 +19,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
 
-      ListItems.Add(new GH_ValueListItem("Parallel to Ground", ((int) DBX.BuiltInMullionPositionId.ParallelToGround).ToString()));
-      ListItems.Add(new GH_ValueListItem("Perpendicular to Face", ((int) DBX.BuiltInMullionPositionId.PerpendicularToFace).ToString()));
+      ListItems.Add(new GH_ValueListItem("Parallel to Ground", ((int) External.DB.BuiltInMullionPositionId.ParallelToGround).ToString()));
+      ListItems.Add(new GH_ValueListItem("Perpendicular to Face", ((int) External.DB.BuiltInMullionPositionId.PerpendicularToFace).ToString()));
     }
   }
 }

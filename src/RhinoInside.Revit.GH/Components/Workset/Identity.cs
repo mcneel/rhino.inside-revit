@@ -1,7 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Worksets
 {
@@ -141,7 +141,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
         if (workset.Value.Name != name)
         {
           StartTransaction(workset.Document);
-          DB.WorksetTable.RenameWorkset(workset.Document, workset.Id, name);
+          ARDB.WorksetTable.RenameWorkset(workset.Document, workset.Id, name);
         }
       }
 

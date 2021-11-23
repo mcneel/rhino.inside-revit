@@ -8,18 +8,19 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Rhino.Display;
 using Rhino.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.UI.Selection;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  using External.DB.Extensions;
+  using External.UI.Selection;
+
   public abstract class GraphicalElementT<T, R> :
     Element<T, R>,
     IGH_PreviewObject,
     ISelectionFilter
     where T : class, Types.IGH_GraphicalElement
-    where R : DB.Element
+    where R : ARDB.Element
   {
     protected GraphicalElementT(string name, string nickname, string description, string category, string subcategory) :
     base(name, nickname, description, category, subcategory)
@@ -29,7 +30,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override T PreferredCast(object data)
     {
-      return data is DB.Element element && AllowElement(element) ?
+      return data is ARDB.Element element && AllowElement(element) ?
              Types.GraphicalElement.FromElement(element) as T :
              null;
     }
@@ -43,10 +44,10 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
 
     #region ISelectionFilter
-    public virtual bool AllowElement(DB.Element elem) => elem is R && Types.GraphicalElement.IsValidElement(elem);
-    public bool AllowReference(DB.Reference reference, DB.XYZ position)
+    public virtual bool AllowElement(ARDB.Element elem) => elem is R && Types.GraphicalElement.IsValidElement(elem);
+    public bool AllowReference(ARDB.Reference reference, ARDB.XYZ position)
     {
-      if (reference.ElementReferenceType == DB.ElementReferenceType.REFERENCE_TYPE_NONE)
+      if (reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
         return AllowElement(Revit.ActiveUIDocument.Document.GetElement(reference));
 
       return false;
@@ -160,12 +161,12 @@ namespace RhinoInside.Revit.GH.Parameters
       readonly ISelectionFilter SelectionFilter;
       public LinkedElementSelectionFilter(ISelectionFilter filter) => SelectionFilter = filter;
 
-      public bool AllowElement(DB.Element elem) => elem is DB.RevitLinkInstance;
-      public bool AllowReference(DB.Reference reference, DB.XYZ position)
+      public bool AllowElement(ARDB.Element elem) => elem is ARDB.RevitLinkInstance;
+      public bool AllowReference(ARDB.Reference reference, ARDB.XYZ position)
       {
-        if (reference.ElementReferenceType == DB.ElementReferenceType.REFERENCE_TYPE_NONE)
+        if (reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
         {
-          if (Revit.ActiveUIDocument.Document.GetElement(reference) is DB.RevitLinkInstance link)
+          if (Revit.ActiveUIDocument.Document.GetElement(reference) is ARDB.RevitLinkInstance link)
             return SelectionFilter.AllowElement(link.GetLinkDocument().GetElement(reference.LinkedElementId));
         }
 
@@ -186,13 +187,13 @@ namespace RhinoInside.Revit.GH.Parameters
                             SelectMany(x => x).
                             Where(x => x.IsValid).
                             Select(x => x.Reference).
-                            OfType<DB.Reference>() :
-                            Enumerable.Empty<DB.Reference>()
+                            OfType<ARDB.Reference>() :
+                            Enumerable.Empty<ARDB.Reference>()
                            ).
                            ToArray();
 
       var result = Autodesk.Revit.UI.Result.Failed;
-      var references = default(IList<DB.Reference>);
+      var references = default(IList<ARDB.Reference>);
       {
         var selectionFilter = objectType == ObjectType.LinkedElement ?
           new LinkedElementSelectionFilter(this) :
@@ -209,7 +210,7 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           result = uiDocument.PickObject(out var reference, objectType, selectionFilter);
           if (result == Autodesk.Revit.UI.Result.Succeeded)
-            references = new DB.Reference[] { reference };
+            references = new ARDB.Reference[] { reference };
         }
       }
 
@@ -270,7 +271,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         using (var Documents = Revit.ActiveDBApplication.Documents)
         {
-          if (Documents.Cast<DB.Document>().Where(x => x.IsLinked).Any())
+          if (Documents.Cast<ARDB.Document>().Where(x => x.IsLinked).Any())
           {
             Menu_AppendSeparator(menu);
             Menu_AppendItem(menu, $"Set one linked {TypeName}", Menu_PromptOneLinked, SourceCount == 0, false);
@@ -287,7 +288,7 @@ namespace RhinoInside.Revit.GH.Parameters
       //base.Menu_AppendInternaliseData(menu);
       Menu_AppendItem(menu, $"Internalise selection", Menu_InternaliseData, SourceCount > 0 || !MutableNickName, false);
 
-      if (Revit.ActiveUIDocument?.Document is DB.Document activeDoc)
+      if (Revit.ActiveUIDocument?.Document is ARDB.Document activeDoc)
       {
         var any = ToElementIds(VolatileData).
           Where(x => activeDoc.Equals(x.Document)).
@@ -313,7 +314,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      if (Revit.ActiveUIDocument?.Document is DB.Document doc)
+      if (Revit.ActiveUIDocument?.Document is ARDB.Document doc)
       {
         var highlight = ToElementIds(VolatileData).Any(x => doc.Equals(x.Document));
 
@@ -588,7 +589,7 @@ namespace RhinoInside.Revit.GH.Parameters
         var changes = await scope.ExecuteCommandAsync(commandId);
         if (changes.GetSummary(activeDoc, out var added, out var deleted, out var modified) > 0)
         {
-          var selectionFilter = added.Select(x => activeDoc.GetElement(x)).OfType<DB.SelectionFilterElement>().FirstOrDefault();
+          var selectionFilter = added.Select(x => activeDoc.GetElement(x)).OfType<ARDB.SelectionFilterElement>().FirstOrDefault();
           if (selectionFilter is object)
           {
             RecordUndoEvent("Externalise data");
@@ -627,12 +628,12 @@ namespace RhinoInside.Revit.GH.Parameters
       var doc = Revit.ActiveUIDocument?.Document;
       if (doc is object)
       {
-        var filters = default(DB.FilterElement[]);
+        var filters = default(ARDB.FilterElement[]);
 
-        using (var collector = new DB.FilteredElementCollector(doc))
+        using (var collector = new ARDB.FilteredElementCollector(doc))
         {
-          var filterCollector = collector.OfClass(typeof(DB.FilterElement));
-          filters = collector.Cast<DB.FilterElement>().OrderBy(x => x.Name).ToArray();
+          var filterCollector = collector.OfClass(typeof(ARDB.FilterElement));
+          filters = collector.Cast<ARDB.FilterElement>().OrderBy(x => x.Name).ToArray();
         }
 
         comboBox.Items.Add("<Active Selection>");
@@ -729,15 +730,15 @@ namespace RhinoInside.Revit.GH.Parameters
           }
           else
           {
-            using (var collector = new DB.FilteredElementCollector(doc))
+            using (var collector = new ARDB.FilteredElementCollector(doc))
             {
-              var filterCollector = collector.OfClass(typeof(DB.FilterElement));
+              var filterCollector = collector.OfClass(typeof(ARDB.FilterElement));
               int filteredElementsCount = 0;
 
-              var filters = collector.Cast<DB.FilterElement>();
-              if (filters.Where(x => x.Name == NickName).FirstOrDefault() is DB.FilterElement filter)
+              var filters = collector.Cast<ARDB.FilterElement>();
+              if (filters.Where(x => x.Name == NickName).FirstOrDefault() is ARDB.FilterElement filter)
               {
-                if (filter is DB.SelectionFilterElement selection)
+                if (filter is ARDB.SelectionFilterElement selection)
                 {
                   var values = selection.GetElementIds().
                                Select(x => PreferredCast(doc.GetElement(x))).
@@ -746,11 +747,11 @@ namespace RhinoInside.Revit.GH.Parameters
                   var path = new GH_Path(0);
                   m_data.AppendRange(values, path);
                 }
-                else if (filter is DB.ParameterFilterElement parameter)
+                else if (filter is ARDB.ParameterFilterElement parameter)
                 {
-                  if (parameter.GetElementFilter() is DB.ElementFilter parameterFilter)
+                  if (parameter.GetElementFilter() is ARDB.ElementFilter parameterFilter)
                   {
-                    using (var elements = new DB.FilteredElementCollector(doc))
+                    using (var elements = new ARDB.FilteredElementCollector(doc))
                     {
                       var values = elements.
                                    WhereElementIsNotElementType().
@@ -784,7 +785,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class GraphicalElement : GraphicalElementT<Types.IGH_GraphicalElement, DB.Element>
+  public class GraphicalElement : GraphicalElementT<Types.IGH_GraphicalElement, ARDB.Element>
   {
     public override GH_Exposure Exposure => GH_Exposure.primary;
     public override Guid ComponentGuid => new Guid("EF607C2A-2F44-43F4-9C39-369CE114B51F");

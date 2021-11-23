@@ -2,28 +2,25 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
-using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using Rhino.Geometry;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using EDBS = RhinoInside.Revit.External.DB.Schemas;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
 using Grasshopper.Special;
+using Rhino.Geometry;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using External.DB.Extensions;
+
   // public interface IGH_PersistentReference
   /// <summary>
-  /// Interface to implement into classes that has a stable <see cref="DB.Reference"/>.
-  /// For example: <see cref="DB.Element"/>, <see cref="DB.GeometryObject"/>
+  /// Interface to implement into classes that has a stable <see cref="ARDB.Reference"/>.
+  /// For example: <see cref="ARDB.Element"/>, <see cref="ARDB.GeometryObject"/>
   /// </summary>
   public interface IGH_ElementId : IGH_ReferenceObject, IEquatable<IGH_ElementId>
   {
-    DB.Reference Reference { get; }
-    DB.ElementId Id { get; }
+    ARDB.Reference Reference { get; }
+    ARDB.ElementId Id { get; }
   }
 
   public abstract class ElementId : ReferenceObject,
@@ -40,7 +37,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string ToString()
     {
       var valid = IsValid;
-      string Invalid = Id == DB.ElementId.InvalidElementId ?
+      string Invalid = Id == ARDB.ElementId.InvalidElementId ?
         string.Empty :
         IsReferencedData ?
         (valid ? /*"Referenced "*/ "" : "Unresolved ") :
@@ -70,7 +67,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (DocumentGUID == Guid.Empty) return $"DocumentGUID '{Guid.Empty}' is invalid";
-        if (!UniqueId.TryParse(UniqueID, out var _, out var _)) return $"UniqueID '{UniqueID}' is invalid";
+        if (!External.DB.UniqueId.TryParse(UniqueID, out var _, out var _)) return $"UniqueID '{UniqueID}' is invalid";
 
         var id = Id;
         if (Document is null)
@@ -80,7 +77,7 @@ namespace RhinoInside.Revit.GH.Types
         else
         {
           if (id is null) return $"Referenced Revit element '{UniqueID}' is not available.";
-          if (id == DB.ElementId.InvalidElementId) return "Id is equal to InvalidElementId.";
+          if (id == ARDB.ElementId.InvalidElementId) return "Id is equal to InvalidElementId.";
         }
 
         return default;
@@ -91,7 +88,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(out Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(DB.ElementId)))
+      if (typeof(Q).IsAssignableFrom(typeof(ARDB.ElementId)))
       {
         target = (Q) (object) Id;
         return true;
@@ -132,7 +129,7 @@ namespace RhinoInside.Revit.GH.Types
       [System.ComponentModel.Description("The Guid of document this element belongs to.")]
       public Guid DocumentGUID => owner.DocumentGUID;
 
-      protected virtual bool IsValidId(DB.Document doc, DB.ElementId id) =>
+      protected virtual bool IsValidId(ARDB.Document doc, ARDB.ElementId id) =>
         owner.GetType() == Element.FromElementId(doc, id).GetType();
 
       [System.ComponentModel.Description("A stable unique identifier for an element within the document.")]
@@ -152,7 +149,7 @@ namespace RhinoInside.Revit.GH.Types
             var element = proxy.owner.Document?.GetElement(proxy.owner.Id);
             if (element is object)
             {
-              var parameters = element.GetParameters(DBX.ParameterClass.Any).
+              var parameters = element.GetParameters(External.DB.ParameterClass.Any).
                 Select(p => new ParameterPropertyDescriptor(p)).
                 ToArray();
 
@@ -170,20 +167,20 @@ namespace RhinoInside.Revit.GH.Types
 
       private class ParameterPropertyDescriptor : PropertyDescriptor
       {
-        readonly DB.Parameter parameter;
-        public ParameterPropertyDescriptor(DB.Parameter p) : base(p.Definition?.Name ?? p.Id.IntegerValue.ToString(), null) { parameter = p; }
+        readonly ARDB.Parameter parameter;
+        public ParameterPropertyDescriptor(ARDB.Parameter p) : base(p.Definition?.Name ?? p.Id.IntegerValue.ToString(), null) { parameter = p; }
         public override Type ComponentType => typeof(Proxy);
         public override bool IsReadOnly => true;
         public override string Name => parameter.Definition?.Name ?? string.Empty;
-        public override string Category => parameter.Definition is null ? string.Empty : DB.LabelUtils.GetLabelFor(parameter.Definition.ParameterGroup);
+        public override string Category => parameter.Definition is null ? string.Empty : ARDB.LabelUtils.GetLabelFor(parameter.Definition.ParameterGroup);
         public override string Description
         {
           get
           {
             var description = string.Empty;
-            if (parameter.Definition is DB.Definition definition)
+            if (parameter.Definition is ARDB.Definition definition)
             {
-              EDBS.DataType dataType = definition.GetDataType();
+              External.DB.Schemas.DataType dataType = definition.GetDataType();
               description = dataType.Label.ToLower();
 
               if (string.IsNullOrEmpty(description))
@@ -199,7 +196,7 @@ namespace RhinoInside.Revit.GH.Types
               description = "read only " + description;
 
             description = $"{parameterClass} {description} parameter.{Environment.NewLine}{Environment.NewLine}";
-            description += $"ParameterId : {((EDBS.ParameterId)parameter.GetTypeId()).FullName}";
+            description += $"ParameterId : {((External.DB.Schemas.ParameterId)parameter.GetTypeId()).FullName}";
 
             if(parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
               description += $"{Environment.NewLine}BuiltInParameter : {builtInParameter.ToStringGeneric()}";
@@ -222,7 +219,7 @@ namespace RhinoInside.Revit.GH.Types
         public override Type PropertyType => typeof(string);
         public override object GetValue(object component) =>
           parameter.Element is object && parameter.Definition is object ?
-          (parameter.StorageType == DB.StorageType.String ? parameter.AsString() :
+          (parameter.StorageType == ARDB.StorageType.String ? parameter.AsString() :
           parameter.AsValueString()) : null;
       }
     }
@@ -242,13 +239,13 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ElementId
-    public abstract DB.Reference Reference { get; }
-    public abstract DB.ElementId Id { get; }
+    public abstract ARDB.Reference Reference { get; }
+    public abstract ARDB.ElementId Id { get; }
     #endregion
 
     #region IGH_QuickCast
     GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
-    int IGH_QuickCast.QC_Hash() => FullUniqueId.Format(DocumentGUID, UniqueID).GetHashCode();
+    int IGH_QuickCast.QC_Hash() => External.DB.FullUniqueId.Format(DocumentGUID, UniqueID).GetHashCode();
 
     double IGH_QuickCast.QC_Distance(IGH_QuickCast other)
     {
@@ -271,8 +268,8 @@ namespace RhinoInside.Revit.GH.Types
       }
       catch { }
 
-      var dist0 = GH_StringMatcher.LevenshteinDistance(FullUniqueId.Format(DocumentGUID, UniqueID), other.QC_Text());
-      var dist1 = GH_StringMatcher.LevenshteinDistance(FullUniqueId.Format(DocumentGUID, UniqueID).ToUpperInvariant(), other.QC_Text().ToUpperInvariant());
+      var dist0 = GH_StringMatcher.LevenshteinDistance(External.DB.FullUniqueId.Format(DocumentGUID, UniqueID), other.QC_Text());
+      var dist1 = GH_StringMatcher.LevenshteinDistance(External.DB.FullUniqueId.Format(DocumentGUID, UniqueID).ToUpperInvariant(), other.QC_Text().ToUpperInvariant());
       return 0.5 * (dist0 + dist1);
     }
 
@@ -281,13 +278,13 @@ namespace RhinoInside.Revit.GH.Types
       if (other.QC_Type != GH_QuickCastType.text)
         return GH_QuickCastType.text.CompareTo(other.QC_Type);
 
-      return FullUniqueId.Format(DocumentGUID, UniqueID).CompareTo(other.QC_Text());
+      return External.DB.FullUniqueId.Format(DocumentGUID, UniqueID).CompareTo(other.QC_Text());
     }
 
     bool IGH_QuickCast.QC_Bool() => IsValid;
     int IGH_QuickCast.QC_Int() => Id?.IntegerValue ?? throw new InvalidCastException();
     double IGH_QuickCast.QC_Num() => Id?.IntegerValue ?? throw new InvalidCastException();
-    string IGH_QuickCast.QC_Text() => FullUniqueId.Format(DocumentGUID, UniqueID);
+    string IGH_QuickCast.QC_Text() => External.DB.FullUniqueId.Format(DocumentGUID, UniqueID);
     Color IGH_QuickCast.QC_Col() => throw new InvalidCastException();
     Point3d IGH_QuickCast.QC_Pt() => throw new InvalidCastException();
     Vector3d IGH_QuickCast.QC_Vec() => throw new InvalidCastException();
@@ -298,7 +295,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public ElementId() { }
 
-    protected ElementId(DB.Document doc, object value) : base(doc, value) { }
+    protected ElementId(ARDB.Document doc, object value) : base(doc, value) { }
 
     #region Properties
     public override string DisplayName => IsReferencedData ?

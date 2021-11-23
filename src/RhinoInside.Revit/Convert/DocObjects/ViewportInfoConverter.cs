@@ -1,36 +1,37 @@
 using System;
 using Rhino.DocObjects;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.Convert.System.Drawing;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.UI.Extensions;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.DocObjects
 {
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+  using Convert.System.Drawing;
+  using External.DB.Extensions;
+  using External.UI.Extensions;
+
   public static class ViewportInfoConverter
   {
-    class CameraInfo : DB.IExportContext
+    class CameraInfo : ARDB.IExportContext
     {
-      bool DB.IExportContext.Start() => true;
-      void DB.IExportContext.Finish() { }
-      bool DB.IExportContext.IsCanceled() => false;
-      DB.RenderNodeAction DB.IExportContext.OnElementBegin(DB.ElementId elementId) => DB.RenderNodeAction.Skip;
-      void DB.IExportContext.OnElementEnd(DB.ElementId elementId) { }
-      DB.RenderNodeAction DB.IExportContext.OnFaceBegin(DB.FaceNode node) => DB.RenderNodeAction.Skip;
-      void DB.IExportContext.OnFaceEnd(DB.FaceNode node) { }
-      DB.RenderNodeAction DB.IExportContext.OnInstanceBegin(DB.InstanceNode node) => DB.RenderNodeAction.Skip;
-      void DB.IExportContext.OnInstanceEnd(DB.InstanceNode node) { }
-      void DB.IExportContext.OnLight(DB.LightNode node) { }
-      DB.RenderNodeAction DB.IExportContext.OnLinkBegin(DB.LinkNode node) => DB.RenderNodeAction.Skip;
-      void DB.IExportContext.OnLinkEnd(DB.LinkNode node) { }
-      void DB.IExportContext.OnMaterial(DB.MaterialNode node) { }
-      void DB.IExportContext.OnPolymesh(DB.PolymeshTopology node) { }
-      void DB.IExportContext.OnRPC(DB.RPCNode node) { }
+      bool ARDB.IExportContext.Start() => true;
+      void ARDB.IExportContext.Finish() { }
+      bool ARDB.IExportContext.IsCanceled() => false;
+      ARDB.RenderNodeAction ARDB.IExportContext.OnElementBegin(ARDB.ElementId elementId) => ARDB.RenderNodeAction.Skip;
+      void ARDB.IExportContext.OnElementEnd(ARDB.ElementId elementId) { }
+      ARDB.RenderNodeAction ARDB.IExportContext.OnFaceBegin(ARDB.FaceNode node) => ARDB.RenderNodeAction.Skip;
+      void ARDB.IExportContext.OnFaceEnd(ARDB.FaceNode node) { }
+      ARDB.RenderNodeAction ARDB.IExportContext.OnInstanceBegin(ARDB.InstanceNode node) => ARDB.RenderNodeAction.Skip;
+      void ARDB.IExportContext.OnInstanceEnd(ARDB.InstanceNode node) { }
+      void ARDB.IExportContext.OnLight(ARDB.LightNode node) { }
+      ARDB.RenderNodeAction ARDB.IExportContext.OnLinkBegin(ARDB.LinkNode node) => ARDB.RenderNodeAction.Skip;
+      void ARDB.IExportContext.OnLinkEnd(ARDB.LinkNode node) { }
+      void ARDB.IExportContext.OnMaterial(ARDB.MaterialNode node) { }
+      void ARDB.IExportContext.OnPolymesh(ARDB.PolymeshTopology node) { }
+      void ARDB.IExportContext.OnRPC(ARDB.RPCNode node) { }
 
-      DB.RenderNodeAction DB.IExportContext.OnViewBegin(DB.ViewNode node)
+      ARDB.RenderNodeAction ARDB.IExportContext.OnViewBegin(ARDB.ViewNode node)
       {
         var cameraInfo = node.GetCameraInfo();
 
@@ -43,12 +44,12 @@ namespace RhinoInside.Revit.Convert.DocObjects
         HorizontalExtent = cameraInfo.HorizontalExtent;
         VerticalExtent = cameraInfo.VerticalExtent;
 
-        return DB.RenderNodeAction.Skip;
+        return ARDB.RenderNodeAction.Skip;
       }
 
-      void DB.IExportContext.OnViewEnd(DB.ElementId elementId) { }
+      void ARDB.IExportContext.OnViewEnd(ARDB.ElementId elementId) { }
 
-      public static CameraInfo GetCameraInfo(DB.View view)
+      public static CameraInfo GetCameraInfo(ARDB.View view)
       {
         var camera = new CameraInfo()
         {
@@ -57,9 +58,9 @@ namespace RhinoInside.Revit.Convert.DocObjects
           UpDirection = view.UpDirection
         };
 
-        if (view is DB.View3D view3D)
+        if (view is ARDB.View3D view3D)
         {
-          using (var exporter = new DB.CustomExporter(view3D.Document, camera))
+          using (var exporter = new ARDB.CustomExporter(view3D.Document, camera))
           {
             exporter.Export(view3D);
             return camera;
@@ -89,12 +90,12 @@ namespace RhinoInside.Revit.Convert.DocObjects
       public double NearDistance      = double.NaN;
       public double FarDistance       = double.NaN;
       public double TargetDistance    = double.NaN;
-      public DB.XYZ EyePosition       = DB.XYZ.Zero;
-      public DB.XYZ ViewDirection     = DB.XYZ.BasisZ;
-      public DB.XYZ UpDirection       = DB.XYZ.BasisY;
+      public ARDB.XYZ EyePosition       = ARDB.XYZ.Zero;
+      public ARDB.XYZ ViewDirection     = ARDB.XYZ.BasisZ;
+      public ARDB.XYZ UpDirection       = ARDB.XYZ.BasisY;
     }
 
-    public static bool TryGetViewportInfo(this DB.View view, bool useUIView, out ViewportInfo vport)
+    public static bool TryGetViewportInfo(this ARDB.View view, bool useUIView, out ViewportInfo vport)
     {
       vport = default;
 

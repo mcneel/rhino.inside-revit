@@ -2,7 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
-namespace RhinoInside.Revit.GH.Components.Element.Sheet
+namespace RhinoInside.Revit.GH.Components.Sheets
 {
   [ComponentVersion(introduced: "1.2", updated: "1.2.1")]
   public class SheetIdentity : TransactionalChainComponent

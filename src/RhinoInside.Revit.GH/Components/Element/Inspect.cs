@@ -6,9 +6,9 @@ using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
   public class ElementInspect : Component, IGH_VariableParameterComponent
   {
@@ -70,10 +70,10 @@ namespace RhinoInside.Revit.GH.Components
       var common = default(HashSet<Parameters.ParameterParam>);
       foreach (var goo in Params.Input[0].VolatileData.AllData(true).OfType<Types.Element>())
       {
-        if (goo.Value is DB.Element element)
+        if (goo.Value is ARDB.Element element)
         {
           var current = new HashSet<Parameters.ParameterParam>();
-          foreach (var param in element.GetOrderedParameters().Where(x => x.Definition is object && x.StorageType != DB.StorageType.None))
+          foreach (var param in element.GetOrderedParameters().Where(x => x.Definition is object && x.StorageType != ARDB.StorageType.None))
             current.Add(new Parameters.ParameterParam(param));
 
           if (common is null)
@@ -93,9 +93,9 @@ namespace RhinoInside.Revit.GH.Components
       var all = new HashSet<Parameters.ParameterParam>();
       foreach (var goo in Params.Input[0].VolatileData.AllData(true).OfType<Types.Element>())
       {
-        if (goo.Value is DB.Element element)
+        if (goo.Value is ARDB.Element element)
         {
-          foreach (var param in element.GetOrderedParameters().Where(x => x.Definition is object && x.StorageType != DB.StorageType.None))
+          foreach (var param in element.GetOrderedParameters().Where(x => x.Definition is object && x.StorageType != ARDB.StorageType.None))
             all.Add(new Parameters.ParameterParam(param));
         }
       }
@@ -166,7 +166,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
+      ARDB.Element element = null;
       if (!DA.GetData("Element", ref element))
         return;
 

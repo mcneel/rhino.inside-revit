@@ -2,12 +2,13 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
+  using Convert.Geometry;
+  using Kernel.Attributes;
+
   public class DirectShapeByMesh : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("5542506A-A09E-4EC9-92B4-F2B52417511C");
@@ -26,10 +27,10 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     void ReconstructDirectShapeByMesh
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), Name("Mesh"), NickName("M"), Description("New Mesh Shape")]
-      ref DB.DirectShape element,
+      ref ARDB.DirectShape element,
 
       Rhino.Geometry.Mesh mesh
     )
@@ -37,16 +38,16 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       if (!ThrowIfNotValid(nameof(mesh), mesh))
         return;
 
-      var genericModel = new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
+      var genericModel = new ARDB.ElementId(ARDB.BuiltInCategory.OST_GenericModel);
       if (element is object && element.Category.Id == genericModel) { }
-      else ReplaceElement(ref element, DB.DirectShape.CreateElement(document, genericModel));
+      else ReplaceElement(ref element, ARDB.DirectShape.CreateElement(document, genericModel));
 
       using (var ctx = GeometryEncoder.Context.Push(element))
       {
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
 
-        element.SetShape(mesh.ToShape().OfType<DB.GeometryObject>().ToList());
+        element.SetShape(mesh.ToShape().OfType<ARDB.GeometryObject>().ToList());
       }
     }
   }

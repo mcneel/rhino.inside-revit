@@ -1,7 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -21,9 +21,9 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
 
-      ListItems.Add(new GH_ValueListItem("Gas", ((int) DB.ThermalMaterialType.Gas).ToString()));
-      ListItems.Add(new GH_ValueListItem("Liquid", ((int) DB.ThermalMaterialType.Liquid).ToString()));
-      ListItems.Add(new GH_ValueListItem("Solid", ((int) DB.ThermalMaterialType.Solid).ToString()));
+      ListItems.Add(new GH_ValueListItem("Gas", ((int) ARDB.ThermalMaterialType.Gas).ToString()));
+      ListItems.Add(new GH_ValueListItem("Liquid", ((int) ARDB.ThermalMaterialType.Liquid).ToString()));
+      ListItems.Add(new GH_ValueListItem("Solid", ((int) ARDB.ThermalMaterialType.Solid).ToString()));
     }
   }
 #endif

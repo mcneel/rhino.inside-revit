@@ -4,72 +4,11 @@ using System.Drawing;
 using System.Linq;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Exceptions
-{
-  /// <summary>
-  /// The exception that is thrown when a non-fatal remark occurs.
-  /// The current operation is canceled but what is already committed remains valid.
-  /// </summary>
-  /// <remarks>
-  /// If it is catched inside a loop is safe to continue looping over the rest of elements.
-  /// </remarks>
-  class RuntimeArgumentException : Exception
-  {
-    readonly string paramName = "";
-    public virtual string ParamName => paramName;
-
-    public RuntimeArgumentException() : this(string.Empty, string.Empty) { }
-    public RuntimeArgumentException(string paramName) : this(string.Empty, paramName) { }
-    public RuntimeArgumentException(string paramName, string message) : base(message)
-    {
-      this.paramName = paramName;
-    }
-  }
-  class RuntimeArgumentNullException : RuntimeArgumentException
-  {
-    public RuntimeArgumentNullException() : base(string.Empty, string.Empty) { }
-    public RuntimeArgumentNullException(string paramName) : base(paramName, string.Empty) { }
-    public RuntimeArgumentNullException(string paramName, string message) : base(paramName, message) { }
-  }
-
-  /// <summary>
-  /// The exception that is thrown when a non-fatal warning occurs.
-  /// The current operation is canceled but what is already committed remains valid.
-  /// </summary>
-  /// <remarks>
-  /// If it is catched inside a loop is safe to continue looping over the rest of elements.
-  /// </remarks>
-  public class RuntimeWarningException : Exception
-  {
-    public RuntimeWarningException() : base(string.Empty) { }
-    public RuntimeWarningException(string message) : base(message) { }
-    public RuntimeWarningException(string message, Exception inner) : base(message, inner)
-    {
-    }
-  }
-
-  /// <summary>
-  /// The exception that is thrown when a non-fatal error occurs.
-  /// The current operation is canceled but what is already committed remains valid.
-  /// </summary>
-  /// <remarks>
-  /// If it is catched inside a loop is safe to continue looping over the rest of elements.
-  /// </remarks>
-  public class RuntimeErrorException : Exception
-  {
-    public RuntimeErrorException() : base(string.Empty) { }
-    public RuntimeErrorException(string message) : base(message) { }
-    public RuntimeErrorException(string message, Exception inner) : base(message, inner)
-    {
-    }
-  }
-}
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Convert.Geometry;
   using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
   using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 
@@ -435,13 +374,13 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region IGH_ElementIdComponent
-    static readonly DB.ElementId[] EmptyElementIds = new DB.ElementId[0];
+    static readonly ARDB.ElementId[] EmptyElementIds = new ARDB.ElementId[0];
     public virtual bool NeedsToBeExpired
     (
-      DB.Document document,
-      ICollection<DB.ElementId> added,
-      ICollection<DB.ElementId> deleted,
-      ICollection<DB.ElementId> modified
+      ARDB.Document document,
+      ICollection<ARDB.ElementId> added,
+      ICollection<ARDB.ElementId> deleted,
+      ICollection<ARDB.ElementId> modified
     )
     {
       // Changes made by this should not expire this.

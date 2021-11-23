@@ -1,20 +1,13 @@
 using System;
-using System.Linq;
-using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-
 using Rhino.Geometry;
-
-using RhinoInside.Revit.GH.ElementTracking;
-using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.Kernel.Attributes;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.ElementTracking;
+using ARDB = Autodesk.Revit.DB;
 
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components.Element.Assembly
+namespace RhinoInside.Revit.GH.Components.Assemblies
 {
   [ComponentVersion(introduced: "1.2")]
   public class AssemblyByLocation : ElementTrackerComponent
@@ -74,10 +67,10 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
       )
     };
 
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
-      DB.BuiltInParameter.ASSEMBLY_NAMING_CATEGORY,
-      DB.BuiltInParameter.ASSEMBLY_NAME,
+      ARDB.BuiltInParameter.ASSEMBLY_NAMING_CATEGORY,
+      ARDB.BuiltInParameter.ASSEMBLY_NAME,
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -89,12 +82,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
       if (!DA.GetData("Location", ref location))
         return;
 
-      var sourceType = default(DB.ElementType);
+      var sourceType = default(ARDB.ElementType);
       if (!DA.GetData("Assembly Type", ref sourceType))
         return;
 
       // find any tracked sheet
-      Params.ReadTrackedElement(_Assembly_.name, doc.Value, out DB.AssemblyInstance assembly);
+      Params.ReadTrackedElement(_Assembly_.name, doc.Value, out ARDB.AssemblyInstance assembly);
 
       // update, or create
       StartTransaction(doc.Value);
@@ -106,23 +99,23 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
       }
     }
 
-    bool Reuse(DB.AssemblyInstance assembly, Plane location)
+    bool Reuse(ARDB.AssemblyInstance assembly, Plane location)
     {
-      if (assembly.Location is DB.LocationPoint lp)
+      if (assembly.Location is ARDB.LocationPoint lp)
       {
         var translate = location.ToPlane().Origin - lp.Point;
-        DB.ElementTransformUtils.MoveElement(assembly.Document, assembly.Id, translate);
+        ARDB.ElementTransformUtils.MoveElement(assembly.Document, assembly.Id, translate);
         return true;
       }
       return false;
     }
 
-    DB.AssemblyInstance Create(DB.Document doc, DB.ElementType sourceType, Plane location)
+    ARDB.AssemblyInstance Create(ARDB.Document doc, ARDB.ElementType sourceType, Plane location)
     {
-      return DB.AssemblyInstance.PlaceInstance(doc, sourceType.Id, location.ToPlane().Origin);
+      return ARDB.AssemblyInstance.PlaceInstance(doc, sourceType.Id, location.ToPlane().Origin);
     }
 
-    DB.AssemblyInstance Reconstruct(DB.AssemblyInstance assembly, DB.Document doc, DB.ElementType sourceType, Plane location)
+    ARDB.AssemblyInstance Reconstruct(ARDB.AssemblyInstance assembly, ARDB.Document doc, ARDB.ElementType sourceType, Plane location)
     {
       if (assembly is null || !Reuse(assembly, location))
         assembly = assembly.ReplaceElement

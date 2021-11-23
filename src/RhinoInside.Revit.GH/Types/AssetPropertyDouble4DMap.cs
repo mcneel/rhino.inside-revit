@@ -1,7 +1,7 @@
 
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using MAT = RhinoInside.Revit.GH.Components.Material;
+using MAT = RhinoInside.Revit.GH.Components.Materials;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -9,10 +9,10 @@ namespace RhinoInside.Revit.GH.Types
   public class AssetPropertyDouble4DMap : GH_Goo<MAT.AssetPropertyDouble4DMap>
   {
     public override string TypeName => "Mappable Color";
-    public override string TypeDescription
-      => "Represents a double[4] property that accepts a texture map";
+    public override string TypeDescription =>
+      "Represents a double[4] property that accepts a texture map";
     public override bool IsValid => Value != null;
-    public override sealed IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
+    public sealed override IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
     public AssetPropertyDouble4DMap() { }
     public AssetPropertyDouble4DMap(MAT.AssetPropertyDouble4DMap prop)

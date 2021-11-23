@@ -8,21 +8,22 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Geometry
 {
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+  using External.DB;
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.0", updated: "1.4")]
   public abstract class ElementGeometryComponent : ZuiComponent
   {
     protected ElementGeometryComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected bool TryGetCommonDocument(IEnumerable<Types.Element> elements, out DB.Document document)
+    protected bool TryGetCommonDocument(IEnumerable<Types.Element> elements, out ARDB.Document document)
     {
       document = default;
       foreach (var element in elements)
@@ -53,18 +54,18 @@ namespace RhinoInside.Revit.GH.Components
       return default;
     }
 
-    static readonly DB.ElementFilter ElementHasGeometryFilter = CompoundElementFilter.Intersect
+    static readonly ARDB.ElementFilter ElementHasGeometryFilter = CompoundElementFilter.Intersect
     (
       // Not 100% sure but looks like only elements with category have geometry.
       CompoundElementFilter.ElementHasCategoryFilter,
       CompoundElementFilter.ElementHasBoundingBoxFilter,
       // Types below return no geometry.
-      new DB.ElementMulticlassFilter
+      new ARDB.ElementMulticlassFilter
       (
         new Type[]
         {
-          typeof(DB.CurveElement),
-          typeof(DB.DatumPlane)
+          typeof(ARDB.CurveElement),
+          typeof(ARDB.DatumPlane)
         },
         inverted: true
       )
@@ -72,10 +73,10 @@ namespace RhinoInside.Revit.GH.Components
 
     protected void SolveGeometry
     (
-      DB.Document doc,
+      ARDB.Document doc,
       IList<Types.Element> include,
       IList<Types.Element> exclude,
-      DB.Options options,
+      ARDB.Options options,
       GH_Path elementsPath, out GH_Structure<Types.Element> elements,
       GH_Path geometriesPath, out GH_Structure<IGH_GeometricGoo> geometries
     )
@@ -88,11 +89,11 @@ namespace RhinoInside.Revit.GH.Components
       {
         if (scope is object)
         {
-          if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? DB.ElementId.InvalidElementId)).Count > 0)
+          if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? ARDB.ElementId.InvalidElementId)).Count > 0)
             doc.Regenerate();
         }
 
-        using (var visibleInViewFilter = options.View is object ? new DB.VisibleInViewFilter(options.View.Document, options.View.Id) : default)
+        using (var visibleInViewFilter = options.View is object ? new ARDB.VisibleInViewFilter(options.View.Document, options.View.Id) : default)
         {
           SolveGeometry
           (
@@ -108,9 +109,9 @@ namespace RhinoInside.Revit.GH.Components
 
     void SolveGeometry
     (
-      IEnumerable<DB.Element> include,
-      DB.VisibleInViewFilter visibleInViewFilter,
-      DB.Options options,
+      IEnumerable<ARDB.Element> include,
+      ARDB.VisibleInViewFilter visibleInViewFilter,
+      ARDB.Options options,
       GH_Path elementsPath, GH_Structure<Types.Element> elements,
       GH_Path geometriesPath, GH_Structure<IGH_GeometricGoo> geometries,
       int level = 0
@@ -140,7 +141,7 @@ namespace RhinoInside.Revit.GH.Components
             level > 0 ||
             (
               // 'Element Geometry' works with types.
-              (options.View is null || !(element is DB.ElementType)) &&
+              (options.View is null || !(element is ARDB.ElementType)) &&
               ElementHasGeometryFilter.PassesFilter(element) &&
               visibleInViewFilter?.PassesFilter(element) != false
             )
@@ -163,7 +164,7 @@ namespace RhinoInside.Revit.GH.Components
                   // 'Element Geometry' works with types, but not when expanding dependents.
                   CompoundElementFilter.ElementIsElementTypeFilter(inverted: true),
                   ElementHasGeometryFilter,
-                  new DB.ExclusionFilter(new DB.ElementId[] { element.Id })
+                  new ARDB.ExclusionFilter(new ARDB.ElementId[] { element.Id })
                 )
               );
 
@@ -173,7 +174,7 @@ namespace RhinoInside.Revit.GH.Components
                 Where
                 (
                   x =>
-                  (x as DB.FamilyInstance)?.Invisible != true &&
+                  (x as ARDB.FamilyInstance)?.Invisible != true &&
                   (visibleInViewFilter?.PassesFilter(x) != false)
                 ),
                 visibleInViewFilter, options,
@@ -191,7 +192,7 @@ namespace RhinoInside.Revit.GH.Components
 
     static bool? ExtractGeometry
     (
-      DB.Element element, DB.Options options,
+      ARDB.Element element, ARDB.Options options,
       List<GeometryBase> list
     )
     {
@@ -203,7 +204,7 @@ namespace RhinoInside.Revit.GH.Components
         using (var context = GeometryDecoder.Context.Push())
         {
           context.Element = element;
-          if (element.Category is DB.Category category)
+          if (element.Category is ARDB.Category category)
           {
             context.Category = category;
             context.Material = category.Material;
@@ -228,7 +229,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected void SolveAttributes
     (
-      DB.Document doc,
+      ARDB.Document doc,
       GH_Structure<IGH_GeometricGoo> geometries,
       GH_Structure<Types.Category> categories,
       GH_Structure<Types.Material> materials
@@ -252,7 +253,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (geometryBase is null) categoriesList.Add(null);
                 else
                 {
-                  geometryBase.TryGetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId categoryId);
+                  geometryBase.TryGetUserString(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out ARDB.ElementId categoryId);
                   categoriesList.Add(new Types.Category(doc, categoryId));
                 }
               }
@@ -262,7 +263,7 @@ namespace RhinoInside.Revit.GH.Components
                 if (geometryBase is null) materialsList.Add(null);
                 else
                 {
-                  geometryBase.TryGetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
+                  geometryBase.TryGetUserString(ARDB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out ARDB.ElementId materialId);
                   materialsList.Add(new Types.Material(doc, materialId));
                 }
               }
@@ -434,7 +435,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
-      if (!Params.TryGetData(DA, "Detail Level", out DB.ViewDetailLevel? detailLevel)) return;
+      if (!Params.TryGetData(DA, "Detail Level", out ARDB.ViewDetailLevel? detailLevel)) return;
 
       if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var doc))
         return;
@@ -442,14 +443,14 @@ namespace RhinoInside.Revit.GH.Components
       var scope = default(IDisposable);
       if (!detailLevel.HasValue)
       {
-        detailLevel = DB.ViewDetailLevel.Coarse;
+        detailLevel = ARDB.ViewDetailLevel.Coarse;
       }
-      else if (elements.Any(x => x.Value is DB.FamilySymbol symbol && !symbol.IsActive))
+      else if (elements.Any(x => x.Value is ARDB.FamilySymbol symbol && !symbol.IsActive))
       {
         scope = doc.RollBackScope();
         try
         {
-          foreach (var symbol in elements.Select(x => x.Value).OfType<DB.FamilySymbol>())
+          foreach (var symbol in elements.Select(x => x.Value).OfType<ARDB.FamilySymbol>())
             symbol.Activate();
 
           doc.Regenerate();
@@ -458,7 +459,7 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       using (scope)
-      using (var options = new DB.Options() { DetailLevel = detailLevel.Value })
+      using (var options = new ARDB.Options() { DetailLevel = detailLevel.Value })
       {
         var _Elements_ = Params.IndexOfOutputParam("Elements");
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
@@ -603,7 +604,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()).Concat(Enumerable.Repeat(view, 1)), out var doc))
         return;
 
-      using (var options = new DB.Options() { View = view.Value })
+      using (var options = new ARDB.Options() { View = view.Value })
       {
         var _Elements_ = Params.IndexOfOutputParam("Elements");
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");

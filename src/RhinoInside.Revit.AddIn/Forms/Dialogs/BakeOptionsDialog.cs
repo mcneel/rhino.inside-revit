@@ -1,30 +1,29 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Autodesk.Revit.UI;
-using Eto.Drawing;
 using Eto.Forms;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
-using Forms = Eto.Forms;
+using Eto.Drawing;
+using ARDB = Autodesk.Revit.DB;
+using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.AddIn.Forms
 {
   using Properties;
+  using External.DB.Extensions;
 
   class BakeOptionsDialog : ModalDialog
   {
     const string OPTROOT = "LastBakeOptions";
 
-    readonly DB.Document Document;
+    readonly ARDB.Document Document;
 
-    readonly Eto.Forms.ComboBox _categorySelector = new Eto.Forms.ComboBox();
-    readonly Eto.Forms.ComboBox _worksetSelector = new Eto.Forms.ComboBox() { Enabled = false };
+    readonly ComboBox _categorySelector = new ComboBox();
+    readonly ComboBox _worksetSelector = new ComboBox() { Enabled = false };
 
-    public DB.ElementId SelectedCategory { get; private set; } = DB.ElementId.InvalidElementId;
-    public DB.WorksetId SelectedWorkset { get; private set; } = DB.WorksetId.InvalidWorksetId;
+    public ARDB.ElementId SelectedCategory { get; private set; } = ARDB.ElementId.InvalidElementId;
+    public ARDB.WorksetId SelectedWorkset { get; private set; } = ARDB.WorksetId.InvalidWorksetId;
 
-    public BakeOptionsDialog(UIApplication uiApp) : base(uiApp, initialSize: new Size(400, -1))
+    public BakeOptionsDialog(ARUI.UIApplication uiApp) : base(uiApp, initialSize: new Size(400, -1))
     {
       Title = "Bake Selected";
       Document = uiApp.ActiveUIDocument?.Document;
@@ -41,7 +40,7 @@ namespace RhinoInside.Revit.AddIn.Forms
         foreach (var category in group.OrderBy(x => x.Name))
         {
           _categorySelector.Items.Add(new ListItem { Key = category.Name, Text = category.Name });
-          if ((DB.BuiltInCategory) category.Id.IntegerValue == DB.BuiltInCategory.OST_GenericModel)
+          if ((ARDB.BuiltInCategory) category.Id.IntegerValue == ARDB.BuiltInCategory.OST_GenericModel)
             _categorySelector.SelectedKey = category.Name;
         }
 
@@ -55,11 +54,11 @@ namespace RhinoInside.Revit.AddIn.Forms
       {
         var wsTable = Document.GetWorksetTable();
         _worksetSelector.Enabled = true;
-        foreach (DB.Workset workset in new DB.FilteredWorksetCollector(Document).OfKind(DB.WorksetKind.UserWorkset).ToWorksets())
+        foreach (ARDB.Workset workset in new ARDB.FilteredWorksetCollector(Document).OfKind(ARDB.WorksetKind.UserWorkset).ToWorksets())
             _worksetSelector.Items.Add(new ListItem { Key = workset.Name, Text = workset.Name });
 
         var activeWorkset = wsTable.GetWorkset(wsTable.GetActiveWorksetId());
-        if (activeWorkset.Kind == DB.WorksetKind.UserWorkset)
+        if (activeWorkset.Kind == ARDB.WorksetKind.UserWorkset)
           _worksetSelector.SelectedKey = activeWorkset.Name;
       }
 
@@ -90,9 +89,9 @@ namespace RhinoInside.Revit.AddIn.Forms
       };
     }
 
-    IEnumerable<DB.Category> DirectShapeCategories =>
+    IEnumerable<ARDB.Category> DirectShapeCategories =>
       BuiltInCategoryExtension.BuiltInCategories.
-      Where(categoryId => DB.DirectShape.IsValidCategoryId(new DB.ElementId(categoryId), Document)).
+      Where(categoryId => ARDB.DirectShape.IsValidCategoryId(new ARDB.ElementId(categoryId), Document)).
       Select(categoryId => Document.GetCategory(categoryId)).
       Where(x => x is object);
 
@@ -110,7 +109,7 @@ namespace RhinoInside.Revit.AddIn.Forms
       // set selected workset
       if (Document.IsWorkshared)
       {
-        foreach (var workset in new DB.FilteredWorksetCollector(Document).OfKind(DB.WorksetKind.UserWorkset))
+        foreach (var workset in new ARDB.FilteredWorksetCollector(Document).OfKind(ARDB.WorksetKind.UserWorkset))
         {
           if (workset.Name != _worksetSelector.SelectedKey) continue;
 

@@ -1,11 +1,11 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.System.Collections.Generic;
+
   [Kernel.Attributes.Name("Compound Structure")]
   public class CompoundStructure : ValueObject
   {
@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.CompoundStructure structure)
+        if (Value is ARDB.CompoundStructure structure)
           return $"{structure.GetWidth() * Revit.ModelUnits} {Grasshopper.Kernel.GH_Format.RhinoUnitSymbol()} compound structure : {structure.LayerCount} layers";
 
         return "<None>";
@@ -22,33 +22,33 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    public new DB.CompoundStructure Value => base.Value as DB.CompoundStructure;
+    public new ARDB.CompoundStructure Value => base.Value as ARDB.CompoundStructure;
 
     public CompoundStructure() : base() { }
 
-    public CompoundStructure(DB.Document doc, DB.CompoundStructure value) : base(doc, value) { }
-    public CompoundStructure(DB.Document doc) : base
+    public CompoundStructure(ARDB.Document doc, ARDB.CompoundStructure value) : base(doc, value) { }
+    public CompoundStructure(ARDB.Document doc) : base
     (
       doc,
-      DB.CompoundStructure.CreateSingleLayerCompoundStructure(DB.MaterialFunctionAssignment.None, 1.0, DB.ElementId.InvalidElementId)
+      ARDB.CompoundStructure.CreateSingleLayerCompoundStructure(ARDB.MaterialFunctionAssignment.None, 1.0, ARDB.ElementId.InvalidElementId)
     )
     {
-      Value.OpeningWrapping = DB.OpeningWrappingCondition.None;
-      Value.EndCap = DB.EndCapCondition.NoEndCap;
+      Value.OpeningWrapping = ARDB.OpeningWrappingCondition.None;
+      Value.EndCap = ARDB.EndCapCondition.NoEndCap;
     }
 
-    public CompoundStructure(DB.Document doc, IList<CompoundStructureLayer> core) : base
+    public CompoundStructure(ARDB.Document doc, IList<CompoundStructureLayer> core) : base
     (
       doc,
-      DB.CompoundStructure.CreateSimpleCompoundStructure(core.ConvertAll(x => x.Value))
+      ARDB.CompoundStructure.CreateSimpleCompoundStructure(core.ConvertAll(x => x.Value))
     )
     { }
 
-    public bool Audit(out IDictionary<int, DB.CompoundStructureError> errors)
+    public bool Audit(out IDictionary<int, ARDB.CompoundStructureError> errors)
     {
       errors = default;
       var valid = false;
-      if (Value is DB.CompoundStructure structure)
+      if (Value is ARDB.CompoundStructure structure)
       {
         valid = structure.IsValid(Document, out errors, out var m);
       }
@@ -56,29 +56,29 @@ namespace RhinoInside.Revit.GH.Types
       return valid;
     }
 
-    static readonly Dictionary<DB.CompoundStructureError, string> CompoundStructureErrorMessages = new Dictionary<DB.CompoundStructureError, string>
+    static readonly Dictionary<ARDB.CompoundStructureError, string> CompoundStructureErrorMessages = new Dictionary<ARDB.CompoundStructureError, string>
     {
-      { DB.CompoundStructureError.BadShellOrder, "Layer Function Priorities ascend from the Core Boundary to the Finish Face." },
-      { DB.CompoundStructureError.CoreTooThin, "Core contain a membrane layer or thickness of core is zero." },
-      { DB.CompoundStructureError.MembraneTooThick, "Thickness of membrane layer is more than zero." },
-      { DB.CompoundStructureError.NonmembraneTooThin, "Thickness of non-membrane layer is too thin." },
-      { DB.CompoundStructureError.BadShellsStructure, "The number of shell layers is larger than the total number of layers." },
-      { DB.CompoundStructureError.ThinOuterLayer, "Thickness of face layer is too thin." },
-      { DB.CompoundStructureError.VerticalUnusedLayer, "A layer is not membrane layer and the Thickness of layer is zero." },
-      { DB.CompoundStructureError.VerticalWrongOrderLayer, "Layers assigned to the same Row are not on the same side of the Core Boundary." },
-      { DB.CompoundStructureError.VerticalWrongOrderCoreExterior, "Exterior core boundary have more than one face at any height." },
-      { DB.CompoundStructureError.VerticalWrongOrderCoreInterior, "Interior core boundary have more than one face at any height." },
-      { DB.CompoundStructureError.VerticalWrongOrderMembrane, "Membrane Layer have more than one face at any height." },
-      { DB.CompoundStructureError.DeckCantBoundAbove, "There is no layer above Structural deck or it is too thin." },
-      { DB.CompoundStructureError.DeckCantBoundBelow, "There is no layer below Structural deck or it is too thin." },
-      { DB.CompoundStructureError.VarThickLayerCantBeZero, "Variable thickness layer have zero thickness." },
-      { DB.CompoundStructureError.InvalidMaterialId, "Element id used as material id does not correspond to an actual MaterialElem." },
-      { DB.CompoundStructureError.ExtensibleRegionsNotContiguousAlongTop, "Extension Layers at the top of the wall must be adjacent." },
-      { DB.CompoundStructureError.ExtensibleRegionsNotContiguousAlongBottom, "Extension Layers at the bottom of the wall must be adjacent." },
-      { DB.CompoundStructureError.InvalidProfileId, "Element id used as profile id does not correspond to a valid deck profile." },
+      { ARDB.CompoundStructureError.BadShellOrder, "Layer Function Priorities ascend from the Core Boundary to the Finish Face." },
+      { ARDB.CompoundStructureError.CoreTooThin, "Core contain a membrane layer or thickness of core is zero." },
+      { ARDB.CompoundStructureError.MembraneTooThick, "Thickness of membrane layer is more than zero." },
+      { ARDB.CompoundStructureError.NonmembraneTooThin, "Thickness of non-membrane layer is too thin." },
+      { ARDB.CompoundStructureError.BadShellsStructure, "The number of shell layers is larger than the total number of layers." },
+      { ARDB.CompoundStructureError.ThinOuterLayer, "Thickness of face layer is too thin." },
+      { ARDB.CompoundStructureError.VerticalUnusedLayer, "A layer is not membrane layer and the Thickness of layer is zero." },
+      { ARDB.CompoundStructureError.VerticalWrongOrderLayer, "Layers assigned to the same Row are not on the same side of the Core Boundary." },
+      { ARDB.CompoundStructureError.VerticalWrongOrderCoreExterior, "Exterior core boundary have more than one face at any height." },
+      { ARDB.CompoundStructureError.VerticalWrongOrderCoreInterior, "Interior core boundary have more than one face at any height." },
+      { ARDB.CompoundStructureError.VerticalWrongOrderMembrane, "Membrane Layer have more than one face at any height." },
+      { ARDB.CompoundStructureError.DeckCantBoundAbove, "There is no layer above Structural deck or it is too thin." },
+      { ARDB.CompoundStructureError.DeckCantBoundBelow, "There is no layer below Structural deck or it is too thin." },
+      { ARDB.CompoundStructureError.VarThickLayerCantBeZero, "Variable thickness layer have zero thickness." },
+      { ARDB.CompoundStructureError.InvalidMaterialId, "Element id used as material id does not correspond to an actual MaterialElem." },
+      { ARDB.CompoundStructureError.ExtensibleRegionsNotContiguousAlongTop, "Extension Layers at the top of the wall must be adjacent." },
+      { ARDB.CompoundStructureError.ExtensibleRegionsNotContiguousAlongBottom, "Extension Layers at the bottom of the wall must be adjacent." },
+      { ARDB.CompoundStructureError.InvalidProfileId, "Element id used as profile id does not correspond to a valid deck profile." },
     };
 
-    public static string ToString(DB.CompoundStructureError error)
+    public static string ToString(ARDB.CompoundStructureError error)
     {
       return CompoundStructureErrorMessages.TryGetValue(error, out var message) ?
         message :
@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.CompoundStructure structure)
+        if (Value is ARDB.CompoundStructure structure)
         {
           var layers = structure.GetLayers();
 
@@ -105,9 +105,9 @@ namespace RhinoInside.Revit.GH.Types
       }
       set
       {
-        if (Value is DB.CompoundStructure structure)
+        if (Value is ARDB.CompoundStructure structure)
         {
-          var layers = new DB.CompoundStructureLayer[value.Count];
+          var layers = new ARDB.CompoundStructureLayer[value.Count];
           for (int l = 0; l < value.Count; ++l)
             layers[l] = value[l].Value;
 
@@ -118,11 +118,11 @@ namespace RhinoInside.Revit.GH.Types
 
     public void GetLayers(out IList<CompoundStructureLayer> exterior, out IList<CompoundStructureLayer> core, out IList<CompoundStructureLayer> interior)
     {
-      if (Value is DB.CompoundStructure structure)
+      if (Value is ARDB.CompoundStructure structure)
       {
         var layers = structure.GetLayers();
-        exterior  = new CompoundStructureLayer[structure.GetNumberOfShellLayers(DB.ShellLayerType.Exterior)];
-        interior  = new CompoundStructureLayer[structure.GetNumberOfShellLayers(DB.ShellLayerType.Interior)];
+        exterior  = new CompoundStructureLayer[structure.GetNumberOfShellLayers(ARDB.ShellLayerType.Exterior)];
+        interior  = new CompoundStructureLayer[structure.GetNumberOfShellLayers(ARDB.ShellLayerType.Interior)];
         core      = new CompoundStructureLayer[-exterior.Count + layers.Count - interior.Count];
 
         var material = structure.StructuralMaterialIndex;
@@ -155,9 +155,9 @@ namespace RhinoInside.Revit.GH.Types
 
     public void SetLayers(IList<CompoundStructureLayer> exterior, IList<CompoundStructureLayer> core, IList<CompoundStructureLayer> interior)
     {
-      if (Value is DB.CompoundStructure structure)
+      if (Value is ARDB.CompoundStructure structure)
       {
-        var layers = new DB.CompoundStructureLayer[(exterior?.Count ?? 0) + (core?.Count ?? 0) + (interior?.Count ?? 0)];
+        var layers = new ARDB.CompoundStructureLayer[(exterior?.Count ?? 0) + (core?.Count ?? 0) + (interior?.Count ?? 0)];
         {
           int l = 0;
           for (int e = 0; e < exterior?.Count; ++e, ++l)
@@ -171,8 +171,8 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         structure.SetLayers(layers);
-        structure.SetNumberOfShellLayers(DB.ShellLayerType.Exterior, exterior?.Count ?? 0);
-        structure.SetNumberOfShellLayers(DB.ShellLayerType.Interior, interior?.Count ?? 0);
+        structure.SetNumberOfShellLayers(ARDB.ShellLayerType.Exterior, exterior?.Count ?? 0);
+        structure.SetNumberOfShellLayers(ARDB.ShellLayerType.Interior, interior?.Count ?? 0);
 
         {
           int l = 0;
@@ -199,13 +199,13 @@ namespace RhinoInside.Revit.GH.Types
 
     public double GetWidth()
     {
-      return Value is DB.CompoundStructure structure ? structure.GetWidth() * Revit.ModelUnits : 0.0;
+      return Value is ARDB.CompoundStructure structure ? structure.GetWidth() * Revit.ModelUnits : 0.0;
     }
 
     public void SetWidth(double width)
     {
       width /= Revit.ModelUnits;
-      if (Value is DB.CompoundStructure structure)
+      if (Value is ARDB.CompoundStructure structure)
       {
         var total = structure.GetWidth();
         var count = structure.LayerCount;
@@ -215,7 +215,7 @@ namespace RhinoInside.Revit.GH.Types
           if (w == 0.0) continue;
 
           var function = structure.GetLayerFunction(l);
-          if(function != DB.MaterialFunctionAssignment.StructuralDeck)
+          if(function != ARDB.MaterialFunctionAssignment.StructuralDeck)
             structure.SetLayerWidth(l, w / total * width);
         }
       }
@@ -223,40 +223,40 @@ namespace RhinoInside.Revit.GH.Types
 
     public OpeningWrappingCondition OpeningWrapping
     {
-      get => Value is DB.CompoundStructure structure ? new OpeningWrappingCondition(structure.OpeningWrapping) : default;
+      get => Value is ARDB.CompoundStructure structure ? new OpeningWrappingCondition(structure.OpeningWrapping) : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructure structure)
+        if (value is object && Value is ARDB.CompoundStructure structure)
           structure.OpeningWrapping = value.Value;
       }
     }
 
     public EndCapCondition EndCap
     {
-      get => Value is DB.CompoundStructure structure ? new EndCapCondition(structure.EndCap) : default;
+      get => Value is ARDB.CompoundStructure structure ? new EndCapCondition(structure.EndCap) : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructure structure)
+        if (value is object && Value is ARDB.CompoundStructure structure)
           structure.EndCap = value.Value;
       }
     }
 
     public double? SampleHeight
     {
-      get => Value is DB.CompoundStructure structure ? structure.SampleHeight * Revit.ModelUnits : default;
+      get => Value is ARDB.CompoundStructure structure ? structure.SampleHeight * Revit.ModelUnits : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructure structure)
+        if (value is object && Value is ARDB.CompoundStructure structure)
           structure.SampleHeight = value.Value / Revit.ModelUnits;
       }
     }
 
     public double? CutoffHeight
     {
-      get => Value is DB.CompoundStructure structure ? structure.CutoffHeight * Revit.ModelUnits : default;
+      get => Value is ARDB.CompoundStructure structure ? structure.CutoffHeight * Revit.ModelUnits : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructure structure)
+        if (value is object && Value is ARDB.CompoundStructure structure)
           structure.CutoffHeight = value.Value / Revit.ModelUnits;
       }
     }
@@ -271,7 +271,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.CompoundStructureLayer layer)
+        if (Value is ARDB.CompoundStructureLayer layer)
           return $"{layer.Function} : {layer.Width * Revit.ModelUnits} {Grasshopper.Kernel.GH_Format.RhinoUnitSymbol()}";
 
         return "<None>";
@@ -279,46 +279,46 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    public new DB.CompoundStructureLayer Value => base.Value as DB.CompoundStructureLayer;
+    public new ARDB.CompoundStructureLayer Value => base.Value as ARDB.CompoundStructureLayer;
 
     object ICloneable.Clone()
     {
       return new CompoundStructureLayer
       (
         Document,
-        Value is DB.CompoundStructureLayer layer ? new DB.CompoundStructureLayer(layer) : default
+        Value is ARDB.CompoundStructureLayer layer ? new ARDB.CompoundStructureLayer(layer) : default
       );
     }
 
     public CompoundStructureLayer() : base() { }
 
     public CompoundStructureLayer(CompoundStructureLayer value) :
-      base(value?.Document, value is null ? null : new DB.CompoundStructureLayer(value.Value))
+      base(value?.Document, value is null ? null : new ARDB.CompoundStructureLayer(value.Value))
     { }
 
-    public CompoundStructureLayer(DB.Document doc, DB.CompoundStructureLayer value) :
+    public CompoundStructureLayer(ARDB.Document doc, ARDB.CompoundStructureLayer value) :
       base(doc, value) { }
 
-    public CompoundStructureLayer(DB.Document doc) :
-      base(doc, new DB.CompoundStructureLayer()) { }
+    public CompoundStructureLayer(ARDB.Document doc) :
+      base(doc, new ARDB.CompoundStructureLayer()) { }
 
     #region Properties
     public LayerFunction Function
     {
-      get => Value is DB.CompoundStructureLayer layer ? new LayerFunction(layer.Function) : default;
+      get => Value is ARDB.CompoundStructureLayer layer ? new LayerFunction(layer.Function) : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructureLayer layer)
+        if (value is object && Value is ARDB.CompoundStructureLayer layer)
           layer.Function = value.Value;
       }
     }
 
     public Material Material
     {
-      get => Value is DB.CompoundStructureLayer layer ? new Material(Document, layer.MaterialId) : default;
+      get => Value is ARDB.CompoundStructureLayer layer ? new Material(Document, layer.MaterialId) : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructureLayer layer)
+        if (value is object && Value is ARDB.CompoundStructureLayer layer)
         {
           AssertValidDocument(value, nameof(Material));
           layer.MaterialId = value.Id;
@@ -329,22 +329,22 @@ namespace RhinoInside.Revit.GH.Types
     bool structuralMaterial = false;
     public bool? StructuralMaterial
     {
-      get => Value is DB.CompoundStructureLayer ? structuralMaterial : default;
+      get => Value is ARDB.CompoundStructureLayer ? structuralMaterial : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructureLayer layer)
+        if (value is object && Value is ARDB.CompoundStructureLayer layer)
           structuralMaterial = value.Value;
       }
     }
 
-    public static double MinWidth => DB.CompoundStructure.GetMinimumLayerThickness() * Revit.ModelUnits;
+    public static double MinWidth => ARDB.CompoundStructure.GetMinimumLayerThickness() * Revit.ModelUnits;
 
     public double? Width
     {
-      get => Value is DB.CompoundStructureLayer layer ? layer.Width * Revit.ModelUnits : default;
+      get => Value is ARDB.CompoundStructureLayer layer ? layer.Width * Revit.ModelUnits : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructureLayer layer)
+        if (value is object && Value is ARDB.CompoundStructureLayer layer)
           layer.Width = value.Value / Revit.ModelUnits;
       }
     }
@@ -352,30 +352,30 @@ namespace RhinoInside.Revit.GH.Types
     bool variableWidth = false;
     public bool? VariableWidth
     {
-      get => Value is DB.CompoundStructureLayer ? variableWidth : default;
+      get => Value is ARDB.CompoundStructureLayer ? variableWidth : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructureLayer layer)
+        if (value is object && Value is ARDB.CompoundStructureLayer layer)
           variableWidth = value.Value;
       }
     }
 
     public bool? LayerCapFlag
     {
-      get => Value is DB.CompoundStructureLayer layer ? layer.LayerCapFlag : default;
+      get => Value is ARDB.CompoundStructureLayer layer ? layer.LayerCapFlag : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructureLayer layer)
+        if (value is object && Value is ARDB.CompoundStructureLayer layer)
           layer.LayerCapFlag = value.Value;
       }
     }
 
     public FamilySymbol DeckProfile
     {
-      get => Value is DB.CompoundStructureLayer layer ? Element.FromElementId(Document, layer.DeckProfileId) as FamilySymbol : default;
+      get => Value is ARDB.CompoundStructureLayer layer ? Element.FromElementId(Document, layer.DeckProfileId) as FamilySymbol : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructureLayer layer)
+        if (value is object && Value is ARDB.CompoundStructureLayer layer)
         {
           AssertValidDocument(value, nameof(DeckProfile));
           layer.DeckProfileId = value.Id;
@@ -385,10 +385,10 @@ namespace RhinoInside.Revit.GH.Types
 
     public DeckEmbeddingType DeckEmbeddingType
     {
-      get => Value is DB.CompoundStructureLayer layer ? new DeckEmbeddingType(layer.DeckEmbeddingType) : default;
+      get => Value is ARDB.CompoundStructureLayer layer ? new DeckEmbeddingType(layer.DeckEmbeddingType) : default;
       set
       {
-        if (value is object && Value is DB.CompoundStructureLayer layer)
+        if (value is object && Value is ARDB.CompoundStructureLayer layer)
           layer.DeckEmbeddingType = value.Value;
       }
     }

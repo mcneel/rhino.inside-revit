@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Categories
 {
+  using External.DB.Extensions;
+
   public class QueryCategories : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
@@ -15,10 +16,10 @@ namespace RhinoInside.Revit.GH.Components
 
     public override bool NeedsToBeExpired
     (
-      DB.Document document,
-      ICollection<DB.ElementId> added,
-      ICollection<DB.ElementId> deleted,
-      ICollection<DB.ElementId> modified
+      ARDB.Document document,
+      ICollection<ARDB.ElementId> added,
+      ICollection<ARDB.ElementId> deleted,
+      ICollection<ARDB.ElementId> modified
     )
     {
       if (added.Where(x => x.IsCategoryId(document)).Any())
@@ -29,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (deleted.Any())
       {
-        var empty = new DB.ElementId[0];
+        var empty = new ARDB.ElementId[0];
         foreach (var param in Params.Output.OfType<Kernel.IGH_ElementIdParam>())
         {
           if (param.NeedsToBeExpired(document, empty, deleted, empty))
@@ -54,7 +55,7 @@ namespace RhinoInside.Revit.GH.Components
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", DB.CategoryType.Model, GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", ARDB.CategoryType.Model, GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", defaultValue: new Types.Category(), GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Category name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Boolean>("Allows Subcategories", "ASC", "Category allows subcategories to be added", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
@@ -74,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      if (!Params.TryGetData(DA, "Type", out DB.CategoryType? type)) return;
+      if (!Params.TryGetData(DA, "Type", out ARDB.CategoryType? type)) return;
       if (!Params.TryGetData(DA, "Parent", out Types.Category parent)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Allows Subcategories", out bool? allowsSubcategories)) return;
@@ -85,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components
       if(!(parent?.Document is null || doc.Equals(parent.Document)))
         throw new System.ArgumentException("Wrong Document.", nameof(parent));
 
-      IEnumerable<DB.Category> categories = doc.GetCategories(parent?.Id);
+      IEnumerable<ARDB.Category> categories = doc.GetCategories(parent?.Id);
 
       if (type.HasValue)
         categories = categories.Where(x => x.CategoryType == type);

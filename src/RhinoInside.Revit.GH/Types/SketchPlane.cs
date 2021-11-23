@@ -2,20 +2,21 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+
   [Kernel.Attributes.Name("Sketch Plane")]
   public class SketchPlane : GraphicalElement
   {
-    protected override Type ValueType => typeof(DB.SketchPlane);
-    public static explicit operator DB.SketchPlane(SketchPlane value) => value?.Value;
-    public new DB.SketchPlane Value => base.Value as DB.SketchPlane;
+    protected override Type ValueType => typeof(ARDB.SketchPlane);
+    public static explicit operator ARDB.SketchPlane(SketchPlane value) => value?.Value;
+    public new ARDB.SketchPlane Value => base.Value as ARDB.SketchPlane;
 
     public SketchPlane() : base() { }
-    public SketchPlane(DB.SketchPlane sketchPlane) : base(sketchPlane) { }
+    public SketchPlane(ARDB.SketchPlane sketchPlane) : base(sketchPlane) { }
 
     public override bool CastFrom(object source)
     {
@@ -24,7 +25,7 @@ namespace RhinoInside.Revit.GH.Types
       if (source is IGH_Goo goo)
         value = goo.ScriptVariable();
 
-      if (value is DB.View view)
+      if (value is ARDB.View view)
         return view.SketchPlane is null ? false : SetValue(view.SketchPlane);
 
       return base.CastFrom(source);

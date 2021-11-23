@@ -4,9 +4,9 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.Assembly
+namespace RhinoInside.Revit.GH.Components.Assemblies
 {
   [ComponentVersion(introduced: "1.2", updated: "1.2.4")]
   public class AssemblyByMembers : ElementTrackerComponent
@@ -90,10 +90,10 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
       )
     };
 
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
-      DB.BuiltInParameter.ASSEMBLY_NAMING_CATEGORY,
-      DB.BuiltInParameter.ASSEMBLY_NAME,
+      ARDB.BuiltInParameter.ASSEMBLY_NAMING_CATEGORY,
+      ARDB.BuiltInParameter.ASSEMBLY_NAME,
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -101,16 +101,16 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
       // active document
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
 
-      var members = new List<DB.Element>();
+      var members = new List<ARDB.Element>();
       if (!DA.GetDataList("Members", members))
         return;
 
-      Params.TryGetData(DA, "Category", out DB.Category category);
+      Params.TryGetData(DA, "Category", out ARDB.Category category);
       Params.TryGetData(DA, "Name", out string name);
-      Params.TryGetData(DA, "Template", out DB.AssemblyInstance template);
+      Params.TryGetData(DA, "Template", out ARDB.AssemblyInstance template);
 
       // find any tracked sheet
-      Params.ReadTrackedElement(_Assembly_.name, doc.Value, out DB.AssemblyInstance assembly);
+      Params.ReadTrackedElement(_Assembly_.name, doc.Value, out ARDB.AssemblyInstance assembly);
 
       // update, or create
       StartTransaction(doc.Value);
@@ -126,12 +126,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
       }
     }
 
-    bool Reuse(DB.AssemblyInstance assembly, AssemblyHandler handler)
+    bool Reuse(ARDB.AssemblyInstance assembly, AssemblyHandler handler)
     {
       bool rejected;
 
       // if categories are different, do not use
-      rejected = assembly.NamingCategoryId is DB.ElementId categoryId
+      rejected = assembly.NamingCategoryId is ARDB.ElementId categoryId
           && !categoryId.Equals(handler.CategoryId);
 
       if (rejected)
@@ -146,14 +146,14 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
       return true;
     }
 
-    DB.AssemblyInstance Create(DB.Document doc, AssemblyHandler handler)
+    ARDB.AssemblyInstance Create(ARDB.Document doc, AssemblyHandler handler)
     {
       var assembly = handler.CreateAssembly(doc);
       assembly.CopyParametersFrom(handler.Template, ExcludeUniqueProperties);
       return assembly;
     }
 
-    DB.AssemblyInstance Reconstruct(DB.AssemblyInstance assembly, DB.Document doc, AssemblyHandler handler)
+    ARDB.AssemblyInstance Reconstruct(ARDB.AssemblyInstance assembly, ARDB.Document doc, AssemblyHandler handler)
     {
       if (assembly is null || !Reuse(assembly, handler))
         assembly = assembly.ReplaceElement

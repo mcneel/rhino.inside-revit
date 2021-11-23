@@ -5,14 +5,15 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
+using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class ParameterKey : Element<Types.ParameterKey, DB.ParameterElement>
+  using External.DB.Extensions;
+
+  public class ParameterKey : Element<Types.ParameterKey, ARDB.ParameterElement>
   {
     public override Guid ComponentGuid => new Guid("A550F532-8C68-460B-91F3-DA0A5A0D42B5");
     public override GH_Exposure Exposure => GH_Exposure.septenary;
@@ -32,8 +33,8 @@ namespace RhinoInside.Revit.GH.Parameters
         var parameterId = document.Value.IsFamilyDocument ?
               document.Value.FamilyManager.
               get_Parameter(keyName)?.Id ??
-              DB.ElementId.InvalidElementId :
-              DB.GlobalParametersManager.FindByName(document.Value, keyName);
+              ARDB.ElementId.InvalidElementId :
+              ARDB.GlobalParametersManager.FindByName(document.Value, keyName);
 
         key = Types.ParameterKey.FromElementId(document.Value, parameterId);
         if (key is object) return true;
@@ -59,12 +60,12 @@ namespace RhinoInside.Revit.GH.Parameters
         var keyName = key.Name;
         if (!document.Value.IsFamilyDocument)
         {
-          var parameterId = DB.ElementId.InvalidElementId;
+          var parameterId = ARDB.ElementId.InvalidElementId;
           using (var iterator = document.Value.ParameterBindings.ForwardIterator())
           {
             while (iterator.MoveNext())
             {
-              if (iterator.Key is DB.InternalDefinition definition)
+              if (iterator.Key is ARDB.InternalDefinition definition)
               {
                 if (definition.Name == keyName)
                   parameterId = definition.Id;
@@ -78,7 +79,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
         throw new Exceptions.RuntimeWarningException($"Project parameter '{keyName}' is not defined on document '{document.Title}'");
       }
-      else if (key.Document.IsFamilyDocument || key.Value is DB.GlobalParameter)
+      else if (key.Document.IsFamilyDocument || key.Value is ARDB.GlobalParameter)
         throw new Exceptions.RuntimeWarningException($"Parameter '{key.Name}' is not a valid reference to a project parameter");
 
       return key.IsValid;
@@ -86,7 +87,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     #region UI
 
-    protected DB.BuiltInCategory SelectedBuiltInCategory = DB.BuiltInCategory.INVALID;
+    protected ARDB.BuiltInCategory SelectedBuiltInCategory = ARDB.BuiltInCategory.INVALID;
 
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
@@ -173,16 +174,16 @@ namespace RhinoInside.Revit.GH.Parameters
       Menu_AppendCustomItem(menu, listBox);
     }
 
-    private void RefreshCategoryList(ComboBox categoriesBox, DB.CategoryType categoryType)
+    private void RefreshCategoryList(ComboBox categoriesBox, ARDB.CategoryType categoryType)
     {
       if (Revit.ActiveUIDocument is null) return;
 
       var doc = Revit.ActiveUIDocument.Document;
       var categories = doc.GetBuiltInCategoriesWithParameters().Select(x => doc.GetCategory(x));
 
-      if (categoryType != DB.CategoryType.Invalid)
+      if (categoryType != ARDB.CategoryType.Invalid)
       {
-        if (categoryType == (DB.CategoryType) 3)
+        if (categoryType == (ARDB.CategoryType) 3)
           categories = categories.Where(x => x.IsTagCategory);
         else
           categories = categories.Where(x => x.CategoryType == categoryType && !x.IsTagCategory);
@@ -195,9 +196,9 @@ namespace RhinoInside.Revit.GH.Parameters
       foreach (var category in categories)
         categoriesBox.Items.Add(Types.Category.FromCategory(category));
 
-      if (SelectedBuiltInCategory != DB.BuiltInCategory.INVALID)
+      if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
       {
-        var currentCategory = new Types.Category(doc, new DB.ElementId(SelectedBuiltInCategory));
+        var currentCategory = new Types.Category(doc, new ARDB.ElementId(SelectedBuiltInCategory));
         categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.Category>().IndexOf(currentCategory, 0).FirstOr(-1);
       }
     }
@@ -220,18 +221,18 @@ namespace RhinoInside.Revit.GH.Parameters
       }
 
       {
-        var parameters = default(IEnumerable<DB.ElementId>);
+        var parameters = default(IEnumerable<ARDB.ElementId>);
         if (categoriesBox.SelectedIndex == -1)
         {
           parameters = categoriesBox.Items.
                         Cast<Types.Category>().
-                        SelectMany(x => DB.TableView.GetAvailableParameters(doc, x.Id)).
+                        SelectMany(x => ARDB.TableView.GetAvailableParameters(doc, x.Id)).
                         GroupBy(x => x.IntegerValue).
                         Select(x => x.First());
         }
         else
         {
-          parameters = DB.TableView.GetAvailableParameters(doc, (categoriesBox.Items[categoriesBox.SelectedIndex] as Types.Category).Id);
+          parameters = ARDB.TableView.GetAvailableParameters(doc, (categoriesBox.Items[categoriesBox.SelectedIndex] as Types.Category).Id);
         }
 
         foreach (var parameter in parameters)
@@ -246,7 +247,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (sender is ComboBox categoriesTypeBox && categoriesTypeBox.Tag is ComboBox categoriesBox)
       {
-        RefreshCategoryList(categoriesBox, (DB.CategoryType) categoriesTypeBox.SelectedIndex);
+        RefreshCategoryList(categoriesBox, (ARDB.CategoryType) categoriesTypeBox.SelectedIndex);
         RefreshParametersList(categoriesBox.Tag as ListBox, categoriesBox);
       }
     }
@@ -255,7 +256,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (sender is ComboBox categoriesBox && categoriesBox.Tag is ListBox parametersListBox)
       {
-        SelectedBuiltInCategory = DB.BuiltInCategory.INVALID;
+        SelectedBuiltInCategory = ARDB.BuiltInCategory.INVALID;
         if (categoriesBox.SelectedItem is Types.Category category)
           category.Id.TryGetBuiltInCategory(out SelectedBuiltInCategory);
 
@@ -293,7 +294,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (reader.TryGetString("SelectedBuiltInCategory", ref selectedBuiltInCategory))
         SelectedBuiltInCategory = new EDBS.CategoryId(selectedBuiltInCategory);
       else
-        SelectedBuiltInCategory = DB.BuiltInCategory.INVALID;
+        SelectedBuiltInCategory = ARDB.BuiltInCategory.INVALID;
 
       return true;
     }
@@ -303,7 +304,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Write(writer))
         return false;
 
-      if (SelectedBuiltInCategory != DB.BuiltInCategory.INVALID)
+      if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
         writer.SetString("SelectedBuiltInCategory", ((EDBS.CategoryId) SelectedBuiltInCategory).FullName);
 
       return true;
@@ -319,7 +320,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override Types.ParameterValue PreferredCast(object data)
     {
-      return data is DB.Parameter parameter ? new Types.ParameterValue(parameter) : default;
+      return data is ARDB.Parameter parameter ? new Types.ParameterValue(parameter) : default;
     }
 
     public ParameterValue() : base
@@ -343,10 +344,10 @@ namespace RhinoInside.Revit.GH.Parameters
 
       try
       {
-        if (data.Value is DB.Parameter parameter && parameter.Definition is DB.Definition definition)
+        if (data.Value is ARDB.Parameter parameter && parameter.Definition is ARDB.Definition definition)
         {
           return parameter.HasValue ?
-            $"{definition.Name} : {(parameter.StorageType == DB.StorageType.String ? parameter.AsString() : parameter.AsValueString())}" :
+            $"{definition.Name} : {(parameter.StorageType == ARDB.StorageType.String ? parameter.AsString() : parameter.AsValueString())}" :
             $"{definition.Name} : <null>";
         }
       }
@@ -370,33 +371,33 @@ namespace RhinoInside.Revit.GH.Parameters
     )
     { }
 
-    public ParameterParam(DB.Parameter p) : this()
+    public ParameterParam(ARDB.Parameter p) : this()
     {
       ParameterName = p.Definition.Name;
       ParameterType = p.Definition.GetDataType();
       ParameterGroup = p.Definition.GetGroupType();
-      ParameterBinding = p.Element is DB.ElementType ? DBX.ParameterBinding.Type : DBX.ParameterBinding.Instance;
+      ParameterBinding = p.Element is ARDB.ElementType ? ERDB.ParameterBinding.Type : ERDB.ParameterBinding.Instance;
 
       if (p.IsShared)
       {
-        ParameterClass = DBX.ParameterClass.Shared;
+        ParameterClass = ERDB.ParameterClass.Shared;
         ParameterSharedGUID = p.GUID;
       }
       else if (p.Id.TryGetBuiltInParameter(out var parameterBuiltInId))
       {
-        ParameterClass = DBX.ParameterClass.BuiltIn;
+        ParameterClass = ERDB.ParameterClass.BuiltIn;
         ParameterBuiltInId = parameterBuiltInId;
       }
-      else if (p.Element.Document.GetElement(p.Id) is DB.ParameterElement paramElement)
+      else if (p.Element.Document.GetElement(p.Id) is ARDB.ParameterElement paramElement)
       {
-        if (paramElement is DB.GlobalParameter)
+        if (paramElement is ARDB.GlobalParameter)
         {
-          ParameterClass = DBX.ParameterClass.Global;
+          ParameterClass = ERDB.ParameterClass.Global;
         }
-        else switch (paramElement.get_Parameter(DB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY).AsInteger())
+        else switch (paramElement.get_Parameter(ARDB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY).AsInteger())
           {
-            case 0: ParameterClass = DBX.ParameterClass.Family; break;
-            case 1: ParameterClass = DBX.ParameterClass.Project; break;
+            case 0: ParameterClass = ERDB.ParameterClass.Family; break;
+            case 1: ParameterClass = ERDB.ParameterClass.Project; break;
           }
       }
 
@@ -418,7 +419,7 @@ namespace RhinoInside.Revit.GH.Parameters
         Description = $"Shared parameter {ParameterSharedGUID.Value:B}\n{Description}";
       else if (ParameterBuiltInId != EDBS.ParameterId.Empty)
         Description = $"BuiltIn Parameter \"{ParameterBuiltInId.FullName}\"\n{Description}";
-      else if (ParameterBinding != DBX.ParameterBinding.Unknown)
+      else if (ParameterBinding != ERDB.ParameterBinding.Unknown)
         Description = $"{ParameterClass} parameter ({ParameterBinding})\n{Description}";
       else
         Description = $"{ParameterClass} parameter\n{Description}";
@@ -427,8 +428,8 @@ namespace RhinoInside.Revit.GH.Parameters
     public string ParameterName { get; private set; } = string.Empty;
     public EDBS.DataType ParameterType { get; private set; } = EDBS.DataType.Empty;
     public EDBS.ParameterGroup ParameterGroup { get; private set; } = EDBS.ParameterGroup.Empty;
-    public DBX.ParameterBinding ParameterBinding { get; private set; } = DBX.ParameterBinding.Unknown;
-    public DBX.ParameterClass ParameterClass { get; private set; } = DBX.ParameterClass.Any;
+    public ERDB.ParameterBinding ParameterBinding { get; private set; } = ERDB.ParameterBinding.Unknown;
+    public ERDB.ParameterClass ParameterClass { get; private set; } = ERDB.ParameterClass.Any;
     public EDBS.ParameterId ParameterBuiltInId { get; private set; } = EDBS.ParameterId.Empty;
     public Guid? ParameterSharedGUID { get; private set; } = default;
 
@@ -455,25 +456,25 @@ namespace RhinoInside.Revit.GH.Parameters
       ParameterType = EDBS.DataType.Empty;
       switch (GetValue("ParameterType"))
       {
-        case int enumerate: ParameterType = ((DB.ParameterType) enumerate).ToDataType(); break;
+        case int enumerate: ParameterType = ((ARDB.ParameterType) enumerate).ToDataType(); break;
         case string schema: ParameterType = new EDBS.DataType(schema); break;
       }
 
       ParameterGroup = EDBS.ParameterGroup.Empty;
       switch (GetValue("ParameterGroup"))
       {
-        case int enumerate: ParameterGroup = ((DB.BuiltInParameterGroup) enumerate).ToParameterGroup(); break;
+        case int enumerate: ParameterGroup = ((ARDB.BuiltInParameterGroup) enumerate).ToParameterGroup(); break;
         case string schema: ParameterGroup = new EDBS.ParameterGroup(schema); break;
       }
 
-      var parameterBinding = (int) DBX.ParameterBinding.Unknown;
+      var parameterBinding = (int) ERDB.ParameterBinding.Unknown;
       reader.TryGetInt32("ParameterBinding", ref parameterBinding);
-      ParameterBinding = (DBX.ParameterBinding) parameterBinding;
+      ParameterBinding = (ERDB.ParameterBinding) parameterBinding;
 
       ParameterBuiltInId = EDBS.ParameterId.Empty;
       switch (GetValue("ParameterBuiltInId"))
       {
-        case int enumerate: ParameterBuiltInId = (DB.BuiltInParameter) enumerate; break;
+        case int enumerate: ParameterBuiltInId = (ARDB.BuiltInParameter) enumerate; break;
         case string schema: ParameterBuiltInId = new EDBS.ParameterId(schema); break;
       }
 
@@ -483,15 +484,15 @@ namespace RhinoInside.Revit.GH.Parameters
       else
         ParameterSharedGUID = default;
 
-      var parameterClass = (int) DBX.ParameterClass.Any;
+      var parameterClass = (int) ERDB.ParameterClass.Any;
       if (reader.TryGetInt32("ParameterClass", ref parameterClass))
-        ParameterClass = (DBX.ParameterClass) parameterClass;
+        ParameterClass = (ERDB.ParameterClass) parameterClass;
       else if (ParameterSharedGUID.HasValue)
-        ParameterClass = DBX.ParameterClass.Shared;
+        ParameterClass = ERDB.ParameterClass.Shared;
       else if (ParameterBuiltInId != EDBS.ParameterId.Empty)
-        ParameterClass = DBX.ParameterClass.BuiltIn;
-      else if (ParameterBinding != DBX.ParameterBinding.Unknown)
-        ParameterClass = DBX.ParameterClass.Project;
+        ParameterClass = ERDB.ParameterClass.BuiltIn;
+      else if (ParameterBinding != ERDB.ParameterBinding.Unknown)
+        ParameterClass = ERDB.ParameterClass.Project;
 
       return true;
     }
@@ -510,7 +511,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (ParameterType != EDBS.DataType.Empty)
         writer.SetString("ParameterType", ParameterType.FullName);
 
-      if (ParameterBinding != DBX.ParameterBinding.Unknown)
+      if (ParameterBinding != ERDB.ParameterBinding.Unknown)
         writer.SetInt32("ParameterBinding", (int) ParameterBinding);
 
       if (ParameterBuiltInId != EDBS.ParameterId.Empty)
@@ -519,7 +520,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (ParameterSharedGUID.HasValue)
         writer.SetGuid("ParameterSharedGUID", ParameterSharedGUID.Value);
 
-      if (ParameterClass != DBX.ParameterClass.Any)
+      if (ParameterClass != ERDB.ParameterClass.Any)
         writer.SetInt32("ParameterClass", (int) ParameterClass);
 
       return true;
@@ -555,7 +556,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return false;
     }
 
-    public DB.Parameter GetParameter(DB.Element element)
+    public ARDB.Parameter GetParameter(ARDB.Element element)
     {
       if (ParameterSharedGUID.HasValue)
         return element.get_Parameter(ParameterSharedGUID.Value);

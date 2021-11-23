@@ -2,19 +2,20 @@ using System;
 using System.Drawing;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Special;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Workset")]
   public class Workset : ReferenceObject,
     IEquatable<Workset>,
     IGH_ItemDescription
   {
     public Workset() { }
-    public Workset(DB.Document doc, DB.WorksetId id) : base() => SetValue(doc, id);
-    public Workset(DB.Document doc, DB.Workset value) : base(doc, value) => SetValue(doc, value.Id);
+    public Workset(ARDB.Document doc, ARDB.WorksetId id) : base() => SetValue(doc, id);
+    public Workset(ARDB.Document doc, ARDB.Workset value) : base(doc, value) => SetValue(doc, value.Id);
 
     #region System.Object
     public bool Equals(Workset other) => other is object &&
@@ -25,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
     public override string ToString()
     {
       var valid = IsValid;
-      string Invalid = Id == DB.WorksetId.InvalidWorksetId?
+      string Invalid = Id == ARDB.WorksetId.InvalidWorksetId?
         string.Empty :
         IsReferencedData ?
         (valid ? /*"Referenced "*/ "" : "Unresolved ") :
@@ -49,8 +50,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    DB.Workset value => base.Value as DB.Workset;
-    public new DB.Workset Value
+    ARDB.Workset value => base.Value as ARDB.Workset;
+    public new ARDB.Workset Value
     {
       get
       {
@@ -61,14 +62,14 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    DB.WorksetId id;
-    public DB.WorksetId Id => id;
+    ARDB.WorksetId id;
+    public ARDB.WorksetId Id => id;
 
     public override string DisplayName => Value.Name;
     #endregion
 
     #region IGH_Goo
-    public override bool IsValid => base.IsValid && Id != DB.WorksetId.InvalidWorksetId;
+    public override bool IsValid => base.IsValid && Id != ARDB.WorksetId.InvalidWorksetId;
     public override string IsValidWhyNot
     {
       get
@@ -84,7 +85,7 @@ namespace RhinoInside.Revit.GH.Types
         else
         {
           if (id is null) return $"Referenced Revit element '{UniqueID}' is not available.";
-          if (id == DB.WorksetId.InvalidWorksetId) return "Id is equal to InvalidElementId.";
+          if (id == ARDB.WorksetId.InvalidWorksetId) return "Id is equal to InvalidElementId.";
         }
 
         return default;
@@ -135,7 +136,7 @@ namespace RhinoInside.Revit.GH.Types
       [System.ComponentModel.Description("The Guid of document this element belongs to.")]
       public Guid DocumentGUID => owner.DocumentGUID;
 
-      protected virtual bool IsValidId(DB.Document doc, DB.ElementId id) =>
+      protected virtual bool IsValidId(ARDB.Document doc, ARDB.ElementId id) =>
         owner.GetType() == Element.FromElementId(doc, id).GetType();
 
       [System.ComponentModel.Description("A stable unique identifier for an element within the document.")]
@@ -170,7 +171,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           if (document.IsWorkshared && Guid.TryParse(UniqueID, out var guid))
           {
-            if (document.GetWorksetTable().GetWorkset(guid) is DB.Workset ws)
+            if (document.GetWorksetTable().GetWorkset(guid) is ARDB.Workset ws)
             {
               Document = document;
               id = ws.Id;
@@ -184,9 +185,9 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override object FetchValue() => Document.GetWorksetTable()?.GetWorkset(Id);
 
-    protected void SetValue(DB.Document doc, DB.WorksetId id)
+    protected void SetValue(ARDB.Document doc, ARDB.WorksetId id)
     {
-      if (id == DB.WorksetId.InvalidWorksetId)
+      if (id == ARDB.WorksetId.InvalidWorksetId)
         doc = null;
 
       Document = doc;

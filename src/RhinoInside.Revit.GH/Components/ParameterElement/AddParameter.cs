@@ -1,14 +1,14 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
-using DBXS = RhinoInside.Revit.External.DB.Schemas;
+using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components.ParameterElement
+namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
+  using External.DB.Extensions;
+  using ElementTracking;
+
   public class AddParameter : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("84AB6F3C-BB4B-48E4-9175-B7F40791BB7F");
@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
           NickName = "B",
           Description = "Parameter binding",
         }.
-        SetDefaultVale(DBX.ParameterBinding.Instance)
+        SetDefaultVale(ERDB.ParameterBinding.Instance)
       ),
     };
 
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
 
     const string _Parameter_ = "Parameter";
     string UserSharedParametersFilename;
-    DB.DefinitionFile DefinitionFile;
+    ARDB.DefinitionFile DefinitionFile;
 
     protected override void BeforeSolveInstance()
     {
@@ -114,7 +114,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Params.GetData(DA, "Definition", out Types.ParameterKey key, x => x.IsValid)) return;
-      if (!Params.GetData(DA, "Binding", out Types.ParameterBinding binding, x => x.IsValid && x.Value != DBX.ParameterBinding.Unknown)) return;
+      if (!Params.GetData(DA, "Binding", out Types.ParameterBinding binding, x => x.IsValid && x.Value != ERDB.ParameterBinding.Unknown)) return;
 
       if (key.DataType is null)
         throw new Exceptions.RuntimeErrorException($"Unknown data-type for parameter '{key.Name}'");
@@ -123,7 +123,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
         throw new Exceptions.RuntimeWarningException($"Parameter '{key.Name}' is a BuiltIn parameter");
 
       // Previous Output
-      Params.ReadTrackedElement(_Parameter_, doc.Value, out DB.ParameterElement parameter);
+      Params.ReadTrackedElement(_Parameter_, doc.Value, out ARDB.ParameterElement parameter);
 
       StartTransaction(doc.Value);
       {
@@ -136,18 +136,18 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
 
     bool ReuseGlobalParameter
     (
-      DB.ParameterElement parameter,
+      ARDB.ParameterElement parameter,
       Types.ParameterKey key
     )
     {
-      if (!(parameter is DB.GlobalParameter)) return false;
+      if (!(parameter is ARDB.GlobalParameter)) return false;
 
       if (parameter.Name != key.Name)
         parameter.Name = key.Name;
 
-      if (parameter.GetDefinition() is DB.InternalDefinition definition)
+      if (parameter.GetDefinition() is ARDB.InternalDefinition definition)
       {
-        if ((DBXS.DataType) definition.GetDataType() != key.DataType) return false;
+        if ((ERDB.Schemas.DataType) definition.GetDataType() != key.DataType) return false;
 
         if (definition.GetGroupType() != key.Group)
           definition.SetGroupType(key.Group);
@@ -160,15 +160,15 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
 
     bool ReuseProjectParameter
     (
-      DB.ParameterElement parameter,
+      ARDB.ParameterElement parameter,
       Types.ParameterKey key,
-      DBX.ParameterBinding parameterBinding
+      ERDB.ParameterBinding parameterBinding
     )
     {
       if (parameter is null) return false;
-      if (parameter is DB.GlobalParameter) return false;
+      if (parameter is ARDB.GlobalParameter) return false;
 
-      if (parameter is DB.SharedParameterElement shared)
+      if (parameter is ARDB.SharedParameterElement shared)
       {
         if (key.GUID.HasValue && shared.GuidValue != key.GUID.Value)
           return false;
@@ -176,7 +176,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
 
       if (parameter.Name != key.Name)
       {
-        if (parameter is DB.SharedParameterElement) return false;
+        if (parameter is ARDB.SharedParameterElement) return false;
         if (parameter.Document.IsFamilyDocument)
         {
           var familyParameter = parameter.Document.FamilyManager.get_Parameter(parameter.GetDefinition());
@@ -185,9 +185,9 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
         else parameter.Name = key.Name;
       }
 
-      if (parameter.GetDefinition() is DB.InternalDefinition definition)
+      if (parameter.GetDefinition() is ARDB.InternalDefinition definition)
       {
-        if ((DBXS.DataType) definition.GetDataType() != key.DataType) return false;
+        if ((ERDB.Schemas.DataType) definition.GetDataType() != key.DataType) return false;
         if (definition.GetParameterBinding(parameter.Document) != parameterBinding) return false;
 
         if (definition.GetGroupType() != key.Group)
@@ -201,26 +201,26 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
 
     bool ReuseFamilyParameter
     (
-      DB.ParameterElement parameter,
+      ARDB.ParameterElement parameter,
       Types.ParameterKey key,
-      DBX.ParameterBinding parameterBinding
+      ERDB.ParameterBinding parameterBinding
     )
     {
       if (parameter is null) return false;
-      if (parameter is DB.GlobalParameter) return false;
+      if (parameter is ARDB.GlobalParameter) return false;
 
-      if (parameter is DB.SharedParameterElement shared)
+      if (parameter is ARDB.SharedParameterElement shared)
       {
         if (key.GUID.HasValue && shared.GuidValue != key.GUID.Value)
           return false;
       }
 
-      if (parameter.GetDefinition() is DB.InternalDefinition definition)
+      if (parameter.GetDefinition() is ARDB.InternalDefinition definition)
       {
-        if ((DBXS.DataType) definition.GetDataType() != key.DataType) return false;
+        if ((ERDB.Schemas.DataType) definition.GetDataType() != key.DataType) return false;
 
         var manager = parameter.Document.FamilyManager;
-        if (manager.get_Parameter(definition) is DB.FamilyParameter familyParameter)
+        if (manager.get_Parameter(definition) is ARDB.FamilyParameter familyParameter)
         {
           if (parameter.Name != key.Name)
           {
@@ -228,10 +228,10 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
             manager.RenameParameter(familyParameter, key.Name);
           }
 
-          if (parameterBinding == DBX.ParameterBinding.Instance && !familyParameter.IsInstance)
+          if (parameterBinding == ERDB.ParameterBinding.Instance && !familyParameter.IsInstance)
             manager.MakeInstance(familyParameter);
 
-          if (parameterBinding == DBX.ParameterBinding.Type && familyParameter.IsInstance)
+          if (parameterBinding == ERDB.ParameterBinding.Type && familyParameter.IsInstance)
             manager.MakeType(familyParameter);
 
           if (definition.GetGroupType() != key.Group)
@@ -245,71 +245,71 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
     }
 
 
-    DB.ParameterElement CreateGlobalParameter
+    ARDB.ParameterElement CreateGlobalParameter
     (
-      DB.Document doc,
+      ARDB.Document doc,
       Types.ParameterKey key
     )
     {
-      if(!DB.GlobalParametersManager.AreGlobalParametersAllowed(doc))
+      if(!ARDB.GlobalParametersManager.AreGlobalParametersAllowed(doc))
         throw new InvalidOperationException("Global parameters are only allowed on project documents.");
 
-      if (!DB.GlobalParametersManager.IsUniqueName(doc, key.Name))
+      if (!ARDB.GlobalParametersManager.IsUniqueName(doc, key.Name))
         throw new InvalidOperationException($"A global parameter named '{key.Name}' already exists in the document.");
 
-      var parameter = DB.GlobalParameter.Create(doc, key.Name, key.DataType ?? DBXS.SpecType.String.Text);
+      var parameter = ARDB.GlobalParameter.Create(doc, key.Name, key.DataType ?? ERDB.Schemas.SpecType.String.Text);
       parameter.GetDefinition().SetGroupType(key.Group);
       return parameter;
     }
 
-    DB.ParameterElement CreateProjectParameter
+    ARDB.ParameterElement CreateProjectParameter
     (
-      DB.Document doc,
+      ARDB.Document doc,
       Types.ParameterKey key,
-      DBX.ParameterBinding parameterBinding
+      ERDB.ParameterBinding parameterBinding
     )
     {
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         if
         (
-          collector.OfClass(typeof(DB.ParameterElement)).
-          WhereParameterEqualsTo(DB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY, 1).
-          Any(x => !(x is DB.GlobalParameter) && x.Name == key.Name)
+          collector.OfClass(typeof(ARDB.ParameterElement)).
+          WhereParameterEqualsTo(ARDB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY, 1).
+          Any(x => !(x is ARDB.GlobalParameter) && x.Name == key.Name)
         )
           throw new InvalidOperationException($"A project parameter with the name '{key.Name}' is already defined on document '{doc.GetTitle()}'.");
       }
 
-      if (key.CastTo(out DB.ExternalDefinitionCreationOptions options))
+      if (key.CastTo(out ARDB.ExternalDefinitionCreationOptions options))
       {
         using (options)
         {
-          if (options.Type == DB.ParameterType.Invalid)
-            options.Type = DB.ParameterType.Text;
+          if (options.Type == ARDB.ParameterType.Invalid)
+            options.Type = ARDB.ParameterType.Text;
 
           var groupName = key.Group?.LocalizedLabel ?? "Other";
           var group = DefinitionFile.Groups.get_Item(groupName) ??
                       DefinitionFile.Groups.Create(groupName);
           if
           (
-            !(group.Definitions.get_Item(key.Name) is DB.ExternalDefinition definition) ||
+            !(group.Definitions.get_Item(key.Name) is ARDB.ExternalDefinition definition) ||
             definition.GUID != key.GUID
           )
-            definition = group.Definitions.Create(options) as DB.ExternalDefinition;
+            definition = group.Definitions.Create(options) as ARDB.ExternalDefinition;
 
-          using (var categorySet = new DB.CategorySet())
+          using (var categorySet = new ARDB.CategorySet())
           {
             var categories = doc.GetBuiltInCategoriesWithParameters().Select(x => doc.GetCategory(x)).ToList();
 
-            var binding = default(DB.ElementBinding);
+            var binding = default(ARDB.ElementBinding);
             switch (parameterBinding)
             {
-              case DBX.ParameterBinding.Instance:
-                binding = new DB.InstanceBinding(categorySet);
+              case ERDB.ParameterBinding.Instance:
+                binding = new ARDB.InstanceBinding(categorySet);
                 break;
 
-              case DBX.ParameterBinding.Type:
-                binding = new DB.TypeBinding(categorySet);
+              case ERDB.ParameterBinding.Type:
+                binding = new ARDB.TypeBinding(categorySet);
                 break;
             }
 
@@ -323,34 +323,34 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
             }
           }
 
-          return DB.SharedParameterElement.Lookup(doc, definition.GUID);
+          return ARDB.SharedParameterElement.Lookup(doc, definition.GUID);
         }
       }
 
       return default;
     }
 
-    DB.ParameterElement CreateFamilyParameter
+    ARDB.ParameterElement CreateFamilyParameter
     (
-      DB.Document doc,
+      ARDB.Document doc,
       Types.ParameterKey key,
-      DBX.ParameterBinding parameterBinding
+      ERDB.ParameterBinding parameterBinding
     )
     {
       if (key.GUID.HasValue)
       {
-        using (var collector = new DB.FilteredElementCollector(doc))
+        using (var collector = new ARDB.FilteredElementCollector(doc))
         {
           if
           (
-            collector.OfClass(typeof(DB.ParameterElement)).
-            WhereParameterEqualsTo(DB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY, 0).
-            Any(x => !(x is DB.GlobalParameter) && x.Name == key.Name)
+            collector.OfClass(typeof(ARDB.ParameterElement)).
+            WhereParameterEqualsTo(ARDB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY, 0).
+            Any(x => !(x is ARDB.GlobalParameter) && x.Name == key.Name)
           )
             throw new InvalidOperationException($"A family parameter with the name '{key.Name}' is already defined on document '{doc.GetTitle()}'.");
         }
 
-        if (key.CastTo(out DB.ExternalDefinitionCreationOptions options))
+        if (key.CastTo(out ARDB.ExternalDefinitionCreationOptions options))
         {
           using (options)
           {
@@ -359,17 +359,17 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
                         DefinitionFile.Groups.Create(groupName);
             if
             (
-              !(group.Definitions.get_Item(key.Name) is DB.ExternalDefinition definition) ||
+              !(group.Definitions.get_Item(key.Name) is ARDB.ExternalDefinition definition) ||
               definition.GUID != key.GUID
             )
-              definition = group.Definitions.Create(options) as DB.ExternalDefinition;
+              definition = group.Definitions.Create(options) as ARDB.ExternalDefinition;
 
             try
             {
               var familyParam = key.Group is object ?
-                doc.FamilyManager.AddParameter(definition, key.Group, parameterBinding == DBX.ParameterBinding.Instance) :
-                doc.FamilyManager.AddParameter(definition, DB.BuiltInParameterGroup.INVALID, parameterBinding == DBX.ParameterBinding.Instance);
-              return doc.GetElement(familyParam.Id) as DB.ParameterElement;
+                doc.FamilyManager.AddParameter(definition, key.Group, parameterBinding == ERDB.ParameterBinding.Instance) :
+                doc.FamilyManager.AddParameter(definition, ARDB.BuiltInParameterGroup.INVALID, parameterBinding == ERDB.ParameterBinding.Instance);
+              return doc.GetElement(familyParam.Id) as ARDB.ParameterElement;
             }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
             {
@@ -380,39 +380,39 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       }
       else
       {
-        var familyParam = DBXS.CategoryId.IsCategoryId(key.DataType, out var categoryId) ?
+        var familyParam = ERDB.Schemas.CategoryId.IsCategoryId(key.DataType, out var categoryId) ?
         doc.FamilyManager.AddParameter
         (
           key.Name,
           key.Group,
-          DB.Category.GetCategory(doc, categoryId),
-          parameterBinding == DBX.ParameterBinding.Instance
+          ARDB.Category.GetCategory(doc, categoryId),
+          parameterBinding == ERDB.ParameterBinding.Instance
         ) :
         doc.FamilyManager.AddParameter
         (
           key.Name,
           key.Group,
           key.DataType,
-          parameterBinding == DBX.ParameterBinding.Instance
+          parameterBinding == ERDB.ParameterBinding.Instance
         );
 
         doc.FamilyManager.SetDescription(familyParam, key.Description ?? string.Empty);
 
-        return doc.GetElement(familyParam.Id) as DB.ParameterElement;
+        return doc.GetElement(familyParam.Id) as ARDB.ParameterElement;
       }
 
       return default;
     }
 
-    DB.ParameterElement Reconstruct
+    ARDB.ParameterElement Reconstruct
     (
-      DB.ParameterElement parameter,
-      DB.Document doc,
+      ARDB.ParameterElement parameter,
+      ARDB.Document doc,
       Types.ParameterKey key,
-      DBX.ParameterBinding parameterBinding
+      ERDB.ParameterBinding parameterBinding
     )
     {
-      if (parameterBinding == DBX.ParameterBinding.Global)
+      if (parameterBinding == ERDB.ParameterBinding.Global)
       {
         if (!ReuseGlobalParameter(parameter, key))
         {

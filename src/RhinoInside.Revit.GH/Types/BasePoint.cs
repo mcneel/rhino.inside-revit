@@ -1,34 +1,35 @@
 using System;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Base Point")]
   public class BasePoint : GraphicalElement
   {
-    protected override Type ValueType => typeof(DB.BasePoint);
-    public new DB.BasePoint Value => base.Value as DB.BasePoint;
+    protected override Type ValueType => typeof(ARDB.BasePoint);
+    public new ARDB.BasePoint Value => base.Value as ARDB.BasePoint;
 
-    protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
-    public static new bool IsValidElement(DB.Element element)
+    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
+    public static new bool IsValidElement(ARDB.Element element)
     {
-      return element is DB.BasePoint &&
-             element.Category.Id.IntegerValue != (int) DB.BuiltInCategory.OST_IOS_GeoSite;
+      return element is ARDB.BasePoint &&
+             element.Category.Id.IntegerValue != (int) ARDB.BuiltInCategory.OST_IOS_GeoSite;
     }
 
     public BasePoint() { }
-    public BasePoint(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public BasePoint(DB.BasePoint point) : base(point) { }
+    public BasePoint(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public BasePoint(ARDB.BasePoint point) : base(point) { }
 
     public override string DisplayName
     {
       get
       {
-        if (Value is DB.BasePoint point)
+        if (Value is ARDB.BasePoint point)
           return point.Category.Name;
 
         return base.DisplayName;
@@ -40,7 +41,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.BasePoint point)
+        if (Value is ARDB.BasePoint point)
         {
           return new BoundingBox
           (
@@ -58,7 +59,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (Value is DB.BasePoint point)
+      if (Value is ARDB.BasePoint point)
       {
         var location = Location;
         point.Category.Id.TryGetBuiltInCategory(out var builtInCategory);
@@ -68,14 +69,14 @@ namespace RhinoInside.Revit.GH.Types
         var secondarySize = 3.5f;
         switch (builtInCategory)
         {
-          case DB.BuiltInCategory.OST_IOS_GeoSite:
+          case ARDB.BuiltInCategory.OST_IOS_GeoSite:
             pointStyle = Rhino.Display.PointStyle.ActivePoint;
             break;
-          case DB.BuiltInCategory.OST_ProjectBasePoint:
+          case ARDB.BuiltInCategory.OST_ProjectBasePoint:
             pointStyle = Rhino.Display.PointStyle.RoundActivePoint;
             angle = (float) Rhino.RhinoMath.ToRadians(45);
             break;
-          case DB.BuiltInCategory.OST_SharedBasePoint:
+          case ARDB.BuiltInCategory.OST_SharedBasePoint:
             pointStyle = Rhino.Display.PointStyle.Triangle;
             radius = 12.0f;
             secondarySize = 7.0f;
@@ -93,7 +94,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.BasePoint point)
+        if (Value is ARDB.BasePoint point)
         {
           var origin = point.GetPosition().ToPoint3d();
           var axisX = Vector3d.XAxis;
@@ -131,15 +132,15 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(DBInternalOrigin);
     public new DBInternalOrigin Value => base.Value as DBInternalOrigin;
 
-    protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
-    public static new bool IsValidElement(DB.Element element)
+    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
+    public static new bool IsValidElement(ARDB.Element element)
     {
       return element is DBInternalOrigin &&
-             element.Category.Id.IntegerValue == (int) DB.BuiltInCategory.OST_IOS_GeoSite;
+             element.Category.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_IOS_GeoSite;
     }
 
     public InternalOrigin() { }
-    public InternalOrigin(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public InternalOrigin(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public InternalOrigin(DBInternalOrigin point) : base(point)
     {
 #if !REVIT_2021

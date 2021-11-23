@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
   public class ElementMaterialQuantities : Component
   {
@@ -39,21 +38,24 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
-      if (!DA.GetData("Element", ref element))
+      Types.Element element = null;
+      if (!DA.GetData("Element", ref element) || !element.IsValid)
         return;
 
-      var materialIds = new List<DB.ElementId>();
+      var area = Math.Pow(Revit.ModelUnits, 2.0);
+      var volume = Math.Pow(Revit.ModelUnits, 3.0);
+
+      var materialIds = new List<Types.Material>();
       if (DA.GetDataList("Materials", materialIds))
       {
-        DA.SetDataList("Volume", materialIds.Select(x => (element?.GetMaterialVolume(x)).GetValueOrDefault() * Math.Pow(Revit.ModelUnits, 3.0)));
-        DA.SetDataList("Area",   materialIds.Select(x => (element?.GetMaterialArea(x, false)).GetValueOrDefault() * Math.Pow(Revit.ModelUnits, 2.0)));
+        DA.SetDataList("Volume", materialIds.Select(x => x.Id is null ? default(double?) : element.Value.GetMaterialVolume(x.Id) * area));
+        DA.SetDataList("Area",   materialIds.Select(x => x.Id is null ? default(double?) : element.Value.GetMaterialArea(x.Id, false) * volume));
       }
 
-      var paintIds = new List<DB.ElementId>();
+      var paintIds = new List<Types.Material>();
       if (DA.GetDataList("Paint", paintIds))
       {
-        try { DA.SetDataList("Painting", paintIds.Select(x => (element?.GetMaterialArea(x, true)).GetValueOrDefault() * Math.Pow(Revit.ModelUnits, 2.0))); }
+        try { DA.SetDataList("Painting", paintIds.Select(x => x.Id is null ? default(double?) : element.Value.GetMaterialArea(x.Id, true) * area)); }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message); }
       }
     }

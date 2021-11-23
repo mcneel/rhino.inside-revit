@@ -1,8 +1,8 @@
 using System;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Views
 {
   [ComponentVersion(introduced: "1.0", updated: "1.2.1")]
   public class ViewIdentity : Component
@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var view = default(DB.View);
+      var view = default(ARDB.View);
       if (!DA.GetData("View", ref view))
         return;
 
@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components
         DA.SetData("Discipline", null);
 
       var type = view.Document.GetElement(view.GetTypeId());
-      DA.SetData("Family", (type as DB.ViewFamilyType)?.ViewFamily);
+      DA.SetData("Family", (type as ARDB.ViewFamilyType)?.ViewFamily);
       DA.SetData("Name", view.Name);
       DA.SetData("Template", new Types.View(view.Document, view.ViewTemplateId));
       DA.SetData("Is Template", view.IsTemplate);

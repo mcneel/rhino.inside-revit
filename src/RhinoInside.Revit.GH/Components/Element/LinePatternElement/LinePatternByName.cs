@@ -2,12 +2,13 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.LinePatternElement
+namespace RhinoInside.Revit.GH.Components.LinePatternElements
 {
+  using ElementTracking;
+  using External.DB.Extensions;
+
   public class LinePatternByName : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("5C99445A-E908-4598-B6F4-F3DB4FB84CC1");
@@ -75,17 +76,17 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElement
     };
 
     const string _LinePattern_ = "Line Pattern";
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties = { };
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties = { };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      Params.TryGetData(DA, "Template", out DB.LinePatternElement template);
+      Params.TryGetData(DA, "Template", out ARDB.LinePatternElement template);
 
       // Previous Output
-      Params.ReadTrackedElement(_LinePattern_, doc.Value, out DB.LinePatternElement pattern);
+      Params.ReadTrackedElement(_LinePattern_, doc.Value, out ARDB.LinePatternElement pattern);
 
       StartTransaction(doc.Value);
       {
@@ -96,7 +97,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElement
       }
     }
 
-    bool Reuse(DB.LinePatternElement pattern, string name, DB.LinePatternElement template)
+    bool Reuse(ARDB.LinePatternElement pattern, string name, ARDB.LinePatternElement template)
     {
       if (pattern is null) return false;
       if (name is object) pattern.Name = name;
@@ -114,9 +115,9 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElement
       return true;
     }
 
-    DB.LinePatternElement Create(DB.Document doc, string name, DB.LinePatternElement template)
+    ARDB.LinePatternElement Create(ARDB.Document doc, string name, ARDB.LinePatternElement template)
     {
-      var pattern = default(DB.LinePatternElement);
+      var pattern = default(ARDB.LinePatternElement);
 
       // Make sure the name is unique
       {
@@ -125,7 +126,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElement
 
         name = doc.GetNamesakeElements
         (
-          typeof(DB.LinePatternElement), name, categoryId: DB.BuiltInCategory.INVALID
+          typeof(ARDB.LinePatternElement), name, categoryId: ARDB.BuiltInCategory.INVALID
         ).
         Select(x => x.Name).
         WhereNamePrefixedWith(name).
@@ -136,41 +137,41 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElement
       if (template is object)
       {
         {
-          var ids = DB.ElementTransformUtils.CopyElements
+          var ids = ARDB.ElementTransformUtils.CopyElements
           (
             template.Document,
-            new DB.ElementId[] { template.Id },
+            new ARDB.ElementId[] { template.Id },
             doc,
             default,
             default
           );
 
-          pattern = ids.Select(x => doc.GetElement(x)).OfType<DB.LinePatternElement>().FirstOrDefault();
+          pattern = ids.Select(x => doc.GetElement(x)).OfType<ARDB.LinePatternElement>().FirstOrDefault();
           pattern.Name = name;
         }
       }
 
       if (pattern is null)
       {
-        using (var dashes = new DB.LinePattern(name))
+        using (var dashes = new ARDB.LinePattern(name))
         {
           dashes.SetSegments
           (
-            new DB.LinePatternSegment[]
+            new ARDB.LinePatternSegment[]
             {
-              new DB.LinePatternSegment(DB.LinePatternSegmentType.Dash,  1.0 / 12.0 /* 1 inch */),
-              new DB.LinePatternSegment(DB.LinePatternSegmentType.Space, 1.0 / 12.0 /* 1 inch */),
+              new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Dash,  1.0 / 12.0 /* 1 inch */),
+              new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Space, 1.0 / 12.0 /* 1 inch */),
             }
           );
 
-          pattern = DB.LinePatternElement.Create(doc, dashes);
+          pattern = ARDB.LinePatternElement.Create(doc, dashes);
         }
       }
 
       return pattern;
     }
 
-    DB.LinePatternElement Reconstruct(DB.LinePatternElement pattern, DB.Document doc, string name, DB.LinePatternElement template)
+    ARDB.LinePatternElement Reconstruct(ARDB.LinePatternElement pattern, ARDB.Document doc, string name, ARDB.LinePatternElement template)
     {
       if (!Reuse(pattern, name, template))
       {

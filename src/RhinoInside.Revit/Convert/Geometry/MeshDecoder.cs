@@ -1,11 +1,11 @@
 using Rhino.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
   static class MeshDecoder
   {
-    internal static Mesh ToRhino(DB.Mesh mesh)
+    internal static Mesh ToRhino(ARDB.Mesh mesh)
     {
       return Raw.RawDecoder.ToRhino(mesh);
     }

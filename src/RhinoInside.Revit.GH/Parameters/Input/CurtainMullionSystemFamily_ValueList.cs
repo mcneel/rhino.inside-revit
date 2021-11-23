@@ -1,7 +1,6 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -20,13 +19,13 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
 
-      ListItems.Add(new GH_ValueListItem("Unknown", ((int) DBX.CurtainMullionSystemFamily.Unknown).ToString()));
-      ListItems.Add(new GH_ValueListItem("Rectangular", ((int) DBX.CurtainMullionSystemFamily.Rectangular).ToString()));
-      ListItems.Add(new GH_ValueListItem("Circular", ((int) DBX.CurtainMullionSystemFamily.Circular).ToString()));
-      ListItems.Add(new GH_ValueListItem("L Corner", ((int) DBX.CurtainMullionSystemFamily.LCorner).ToString()));
-      ListItems.Add(new GH_ValueListItem("Trapezoid Corner", ((int) DBX.CurtainMullionSystemFamily.TrapezoidCorner).ToString()));
-      ListItems.Add(new GH_ValueListItem("Quad Corner", ((int) DBX.CurtainMullionSystemFamily.QuadCorner).ToString()));
-      ListItems.Add(new GH_ValueListItem("V Corner", ((int) DBX.CurtainMullionSystemFamily.VCorner).ToString()));
+      ListItems.Add(new GH_ValueListItem("Unknown", ((int) External.DB.CurtainMullionSystemFamily.Unknown).ToString()));
+      ListItems.Add(new GH_ValueListItem("Rectangular", ((int) External.DB.CurtainMullionSystemFamily.Rectangular).ToString()));
+      ListItems.Add(new GH_ValueListItem("Circular", ((int) External.DB.CurtainMullionSystemFamily.Circular).ToString()));
+      ListItems.Add(new GH_ValueListItem("L Corner", ((int) External.DB.CurtainMullionSystemFamily.LCorner).ToString()));
+      ListItems.Add(new GH_ValueListItem("Trapezoid Corner", ((int) External.DB.CurtainMullionSystemFamily.TrapezoidCorner).ToString()));
+      ListItems.Add(new GH_ValueListItem("Quad Corner", ((int) External.DB.CurtainMullionSystemFamily.QuadCorner).ToString()));
+      ListItems.Add(new GH_ValueListItem("V Corner", ((int) External.DB.CurtainMullionSystemFamily.VCorner).ToString()));
     }
   }
 }

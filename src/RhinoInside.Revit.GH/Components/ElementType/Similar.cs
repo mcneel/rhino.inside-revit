@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ElementTypes
 {
   public class ElementTypeSimilar : Component
   {
@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var elementType = default(DB.ElementType);
+      var elementType = default(ARDB.ElementType);
       if (!DA.GetData("Type", ref elementType) || elementType is null)
         return;
 

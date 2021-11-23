@@ -8,12 +8,13 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Special;
 using Rhino.Geometry;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Kernel.Attributes;
+
   public abstract class DataType<T> : IGH_Goo,
     IEquatable<DataType<T>>,
     IComparable<DataType<T>>,
@@ -213,8 +214,8 @@ namespace RhinoInside.Revit.GH.Types
 #if REVIT_2021
           case DB.ForgeTypeId f: Value = f; break;
 #else
-          case int i: Value = (DB.DisplayUnitType) i; break;
-          case DB.DisplayUnitType u: Value = u; break;
+          case int i: Value = (ARDB.DisplayUnitType) i; break;
+          case ARDB.DisplayUnitType u: Value = u; break;
 #endif
           case EDBS.DataType s: Value = new EDBS.UnitType(s.TypeId); break;
           case string t: Value = new EDBS.UnitType(t); break;
@@ -295,9 +296,9 @@ namespace RhinoInside.Revit.GH.Types
 #if REVIT_2021
           case DB.ForgeTypeId f: Value = f; break;
 #else
-          case int i: Value = (EDBS.SpecType) (DB.ParameterType) i; break;
-          case DB.ParameterType u: Value = (EDBS.SpecType) u; break;
-          case DB.UnitType t: Value = (EDBS.SpecType) t; break;
+          case int i: Value = (EDBS.SpecType) (ARDB.ParameterType) i; break;
+          case ARDB.ParameterType u: Value = (EDBS.SpecType) u; break;
+          case ARDB.UnitType t: Value = (EDBS.SpecType) t; break;
 #endif
           case EDBS.DataType s: Value = new EDBS.DataType(s.TypeId); break;
           case string t: Value = new EDBS.SpecType(t); break;
@@ -354,8 +355,8 @@ namespace RhinoInside.Revit.GH.Types
           case DB.ForgeTypeId f: Value = f; break;
 #endif
 #if !REVIT_2022
-          case int i: Value = (DB.BuiltInParameterGroup) i; break;
-          case DB.BuiltInParameterGroup u: Value = u; break;
+          case int i: Value = (ARDB.BuiltInParameterGroup) i; break;
+          case ARDB.BuiltInParameterGroup u: Value = u; break;
 #endif
           case EDBS.ParameterGroup v: Value = v; break;
           case EDBS.DataType s: Value = new EDBS.ParameterGroup(s.TypeId); break;
@@ -413,8 +414,8 @@ namespace RhinoInside.Revit.GH.Types
           case DB.ForgeTypeId f: Value = f; break;
 #endif
 #if !REVIT_2022
-          case int i: Value = (DB.BuiltInParameter) i; break;
-          case DB.BuiltInParameter u: Value = u; break;
+          case int i: Value = (ARDB.BuiltInParameter) i; break;
+          case ARDB.BuiltInParameter u: Value = u; break;
 #endif
           case EDBS.ParameterId v: Value = v; break;
           case EDBS.DataType s: Value = new EDBS.ParameterId(s.TypeId); break;
@@ -472,8 +473,8 @@ namespace RhinoInside.Revit.GH.Types
           case DB.ForgeTypeId f: Value = f; break;
 #endif
 #if !REVIT_2022
-          case int i: Value = (DB.BuiltInCategory) i; break;
-          case DB.BuiltInCategory u: Value = u; break;
+          case int i: Value = (ARDB.BuiltInCategory) i; break;
+          case ARDB.BuiltInCategory u: Value = u; break;
 #endif
           case EDBS.CategoryId v: Value = v; break;
           case EDBS.DataType s: Value = new EDBS.CategoryId(s.TypeId); break;

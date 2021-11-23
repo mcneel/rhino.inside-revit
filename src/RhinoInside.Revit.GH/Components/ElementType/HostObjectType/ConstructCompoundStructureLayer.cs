@@ -1,9 +1,9 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Host
+namespace RhinoInside.Revit.GH.Components.Hosts
 {
   public class ConstructCompoundStructureLayer : ZuiComponent
   {
@@ -144,7 +144,7 @@ namespace RhinoInside.Revit.GH.Components.Host
       var layer = update ? new Types.CompoundStructureLayer(doc)
       {
         Function = function?.IsValid == true ? function :
-        new Types.LayerFunction(width == 0.0 ? DB.MaterialFunctionAssignment.Membrane : DB.MaterialFunctionAssignment.Structure),
+        new Types.LayerFunction(width == 0.0 ? ARDB.MaterialFunctionAssignment.Membrane : ARDB.MaterialFunctionAssignment.Structure),
         Material = material,
         Width = width,
         LayerCapFlag = wraps,
@@ -157,15 +157,15 @@ namespace RhinoInside.Revit.GH.Components.Host
 
       if (layer is object)
       {
-        if (layer.Function.Value == DB.MaterialFunctionAssignment.Membrane)
+        if (layer.Function.Value == ARDB.MaterialFunctionAssignment.Membrane)
         {
           if (layer.Width.Value != 0.0)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, Types.CompoundStructure.ToString(DB.CompoundStructureError.MembraneTooThick));
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, Types.CompoundStructure.ToString(ARDB.CompoundStructureError.MembraneTooThick));
         }
-        else if (layer.Function.Value != DB.MaterialFunctionAssignment.Membrane)
+        else if (layer.Function.Value != ARDB.MaterialFunctionAssignment.Membrane)
         {
           if (layer.Width.Value == 0.0)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, Types.CompoundStructure.ToString(DB.CompoundStructureError.NonmembraneTooThin));
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, Types.CompoundStructure.ToString(ARDB.CompoundStructureError.NonmembraneTooThin));
         }
       }
 

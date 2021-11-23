@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
-namespace RhinoInside.Revit.GH.Components.ParameterElement
+namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
   public class ParameterIdentity : TransactionalChainComponent
   {
@@ -121,7 +121,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.ParameterElements.Obsolete
 {
   using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
   using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;

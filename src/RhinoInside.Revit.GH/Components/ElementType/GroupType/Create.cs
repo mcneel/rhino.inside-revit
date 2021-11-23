@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ModelElements
 {
+  using Kernel.Attributes;
+
   public class GroupTypeCreate : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("39E42448-1C1C-4140-BC37-7399ABF82117");
@@ -26,18 +27,18 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructGroupTypeCreate
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New Group Type"), NickName("GT")]
-      ref DB.GroupType groupType,
+      ref ARDB.GroupType groupType,
 
-      IList<DB.Element> elements,
+      IList<ARDB.Element> elements,
       Optional<string> name
     )
     {
-      var elementIds = DB.ElementTransformUtils.CopyElements(document, elements.Where(x => x.Document.Equals(document)).Select(x => x.Id).ToList(), DB.XYZ.Zero);
+      var elementIds = ARDB.ElementTransformUtils.CopyElements(document, elements.Where(x => x.Document.Equals(document)).Select(x => x.Id).ToList(), ARDB.XYZ.Zero);
 
-      if (groupType is DB.GroupType oldGroupType)
+      if (groupType is ARDB.GroupType oldGroupType)
       {
         // To avoid name conflicts we rename the old GroupType that will be deleted
         oldGroupType.Name = Guid.NewGuid().ToString();
@@ -49,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components
         document.Delete(newGroup.Id);
 
         // Update other occurrences of oldGroupType
-        foreach (var twinGroup in oldGroupType.Groups.Cast<DB.Group>())
+        foreach (var twinGroup in oldGroupType.Groups.Cast<ARDB.Group>())
           twinGroup.GroupType = groupType;
       }
       else

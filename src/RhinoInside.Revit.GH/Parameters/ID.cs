@@ -8,8 +8,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Rhino;
 using Rhino.DocObjects;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Bake
 {
@@ -17,7 +16,7 @@ namespace RhinoInside.Revit.GH.Bake
   {
     bool BakeElement
     (
-      IDictionary<DB.ElementId, Guid> idMap,
+      IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
       RhinoDoc doc,
       ObjectAttributes att,
@@ -28,6 +27,8 @@ namespace RhinoInside.Revit.GH.Bake
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  using External.DB.Extensions;
+
   public abstract class ElementIdParam<T, R> :
   PersistentParam<T>,
   IGH_BakeAwareObject,
@@ -281,10 +282,10 @@ namespace RhinoInside.Revit.GH.Parameters
     #region IGH_ElementIdParam
     bool Kernel.IGH_ElementIdParam.NeedsToBeExpired
     (
-      DB.Document doc,
-      ICollection<DB.ElementId> added,
-      ICollection<DB.ElementId> deleted,
-      ICollection<DB.ElementId> modified
+      ARDB.Document doc,
+      ICollection<ARDB.ElementId> added,
+      ICollection<ARDB.ElementId> deleted,
+      ICollection<ARDB.ElementId> modified
     )
     {
       if (Kind != GH_ParamKind.output)
@@ -329,7 +330,7 @@ namespace RhinoInside.Revit.GH.Parameters
       else att = att.Duplicate();
       if (guids is null) throw new ArgumentNullException(nameof(guids));
 
-      var idMap = new Dictionary<DB.ElementId, Guid>();
+      var idMap = new Dictionary<ARDB.ElementId, Guid>();
 
       // In case some element has no Category it should go to Root 'Revit' layer.
       if (new Types.Category().BakeElement(idMap, false, doc, att, out var layerGuid))

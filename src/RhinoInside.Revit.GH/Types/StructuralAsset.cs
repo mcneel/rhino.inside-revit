@@ -1,21 +1,20 @@
 using System;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  [Name("Structural Asset")]
+  [Kernel.Attributes.Name("Structural Asset")]
   public class StructuralAssetElement : Element
   {
-    protected override Type ValueType => typeof(DB.PropertySetElement);
-    public new DB.PropertySetElement Value => base.Value as DB.PropertySetElement;
+    protected override Type ValueType => typeof(ARDB.PropertySetElement);
+    public new ARDB.PropertySetElement Value => base.Value as ARDB.PropertySetElement;
 
-    protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
-    public static bool IsValidElement(DB.Element element)
+    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
+    public static bool IsValidElement(ARDB.Element element)
     {
-      if (element is DB.PropertySetElement pset)
+      if (element is ARDB.PropertySetElement pset)
       {
-        try { return pset.GetStructuralAsset() is DB.StructuralAsset; }
+        try { return pset.GetStructuralAsset() is ARDB.StructuralAsset; }
         catch { }
       }
 
@@ -23,7 +22,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public StructuralAssetElement() { }
-    public StructuralAssetElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public StructuralAssetElement(DB.PropertySetElement asset) : base(asset) { }
+    public StructuralAssetElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public StructuralAssetElement(ARDB.PropertySetElement asset) : base(asset) { }
   }
 }

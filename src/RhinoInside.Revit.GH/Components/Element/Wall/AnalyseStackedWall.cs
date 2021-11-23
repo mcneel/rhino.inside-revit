@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using ARDB = Autodesk.Revit.DB;
 
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class AnalyzeStackedWall : AnalysisComponent
   {
@@ -46,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // grab input wall type
-      DB.Wall wallInstance = default;
+      ARDB.Wall wallInstance = default;
       if (!DA.GetData("Stacked Wall", ref wallInstance))
         return;
 

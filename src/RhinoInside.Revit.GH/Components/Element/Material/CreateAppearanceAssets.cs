@@ -2,13 +2,14 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Material
+namespace RhinoInside.Revit.GH.Components.Materials
 {
 #if REVIT_2018
+  using ElementTracking;
+  using External.DB.Extensions;
+
   public class CreateGenericShader : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("0F251F87-317B-4669-BC70-22B29D3EBA6A");
@@ -77,17 +78,17 @@ namespace RhinoInside.Revit.GH.Components.Material
     };
 
     const string _Asset_ = "Appearance Asset";
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties = { };
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties = { };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      Params.TryGetData(DA, "Template", out DB.AppearanceAssetElement template);
+      Params.TryGetData(DA, "Template", out ARDB.AppearanceAssetElement template);
 
       // Previous Output
-      Params.ReadTrackedElement(_Asset_, doc.Value, out DB.AppearanceAssetElement asset);
+      Params.ReadTrackedElement(_Asset_, doc.Value, out ARDB.AppearanceAssetElement asset);
 
       StartTransaction(doc.Value);
       {
@@ -98,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       }
     }
 
-    bool Reuse(DB.AppearanceAssetElement assetElement, string name, DB.AppearanceAssetElement template)
+    bool Reuse(ARDB.AppearanceAssetElement assetElement, string name, ARDB.AppearanceAssetElement template)
     {
       if (assetElement is null) return false;
       if (name is object) assetElement.Name = name;
@@ -112,9 +113,9 @@ namespace RhinoInside.Revit.GH.Components.Material
       return true;
     }
 
-    DB.AppearanceAssetElement Create(DB.Document doc, string name, string schema, DB.AppearanceAssetElement template)
+    ARDB.AppearanceAssetElement Create(ARDB.Document doc, string name, string schema, ARDB.AppearanceAssetElement template)
     {
-      var assetElement = default(DB.AppearanceAssetElement);
+      var assetElement = default(ARDB.AppearanceAssetElement);
 
       // Make sure the name is unique
       {
@@ -123,7 +124,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
         name = doc.GetNamesakeElements
         (
-          typeof(DB.AppearanceAssetElement), name, categoryId: DB.BuiltInCategory.INVALID
+          typeof(ARDB.AppearanceAssetElement), name, categoryId: ARDB.BuiltInCategory.INVALID
         ).
         Select(x => x.Name).
         WhereNamePrefixedWith(name).
@@ -139,31 +140,31 @@ namespace RhinoInside.Revit.GH.Components.Material
         }
         else
         {
-          var ids = DB.ElementTransformUtils.CopyElements
+          var ids = ARDB.ElementTransformUtils.CopyElements
           (
             template.Document,
-            new DB.ElementId[] { template.Id },
+            new ARDB.ElementId[] { template.Id },
             doc,
             default,
             default
           );
 
-          assetElement = ids.Select(x => doc.GetElement(x)).OfType<DB.AppearanceAssetElement>().FirstOrDefault();
+          assetElement = ids.Select(x => doc.GetElement(x)).OfType<ARDB.AppearanceAssetElement>().FirstOrDefault();
           assetElement.Name = name;
         }
       }
 
       if (assetElement is null)
       {
-        var assets = doc.Application.GetAssets(DB.Visual.AssetType.Appearance);
+        var assets = doc.Application.GetAssets(ARDB.Visual.AssetType.Appearance);
         var asset = assets.Where(x => x.Name == schema).FirstOrDefault();
-        assetElement = DB.AppearanceAssetElement.Create(doc, name, asset);
+        assetElement = ARDB.AppearanceAssetElement.Create(doc, name, asset);
       }
 
       return assetElement;
     }
 
-    DB.AppearanceAssetElement Reconstruct(DB.AppearanceAssetElement assetElement, DB.Document doc, string name, DB.AppearanceAssetElement template)
+    ARDB.AppearanceAssetElement Reconstruct(ARDB.AppearanceAssetElement assetElement, ARDB.Document doc, string name, ARDB.AppearanceAssetElement template)
     {
       if (!Reuse(assetElement, name, template))
       {

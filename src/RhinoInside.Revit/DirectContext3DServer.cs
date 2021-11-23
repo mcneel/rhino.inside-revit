@@ -3,9 +3,9 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-using DB = Autodesk.Revit.DB;
-using DBES = Autodesk.Revit.DB.ExternalService;
-using DB3D = Autodesk.Revit.DB.DirectContext3D;
+using ARDB = Autodesk.Revit.DB;
+using ARDBES = Autodesk.Revit.DB.ExternalService;
+using ARDB3D = Autodesk.Revit.DB.DirectContext3D;
 
 using Rhino;
 using Rhino.Geometry;
@@ -13,29 +13,29 @@ using RhinoInside.Revit.Convert.Geometry.Raw;
 
 namespace RhinoInside.Revit
 {
-  internal abstract class DirectContext3DServer : DB3D.IDirectContext3DServer
+  internal abstract class DirectContext3DServer : ARDB3D.IDirectContext3DServer
   {
     #region IExternalServer
     public abstract string GetDescription();
     public abstract string GetName();
-    string DBES.IExternalServer.GetVendorId() => "com.mcneel";
-    DBES.ExternalServiceId DBES.IExternalServer.GetServiceId() => DBES.ExternalServices.BuiltInExternalServices.DirectContext3DService;
+    string ARDBES.IExternalServer.GetVendorId() => "com.mcneel";
+    ARDBES.ExternalServiceId ARDBES.IExternalServer.GetServiceId() => ARDBES.ExternalServices.BuiltInExternalServices.DirectContext3DService;
     public abstract Guid GetServerId();
     #endregion
 
     #region IDirectContext3DServer
-    string DB3D.IDirectContext3DServer.GetApplicationId() => string.Empty;
-    string DB3D.IDirectContext3DServer.GetSourceId() => string.Empty;
-    bool DB3D.IDirectContext3DServer.UsesHandles() => false;
-    public virtual bool UseInTransparentPass(DB.View dBView) => false;
-    public abstract bool CanExecute(DB.View dBView);
-    public abstract DB.Outline GetBoundingBox(DB.View dBView);
-    public abstract void RenderScene(DB.View dBView, DB.DisplayStyle displayStyle);
+    string ARDB3D.IDirectContext3DServer.GetApplicationId() => string.Empty;
+    string ARDB3D.IDirectContext3DServer.GetSourceId() => string.Empty;
+    bool ARDB3D.IDirectContext3DServer.UsesHandles() => false;
+    public virtual bool UseInTransparentPass(ARDB.View dBView) => false;
+    public abstract bool CanExecute(ARDB.View dBView);
+    public abstract ARDB.Outline GetBoundingBox(ARDB.View dBView);
+    public abstract void RenderScene(ARDB.View dBView, ARDB.DisplayStyle displayStyle);
     #endregion
 
     public virtual void Register()
     {
-      using (var service = DBES.ExternalServiceRegistry.GetService(DBES.ExternalServices.BuiltInExternalServices.DirectContext3DService) as DBES.MultiServerService)
+      using (var service = ARDBES.ExternalServiceRegistry.GetService(ARDBES.ExternalServices.BuiltInExternalServices.DirectContext3DService) as ARDBES.MultiServerService)
       {
         service.AddServer(this);
 
@@ -47,7 +47,7 @@ namespace RhinoInside.Revit
 
     public virtual void Unregister()
     {
-      using (var service = DBES.ExternalServiceRegistry.GetService(DBES.ExternalServices.BuiltInExternalServices.DirectContext3DService) as DBES.MultiServerService)
+      using (var service = ARDBES.ExternalServiceRegistry.GetService(ARDBES.ExternalServices.BuiltInExternalServices.DirectContext3DService) as ARDBES.MultiServerService)
       {
         var activeServerIds = service.GetActiveServerIds();
         activeServerIds.Remove(GetServerId());
@@ -57,15 +57,15 @@ namespace RhinoInside.Revit
       }
     }
 
-    protected static bool IsModelView(DB.View dBView)
+    protected static bool IsModelView(ARDB.View dBView)
     {
       if
       (
-        dBView.ViewType == DB.ViewType.FloorPlan ||
-        dBView.ViewType == DB.ViewType.CeilingPlan ||
-        dBView.ViewType == DB.ViewType.Elevation ||
-        dBView.ViewType == DB.ViewType.Section ||
-        dBView.ViewType == DB.ViewType.ThreeD
+        dBView.ViewType == ARDB.ViewType.FloorPlan ||
+        dBView.ViewType == ARDB.ViewType.CeilingPlan ||
+        dBView.ViewType == ARDB.ViewType.Elevation ||
+        dBView.ViewType == ARDB.ViewType.Section ||
+        dBView.ViewType == ARDB.ViewType.ThreeD
       )
         return true;
 
@@ -74,18 +74,18 @@ namespace RhinoInside.Revit
 
     public const int VertexThreshold = ushort.MaxValue + 1;
 
-    static DB3D.IndexBuffer indexPointsBuffer;
-    static DB3D.IndexBuffer IndexPointsBuffer(int pointsCount)
+    static ARDB3D.IndexBuffer indexPointsBuffer;
+    static ARDB3D.IndexBuffer IndexPointsBuffer(int pointsCount)
     {
       Debug.Assert(pointsCount <= VertexThreshold);
 
       if (indexPointsBuffer == null)
       {
-        indexPointsBuffer = new DB3D.IndexBuffer(VertexThreshold * DB3D.IndexPoint.GetSizeInShortInts());
-        indexPointsBuffer.Map(VertexThreshold * DB3D.IndexPoint.GetSizeInShortInts());
+        indexPointsBuffer = new ARDB3D.IndexBuffer(VertexThreshold * ARDB3D.IndexPoint.GetSizeInShortInts());
+        indexPointsBuffer.Map(VertexThreshold * ARDB3D.IndexPoint.GetSizeInShortInts());
         using (var istream = indexPointsBuffer.GetIndexStreamPoint())
         {
-          using (var point = new DB3D.IndexPoint(0))
+          using (var point = new ARDB3D.IndexPoint(0))
           {
             for (int vi = 0; vi < VertexThreshold; ++vi)
             {
@@ -101,19 +101,19 @@ namespace RhinoInside.Revit
       return indexPointsBuffer;
     }
 
-    static DB3D.IndexBuffer indexLinesBuffer;
-    static DB3D.IndexBuffer IndexLinesBuffer(int pointsCount)
+    static ARDB3D.IndexBuffer indexLinesBuffer;
+    static ARDB3D.IndexBuffer IndexLinesBuffer(int pointsCount)
     {
       Debug.Assert(pointsCount <= VertexThreshold);
 
       if (indexLinesBuffer == null)
       {
-        indexLinesBuffer = new DB3D.IndexBuffer(VertexThreshold * DB3D.IndexLine.GetSizeInShortInts());
-        indexLinesBuffer.Map(VertexThreshold * DB3D.IndexLine.GetSizeInShortInts());
+        indexLinesBuffer = new ARDB3D.IndexBuffer(VertexThreshold * ARDB3D.IndexLine.GetSizeInShortInts());
+        indexLinesBuffer.Map(VertexThreshold * ARDB3D.IndexLine.GetSizeInShortInts());
         using (var istream = indexLinesBuffer.GetIndexStreamLine())
         {
           for (int vi = 0; vi < VertexThreshold - 1; ++vi)
-            istream.AddLine(new DB3D.IndexLine(vi, vi + 1));
+            istream.AddLine(new ARDB3D.IndexLine(vi, vi + 1));
         }
         indexLinesBuffer.Unmap();
       }
@@ -130,11 +130,11 @@ namespace RhinoInside.Revit
     /// <returns></returns>
     static uint AlphaToTransparency(byte alpha) => Math.Max(1u, 255u - alpha);
 
-    protected static DB3D.VertexBuffer ToVertexBuffer
+    protected static ARDB3D.VertexBuffer ToVertexBuffer
     (
       Mesh mesh,
       Primitive.Part part,
-      out DB3D.VertexFormatBits vertexFormatBits,
+      out ARDB3D.VertexFormatBits vertexFormatBits,
       System.Drawing.Color color = default
     )
     {
@@ -154,15 +154,15 @@ namespace RhinoInside.Revit
           var normals = mesh.Normals;
           if (hasColors)
           {
-            vertexFormatBits = DB3D.VertexFormatBits.PositionNormalColored;
+            vertexFormatBits = ARDB3D.VertexFormatBits.PositionNormalColored;
             var colors = mesh.VertexColors;
-            var vb = new DB3D.VertexBuffer(verticesCount * DB3D.VertexPositionNormalColored.GetSizeInFloats());
-            vb.Map(verticesCount * DB3D.VertexPositionNormalColored.GetSizeInFloats());
+            var vb = new ARDB3D.VertexBuffer(verticesCount * ARDB3D.VertexPositionNormalColored.GetSizeInFloats());
+            vb.Map(verticesCount * ARDB3D.VertexPositionNormalColored.GetSizeInFloats());
             using (var stream = vb.GetVertexStreamPositionNormalColored())
             {
-              using (var clr = new DB.ColorWithTransparency(color.R, color.G, color.B, AlphaToTransparency(color.A)))
+              using (var clr = new ARDB.ColorWithTransparency(color.R, color.G, color.B, AlphaToTransparency(color.A)))
               {
-                using (var vtx = new DB3D.VertexPositionNormalColored(DB.XYZ.Zero, DB.XYZ.Zero, clr))
+                using (var vtx = new ARDB3D.VertexPositionNormalColored(ARDB.XYZ.Zero, ARDB.XYZ.Zero, clr))
                 {
                   for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
                   {
@@ -188,14 +188,14 @@ namespace RhinoInside.Revit
           }
           else
           {
-            vertexFormatBits = DB3D.VertexFormatBits.PositionNormal;
-            var sizeInFloats = DB3D.VertexPositionNormal.GetSizeInFloats();
-            var vb = new DB3D.VertexBuffer(verticesCount * sizeInFloats);
+            vertexFormatBits = ARDB3D.VertexFormatBits.PositionNormal;
+            var sizeInFloats = ARDB3D.VertexPositionNormal.GetSizeInFloats();
+            var vb = new ARDB3D.VertexBuffer(verticesCount * sizeInFloats);
             vb.Map(verticesCount * sizeInFloats);
 
             using (var stream = vb.GetVertexStreamPositionNormal())
             {
-              using (var vtx = new DB3D.VertexPositionNormal(DB.XYZ.Zero, DB.XYZ.Zero))
+              using (var vtx = new ARDB3D.VertexPositionNormal(ARDB.XYZ.Zero, ARDB.XYZ.Zero))
               {
                 for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
                 {
@@ -214,15 +214,15 @@ namespace RhinoInside.Revit
         {
           if (hasColors)
           {
-            vertexFormatBits = DB3D.VertexFormatBits.PositionColored;
+            vertexFormatBits = ARDB3D.VertexFormatBits.PositionColored;
             var colors = mesh.VertexColors;
-            var vb = new DB3D.VertexBuffer(verticesCount * DB3D.VertexPositionColored.GetSizeInFloats());
-            vb.Map(verticesCount * DB3D.VertexPositionColored.GetSizeInFloats());
+            var vb = new ARDB3D.VertexBuffer(verticesCount * ARDB3D.VertexPositionColored.GetSizeInFloats());
+            vb.Map(verticesCount * ARDB3D.VertexPositionColored.GetSizeInFloats());
             using (var stream = vb.GetVertexStreamPositionColored())
             {
-              using (var clr = new DB.ColorWithTransparency(color.R, color.G, color.B, AlphaToTransparency(color.A)))
+              using (var clr = new ARDB.ColorWithTransparency(color.R, color.G, color.B, AlphaToTransparency(color.A)))
               {
-                using (var vtx = new DB3D.VertexPositionColored(DB.XYZ.Zero, clr))
+                using (var vtx = new ARDB3D.VertexPositionColored(ARDB.XYZ.Zero, clr))
                 {
                   for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
                   {
@@ -247,12 +247,12 @@ namespace RhinoInside.Revit
           }
           else
           {
-            vertexFormatBits = DB3D.VertexFormatBits.Position;
-            var vb = new DB3D.VertexBuffer(verticesCount * DB3D.VertexPosition.GetSizeInFloats());
-            vb.Map(verticesCount * DB3D.VertexPosition.GetSizeInFloats());
+            vertexFormatBits = ARDB3D.VertexFormatBits.Position;
+            var vb = new ARDB3D.VertexBuffer(verticesCount * ARDB3D.VertexPosition.GetSizeInFloats());
+            vb.Map(verticesCount * ARDB3D.VertexPosition.GetSizeInFloats());
             using (var stream = vb.GetVertexStreamPosition())
             {
-              using (var vtx = new DB3D.VertexPosition(DB.XYZ.Zero))
+              using (var vtx = new ARDB3D.VertexPosition(ARDB.XYZ.Zero))
               {
                 for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
                 {
@@ -271,7 +271,7 @@ namespace RhinoInside.Revit
       return null;
     }
 
-    protected static DB3D.IndexBuffer ToTrianglesBuffer
+    protected static ARDB3D.IndexBuffer ToTrianglesBuffer
     (
       Mesh mesh, Primitive.Part part,
       out int triangleCount
@@ -289,13 +289,13 @@ namespace RhinoInside.Revit
 
       if (triangleCount > 0)
       {
-        var ib = new DB3D.IndexBuffer(triangleCount * DB3D.IndexTriangle.GetSizeInShortInts());
-        ib.Map(triangleCount * DB3D.IndexTriangle.GetSizeInShortInts());
+        var ib = new ARDB3D.IndexBuffer(triangleCount * ARDB3D.IndexTriangle.GetSizeInShortInts());
+        ib.Map(triangleCount * ARDB3D.IndexTriangle.GetSizeInShortInts());
 
         using (var istream = ib.GetIndexStreamTriangle())
         {
           var faces = mesh.Faces;
-          using (var triangle = new DB3D.IndexTriangle(0, 0, 0))
+          using (var triangle = new ARDB3D.IndexTriangle(0, 0, 0))
           {
             for (int f = part.StartFaceIndex; f < part.EndFaceIndex; ++f)
             {
@@ -324,17 +324,17 @@ namespace RhinoInside.Revit
       return null;
     }
 
-    protected static DB3D.IndexBuffer ToWireframeBuffer(Mesh mesh, out int linesCount)
+    protected static ARDB3D.IndexBuffer ToWireframeBuffer(Mesh mesh, out int linesCount)
     {
       linesCount = (mesh.Faces.Count * 3) + mesh.Faces.QuadCount;
       if (linesCount > 0)
       {
-        var ib = new DB3D.IndexBuffer(linesCount * DB3D.IndexLine.GetSizeInShortInts());
-        ib.Map(linesCount * DB3D.IndexLine.GetSizeInShortInts());
+        var ib = new ARDB3D.IndexBuffer(linesCount * ARDB3D.IndexLine.GetSizeInShortInts());
+        ib.Map(linesCount * ARDB3D.IndexLine.GetSizeInShortInts());
 
         using (var istream = ib.GetIndexStreamLine())
         {
-          using (var line = new DB3D.IndexLine(0, 0))
+          using (var line = new ARDB3D.IndexLine(0, 0))
           {
             foreach (var face in mesh.Faces)
             {
@@ -361,7 +361,7 @@ namespace RhinoInside.Revit
       return null;
     }
 
-    protected static DB3D.IndexBuffer ToEdgeBuffer
+    protected static ARDB3D.IndexBuffer ToEdgeBuffer
     (
       Mesh mesh,
       Primitive.Part part,
@@ -415,11 +415,11 @@ namespace RhinoInside.Revit
         linesCount = edgeIndices.Count;
         if (linesCount > 0)
         {
-          var ib = new DB3D.IndexBuffer(linesCount * DB3D.IndexLine.GetSizeInShortInts());
-          ib.Map(linesCount * DB3D.IndexLine.GetSizeInShortInts());
+          var ib = new ARDB3D.IndexBuffer(linesCount * ARDB3D.IndexLine.GetSizeInShortInts());
+          ib.Map(linesCount * ARDB3D.IndexLine.GetSizeInShortInts());
           using (var istream = ib.GetIndexStreamLine())
           {
-            using (var line = new DB3D.IndexLine(0, 0))
+            using (var line = new ARDB3D.IndexLine(0, 0))
             {
               foreach (var edge in edgeIndices)
               {
@@ -442,9 +442,9 @@ namespace RhinoInside.Revit
     protected static int ToPolylineBuffer
     (
       Polyline polyline,
-      out DB3D.VertexFormatBits vertexFormatBits,
-      out DB3D.VertexBuffer vb, out int vertexCount,
-      out DB3D.IndexBuffer ib
+      out ARDB3D.VertexFormatBits vertexFormatBits,
+      out ARDB3D.VertexBuffer vb, out int vertexCount,
+      out ARDB3D.IndexBuffer ib
     )
     {
       int linesCount = 0;
@@ -454,12 +454,12 @@ namespace RhinoInside.Revit
         linesCount = polyline.SegmentCount;
         vertexCount = polyline.Count;
 
-        vertexFormatBits = DB3D.VertexFormatBits.Position;
-        vb = new DB3D.VertexBuffer(vertexCount * DB3D.VertexPosition.GetSizeInFloats());
-        vb.Map(vertexCount * DB3D.VertexPosition.GetSizeInFloats());
+        vertexFormatBits = ARDB3D.VertexFormatBits.Position;
+        vb = new ARDB3D.VertexBuffer(vertexCount * ARDB3D.VertexPosition.GetSizeInFloats());
+        vb.Map(vertexCount * ARDB3D.VertexPosition.GetSizeInFloats());
         using (var vstream = vb.GetVertexStreamPosition())
         {
-          using (var vtx = new DB3D.VertexPosition(DB.XYZ.Zero))
+          using (var vtx = new ARDB3D.VertexPosition(ARDB.XYZ.Zero))
           {
             foreach (var v in polyline)
             {
@@ -485,9 +485,9 @@ namespace RhinoInside.Revit
     protected static int ToPointsBuffer
     (
       Point point,
-      out DB3D.VertexFormatBits vertexFormatBits,
-      out DB3D.VertexBuffer vb, out int vertexCount,
-      out DB3D.IndexBuffer ib
+      out ARDB3D.VertexFormatBits vertexFormatBits,
+      out ARDB3D.VertexBuffer vb, out int vertexCount,
+      out ARDB3D.IndexBuffer ib
     )
     {
       int pointsCount = 0;
@@ -497,12 +497,12 @@ namespace RhinoInside.Revit
         pointsCount = 1;
         vertexCount = 1;
 
-        vertexFormatBits = DB3D.VertexFormatBits.Position;
-        vb = new DB3D.VertexBuffer(pointsCount * DB3D.VertexPosition.GetSizeInFloats());
-        vb.Map(pointsCount * DB3D.VertexPosition.GetSizeInFloats());
+        vertexFormatBits = ARDB3D.VertexFormatBits.Position;
+        vb = new ARDB3D.VertexBuffer(pointsCount * ARDB3D.VertexPosition.GetSizeInFloats());
+        vb.Map(pointsCount * ARDB3D.VertexPosition.GetSizeInFloats());
         using (var vstream = vb.GetVertexStreamPosition())
         {
-          using (var vtx = new DB3D.VertexPosition(RawEncoder.AsXYZ(point.Location)))
+          using (var vtx = new ARDB3D.VertexPosition(RawEncoder.AsXYZ(point.Location)))
             vstream.AddVertex(vtx);
         }
         vb.Unmap();
@@ -523,9 +523,9 @@ namespace RhinoInside.Revit
     (
       PointCloud pointCloud,
       Primitive.Part part,
-      out DB3D.VertexFormatBits vertexFormatBits,
-      out DB3D.VertexBuffer vb, out int vertexCount,
-      out DB3D.IndexBuffer ib
+      out ARDB3D.VertexFormatBits vertexFormatBits,
+      out ARDB3D.VertexBuffer vb, out int vertexCount,
+      out ARDB3D.IndexBuffer ib
     )
     {
       int pointsCount = part.VertexCount;
@@ -542,15 +542,15 @@ namespace RhinoInside.Revit
         {
           if(hasColors)
           {
-            vertexFormatBits = DB3D.VertexFormatBits.PositionNormalColored;
-            vb = new DB3D.VertexBuffer(pointsCount * DB3D.VertexPositionNormalColored.GetSizeInFloats());
-            vb.Map(pointsCount * DB3D.VertexPositionNormalColored.GetSizeInFloats());
+            vertexFormatBits = ARDB3D.VertexFormatBits.PositionNormalColored;
+            vb = new ARDB3D.VertexBuffer(pointsCount * ARDB3D.VertexPositionNormalColored.GetSizeInFloats());
+            vb.Map(pointsCount * ARDB3D.VertexPositionNormalColored.GetSizeInFloats());
 
             using (var vstream = vb.GetVertexStreamPositionNormalColored())
             {
-              using (var clr = new DB.ColorWithTransparency())
+              using (var clr = new ARDB.ColorWithTransparency())
               {
-                using (var vtx = new DB3D.VertexPositionNormalColored(DB.XYZ.Zero, DB.XYZ.Zero, clr))
+                using (var vtx = new ARDB3D.VertexPositionNormalColored(ARDB.XYZ.Zero, ARDB.XYZ.Zero, clr))
                 {
                   for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
                   {
@@ -572,13 +572,13 @@ namespace RhinoInside.Revit
           }
           else
           {
-            vertexFormatBits = DB3D.VertexFormatBits.PositionNormal;
-            vb = new DB3D.VertexBuffer(pointsCount * DB3D.VertexPositionNormal.GetSizeInFloats());
-            vb.Map(pointsCount * DB3D.VertexPositionNormal.GetSizeInFloats());
+            vertexFormatBits = ARDB3D.VertexFormatBits.PositionNormal;
+            vb = new ARDB3D.VertexBuffer(pointsCount * ARDB3D.VertexPositionNormal.GetSizeInFloats());
+            vb.Map(pointsCount * ARDB3D.VertexPositionNormal.GetSizeInFloats());
 
             using (var vstream = vb.GetVertexStreamPositionNormal())
             {
-              using (var vtx = new DB3D.VertexPositionNormal(DB.XYZ.Zero, DB.XYZ.Zero))
+              using (var vtx = new ARDB3D.VertexPositionNormal(ARDB.XYZ.Zero, ARDB.XYZ.Zero))
               {
                 for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
                 {
@@ -597,15 +597,15 @@ namespace RhinoInside.Revit
         {
           if (hasColors)
           {
-            vertexFormatBits = DB3D.VertexFormatBits.PositionColored;
-            vb = new DB3D.VertexBuffer(pointsCount * DB3D.VertexPositionColored.GetSizeInFloats());
-            vb.Map(pointsCount * DB3D.VertexPositionColored.GetSizeInFloats());
+            vertexFormatBits = ARDB3D.VertexFormatBits.PositionColored;
+            vb = new ARDB3D.VertexBuffer(pointsCount * ARDB3D.VertexPositionColored.GetSizeInFloats());
+            vb.Map(pointsCount * ARDB3D.VertexPositionColored.GetSizeInFloats());
 
             using (var vstream = vb.GetVertexStreamPositionColored())
             {
-              using (var clr = new DB.ColorWithTransparency())
+              using (var clr = new ARDB.ColorWithTransparency())
               {
-                using (var vtx = new DB3D.VertexPositionColored(DB.XYZ.Zero, clr))
+                using (var vtx = new ARDB3D.VertexPositionColored(ARDB.XYZ.Zero, clr))
                 {
                   for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
                   {
@@ -626,13 +626,13 @@ namespace RhinoInside.Revit
           }
           else
           {
-            vertexFormatBits = DB3D.VertexFormatBits.Position;
-            vb = new DB3D.VertexBuffer(pointsCount * DB3D.VertexPosition.GetSizeInFloats());
-            vb.Map(pointsCount * DB3D.VertexPosition.GetSizeInFloats());
+            vertexFormatBits = ARDB3D.VertexFormatBits.Position;
+            vb = new ARDB3D.VertexBuffer(pointsCount * ARDB3D.VertexPosition.GetSizeInFloats());
+            vb.Map(pointsCount * ARDB3D.VertexPosition.GetSizeInFloats());
 
             using (var vstream = vb.GetVertexStreamPosition())
             {
-              using (var vtx = new DB3D.VertexPosition(DB.XYZ.Zero))
+              using (var vtx = new ARDB3D.VertexPosition(ARDB.XYZ.Zero))
               {
                 for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
                 {
@@ -661,24 +661,24 @@ namespace RhinoInside.Revit
     }
 
 #region Utils
-    public static bool ShowsEdges(DB.DisplayStyle displayStyle)
+    public static bool ShowsEdges(ARDB.DisplayStyle displayStyle)
     {
-      return displayStyle == DB.DisplayStyle.Wireframe ||
-             displayStyle == DB.DisplayStyle.HLR ||
-             displayStyle == DB.DisplayStyle.ShadingWithEdges ||
-             displayStyle == DB.DisplayStyle.FlatColors ||
-             displayStyle == DB.DisplayStyle.RealisticWithEdges;
+      return displayStyle == ARDB.DisplayStyle.Wireframe ||
+             displayStyle == ARDB.DisplayStyle.HLR ||
+             displayStyle == ARDB.DisplayStyle.ShadingWithEdges ||
+             displayStyle == ARDB.DisplayStyle.FlatColors ||
+             displayStyle == ARDB.DisplayStyle.RealisticWithEdges;
     }
 
-    public static bool ShowsVertexColors(DB.DisplayStyle displayStyle)
+    public static bool ShowsVertexColors(ARDB.DisplayStyle displayStyle)
     {
-      return displayStyle == DB.DisplayStyle.Shading ||
-             displayStyle == DB.DisplayStyle.ShadingWithEdges ||
-             displayStyle == DB.DisplayStyle.Realistic ||
-             displayStyle == DB.DisplayStyle.RealisticWithEdges;
+      return displayStyle == ARDB.DisplayStyle.Shading ||
+             displayStyle == ARDB.DisplayStyle.ShadingWithEdges ||
+             displayStyle == ARDB.DisplayStyle.Realistic ||
+             displayStyle == ARDB.DisplayStyle.RealisticWithEdges;
     }
 
-    public static bool IsAvailable(DB.View view)
+    public static bool IsAvailable(ARDB.View view)
     {
       if (view is null) return false;
       if (view.Document.IsFamilyDocument) return false;
@@ -686,32 +686,32 @@ namespace RhinoInside.Revit
 
       var displayStyle = view.DisplayStyle;
       return
-       displayStyle == DB.DisplayStyle.Wireframe ||
-       displayStyle == DB.DisplayStyle.HLR ||
-       displayStyle == DB.DisplayStyle.Shading ||
-       displayStyle == DB.DisplayStyle.ShadingWithEdges ||
-       displayStyle == DB.DisplayStyle.FlatColors;
+       displayStyle == ARDB.DisplayStyle.Wireframe ||
+       displayStyle == ARDB.DisplayStyle.HLR ||
+       displayStyle == ARDB.DisplayStyle.Shading ||
+       displayStyle == ARDB.DisplayStyle.ShadingWithEdges ||
+       displayStyle == ARDB.DisplayStyle.FlatColors;
     }
 
-    public static bool HasVertexNormals(DB3D.VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 2) != 0;
-    public static bool HasVertexColors (DB3D.VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 4) != 0;
+    public static bool HasVertexNormals(ARDB3D.VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 2) != 0;
+    public static bool HasVertexColors (ARDB3D.VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 4) != 0;
 #endregion
 
 #region Primitive
     protected class Primitive : IDisposable
     {
-      protected DB3D.VertexFormatBits vertexFormatBits;
+      protected ARDB3D.VertexFormatBits vertexFormatBits;
       protected int vertexCount;
-      protected DB3D.VertexBuffer vertexBuffer;
-      protected DB3D.VertexFormat vertexFormat;
+      protected ARDB3D.VertexBuffer vertexBuffer;
+      protected ARDB3D.VertexFormat vertexFormat;
 
       protected int triangleCount;
-      protected DB3D.IndexBuffer triangleBuffer;
+      protected ARDB3D.IndexBuffer triangleBuffer;
 
       protected int linesCount;
-      protected DB3D.IndexBuffer linesBuffer;
+      protected ARDB3D.IndexBuffer linesBuffer;
 
-      protected DB3D.EffectInstance effectInstance;
+      protected ARDB3D.EffectInstance effectInstance;
       protected GeometryBase geometry;
       public struct Part
       {
@@ -767,10 +767,10 @@ namespace RhinoInside.Revit
         vertexBuffer?.Dispose();   vertexBuffer = null; vertexCount = 0;
       }
 
-      public virtual DB3D.EffectInstance EffectInstance(DB.DisplayStyle displayStyle, bool IsShadingPass)
+      public virtual ARDB3D.EffectInstance EffectInstance(ARDB.DisplayStyle displayStyle, bool IsShadingPass)
       {
         if (effectInstance == null)
-          effectInstance = new DB3D.EffectInstance(vertexFormatBits);
+          effectInstance = new ARDB3D.EffectInstance(vertexFormatBits);
 
         return effectInstance;
       }
@@ -824,7 +824,7 @@ namespace RhinoInside.Revit
             }
 
             if (vertexFormatBits != default)
-              vertexFormat = new DB3D.VertexFormat(vertexFormatBits);
+              vertexFormat = new ARDB3D.VertexFormat(vertexFormatBits);
           }
 
           geometry = null;
@@ -835,12 +835,12 @@ namespace RhinoInside.Revit
         return true;
       }
 
-      public virtual void Draw(DB.DisplayStyle displayStyle)
+      public virtual void Draw(ARDB.DisplayStyle displayStyle)
       {
         if (!Regen())
           return;
 
-        if (DB3D.DrawContext.IsTransparentPass())
+        if (ARDB3D.DrawContext.IsTransparentPass())
         {
           if (vertexCount > 0)
           {
@@ -848,30 +848,30 @@ namespace RhinoInside.Revit
 
             if (triangleCount > 0)
             {
-              DB3D.DrawContext.FlushBuffer
+              ARDB3D.DrawContext.FlushBuffer
               (
                 vertexBuffer, vertexCount,
                 triangleBuffer, triangleCount * 3,
                 vertexFormat, ei,
-                DB3D.PrimitiveType.TriangleList,
+                ARDB3D.PrimitiveType.TriangleList,
                 0, triangleCount
               );
             }
             else if (linesBuffer != null)
             {
-              DB3D.DrawContext.FlushBuffer
+              ARDB3D.DrawContext.FlushBuffer
               (
                 vertexBuffer, vertexCount,
                 linesBuffer, vertexCount,
                 vertexFormat, ei,
-                DB3D.PrimitiveType.PointList,
+                ARDB3D.PrimitiveType.PointList,
                 0, vertexCount
               );
             }
           }
         }
 
-        if(!DB3D.DrawContext.IsTransparentPass())
+        if(!ARDB3D.DrawContext.IsTransparentPass())
         {
           if (linesCount != 0)
           {
@@ -880,23 +880,23 @@ namespace RhinoInside.Revit
 
             if (linesCount > 0)
             {
-              DB3D.DrawContext.FlushBuffer
+              ARDB3D.DrawContext.FlushBuffer
               (
                 vertexBuffer, vertexCount,
                 linesBuffer, linesCount * 2,
                 vertexFormat, EffectInstance(displayStyle, false),
-                DB3D.PrimitiveType.LineList,
+                ARDB3D.PrimitiveType.LineList,
                 0, linesCount
               );
             }
             else if(triangleCount == 0)
             {
-              DB3D.DrawContext.FlushBuffer
+              ARDB3D.DrawContext.FlushBuffer
               (
                 vertexBuffer, vertexCount,
                 linesBuffer, vertexCount,
                 vertexFormat, EffectInstance(displayStyle, false),
-                DB3D.PrimitiveType.PointList,
+                ARDB3D.PrimitiveType.PointList,
                 0, vertexCount
               );
             }

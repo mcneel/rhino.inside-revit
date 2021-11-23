@@ -1,12 +1,9 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using ARDB = Autodesk.Revit.DB;
 
-using RhinoInside.Revit.GH.Kernel.Attributes;
-
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components.Element.Assembly
+namespace RhinoInside.Revit.GH.Components.Assemblies
 {
   [ComponentVersion(introduced: "1.2")]
   public class DisassembleAssembly : TransactionalChainComponent
@@ -56,7 +53,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var assembly = default(DB.AssemblyInstance);
+      var assembly = default(ARDB.AssemblyInstance);
       if (!DA.GetData("Assembly", ref assembly))
         return;
 

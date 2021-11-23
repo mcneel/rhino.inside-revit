@@ -3,13 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
+using ARDBES = Autodesk.Revit.DB.ExtensibleStorage;
 
 namespace RhinoInside.Revit.GH.ElementTracking
 {
-  using DBXS = DB.ExtensibleStorage;
+  using External.DB;
+  using External.DB.Extensions;
 
   internal enum TrackingMode
   {
@@ -62,10 +62,10 @@ namespace RhinoInside.Revit.GH.ElementTracking
     void OpenTrackingParam(bool currentDocumentOnly);
     void CloseTrackingParam();
 
-    IEnumerable<T> GetTrackedElements<T>(DB.Document doc) where T : DB.Element;
+    IEnumerable<T> GetTrackedElements<T>(ARDB.Document doc) where T : ARDB.Element;
 
-    bool ReadTrackedElement<T>(DB.Document doc, out T element) where T : DB.Element;
-    void WriteTrackedElement<T>(DB.Document doc, T element) where T : DB.Element;
+    bool ReadTrackedElement<T>(ARDB.Document doc, out T element) where T : ARDB.Element;
+    void WriteTrackedElement<T>(ARDB.Document doc, T element) where T : ARDB.Element;
   }
 
   #region ElementStream
@@ -79,15 +79,15 @@ namespace RhinoInside.Revit.GH.ElementTracking
     CurrentWorkset = 8,      // Skip elements in other Worksets than the current.
   }
 
-  internal class ElementStreamDictionary<T> : IReadOnlyDictionary<DB.Document, ElementStream<T>>, IDisposable
-    where T : DB.Element
+  internal class ElementStreamDictionary<T> : IReadOnlyDictionary<ARDB.Document, ElementStream<T>>, IDisposable
+    where T : ARDB.Element
   {
     readonly ElementStreamMode Mode;
     readonly ElementStreamId Id;
-    readonly DB.BuiltInCategory CategoryId;
-    readonly Dictionary<DB.Document, ElementStream<T>> streams = new Dictionary<DB.Document, ElementStream<T>>();
+    readonly ARDB.BuiltInCategory CategoryId;
+    readonly Dictionary<ARDB.Document, ElementStream<T>> streams = new Dictionary<ARDB.Document, ElementStream<T>>();
 
-    public ElementStreamDictionary(ElementStreamId streamId, ElementStreamMode mode, DB.BuiltInCategory categoryId = default)
+    public ElementStreamDictionary(ElementStreamId streamId, ElementStreamMode mode, ARDB.BuiltInCategory categoryId = default)
     {
       Mode = mode;
       Id = streamId;
@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
     {
       var documents = Mode.HasFlag(ElementStreamMode.CurrentDocument) ?
         Enumerable.Repeat(Revit.ActiveDBDocument, 1) :
-        Revit.ActiveDBApplication.Documents.Cast<DB.Document>();
+        Revit.ActiveDBApplication.Documents.Cast<ARDB.Document>();
 
       foreach (var document in documents)
       {
@@ -112,9 +112,9 @@ namespace RhinoInside.Revit.GH.ElementTracking
         var streamFilter = new ElementStreamFilter() { CategoryId = CategoryId };
 
         if (Mode.HasFlag(ElementStreamMode.CurrentDesignOption))
-          streamFilter.DesignOptionId = DB.DesignOption.GetActiveDesignOptionId(document);
+          streamFilter.DesignOptionId = ARDB.DesignOption.GetActiveDesignOptionId(document);
 
-        if (Mode.HasFlag(ElementStreamMode.CurrentView) && document.GetActiveGraphicalView() is DB.View view)
+        if (Mode.HasFlag(ElementStreamMode.CurrentView) && document.GetActiveGraphicalView() is ARDB.View view)
           streamFilter.OwnerViewId = view.Id;
 
         if (Mode.HasFlag(ElementStreamMode.CurrentWorkset))
@@ -133,12 +133,12 @@ namespace RhinoInside.Revit.GH.ElementTracking
     }
 
     #region IReadOnlyDictionary
-    public ElementStream<T> this[DB.Document doc] => streams[doc];
-    public IEnumerable<DB.Document> Keys => streams.Keys;
+    public ElementStream<T> this[ARDB.Document doc] => streams[doc];
+    public IEnumerable<ARDB.Document> Keys => streams.Keys;
     public IEnumerable<ElementStream<T>> Values => streams.Values;
 
-    public bool ContainsKey(DB.Document key) => streams.ContainsKey(key);
-    public bool TryGetValue(DB.Document key, out ElementStream<T> value) => streams.TryGetValue(key, out value);
+    public bool ContainsKey(ARDB.Document key) => streams.ContainsKey(key);
+    public bool TryGetValue(ARDB.Document key, out ElementStream<T> value) => streams.TryGetValue(key, out value);
     #endregion
 
     #region IReadOnlyCollection
@@ -146,7 +146,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
     #endregion
 
     #region IEnumerable
-    public IEnumerator<KeyValuePair<DB.Document, ElementStream<T>>> GetEnumerator() => streams.GetEnumerator();
+    public IEnumerator<KeyValuePair<ARDB.Document, ElementStream<T>>> GetEnumerator() => streams.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => streams.GetEnumerator();
     #endregion
   }
@@ -155,21 +155,21 @@ namespace RhinoInside.Revit.GH.ElementTracking
   {
     public virtual void Dispose() { }
 
-    public static bool ReleaseElement(DB.Element element)
+    public static bool ReleaseElement(ARDB.Element element)
     {
       return TrackedElementsDictionary.Remove(element);
     }
 
-    public static bool IsElementTracked(DB.Element element)
+    public static bool IsElementTracked(ARDB.Element element)
     {
       return element is null ? false : TrackedElementsDictionary.ContainsKey(element);
     }
   }
 
   internal class ElementStream<T> : ElementStream, IEnumerable<T>, IDisposable
-    where T : DB.Element
+    where T : ARDB.Element
   {
-    class ElementEnumerator<E> : IEnumerator<E> where E : DB.Element
+    class ElementEnumerator<E> : IEnumerator<E> where E : ARDB.Element
     {
       internal readonly IDictionary<int, E> data;
       int count;
@@ -207,11 +207,11 @@ namespace RhinoInside.Revit.GH.ElementTracking
         Reset();
       }
 
-      public DB.ElementId[] Excess
+      public ARDB.ElementId[] Excess
       {
         get
         {
-          var excess = new DB.ElementId[count];
+          var excess = new ARDB.ElementId[count];
           var values = data.Values;
 
           int e = 0;
@@ -253,12 +253,12 @@ namespace RhinoInside.Revit.GH.ElementTracking
       }
     }
 
-    public readonly DB.Document Document;
+    public readonly ARDB.Document Document;
     public readonly ElementStreamId Id;
-    public readonly DB.ElementFilter Filter;
+    public readonly ARDB.ElementFilter Filter;
     readonly ElementEnumerator<T> Enumerator;
 
-    public ElementStream(DB.Document document, ElementStreamId streamId, DB.ElementFilter streamFilter = default)
+    public ElementStream(ARDB.Document document, ElementStreamId streamId, ARDB.ElementFilter streamFilter = default)
     {
       Document = document;
       Id = streamId;
@@ -431,28 +431,28 @@ namespace RhinoInside.Revit.GH.ElementTracking
 
   internal struct ElementStreamFilter
   {
-    public DB.BuiltInCategory CategoryId;
-    public DB.ElementId DesignOptionId;
-    public DB.ElementId OwnerViewId;
-    public DB.WorksetId WorksetId;
-    public DB.ElementFilter ElementFilter;
+    public ARDB.BuiltInCategory CategoryId;
+    public ARDB.ElementId DesignOptionId;
+    public ARDB.ElementId OwnerViewId;
+    public ARDB.WorksetId WorksetId;
+    public ARDB.ElementFilter ElementFilter;
 
-    public static implicit operator ElementStreamFilter(DB.BuiltInCategory categoryId) => new ElementStreamFilter() { CategoryId = categoryId };
-    public static implicit operator DB.ElementFilter(ElementStreamFilter streamFilter)
+    public static implicit operator ElementStreamFilter(ARDB.BuiltInCategory categoryId) => new ElementStreamFilter() { CategoryId = categoryId };
+    public static implicit operator ARDB.ElementFilter(ElementStreamFilter streamFilter)
     {
-      var filters = new List<DB.ElementFilter>();
+      var filters = new List<ARDB.ElementFilter>();
 
       if (streamFilter.CategoryId != default)
-        filters.Add(new DB.ElementCategoryFilter(streamFilter.CategoryId));
+        filters.Add(new ARDB.ElementCategoryFilter(streamFilter.CategoryId));
 
       if (streamFilter.DesignOptionId != default)
-        filters.Add(new DB.ElementDesignOptionFilter(streamFilter.DesignOptionId));
+        filters.Add(new ARDB.ElementDesignOptionFilter(streamFilter.DesignOptionId));
 
       if (streamFilter.OwnerViewId != default)
-        filters.Add(new DB.ElementOwnerViewFilter(streamFilter.OwnerViewId));
+        filters.Add(new ARDB.ElementOwnerViewFilter(streamFilter.OwnerViewId));
 
       if (streamFilter.WorksetId != default)
-        filters.Add(new DB.ElementWorksetFilter(streamFilter.WorksetId));
+        filters.Add(new ARDB.ElementWorksetFilter(streamFilter.WorksetId));
 
       if (streamFilter.ElementFilter != default)
         filters.Add(streamFilter.ElementFilter);
@@ -460,26 +460,26 @@ namespace RhinoInside.Revit.GH.ElementTracking
       if (filters.Count > 0)
       {
         if (filters.Count == 1) return filters[0];
-        return new DB.LogicalAndFilter(filters);
+        return new ARDB.LogicalAndFilter(filters);
       }
 
       return default;
     }
 
-    public bool PassesFilter(DB.Element element)
+    public bool PassesFilter(ARDB.Element element)
     {
       if (element is null)
         return false;
 
       if (CategoryId != default)
       {
-        if ((element.Category?.Id ?? DB.ElementId.InvalidElementId).IntegerValue != (int) CategoryId)
+        if ((element.Category?.Id ?? ARDB.ElementId.InvalidElementId).IntegerValue != (int) CategoryId)
           return false;
       }
 
       if (DesignOptionId != default)
       {
-        if ((element.DesignOption?.Id ?? DB.ElementId.InvalidElementId) != DesignOptionId)
+        if ((element.DesignOption?.Id ?? ARDB.ElementId.InvalidElementId) != DesignOptionId)
           return false;
       }
 
@@ -508,7 +508,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
   internal static class TrackedElementsDictionary
   {
     static readonly Guid SchemaGUID = new Guid("BE96E8BD-C0B9-4B31-98C7-518E0ED70772");
-    static readonly DB.ElementFilter SchemaFilter = new DBXS.ExtensibleStorageFilter(SchemaGUID);
+    static readonly ARDB.ElementFilter SchemaFilter = new ARDBES.ExtensibleStorageFilter(SchemaGUID);
 
     // TODO: Implement an Updater that cleans entities from copied Elements.
 
@@ -517,28 +517,28 @@ namespace RhinoInside.Revit.GH.ElementTracking
 
     static class Fields
     {
-      public static DBXS.Field UniqueId;
-      public static DBXS.Field Flags;
-      public static DBXS.Field Authority;
-      public static DBXS.Field Name;
-      public static DBXS.Field Index;
-      public static DBXS.Field Data;
+      public static ARDBES.Field UniqueId;
+      public static ARDBES.Field Flags;
+      public static ARDBES.Field Authority;
+      public static ARDBES.Field Name;
+      public static ARDBES.Field Index;
+      public static ARDBES.Field Data;
     }
 
-    static DBXS.Schema schema;
-    static DBXS.Schema Schema
+    static ARDBES.Schema schema;
+    static ARDBES.Schema Schema
     {
       get
       {
         if (schema != null) return schema;
 
-        schema = DBXS.Schema.Lookup(SchemaGUID);
+        schema = ARDBES.Schema.Lookup(SchemaGUID);
         if (schema is null)
         {
-          var builder = new DBXS.SchemaBuilder(SchemaGUID);
+          var builder = new ARDBES.SchemaBuilder(SchemaGUID);
           builder.SetSchemaName(typeof(TrackedElementsDictionary).FullName.Replace('.', '_'));
-          builder.SetReadAccessLevel(DBXS.AccessLevel.Public);
-          builder.SetWriteAccessLevel(DBXS.AccessLevel.Vendor);
+          builder.SetReadAccessLevel(ARDBES.AccessLevel.Public);
+          builder.SetWriteAccessLevel(ARDBES.AccessLevel.Vendor);
           builder.SetVendorId("com.mcneel");
 
           {
@@ -584,16 +584,16 @@ namespace RhinoInside.Revit.GH.ElementTracking
       }
     }
 
-    public static DB.FilteredElementCollector Keys(DB.Document doc)
+    public static ARDB.FilteredElementCollector Keys(ARDB.Document doc)
     {
-      return new DB.FilteredElementCollector(doc).WherePasses(SchemaFilter);
+      return new ARDB.FilteredElementCollector(doc).WherePasses(SchemaFilter);
     }
 
-    public static IList<DB.Element> Keys(DB.Document doc, ElementStreamId id, DB.ElementFilter filter = default)
+    public static IList<ARDB.Element> Keys(ARDB.Document doc, ElementStreamId id, ARDB.ElementFilter filter = default)
     {
       if (id.Authority == default) throw new ArgumentNullException(nameof(id.Authority));
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(SchemaFilter);
 
@@ -601,7 +601,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
           elementCollector = elementCollector.WherePasses(filter);
 
         var authorityComparer = default(AuthorityComparer);
-        var keys = new List<DB.Element>();
+        var keys = new List<ARDB.Element>();
         foreach (var element in elementCollector)
         {
           if (TryGetValue(element, out var _, out var authority, out var name, out var _))
@@ -620,16 +620,16 @@ namespace RhinoInside.Revit.GH.ElementTracking
       }
     }
 
-    public static IList<DB.Element> Keys(DB.Document doc, ICollection<IList<Guid>> authorities, DB.ElementFilter filter = default)
+    public static IList<ARDB.Element> Keys(ARDB.Document doc, ICollection<IList<Guid>> authorities, ARDB.ElementFilter filter = default)
     {
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(SchemaFilter);
 
         if (filter != default)
           elementCollector = elementCollector.WherePasses(filter);
 
-        var keys = new List<DB.Element>();
+        var keys = new List<ARDB.Element>();
         foreach (var element in elementCollector)
         {
           if (TryGetValue(element, out var _, out var authority, out var _, out var _))
@@ -645,17 +645,17 @@ namespace RhinoInside.Revit.GH.ElementTracking
       }
     }
 
-    public static IDictionary<int, T> SortedKeys<T>(DB.Document doc, ElementStreamId id, DB.ElementFilter filter = default)
-      where T : DB.Element
+    public static IDictionary<int, T> SortedKeys<T>(ARDB.Document doc, ElementStreamId id, ARDB.ElementFilter filter = default)
+      where T : ARDB.Element
     {
       if (id.Authority == default) throw new ArgumentNullException(nameof(id.Authority));
       if (id.Name == default) throw new ArgumentNullException(nameof(id.Name));
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(SchemaFilter);
 
-        if (typeof(T) != typeof(DB.Element))
+        if (typeof(T) != typeof(ARDB.Element))
           elementCollector = elementCollector.OfClass(typeof(T));
 
         if (filter != default)
@@ -678,14 +678,14 @@ namespace RhinoInside.Revit.GH.ElementTracking
       }
     }
 
-    public static void Add(DB.Element element, IList<Guid> authority, string name, int index)
+    public static void Add(ARDB.Element element, IList<Guid> authority, string name, int index)
     {
-      DBXS.Entity GetEntity(DB.Element e)
+      ARDBES.Entity GetEntity(ARDB.Element e)
       {
-        if (e.GetEntity(Schema) is DBXS.Entity entity && entity.Schema != null)
+        if (e.GetEntity(Schema) is ARDBES.Entity entity && entity.Schema != null)
           return entity;
 
-        return new DBXS.Entity(Schema);
+        return new ARDBES.Entity(Schema);
       }
 
       using (var entity = GetEntity(element))
@@ -698,9 +698,9 @@ namespace RhinoInside.Revit.GH.ElementTracking
       }
     }
 
-    public static bool Remove(DB.Element value) => value.DeleteEntity(Schema);
+    public static bool Remove(ARDB.Element value) => value.DeleteEntity(Schema);
 
-    public static bool TryGetValue(DB.Element element, out int flags, out IList<Guid> authority, out string name, out int index)
+    public static bool TryGetValue(ARDB.Element element, out int flags, out IList<Guid> authority, out string name, out int index)
     {
       using (var entity = element.GetEntity(Schema))
       {
@@ -725,13 +725,13 @@ namespace RhinoInside.Revit.GH.ElementTracking
       }
     }
 
-    public static bool ContainsKey(DB.Element element)
+    public static bool ContainsKey(ARDB.Element element)
     {
       using (var entity = element.GetEntity(Schema))
         return entity.Schema != null && entity.Get<string>(Fields.UniqueId) == element.UniqueId;
     }
 
-    public static bool ContainsKey(DB.Document document, DB.ElementId elementId)
+    public static bool ContainsKey(ARDB.Document document, ARDB.ElementId elementId)
     {
       return SchemaFilter.PassesFilter(document, elementId);
     }

@@ -4,15 +4,16 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+  using External.DB.Extensions;
+  using ElementTracking;
+  using Kernel.Attributes;
+
   public class WallByProfile : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("78b02ae8-2b78-45a7-962e-92e7d9097598");
@@ -28,44 +29,44 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    public override void OnStarted(DB.Document document)
+    public override void OnStarted(ARDB.Document document)
     {
       base.OnStarted(document);
 
       // Disable all previous walls joins
-      var walls = Params.TrackedElements<DB.Wall>("Wall", document);
+      var walls = Params.TrackedElements<ARDB.Wall>("Wall", document);
       var pinnedWalls = walls.Where(x => x.Pinned).
                         Select
                         (
                           x =>
                           (
                             x,
-                            (x.Location as DB.LocationCurve).get_JoinType(0),
-                            (x.Location as DB.LocationCurve).get_JoinType(1)
+                            (x.Location as ARDB.LocationCurve).get_JoinType(0),
+                            (x.Location as ARDB.LocationCurve).get_JoinType(1)
                           )
                         );
 
       foreach (var (wall, joinType0, joinType1) in pinnedWalls)
       {
-        var location = wall.Location as DB.LocationCurve;
-        if (DB.WallUtils.IsWallJoinAllowedAtEnd(wall, 0))
+        var location = wall.Location as ARDB.LocationCurve;
+        if (ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, 0))
         {
-          DB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
-          DB.WallUtils.AllowWallJoinAtEnd(wall, 0);
+          ARDB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
+          ARDB.WallUtils.AllowWallJoinAtEnd(wall, 0);
           location.set_JoinType(0, joinType0);
         }
 
-        if (DB.WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
+        if (ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
         {
-          DB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
-          DB.WallUtils.AllowWallJoinAtEnd(wall, 1);
+          ARDB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
+          ARDB.WallUtils.AllowWallJoinAtEnd(wall, 1);
           location.set_JoinType(1, joinType1);
         }
       }
     }
 
-    List<DB.Wall> joinedWalls = new List<DB.Wall>();
-    public override void OnPrepare(IReadOnlyCollection<DB.Document> documents)
+    List<ARDB.Wall> joinedWalls = new List<ARDB.Wall>();
+    public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
     {
       base.OnPrepare(documents);
 
@@ -73,25 +74,25 @@ namespace RhinoInside.Revit.GH.Components
       foreach (var wallToJoin in joinedWalls)
       {
         if (!wallToJoin.IsValid()) continue;
-        DB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 0);
-        DB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 1);
+        ARDB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 0);
+        ARDB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 1);
       }
 
-      joinedWalls = new List<DB.Wall>();
+      joinedWalls = new List<ARDB.Wall>();
     }
 
-    static readonly DB.FailureDefinitionId[] failureDefinitionIdsToFix = new DB.FailureDefinitionId[]
+    static readonly ARDB.FailureDefinitionId[] failureDefinitionIdsToFix = new ARDB.FailureDefinitionId[]
     {
-      DB.BuiltInFailures.CreationFailures.CannotDrawWallsError,
-      DB.BuiltInFailures.JoinElementsFailures.CannotJoinElementsError,
+      ARDB.BuiltInFailures.CreationFailures.CannotDrawWallsError,
+      ARDB.BuiltInFailures.JoinElementsFailures.CannotJoinElementsError,
     };
-    protected override IEnumerable<DB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix;
+    protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix;
 
-    bool Reuse(ref DB.Wall element, IList<Curve> boundaries, Vector3d normal, DB.WallType type)
+    bool Reuse(ref ARDB.Wall element, IList<Curve> boundaries, Vector3d normal, ARDB.WallType type)
     {
       if (element is null) return false;
 
-      if (element.GetSketch() is DB.Sketch sketch)
+      if (element.GetSketch() is ARDB.Sketch sketch)
       {
         var plane = sketch.SketchPlane.GetPlane().ToPlane();
         if (normal.IsParallelTo(plane.Normal, Revit.AngleTolerance) == 0)
@@ -128,17 +129,17 @@ namespace RhinoInside.Revit.GH.Components
               {
                 var segment = segments[(++index) % segments.Length];
 
-                var curve = default(DB.Curve);
+                var curve = default(ARDB.Curve);
                 if
                 (
-                  edge.GeometryCurve is DB.HermiteSpline &&
+                  edge.GeometryCurve is ARDB.HermiteSpline &&
                   segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance * Revit.ModelUnits)
                 )
                 {
-                  using (var tangents = new DB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
+                  using (var tangents = new ARDB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
                   {
                     var xyz = points.ConvertAll(GeometryEncoder.ToXYZ);
-                    curve = DB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
+                    curve = ARDB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
                   }
                 }
                 else curve = segment.ToCurve();
@@ -156,10 +157,10 @@ namespace RhinoInside.Revit.GH.Components
 
       if (element.GetTypeId() != type.Id)
       {
-        if (DB.Element.IsValidType(element.Document, new DB.ElementId[] { element.Id }, type.Id))
+        if (ARDB.Element.IsValidType(element.Document, new ARDB.ElementId[] { element.Id }, type.Id))
         {
-          if (element.ChangeTypeId(type.Id) is DB.ElementId id && id != DB.ElementId.InvalidElementId)
-            element = element.Document.GetElement(id) as DB.Wall;
+          if (element.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
+            element = element.Document.GetElement(id) as ARDB.Wall;
         }
         else return false;
       }
@@ -170,18 +171,18 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructWallByProfile
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New Wall")]
-      ref DB.Wall wall,
+      ref ARDB.Wall wall,
 
       IList<Curve> profile,
-      Optional<DB.WallType> type,
-      Optional<DB.Level> level,
-      [Optional] DB.WallLocationLine locationLine,
+      Optional<ARDB.WallType> type,
+      Optional<ARDB.Level> level,
+      [Optional] ARDB.WallLocationLine locationLine,
       [Optional] bool flipped,
       [Optional, NickName("J")] bool allowJoins,
-      [Optional] DB.Structure.StructuralWallUsage structuralUsage
+      [Optional] ARDB.Structure.StructuralWallUsage structuralUsage
     )
     {
       if (profile.Count < 1) return;
@@ -220,17 +221,17 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-      SolveOptionalType(document, ref type, DB.ElementTypeGroup.WallType, nameof(type));
+      SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.WallType, nameof(type));
       SolveOptionalLevel(document, profile, ref level, out var bbox);
 
       // LocationLine
-      if (locationLine != DB.WallLocationLine.WallCenterline)
+      if (locationLine != ARDB.WallLocationLine.WallCenterline)
       {
         double offsetDist = 0.0;
-        if (type.Value.GetCompoundStructure() is DB.CompoundStructure compoundStructure)
+        if (type.Value.GetCompoundStructure() is ARDB.CompoundStructure compoundStructure)
         {
           if (!compoundStructure.IsVerticallyHomogeneous())
-            compoundStructure = DB.CompoundStructure.CreateSimpleCompoundStructure(compoundStructure.GetLayers());
+            compoundStructure = ARDB.CompoundStructure.CreateSimpleCompoundStructure(compoundStructure.GetLayers());
 
           offsetDist = compoundStructure.GetOffsetForLocationLine(locationLine);
         }
@@ -238,15 +239,15 @@ namespace RhinoInside.Revit.GH.Components
         {
           switch (locationLine)
           {
-            case DB.WallLocationLine.WallCenterline:
-            case DB.WallLocationLine.CoreCenterline:
+            case ARDB.WallLocationLine.WallCenterline:
+            case ARDB.WallLocationLine.CoreCenterline:
               break;
-            case DB.WallLocationLine.FinishFaceExterior:
-            case DB.WallLocationLine.CoreExterior:
+            case ARDB.WallLocationLine.FinishFaceExterior:
+            case ARDB.WallLocationLine.CoreExterior:
               offsetDist = type.Value.Width / +2.0;
               break;
-            case DB.WallLocationLine.FinishFaceInterior:
-            case DB.WallLocationLine.CoreInterior:
+            case ARDB.WallLocationLine.FinishFaceInterior:
+            case ARDB.WallLocationLine.CoreInterior:
               offsetDist = type.Value.Width / -2.0;
               break;
           }
@@ -273,31 +274,31 @@ namespace RhinoInside.Revit.GH.Components
       if (!Reuse(ref wall, profile, normal, type.Value))
       {
         var boundaries = profile.SelectMany(x => GeometryEncoder.ToCurveMany(x)).SelectMany(External.DB.Extensions.CurveExtension.ToBoundedCurves).ToList();
-        var newWall = DB.Wall.Create
+        var newWall = ARDB.Wall.Create
         (
           document,
           boundaries,
           type.Value.Id,
           level.Value.Id,
-          structuralUsage != DB.Structure.StructuralWallUsage.NonBearing,
+          structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing,
           normal.ToXYZ()
         );
 
         // Walls are created with the last LocationLine used in the Revit editor!!
         //newWall.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM).Update((int) WallLocationLine.WallCenterline);
 
-        var parametersMask = new DB.BuiltInParameter[]
+        var parametersMask = new ARDB.BuiltInParameter[]
         {
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.WALL_KEY_REF_PARAM,
-          DB.BuiltInParameter.WALL_HEIGHT_TYPE,
-          DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM,
-          DB.BuiltInParameter.WALL_BASE_CONSTRAINT,
-          DB.BuiltInParameter.WALL_BASE_OFFSET,
-          DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT,
-          DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM
+          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+          ARDB.BuiltInParameter.WALL_KEY_REF_PARAM,
+          ARDB.BuiltInParameter.WALL_HEIGHT_TYPE,
+          ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM,
+          ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT,
+          ARDB.BuiltInParameter.WALL_BASE_OFFSET,
+          ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT,
+          ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM
         };
 
         ReplaceElement(ref wall, newWall, parametersMask);
@@ -305,19 +306,19 @@ namespace RhinoInside.Revit.GH.Components
 
       if (wall is object)
       {
-        wall.get_Parameter(DB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(DB.ElementId.InvalidElementId);
-        wall.get_Parameter(DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update((bbox.Max.Z - bbox.Min.Z) / Revit.ModelUnits);
-        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Value.Id);
-        wall.get_Parameter(DB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
-        wall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).Update((int) locationLine);
-        if (structuralUsage == DB.Structure.StructuralWallUsage.NonBearing)
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(ARDB.ElementId.InvalidElementId);
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update((bbox.Max.Z - bbox.Min.Z) / Revit.ModelUnits);
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Value.Id);
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update((int) locationLine);
+        if (structuralUsage == ARDB.Structure.StructuralWallUsage.NonBearing)
         {
-          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(0);
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(0);
         }
         else
         {
-          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(1);
-          wall.get_Parameter(DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Update((int) structuralUsage);
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(1);
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Update((int) structuralUsage);
         }
 
         if (wall.Flipped != flipped)
@@ -327,8 +328,8 @@ namespace RhinoInside.Revit.GH.Components
         if (allowJoins) joinedWalls.Add(wall);
         else
         {
-          DB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
-          DB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
+          ARDB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
+          ARDB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
         }
       }
     }

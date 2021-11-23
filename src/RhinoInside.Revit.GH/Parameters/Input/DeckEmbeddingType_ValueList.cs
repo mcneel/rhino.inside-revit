@@ -3,7 +3,7 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 
 namespace RhinoInside.Revit.GH.Parameters.Input
@@ -23,10 +23,10 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
       ListItems.Add(
-        new GH_ValueListItem("Merge with Layer Above", ((int) DB.StructDeckEmbeddingType.MergeWithLayerAbove).ToString())
+        new GH_ValueListItem("Merge with Layer Above", ((int) ARDB.StructDeckEmbeddingType.MergeWithLayerAbove).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Standalone", ((int) DB.StructDeckEmbeddingType.Standalone).ToString())
+        new GH_ValueListItem("Standalone", ((int) ARDB.StructDeckEmbeddingType.Standalone).ToString())
         );
     }
   }

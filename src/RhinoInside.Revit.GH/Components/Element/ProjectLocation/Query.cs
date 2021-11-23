@@ -3,7 +3,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     public override Guid ComponentGuid => new Guid("62641279-D4CE-4F93-8430-BD342BE123AB");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "⌖";
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.ProjectLocation));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.ProjectLocation));
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -61,16 +61,16 @@ namespace RhinoInside.Revit.GH.Components.Site
         return;
 
       if (!Params.TryGetData(DA, "Name", out string name)) return;
-      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var sitesCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           sitesCollector = sitesCollector.WherePasses(filter);
 
-        var sites = collector.Cast<DB.ProjectLocation>();
+        var sites = collector.Cast<ARDB.ProjectLocation>();
 
         if (name is object)
           sites = sites.Where(x => x.Name.IsSymbolNameLike(name));

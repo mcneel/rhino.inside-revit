@@ -1,11 +1,8 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.Convert.System.Drawing;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Categories
 {
   public class CategoryObjectStyle : TransactionalChainComponent
   {
@@ -89,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Categories.Obsolete
 {
   [Obsolete("Obsolete since 2020-10-08")]
   public class CategoryObjectStyle : Component
@@ -119,19 +116,17 @@ namespace RhinoInside.Revit.GH.Components.Obsolete
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Category category = null;
-      if (!DA.GetData("Category", ref category))
+      Types.Category category = null;
+      if (!DA.GetData("Category", ref category) || category.APIObject is null)
         return;
 
-      var doc = category?.Document();
-
-      DA.SetData("LineWeight [projection]", category?.GetLineWeight(DB.GraphicsStyleType.Projection));
-      DA.SetData("LineWeight [cut]", category?.GetLineWeight(DB.GraphicsStyleType.Cut));
-      DA.SetData("LineColor", category?.LineColor.ToColor());
-      DA.SetData("LinePattern [projection]", doc?.GetElement(category.GetLinePatternId(DB.GraphicsStyleType.Projection)));
-      DA.SetData("LinePattern [cut]", doc?.GetElement(category.GetLinePatternId(DB.GraphicsStyleType.Cut)));
-      DA.SetData("Material", category?.Material);
-      DA.SetData("Cuttable", category?.IsCuttable);
+      DA.SetData("LineWeight [projection]", category.ProjectionLineWeight);
+      DA.SetData("LineWeight [cut]", category.CutLineWeight);
+      DA.SetData("LineColor", category.LineColor);
+      DA.SetData("LinePattern [projection]", category.ProjectionLinePattern);
+      DA.SetData("LinePattern [cut]", category.CutLinePattern);
+      DA.SetData("Material", category.Material);
+      DA.SetData("Cuttable", category.APIObject.IsCuttable);
     }
   }
 }

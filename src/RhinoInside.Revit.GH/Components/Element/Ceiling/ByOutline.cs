@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+  using External.DB.Extensions;
+  using Kernel.Attributes;
+
   [ComponentVersion(introduced: "1.3")]
   public class CeilingByOutline : ReconstructElementComponent
   {
@@ -34,11 +35,11 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    bool Reuse(ref DB.Ceiling element, IList<Curve> boundaries, DB.CeilingType type, DB.Level level)
+    bool Reuse(ref ARDB.Ceiling element, IList<Curve> boundaries, ARDB.CeilingType type, ARDB.Level level)
     {
       if (element is null) return false;
 
-      if (element.GetSketch() is DB.Sketch sketch)
+      if (element.GetSketch() is ARDB.Sketch sketch)
       {
         var profiles = sketch.Profile.ToPolyCurves();
         if (profiles.Length != boundaries.Count)
@@ -73,17 +74,17 @@ namespace RhinoInside.Revit.GH.Components
               {
                 var segment = segments[(++index) % segments.Length];
 
-                var curve = default(DB.Curve);
+                var curve = default(ARDB.Curve);
                 if
                 (
-                  edge.GeometryCurve is DB.HermiteSpline &&
+                  edge.GeometryCurve is ARDB.HermiteSpline &&
                   segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance * Revit.ModelUnits)
                 )
                 {
-                  using (var tangents = new DB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
+                  using (var tangents = new ARDB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
                   {
                     var xyz = points.ConvertAll(GeometryEncoder.ToXYZ);
-                    curve = DB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
+                    curve = ARDB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
                   }
                 }
                 else curve = segment.ToCurve();
@@ -101,16 +102,16 @@ namespace RhinoInside.Revit.GH.Components
 
       if (element.GetTypeId() != type.Id)
       {
-        if (DB.Element.IsValidType(element.Document, new DB.ElementId[] { element.Id }, type.Id))
+        if (ARDB.Element.IsValidType(element.Document, new ARDB.ElementId[] { element.Id }, type.Id))
         {
-          if (element.ChangeTypeId(type.Id) is DB.ElementId id && id != DB.ElementId.InvalidElementId)
-            element = element.Document.GetElement(id) as DB.Ceiling;
+          if (element.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
+            element = element.Document.GetElement(id) as ARDB.Ceiling;
         }
         else return false;
       }
 
       bool succeed = true;
-      succeed &= element.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Update(level.Id);
+      succeed &= element.get_Parameter(ARDB.BuiltInParameter.LEVEL_PARAM).Update(level.Id);
 
       return succeed;
     }
@@ -118,14 +119,14 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructCeilingByOutline
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New Ceiling")]
-      ref DB.Ceiling ceiling,
+      ref ARDB.Ceiling ceiling,
 
       IList<Curve> boundary,
-      Optional<DB.CeilingType> type,
-      Optional<DB.Level> level
+      Optional<ARDB.CeilingType> type,
+      Optional<ARDB.Level> level
     )
     {
       if (boundary is null) return;
@@ -168,7 +169,7 @@ namespace RhinoInside.Revit.GH.Components
       if (level.HasValue && level.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(level));
 
-      SolveOptionalType(document, ref type, DB.ElementTypeGroup.CeilingType, nameof(type));
+      SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.CeilingType, nameof(type));
 
       SolveOptionalLevel(document, boundary, ref level, out var bbox);
 
@@ -178,13 +179,13 @@ namespace RhinoInside.Revit.GH.Components
       }
       else if (!Reuse(ref ceiling, boundary, type.Value, level.Value))
       {
-        var parametersMask = new DB.BuiltInParameter[]
+        var parametersMask = new ARDB.BuiltInParameter[]
         {
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.LEVEL_PARAM,
-          DB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM
+          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+          ARDB.BuiltInParameter.LEVEL_PARAM,
+          ARDB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM
         };
 
 #if REVIT_2022
@@ -199,7 +200,7 @@ namespace RhinoInside.Revit.GH.Components
       if (ceiling is object)
       {
         var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
-        ceiling.get_Parameter(DB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
+        ceiling.get_Parameter(ARDB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
       }
     }
   }

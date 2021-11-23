@@ -310,10 +310,12 @@
     <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj">
       <Project>{1df04e19-3270-4ca3-a6c0-692c52fa5853}</Project>
       <Name>RhinoInside.Revit.External</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\RhinoInside.Revit\RhinoInside.Revit.csproj">
       <Project>{d6c256d4-b518-464f-9e68-cb282202e846}</Project>
       <Name>RhinoInside.Revit</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

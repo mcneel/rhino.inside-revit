@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ElementTypes
 {
+  using Convert.System.Collections.Generic;
+  using External.DB.Extensions;
+
   public class ElementTypeInstances : Component
   {
     public override Guid ComponentGuid => new Guid("9958995F-CCD4-48DE-B3B3-AE769F04F4DD");
@@ -37,18 +38,18 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var elementType = default(DB.ElementType);
+      var elementType = default(ARDB.ElementType);
       if (!DA.GetData("Type", ref elementType))
         return;
 
-      var filter = default(DB.ElementFilter);
+      var filter = default(ARDB.ElementFilter);
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new DB.FilteredElementCollector(elementType.Document))
+      using (var collector = new ARDB.FilteredElementCollector(elementType.Document))
       {
         var elementCollector = collector.WhereElementIsNotElementType();
 
-        if(elementType.Category?.Id is DB.ElementId categoryId)
+        if(elementType.Category?.Id is ARDB.ElementId categoryId)
           elementCollector = elementCollector.WhereCategoryIdEqualsTo(categoryId);
 
         if (filter is object)

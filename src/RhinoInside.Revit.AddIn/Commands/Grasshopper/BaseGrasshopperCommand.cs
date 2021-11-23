@@ -1,7 +1,7 @@
 using System;
-using Autodesk.Revit.UI;
 using Rhino.PlugIns;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
+using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         return ready || (ready = AssemblyResolver.References["Grasshopper"].Assembly is object);
       }
 
-      protected override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
+      protected override bool IsCommandAvailable(ARUI.UIApplication app, ARDB.CategorySet selectedCategories) =>
         base.IsCommandAvailable(app, selectedCategories) &&
         (PlugIn.PlugInExists(PlugInId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
     }

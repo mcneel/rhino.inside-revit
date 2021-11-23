@@ -1,27 +1,28 @@
 using System;
-using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
 using Rhino.Geometry;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+
   [Kernel.Attributes.Name("Dimension")]
   public class Dimension : GraphicalElement
   {
-    protected override Type ValueType => typeof(DB.Dimension);
-    public static explicit operator DB.Dimension(Dimension value) => value?.Value;
-    public new DB.Dimension Value => base.Value as DB.Dimension;
+    protected override Type ValueType => typeof(ARDB.Dimension);
+    public static explicit operator ARDB.Dimension(Dimension value) => value?.Value;
+    public new ARDB.Dimension Value => base.Value as ARDB.Dimension;
 
     public Dimension() { }
-    public Dimension(DB.Dimension dimension) : base(dimension) { }
+    public Dimension(ARDB.Dimension dimension) : base(dimension) { }
 
     public override Plane Location
     {
       get
       {
-        if (Value is DB.Dimension dimension && dimension.Curve is DB.Curve curve)
+        if (Value is ARDB.Dimension dimension && dimension.Curve is ARDB.Curve curve)
         {
-          if (curve.Project(dimension.Origin) is DB.IntersectionResult result)
+          if (curve.Project(dimension.Origin) is ARDB.IntersectionResult result)
           {
             var transform = curve.ComputeDerivatives(result.Parameter, false);
             var origin = transform.Origin.ToPoint3d();
@@ -41,13 +42,13 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Dimension dimension && dimension.Curve is DB.Curve curve)
+        if (Value is ARDB.Dimension dimension && dimension.Curve is ARDB.Curve curve)
         {
           try
           {
             if (!curve.IsBound && dimension.Value.HasValue)
             {
-              if (dimension.Curve.Project(dimension.Origin) is DB.IntersectionResult result)
+              if (dimension.Curve.Project(dimension.Origin) is ARDB.IntersectionResult result)
               {
                 var startParameter = dimension.Value.Value * -0.5;
                 var endParameter = dimension.Value.Value * +0.5;

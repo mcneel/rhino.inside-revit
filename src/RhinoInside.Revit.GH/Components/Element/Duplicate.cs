@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
+  using ElementTracking;
+  using External.DB.Extensions;
+
   public class ElementDuplicate : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("F4C12AA0-A87B-4209-BD7B-4A189E4F4F0E");
@@ -119,7 +120,7 @@ namespace RhinoInside.Revit.GH.Components
           if (sourceNonBuiltIn.Count > 0)
           {
             // Create a map with unique elements to recover results of CopyElements in the correct order
-            var map = new SortedList<DB.ElementId, (string name, List<int> twins)>
+            var map = new SortedList<ARDB.ElementId, (string name, List<int> twins)>
             (
               sourceNonBuiltIn.Count, ElementIdComparer.Ascending
             );
@@ -133,7 +134,7 @@ namespace RhinoInside.Revit.GH.Components
             }
 
             // Duplicate elements
-            var copiedElements = DB.ElementTransformUtils.CopyElements
+            var copiedElements = ARDB.ElementTransformUtils.CopyElements
             (
               document.Key,
               map.Keys,

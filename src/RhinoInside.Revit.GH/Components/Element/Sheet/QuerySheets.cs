@@ -2,19 +2,18 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using ARDB = Autodesk.Revit.DB;
 
-using RhinoInside.Revit.External.DB.Extensions;
-
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components.Element.Sheet
+namespace RhinoInside.Revit.GH.Components.Sheets
 {
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.2")]
   public class QuerySheets : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("97c8cb27-955f-44cf-948d-dfbde285cd7a");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.ViewSheet));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.ViewSheet));
 
     public QuerySheets() : base
     (
@@ -71,32 +70,32 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       var _Assembly_ = Params.IndexOfInputParam("Assembly");
       bool noFilterAssembly = (!DA.GetData(_Assembly_, ref Assembly) && Params.Input[_Assembly_].DataType == GH_ParamData.@void);
 
-      DB.ElementFilter filter = null;
+      ARDB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var sheetsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           sheetsCollector = sheetsCollector.WherePasses(filter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.SHEET_NUMBER, ref number, out var sheetNumberFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.SHEET_NUMBER, ref number, out var sheetNumberFilter))
           sheetsCollector = sheetsCollector.WherePasses(sheetNumberFilter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.SHEET_NAME, ref name, out var sheetNameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.SHEET_NAME, ref name, out var sheetNameFilter))
           sheetsCollector = sheetsCollector.WherePasses(sheetNameFilter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.SHEET_ISSUE_DATE, ref date, out var sheetIssueDateFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.SHEET_ISSUE_DATE, ref date, out var sheetIssueDateFilter))
           sheetsCollector = sheetsCollector.WherePasses(sheetIssueDateFilter);
 
         if (!nofilterIsScheduled)
-          sheetsCollector = sheetsCollector.WhereParameterEqualsTo(DB.BuiltInParameter.SHEET_SCHEDULED, IsScheduled ? 1 : 0);
+          sheetsCollector = sheetsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.SHEET_SCHEDULED, IsScheduled ? 1 : 0);
 
-        if (!noFilterAssembly && TryGetFilterElementIdParam(DB.BuiltInParameter.VIEW_ASSOCIATED_ASSEMBLY_INSTANCE_ID, Assembly?.Id ?? DB.ElementId.InvalidElementId, out var assemblyFilter))
+        if (!noFilterAssembly && TryGetFilterElementIdParam(ARDB.BuiltInParameter.VIEW_ASSOCIATED_ASSEMBLY_INSTANCE_ID, Assembly?.Id ?? ARDB.ElementId.InvalidElementId, out var assemblyFilter))
           sheetsCollector = sheetsCollector.WherePasses(assemblyFilter);
 
-        var sheets = sheetsCollector.Cast<DB.ViewSheet>();
+        var sheets = sheetsCollector.Cast<ARDB.ViewSheet>();
 
         if (!nofilterIsPlaceholder)
           sheets = sheets.Where((x) => x.IsPlaceholder == IsPlaceholder);

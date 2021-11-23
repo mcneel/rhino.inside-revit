@@ -1,8 +1,8 @@
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
-  class FamilyLoadOptions : DB.IFamilyLoadOptions
+  class FamilyLoadOptions : ARDB.IFamilyLoadOptions
   {
     readonly bool OverwriteFamily;
     readonly bool OverwriteParameters;
@@ -13,15 +13,15 @@ namespace RhinoInside.Revit.GH.Components
       OverwriteParameters = overwriteParameters;
     }
 
-    bool DB.IFamilyLoadOptions.OnFamilyFound(bool familyInUse, out bool overwriteParameterValues)
+    bool ARDB.IFamilyLoadOptions.OnFamilyFound(bool familyInUse, out bool overwriteParameterValues)
     {
       overwriteParameterValues = !familyInUse | OverwriteParameters;
       return !familyInUse | OverwriteFamily;
     }
 
-    bool DB.IFamilyLoadOptions.OnSharedFamilyFound(DB.Family sharedFamily, bool familyInUse, out DB.FamilySource source, out bool overwriteParameterValues)
+    bool ARDB.IFamilyLoadOptions.OnSharedFamilyFound(ARDB.Family sharedFamily, bool familyInUse, out ARDB.FamilySource source, out bool overwriteParameterValues)
     {
-      source = DB.FamilySource.Family;
+      source = ARDB.FamilySource.Family;
       overwriteParameterValues = !familyInUse | OverwriteParameters;
       return !familyInUse | OverwriteFamily;
     }

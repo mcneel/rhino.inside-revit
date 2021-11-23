@@ -1,8 +1,8 @@
 using System;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Host
+namespace RhinoInside.Revit.GH.Components.Hosts
 {
   public class HostObjectTypeCompoundStructure : TransactionalChainComponent
   {
@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Host
         catch (Autodesk.Revit.Exceptions.ArgumentException)
         {
           if (structure.Audit(out var errors))
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{Types.CompoundStructure.ToString((DB.CompoundStructureError)(-1))}");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{Types.CompoundStructure.ToString((ARDB.CompoundStructureError)(-1))}");
           else foreach (var error in errors.Values)
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{Types.CompoundStructure.ToString(error)}");
 
@@ -99,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Host
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Host.Obsolete
+namespace RhinoInside.Revit.GH.Components.Hosts.Obsolete
 {
   [Obsolete("Since 2021-03-23")]
   public class HostObjectTypeCompoundStructure : Component

@@ -4,11 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using Rhino.Geometry;
 using Rhino.Geometry.Collections;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry.Raw
 {
+  using Convert.System.Collections.Generic;
+
   /// <summary>
   /// Methods in this class convert Revit geometry from "Raw" form.
   /// <para>The input geometry is granted not to be modified on any way, no copies are necessary before calling this methods.</para>
@@ -17,55 +18,55 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
   static class RawEncoder
   {
     #region Values
-    public static DB::UV AsUV(Point2f value)
+    public static ARDB::UV AsUV(Point2f value)
     {
-      return new DB::UV(value.X, value.Y);
+      return new ARDB::UV(value.X, value.Y);
     }
-    public static DB::UV AsUV(Point2d value)
+    public static ARDB::UV AsUV(Point2d value)
     {
-      return new DB::UV(value.X, value.Y);
+      return new ARDB::UV(value.X, value.Y);
     }
-    public static DB::UV AsUV(Vector2d value)
+    public static ARDB::UV AsUV(Vector2d value)
     {
-      return new DB::UV(value.X, value.Y);
+      return new ARDB::UV(value.X, value.Y);
     }
-    public static DB::UV AsUV(Vector2f value)
+    public static ARDB::UV AsUV(Vector2f value)
     {
-      return new DB::UV(value.X, value.Y);
-    }
-
-    public static DB::XYZ AsXYZ(Point3f value)
-    {
-      return new DB::XYZ(value.X, value.Y, value.Z);
-    }
-    public static DB::XYZ AsXYZ(Point3d value)
-    {
-      return new DB::XYZ(value.X, value.Y, value.Z);
-    }
-    public static DB::XYZ AsXYZ(Vector3d value)
-    {
-      return new DB::XYZ(value.X, value.Y, value.Z);
-    }
-    public static DB::XYZ AsXYZ(Vector3f value)
-    {
-      return new DB::XYZ(value.X, value.Y, value.Z);
+      return new ARDB::UV(value.X, value.Y);
     }
 
-    public static DB.Transform AsTransform(Transform value)
+    public static ARDB::XYZ AsXYZ(Point3f value)
+    {
+      return new ARDB::XYZ(value.X, value.Y, value.Z);
+    }
+    public static ARDB::XYZ AsXYZ(Point3d value)
+    {
+      return new ARDB::XYZ(value.X, value.Y, value.Z);
+    }
+    public static ARDB::XYZ AsXYZ(Vector3d value)
+    {
+      return new ARDB::XYZ(value.X, value.Y, value.Z);
+    }
+    public static ARDB::XYZ AsXYZ(Vector3f value)
+    {
+      return new ARDB::XYZ(value.X, value.Y, value.Z);
+    }
+
+    public static ARDB.Transform AsTransform(Transform value)
     {
       Debug.Assert(value.IsAffine);
 
-      var result = DB.Transform.CreateTranslation(new DB.XYZ(value.M03, value.M13, value.M23));
+      var result = ARDB.Transform.CreateTranslation(new ARDB.XYZ(value.M03, value.M13, value.M23));
 
-      result.BasisX = new DB.XYZ(value.M00, value.M10, value.M20);
-      result.BasisY = new DB.XYZ(value.M01, value.M11, value.M21);
-      result.BasisZ = new DB.XYZ(value.M02, value.M12, value.M22);
+      result.BasisX = new ARDB.XYZ(value.M00, value.M10, value.M20);
+      result.BasisY = new ARDB.XYZ(value.M01, value.M11, value.M21);
+      result.BasisZ = new ARDB.XYZ(value.M02, value.M12, value.M22);
       return result;
     }
 
-    public static DB.BoundingBoxXYZ AsBoundingBoxXYZ(BoundingBox value)
+    public static ARDB.BoundingBoxXYZ AsBoundingBoxXYZ(BoundingBox value)
     {
-      return new DB.BoundingBoxXYZ
+      return new ARDB.BoundingBoxXYZ
       {
         Min = AsXYZ(value.Min),
         Max = AsXYZ(value.Max),
@@ -73,55 +74,55 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       };
     }
 
-    public static DB.BoundingBoxXYZ AsBoundingBoxXYZ(Box value)
+    public static ARDB.BoundingBoxXYZ AsBoundingBoxXYZ(Box value)
     {
-      return new DB.BoundingBoxXYZ
+      return new ARDB.BoundingBoxXYZ
       {
         Transform = AsTransform(Transform.PlaneToPlane(Plane.WorldXY, value.Plane)),
-        Min = new DB.XYZ(value.X.Min, value.Y.Min, value.Z.Min),
-        Max = new DB.XYZ(value.X.Max, value.Y.Max, value.Z.Max),
+        Min = new ARDB.XYZ(value.X.Min, value.Y.Min, value.Z.Min),
+        Max = new ARDB.XYZ(value.X.Max, value.Y.Max, value.Z.Max),
         Enabled = value.IsValid
       };
     }
 
-    public static DB.Plane AsPlane(Plane value)
+    public static ARDB.Plane AsPlane(Plane value)
     {
-      return DB.Plane.CreateByOriginAndBasis(AsXYZ(value.Origin), AsXYZ((Point3d) value.XAxis), AsXYZ((Point3d) value.YAxis));
+      return ARDB.Plane.CreateByOriginAndBasis(AsXYZ(value.Origin), AsXYZ((Point3d) value.XAxis), AsXYZ((Point3d) value.YAxis));
     }
 
-    public static DB.PolyLine AsPolyLine(Polyline value)
+    public static ARDB.PolyLine AsPolyLine(Polyline value)
     {
       int count = value.Count;
-      var points = new DB.XYZ[count];
+      var points = new ARDB.XYZ[count];
 
       for (int p = 0; p < count; ++p)
         points[p] = AsXYZ(value[p]);
 
-      return DB.PolyLine.Create(points);
+      return ARDB.PolyLine.Create(points);
     }
     #endregion
 
     #region Point
-    public static DB.Point ToHost(Point value)
+    public static ARDB.Point ToHost(Point value)
     {
-      return DB.Point.Create(AsXYZ(value.Location));
+      return ARDB.Point.Create(AsXYZ(value.Location));
     }
     #endregion
 
     #region Curve
-    public static DB.Line ToHost(LineCurve value)
+    public static ARDB.Line ToHost(LineCurve value)
     {
       var line = value.Line;
-      return DB.Line.CreateBound(AsXYZ(line.From), AsXYZ(line.To));
+      return ARDB.Line.CreateBound(AsXYZ(line.From), AsXYZ(line.To));
     }
 
-    public static DB.Arc ToHost(ArcCurve value)
+    public static ARDB.Arc ToHost(ArcCurve value)
     {
       var arc = value.Arc;
       if (value.Arc.IsCircle)
-        return DB.Arc.Create(AsPlane(arc.Plane), value.Radius, 0.0, 2.0 * Math.PI);
+        return ARDB.Arc.Create(AsPlane(arc.Plane), value.Radius, 0.0, 2.0 * Math.PI);
       else
-        return DB.Arc.Create(AsXYZ(arc.StartPoint), AsXYZ(arc.EndPoint), AsXYZ(arc.MidPoint));
+        return ARDB.Arc.Create(AsXYZ(arc.StartPoint), AsXYZ(arc.EndPoint), AsXYZ(arc.MidPoint));
     }
 
     public static double[] ToHost(NurbsCurveKnotList list)
@@ -139,21 +140,21 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return knots;
     }
 
-    public static DB.XYZ[] ToHost(NurbsCurvePointList list)
+    public static ARDB.XYZ[] ToHost(NurbsCurvePointList list)
     {
       var count = list.Count;
-      var points = new DB.XYZ[count];
+      var points = new ARDB.XYZ[count];
 
       for(int p = 0; p < count; ++p)
       {
         var location = list[p].Location;
-        points[p] = new DB::XYZ(location.X, location.Y, location.Z);
+        points[p] = new ARDB::XYZ(location.X, location.Y, location.Z);
       }
 
       return points;
     }
 
-    public static DB.Curve ToHost(NurbsCurve value)
+    public static ARDB.Curve ToHost(NurbsCurve value)
     {
       var degree = value.Degree;
       var knots = ToHost(value.Knots);
@@ -167,17 +168,17 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       if (value.IsRational)
       {
         var weights = value.Points.ConvertAll(p => p.Weight);
-        return DB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints, weights);
+        return ARDB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints, weights);
       }
       else
       {
-        return DB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints);
+        return ARDB.NurbSpline.CreateCurve(value.Degree, knots, controlPoints);
       }
     }
     #endregion
 
     #region Brep
-    public static IEnumerable<DB.BRepBuilderEdgeGeometry> ToHost(BrepEdge edge)
+    public static IEnumerable<ARDB.BRepBuilderEdgeGeometry> ToHost(BrepEdge edge)
     {
       var edgeCurve = edge.EdgeCurve.Trim(edge.Domain);
 
@@ -187,13 +188,13 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       switch (edgeCurve)
       {
         case LineCurve line:
-          yield return DB.BRepBuilderEdgeGeometry.Create(ToHost(line));
+          yield return ARDB.BRepBuilderEdgeGeometry.Create(ToHost(line));
           yield break;
         case ArcCurve arc:
-          yield return DB.BRepBuilderEdgeGeometry.Create(ToHost(arc));
+          yield return ARDB.BRepBuilderEdgeGeometry.Create(ToHost(arc));
           yield break;
         case NurbsCurve nurbs:
-          yield return DB.BRepBuilderEdgeGeometry.Create(ToHost(nurbs));
+          yield return ARDB.BRepBuilderEdgeGeometry.Create(ToHost(nurbs));
           yield break;
         default:
           Debug.Fail($"{edgeCurve} is not supported as a Solid Edge");
@@ -216,22 +217,22 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return knots;
     }
 
-    public static DB.XYZ[] ToHost(NurbsSurfacePointList list)
+    public static ARDB.XYZ[] ToHost(NurbsSurfacePointList list)
     {
       var count = list.CountU * list.CountV;
-      var points = new DB.XYZ[count];
+      var points = new ARDB.XYZ[count];
 
       int p = 0;
       foreach (var point in list)
       {
         var location = point.Location;
-        points[p++] = new DB::XYZ(location.X, location.Y, location.Z);
+        points[p++] = new ARDB::XYZ(location.X, location.Y, location.Z);
       }
 
       return points;
     }
 
-    public static DB.BRepBuilderSurfaceGeometry ToHost(BrepFace face)
+    public static ARDB.BRepBuilderSurfaceGeometry ToHost(BrepFace face)
     {
       // TODO: Implement conversion from other Rhino surface types like PlaneSurface, RevSurface and SumSurface.
 
@@ -244,7 +245,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         var knotsU = ToHost(nurbsSurface.KnotsU);
         var knotsV = ToHost(nurbsSurface.KnotsV);
         var controlPoints = ToHost(nurbsSurface.Points);
-        var bboxUV = new DB.BoundingBoxUV(knotsU[0], knotsV[0], knotsU[knotsU.Length - 1], knotsV[knotsV.Length - 1]);
+        var bboxUV = new ARDB.BoundingBoxUV(knotsU[0], knotsV[0], knotsU[knotsU.Length - 1], knotsV[knotsV.Length - 1]);
 
         Debug.Assert(!nurbsSurface.IsClosed(0));
         Debug.Assert(!nurbsSurface.IsClosed(1));
@@ -258,14 +259,14 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         {
           var weights = nurbsSurface.Points.Select(p => p.Weight).ToList();
 
-          return DB.BRepBuilderSurfaceGeometry.CreateNURBSSurface
+          return ARDB.BRepBuilderSurfaceGeometry.CreateNURBSSurface
           (
             degreeU, degreeV, knotsU, knotsV, controlPoints, weights, false, isNurbs ? bboxUV : default
           );
         }
         else
         {
-          return DB.BRepBuilderSurfaceGeometry.CreateNURBSSurface
+          return ARDB.BRepBuilderSurfaceGeometry.CreateNURBSSurface
           (
             degreeU, degreeV, knotsU, knotsV, controlPoints, false, isNurbs ? bboxUV : default
           );
@@ -273,18 +274,18 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       }
     }
 
-    public static DB.Solid ToHost(Brep brep)
+    public static ARDB.Solid ToHost(Brep brep)
     {
-      var brepType = DB.BRepType.OpenShell;
+      var brepType = ARDB.BRepType.OpenShell;
       switch (brep.SolidOrientation)
       {
-        case BrepSolidOrientation.Inward: brepType = DB.BRepType.Void; break;
-        case BrepSolidOrientation.Outward: brepType = DB.BRepType.Solid; break;
+        case BrepSolidOrientation.Inward: brepType = ARDB.BRepType.Void; break;
+        case BrepSolidOrientation.Outward: brepType = ARDB.BRepType.Solid; break;
       }
 
-      using (var builder = new DB.BRepBuilder(brepType))
+      using (var builder = new ARDB.BRepBuilder(brepType))
       {
-        var brepEdges = new List<DB.BRepBuilderGeometryId>[brep.Edges.Count];
+        var brepEdges = new List<ARDB.BRepBuilderGeometryId>[brep.Edges.Count];
         foreach (var face in brep.Faces)
         {
           var faceId = builder.AddFace(ToHost(face), face.OrientationIsReversed);
@@ -310,7 +311,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
               var edgeIds = brepEdges[edge.EdgeIndex];
               if (edgeIds is null)
               {
-                edgeIds = brepEdges[edge.EdgeIndex] = new List<DB.BRepBuilderGeometryId>();
+                edgeIds = brepEdges[edge.EdgeIndex] = new List<ARDB.BRepBuilderGeometryId>();
                 edgeIds.AddRange(ToHost(edge).Select(e => builder.AddEdge(e)));
               }
 
@@ -346,18 +347,18 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     #endregion
 
     #region Mesh
-    public static DB.Mesh ToHost(Mesh mesh)
+    public static ARDB.Mesh ToHost(Mesh mesh)
     {
       if (mesh is null)
         return null;
 
       using
       (
-        var builder = new DB.TessellatedShapeBuilder()
+        var builder = new ARDB.TessellatedShapeBuilder()
         {
           GraphicsStyleId = GeometryEncoder.Context.Peek.GraphicsStyleId,
-          Target = DB.TessellatedShapeBuilderTarget.Mesh,
-          Fallback = DB.TessellatedShapeBuilderFallback.Salvage
+          Target = ARDB.TessellatedShapeBuilderTarget.Mesh,
+          Fallback = ARDB.TessellatedShapeBuilderFallback.Salvage
         }
       )
       {
@@ -365,8 +366,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         builder.OpenConnectedFaceSet(isSolid);
 
         var vertices = mesh.Vertices.ToPoint3dArray();
-        var triangle = new DB.XYZ[3];
-        var quad = new DB.XYZ[4];
+        var triangle = new ARDB.XYZ[3];
+        var quad = new ARDB.XYZ[4];
 
         foreach (var face in mesh.Faces)
         {
@@ -377,7 +378,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
             quad[2] = AsXYZ(vertices[face.C]);
             quad[3] = AsXYZ(vertices[face.D]);
 
-            builder.AddFace(new DB.TessellatedFace(quad, GeometryEncoder.Context.Peek.MaterialId));
+            builder.AddFace(new ARDB.TessellatedFace(quad, GeometryEncoder.Context.Peek.MaterialId));
           }
           else
           {
@@ -385,7 +386,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
             triangle[1] = AsXYZ(vertices[face.B]);
             triangle[2] = AsXYZ(vertices[face.C]);
 
-            builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+            builder.AddFace(new ARDB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
           }
         }
         builder.CloseConnectedFaceSet();
@@ -393,12 +394,12 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         builder.Build();
         using (var result = builder.GetBuildResult())
         {
-          if (result.Outcome != DB.TessellatedShapeBuilderOutcome.Nothing)
+          if (result.Outcome != ARDB.TessellatedShapeBuilderOutcome.Nothing)
           {
             var geometries = result.GetGeometricalObjects();
             if (geometries.Count == 1)
             {
-              return geometries[0] as DB.Mesh;
+              return geometries[0] as ARDB.Mesh;
             }
           }
         }

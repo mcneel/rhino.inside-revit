@@ -4,9 +4,9 @@ using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class AnalyzeWallLocationCurve : AnalysisComponent
   {
@@ -65,40 +65,40 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     // support methods
-    private DB.WallType GetApplicableType(DB.Wall wall)
+    private ARDB.WallType GetApplicableType(ARDB.Wall wall)
     {
-      if (wall.WallType.Kind == DB.WallKind.Stacked)
+      if (wall.WallType.Kind == ARDB.WallKind.Stacked)
       {
-        DB.ElementId baseWallId = wall.GetStackedWallMemberIds().First();
-        DB.Wall baseWall = wall.Document.GetElement(baseWallId) as DB.Wall;
+        ARDB.ElementId baseWallId = wall.GetStackedWallMemberIds().First();
+        ARDB.Wall baseWall = wall.Document.GetElement(baseWallId) as ARDB.Wall;
         return baseWall.WallType;
       }
       else
         return wall.WallType;
     }
 
-    private DB.XYZ GetOffsetPlaneNormal(DB.Wall wall)
+    private ARDB.XYZ GetOffsetPlaneNormal(ARDB.Wall wall)
     {
-      var offsetPlaneNormal = -(DB.XYZ.BasisZ);
+      var offsetPlaneNormal = -(ARDB.XYZ.BasisZ);
       return wall.Flipped ? -offsetPlaneNormal : offsetPlaneNormal;
     }
 
-    private double GetOffsetForLocationCurve(DB.Wall wall)
+    private double GetOffsetForLocationCurve(ARDB.Wall wall)
     {
       var wallType = GetApplicableType(wall);
       var cstruct = wallType.GetCompoundStructure();
       if (cstruct != null)
       {
-        int wallLocationLine = wall.get_Parameter(DB.BuiltInParameter.WALL_KEY_REF_PARAM).AsInteger();
+        int wallLocationLine = wall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).AsInteger();
         return cstruct.GetOffsetForLocationLine(
-          (DB.WallLocationLine) Enum.ToObject(typeof(DB.WallLocationLine), wallLocationLine)
+          (ARDB.WallLocationLine) Enum.ToObject(typeof(ARDB.WallLocationLine), wallLocationLine)
           );
       }
       else
         return 0;
     }
 
-    private DB.Curve OffsetLocationCurve(DB.Curve centerCurve, double offsetValue, DB.XYZ offsetPlaneNormal)
+    private ARDB.Curve OffsetLocationCurve(ARDB.Curve centerCurve, double offsetValue, ARDB.XYZ offsetPlaneNormal)
     {
       return centerCurve.CreateOffset(offsetValue, offsetPlaneNormal);
     }
@@ -107,12 +107,12 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // grab input wall type
-      DB.Wall wallInstance = default;
+      ARDB.Wall wallInstance = default;
       if (!DA.GetData("Wall", ref wallInstance))
         return;
 
       DA.SetData("Center Curve", wallInstance.GetCenterCurve().ToCurve());
-      PipeHostParameter(DA, wallInstance, DB.BuiltInParameter.WALL_KEY_REF_PARAM, "Location Line");
+      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_KEY_REF_PARAM, "Location Line");
 
       var offsetPlaneNormal = GetOffsetPlaneNormal(wallInstance);
       var offsetValue = GetOffsetForLocationCurve(wallInstance);

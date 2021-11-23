@@ -1,9 +1,9 @@
 using System;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
   public class FamilyGeometryVoidByBrep : Component
   {
@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components
 
       var cutting = default(bool);
       if (DA.GetData("Void", ref cutting))
-        brep.TrySetUserString(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), cutting, false);
+        brep.TrySetUserString(ARDB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), cutting, false);
 
       DA.SetData("Brep", brep);
     }

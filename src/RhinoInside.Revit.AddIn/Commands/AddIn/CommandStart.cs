@@ -4,9 +4,8 @@ using System.Reflection;
 using System.Windows.Input;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.DB;
 using static RhinoInside.Revit.Diagnostics;
-using DB = Autodesk.Revit.DB;
-using UIX = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -60,7 +59,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       if
       (
@@ -278,7 +277,7 @@ namespace RhinoInside.Revit.AddIn.Commands
           var taskDialog = new TaskDialog("New Shortcut")
           {
             Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
-            MainIcon = UIX.TaskDialogIcons.IconInformation,
+            MainIcon = External.UI.TaskDialogIcons.IconInformation,
             TitleAutoPrefix = true,
             AllowCancellation = true,
             MainInstruction = $"Keyboard shortcut 'R' is now assigned to Rhino",

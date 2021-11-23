@@ -6,7 +6,7 @@ using System.Text;
 using Eto.Forms;
 
 using Autodesk.Revit.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 #if REVIT_2018
 using Autodesk.Revit.DB.Visual;
@@ -14,7 +14,6 @@ using Autodesk.Revit.DB.Visual;
 using Autodesk.Revit.Utility;
 #endif
 
-using Rhino;
 using Rhino.Geometry;
 using Rhino.FileIO;
 using Rhino.DocObjects;
@@ -46,23 +45,23 @@ namespace RhinoInside.Revit.AddIn.Commands
     }
 
     #region Categories
-    static Dictionary<string, DB.Category> GetCategoriesByName(DB.Document doc)
+    static Dictionary<string, ARDB.Category> GetCategoriesByName(ARDB.Document doc)
     {
       return doc.OwnerFamily.FamilyCategory.SubCategories.
-        OfType<DB.Category>().
+        OfType<ARDB.Category>().
         ToDictionary(x => x.Name, x => x);
     }
 
-    static DB.ElementId ImportLayer
+    static ARDB.ElementId ImportLayer
     (
-      DB.Document doc,
+      ARDB.Document doc,
       File3dm model,
       Layer layer,
-      Dictionary<string, DB.Category> categories,
-      Dictionary<string, DB.Material> materials
+      Dictionary<string, ARDB.Category> categories,
+      Dictionary<string, ARDB.Material> materials
     )
     {
-      var id = DB.ElementId.InvalidElementId;
+      var id = ARDB.ElementId.InvalidElementId;
 
       if (layer.HasName && layer.Name is string layerName)
       {
@@ -72,14 +71,14 @@ namespace RhinoInside.Revit.AddIn.Commands
           var familyCategory = doc.OwnerFamily.FamilyCategory;
           if (familyCategory.CanAddSubcategory)
           {
-            if (doc.Settings.Categories.NewSubcategory(familyCategory, layerName) is DB.Category subCategory)
+            if (doc.Settings.Categories.NewSubcategory(familyCategory, layerName) is ARDB.Category subCategory)
             {
               subCategory.LineColor = layer.Color.ToColor();
 
               var modelMaterial = layer.RenderMaterialIndex >= 0 ? model.AllMaterials.FindIndex(layer.RenderMaterialIndex) : default;
               if (modelMaterial is object)
               {
-                if (doc.GetElement(ImportMaterial(doc, modelMaterial, materials)) is DB.Material material)
+                if (doc.GetElement(ImportMaterial(doc, modelMaterial, materials)) is ARDB.Material material)
                   subCategory.Material = material;
               }
 
@@ -95,10 +94,10 @@ namespace RhinoInside.Revit.AddIn.Commands
     #endregion
 
     #region Materials
-    static Dictionary<string, DB.Material> GetMaterialsByName(DB.Document doc)
+    static Dictionary<string, ARDB.Material> GetMaterialsByName(ARDB.Document doc)
     {
-      var collector = new DB.FilteredElementCollector(doc);
-      return collector.OfClass(typeof(DB.Material)).OfType<DB.Material>().
+      var collector = new ARDB.FilteredElementCollector(doc);
+      return collector.OfClass(typeof(ARDB.Material)).OfType<ARDB.Material>().
         GroupBy(x => x.Name).
         ToDictionary(x => x.Key, x => x.First());
     }
@@ -132,7 +131,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     static string GenericAssetName() => GenericAssetName(Revit.ActiveUIApplication.Application.Language) ?? "Generic";
 
-    static DB.AppearanceAssetElement GetGenericAppearanceAssetElement(DB.Document doc)
+    static ARDB.AppearanceAssetElement GetGenericAppearanceAssetElement(ARDB.Document doc)
     {
       var applicationLanguage = Revit.ActiveUIApplication.Application.Language;
       var languages = Enumerable.Repeat(applicationLanguage, 1).
@@ -145,24 +144,24 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       foreach (var lang in languages)
       {
-        if (DB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, GenericAssetName(lang)) is DB.AppearanceAssetElement assetElement)
+        if (ARDB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, GenericAssetName(lang)) is ARDB.AppearanceAssetElement assetElement)
           return assetElement;
       }
 
       return null;
     }
 
-    static DB.ElementId ImportMaterial
+    static ARDB.ElementId ImportMaterial
     (
-      DB.Document doc,
+      ARDB.Document doc,
       Rhino.Render.RenderMaterial mat
     )
     {
       string name = mat.Name ?? mat.Id.ToString();
-      var appearanceAssetId = DB.ElementId.InvalidElementId;
+      var appearanceAssetId = ARDB.ElementId.InvalidElementId;
 
 #if REVIT_2018
-      if (DB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name) is DB.AppearanceAssetElement appearanceAssetElement)
+      if (ARDB.AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name) is ARDB.AppearanceAssetElement appearanceAssetElement)
         appearanceAssetId = appearanceAssetElement.Id;
       else
       {
@@ -174,7 +173,7 @@ namespace RhinoInside.Revit.AddIn.Commands
           {
             if (asset.Name == GenericAssetName())
             {
-              appearanceAssetElement = DB.AppearanceAssetElement.Create(doc, name, asset);
+              appearanceAssetElement = ARDB.AppearanceAssetElement.Create(doc, name, asset);
               appearanceAssetId = appearanceAssetElement.Id;
               break;
             }
@@ -186,7 +185,7 @@ namespace RhinoInside.Revit.AddIn.Commands
           appearanceAssetId = appearanceAssetElement.Id;
         }
 
-        if (appearanceAssetId != DB.ElementId.InvalidElementId)
+        if (appearanceAssetId != ARDB.ElementId.InvalidElementId)
         {
           using (var editScope = new AppearanceAssetEditScope(doc))
           {
@@ -290,22 +289,22 @@ namespace RhinoInside.Revit.AddIn.Commands
       return appearanceAssetId;
     }
 
-    static DB.ElementId ImportMaterial
+    static ARDB.ElementId ImportMaterial
     (
-      DB.Document doc,
+      ARDB.Document doc,
       Material mat,
-      Dictionary<string, DB.Material> materials
+      Dictionary<string, ARDB.Material> materials
     )
     {
-      var id = DB.ElementId.InvalidElementId;
+      var id = ARDB.ElementId.InvalidElementId;
 
       if(mat.HasName && mat.Name is string materialName)
       {
         if (materials.TryGetValue(materialName, out var material)) id = material.Id;
         else
         {
-          id = DB.Material.Create(doc, materialName);
-          var newMaterial = doc.GetElement(id) as DB.Material;
+          id = ARDB.Material.Create(doc, materialName);
+          var newMaterial = doc.GetElement(id) as ARDB.Material;
 
           newMaterial.Color         = mat.PreviewColor.ToColor();
           newMaterial.Shininess     = (int) Math.Round(mat.Shine / Material.MaxShine * 128.0);
@@ -321,40 +320,40 @@ namespace RhinoInside.Revit.AddIn.Commands
     }
     #endregion
 
-    static Point3d ImportPlacement(File3dm model, DB.ImportPlacement placement)
+    static Point3d ImportPlacement(File3dm model, ARDB.ImportPlacement placement)
     {
       switch (placement)
       {
-        case DB.ImportPlacement.Site:
+        case ARDB.ImportPlacement.Site:
           return model.Settings.ModelBasepoint;
 
-        case DB.ImportPlacement.Origin:
+        case ARDB.ImportPlacement.Origin:
           return Point3d.Origin;
 
-        case DB.ImportPlacement.Centered:
+        case ARDB.ImportPlacement.Centered:
           throw new NotImplementedException();
 
-        case DB.ImportPlacement.Shared:
+        case ARDB.ImportPlacement.Shared:
           throw new NotImplementedException();
       }
 
       throw new NotImplementedException();
     }
 
-    static DB.XYZ ImportPlacement(DB.Document doc, DB.ImportPlacement placement)
+    static ARDB.XYZ ImportPlacement(ARDB.Document doc, ARDB.ImportPlacement placement)
     {
       switch (placement)
       {
-        case DB.ImportPlacement.Site:
+        case ARDB.ImportPlacement.Site:
           return BasePointExtension.GetProjectBasePoint(doc).GetPosition();
 
-        case DB.ImportPlacement.Origin:
-          return DB.XYZ.Zero;
+        case ARDB.ImportPlacement.Origin:
+          return ARDB.XYZ.Zero;
 
-        case DB.ImportPlacement.Centered:
+        case ARDB.ImportPlacement.Centered:
           throw new NotImplementedException();
 
-        case DB.ImportPlacement.Shared:
+        case ARDB.ImportPlacement.Shared:
           return BasePointExtension.GetSurveyPoint(doc).GetPosition();
       }
 
@@ -362,13 +361,13 @@ namespace RhinoInside.Revit.AddIn.Commands
     }
 
     #region Project
-    static IList<DB.GeometryObject> ImportObject
+    static IList<ARDB.GeometryObject> ImportObject
     (
-      DB.Document doc,
+      ARDB.Document doc,
       File3dm model,
       GeometryBase geometry,
       ObjectAttributes attributes,
-      Dictionary<string, DB.Material> materials,
+      Dictionary<string, ARDB.Material> materials,
       double scaleFactor,
       Vector3d translationVector,
       bool visibleLayersOnly
@@ -404,7 +403,7 @@ namespace RhinoInside.Revit.AddIn.Commands
             if (model.AllInstanceDefinitions.FindId(instance.ParentIdefId) is InstanceDefinitionGeometry definition)
             {
               var definitionId = definition.Id.ToString();
-              var library = DB.DirectShapeLibrary.GetDirectShapeLibrary(doc);
+              var library = ARDB.DirectShapeLibrary.GetDirectShapeLibrary(doc);
               if (!library.Contains(definitionId))
               {
                 var GNodes = definition.GetObjectIds(). // Get idef object ids
@@ -415,59 +414,59 @@ namespace RhinoInside.Revit.AddIn.Commands
                 library.AddDefinition(definitionId, GNodes.ToArray());
               }
 
-              return DB.DirectShape.CreateGeometryInstance(doc, definitionId, instance.Xform.ToTransform(scaleFactor));
+              return ARDB.DirectShape.CreateGeometryInstance(doc, definitionId, instance.Xform.ToTransform(scaleFactor));
             }
           }
           else return geometry.ToShape(scaleFactor);
         }
       }
 
-      return new DB.GeometryObject[0];
+      return new ARDB.GeometryObject[0];
     }
 
     static Result Import3DMFileToProject
     (
-      DB.Document doc,
+      ARDB.Document doc,
       string filePath,
-      DB.ImportPlacement placement,
+      ARDB.ImportPlacement placement,
       bool visibleLayersOnly,
-      DB.ElementId categoryId,
-      DB.WorksetId worksetId,
+      ARDB.ElementId categoryId,
+      ARDB.WorksetId worksetId,
       string familyName,
       string typeName
     )
     {
       try
       {
-        DB.DirectShapeLibrary.GetDirectShapeLibrary(doc).Reset();
+        ARDB.DirectShapeLibrary.GetDirectShapeLibrary(doc).Reset();
 
         using (var model = File3dm.Read(filePath))
         {
           var scaleFactor = UnitConverter.ConvertToHostUnits(1.0, model.Settings.ModelUnitSystem);
 
-          using (var trans = new DB.Transaction(doc, "Import 3D Model"))
+          using (var trans = new ARDB.Transaction(doc, "Import 3D Model"))
           {
-            if (trans.Start() == DB.TransactionStatus.Started)
+            if (trans.Start() == ARDB.TransactionStatus.Started)
             {
               var materials = GetMaterialsByName(doc);
 
               if (string.IsNullOrEmpty(typeName))
                 typeName = Path.GetFileName(filePath);
 
-              var type = default(DB.DirectShapeType);
+              var type = default(ARDB.DirectShapeType);
               {
-                using (var collector = new DB.FilteredElementCollector(doc))
+                using (var collector = new ARDB.FilteredElementCollector(doc))
                 {
                   var typeCollector = collector.WhereElementIsElementType().
-                    WhereElementIsKindOf(typeof(DB.DirectShapeType)).
+                    WhereElementIsKindOf(typeof(ARDB.DirectShapeType)).
                     OfCategoryId(categoryId).
-                    WhereParameterEqualsTo(DB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, familyName).
-                    WhereParameterEqualsTo(DB.BuiltInParameter.ALL_MODEL_TYPE_NAME, typeName);
+                    WhereParameterEqualsTo(ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, familyName).
+                    WhereParameterEqualsTo(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, typeName);
 
-                  type = typeCollector.FirstElement() as DB.DirectShapeType;
+                  type = typeCollector.FirstElement() as ARDB.DirectShapeType;
                   if (type is null)
                   {
-                    type = DB.DirectShapeType.Create(doc, typeName, categoryId);
+                    type = ARDB.DirectShapeType.Create(doc, typeName, categoryId);
 #if REVIT_2022
                     if (!string.IsNullOrEmpty(familyName))
                       type.SetFamilyName(familyName);
@@ -475,7 +474,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                   }
                   else
                   {
-                    type.SetShape(new DB.GeometryObject[0]);
+                    type.SetShape(new ARDB.GeometryObject[0]);
                   }
                 }
               }
@@ -507,19 +506,19 @@ namespace RhinoInside.Revit.AddIn.Commands
                 }
               }
 
-              var ds = DB.DirectShape.CreateElement(doc, type.Category.Id);
+              var ds = ARDB.DirectShape.CreateElement(doc, type.Category.Id);
               ds.SetTypeId(type.Id);
 
-              var library = DB.DirectShapeLibrary.GetDirectShapeLibrary(doc);
+              var library = ARDB.DirectShapeLibrary.GetDirectShapeLibrary(doc);
               if (!library.ContainsType(type.UniqueId))
                 library.AddDefinitionType(type.UniqueId, type.Id);
 
-              var transform = DB.Transform.CreateTranslation(model.Settings.ModelBasepoint.ToXYZ(scaleFactor));
-              ds.SetShape(DB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, transform));
+              var transform = ARDB.Transform.CreateTranslation(model.Settings.ModelBasepoint.ToXYZ(scaleFactor));
+              ds.SetShape(ARDB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, transform));
 
               if (doc.IsWorkshared)
               {
-                if (ds.GetParameter(ParameterId.ElemPartitionParam) is DB.Parameter worksetParam)
+                if (ds.GetParameter(ParameterId.ElemPartitionParam) is ARDB.Parameter worksetParam)
                   worksetParam.Set(worksetId.IntegerValue);
               }
 
@@ -529,12 +528,12 @@ namespace RhinoInside.Revit.AddIn.Commands
                 var placementTranslation = to - from;
 
                 if (!placementTranslation.IsZeroLength())
-                  DB.ElementTransformUtils.MoveElement(doc, ds.Id, placementTranslation);
+                  ARDB.ElementTransformUtils.MoveElement(doc, ds.Id, placementTranslation);
               }
 
-              if (trans.Commit() == DB.TransactionStatus.Committed)
+              if (trans.Commit() == ARDB.TransactionStatus.Committed)
               {
-                var elements = new DB.ElementId[] { ds.Id };
+                var elements = new ARDB.ElementId[] { ds.Id };
                 Revit.ActiveUIDocument.Selection.SetElementIds(elements);
                 Revit.ActiveUIDocument.ShowElements(elements);
 
@@ -546,7 +545,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
       finally
       {
-        DB.DirectShapeLibrary.GetDirectShapeLibrary(doc).Reset();
+        ARDB.DirectShapeLibrary.GetDirectShapeLibrary(doc).Reset();
       }
 
       return Result.Failed;
@@ -556,9 +555,9 @@ namespace RhinoInside.Revit.AddIn.Commands
     #region Family
     static Result Import3DMFileToFamily
     (
-      DB.Document doc,
+      ARDB.Document doc,
       string filePath,
-      DB.ImportPlacement placement,
+      ARDB.ImportPlacement placement,
       bool visibleLayersOnly
     )
     {
@@ -567,19 +566,19 @@ namespace RhinoInside.Revit.AddIn.Commands
         var scaleFactor = UnitConverter.ConvertToHostUnits(1.0, model.Settings.ModelUnitSystem);
         var translationVector = Point3d.Origin - ImportPlacement(model, placement);
 
-        using (var trans = new DB.Transaction(doc, "Import 3D Model"))
+        using (var trans = new ARDB.Transaction(doc, "Import 3D Model"))
         {
-          if (trans.Start() == DB.TransactionStatus.Started)
+          if (trans.Start() == ARDB.TransactionStatus.Started)
           {
             var materials = GetMaterialsByName(doc);
             var categories = GetCategoriesByName(doc);
-            var elements = new List<DB.ElementId>();
+            var elements = new List<ARDB.ElementId>();
 
-            var view3D = default(DB.View);
-            using (var collector = new DB.FilteredElementCollector(doc))
+            var view3D = default(ARDB.View);
+            using (var collector = new ARDB.FilteredElementCollector(doc))
             {
-              var elementCollector = collector.OfClass(typeof(DB.View3D));
-              view3D = elementCollector.Cast<DB.View3D>().Where(x => x.Name == "{3D}").FirstOrDefault();
+              var elementCollector = collector.OfClass(typeof(ARDB.View3D));
+              view3D = elementCollector.Cast<ARDB.View3D>().Where(x => x.Name == "{3D}").FirstOrDefault();
             }
 
             if (view3D is object)
@@ -627,18 +626,18 @@ namespace RhinoInside.Revit.AddIn.Commands
                   case Curve curve:
                     if (curve.TryGetPlane(out var plane, Revit.VertexTolerance))
                     {
-                      if (curve.ToCurve(scaleFactor) is DB.Curve crv)
+                      if (curve.ToCurve(scaleFactor) is ARDB.Curve crv)
                       {
-                        var sketchPlane = DB.SketchPlane.Create(doc, plane.ToPlane(scaleFactor));
+                        var sketchPlane = ARDB.SketchPlane.Create(doc, plane.ToPlane(scaleFactor));
                         var modelCurve = doc.FamilyCreate.NewModelCurve(crv, sketchPlane);
 
                         elements.Add(modelCurve.Id);
 
                         {
                           var subCategoryId = ImportLayer(doc, model, layer, categories, materials);
-                          if (DB.Category.GetCategory(doc, subCategoryId) is DB.Category subCategory)
+                          if (ARDB.Category.GetCategory(doc, subCategoryId) is ARDB.Category subCategory)
                           {
-                            var familyGraphicsStyle = subCategory?.GetGraphicsStyle(DB.GraphicsStyleType.Projection);
+                            var familyGraphicsStyle = subCategory?.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection);
 
                             if (familyGraphicsStyle is object)
                               modelCurve.Subcategory = familyGraphicsStyle;
@@ -646,28 +645,28 @@ namespace RhinoInside.Revit.AddIn.Commands
                         }
                       }
                     }
-                    else if (DB.DirectShape.IsSupportedDocument(doc) && DB.DirectShape.IsValidCategoryId(doc.OwnerFamily.FamilyCategory.Id, doc))
+                    else if (ARDB.DirectShape.IsSupportedDocument(doc) && ARDB.DirectShape.IsValidCategoryId(doc.OwnerFamily.FamilyCategory.Id, doc))
                     {
                       var subCategoryId = ImportLayer(doc, model, layer, categories, materials);
                       var shape = curve.ToShape();
                       if (shape.Length > 0)
                       {
-                        var ds = DB.DirectShape.CreateElement(doc, doc.OwnerFamily.FamilyCategory.Id);
+                        var ds = ARDB.DirectShape.CreateElement(doc, doc.OwnerFamily.FamilyCategory.Id);
                         ds.SetShape(shape);
                         elements.Add(ds.Id);
                       }
                     }
                     break;
                   case Brep brep:
-                    if (brep.ToSolid(scaleFactor) is DB.Solid solid)
+                    if (brep.ToSolid(scaleFactor) is ARDB.Solid solid)
                     {
-                      if (DB.FreeFormElement.Create(doc, solid) is DB.FreeFormElement freeForm)
+                      if (ARDB.FreeFormElement.Create(doc, solid) is ARDB.FreeFormElement freeForm)
                       {
                         elements.Add(freeForm.Id);
 
                         {
                           var categoryId = ImportLayer(doc, model, layer, categories, materials);
-                          if (categoryId != DB.ElementId.InvalidElementId)
+                          if (categoryId != ARDB.ElementId.InvalidElementId)
                             freeForm.GetParameter(ParameterId.FamilyElemSubcategory).Set(categoryId);
                         }
 
@@ -676,7 +675,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                           if (model.AllMaterials.FindIndex(obj.Attributes.MaterialIndex) is Material material)
                           {
                             var categoryId = ImportMaterial(doc, material, materials);
-                            if (categoryId != DB.ElementId.InvalidElementId)
+                            if (categoryId != ARDB.ElementId.InvalidElementId)
                               freeForm.GetParameter(ParameterId.MaterialIdParam).Set(categoryId);
                           }
                         }
@@ -688,7 +687,7 @@ namespace RhinoInside.Revit.AddIn.Commands
               catch (Autodesk.Revit.Exceptions.ArgumentException) { }
             }
 
-            if (trans.Commit() == DB.TransactionStatus.Committed)
+            if (trans.Commit() == ARDB.TransactionStatus.Committed)
             {
               Revit.ActiveUIDocument.Selection.SetElementIds(elements);
               Revit.ActiveUIDocument.ShowElements(elements);
@@ -703,10 +702,10 @@ namespace RhinoInside.Revit.AddIn.Commands
     }
     #endregion
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ARDB.ElementSet elements)
     {
       var doc = data.Application.ActiveUIDocument.Document;
-      if(!doc.IsFamilyDocument && !DB.DirectShape.IsSupportedDocument(doc))
+      if(!doc.IsFamilyDocument && !ARDB.DirectShape.IsSupportedDocument(doc))
       {
         message = "Active document doesnt't support DirectShape functionality.";
         return Result.Failed;
@@ -729,7 +728,7 @@ namespace RhinoInside.Revit.AddIn.Commands
             }
             else
             {
-              if (!DB.DirectShape.IsValidCategoryId(options.CategoryId, doc))
+              if (!ARDB.DirectShape.IsValidCategoryId(options.CategoryId, doc))
               {
                 message = "DirectShape functionality doesnt't support selected category on the active document.";
                 return Result.Failed;

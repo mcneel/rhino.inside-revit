@@ -1,24 +1,17 @@
 using Grasshopper.Kernel.Types;
 
-using MAT = RhinoInside.Revit.GH.Components.Material;
+using MAT = RhinoInside.Revit.GH.Components.Materials;
 
 namespace RhinoInside.Revit.GH.Types
 {
 #if REVIT_2018
   public class TextureData : GH_Goo<MAT.TextureData>
   {
-    public override bool IsValid => Value != null;
+    public override bool IsValid => Value is object;
 
-    public override string TypeName
-    {
-      get
-      {
-        if (IsValid)
-          return Value.GetGHComponentInfo().Name;
-        else
-          return $"Texture Data";
-      }
-    }
+    public override string TypeName => IsValid ?
+      Value.GetGHComponentInfo().Name :
+      $"Texture Data";
 
     public override string TypeDescription => $"Represents a {TypeName}";
 
@@ -63,7 +56,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastTo<Q>(ref target);
+      return base.CastTo(ref target);
     }
 
     public override string ToString()

@@ -4,21 +4,22 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Sketch")]
   public class Sketch : GraphicalElement
   {
-    protected override Type ValueType => typeof(DB.Sketch);
-    public new DB.Sketch Value => base.Value as DB.Sketch;
-    public static explicit operator DB.Sketch(Sketch value) => value?.Value;
+    protected override Type ValueType => typeof(ARDB.Sketch);
+    public new ARDB.Sketch Value => base.Value as ARDB.Sketch;
+    public static explicit operator ARDB.Sketch(Sketch value) => value?.Value;
 
     public Sketch() : base() { }
-    public Sketch(DB.Sketch sketchPlane) : base(sketchPlane) { }
+    public Sketch(ARDB.Sketch sketchPlane) : base(sketchPlane) { }
 
     public override bool CastFrom(object source)
     {
@@ -27,7 +28,7 @@ namespace RhinoInside.Revit.GH.Types
       if (source is IGH_Goo goo)
         value = goo.ScriptVariable();
 
-      if (value is DB.HostObject host)
+      if (value is ARDB.HostObject host)
       {
         var sketch = host.GetSketch();
         return sketch is object && SetValue(sketch);
@@ -82,7 +83,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (!regionIsValid && Value is DB.Sketch sketch)
+        if (!regionIsValid && Value is ARDB.Sketch sketch)
         {
           var loops = sketch.Profile.ToPolyCurves().Where(x => x.IsClosed).ToArray();
           var plane = sketch.SketchPlane.GetPlane().ToPlane();

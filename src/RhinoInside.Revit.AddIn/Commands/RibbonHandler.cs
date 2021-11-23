@@ -1,24 +1,22 @@
 using System;
 using Autodesk.Revit.UI;
-using RhinoInside.Revit.External.UI;
-using ADW = Autodesk.Windows;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
   class RibbonHandler : IDisposable
   {
-    readonly UIHostApplication _app;
+    readonly External.UI.UIHostApplication _app;
 
-    public RibbonHandler(UIHostApplication app) => _app= app;
+    public RibbonHandler(External.UI.UIHostApplication app) => _app= app;
     public void Dispose() => _app.Dispose();
 
     /// <summary>
     /// Get Revit tab as underlying Autodesk.Windows.RibbonTab instance
     /// </summary>
-    private static ADW.RibbonTab GetAdwndRibbonTab(string tabName)
+    private static Autodesk.Windows.RibbonTab GetAdwndRibbonTab(string tabName)
     {
       // grab the underlying Autodesk.Windows object from Button
-      foreach (var adwndRibbonTab in ADW.ComponentManager.Ribbon.Tabs)
+      foreach (var adwndRibbonTab in Autodesk.Windows.ComponentManager.Ribbon.Tabs)
         if (adwndRibbonTab.Title == tabName)
           return adwndRibbonTab;
       return null;
@@ -28,7 +26,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     public bool HasPanel(string tabName, string panelName)
     {
-      if (GetAdwndRibbonTab(tabName) is ADW.RibbonTab tab)
+      if (GetAdwndRibbonTab(tabName) is Autodesk.Windows.RibbonTab tab)
         foreach (var panel in tab.Panels)
           if (panelName == panel.Source.Title)
             return true;

@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Documents
 {
   public class DocumentSave : ZuiComponent
   {
@@ -69,7 +69,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Backups", ref backups))
         return;
 
-      var view = default(DB.View);
+      var view = default(ARDB.View);
       if (DA.GetData("View", ref view) && !view.Document.Equals(doc))
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Title}' is not a valid view in document {doc.Title}");
@@ -84,7 +84,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           if (overwrite)
           {
-            using (var saveOptions = new DB.SaveOptions() { Compact = compact })
+            using (var saveOptions = new ARDB.SaveOptions() { Compact = compact })
             {
               if (view is object)
                 saveOptions.PreviewViewId = view.Id;
@@ -111,7 +111,7 @@ namespace RhinoInside.Revit.GH.Components
                 filePath += ".rvt";
             }
 
-            using (var saveAsOptions = new DB.SaveAsOptions() { OverwriteExistingFile = overwrite, Compact = compact })
+            using (var saveAsOptions = new ARDB.SaveAsOptions() { OverwriteExistingFile = overwrite, Compact = compact })
             {
               if (backups > -1)
                 saveAsOptions.MaximumBackups = backups;

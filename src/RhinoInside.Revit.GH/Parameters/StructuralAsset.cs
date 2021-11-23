@@ -1,10 +1,10 @@
 using System;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class StructuralAsset : Element<Types.StructuralAssetElement, DB.PropertySetElement>
+  public class StructuralAsset : Element<Types.StructuralAssetElement, ARDB.PropertySetElement>
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid =>

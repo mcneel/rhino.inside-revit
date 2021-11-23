@@ -4,7 +4,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Rhino.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
@@ -87,8 +87,8 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    static readonly Dictionary<byte[], SoftReference<DB.GeometryObject>> GeometryDictionary =
-      new Dictionary<byte[], SoftReference<DB.GeometryObject>>(default(HashComparer));
+    static readonly Dictionary<byte[], SoftReference<ARDB.GeometryObject>> GeometryDictionary =
+      new Dictionary<byte[], SoftReference<ARDB.GeometryObject>>(default(HashComparer));
 
     internal static void StartKeepAliveRegion()
     {
@@ -236,18 +236,18 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    internal static void AddExistingGeometry(byte[] hash, DB.GeometryObject value)
+    internal static void AddExistingGeometry(byte[] hash, ARDB.GeometryObject value)
     {
       if (hash is object && value is object) GeometryDictionary.Add
       (
         hash,
-        new SoftReference<DB.GeometryObject>(value) { KeepAlive = true, Hit = true }
+        new SoftReference<ARDB.GeometryObject>(value) { KeepAlive = true, Hit = true }
       );
     }
 
     internal static bool TryGetExistingGeometry<R, T>(/*const*/ R key, double factor, out T value, out byte[] hash)
       where R : GeometryBase
-      where T : DB.GeometryObject
+      where T : ARDB.GeometryObject
     {
       if (Policy == CachePolicy.Disabled)
       {

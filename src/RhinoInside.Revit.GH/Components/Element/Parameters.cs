@@ -2,20 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.DB.Schemas;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
-using DBXS = RhinoInside.Revit.External.DB.Schemas;
+using Grasshopper.Kernel.Types;
+using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   static class ParameterUtils
   {
-    internal static IGH_Goo AsGoo(this DB.Parameter parameter)
+    internal static IGH_Goo AsGoo(this ARDB.Parameter parameter)
     {
       if (parameter is null) return default;
 
@@ -23,14 +22,14 @@ namespace RhinoInside.Revit.GH
       // but DB.ElementParameterFilter works on those parameters!?!?
       if (!parameter.HasValue)
       {
-        switch ((DB.BuiltInParameter) parameter.Id.IntegerValue)
+        switch ((ARDB.BuiltInParameter) parameter.Id.IntegerValue)
         {
-          case DB.BuiltInParameter.ALL_MODEL_FAMILY_NAME:
-            return ((parameter.Element.Document.GetElement(parameter.Element.GetTypeId()) as DB.ElementType)?.FamilyName)
+          case ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME:
+            return ((parameter.Element.Document.GetElement(parameter.Element.GetTypeId()) as ARDB.ElementType)?.FamilyName)
               is string familyName ? new GH_String(familyName) : default;
 
-          case DB.BuiltInParameter.ALL_MODEL_TYPE_NAME:
-            return ((parameter.Element.Document.GetElement(parameter.Element.GetTypeId()) as DB.ElementType)?.Name)
+          case ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME:
+            return ((parameter.Element.Document.GetElement(parameter.Element.GetTypeId()) as ARDB.ElementType)?.Name)
               is string typeName ? new GH_String(typeName) : default;
         }
 
@@ -39,33 +38,33 @@ namespace RhinoInside.Revit.GH
 
       switch (parameter.StorageType)
       {
-        case DB.StorageType.Integer:
+        case ARDB.StorageType.Integer:
           var integer = parameter.AsInteger();
 
-          if (parameter.Definition is DB.Definition definition)
+          if (parameter.Definition is ARDB.Definition definition)
           {
             var dataType = definition.GetDataType();
 
-            if (dataType == SpecType.Boolean.YesNo)
+            if (dataType == ERDB.Schemas.SpecType.Boolean.YesNo)
               return new GH_Boolean(integer != 0);
 
             if (parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
             {
               switch (builtInInteger)
               {
-                case DB.BuiltInParameter.AUTO_JOIN_CONDITION:         return new Types.CurtainGridJoinCondition((DBX.CurtainGridJoinCondition) integer);
-                case DB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL:    return new Types.CurtainGridJoinCondition((DBX.CurtainGridJoinCondition) integer);
-                case DB.BuiltInParameter.SPACING_LAYOUT_U:            return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
-                case DB.BuiltInParameter.SPACING_LAYOUT_1:            return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
-                case DB.BuiltInParameter.SPACING_LAYOUT_VERT:         return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
-                case DB.BuiltInParameter.SPACING_LAYOUT_V:            return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
-                case DB.BuiltInParameter.SPACING_LAYOUT_2:            return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
-                case DB.BuiltInParameter.SPACING_LAYOUT_HORIZ:        return new Types.CurtainGridLayout((DBX.CurtainGridLayout) integer);
-                case DB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM:   return new Types.WallWrapping((DBX.WallWrapping) integer);
-                case DB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM:      return new Types.WallWrapping((DBX.WallWrapping) integer);
-                case DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM: return new Types.StructuralWallUsage((DB.Structure.StructuralWallUsage) integer);
-                case DB.BuiltInParameter.WALL_KEY_REF_PARAM:          return new Types.WallLocationLine((DB.WallLocationLine) integer);
-                case DB.BuiltInParameter.FUNCTION_PARAM:              return new Types.WallFunction((DB.WallFunction) integer);
+                case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) integer);
+                case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) integer);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_U: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) integer);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_1: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) integer);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_VERT: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) integer);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_V: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) integer);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_2: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) integer);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_HORIZ: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) integer);
+                case ARDB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM: return new Types.WallWrapping((ERDB.WallWrapping) integer);
+                case ARDB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM: return new Types.WallWrapping((ERDB.WallWrapping) integer);
+                case ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM: return new Types.StructuralWallUsage((ARDB.Structure.StructuralWallUsage) integer);
+                case ARDB.BuiltInParameter.WALL_KEY_REF_PARAM: return new Types.WallLocationLine((ARDB.WallLocationLine) integer);
+                case ARDB.BuiltInParameter.FUNCTION_PARAM: return new Types.WallFunction((ARDB.WallFunction) integer);
               }
 
               var builtInIntegerName = builtInInteger.ToString();
@@ -84,23 +83,23 @@ namespace RhinoInside.Revit.GH
 
           return new GH_Integer(integer);
 
-        case DB.StorageType.Double:
+        case ARDB.StorageType.Double:
           var value = parameter.AsDouble();
 
-          if (SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec))
+          if (ERDB.Schemas.SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec))
             value = UnitConverter.InRhinoUnits(value, spec);
 
           return new GH_Number(value);
 
-        case DB.StorageType.String:
+        case ARDB.StorageType.String:
           return new GH_String(parameter.AsString());
 
-        case DB.StorageType.ElementId:
+        case ARDB.StorageType.ElementId:
 
           var elementId = parameter.AsElementId();
           if (parameter.Id.TryGetBuiltInParameter(out var builtInElementId))
           {
-            if (builtInElementId == DB.BuiltInParameter.ID_PARAM || builtInElementId == DB.BuiltInParameter.SYMBOL_ID_PARAM)
+            if (builtInElementId == ARDB.BuiltInParameter.ID_PARAM || builtInElementId == ARDB.BuiltInParameter.SYMBOL_ID_PARAM)
               return new GH_Integer(elementId.IntegerValue);
           }
 
@@ -111,18 +110,18 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    internal static bool Update(this DB.Parameter parameter, IGH_Goo value)
+    internal static bool Update(this ARDB.Parameter parameter, IGH_Goo value)
     {
       if (parameter is null)
         return default;
 
       switch (parameter.StorageType)
       {
-        case DB.StorageType.Integer:
+        case ARDB.StorageType.Integer:
 
-          if (parameter.Definition is DB.Definition definition)
+          if (parameter.Definition is ARDB.Definition definition)
           {
-            if (definition.GetDataType() == SpecType.Boolean.YesNo)
+            if (definition.GetDataType() == ERDB.Schemas.SpecType.Boolean.YesNo)
             {
               if (!GH_Convert.ToBoolean(value, out var boolean, GH_Conversion.Both))
                 throw new InvalidCastException();
@@ -149,24 +148,24 @@ namespace RhinoInside.Revit.GH
 
           return parameter.Update(integer);
 
-        case DB.StorageType.Double:
+        case ARDB.StorageType.Double:
           if (!GH_Convert.ToDouble(value, out var real, GH_Conversion.Both))
             throw new InvalidCastException();
 
           return parameter.Update
           (
-            SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
+            ERDB.Schemas.SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
             UnitConverter.InHostUnits(real, spec) :
             real
           );
 
-        case DB.StorageType.String:
+        case ARDB.StorageType.String:
           if (!GH_Convert.ToString(value, out var text, GH_Conversion.Both))
             throw new InvalidCastException();
 
           return parameter.Update(text);
 
-        case DB.StorageType.ElementId:
+        case ARDB.StorageType.ElementId:
           var element = new Types.Element();
           if (!element.CastFrom(value))
             throw new InvalidCastException();
@@ -181,9 +180,9 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    internal static DB.Parameter GetParameter(IGH_ActiveObject obj, DB.Element element, IGH_Goo goo)
+    internal static ARDB.Parameter GetParameter(IGH_ActiveObject obj, ARDB.Element element, IGH_Goo goo)
     {
-      DB.Parameter parameter = null;
+      ARDB.Parameter parameter = null;
       object key = default;
 
       if (goo is Types.ParameterValue value)
@@ -199,13 +198,13 @@ namespace RhinoInside.Revit.GH
           {
             switch (parameterKey.Class)
             {
-              case DBX.ParameterClass.BuiltIn:
+              case ERDB.ParameterClass.BuiltIn:
                 parameter = parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter) ? element.get_Parameter(builtInParameter) : default; break;
-              case DBX.ParameterClass.Project:
-                parameter = element.GetParameter(parameterKey.Name, parameterKey.DataType, DBX.ParameterClass.Project); break;
-              case DBX.ParameterClass.Family:
-                parameter = element.GetParameter(parameterKey.Name, parameterKey.DataType, DBX.ParameterClass.Family); break;
-              case DBX.ParameterClass.Shared:
+              case ERDB.ParameterClass.Project:
+                parameter = element.GetParameter(parameterKey.Name, parameterKey.DataType, ERDB.ParameterClass.Project); break;
+              case ERDB.ParameterClass.Family:
+                parameter = element.GetParameter(parameterKey.Name, parameterKey.DataType, ERDB.ParameterClass.Family); break;
+              case ERDB.ParameterClass.Shared:
                 parameter = element.get_Parameter(parameterKey.GUID.Value); break;
             }
           }
@@ -216,7 +215,7 @@ namespace RhinoInside.Revit.GH
             else if (parameterKey.Id.TryGetBuiltInParameter(out var bip))
               parameter = element.get_Parameter(bip);
             else if (!string.IsNullOrEmpty(parameterKey.Name))
-              parameter = element.GetParameter(parameterKey.Name, DBX.ParameterClass.Any);
+              parameter = element.GetParameter(parameterKey.Name, ERDB.ParameterClass.Any);
           }
 
           if (parameter is null)
@@ -232,19 +231,19 @@ namespace RhinoInside.Revit.GH
         {
           case string parameterName:
           {
-            parameter = element.GetParameter(parameterName, DBX.ParameterClass.Any);
+            parameter = element.GetParameter(parameterName, ERDB.ParameterClass.Any);
             if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterName}' is not defined in 'Element'");
             break;
           }
           case int parameterId:
           {
-            var elementId = new DB.ElementId(parameterId);
+            var elementId = new ARDB.ElementId(parameterId);
             if (elementId.TryGetBuiltInParameter(out var builtInParameter))
             {
               parameter = element.get_Parameter(builtInParameter);
-              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' is not defined in 'Element'");
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not defined in 'Element'");
             }
-            else if (element.Document.GetElement(new DB.ElementId(parameterId)) is DB.ParameterElement parameterElement)
+            else if (element.Document.GetElement(new ARDB.ElementId(parameterId)) is ARDB.ParameterElement parameterElement)
             {
               parameter = element.get_Parameter(parameterElement.GetDefinition());
               if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'");
@@ -252,20 +251,20 @@ namespace RhinoInside.Revit.GH
             else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element");
             break;
           }
-          case DB.Parameter param:
+          case ARDB.Parameter param:
           {
             parameter = element.get_Parameter(param.Definition);
             if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{param.Definition.Name}' is not defined in 'Element'");
             break;
           }
-          case DB.ElementId elementId:
+          case ARDB.ElementId elementId:
           {
             if (elementId.TryGetBuiltInParameter(out var builtInParameter))
             {
               parameter = element.get_Parameter(builtInParameter);
-              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{DB.LabelUtils.GetLabelFor(builtInParameter)}' is not  defined in 'Element'");
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not  defined in 'Element'");
             }
-            else if (element.Document.GetElement(elementId) is DB.ParameterElement parameterElement)
+            else if (element.Document.GetElement(elementId) is ARDB.ParameterElement parameterElement)
             {
               parameter = element.get_Parameter(parameterElement.GetDefinition());
               if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'");
@@ -290,18 +289,18 @@ namespace RhinoInside.Revit.GH
       return parameter;
     }
 
-    public static IConvertible ToConvertible(this DB.Parameter parameter)
+    public static IConvertible ToConvertible(this ARDB.Parameter parameter)
     {
       switch (parameter.StorageType)
       {
-        case DB.StorageType.Integer:
+        case ARDB.StorageType.Integer:
           var integer = parameter.AsInteger();
 
-          if (parameter.Definition is DB.Definition definition)
+          if (parameter.Definition is ARDB.Definition definition)
           {
             var dataType = definition.GetDataType();
 
-            if (dataType == DBXS.SpecType.Boolean.YesNo)
+            if (dataType == ERDB.Schemas.SpecType.Boolean.YesNo)
               return integer != 0;
 
             if (parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
@@ -322,26 +321,26 @@ namespace RhinoInside.Revit.GH
 
           return integer;
 
-        case DB.StorageType.Double:
+        case ARDB.StorageType.Double:
           var value = parameter.AsDouble();
-          return DBXS.SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
+          return ERDB.Schemas.SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
             Convert.Geometry.UnitConverter.InRhinoUnits(value, spec) :
             value;
 
-        case DB.StorageType.String:
+        case ARDB.StorageType.String:
           return parameter.AsString();
 
-        case DB.StorageType.ElementId:
+        case ARDB.StorageType.ElementId:
 
           var document = parameter.Element?.Document;
           var documentGUID = document.GetFingerprintGUID();
           var elementId = parameter.AsElementId();
 
           return elementId.IsBuiltInId() ?
-            DBX.FullUniqueId.Format(documentGUID, DBX.UniqueId.Format(Guid.Empty, elementId.IntegerValue)) :
-            document?.GetElement(elementId) is DB.Element element ?
-            DBX.FullUniqueId.Format(documentGUID, element.UniqueId) :
-            DBX.FullUniqueId.Format(Guid.Empty, DBX.UniqueId.Format(Guid.Empty, DB.ElementId.InvalidElementId.IntegerValue));
+            ERDB.FullUniqueId.Format(documentGUID, ERDB.UniqueId.Format(Guid.Empty, elementId.IntegerValue)) :
+            document?.GetElement(elementId) is ARDB.Element element ?
+            ERDB.FullUniqueId.Format(documentGUID, element.UniqueId) :
+            ERDB.FullUniqueId.Format(Guid.Empty, ERDB.UniqueId.Format(Guid.Empty, ARDB.ElementId.InvalidElementId.IntegerValue));
 
         default:
           throw new NotImplementedException();
@@ -350,8 +349,11 @@ namespace RhinoInside.Revit.GH
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Element
+namespace RhinoInside.Revit.GH.Components.ElementParameters
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   public class ElementParameter : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("F568D3E7-BE3F-455B-A8D4-EBFA573D55C2");
@@ -461,23 +463,23 @@ namespace RhinoInside.Revit.GH.Components.Element
           var dataTypeId = parameter.Definition?.GetDataType();
           if
           (
-            SpecType.IsMeasurableSpec(dataTypeId, out var specTypeId) &&
+            ERDB.Schemas.SpecType.IsMeasurableSpec(dataTypeId, out var specTypeId) &&
             GH_Convert.ToDouble(value, out var number, GH_Conversion.Both)
           )
           {
             var unit_symbol = string.Empty;
-            if (specTypeId == SpecType.Measurable.Angle) unit_symbol = " ㎭";
-            else if (specTypeId == SpecType.Measurable.Length) unit_symbol = $" {GH_Format.RhinoUnitSymbol()}";
-            else if (specTypeId == SpecType.Measurable.Area) unit_symbol = $" {GH_Format.RhinoUnitSymbol()}²";
-            else if (specTypeId == SpecType.Measurable.Volume) unit_symbol = $" {GH_Format.RhinoUnitSymbol()}³";
+            if (specTypeId == ERDB.Schemas.SpecType.Measurable.Angle) unit_symbol = " ㎭";
+            else if (specTypeId == ERDB.Schemas.SpecType.Measurable.Length) unit_symbol = $" {GH_Format.RhinoUnitSymbol()}";
+            else if (specTypeId == ERDB.Schemas.SpecType.Measurable.Area) unit_symbol = $" {GH_Format.RhinoUnitSymbol()}²";
+            else if (specTypeId == ERDB.Schemas.SpecType.Measurable.Volume) unit_symbol = $" {GH_Format.RhinoUnitSymbol()}³";
 
-            using (var formatOptions = new DB.FormatValueOptions() { AppendUnitSymbol = true })
+            using (var formatOptions = new ARDB.FormatValueOptions() { AppendUnitSymbol = true })
             {
               var host = UnitConverter.InHostUnits(number, specTypeId);
 #if REVIT_2021
               var formated = DB.UnitFormatUtils.Format(element.Document.GetUnits(), specTypeId, host, forEditing: false, formatOptions);
 #else
-              var formated = DB.UnitFormatUtils.Format(element.Document.GetUnits(), specTypeId, host, maxAccuracy: false, forEditing: false, formatOptions);
+              var formated = ARDB.UnitFormatUtils.Format(element.Document.GetUnits(), specTypeId, host, maxAccuracy: false, forEditing: false, formatOptions);
 #endif
               message = $"Failed to set parameter '{parameter.Definition.Name}' to '{value}{unit_symbol}'. This value would be {formated} in Revit.";
             }
@@ -489,7 +491,7 @@ namespace RhinoInside.Revit.GH.Components.Element
 
       DA.SetData("Element", element);
 
-      Params.TrySetData(DA, "Parameter", () => new Types.ParameterKey(element.Document, parameter.Definition as DB.InternalDefinition));
+      Params.TrySetData(DA, "Parameter", () => new Types.ParameterKey(element.Document, parameter.Definition as ARDB.InternalDefinition));
       Params.TrySetData(DA, "Value", () => parameter.AsGoo());
     }
   }
@@ -591,11 +593,11 @@ namespace RhinoInside.Revit.GH.Components.Element
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
       var filterName = Params.GetData(DA, "Name", out string parameterName);
-      var filterGroup = Params.GetData(DA, "Group", out DBXS.ParameterGroup parameterGroup);
+      var filterGroup = Params.GetData(DA, "Group", out ERDB.Schemas.ParameterGroup parameterGroup);
       var filterReadOnly = Params.GetData(DA, "ReadOnly", out bool? readOnly);
 
-      var parameters = new List<DB.Parameter>(element.Value.Parameters.Size);
-      foreach (var group in element.Value.GetParameters(DBX.ParameterClass.Any).GroupBy(x => x.Definition?.GetGroupType() ?? DBXS.ParameterGroup.Empty).OrderBy(x => x.Key))
+      var parameters = new List<ARDB.Parameter>(element.Value.Parameters.Size);
+      foreach (var group in element.Value.GetParameters(ERDB.ParameterClass.Any).GroupBy(x => x.Definition?.GetGroupType() ?? ERDB.Schemas.ParameterGroup.Empty).OrderBy(x => x.Key))
       {
         foreach (var param in group.OrderBy(x => x.Id.IntegerValue))
         {
@@ -605,7 +607,7 @@ namespace RhinoInside.Revit.GH.Components.Element
           if (filterName && !param.Definition.Name.IsSymbolNameLike(parameterName))
             continue;
 
-          if (filterGroup && parameterGroup != (param.Definition?.GetGroupType() ?? DBXS.ParameterGroup.Empty))
+          if (filterGroup && parameterGroup != (param.Definition?.GetGroupType() ?? ERDB.Schemas.ParameterGroup.Empty))
             continue;
 
           if (filterReadOnly && readOnly != param.IsReadOnly)
@@ -620,7 +622,7 @@ namespace RhinoInside.Revit.GH.Components.Element
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.ElementParameters.Obsolete
 {
   using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
   using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;

@@ -1,31 +1,32 @@
 using System;
 using System.Collections.Generic;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.System.Collections.Generic;
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Design Option Set")]
   public class DesignOptionSet : Element
   {
-    protected override bool SetValue(DB.Element element) =>
+    protected override bool SetValue(ARDB.Element element) =>
       IsValidElement(element) && base.SetValue(element);
 
-    public static bool IsValidElement(DB.Element element) => IsValidElementFilter.PassesFilter(element);
+    public static bool IsValidElement(ARDB.Element element) => IsValidElementFilter.PassesFilter(element);
 
-    internal static readonly DB.ElementFilter IsValidElementFilter = new DB.LogicalAndFilter
+    internal static readonly ARDB.ElementFilter IsValidElementFilter = new ARDB.LogicalAndFilter
     (
-      new DB.ElementCategoryFilter(DB.BuiltInCategory.OST_DesignOptionSets),
+      new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_DesignOptionSets),
 #if REVIT_2021
-      new DB.ElementParameterFilter(new DB.HasValueFilterRule(new DB.ElementId(DB.BuiltInParameter.OPTION_SET_NAME)))
+      new ARDB.ElementParameterFilter(new DB.HasValueFilterRule(new DB.ElementId(DB.BuiltInParameter.OPTION_SET_NAME)))
 #else
-      new DB.ElementParameterFilter
+      new ARDB.ElementParameterFilter
       (
-        new DB.FilterStringRule
+        new ARDB.FilterStringRule
         (
-          new DB.ParameterValueProvider(new DB.ElementId(DB.BuiltInParameter.OPTION_SET_NAME)),
-          new DB.FilterStringEquals(), string.Empty, true
+          new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.OPTION_SET_NAME)),
+          new ARDB.FilterStringEquals(), string.Empty, true
         ),
         inverted: true
       )
@@ -33,15 +34,15 @@ namespace RhinoInside.Revit.GH.Types
     );
 
     public DesignOptionSet() { }
-    public DesignOptionSet(DB.Element value) : base(value) { }
-    public DesignOptionSet(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public DesignOptionSet(ARDB.Element value) : base(value) { }
+    public DesignOptionSet(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
 
     public IList<DesignOption> Options
     {
       get
       {
-        if (Value is DB.Element set)
-          return set.GetDependents<DB.DesignOption>().ConvertAll(x => new DesignOption(x));
+        if (Value is ARDB.Element set)
+          return set.GetDependents<ARDB.DesignOption>().ConvertAll(x => new DesignOption(x));
 
         return default;
       }
@@ -51,19 +52,19 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Design Option")]
   public class DesignOption : Element
   {
-    protected override Type ValueType => typeof(DB.DesignOption);
-    public new DB.DesignOption Value => base.Value as DB.DesignOption;
+    protected override Type ValueType => typeof(ARDB.DesignOption);
+    public new ARDB.DesignOption Value => base.Value as ARDB.DesignOption;
 
     public override string DisplayName
     {
       get
       {
-        if (Value is DB.DesignOption option)
+        if (Value is ARDB.DesignOption option)
         {
-          var set = Document.GetElement(option.get_Parameter(DB.BuiltInParameter.OPTION_SET_ID).AsElementId());
+          var set = Document.GetElement(option.get_Parameter(ARDB.BuiltInParameter.OPTION_SET_ID).AsElementId());
           return $"{set.Name}\\{Name}";
         }
-        else if (Document is null && Id == DB.ElementId.InvalidElementId)
+        else if (Document is null && Id == ARDB.ElementId.InvalidElementId)
         {
           return "Main Model";
         }
@@ -73,16 +74,16 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public DesignOption() { }
-    public DesignOption(DB.DesignOption value) : base(value) { }
-    public DesignOption(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public DesignOption(ARDB.DesignOption value) : base(value) { }
+    public DesignOption(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
 
     public override string Name
     {
       get
       {
-        if (Value is DB.DesignOption option)
-          return option.get_Parameter(DB.BuiltInParameter.OPTION_NAME).AsString();
-        else if (Document is null && Id == DB.ElementId.InvalidElementId)
+        if (Value is ARDB.DesignOption option)
+          return option.get_Parameter(ARDB.BuiltInParameter.OPTION_NAME).AsString();
+        else if (Document is null && Id == ARDB.ElementId.InvalidElementId)
           return "Main Model";
 
         return default;
@@ -91,9 +92,9 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object)
         {
-          if (Value is DB.DesignOption option)
-            option.get_Parameter(DB.BuiltInParameter.OPTION_NAME).Update(value);
-          else if (Document is null && Id == DB.ElementId.InvalidElementId && value != "Main Model")
+          if (Value is ARDB.DesignOption option)
+            option.get_Parameter(ARDB.BuiltInParameter.OPTION_NAME).Update(value);
+          else if (Document is null && Id == ARDB.ElementId.InvalidElementId && value != "Main Model")
             throw new InvalidOperationException($"Design option 'Main Model' does not support assignment of a user-specified name.");
         }
       }
@@ -103,9 +104,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.DesignOption option)
+        if (Value is ARDB.DesignOption option)
           return option.IsPrimary;
-        else if (Document is null && Id == DB.ElementId.InvalidElementId)
+        else if (Document is null && Id == ARDB.ElementId.InvalidElementId)
           return true;
 
         return default;
@@ -116,9 +117,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.DesignOption option)
-          return new DesignOptionSet(Document, option.get_Parameter(DB.BuiltInParameter.OPTION_SET_ID).AsElementId());
-        else if (Document is null && Id == DB.ElementId.InvalidElementId)
+        if (Value is ARDB.DesignOption option)
+          return new DesignOptionSet(Document, option.get_Parameter(ARDB.BuiltInParameter.OPTION_SET_ID).AsElementId());
+        else if (Document is null && Id == ARDB.ElementId.InvalidElementId)
           return new DesignOptionSet();
 
         return default;

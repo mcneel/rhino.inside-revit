@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
+  using Convert.Geometry;
+  using Kernel.Attributes;
+
   public class FormByCurves : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("42631B6E-505E-4091-981A-E7605AE5A1FF");
@@ -26,10 +27,10 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructFormByCurves
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), Description("New Form")]
-      ref DB.GenericForm form,
+      ref ARDB.GenericForm form,
 
       IList<Rhino.Geometry.Curve> profiles
     )
@@ -52,28 +53,28 @@ namespace RhinoInside.Revit.GH.Components
         var profile = profiles[0];
         var plane = planes[0];
 
-        using (var sketchPlane = DB.SketchPlane.Create(document, plane.ToPlane()))
-        using (var referenceArray = new DB.ReferenceArray())
+        using (var sketchPlane = ARDB.SketchPlane.Create(document, plane.ToPlane()))
+        using (var referenceArray = new ARDB.ReferenceArray())
         {
           foreach (var curve in profile.ToCurveMany())
-            referenceArray.Append(new DB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
+            referenceArray.Append(new ARDB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
           ReplaceElement(ref form, document.FamilyCreate.NewFormByCap(true, referenceArray));
         }
       }
       else
       {
-        using (var referenceArrayArray = new DB.ReferenceArrayArray())
+        using (var referenceArrayArray = new ARDB.ReferenceArrayArray())
         {
           int index = 0;
           foreach (var profile in profiles)
           {
-            using (var sketchPlane = DB.SketchPlane.Create(document, planes[index++].ToPlane()))
+            using (var sketchPlane = ARDB.SketchPlane.Create(document, planes[index++].ToPlane()))
             {
-              var referenceArray = new DB.ReferenceArray();
+              var referenceArray = new ARDB.ReferenceArray();
 
               foreach (var curve in profile.ToCurveMany())
-                referenceArray.Append(new DB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
+                referenceArray.Append(new ARDB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
               referenceArrayArray.Append(referenceArray);
             }

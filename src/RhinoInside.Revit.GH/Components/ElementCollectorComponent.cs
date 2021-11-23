@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -9,22 +9,22 @@ namespace RhinoInside.Revit.GH.Components
     protected ElementCollectorComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected virtual DB.ElementFilter ElementFilter { get; } = default;
+    protected virtual ARDB.ElementFilter ElementFilter { get; } = default;
     public override bool NeedsToBeExpired
     (
-      DB.Document document,
-      ICollection<DB.ElementId> added,
-      ICollection<DB.ElementId> deleted,
-      ICollection<DB.ElementId> modified
+      ARDB.Document document,
+      ICollection<ARDB.ElementId> added,
+      ICollection<ARDB.ElementId> deleted,
+      ICollection<ARDB.ElementId> modified
     )
     {
       var elementFilter = ElementFilter;
       var _Filter_ = Params.IndexOfInputParam("Filter");
       var filters = _Filter_ < 0 ?
-                    Enumerable.Empty<DB.ElementFilter>() :
+                    Enumerable.Empty<ARDB.ElementFilter>() :
                     Params.Input[_Filter_].VolatileData.AllData(true).
                     OfType<Types.ElementFilter>().
-                    Select(x => new DB.LogicalAndFilter(elementFilter, x.Value));
+                    Select(x => new ARDB.LogicalAndFilter(elementFilter, x.Value));
 
       foreach (var filter in filters.Any() ? filters : Enumerable.Repeat(elementFilter, 1))
       {
@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (deleted.Count > 0)
         {
-          var empty = new DB.ElementId[0];
+          var empty = new ARDB.ElementId[0];
           foreach (var param in Params.Output.OfType<Kernel.IGH_ElementIdParam>())
           {
             if (param.NeedsToBeExpired(document, empty, deleted, empty))
@@ -48,62 +48,62 @@ namespace RhinoInside.Revit.GH.Components
       return false;
     }
 
-    protected static bool TryGetFilterIntegerParam(DB.BuiltInParameter paramId, int pattern, out DB.ElementFilter filter)
+    protected static bool TryGetFilterIntegerParam(ARDB.BuiltInParameter paramId, int pattern, out ARDB.ElementFilter filter)
     {
-      var rule = new DB.FilterIntegerRule
+      var rule = new ARDB.FilterIntegerRule
       (
-        new DB.ParameterValueProvider(new DB.ElementId(paramId)),
-        new DB.FilterNumericEquals(),
+        new ARDB.ParameterValueProvider(new ARDB.ElementId(paramId)),
+        new ARDB.FilterNumericEquals(),
         pattern
       );
 
-      filter = new DB.ElementParameterFilter(rule, false);
+      filter = new ARDB.ElementParameterFilter(rule, false);
       return true;
     }
 
-    protected static bool TryGetFilterDoubleParam(DB.BuiltInParameter paramId, double pattern, out DB.ElementFilter filter)
+    protected static bool TryGetFilterDoubleParam(ARDB.BuiltInParameter paramId, double pattern, out ARDB.ElementFilter filter)
     {
-      var rule = new DB.FilterDoubleRule
+      var rule = new ARDB.FilterDoubleRule
       (
-        new DB.ParameterValueProvider(new DB.ElementId(paramId)),
-        new DB.FilterNumericEquals(),
+        new ARDB.ParameterValueProvider(new ARDB.ElementId(paramId)),
+        new ARDB.FilterNumericEquals(),
         pattern,
         1e-6
       );
 
-      filter = new DB.ElementParameterFilter(rule, false);
+      filter = new ARDB.ElementParameterFilter(rule, false);
       return true;
     }
 
-    protected static bool TryGetFilterDoubleParam(DB.BuiltInParameter paramId, double pattern, double tolerance, out DB.ElementFilter filter)
+    protected static bool TryGetFilterDoubleParam(ARDB.BuiltInParameter paramId, double pattern, double tolerance, out ARDB.ElementFilter filter)
     {
-      var rule = new DB.FilterDoubleRule
+      var rule = new ARDB.FilterDoubleRule
       (
-        new DB.ParameterValueProvider(new DB.ElementId(paramId)),
-        new DB.FilterNumericEquals(),
+        new ARDB.ParameterValueProvider(new ARDB.ElementId(paramId)),
+        new ARDB.FilterNumericEquals(),
         pattern,
         tolerance
       );
 
-      filter = new DB.ElementParameterFilter(rule, false);
+      filter = new ARDB.ElementParameterFilter(rule, false);
       return true;
     }
 
-    protected static bool TryGetFilterLengthParam(DB.BuiltInParameter paramId, double pattern, out DB.ElementFilter filter)
+    protected static bool TryGetFilterLengthParam(ARDB.BuiltInParameter paramId, double pattern, out ARDB.ElementFilter filter)
     {
-      var rule = new DB.FilterDoubleRule
+      var rule = new ARDB.FilterDoubleRule
       (
-        new DB.ParameterValueProvider(new DB.ElementId(paramId)),
-        new DB.FilterNumericEquals(),
+        new ARDB.ParameterValueProvider(new ARDB.ElementId(paramId)),
+        new ARDB.FilterNumericEquals(),
         pattern,
         Revit.VertexTolerance
       );
 
-      filter = new DB.ElementParameterFilter(rule, false);
+      filter = new ARDB.ElementParameterFilter(rule, false);
       return true;
     }
 
-    protected internal static bool TryGetFilterStringParam(DB.BuiltInParameter paramId, ref string pattern, out DB.ElementFilter filter)
+    protected internal static bool TryGetFilterStringParam(ARDB.BuiltInParameter paramId, ref string pattern, out ARDB.ElementFilter filter)
     {
       if (pattern is string subPattern)
       {
@@ -111,24 +111,24 @@ namespace RhinoInside.Revit.GH.Components
         var method = Operator.CompareMethodFromPattern(ref subPattern, ref inverted);
         if (Operator.CompareMethod.Nothing < method && method < Operator.CompareMethod.Wildcard)
         {
-          var evaluator = default(DB.FilterStringRuleEvaluator);
+          var evaluator = default(ARDB.FilterStringRuleEvaluator);
           switch (method)
           {
-            case Operator.CompareMethod.Equals: evaluator = new DB.FilterStringEquals(); break;
-            case Operator.CompareMethod.StartsWith: evaluator = new DB.FilterStringBeginsWith(); break;
-            case Operator.CompareMethod.EndsWith: evaluator = new DB.FilterStringEndsWith(); break;
-            case Operator.CompareMethod.Contains: evaluator = new DB.FilterStringContains(); break;
+            case Operator.CompareMethod.Equals: evaluator = new ARDB.FilterStringEquals(); break;
+            case Operator.CompareMethod.StartsWith: evaluator = new ARDB.FilterStringBeginsWith(); break;
+            case Operator.CompareMethod.EndsWith: evaluator = new ARDB.FilterStringEndsWith(); break;
+            case Operator.CompareMethod.Contains: evaluator = new ARDB.FilterStringContains(); break;
           }
 
-          var rule = new DB.FilterStringRule
+          var rule = new ARDB.FilterStringRule
           (
-            new DB.ParameterValueProvider(new DB.ElementId(paramId)),
+            new ARDB.ParameterValueProvider(new ARDB.ElementId(paramId)),
             evaluator,
             subPattern,
             true
           );
 
-          filter = new DB.ElementParameterFilter(rule, inverted);
+          filter = new ARDB.ElementParameterFilter(rule, inverted);
           pattern = default;
           return true;
         }
@@ -138,16 +138,16 @@ namespace RhinoInside.Revit.GH.Components
       return false;
     }
 
-    protected static bool TryGetFilterElementIdParam(DB.BuiltInParameter paramId, DB.ElementId pattern, out DB.ElementFilter filter)
+    protected static bool TryGetFilterElementIdParam(ARDB.BuiltInParameter paramId, ARDB.ElementId pattern, out ARDB.ElementFilter filter)
     {
-      var rule = new DB.FilterElementIdRule
+      var rule = new ARDB.FilterElementIdRule
       (
-        new DB.ParameterValueProvider(new DB.ElementId(paramId)),
-        new DB.FilterNumericEquals(),
+        new ARDB.ParameterValueProvider(new ARDB.ElementId(paramId)),
+        new ARDB.FilterNumericEquals(),
         pattern
       );
 
-      filter = new DB.ElementParameterFilter(rule, false);
+      filter = new ARDB.ElementParameterFilter(rule, false);
       return true;
     }
   }

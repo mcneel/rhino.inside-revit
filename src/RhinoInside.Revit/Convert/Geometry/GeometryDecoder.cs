@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Rhino.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
@@ -19,35 +19,35 @@ namespace RhinoInside.Revit.Convert.Geometry
     #region Context
     internal sealed class Context : State<Context>
     {
-      public DB.Element Element = default;
-      public DB.Visibility Visibility = DB.Visibility.Invisible;
-      public DB.Category Category = default;
-      public DB.Material Material = default;
-      public DB.ElementId[] FaceMaterialId;
+      public ARDB.Element Element = default;
+      public ARDB.Visibility Visibility = ARDB.Visibility.Invisible;
+      public ARDB.Category Category = default;
+      public ARDB.Material Material = default;
+      public ARDB.ElementId[] FaceMaterialId;
     }
     #endregion
 
     #region Geometry values
-    public static Point2d ToPoint2d(this DB.UV value)
+    public static Point2d ToPoint2d(this ARDB.UV value)
     { var rhino = RawDecoder.AsPoint2d(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
-    public static Vector2d ToVector2d(this DB.UV value)
+    public static Vector2d ToVector2d(this ARDB.UV value)
     { return new Vector2d(value.U, value.V); }
 
-    public static Point3d ToPoint3d(this DB.XYZ value)
+    public static Point3d ToPoint3d(this ARDB.XYZ value)
     { var rhino = RawDecoder.AsPoint3d(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
-    public static Vector3d ToVector3d(this DB.XYZ value)
+    public static Vector3d ToVector3d(this ARDB.XYZ value)
     { return new Vector3d(value.X, value.Y, value.Z); }
 
-    public static Plane ToPlane(this DB.Plane value)
+    public static Plane ToPlane(this ARDB.Plane value)
     { var rhino = RawDecoder.AsPlane(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Transform ToTransform(this DB.Transform value)
+    public static Transform ToTransform(this ARDB.Transform value)
     { var rhino = RawDecoder.AsTransform(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static BoundingBox ToBoundingBox(this DB.BoundingBoxXYZ value)
+    public static BoundingBox ToBoundingBox(this ARDB.BoundingBoxXYZ value)
     { var rhino = RawDecoder.AsBoundingBox(value); UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static BoundingBox ToBoundingBox(this DB.BoundingBoxXYZ value, out Transform transform)
+    public static BoundingBox ToBoundingBox(this ARDB.BoundingBoxXYZ value, out Transform transform)
     {
       var rhino = RawDecoder.AsBoundingBox(value, out transform);
       UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits);
@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       return rhino;
     }
 
-    public static Interval[] ToIntervals(DB.BoundingBoxUV value)
+    public static Interval[] ToIntervals(ARDB.BoundingBoxUV value)
     {
       return !value.IsUnset() ?
       new Interval[]
@@ -70,12 +70,12 @@ namespace RhinoInside.Revit.Convert.Geometry
       };
     }
 
-    public static BoundingBox ToBoundingBox(this DB.Outline value)
+    public static BoundingBox ToBoundingBox(this ARDB.Outline value)
     {
       return new BoundingBox(value.MinimumPoint.ToPoint3d(), value.MaximumPoint.ToPoint3d());
     }
 
-    public static Box ToBox(this DB.BoundingBoxXYZ value)
+    public static Box ToBox(this ARDB.BoundingBoxXYZ value)
     {
       var rhino = RawDecoder.AsBoundingBox(value, out var transform);
       UnitConverter.Scale(ref rhino, UnitConverter.ToRhinoUnits);
@@ -97,47 +97,47 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region GeometryBase
-    public static Point ToPoint(this DB.Point value)
+    public static Point ToPoint(this ARDB.Point value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Curve ToCurve(this DB.Line value)
+    public static Curve ToCurve(this ARDB.Line value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Curve ToCurve(this DB.Arc value)
+    public static Curve ToCurve(this ARDB.Arc value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Curve ToCurve(this DB.Ellipse value)
+    public static Curve ToCurve(this ARDB.Ellipse value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Curve ToCurve(this DB.NurbSpline value)
+    public static Curve ToCurve(this ARDB.NurbSpline value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Curve ToCurve(this DB.HermiteSpline value)
+    public static Curve ToCurve(this ARDB.HermiteSpline value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Curve ToCurve(this DB.CylindricalHelix value)
+    public static Curve ToCurve(this ARDB.CylindricalHelix value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Curve ToCurve(this DB.Curve value)
+    public static Curve ToCurve(this ARDB.Curve value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static PolylineCurve ToPolylineCurve(this DB.PolyLine value)
+    public static PolylineCurve ToPolylineCurve(this ARDB.PolyLine value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Brep ToBrep(this DB.Face value)
+    public static Brep ToBrep(this ARDB.Face value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Brep ToBrep(this DB.Solid value)
+    public static Brep ToBrep(this ARDB.Solid value)
     { var rhino = RawDecoder.ToRhino(value); UnitConverter.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
 
-    public static Mesh ToMesh(this DB.Mesh value) =>
+    public static Mesh ToMesh(this ARDB.Mesh value) =>
       MeshDecoder.FromRawMesh(MeshDecoder.ToRhino(value), UnitConverter.ToRhinoUnits);
     #endregion
 
     /// <summary>
-    /// Converts a <see cref="DB.CurveLoop"/> into a Rhino <see cref="Curve"/>
+    /// Converts a <see cref="ARDB.CurveLoop"/> into a Rhino <see cref="Curve"/>
     /// </summary>
-    public static Curve ToCurve(this DB.CurveLoop value)
+    public static Curve ToCurve(this ARDB.CurveLoop value)
     {
       if (value.NumberOfCurves() == 1)
         return value.First().ToCurve();
@@ -154,36 +154,36 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     /// <summary>
-    /// Converts a <see cref="DB.CurveArray"/> into a Rhino <see cref="Curve"/>[]
+    /// Converts a <see cref="ARDB.CurveArray"/> into a Rhino <see cref="Curve"/>[]
     /// </summary>
-    /// <seealso cref="ToPolyCurves(DB.CurveArrArray)"/>
-    public static Curve[] ToCurves(this DB.CurveArray value)
+    /// <seealso cref="ToPolyCurves(ARDB.CurveArrArray)"/>
+    public static Curve[] ToCurves(this ARDB.CurveArray value)
     {
       var count = value.Size;
       var curves = new Curve[count];
 
       int index = 0;
-      foreach (var curve in value.Cast<DB.Curve>())
+      foreach (var curve in value.Cast<ARDB.Curve>())
         curves[index++] = curve.ToCurve();
 
       return curves;
     }
 
     /// <summary>
-    /// Converts a <see cref="DB.CurveArrArray"/> into a <see cref="PolyCurve"/>[]
+    /// Converts a <see cref="ARDB.CurveArrArray"/> into a <see cref="PolyCurve"/>[]
     /// </summary>
-    /// <seealso cref="ToCurves(DB.CurveArrArray)"/>
-    public static PolyCurve[] ToPolyCurves(this DB.CurveArrArray value)
+    /// <seealso cref="ToCurves(ARDB.CurveArrArray)"/>
+    public static PolyCurve[] ToPolyCurves(this ARDB.CurveArrArray value)
     {
       var count = value.Size;
       var list = new PolyCurve[count];
 
       int index = 0;
-      foreach (var curveArray in value.Cast<DB.CurveArray>())
+      foreach (var curveArray in value.Cast<ARDB.CurveArray>())
       {
         var polycurve = new PolyCurve();
 
-        foreach (var curve in curveArray.Cast<DB.Curve>())
+        foreach (var curve in curveArray.Cast<ARDB.Curve>())
           polycurve.AppendSegment(curve.ToCurve());
 
         polycurve.MakeClosed(Revit.VertexTolerance * Revit.ModelUnits);
@@ -195,47 +195,47 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     /// <summary>
-    /// Update Context from <see cref="DB.GeometryObject"/> <paramref name="geometryObject"/>
+    /// Update Context from <see cref="ARDB.GeometryObject"/> <paramref name="geometryObject"/>
     /// </summary>
     /// <param name="geometryObject"></param>
-    internal static void UpdateGraphicAttributes(DB.GeometryObject geometryObject)
+    internal static void UpdateGraphicAttributes(ARDB.GeometryObject geometryObject)
     {
       if (geometryObject is object)
       {
         var context = Context.Peek;
-        if (context.Element is DB.Element element)
+        if (context.Element is ARDB.Element element)
         {
           context.Visibility = geometryObject.Visibility;
 
-          if (geometryObject is DB.GeometryInstance instance)
+          if (geometryObject is ARDB.GeometryInstance instance)
           {
             context.Element = instance.Symbol;
             context.Category = instance.Symbol.Category ?? context.Category;
             context.Material = context.Category?.Material;
           }
-          else if (geometryObject is DB.GeometryElement geometry)
+          else if (geometryObject is ARDB.GeometryElement geometry)
           {
             context.Material = geometry.MaterialElement;
           }
-          else if (geometryObject is DB.Solid solid)
+          else if (geometryObject is ARDB.Solid solid)
           {
             if (!solid.Faces.IsEmpty)
             {
               var faces = solid.Faces;
               var count = faces.Size;
 
-              context.FaceMaterialId = new DB.ElementId[count];
+              context.FaceMaterialId = new ARDB.ElementId[count];
               for (int f = 0; f < count; ++f)
                 context.FaceMaterialId[f] = faces.get_Item(f).MaterialElementId;
             }
           }
-          else if (geometryObject is DB.Mesh mesh)
+          else if (geometryObject is ARDB.Mesh mesh)
           {
-            context.FaceMaterialId = new DB.ElementId[] { mesh.MaterialElementId };
+            context.FaceMaterialId = new ARDB.ElementId[] { mesh.MaterialElementId };
           }
 
-          if (geometryObject.GraphicsStyleId != DB.ElementId.InvalidElementId)
-            context.Category = (element.Document.GetElement(geometryObject.GraphicsStyleId) as DB.GraphicsStyle).GraphicsStyleCategory;
+          if (geometryObject.GraphicsStyleId != ARDB.ElementId.InvalidElementId)
+            context.Category = (element.Document.GetElement(geometryObject.GraphicsStyleId) as ARDB.GraphicsStyle).GraphicsStyleCategory;
         }
       }
     }
@@ -252,21 +252,21 @@ namespace RhinoInside.Revit.Convert.Geometry
         var context = Context.Peek;
         if (context.Element is object)
         {
-          if (context.Category is DB.Category category)
-            geometry.TrySetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), category.Id);
+          if (context.Category is ARDB.Category category)
+            geometry.TrySetUserString(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), category.Id);
 
-          if (context.Material is DB.Material material)
-            geometry.TrySetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), material.Id);
+          if (context.Material is ARDB.Material material)
+            geometry.TrySetUserString(ARDB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), material.Id);
         }
       }
 
       return geometry;
     }
 
-    public static IEnumerable<GeometryBase> ToGeometryBaseMany(this DB.GeometryObject geometry) =>
+    public static IEnumerable<GeometryBase> ToGeometryBaseMany(this ARDB.GeometryObject geometry) =>
       ToGeometryBaseMany(geometry, _ => true);
 
-    internal static IEnumerable<GeometryBase> ToGeometryBaseMany(this DB.GeometryObject geometry, Func<DB.GeometryObject, bool> visitor)
+    internal static IEnumerable<GeometryBase> ToGeometryBaseMany(this ARDB.GeometryObject geometry, Func<ARDB.GeometryObject, bool> visitor)
     {
       UpdateGraphicAttributes(geometry);
 
@@ -274,29 +274,29 @@ namespace RhinoInside.Revit.Convert.Geometry
       {
         switch (geometry)
         {
-          case DB.GeometryElement element:
+          case ARDB.GeometryElement element:
             foreach (var g in element.SelectMany(x => x.ToGeometryBaseMany(visitor)))
               yield return g;
             yield break;
 
-          case DB.GeometryInstance instance:
+          case ARDB.GeometryInstance instance:
             foreach (var g in instance.GetInstanceGeometry().ToGeometryBaseMany(visitor))
               yield return g;
             yield break;
 
-          case DB.Mesh mesh:
+          case ARDB.Mesh mesh:
             yield return SetGraphicAttributes(mesh.ToMesh());
             yield break;
 
-          case DB.Solid solid:
+          case ARDB.Solid solid:
             yield return SetGraphicAttributes(solid.ToBrep());
             yield break;
 
-          case DB.Curve curve:
+          case ARDB.Curve curve:
             yield return SetGraphicAttributes(curve.ToCurve());
             yield break;
 
-          case DB.PolyLine polyline:
+          case ARDB.PolyLine polyline:
             yield return SetGraphicAttributes(polyline.ToPolylineCurve());
             yield break;
         }

@@ -8,13 +8,14 @@ using Autodesk.Revit.Utility;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.Convert.System.Drawing;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Material
+namespace RhinoInside.Revit.GH.Components.Materials
 {
+  using Convert.System.Drawing;
+  using External.DB.Extensions;
+  using GH.ElementTracking;
+
   public class MaterialByColor : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("273FF43D-B771-4EB7-A66D-5DA5F7F2731E");
@@ -70,9 +71,9 @@ namespace RhinoInside.Revit.GH.Components.Material
     const string _Material_ = "Material";
     const string _Asset_ = "Appearance Asset";
 
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
-      DB.BuiltInParameter.MATERIAL_NAME
+      ARDB.BuiltInParameter.MATERIAL_NAME
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -85,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       if (name is null)
         name = GetMaterialName(template);
 
-      if (Params.ReadTrackedElement(_Material_, doc.Value, out DB.Material material))
+      if (Params.ReadTrackedElement(_Material_, doc.Value, out ARDB.Material material))
       {
         StartTransaction(doc.Value);
         material = Reconstruct(material, doc.Value, name, template);
@@ -94,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         DA.SetData(_Material_, material);
       }
 
-      if (Params.ReadTrackedElement(_Asset_, doc.Value, out DB.AppearanceAssetElement asset))
+      if (Params.ReadTrackedElement(_Asset_, doc.Value, out ARDB.AppearanceAssetElement asset))
       {
         StartTransaction(doc.Value);
         asset = Reconstruct(asset, doc.Value, name, template);
@@ -105,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         }
         else
         {
-          material.AppearanceAssetId = DB.ElementId.InvalidElementId;
+          material.AppearanceAssetId = ARDB.ElementId.InvalidElementId;
           material.UseRenderAppearanceForShading = false;
         }
 
@@ -150,7 +151,7 @@ namespace RhinoInside.Revit.GH.Components.Material
     #endregion
 
     #region Material
-    bool Reuse(DB.Material material, string name, GH_Material template)
+    bool Reuse(ARDB.Material material, string name, GH_Material template)
     {
       if (material is null) return false;
       if (name is object) material.Name = name;
@@ -162,22 +163,22 @@ namespace RhinoInside.Revit.GH.Components.Material
       return true;
     }
 
-    DB.Material CreateMaterial(DB.Document doc, string name, GH_Material template)
+    ARDB.Material CreateMaterial(ARDB.Document doc, string name, GH_Material template)
     {
-      var material = default(DB.Material);
+      var material = default(ARDB.Material);
 
       // Make sure the name is unique
       {
         name = doc.GetNamesakeElements
         (
-          typeof(DB.Material), name, categoryId: DB.BuiltInCategory.OST_Materials
+          typeof(ARDB.Material), name, categoryId: ARDB.BuiltInCategory.OST_Materials
         ).
         Select(x => x.Name).
         WhereNamePrefixedWith(name).
         NextNameOrDefault() ?? name;
       }
 
-      material = doc.GetElement(DB.Material.Create(doc, name)) as DB.Material;
+      material = doc.GetElement(ARDB.Material.Create(doc, name)) as ARDB.Material;
       material.MaterialCategory = material.MaterialClass = "Display";
 
       if (template is object)
@@ -190,7 +191,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       return material;
     }
 
-    DB.Material Reconstruct(DB.Material material, DB.Document doc, string name, GH_Material template)
+    ARDB.Material Reconstruct(ARDB.Material material, ARDB.Document doc, string name, GH_Material template)
     {
       if (!Reuse(material, name, template))
       {
@@ -206,7 +207,7 @@ namespace RhinoInside.Revit.GH.Components.Material
     #endregion
 
     #region AppearanceAssetElement
-    bool Reuse(DB.AppearanceAssetElement assetElement, string name, GH_Material template)
+    bool Reuse(ARDB.AppearanceAssetElement assetElement, string name, GH_Material template)
     {
       if (assetElement is null) return false;
       if (name is object) assetElement.Name = name;
@@ -244,15 +245,15 @@ namespace RhinoInside.Revit.GH.Components.Material
       return true;
     }
 
-    DB.AppearanceAssetElement CreateAppearanceAsset(DB.Document doc, string name, GH_Material template)
+    ARDB.AppearanceAssetElement CreateAppearanceAsset(ARDB.Document doc, string name, GH_Material template)
     {
-      var assetElement = default(DB.AppearanceAssetElement);
+      var assetElement = default(ARDB.AppearanceAssetElement);
 
       // Make sure the name is unique
       {
         name = doc.GetNamesakeElements
         (
-          typeof(DB.AppearanceAssetElement), name, categoryId: DB.BuiltInCategory.INVALID
+          typeof(ARDB.AppearanceAssetElement), name, categoryId: ARDB.BuiltInCategory.INVALID
         ).
         Select(x => x.Name).
         WhereNamePrefixedWith(name).
@@ -261,13 +262,13 @@ namespace RhinoInside.Revit.GH.Components.Material
 
       var assets = doc.Application.GetAssets(AssetType.Appearance);
       var asset = assets.Where(x => x.Name == "Generic").FirstOrDefault();
-      assetElement = DB.AppearanceAssetElement.Create(doc, name, asset);
+      assetElement = ARDB.AppearanceAssetElement.Create(doc, name, asset);
 
       Reuse(assetElement, default, template);
       return assetElement;
     }
 
-    DB.AppearanceAssetElement Reconstruct(DB.AppearanceAssetElement asset, DB.Document doc, string name, GH_Material template)
+    ARDB.AppearanceAssetElement Reconstruct(ARDB.AppearanceAssetElement asset, ARDB.Document doc, string name, GH_Material template)
     {
       if (!Reuse(asset, name, template))
       {

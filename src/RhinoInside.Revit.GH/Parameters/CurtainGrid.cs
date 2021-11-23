@@ -1,6 +1,6 @@
 using System;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
   }
 
-  public class CurtainCell : Param<Types.DataObject<DB.CurtainCell>>
+  public class CurtainCell : Param<Types.DataObject<ARDB.CurtainCell>>
   {
     public override Guid ComponentGuid => new Guid("F25FAC7B-B338-4E12-A974-F2238E3B83C2");
     public override GH_Exposure Exposure => GH_Exposure.hidden;

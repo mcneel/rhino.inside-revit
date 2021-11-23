@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Host
+namespace RhinoInside.Revit.GH.Components.Hosts
 {
   public class ConstructCompoundStructure : ZuiComponent
   {

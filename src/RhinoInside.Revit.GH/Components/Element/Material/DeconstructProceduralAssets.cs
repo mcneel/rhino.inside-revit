@@ -2,7 +2,7 @@ using System;
 
 using Grasshopper.Kernel;
 
-namespace RhinoInside.Revit.GH.Components.Material
+namespace RhinoInside.Revit.GH.Components.Materials
 {
 #if REVIT_2018
   public abstract class DeconstructTextureAsset<T>

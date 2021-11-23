@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ModelElements
 {
   public class QueryGroupTypes : ElementCollectorComponent
   {
@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "G";
 
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.GroupType));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.GroupType));
 
     public QueryGroupTypes() : base
     (
@@ -46,20 +46,20 @@ namespace RhinoInside.Revit.GH.Components
       string name = null;
       DA.GetData("Name", ref name);
 
-      DB.ElementFilter filter = null;
+      ARDB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var viewsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           viewsCollector = viewsCollector.WherePasses(filter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
           viewsCollector = viewsCollector.WherePasses(nameFilter);
 
-        var groupTypes = collector.Cast<DB.GroupType>();
+        var groupTypes = collector.Cast<ARDB.GroupType>();
 
         if (!string.IsNullOrEmpty(name))
           groupTypes = groupTypes.Where(x => x.Name.IsSymbolNameLike(name));

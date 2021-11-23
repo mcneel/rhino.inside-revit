@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
+  using Convert.System.Collections.Generic;
+  using External.DB;
+  using External.DB.Extensions;
+
   public class QueryElement : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("BBCF5D5C-9ABC-4E28-861A-584644EDFC3D");
@@ -46,11 +47,11 @@ namespace RhinoInside.Revit.GH.Components
       switch (goo)
       {
         case Types.CategoryId c:
-          DA.SetData("Element", Types.Category.FromElementId(doc, new DB.ElementId(c.Value)));
+          DA.SetData("Element", Types.Category.FromElementId(doc, new ARDB.ElementId(c.Value)));
           return;
 
         case Types.ParameterId p:
-          DA.SetData("Element", Types.ParameterKey.FromElementId(doc, new DB.ElementId(p.Value)));
+          DA.SetData("Element", Types.ParameterKey.FromElementId(doc, new ARDB.ElementId(p.Value)));
           return;
       }
 
@@ -61,13 +62,13 @@ namespace RhinoInside.Revit.GH.Components
         case double n:
           if (!double.IsNaN(n))
           {
-            try { DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(System.Convert.ToInt32(n)))); }
+            try { DA.SetData("Element", Types.Element.FromElementId(doc, new ARDB.ElementId(System.Convert.ToInt32(n)))); }
             catch { }
           }
           return;
 
         case int i:
-          DA.SetData("Element", Types.Element.FromElementId(doc, new DB.ElementId(i)));
+          DA.SetData("Element", Types.Element.FromElementId(doc, new ARDB.ElementId(i)));
           return;
 
         case string s:
@@ -90,7 +91,7 @@ namespace RhinoInside.Revit.GH.Components
 
           if (int.TryParse(s, out var index))
           {
-            if (doc.GetElement(new DB.ElementId(index)) is DB.Element element)
+            if (doc.GetElement(new ARDB.ElementId(index)) is ARDB.Element element)
               DA.SetData("Element", Types.Element.FromElement(element));
 
             return;
@@ -105,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("0F7DA57E-6C05-4DD0-AABF-69E42DF38859");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
-    protected override DB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter(inverted: true);
+    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter(inverted: true);
 
     static readonly string[] keywords = new string[] { "Count" };
     public override IEnumerable<string> Keywords => Enumerable.Concat(base.Keywords, keywords);
@@ -141,7 +142,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.GetData(DA, "Filter", out Types.ElementFilter filter, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Limit", out int? limit, x => x >= 0)) return;
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter).
           WherePasses(filter.Value);
@@ -182,7 +183,7 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("79DAEA3A-13A3-49BF-8BEB-AA28E3BE4515");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(inverted: true);
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementIsElementTypeFilter(inverted: true);
 
     public QueryViewElements() : base
     (
@@ -212,9 +213,9 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
-      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new DB.FilteredElementCollector(view.Document, view.Id))
+      using (var collector = new ARDB.FilteredElementCollector(view.Document, view.Id))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 

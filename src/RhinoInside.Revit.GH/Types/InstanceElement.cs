@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARBD = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   /// <summary>
-  /// Interface that represents any <see cref="DB.Element"/> that is a geometric element but is also in a category.
+  /// Interface that represents any <see cref="ARBD.Element"/> that is a geometric element but is also in a category.
   /// </summary>
   [Kernel.Attributes.Name("Instance Element")]
   public interface IGH_InstanceElement : IGH_GeometricElement
@@ -20,10 +21,10 @@ namespace RhinoInside.Revit.GH.Types
   public class InstanceElement : GeometricElement, IGH_InstanceElement
   {
     public InstanceElement() { }
-    public InstanceElement(DB.Element element) : base(element) { }
+    public InstanceElement(ARBD.Element element) : base(element) { }
 
-    protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
-    public static new bool IsValidElement(DB.Element element)
+    protected override bool SetValue(ARBD.Element element) => IsValidElement(element) && base.SetValue(element);
+    public static new bool IsValidElement(ARBD.Element element)
     {
       if (element?.Category is null)
         return false;
@@ -31,7 +32,7 @@ namespace RhinoInside.Revit.GH.Types
       return GeometricElement.IsValidElement(element);
     }
 
-    public override Level Level => (Value is DB.Element element) ?
+    public override Level Level => (Value is ARBD.Element element) ?
       new Level(element.Document, element.LevelId) :
       default;
 
@@ -47,15 +48,15 @@ namespace RhinoInside.Revit.GH.Types
       set { if (value is object) throw new InvalidOperationException("Join at end is not valid for this elemenmt."); }
     }
 
-    HashSet<DB.Element> GetJoinedElements()
+    HashSet<ARBD.Element> GetJoinedElements()
     {
-      bool IsJoinedTo(DB.Element element, DB.ElementId id)
+      bool IsJoinedTo(ARBD.Element element, ARBD.ElementId id)
       {
-        if (element.Location is DB.LocationCurve elementLocation)
+        if (element.Location is ARBD.LocationCurve elementLocation)
         {
           for (int i = 0; i < 2; i++)
           {
-            foreach (var joinned in elementLocation.get_ElementsAtJoin(i).Cast<DB.Element>())
+            foreach (var joinned in elementLocation.get_ElementsAtJoin(i).Cast<ARBD.Element>())
             {
               if (joinned.Id == id)
                 return true;
@@ -66,14 +67,14 @@ namespace RhinoInside.Revit.GH.Types
         return false;
       }
 
-      var result = new HashSet<DB.Element>(ElementEqualityComparer.SameDocument);
+      var result = new HashSet<ARBD.Element>(ElementEqualityComparer.SameDocument);
 
-      if (Value.Location is DB.LocationCurve valueLocation)
+      if (Value.Location is ARBD.LocationCurve valueLocation)
       {
         // Get joins at ends
         for (int i = 0; i < 2; i++)
         {
-          foreach (var join in valueLocation.get_ElementsAtJoin(i).Cast<DB.Element>())
+          foreach (var join in valueLocation.get_ElementsAtJoin(i).Cast<ARBD.Element>())
           {
             if (join.Id != Id)
               result.Add(join);
@@ -81,10 +82,10 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         // Find joins at mid
-        using (var collector = new DB.FilteredElementCollector(Document))
+        using (var collector = new ARBD.FilteredElementCollector(Document))
         {
           var elementCollector = collector.OfClass(Value.GetType()).OfCategoryId(Value.Category.Id).
-            WherePasses(new DB.BoundingBoxIntersectsFilter(BoundingBox.ToOutline()));
+            WherePasses(new ARBD.BoundingBoxIntersectsFilter(BoundingBox.ToOutline()));
 
           foreach (var element in elementCollector)
           {

@@ -4,13 +4,14 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+  using Kernel.Attributes;
+
   public class TopographyByPoints : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("E8D8D05A-8703-4F75-B106-12B40EC9DF7B");
@@ -34,10 +35,10 @@ namespace RhinoInside.Revit.GH.Components.Site
     void ReconstructTopographyByPoints
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), Description("New Topography")]
-      ref DB.Architecture.TopographySurface topography,
+      ref ARDB.Architecture.TopographySurface topography,
 
       IList<Point3d> points,
       [Optional] IList<Curve> regions
@@ -81,13 +82,13 @@ namespace RhinoInside.Revit.GH.Components.Site
       //}
       //else
       {
-        ReplaceElement(ref topography, DB.Architecture.TopographySurface.Create(document, xyz));
+        ReplaceElement(ref topography, ARDB.Architecture.TopographySurface.Create(document, xyz));
       }
 
       if (topography is object && regions?.Count > 0)
       {
         var curveLoops = regions.Select(region => region.ToCurveLoop());
-        DB.Architecture.SiteSubRegion.Create(document, curveLoops.ToList(), topography.Id);
+        ARDB.Architecture.SiteSubRegion.Create(document, curveLoops.ToList(), topography.Id);
       }
     }
   }

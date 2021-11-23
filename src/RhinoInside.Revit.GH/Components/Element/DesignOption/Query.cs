@@ -3,9 +3,9 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.DesignOption
+namespace RhinoInside.Revit.GH.Components.DesignOptions
 {
   public class QueryDesignOptionSets : ElementCollectorComponent
   {
@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "Q";
 
-    protected override DB.ElementFilter ElementFilter => Types.DesignOptionSet.IsValidElementFilter;
+    protected override ARDB.ElementFilter ElementFilter => Types.DesignOptionSet.IsValidElementFilter;
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -61,22 +61,22 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
         return;
 
       if (!Params.TryGetData(DA, "Name", out string name)) return;
-      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var optionsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           optionsCollector = optionsCollector.WherePasses(filter);
 
-        if (name is object && TryGetFilterStringParam(DB.BuiltInParameter.OPTION_SET_NAME, ref name, out var nameFilter))
+        if (name is object && TryGetFilterStringParam(ARDB.BuiltInParameter.OPTION_SET_NAME, ref name, out var nameFilter))
           optionsCollector = optionsCollector.WherePasses(nameFilter);
 
-        var options = collector.Cast<DB.Element>();
+        var options = collector.Cast<ARDB.Element>();
 
         if (name is object)
-          options = options.Where(x => x.get_Parameter(DB.BuiltInParameter.OPTION_SET_NAME).AsString().IsSymbolNameLike(name));
+          options = options.Where(x => x.get_Parameter(ARDB.BuiltInParameter.OPTION_SET_NAME).AsString().IsSymbolNameLike(name));
 
         DA.SetDataList
         (
@@ -95,8 +95,8 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "Q";
 
-    static readonly DB.ElementFilter elementFilter = new DB.ElementClassFilter(typeof(DB.DesignOption));
-    protected override DB.ElementFilter ElementFilter => elementFilter;
+    static readonly ARDB.ElementFilter elementFilter = new ARDB.ElementClassFilter(typeof(ARDB.DesignOption));
+    protected override ARDB.ElementFilter ElementFilter => elementFilter;
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -148,40 +148,40 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
       if (!Params.TryGetData(DA, "Design Option Set", out Types.DesignOptionSet set)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Primary", out bool? primary)) return;
-      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
       if (!(set?.Document is null || doc.Equals(set.Document)))
         throw new System.ArgumentException("Wrong Document.", "Design Option Set");
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var optionsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           optionsCollector = optionsCollector.WherePasses(filter);
 
-        if (set is object && TryGetFilterElementIdParam(DB.BuiltInParameter.OPTION_SET_ID, set.Id, out var optionSetFilter))
+        if (set is object && TryGetFilterElementIdParam(ARDB.BuiltInParameter.OPTION_SET_ID, set.Id, out var optionSetFilter))
           optionsCollector = optionsCollector.WherePasses(optionSetFilter);
 
-        if (name is object && TryGetFilterStringParam(DB.BuiltInParameter.OPTION_NAME, ref name, out var nameFilter))
+        if (name is object && TryGetFilterStringParam(ARDB.BuiltInParameter.OPTION_NAME, ref name, out var nameFilter))
           optionsCollector = optionsCollector.WherePasses(nameFilter);
 
-        var options = collector.Cast<DB.DesignOption>();
+        var options = collector.Cast<ARDB.DesignOption>();
 
         if (primary.HasValue)
           options = options.Where(x => x.IsPrimary == primary.Value);
 
         if (name is object)
-          options = options.Where(x => x.get_Parameter(DB.BuiltInParameter.OPTION_NAME).AsString().IsSymbolNameLike(name));
+          options = options.Where(x => x.get_Parameter(ARDB.BuiltInParameter.OPTION_NAME).AsString().IsSymbolNameLike(name));
 
         if
         (
-          (set is null || set.Id == DB.ElementId.InvalidElementId) &&
+          (set is null || set.Id == ARDB.ElementId.InvalidElementId) &&
           (name is null || name == "Main Model") &&
           primary != false
         )
         {
-          options = Enumerable.Repeat(default(DB.DesignOption), 1).Concat(options);
+          options = Enumerable.Repeat(default(ARDB.DesignOption), 1).Concat(options);
         }
 
         DA.SetDataList

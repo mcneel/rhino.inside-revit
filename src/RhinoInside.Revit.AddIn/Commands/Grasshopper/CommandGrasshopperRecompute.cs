@@ -1,10 +1,9 @@
 using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Microsoft.Win32.SafeHandles;
-using Rhino.PlugIns;
-using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -18,7 +17,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     /// </summary>
     protected class AvailableWhenCanvasHasDocument : Availability
     {
-      protected override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
+      protected override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
         base.IsCommandAvailable(app, selectedCategories) &&
         Instances.ActiveCanvas?.Document is object;
     }
@@ -39,7 +38,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
       {

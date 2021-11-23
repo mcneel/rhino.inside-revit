@@ -12,17 +12,16 @@ using Rhino.Geometry;
 using Rhino.Input;
 using Rhino.PlugIns;
 using Rhino.Runtime.InProcess;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.Units;
-using static RhinoInside.Revit.Diagnostics;
-using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using static Rhino.RhinoMath;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
+using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit
 {
-  using Result = Autodesk.Revit.UI.Result;
-  using TaskDialog = Autodesk.Revit.UI.TaskDialog;
+  using Convert.Geometry;
+  using Convert.Units;
+  using External.ApplicationServices.Extensions;
+  using static Diagnostics;
 
   public static partial class Rhinoceros
   {
@@ -109,7 +108,7 @@ namespace RhinoInside.Revit
       return PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected);
     }
 
-    internal static Result Startup()
+    internal static ARUI.Result Startup()
     {
       RhinoApp.MainLoop                         += MainLoop;
 
@@ -152,13 +151,13 @@ namespace RhinoInside.Revit
       // Load Guests
       CheckInGuests();
 
-      return Result.Succeeded;
+      return ARUI.Result.Succeeded;
     }
 
-    internal static Result Shutdown()
+    internal static ARUI.Result Shutdown()
     {
       if (core is null)
-        return Result.Failed;
+        return ARUI.Result.Failed;
 
       External.ActivationGate.RemoveGateWindow(MainWindow.Handle);
       MainWindow.BringToFront();
@@ -183,10 +182,10 @@ namespace RhinoInside.Revit
       catch (Exception /*e*/)
       {
         //Debug.Fail(e.Source, e.Message);
-        return Result.Failed;
+        return ARUI.Result.Failed;
       }
 
-      return Result.Succeeded;
+      return ARUI.Result.Succeeded;
     }
 
     internal static WindowHandle MainWindow = WindowHandle.Zero;
@@ -313,7 +312,7 @@ namespace RhinoInside.Revit
 
           using
           (
-            var taskDialog = new TaskDialog(Core.DisplayVersion)
+            var taskDialog = new ARUI.TaskDialog(Core.DisplayVersion)
             {
               Id = $"{MethodBase.GetCurrentMethod().DeclaringType.FullName}.{MethodBase.GetCurrentMethod().Name}",
               MainIcon = External.UI.TaskDialogIcons.IconError,
@@ -405,7 +404,7 @@ namespace RhinoInside.Revit
       if (Command.InScriptRunnerCommand())
         return;
 
-      if (Revit.ActiveUIDocument?.Document is DB.Document revitDoc)
+      if (Revit.ActiveUIDocument?.Document is ARDB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
         var RevitModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
@@ -419,7 +418,7 @@ namespace RhinoInside.Revit
 
           using
           (
-            var taskDialog = new TaskDialog("Units")
+            var taskDialog = new ARUI.TaskDialog("Units")
             {
               MainIcon = External.UI.TaskDialogIcons.IconInformation,
               TitleAutoPrefix = true,
@@ -503,7 +502,7 @@ namespace RhinoInside.Revit
       }
     }
 
-    static void UpdateDocumentUnits(RhinoDoc rhinoDoc, DB.Document revitDoc = null)
+    static void UpdateDocumentUnits(RhinoDoc rhinoDoc, ARDB.Document revitDoc = null)
     {
       bool docModified = rhinoDoc.Modified;
       try
@@ -623,7 +622,7 @@ namespace RhinoInside.Revit
     }
     static ExposureSnapshot QuiescentExposure;
 
-    static DB.TransactionGroup CommandGroup;
+    static ARDB.TransactionGroup CommandGroup;
 
     static void BeginCommand(object sender, CommandEventArgs e)
     {
@@ -651,7 +650,7 @@ namespace RhinoInside.Revit
           groupName = displayName;
         }
 
-        CommandGroup = new DB.TransactionGroup
+        CommandGroup = new ARDB.TransactionGroup
         (Revit.ActiveUIDocument.Document, groupName)
         { IsFailureHandlingForcedModal = true };
 
@@ -762,28 +761,28 @@ namespace RhinoInside.Revit
       RhinoApp.RunScript(script, false);
     }
 
-    internal static Result RunCommandAbout()
+    internal static ARUI.Result RunCommandAbout()
     {
       var docSerial = RhinoDoc.ActiveDoc.RuntimeSerialNumber;
-      var result = RhinoApp.RunScript("!_About", false) ? Result.Succeeded : Result.Failed;
+      var result = RhinoApp.RunScript("!_About", false) ? ARUI.Result.Succeeded : ARUI.Result.Failed;
 
-      if (result == Result.Succeeded && docSerial != RhinoDoc.ActiveDoc.RuntimeSerialNumber)
+      if (result == ARUI.Result.Succeeded && docSerial != RhinoDoc.ActiveDoc.RuntimeSerialNumber)
       {
         Exposed = true;
-        return Result.Succeeded;
+        return ARUI.Result.Succeeded;
       }
 
-      return Result.Cancelled;
+      return ARUI.Result.Cancelled;
     }
 
-    internal static Result RunCommandOptions()
+    internal static ARUI.Result RunCommandOptions()
     {
-      return RhinoApp.RunScript("!_Options", false) ? Result.Succeeded : Result.Failed;
+      return RhinoApp.RunScript("!_Options", false) ? ARUI.Result.Succeeded : ARUI.Result.Failed;
     }
 
-    internal static Result RunCommandPackageManager()
+    internal static ARUI.Result RunCommandPackageManager()
     {
-      return RhinoApp.RunScript("!_PackageManager", false) ? Result.Succeeded : Result.Failed;
+      return RhinoApp.RunScript("!_PackageManager", false) ? ARUI.Result.Succeeded : ARUI.Result.Failed;
     }
 
     #region Open Viewport

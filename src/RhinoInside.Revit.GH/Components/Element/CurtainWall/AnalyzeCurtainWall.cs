@@ -1,9 +1,9 @@
 using System;
 using Grasshopper.Kernel;
 
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class AnalyzeCurtainWall : AnalysisComponent
   {
@@ -53,23 +53,23 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // grab input
-      DB.Wall wallInstance = default;
+      ARDB.Wall wallInstance = default;
       if (!DA.GetData("Curtain Wall", ref wallInstance))
         return;
 
       // only process curtain walls
-      if (wallInstance.WallType.Kind == DB.WallKind.Curtain)
+      if (wallInstance.WallType.Kind == ARDB.WallKind.Curtain)
       {
         DA.SetData("Curtain Grid", new Types.CurtainGrid(wallInstance, wallInstance.CurtainGrid));
 
         // determine if curtain wall is embeded in another wall
         // find all the wall elements that are intersecting the bbox of this wall
         var bbox = wallInstance.get_BoundingBox(null);
-        var outline = new DB.Outline(bbox.Min, bbox.Max);
-        var bbf = new DB.BoundingBoxIntersectsFilter(outline);
-        var walls = new DB.FilteredElementCollector(wallInstance.Document).WherePasses(bbf).OfClass(typeof(DB.Wall)).ToElements();
+        var outline = new ARDB.Outline(bbox.Min, bbox.Max);
+        var bbf = new ARDB.BoundingBoxIntersectsFilter(outline);
+        var walls = new ARDB.FilteredElementCollector(wallInstance.Document).WherePasses(bbf).OfClass(typeof(ARDB.Wall)).ToElements();
         // ask for embedded wall inserts from these instances
-        foreach (DB.Wall wall in walls)
+        foreach (ARDB.Wall wall in walls)
         {
           var embeddedWalls = wall.FindInserts(addRectOpenings: false, includeShadows: false, includeEmbeddedWalls: true, includeSharedEmbeddedInserts: false);
           if (embeddedWalls.Contains(wallInstance.Id))

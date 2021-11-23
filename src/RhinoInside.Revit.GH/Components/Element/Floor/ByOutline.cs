@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+  using External.DB.Extensions;
+  using Kernel.Attributes;
+
   public class FloorByOutline : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("DC8DAF4F-CC93-43E2-A871-3A01A920A722");
@@ -27,11 +28,11 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    bool Reuse(ref DB.Floor element, IList<Curve> boundaries, DB.FloorType type, DB.Level level, bool structural)
+    bool Reuse(ref ARDB.Floor element, IList<Curve> boundaries, ARDB.FloorType type, ARDB.Level level, bool structural)
     {
       if (element is null) return false;
 
-      if (element.GetSketch() is DB.Sketch sketch)
+      if (element.GetSketch() is ARDB.Sketch sketch)
       {
         var profiles = sketch.Profile.ToPolyCurves();
         if (profiles.Length != boundaries.Count)
@@ -66,17 +67,17 @@ namespace RhinoInside.Revit.GH.Components
               {
                 var segment = segments[(++index) % segments.Length];
 
-                var curve = default(DB.Curve);
+                var curve = default(ARDB.Curve);
                 if
                 (
-                  edge.GeometryCurve is DB.HermiteSpline &&
+                  edge.GeometryCurve is ARDB.HermiteSpline &&
                   segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance * Revit.ModelUnits)
                 )
                 {
-                  using (var tangents = new DB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
+                  using (var tangents = new ARDB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
                   {
                     var xyz = points.ConvertAll(GeometryEncoder.ToXYZ);
-                    curve = DB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
+                    curve = ARDB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
                   }
                 }
                 else curve = segment.ToCurve();
@@ -94,17 +95,17 @@ namespace RhinoInside.Revit.GH.Components
 
       if (element.GetTypeId() != type.Id)
       {
-        if (DB.Element.IsValidType(element.Document, new DB.ElementId[] { element.Id }, type.Id))
+        if (ARDB.Element.IsValidType(element.Document, new ARDB.ElementId[] { element.Id }, type.Id))
         {
-          if (element.ChangeTypeId(type.Id) is DB.ElementId id && id != DB.ElementId.InvalidElementId)
-            element = element.Document.GetElement(id) as DB.Floor;
+          if (element.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
+            element = element.Document.GetElement(id) as ARDB.Floor;
         }
         else return false;
       }
 
       bool succeed = true;
-      succeed &= element.get_Parameter(DB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).Update(structural ? 1 : 0);
-      succeed &= element.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Update(level.Id);
+      succeed &= element.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).Update(structural ? 1 : 0);
+      succeed &= element.get_Parameter(ARDB.BuiltInParameter.LEVEL_PARAM).Update(level.Id);
 
       return succeed;
     }
@@ -112,14 +113,14 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructFloorByOutline
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New Floor")]
-      ref DB.Floor floor,
+      ref ARDB.Floor floor,
 
       IList<Curve> boundary,
-      Optional<DB.FloorType> type,
-      Optional<DB.Level> level,
+      Optional<ARDB.FloorType> type,
+      Optional<ARDB.Level> level,
       [Optional] bool structural
     )
     {
@@ -171,7 +172,7 @@ namespace RhinoInside.Revit.GH.Components
       if (level.HasValue && level.Value.Document.IsEquivalent(document) == false)
         ThrowArgumentException(nameof(level));
 
-      SolveOptionalType(document, ref type, DB.ElementTypeGroup.FloorType, nameof(type));
+      SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.FloorType, nameof(type));
 
       SolveOptionalLevel(document, boundary, ref level, out var bbox);
 
@@ -181,14 +182,14 @@ namespace RhinoInside.Revit.GH.Components
       }
       else if (!Reuse(ref floor, boundary, type.Value, level.Value, structural))
       {
-        var parametersMask = new DB.BuiltInParameter[]
+        var parametersMask = new ARDB.BuiltInParameter[]
         {
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.LEVEL_PARAM,
-          DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM,
-          DB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL
+          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+          ARDB.BuiltInParameter.LEVEL_PARAM,
+          ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM,
+          ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL
         };
 
 #if REVIT_2022
@@ -199,16 +200,16 @@ namespace RhinoInside.Revit.GH.Components
         var curveArray = boundary[0].ToCurveArray();
 
         if (type.Value.IsFoundationSlab)
-          ReplaceElement(ref floor, document.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
+          ReplaceElement(ref floor, document.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, ARDB.XYZ.BasisZ), parametersMask);
         else
-          ReplaceElement(ref floor, document.Create.NewFloor(curveArray, type.Value, level.Value, structural, DB.XYZ.BasisZ), parametersMask);
+          ReplaceElement(ref floor, document.Create.NewFloor(curveArray, type.Value, level.Value, structural, ARDB.XYZ.BasisZ), parametersMask);
 #endif
       }
 
       if (floor is object)
       {
         var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
-        floor.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
+        floor.get_Parameter(ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
       }
     }
   }

@@ -1,9 +1,9 @@
 using System;
 
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Material
+namespace RhinoInside.Revit.GH.Components.Materials
 {
 #if REVIT_2018
   public abstract class AnalyzeAppearanceAsset<T>
@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var appearanceAsset = default(DB.AppearanceAssetElement);
+      var appearanceAsset = default(ARDB.AppearanceAssetElement);
       if (!DA.GetData(ComponentInfo.Name, ref appearanceAsset))
         return;
 

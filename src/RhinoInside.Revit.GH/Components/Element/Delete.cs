@@ -5,10 +5,10 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
+using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
   public class ElementDelete : TransactionalComponent
   {
@@ -83,40 +83,40 @@ namespace RhinoInside.Revit.GH.Components
     /// <summary>
     /// Updater to collect changes on the Delete operation
     /// </summary>
-    class Updater : DB.IUpdater, IDisposable
+    class Updater : ARDB.IUpdater, IDisposable
     {
       public string GetUpdaterName() => "Delete Updater";
       public string GetAdditionalInformation() => "N/A";
-      public DB.ChangePriority GetChangePriority() => DB.ChangePriority.Annotations;
-      public DB.UpdaterId GetUpdaterId() => updaterId;
-      readonly DB.UpdaterId updaterId;
+      public ARDB.ChangePriority GetChangePriority() => ARDB.ChangePriority.Annotations;
+      public ARDB.UpdaterId GetUpdaterId() => updaterId;
+      readonly ARDB.UpdaterId updaterId;
 
-      public ICollection<DB.ElementId> AddedElementIds { get; private set; }
-      public ICollection<DB.ElementId> DeletedElementIds { get; private set; }
-      public ICollection<DB.ElementId> ModifiedElementIds { get; private set; }
+      public ICollection<ARDB.ElementId> AddedElementIds { get; private set; }
+      public ICollection<ARDB.ElementId> DeletedElementIds { get; private set; }
+      public ICollection<ARDB.ElementId> ModifiedElementIds { get; private set; }
 
-      public Updater(DB.Document doc)
+      public Updater(ARDB.Document doc)
       {
-        updaterId = new DB.UpdaterId
+        updaterId = new ARDB.UpdaterId
         (
           doc.Application.ActiveAddInId,
           new Guid("9536C7C9-C58B-4D48-9103-5C8EBAA6F6C8")
         );
 
-        DB.UpdaterRegistry.RegisterUpdater(this, isOptional: true);
+        ARDB.UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
-        var filter = DBX.CompoundElementFilter.ElementIsNotInternalFilter(doc);
-        DB.UpdaterRegistry.AddTrigger(updaterId, filter, DB.Element.GetChangeTypeAny());
-        DB.UpdaterRegistry.AddTrigger(updaterId, filter, DB.Element.GetChangeTypeElementDeletion());
+        var filter = ERDB.CompoundElementFilter.ElementIsNotInternalFilter(doc);
+        ARDB.UpdaterRegistry.AddTrigger(updaterId, filter, ARDB.Element.GetChangeTypeAny());
+        ARDB.UpdaterRegistry.AddTrigger(updaterId, filter, ARDB.Element.GetChangeTypeElementDeletion());
       }
 
       void IDisposable.Dispose()
       {
-        DB.UpdaterRegistry.RemoveAllTriggers(updaterId);
-        DB.UpdaterRegistry.UnregisterUpdater(updaterId);
+        ARDB.UpdaterRegistry.RemoveAllTriggers(updaterId);
+        ARDB.UpdaterRegistry.UnregisterUpdater(updaterId);
       }
 
-      public void Execute(DB.UpdaterData data)
+      public void Execute(ARDB.UpdaterData data)
       {
         AddedElementIds = data.GetAddedElementIds();
         DeletedElementIds = data.GetDeletedElementIds();
@@ -126,8 +126,8 @@ namespace RhinoInside.Revit.GH.Components
 
     int Delete
     (
-      DB.Document document,
-      ICollection<DB.ElementId> elementIds,
+      ARDB.Document document,
+      ICollection<ARDB.ElementId> elementIds,
       List<Types.Element> deleted,
       List<Types.Element> modified
     )
@@ -143,7 +143,7 @@ namespace RhinoInside.Revit.GH.Components
 
             var DeletedElementIds = document.Delete(elementIds);
 
-            if (CommitTransaction(document, transaction) == DB.TransactionStatus.Committed)
+            if (CommitTransaction(document, transaction) == ARDB.TransactionStatus.Committed)
             {
               result = DeletedElementIds.Count;
 
@@ -207,7 +207,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (elementGroups.Length > 0)
         {
-          var transactionGroups = new Queue<DB.TransactionGroup>();
+          var transactionGroups = new Queue<ARDB.TransactionGroup>();
 
           try
           {
@@ -224,8 +224,8 @@ namespace RhinoInside.Revit.GH.Components
 
               // Start a transaction Group to be able to rollback in case changes in different documents fails.
               {
-                var group = new DB.TransactionGroup(doc, Name);
-                if (group.Start() != DB.TransactionStatus.Started)
+                var group = new ARDB.TransactionGroup(doc, Name);
+                if (group.Start() != ARDB.TransactionStatus.Started)
                 {
                   group.Dispose();
                   continue;
@@ -233,7 +233,7 @@ namespace RhinoInside.Revit.GH.Components
                 transactionGroups.Enqueue(group);
               }
 
-              var elements = new HashSet<DB.ElementId>(elementGroup.Select(x => x.Id));
+              var elements = new HashSet<ARDB.ElementId>(elementGroup.Select(x => x.Id));
 
               var result = Delete(doc, elements, Deleted, Modified);
               if (result < 0)
@@ -271,7 +271,7 @@ namespace RhinoInside.Revit.GH.Components
           finally
           {
             // In case we still have transaction groups here something bad happened
-            foreach (var group in transactionGroups.Cast<DB.TransactionGroup>().Reverse())
+            foreach (var group in transactionGroups.Cast<ARDB.TransactionGroup>().Reverse())
             {
               using (group)
               {
@@ -297,7 +297,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (Simulated)
         {
-          Status = DB.TransactionStatus.RolledBack;
+          Status = ARDB.TransactionStatus.RolledBack;
         }
         else
         {
@@ -361,7 +361,7 @@ namespace RhinoInside.Revit.GH.Components
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Elements.Obsolete
 {
   [Obsolete("Obsolete since 2020-05-21")]
   public class ElementDelete : TransactionalChainComponent

@@ -2,12 +2,13 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Categories
 {
+  using ElementTracking;
+  using External.DB.Extensions;
+
   public class CategorySubCategories : Component
   {
     public override Guid ComponentGuid => new Guid("4915AB87-0BD5-4541-AC43-3FBC450DD883");
@@ -34,15 +35,15 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var category = default(DB.Category);
+      var category = default(ARDB.Category);
       if (!DA.GetData("Category", ref category))
         return;
 
-      if (category.Document() is DB.Document doc)
+      if (category.Document() is ARDB.Document doc)
       {
         using (var subCategories = category.SubCategories)
         {
-          var list = subCategories.Cast<DB.Category>();
+          var list = subCategories.Cast<ARDB.Category>();
           DA.SetDataList("SubCategories", list.Select(x => new Types.Category(doc, x.Id)));
         }
       }
@@ -80,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override bool CurrentDocumentOnly => false;
     const string _SubCategory_ = "SubCategory";
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties = { };
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties = { };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -89,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components
       Params.TryGetData(DA, "Template", out Types.Category template);
 
       // Previous Output
-      Params.ReadTrackedElement(_SubCategory_, parent.Document, out DB.Element element);
+      Params.ReadTrackedElement(_SubCategory_, parent.Document, out ARDB.Element element);
       var category = element is object ?
         Types.Category.FromCategory(DocumentExtension.AsCategory(element)) :
         new Types.Category();
@@ -132,7 +133,7 @@ namespace RhinoInside.Revit.GH.Components
           name = template?.Name ?? parent.Name;
 
         name = parent.APIObject.SubCategories.
-          Cast<DB.Category>().
+          Cast<ARDB.Category>().
           Select(x => x.Name).
           WhereNamePrefixedWith(name).
           NextNameOrDefault() ?? name;
@@ -141,10 +142,10 @@ namespace RhinoInside.Revit.GH.Components
       // Try to duplicate template
       if (template?.Id.IsBuiltInId() == false)
       {
-        var ids = DB.ElementTransformUtils.CopyElements
+        var ids = ARDB.ElementTransformUtils.CopyElements
         (
           template.Document,
-          new DB.ElementId[] { template.Id },
+          new ARDB.ElementId[] { template.Id },
           doc,
           default,
           default

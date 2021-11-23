@@ -1,11 +1,11 @@
 using System;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class HostObject : GraphicalElementT<Types.IGH_HostObject, DB.HostObject>
+  public class HostObject : GraphicalElementT<Types.IGH_HostObject, ARDB.HostObject>
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("E3462915-3C4D-4864-9DD4-5A73F91C6543");
@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override Types.IGH_HostObject InstantiateT() => new Types.HostObject();
   }
 
-  public class HostObjectType : ElementType<Types.IGH_HostObjectType, DB.HostObjAttributes>
+  public class HostObjectType : ElementType<Types.IGH_HostObjectType, ARDB.HostObjAttributes>
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("708AB072-878E-41ED-9B8C-AAB0E1D85A53");
@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override Types.IGH_HostObjectType InstantiateT() => new Types.HostObjectType();
   }
 
-  public class BuildingPad : GraphicalElementT<Types.BuildingPad, DB.Architecture.BuildingPad>
+  public class BuildingPad : GraphicalElementT<Types.BuildingPad, ARDB.Architecture.BuildingPad>
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("0D0AFE5F-4578-493E-8374-C6BD1C5395BE");
@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class CurtainGridLine : GraphicalElementT<Types.CurtainGridLine, DB.CurtainGridLine>
+  public class CurtainGridLine : GraphicalElementT<Types.CurtainGridLine, ARDB.CurtainGridLine>
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("A2DD571E-729C-4F69-BD34-2769583D329B");
@@ -69,7 +69,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class CurtainSystem : GraphicalElementT<Types.CurtainSystem, DB.CurtainSystem>
+  public class CurtainSystem : GraphicalElementT<Types.CurtainSystem, ARDB.CurtainSystem>
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("E94B20E9-C2AA-4FC7-939D-ECD071EA45DA");
@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class Ceiling : GraphicalElementT<Types.Ceiling, DB.Ceiling>
+  public class Ceiling : GraphicalElementT<Types.Ceiling, ARDB.Ceiling>
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("7FCEA93D-8CDE-446C-9167-E8B590342C66");
@@ -99,7 +99,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public Ceiling() : base("Ceiling", "Ceiling", "Contains a collection of Revit ceiling elements", "Params", "Revit Primitives") { }
   }
 
-  public class Floor : GraphicalElementT<Types.Floor, DB.Floor>
+  public class Floor : GraphicalElementT<Types.Floor, ARDB.Floor>
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("45616DF6-59BF-4480-A133-8F9B3BA27AF1");
@@ -141,7 +141,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class Roof : GraphicalElementT<Types.Roof, DB.RoofBase>
+  public class Roof : GraphicalElementT<Types.Roof, ARDB.RoofBase>
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("D75E33E2-2508-42E6-AEF1-B05759A495AB");
@@ -183,7 +183,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class Wall : GraphicalElementT<Types.Wall, DB.Wall>
+  public class Wall : GraphicalElementT<Types.Wall, ARDB.Wall>
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("15AD6BF9-63AD-462B-985D-F6B8C2299465");

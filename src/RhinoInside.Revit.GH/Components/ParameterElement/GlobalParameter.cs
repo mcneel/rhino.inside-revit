@@ -3,14 +3,15 @@ using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.DB.Schemas;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
+using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components.ParameterElement
+namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+  using External.DB.Schemas;
+
   public class GlobalParameter : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("32E77D86-0BF5-4766-B5E7-E181044C3820");
@@ -97,7 +98,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       ),
     };
 
-    static IGH_Goo GetGoo(DB.GlobalParameter parameter)
+    static IGH_Goo GetGoo(ARDB.GlobalParameter parameter)
     {
       var parameterValue = parameter.GetValue();
       if (parameterValue is null)
@@ -105,11 +106,11 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
 
       switch (parameterValue)
       {
-        case DB.IntegerParameterValue i:
+        case ARDB.IntegerParameterValue i:
         {
           var value = i.Value;
 
-          if (parameter.GetDefinition() is DB.Definition definition)
+          if (parameter.GetDefinition() is ARDB.Definition definition)
           {
             var dataType = definition.GetDataType();
 
@@ -120,19 +121,19 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
             {
               switch (builtInInteger)
               {
-                case DB.BuiltInParameter.AUTO_JOIN_CONDITION: return new Types.CurtainGridJoinCondition((DBX.CurtainGridJoinCondition) value);
-                case DB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL: return new Types.CurtainGridJoinCondition((DBX.CurtainGridJoinCondition) value);
-                case DB.BuiltInParameter.SPACING_LAYOUT_U: return new Types.CurtainGridLayout((DBX.CurtainGridLayout) value);
-                case DB.BuiltInParameter.SPACING_LAYOUT_1: return new Types.CurtainGridLayout((DBX.CurtainGridLayout) value);
-                case DB.BuiltInParameter.SPACING_LAYOUT_VERT: return new Types.CurtainGridLayout((DBX.CurtainGridLayout) value);
-                case DB.BuiltInParameter.SPACING_LAYOUT_V: return new Types.CurtainGridLayout((DBX.CurtainGridLayout) value);
-                case DB.BuiltInParameter.SPACING_LAYOUT_2: return new Types.CurtainGridLayout((DBX.CurtainGridLayout) value);
-                case DB.BuiltInParameter.SPACING_LAYOUT_HORIZ: return new Types.CurtainGridLayout((DBX.CurtainGridLayout) value);
-                case DB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM: return new Types.WallWrapping((DBX.WallWrapping) value);
-                case DB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM: return new Types.WallWrapping((DBX.WallWrapping) value);
-                case DB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM: return new Types.StructuralWallUsage((DB.Structure.StructuralWallUsage) value);
-                case DB.BuiltInParameter.WALL_KEY_REF_PARAM: return new Types.WallLocationLine((DB.WallLocationLine) value);
-                case DB.BuiltInParameter.FUNCTION_PARAM: return new Types.WallFunction((DB.WallFunction) value);
+                case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) value);
+                case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) value);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_U: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_1: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_VERT: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_V: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_2: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
+                case ARDB.BuiltInParameter.SPACING_LAYOUT_HORIZ: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
+                case ARDB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM: return new Types.WallWrapping((ERDB.WallWrapping) value);
+                case ARDB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM: return new Types.WallWrapping((ERDB.WallWrapping) value);
+                case ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM: return new Types.StructuralWallUsage((ARDB.Structure.StructuralWallUsage) value);
+                case ARDB.BuiltInParameter.WALL_KEY_REF_PARAM: return new Types.WallLocationLine((ARDB.WallLocationLine) value);
+                case ARDB.BuiltInParameter.FUNCTION_PARAM: return new Types.WallFunction((ARDB.WallFunction) value);
               }
 
               var builtInIntegerName = builtInInteger.ToString();
@@ -151,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
 
           return new GH_Integer(value);
         }
-        case DB.DoubleParameterValue d:
+        case ARDB.DoubleParameterValue d:
         {
           var value = SpecType.IsMeasurableSpec(parameter.GetDefinition().GetDataType(), out var spec) ?
             UnitConverter.InRhinoUnits(d.Value, spec) :
@@ -160,17 +161,17 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
           return new GH_Number(value);
         }
 
-        case DB.StringParameterValue s:
+        case ARDB.StringParameterValue s:
         {
           return new GH_String(s.Value);
         }
 
-        case DB.ElementIdParameterValue id:
+        case ARDB.ElementIdParameterValue id:
         {
           var value = id.Value;
           if (parameter.Id.TryGetBuiltInParameter(out var builtInElementId))
           {
-            if (builtInElementId == DB.BuiltInParameter.ID_PARAM || builtInElementId == DB.BuiltInParameter.SYMBOL_ID_PARAM)
+            if (builtInElementId == ARDB.BuiltInParameter.ID_PARAM || builtInElementId == ARDB.BuiltInParameter.SYMBOL_ID_PARAM)
               return new GH_Integer(value.IntegerValue);
           }
 
@@ -182,7 +183,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       }
     }
 
-    static bool SetGoo(DB.GlobalParameter parameter, IGH_Goo value)
+    static bool SetGoo(ARDB.GlobalParameter parameter, IGH_Goo value)
     {
       if (parameter is null || value is null)
         return default;
@@ -190,9 +191,9 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       using (var parameterValue = parameter.GetValue())
         switch (parameterValue)
         {
-          case DB.IntegerParameterValue i:
+          case ARDB.IntegerParameterValue i:
 
-            if (parameter.GetDefinition() is DB.Definition definition)
+            if (parameter.GetDefinition() is ARDB.Definition definition)
             {
               if (definition.GetDataType() == SpecType.Boolean.YesNo)
               {
@@ -225,7 +226,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
             parameter.SetValue(i);
             return true;
 
-          case DB.DoubleParameterValue d:
+          case ARDB.DoubleParameterValue d:
             if (!GH_Convert.ToDouble(value, out var real, GH_Conversion.Both))
               throw new InvalidCastException();
 
@@ -236,7 +237,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
             parameter.SetValue(d);
             return true;
 
-          case DB.StringParameterValue s:
+          case ARDB.StringParameterValue s:
             if (!GH_Convert.ToString(value, out var text, GH_Conversion.Both))
               throw new InvalidCastException();
 
@@ -244,7 +245,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
             parameter.SetValue(s);
             return true;
 
-          case DB.ElementIdParameterValue id:
+          case ARDB.ElementIdParameterValue id:
             var element = new Types.Element();
             if (!element.CastFrom(value))
               throw new InvalidCastException();
@@ -267,7 +268,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       if (!Parameters.ParameterKey.GetDocumentParameter(this, DA, "Parameter", out var key)) return;
       if (!Params.TryGetData(DA, "Value", out IGH_Goo value)) return;
 
-      if (key.Value is DB.GlobalParameter global)
+      if (key.Value is ARDB.GlobalParameter global)
       {
         if (value is object)
         {

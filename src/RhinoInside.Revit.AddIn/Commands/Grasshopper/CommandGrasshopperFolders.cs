@@ -1,6 +1,6 @@
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using DB = Autodesk.Revit.DB;
+using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     public static string CommandName => "UserObjects Folder";
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       Grasshopper.Folders.ShowFolderInExplorer(Grasshopper.Folders.DefaultUserObjectFolder);
       return Result.Succeeded;
@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     public static string CommandName => "Clusters Folder";
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       Grasshopper.Folders.ShowFolderInExplorer(Grasshopper.Folders.DefaultClusterFolder);
       return Result.Succeeded;
@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     public static string CommandName => "Components Folder";
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       Grasshopper.Folders.ShowFolderInExplorer(Grasshopper.Folders.DefaultAssemblyFolder);
       return Result.Succeeded;

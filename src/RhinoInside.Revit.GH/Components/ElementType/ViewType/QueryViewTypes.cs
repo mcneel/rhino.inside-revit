@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Views
 {
   public class QueryViewTypes : ElementCollectorComponent
   {
@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "V";
 
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.ViewFamilyType));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.ViewFamilyType));
 
     public QueryViewTypes() : base
     (
@@ -44,28 +44,28 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      var viewFamily = DB.ViewFamily.Invalid;
+      var viewFamily = ARDB.ViewFamily.Invalid;
       DA.GetData("Family", ref viewFamily);
 
       string name = null;
       DA.GetData("Name", ref name);
 
-      var filter = default(DB.ElementFilter);
+      var filter = default(ARDB.ElementFilter);
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
 
-        var types = collector.Cast<DB.ViewFamilyType>();
+        var types = collector.Cast<ARDB.ViewFamilyType>();
 
-        if (viewFamily != DB.ViewFamily.Invalid)
+        if (viewFamily != ARDB.ViewFamily.Invalid)
           types = types.Where(x => x.ViewFamily == viewFamily);
 
         if (!string.IsNullOrEmpty(name))

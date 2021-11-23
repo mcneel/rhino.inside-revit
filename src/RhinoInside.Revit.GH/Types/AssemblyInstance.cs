@@ -1,16 +1,16 @@
 using System;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Assembly")]
   public class AssemblyInstance : GraphicalElement
   {
-    protected override Type ValueType => typeof(DB.AssemblyInstance);
-    public new DB.AssemblyInstance Value => base.Value as DB.AssemblyInstance;
+    protected override Type ValueType => typeof(ARDB.AssemblyInstance);
+    public new ARDB.AssemblyInstance Value => base.Value as ARDB.AssemblyInstance;
 
     public AssemblyInstance() { }
-    public AssemblyInstance(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public AssemblyInstance(DB.AssemblyInstance assembly) : base(assembly) { }
+    public AssemblyInstance(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public AssemblyInstance(ARDB.AssemblyInstance assembly) : base(assembly) { }
   }
 }

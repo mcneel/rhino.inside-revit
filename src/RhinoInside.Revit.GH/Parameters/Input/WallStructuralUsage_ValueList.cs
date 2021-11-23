@@ -1,10 +1,7 @@
 using System;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-
-using DB = Autodesk.Revit.DB;
-
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -23,16 +20,16 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
       ListItems.Add(
-        new GH_ValueListItem("Non-Bearing", ((int) DB.Structure.StructuralWallUsage.NonBearing).ToString())
+        new GH_ValueListItem("Non-Bearing", ((int) ARDB.Structure.StructuralWallUsage.NonBearing).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Bearing", ((int) DB.Structure.StructuralWallUsage.Bearing).ToString())
+        new GH_ValueListItem("Bearing", ((int) ARDB.Structure.StructuralWallUsage.Bearing).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Shear", ((int) DB.Structure.StructuralWallUsage.Shear).ToString())
+        new GH_ValueListItem("Shear", ((int) ARDB.Structure.StructuralWallUsage.Shear).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Combined", ((int) DB.Structure.StructuralWallUsage.Combined).ToString())
+        new GH_ValueListItem("Combined", ((int) ARDB.Structure.StructuralWallUsage.Combined).ToString())
         );
     }
   }
