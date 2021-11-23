@@ -4,9 +4,9 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
   public class ElementPropertyName : TransactionalChainComponent
   {
@@ -130,7 +130,7 @@ namespace RhinoInside.Revit.GH.Components
     }
 
     Dictionary<string, string> namesMap;
-    public override void OnPrepare(IReadOnlyCollection<DB.Document> documents)
+    public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
     {
       if (renames is object)
       {
@@ -152,9 +152,9 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    public override void OnDone(DB.TransactionStatus status)
+    public override void OnDone(ARDB.TransactionStatus status)
     {
-      if (status == DB.TransactionStatus.Committed && namesMap is object)
+      if (status == ARDB.TransactionStatus.Committed && namesMap is object)
       {
         // Reconstruct output 'Name' with final values from `namesMap`.
         var _Name_ = Params.IndexOfOutputParam("Name");
@@ -322,7 +322,7 @@ namespace RhinoInside.Revit.GH.Components
       if (Params.GetDataList(DA, "Type", out IList<Types.ElementType> types))
       {
         var newTypes = Params.IndexOfInputParam("Type") < 0 ? default : new List<Types.ElementType>();
-        var typesSets = new Dictionary<Types.ElementType, List<DB.ElementId>>();
+        var typesSets = new Dictionary<Types.ElementType, List<ARDB.ElementId>>();
 
         int index = 0;
         foreach (var element in elements)
@@ -332,7 +332,7 @@ namespace RhinoInside.Revit.GH.Components
             newTypes?.Add(element is object ? type : default);
 
             if (!typesSets.TryGetValue(type, out var entry))
-              typesSets.Add(type, new List<DB.ElementId> { element.Id });
+              typesSets.Add(type, new List<ARDB.ElementId> { element.Id });
             else
               entry.Add(element.Id);
           }
@@ -341,12 +341,12 @@ namespace RhinoInside.Revit.GH.Components
           index++;
         }
 
-        var map = new Dictionary<DB.ElementId, DB.ElementId>();
+        var map = new Dictionary<ARDB.ElementId, ARDB.ElementId>();
         foreach (var type in typesSets)
         {
           StartTransaction(type.Key.Document);
 
-          foreach (var entry in DB.Element.ChangeTypeId(type.Key.Document, type.Value, type.Key.Id))
+          foreach (var entry in ARDB.Element.ChangeTypeId(type.Key.Document, type.Value, type.Key.Id))
           {
             if (map.ContainsKey(entry.Key)) map.Remove(entry.Key);
             map.Add(entry.Key, entry.Value);

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Material : Element<Types.Material, DB.Material>
+  public class Material : Element<Types.Material, ARDB.Material>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("B18EF2CC-2E67-4A5E-9241-9010FB7D27CE");
@@ -54,19 +54,19 @@ namespace RhinoInside.Revit.GH.Parameters
       materialCategoryBox.SelectedIndexChanged += MaterialCategoryBox_SelectedIndexChanged;
       materialCategoryBox.SetCueBanner("Material class filter…");
 
-      using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
+      using (var collector = new ARDB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
       {
         listBox.Items.Clear();
 
         var materials = collector.
-                        OfClass(typeof(DB.Material)).
-                        Cast<DB.Material>().
+                        OfClass(typeof(ARDB.Material)).
+                        Cast<ARDB.Material>().
                         GroupBy(x => x.MaterialClass);
 
         foreach(var cat in materials)
           materialCategoryBox.Items.Add(cat.Key);
 
-        if (PersistentValue?.Value is DB.Material current)
+        if (PersistentValue?.Value is ARDB.Material current)
         {
           var familyIndex = 0;
           foreach (var materialClass in materialCategoryBox.Items.Cast<string>())
@@ -103,10 +103,10 @@ namespace RhinoInside.Revit.GH.Parameters
       listBox.Items.Clear();
       listBox.Items.Add(new Types.Material());
 
-      using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Material)))
+      using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.Material)))
       {
         var materials = collector.
-                        Cast<DB.Material>().
+                        Cast<ARDB.Material>().
                         Where(x => string.IsNullOrEmpty(materialClass) || x.MaterialClass == materialClass);
 
         listBox.DisplayMember = "DisplayName";

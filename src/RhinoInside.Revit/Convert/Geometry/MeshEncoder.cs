@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Linq;
 using Rhino.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.Convert.Geometry
   using global::System.Collections.Generic;
 
   /// <summary>
-  /// Converts <see cref="Mesh"/> to be transfered to a <see cref="DB.Mesh"/>.
+  /// Converts <see cref="Mesh"/> to be transfered to a <see cref="ARDB.Mesh"/>.
   /// </summary>
   static class MeshEncoder
   {
@@ -159,7 +159,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="mesh"></param>
     /// <returns></returns>
-    internal static DB.Mesh ToMesh(Mesh mesh, double factor = UnitConverter.NoScale)
+    internal static ARDB.Mesh ToMesh(Mesh mesh, double factor = UnitConverter.NoScale)
     {
       if (mesh is null)
         return default;
@@ -168,17 +168,17 @@ namespace RhinoInside.Revit.Convert.Geometry
       return ToMesh(shells.Length == 0 ? new Mesh[] { mesh } : shells, factor);
     }
 
-    internal static DB.Mesh ToMesh(Mesh[] shells, double factor = UnitConverter.NoScale)
+    internal static ARDB.Mesh ToMesh(Mesh[] shells, double factor = UnitConverter.NoScale)
     {
       try
       {
         using
         (
-          var builder = new DB.TessellatedShapeBuilder()
+          var builder = new ARDB.TessellatedShapeBuilder()
           {
             GraphicsStyleId = GeometryEncoder.Context.Peek.GraphicsStyleId,
-            Target = DB.TessellatedShapeBuilderTarget.Mesh,
-            Fallback = DB.TessellatedShapeBuilderFallback.Salvage
+            Target = ARDB.TessellatedShapeBuilderTarget.Mesh,
+            Fallback = ARDB.TessellatedShapeBuilderFallback.Salvage
           }
         )
         { 
@@ -204,11 +204,11 @@ namespace RhinoInside.Revit.Convert.Geometry
               }
             }
 #endif
-            if (result.Outcome != DB.TessellatedShapeBuilderOutcome.Nothing)
+            if (result.Outcome != ARDB.TessellatedShapeBuilderOutcome.Nothing)
             {
               var geometries = result.GetGeometricalObjects();
               if (geometries.Count == 1)
-                return geometries[0] as DB.Mesh;
+                return geometries[0] as ARDB.Mesh;
             }
           }
         }
@@ -221,7 +221,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       return default;
     }
 
-    static void AddConnectedFaceSet(DB.TessellatedShapeBuilder builder, Mesh mesh, double factor, bool assumePlanarNgons = false)
+    static void AddConnectedFaceSet(ARDB.TessellatedShapeBuilder builder, Mesh mesh, double factor, bool assumePlanarNgons = false)
     {
       var vertices = mesh.Vertices.ToPoint3dArray();
       if (vertices.Length < 3)
@@ -346,13 +346,13 @@ namespace RhinoInside.Revit.Convert.Geometry
               loops[i].RemoveShortSegments(ShortEdgeTolerance);
             }
 
-            var allLoopVertices = new List<IList<DB.XYZ>>(loops.Length);
+            var allLoopVertices = new List<IList<ARDB.XYZ>>(loops.Length);
 
             foreach (var loop in loops)
             {
               if (loop is PolylineCurve polyline && polyline.SpanCount > 2)
               {
-                var loopVertices = new DB.XYZ[polyline.PointCount - 1];
+                var loopVertices = new ARDB.XYZ[polyline.PointCount - 1];
                 for (int p = 0; p < loopVertices.Length; ++p)
                   loopVertices[p] = Raw.RawEncoder.AsXYZ(polyline.Point(p));
 
@@ -364,7 +364,7 @@ namespace RhinoInside.Revit.Convert.Geometry
               }
             }
 
-            builder.AddFace(new DB.TessellatedFace(allLoopVertices, GeometryEncoder.Context.Peek.MaterialId));
+            builder.AddFace(new ARDB.TessellatedFace(allLoopVertices, GeometryEncoder.Context.Peek.MaterialId));
             faces++;
           }
           else
@@ -383,15 +383,15 @@ namespace RhinoInside.Revit.Convert.Geometry
             if (polyline.SpanCount > 2)
             {
               var outerLoopVertices = polyline.ToPolyline().ConvertAll(vi => Raw.RawEncoder.AsXYZ(vi));
-              builder.AddFace(new DB.TessellatedFace(outerLoopVertices, GeometryEncoder.Context.Peek.MaterialId));
+              builder.AddFace(new ARDB.TessellatedFace(outerLoopVertices, GeometryEncoder.Context.Peek.MaterialId));
               faces++;
             }
           }
         }
       }
 
-      var triangle = new DB.XYZ[3];
-      var quad = new DB.XYZ[4];
+      var triangle = new ARDB.XYZ[3];
+      var quad = new ARDB.XYZ[4];
       var fitPoints = new Point3d[4];
 
       var faceCount = mesh.Faces.Count;
@@ -438,7 +438,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             // If is not planar transfer as two triangles
             if (planar && validB && validD && (distanceB < 0.0 != distanceD < 0.0))
             {
-              builder.AddFace(new DB.TessellatedFace(quad, GeometryEncoder.Context.Peek.MaterialId));
+              builder.AddFace(new ARDB.TessellatedFace(quad, GeometryEncoder.Context.Peek.MaterialId));
               faces++;
             }
             else
@@ -446,14 +446,14 @@ namespace RhinoInside.Revit.Convert.Geometry
               if (validB)
               {
                 triangle[0] = quad[0]; triangle[1] = quad[1]; triangle[2] = quad[2];
-                builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+                builder.AddFace(new ARDB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
                 faces++;
               }
 
               if (validD)
               {
                 triangle[0] = quad[2]; triangle[1] = quad[3]; triangle[2] = quad[0];
-                builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+                builder.AddFace(new ARDB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
                 faces++;
               }
             }
@@ -465,7 +465,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           triangle[1] = Raw.RawEncoder.AsXYZ(vertices[face.B]);
           triangle[2] = Raw.RawEncoder.AsXYZ(vertices[face.C]);
 
-          builder.AddFace(new DB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+          builder.AddFace(new ARDB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
           faces++;
         }
       }

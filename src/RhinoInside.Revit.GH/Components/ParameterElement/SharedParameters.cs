@@ -5,9 +5,9 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.ParameterElement
+namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
   public class SharedParameters : ZuiComponent
   {
@@ -161,7 +161,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
                     if (name is object && !Operator.IsSymbolNameLike(definition.Name, name))
                       continue;
 
-                    definitions.Append(new Types.ParameterKey(definition as DB.ExternalDefinition), dPath);
+                    definitions.Append(new Types.ParameterKey(definition as ARDB.ExternalDefinition), dPath);
                   }
                   index++;
                 }

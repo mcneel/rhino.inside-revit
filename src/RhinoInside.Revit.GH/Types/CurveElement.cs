@@ -1,24 +1,24 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+
   [Kernel.Attributes.Name("Curve Element")]
   public class CurveElement : GraphicalElement, Bake.IGH_BakeAwareElement
   {
-    protected override Type ValueType => typeof(DB.CurveElement);
-    public static explicit operator DB.CurveElement(CurveElement value) => value?.Value;
-    public new DB.CurveElement Value => base.Value as DB.CurveElement;
+    protected override Type ValueType => typeof(ARDB.CurveElement);
+    public static explicit operator ARDB.CurveElement(CurveElement value) => value?.Value;
+    public new ARDB.CurveElement Value => base.Value as ARDB.CurveElement;
 
     public CurveElement() { }
-    public CurveElement(DB.CurveElement value) : base(value) { }
+    public CurveElement(ARDB.CurveElement value) : base(value) { }
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
@@ -38,11 +38,11 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_BakeAwareElement
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
-      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
     public bool BakeElement
     (
-      IDictionary<DB.ElementId, Guid> idMap,
+      IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
       RhinoDoc doc,
       ObjectAttributes att,
@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
 
       // 3. Update if necessary
-      if (Value is DB.CurveElement curve)
+      if (Value is ARDB.CurveElement curve)
       {
         att = att.Duplicate();
         att.Name = DisplayName;

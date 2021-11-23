@@ -3,12 +3,13 @@ using System.Linq;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.External.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Geometry
 {
+  using Convert.Geometry;
+  using External.DB;
+
   public class ElementPreview : Component
   {
     public override Guid ComponentGuid => new Guid("A95C7B73-6F70-46CA-85FC-A4402A3B6971");
@@ -34,18 +35,18 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var element = default(DB.Element);
+      var element = default(ARDB.Element);
       if (!DA.GetData("Element", ref element))
         return;
 
       var scope = default(IDisposable);
-      var detailLevel = DB.ViewDetailLevel.Undefined;
+      var detailLevel = ARDB.ViewDetailLevel.Undefined;
       DA.GetData(1, ref detailLevel);
-      if (detailLevel == DB.ViewDetailLevel.Undefined)
+      if (detailLevel == ARDB.ViewDetailLevel.Undefined)
       {
-        detailLevel = DB.ViewDetailLevel.Coarse;
+        detailLevel = ARDB.ViewDetailLevel.Coarse;
       }
-      else if (element is DB.FamilySymbol symbol && !symbol.IsActive)
+      else if (element is ARDB.FamilySymbol symbol && !symbol.IsActive)
       {
         scope = symbol.Document.RollBackScope();
         symbol.Activate();

@@ -6,7 +6,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    protected static void ChangeElementTypeId<T>(ref T element, DB.ElementId elementTypeId) where T : DB.Element
+    protected static void ChangeElementTypeId<T>(ref T element, ARDB.ElementId elementTypeId) where T : ARDB.Element
     {
       if (element is object && elementTypeId != element.GetTypeId())
       {
@@ -49,14 +49,14 @@ namespace RhinoInside.Revit.GH.Components
         if (element.IsValidType(elementTypeId))
         {
           var newElmentId = element.ChangeTypeId(elementTypeId);
-          if (newElmentId != DB.ElementId.InvalidElementId)
+          if (newElmentId != ARDB.ElementId.InvalidElementId)
             element = (T) doc.GetElement(newElmentId);
         }
         else element = null;
       }
     }
 
-    protected static void ChangeElementType<E, T>(ref E element, Optional<T> elementType) where E : DB.Element where T : DB.ElementType
+    protected static void ChangeElementType<E, T>(ref E element, Optional<T> elementType) where E : ARDB.Element where T : ARDB.ElementType
     {
       if (elementType.HasValue && element is object)
       {
@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    protected static bool SolveOptionalCategory(ref Optional<DB.Category> category, DB.Document doc, DB.BuiltInCategory builtInCategory, string paramName)
+    protected static bool SolveOptionalCategory(ref Optional<ARDB.Category> category, ARDB.Document doc, ARDB.BuiltInCategory builtInCategory, string paramName)
     {
       bool wasMissing = category.IsMissing;
 
@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if(category.IsMissing)
         {
-          category = DB.Category.GetCategory(doc, builtInCategory) ??
+          category = ARDB.Category.GetCategory(doc, builtInCategory) ??
           throw new RuntimeArgumentException(paramName, "No suitable Category has been found.");
         }
       }
@@ -89,12 +89,12 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    protected static bool SolveOptionalType<T>(DB.Document doc, ref Optional<T> type, DB.ElementTypeGroup group, string paramName) where T : DB.ElementType
+    protected static bool SolveOptionalType<T>(ARDB.Document doc, ref Optional<T> type, ARDB.ElementTypeGroup group, string paramName) where T : ARDB.ElementType
     {
       return SolveOptionalType(doc, ref type, group, (document, name) => throw new RuntimeArgumentNullException(paramName), paramName);
     }
 
-    protected static bool SolveOptionalType<T>(DB.Document doc, ref Optional<T> type, DB.ElementTypeGroup group, Func<DB.Document, string, T> recoveryAction, string paramName) where T : DB.ElementType
+    protected static bool SolveOptionalType<T>(ARDB.Document doc, ref Optional<T> type, ARDB.ElementTypeGroup group, Func<ARDB.Document, string, T> recoveryAction, string paramName) where T : ARDB.ElementType
     {
       bool wasMissing = type.IsMissing;
 
@@ -112,12 +112,12 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    protected static bool SolveOptionalType(DB.Document doc, ref Optional<DB.FamilySymbol> type, DB.BuiltInCategory category, string paramName)
+    protected static bool SolveOptionalType(ARDB.Document doc, ref Optional<ARDB.FamilySymbol> type, ARDB.BuiltInCategory category, string paramName)
     {
       bool wasMissing = type.IsMissing;
 
       if (wasMissing)
-        type = doc.GetElement(doc.GetDefaultFamilyTypeId(new DB.ElementId(category))) as DB.FamilySymbol ??
+        type = doc.GetElement(doc.GetDefaultFamilyTypeId(new ARDB.ElementId(category))) as ARDB.FamilySymbol ??
                throw new RuntimeArgumentException(paramName, "No suitable type has been found.");
 
       else if (type.Value == null)
@@ -132,13 +132,13 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    protected static bool SolveOptionalLevel(DB.Document doc, DB.Element host, ref Optional<DB.Level> level)
+    protected static bool SolveOptionalLevel(ARDB.Document doc, ARDB.Element host, ref Optional<ARDB.Level> level)
     {
       bool wasMissing = level.IsMissing;
 
       if (wasMissing)
       {
-        if (host?.Document.GetElement(host.LevelId) is DB.Level newLevel)
+        if (host?.Document.GetElement(host.LevelId) is ARDB.Level newLevel)
           level = newLevel;
       }
 
@@ -151,7 +151,7 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    protected static bool SolveOptionalLevel(DB.Document doc, double height, ref Optional<DB.Level> level)
+    protected static bool SolveOptionalLevel(ARDB.Document doc, double height, ref Optional<ARDB.Level> level)
     {
       bool wasMissing = level.IsMissing;
 
@@ -168,25 +168,25 @@ namespace RhinoInside.Revit.GH.Components
       return wasMissing;
     }
 
-    protected static bool SolveOptionalLevel(DB.Document doc, Point3d point, ref Optional<DB.Level> level, out BoundingBox bbox)
+    protected static bool SolveOptionalLevel(ARDB.Document doc, Point3d point, ref Optional<ARDB.Level> level, out BoundingBox bbox)
     {
       bbox = new Rhino.Geometry.BoundingBox(point, point);
       return SolveOptionalLevel(doc, point.IsValid ? point.Z : double.NaN, ref level);
     }
 
-    protected static bool SolveOptionalLevel(DB.Document doc, Line line, ref Optional<DB.Level> level, out BoundingBox bbox)
+    protected static bool SolveOptionalLevel(ARDB.Document doc, Line line, ref Optional<ARDB.Level> level, out BoundingBox bbox)
     {
       bbox = line.BoundingBox;
       return SolveOptionalLevel(doc, bbox.IsValid ? bbox.Min.Z : double.NaN, ref level);
     }
 
-    protected static bool SolveOptionalLevel(DB.Document doc, GeometryBase geometry, ref Optional<DB.Level> level, out BoundingBox bbox)
+    protected static bool SolveOptionalLevel(ARDB.Document doc, GeometryBase geometry, ref Optional<ARDB.Level> level, out BoundingBox bbox)
     {
       bbox = geometry.GetBoundingBox(true);
       return SolveOptionalLevel(doc, bbox.IsValid ? bbox.Min.Z : double.NaN, ref level);
     }
 
-    protected static bool SolveOptionalLevel(DB.Document doc, IEnumerable<GeometryBase> geometries, ref Optional<DB.Level> level, out BoundingBox bbox)
+    protected static bool SolveOptionalLevel(ARDB.Document doc, IEnumerable<GeometryBase> geometries, ref Optional<ARDB.Level> level, out BoundingBox bbox)
     {
       bbox = Rhino.Geometry.BoundingBox.Empty;
       foreach (var geometry in geometries)
@@ -195,7 +195,7 @@ namespace RhinoInside.Revit.GH.Components
       return SolveOptionalLevel(doc, bbox.IsValid ? bbox.Min.Z : double.NaN, ref level);
     }
 
-    protected static void SolveOptionalLevelsFromBase(DB.Document doc, double height, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
+    protected static void SolveOptionalLevelsFromBase(ARDB.Document doc, double height, ref Optional<ARDB.Level> baseLevel, ref Optional<ARDB.Level> topLevel)
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
@@ -222,7 +222,7 @@ namespace RhinoInside.Revit.GH.Components
         throw new RuntimeArgumentException(nameof(topLevel), "Failed to assign a level from a diferent document.");
     }
 
-    protected static void SolveOptionalLevelsFromTop(DB.Document doc, double height, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
+    protected static void SolveOptionalLevelsFromTop(ARDB.Document doc, double height, ref Optional<ARDB.Level> baseLevel, ref Optional<ARDB.Level> topLevel)
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
@@ -249,7 +249,7 @@ namespace RhinoInside.Revit.GH.Components
         throw new RuntimeArgumentException(nameof(topLevel), "Failed to assign a level from a diferent document.");
     }
 
-    protected static bool SolveOptionalLevels(DB.Document doc, Rhino.Geometry.Curve curve, ref Optional<DB.Level> baseLevel, ref Optional<DB.Level> topLevel)
+    protected static bool SolveOptionalLevels(ARDB.Document doc, Rhino.Geometry.Curve curve, ref Optional<ARDB.Level> baseLevel, ref Optional<ARDB.Level> topLevel)
     {
       bool result = true;
 
@@ -261,7 +261,7 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region Geometry Conversion
-    public static bool TryGetCurveAtPlane(Curve curve, Plane plane, out DB.Curve projected)
+    public static bool TryGetCurveAtPlane(Curve curve, Plane plane, out ARDB.Curve projected)
     {
       if (Curve.ProjectToPlane(curve, plane) is Curve p)
       {
@@ -315,39 +315,39 @@ namespace RhinoInside.Revit.GH.Components
       { typeof(IGH_Goo),                      (typeof(Param_GenericObject),         typeof(IGH_Goo))                },
       { typeof(IGH_GeometricGoo),             (typeof(Param_Geometry),              typeof(IGH_GeometricGoo))       },
 
-      { typeof(DB.Document),                  (typeof(Parameters.Document),         typeof(Types.Document))         },
-      { typeof(DB.ElementFilter),             (typeof(Parameters.ElementFilter),    typeof(Types.ElementFilter))    },
-      { typeof(DB.FilterRule),                (typeof(Parameters.FilterRule),       typeof(Types.FilterRule))       },
-      { typeof(DB.ParameterElement),          (typeof(Parameters.ParameterKey),     typeof(Types.ParameterKey))     },
+      { typeof(ARDB.Document),                  (typeof(Parameters.Document),         typeof(Types.Document))         },
+      { typeof(ARDB.ElementFilter),             (typeof(Parameters.ElementFilter),    typeof(Types.ElementFilter))    },
+      { typeof(ARDB.FilterRule),                (typeof(Parameters.FilterRule),       typeof(Types.FilterRule))       },
+      { typeof(ARDB.ParameterElement),          (typeof(Parameters.ParameterKey),     typeof(Types.ParameterKey))     },
 
-      { typeof(DB.ElementType),               (typeof(Parameters.ElementType),      typeof(Types.ElementType))      },
-      { typeof(DB.Element),                   (typeof(Parameters.Element),          typeof(Types.Element))          },
+      { typeof(ARDB.ElementType),               (typeof(Parameters.ElementType),      typeof(Types.ElementType))      },
+      { typeof(ARDB.Element),                   (typeof(Parameters.Element),          typeof(Types.Element))          },
 
-      { typeof(DB.Category),                  (typeof(Parameters.Category),         typeof(Types.Category))         },
-      { typeof(DB.Family),                    (typeof(Parameters.Family),           typeof(Types.Family))           },
-      { typeof(DB.View),                      (typeof(Parameters.View),             typeof(Types.View))             },
-      { typeof(DB.Group),                     (typeof(Parameters.Group),            typeof(Types.Group))            },
+      { typeof(ARDB.Category),                  (typeof(Parameters.Category),         typeof(Types.Category))         },
+      { typeof(ARDB.Family),                    (typeof(Parameters.Family),           typeof(Types.Family))           },
+      { typeof(ARDB.View),                      (typeof(Parameters.View),             typeof(Types.View))             },
+      { typeof(ARDB.Group),                     (typeof(Parameters.Group),            typeof(Types.Group))            },
 
-      { typeof(DB.CurveElement),              (typeof(Parameters.CurveElement),     typeof(Types.CurveElement))     },
-      { typeof(DB.SketchPlane),               (typeof(Parameters.SketchPlane),      typeof(Types.SketchPlane))      },
-      { typeof(DB.Level),                     (typeof(Parameters.Level),            typeof(Types.Level))            },
-      { typeof(DB.Grid),                      (typeof(Parameters.Grid),             typeof(Types.Grid))             },
-      { typeof(DB.Material),                  (typeof(Parameters.Material),         typeof(Types.Material))         },
+      { typeof(ARDB.CurveElement),              (typeof(Parameters.CurveElement),     typeof(Types.CurveElement))     },
+      { typeof(ARDB.SketchPlane),               (typeof(Parameters.SketchPlane),      typeof(Types.SketchPlane))      },
+      { typeof(ARDB.Level),                     (typeof(Parameters.Level),            typeof(Types.Level))            },
+      { typeof(ARDB.Grid),                      (typeof(Parameters.Grid),             typeof(Types.Grid))             },
+      { typeof(ARDB.Material),                  (typeof(Parameters.Material),         typeof(Types.Material))         },
 
-      { typeof(DB.HostObjAttributes),         (typeof(Parameters.HostObjectType),   typeof(Types.HostObjectType))   },
-      { typeof(DB.HostObject),                (typeof(Parameters.HostObject),       typeof(Types.HostObject))       },
-      { typeof(DB.Wall),                      (typeof(Parameters.Wall),             typeof(Types.Wall))             },
-      { typeof(DB.Floor),                     (typeof(Parameters.Floor),            typeof(Types.Floor))            },
-      { typeof(DB.Ceiling),                   (typeof(Parameters.Ceiling),          typeof(Types.Ceiling))          },
-      { typeof(DB.RoofBase),                  (typeof(Parameters.Roof),             typeof(Types.Roof))             },
-      { typeof(DB.CurtainSystem),             (typeof(Parameters.CurtainSystem),    typeof(Types.CurtainSystem))    },
-      { typeof(DB.CurtainGridLine),           (typeof(Parameters.CurtainGridLine),  typeof(Types.CurtainGridLine))  },
-      { typeof(DB.Architecture.BuildingPad),  (typeof(Parameters.BuildingPad),      typeof(Types.BuildingPad))      },
+      { typeof(ARDB.HostObjAttributes),         (typeof(Parameters.HostObjectType),   typeof(Types.HostObjectType))   },
+      { typeof(ARDB.HostObject),                (typeof(Parameters.HostObject),       typeof(Types.HostObject))       },
+      { typeof(ARDB.Wall),                      (typeof(Parameters.Wall),             typeof(Types.Wall))             },
+      { typeof(ARDB.Floor),                     (typeof(Parameters.Floor),            typeof(Types.Floor))            },
+      { typeof(ARDB.Ceiling),                   (typeof(Parameters.Ceiling),          typeof(Types.Ceiling))          },
+      { typeof(ARDB.RoofBase),                  (typeof(Parameters.Roof),             typeof(Types.Roof))             },
+      { typeof(ARDB.CurtainSystem),             (typeof(Parameters.CurtainSystem),    typeof(Types.CurtainSystem))    },
+      { typeof(ARDB.CurtainGridLine),           (typeof(Parameters.CurtainGridLine),  typeof(Types.CurtainGridLine))  },
+      { typeof(ARDB.Architecture.BuildingPad),  (typeof(Parameters.BuildingPad),      typeof(Types.BuildingPad))      },
 
-      { typeof(DB.FamilySymbol),              (typeof(Parameters.FamilySymbol),     typeof(Types.FamilySymbol))     },
-      { typeof(DB.FamilyInstance),            (typeof(Parameters.FamilyInstance),   typeof(Types.FamilyInstance))   },
+      { typeof(ARDB.FamilySymbol),              (typeof(Parameters.FamilySymbol),     typeof(Types.FamilySymbol))     },
+      { typeof(ARDB.FamilyInstance),            (typeof(Parameters.FamilyInstance),   typeof(Types.FamilyInstance))   },
 
-      { typeof(DB.SpatialElement),            (typeof(Parameters.SpatialElement),   typeof(Types.SpatialElement))   },
+      { typeof(ARDB.SpatialElement),            (typeof(Parameters.SpatialElement),   typeof(Types.SpatialElement))   },
     };
 
     protected bool TryGetParamTypes(Type type, out (Type ParamType, Type GooType) paramTypes)
@@ -656,7 +656,7 @@ namespace RhinoInside.Revit.GH.Components
     private ParamDefinition[] outputs;
     protected override ParamDefinition[] Outputs => outputs;
 
-    protected static void ReplaceElement<T>(ref T previous, T next, ICollection<DB.BuiltInParameter> parametersMask = null) where T : DB.Element
+    protected static void ReplaceElement<T>(ref T previous, T next, ICollection<ARDB.BuiltInParameter> parametersMask = null) where T : ARDB.Element
     {
       next.CopyParametersFrom(previous, parametersMask);
       previous = next;
@@ -672,24 +672,24 @@ namespace RhinoInside.Revit.GH.Components
         (
           DA,
           document.Value,
-          (DB.Document doc, ref DB.Element current) => TrySolveInstance(DA, doc, ref current)
+          (ARDB.Document doc, ref ARDB.Element current) => TrySolveInstance(DA, doc, ref current)
         );
       }
       else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no active Revit document");
     }
 
-    delegate void CommitAction(DB.Document doc, ref DB.Element element);
+    delegate void CommitAction(ARDB.Document doc, ref ARDB.Element element);
 
-    void Iterate(IGH_DataAccess DA, DB.Document doc, CommitAction action)
+    void Iterate(IGH_DataAccess DA, ARDB.Document doc, CommitAction action)
     {
       // Previous Output
       var trackedParam = Params.Output[0];
-      Params.ReadTrackedElement(trackedParam.Name, doc, out DB.Element previous);
+      Params.ReadTrackedElement(trackedParam.Name, doc, out ARDB.Element previous);
       var element = previous; 
 
-      if (element?.DesignOption?.Id is DB.ElementId elementDesignOptionId)
+      if (element?.DesignOption?.Id is ARDB.ElementId elementDesignOptionId)
       {
-        var activeDesignOptionId = DB.DesignOption.GetActiveDesignOptionId(element.Document);
+        var activeDesignOptionId = ARDB.DesignOption.GetActiveDesignOptionId(element.Document);
 
         if (elementDesignOptionId != activeDesignOptionId)
           element = null;
@@ -734,8 +734,8 @@ namespace RhinoInside.Revit.GH.Components
     void TrySolveInstance
     (
       IGH_DataAccess DA,
-      DB.Document doc,
-      ref DB.Element element
+      ARDB.Document doc,
+      ref ARDB.Element element
     )
     {
       var type = GetType();
@@ -778,63 +778,63 @@ namespace RhinoInside.Revit.GH.Components
         ReconstructInfo.Invoke(this, arguments);
       }
       catch (TargetInvocationException e) { throw e.InnerException; }
-      finally { element = (DB.Element) arguments[1]; }
+      finally { element = (ARDB.Element) arguments[1]; }
     }
 
     // Step 2.1
-    public override void OnStarted(DB.Document document)
+    public override void OnStarted(ARDB.Document document)
     {
       base.OnStarted(document);
     }
 
     // Step 3.1
-    public override void OnPrepare(IReadOnlyCollection<DB.Document> documents)
+    public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
     {
       base.OnPrepare(documents);
     }
 
     // Step 3.2
-    public override void OnDone(DB.TransactionStatus status)
+    public override void OnDone(ARDB.TransactionStatus status)
     {
       base.OnDone(status);
     }
     #region IGH_ElementIdBakeAwareObject
 
-    IEnumerable<Types.IGH_GraphicalElement> GetElementsToBake(DB.Document document) =>
+    IEnumerable<Types.IGH_GraphicalElement> GetElementsToBake(ARDB.Document document) =>
       Params.Output.Where(x => x is Kernel.IGH_ElementIdParam).
       SelectMany(x => x.VolatileData.AllData(true).OfType<Types.IGH_GraphicalElement>()).
       Where(x => x.Document.IsEquivalent(document));
 
     bool Bake.IGH_ElementIdBakeAwareObject.CanBake(Bake.BakeOptions options) =>
-      DB.DirectShape.IsSupportedDocument(options.Document) &&
+      ARDB.DirectShape.IsSupportedDocument(options.Document) &&
       GetElementsToBake(options.Document).Any();
 
-    bool Bake.IGH_ElementIdBakeAwareObject.Bake(Bake.BakeOptions options, out ICollection<DB.ElementId> ids)
+    bool Bake.IGH_ElementIdBakeAwareObject.Bake(Bake.BakeOptions options, out ICollection<ARDB.ElementId> ids)
     {
-      using (var trans = new DB.Transaction(options.Document, "Bake"))
+      using (var trans = new ARDB.Transaction(options.Document, "Bake"))
       {
-        if (trans.Start() == DB.TransactionStatus.Started)
+        if (trans.Start() == ARDB.TransactionStatus.Started)
         {
-          var newIds = new List<DB.ElementId>();
+          var newIds = new List<ARDB.ElementId>();
           var graphicalElements = GetElementsToBake(options.Document);
 
           foreach (var graphicalElement in graphicalElements)
           {
-            if (graphicalElement.Value is DB.Element element && element.get_BoundingBox(null) != null)
+            if (graphicalElement.Value is ARDB.Element element && element.get_BoundingBox(null) != null)
             {
-              using (var geometryOptions = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+              using (var geometryOptions = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Fine })
               {
                 using (var geometry = element.get_Geometry(geometryOptions))
                 {
                   var list = geometry.ToDirectShapeGeometry().ToList();
                   if (list.Count > 0)
                   {
-                    var categoryId = DB.DirectShape.IsValidCategoryId(element.Category.Id, options.Document) ?
-                      element.Category.Id : new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
+                    var categoryId = ARDB.DirectShape.IsValidCategoryId(element.Category.Id, options.Document) ?
+                      element.Category.Id : new ARDB.ElementId(ARDB.BuiltInCategory.OST_GenericModel);
 
                     try
                     {
-                      var shape = DB.DirectShape.CreateElement(options.Document, categoryId);
+                      var shape = ARDB.DirectShape.CreateElement(options.Document, categoryId);
                       shape.SetShape(list);
                       newIds.Add(shape.Id);
                     }
@@ -845,7 +845,7 @@ namespace RhinoInside.Revit.GH.Components
             }
           }
 
-          if (trans.Commit() == DB.TransactionStatus.Committed)
+          if (trans.Commit() == ARDB.TransactionStatus.Committed)
           {
             ids = newIds;
             return true;

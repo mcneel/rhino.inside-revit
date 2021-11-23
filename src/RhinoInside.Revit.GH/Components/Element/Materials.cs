@@ -1,9 +1,8 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
   public class ElementMaterials : Component
   {
@@ -35,12 +34,12 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
-      if (!DA.GetData("Element", ref element))
+      Types.Element element = null;
+      if (!DA.GetData("Element", ref element) || !element.IsValid)
         return;
 
-      DA.SetDataList("Materials", element?.GetMaterialIds(false).Select(x => element.Document.GetElement(x)));
-      DA.SetDataList("Paint", element?.GetMaterialIds(true).Select(x => element.Document.GetElement(x)));
+      DA.SetDataList("Materials", element.Value.GetMaterialIds(false).Select(x => Types.Material.FromElementId(element.Document, x)));
+      DA.SetDataList("Paint",     element.Value.GetMaterialIds(true ).Select(x => Types.Material.FromElementId(element.Document, x)));
     }
   }
 }

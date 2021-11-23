@@ -3,17 +3,18 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Level
+namespace RhinoInside.Revit.GH.Components.Levels
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   public class DocumentLevels : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("87715CAF-92A9-4B14-99E5-F8CCB2CC19BD");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Level));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.Level));
 
     public DocumentLevels() : base
     (
@@ -51,25 +52,25 @@ namespace RhinoInside.Revit.GH.Components.Level
       if (!Params.TryGetData(DA, "Elevation", out Interval? elevation, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Structural", out bool? structural)) return;
       if (!Params.TryGetData(DA, "Building Story", out bool? buildingStory)) return;
-      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var levelsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           levelsCollector = levelsCollector.WherePasses(filter);
 
-        if (name is string && TryGetFilterStringParam(DB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
+        if (name is string && TryGetFilterStringParam(ARDB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
           levelsCollector = levelsCollector.WherePasses(nameFilter);
 
-        if (structural.HasValue && TryGetFilterIntegerParam(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL, structural.Value ? 1 : 0, out var structuralFilter))
+        if (structural.HasValue && TryGetFilterIntegerParam(ARDB.BuiltInParameter.LEVEL_IS_STRUCTURAL, structural.Value ? 1 : 0, out var structuralFilter))
           levelsCollector = levelsCollector.WherePasses(structuralFilter);
 
-        if (buildingStory.HasValue && TryGetFilterIntegerParam(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY, buildingStory.Value ? 1 : 0, out var buildingStoryilter))
+        if (buildingStory.HasValue && TryGetFilterIntegerParam(ARDB.BuiltInParameter.LEVEL_IS_BUILDING_STORY, buildingStory.Value ? 1 : 0, out var buildingStoryilter))
           levelsCollector = levelsCollector.WherePasses(buildingStoryilter);
 
-        var levels = levelsCollector.Cast<DB.Level>();
+        var levels = levelsCollector.Cast<ARDB.Level>();
 
         if (!string.IsNullOrEmpty(name))
           levels = levels.Where(x => x.Name.IsSymbolNameLike(name));

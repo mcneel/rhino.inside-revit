@@ -1,7 +1,6 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -20,10 +19,10 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
       
-      ListItems.Add(new GH_ValueListItem("Do Not Wrap", ((int) DBX.WallWrapping.DoNotWrap).ToString()));
-      ListItems.Add(new GH_ValueListItem("Exterior", ((int) DBX.WallWrapping.Exterior).ToString()));
-      ListItems.Add(new GH_ValueListItem("Interior", ((int) DBX.WallWrapping.Interior).ToString()));
-      ListItems.Add(new GH_ValueListItem("Both", ((int) DBX.WallWrapping.Both).ToString()));
+      ListItems.Add(new GH_ValueListItem("Do Not Wrap", ((int) External.DB.WallWrapping.DoNotWrap).ToString()));
+      ListItems.Add(new GH_ValueListItem("Exterior", ((int) External.DB.WallWrapping.Exterior).ToString()));
+      ListItems.Add(new GH_ValueListItem("Interior", ((int) External.DB.WallWrapping.Interior).ToString()));
+      ListItems.Add(new GH_ValueListItem("Both", ((int) External.DB.WallWrapping.Both).ToString()));
     }
   }
 }

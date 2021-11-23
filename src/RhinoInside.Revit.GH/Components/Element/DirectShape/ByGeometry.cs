@@ -4,13 +4,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
-  using Kernel.Attributes;
   using Convert.Geometry;
   using External.DB.Extensions;
+  using Kernel.Attributes;
 
   public abstract class ReconstructDirectShapeComponent : ReconstructElementComponent
   {
@@ -34,12 +34,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       return scriptVariable as Rhino.Geometry.GeometryBase;
     }
 
-    protected IList<DB.GeometryObject> BuildShape
+    protected IList<ARDB.GeometryObject> BuildShape
     (
-      DB.Element element,
+      ARDB.Element element,
       IList<IGH_GeometricGoo> geometry,
-      IList<DB.Material> materials,
-      out IList<DB.ElementId> paintIds
+      IList<ARDB.Material> materials,
+      out IList<ARDB.ElementId> paintIds
     )
     {
       bool hasSolids = false;
@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         var materialIndex = 0;
         var materialCount = materials?.Count ?? 0;
 
-        var materialIds = materials is null ? null : new List<DB.ElementId>(geometry.Count);
+        var materialIds = materials is null ? null : new List<ARDB.ElementId>(geometry.Count);
         var shape = geometry.
                     Select(x => AsGeometryBase(x)).
                     Where(x => ThrowIfNotValid(nameof(geometry), x)).
@@ -65,12 +65,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
                           materials[materialIndex++]?.Id :
                           materials[materialCount - 1]?.Id
                         ) ??
-                        DB.ElementId.InvalidElementId;
+                        ARDB.ElementId.InvalidElementId;
                       }
 
                       var subShape = x.ToShape();
                       materialIds?.AddRange(Enumerable.Repeat(ctx.MaterialId, subShape.Length));
-                      if (!hasSolids) hasSolids = subShape.Any(s => s is DB.Solid);
+                      if (!hasSolids) hasSolids = subShape.Any(s => s is ARDB.Solid);
 
                       return subShape;
                     }).
@@ -81,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       }
     }
 
-    protected void PaintElementSolids(DB.Element element, IList<DB.ElementId> paintIds)
+    protected void PaintElementSolids(ARDB.Element element, IList<ARDB.ElementId> paintIds)
     {
       // If there are solids we may need to paint them
       if (paintIds is object)
@@ -91,15 +91,15 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         // Regenerate is necessary here, else 'element' may still have no geometry.
         doc.Regenerate();
 
-        using (var elementGeometry = element.get_Geometry(new DB.Options() { DetailLevel = DB.ViewDetailLevel.Undefined }))
+        using (var elementGeometry = element.get_Geometry(new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Undefined }))
         {
           int index = 0;
           foreach (var geo in elementGeometry)
           {
-            if (geo is DB.Solid solid)
+            if (geo is ARDB.Solid solid)
             {
-              var materialId = index < paintIds.Count ? paintIds[index] : DB.ElementId.InvalidElementId;
-              foreach (var face in solid.Faces.Cast<DB.Face>())
+              var materialId = index < paintIds.Count ? paintIds[index] : ARDB.ElementId.InvalidElementId;
+              foreach (var face in solid.Faces.Cast<ARDB.Face>())
               {
                 if (materialId.IsValid())
                   doc.Paint(element.Id, face, materialId);
@@ -133,21 +133,21 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     void ReconstructDirectShapeByGeometry
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), NickName("DS"), Description("New DirectShape")]
-      ref DB.DirectShape directShape,
+      ref ARDB.DirectShape directShape,
 
       [Optional] string name,
-      Optional<DB.Category> category,
+      Optional<ARDB.Category> category,
       IList<IGH_GeometricGoo> geometry,
-      [Optional] IList<DB.Material> material
+      [Optional] IList<ARDB.Material> material
     )
     {
-      SolveOptionalCategory(ref category, document, DB.BuiltInCategory.OST_GenericModel, nameof(geometry));
+      SolveOptionalCategory(ref category, document, ARDB.BuiltInCategory.OST_GenericModel, nameof(geometry));
 
       if (directShape is object && directShape.Category.Id == category.Value.Id) { }
-      else ReplaceElement(ref directShape, DB.DirectShape.CreateElement(document, category.Value.Id));
+      else ReplaceElement(ref directShape, ARDB.DirectShape.CreateElement(document, category.Value.Id));
 
       directShape.Name = name ?? string.Empty;
       directShape.SetShape(BuildShape(directShape, geometry, material, out var paintIds));
@@ -174,23 +174,23 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     void ReconstructDirectShapeTypeByGeometry
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New DirectShape Type")]
-      ref DB.ElementType type,
+      ref ARDB.ElementType type,
 
       [Optional, Name("Family Name"), NickName("FN")]
       string familyName,
       string name,
-      Optional<DB.Category> category,
+      Optional<ARDB.Category> category,
       IList<IGH_GeometricGoo> geometry,
-      [Optional] IList<DB.Material> material
+      [Optional] IList<ARDB.Material> material
     )
     {
-      SolveOptionalCategory(ref category, document, DB.BuiltInCategory.OST_GenericModel, nameof(geometry));
+      SolveOptionalCategory(ref category, document, ARDB.BuiltInCategory.OST_GenericModel, nameof(geometry));
 
-      if (type is DB.DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
-      else directShapeType = DB.DirectShapeType.Create(document, name, category.Value.Id);
+      if (type is ARDB.DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
+      else directShapeType = ARDB.DirectShapeType.Create(document, name, category.Value.Id);
 
 #if REVIT_2022
       if (familyName is object)
@@ -228,30 +228,30 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     void ReconstructDirectShapeByLocation
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), NickName("DS"), Description("New DirectShape")]
-      ref DB.DirectShape directShape,
+      ref ARDB.DirectShape directShape,
 
       [Description("Location where to place the element. Point or plane is accepted.")]
       Rhino.Geometry.Plane location,
-      DB.DirectShapeType type
+      ARDB.DirectShapeType type
     )
     {
-      var parametersMask = new DB.BuiltInParameter[]
+      var parametersMask = new ARDB.BuiltInParameter[]
       {
-        DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-        DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-        DB.BuiltInParameter.ELEM_TYPE_PARAM
+        ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+        ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+        ARDB.BuiltInParameter.ELEM_TYPE_PARAM
       };
 
       if (directShape is object && directShape.Category.Id == type.Category.Id) { }
-      else ReplaceElement(ref directShape, DB.DirectShape.CreateElement(document, type.Category.Id), parametersMask);
+      else ReplaceElement(ref directShape, ARDB.DirectShape.CreateElement(document, type.Category.Id), parametersMask);
 
       if (directShape.TypeId != type.Id)
         directShape.SetTypeId(type.Id);
 
-      using (var library = DB.DirectShapeLibrary.GetDirectShapeLibrary(document))
+      using (var library = ARDB.DirectShapeLibrary.GetDirectShapeLibrary(document))
       {
         if (!library.ContainsType(type.UniqueId))
           library.AddDefinitionType(type.UniqueId, type.Id);
@@ -259,7 +259,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
       using (var transform = Rhino.Geometry.Transform.PlaneToPlane(Rhino.Geometry.Plane.WorldXY, location).ToTransform())
       {
-        directShape.SetShape(DB.DirectShape.CreateGeometryInstance(document, type.UniqueId, transform));
+        directShape.SetShape(ARDB.DirectShape.CreateGeometryInstance(document, type.UniqueId, transform));
       }
     }
   }

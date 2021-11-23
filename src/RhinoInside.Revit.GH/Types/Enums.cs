@@ -1,26 +1,19 @@
-using System;
-using System.Linq;
-using Grasshopper.Kernel.Types;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
-using DBXS = RhinoInside.Revit.External.DB.Schemas;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using System.Collections.Generic;
   using System.Collections.ObjectModel;
-  using System.Reflection;
   using Kernel.Attributes;
-  using RhinoInside.Revit.External.DB.Extensions;
 
   [
     ComponentGuid("4615F47E-A20E-448A-A5DB-AF3473867E3D"),
     Name("Element Kind"),
     Description("Contains a collection of Revit element kind values"),
   ]
-  public class ElementKind : GH_Enum<DBX.ElementKind>
+  public class ElementKind : GH_Enum<External.DB.ElementKind>
   {
-    public override bool IsEmpty => Value == DBX.ElementKind.None;
+    public override bool IsEmpty => Value == External.DB.ElementKind.None;
   }
 
   [
@@ -28,9 +21,9 @@ namespace RhinoInside.Revit.GH.Types
     Name("Parameter Class"),
     Description("Contains a collection of Revit Parameter class values"),
   ]
-  public class ParameterClass : GH_Enum<DBX.ParameterClass>
+  public class ParameterClass : GH_Enum<External.DB.ParameterClass>
   {
-    public override bool IsEmpty => Value == DBX.ParameterClass.Any;
+    public override bool IsEmpty => Value == External.DB.ParameterClass.Any;
   }
 
   [
@@ -38,9 +31,9 @@ namespace RhinoInside.Revit.GH.Types
     Name("Parameter Binding"),
     Description("Contains a collection of Revit parameter binding type values"),
   ]
-  public class ParameterBinding : GH_Enum<DBX.ParameterBinding>
+  public class ParameterBinding : GH_Enum<External.DB.ParameterBinding>
   {
-    public override bool IsEmpty => Value == DBX.ParameterBinding.Unknown;
+    public override bool IsEmpty => Value == External.DB.ParameterBinding.Unknown;
   }
 
   [
@@ -48,9 +41,9 @@ namespace RhinoInside.Revit.GH.Types
     Name("Storage Type"),
     Description("Contains a collection of Revit storage type values"),
   ]
-  public class StorageType : GH_Enum<DB.StorageType>
+  public class StorageType : GH_Enum<ARDB.StorageType>
   {
-    public override bool IsEmpty => Value == DB.StorageType.None;
+    public override bool IsEmpty => Value == ARDB.StorageType.None;
   }
 
   [
@@ -58,27 +51,27 @@ namespace RhinoInside.Revit.GH.Types
     Name("Unit System"),
     Description("Contains a collection of Revit unit system values"),
   ]
-  public class UnitSystem : GH_Enum<DB.UnitSystem> { }
+  public class UnitSystem : GH_Enum<ARDB.UnitSystem> { }
 
   [
     ComponentGuid("195B9D7E-D4B0-4335-A442-3C2FA40794A2"),
     Name("Category Type"),
     Description("Contains a collection of Revit parameter category type values"),
   ]
-  public class CategoryType : GH_Enum<DB.CategoryType>
+  public class CategoryType : GH_Enum<ARDB.CategoryType>
   {
-    public CategoryType() : base(DB.CategoryType.Invalid) { }
-    public CategoryType(DB.CategoryType value) : base(value) { }
+    public CategoryType() : base(ARDB.CategoryType.Invalid) { }
+    public CategoryType(ARDB.CategoryType value) : base(value) { }
 
-    public override bool IsEmpty => Value == DB.CategoryType.Invalid;
+    public override bool IsEmpty => Value == ARDB.CategoryType.Invalid;
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.CategoryType.Model,            "Model"       },
-        { (int) DB.CategoryType.Annotation,       "Annotation"  },
-        { (int) DB.CategoryType.Internal,         "Internal"    },
-        { (int) DB.CategoryType.AnalyticalModel,  "Analytical"  },
+        { (int) ARDB.CategoryType.Model,            "Model"       },
+        { (int) ARDB.CategoryType.Annotation,       "Annotation"  },
+        { (int) ARDB.CategoryType.Internal,         "Internal"    },
+        { (int) ARDB.CategoryType.AnalyticalModel,  "Analytical"  },
       }
     );
   }
@@ -88,22 +81,22 @@ namespace RhinoInside.Revit.GH.Types
     Name("Element On Phase Status"),
     Description("Represents the statuses that an element can have with respect to a given phase."),
   ]
-  public class ElementOnPhaseStatus : GH_Enum<DB.ElementOnPhaseStatus>
+  public class ElementOnPhaseStatus : GH_Enum<ARDB.ElementOnPhaseStatus>
   {
     public ElementOnPhaseStatus() : base() { }
-    public ElementOnPhaseStatus(DB.ElementOnPhaseStatus value) : base(value) { }
+    public ElementOnPhaseStatus(ARDB.ElementOnPhaseStatus value) : base(value) { }
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.ElementOnPhaseStatus.None,       "<None>"      },
-        { (int) DB.ElementOnPhaseStatus.Past,       "Past"        },
-        { (int) DB.ElementOnPhaseStatus.Existing,   "Existing"    },
-        { (int) DB.ElementOnPhaseStatus.Demolished, "Demolished"  },
-        { (int) DB.ElementOnPhaseStatus.New,        "New"         },
-        { (int) DB.ElementOnPhaseStatus.Temporary,  "Temporary"   },
-        { (int) DB.ElementOnPhaseStatus.Future,     "Future"      },
+        { (int) ARDB.ElementOnPhaseStatus.None,       "<None>"      },
+        { (int) ARDB.ElementOnPhaseStatus.Past,       "Past"        },
+        { (int) ARDB.ElementOnPhaseStatus.Existing,   "Existing"    },
+        { (int) ARDB.ElementOnPhaseStatus.Demolished, "Demolished"  },
+        { (int) ARDB.ElementOnPhaseStatus.New,        "New"         },
+        { (int) ARDB.ElementOnPhaseStatus.Temporary,  "Temporary"   },
+        { (int) ARDB.ElementOnPhaseStatus.Future,     "Future"      },
       }
     );
   }
@@ -113,10 +106,10 @@ namespace RhinoInside.Revit.GH.Types
     Name("Graphics Style Type"),
     Description("Contains a collection of graphics style type values"),
   ]
-  public class GraphicsStyleType : GH_Enum<DB.GraphicsStyleType>
+  public class GraphicsStyleType : GH_Enum<ARDB.GraphicsStyleType>
   {
-    public GraphicsStyleType() : base(DB.GraphicsStyleType.Projection) { }
-    public GraphicsStyleType(DB.GraphicsStyleType value) : base(value) { }
+    public GraphicsStyleType() : base(ARDB.GraphicsStyleType.Projection) { }
+    public GraphicsStyleType(ARDB.GraphicsStyleType value) : base(value) { }
   }
 
   [
@@ -124,9 +117,9 @@ namespace RhinoInside.Revit.GH.Types
     Name("Detail Level"),
     Description("Contains a collection of view detail level values"),
   ]
-  public class ViewDetailLevel : GH_Enum<DB.ViewDetailLevel>
+  public class ViewDetailLevel : GH_Enum<ARDB.ViewDetailLevel>
   {
-    public override bool IsEmpty => Value == DB.ViewDetailLevel.Undefined;
+    public override bool IsEmpty => Value == ARDB.ViewDetailLevel.Undefined;
   }
 
   [
@@ -134,7 +127,7 @@ namespace RhinoInside.Revit.GH.Types
     Name("View Discipline"),
     Description("Contains a collection of Revit view discipline values"),
   ]
-  public class ViewDiscipline : GH_Enum<DB.ViewDiscipline>
+  public class ViewDiscipline : GH_Enum<ARDB.ViewDiscipline>
   {
     public override bool IsEmpty => Value == 0;
   }
@@ -144,35 +137,35 @@ namespace RhinoInside.Revit.GH.Types
     Name("View Family"),
     Description("Contains a collection of Revit view family values"),
   ]
-  public class ViewFamily : GH_Enum<DB.ViewFamily>
+  public class ViewFamily : GH_Enum<ARDB.ViewFamily>
   {
-    public ViewFamily() : base(DB.ViewFamily.Invalid) { }
-    public ViewFamily(DB.ViewFamily value) : base(value) { }
-    public override bool IsEmpty => Value == DB.ViewFamily.Invalid;
+    public ViewFamily() : base(ARDB.ViewFamily.Invalid) { }
+    public ViewFamily(ARDB.ViewFamily value) : base(value) { }
+    public override bool IsEmpty => Value == ARDB.ViewFamily.Invalid;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.ViewFamily.ThreeDimensional,         "3D View"                   },
-        { (int) DB.ViewFamily.FloorPlan,                "Floor Plan"                },
-        { (int) DB.ViewFamily.CeilingPlan,              "Ceiling Plan"              },
-        { (int) DB.ViewFamily.StructuralPlan,           "Structural Plan"           },
-        { (int) DB.ViewFamily.AreaPlan,                 "Area Plan"                 },
-        { (int) DB.ViewFamily.Elevation,                "Elevation"                 },
-        { (int) DB.ViewFamily.Section,                  "Section"                   },
-        { (int) DB.ViewFamily.Detail,                   "Detail View"               },
-        { (int) DB.ViewFamily.Drafting,                 "Drafting View"             },
-        { (int) DB.ViewFamily.ImageView,                "Rendering"                 },
-        { (int) DB.ViewFamily.Walkthrough,              "Walkthrough"               },
-        { (int) DB.ViewFamily.Legend,                   "Legend"                    },
-        { (int) DB.ViewFamily.Sheet,                    "Sheet"                     },
-        { (int) DB.ViewFamily.Schedule,                 "Schedule"                  },
-        { (int) DB.ViewFamily.GraphicalColumnSchedule,  "Graphical Column Schedule" },
-        { (int) DB.ViewFamily.PanelSchedule,            "Panel Schedule"            },
-        { (int) DB.ViewFamily.CostReport,               "Cost Report"               },
-        { (int) DB.ViewFamily.LoadsReport,              "Loads Report"              },
-        { (int) DB.ViewFamily.PressureLossReport,       "Pressure Loss Report"      },
+        { (int) ARDB.ViewFamily.ThreeDimensional,         "3D View"                   },
+        { (int) ARDB.ViewFamily.FloorPlan,                "Floor Plan"                },
+        { (int) ARDB.ViewFamily.CeilingPlan,              "Ceiling Plan"              },
+        { (int) ARDB.ViewFamily.StructuralPlan,           "Structural Plan"           },
+        { (int) ARDB.ViewFamily.AreaPlan,                 "Area Plan"                 },
+        { (int) ARDB.ViewFamily.Elevation,                "Elevation"                 },
+        { (int) ARDB.ViewFamily.Section,                  "Section"                   },
+        { (int) ARDB.ViewFamily.Detail,                   "Detail View"               },
+        { (int) ARDB.ViewFamily.Drafting,                 "Drafting View"             },
+        { (int) ARDB.ViewFamily.ImageView,                "Rendering"                 },
+        { (int) ARDB.ViewFamily.Walkthrough,              "Walkthrough"               },
+        { (int) ARDB.ViewFamily.Legend,                   "Legend"                    },
+        { (int) ARDB.ViewFamily.Sheet,                    "Sheet"                     },
+        { (int) ARDB.ViewFamily.Schedule,                 "Schedule"                  },
+        { (int) ARDB.ViewFamily.GraphicalColumnSchedule,  "Graphical Column Schedule" },
+        { (int) ARDB.ViewFamily.PanelSchedule,            "Panel Schedule"            },
+        { (int) ARDB.ViewFamily.CostReport,               "Cost Report"               },
+        { (int) ARDB.ViewFamily.LoadsReport,              "Loads Report"              },
+        { (int) ARDB.ViewFamily.PressureLossReport,       "Pressure Loss Report"      },
       }
     );
   }
@@ -182,41 +175,41 @@ namespace RhinoInside.Revit.GH.Types
     Name("View Type"),
     Description("Contains a collection of Revit view type values"),
   ]
-  public class ViewType : GH_Enum<DB.ViewType>
+  public class ViewType : GH_Enum<ARDB.ViewType>
   {
-    public override bool IsEmpty => Value == DB.ViewType.Undefined;
+    public override bool IsEmpty => Value == ARDB.ViewType.Undefined;
     public ViewType() { }
-    public ViewType(DB.ViewType value) : base(value) { }
+    public ViewType(ARDB.ViewType value) : base(value) { }
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.ViewType.FloorPlan,            "Floor Plan" },
-        { (int) DB.ViewType.CeilingPlan,          "Ceiling Plan" },
-        { (int) DB.ViewType.Elevation,            "Elevation" },
-        { (int) DB.ViewType.ThreeD,               "3D View" },
-        { (int) DB.ViewType.Schedule,             "Schedule" },
-        { (int) DB.ViewType.DrawingSheet,         "Sheet" },
-        { (int) DB.ViewType.ProjectBrowser,       "Project Browser" },
-        { (int) DB.ViewType.Report,               "Report" },
-        { (int) DB.ViewType.DraftingView,         "Drafting" },
-        { (int) DB.ViewType.Legend,               "Legend" },
-        { (int) DB.ViewType.SystemBrowser,        "System Browser" },
-        { (int) DB.ViewType.EngineeringPlan,      "Engineering Plan" },
-        { (int) DB.ViewType.AreaPlan,             "Area Plan" },
-        { (int) DB.ViewType.Section,              "Section" },
-        { (int) DB.ViewType.Detail,               "Detail" },
-        { (int) DB.ViewType.CostReport,           "Cost Report" },
-        { (int) DB.ViewType.LoadsReport,          "Loads Report" },
-        { (int) DB.ViewType.PresureLossReport,    "Presure Loss Report" },
-        { (int) DB.ViewType.ColumnSchedule,       "Column Schedule" },
-        { (int) DB.ViewType.PanelSchedule,        "Panel Schedule" },
-        { (int) DB.ViewType.Walkthrough,          "Walkthrough" },
-        { (int) DB.ViewType.Rendering,            "Rendering" },
+        { (int) ARDB.ViewType.FloorPlan,            "Floor Plan" },
+        { (int) ARDB.ViewType.CeilingPlan,          "Ceiling Plan" },
+        { (int) ARDB.ViewType.Elevation,            "Elevation" },
+        { (int) ARDB.ViewType.ThreeD,               "3D View" },
+        { (int) ARDB.ViewType.Schedule,             "Schedule" },
+        { (int) ARDB.ViewType.DrawingSheet,         "Sheet" },
+        { (int) ARDB.ViewType.ProjectBrowser,       "Project Browser" },
+        { (int) ARDB.ViewType.Report,               "Report" },
+        { (int) ARDB.ViewType.DraftingView,         "Drafting" },
+        { (int) ARDB.ViewType.Legend,               "Legend" },
+        { (int) ARDB.ViewType.SystemBrowser,        "System Browser" },
+        { (int) ARDB.ViewType.EngineeringPlan,      "Engineering Plan" },
+        { (int) ARDB.ViewType.AreaPlan,             "Area Plan" },
+        { (int) ARDB.ViewType.Section,              "Section" },
+        { (int) ARDB.ViewType.Detail,               "Detail" },
+        { (int) ARDB.ViewType.CostReport,           "Cost Report" },
+        { (int) ARDB.ViewType.LoadsReport,          "Loads Report" },
+        { (int) ARDB.ViewType.PresureLossReport,    "Presure Loss Report" },
+        { (int) ARDB.ViewType.ColumnSchedule,       "Column Schedule" },
+        { (int) ARDB.ViewType.PanelSchedule,        "Panel Schedule" },
+        { (int) ARDB.ViewType.Walkthrough,          "Walkthrough" },
+        { (int) ARDB.ViewType.Rendering,            "Rendering" },
 #if REVIT_2020
-        { (int) DB.ViewType.SystemsAnalysisReport,"Systems Analysis Report" },
+        { (int) ARDB.ViewType.SystemsAnalysisReport,"Systems Analysis Report" },
 #endif
-        { (int) DB.ViewType.Internal,             "Internal" },
+        { (int) ARDB.ViewType.Internal,             "Internal" },
       }
     );
   }
@@ -226,10 +219,10 @@ namespace RhinoInside.Revit.GH.Types
     Name("Image Fit direction type"),
     Description("Contains a collection of Revit fit direction type values"),
   ]
-  public class FitDirectionType : GH_Enum<DB.FitDirectionType>
+  public class FitDirectionType : GH_Enum<ARDB.FitDirectionType>
   {
-    public FitDirectionType() : base(DB.FitDirectionType.Horizontal) { }
-    public FitDirectionType(DB.FitDirectionType value) : base(value) { }
+    public FitDirectionType() : base(ARDB.FitDirectionType.Horizontal) { }
+    public FitDirectionType(ARDB.FitDirectionType value) : base(value) { }
   }
 
   [
@@ -237,19 +230,19 @@ namespace RhinoInside.Revit.GH.Types
     Name("Image Resolution"),
     Description("Contains a collection of Revit image resolution values"),
   ]
-  public class ImageResolution : GH_Enum<DB.ImageResolution>
+  public class ImageResolution : GH_Enum<ARDB.ImageResolution>
   {
-    public ImageResolution() : base(DB.ImageResolution.DPI_72) { }
-    public ImageResolution(DB.ImageResolution value) : base(value) { }
+    public ImageResolution() : base(ARDB.ImageResolution.DPI_72) { }
+    public ImageResolution(ARDB.ImageResolution value) : base(value) { }
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.ImageResolution.DPI_72,   "72 DPI" },
-        { (int) DB.ImageResolution.DPI_150, "150 DPI" },
-        { (int) DB.ImageResolution.DPI_300, "300 DPI" },
-        { (int) DB.ImageResolution.DPI_600, "600 DPI" },
+        { (int) ARDB.ImageResolution.DPI_72,   "72 DPI" },
+        { (int) ARDB.ImageResolution.DPI_150, "150 DPI" },
+        { (int) ARDB.ImageResolution.DPI_300, "300 DPI" },
+        { (int) ARDB.ImageResolution.DPI_600, "600 DPI" },
       }
     );
   }
@@ -259,22 +252,22 @@ namespace RhinoInside.Revit.GH.Types
     Name("Image FileType"),
     Description("Contains a collection of Revit image file type values"),
   ]
-  public class ImageFileType : GH_Enum<DB.ImageFileType>
+  public class ImageFileType : GH_Enum<ARDB.ImageFileType>
   {
-    public ImageFileType() : base(DB.ImageFileType.BMP) { }
-    public ImageFileType(DB.ImageFileType value) : base(value) { }
+    public ImageFileType() : base(ARDB.ImageFileType.BMP) { }
+    public ImageFileType(ARDB.ImageFileType value) : base(value) { }
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.ImageFileType.BMP,           "BMP" },
-        { (int) DB.ImageFileType.JPEGLossless,  "JPEG-Lossless" },
-        { (int) DB.ImageFileType.JPEGMedium,    "JPEG-Medium" },
-        { (int) DB.ImageFileType.JPEGSmallest,  "JPEG-Smallest" },
-        { (int) DB.ImageFileType.PNG,           "PNG" },
-        { (int) DB.ImageFileType.TARGA,         "TARGA" },
-        { (int) DB.ImageFileType.TIFF,          "TIFF" },
+        { (int) ARDB.ImageFileType.BMP,           "BMP" },
+        { (int) ARDB.ImageFileType.JPEGLossless,  "JPEG-Lossless" },
+        { (int) ARDB.ImageFileType.JPEGMedium,    "JPEG-Medium" },
+        { (int) ARDB.ImageFileType.JPEGSmallest,  "JPEG-Smallest" },
+        { (int) ARDB.ImageFileType.PNG,           "PNG" },
+        { (int) ARDB.ImageFileType.TARGA,         "TARGA" },
+        { (int) ARDB.ImageFileType.TIFF,          "TIFF" },
       }
     );
   }
@@ -284,21 +277,21 @@ namespace RhinoInside.Revit.GH.Types
     Name("Wall Location Line"),
     Description("Contains a collection of Revit wall location line values"),
   ]
-  public class WallLocationLine : GH_Enum<DB.WallLocationLine>
+  public class WallLocationLine : GH_Enum<ARDB.WallLocationLine>
   {
     public WallLocationLine() : base() { }
-    public WallLocationLine(DB.WallLocationLine value) : base(value) { }
+    public WallLocationLine(ARDB.WallLocationLine value) : base(value) { }
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.WallLocationLine.WallCenterline,      "Wall Centerline"       },
-        { (int) DB.WallLocationLine.CoreCenterline,      "Core Centerline"       },
-        { (int) DB.WallLocationLine.FinishFaceExterior,  "Finish Face: Exterior" },
-        { (int) DB.WallLocationLine.FinishFaceInterior,  "Finish Face: Interior" },
-        { (int) DB.WallLocationLine.CoreExterior,        "Core Face: Exterior"   },
-        { (int) DB.WallLocationLine.CoreInterior,        "Core Face: Interior"   },
+        { (int) ARDB.WallLocationLine.WallCenterline,      "Wall Centerline"       },
+        { (int) ARDB.WallLocationLine.CoreCenterline,      "Core Centerline"       },
+        { (int) ARDB.WallLocationLine.FinishFaceExterior,  "Finish Face: Exterior" },
+        { (int) ARDB.WallLocationLine.FinishFaceInterior,  "Finish Face: Interior" },
+        { (int) ARDB.WallLocationLine.CoreExterior,        "Core Face: Exterior"   },
+        { (int) ARDB.WallLocationLine.CoreInterior,        "Core Face: Interior"   },
       }
     );
   }
@@ -308,19 +301,19 @@ namespace RhinoInside.Revit.GH.Types
     Name("Wall System Family"),
     Description("Contains a collection of Revit wall system family"),
   ]
-  public class WallSystemFamily : GH_Enum<DB.WallKind>
+  public class WallSystemFamily : GH_Enum<ARDB.WallKind>
   {
-    public WallSystemFamily() : base(DB.WallKind.Unknown) { }
-    public WallSystemFamily(DB.WallKind value) : base(value) { }
-    public override bool IsEmpty => Value == DB.WallKind.Unknown;
+    public WallSystemFamily() : base(ARDB.WallKind.Unknown) { }
+    public WallSystemFamily(ARDB.WallKind value) : base(value) { }
+    public override bool IsEmpty => Value == ARDB.WallKind.Unknown;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.WallKind.Basic,      "Basic Wall"    },
-        { (int) DB.WallKind.Curtain,    "Curtain Wall"  },
-        { (int) DB.WallKind.Stacked,    "Stacked Wall"  },
+        { (int) ARDB.WallKind.Basic,      "Basic Wall"    },
+        { (int) ARDB.WallKind.Curtain,    "Curtain Wall"  },
+        { (int) ARDB.WallKind.Stacked,    "Stacked Wall"  },
       }
     );
   }
@@ -330,9 +323,9 @@ namespace RhinoInside.Revit.GH.Types
     Name("Wall Function"),
     Description("Contains a collection of Revit wall function"),
   ]
-  public class WallFunction : GH_Enum<DB.WallFunction> {
+  public class WallFunction : GH_Enum<ARDB.WallFunction> {
     public WallFunction() : base() { }
-    public WallFunction(DB.WallFunction value) : base(value) { }
+    public WallFunction(ARDB.WallFunction value) : base(value) { }
   }
 
   [
@@ -340,10 +333,10 @@ namespace RhinoInside.Revit.GH.Types
     Name("Wall Wrapping"),
     Description("Contains a collection of Revit wall wrapping option"),
   ]
-  public class WallWrapping : GH_Enum<DBX.WallWrapping>
+  public class WallWrapping : GH_Enum<External.DB.WallWrapping>
   {
     public WallWrapping() : base() { }
-    public WallWrapping(DBX.WallWrapping value) : base(value) { }
+    public WallWrapping(External.DB.WallWrapping value) : base(value) { }
   }
 
   [
@@ -351,18 +344,18 @@ namespace RhinoInside.Revit.GH.Types
     Name("Structural Wall Usage"),
     Description("Contains a collection of Revit structural wall usage values"),
   ]
-  public class StructuralWallUsage : GH_Enum<DB.Structure.StructuralWallUsage> {
+  public class StructuralWallUsage : GH_Enum<ARDB.Structure.StructuralWallUsage> {
     public StructuralWallUsage() : base() { }
-    public StructuralWallUsage(DB.Structure.StructuralWallUsage value) : base(value) { }
+    public StructuralWallUsage(ARDB.Structure.StructuralWallUsage value) : base(value) { }
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.Structure.StructuralWallUsage.NonBearing,  "Non-Bearing"         },
-        { (int) DB.Structure.StructuralWallUsage.Bearing,     "Bearing"             },
-        { (int) DB.Structure.StructuralWallUsage.Shear,       "Shear"               },
-        { (int) DB.Structure.StructuralWallUsage.Combined,    "Structural combined" },
+        { (int) ARDB.Structure.StructuralWallUsage.NonBearing,  "Non-Bearing"         },
+        { (int) ARDB.Structure.StructuralWallUsage.Bearing,     "Bearing"             },
+        { (int) ARDB.Structure.StructuralWallUsage.Shear,       "Shear"               },
+        { (int) ARDB.Structure.StructuralWallUsage.Combined,    "Structural combined" },
       }
     );
   }
@@ -372,20 +365,20 @@ namespace RhinoInside.Revit.GH.Types
     Name("End Cap Condition"),
     Description("Represents end cap condition of a compound structure"),
   ]
-  public class EndCapCondition : GH_Enum<DB.EndCapCondition>
+  public class EndCapCondition : GH_Enum<ARDB.EndCapCondition>
   {
     public EndCapCondition() : base() { }
-    public EndCapCondition(DB.EndCapCondition value) : base(value) { }
+    public EndCapCondition(ARDB.EndCapCondition value) : base(value) { }
 
-    public override bool IsEmpty => Value == DB.EndCapCondition.None;
+    public override bool IsEmpty => Value == ARDB.EndCapCondition.None;
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.EndCapCondition.None,      "<empty>"  },
-        { (int) DB.EndCapCondition.Exterior,  "Exterior" },
-        { (int) DB.EndCapCondition.Interior,  "Interior" },
-        { (int) DB.EndCapCondition.NoEndCap,  "None"     },
+        { (int) ARDB.EndCapCondition.None,      "<empty>"  },
+        { (int) ARDB.EndCapCondition.Exterior,  "Exterior" },
+        { (int) ARDB.EndCapCondition.Interior,  "Interior" },
+        { (int) ARDB.EndCapCondition.NoEndCap,  "None"     },
       }
     );
   }
@@ -395,12 +388,12 @@ namespace RhinoInside.Revit.GH.Types
     Name("Deck Embedding Type"),
     Description("Represents deck embedding type of a compound structure layer"),
   ]
-  public class DeckEmbeddingType : GH_Enum<DB.StructDeckEmbeddingType>
+  public class DeckEmbeddingType : GH_Enum<ARDB.StructDeckEmbeddingType>
   {
-    public DeckEmbeddingType() : base(DB.StructDeckEmbeddingType.Invalid) { }
-    public DeckEmbeddingType(DB.StructDeckEmbeddingType value) : base(value) { }
+    public DeckEmbeddingType() : base(ARDB.StructDeckEmbeddingType.Invalid) { }
+    public DeckEmbeddingType(ARDB.StructDeckEmbeddingType value) : base(value) { }
 
-    public override bool IsEmpty => Value == DB.StructDeckEmbeddingType.Invalid;
+    public override bool IsEmpty => Value == ARDB.StructDeckEmbeddingType.Invalid;
   }
 
   [
@@ -408,25 +401,25 @@ namespace RhinoInside.Revit.GH.Types
     Name("Layer Function"),
     Description("Represents layer function of a wall compound structure layer"),
   ]
-  public class LayerFunction : GH_Enum<DB.MaterialFunctionAssignment>
+  public class LayerFunction : GH_Enum<ARDB.MaterialFunctionAssignment>
   {
     public LayerFunction() : base() { }
-    public LayerFunction(DB.MaterialFunctionAssignment value) : base(value) { }
+    public LayerFunction(ARDB.MaterialFunctionAssignment value) : base(value) { }
 
-    public override bool IsEmpty => Value == DB.MaterialFunctionAssignment.None;
+    public override bool IsEmpty => Value == ARDB.MaterialFunctionAssignment.None;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.MaterialFunctionAssignment.None,                 "<empty>"               },
-        { (int) DB.MaterialFunctionAssignment.Structure,            "Structure [1]"         },
-        { (int) DB.MaterialFunctionAssignment.Substrate,            "Substrate [2]"         },
-        { (int) DB.MaterialFunctionAssignment.Insulation,           "Thermal/Air Layer [3]" },
-        { (int) DB.MaterialFunctionAssignment.Finish1,              "Finish 1 [4]"          },
-        { (int) DB.MaterialFunctionAssignment.Finish2,              "Finish 2 [5]"          },
-        { (int) DB.MaterialFunctionAssignment.Membrane,             "Membrane Layer"        },
-        { (int) DB.MaterialFunctionAssignment.StructuralDeck,       "Structural Deck [1]"   },
+        { (int) ARDB.MaterialFunctionAssignment.None,                 "<empty>"               },
+        { (int) ARDB.MaterialFunctionAssignment.Structure,            "Structure [1]"         },
+        { (int) ARDB.MaterialFunctionAssignment.Substrate,            "Substrate [2]"         },
+        { (int) ARDB.MaterialFunctionAssignment.Insulation,           "Thermal/Air Layer [3]" },
+        { (int) ARDB.MaterialFunctionAssignment.Finish1,              "Finish 1 [4]"          },
+        { (int) ARDB.MaterialFunctionAssignment.Finish2,              "Finish 2 [5]"          },
+        { (int) ARDB.MaterialFunctionAssignment.Membrane,             "Membrane Layer"        },
+        { (int) ARDB.MaterialFunctionAssignment.StructuralDeck,       "Structural Deck [1]"   },
       }
     );
   }
@@ -436,19 +429,19 @@ namespace RhinoInside.Revit.GH.Types
     Name("Opening Wrapping Condition"),
     Description("Represents compound structure layers wrapping at openings setting"),
   ]
-  public class OpeningWrappingCondition : GH_Enum<DB.OpeningWrappingCondition>
+  public class OpeningWrappingCondition : GH_Enum<ARDB.OpeningWrappingCondition>
   {
     public OpeningWrappingCondition() : base() { }
-    public OpeningWrappingCondition(DB.OpeningWrappingCondition value) : base(value) { }
+    public OpeningWrappingCondition(ARDB.OpeningWrappingCondition value) : base(value) { }
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.OpeningWrappingCondition.None,                 "None"                },
-        { (int) DB.OpeningWrappingCondition.Exterior,             "Exterior"            },
-        { (int) DB.OpeningWrappingCondition.Interior,             "Interior"            },
-        { (int) DB.OpeningWrappingCondition.ExteriorAndInterior,  "Exterior & Interior" },
+        { (int) ARDB.OpeningWrappingCondition.None,                 "None"                },
+        { (int) ARDB.OpeningWrappingCondition.Exterior,             "Exterior"            },
+        { (int) ARDB.OpeningWrappingCondition.Interior,             "Interior"            },
+        { (int) ARDB.OpeningWrappingCondition.ExteriorAndInterior,  "Exterior & Interior" },
       }
     );
   }
@@ -458,10 +451,10 @@ namespace RhinoInside.Revit.GH.Types
     Name("Curtain Grid Align Type"),
     Description("Represents alignment type for curtain grids at either direction"),
   ]
-  public class CurtainGridAlignType : GH_Enum<DB.CurtainGridAlignType>
+  public class CurtainGridAlignType : GH_Enum<ARDB.CurtainGridAlignType>
   {
     public CurtainGridAlignType() : base() { }
-    public CurtainGridAlignType(DB.CurtainGridAlignType value) : base(value) { }
+    public CurtainGridAlignType(ARDB.CurtainGridAlignType value) : base(value) { }
   }
 
   [
@@ -469,20 +462,20 @@ namespace RhinoInside.Revit.GH.Types
     Name("Curtain Grid Layout"),
     Description("Represents layout for curtain grids at either direction"),
   ]
-  public class CurtainGridLayout : GH_Enum<DBX.CurtainGridLayout>
+  public class CurtainGridLayout : GH_Enum<External.DB.CurtainGridLayout>
   {
     public CurtainGridLayout() : base() { }
-    public CurtainGridLayout(DBX.CurtainGridLayout value) : base(value) { }
+    public CurtainGridLayout(External.DB.CurtainGridLayout value) : base(value) { }
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DBX.CurtainGridLayout.None,            "None"             },
-        { (int) DBX.CurtainGridLayout.FixedDistance,   "Fixed Distance"   },
-        { (int) DBX.CurtainGridLayout.FixedNumber,     "Fixed Number"     },
-        { (int) DBX.CurtainGridLayout.MaximumSpacing,  "Maximum Spacing"  },
-        { (int) DBX.CurtainGridLayout.MinimumSpacing,  "Minimum Spacing"  },
+        { (int) External.DB.CurtainGridLayout.None,            "None"             },
+        { (int) External.DB.CurtainGridLayout.FixedDistance,   "Fixed Distance"   },
+        { (int) External.DB.CurtainGridLayout.FixedNumber,     "Fixed Number"     },
+        { (int) External.DB.CurtainGridLayout.MaximumSpacing,  "Maximum Spacing"  },
+        { (int) External.DB.CurtainGridLayout.MinimumSpacing,  "Minimum Spacing"  },
       }
     );
   }
@@ -492,21 +485,21 @@ namespace RhinoInside.Revit.GH.Types
     Name("Curtain Grid Join Condition"),
     Description("Represents join condition for curtain grids at either direction"),
   ]
-  public class CurtainGridJoinCondition : GH_Enum<DBX.CurtainGridJoinCondition>
+  public class CurtainGridJoinCondition : GH_Enum<External.DB.CurtainGridJoinCondition>
   {
     public CurtainGridJoinCondition() : base() { }
-    public CurtainGridJoinCondition(DBX.CurtainGridJoinCondition value) : base(value) { }
-    public override bool IsEmpty => Value == DBX.CurtainGridJoinCondition.NotDefined;
+    public CurtainGridJoinCondition(External.DB.CurtainGridJoinCondition value) : base(value) { }
+    public override bool IsEmpty => Value == External.DB.CurtainGridJoinCondition.NotDefined;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DBX.CurtainGridJoinCondition.NotDefined,                        "Not Defined" },
-        { (int) DBX.CurtainGridJoinCondition.VerticalGridContinuous,            "Vertical Grid Continuous" },
-        { (int) DBX.CurtainGridJoinCondition.HorizontalGridContinuous,          "Horizontal Grid Continuous" },
-        { (int) DBX.CurtainGridJoinCondition.BorderAndVerticalGridContinuous,   "Border & Vertical Grid Continuous" },
-        { (int) DBX.CurtainGridJoinCondition.BorderAndHorizontalGridContinuous, "Border & Horizontal Grid Continuous" },
+        { (int) External.DB.CurtainGridJoinCondition.NotDefined,                        "Not Defined" },
+        { (int) External.DB.CurtainGridJoinCondition.VerticalGridContinuous,            "Vertical Grid Continuous" },
+        { (int) External.DB.CurtainGridJoinCondition.HorizontalGridContinuous,          "Horizontal Grid Continuous" },
+        { (int) External.DB.CurtainGridJoinCondition.BorderAndVerticalGridContinuous,   "Border & Vertical Grid Continuous" },
+        { (int) External.DB.CurtainGridJoinCondition.BorderAndHorizontalGridContinuous, "Border & Horizontal Grid Continuous" },
       }
     );
   }
@@ -516,23 +509,23 @@ namespace RhinoInside.Revit.GH.Types
     Name("Curtain Mullion System Family"),
     Description("Represents builtin curtain mullion system families"),
   ]
-  public class CurtainMullionSystemFamily : GH_Enum<DBX.CurtainMullionSystemFamily>
+  public class CurtainMullionSystemFamily : GH_Enum<External.DB.CurtainMullionSystemFamily>
   {
-    public CurtainMullionSystemFamily() : base(DBX.CurtainMullionSystemFamily.Unknown) { }
-    public CurtainMullionSystemFamily(DBX.CurtainMullionSystemFamily value) : base(value) { }
-    public override bool IsEmpty => Value == DBX.CurtainMullionSystemFamily.Unknown;
+    public CurtainMullionSystemFamily() : base(External.DB.CurtainMullionSystemFamily.Unknown) { }
+    public CurtainMullionSystemFamily(External.DB.CurtainMullionSystemFamily value) : base(value) { }
+    public override bool IsEmpty => Value == External.DB.CurtainMullionSystemFamily.Unknown;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DBX.CurtainMullionSystemFamily.Unknown,         "Unknown"         },
-        { (int) DBX.CurtainMullionSystemFamily.Rectangular,     "Rectangular"     },
-        { (int) DBX.CurtainMullionSystemFamily.Circular,        "Circular"        },
-        { (int) DBX.CurtainMullionSystemFamily.LCorner,         "L Corner"        },
-        { (int) DBX.CurtainMullionSystemFamily.TrapezoidCorner, "Trapezoid Corner"},
-        { (int) DBX.CurtainMullionSystemFamily.QuadCorner,      "Quad Corner"     },
-        { (int) DBX.CurtainMullionSystemFamily.VCorner,         "V Corner"        },
+        { (int) External.DB.CurtainMullionSystemFamily.Unknown,         "Unknown"         },
+        { (int) External.DB.CurtainMullionSystemFamily.Rectangular,     "Rectangular"     },
+        { (int) External.DB.CurtainMullionSystemFamily.Circular,        "Circular"        },
+        { (int) External.DB.CurtainMullionSystemFamily.LCorner,         "L Corner"        },
+        { (int) External.DB.CurtainMullionSystemFamily.TrapezoidCorner, "Trapezoid Corner"},
+        { (int) External.DB.CurtainMullionSystemFamily.QuadCorner,      "Quad Corner"     },
+        { (int) External.DB.CurtainMullionSystemFamily.VCorner,         "V Corner"        },
       }
     );
   }
@@ -542,11 +535,11 @@ namespace RhinoInside.Revit.GH.Types
     Name("Curtain Panel System Family"),
     Description("Represents builtin curtain panel system families"),
   ]
-  public class CurtainPanelSystemFamily : GH_Enum<DBX.CurtainPanelSystemFamily>
+  public class CurtainPanelSystemFamily : GH_Enum<External.DB.CurtainPanelSystemFamily>
   {
     public CurtainPanelSystemFamily() : base() { }
-    public CurtainPanelSystemFamily(DBX.CurtainPanelSystemFamily value) : base(value) { }
-    public override bool IsEmpty => Value == DBX.CurtainPanelSystemFamily.Unknown;
+    public CurtainPanelSystemFamily(External.DB.CurtainPanelSystemFamily value) : base(value) { }
+    public override bool IsEmpty => Value == External.DB.CurtainPanelSystemFamily.Unknown;
   }
 
   [
@@ -554,7 +547,7 @@ namespace RhinoInside.Revit.GH.Types
     Name("Floor Function"),
     Description("Represents builtin floor function"),
   ]
-  public class FloorFunction : GH_Enum<DBX.FloorFunction>
+  public class FloorFunction : GH_Enum<External.DB.FloorFunction>
   {
   }
 
@@ -563,9 +556,9 @@ namespace RhinoInside.Revit.GH.Types
     Name("Physical Asset Class"),
     Description("Represents physical asset class"),
   ]
-  public class StructuralAssetClass : GH_Enum<DB.StructuralAssetClass>
+  public class StructuralAssetClass : GH_Enum<ARDB.StructuralAssetClass>
   {
-    public override bool IsEmpty => Value == DB.StructuralAssetClass.Undefined;
+    public override bool IsEmpty => Value == ARDB.StructuralAssetClass.Undefined;
   }
 
   [
@@ -573,7 +566,7 @@ namespace RhinoInside.Revit.GH.Types
     Name("Material Behavior"),
     Description("Represents material behavior of physical or thermal assets"),
   ]
-  public class StructuralBehavior : GH_Enum<DB.StructuralBehavior>
+  public class StructuralBehavior : GH_Enum<ARDB.StructuralBehavior>
   {
   }
 
@@ -582,9 +575,9 @@ namespace RhinoInside.Revit.GH.Types
     Name("Thermal Material Class"),
     Description("Represents thermal material class"),
   ]
-  public class ThermalMaterialType : GH_Enum<DB.ThermalMaterialType>
+  public class ThermalMaterialType : GH_Enum<ARDB.ThermalMaterialType>
   {
-    public override bool IsEmpty => Value == DB.ThermalMaterialType.Undefined;
+    public override bool IsEmpty => Value == ARDB.ThermalMaterialType.Undefined;
   }
 
   [
@@ -592,19 +585,19 @@ namespace RhinoInside.Revit.GH.Types
     Name("Workset Kind"),
     Description("Represents workset kind"),
   ]
-  public class WorksetKind : GH_Enum<DB.WorksetKind>
+  public class WorksetKind : GH_Enum<ARDB.WorksetKind>
   {
-    public override bool IsEmpty => Value == DB.WorksetKind.OtherWorkset;
+    public override bool IsEmpty => Value == ARDB.WorksetKind.OtherWorkset;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.WorksetKind.OtherWorkset,    "Other"             },
-        { (int) DB.WorksetKind.StandardWorkset, "Project Standards" },
-        { (int) DB.WorksetKind.UserWorkset,     "User-Created"      },
-        { (int) DB.WorksetKind.FamilyWorkset,   "Families"          },
-        { (int) DB.WorksetKind.ViewWorkset,     "Views"             },
+        { (int) ARDB.WorksetKind.OtherWorkset,    "Other"             },
+        { (int) ARDB.WorksetKind.StandardWorkset, "Project Standards" },
+        { (int) ARDB.WorksetKind.UserWorkset,     "User-Created"      },
+        { (int) ARDB.WorksetKind.FamilyWorkset,   "Families"          },
+        { (int) ARDB.WorksetKind.ViewWorkset,     "Views"             },
       }
     );
   }
@@ -615,15 +608,15 @@ namespace RhinoInside.Revit.GH.Types
     Name("Checkout Status"),
     Description("Represents checkout status"),
   ]
-  public class CheckoutStatus : GH_Enum<DB.CheckoutStatus>
+  public class CheckoutStatus : GH_Enum<ARDB.CheckoutStatus>
   {
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) DB.CheckoutStatus.OwnedByCurrentUser, "Owned by current user" },
-        { (int) DB.CheckoutStatus.OwnedByOtherUser,   "Owned by other user" },
-        { (int) DB.CheckoutStatus.NotOwned,           "Not Owned" },
+        { (int) ARDB.CheckoutStatus.OwnedByCurrentUser, "Owned by current user" },
+        { (int) ARDB.CheckoutStatus.OwnedByOtherUser,   "Owned by other user" },
+        { (int) ARDB.CheckoutStatus.NotOwned,           "Not Owned" },
       }
     );
   }

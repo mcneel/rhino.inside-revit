@@ -1,9 +1,8 @@
 using System;
 using Grasshopper.Kernel;
+using ARDB = Autodesk.Revit.DB;
 
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class AnalyzeCurtainGridPanelType : AnalysisComponent
   {
@@ -59,14 +58,14 @@ namespace RhinoInside.Revit.GH.Components
     {
       // get input
       // panel types can be DB.FamilySymbol or DB.PanelType
-      DB.FamilySymbol famInst = default;
+      ARDB.FamilySymbol famInst = default;
       if (!DA.GetData("Panel Type", ref famInst))
         return;
 
       var inputType = famInst.GetType();
       // make sure other derivatives of DB.FamilySymbol do not pass this filter
       // we are only interested in panel types
-      if (inputType == typeof(DB.FamilySymbol) || inputType == typeof(DB.PanelType))
+      if (inputType == typeof(ARDB.FamilySymbol) || inputType == typeof(ARDB.PanelType))
       {
         // TODO: find a way to determine whether panel type is an Empty type or not
         // maybe the Id/Unique is fixed? Compare across multiple example models of various languages
@@ -74,15 +73,15 @@ namespace RhinoInside.Revit.GH.Components
 
         switch (famInst)
         {
-          case DB.PanelType panelType:
-            PipeHostParameter(DA, panelType, DB.BuiltInParameter.CURTAIN_WALL_SYSPANEL_OFFSET, "Offset");
-            PipeHostParameter(DA, panelType, DB.BuiltInParameter.CURTAIN_WALL_SYSPANEL_THICKNESS, "Thickness");
+          case ARDB.PanelType panelType:
+            PipeHostParameter(DA, panelType, ARDB.BuiltInParameter.CURTAIN_WALL_SYSPANEL_OFFSET, "Offset");
+            PipeHostParameter(DA, panelType, ARDB.BuiltInParameter.CURTAIN_WALL_SYSPANEL_THICKNESS, "Thickness");
             break;
 
-          case DB.FamilySymbol finst:
+          case ARDB.FamilySymbol finst:
             // make sure family symbol belongs to a Panel Family
             // finst.Family.IsCurtainPanelFamily returns FALSE !!!
-            var isCurtainPanelFamily = finst.Family.FamilyCategory.Id.IntegerValue == (int) DB.BuiltInCategory.OST_CurtainWallPanels;
+            var isCurtainPanelFamily = finst.Family.FamilyCategory.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_CurtainWallPanels;
             // can not extract Offset and Thickness since they are not builtin for curtain panel custom families
             // TODO: maybe extract other info for Panel Families?!
             break;

@@ -4,21 +4,22 @@ using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Display;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Display;
+  using Convert.Geometry;
+  using External.DB.Extensions;
+  using GH.Kernel.Attributes;
+
   public abstract class GeometryObject<X> :
     ElementId,
     IEquatable<GeometryObject<X>>,
     IGH_GeometricGoo,
     IGH_PreviewData,
     IGH_PreviewMeshData
-    where X : DB.GeometryObject
+    where X : ARDB.GeometryObject
   {
     #region System.Object
     public bool Equals(GeometryObject<X> other) => other is object &&
@@ -34,20 +35,20 @@ namespace RhinoInside.Revit.GH.Types
 
       try
       {
-        if (Document?.GetElement(Reference) is DB.Element element)
+        if (Document?.GetElement(Reference) is ARDB.Element element)
         {
           typeName = "Referenced ";
           switch (Reference.ElementReferenceType)
           {
-            case DB.ElementReferenceType.REFERENCE_TYPE_NONE: typeName += "geometry"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_LINEAR: typeName += "edge"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_SURFACE: typeName += "face"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_FOREIGN: typeName += "external geometry"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_INSTANCE: typeName += "instance"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_CUT_EDGE: typeName += "trim"; break;
-            case DB.ElementReferenceType.REFERENCE_TYPE_MESH: typeName += "mesh"; break;
+            case ARDB.ElementReferenceType.REFERENCE_TYPE_NONE: typeName += "geometry"; break;
+            case ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR: typeName += "edge"; break;
+            case ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE: typeName += "face"; break;
+            case ARDB.ElementReferenceType.REFERENCE_TYPE_FOREIGN: typeName += "external geometry"; break;
+            case ARDB.ElementReferenceType.REFERENCE_TYPE_INSTANCE: typeName += "instance"; break;
+            case ARDB.ElementReferenceType.REFERENCE_TYPE_CUT_EDGE: typeName += "trim"; break;
+            case ARDB.ElementReferenceType.REFERENCE_TYPE_MESH: typeName += "mesh"; break;
 #if REVIT_2018
-            case DB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT: typeName += "subelement"; break;
+            case ARDB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT: typeName += "subelement"; break;
 #endif
           }
 
@@ -71,12 +72,12 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region ReferenceObject
-    public override DB.ElementId Id => reference?.ElementId;
+    public override ARDB.ElementId Id => reference?.ElementId;
     #endregion
 
     #region IGH_ElementId
-    DB.Reference reference;
-    public override DB.Reference Reference => reference;
+    ARDB.Reference reference;
+    public override ARDB.Reference Reference => reference;
 
     public override bool IsReferencedDataLoaded => Document is object && Reference is object;
     public override bool LoadReferencedData()
@@ -89,7 +90,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           try
           {
-            reference = DB.Reference.ParseFromStableRepresentation(document, UniqueID);
+            reference = ARDB.Reference.ParseFromStableRepresentation(document, UniqueID);
             Document = document;
           }
           catch { }
@@ -109,7 +110,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override object FetchValue()
     {
-      if (Document is DB.Document doc && Reference is DB.Reference reference)
+      if (Document is ARDB.Document doc && Reference is ARDB.Reference reference)
         try { return doc.GetElement(reference)?.GetGeometryObjectFromReference(reference); }
         catch (Autodesk.Revit.Exceptions.ArgumentException) { }
 
@@ -169,7 +170,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     protected GeometryObject() { }
-    protected GeometryObject(DB.Document doc, DB.Reference reference)
+    protected GeometryObject(ARDB.Document doc, ARDB.Reference reference)
     {
       try
       {
@@ -181,8 +182,22 @@ namespace RhinoInside.Revit.GH.Types
       }
       catch (Autodesk.Revit.Exceptions.InvalidObjectException) { }
     }
+    public new X Value
+    {
+      get
+      {
+        // Cached value is not reliable if a document regeneration happens.
+        // Since there is no IsValidObject property we Reset the value always :(
+        ResetValue();
+        return base.Value as X;
+      }
+    }
 
-    public new X Value => base.Value as X;
+    protected override void ResetValue()
+    {
+      (this as IGH_PreviewMeshData).DestroyPreviewMeshes();
+      base.ResetValue();
+    }
 
     /// <summary>
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
@@ -196,19 +211,19 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Name("Revit Vertex")]
-  public class Vertex : GeometryObject<DB.Point>, IGH_PreviewData
+  public class Vertex : GeometryObject<ARDB.Point>, IGH_PreviewData
   {
     readonly int VertexIndex = -1;
     protected override object FetchValue()
     {
-      if (Document is DB.Document doc && Reference is DB.Reference reference)
+      if (Document is ARDB.Document doc && Reference is ARDB.Reference reference)
         try
         {
-          if (doc.GetElement(reference)?.GetGeometryObjectFromReference(reference) is DB.Edge edge)
+          if (doc.GetElement(reference)?.GetGeometryObjectFromReference(reference) is ARDB.Edge edge)
           {
             var curve = edge.AsCurve();
-            var points = new DB.XYZ[] { curve.GetEndPoint(0), curve.GetEndPoint(1) };
-            return DB.Point.Create(points[VertexIndex]);
+            var points = new ARDB.XYZ[] { curve.GetEndPoint(0), curve.GetEndPoint(1) };
+            return ARDB.Point.Create(points[VertexIndex]);
           }
         }
         catch (Autodesk.Revit.Exceptions.ArgumentException) { }
@@ -217,17 +232,17 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public Vertex() { }
-    public Vertex(DB.Document doc, DB.Reference reference, int index) : base(doc, reference) { VertexIndex = index; }
+    public Vertex(ARDB.Document doc, ARDB.Reference reference, int index) : base(doc, reference) { VertexIndex = index; }
 
     Point Point
     {
       get
       {
-        if (point is null && IsValid)
+        if (point is null && Value is ARDB.Point vertex)
         {
-          point = new Point(Value.Coord.ToPoint3d());
+          point = new Point(vertex.Coord.ToPoint3d());
 
-          if(/*Value.IsElementGeometry && */Document?.GetElement(Reference) is DB.Instance instance)
+          if(vertex.IsElementGeometry && Document?.GetElement(Reference) is ARDB.Instance instance)
           {
             var xform = instance.GetTransform().ToTransform();
             point.Transform(xform);
@@ -240,12 +255,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(out Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(DB.Reference)))
+      if (typeof(Q).IsAssignableFrom(typeof(ARDB.Reference)))
       {
         target = (Q) (object) (IsValid ? Reference : null);
         return true;
       }
-      else if (typeof(Q).IsAssignableFrom(typeof(DB.Point)))
+      else if (typeof(Q).IsAssignableFrom(typeof(ARDB.Point)))
       {
         target = (Q) (object) (IsValid ? Value : null);
         return true;
@@ -269,15 +284,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is null)
-        return BoundingBox.Empty;
-
-      return
+      return Point is Point point ?
       (
         xform == Transform.Identity ?
-        Point?.GetBoundingBox(true) :
-        Point?.GetBoundingBox(xform)
-      ) ?? BoundingBox.Empty;
+        point.GetBoundingBox(true) :
+        point.GetBoundingBox(xform)
+      ) : BoundingBox.Empty;
     }
 
     #region IGH_PreviewData
@@ -297,20 +309,20 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Name("Edge")]
-  public class Edge : GeometryObject<DB.Edge>, IGH_PreviewData
+  public class Edge : GeometryObject<ARDB.Edge>, IGH_PreviewData
   {
     public Edge() { }
-    public Edge(DB.Document doc, DB.Reference reference) : base(doc, reference) { }
+    public Edge(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
 
     Curve Curve
     {
       get
       {
-        if (wires is null && IsValid)
+        if (wires is null && Value is ARDB.Edge edge)
         {
-          wires = Enumerable.Repeat(Value, 1).GetPreviewWires().ToArray();
+          wires = Enumerable.Repeat(edge, 1).GetPreviewWires().ToArray();
 
-          if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
+          if (edge.IsElementGeometry && Document?.GetElement(Reference) is ARDB.Instance instance)
           {
             var xform = instance.GetTransform().ToTransform();
             foreach (var wire in wires)
@@ -324,12 +336,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(out Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(DB.Reference)))
+      if (typeof(Q).IsAssignableFrom(typeof(ARDB.Reference)))
       {
         target = (Q) (object) (IsValid ? Reference : null);
         return true;
       }
-      else if (typeof(Q).IsAssignableFrom(typeof(DB.Edge)))
+      else if (typeof(Q).IsAssignableFrom(typeof(ARDB.Edge)))
       {
         target = (Q) (object) (IsValid ? Value : null);
         return true;
@@ -353,15 +365,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is null)
-        return BoundingBox.Empty;
-
-      return
+      return Curve is Curve curve ?
       (
         xform == Transform.Identity ?
-        Curve?.GetBoundingBox(true) :
-        Curve?.GetBoundingBox(xform)
-      ) ?? BoundingBox.Empty;
+        curve.GetBoundingBox(true) :
+        curve.GetBoundingBox(xform)
+      ) : BoundingBox.Empty;
     }
 
     #region IGH_PreviewData
@@ -385,12 +394,12 @@ namespace RhinoInside.Revit.GH.Types
         {
           switch (curve)
           {
-            case DB.Arc _:              edgeType = "Arc Edge"; break;
-            case DB.CylindricalHelix _: edgeType = "Helix Edge"; break;
-            case DB.Ellipse _:          edgeType = "Ellipse Edge"; break;
-            case DB.HermiteSpline _:    edgeType = "Hermite Edge"; break;
-            case DB.Line _:             edgeType = "Line Edge"; break;
-            case DB.NurbSpline _:       edgeType = "NURB Edge"; break;
+            case ARDB.Arc _:              edgeType = "Arc Edge"; break;
+            case ARDB.CylindricalHelix _: edgeType = "Helix Edge"; break;
+            case ARDB.Ellipse _:          edgeType = "Ellipse Edge"; break;
+            case ARDB.HermiteSpline _:    edgeType = "Hermite Edge"; break;
+            case ARDB.Line _:             edgeType = "Line Edge"; break;
+            case ARDB.NurbSpline _:       edgeType = "NURB Edge"; break;
             default:                    edgeType = "Unknown Edge"; break;
           }
         }
@@ -402,20 +411,20 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Name("Face")]
-  public class Face : GeometryObject<DB.Face>, IGH_PreviewData
+  public class Face : GeometryObject<ARDB.Face>, IGH_PreviewData
   {
     public Face() { }
-    public Face(DB.Document doc, DB.Reference reference) : base(doc, reference) { }
+    public Face(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
 
     Curve[] Curves
     {
       get
       {
-        if (wires is null && IsValid)
+        if (wires is null && Value is ARDB.Face face)
         {
-          wires = Value.GetEdgesAsCurveLoops().SelectMany(x => x.GetPreviewWires()).ToArray();
+          wires = face.GetEdgesAsCurveLoops().SelectMany(x => x.GetPreviewWires()).ToArray();
 
-          if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
+          if (face.IsElementGeometry && Document?.GetElement(Reference) is ARDB.Instance instance)
           {
             var xform = instance.GetTransform().ToTransform();
             foreach (var wire in wires)
@@ -429,11 +438,11 @@ namespace RhinoInside.Revit.GH.Types
 
     Mesh[] Meshes(MeshingParameters meshingParameters)
     {
-      if (meshes is null && IsValid)
+      if (meshes is null && Value is ARDB.Face face)
       {
-        meshes = Enumerable.Repeat(Value, 1).GetPreviewMeshes(Document, meshingParameters).ToArray();
+        meshes = Enumerable.Repeat(face, 1).GetPreviewMeshes(Document, meshingParameters).ToArray();
 
-        if (Value.IsElementGeometry && Document?.GetElement(Reference) is DB.Instance instance)
+        if (face.IsElementGeometry && Document?.GetElement(Reference) is ARDB.Instance instance)
         {
           var xform = instance.GetTransform().ToTransform();
           foreach (var mesh in meshes)
@@ -449,25 +458,25 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(out Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(DB.Reference)))
+      if (typeof(Q).IsAssignableFrom(typeof(ARDB.Reference)))
       {
         target = (Q) (object) (IsValid ? Reference : null);
         return true;
       }
-      else if (typeof(Q).IsAssignableFrom(typeof(DB.Face)))
+      else if (typeof(Q).IsAssignableFrom(typeof(ARDB.Face)))
       {
         target = (Q) (object) (IsValid ? Value : null);
         return true;
       }
-      else if (Value is object)
+      else if (Value is ARDB.Face face)
       {
         var element = Reference is object ? Document?.GetElement(Reference) : null;
 
         if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
         {
-          if (Value.ToBrep() is Brep brep)
+          if (face.ToBrep() is Brep brep)
           {
-            if (element is DB.Instance instance)
+            if (element is ARDB.Instance instance)
               brep.Transform(instance.GetTransform().ToTransform());
 
             target = (Q) (object) new GH_Surface(brep);
@@ -477,9 +486,9 @@ namespace RhinoInside.Revit.GH.Types
         }
         else if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
         {
-          if (Value.ToBrep() is Brep brep)
+          if (face.ToBrep() is Brep brep)
           {
-            if (element is DB.Instance instance)
+            if (element is ARDB.Instance instance)
               brep.Transform(instance.GetTransform().ToTransform());
 
             target = (Q) (object) new GH_Brep(brep);
@@ -489,9 +498,9 @@ namespace RhinoInside.Revit.GH.Types
         }
         if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
         {
-          if (Value.Triangulate()?.ToMesh() is Mesh mesh)
+          if (face.Triangulate()?.ToMesh() is Mesh mesh)
           {
-            if (element is DB.Instance instance)
+            if (element is ARDB.Instance instance)
               mesh.Transform(instance.GetTransform().ToTransform());
 
             mesh.Normals.ComputeNormals();
@@ -513,9 +522,6 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is null)
-        return BoundingBox.Empty;
-
       var bbox = BoundingBox.Empty;
       if (Curves is Curve[] curves)
       {
@@ -564,15 +570,15 @@ namespace RhinoInside.Revit.GH.Types
         {
           switch (surface)
           {
-            case DB.ConicalSurface _:     faceType = "Conical Face"; break;
-            case DB.CylindricalSurface _: faceType = "Cylindrical Face"; break;
-            case DB.HermiteSurface _:     faceType = "Hermite Face"; break;
-            case DB.Plane _:              faceType = "Planar Face"; break;
+            case ARDB.ConicalSurface _:     faceType = "Conical Face"; break;
+            case ARDB.CylindricalSurface _: faceType = "Cylindrical Face"; break;
+            case ARDB.HermiteSurface _:     faceType = "Hermite Face"; break;
+            case ARDB.Plane _:              faceType = "Planar Face"; break;
 #if REVIT_2021
-            case DB.OffsetSurface _:      faceType = "Offset Face"; break;
+            case ARDB.OffsetSurface _:      faceType = "Offset Face"; break;
 #endif
-            case DB.RevolvedSurface _:    faceType = "Revolved Face"; break;
-            case DB.RuledSurface _:       faceType = "Ruled Face"; break;
+            case ARDB.RevolvedSurface _:    faceType = "Revolved Face"; break;
+            case ARDB.RuledSurface _:       faceType = "Ruled Face"; break;
             default:                      faceType = "Unknown Face"; break;
           }
         }

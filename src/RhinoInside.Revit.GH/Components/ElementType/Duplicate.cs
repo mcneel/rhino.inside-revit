@@ -1,12 +1,13 @@
 using System;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ElementTypes
 {
+  using External.DB.Extensions;
+  using Kernel.Attributes;
+
   public class ElementTypeDuplicate : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("5ED7E612-E5C6-4F0E-AA69-814CF2478F7E");
@@ -26,18 +27,18 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructElementTypeDuplicate
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Name("Type"), NickName("T"), Description("New Type")]
-      ref DB.ElementType elementType,
+      ref ARDB.ElementType elementType,
 
-      DB.ElementType type,
+      ARDB.ElementType type,
       string name
     )
     {
       if
       (
-        elementType is DB.ElementType &&
+        elementType is ARDB.ElementType &&
         elementType.GetType() == type.GetType() &&
         elementType.FamilyName == type.FamilyName &&
         elementType.Category?.Id == type.Category?.Id
@@ -46,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components
         if (elementType.Name != name)
           elementType.Name = name;
 
-        if (elementType is DB.HostObjAttributes hostElementType && type is DB.HostObjAttributes hostType)
+        if (elementType is ARDB.HostObjAttributes hostElementType && type is ARDB.HostObjAttributes hostType)
           hostElementType.SetCompoundStructure(hostType.GetCompoundStructure());
 
         elementType.CopyParametersFrom(type);

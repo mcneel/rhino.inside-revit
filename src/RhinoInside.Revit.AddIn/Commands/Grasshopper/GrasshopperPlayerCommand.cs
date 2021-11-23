@@ -1,27 +1,27 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Windows.Input;
-using System.Windows.Forms;
 using System.Windows.Forms.Interop;
+using System.Windows.Input;
 using Autodesk.Revit.Attributes;
-using DB = Autodesk.Revit.DB;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
-using Rhino.Geometry;
-using Rhino.PlugIns;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
+using Microsoft.Win32.SafeHandles;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPlayer : GrasshopperCommand
   {
@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     {
       using
       (
-        var openFileDialog = new OpenFileDialog()
+        var openFileDialog = new System.Windows.Forms.OpenFileDialog()
         {
           Title = "Open Grasshopper file",
           Filter = "All Grasshopper files (*.gh, *.ghx)|*.gh;*.ghx|Grasshopper Binary (*.gh)|*.gh|Grasshopper Xml (*.ghx)|*.ghx",
@@ -58,8 +58,8 @@ namespace RhinoInside.Revit.AddIn.Commands
       {
         switch (openFileDialog.ShowDialog(Revit.MainWindow.Handle))
         {
-          case DialogResult.OK: filePath = openFileDialog.FileName; return Result.Succeeded;
-          case DialogResult.Cancel: filePath = null; return Result.Cancelled;
+          case System.Windows.Forms.DialogResult.OK: filePath = openFileDialog.FileName; return Result.Succeeded;
+          case System.Windows.Forms.DialogResult.Cancel: filePath = null; return Result.Cancelled;
           default: filePath = null; return Result.Failed;
         }
       }
@@ -182,11 +182,11 @@ namespace RhinoInside.Revit.AddIn.Commands
       ObjectSnapTypes.Quadrants |
       ObjectSnapTypes.Points;
 
-    internal static bool PickPointOnFace(UIDocument doc, string prompt, out DB.XYZ point, ObjectSnapTypes snapSettings = DefaultSnapTypes)
+    internal static bool PickPointOnFace(UIDocument doc, string prompt, out XYZ point, ObjectSnapTypes snapSettings = DefaultSnapTypes)
     {
       point = null;
 
-      if (doc.ActiveView.ViewType != DB.ViewType.ThreeD)
+      if (doc.ActiveView.ViewType != ViewType.ThreeD)
       {
         try { point = doc.Selection.PickPoint(snapSettings, prompt + "Please pick a point on the current work plane"); }
         catch (OperationCanceledException) { }
@@ -194,9 +194,9 @@ namespace RhinoInside.Revit.AddIn.Commands
       else
       {
         var reference = doc.Selection.PickObject(ObjectType.Face, prompt + "Please select a face to define a work plane");
-        if (doc.Document.GetElement(reference.ElementId) is DB.Element element)
+        if (doc.Document.GetElement(reference.ElementId) is Element element)
         {
-          if (element.GetGeometryObjectFromReference(reference) is DB.Face face)
+          if (element.GetGeometryObjectFromReference(reference) is Face face)
           {
             if (Keyboard.IsKeyDown(Key.LeftCtrl))
             {
@@ -204,13 +204,13 @@ namespace RhinoInside.Revit.AddIn.Commands
             }
             else
             {
-              var plane = DB.Plane.CreateByNormalAndOrigin(face.ComputeNormal(reference.UVPoint), face.Evaluate(reference.UVPoint));
+              var plane = Plane.CreateByNormalAndOrigin(face.ComputeNormal(reference.UVPoint), face.Evaluate(reference.UVPoint));
 
-              using (var transaction = new DB.Transaction(doc.Document))
+              using (var transaction = new Transaction(doc.Document))
               {
                 transaction.Start("PickPointOnFace");
 
-                doc.ActiveView.SketchPlane = DB.SketchPlane.Create(doc.Document, plane);
+                doc.ActiveView.SketchPlane = SketchPlane.Create(doc.Document, plane);
                 doc.ActiveView.ShowActiveWorkPlane();
 
                 try { point = doc.Selection.PickPoint(snapSettings, prompt + "Please pick a point on the defined work plane"); }
@@ -226,11 +226,11 @@ namespace RhinoInside.Revit.AddIn.Commands
       return null != point;
     }
 
-    internal static bool PickPoint(UIDocument doc, string prompt, out DB.XYZ point, ObjectSnapTypes snapSettings = DefaultSnapTypes)
+    internal static bool PickPoint(UIDocument doc, string prompt, out XYZ point, ObjectSnapTypes snapSettings = DefaultSnapTypes)
     {
       point = null;
 
-      DB.View view;
+      View view;
       do
       {
         view = doc.ActiveView;
@@ -262,7 +262,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         PickPoint(doc, prompt + " : End pont - ", out var to)
       )
       {
-        goo = new GH_Line(new Line(from.ToPoint3d(), to.ToPoint3d()));
+        goo = new GH_Line(new Rhino.Geometry.Line(from.ToPoint3d(), to.ToPoint3d()));
       }
 
       yield return goo;
@@ -278,10 +278,10 @@ namespace RhinoInside.Revit.AddIn.Commands
         PickPointOnFace(doc, prompt + " : Second box corner - ", out var to)
       )
       {
-        var min = new DB.XYZ(Math.Min(from.X, to.X), Math.Min(from.Y, to.Y), Math.Min(from.Z, to.Z));
-        var max = new DB.XYZ(Math.Max(from.X, to.X), Math.Max(from.Y, to.Y), Math.Max(from.Z, to.Z));
+        var min = new XYZ(Math.Min(from.X, to.X), Math.Min(from.Y, to.Y), Math.Min(from.Z, to.Z));
+        var max = new XYZ(Math.Max(from.X, to.X), Math.Max(from.Y, to.Y), Math.Max(from.Z, to.Z));
 
-        goo = new GH_Box(new BoundingBox(min.ToPoint3d(), max.ToPoint3d()));
+        goo = new GH_Box(new Rhino.Geometry.BoundingBox(min.ToPoint3d(), max.ToPoint3d()));
       }
 
       yield return goo;
@@ -297,7 +297,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         if (reference != null)
         {
           var element = doc.Document.GetElement(reference);
-          var edge = element.GetGeometryObjectFromReference(reference) as DB.Edge;
+          var edge = element.GetGeometryObjectFromReference(reference) as Edge;
           var curve = edge.AsCurve().ToCurve();
           goo = new GH_Curve(curve);
         }
@@ -315,7 +315,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         if (reference != null)
         {
           var element = doc.Document.GetElement(reference);
-          var face = element.GetGeometryObjectFromReference(reference) as DB.Face;
+          var face = element.GetGeometryObjectFromReference(reference) as Face;
           var surface = face.ToBrep();
           return new GH_Surface[] { new GH_Surface(surface) };
         }
@@ -334,9 +334,9 @@ namespace RhinoInside.Revit.AddIn.Commands
         {
           var element = doc.Document.GetElement(reference);
 
-          using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+          using (var options = new Options() { DetailLevel = ViewDetailLevel.Fine })
           using (var geometry = element.GetGeometry(options))
-            return geometry.ToGeometryBaseMany().OfType<Brep>().Select((x) => new GH_Brep(x));
+            return geometry.ToGeometryBaseMany().OfType<Rhino.Geometry.Brep>().Select((x) => new GH_Brep(x));
         }
       }
       catch (Autodesk.Revit.Exceptions.OperationCanceledException) { }
@@ -344,7 +344,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       return null;
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       Result result;
       if ((result = BrowseForFile(out var filePath)) == Result.Succeeded)
@@ -358,7 +358,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     public static Result Execute
     (
       UIApplication app,
-      DB.View view,
+      View view,
       IDictionary<string, string> journalData,
       string filePath,
       ref string message
@@ -375,7 +375,7 @@ namespace RhinoInside.Revit.AddIn.Commands
             var currentCulture = Thread.CurrentThread.CurrentCulture;
             try
             {
-              using (var transGroup = new DB.TransactionGroup(app.ActiveUIDocument.Document))
+              using (var transGroup = new TransactionGroup(app.ActiveUIDocument.Document))
               {
                 transGroup.Start(Path.GetFileNameWithoutExtension(definition.Properties.ProjectFileName));
 
@@ -393,7 +393,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                   value.Key.AddVolatileDataList(new Grasshopper.Kernel.Data.GH_Path(0), value.Value);
 
                 Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-                using (var modal = new Rhinoceros.ModalScope())
+                using (var modal = new ModalScope())
                 {
                   definition.NewSolution(false, GH_SolutionMode.Silent);
 
@@ -431,6 +431,70 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       message = msg;
       return res;
+    }
+  }
+
+  /// <summary>
+  /// Represents a Pseudo-modal loop.
+  /// </summary>
+  /// <remarks>
+  /// This class implements <see cref="IDisposable"/> interface, it's been designed to be used in a using statement.
+  /// </remarks>
+  sealed class ModalScope : IDisposable
+  {
+    static bool wasExposed = false;
+    readonly bool wasEnabled = Revit.MainWindow.Enabled;
+
+    public ModalScope() => Revit.MainWindow.Enabled = false;
+
+    void IDisposable.Dispose() => Revit.MainWindow.Enabled = wasEnabled;
+
+    public Result Run(bool exposeMainWindow)
+    {
+      return Run(exposeMainWindow, !Keyboard.IsKeyDown(Key.LeftCtrl));
+    }
+
+    public Result Run(bool exposeMainWindow, bool restorePopups)
+    {
+      try
+      {
+        if (exposeMainWindow) Rhinoceros.Exposed = true;
+        else if (restorePopups) Rhinoceros.Exposed = wasExposed || Rhinoceros.MainWindow.WindowStyle == ProcessWindowStyle.Minimized;
+
+        if (restorePopups)
+          Rhinoceros.MainWindow.ShowOwnedPopups();
+
+        // Activate a Rhino window to keep the loop running
+        var activePopup = Rhinoceros.MainWindow.ActivePopup;
+        if (activePopup.IsInvalid || exposeMainWindow)
+        {
+          if (!Rhinoceros.Exposed)
+            return Result.Cancelled;
+
+          Rhino.RhinoApp.SetFocusToMainWindow();
+        }
+        else
+        {
+          activePopup.BringToFront();
+        }
+
+        while (Rhinoceros.Run())
+        {
+          if (!Rhinoceros.Exposed && Rhinoceros.MainWindow.ActivePopup.IsInvalid)
+            break;
+        }
+
+        return Result.Succeeded;
+      }
+      finally
+      {
+        wasExposed = Rhinoceros.Exposed;
+
+        Revit.MainWindow.Enabled = true;
+        WindowHandle.ActiveWindow = Revit.MainWindow;
+        Rhinoceros.MainWindow.HideOwnedPopups();
+        Rhinoceros.Exposed = false;
+      }
     }
   }
 }

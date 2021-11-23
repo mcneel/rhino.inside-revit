@@ -1,24 +1,24 @@
 using System.Diagnostics;
 using System.Linq;
 using Rhino.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
   using External.DB.Extensions;
 
   /// <summary>
-  /// This class is used to convert geometry to be stored in a <see cref="DB.DirectShape"/>.
+  /// This class is used to convert geometry to be stored in a <see cref="ARDB.DirectShape"/>.
   /// </summary>
   public static class ShapeEncoder
   {
-    public static DB.GeometryObject[] ToShape(this GeometryBase geometry) => ToShape(geometry, UnitConverter.ToHostUnits);
-    public static DB.GeometryObject[] ToShape(this GeometryBase geometry, double factor)
+    public static ARDB.GeometryObject[] ToShape(this GeometryBase geometry) => ToShape(geometry, UnitConverter.ToHostUnits);
+    public static ARDB.GeometryObject[] ToShape(this GeometryBase geometry, double factor)
     {
       switch (geometry)
       {
         case Point point:
-          return new DB.Point[] { point.ToPoint(factor) };
+          return new ARDB.Point[] { point.ToPoint(factor) };
 
         case PointCloud pointCloud:
           return pointCloud.ToPoints(factor);
@@ -27,62 +27,62 @@ namespace RhinoInside.Revit.Convert.Geometry
           return curve.ToCurveMany(factor).SelectMany(x => x.ToBoundedCurves()).ToArray();
 
         case Brep brep:
-          if (ToShape(brep, factor) is DB.GeometryObject brepShape)
-            return new DB.GeometryObject[] { brepShape };
+          if (ToShape(brep, factor) is ARDB.GeometryObject brepShape)
+            return new ARDB.GeometryObject[] { brepShape };
           break;
 
         case Extrusion extrusion:
-          if (ToShape(extrusion, factor) is DB.GeometryObject extrusionShape)
-            return new DB.GeometryObject[] { extrusionShape };
+          if (ToShape(extrusion, factor) is ARDB.GeometryObject extrusionShape)
+            return new ARDB.GeometryObject[] { extrusionShape };
           break;
 
         case SubD subD:
-          if (ToShape(subD, factor) is DB.GeometryObject subDShape)
-            return new DB.GeometryObject[] { subDShape };
+          if (ToShape(subD, factor) is ARDB.GeometryObject subDShape)
+            return new ARDB.GeometryObject[] { subDShape };
           break;
 
         case Mesh mesh:
-          if (MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(mesh, factor)) is DB.GeometryObject meshShape)
-            return new DB.GeometryObject[] { meshShape };
+          if (MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(mesh, factor)) is ARDB.GeometryObject meshShape)
+            return new ARDB.GeometryObject[] { meshShape };
           break;
 
         default:
           if (geometry.HasBrepForm)
           {
             var brepForm = Brep.TryConvertBrep(geometry);
-            if (brepForm is object && ToShape(brepForm, factor) is DB.GeometryObject geometryShape)
-              return new DB.GeometryObject[] { geometryShape };
+            if (brepForm is object && ToShape(brepForm, factor) is ARDB.GeometryObject geometryShape)
+              return new ARDB.GeometryObject[] { geometryShape };
           }
           break;
       }
 
-      return new DB.GeometryObject[0];
+      return new ARDB.GeometryObject[0];
     }
 
-    static DB.GeometryObject ToShape(Brep brep, double factor)
+    static ARDB.GeometryObject ToShape(Brep brep, double factor)
     {
       // Try using DB.BRepBuilder
-      if (BrepEncoder.ToSolid(brep, factor) is DB.Solid solid)
+      if (BrepEncoder.ToSolid(brep, factor) is ARDB.Solid solid)
         return solid;
 
       Debug.WriteLine("Try meshing the brep.");
       return BrepEncoder.ToMesh(brep, factor);
     }
 
-    static DB.GeometryObject ToShape(Extrusion extrusion, double factor)
+    static ARDB.GeometryObject ToShape(Extrusion extrusion, double factor)
     {
       // Try using DB.BRepBuilder
-      if (ExtrusionEncoder.ToSolid(extrusion, factor) is DB.Solid solid)
+      if (ExtrusionEncoder.ToSolid(extrusion, factor) is ARDB.Solid solid)
         return solid;
 
       Debug.WriteLine("Try meshing the extrusion.");
       return ExtrusionEncoder.ToMesh(extrusion, factor);
     }
 
-    static DB.GeometryObject ToShape(SubD subD, double factor)
+    static ARDB.GeometryObject ToShape(SubD subD, double factor)
     {
       // Try using DB.BRepBuilder
-      if (SubDEncoder.ToSolid(subD, factor) is DB.Solid solid)
+      if (SubDEncoder.ToSolid(subD, factor) is ARDB.Solid solid)
         return solid;
 
       Debug.WriteLine("Try meshing the subD.");

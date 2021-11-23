@@ -2,10 +2,11 @@ using System;
 using System.IO;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
+  using External.DB.Extensions;
+
   public class FamilyLoad : TransactionalComponent
   {
     public override Guid ComponentGuid => new Guid("0E244846-95AE-4B0E-8218-CB24FD4D34D1");

@@ -7,35 +7,36 @@ using Rhino;
 using Rhino.DocObjects;
 using Rhino.DocObjects.Tables;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Datum")]
   public class DatumPlane : GraphicalElement
   {
-    protected override Type ValueType => typeof(DB.DatumPlane);
-    public new DB.DatumPlane Value => base.Value as DB.DatumPlane;
-    public static explicit operator DB.DatumPlane(DatumPlane value) => value?.Value;
+    protected override Type ValueType => typeof(ARDB.DatumPlane);
+    public new ARDB.DatumPlane Value => base.Value as ARDB.DatumPlane;
+    public static explicit operator ARDB.DatumPlane(DatumPlane value) => value?.Value;
 
     public DatumPlane() { }
-    public DatumPlane(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public DatumPlane(DB.DatumPlane plane) : base(plane) { }
+    public DatumPlane(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public DatumPlane(ARDB.DatumPlane plane) : base(plane) { }
   }
 
   [Kernel.Attributes.Name("Level")]
   public class Level : DatumPlane, Bake.IGH_BakeAwareElement
   {
-    protected override Type ValueType => typeof(DB.Level);
-    public new DB.Level Value => base.Value as DB.Level;
-    public static explicit operator DB.Level(Level value) => value?.Value;
+    protected override Type ValueType => typeof(ARDB.Level);
+    public new ARDB.Level Value => base.Value as ARDB.Level;
+    public static explicit operator ARDB.Level(Level value) => value?.Value;
 
     public Level() { }
-    public Level(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public Level(DB.Level level) : base(level) { }
+    public Level(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public Level(ARDB.Level level) : base(level) { }
 
     public override bool CastFrom(object source)
     {
@@ -44,7 +45,7 @@ namespace RhinoInside.Revit.GH.Types
       if (source is IGH_Goo goo)
         value = goo.ScriptVariable();
 
-      if (value is DB.View view)
+      if (value is ARDB.View view)
         return view.GenLevel is null ? false : SetValue(view.GenLevel);
 
       return base.CastFrom(source);
@@ -79,11 +80,11 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_BakeAwareElement
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
-      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
     public bool BakeElement
     (
-      IDictionary<DB.ElementId, Guid> idMap,
+      IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
       RhinoDoc doc,
       ObjectAttributes att,
@@ -94,7 +95,7 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      if (Value is DB.Level)
+      if (Value is ARDB.Level)
       {
         var name = ToString();
 
@@ -128,9 +129,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Level level)
+        if (Value is ARDB.Level level)
         {
-          var levelType = level.Document.GetElement(level.GetTypeId()) as DB.LevelType;
+          var levelType = level.Document.GetElement(level.GetTypeId()) as ARDB.LevelType;
           var position = LevelExtension.GetBasePointLocation(level.Document, levelType.GetElevationBase());
 
           return new Plane
@@ -169,21 +170,21 @@ namespace RhinoInside.Revit.GH.Types
 
     public bool? IsStructural
     {
-      get => Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL).AsInteger() != 0;
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_IS_STRUCTURAL).AsInteger() != 0;
       set
       {
         if (value is null || IsStructural == value) return;
-        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_STRUCTURAL).Update(value.Value ? 1 : 0);
+        Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_IS_STRUCTURAL).Update(value.Value ? 1 : 0);
       }
     }
 
     public bool? IsBuildingStory
     {
-      get => Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).AsInteger() != 0;
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).AsInteger() != 0;
       set
       {
         if (value is null || IsBuildingStory == value) return;
-        Value?.get_Parameter(DB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).Update(value.Value ? 1 : 0);
+        Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).Update(value.Value ? 1 : 0);
       }
     }
     #endregion
@@ -192,16 +193,16 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Grid")]
   public class Grid : DatumPlane, Bake.IGH_BakeAwareElement
   {
-    protected override Type ValueType => typeof(DB.Grid);
-    public new DB.Grid Value => base.Value as DB.Grid;
-    public static explicit operator DB.Grid(Grid value) => value?.Value;
+    protected override Type ValueType => typeof(ARDB.Grid);
+    public new ARDB.Grid Value => base.Value as ARDB.Grid;
+    public static explicit operator ARDB.Grid(Grid value) => value?.Value;
 
     public Grid() { }
-    public Grid(DB.Grid grid) : base(grid) { }
+    public Grid(ARDB.Grid grid) : base(grid) { }
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is DB.Grid grid)
+      if (Value is ARDB.Grid grid)
       {
         var bbox = grid.GetExtents().ToBoundingBox();
         var curve = grid.Curve.ToCurve();
@@ -223,7 +224,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Grid grid)
+        if (Value is ARDB.Grid grid)
         {
           var points = grid.Curve?.Tessellate().ConvertAll(GeometryDecoder.ToPoint3d);
           if (points is object)
@@ -251,7 +252,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (Value is DB.Grid grid)
+      if (Value is ARDB.Grid grid)
       {
         var cameraDirection = args.Viewport.CameraDirection;
         var start = grid.Curve.GetEndPoint(0).ToPoint3d();
@@ -303,11 +304,11 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_BakeAwareElement
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
-      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
     public bool BakeElement
     (
-      IDictionary<DB.ElementId, Guid> idMap,
+      IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
       RhinoDoc doc,
       ObjectAttributes att,
@@ -318,7 +319,7 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      if (Value is DB.Grid grid)
+      if (Value is ARDB.Grid grid)
       {
         att = att.Duplicate();
         att.Name = grid.Name;
@@ -367,7 +368,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Grid grid)
+        if (Value is ARDB.Grid grid)
         {
           var bbox = grid.GetExtents().ToBoundingBox();
           bbox.Union(Curve.GetBoundingBox(true));
@@ -386,7 +387,7 @@ namespace RhinoInside.Revit.GH.Types
         var axis = NaN.Vector3d;
         var perp = NaN.Vector3d;
 
-        if (Value is DB.Grid grid)
+        if (Value is ARDB.Grid grid)
         {
           var start = grid.Curve.Evaluate(0.0, normalized: true).ToPoint3d();
           var end = grid.Curve.Evaluate(1.0, normalized: true).ToPoint3d();
@@ -405,7 +406,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Grid grid)
+        if (Value is ARDB.Grid grid)
         {
           var bbox = BoundingBox;
           var curve = grid.Curve.ToCurve();
@@ -437,16 +438,16 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Reference Plane")]
   public class ReferencePlane : DatumPlane, Bake.IGH_BakeAwareElement
   {
-    protected override Type ValueType => typeof(DB.ReferencePlane);
-    public new DB.ReferencePlane Value => base.Value as DB.ReferencePlane;
-    public static explicit operator DB.ReferencePlane(ReferencePlane value) => value?.Value;
+    protected override Type ValueType => typeof(ARDB.ReferencePlane);
+    public new ARDB.ReferencePlane Value => base.Value as ARDB.ReferencePlane;
+    public static explicit operator ARDB.ReferencePlane(ReferencePlane value) => value?.Value;
 
     public ReferencePlane() { }
-    public ReferencePlane(DB.ReferencePlane value) : base(value) { }
+    public ReferencePlane(ARDB.ReferencePlane value) : base(value) { }
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is DB.ReferencePlane referencePlane)
+      if (Value is ARDB.ReferencePlane referencePlane)
       {
         return new BoundingBox
         (
@@ -467,7 +468,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (args.Viewport.IsParallelProjection)
       {
-        if (Value is DB.ReferencePlane referencePlane)
+        if (Value is ARDB.ReferencePlane referencePlane)
         {
           if (args.Viewport.CameraDirection.IsPerpendicularTo(referencePlane.Normal.ToVector3d()))
           {
@@ -482,11 +483,11 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_BakeAwareElement
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
-      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
     public bool BakeElement
     (
-      IDictionary<DB.ElementId, Guid> idMap,
+      IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
       RhinoDoc doc,
       ObjectAttributes att,
@@ -497,7 +498,7 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      if (Value is DB.ReferencePlane)
+      if (Value is ARDB.ReferencePlane)
       {
         var name = ToString();
 
@@ -529,7 +530,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.ReferencePlane referencePlane)
+        if (Value is ARDB.ReferencePlane referencePlane)
         {
           return new BoundingBox
           (
@@ -549,7 +550,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        return Value is DB.ReferencePlane referencePlane ?
+        return Value is ARDB.ReferencePlane referencePlane ?
           referencePlane.GetPlane().ToPlane() :
           NaN.Plane;
       }
@@ -557,7 +558,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override Curve Curve
     {
-      get => Value is DB.ReferencePlane referencePlane ?
+      get => Value is ARDB.ReferencePlane referencePlane ?
           new LineCurve(referencePlane.BubbleEnd.ToPoint3d(), referencePlane.FreeEnd.ToPoint3d()) :
           default;
     }

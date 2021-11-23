@@ -1,8 +1,8 @@
 using System;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.DesignOption
+namespace RhinoInside.Revit.GH.Components.DesignOptions
 {
   public class DesignOptionActive : ZuiComponent
   {
@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOption
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      var option = new Types.DesignOption(doc, DB.DesignOption.GetActiveDesignOptionId(doc));
+      var option = new Types.DesignOption(doc, ARDB.DesignOption.GetActiveDesignOptionId(doc));
       DA.SetData("Active Design Option", option);
     }
   }

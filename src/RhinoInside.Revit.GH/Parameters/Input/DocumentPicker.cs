@@ -4,63 +4,18 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
-  #region DocumentValuePicker
-  public abstract class DocumentValuePicker : GH_ValueList, Kernel.IGH_ElementIdParam
-  {
-    #region IGH_ElementIdParam
-    protected virtual DB.ElementFilter ElementFilter => null;
-    public virtual bool PassesFilter(DB.Document document, Autodesk.Revit.DB.ElementId id)
-    {
-      return ElementFilter?.PassesFilter(document, id) ?? true;
-    }
+  using External.DB.Extensions;
 
-    bool Kernel.IGH_ElementIdParam.NeedsToBeExpired
-    (
-      DB.Document doc,
-      ICollection<DB.ElementId> added,
-      ICollection<DB.ElementId> deleted,
-      ICollection<DB.ElementId> modified
-    )
-    {
-      // If anything of that type is added we need to update ListItems
-      if (added.Where(id => PassesFilter(doc, id)).Any())
-        return true;
-
-      // If selected items are modified we need to expire dependant components
-      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
-      {
-        if (!data.IsValid)
-          continue;
-
-        if (modified.Contains(data.Id))
-          return true;
-      }
-
-      // If an item in ListItems is deleted we need to update ListItems
-      foreach (var item in ListItems.Select(x => x.Value).OfType<Grasshopper.Kernel.Types.GH_Integer>())
-      {
-        var id = new DB.ElementId(item.Value);
-
-        if (deleted.Contains(id))
-          return true;
-      }
-
-      return false;
-    }
-    #endregion
-  }
-
-  public abstract class DocumentCategoriesPicker : DocumentValuePicker
+  #region DocumentCategoriesPicker
+  public abstract class DocumentCategoriesPicker : GH_ValueList, Kernel.IGH_ElementIdParam
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
-    public override bool PassesFilter(DB.Document document, DB.ElementId id) => id.IsCategoryId(document);
-    protected abstract bool CategoryIsInSet(DB.Category category);
-    protected abstract DB.BuiltInCategory DefaultBuiltInCategory { get; }
+    protected abstract bool CategoryIsInSet(ARDB.Category category);
+    protected abstract ARDB.BuiltInCategory DefaultBuiltInCategory { get; }
 
     public DocumentCategoriesPicker()
     {
@@ -81,14 +36,14 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       if (Revit.ActiveDBDocument is object)
       {
-        foreach (var group in Revit.ActiveDBDocument.Settings.Categories.Cast<DB.Category>().GroupBy(x => x.CategoryType).OrderBy(x => x.Key))
+        foreach (var group in Revit.ActiveDBDocument.Settings.Categories.Cast<ARDB.Category>().GroupBy(x => x.CategoryType).OrderBy(x => x.Key))
         {
           foreach (var category in group.OrderBy(x => x.Name).Where(x => CategoryIsInSet(x)))
           {
             if (!category.Id.IsBuiltInId())
               continue;
 
-            if (category.CategoryType == DB.CategoryType.Invalid)
+            if (category.CategoryType == ARDB.CategoryType.Invalid)
               continue;
 
             var item = new GH_ValueListItem(category.Name, category.Id.IntegerValue.ToString());
@@ -106,6 +61,48 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       base.CollectVolatileData_Custom();
     }
+
+    #region IGH_ElementIdParam
+    public virtual bool PassesFilter(ARDB.Document document, ARDB.ElementId id)
+    {
+      return id.IsCategoryId(document);
+    }
+
+    bool Kernel.IGH_ElementIdParam.NeedsToBeExpired
+    (
+      ARDB.Document doc,
+      ICollection<ARDB.ElementId> added,
+      ICollection<ARDB.ElementId> deleted,
+      ICollection<ARDB.ElementId> modified
+    )
+    {
+      // If anything of that type is added we need to update ListItems
+      if (added.Where(id => PassesFilter(doc, id)).Any())
+        return true;
+
+      // If selected items are modified we need to expire dependant components
+      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
+      {
+        if (!data.IsValid)
+          continue;
+
+        if (modified.Contains(data.Id))
+          return true;
+      }
+
+      // If an item in ListItems is deleted we need to update ListItems
+      foreach (var item in ListItems.Select(x => x.Value).OfType<Grasshopper.Kernel.Types.GH_Integer>())
+      {
+        var id = new ARDB.ElementId(item.Value);
+
+        if (deleted.Contains(id))
+          return true;
+      }
+
+      return false;
+    }
+    #endregion
+
   }
 
   [Obsolete("Since 2021-06-10. Please use 'Built-In Categories'")]
@@ -113,8 +110,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   {
     public override Guid ComponentGuid => new Guid("EB266925-F1AA-4729-B5C0-B978937F51A3");
     public override string NickName => MutableNickName ? base.NickName : "Model";
-    protected override DB.BuiltInCategory DefaultBuiltInCategory => DB.BuiltInCategory.OST_GenericModel;
-    protected override bool CategoryIsInSet(DB.Category category) => !category.IsTagCategory && category.CategoryType == DB.CategoryType.Model;
+    protected override ARDB.BuiltInCategory DefaultBuiltInCategory => ARDB.BuiltInCategory.OST_GenericModel;
+    protected override bool CategoryIsInSet(ARDB.Category category) => !category.IsTagCategory && category.CategoryType == ARDB.CategoryType.Model;
 
     public ModelCategoriesPicker() { }
   }
@@ -124,8 +121,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   {
     public override Guid ComponentGuid => new Guid("B1D1CA45-3771-49CA-8540-9A916A743C1B");
     public override string NickName => MutableNickName ? base.NickName : "Annotation";
-    protected override DB.BuiltInCategory DefaultBuiltInCategory => DB.BuiltInCategory.OST_GenericAnnotation;
-    protected override bool CategoryIsInSet(DB.Category category) => !category.IsTagCategory && category.CategoryType == DB.CategoryType.Annotation;
+    protected override ARDB.BuiltInCategory DefaultBuiltInCategory => ARDB.BuiltInCategory.OST_GenericAnnotation;
+    protected override bool CategoryIsInSet(ARDB.Category category) => !category.IsTagCategory && category.CategoryType == ARDB.CategoryType.Annotation;
     public AnnotationCategoriesPicker() { }
   }
 
@@ -134,8 +131,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   {
     public override Guid ComponentGuid => new Guid("30F6DA06-35F9-4E83-AE9E-080AF26C8326");
     public override string NickName => MutableNickName ? base.NickName : "Tag";
-    protected override DB.BuiltInCategory DefaultBuiltInCategory => DB.BuiltInCategory.OST_GenericModelTags;
-    protected override bool CategoryIsInSet(DB.Category category) => category.IsTagCategory;
+    protected override ARDB.BuiltInCategory DefaultBuiltInCategory => ARDB.BuiltInCategory.OST_GenericModelTags;
+    protected override bool CategoryIsInSet(ARDB.Category category) => category.IsTagCategory;
     public TagCategoriesPicker() { }
   }
 
@@ -144,8 +141,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   {
     public override Guid ComponentGuid => new Guid("4120C5ED-4329-4F42-B8D3-FA518E6E6807");
     public override string NickName => MutableNickName ? base.NickName : "Analytical";
-    protected override DB.BuiltInCategory DefaultBuiltInCategory => DB.BuiltInCategory.OST_AnalyticalNodes;
-    protected override bool CategoryIsInSet(DB.Category category) => !category.IsTagCategory && category.CategoryType == DB.CategoryType.AnalyticalModel;
+    protected override ARDB.BuiltInCategory DefaultBuiltInCategory => ARDB.BuiltInCategory.OST_AnalyticalNodes;
+    protected override bool CategoryIsInSet(ARDB.Category category) => !category.IsTagCategory && category.CategoryType == ARDB.CategoryType.AnalyticalModel;
 
     public AnalyticalCategoriesPicker() { }
   }
@@ -153,7 +150,6 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   #endregion
 
   #region DocumentElementPicker
-
   public abstract class DocumentElementPicker<T> : Grasshopper.Special.ValueSet<T>,
   Kernel.IGH_ElementIdParam
   where T : class, IGH_Goo
@@ -169,18 +165,18 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       base.Icon;
 
     #region IGH_ElementIdParam
-    protected virtual DB.ElementFilter ElementFilter => null;
-    public virtual bool PassesFilter(DB.Document document, DB.ElementId id)
+    protected virtual ARDB.ElementFilter ElementFilter => null;
+    public virtual bool PassesFilter(ARDB.Document document, ARDB.ElementId id)
     {
       return ElementFilter?.PassesFilter(document, id) ?? true;
     }
 
     bool Kernel.IGH_ElementIdParam.NeedsToBeExpired
     (
-      DB.Document doc,
-      ICollection<DB.ElementId> added,
-      ICollection<DB.ElementId> deleted,
-      ICollection<DB.ElementId> modified
+      ARDB.Document doc,
+      ICollection<ARDB.ElementId> added,
+      ICollection<ARDB.ElementId> deleted,
+      ICollection<ARDB.ElementId> modified
     )
     {
       // If selected items are modified we need to expire dependant components
@@ -232,7 +228,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   {
     public override Guid ComponentGuid => new Guid("BD6A74F3-8C46-4506-87D9-B34BD96747DA");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Level));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.Level));
 
     public DocumentLevelsPicker() : base
     (
@@ -252,9 +248,9 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
         if (Document.TryGetCurrentDocument(this, out var doc))
         {
-          using (var collector = new DB.FilteredElementCollector(doc.Value))
+          using (var collector = new ARDB.FilteredElementCollector(doc.Value))
           {
-            m_data.AppendRange(collector.OfClass(typeof(DB.Level)).Cast<DB.Level>().Select(x => new Types.Level(x)));
+            m_data.AppendRange(collector.OfClass(typeof(ARDB.Level)).Cast<ARDB.Level>().Select(x => new Types.Level(x)));
           }
         }
       }
@@ -277,7 +273,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   {
     public override Guid ComponentGuid => new Guid("45CEE087-4194-4E55-AA20-9CC5D2193CE0");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Family));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.Family));
 
     public DocumentFamiliesPicker() : base
     (
@@ -297,9 +293,9 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
         if (Document.TryGetCurrentDocument(this, out var doc))
         {
-          using (var collector = new DB.FilteredElementCollector(doc.Value))
+          using (var collector = new ARDB.FilteredElementCollector(doc.Value))
           {
-            m_data.AppendRange(collector.OfClass(typeof(DB.Family)).Cast<DB.Family>().Select(x => new Types.Family(x)));
+            m_data.AppendRange(collector.OfClass(typeof(ARDB.Family)).Cast<ARDB.Family>().Select(x => new Types.Family(x)));
           }
         }
       }
@@ -313,7 +309,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   {
     public override Guid ComponentGuid => new Guid("f737745f-57ff-4699-a402-01a6db329313");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementCategoryFilter(DB.BuiltInCategory.OST_TitleBlocks);
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_TitleBlocks);
 
     public DocumentTitleBlockSymbolPicker() : base
     (
@@ -333,11 +329,11 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
         if (Document.TryGetCurrentDocument(this, out var doc))
         {
-          using (var collector = new DB.FilteredElementCollector(doc.Value).WherePasses(ElementFilter))
+          using (var collector = new ARDB.FilteredElementCollector(doc.Value).WherePasses(ElementFilter))
           {
             m_data.AppendRange(
               collector.WhereElementIsElementType()
-                       .Cast<DB.FamilySymbol>()
+                       .Cast<ARDB.FamilySymbol>()
                        .Select(x => new Types.FamilySymbol(x))
               );
           }
@@ -347,7 +343,5 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       base.LoadVolatileData();
     }
   }
-
-
   #endregion
 }

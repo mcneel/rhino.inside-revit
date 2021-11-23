@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Views
 {
   [ComponentVersion(introduced: "1.2", updated: "1.2.4")]
   public class ClusterViewsByType : ZuiComponent
@@ -36,8 +36,8 @@ namespace RhinoInside.Revit.GH.Components
     {
       var list = new List<ParamDefinition>();
 
-      var values = Enum.GetValues(typeof(DB.ViewType)).
-      Cast<DB.ViewType>().
+      var values = Enum.GetValues(typeof(ARDB.ViewType)).
+      Cast<ARDB.ViewType>().
       Select
       (
         x =>
@@ -54,12 +54,12 @@ namespace RhinoInside.Revit.GH.Components
 
         switch (value.ViewType)
         {
-          case DB.ViewType.Undefined:
-          case DB.ViewType.Internal:
-          case DB.ViewType.ProjectBrowser:
-          case DB.ViewType.SystemBrowser:
+          case ARDB.ViewType.Undefined:
+          case ARDB.ViewType.Internal:
+          case ARDB.ViewType.ProjectBrowser:
+          case ARDB.ViewType.SystemBrowser:
             continue;
-          case DB.ViewType.DrawingSheet: param = new Parameters.ViewSheet(); break;
+          case ARDB.ViewType.DrawingSheet: param = new Parameters.ViewSheet(); break;
           default:                       param = new Parameters.View(); break;
         }
 
@@ -78,11 +78,11 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (!Params.GetDataList(DA, "Views", out IList<Types.View> views)) return;
 
-      var viewTypes = Enum.GetValues(typeof(DB.ViewType));
-      var clusters = new Dictionary<DB.ViewType, List<Types.View>>(viewTypes.Length);
+      var viewTypes = Enum.GetValues(typeof(ARDB.ViewType));
+      var clusters = new Dictionary<ARDB.ViewType, List<Types.View>>(viewTypes.Length);
       foreach (var view in views)
       {
-        if (view.Value is DB.View value)
+        if (view.Value is ARDB.View value)
         {
           if (!clusters.TryGetValue(value.ViewType, out var cluster))
             clusters.Add(value.ViewType, cluster = new List<Types.View>());

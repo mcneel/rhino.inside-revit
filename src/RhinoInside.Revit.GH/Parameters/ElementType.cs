@@ -5,15 +5,15 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
-using EDBS = RhinoInside.Revit.External.DB.Schemas;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  using External.DB.Extensions;
+
   public abstract class ElementType<T, R> : Element<T, R>
     where T : class, Types.IGH_ElementType
-    where R : DB.ElementType
+    where R : ARDB.ElementType
   {
     protected ElementType(string name, string nickname, string description, string category, string subcategory) :
     base(name, nickname, description, category, subcategory)
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override System.Drawing.Bitmap Icon => Properties.Resources.ElementType;
 
     #region UI
-    public DB.BuiltInCategory SelectedBuiltInCategory { get; set; } = DB.BuiltInCategory.INVALID;
+    public ARDB.BuiltInCategory SelectedBuiltInCategory { get; set; } = ARDB.BuiltInCategory.INVALID;
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
@@ -105,9 +105,9 @@ namespace RhinoInside.Revit.GH.Parameters
           familyIndex++;
         }
       }
-      else if (SelectedBuiltInCategory != DB.BuiltInCategory.INVALID)
+      else if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
       {
-        var category = new Types.Category(Revit.ActiveDBDocument, new DB.ElementId(SelectedBuiltInCategory));
+        var category = new Types.Category(Revit.ActiveDBDocument, new ARDB.ElementId(SelectedBuiltInCategory));
         if (category.IsTagCategory == true)
           categoriesTypeBox.SelectedIndex = 3;
         else
@@ -124,12 +124,12 @@ namespace RhinoInside.Revit.GH.Parameters
       Menu_AppendCustomItem(menu, elementTypesBox);
     }
 
-    ICollection<DB.Category> CategoriesWithTypes(DB.Document document)
+    ICollection<ARDB.Category> CategoriesWithTypes(ARDB.Document document)
     {
-      using (var collector = new DB.FilteredElementCollector(document))
+      using (var collector = new ARDB.FilteredElementCollector(document))
       {
         var elementCollector = collector.WhereElementIsElementType().OfClass(typeof(R));
-        return new HashSet<DB.Category>
+        return new HashSet<ARDB.Category>
         (
           collector.Select(x => x.Category),
           CategoryEqualityComparer.SameDocument
@@ -137,21 +137,21 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    private void RefreshCategoryList(ComboBox categoriesBox, DB.CategoryType categoryType)
+    private void RefreshCategoryList(ComboBox categoriesBox, ARDB.CategoryType categoryType)
     {
       if (Revit.ActiveUIDocument is null) return;
 
       var doc = Revit.ActiveUIDocument.Document;
-      var categories = (IEnumerable<DB.Category>) CategoriesWithTypes(doc);
+      var categories = (IEnumerable<ARDB.Category>) CategoriesWithTypes(doc);
 
-      if (categoryType != DB.CategoryType.Invalid)
+      if (categoryType != ARDB.CategoryType.Invalid)
       {
-        if (categoryType == (DB.CategoryType) 3)
+        if (categoryType == (ARDB.CategoryType) 3)
           categories = categories.Where(x => x?.IsTagCategory == true);
         else
           categories = categories.Where
           (
-            x => (x?.CategoryType ?? DB.CategoryType.Internal) == categoryType &&
+            x => (x?.CategoryType ?? ARDB.CategoryType.Internal) == categoryType &&
             x?.IsTagCategory == false
           );
       }
@@ -168,14 +168,14 @@ namespace RhinoInside.Revit.GH.Parameters
           categoriesBox.Items.Add(Types.Category.FromCategory(category));
       }
 
-      if (SelectedBuiltInCategory != DB.BuiltInCategory.INVALID)
+      if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
       {
-        var currentCategory = new Types.Category(doc, new DB.ElementId(SelectedBuiltInCategory));
+        var currentCategory = new Types.Category(doc, new ARDB.ElementId(SelectedBuiltInCategory));
         categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.Category>().IndexOf(currentCategory, 0).FirstOr(-1);
       }
     }
 
-    private DB.ElementId[] GetCategoryIds(ComboBox categoriesBox)
+    private ARDB.ElementId[] GetCategoryIds(ComboBox categoriesBox)
     {        
       return
       (
@@ -192,12 +192,12 @@ namespace RhinoInside.Revit.GH.Parameters
       familiesBox.SelectedIndex = -1;
       familiesBox.Items.Clear();
 
-      using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
+      using (var collector = new ARDB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
       {
         var categories = GetCategoryIds(categoriesBox);
 
         foreach (var familyName in collector.WhereElementIsElementType().OfClass(typeof(R)).
-          WherePasses(new DB.ElementMulticategoryFilter(categories)).Cast<R>().
+          WherePasses(new ARDB.ElementMulticategoryFilter(categories)).Cast<R>().
           Select(x => x.GetFamilyName()).Distinct())
         {
           familiesBox.Items.Add(familyName);
@@ -218,10 +218,10 @@ namespace RhinoInside.Revit.GH.Parameters
         if (categories.Length > 0)
         {
           var elementTypes = default(IEnumerable<R>);
-          using (var collector = new DB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
+          using (var collector = new ARDB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
           {
             elementTypes = collector.WhereElementIsElementType().OfClass(typeof(R)).
-                            WherePasses(new DB.ElementMulticategoryFilter(categories)).Cast<R>();
+                            WherePasses(new ARDB.ElementMulticategoryFilter(categories)).Cast<R>();
 
             var familyName = familiesBox.SelectedItem as string;
 
@@ -249,7 +249,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (sender is ComboBox categoriesTypeBox && categoriesTypeBox.Tag is ComboBox categoriesBox)
       {
-        RefreshCategoryList(categoriesBox, (DB.CategoryType) categoriesTypeBox.SelectedIndex);
+        RefreshCategoryList(categoriesBox, (ARDB.CategoryType) categoriesTypeBox.SelectedIndex);
         if (categoriesBox.Tag is Tuple<ListBox, ComboBox> tuple)
         {
           RefreshFamiliesBox(tuple.Item2, categoriesBox);
@@ -264,7 +264,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         SelectedBuiltInCategory = categoriesBox.SelectedItem is Types.Category category &&
           category.Id.TryGetBuiltInCategory(out var bic) ?
-          bic : DB.BuiltInCategory.INVALID;
+          bic : ARDB.BuiltInCategory.INVALID;
 
         RefreshFamiliesBox(tuple.Item2, categoriesBox);
         RefreshElementTypesList(tuple.Item1, categoriesBox, tuple.Item2);
@@ -305,9 +305,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
       var selectedBuiltInCategory = string.Empty;
       if (reader.TryGetString("SelectedBuiltInCategory", ref selectedBuiltInCategory))
-        SelectedBuiltInCategory = new EDBS.CategoryId(selectedBuiltInCategory);
+        SelectedBuiltInCategory = new External.DB.Schemas.CategoryId(selectedBuiltInCategory);
       else
-        SelectedBuiltInCategory = DB.BuiltInCategory.INVALID;
+        SelectedBuiltInCategory = ARDB.BuiltInCategory.INVALID;
 
       return true;
     }
@@ -317,8 +317,8 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Write(writer))
         return false;
 
-      if (SelectedBuiltInCategory != DB.BuiltInCategory.INVALID)
-        writer.SetString("SelectedBuiltInCategory", ((EDBS.CategoryId) SelectedBuiltInCategory).FullName);
+      if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
+        writer.SetString("SelectedBuiltInCategory", ((External.DB.Schemas.CategoryId) SelectedBuiltInCategory).FullName);
 
       return true;
     }
@@ -331,7 +331,7 @@ namespace RhinoInside.Revit.GH.Parameters
       string name,
       out TOutput type,
       Types.Document document,
-      DB.ElementTypeGroup typeGroup
+      ARDB.ElementTypeGroup typeGroup
     )
       where TOutput : class
     {
@@ -350,7 +350,7 @@ namespace RhinoInside.Revit.GH.Parameters
       // Validate document
       switch (type)
       {
-        case DB.Element element:
+        case ARDB.Element element:
           if (!document.Value.IsEquivalent(element.Document))
             throw new Exceptions.RuntimeErrorException("Failed to assign a type from a diferent document.");
           break;
@@ -364,7 +364,7 @@ namespace RhinoInside.Revit.GH.Parameters
     }
   }
 
-  public class ElementType : ElementType<Types.IGH_ElementType, DB.ElementType>
+  public class ElementType : ElementType<Types.IGH_ElementType, ARDB.ElementType>
   {
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("97DD546D-65C3-4D00-A609-3F5FBDA67142");

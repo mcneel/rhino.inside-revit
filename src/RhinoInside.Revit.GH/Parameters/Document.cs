@@ -4,12 +4,12 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  using External.DB.Extensions;
+
   public class Document : PersistentParam<Types.IGH_Document>
   {
     public override Guid ComponentGuid => new Guid("F3427D5C-3793-4E32-B219-8172D56EF04C");
@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return DA.GetData(_Document_, ref document);
     }
 
-    public static bool GetDataOrDefault(IGH_Component component, IGH_DataAccess DA, string name, out DB.Document document)
+    public static bool GetDataOrDefault(IGH_Component component, IGH_DataAccess DA, string name, out ARDB.Document document)
     {
       TryGetDocumentOrCurrent(component, DA, name, out var doc);
       document = doc?.Value;
@@ -76,12 +76,12 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override GH_GetterResult Prompt_Singular(ref Types.IGH_Document value) => GH_GetterResult.cancel;
     protected override GH_GetterResult Prompt_Plural(ref List<Types.IGH_Document> values) => GH_GetterResult.cancel;
 
-    static DB.DocumentType GetDocumentType(DB.Document doc)
+    static ARDB.DocumentType GetDocumentType(ARDB.Document doc)
     {
       if (doc.IsFamilyDocument)
-        return DB.DocumentType.Family;
+        return ARDB.DocumentType.Family;
       else
-        return DB.DocumentType.Project;
+        return ARDB.DocumentType.Project;
     }
 
     protected EventHandler Menu_PromptFile(Autodesk.Revit.UI.RevitCommandId commandId) => async (sender, args) =>
@@ -128,13 +128,13 @@ namespace RhinoInside.Revit.GH.Parameters
       };
       docTypeBox.SelectedIndexChanged += DocumentTypeBox_SelectedIndexChanged;
       docTypeBox.SetCueBanner("Document type filter…");
-      docTypeBox.Items.Add(DB.DocumentType.Project);
-      docTypeBox.Items.Add(DB.DocumentType.Family);
+      docTypeBox.Items.Add(ARDB.DocumentType.Project);
+      docTypeBox.Items.Add(ARDB.DocumentType.Family);
 
-      if (PersistentValue?.Value is DB.Document current)
+      if (PersistentValue?.Value is ARDB.Document current)
         RefreshDocumentsList(listBox, GetDocumentType(current));
       else
-        RefreshDocumentsList(listBox, DB.DocumentType.Other);
+        RefreshDocumentsList(listBox, ARDB.DocumentType.Other);
 
       Menu_AppendCustomItem(menu, docTypeBox);
       Menu_AppendCustomItem(menu, listBox);
@@ -226,19 +226,19 @@ namespace RhinoInside.Revit.GH.Parameters
       if (sender is ComboBox comboBox)
       {
         if (comboBox.Tag is ListBox listBox)
-          RefreshDocumentsList(listBox, ((DB.DocumentType?) comboBox.SelectedItem) ?? DB.DocumentType.Other);
+          RefreshDocumentsList(listBox, ((ARDB.DocumentType?) comboBox.SelectedItem) ?? ARDB.DocumentType.Other);
       }
     }
 
-    private void RefreshDocumentsList(ListBox listBox, DB.DocumentType docType)
+    private void RefreshDocumentsList(ListBox listBox, ARDB.DocumentType docType)
     {
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
       listBox.Items.Clear();
 
       var documents = Revit.ActiveUIApplication.
         Application.Documents.
-        Cast<DB.Document>().
-        Where(x => !x.IsLinked && (docType == DB.DocumentType.Other || GetDocumentType(x) == docType)).
+        Cast<ARDB.Document>().
+        Where(x => !x.IsLinked && (docType == ARDB.DocumentType.Other || GetDocumentType(x) == docType)).
         Select(Types.Document.FromValue);
 
       listBox.DisplayMember = nameof(Types.Document.DisplayName);
@@ -286,7 +286,7 @@ namespace RhinoInside.Revit.GH.Parameters
         else if
         (
           forceLoad &&
-          document.ModelURI.ToModelPath() is DB.ModelPath modelPath &&
+          document.ModelURI.ToModelPath() is ARDB.ModelPath modelPath &&
           Core.Host.Value is Autodesk.Revit.UI.UIApplication host &&
           MessageBox.Show
           (
@@ -301,7 +301,7 @@ namespace RhinoInside.Revit.GH.Parameters
           ) == DialogResult.Yes
         )
         {
-          using (var options = new DB.OpenOptions())
+          using (var options = new ARDB.OpenOptions())
             return host.OpenAndActivateDocument(modelPath, options, false);
         }
         else

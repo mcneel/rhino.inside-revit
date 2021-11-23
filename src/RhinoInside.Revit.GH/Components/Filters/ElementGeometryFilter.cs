@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
+  using Convert.Geometry;
+  using External.DB;
+
   public class ElementBoundingBoxFilter : ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("3B8BE676-390B-4BE1-B6DA-C02FFA3234B6");
@@ -57,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         return;
 
       var targets = new List<Rhino.Geometry.Box>();
-      DB.ElementFilter filter = null;
+      ARDB.ElementFilter filter = null;
 
       var boundingBoxes = geometries.Select(x => x?.Boundingbox ?? Rhino.Geometry.BoundingBox.Empty).Where(x => x.IsDegenerate(0.0) < 4);
       if (boundingBoxes.Any())
@@ -75,15 +76,15 @@ namespace RhinoInside.Revit.GH.Components.Filters
           }
 
           if (bbox.IsDegenerate(0.0) == 3)
-            filter = new DB.BoundingBoxContainsPointFilter(bbox.Center.ToXYZ(), Math.Abs(tolerance) / Revit.ModelUnits, inverted);
+            filter = new ARDB.BoundingBoxContainsPointFilter(bbox.Center.ToXYZ(), Math.Abs(tolerance) / Revit.ModelUnits, inverted);
           else if (strict)
-            filter = new DB.BoundingBoxIsInsideFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+            filter = new ARDB.BoundingBoxIsInsideFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
           else
-            filter = new DB.BoundingBoxIntersectsFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+            filter = new ARDB.BoundingBoxIntersectsFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
         }
         else
         {
-          var filters = boundingBoxes.Select<Rhino.Geometry.BoundingBox, DB.ElementFilter>
+          var filters = boundingBoxes.Select<Rhino.Geometry.BoundingBox, ARDB.ElementFilter>
           (
             x =>
             {
@@ -96,11 +97,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
               var bbox = x;
               var degenerate = bbox.IsDegenerate(0.0);
               if (degenerate == 3)
-                return new DB.BoundingBoxContainsPointFilter(bbox.Center.ToXYZ(), Math.Abs(tolerance) / Revit.ModelUnits, inverted);
+                return new ARDB.BoundingBoxContainsPointFilter(bbox.Center.ToXYZ(), Math.Abs(tolerance) / Revit.ModelUnits, inverted);
               else if (strict)
-                return new DB.BoundingBoxIsInsideFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+                return new ARDB.BoundingBoxIsInsideFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
               else
-                return new DB.BoundingBoxIntersectsFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+                return new ARDB.BoundingBoxIntersectsFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
             }
           );
 
@@ -131,7 +132,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
+      ARDB.Element element = null;
       if (!DA.GetData("Element", ref element))
         return;
 
@@ -139,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementIntersectsElementFilter(element, inverted));
+      DA.SetData("Filter", new ARDB.ElementIntersectsElementFilter(element, inverted));
     }
   }
 
@@ -169,8 +170,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      if (brep.ToSolid() is DB.Solid solid)
-        DA.SetData("Filter", new DB.ElementIntersectsSolidFilter(solid, inverted));
+      if (brep.ToSolid() is ARDB.Solid solid)
+        DA.SetData("Filter", new ARDB.ElementIntersectsSolidFilter(solid, inverted));
       else
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to convert Brep");
     }
@@ -202,8 +203,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      if (mesh.ToSolid() is DB.Solid solid)
-        DA.SetData("Filter", new DB.ElementIntersectsSolidFilter(solid, inverted));
+      if (mesh.ToSolid() is ARDB.Solid solid)
+        DA.SetData("Filter", new ARDB.ElementIntersectsSolidFilter(solid, inverted));
       else
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to convert Mesh");
     }

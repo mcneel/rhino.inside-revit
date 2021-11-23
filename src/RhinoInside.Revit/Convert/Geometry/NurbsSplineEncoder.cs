@@ -1,13 +1,14 @@
 using System.Diagnostics;
 using Rhino.Geometry;
 using Rhino.Geometry.Collections;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
+  using Convert.System.Collections.Generic;
+
   /// <summary>
-  /// Converts <see cref="NurbsCurve"/> to be transfered to a <see cref="DB.NurbSpline"/>.
+  /// Converts <see cref="NurbsCurve"/> to be transfered to a <see cref="ARDB.NurbSpline"/>.
   /// <para>Non C2 curves are "Smoothed" when necessary.</para>
   /// </summary>
   static class NurbsSplineEncoder
@@ -83,10 +84,10 @@ namespace RhinoInside.Revit.Convert.Geometry
       return knots;
     }
 
-    static DB.XYZ[] ToXYZArray(NurbsCurvePointList list, double factor)
+    static ARDB.XYZ[] ToXYZArray(NurbsCurvePointList list, double factor)
     {
       var count = list.Count;
-      var points = new DB.XYZ[count];
+      var points = new ARDB.XYZ[count];
 
       int p = 0;
       if (factor == 1.0)
@@ -94,7 +95,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         while (p < count)
         {
           var location = list[p].Location;
-          points[p++] = new DB::XYZ(location.X, location.Y, location.Z);
+          points[p++] = new ARDB::XYZ(location.X, location.Y, location.Z);
         }
       }
       else
@@ -102,14 +103,14 @@ namespace RhinoInside.Revit.Convert.Geometry
         while (p < count)
         {
           var location = list[p].Location;
-          points[p++] = new DB::XYZ(location.X * factor, location.Y * factor, location.Z * factor);
+          points[p++] = new ARDB::XYZ(location.X * factor, location.Y * factor, location.Z * factor);
         }
       }
 
       return points;
     }
 
-    internal static DB.Curve ToNurbsSpline(NurbsCurve value, double factor)
+    internal static ARDB.Curve ToNurbsSpline(NurbsCurve value, double factor)
     {
       var degree = value.Degree;
       var knots = ToDoubleArray(value.Knots, degree);
@@ -123,11 +124,11 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (value.IsRational)
       {
         var weights = value.Points.ConvertAll(x => x.Weight);
-        return DB.NurbSpline.CreateCurve(degree, knots, controlPoints, weights);
+        return ARDB.NurbSpline.CreateCurve(degree, knots, controlPoints, weights);
       }
       else
       {
-        return DB.NurbSpline.CreateCurve(degree, knots, controlPoints);
+        return ARDB.NurbSpline.CreateCurve(degree, knots, controlPoints);
       }
     }
   }

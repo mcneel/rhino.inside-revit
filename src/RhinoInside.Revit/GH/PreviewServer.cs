@@ -5,10 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-using DB = Autodesk.Revit.DB;
-using DBES = Autodesk.Revit.DB.ExternalService;
-using DB3D = Autodesk.Revit.DB.DirectContext3D;
-using RhinoInside.Revit.Convert.Geometry;
+using ARDB = Autodesk.Revit.DB;
+using ARDBES = Autodesk.Revit.DB.ExternalService;
+using ARDB3D = Autodesk.Revit.DB.DirectContext3D;
 
 using Grasshopper;
 using Grasshopper.Kernel;
@@ -16,6 +15,8 @@ using Grasshopper.GUI.Canvas;
 
 namespace RhinoInside.Revit.GH
 {
+  using Convert.Geometry;
+
   internal class PreviewServer : DirectContext3DServer
   {
     static GH_Document ActiveDefinition => Instances.ActiveCanvas?.Document;
@@ -84,10 +85,10 @@ namespace RhinoInside.Revit.GH
     #endregion
 
     #region IDirectContext3DServer
-    public override bool UseInTransparentPass(DB.View dBView) =>
+    public override bool UseInTransparentPass(ARDB.View dBView) =>
       ((ActiveDefinition is null ? GH_PreviewMode.Disabled : PreviewMode) == GH_PreviewMode.Shaded);
 
-    public override bool CanExecute(DB.View dBView) =>
+    public override bool CanExecute(ARDB.View dBView) =>
       GH_Document.EnableSolutions &&
       PreviewMode != GH_PreviewMode.Disabled &&
       ActiveDefinition is object &&
@@ -164,7 +165,7 @@ namespace RhinoInside.Revit.GH
           Revit.RefreshActiveView();
       }
 
-      public override DB3D.EffectInstance EffectInstance(DB.DisplayStyle displayStyle, bool IsShadingPass)
+      public override ARDB3D.EffectInstance EffectInstance(ARDB.DisplayStyle displayStyle, bool IsShadingPass)
       {
         var ei = base.EffectInstance(displayStyle, IsShadingPass);
 
@@ -176,26 +177,26 @@ namespace RhinoInside.Revit.GH
           if (HasVertexColors(vertexFormatBits) && ShowsVertexColors(displayStyle))
           {
             ei.SetTransparency(0.0);
-            ei.SetColor(DB.Color.InvalidColorValue);
-            ei.SetEmissiveColor(DB.Color.InvalidColorValue);
+            ei.SetColor(ARDB.Color.InvalidColorValue);
+            ei.SetEmissiveColor(ARDB.Color.InvalidColorValue);
           }
           else
           {
             ei.SetTransparency((255 - color.A) / 255.0);
-            ei.SetEmissiveColor(new DB.Color(color.R, color.G, color.B));
+            ei.SetEmissiveColor(new ARDB.Color(color.R, color.G, color.B));
           }
         }
         else
         {
           ei.SetTransparency(0.0);
-          ei.SetColor(new DB.Color(color.R, color.G, color.B));
-          ei.SetEmissiveColor(DB.Color.InvalidColorValue);
+          ei.SetColor(new ARDB.Color(color.R, color.G, color.B));
+          ei.SetEmissiveColor(ARDB.Color.InvalidColorValue);
         }
 
         return ei;
       }
 
-      public override void Draw(DB.DisplayStyle displayStyle)
+      public override void Draw(ARDB.DisplayStyle displayStyle)
       {
         if (docObject is IGH_PreviewObject preview)
         {
@@ -281,7 +282,7 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    Rhino.Geometry.BoundingBox BuildScene(DB.View dBView)
+    Rhino.Geometry.BoundingBox BuildScene(ARDB.View dBView)
     {
       if (Interlocked.Exchange(ref RebuildPrimitives, 0) != 0)
       {
@@ -329,22 +330,22 @@ namespace RhinoInside.Revit.GH
       return primitivesBoundingBox;
     }
 
-    public override DB.Outline GetBoundingBox(DB.View dBView) => primitivesBoundingBox.ToOutline();
+    public override ARDB.Outline GetBoundingBox(ARDB.View dBView) => primitivesBoundingBox.ToOutline();
 
-    public override void RenderScene(DB.View dBView, DB.DisplayStyle displayStyle)
+    public override void RenderScene(ARDB.View dBView, ARDB.DisplayStyle displayStyle)
     {
       try
       {
         if (!BuildScene(dBView).IsValid)
           return;
 
-        DB3D.DrawContext.SetWorldTransform(DB.Transform.Identity.ScaleBasis(UnitConverter.ToHostUnits));
+        ARDB3D.DrawContext.SetWorldTransform(ARDB.Transform.Identity.ScaleBasis(UnitConverter.ToHostUnits));
 
         var CropBox = dBView.CropBox.ToBoundingBox();
 
         foreach (var primitive in primitives)
         {
-          if (DB3D.DrawContext.IsInterrupted())
+          if (ARDB3D.DrawContext.IsInterrupted())
             break;
 
           if (dBView.CropBoxActive && !Rhino.Geometry.BoundingBox.Intersection(CropBox, primitive.ClippingBox).IsValid)

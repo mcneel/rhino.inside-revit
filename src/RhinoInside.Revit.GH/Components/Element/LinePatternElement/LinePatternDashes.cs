@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
-namespace RhinoInside.Revit.GH.Components.LinePatternElement
+namespace RhinoInside.Revit.GH.Components.LinePatternElements
 {
   public class LinePatternDashes : TransactionalChainComponent
   {

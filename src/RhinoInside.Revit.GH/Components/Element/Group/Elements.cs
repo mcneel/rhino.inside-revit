@@ -1,9 +1,8 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ModelElements
 {
   public class GroupElements : Component
   {
@@ -31,11 +30,11 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var group = default(DB.Group);
-      if (!DA.GetData("Group", ref group))
+      var group = default(Types.Group);
+      if (!DA.GetData("Group", ref group) || !group.IsValid)
         return;
 
-      DA.SetDataList("Elements", group.GetMemberIds().Select(x => Types.Element.FromElementId(group.Document, x)));
+      DA.SetDataList("Elements", group.Value.GetMemberIds().Select(x => Types.Element.FromElementId(group.Document, x)));
     }
   }
 }

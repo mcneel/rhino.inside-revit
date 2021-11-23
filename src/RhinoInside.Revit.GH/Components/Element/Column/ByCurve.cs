@@ -1,13 +1,14 @@
 using System;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+  using GH.Kernel.Attributes;
+
   public class ColumnByCurve : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("47B560AC-1E1D-4576-9F17-BCCF612974D8");
@@ -26,20 +27,20 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructColumnByCurve
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New Column")]
-      ref DB.FamilyInstance column,
+      ref ARDB.FamilyInstance column,
 
       Rhino.Geometry.Line curve,
-      Optional<DB.FamilySymbol> type,
-      Optional<DB.Level> level
+      Optional<ARDB.FamilySymbol> type,
+      Optional<ARDB.Level> level
     )
     {
       if (curve.FromZ > curve.ToZ)
         curve.Flip();
 
-      SolveOptionalType(document, ref type, DB.BuiltInCategory.OST_StructuralColumns, nameof(type));
+      SolveOptionalType(document, ref type, ARDB.BuiltInCategory.OST_StructuralColumns, nameof(type));
 
       if (!type.Value.IsActive)
         type.Value.Activate();
@@ -49,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components
       // Type
       ChangeElementTypeId(ref column, type.Value.Id);
 
-      if (column is object && column.Location is DB.LocationCurve locationCurve)
+      if (column is object && column.Location is ARDB.LocationCurve locationCurve)
       {
         var centerLine = curve.ToLine();
         if (!locationCurve.Curve.IsAlmostEqualTo(centerLine))
@@ -64,15 +65,15 @@ namespace RhinoInside.Revit.GH.Components
           curve.ToLine(),
           type.Value,
           level.Value,
-          DB.Structure.StructuralType.Column
+          ARDB.Structure.StructuralType.Column
         );
 
-        var parametersMask = new DB.BuiltInParameter[]
+        var parametersMask = new ARDB.BuiltInParameter[]
         {
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.LEVEL_PARAM
+          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+          ARDB.BuiltInParameter.LEVEL_PARAM
         };
 
         ReplaceElement(ref column, newColumn, parametersMask);

@@ -6,15 +6,16 @@ using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Display;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Drawing;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Display;
+  using Convert.Geometry;
+  using Convert.System.Drawing;
+  using External.DB;
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Geometric Element")]
   public interface IGH_GeometricElement : IGH_GraphicalElement { }
 
@@ -22,14 +23,14 @@ namespace RhinoInside.Revit.GH.Types
   public class GeometricElement : GraphicalElement, IGH_GeometricElement, IGH_PreviewMeshData, Bake.IGH_BakeAwareElement
   {
     public GeometricElement() { }
-    public GeometricElement(DB.Element element) : base(element) { }
+    public GeometricElement(ARDB.Element element) : base(element) { }
 
-    public static new bool IsValidElement(DB.Element element)
+    public static new bool IsValidElement(ARDB.Element element)
     {
       if (!GraphicalElement.IsValidElement(element))
         return false;
 
-      using (var options = new DB.Options())
+      using (var options = new ARDB.Options())
         return element.get_Geometry(options) is object;
     }
 
@@ -42,14 +43,14 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is DB.Element element)
+      if (Value is ARDB.Element element)
       {
         if (!xform.IsIdentity)
         {
           var meshes = TryGetPreviewMeshes();
           var wires = TryGetPreviewWires();
           if (meshes is null && wires is null)
-            BuildPreview(element, default, DB.ViewDetailLevel.Medium, out var _, out meshes, out wires);
+            BuildPreview(element, default, ARDB.ViewDetailLevel.Medium, out var _, out meshes, out wires);
 
           if (meshes?.Length > 0 || wires?.Length > 0)
           {
@@ -72,15 +73,15 @@ namespace RhinoInside.Revit.GH.Types
     #region Preview
     internal static void BuildPreview
     (
-      DB.Element element, MeshingParameters meshingParameters, DB.ViewDetailLevel detailLevel,
-      out DB.Material[] materials, out Mesh[] meshes, out Curve[] wires
+      ARDB.Element element, MeshingParameters meshingParameters, ARDB.ViewDetailLevel detailLevel,
+      out ARDB.Material[] materials, out Mesh[] meshes, out Curve[] wires
     )
     {
       using
       (
         var options = element.ViewSpecific ?
-        new DB.Options() { View = element.Document.GetElement(element.OwnerViewId) as DB.View } :
-        new DB.Options() { DetailLevel = detailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : detailLevel }
+        new ARDB.Options() { View = element.Document.GetElement(element.OwnerViewId) as ARDB.View } :
+        new ARDB.Options() { DetailLevel = detailLevel == ARDB.ViewDetailLevel.Undefined ? ARDB.ViewDetailLevel.Medium : detailLevel }
       )
       using (var geometry = element?.GetGeometry(options))
       {
@@ -99,11 +100,11 @@ namespace RhinoInside.Revit.GH.Types
           meshes = geometry.GetPreviewMeshes(element.Document, meshingParameters).ToArray();
           materials = geometry.GetPreviewMaterials(element.Document, elementMaterial).ToArray();
 
-          if (wires.Length == 0 && meshes.Length == 0 && element.get_BoundingBox(options.View) is DB.BoundingBoxXYZ)
+          if (wires.Length == 0 && meshes.Length == 0 && element.get_BoundingBox(options.View) is ARDB.BoundingBoxXYZ)
           {
             var subMeshes = new List<Mesh>();
             var subWires = new List<Curve>();
-            var subMaterials = new List<DB.Material>();
+            var subMaterials = new List<ARDB.Material>();
 
             foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
             {
@@ -113,8 +114,8 @@ namespace RhinoInside.Revit.GH.Types
               using
               (
                 var dependentOptions = view is object ?
-                new DB.Options() { View = view } :
-                new DB.Options() { DetailLevel = detailLevel == DB.ViewDetailLevel.Undefined ? DB.ViewDetailLevel.Medium : detailLevel }
+                new ARDB.Options() { View = view } :
+                new ARDB.Options() { DetailLevel = detailLevel == ARDB.ViewDetailLevel.Undefined ? ARDB.ViewDetailLevel.Medium : detailLevel }
               )
               using (var dependentGeometry = dependent?.GetGeometry(dependentOptions))
               {
@@ -157,7 +158,7 @@ namespace RhinoInside.Revit.GH.Types
           if (element is null)
             return;
 
-          BuildPreview(element, MeshingParameters, DB.ViewDetailLevel.Undefined, out var materialElements, out meshes, out wires);
+          BuildPreview(element, MeshingParameters, ARDB.ViewDetailLevel.Undefined, out var materialElements, out meshes, out wires);
 
           // Combine meshes of same material for display performance
           if (meshes is object && materialElements is object)
@@ -178,7 +179,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      static void BuildPreviews(DB.Document _, bool cancelled)
+      static void BuildPreviews(ARDB.Document _, bool cancelled)
       {
         var previews = previewsQueue;
         previewsQueue = null;
@@ -418,18 +419,18 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_BakeAwareElement
-    static ObjectAttributes PeekAttributes(IDictionary<DB.ElementId, Guid> idMap, RhinoDoc doc, ObjectAttributes att, DB.Document document)
+    static ObjectAttributes PeekAttributes(IDictionary<ARDB.ElementId, Guid> idMap, RhinoDoc doc, ObjectAttributes att, ARDB.Document document)
     {
       var context = GeometryDecoder.Context.Peek;
       var attributes = new ObjectAttributes();
 
-      if (context.Category is DB.Category category)
+      if (context.Category is ARDB.Category category)
       {
         if (new Category(category).BakeElement(idMap, false, doc, att, out var layerGuid))
           attributes.LayerIndex = doc.Layers.FindId(layerGuid).Index;
       }
 
-      if (context.Material is DB.Material material)
+      if (context.Material is ARDB.Material material)
       {
         if (new Material(material).BakeElement(idMap, false, doc, att, out var materialGuid))
         {
@@ -443,13 +444,13 @@ namespace RhinoInside.Revit.GH.Types
 
     protected internal static bool BakeGeometryElement
     (
-      IDictionary<DB.ElementId, Guid> idMap,
+      IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
       RhinoDoc doc,
       ObjectAttributes att,
       Transform transform,
-      DB.Element element,
-      DB.GeometryElement geometryElement,
+      ARDB.Element element,
+      ARDB.GeometryElement geometryElement,
       out int index
     )
     {
@@ -469,8 +470,8 @@ namespace RhinoInside.Revit.GH.Types
       else if
       (
         geometryElementContent.Length == 1 &&
-        geometryElementContent[0] is DB.GeometryInstance geometryInstance &&
-        geometryInstance.Symbol is DB.ElementType
+        geometryElementContent[0] is ARDB.GeometryInstance geometryInstance &&
+        geometryInstance.Symbol is ARDB.ElementType
       )
       {
         // Special case to simplify DB.FamilyInstance elements.
@@ -482,12 +483,12 @@ namespace RhinoInside.Revit.GH.Types
       var idef_description = string.Empty;
 
       // Decorate idef_name using "Category:FamilyName:TypeName" when posible
-      if (element is DB.ElementType type)
+      if (element is ARDB.ElementType type)
       {
         idef_name = $"Revit:{type.Category?.FullName()}:{type.FamilyName}:{type.Name} {{{idef_name}}}";
-        idef_description = element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
+        idef_description = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
       }
-      else if (element.Document.GetElement(element.GetTypeId()) is DB.ElementType elementType)
+      else if (element.Document.GetElement(element.GetTypeId()) is ARDB.ElementType elementType)
       {
         idef_name = $"Revit:{elementType.Category?.FullName()}:{elementType.FamilyName}:{elementType.Name} {{{idef_name}}}";
       }
@@ -518,11 +519,11 @@ namespace RhinoInside.Revit.GH.Types
             var geo = default(GeometryBase);
             switch (g)
             {
-              case DB.Mesh mesh: if(mesh.NumTriangles > 0) geo = mesh.ToMesh(); break;
-              case DB.Solid solid: if(!solid.Faces.IsEmpty) geo = solid.ToBrep(); break;
-              case DB.Curve curve: geo = curve.ToCurve(); break;
-              case DB.PolyLine pline: if (pline.NumberOfCoordinates > 0) geo = pline.ToPolylineCurve(); break;
-              case DB.GeometryInstance instance:
+              case ARDB.Mesh mesh: if(mesh.NumTriangles > 0) geo = mesh.ToMesh(); break;
+              case ARDB.Solid solid: if(!solid.Faces.IsEmpty) geo = solid.ToBrep(); break;
+              case ARDB.Curve curve: geo = curve.ToCurve(); break;
+              case ARDB.PolyLine pline: if (pline.NumberOfCoordinates > 0) geo = pline.ToPolylineCurve(); break;
+              case ARDB.GeometryInstance instance:
                 using (GeometryDecoder.Context.Push())
                 {
                   if (BakeGeometryElement(idMap, false, doc, att, Transform.Identity, instance.Symbol, instance.SymbolGeometry, out var idefIndex))
@@ -564,7 +565,7 @@ namespace RhinoInside.Revit.GH.Types
                   foreach (var face in brep.Faces)
                   {
                     var faceMaterialId = context.FaceMaterialId[face.SurfaceIndex];
-                    if (faceMaterialId != (context.Material?.Id ?? DB.ElementId.InvalidElementId))
+                    if (faceMaterialId != (context.Material?.Id ?? ARDB.ElementId.InvalidElementId))
                     {
                       var faceMaterial = new Material(element.Document, faceMaterialId);
                       if (faceMaterial.BakeElement(idMap, false, doc, att, out var materialGuid))
@@ -618,11 +619,11 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
-      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
     public bool BakeElement
     (
-      IDictionary<DB.ElementId, Guid> idMap,
+      IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
       RhinoDoc doc,
       ObjectAttributes att,
@@ -634,9 +635,9 @@ namespace RhinoInside.Revit.GH.Types
         return true;
 
       // 3. Update if necessary
-      if (Value is DB.Element element)
+      if (Value is ARDB.Element element)
       {
-        using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+        using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Fine })
         {
           using (var geometry = element.GetGeometry(options))
           {
@@ -655,9 +656,9 @@ namespace RhinoInside.Revit.GH.Types
                 var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
                 if (BakeGeometryElement(idMap, overwrite, doc, att, worldToElement, element, geometry, out var idefIndex))
                 {
-                  att = att.Duplicate();
-                  att.Name = element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
-                  att.Url = element.get_Parameter(DB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
+                  att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
+                  att.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
+                  att.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
 
                   if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
                     att.LayerIndex = doc.Layers.FindId(layerGuid).Index;

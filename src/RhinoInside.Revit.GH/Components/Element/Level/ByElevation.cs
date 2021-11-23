@@ -2,12 +2,13 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Level
+namespace RhinoInside.Revit.GH.Components.Levels
 {
+  using External.DB.Extensions;
+  using ElementTracking;
+
   public class LevelByElevation : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("C6DEC111-EAC6-4047-8618-28EE144D55C5");
@@ -44,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components.Level
           NickName = "T",
           Description = "Level Type",
           Optional = true,
-          SelectedBuiltInCategory = DB.BuiltInCategory.OST_Levels
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Levels
         },
         ParamRelevance.Primary
       ),
@@ -86,26 +87,26 @@ namespace RhinoInside.Revit.GH.Components.Level
     };
 
     const string _Level_ = "Level";
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
-      DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-      DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-      DB.BuiltInParameter.ELEM_TYPE_PARAM,
-      DB.BuiltInParameter.DATUM_TEXT,
-      DB.BuiltInParameter.LEVEL_ELEV,
+      ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+      ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+      ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+      ARDB.BuiltInParameter.DATUM_TEXT,
+      ARDB.BuiltInParameter.LEVEL_ELEV,
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
-      if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out DB.LevelType type, doc, DB.ElementTypeGroup.LevelType)) return;
+      if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.LevelType type, doc, ARDB.ElementTypeGroup.LevelType)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
       if (!Parameters.Elevation.GetData(this, DA, "Elevation", out var height, doc)) return;
-      Params.TryGetData(DA, "Template", out DB.Level template);
+      Params.TryGetData(DA, "Template", out ARDB.Level template);
 
       // Previous Output
-      Params.ReadTrackedElement(_Level_, doc.Value, out DB.Level level);
+      Params.ReadTrackedElement(_Level_, doc.Value, out ARDB.Level level);
 
       StartTransaction(doc.Value);
       {
@@ -116,7 +117,7 @@ namespace RhinoInside.Revit.GH.Components.Level
       }
     }
 
-    bool Reuse(DB.Level level, double height, DB.LevelType type, DB.Level template)
+    bool Reuse(ARDB.Level level, double height, ARDB.LevelType type, ARDB.Level template)
     {
       if (level is null) return false;
       if (level.GetHeight() != height) level.SetHeight(height);
@@ -125,27 +126,27 @@ namespace RhinoInside.Revit.GH.Components.Level
       return true;
     }
 
-    DB.Level Create(DB.Document doc, double height, DB.LevelType type, DB.Level template)
+    ARDB.Level Create(ARDB.Document doc, double height, ARDB.LevelType type, ARDB.Level template)
     {
-      var level = default(DB.Level);
+      var level = default(ARDB.Level);
 
       // Try to duplicate template
       if (template is object)
       {
-        var ids = DB.ElementTransformUtils.CopyElements
+        var ids = ARDB.ElementTransformUtils.CopyElements
         (
           template.Document,
-          new DB.ElementId[] { template.Id },
+          new ARDB.ElementId[] { template.Id },
           doc,
           default,
           default
         );
 
-        level = ids.Select(x => doc.GetElement(x)).OfType<DB.Level>().FirstOrDefault();
+        level = ids.Select(x => doc.GetElement(x)).OfType<ARDB.Level>().FirstOrDefault();
       }
 
       if (level is null)
-        level = DB.Level.Create(doc, height);
+        level = ARDB.Level.Create(doc, height);
       else
         level.SetHeight(height);
 
@@ -155,7 +156,7 @@ namespace RhinoInside.Revit.GH.Components.Level
       return level;
     }
 
-    DB.Level Reconstruct(DB.Level level, DB.Document doc, double height, DB.LevelType type, string name, DB.Level template)
+    ARDB.Level Reconstruct(ARDB.Level level, ARDB.Document doc, double height, ARDB.LevelType type, string name, ARDB.Level template)
     {
       if (!Reuse(level, height, type, template))
       {

@@ -1,10 +1,10 @@
 using System;
 using System.Windows.Media;
 using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Grasshopper;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     protected new class Availability : GrasshopperCommand.Availability
     {
-      protected override bool IsCommandAvailable(UIApplication _, DB.CategorySet selectedCategories) =>
+      protected override bool IsCommandAvailable(UIApplication _, CategorySet selectedCategories) =>
         base.IsCommandAvailable(_, selectedCategories) &&
         GH.Guest.IsEditorLoaded();
     }
@@ -72,7 +72,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       GH_Document.EnableSolutions = !GH_Document.EnableSolutions;
 

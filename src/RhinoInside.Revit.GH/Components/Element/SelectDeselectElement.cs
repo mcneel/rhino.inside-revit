@@ -4,11 +4,12 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
+  using External.DB.Extensions;
+
   public class SelectDeselectElement : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("3E44D6BB-5F49-40E8-A2C4-53E5E3A63DDC");
@@ -74,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components
       ),
     };
 
-    readonly Dictionary<DB.Document, HashSet<DB.ElementId>> Selection = new Dictionary<DB.Document, HashSet<DB.ElementId>>();
+    readonly Dictionary<ARDB.Document, HashSet<ARDB.ElementId>> Selection = new Dictionary<ARDB.Document, HashSet<ARDB.ElementId>>();
     protected override void BeforeSolveInstance()
     {
       base.BeforeSolveInstance();
@@ -84,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components
       foreach (var doc in projects.Concat(families))
       {
         var uiDoc = new Autodesk.Revit.UI.UIDocument(doc);
-        Selection.Add(uiDoc.Document, new HashSet<DB.ElementId>(uiDoc.Selection.GetElementIds()));
+        Selection.Add(uiDoc.Document, new HashSet<ARDB.ElementId>(uiDoc.Selection.GetElementIds()));
       }
     }
 

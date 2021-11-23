@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
+  using External.DB;
+
   [ComponentVersion(introduced: "1.0", updated: "1.3")]
   public class ElementExcludeElementTypeFilter : ElementFilterComponent
   {
@@ -49,20 +50,20 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetDataList("Classes", classNames))
         return;
 
-      var filters = new List<DB.ElementFilter>();
+      var filters = new List<ARDB.ElementFilter>();
       var classes = new HashSet<string>(classNames);
       if (classes.Remove("Autodesk.Revit.DB.Area"))
-        filters.Add(new DB.AreaFilter());
+        filters.Add(new ARDB.AreaFilter());
       if (classes.Remove("Autodesk.Revit.DB.AreaTag"))
-        filters.Add(new DB.AreaTagFilter());
+        filters.Add(new ARDB.AreaTagFilter());
       if (classes.Remove("Autodesk.Revit.DB.Architecture.Room"))
-        filters.Add(new DB.Architecture.RoomFilter());
+        filters.Add(new ARDB.Architecture.RoomFilter());
       if (classes.Remove("Autodesk.Revit.DB.Architecture.RoomTag"))
-        filters.Add(new DB.Architecture.RoomTagFilter());
+        filters.Add(new ARDB.Architecture.RoomTagFilter());
       if (classes.Remove("Autodesk.Revit.DB.Mechanical.Space"))
-        filters.Add(new DB.Mechanical.SpaceFilter());
+        filters.Add(new ARDB.Mechanical.SpaceFilter());
       if (classes.Remove("Autodesk.Revit.DB.Mechanical.SpaceTag"))
-        filters.Add(new DB.Mechanical.SpaceTagFilter());
+        filters.Add(new ARDB.Mechanical.SpaceTagFilter());
 
       try
       {
@@ -71,9 +72,9 @@ namespace RhinoInside.Revit.GH.Components.Filters
         if (types.Count > 0)
         {
           if (types.Count == 1)
-            filters.Add(new DB.ElementClassFilter(types[0]));
+            filters.Add(new ARDB.ElementClassFilter(types[0]));
           else
-            filters.Add(new DB.ElementMulticlassFilter(types));
+            filters.Add(new ARDB.ElementMulticlassFilter(types));
         }
 
         DA.SetData("Filter", CompoundElementFilter.Union(filters));
@@ -107,7 +108,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var categoryIds = new List<DB.ElementId>();
+      var categoryIds = new List<ARDB.ElementId>();
       if (!DA.GetDataList("Categories", categoryIds))
         return;
 
@@ -146,7 +147,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!Params.TryGetData(DA, "Type Name", out string typeName)) return;
       if (!Params.GetData(DA, "Inverted", out bool? inverted)) return;
 
-      var filters = new List<DB.ElementFilter>(3);
+      var filters = new List<ARDB.ElementFilter>(3);
       if (kind.HasValue)
         filters.Add(CompoundElementFilter.ElementKindFilter(kind.Value, elementType: default, inverted.Value));
 
@@ -183,7 +184,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var types = new List<DB.ElementType>();
+      var types = new List<ARDB.ElementType>();
       if (!DA.GetDataList("Types", types))
         return;
 
@@ -214,7 +215,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var rules = new List<DB.FilterRule>();
+      var rules = new List<ARDB.FilterRule>();
       if (!DA.GetDataList("Rules", rules))
         return;
 
@@ -222,9 +223,9 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      rules = rules.OfType<DB.FilterRule>().ToList();
+      rules = rules.OfType<ARDB.FilterRule>().ToList();
       if (rules.Count > 0)
-        DA.SetData("Filter", new DB.ElementParameterFilter(rules, inverted));
+        DA.SetData("Filter", new ARDB.ElementParameterFilter(rules, inverted));
     }
   }
 
@@ -255,7 +256,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementWorksetFilter(workset.Id, inverted));
+      DA.SetData("Filter", new ARDB.ElementWorksetFilter(workset.Id, inverted));
     }
   }
 }

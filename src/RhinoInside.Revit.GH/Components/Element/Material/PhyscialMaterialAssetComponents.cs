@@ -4,13 +4,13 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
+using ARDB = Autodesk.Revit.DB;
 
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components.Material
+namespace RhinoInside.Revit.GH.Components.Materials
 {
+  using ElementTracking;
+  using External.DB.Extensions;
+
   public abstract class BasePhysicalAssetComponent<T>
     : TransactionalChainComponent where T : PhysicalMaterialData, new()
   {
@@ -81,19 +81,19 @@ namespace RhinoInside.Revit.GH.Components.Material
       return outputs.ToArray();
     }
 
-    protected static DB.PropertySetElement FindPropertySetElement(DB.Document doc, string name)
+    protected static ARDB.PropertySetElement FindPropertySetElement(ARDB.Document doc, string name)
     {
-      using (var collector = new DB.FilteredElementCollector(doc).
-             OfClass(typeof(DB.PropertySetElement)).
-             WhereParameterEqualsTo(DB.BuiltInParameter.PROPERTY_SET_NAME, name))
+      using (var collector = new ARDB.FilteredElementCollector(doc).
+             OfClass(typeof(ARDB.PropertySetElement)).
+             WhereParameterEqualsTo(ARDB.BuiltInParameter.PROPERTY_SET_NAME, name))
       {
-        return collector.FirstElement() as DB.PropertySetElement;
+        return collector.FirstElement() as ARDB.PropertySetElement;
       }
     }
 
     // determines matching assets based on any builtin properties
     // that are marked exclusive
-    protected bool MatchesPhysicalAssetType(DB.PropertySetElement psetElement)
+    protected bool MatchesPhysicalAssetType(ARDB.PropertySetElement psetElement)
     {
       foreach (var assetPropInfo in _assetData.GetAssetProperties())
         foreach (var builtInPropInfo in
@@ -138,7 +138,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       return output;
     }
 
-    protected void SetOutputsFromPropertySetElement(IGH_DataAccess DA, DB.PropertySetElement psetElement)
+    protected void SetOutputsFromPropertySetElement(IGH_DataAccess DA, ARDB.PropertySetElement psetElement)
     {
       if (psetElement is null)
         return;
@@ -153,7 +153,7 @@ namespace RhinoInside.Revit.GH.Components.Material
         // grab the value from the first valid builtin param and set on the ouput
         foreach (var builtInPropInfo in _assetData.GetAPIAssetBuiltInPropertyInfos(assetPropInfo))
         {
-          if (psetElement.get_Parameter(builtInPropInfo.ParamId) is DB.Parameter parameter)
+          if (psetElement.get_Parameter(builtInPropInfo.ParamId) is ARDB.Parameter parameter)
           {
             DA.SetData(paramInfo.Name, parameter.AsGoo());
             break;
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Components.Material
       }
     }
 
-    protected void UpdatePropertySetElementFromData(DB.PropertySetElement psetElement, T assetData)
+    protected void UpdatePropertySetElementFromData(ARDB.PropertySetElement psetElement, T assetData)
     {
       foreach (var assetPropInfo in _assetData.GetAssetProperties())
       {
@@ -297,10 +297,10 @@ namespace RhinoInside.Revit.GH.Components.Material
     };
 
     const string _Asset_ = "Physical Asset";
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
-      DB.BuiltInParameter.PROPERTY_SET_NAME,
-      DB.BuiltInParameter.PHY_MATERIAL_PARAM_CLASS
+      ARDB.BuiltInParameter.PROPERTY_SET_NAME,
+      ARDB.BuiltInParameter.PHY_MATERIAL_PARAM_CLASS
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -309,10 +309,10 @@ namespace RhinoInside.Revit.GH.Components.Material
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
       if (!Params.GetData(DA, "Class", out Types.StructuralAssetClass type, x => x.IsValid)) return;
-      Params.TryGetData(DA, "Template", out DB.PropertySetElement template);
+      Params.TryGetData(DA, "Template", out ARDB.PropertySetElement template);
 
       // Previous Output
-      Params.ReadTrackedElement(_Asset_, doc.Value, out DB.PropertySetElement asset);
+      Params.ReadTrackedElement(_Asset_, doc.Value, out ARDB.PropertySetElement asset);
 
       StartTransaction(doc.Value);
       {
@@ -323,18 +323,18 @@ namespace RhinoInside.Revit.GH.Components.Material
       }
     }
 
-    bool Reuse(DB.PropertySetElement assetElement, string name, DB.StructuralAssetClass type, DB.PropertySetElement template)
+    bool Reuse(ARDB.PropertySetElement assetElement, string name, ARDB.StructuralAssetClass type, ARDB.PropertySetElement template)
     {
       if (assetElement is null) return false;
       if (name is object) assetElement.Name = name;
 
-      if (assetElement.GetStructuralAsset() is DB.StructuralAsset asset)
+      if (assetElement.GetStructuralAsset() is ARDB.StructuralAsset asset)
       {
         if (asset.StructuralAssetClass != type) return false;
       }
       else return false;
 
-      if (template?.GetStructuralAsset() is DB.StructuralAsset)
+      if (template?.GetStructuralAsset() is ARDB.StructuralAsset)
       {
         template.CopyParametersFrom(template, ExcludeUniqueProperties);
       }
@@ -342,9 +342,9 @@ namespace RhinoInside.Revit.GH.Components.Material
       return true;
     }
 
-    DB.PropertySetElement Create(DB.Document doc, string name, DB.StructuralAssetClass type, DB.PropertySetElement template)
+    ARDB.PropertySetElement Create(ARDB.Document doc, string name, ARDB.StructuralAssetClass type, ARDB.PropertySetElement template)
     {
-      var assetElement = default(DB.PropertySetElement);
+      var assetElement = default(ARDB.PropertySetElement);
 
       // Make sure the name is unique
       {
@@ -353,7 +353,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
         name = doc.GetNamesakeElements
         (
-          typeof(DB.PropertySetElement), name, categoryId: DB.BuiltInCategory.OST_PropertySet
+          typeof(ARDB.PropertySetElement), name, categoryId: ARDB.BuiltInCategory.OST_PropertySet
         ).
         Where(x => Types.StructuralAssetElement.IsValidElement(x)).
         Select(x => x.Name).
@@ -370,30 +370,30 @@ namespace RhinoInside.Revit.GH.Components.Material
         }
         else
         {
-          var ids = DB.ElementTransformUtils.CopyElements
+          var ids = ARDB.ElementTransformUtils.CopyElements
           (
             template.Document,
-            new DB.ElementId[] { template.Id },
+            new ARDB.ElementId[] { template.Id },
             doc,
             default,
             default
           );
 
-          assetElement = ids.Select(x => doc.GetElement(x)).OfType<DB.PropertySetElement>().FirstOrDefault();
+          assetElement = ids.Select(x => doc.GetElement(x)).OfType<ARDB.PropertySetElement>().FirstOrDefault();
           assetElement.Name = name;
         }
       }
 
       if (assetElement is null)
       {
-        var asset = new DB.StructuralAsset(name, type);
-        assetElement = DB.PropertySetElement.Create(doc, asset);
+        var asset = new ARDB.StructuralAsset(name, type);
+        assetElement = ARDB.PropertySetElement.Create(doc, asset);
       }
 
       return assetElement;
     }
 
-    DB.PropertySetElement Reconstruct(DB.PropertySetElement assetElement, DB.Document doc, string name, DB.StructuralAssetClass type, DB.PropertySetElement template)
+    ARDB.PropertySetElement Reconstruct(ARDB.PropertySetElement assetElement, ARDB.Document doc, string name, ARDB.StructuralAssetClass type, ARDB.PropertySetElement template)
     {
       if (!Reuse(assetElement, name, type, template))
       {
@@ -586,10 +586,10 @@ namespace RhinoInside.Revit.GH.Components.Material
     };
 
     const string _Asset_ = "Thermal Asset";
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
-      DB.BuiltInParameter.PROPERTY_SET_NAME,
-      DB.BuiltInParameter.PHY_MATERIAL_PARAM_CLASS
+      ARDB.BuiltInParameter.PROPERTY_SET_NAME,
+      ARDB.BuiltInParameter.PHY_MATERIAL_PARAM_CLASS
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -598,10 +598,10 @@ namespace RhinoInside.Revit.GH.Components.Material
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
       if (!Params.GetData(DA, "Class", out Types.ThermalMaterialType type, x => x.IsValid)) return;
-      Params.TryGetData(DA, "Template", out DB.PropertySetElement template);
+      Params.TryGetData(DA, "Template", out ARDB.PropertySetElement template);
 
       // Previous Output
-      Params.ReadTrackedElement(_Asset_, doc.Value, out DB.PropertySetElement asset);
+      Params.ReadTrackedElement(_Asset_, doc.Value, out ARDB.PropertySetElement asset);
 
       StartTransaction(doc.Value);
       {
@@ -612,18 +612,18 @@ namespace RhinoInside.Revit.GH.Components.Material
       }
     }
 
-    bool Reuse(DB.PropertySetElement assetElement, string name, DB.ThermalMaterialType type, DB.PropertySetElement template)
+    bool Reuse(ARDB.PropertySetElement assetElement, string name, ARDB.ThermalMaterialType type, ARDB.PropertySetElement template)
     {
       if (assetElement is null) return false;
       if (name is object) assetElement.Name = name;
 
-      if (assetElement.GetThermalAsset() is DB.ThermalAsset asset)
+      if (assetElement.GetThermalAsset() is ARDB.ThermalAsset asset)
       {
         if (asset.ThermalMaterialType != type) return false;
       }
       else return false;
 
-      if (template?.GetThermalAsset() is DB.ThermalAsset)
+      if (template?.GetThermalAsset() is ARDB.ThermalAsset)
       {
         template.CopyParametersFrom(template, ExcludeUniqueProperties);
       }
@@ -631,9 +631,9 @@ namespace RhinoInside.Revit.GH.Components.Material
       return true;
     }
 
-    DB.PropertySetElement Create(DB.Document doc, string name, DB.ThermalMaterialType type, DB.PropertySetElement template)
+    ARDB.PropertySetElement Create(ARDB.Document doc, string name, ARDB.ThermalMaterialType type, ARDB.PropertySetElement template)
     {
-      var assetElement = default(DB.PropertySetElement);
+      var assetElement = default(ARDB.PropertySetElement);
 
       // Make sure the name is unique
       {
@@ -642,7 +642,7 @@ namespace RhinoInside.Revit.GH.Components.Material
 
         name = doc.GetNamesakeElements
         (
-          typeof(DB.PropertySetElement), name, categoryId: DB.BuiltInCategory.OST_PropertySet
+          typeof(ARDB.PropertySetElement), name, categoryId: ARDB.BuiltInCategory.OST_PropertySet
         ).
         Where(x => Types.ThermalAssetElement.IsValidElement(x)).
         Select(x => x.Name).
@@ -659,30 +659,30 @@ namespace RhinoInside.Revit.GH.Components.Material
         }
         else
         {
-          var ids = DB.ElementTransformUtils.CopyElements
+          var ids = ARDB.ElementTransformUtils.CopyElements
           (
             template.Document,
-            new DB.ElementId[] { template.Id },
+            new ARDB.ElementId[] { template.Id },
             doc,
             default,
             default
           );
 
-          assetElement = ids.Select(x => doc.GetElement(x)).OfType<DB.PropertySetElement>().FirstOrDefault();
+          assetElement = ids.Select(x => doc.GetElement(x)).OfType<ARDB.PropertySetElement>().FirstOrDefault();
           assetElement.Name = name;
         }
       }
 
       if (assetElement is null)
       {
-        var asset = new DB.ThermalAsset(name, type);
-        assetElement = DB.PropertySetElement.Create(doc, asset);
+        var asset = new ARDB.ThermalAsset(name, type);
+        assetElement = ARDB.PropertySetElement.Create(doc, asset);
       }
 
       return assetElement;
     }
 
-    DB.PropertySetElement Reconstruct(DB.PropertySetElement assetElement, DB.Document doc, string name, DB.ThermalMaterialType type, DB.PropertySetElement template)
+    ARDB.PropertySetElement Reconstruct(ARDB.PropertySetElement assetElement, ARDB.Document doc, string name, ARDB.ThermalMaterialType type, ARDB.PropertySetElement template)
     {
       if (!Reuse(assetElement, name, type, template))
       {

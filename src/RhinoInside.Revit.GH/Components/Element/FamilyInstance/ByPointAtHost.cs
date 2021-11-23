@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 using Autodesk.Revit.Creation;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
   using Kernel.Attributes;
 
   public class FamilyInstanceByLocation : ReconstructElementComponent
@@ -28,18 +28,18 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
-    bool Reuse(ref DB.FamilyInstance element, Plane location, DB.FamilySymbol type, DB.Level level, DB.Element host)
+    bool Reuse(ref ARDB.FamilyInstance element, Plane location, ARDB.FamilySymbol type, ARDB.Level level, ARDB.Element host)
     {
       if (element is null) return false;
 
       if (!element.Host.IsEquivalent(host)) return false;
-      if (element.LevelId != (level?.Id ?? DB.ElementId.InvalidElementId)) return false;
+      if (element.LevelId != (level?.Id ?? ARDB.ElementId.InvalidElementId)) return false;
       if (element.GetTypeId() != type.Id)
       {
-        if (DB.Element.IsValidType(element.Document, new DB.ElementId[] { element.Id }, type.Id))
+        if (ARDB.Element.IsValidType(element.Document, new ARDB.ElementId[] { element.Id }, type.Id))
         {
-          if (element.ChangeTypeId(type.Id) is DB.ElementId id && id != DB.ElementId.InvalidElementId)
-            element = element.Document.GetElement(id) as DB.FamilyInstance;
+          if (element.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
+            element = element.Document.GetElement(id) as ARDB.FamilyInstance;
         }
         else return false;
       }
@@ -59,16 +59,16 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructFamilyInstanceByLocation
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New Component element")]
-      ref DB.FamilyInstance component,
+      ref ARDB.FamilyInstance component,
 
       [Description("Location where to place the element. Point or plane is accepted.")]
       Plane location,
-      DB.FamilySymbol type,
-      Optional<DB.Level> level,
-      [Optional] DB.Element host
+      ARDB.FamilySymbol type,
+      Optional<ARDB.Level> level,
+      [Optional] ARDB.Element host
     )
     {
       if (!location.IsValid)
@@ -93,19 +93,19 @@ namespace RhinoInside.Revit.GH.Components
         FamilyInstanceCreationData creationData;
         switch (type.Family.FamilyPlacementType)
         {
-          case DB.FamilyPlacementType.OneLevelBased:
+          case ARDB.FamilyPlacementType.OneLevelBased:
             creationData = CreateOneLevelBased(document, location, type, level, host);
             break;
 
-          case DB.FamilyPlacementType.OneLevelBasedHosted:
+          case ARDB.FamilyPlacementType.OneLevelBasedHosted:
             creationData = CreateOneLevelBasedHosted(document, location, type, level, host);
             break;
 
-          case DB.FamilyPlacementType.TwoLevelsBased:
+          case ARDB.FamilyPlacementType.TwoLevelsBased:
             creationData = CreateTwoLevelsBased(document, location, type, level, host);
             break;
 
-          case DB.FamilyPlacementType.WorkPlaneBased:
+          case ARDB.FamilyPlacementType.WorkPlaneBased:
             creationData = CreateWorkPlaneBased(document, location, type, level, host);
             break;
 
@@ -122,32 +122,32 @@ namespace RhinoInside.Revit.GH.Components
         if (newElementIds.Count != 1)
           throw new InvalidOperationException();
 
-        var newElement = document.GetElement(newElementIds.First()) as DB.FamilyInstance;
+        var newElement = document.GetElement(newElementIds.First()) as ARDB.FamilyInstance;
 
-        var parametersMask = new DB.BuiltInParameter[]
+        var parametersMask = new ARDB.BuiltInParameter[]
         {
-          DB.BuiltInParameter.ELEMENT_LOCKED_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.FAMILY_LEVEL_PARAM,
-          DB.BuiltInParameter.FAMILY_BASE_LEVEL_PARAM,
-          DB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM,
-          DB.BuiltInParameter.FAMILY_TOP_LEVEL_PARAM,
-          DB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM,
-          DB.BuiltInParameter.SCHEDULE_LEVEL_PARAM,
-          DB.BuiltInParameter.SCHEDULE_BASE_LEVEL_PARAM,
-          DB.BuiltInParameter.SCHEDULE_BASE_LEVEL_OFFSET_PARAM,
-          DB.BuiltInParameter.SCHEDULE_TOP_LEVEL_PARAM,
-          DB.BuiltInParameter.SCHEDULE_TOP_LEVEL_OFFSET_PARAM,
-          DB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM,
-          DB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM
+          ARDB.BuiltInParameter.ELEMENT_LOCKED_PARAM,
+          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+          ARDB.BuiltInParameter.FAMILY_LEVEL_PARAM,
+          ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_PARAM,
+          ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM,
+          ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_PARAM,
+          ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM,
+          ARDB.BuiltInParameter.SCHEDULE_LEVEL_PARAM,
+          ARDB.BuiltInParameter.SCHEDULE_BASE_LEVEL_PARAM,
+          ARDB.BuiltInParameter.SCHEDULE_BASE_LEVEL_OFFSET_PARAM,
+          ARDB.BuiltInParameter.SCHEDULE_TOP_LEVEL_PARAM,
+          ARDB.BuiltInParameter.SCHEDULE_TOP_LEVEL_OFFSET_PARAM,
+          ARDB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM,
+          ARDB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM
         };
 
         ReplaceElement(ref component, newElement, parametersMask);
 
         // Regenerate here to allow SetLocation get the current element location correctly.
-        if (component.Symbol.Family.FamilyPlacementType != DB.FamilyPlacementType.OneLevelBasedHosted)
+        if (component.Symbol.Family.FamilyPlacementType != ARDB.FamilyPlacementType.OneLevelBasedHosted)
         {
           document.Regenerate();
           component.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
@@ -155,16 +155,16 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    void SolveOptionalLevel(DB.Document doc, Plane location, DB.FamilySymbol type, ref Optional<DB.Level> level, DB.Element host)
+    void SolveOptionalLevel(ARDB.Document doc, Plane location, ARDB.FamilySymbol type, ref Optional<ARDB.Level> level, ARDB.Element host)
     {
       switch (type.Family.FamilyPlacementType)
       {
-        case DB.FamilyPlacementType.OneLevelBased:
+        case ARDB.FamilyPlacementType.OneLevelBased:
           SolveOptionalLevel(doc, host, ref level);
           SolveOptionalLevel(doc, location.Origin, ref level, out var _);
           break;
 
-        case DB.FamilyPlacementType.OneLevelBasedHosted:
+        case ARDB.FamilyPlacementType.OneLevelBasedHosted:
           if (host is null)
             AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "This family requires a host.");
           else
@@ -173,12 +173,12 @@ namespace RhinoInside.Revit.GH.Components
           SolveOptionalLevel(doc, location.Origin, ref level, out var _);
           break;
 
-        case DB.FamilyPlacementType.TwoLevelsBased:
+        case ARDB.FamilyPlacementType.TwoLevelsBased:
           SolveOptionalLevel(doc, host, ref level);
           SolveOptionalLevel(doc, location.Origin, ref level, out var _);
           break;
 
-        case DB.FamilyPlacementType.WorkPlaneBased:
+        case ARDB.FamilyPlacementType.WorkPlaneBased:
           break;
 
         default:
@@ -189,7 +189,7 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
-    FamilyInstanceCreationData CreateOneLevelBased(DB.Document doc, Plane location, DB.FamilySymbol type, Optional<DB.Level> level, DB.Element host)
+    FamilyInstanceCreationData CreateOneLevelBased(ARDB.Document doc, Plane location, ARDB.FamilySymbol type, Optional<ARDB.Level> level, ARDB.Element host)
     {
       if (host is null)
       {
@@ -198,7 +198,7 @@ namespace RhinoInside.Revit.GH.Components
           location.Origin.ToXYZ(),
           type,
           level.Value,
-          DB.Structure.StructuralType.NonStructural
+          ARDB.Structure.StructuralType.NonStructural
         );
       }
       else
@@ -209,12 +209,12 @@ namespace RhinoInside.Revit.GH.Components
           type,
           host,
           level.Value,
-          DB.Structure.StructuralType.NonStructural
+          ARDB.Structure.StructuralType.NonStructural
         );
       }
     }
 
-    FamilyInstanceCreationData CreateOneLevelBasedHosted(DB.Document doc, Plane location, DB.FamilySymbol type, Optional<DB.Level> level, DB.Element host)
+    FamilyInstanceCreationData CreateOneLevelBasedHosted(ARDB.Document doc, Plane location, ARDB.FamilySymbol type, Optional<ARDB.Level> level, ARDB.Element host)
     {
       return new FamilyInstanceCreationData
       (
@@ -222,11 +222,11 @@ namespace RhinoInside.Revit.GH.Components
         type,
         host,
         level.Value,
-        DB.Structure.StructuralType.NonStructural
+        ARDB.Structure.StructuralType.NonStructural
       );
     }
 
-    FamilyInstanceCreationData CreateTwoLevelsBased(DB.Document doc, Plane location, DB.FamilySymbol type, Optional<DB.Level> level, DB.Element host)
+    FamilyInstanceCreationData CreateTwoLevelsBased(ARDB.Document doc, Plane location, ARDB.FamilySymbol type, Optional<ARDB.Level> level, ARDB.Element host)
     {
       return new FamilyInstanceCreationData
       (
@@ -234,14 +234,14 @@ namespace RhinoInside.Revit.GH.Components
         type,
         host,
         level.Value,
-        DB.Structure.StructuralType.NonStructural
+        ARDB.Structure.StructuralType.NonStructural
       );
     }
 
-    FamilyInstanceCreationData CreateWorkPlaneBased(DB.Document doc, Plane location, DB.FamilySymbol type, Optional<DB.Level> level, DB.Element host)
+    FamilyInstanceCreationData CreateWorkPlaneBased(ARDB.Document doc, Plane location, ARDB.FamilySymbol type, Optional<ARDB.Level> level, ARDB.Element host)
     {
       if (host is null)
-        host = DB.SketchPlane.Create(doc, location.ToPlane());
+        host = ARDB.SketchPlane.Create(doc, location.ToPlane());
 
       if (level.HasValue)
       {
@@ -251,7 +251,7 @@ namespace RhinoInside.Revit.GH.Components
           type,
           host,
           level.Value,
-          DB.Structure.StructuralType.NonStructural
+          ARDB.Structure.StructuralType.NonStructural
         );
       }
       else
@@ -261,12 +261,12 @@ namespace RhinoInside.Revit.GH.Components
           location.Origin.ToXYZ(),
           type,
           host,
-          DB.Structure.StructuralType.NonStructural
+          ARDB.Structure.StructuralType.NonStructural
         );
       }
     }
 
-    FamilyInstanceCreationData CreateDefault(DB.Document doc, Plane location, DB.FamilySymbol type, Optional<DB.Level> level, DB.Element host)
+    FamilyInstanceCreationData CreateDefault(ARDB.Document doc, Plane location, ARDB.FamilySymbol type, Optional<ARDB.Level> level, ARDB.Element host)
     {
       if (host is null)
       {
@@ -275,7 +275,7 @@ namespace RhinoInside.Revit.GH.Components
           location.Origin.ToXYZ(),
           type,
           level.Value,
-          DB.Structure.StructuralType.NonStructural
+          ARDB.Structure.StructuralType.NonStructural
         );
       }
       else if (level.HasValue)
@@ -286,7 +286,7 @@ namespace RhinoInside.Revit.GH.Components
           type,
           host,
           level.Value,
-          DB.Structure.StructuralType.NonStructural
+          ARDB.Structure.StructuralType.NonStructural
         );
       }
       else
@@ -296,7 +296,7 @@ namespace RhinoInside.Revit.GH.Components
           location.Origin.ToXYZ(),
           type,
           host,
-          DB.Structure.StructuralType.NonStructural
+          ARDB.Structure.StructuralType.NonStructural
         );
       }
     }

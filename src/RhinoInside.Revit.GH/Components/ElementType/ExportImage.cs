@@ -3,11 +3,12 @@ using System.Linq;
 using System.Drawing.Imaging;
 using System.IO;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.External.DB.Extensions;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ElementTypes
 {
+  using External.DB.Extensions;
+
   public class ElementTypeExportImage : Component
   {
     public override Guid ComponentGuid => new Guid("3A5F6AF7-5449-406F-B47E-8A55800D0BEE");
@@ -34,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddBooleanParameter("Overwrite", "O", "Overwrite file", GH_ParamAccess.item, false);
 
       var fileType = new Parameters.Param_Enum<Types.ImageFileType>();
-      fileType.PersistentData.Append(new Types.ImageFileType(DB.ImageFileType.PNG));
+      fileType.PersistentData.Append(new Types.ImageFileType(ARDB.ImageFileType.PNG));
       manager.AddParameter(fileType, "File Type", "FT", "The file type used for export", GH_ParamAccess.item);
 
       var imageResolution = new Parameters.Param_Enum<Types.ImageResolution>();
@@ -53,7 +54,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var elementType = default(DB.ElementType);
+      var elementType = default(ARDB.ElementType);
       if (!DA.GetData("Type", ref elementType))
         return;
 
@@ -69,11 +70,11 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Overwrite", ref overrideFile))
         return;
 
-      var fileType = default(DB.ImageFileType);
+      var fileType = default(ARDB.ImageFileType);
       if (!DA.GetData("File Type", ref fileType))
         return;
 
-      var resolution = default(DB.ImageResolution);
+      var resolution = default(ARDB.ImageResolution);
       if (!DA.GetData("Resolution", ref resolution))
         return;
 
@@ -99,19 +100,19 @@ namespace RhinoInside.Revit.GH.Components
       {
         switch (resolution)
         {
-          case DB.ImageResolution.DPI_72:  bitmap.SetResolution(72,  72); break;
-          case DB.ImageResolution.DPI_150: bitmap.SetResolution(150, 150); break;
-          case DB.ImageResolution.DPI_300: bitmap.SetResolution(300, 300); break;
-          case DB.ImageResolution.DPI_600: bitmap.SetResolution(600, 600); break;
+          case ARDB.ImageResolution.DPI_72:  bitmap.SetResolution(72,  72); break;
+          case ARDB.ImageResolution.DPI_150: bitmap.SetResolution(150, 150); break;
+          case ARDB.ImageResolution.DPI_300: bitmap.SetResolution(300, 300); break;
+          case ARDB.ImageResolution.DPI_600: bitmap.SetResolution(600, 600); break;
         }
 
         switch (fileType)
         {
-          case DB.ImageFileType.BMP:
+          case ARDB.ImageFileType.BMP:
             filePath += ".bmp";
             bitmap.Save(filePath, ImageFormat.Bmp);
             break;
-          case DB.ImageFileType.JPEGLossless:
+          case ARDB.ImageFileType.JPEGLossless:
           {
             filePath += ".jpg";
             var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
@@ -122,7 +123,7 @@ namespace RhinoInside.Revit.GH.Components
             }
           }
           break;
-          case DB.ImageFileType.JPEGMedium:
+          case ARDB.ImageFileType.JPEGMedium:
           {
             filePath += ".jpg";
             var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
@@ -133,7 +134,7 @@ namespace RhinoInside.Revit.GH.Components
             }
           }
           break;
-          case DB.ImageFileType.JPEGSmallest:
+          case ARDB.ImageFileType.JPEGSmallest:
           {
             filePath += ".jpg";
             var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
@@ -144,16 +145,16 @@ namespace RhinoInside.Revit.GH.Components
             }
           }
           break;
-          case DB.ImageFileType.PNG:
+          case ARDB.ImageFileType.PNG:
             filePath += ".png";
             bitmap.Save(filePath, ImageFormat.Png);
             break;
-          case DB.ImageFileType.TARGA:
+          case ARDB.ImageFileType.TARGA:
             filePath += ".tga";
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Unsuported file format.");
             filePath = string.Empty;
             break;
-          case DB.ImageFileType.TIFF:
+          case ARDB.ImageFileType.TIFF:
             filePath += ".tif";
             bitmap.Save(filePath, ImageFormat.Tiff);
             break;

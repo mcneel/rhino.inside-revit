@@ -1,10 +1,11 @@
 using System;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ModelElements
 {
+  using Convert.Geometry;
+
   public class SketchDeconstruct : Component
   {
     public override Guid ComponentGuid => new Guid("F9BC3F5E-7415-485E-B74C-5CB855B818B8");
@@ -34,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Sketch sketch = null;
+      ARDB.Sketch sketch = null;
       if (!DA.GetData("Sketch", ref sketch))
         return;
 

@@ -1,15 +1,15 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Level : GraphicalElementT<Types.Level, DB.Level>
+  using External.DB.Extensions;
+
+  public class Level : GraphicalElementT<Types.Level, ARDB.Level>
   {
     public override GH_Exposure Exposure => GH_Exposure.primary;
     public override Guid ComponentGuid => new Guid("3238F8BC-8483-4584-B47C-48B4933E478E");
@@ -60,9 +60,9 @@ namespace RhinoInside.Revit.GH.Parameters
       listBox.DisplayMember = "DisplayName";
       listBox.Items.Clear();
 
-      using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Level)))
+      using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.Level)))
       {
-        var levels = collector.Cast<DB.Level>().
+        var levels = collector.Cast<ARDB.Level>().
           OrderBy(x => x.GetHeight()).
           Select(x => new Types.Level(x)).
           OrderBy(x => x.Name, default(ElementNameComparer)).
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class Grid : GraphicalElementT<Types.Grid, DB.Grid>
+  public class Grid : GraphicalElementT<Types.Grid, ARDB.Grid>
   {
     public override GH_Exposure Exposure => GH_Exposure.primary;
     public override Guid ComponentGuid => new Guid("7D2FB886-A184-41B8-A7D6-A6FDB85CF4E4");
@@ -146,9 +146,9 @@ namespace RhinoInside.Revit.GH.Parameters
       listBox.DisplayMember = "DisplayName";
       listBox.Items.Clear();
 
-      using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.Grid)))
+      using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.Grid)))
       {
-        var items = collector.Cast<DB.Grid>().
+        var items = collector.Cast<ARDB.Grid>().
           Select(x => new Types.Grid(x)).
           OrderBy(x => x.Name, default(ElementNameComparer)).
           ToList();

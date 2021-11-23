@@ -1,13 +1,10 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
+using ARDB = Autodesk.Revit.DB;
 
-using RhinoInside.Revit.GH.Kernel.Attributes;
-
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components.Element.Assembly
+namespace RhinoInside.Revit.GH.Components.Assemblies
 {
   [ComponentVersion(introduced: "1.2")]
   public class AssemblyMembers : TransactionalChainComponent
@@ -76,15 +73,15 @@ namespace RhinoInside.Revit.GH.Components.Element.Assembly
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var assembly = default(DB.AssemblyInstance);
+      var assembly = default(ARDB.AssemblyInstance);
       if (!DA.GetData("Assembly", ref assembly))
         return;
 
       var _Members_ = Params.IndexOfInputParam("Members");
       if (_Members_ >= 0 && Params.Input[_Members_].DataType != GH_ParamData.@void)
       {
-        DB.ElementId prevNamingCategoryId = assembly.NamingCategoryId;
-        var newMembers = new List<DB.Element>();
+        ARDB.ElementId prevNamingCategoryId = assembly.NamingCategoryId;
+        var newMembers = new List<ARDB.Element>();
         if (DA.GetDataList("Members", newMembers))
         {
           // set the assembly members to a new list. previous is cleared

@@ -65,10 +65,14 @@ namespace RhinoInside.Revit.External.UI.Selection
       return Pick(doc.Application, out reference, () => doc.Selection.PickObjects(objectType, selectionFilter, statusPrompt, pPreSelected));
     }
 
+    public static Result PickElementsByRectangle(this UIDocument doc, out IList<Element> elements, ISelectionFilter selectionFilter, string statusPrompt)
+    {
+      return Pick(doc.Application, out elements, () => doc.Selection.PickElementsByRectangle(selectionFilter, statusPrompt));
+    }
+
     public static Result PickPoint(this UIDocument doc, out XYZ point, ObjectSnapTypes snapSettings, string statusPrompt)
     {
       return Pick(doc.Application, out point, () => doc.Selection.PickPoint(snapSettings, statusPrompt));
     }
-
   }
 }

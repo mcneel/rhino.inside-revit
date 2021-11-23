@@ -1,9 +1,9 @@
 using System;
 using Grasshopper.Kernel;
 
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class AnalyzeBasicWallType : AnalysisComponent
   {
@@ -73,22 +73,22 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // grab input wall type
-      DB.WallType wallType = default;
+      ARDB.WallType wallType = default;
       if (!DA.GetData("Basic Wall Type", ref wallType))
         return;
 
       // make sure input wall type is a DB.WallKind.Basic
-      if(wallType.Kind != DB.WallKind.Basic)
+      if(wallType.Kind != ARDB.WallKind.Basic)
         return;
 
       // grab compound structure
       DA.SetData("Structure", new Types.CompoundStructure(wallType.Document, wallType.GetCompoundStructure()));
 
       // pipe the wall type parameters directly to component outputs
-      PipeHostParameter(DA, wallType, DB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM, "Wrapping at Inserts");
-      PipeHostParameter(DA, wallType, DB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM, "Wrapping at Ends");
-      PipeHostParameter(DA, wallType, DB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM, "Width");
-      PipeHostParameter(DA, wallType, DB.BuiltInParameter.FUNCTION_PARAM, "Function");
+      PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM, "Wrapping at Inserts");
+      PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM, "Wrapping at Ends");
+      PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM, "Width");
+      PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.FUNCTION_PARAM, "Function");
     }
   }
 }

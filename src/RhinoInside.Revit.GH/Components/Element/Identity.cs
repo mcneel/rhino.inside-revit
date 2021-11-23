@@ -1,7 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Elements.Obsolete
 {
   [Obsolete("Obsolete since 2020-07-27")]
   public class ElementIdentity : Component

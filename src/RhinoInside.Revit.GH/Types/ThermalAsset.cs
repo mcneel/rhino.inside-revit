@@ -1,21 +1,20 @@
 using System;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  [Name("Thermal Asset")]
+  [Kernel.Attributes.Name("Thermal Asset")]
   public class ThermalAssetElement : Element
   {
-    protected override Type ValueType => typeof(DB.PropertySetElement);
-    public new DB.PropertySetElement Value => base.Value as DB.PropertySetElement;
+    protected override Type ValueType => typeof(ARDB.PropertySetElement);
+    public new ARDB.PropertySetElement Value => base.Value as ARDB.PropertySetElement;
 
-    protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
-    public static bool IsValidElement(DB.Element element)
+    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
+    public static bool IsValidElement(ARDB.Element element)
     {
-      if (element is DB.PropertySetElement pset)
+      if (element is ARDB.PropertySetElement pset)
       {
-        try { return pset.GetThermalAsset() is DB.ThermalAsset; }
+        try { return pset.GetThermalAsset() is ARDB.ThermalAsset; }
         catch { }
       }
 
@@ -23,7 +22,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public ThermalAssetElement() { }
-    public ThermalAssetElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public ThermalAssetElement(DB.PropertySetElement asset) : base(asset) { }
+    public ThermalAssetElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public ThermalAssetElement(ARDB.PropertySetElement asset) : base(asset) { }
   }
 }

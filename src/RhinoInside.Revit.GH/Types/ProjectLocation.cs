@@ -5,20 +5,21 @@ using Rhino;
 using Rhino.DocObjects;
 using Rhino.DocObjects.Tables;
 using Rhino.Geometry;
-using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.External.DB.Extensions;
+using ARDB = Autodesk.Revit.DB;
 using static Rhino.RhinoMath;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Shared Site")]
   public class ProjectLocation : Instance, Bake.IGH_BakeAwareElement
   {
-    protected override Type ValueType => typeof(DB.ProjectLocation);
-    public new DB.ProjectLocation Value => base.Value as DB.ProjectLocation;
+    protected override Type ValueType => typeof(ARDB.ProjectLocation);
+    public new ARDB.ProjectLocation Value => base.Value as ARDB.ProjectLocation;
 
     public ProjectLocation() { }
-    public ProjectLocation(DB.ProjectLocation instance) : base(instance) { }
+    public ProjectLocation(ARDB.ProjectLocation instance) : base(instance) { }
 
     #region IGH_PreviewData
     public override BoundingBox BoundingBox
@@ -46,11 +47,11 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_BakeAwareElement
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
-      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
     public bool BakeElement
     (
-      IDictionary<DB.ElementId, Guid> idMap,
+      IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
       RhinoDoc doc,
       ObjectAttributes att,
@@ -61,7 +62,7 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      if (Value is DB.ProjectLocation projectLocation)
+      if (Value is ARDB.ProjectLocation projectLocation)
       {
         var name = ToString();
 
@@ -71,7 +72,7 @@ namespace RhinoInside.Revit.GH.Types
         // 3. Update if necessary
         if (index < 0 || overwrite)
         {
-          if (projectLocation.GetSiteLocation() is DB.SiteLocation siteLocation)
+          if (projectLocation.GetSiteLocation() is ARDB.SiteLocation siteLocation)
           {
             var location = Location;
             var anchorPoint = new EarthAnchorPoint()
@@ -110,11 +111,11 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Site Location")]
   public class SiteLocation : ElementType
   {
-    protected override Type ValueType => typeof(DB.SiteLocation);
-    public new DB.SiteLocation Value => base.Value as DB.SiteLocation;
+    protected override Type ValueType => typeof(ARDB.SiteLocation);
+    public new ARDB.SiteLocation Value => base.Value as ARDB.SiteLocation;
 
     public SiteLocation() { }
-    public SiteLocation(DB.SiteLocation value) : base(value) { }
+    public SiteLocation(ARDB.SiteLocation value) : base(value) { }
 
     public override string DisplayName =>
       Value?.PlaceName is string placeName && placeName.Length > 0?

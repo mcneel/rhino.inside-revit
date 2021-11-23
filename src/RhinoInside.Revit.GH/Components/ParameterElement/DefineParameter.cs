@@ -1,10 +1,9 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
-using DBXS = RhinoInside.Revit.External.DB.Schemas;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.ParameterElement
+namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
   public class DefineParameter : ZuiComponent
   {
@@ -52,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
           NickName = "T",
           Description = "Parameter type",
         }.
-        SetDefaultVale(DBXS.SpecType.String.Text)
+        SetDefaultVale(External.DB.Schemas.SpecType.String.Text)
       ),
       new ParamDefinition
       (
@@ -62,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
           NickName = "G",
           Description = "Parameter group",
         }.
-        SetDefaultVale(DBXS.ParameterGroup.Data)
+        SetDefaultVale(External.DB.Schemas.ParameterGroup.Data)
       ),
       new ParamDefinition
       (
@@ -102,7 +101,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       if (!Params.GetData(DA, "Group", out Types.ParameterGroup group, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Description", out string description)) return;
 
-      if (DB.NamingUtils.IsValidName(name))
+      if (ARDB.NamingUtils.IsValidName(name))
       {
         var definition = new Types.ParameterKey()
         {

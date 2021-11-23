@@ -3,16 +3,16 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
-using DBX = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  using External.DB.Extensions;
+
   public class Elevation : Param_Number
   {
     public override Guid ComponentGuid => new Guid("63F4A581-6065-4F90-BAD2-714DA8B97C08");
     public override GH_Exposure Exposure => GH_Exposure.hidden;
-    public DBX.ElevationBase ElevationBase { get; set; } = DBX.ElevationBase.InternalOrigin;
+    public External.DB.ElevationBase ElevationBase { get; set; } = External.DB.ElevationBase.InternalOrigin;
 
     public Elevation()
     {
@@ -28,9 +28,9 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Read(reader))
         return false;
 
-      int elevationBase = (int) DBX.ElevationBase.InternalOrigin;
+      int elevationBase = (int) External.DB.ElevationBase.InternalOrigin;
       reader.TryGetInt32("ElevationBase", ref elevationBase);
-      ElevationBase = (DBX.ElevationBase) elevationBase;
+      ElevationBase = (External.DB.ElevationBase) elevationBase;
 
       return true;
     }
@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Write(writer))
         return false;
 
-      if (ElevationBase != DBX.ElevationBase.InternalOrigin)
+      if (ElevationBase != External.DB.ElevationBase.InternalOrigin)
         writer.SetInt32("ElevationBase", (int) ElevationBase);
 
       return true;
@@ -93,13 +93,13 @@ namespace RhinoInside.Revit.GH.Parameters
 
       var Base = Menu_AppendItem(menu, "Elevation Base") as ToolStripMenuItem;
 
-      Base.Checked = ElevationBase != DBX.ElevationBase.InternalOrigin;
-      Menu_AppendItem(Base.DropDown, "Internal Origin", (s, a) => Menu_ElevationBase(DBX.ElevationBase.InternalOrigin), true, ElevationBase == DBX.ElevationBase.InternalOrigin);
-      Menu_AppendItem(Base.DropDown, "Project Base Point", (s, a) => Menu_ElevationBase(DBX.ElevationBase.ProjectBasePoint), true, ElevationBase == DBX.ElevationBase.ProjectBasePoint);
-      Menu_AppendItem(Base.DropDown, "Survey Point", (s, a) => Menu_ElevationBase(DBX.ElevationBase.SurveyPoint), true, ElevationBase == DBX.ElevationBase.SurveyPoint);
+      Base.Checked = ElevationBase != External.DB.ElevationBase.InternalOrigin;
+      Menu_AppendItem(Base.DropDown, "Internal Origin", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.InternalOrigin), true, ElevationBase == External.DB.ElevationBase.InternalOrigin);
+      Menu_AppendItem(Base.DropDown, "Project Base Point", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.ProjectBasePoint), true, ElevationBase == External.DB.ElevationBase.ProjectBasePoint);
+      Menu_AppendItem(Base.DropDown, "Survey Point", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.SurveyPoint), true, ElevationBase == External.DB.ElevationBase.SurveyPoint);
     }
 
-    private void Menu_ElevationBase(DBX.ElevationBase value)
+    private void Menu_ElevationBase(External.DB.ElevationBase value)
     {
       RecordUndoEvent("Set: Elevation Base");
 
@@ -127,7 +127,7 @@ namespace RhinoInside.Revit.GH.Parameters
   {
     public override Guid ComponentGuid => new Guid("4150D40A-7C02-4633-B3B5-CFE4B16855B5");
     public override GH_Exposure Exposure => GH_Exposure.hidden;
-    public DBX.ElevationBase ElevationBase { get; set; } = DBX.ElevationBase.InternalOrigin;
+    public External.DB.ElevationBase ElevationBase { get; set; } = External.DB.ElevationBase.InternalOrigin;
 
     public ElevationInterval()
     {
@@ -143,9 +143,9 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Read(reader))
         return false;
 
-      int elevationBase = (int) DBX.ElevationBase.InternalOrigin;
+      int elevationBase = (int) External.DB.ElevationBase.InternalOrigin;
       reader.TryGetInt32("ElevationBase", ref elevationBase);
-      ElevationBase = (DBX.ElevationBase) elevationBase;
+      ElevationBase = (External.DB.ElevationBase) elevationBase;
 
       return true;
     }
@@ -155,7 +155,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Write(writer))
         return false;
 
-      if (ElevationBase != DBX.ElevationBase.InternalOrigin)
+      if (ElevationBase != External.DB.ElevationBase.InternalOrigin)
         writer.SetInt32("ElevationBase", (int) ElevationBase);
 
       return true;
@@ -208,13 +208,13 @@ namespace RhinoInside.Revit.GH.Parameters
 
       var Base = Menu_AppendItem(menu, "Elevation Base") as ToolStripMenuItem;
 
-      Base.Checked = ElevationBase != DBX.ElevationBase.InternalOrigin;
-      Menu_AppendItem(Base.DropDown, "Internal Origin", (s, a) => Menu_ElevationBase(DBX.ElevationBase.InternalOrigin), true, ElevationBase == DBX.ElevationBase.InternalOrigin);
-      Menu_AppendItem(Base.DropDown, "Project Base Point", (s, a) => Menu_ElevationBase(DBX.ElevationBase.ProjectBasePoint), true, ElevationBase == DBX.ElevationBase.ProjectBasePoint);
-      Menu_AppendItem(Base.DropDown, "Survey Point", (s, a) => Menu_ElevationBase(DBX.ElevationBase.SurveyPoint), true, ElevationBase == DBX.ElevationBase.SurveyPoint);
+      Base.Checked = ElevationBase != External.DB.ElevationBase.InternalOrigin;
+      Menu_AppendItem(Base.DropDown, "Internal Origin", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.InternalOrigin), true, ElevationBase == External.DB.ElevationBase.InternalOrigin);
+      Menu_AppendItem(Base.DropDown, "Project Base Point", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.ProjectBasePoint), true, ElevationBase == External.DB.ElevationBase.ProjectBasePoint);
+      Menu_AppendItem(Base.DropDown, "Survey Point", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.SurveyPoint), true, ElevationBase == External.DB.ElevationBase.SurveyPoint);
     }
 
-    private void Menu_ElevationBase(DBX.ElevationBase value)
+    private void Menu_ElevationBase(External.DB.ElevationBase value)
     {
       RecordUndoEvent("Set: Elevation Base");
 

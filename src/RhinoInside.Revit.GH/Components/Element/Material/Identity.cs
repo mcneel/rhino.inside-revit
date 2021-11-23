@@ -1,9 +1,8 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Material
+namespace RhinoInside.Revit.GH.Components.Materials
 {
   public class MaterialIdentity : TransactionalChainComponent
   {
@@ -140,12 +139,12 @@ namespace RhinoInside.Revit.GH.Components.Material
 
       protected override void TrySolveInstance(IGH_DataAccess DA)
       {
-        var material = default(DB.Material);
-        if (!DA.GetData("Material", ref material))
+        var material = default(Types.Material);
+        if (!DA.GetData("Material", ref material) || !material.IsValid)
           return;
 
-        DA.SetData("Class", material?.MaterialClass);
-        DA.SetData("Name", material?.Name);
+        DA.SetData("Class", material.MaterialClass);
+        DA.SetData("Name", material.Name);
       }
     }
   }

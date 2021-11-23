@@ -1,13 +1,14 @@
 using System;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ModelElements
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+  using Kernel.Attributes;
+
   public class ModelLineByCurve : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("240127B1-94EE-47C9-98F8-05DE32447B01");
@@ -26,13 +27,13 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructModelLineByCurve
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New CurveElement")]
-      ref DB.ModelCurve curveElement,
+      ref ARDB.ModelCurve curveElement,
 
       Rhino.Geometry.Curve curve,
-      DB.SketchPlane sketchPlane
+      ARDB.SketchPlane sketchPlane
     )
     {
       var plane = sketchPlane.GetPlane().ToPlane();
@@ -44,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components
       if (curve.IsClosed == centerLine.IsBound)
         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Unable to keep curve closed.");
 
-      if (curveElement is DB.ModelCurve modelCurve && centerLine.IsSameKindAs(modelCurve.GeometryCurve))
+      if (curveElement is ARDB.ModelCurve modelCurve && centerLine.IsSameKindAs(modelCurve.GeometryCurve))
       {
         if (modelCurve.SketchPlane.IsEquivalent(sketchPlane))
         {

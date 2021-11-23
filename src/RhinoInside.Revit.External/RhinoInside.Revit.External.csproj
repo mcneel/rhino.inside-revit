@@ -150,6 +150,30 @@
   <Choose>
     <When Condition="$(Configuration.Contains('Debug'))">
       <ItemGroup>
+        <Reference Include="Eto">
+          <HintPath>$(Rhino7InstallDir)Eto.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Eto.Wpf">
+          <HintPath>$(Rhino7InstallDir)Eto.Wpf.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="RhinoCommon">
+          <HintPath>$(Rhino7InstallDir)RhinoCommon.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Rhino.UI">
+          <HintPath>$(Rhino7InstallDir)Rhino.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="GH_IO">
+          <HintPath>$(Rhino7PluginsDir)Grasshopper\GH_IO.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Grasshopper">
+          <HintPath>$(Rhino7PluginsDir)Grasshopper\Grasshopper.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
         <Reference Include="RevitAPI">
           <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
           <Private>False</Private>
@@ -166,6 +190,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
+        <PackageReference Include="RhinoCommon" Version="7.9.21222.15001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoWindows" Version="7.9.21222.15001" IncludeAssets="build; compile" />
+        <PackageReference Include="Grasshopper" Version="7.9.21222.15001" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="build; compile" />
       </ItemGroup>
     </Otherwise>
@@ -249,6 +276,8 @@
     <Compile Include="DB\WallWrapping.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions\AdWindows.cs" />
+    <Compile Include="Extensions\RhinoCommon.cs" />
+    <Compile Include="Extensions\ShellItem.cs" />
     <Compile Include="Extensions\System.cs" />
     <Compile Include="Extensions\Win32.cs" />
     <Compile Include="Extensions\WinForms.cs" />

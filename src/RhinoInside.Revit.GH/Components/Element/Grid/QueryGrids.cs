@@ -3,17 +3,18 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Grids
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   public class QueryGrids : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("218FDACD-15CE-4B3A-8D70-F7F41362A4F4");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Grid));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.Grid));
 
     public QueryGrids() : base
     (
@@ -47,19 +48,19 @@ namespace RhinoInside.Revit.GH.Components
 
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Elevation", out Interval? elevation, x => x.IsValid)) return;
-      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var gridsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           gridsCollector = gridsCollector.WherePasses(filter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
           gridsCollector = gridsCollector.WherePasses(nameFilter);
 
-        var grids = gridsCollector.Cast<DB.Grid>();
+        var grids = gridsCollector.Cast<ARDB.Grid>();
 
         if (!string.IsNullOrEmpty(name))
           grids = grids.Where(x => x.Name.IsSymbolNameLike(name));

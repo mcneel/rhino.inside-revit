@@ -1,14 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-
-using DB = Autodesk.Revit.DB;
-
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -27,13 +20,13 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
       ListItems.Add(
-        new GH_ValueListItem("Basic", ((int) DB.WallKind.Basic).ToString())
+        new GH_ValueListItem("Basic", ((int) ARDB.WallKind.Basic).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Curtain", ((int) DB.WallKind.Curtain).ToString())
+        new GH_ValueListItem("Curtain", ((int) ARDB.WallKind.Curtain).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Stacked", ((int) DB.WallKind.Stacked).ToString())
+        new GH_ValueListItem("Stacked", ((int) ARDB.WallKind.Stacked).ToString())
         );
     }
   }

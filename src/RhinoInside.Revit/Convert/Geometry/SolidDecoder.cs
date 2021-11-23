@@ -2,19 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Rhino.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
+  using External.DB.Extensions;
+
   /// <summary>
   /// This class is obsolete but is here as reference of a possible alternative SolidDecoder
-  /// <para><see cref="Raw.RawDecoder.ToRhino(DB.Solid)"/> seems to be robust enough to make this class obsolete</para>
+  /// <para><see cref="Raw.RawDecoder.ToRhino(ARDB.Solid)"/> seems to be robust enough to make this class obsolete</para>
   /// </summary>
   [Obsolete("Please use Raw.RawDecoder.ToRhino(DB.Solid)")]
   static class SolidDecoder
   {
-    static IEnumerable<Curve> ToCurveMany(IEnumerable<DB.CurveLoop> loops)
+    static IEnumerable<Curve> ToCurveMany(IEnumerable<ARDB.CurveLoop> loops)
     {
       foreach (var loop in loops)
       {
@@ -103,7 +104,7 @@ namespace RhinoInside.Revit.Convert.Geometry
              JoinAndMerge(brepFaces, Revit.VertexTolerance);
     }
 
-    internal static Brep ToBrep(DB.Face face)
+    internal static Brep ToBrep(ARDB.Face face)
     {
       var surface = Raw.RawDecoder.ToRhinoSurface(face, out var _, 1.0);
       if (surface is null)
@@ -122,12 +123,12 @@ namespace RhinoInside.Revit.Convert.Geometry
       finally { brep.Dispose(); }
     }
 
-    internal static Brep ToBrep(DB.Solid solid)
+    internal static Brep ToBrep(ARDB.Solid solid)
     {
       return JoinAndMerge
       (
         solid.Faces.
-        Cast<DB.Face>().
+        Cast<ARDB.Face>().
         Select(x => ToBrep(x)).
         ToArray(),
         Revit.VertexTolerance

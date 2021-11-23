@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -10,24 +10,24 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Family")]
   public class Family : Element, IGH_Family
   {
-    protected override Type ValueType => typeof(DB.Family);
-    public static explicit operator DB.Family(Family value) => value?.Value;
-    public new DB.Family Value => base.Value as DB.Family;
+    protected override Type ValueType => typeof(ARDB.Family);
+    public static explicit operator ARDB.Family(Family value) => value?.Value;
+    public new ARDB.Family Value => base.Value as ARDB.Family;
 
     public Family() { }
-    public Family(DB.Family family) : base(family) { }
+    public Family(ARDB.Family family) : base(family) { }
     public override string DisplayName
     {
       get
       {
-        if (Value is DB.Family family)
+        if (Value is ARDB.Family family)
         {
           var familyCategory = family.FamilyCategory;
           if 
           (
             familyCategory is null &&
-            family.GetFamilySymbolIds().FirstOrDefault() is DB.ElementId typeId &&
-            family.Document.GetElement(typeId) is DB.ElementType type
+            family.GetFamilySymbolIds().FirstOrDefault() is ARDB.ElementId typeId &&
+            family.Document.GetElement(typeId) is ARDB.ElementType type
           )
             familyCategory = type.Category;
 

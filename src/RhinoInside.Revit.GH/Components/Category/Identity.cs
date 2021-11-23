@@ -1,9 +1,7 @@
 using System;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Categories
 {
   public class CategoryIdentity : Component
   {
@@ -32,17 +30,17 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Category category = null;
-      if (!DA.GetData("Category", ref category))
+      Types.Category category = null;
+      if (!DA.GetData("Category", ref category) || category.APIObject is null)
         return;
 
-      DA.SetData("Type", category?.CategoryType);
-      DA.SetData("Parent", category?.Parent);
-      DA.SetData("Name", category?.FullName());
-      DA.SetData("AllowsSubcategories", category?.CanAddSubcategory);
-      DA.SetData("AllowsParameters", category?.AllowsBoundParameters);
-      DA.SetData("HasMaterialQuantities", category?.HasMaterialQuantities);
-      DA.SetData("Cuttable", category?.IsCuttable);
+      DA.SetData("Type", category.CategoryType);
+      DA.SetData("Parent", category.APIObject.Parent);
+      DA.SetData("Name", category.FullName);
+      DA.SetData("AllowsSubcategories", category.APIObject.CanAddSubcategory);
+      DA.SetData("AllowsParameters", category.APIObject.AllowsBoundParameters);
+      DA.SetData("HasMaterialQuantities", category.APIObject.HasMaterialQuantities);
+      DA.SetData("Cuttable", category.APIObject.IsCuttable);
     }
   }
 }

@@ -1,10 +1,7 @@
 using System;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-
-using DB = Autodesk.Revit.DB;
-
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -23,16 +20,16 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
       ListItems.Add(
-        new GH_ValueListItem("None", ((int) DB.OpeningWrappingCondition.None).ToString())
+        new GH_ValueListItem("None", ((int) ARDB.OpeningWrappingCondition.None).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Exterior", ((int) DB.OpeningWrappingCondition.Exterior).ToString())
+        new GH_ValueListItem("Exterior", ((int) ARDB.OpeningWrappingCondition.Exterior).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Interior", ((int) DB.OpeningWrappingCondition.Interior).ToString())
+        new GH_ValueListItem("Interior", ((int) ARDB.OpeningWrappingCondition.Interior).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Exterior and Interior", ((int) DB.OpeningWrappingCondition.ExteriorAndInterior).ToString())
+        new GH_ValueListItem("Exterior and Interior", ((int) ARDB.OpeningWrappingCondition.ExteriorAndInterior).ToString())
         );
     }
   }

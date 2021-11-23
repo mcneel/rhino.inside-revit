@@ -1,9 +1,9 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Host
+namespace RhinoInside.Revit.GH.Components.Hosts
 {
   public class DeconstructCompoundStructureLayer : ZuiComponent
   {
@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components.Host
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Host.Obsolete
+namespace RhinoInside.Revit.GH.Components.Hosts.Obsolete
 {
   [Obsolete("Since 2021-03-24")]
   public class DeconstructCompoundStructureLayer : Component
@@ -221,7 +221,7 @@ namespace RhinoInside.Revit.GH.Components.Host.Obsolete
       if (!DA.GetData("Compound Structure Layer", ref layer))
         return;
 
-      if (layer.Value is DB.CompoundStructureLayer cslayer)
+      if (layer.Value is ARDB.CompoundStructureLayer cslayer)
       {
         DA.SetData("Index", cslayer.LayerId);
         DA.SetData("Function", cslayer.Function);

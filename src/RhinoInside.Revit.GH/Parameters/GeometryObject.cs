@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.UI.Selection;
-using RhinoInside.Revit.External.UI.Selection;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
 using Rhino.Geometry;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  using External.UI.Selection;
+
   public abstract class GeometryObject<X, R> : ElementIdParam<X, R>, IGH_PreviewObject
   where X : class, Types.IGH_ElementId
   {
@@ -25,7 +26,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class Vertex : GeometryObject<Types.Vertex, DB.Point>
+  public class Vertex : GeometryObject<Types.Vertex, ARDB.Point>
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("BC1B160A-DC04-4139-AB7D-1AECBDE7FF88");
@@ -56,11 +57,11 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         case Autodesk.Revit.UI.Result.Succeeded:
           var element = uiDocument.Document.GetElement(reference);
-          if (element?.GetGeometryObjectFromReference(reference) is DB.Edge edge)
+          if (element?.GetGeometryObjectFromReference(reference) is ARDB.Edge edge)
           {
             var curve = edge.AsCurve();
             var result = curve.Project(reference.GlobalPoint);
-            var points = new DB.XYZ[] { curve.GetEndPoint(0), curve.GetEndPoint(1) };
+            var points = new ARDB.XYZ[] { curve.GetEndPoint(0), curve.GetEndPoint(1) };
             int index = result.XYZPoint.DistanceTo(points[0]) < result.XYZPoint.DistanceTo(points[1]) ? 0 : 1;
 
             value = new Types.Vertex(uiDocument.Document, reference, index);
@@ -78,7 +79,7 @@ namespace RhinoInside.Revit.GH.Parameters
 #endregion
   }
 
-  public class Edge : GeometryObject<Types.Edge, DB.Edge>
+  public class Edge : GeometryObject<Types.Edge, ARDB.Edge>
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("B79FD0FD-63AE-4776-A0A7-6392A3A58B0D");
@@ -124,7 +125,7 @@ namespace RhinoInside.Revit.GH.Parameters
 #endregion
   }
 
-  public class Face : GeometryObject<Types.Face, DB.Face>
+  public class Face : GeometryObject<Types.Face, ARDB.Face>
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("759700ED-BC79-4986-A6AB-84921A7C9293");

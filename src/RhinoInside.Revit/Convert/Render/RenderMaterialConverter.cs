@@ -11,22 +11,23 @@ using Autodesk.Revit.Utility;
 using Rhino;
 using Rhino.Display;
 using Rhino.Render;
-using RhinoInside.Revit.Convert.System.Drawing;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 using SD = System.Drawing;
 
 namespace RhinoInside.Revit.Convert.Render
 {
+  using Convert.System.Drawing;
+  using External.DB.Extensions;
+
   public static class RenderMaterialConverter
   {
-    public static RenderMaterial ToRenderMaterial(this DB.Material material, RhinoDoc rhinoDoc)
+    public static RenderMaterial ToRenderMaterial(this ARDB.Material material, RhinoDoc rhinoDoc)
     {
       var renderMaterial = RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, rhinoDoc);
       renderMaterial.Name = material.Name;
 
 #if REVIT_2018
-      if (material.Document.GetElement(material.AppearanceAssetId) is DB.AppearanceAssetElement appearance)
+      if (material.Document.GetElement(material.AppearanceAssetId) is ARDB.AppearanceAssetElement appearance)
       {
         using (var asset = appearance.GetRenderingAsset())
           renderMaterial.SimulateRenderingAsset(asset, rhinoDoc);
@@ -160,16 +161,16 @@ namespace RhinoInside.Revit.Convert.Render
 
       var offset = Rhino.Geometry.Vector2d.Zero;
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetX) is AssetPropertyDistance offsetX)
-        offset.X = DB.UnitUtils.Convert(offsetX.Value, offsetX.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
+        offset.X = ARDB.UnitUtils.Convert(offsetX.Value, offsetX.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetY) is AssetPropertyDistance offsetY)
-        offset.Y = DB.UnitUtils.Convert(offsetY.Value, offsetY.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
+        offset.Y = ARDB.UnitUtils.Convert(offsetY.Value, offsetY.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
       texture.Offset = offset;
 
       var repeat = new Rhino.Geometry.Vector2d(1.0, 1.0);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleX) is AssetPropertyDistance scaleX)
-        repeat.X = 1.0 / DB.UnitUtils.Convert(scaleX.Value, scaleX.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
+        repeat.X = 1.0 / ARDB.UnitUtils.Convert(scaleX.Value, scaleX.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleY) is AssetPropertyDistance scaleY)
-        repeat.Y = 1.0 / DB.UnitUtils.Convert(scaleY.Value, scaleY.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
+        repeat.Y = 1.0 / ARDB.UnitUtils.Convert(scaleY.Value, scaleY.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
       texture.Repeat = repeat;
 
       return texture;

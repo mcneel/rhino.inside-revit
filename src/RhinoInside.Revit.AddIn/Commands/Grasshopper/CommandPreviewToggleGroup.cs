@@ -1,9 +1,8 @@
 using System;
 using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Grasshopper.Kernel;
-
-using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -47,7 +46,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     /// </summary>
     protected new class Availability : GrasshopperCommand.Availability
     {
-      protected override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories) =>
+      protected override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories) =>
         base.IsCommandAvailable(app, selectedCategories) &&
         DirectContext3DServer.IsAvailable(Revit.ActiveUIDocument?.ActiveGraphicalView);
     }
@@ -76,7 +75,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       GH.PreviewServer.PreviewMode = GH_PreviewMode.Disabled;
       data.Application.ActiveUIDocument.RefreshActiveView();
@@ -106,7 +105,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       GH.PreviewServer.PreviewMode = GH_PreviewMode.Wireframe;
       data.Application.ActiveUIDocument.RefreshActiveView();
@@ -134,7 +133,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       GH.PreviewServer.PreviewMode = GH_PreviewMode.Shaded;
       data.Application.ActiveUIDocument.RefreshActiveView();

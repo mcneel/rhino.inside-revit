@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Kernel
 {
@@ -15,10 +15,10 @@ namespace RhinoInside.Revit.GH.Kernel
   {
     bool NeedsToBeExpired
     (
-      DB.Document doc,
-      ICollection<DB.ElementId> added,
-      ICollection<DB.ElementId> deleted,
-      ICollection<DB.ElementId> modified
+      ARDB.Document doc,
+      ICollection<ARDB.ElementId> added,
+      ICollection<ARDB.ElementId> deleted,
+      ICollection<ARDB.ElementId> modified
     );
   }
 
@@ -33,10 +33,10 @@ namespace RhinoInside.Revit.GH.Kernel
   {
     bool NeedsToBeExpired
     (
-      DB.Document doc,
-      ICollection<DB.ElementId> added,
-      ICollection<DB.ElementId> deleted,
-      ICollection<DB.ElementId> modified
+      ARDB.Document doc,
+      ICollection<ARDB.ElementId> added,
+      ICollection<ARDB.ElementId> deleted,
+      ICollection<ARDB.ElementId> modified
     );
   }
 }

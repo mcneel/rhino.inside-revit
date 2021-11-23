@@ -3,14 +3,15 @@ using System.Reflection;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   /// <summary>
-  /// Interface that represents any <see cref="DB.Element"/> that has a Graphical representation in Revit
+  /// Interface that represents any <see cref="ARDB.Element"/> that has a Graphical representation in Revit
   /// </summary>
   [Kernel.Attributes.Name("Graphical Element")]
   public interface IGH_GraphicalElement : IGH_Element, IGH_QuickCast
@@ -27,19 +28,19 @@ namespace RhinoInside.Revit.GH.Types
     IGH_PreviewData
   {
     public GraphicalElement() { }
-    public GraphicalElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public GraphicalElement(DB.Element element) : base(element) { }
+    public GraphicalElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public GraphicalElement(ARDB.Element element) : base(element) { }
 
-    protected override bool SetValue(DB.Element element) => IsValidElement(element) && base.SetValue(element);
-    public static bool IsValidElement(DB.Element element)
+    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
+    public static bool IsValidElement(ARDB.Element element)
     {
       if (!element.IsValid())
         return false;
 
-      if (element is DB.ElementType)
+      if (element is ARDB.ElementType)
         return false;
 
-      if (element is DB.View)
+      if (element is ARDB.View)
         return false;
 
       using (var location = element.Location)
@@ -79,7 +80,7 @@ namespace RhinoInside.Revit.GH.Types
     IGH_GeometricGoo IGH_GeometricGoo.DuplicateGeometry() => (IGH_GeometricGoo) MemberwiseClone();
     public virtual BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is DB.Element)
+      if (Value is ARDB.Element)
       {
         var bbox = BoundingBox;
         if (bbox.Transform(xform))
@@ -272,7 +273,7 @@ namespace RhinoInside.Revit.GH.Types
     /// <summary>
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
     /// </summary>
-    public virtual BoundingBox BoundingBox => Value is DB.Element element ?
+    public virtual BoundingBox BoundingBox => Value is ARDB.Element element ?
       element.GetBoundingBoxXYZ().ToBoundingBox() :
       NaN.BoundingBox;
 
@@ -283,7 +284,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Element element)
+        if (Value is ARDB.Element element)
         {
           var plane = Location;
           if (!Location.IsValid)
@@ -342,11 +343,11 @@ namespace RhinoInside.Revit.GH.Types
         var axis = NaN.Vector3d;
         var perp = NaN.Vector3d;
 
-        if (Value is DB.Element element)
+        if (Value is ARDB.Element element)
         {
           switch (element.Location)
           {
-            case DB.LocationPoint pointLocation:
+            case ARDB.LocationPoint pointLocation:
               origin = pointLocation.Point.ToPoint3d();
               axis = Vector3d.XAxis;
               perp = Vector3d.YAxis;
@@ -359,14 +360,14 @@ namespace RhinoInside.Revit.GH.Types
               catch { }
 
               break;
-            case DB.LocationCurve curveLocation:
+            case ARDB.LocationCurve curveLocation:
               if(curveLocation.Curve.TryGetLocation(out var cO, out var cX, out var cY))
                 return new Plane(cO.ToPoint3d(), cX.ToVector3d(), cY.ToVector3d());
 
               break;
             default:
               // Try with the first non empty geometry object.
-              using (var options = new DB.Options { DetailLevel = DB.ViewDetailLevel.Undefined })
+              using (var options = new ARDB.Options { DetailLevel = ARDB.ViewDetailLevel.Undefined })
               {
                 if (element.get_Geometry(options).TryGetLocation(out var gO, out var gX, out var gY))
                   return new Plane(gO.ToPoint3d(), gX.ToVector3d(), gY.ToVector3d());
@@ -393,7 +394,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    void GetLocation(out DB.XYZ origin, out DB.XYZ basisX, out DB.XYZ basisY)
+    void GetLocation(out ARDB.XYZ origin, out ARDB.XYZ basisX, out ARDB.XYZ basisY)
     {
       var plane = Location.ToPlane();
       origin = plane.Origin;
@@ -401,9 +402,9 @@ namespace RhinoInside.Revit.GH.Types
       basisY = plane.YVec;
     }
 
-    void SetLocation(DB.XYZ newOrigin, DB.XYZ newBasisX, DB.XYZ newBasisY)
+    void SetLocation(ARDB.XYZ newOrigin, ARDB.XYZ newBasisX, ARDB.XYZ newBasisY)
     {
-      if (Value is DB.Element element)
+      if (Value is ARDB.Element element)
       {
         InvalidateGraphics();
 
@@ -417,8 +418,8 @@ namespace RhinoInside.Revit.GH.Types
             var axisDirection = basisZ.CrossProduct(newBasisZ);
             double angle = basisZ.AngleTo(newBasisZ);
 
-            using (var axis = DB.Line.CreateUnbound(origin, axisDirection))
-              DB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
+            using (var axis = ARDB.Line.CreateUnbound(origin, axisDirection))
+              ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
 
             GetLocation(out origin, out basisX, out basisY);
             basisZ = basisX.CrossProduct(basisY);
@@ -427,14 +428,14 @@ namespace RhinoInside.Revit.GH.Types
           if (!basisX.IsAlmostEqualTo(newBasisX))
           {
             double angle = basisX.AngleOnPlaneTo(newBasisX, newBasisZ);
-            using (var axis = DB.Line.CreateUnbound(origin, newBasisZ))
-              DB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
+            using (var axis = ARDB.Line.CreateUnbound(origin, newBasisZ))
+              ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
           }
 
           {
             var trans = newOrigin - origin;
             if (!trans.IsZeroLength())
-              DB.ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
+              ARDB.ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
           }
         }
       }
@@ -468,14 +469,14 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual Curve Curve
     {
-      get => Value?.Location is DB.LocationCurve curveLocation ?
+      get => Value?.Location is ARDB.LocationCurve curveLocation ?
           curveLocation.Curve.ToCurve() :
           default;
       set
       {
-        if (value is object && Value is DB.Element element)
+        if (value is object && Value is ARDB.Element element)
         {
-          if (element.Location is DB.LocationCurve locationCurve)
+          if (element.Location is ARDB.LocationCurve locationCurve)
           {
             var curve = value.ToCurve();
             if (!locationCurve.Curve.IsAlmostEqualTo(curve))
@@ -506,13 +507,13 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        return Value is DB.Element element && element.GetType().GetProperty("Flipped") is PropertyInfo Flipped ?
+        return Value is ARDB.Element element && element.GetType().GetProperty("Flipped") is PropertyInfo Flipped ?
           (bool?) Flipped.GetValue(element) :
           default;
       }
       set
       {
-        if (value.HasValue && Value is DB.Element element)
+        if (value.HasValue && Value is ARDB.Element element)
         {
           var Flip = element.GetType().GetMethod("Flip");
           var Flipped = element.GetType().GetProperty("Flipped");
@@ -535,7 +536,7 @@ namespace RhinoInside.Revit.GH.Types
       get => default;
       set
       {
-        if (value.HasValue && Value is DB.Element element)
+        if (value.HasValue && Value is ARDB.Element element)
         {
           if (!CanFlipHand)
             throw new InvalidOperationException("Hand can not be flipped for this element.");
@@ -552,7 +553,7 @@ namespace RhinoInside.Revit.GH.Types
       get => default;
       set
       {
-        if (value.HasValue && Value is DB.Element element)
+        if (value.HasValue && Value is ARDB.Element element)
         {
           if (!CanFlipWorkPlane)
             throw new InvalidOperationException("Work Plane can not be flipped for this element.");

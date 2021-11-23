@@ -1,9 +1,9 @@
 using System;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class AnalyzeCurtainGridCell : AnalysisComponent
   {
@@ -51,11 +51,11 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // get input
-      Types.DataObject<DB.CurtainCell> dataObj = default;
+      Types.DataObject<ARDB.CurtainCell> dataObj = default;
       if (!DA.GetData("Curtain Grid Cell", ref dataObj))
         return;
 
-      DB.CurtainCell cell = dataObj.Value;
+      ARDB.CurtainCell cell = dataObj.Value;
 
       // Revit API throws errors with no message when .CurveLoops is accessed
       // Autodesk.Revit.Exceptions.InvalidOperationException at Autodesk.Revit.DB.CurtainCell.get_CurveLoops()

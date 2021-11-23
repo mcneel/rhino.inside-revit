@@ -1,9 +1,9 @@
 using System;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class AnalyzeCurtainGridPanel : AnalysisComponent
   {
@@ -92,7 +92,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // get input
-      var instance = default(DB.FamilyInstance);
+      var instance = default(ARDB.FamilyInstance);
       if (!DA.GetData("Panel", ref instance))
         return;
 
@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.GH.Components
       DA.SetData("Base Point", instance.GetTransform().Origin.ToPoint3d());
       DA.SetData("Orientation", instance.FacingOrientation.ToVector3d());
 
-      if (instance is DB.Panel panel)
+      if (instance is ARDB.Panel panel)
       {
         //DA.SetData("Locked", panel.Locked);
         //DA.SetData("Lockable", panel.Lockable);
@@ -113,8 +113,8 @@ namespace RhinoInside.Revit.GH.Components
         DA.SetData("Host Panel", null);
       }
 
-      PipeHostParameter(DA, instance, DB.BuiltInParameter.GENERIC_WIDTH, "Width");
-      PipeHostParameter(DA, instance, DB.BuiltInParameter.GENERIC_HEIGHT, "Height");
+      PipeHostParameter(DA, instance, ARDB.BuiltInParameter.GENERIC_WIDTH, "Width");
+      PipeHostParameter(DA, instance, ARDB.BuiltInParameter.GENERIC_HEIGHT, "Height");
     }
   }
 }

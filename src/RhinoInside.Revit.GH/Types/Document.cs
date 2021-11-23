@@ -7,14 +7,14 @@ using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.UI.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  [Name("Document")]
+  using External.DB.Extensions;
+  using External.UI.Extensions;
+
+  [Kernel.Attributes.Name("Document")]
   public interface IGH_Document : IGH_Goo, IEquatable<IGH_Document>
   {
     Guid DocumentGUID { get; }
@@ -25,10 +25,10 @@ namespace RhinoInside.Revit.GH.Types
     Uri CentralModelURI { get; }
     string CentralPathName { get; }
 
-    DB.Document Value { get; }
+    ARDB.Document Value { get; }
   }
 
-  [Name("Document"), AssemblyPriority]
+  [Kernel.Attributes.Name("Document"), AssemblyPriority]
   public class Document : IGH_Document, IGH_ReferenceData, ICloneable
   {
     #region System.Object
@@ -164,7 +164,7 @@ namespace RhinoInside.Revit.GH.Types
           {
             try
             {
-              using (var info = DB.BasicFileInfo.Extract(ModelURI.LocalPath))
+              using (var info = ARDB.BasicFileInfo.Extract(ModelURI.LocalPath))
               {
                 if (!info.IsWorkshared)
                 {
@@ -182,9 +182,9 @@ namespace RhinoInside.Revit.GH.Types
             catch (Autodesk.Revit.Exceptions.ApplicationException) { }
           }
         }
-        else if (ModelURI.ToModelPath() is DB.ModelPath modelPath)
+        else if (ModelURI.ToModelPath() is ARDB.ModelPath modelPath)
         {
-          try { PathName = DB.ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath); }
+          try { PathName = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath); }
           catch (Autodesk.Revit.Exceptions.ApplicationException) { }
         }
       }
@@ -196,7 +196,7 @@ namespace RhinoInside.Revit.GH.Types
           if (ModelURI != modelUri)
           {
             ModelURI = modelUri;
-            PathName = DB.ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath);
+            PathName = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath);
           }
           else
           {
@@ -212,7 +212,7 @@ namespace RhinoInside.Revit.GH.Types
             if (centralUri != CentralModelURI)
             {
               CentralModelURI = centralUri;
-              CentralPathName = DB.ModelPathUtils.ConvertModelPathToUserVisiblePath(centralPath);
+              CentralPathName = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(centralPath);
             }
           }
         }
@@ -225,8 +225,8 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    DB.Document document;
-    public DB.Document Value
+    ARDB.Document document;
+    public ARDB.Document Value
     {
       get
       {
@@ -245,7 +245,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Document document)
+        if (Value is ARDB.Document document)
           return document.GetFileName();
 
         if (!string.IsNullOrEmpty(PathName))
@@ -259,7 +259,7 @@ namespace RhinoInside.Revit.GH.Types
     public string CentralPathName { get; protected set; } = default;
 
     public Document() { }
-    protected Document(DB.Document value)
+    protected Document(ARDB.Document value)
     {
       if (value is null) return;
       document = value;
@@ -271,7 +271,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Core.Host.Value is Autodesk.Revit.UI.UIApplication host)
       {
-        foreach (var document in host.Application.Documents.Cast<DB.Document>())
+        foreach (var document in host.Application.Documents.Cast<ARDB.Document>())
           AddDocument(document);
 
         // Create a Grasshopper document
@@ -285,40 +285,40 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    private static void Host_DocumentCreated(object sender, DB.Events.DocumentCreatedEventArgs e)
+    private static void Host_DocumentCreated(object sender, ARDB.Events.DocumentCreatedEventArgs e)
     {
       AddDocument(e.Document);
     }
-    private static void Host_DocumentOpened(object sender, DB.Events.DocumentOpenedEventArgs e)
+    private static void Host_DocumentOpened(object sender, ARDB.Events.DocumentOpenedEventArgs e)
     {
       AddDocument(e.Document);
     }
 
-    static void Host_DocumentClosing(object sender, DB.Events.DocumentClosingEventArgs e)
+    static void Host_DocumentClosing(object sender, ARDB.Events.DocumentClosingEventArgs e)
     {
       ClosingDocuments.Add(e.DocumentId, e.Document);
       RemoveDocument(e.Document);
     }
-    static void Host_DocumentClosed(object sender, DB.Events.DocumentClosedEventArgs e)
+    static void Host_DocumentClosed(object sender, ARDB.Events.DocumentClosedEventArgs e)
     {
       if (!ClosingDocuments.TryGetValue(e.DocumentId, out var document)) return;
       ClosingDocuments.Remove(e.DocumentId);
 
-      if (e.Status != DB.Events.RevitAPIEventStatus.Succeeded)
+      if (e.Status != ARDB.Events.RevitAPIEventStatus.Succeeded)
         AddDocument(document);
     }
 
-    static void AddDocument(DB.Document document)
+    static void AddDocument(ARDB.Document document)
     {
       if (document is null) return;
 
       if (DocumentsRegistry.TryGetValue(document.GetFingerprintGUID(), out var twins))
         twins.Add(document);
       else
-        DocumentsRegistry.Add(document.GetFingerprintGUID(), new List<DB.Document>() { document });
+        DocumentsRegistry.Add(document.GetFingerprintGUID(), new List<ARDB.Document>() { document });
     }
 
-    static void RemoveDocument(DB.Document document)
+    static void RemoveDocument(ARDB.Document document)
     {
       if (document is null) return;
 
@@ -335,10 +335,10 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    static readonly Dictionary<int, DB.Document> ClosingDocuments = new Dictionary<int, DB.Document>();
-    static readonly Dictionary<Guid, List<DB.Document>> DocumentsRegistry = new Dictionary<Guid, List<DB.Document>>();
+    static readonly Dictionary<int, ARDB.Document> ClosingDocuments = new Dictionary<int, ARDB.Document>();
+    static readonly Dictionary<Guid, List<ARDB.Document>> DocumentsRegistry = new Dictionary<Guid, List<ARDB.Document>>();
 
-    internal static bool TryGetDocument(Guid guid, out DB.Document document)
+    internal static bool TryGetDocument(Guid guid, out ARDB.Document document)
     {
       // Only return a document when the query is not ambiguous.
       // An ambiguous situation happens when two documents with the same GUID are loaded at the same time.
@@ -363,12 +363,12 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (value)
       {
-        case DB.Document document: return FromValue(document);
-        case DB.Element element: return FromValue(element.Document);
+        case ARDB.Document document: return FromValue(document);
+        case ARDB.Element element: return FromValue(element.Document);
         case string str:
           using (var documents = Revit.ActiveDBApplication.Documents)
           {
-            var docs = documents.Cast<DB.Document>();
+            var docs = documents.Cast<ARDB.Document>();
 
             if (str.Contains(Path.DirectorySeparatorChar) || str.Contains(Path.AltDirectorySeparatorChar))
             {
@@ -396,7 +396,7 @@ namespace RhinoInside.Revit.GH.Types
       return default;
     }
 
-    public static Document FromValue(DB.Document document)
+    public static Document FromValue(ARDB.Document document)
     {
       if (document?.IsValidObject != true)
         return null;
@@ -436,7 +436,7 @@ namespace RhinoInside.Revit.GH.Types
     bool IGH_Goo.CastFrom(object source) => false;
     public virtual bool CastTo<Q>(out Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(DB.Document)))
+      if (typeof(Q).IsAssignableFrom(typeof(ARDB.Document)))
       {
         target = (Q) (object) Value;
         return true;
@@ -512,8 +512,8 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Identity
     public string Title => Value?.GetTitle() ?? Path.GetFileNameWithoutExtension(FileName);
-    public UnitSystem DisplayUnitSystem => Value is DB.Document document ?
-      new UnitSystem { Value = (DB.UnitSystem) document.DisplayUnitSystem } :
+    public UnitSystem DisplayUnitSystem => Value is ARDB.Document document ?
+      new UnitSystem { Value = (ARDB.UnitSystem) document.DisplayUnitSystem } :
       default;
 
     #endregion
@@ -523,25 +523,25 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.Document document) return document.IsWorkshared;
+        if (Value is ARDB.Document document) return document.IsWorkshared;
         return !(CentralModelURI is null);
       }
     }
     #endregion
   }
 
-  [Name("Project Document")]
+  [Kernel.Attributes.Name("Project Document")]
   public class ProjectDocument : Document
   {
     public ProjectDocument() : base(default) { }
-    internal ProjectDocument(DB.Document value) : base(value) { }
+    internal ProjectDocument(ARDB.Document value) : base(value) { }
   }
 
-  [Name("Family Document")]
+  [Kernel.Attributes.Name("Family Document")]
   public class FamilyDocument : Document
   {
     public FamilyDocument() : base(default) { }
-    internal FamilyDocument(DB.Document value) : base(value) { }
+    internal FamilyDocument(ARDB.Document value) : base(value) { }
   }
 
   class DocumentState : IGH_Goo, IEquatable<DocumentState>
@@ -913,5 +913,4 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
   }
-
 }

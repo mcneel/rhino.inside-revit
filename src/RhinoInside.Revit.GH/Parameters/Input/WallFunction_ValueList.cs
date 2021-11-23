@@ -1,10 +1,7 @@
 using System;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-
-using DB = Autodesk.Revit.DB;
-
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -23,22 +20,22 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
       ListItems.Add(
-        new GH_ValueListItem("Interior", ((int) DB.WallFunction.Interior).ToString())
+        new GH_ValueListItem("Interior", ((int) ARDB.WallFunction.Interior).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Exterior", ((int) DB.WallFunction.Exterior).ToString())
+        new GH_ValueListItem("Exterior", ((int) ARDB.WallFunction.Exterior).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Foundation", ((int) DB.WallFunction.Foundation).ToString())
+        new GH_ValueListItem("Foundation", ((int) ARDB.WallFunction.Foundation).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Retaining", ((int) DB.WallFunction.Retaining).ToString())
+        new GH_ValueListItem("Retaining", ((int) ARDB.WallFunction.Retaining).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Soffit", ((int) DB.WallFunction.Soffit).ToString())
+        new GH_ValueListItem("Soffit", ((int) ARDB.WallFunction.Soffit).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Core-Shaft", ((int) DB.WallFunction.Coreshaft).ToString())
+        new GH_ValueListItem("Core-Shaft", ((int) ARDB.WallFunction.Coreshaft).ToString())
         );
     }
   }

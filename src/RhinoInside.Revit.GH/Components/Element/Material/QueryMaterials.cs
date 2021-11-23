@@ -3,9 +3,9 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Material
+namespace RhinoInside.Revit.GH.Components.Materials
 {
   public class QueryMaterials : ElementCollectorComponent
   {
@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Material
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "M";
 
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Material));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.Material));
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -67,20 +67,20 @@ namespace RhinoInside.Revit.GH.Components.Material
       string name = null;
       DA.GetData("Name", ref name);
 
-      DB.ElementFilter filter = null;
+      ARDB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var materialsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           materialsCollector = materialsCollector.WherePasses(filter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.MATERIAL_NAME, ref name, out var nameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.MATERIAL_NAME, ref name, out var nameFilter))
           materialsCollector = materialsCollector.WherePasses(nameFilter);
 
-        var materials = collector.Cast<DB.Material>();
+        var materials = collector.Cast<ARDB.Material>();
 
         if (!string.IsNullOrEmpty(@class))
           materials = materials.Where(x => x.MaterialClass.IsSymbolNameLike(@class));

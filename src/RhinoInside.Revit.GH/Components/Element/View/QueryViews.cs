@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Views
 {
   [ComponentVersion(introduced: "1.0", updated: "1.2.1")]
   public class QueryViews : ElementCollectorComponent
@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("DF691659-B75B-4455-AF5F-8A5DE485FA05");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "V";
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.View));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.View));
 
     public QueryViews() : base
     (
@@ -50,17 +50,17 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      var viewDiscipline = default(DB.ViewDiscipline);
+      var viewDiscipline = default(ARDB.ViewDiscipline);
       var _Discipline_ = Params.IndexOfInputParam("Discipline");
       bool nofilterDiscipline = (!DA.GetData(_Discipline_, ref viewDiscipline) && Params.Input[_Discipline_].Sources.Count == 0);
 
-      var viewFamily = DB.ViewFamily.Invalid;
+      var viewFamily = ARDB.ViewFamily.Invalid;
       DA.GetData("Family", ref viewFamily);
 
       string name = null;
       DA.GetData("Name", ref name);
 
-      var Template = default(DB.View);
+      var Template = default(ARDB.View);
       var _Template_ = Params.IndexOfInputParam("Template");
       bool nofilterTemplate = (!DA.GetData(_Template_, ref Template) && Params.Input[_Template_].DataType == GH_ParamData.@void);
 
@@ -80,29 +80,29 @@ namespace RhinoInside.Revit.GH.Components
       var _Assembly_ = Params.IndexOfInputParam("Assembly");
       bool noFilterAssembly = (!DA.GetData(_Assembly_, ref Assembly) && Params.Input[_Assembly_].DataType == GH_ParamData.@void);
 
-      DB.ElementFilter filter = null;
+      ARDB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var viewsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           viewsCollector = viewsCollector.WherePasses(filter);
 
-        if (!nofilterDiscipline && TryGetFilterIntegerParam(DB.BuiltInParameter.VIEW_DISCIPLINE, (int) viewDiscipline, out var viewDisciplineFilter))
+        if (!nofilterDiscipline && TryGetFilterIntegerParam(ARDB.BuiltInParameter.VIEW_DISCIPLINE, (int) viewDiscipline, out var viewDisciplineFilter))
           viewsCollector = viewsCollector.WherePasses(viewDisciplineFilter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.VIEW_NAME, ref name, out var viewNameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.VIEW_NAME, ref name, out var viewNameFilter))
           viewsCollector = viewsCollector.WherePasses(viewNameFilter);
 
-        if (!nofilterTemplate && TryGetFilterElementIdParam(DB.BuiltInParameter.VIEW_TEMPLATE, Template?.Id ?? DB.ElementId.InvalidElementId, out var templateFilter))
+        if (!nofilterTemplate && TryGetFilterElementIdParam(ARDB.BuiltInParameter.VIEW_TEMPLATE, Template?.Id ?? ARDB.ElementId.InvalidElementId, out var templateFilter))
           viewsCollector = viewsCollector.WherePasses(templateFilter);
 
-        if (!noFilterAssembly && TryGetFilterElementIdParam(DB.BuiltInParameter.VIEW_ASSOCIATED_ASSEMBLY_INSTANCE_ID, Assembly?.Id ?? DB.ElementId.InvalidElementId, out var assemblyFilter))
+        if (!noFilterAssembly && TryGetFilterElementIdParam(ARDB.BuiltInParameter.VIEW_ASSOCIATED_ASSEMBLY_INSTANCE_ID, Assembly?.Id ?? ARDB.ElementId.InvalidElementId, out var assemblyFilter))
           viewsCollector = viewsCollector.WherePasses(assemblyFilter);
 
-        var views = collector.Cast<DB.View>();
+        var views = collector.Cast<ARDB.View>();
 
         if (!nofilterIsTemplate)
           views = views.Where((x) => x.IsTemplate == IsTemplate);
@@ -113,8 +113,8 @@ namespace RhinoInside.Revit.GH.Components
         if (!nofilterIsAssembly)
           views = views.Where((x) => x.IsAssemblyView == IsAssembly);
 
-        if (viewFamily != DB.ViewFamily.Invalid)
-          views = views.Where(x => (x.Document.GetElement(x.GetTypeId()) as DB.ViewFamilyType)?.ViewFamily == viewFamily);
+        if (viewFamily != ARDB.ViewFamily.Invalid)
+          views = views.Where(x => (x.Document.GetElement(x.GetTypeId()) as ARDB.ViewFamilyType)?.ViewFamily == viewFamily);
 
         if (name is object)
           views = views.Where(x => x.Name.IsSymbolNameLike(name));

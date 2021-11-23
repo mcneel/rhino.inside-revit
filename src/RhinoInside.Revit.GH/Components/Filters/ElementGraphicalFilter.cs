@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
+  using External.DB;
+
   public class ElementLevelFilter : ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("B534489B-1367-4ACA-8FD8-D4B365CEEE0D");
@@ -25,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var levels = new List<DB.Level>();
+      var levels = new List<ARDB.Level>();
       if (!DA.GetDataList("Levels", levels))
         return;
 
@@ -34,8 +35,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
         return;
 
       var filters = levels.Where(x => x is object).
-                    Select(x => new DB.ElementLevelFilter(x.Id, inverted)).
-                    ToList<DB.ElementFilter>();
+                    Select(x => new ARDB.ElementLevelFilter(x.Id, inverted)).
+                    ToList<ARDB.ElementFilter>();
 
       DA.SetData("Filter", inverted ? CompoundElementFilter.Intersect(filters) : CompoundElementFilter.Union(filters));
     }
@@ -70,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementDesignOptionFilter(designOption.Id, inverted));
+      DA.SetData("Filter", new ARDB.ElementDesignOptionFilter(designOption.Id, inverted));
     }
   }
 
@@ -98,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Phase", ref phase))
         return;
 
-      var status = new List<DB.ElementOnPhaseStatus>();
+      var status = new List<ARDB.ElementOnPhaseStatus>();
       if (!DA.GetDataList("Status", status))
         return;
 
@@ -106,7 +107,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementPhaseStatusFilter(phase.Id, status, inverted));
+      DA.SetData("Filter", new ARDB.ElementPhaseStatusFilter(phase.Id, status, inverted));
     }
   }
 
@@ -139,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", new DB.ElementOwnerViewFilter(view.Id, inverted));
+      DA.SetData("Filter", new ARDB.ElementOwnerViewFilter(view.Id, inverted));
     }
   }
 
@@ -200,7 +201,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", (DB.ElementFilter) new DB.VisibleInViewFilter(view.Document, view.Id, inverted));
+      DA.SetData("Filter", (ARDB.ElementFilter) new ARDB.VisibleInViewFilter(view.Document, view.Id, inverted));
     }
   }
 }

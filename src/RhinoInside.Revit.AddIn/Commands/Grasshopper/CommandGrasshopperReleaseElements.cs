@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using RhinoInside.Revit.External.DB;
-using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     /// </summary>
     protected new class Availability : NeedsActiveDocument<GrasshopperCommand.Availability>
     {
-      protected override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories)
+      protected override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories)
       {
         if (!base.IsCommandAvailable(app, selectedCategories))
           return false;
@@ -46,23 +46,23 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    bool ReleaseElements(IEnumerable<DB.Element> elements)
+    bool ReleaseElements(IEnumerable<Element> elements)
     {
       var committed = false;
       var messages = new List<string>();
 
       foreach (var document in elements.GroupBy(x => x.Document))
       {
-        using (var tx = new DB.Transaction(document.Key, "Release Elements"))
+        using (var tx = new Transaction(document.Key, "Release Elements"))
         {
           tx.SetFailureHandlingOptions
           (
             tx.GetFailureHandlingOptions().SetForcedModalHandling(false)
           );
 
-          if (tx.Start() == DB.TransactionStatus.Started)
+          if (tx.Start() == TransactionStatus.Started)
           {
-            var list = new List<DB.ElementId>();
+            var list = new List<ElementId>();
 
             foreach (var element in document)
             {
@@ -76,13 +76,13 @@ namespace RhinoInside.Revit.AddIn.Commands
             // Show feedback on Revit
             if (list.Count > 0)
             {
-              using (var message = new DB.FailureMessage(ExternalFailures.ElementFailures.TrackedElementReleased))
+              using (var message = new FailureMessage(ExternalFailures.ElementFailures.TrackedElementReleased))
               {
                 message.SetFailingElements(list);
                 document.Key.PostFailure(message);
               }
 
-              committed |= tx.Commit() == DB.TransactionStatus.Committed;
+              committed |= tx.Commit() == TransactionStatus.Committed;
             }
           }
         }
@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       return committed;
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       var commited = ReleaseElements
       (

@@ -1,14 +1,15 @@
 using System;
 using System.Windows.Input;
 using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using RhinoInside.Revit.Convert.DocObjects;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
+  using Convert.DocObjects;
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandRhinoOpenViewport : RhinoCommand
   {
@@ -31,7 +32,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       var ctrlIsPressed = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
 
@@ -57,7 +58,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         if
         (
           data.View.TryGetSketchGridSurface(out var name, out var surface, out var bboxUV, out spacing) &&
-          surface is DB.Plane plane
+          surface is Plane plane
         )
         {
           cplane.Name = name;

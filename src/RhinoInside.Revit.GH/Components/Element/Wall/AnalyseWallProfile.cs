@@ -3,10 +3,9 @@ using System.Linq;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
-using RhinoInside.Revit.External.DB.Extensions;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   // TODO: improve AnalyzeWallProfile to work on curtain walls
   // TODO: improve AnalyzeWallProfile to work on curved walls
@@ -46,22 +45,22 @@ namespace RhinoInside.Revit.GH.Components
         );
     }
 
-    private List<Rhino.Geometry.Curve> ExtractDependentCurves(DB.Element element)
+    private List<Rhino.Geometry.Curve> ExtractDependentCurves(ARDB.Element element)
     {
-      return element.GetDependentElements(new DB.ElementClassFilter(typeof(DB.CurveElement)))
+      return element.GetDependentElements(new ARDB.ElementClassFilter(typeof(ARDB.CurveElement)))
              .Select(x => element.Document.GetElement(x))
-             .Cast<DB.CurveElement>()
+             .Cast<ARDB.CurveElement>()
              .Select(x => x.GeometryCurve.ToCurve())
              .ToList();
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Wall wall = null;
+      ARDB.Wall wall = null;
       if (!DA.GetData("Wall", ref wall))
         return;
 
-      if (wall.WallType.Kind != DB.WallKind.Curtain)
+      if (wall.WallType.Kind != ARDB.WallKind.Curtain)
         DA.SetDataList("Profile Curves", ExtractDependentCurves(wall));
     }
   }

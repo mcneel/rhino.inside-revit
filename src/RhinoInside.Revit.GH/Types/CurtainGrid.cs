@@ -5,18 +5,19 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+
   [Kernel.Attributes.Name("Curtain Grid")]
   public class CurtainGrid : DocumentObject,
     IGH_GeometricGoo,
     IGH_PreviewData
   {
     public CurtainGrid() : base() { }
-    public CurtainGrid(DB.HostObject host, DB.CurtainGrid value) : base(host.Document, value)
+    public CurtainGrid(ARDB.HostObject host, ARDB.CurtainGrid value) : base(host.Document, value)
     { }
 
     #region DocumentObject
@@ -24,7 +25,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.CurtainGrid grid)
+        if (Value is ARDB.CurtainGrid grid)
           return $"Curtain Grid [{grid.NumULines} x {grid.NumVLines}]";
 
         return "Curtain Grid";
@@ -124,45 +125,45 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Implementation
-    static IEnumerable<DB.CurtainGrid> HostCurtainGrids(DB.HostObject host)
+    static IEnumerable<ARDB.CurtainGrid> HostCurtainGrids(ARDB.HostObject host)
     {
-      var grids = default(IEnumerable<DB.CurtainGrid>);
+      var grids = default(IEnumerable<ARDB.CurtainGrid>);
       switch (host)
       {
-        case DB.CurtainSystem curtainSystem: grids = curtainSystem.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
-        case DB.ExtrusionRoof extrusionRoof: grids = extrusionRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
-        case DB.FootPrintRoof footPrintRoof: grids = footPrintRoof.CurtainGrids?.Cast<DB.CurtainGrid>(); break;
-        case DB.Wall wall: grids = wall.CurtainGrid is null ? null : Enumerable.Repeat(wall.CurtainGrid, 1); break;
+        case ARDB.CurtainSystem curtainSystem: grids = curtainSystem.CurtainGrids?.Cast<ARDB.CurtainGrid>(); break;
+        case ARDB.ExtrusionRoof extrusionRoof: grids = extrusionRoof.CurtainGrids?.Cast<ARDB.CurtainGrid>(); break;
+        case ARDB.FootPrintRoof footPrintRoof: grids = footPrintRoof.CurtainGrids?.Cast<ARDB.CurtainGrid>(); break;
+        case ARDB.Wall wall: grids = wall.CurtainGrid is null ? null : Enumerable.Repeat(wall.CurtainGrid, 1); break;
       }
 
       return grids;
     }
 
-    static IList<DB.Reference> GetFaceReferences(DB.HostObject host)
+    static IList<ARDB.Reference> GetFaceReferences(ARDB.HostObject host)
     {
-      var references = new List<DB.Reference>();
+      var references = new List<ARDB.Reference>();
 
-      try { references.AddRange(DB.HostObjectUtils.GetBottomFaces(host)); }
+      try { references.AddRange(ARDB.HostObjectUtils.GetBottomFaces(host)); }
       catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-      try { references.AddRange(DB.HostObjectUtils.GetTopFaces(host)); }
+      try { references.AddRange(ARDB.HostObjectUtils.GetTopFaces(host)); }
       catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-      try { references.AddRange(DB.HostObjectUtils.GetSideFaces(host, DB.ShellLayerType.Interior)); }
+      try { references.AddRange(ARDB.HostObjectUtils.GetSideFaces(host, ARDB.ShellLayerType.Interior)); }
       catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-      try { references.AddRange(DB.HostObjectUtils.GetSideFaces(host, DB.ShellLayerType.Exterior)); }
+      try { references.AddRange(ARDB.HostObjectUtils.GetSideFaces(host, ARDB.ShellLayerType.Exterior)); }
       catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
       return references;
     }
 
-    static bool IsCurtainGridOnFace(ICollection<DB.CurtainCell> cells, DB.Face face)
+    static bool IsCurtainGridOnFace(ICollection<ARDB.CurtainCell> cells, ARDB.Face face)
     {
       var result = cells.Count > 0;
 
       foreach (var cell in cells)
       {
-        foreach (var loop in cell.CurveLoops.Cast<DB.CurveArray>())
+        foreach (var loop in cell.CurveLoops.Cast<ARDB.CurveArray>())
         {
-          foreach (var curve in loop.Cast<DB.Curve>())
+          foreach (var curve in loop.Cast<ARDB.Curve>())
           {
             var center = curve.Evaluate(0.5, true);
             var distance = face.Project(center).Distance;
@@ -175,24 +176,24 @@ namespace RhinoInside.Revit.GH.Types
       return result;
     }
 
-    static DB.Reference FindReference(DB.HostObject host, DB.CurtainGrid value)
+    static ARDB.Reference FindReference(ARDB.HostObject host, ARDB.CurtainGrid value)
     {
-      if (host is DB.Wall wall)
-        return new DB.Reference(wall);
+      if (host is ARDB.Wall wall)
+        return new ARDB.Reference(wall);
 
       var cells = value.GetCurtainCells();
       foreach (var reference in GetFaceReferences(host))
       {
-        if (host.GetGeometryObjectFromReference(reference) is DB.Face face && IsCurtainGridOnFace(cells, face))
+        if (host.GetGeometryObjectFromReference(reference) is ARDB.Face face && IsCurtainGridOnFace(cells, face))
           return reference;
       }
 
       return default;
     }
 
-    DB.CurtainGrid FindCurtainGrid(DB.HostObject host, DB.Reference reference)
+    ARDB.CurtainGrid FindCurtainGrid(ARDB.HostObject host, ARDB.Reference reference)
     {
-      if (host is DB.Wall wall)
+      if (host is ARDB.Wall wall)
       {
         return wall.CurtainGrid;
       }
@@ -200,9 +201,9 @@ namespace RhinoInside.Revit.GH.Types
       {
         if
         (
-          reference.ElementReferenceType == DB.ElementReferenceType.REFERENCE_TYPE_SURFACE &&
-          host.GetGeometryObjectFromReference(reference) is DB.Face face &&
-          HostCurtainGrids(host) is IEnumerable<DB.CurtainGrid> grids
+          reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE &&
+          host.GetGeometryObjectFromReference(reference) is ARDB.Face face &&
+          HostCurtainGrids(host) is IEnumerable<ARDB.CurtainGrid> grids
         )
         {
           foreach (var grid in grids)
@@ -226,8 +227,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (curves is null)
         {
-          if (Value is DB.CurtainGrid grid)
-            curves = grid.GetCurtainCells().Cast<DB.CurtainCell>().SelectMany
+          if (Value is ARDB.CurtainGrid grid)
+            curves = grid.GetCurtainCells().Cast<ARDB.CurtainCell>().SelectMany
             (
               x =>
               {

@@ -1,7 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -21,14 +21,14 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
 
-      ListItems.Add(new GH_ValueListItem("Generic", ((int) DB.StructuralAssetClass.Generic).ToString()));
-      ListItems.Add(new GH_ValueListItem("Basic", ((int) DB.StructuralAssetClass.Basic).ToString()));
-      ListItems.Add(new GH_ValueListItem("Concrete", ((int) DB.StructuralAssetClass.Concrete).ToString()));
-      ListItems.Add(new GH_ValueListItem("Gas", ((int) DB.StructuralAssetClass.Gas).ToString()));
-      ListItems.Add(new GH_ValueListItem("Liquid", ((int) DB.StructuralAssetClass.Liquid).ToString()));
-      ListItems.Add(new GH_ValueListItem("Metal", ((int) DB.StructuralAssetClass.Metal).ToString()));
-      ListItems.Add(new GH_ValueListItem("Plastic", ((int) DB.StructuralAssetClass.Plastic).ToString()));
-      ListItems.Add(new GH_ValueListItem("Wood", ((int) DB.StructuralAssetClass.Wood).ToString()));
+      ListItems.Add(new GH_ValueListItem("Generic", ((int) ARDB.StructuralAssetClass.Generic).ToString()));
+      ListItems.Add(new GH_ValueListItem("Basic", ((int) ARDB.StructuralAssetClass.Basic).ToString()));
+      ListItems.Add(new GH_ValueListItem("Concrete", ((int) ARDB.StructuralAssetClass.Concrete).ToString()));
+      ListItems.Add(new GH_ValueListItem("Gas", ((int) ARDB.StructuralAssetClass.Gas).ToString()));
+      ListItems.Add(new GH_ValueListItem("Liquid", ((int) ARDB.StructuralAssetClass.Liquid).ToString()));
+      ListItems.Add(new GH_ValueListItem("Metal", ((int) ARDB.StructuralAssetClass.Metal).ToString()));
+      ListItems.Add(new GH_ValueListItem("Plastic", ((int) ARDB.StructuralAssetClass.Plastic).ToString()));
+      ListItems.Add(new GH_ValueListItem("Wood", ((int) ARDB.StructuralAssetClass.Wood).ToString()));
     }
   }
 #endif

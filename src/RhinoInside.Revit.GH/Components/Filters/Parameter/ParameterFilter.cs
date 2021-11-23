@@ -4,12 +4,13 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
+  using ElementTracking;
+  using External.DB.Extensions;
+
   public class ParameterFilterElementByName : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("01E86D7C-B143-47F6-BC26-0A234EB360F3");
@@ -103,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!Params.TryGetData(DA, "Filter", out Types.ElementFilter filter)) return;
 
       // Previous Output
-      Params.ReadTrackedElement(_ParameterFilter_, doc.Value, out DB.ParameterFilterElement ruleFilter);
+      Params.ReadTrackedElement(_ParameterFilter_, doc.Value, out ARDB.ParameterFilterElement ruleFilter);
 
       StartTransaction(doc.Value);
       {
@@ -117,11 +118,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     bool Reuse
     (
-      DB.ParameterFilterElement ruleFilter,
+      ARDB.ParameterFilterElement ruleFilter,
       string name,
-      ICollection<DB.ElementId> categoryIds,
-      DB.ElementFilter filter,
-      DB.ParameterFilterElement template
+      ICollection<ARDB.ElementId> categoryIds,
+      ARDB.ElementFilter filter,
+      ARDB.ParameterFilterElement template
     )
     {
       if (ruleFilter is null) return false;
@@ -133,16 +134,16 @@ namespace RhinoInside.Revit.GH.Components.Filters
       return true;
     }
 
-    DB.ParameterFilterElement Create
+    ARDB.ParameterFilterElement Create
     (
-      DB.Document doc,
+      ARDB.Document doc,
       string name,
-      ICollection<DB.ElementId> categoryIds,
-      DB.ElementFilter filter,
-      DB.ParameterFilterElement template
+      ICollection<ARDB.ElementId> categoryIds,
+      ARDB.ElementFilter filter,
+      ARDB.ParameterFilterElement template
     )
     {
-      var ruleFilter = default(DB.ParameterFilterElement);
+      var ruleFilter = default(ARDB.ParameterFilterElement);
 
       // Make sure the name is unique
       {
@@ -151,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
         name = doc.GetNamesakeElements
         (
-          typeof(DB.FilterElement), name
+          typeof(ARDB.FilterElement), name
         ).
         Select(x => x.Name).
         WhereNamePrefixedWith(name).
@@ -161,22 +162,22 @@ namespace RhinoInside.Revit.GH.Components.Filters
       // Try to duplicate template
       if (template is object)
       {
-        var ids = DB.ElementTransformUtils.CopyElements
+        var ids = ARDB.ElementTransformUtils.CopyElements
         (
           template.Document,
-          new DB.ElementId[] { template.Id },
+          new ARDB.ElementId[] { template.Id },
           doc,
           default,
           default
         );
 
-        ruleFilter = ids.Select(x => doc.GetElement(x)).OfType<DB.ParameterFilterElement>().FirstOrDefault();
+        ruleFilter = ids.Select(x => doc.GetElement(x)).OfType<ARDB.ParameterFilterElement>().FirstOrDefault();
         ruleFilter.Name = name;
       }
 
       if (ruleFilter is null)
       {
-        ruleFilter = DB.ParameterFilterElement.Create
+        ruleFilter = ARDB.ParameterFilterElement.Create
         (
           doc, name, categoryIds
         );
@@ -188,14 +189,14 @@ namespace RhinoInside.Revit.GH.Components.Filters
       return ruleFilter;
     }
 
-    DB.ParameterFilterElement Reconstruct
+    ARDB.ParameterFilterElement Reconstruct
     (
-      DB.ParameterFilterElement ruleFilter,
-      DB.Document doc,
+      ARDB.ParameterFilterElement ruleFilter,
+      ARDB.Document doc,
       string name,
-      ICollection<DB.ElementId> categoryIds,
-      DB.ElementFilter filter,
-      DB.ParameterFilterElement template
+      ICollection<ARDB.ElementId> categoryIds,
+      ARDB.ElementFilter filter,
+      ARDB.ParameterFilterElement template
     )
     {
       if (!Reuse(ruleFilter, name, categoryIds, filter, template))

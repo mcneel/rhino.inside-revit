@@ -1,7 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Worksets
 {
@@ -113,20 +113,20 @@ namespace RhinoInside.Revit.GH.Components.Worksets
 
       DA.SetData("Element", element);
       Params.TrySetData(DA, "Workset", () => new Types.Workset(element.Document, element.WorksetId));
-      Params.TrySetData(DA, "Edited by", () => element.Value.get_Parameter(DB.BuiltInParameter.EDITED_BY)?.AsString());
+      Params.TrySetData(DA, "Edited by", () => element.Value.get_Parameter(ARDB.BuiltInParameter.EDITED_BY)?.AsString());
 
       var _Owner_ = Params.IndexOfOutputParam("Owner");
       var _Status_ = Params.IndexOfOutputParam("Status");
 
       if (_Owner_ >= 0 || _Status_ >= 0)
       {
-        var checkoutStatus = default(DB.CheckoutStatus);
+        var checkoutStatus = default(ARDB.CheckoutStatus);
         if (_Owner_ >= 0)
         {
-          checkoutStatus = DB.WorksharingUtils.GetCheckoutStatus(element.Document, element.Id, out var owner);
+          checkoutStatus = ARDB.WorksharingUtils.GetCheckoutStatus(element.Document, element.Id, out var owner);
           DA.SetData(_Owner_, owner);
         }
-        else checkoutStatus = DB.WorksharingUtils.GetCheckoutStatus(element.Document, element.Id);
+        else checkoutStatus = ARDB.WorksharingUtils.GetCheckoutStatus(element.Document, element.Id);
 
         if (_Status_ >= 0)
           DA.SetData(_Status_, checkoutStatus);

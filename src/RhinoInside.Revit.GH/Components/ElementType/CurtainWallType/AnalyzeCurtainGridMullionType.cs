@@ -1,10 +1,8 @@
 using System;
 using Grasshopper.Kernel;
+using ARDB = Autodesk.Revit.DB;
 
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
-
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class AnalyzeCurtainGridMullionType : AnalysisComponent
   {
@@ -103,7 +101,7 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // get input
-      DB.MullionType mullionType = default;
+      ARDB.MullionType mullionType = default;
       if (!DA.GetData("Mullion Type", ref mullionType))
         return;
 
@@ -135,48 +133,48 @@ namespace RhinoInside.Revit.GH.Components
       //    Trapezoid Corner = 3
       //    Quad Corner      = 4
       //    V Corner         = 5
-      var hasRadius = mullionType.get_Parameter(DB.BuiltInParameter.CIRC_MULLION_RADIUS) != null;
-      var hasRectWidthside1 = mullionType.get_Parameter(DB.BuiltInParameter.RECT_MULLION_WIDTH1) != null;
-      var hasCustWidthside1 = mullionType.get_Parameter(DB.BuiltInParameter.CUST_MULLION_WIDTH1) != null;
-      var hasDepth1 = mullionType.get_Parameter(DB.BuiltInParameter.MULLION_DEPTH1) != null;
-      var hasCenterWidth = mullionType.get_Parameter(DB.BuiltInParameter.TRAP_MULL_WIDTH) != null;
-      var hasLeg1 = mullionType.get_Parameter(DB.BuiltInParameter.LV_MULLION_LEG1) != null;
+      var hasRadius = mullionType.get_Parameter(ARDB.BuiltInParameter.CIRC_MULLION_RADIUS) != null;
+      var hasRectWidthside1 = mullionType.get_Parameter(ARDB.BuiltInParameter.RECT_MULLION_WIDTH1) != null;
+      var hasCustWidthside1 = mullionType.get_Parameter(ARDB.BuiltInParameter.CUST_MULLION_WIDTH1) != null;
+      var hasDepth1 = mullionType.get_Parameter(ARDB.BuiltInParameter.MULLION_DEPTH1) != null;
+      var hasCenterWidth = mullionType.get_Parameter(ARDB.BuiltInParameter.TRAP_MULL_WIDTH) != null;
+      var hasLeg1 = mullionType.get_Parameter(ARDB.BuiltInParameter.LV_MULLION_LEG1) != null;
 
-      var mullionSystemFamily = DBX.CurtainMullionSystemFamily.Unknown;
+      var mullionSystemFamily = External.DB.CurtainMullionSystemFamily.Unknown;
       // rectangular
       if (hasRectWidthside1 || hasCustWidthside1)
-        mullionSystemFamily = DBX.CurtainMullionSystemFamily.Rectangular;
+        mullionSystemFamily = External.DB.CurtainMullionSystemFamily.Rectangular;
       // cicular
       else if (hasRadius)
-        mullionSystemFamily = DBX.CurtainMullionSystemFamily.Circular;
+        mullionSystemFamily = External.DB.CurtainMullionSystemFamily.Circular;
       // quad
       else if (hasDepth1)
-        mullionSystemFamily = DBX.CurtainMullionSystemFamily.QuadCorner;
+        mullionSystemFamily = External.DB.CurtainMullionSystemFamily.QuadCorner;
       // trapezoid
       else if (hasCenterWidth)
-        mullionSystemFamily = DBX.CurtainMullionSystemFamily.TrapezoidCorner;
+        mullionSystemFamily = External.DB.CurtainMullionSystemFamily.TrapezoidCorner;
       // corner L or V
       else if (hasLeg1)
       {
         // confirmed that the corner mullion system family name in other languages also starts with L or V
         if (mullionType.FamilyName.StartsWith("L "))
-          mullionSystemFamily = DBX.CurtainMullionSystemFamily.LCorner;
+          mullionSystemFamily = External.DB.CurtainMullionSystemFamily.LCorner;
         else if (mullionType.FamilyName.StartsWith("V "))
-          mullionSystemFamily = DBX.CurtainMullionSystemFamily.VCorner;
+          mullionSystemFamily = External.DB.CurtainMullionSystemFamily.VCorner;
       }
 
       DA.SetData("Mullion System Family", mullionSystemFamily);
 
-      PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_ANGLE, "Angle");
-      PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_OFFSET, "Offset");
+      PipeHostParameter(DA, mullionType, ARDB.BuiltInParameter.MULLION_ANGLE, "Angle");
+      PipeHostParameter(DA, mullionType, ARDB.BuiltInParameter.MULLION_OFFSET, "Offset");
 
-      var profile = new Types.MullionProfile(mullionType.Document, mullionType.get_Parameter(DB.BuiltInParameter.MULLION_PROFILE).AsElementId());
+      var profile = new Types.MullionProfile(mullionType.Document, mullionType.get_Parameter(ARDB.BuiltInParameter.MULLION_PROFILE).AsElementId());
       DA.SetData("Profile", profile);
 
-      var position = new Types.MullionPosition(mullionType.Document, mullionType.get_Parameter(DB.BuiltInParameter.MULLION_POSITION).AsElementId());
+      var position = new Types.MullionPosition(mullionType.Document, mullionType.get_Parameter(ARDB.BuiltInParameter.MULLION_POSITION).AsElementId());
       DA.SetData("Position", position);
 
-      PipeHostParameter(DA, mullionType, DB.BuiltInParameter.MULLION_CORNER_TYPE, "Corner Mullion");
+      PipeHostParameter(DA, mullionType, ARDB.BuiltInParameter.MULLION_CORNER_TYPE, "Corner Mullion");
 
       // output params are reused for various mullion types
       //
@@ -194,27 +192,27 @@ namespace RhinoInside.Revit.GH.Components
       // Center Width     |  -   |  -   |  -   |  T     | -  | -
       // Diameter         |  T   <= custom calculated for circular mullions
       var thicknessParam =
-        mullionType.get_Parameter(DB.BuiltInParameter.RECT_MULLION_THICK) ??
-        mullionType.get_Parameter(DB.BuiltInParameter.CUST_MULLION_THICK) ??
-        mullionType.get_Parameter(DB.BuiltInParameter.TRAP_MULL_WIDTH);
+        mullionType.get_Parameter(ARDB.BuiltInParameter.RECT_MULLION_THICK) ??
+        mullionType.get_Parameter(ARDB.BuiltInParameter.CUST_MULLION_THICK) ??
+        mullionType.get_Parameter(ARDB.BuiltInParameter.TRAP_MULL_WIDTH);
       DA.SetData("Thickness", thicknessParam.AsGoo());
 
       var depth1Param =
-        mullionType.get_Parameter(DB.BuiltInParameter.RECT_MULLION_WIDTH1) ??
-        mullionType.get_Parameter(DB.BuiltInParameter.CUST_MULLION_WIDTH1) ??
-        mullionType.get_Parameter(DB.BuiltInParameter.LV_MULLION_LEG1) ??
-        mullionType.get_Parameter(DB.BuiltInParameter.MULLION_DEPTH1) ??
-        mullionType.get_Parameter(DB.BuiltInParameter.MULLION_DEPTH);
+        mullionType.get_Parameter(ARDB.BuiltInParameter.RECT_MULLION_WIDTH1) ??
+        mullionType.get_Parameter(ARDB.BuiltInParameter.CUST_MULLION_WIDTH1) ??
+        mullionType.get_Parameter(ARDB.BuiltInParameter.LV_MULLION_LEG1) ??
+        mullionType.get_Parameter(ARDB.BuiltInParameter.MULLION_DEPTH1) ??
+        mullionType.get_Parameter(ARDB.BuiltInParameter.MULLION_DEPTH);
       DA.SetData("Depth 1", depth1Param.AsGoo());
 
       var depth2Param =
-        mullionType.get_Parameter(DB.BuiltInParameter.RECT_MULLION_WIDTH2) ??
-        mullionType.get_Parameter(DB.BuiltInParameter.CUST_MULLION_WIDTH2) ??
-        mullionType.get_Parameter(DB.BuiltInParameter.LV_MULLION_LEG2) ??
-        mullionType.get_Parameter(DB.BuiltInParameter.MULLION_DEPTH2);
+        mullionType.get_Parameter(ARDB.BuiltInParameter.RECT_MULLION_WIDTH2) ??
+        mullionType.get_Parameter(ARDB.BuiltInParameter.CUST_MULLION_WIDTH2) ??
+        mullionType.get_Parameter(ARDB.BuiltInParameter.LV_MULLION_LEG2) ??
+        mullionType.get_Parameter(ARDB.BuiltInParameter.MULLION_DEPTH2);
       DA.SetData("Depth 2", depth2Param.AsGoo());
 
-      var radiusParam = mullionType.get_Parameter(DB.BuiltInParameter.CIRC_MULLION_RADIUS);
+      var radiusParam = mullionType.get_Parameter(ARDB.BuiltInParameter.CIRC_MULLION_RADIUS);
       if (radiusParam != null)
       {
         var radius = radiusParam.AsDouble() * Revit.ModelUnits;

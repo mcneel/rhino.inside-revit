@@ -1,7 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -19,10 +19,10 @@ namespace RhinoInside.Revit.GH.Parameters
       Description = "Provides a picker of a CategoryType";
 
       ListItems.Clear();
-      ListItems.Add(new GH_ValueListItem("Model", ((int) DB.CategoryType.Model).ToString()));
-      ListItems.Add(new GH_ValueListItem("Annotation", ((int) DB.CategoryType.Annotation).ToString()));
-      ListItems.Add(new GH_ValueListItem("Internal", ((int) DB.CategoryType.Internal).ToString()));
-      ListItems.Add(new GH_ValueListItem("Analytical", ((int) DB.CategoryType.AnalyticalModel).ToString()));
+      ListItems.Add(new GH_ValueListItem("Model", ((int) ARDB.CategoryType.Model).ToString()));
+      ListItems.Add(new GH_ValueListItem("Annotation", ((int) ARDB.CategoryType.Annotation).ToString()));
+      ListItems.Add(new GH_ValueListItem("Internal", ((int) ARDB.CategoryType.Internal).ToString()));
+      ListItems.Add(new GH_ValueListItem("Analytical", ((int) ARDB.CategoryType.AnalyticalModel).ToString()));
     }
   }
 }

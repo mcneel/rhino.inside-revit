@@ -5,10 +5,10 @@ using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
+using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components.ParameterElement
+namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
   public class ProjectParameter : TransactionalChainComponent
   {
@@ -144,7 +144,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       // Input
       if (!Parameters.ParameterKey.GetProjectParameter(this, DA, _Parameter_, out var key)) return;
       if (!Params.TryGetData(DA, "Varies", out bool? varies)) return;
-      if (!Params.TryGetData(DA, "Binding", out Types.ParameterBinding binding, x => x.IsValid && x.Value != DBX.ParameterBinding.Unknown)) return;
+      if (!Params.TryGetData(DA, "Binding", out Types.ParameterBinding binding, x => x.IsValid && x.Value != ERDB.ParameterBinding.Unknown)) return;
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
 
       var doc = key.Document;
@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       var definition = key.Value?.GetDefinition();
       if (binding is object || varies is object || categories is object)
       {
-        if (key.Id.IsBuiltInId() || key.Value is DB.GlobalParameter || doc?.IsFamilyDocument == true)
+        if (key.Id.IsBuiltInId() || key.Value is ARDB.GlobalParameter || doc?.IsFamilyDocument == true)
           throw new InvalidOperationException("This operation is only supported on project parameters");
 
         StartTransaction(doc);
@@ -160,8 +160,8 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
         if (varies != default && definition.VariesAcrossGroups != varies.Value)
           definition.SetAllowVaryBetweenGroups(doc, varies.Value);
 
-        var parameterBinding = binding?.Value ?? DBX.ParameterBinding.Unknown;
-        var parameterCategories = categories?.Select(x => x.APIObject).OfType<DB.Category>().ToList();
+        var parameterBinding = binding?.Value ?? ERDB.ParameterBinding.Unknown;
+        var parameterCategories = categories?.Select(x => x.APIObject).OfType<ARDB.Category>().ToList();
 
         UpdateBinding
         (
@@ -178,45 +178,45 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
         Params.TrySetData(DA, "Varies", () => definition.VariesAcrossGroups);
         Params.TrySetData(DA, "Binding", () => definition.GetParameterBinding(key.Document));
         Params.TrySetDataList(DA, "Categories", () =>
-          (key.Document.ParameterBindings.get_Item(definition) as DB.ElementBinding)?.Categories.Cast<DB.Category>());
+          (key.Document.ParameterBindings.get_Item(definition) as ARDB.ElementBinding)?.Categories.Cast<ARDB.Category>());
       }
     }
 
-    DBX.ParameterBinding ToParameterBinding(DB.Binding binding)
+    ERDB.ParameterBinding ToParameterBinding(ARDB.Binding binding)
     {
       switch (binding)
       {
-        case DB.InstanceBinding _: return DBX.ParameterBinding.Instance;
-        case DB.TypeBinding _: return DBX.ParameterBinding.Type;
-        default: return DBX.ParameterBinding.Unknown;
+        case ARDB.InstanceBinding _: return ERDB.ParameterBinding.Instance;
+        case ARDB.TypeBinding _: return ERDB.ParameterBinding.Type;
+        default: return ERDB.ParameterBinding.Unknown;
       }
     }
 
-    DB.Binding CreateBinding(DBX.ParameterBinding binding, DB.CategorySet categorySet)
+    ARDB.Binding CreateBinding(ERDB.ParameterBinding binding, ARDB.CategorySet categorySet)
     {
       switch (binding)
       {
-        case DBX.ParameterBinding.Instance: return new DB.InstanceBinding(categorySet);
-        case DBX.ParameterBinding.Type: return new DB.TypeBinding(categorySet);
+        case ERDB.ParameterBinding.Instance: return new ARDB.InstanceBinding(categorySet);
+        case ERDB.ParameterBinding.Type: return new ARDB.TypeBinding(categorySet);
       }
       return default;
     }
 
     bool UpdateBinding
     (
-      DB.ParameterElement parameter,
-      DB.InternalDefinition definition,
-      DBX.ParameterBinding parameterBinding,
-      IList<DB.Category> categories
+      ARDB.ParameterElement parameter,
+      ARDB.InternalDefinition definition,
+      ERDB.ParameterBinding parameterBinding,
+      IList<ARDB.Category> categories
     )
     {
       bool reinsert = false;
       var doc = parameter.Document;
       var binding = doc.ParameterBindings.get_Item(definition);
-      var categorySet = (binding as DB.ElementBinding)?.Categories ?? new DB.CategorySet();
+      var categorySet = (binding as ARDB.ElementBinding)?.Categories ?? new ARDB.CategorySet();
       var bindingType = ToParameterBinding(binding);
 
-      if (parameterBinding != DBX.ParameterBinding.Unknown && bindingType != parameterBinding)
+      if (parameterBinding != ERDB.ParameterBinding.Unknown && bindingType != parameterBinding)
       {
         reinsert = true;
         binding = CreateBinding(parameterBinding, categorySet);
@@ -241,7 +241,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       {
         if (!doc.ParameterBindings.ReInsert(definition, binding, definition.GetGroupType()))
         {
-          if (parameter is DB.SharedParameterElement)
+          if (parameter is ARDB.SharedParameterElement)
             throw new InvalidOperationException("Failed editing the parameter binding.");
           else
             throw new InvalidOperationException($"Categories rebinding is only supported on shared parameters.");

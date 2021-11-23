@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using ARDB = Autodesk.Revit.DB;
 
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class AnalyzeCurtainSystem : AnalysisComponent
   {
@@ -48,13 +46,13 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // grab input
-      DB.CurtainSystem curtainSystemInstance = default;
+      ARDB.CurtainSystem curtainSystemInstance = default;
       if (!DA.GetData("Curtain System", ref curtainSystemInstance))
         return;
 
       if (curtainSystemInstance.CurtainGrids != null)
       {
-        var cGrids = curtainSystemInstance.CurtainGrids.Cast<DB.CurtainGrid>();
+        var cGrids = curtainSystemInstance.CurtainGrids.Cast<ARDB.CurtainGrid>();
         DA.SetDataList("Curtain Grids", cGrids.Select(x => new Types.CurtainGrid(curtainSystemInstance, x))) ;
       }
     }

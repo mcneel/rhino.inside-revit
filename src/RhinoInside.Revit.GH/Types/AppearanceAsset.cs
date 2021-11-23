@@ -6,19 +6,19 @@ using Rhino;
 using Rhino.DocObjects;
 using Rhino.Render;
 using RhinoInside.Revit.Convert.Render;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Appearance Asset")]
   public class AppearanceAssetElement : Element, Bake.IGH_BakeAwareElement
   {
-    protected override Type ValueType => typeof(DB.AppearanceAssetElement);
-    public new DB.AppearanceAssetElement Value => base.Value as DB.AppearanceAssetElement;
+    protected override Type ValueType => typeof(ARDB.AppearanceAssetElement);
+    public new ARDB.AppearanceAssetElement Value => base.Value as ARDB.AppearanceAssetElement;
 
     public AppearanceAssetElement() { }
-    public AppearanceAssetElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public AppearanceAssetElement(DB.AppearanceAssetElement asset) : base(asset) { }
+    public AppearanceAssetElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public AppearanceAssetElement(ARDB.AppearanceAssetElement asset) : base(asset) { }
 
     public override bool CastTo<Q>(out Q target)
     {
@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (RhinoDoc.ActiveDoc is RhinoDoc doc)
         {
-          if (Value is DB.AppearanceAssetElement appearance)
+          if (Value is ARDB.AppearanceAssetElement appearance)
           {
             var renderMaterial = RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, doc);
             renderMaterial.Name = appearance.Name;
@@ -48,11 +48,11 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_BakeAwareElement
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
-      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
     public bool BakeElement
     (
-      IDictionary<DB.ElementId, Guid> idMap,
+      IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
       RhinoDoc doc,
       ObjectAttributes att,
@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      if (Value is DB.AppearanceAssetElement appearance)
+      if (Value is ARDB.AppearanceAssetElement appearance)
       {
         if (BakeRenderMaterial(overwrite, doc, appearance.Name, out guid))
           idMap.Add(Id, guid);
@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Types
       out Guid guid
     )
     {
-      if (Value is DB.AppearanceAssetElement appearance)
+      if (Value is ARDB.AppearanceAssetElement appearance)
       {
         // 2. Check if already exist
         var material = doc.RenderMaterials.Where(x => x.Name == materialName).FirstOrDefault();

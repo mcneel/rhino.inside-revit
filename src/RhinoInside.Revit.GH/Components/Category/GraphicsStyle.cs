@@ -3,9 +3,9 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Categories
 {
   public class CategoryGraphicsStyle : Component
   {
@@ -31,12 +31,12 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Category category = null;
+      ARDB.Category category = null;
       if (!DA.GetData("Category", ref category))
         return;
 
-      DA.SetData("Projection", category?.GetGraphicsStyle(DB.GraphicsStyleType.Projection));
-      DA.SetData("Cut", category?.GetGraphicsStyle(DB.GraphicsStyleType.Cut));
+      DA.SetData("Projection", category?.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection));
+      DA.SetData("Cut", category?.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut));
     }
   }
 
@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("54082395-7160-4563-B289-215AFDD33A7F");
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
 
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.GraphicsStyle));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.GraphicsStyle));
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -95,13 +95,13 @@ namespace RhinoInside.Revit.GH.Components
       string name = null;
       DA.GetData("Name", ref name);
 
-      Params.TryGetData(DA, "Filter", out DB.ElementFilter filter);
+      Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
       using (var categories = doc.Settings.Categories)
       {
         var styles = categories.
-          get_Item(DB.BuiltInCategory.OST_Lines).SubCategories.Cast<DB.Category>().
-          Select(x => x.GetGraphicsStyle(DB.GraphicsStyleType.Projection));
+          get_Item(ARDB.BuiltInCategory.OST_Lines).SubCategories.Cast<ARDB.Category>().
+          Select(x => x.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection));
 
         if (filter is object)
           styles = styles.Where(x => filter.PassesFilter(x));

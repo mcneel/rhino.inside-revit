@@ -1,10 +1,7 @@
 using System;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-
-using DB = Autodesk.Revit.DB;
-
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -23,13 +20,13 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
       ListItems.Add(
-        new GH_ValueListItem("Coarse", ((int) DB.ViewDetailLevel.Coarse).ToString())
+        new GH_ValueListItem("Coarse", ((int) ARDB.ViewDetailLevel.Coarse).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Medium", ((int) DB.ViewDetailLevel.Medium).ToString())
+        new GH_ValueListItem("Medium", ((int) ARDB.ViewDetailLevel.Medium).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Fine", ((int) DB.ViewDetailLevel.Fine).ToString())
+        new GH_ValueListItem("Fine", ((int) ARDB.ViewDetailLevel.Fine).ToString())
         );
     }
   }

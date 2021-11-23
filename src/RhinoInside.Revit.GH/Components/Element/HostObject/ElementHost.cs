@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Host
+namespace RhinoInside.Revit.GH.Components.Hosts
 {
+  using External.DB;
+  using External.DB.Extensions;
+
   public class ElementHost : Component
   {
     public override Guid ComponentGuid => new Guid("6723BEB1-DD99-40BE-8DA9-13B3812D6B46");
@@ -34,68 +35,68 @@ namespace RhinoInside.Revit.GH.Components.Host
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      DB.Element element = null;
+      ARDB.Element element = null;
       if (!DA.GetData("Element", ref element) || element is null)
         return;
 
       // Special cases
-      if (element is DB.FamilyInstance familyInstace)
+      if (element is ARDB.FamilyInstance familyInstace)
       {
         DA.SetData("Host", Types.HostObject.FromElement(familyInstace.Host));
         return;
       }
-      else if (element is DB.Opening opening)
+      else if (element is ARDB.Opening opening)
       {
         DA.SetData("Host", Types.HostObject.FromElement(opening.Host));
         return;
       }
-      else if (element is DB.Sketch sketch)
+      else if (element is ARDB.Sketch sketch)
       {
         DA.SetData("Host", Types.HostObject.FromElement(sketch.GetHostObject()));
         return;
       }
-      else if (element.get_Parameter(DB.BuiltInParameter.HOST_ID_PARAM) is DB.Parameter hostId)
+      else if (element.get_Parameter(ARDB.BuiltInParameter.HOST_ID_PARAM) is ARDB.Parameter hostId)
       {
         DA.SetData("Host", Types.HostObject.FromElementId(element.Document, hostId.AsElementId()));
         return;
       }
 
       // Search geometrically
-      if (element.get_BoundingBox(null) is DB.BoundingBoxXYZ bbox)
+      if (element.get_BoundingBox(null) is ARDB.BoundingBoxXYZ bbox)
       {
-        using (var collector = new DB.FilteredElementCollector(element.Document))
+        using (var collector = new ARDB.FilteredElementCollector(element.Document))
         {
-          var elementCollector = collector.OfClass(typeof(DB.HostObject));
+          var elementCollector = collector.OfClass(typeof(ARDB.HostObject));
 
           // Element should be at the same Design Option
-          if (element.DesignOption is DB.DesignOption designOption)
-            elementCollector = elementCollector.WherePasses(new DB.ElementDesignOptionFilter(designOption.Id));
+          if (element.DesignOption is ARDB.DesignOption designOption)
+            elementCollector = elementCollector.WherePasses(new ARDB.ElementDesignOptionFilter(designOption.Id));
           else
-            elementCollector = elementCollector.WherePasses(new DB.ElementDesignOptionFilter(DB.ElementId.InvalidElementId));
+            elementCollector = elementCollector.WherePasses(new ARDB.ElementDesignOptionFilter(ARDB.ElementId.InvalidElementId));
 
-          if (element.Category?.Parent is DB.Category hostCategory)
+          if (element.Category?.Parent is ARDB.Category hostCategory)
             elementCollector = elementCollector.OfCategoryId(hostCategory.Id);
 
-          var bboxFilter = new DB.BoundingBoxIntersectsFilter(new DB.Outline(bbox.Min, bbox.Max));
+          var bboxFilter = new ARDB.BoundingBoxIntersectsFilter(new ARDB.Outline(bbox.Min, bbox.Max));
           elementCollector = elementCollector.WherePasses(bboxFilter);
 
-          var classFilter = default(DB.ElementFilter);
-          if (element is DB.FamilyInstance instance) classFilter = new DB.FamilyInstanceFilter(element.Document, instance.GetTypeId());
-          else if (element is DB.Area) classFilter = new DB.AreaFilter();
-          else if (element is DB.AreaTag) classFilter = new DB.AreaTagFilter();
-          else if (element is DB.Architecture.Room) classFilter = new DB.Architecture.RoomFilter();
-          else if (element is DB.Architecture.RoomTag) classFilter = new DB.Architecture.RoomTagFilter();
-          else if (element is DB.Mechanical.Space) classFilter = new DB.Mechanical.SpaceFilter();
-          else if (element is DB.Mechanical.SpaceTag) classFilter = new DB.Mechanical.SpaceTagFilter();
+          var classFilter = default(ARDB.ElementFilter);
+          if (element is ARDB.FamilyInstance instance) classFilter = new ARDB.FamilyInstanceFilter(element.Document, instance.GetTypeId());
+          else if (element is ARDB.Area) classFilter = new ARDB.AreaFilter();
+          else if (element is ARDB.AreaTag) classFilter = new ARDB.AreaTagFilter();
+          else if (element is ARDB.Architecture.Room) classFilter = new ARDB.Architecture.RoomFilter();
+          else if (element is ARDB.Architecture.RoomTag) classFilter = new ARDB.Architecture.RoomTagFilter();
+          else if (element is ARDB.Mechanical.Space) classFilter = new ARDB.Mechanical.SpaceFilter();
+          else if (element is ARDB.Mechanical.SpaceTag) classFilter = new ARDB.Mechanical.SpaceTagFilter();
           else
           {
-            if (element is DB.CurveElement)
-              classFilter = new DB.ElementClassFilter(typeof(DB.CurveElement));
+            if (element is ARDB.CurveElement)
+              classFilter = new ARDB.ElementClassFilter(typeof(ARDB.CurveElement));
             else
-              classFilter = new DB.ElementClassFilter(element.GetType());
+              classFilter = new ARDB.ElementClassFilter(element.GetType());
           }
 
-          foreach (var host in elementCollector.Cast<DB.HostObject>())
+          foreach (var host in elementCollector.Cast<ARDB.HostObject>())
           {
             if (host.Id == element.Id)
               continue;

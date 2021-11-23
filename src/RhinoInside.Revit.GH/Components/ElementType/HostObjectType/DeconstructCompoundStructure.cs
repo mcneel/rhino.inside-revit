@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Host
+namespace RhinoInside.Revit.GH.Components.Hosts
 {
   public class DeconstructCompoundStructure : ZuiComponent
   {
@@ -146,7 +145,7 @@ namespace RhinoInside.Revit.GH.Components.Host
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Host.Obsolete
+namespace RhinoInside.Revit.GH.Components.Hosts.Obsolete
 {
   [Obsolete("Since 2021-03-24")]
   public class DeconstructCompoundStructure : Component
@@ -279,13 +278,13 @@ namespace RhinoInside.Revit.GH.Components.Host.Obsolete
       if (!DA.GetData("Compound Structure", ref structure))
         return;
 
-      if (structure.Value is DB.CompoundStructure cstruct)
+      if (structure.Value is ARDB.CompoundStructure cstruct)
       {
         DA.SetData("Total Thickness", cstruct.GetWidth() * Revit.ModelUnits);
         DA.SetData("Sample Height", cstruct.SampleHeight * Revit.ModelUnits);
         DA.SetData("Cutoff Height", cstruct.CutoffHeight * Revit.ModelUnits);
         DA.SetData("Minimum Sample Height", cstruct.MinimumSampleHeight * Revit.ModelUnits);
-        DA.SetData("Minimum Layer Thickness", DB.CompoundStructure.GetMinimumLayerThickness() * Revit.ModelUnits);
+        DA.SetData("Minimum Layer Thickness", ARDB.CompoundStructure.GetMinimumLayerThickness() * Revit.ModelUnits);
         DA.SetDataList("Layers", cstruct.GetLayers().Select(x => new Types.CompoundStructureLayer(structure.Document, x)));
         DA.SetData("First Core Layer Index", cstruct.GetFirstCoreLayerIndex());
         DA.SetData("Last Core Layer Index", cstruct.GetLastCoreLayerIndex());

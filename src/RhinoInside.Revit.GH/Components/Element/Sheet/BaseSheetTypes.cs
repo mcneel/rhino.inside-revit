@@ -1,16 +1,9 @@
-using System;
-using System.Linq;
+using ARDB = Autodesk.Revit.DB;
 
-using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
-
-using RhinoInside.Revit.GH.ElementTracking;
-using RhinoInside.Revit.External.DB.Extensions;
-
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components.Element.Sheet
+namespace RhinoInside.Revit.GH.Components.Sheets
 {
+  using External.DB.Extensions;
+
   public abstract class BaseSheetByNumber<TSheetHandler> : ElementTrackerComponent where TSheetHandler: BaseSheetHandler
   {
     public BaseSheetByNumber(string name, string nickname, string description) : base
@@ -23,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
     )
     { }
 
-    protected DB.ViewSheet Reconstruct(DB.ViewSheet sheet, DB.Document doc, TSheetHandler handler)
+    protected ARDB.ViewSheet Reconstruct(ARDB.ViewSheet sheet, ARDB.Document doc, TSheetHandler handler)
     {
       if (!Reuse(sheet, handler))
       {
@@ -37,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       return sheet;
     }
 
-    bool Reuse(DB.ViewSheet sheet, TSheetHandler handler)
+    bool Reuse(ARDB.ViewSheet sheet, TSheetHandler handler)
     {
       if (!handler.CanUpdateSheet(sheet))
       {
@@ -54,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       }
     }
 
-    DB.ViewSheet Create(DB.Document doc, TSheetHandler handler)
+    ARDB.ViewSheet Create(ARDB.Document doc, TSheetHandler handler)
     {
       var sheet = handler.CreateSheet(doc);
       handler.UpdateSheet(sheet);
@@ -89,18 +82,18 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
 
     public bool? SheetScheduled { get; set; }
 
-    public DB.ViewSheet Template { get; set; }
+    public ARDB.ViewSheet Template { get; set; }
 
-    public abstract DB.ViewSheet CreateSheet(DB.Document doc);
+    public abstract ARDB.ViewSheet CreateSheet(ARDB.Document doc);
 
-    public virtual bool CanUpdateSheet(DB.ViewSheet sheet) => sheet is object;
+    public virtual bool CanUpdateSheet(ARDB.ViewSheet sheet) => sheet is object;
 
-    public virtual void UpdateSheet(DB.ViewSheet sheet)
+    public virtual void UpdateSheet(ARDB.ViewSheet sheet)
     {
       // we are not duplicating sheets. that is a very complex process
       // involving various view types, some can only exist on a single sheet
       // let's just copy the parameters from template instead
-      if (Template is DB.ViewSheet template)
+      if (Template is ARDB.ViewSheet template)
         sheet.CopyParametersFrom(template, ExcludeUniqueProperties);
 
       sheet.SheetNumber = Number;
@@ -109,7 +102,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
         sheet.Name = Name;
 
       if (SheetScheduled.HasValue)
-        sheet.UpdateParameterValue(DB.BuiltInParameter.SHEET_SCHEDULED, SheetScheduled.Value);
+        sheet.UpdateParameterValue(ARDB.BuiltInParameter.SHEET_SCHEDULED, SheetScheduled.Value);
     }
 
     public BaseSheetHandler(string number)
@@ -117,9 +110,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       Number = number;
     }
 
-    public static readonly DB.BuiltInParameter[] ExcludeUniqueProperties =
+    public static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
-      DB.BuiltInParameter.SHEET_NUMBER,
+      ARDB.BuiltInParameter.SHEET_NUMBER,
     };
   }
 
@@ -127,32 +120,32 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
   {
     public SheetHandler(string number) : base(number) { }
 
-    public override DB.ViewSheet CreateSheet(DB.Document doc) =>
-      DB.ViewSheet.Create(doc, DB.ElementId.InvalidElementId);
+    public override ARDB.ViewSheet CreateSheet(ARDB.Document doc) =>
+      ARDB.ViewSheet.Create(doc, ARDB.ElementId.InvalidElementId);
   }
 
   public class PlaceholderSheetHandler : BaseSheetHandler
   {
     public PlaceholderSheetHandler(string number) : base(number) { }
 
-    public override DB.ViewSheet CreateSheet(DB.Document doc) =>
-      DB.ViewSheet.CreatePlaceholder(doc);
+    public override ARDB.ViewSheet CreateSheet(ARDB.Document doc) =>
+      ARDB.ViewSheet.CreatePlaceholder(doc);
   }
 
   public class AssemblySheetHandler : BaseSheetHandler
   {
-    public DB.AssemblyInstance Assembly { get; set; }
+    public ARDB.AssemblyInstance Assembly { get; set; }
 
     public AssemblySheetHandler(string number) : base(number) { }
 
-    public override DB.ViewSheet CreateSheet(DB.Document doc)
+    public override ARDB.ViewSheet CreateSheet(ARDB.Document doc)
     {
-      return Assembly is DB.AssemblyInstance assm ?
-        DB.AssemblyViewUtils.CreateSheet(assm.Document, assm.Id, DB.ElementId.InvalidElementId) :
+      return Assembly is ARDB.AssemblyInstance assm ?
+        ARDB.AssemblyViewUtils.CreateSheet(assm.Document, assm.Id, ARDB.ElementId.InvalidElementId) :
         null;
     }
 
-    public override bool CanUpdateSheet(DB.ViewSheet sheet)
+    public override bool CanUpdateSheet(ARDB.ViewSheet sheet)
     {
       if (!base.CanUpdateSheet(sheet))
         return false;

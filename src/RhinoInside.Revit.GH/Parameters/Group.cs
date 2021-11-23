@@ -1,11 +1,11 @@
 using System;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Group : GraphicalElementT<Types.Group, DB.Group>
+  public class Group : GraphicalElementT<Types.Group, ARDB.Group>
   {
     public override GH_Exposure Exposure => GH_Exposure.primary;
     public override Guid ComponentGuid => new Guid("2674B9FF-E463-426B-8A8C-CCB5A7F4C84E");

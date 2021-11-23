@@ -1,9 +1,9 @@
 using System;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class AnalyzeCurtainGridMullion : AnalysisComponent
   {
@@ -76,13 +76,13 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // get input
-      DB.Mullion mullionInstance = default;
+      ARDB.Mullion mullionInstance = default;
       if (!DA.GetData("Mullion", ref mullionInstance))
         return;
 
       DA.SetData("Type", Types.ElementType.FromElement(mullionInstance.MullionType));
       DA.SetData("Axis Curve", mullionInstance.LocationCurve?.ToCurve());
-      DA.SetData("Base Point", ((DB.LocationPoint) mullionInstance.Location).Point.ToPoint3d());
+      DA.SetData("Base Point", ((ARDB.LocationPoint) mullionInstance.Location).Point.ToPoint3d());
       //DA.SetData("Locked", mullionInstance.Lock);
       //DA.SetData("Lockable", mullionInstance.Lockable);
       // Length can be acquired from axis curve

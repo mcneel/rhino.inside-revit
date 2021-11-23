@@ -7,10 +7,10 @@ using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
+using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
   public class ElementPurge : TransactionalComponent
   {
@@ -83,22 +83,22 @@ namespace RhinoInside.Revit.GH.Components
     /// <summary>
     /// Updater to collect changes on the Purge operation
     /// </summary>
-    class Updater : DB.IUpdater, IDisposable
+    class Updater : ARDB.IUpdater, IDisposable
     {
       public string GetUpdaterName() => "Purge Updater";
       public string GetAdditionalInformation() => "N/A";
-      public DB.ChangePriority GetChangePriority() => DB.ChangePriority.Annotations;
-      public DB.UpdaterId GetUpdaterId() => updaterId;
-      readonly DB.UpdaterId updaterId;
+      public ARDB.ChangePriority GetChangePriority() => ARDB.ChangePriority.Annotations;
+      public ARDB.UpdaterId GetUpdaterId() => updaterId;
+      readonly ARDB.UpdaterId updaterId;
 
-      public ICollection<DB.ElementId> AddedElementIds { get; private set; }
-      public ICollection<DB.ElementId> DeletedElementIds { get; private set; }
-      public ICollection<DB.ElementId> ModifiedElementIds { get; private set; }
+      public ICollection<ARDB.ElementId> AddedElementIds { get; private set; }
+      public ICollection<ARDB.ElementId> DeletedElementIds { get; private set; }
+      public ICollection<ARDB.ElementId> ModifiedElementIds { get; private set; }
 
-      readonly ICollection<DB.ElementId> ElementIds;
-      public Updater(DB.Document doc, ICollection<DB.ElementId> elementIds)
+      readonly ICollection<ARDB.ElementId> ElementIds;
+      public Updater(ARDB.Document doc, ICollection<ARDB.ElementId> elementIds)
       {
-        updaterId = new DB.UpdaterId
+        updaterId = new ARDB.UpdaterId
         (
           doc.Application.ActiveAddInId,
           new Guid("A50F0406-4E9A-4BE5-85CB-77C608AD8086")
@@ -106,20 +106,20 @@ namespace RhinoInside.Revit.GH.Components
 
         ElementIds = elementIds;
 
-        DB.UpdaterRegistry.RegisterUpdater(this, isOptional: true);
+        ARDB.UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
-        var filter = DBX.CompoundElementFilter.ElementIsNotInternalFilter(doc);
-        DB.UpdaterRegistry.AddTrigger(updaterId, filter, DB.Element.GetChangeTypeAny());
-        DB.UpdaterRegistry.AddTrigger(updaterId, filter, DB.Element.GetChangeTypeElementDeletion());
+        var filter = ERDB.CompoundElementFilter.ElementIsNotInternalFilter(doc);
+        ARDB.UpdaterRegistry.AddTrigger(updaterId, filter, ARDB.Element.GetChangeTypeAny());
+        ARDB.UpdaterRegistry.AddTrigger(updaterId, filter, ARDB.Element.GetChangeTypeElementDeletion());
       }
 
       void IDisposable.Dispose()
       {
-        DB.UpdaterRegistry.RemoveAllTriggers(updaterId);
-        DB.UpdaterRegistry.UnregisterUpdater(updaterId);
+        ARDB.UpdaterRegistry.RemoveAllTriggers(updaterId);
+        ARDB.UpdaterRegistry.UnregisterUpdater(updaterId);
       }
 
-      public void Execute(DB.UpdaterData data)
+      public void Execute(ARDB.UpdaterData data)
       {
         if (AddedElementIds is null)
           AddedElementIds = data.GetAddedElementIds();
@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (ModifiedElementIds.Count > 0)
         {
-          var message = new DB.FailureMessage(DBX.ExternalFailures.ElementFailures.FailedToPurgeElement);
+          var message = new ARDB.FailureMessage(ERDB.ExternalFailures.ElementFailures.FailedToPurgeElement);
 
           message.SetFailingElements(ElementIds);
           message.SetAdditionalElements(data.GetModifiedElementIds());
@@ -159,12 +159,12 @@ namespace RhinoInside.Revit.GH.Components
       deletedElements = 0;
     }
 
-    static void ClassifyElementIds(IGrouping<DB.Document, Types.IGH_Element> group, out HashSet<DB.ElementId> elements, out HashSet<DB.ElementId> types)
+    static void ClassifyElementIds(IGrouping<ARDB.Document, Types.IGH_Element> group, out HashSet<ARDB.ElementId> elements, out HashSet<ARDB.ElementId> types)
     {
-      elements = new HashSet<DB.ElementId>();
-      types = new HashSet<DB.ElementId>();
+      elements = new HashSet<ARDB.ElementId>();
+      types = new HashSet<ARDB.ElementId>();
 
-      using (var typesFilter = new DB.ElementIsElementTypeFilter())
+      using (var typesFilter = new ARDB.ElementIsElementTypeFilter())
       {
         foreach (var item in group)
         {
@@ -179,8 +179,8 @@ namespace RhinoInside.Revit.GH.Components
 
     bool Purge
     (
-      DB.Document document,
-      ICollection<DB.ElementId> elementIds,
+      ARDB.Document document,
+      ICollection<ARDB.ElementId> elementIds,
       List<Types.Element> deleted,
       List<Types.Element> modified
     )
@@ -196,7 +196,7 @@ namespace RhinoInside.Revit.GH.Components
 
             var DeletedElementIds = document.Delete(elementIds);
 
-            if (CommitTransaction(document, transaction) == DB.TransactionStatus.Committed)
+            if (CommitTransaction(document, transaction) == ARDB.TransactionStatus.Committed)
             {
               if (updater?.DeletedElementIds is object)
               {
@@ -250,7 +250,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (elementGroups.Length > 0)
         {
-          var transactionGroups = new Queue<DB.TransactionGroup>();
+          var transactionGroups = new Queue<ARDB.TransactionGroup>();
 
           try
           {
@@ -264,8 +264,8 @@ namespace RhinoInside.Revit.GH.Components
 
               // Start a transaction Group to be able to rollback in case changes in different documents fails.
               {
-                var group = new DB.TransactionGroup(doc, Name);
-                if (group.Start() != DB.TransactionStatus.Started)
+                var group = new ARDB.TransactionGroup(doc, Name);
+                if (group.Start() != ARDB.TransactionStatus.Started)
                 {
                   group.Dispose();
                   continue;
@@ -281,7 +281,7 @@ namespace RhinoInside.Revit.GH.Components
               // Step 2. Check if ElementTypes to be purged are still in use in the model by any Instance
               if (types.Count > 0)
               {
-                var typesInUse = new List<DB.ElementId>(types.Count);
+                var typesInUse = new List<ARDB.ElementId>(types.Count);
 
                 // Remove purgable ElementTypes from types
                 if (doc.GetPurgableElementTypes(out var purgableTypes))
@@ -300,7 +300,7 @@ namespace RhinoInside.Revit.GH.Components
                   {
                     transaction.Start();
 
-                    using (var message = new DB.FailureMessage(DBX.ExternalFailures.ElementFailures.FailedToPurgeElement))
+                    using (var message = new ARDB.FailureMessage(ERDB.ExternalFailures.ElementFailures.FailedToPurgeElement))
                     {
                       message.SetFailingElements(typesInUse);
                       doc.PostFailure(message);
@@ -344,7 +344,7 @@ namespace RhinoInside.Revit.GH.Components
           finally
           {
             // In case we still have transaction groups here something bad happened
-            foreach (var group in transactionGroups.Cast<DB.TransactionGroup>().Reverse())
+            foreach (var group in transactionGroups.Cast<ARDB.TransactionGroup>().Reverse())
             {
               using (group)
               {
@@ -369,7 +369,7 @@ namespace RhinoInside.Revit.GH.Components
 
         if (Simulated)
         {
-          Status = DB.TransactionStatus.RolledBack;
+          Status = ARDB.TransactionStatus.RolledBack;
         }
         else
         {

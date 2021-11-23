@@ -1,6 +1,6 @@
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using DB = Autodesk.Revit.DB;
+using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       // TODO: kike add logic here please :D 
       return Result.Succeeded;

@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
+  using External.DB;
+  using External.DB.Extensions;
+
   public class QueryFamilies : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("B6C377BA-BC46-495C-8250-F09DB0219C91");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override DB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter();
+    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter();
 
     public QueryFamilies() : base
     (
@@ -41,27 +42,27 @@ namespace RhinoInside.Revit.GH.Components
       ParamDefinition.Create<Param_String>("Families", "F", "Family list", GH_ParamAccess.list)
     };
 
-    struct FamilyNameComparer : IEqualityComparer<DB.ElementType>
+    struct FamilyNameComparer : IEqualityComparer<ARDB.ElementType>
     {
-      public  bool Equals(DB.ElementType x, DB.ElementType y)
+      public  bool Equals(ARDB.ElementType x, ARDB.ElementType y)
       {
         if (ReferenceEquals(x, y))
           return true;
 
-        var categoryIdX = x?.Category?.Id ?? DB.ElementId.InvalidElementId;
+        var categoryIdX = x?.Category?.Id ?? ARDB.ElementId.InvalidElementId;
         var familyNameX = x?.FamilyName;
         var kindX = x.GetElementKind();
 
-        var categoryIdY = y?.Category?.Id ?? DB.ElementId.InvalidElementId;
+        var categoryIdY = y?.Category?.Id ?? ARDB.ElementId.InvalidElementId;
         var familyNameY = y?.FamilyName;
         var kindY = y.GetElementKind();
 
         return (kindX == kindY) && (categoryIdX == categoryIdY) && (familyNameX == familyNameY);
       }
 
-      public int GetHashCode(DB.ElementType obj) => new
+      public int GetHashCode(ARDB.ElementType obj) => new
       {
-        Category = (obj?.Category?.Id ?? DB.ElementId.InvalidElementId).IntegerValue,
+        Category = (obj?.Category?.Id ?? ARDB.ElementId.InvalidElementId).IntegerValue,
         Kind = obj.GetElementKind(),
         FamilyName = obj?.FamilyName
       }.
@@ -74,13 +75,13 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.TryGetData(DA, "Kind", out Types.ElementKind kind)) return;
       if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
-      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
-        if (kind is object && CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true) is DB.ElementFilter kindFilter)
+        if (kind is object && CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true) is ARDB.ElementFilter kindFilter)
           elementCollector = elementCollector.WherePasses(kindFilter);
 
         if (category is object)
@@ -89,14 +90,14 @@ namespace RhinoInside.Revit.GH.Components
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref name, out var nameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref name, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
 
-        var familiesSet = new HashSet<DB.ElementType>
+        var familiesSet = new HashSet<ARDB.ElementType>
         (
           elementCollector.
           TakeWhileIsNotEscapeKeyDown(this).
-          Cast<DB.ElementType>(),
+          Cast<ARDB.ElementType>(),
           default(FamilyNameComparer)
         );
 

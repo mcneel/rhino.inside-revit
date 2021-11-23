@@ -1,18 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Input;
 using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Grasshopper;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.DB.Schemas;
-using RhinoInside.Revit.GH.Bake;
-using DB = Autodesk.Revit.DB;
-using WF = System.Windows.Forms;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+  using External.DB.Schemas;
+  using GH.Bake;
+
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperBake : GrasshopperCommand
   {
@@ -23,17 +24,17 @@ namespace RhinoInside.Revit.AddIn.Commands
     /// </summary>
     protected new class Availability : NeedsActiveDocument<GrasshopperCommand.Availability>
     {
-      protected override bool IsCommandAvailable(UIApplication app, DB.CategorySet selectedCategories)
+      protected override bool IsCommandAvailable(UIApplication app, CategorySet selectedCategories)
       {
         if (!base.IsCommandAvailable(app, selectedCategories))
           return false;
 
-        if (!DB.DirectShape.IsSupportedDocument(Revit.ActiveUIDocument.Document))
+        if (!DirectShape.IsSupportedDocument(Revit.ActiveUIDocument.Document))
           return false;
 
         if (Instances.ActiveCanvas?.Document is GH_Document definition)
         {
-          if (Revit.ActiveUIDocument.ActiveGraphicalView is DB.View view)
+          if (Revit.ActiveUIDocument.ActiveGraphicalView is View view)
           {
             var options = new BakeOptions()
             {
@@ -92,11 +93,11 @@ namespace RhinoInside.Revit.AddIn.Commands
       public ElementIdBakeAwareObject(IGH_BakeAwareObject value) { activeObject = value; }
       bool IGH_ElementIdBakeAwareObject.CanBake(BakeOptions options) => activeObject.IsBakeCapable;
 
-      bool IGH_ElementIdBakeAwareObject.Bake(BakeOptions options, out ICollection<DB.ElementId> ids)
+      bool IGH_ElementIdBakeAwareObject.Bake(BakeOptions options, out ICollection<ElementId> ids)
       {
-        using (var trans = new DB.Transaction(options.Document, "Bake"))
+        using (var trans = new Transaction(options.Document, "Bake"))
         {
-          if (trans.Start() == DB.TransactionStatus.Started)
+          if (trans.Start() == TransactionStatus.Started)
           {
             bool result = false;
 
@@ -106,7 +107,7 @@ namespace RhinoInside.Revit.AddIn.Commands
             }
             else if (activeObject is IGH_Component component)
             {
-              var list = new List<DB.ElementId>();
+              var list = new List<ElementId>();
               foreach (var outParam in component.Params.Output)
               {
                 if (Bake(outParam, options, out var partial))
@@ -129,7 +130,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         return false;
       }
 
-      bool Bake(IGH_Param param, BakeOptions options, out ICollection<DB.ElementId> ids)
+      bool Bake(IGH_Param param, BakeOptions options, out ICollection<ElementId> ids)
       {
         var geometryToBake = param.VolatileData.AllData(true).
           Select(GH_Convert.ToGeometryBase).
@@ -137,20 +138,20 @@ namespace RhinoInside.Revit.AddIn.Commands
 
         if (geometryToBake.Any())
         {
-          var categoryId = options.Category?.Id ?? new DB.ElementId(DB.BuiltInCategory.OST_GenericModel);
+          var categoryId = options.Category?.Id ?? new ElementId(BuiltInCategory.OST_GenericModel);
 
-          var worksetId = DB.WorksetId.InvalidWorksetId;
+          var worksetId = WorksetId.InvalidWorksetId;
           if (options.Document.IsWorkshared)
             worksetId = options.Workset?.Id ?? options.Document.GetWorksetTable().GetActiveWorksetId();
 
-          ids = new List<DB.ElementId>();
+          ids = new List<ElementId>();
           foreach (var geometry in geometryToBake.Where(g => g is object))
           {
-            var ds = DB.DirectShape.CreateElement(options.Document, categoryId);
+            var ds = DirectShape.CreateElement(options.Document, categoryId);
             ds.Name = param.NickName;
             if (options.Document.IsWorkshared)
             {
-              if (ds.GetParameter(ParameterId.ElemPartitionParam) is DB.Parameter worksetParam)
+              if (ds.GetParameter(ParameterId.ElemPartitionParam) is Parameter worksetParam)
                 worksetParam.Set(worksetId.IntegerValue);
             }
 
@@ -166,7 +167,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    public override Result Execute(ExternalCommandData data, ref string message, DB.ElementSet elements)
+    public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
       {
@@ -176,23 +177,23 @@ namespace RhinoInside.Revit.AddIn.Commands
         if (bakeOptsDlg.ShowModal() != Eto.Forms.DialogResult.Ok)
           return Result.Cancelled;
 
-        bool groupResult = (WF.Control.ModifierKeys & WF.Keys.Control) != WF.Keys.None;
+        var groupResult = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
 
         var options = new BakeOptions()
         {
           Document = doc,
           View = data.View,
-          Category = DB.Category.GetCategory(doc, bakeOptsDlg.SelectedCategory),
+          Category = Category.GetCategory(doc, bakeOptsDlg.SelectedCategory),
           Workset = doc.IsWorkshared ? doc.GetWorksetTable().GetWorkset(bakeOptsDlg.SelectedWorkset) : default,
           Material = default
         };
 
-        var resultingElementIds = new List<DB.ElementId>();
-        using (var transGroup = new DB.TransactionGroup(options.Document))
+        var resultingElementIds = new List<ElementId>();
+        using (var transGroup = new TransactionGroup(options.Document))
         {
           transGroup.Start("Bake Selected");
 
-          var bakedElementIds = new List<DB.ElementId>();
+          var bakedElementIds = new List<ElementId>();
           foreach (var obj in Availability.ObjectsToBake(definition, options))
           {
             if (obj.Bake(options, out var partial))
@@ -200,14 +201,14 @@ namespace RhinoInside.Revit.AddIn.Commands
           }
 
           {
-            var activeDesignOptionId = DB.DesignOption.GetActiveDesignOptionId(options.Document);
-            var elementIdsToAssignDO = new List<DB.ElementId>();
+            var activeDesignOptionId = DesignOption.GetActiveDesignOptionId(options.Document);
+            var elementIdsToAssignDO = new List<ElementId>();
             foreach (var elementId in bakedElementIds)
             {
               if
               (
-                options.Document.GetElement(elementId) is DB.Element element &&
-                element.DesignOption?.Id is DB.ElementId elementDesignOptionId &&
+                options.Document.GetElement(elementId) is Element element &&
+                element.DesignOption?.Id is ElementId elementDesignOptionId &&
                 elementDesignOptionId != activeDesignOptionId
               )
               {
@@ -218,12 +219,12 @@ namespace RhinoInside.Revit.AddIn.Commands
 
             if (elementIdsToAssignDO.Count > 0)
             {
-              using (var trans = new DB.Transaction(options.Document, "Assign to Active Design Option"))
+              using (var trans = new Transaction(options.Document, "Assign to Active Design Option"))
               {
-                if (trans.Start() == DB.TransactionStatus.Started)
+                if (trans.Start() == TransactionStatus.Started)
                 {
                   // Move elements to Active Design Option
-                  var elementIdsCopied = DB.ElementTransformUtils.CopyElements(options.Document, elementIdsToAssignDO, DB.XYZ.Zero);
+                  var elementIdsCopied = ElementTransformUtils.CopyElements(options.Document, elementIdsToAssignDO, XYZ.Zero);
                   options.Document.Delete(elementIdsToAssignDO);
                   resultingElementIds?.AddRange(elementIdsCopied);
 
@@ -235,14 +236,14 @@ namespace RhinoInside.Revit.AddIn.Commands
 
           if (groupResult)
           {
-            using (var trans = new DB.Transaction(options.Document, "Group Bake"))
+            using (var trans = new Transaction(options.Document, "Group Bake"))
             {
-              if (trans.Start() == DB.TransactionStatus.Started)
+              if (trans.Start() == TransactionStatus.Started)
               {
                 var group = options.Document.Create.NewGroup(resultingElementIds);
                 trans.Commit();
 
-                resultingElementIds = new List<DB.ElementId>() { group.Id };
+                resultingElementIds = new List<ElementId>() { group.Id };
               }
             }
           }

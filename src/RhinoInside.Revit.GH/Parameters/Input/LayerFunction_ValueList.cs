@@ -1,10 +1,7 @@
 using System;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-
-using DB = Autodesk.Revit.DB;
-
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -23,25 +20,25 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
       ListItems.Add(
-        new GH_ValueListItem("Structure", ((int) DB.MaterialFunctionAssignment.Structure).ToString())
+        new GH_ValueListItem("Structure", ((int) ARDB.MaterialFunctionAssignment.Structure).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Substrate", ((int) DB.MaterialFunctionAssignment.Substrate).ToString())
+        new GH_ValueListItem("Substrate", ((int) ARDB.MaterialFunctionAssignment.Substrate).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Insulation", ((int) DB.MaterialFunctionAssignment.Insulation).ToString())
+        new GH_ValueListItem("Insulation", ((int) ARDB.MaterialFunctionAssignment.Insulation).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Finish 1", ((int) DB.MaterialFunctionAssignment.Finish1).ToString())
+        new GH_ValueListItem("Finish 1", ((int) ARDB.MaterialFunctionAssignment.Finish1).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Finish 2", ((int) DB.MaterialFunctionAssignment.Finish2).ToString())
+        new GH_ValueListItem("Finish 2", ((int) ARDB.MaterialFunctionAssignment.Finish2).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("Membrane", ((int) DB.MaterialFunctionAssignment.Membrane).ToString())
+        new GH_ValueListItem("Membrane", ((int) ARDB.MaterialFunctionAssignment.Membrane).ToString())
         );
       ListItems.Add(
-        new GH_ValueListItem("StructuralDeck", ((int) DB.MaterialFunctionAssignment.StructuralDeck).ToString())
+        new GH_ValueListItem("StructuralDeck", ((int) ARDB.MaterialFunctionAssignment.StructuralDeck).ToString())
         );
     }
   }

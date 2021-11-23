@@ -4,12 +4,13 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
+  using ElementTracking;
+  using External.DB.Extensions;
+
   public class SelectionFilterElementByName : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("29618F71-3B57-4A20-9CB2-4C3D17774172");
@@ -92,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!Params.TryGetDataList(DA, "Elements", out IList<Types.IGH_GraphicalElement> elements)) return;
 
       // Previous Output
-      Params.ReadTrackedElement(_SelectionFilter_, doc.Value, out DB.SelectionFilterElement selection);
+      Params.ReadTrackedElement(_SelectionFilter_, doc.Value, out ARDB.SelectionFilterElement selection);
 
       StartTransaction(doc.Value);
       {
@@ -106,10 +107,10 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     bool Reuse
     (
-      DB.SelectionFilterElement selection,
+      ARDB.SelectionFilterElement selection,
       string name,
-      ICollection<DB.ElementId> elementIds,
-      DB.SelectionFilterElement template
+      ICollection<ARDB.ElementId> elementIds,
+      ARDB.SelectionFilterElement template
     )
     {
       if (selection is null) return false;
@@ -119,15 +120,15 @@ namespace RhinoInside.Revit.GH.Components.Filters
       return true;
     }
 
-    DB.SelectionFilterElement Create
+    ARDB.SelectionFilterElement Create
     (
-      DB.Document doc,
+      ARDB.Document doc,
       string name,
-      ICollection<DB.ElementId> elementIds,
-      DB.SelectionFilterElement template
+      ICollection<ARDB.ElementId> elementIds,
+      ARDB.SelectionFilterElement template
     )
     {
-      var selection = default(DB.SelectionFilterElement);
+      var selection = default(ARDB.SelectionFilterElement);
 
       // Make sure the name is unique
       {
@@ -136,7 +137,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
         name = doc.GetNamesakeElements
         (
-          typeof(DB.FilterElement), name
+          typeof(ARDB.FilterElement), name
         ).
         Select(x => x.Name).
         WhereNamePrefixedWith(name).
@@ -146,21 +147,21 @@ namespace RhinoInside.Revit.GH.Components.Filters
       // Try to duplicate template
       if (template is object)
       {
-        var ids = DB.ElementTransformUtils.CopyElements
+        var ids = ARDB.ElementTransformUtils.CopyElements
         (
           template.Document,
-          new DB.ElementId[] { template.Id },
+          new ARDB.ElementId[] { template.Id },
           doc,
           default,
           default
         );
 
-        selection = ids.Select(x => doc.GetElement(x)).OfType<DB.SelectionFilterElement>().FirstOrDefault();
+        selection = ids.Select(x => doc.GetElement(x)).OfType<ARDB.SelectionFilterElement>().FirstOrDefault();
         selection.Name = name;
       }
 
       if (selection is null)
-        selection = DB.SelectionFilterElement.Create(doc, name);
+        selection = ARDB.SelectionFilterElement.Create(doc, name);
 
       if(elementIds is object)
         selection.SetElementIds(elementIds);
@@ -168,13 +169,13 @@ namespace RhinoInside.Revit.GH.Components.Filters
       return selection;
     }
 
-    DB.SelectionFilterElement Reconstruct
+    ARDB.SelectionFilterElement Reconstruct
     (
-      DB.SelectionFilterElement selection,
-      DB.Document doc,
+      ARDB.SelectionFilterElement selection,
+      ARDB.Document doc,
       string name,
-      ICollection<DB.ElementId> elementIds,
-      DB.SelectionFilterElement template
+      ICollection<ARDB.ElementId> elementIds,
+      ARDB.SelectionFilterElement template
     )
     {
       if (!Reuse(selection, name, elementIds, template))

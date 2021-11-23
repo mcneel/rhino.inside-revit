@@ -1,11 +1,12 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Documents
 {
+  using External.DB.Extensions;
+
   public class DocumentIdentity : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("94BD655C-77DD-4A88-BDDB-B9456C45F06C");
@@ -44,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components
 
       DA.SetData("Title", doc.Title);
       DA.SetData("Is Family", doc.IsFamilyDocument);
-      DA.SetData("Unit System", (DB.UnitSystem) doc.DisplayUnitSystem);
+      DA.SetData("Unit System", (ARDB.UnitSystem) doc.DisplayUnitSystem);
       //DA.SetData("Project Information", doc.ProjectInformation);
     }
   }
@@ -87,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      var version = DB.Document.GetDocumentVersion(doc);
+      var version = ARDB.Document.GetDocumentVersion(doc);
 
       DA.SetData("DocumentGUID", doc.GetFingerprintGUID());
       DA.SetData("PathName", doc.PathName);
@@ -138,7 +139,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (doc.IsWorkshared)
       {
-        if (doc.GetWorksharingCentralModelPath() is DB.ModelPath worksharingPath && worksharingPath.ServerPath)
+        if (doc.GetWorksharingCentralModelPath() is ARDB.ModelPath worksharingPath && worksharingPath.ServerPath)
           DA.SetData("ServerPath", worksharingPath.CentralServerPath);
 
         try { DA.SetData("CentralGUID", doc.WorksharingCentralGUID); }
@@ -191,7 +192,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (doc.IsModelInCloud)
       {
-        if (doc.GetCloudModelPath() is DB.ModelPath cloudPath && cloudPath.CloudPath)
+        if (doc.GetCloudModelPath() is ARDB.ModelPath cloudPath && cloudPath.CloudPath)
         {
           DA.SetData("ProjectGUID", cloudPath.GetProjectGUID());
           DA.SetData("ModelGUID", cloudPath.GetModelGUID());

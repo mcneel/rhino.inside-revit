@@ -1,14 +1,14 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ModelElements
 {
-  using System.Runtime.InteropServices;
+  using Convert.Geometry;
+  using External.DB.Extensions;
   using Kernel.Attributes;
 
   public class GroupByLocation : ReconstructElementComponent
@@ -29,15 +29,15 @@ namespace RhinoInside.Revit.GH.Components
     void ReconstructGroupByLocation
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New Group Element")]
-      ref DB.Group group,
+      ref ARDB.Group group,
 
       [Description("Location where to place the group.")]
       Rhino.Geometry.Plane location,
-      DB.GroupType type,
-      Optional<DB.Level> level
+      ARDB.GroupType type,
+      Optional<ARDB.Level> level
     )
     {
       if (!location.IsValid)
@@ -50,8 +50,8 @@ namespace RhinoInside.Revit.GH.Components
       var newLocation = location.Origin.ToXYZ();
       if
       (
-        group is DB.Group &&
-        group.Location is DB.LocationPoint locationPoint &&
+        group is ARDB.Group &&
+        group.Location is ARDB.LocationPoint locationPoint &&
         locationPoint.Point.Z == newLocation.Z
       )
       {
@@ -68,39 +68,39 @@ namespace RhinoInside.Revit.GH.Components
                        document.FamilyCreate.PlaceGroup(newLocation, type) :
                        document.Create.PlaceGroup(newLocation, type);
 
-        var parametersMask = new DB.BuiltInParameter[]
+        var parametersMask = new ARDB.BuiltInParameter[]
         {
-          DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          DB.BuiltInParameter.ELEM_TYPE_PARAM,
-          DB.BuiltInParameter.GROUP_LEVEL,
-          DB.BuiltInParameter.GROUP_OFFSET_FROM_LEVEL,
+          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+          ARDB.BuiltInParameter.GROUP_LEVEL,
+          ARDB.BuiltInParameter.GROUP_OFFSET_FROM_LEVEL,
         };
 
         ReplaceElement(ref group, newGroup, parametersMask);
       }
 
-      if (group is DB.Group)
+      if (group is ARDB.Group)
       {
-        using (var levelParam = group.get_Parameter(DB.BuiltInParameter.GROUP_LEVEL))
-        using (var offsetFromLevel = group.get_Parameter(DB.BuiltInParameter.GROUP_OFFSET_FROM_LEVEL))
+        using (var levelParam = group.get_Parameter(ARDB.BuiltInParameter.GROUP_LEVEL))
+        using (var offsetFromLevel = group.get_Parameter(ARDB.BuiltInParameter.GROUP_OFFSET_FROM_LEVEL))
         {
           var oldOffset = offsetFromLevel.AsDouble();
           var newOffset = newLocation.Z - level.Value.GetHeight();
           if (levelParam.AsElementId() != level.Value.Id || !Rhino.RhinoMath.EpsilonEquals(oldOffset, newOffset, Rhino.RhinoMath.SqrtEpsilon))
           {
             var groupType = group.GroupType;
-            var oldGroups = new HashSet<DB.ElementId>(groupType.Groups.Cast<DB.Group>().Select(x => x.Id));
+            var oldGroups = new HashSet<ARDB.ElementId>(groupType.Groups.Cast<ARDB.Group>().Select(x => x.Id));
 
             levelParam.Set(level.Value.Id);
             offsetFromLevel.Set(newOffset);
             document.Regenerate();
 
-            var newGroups = new HashSet<DB.ElementId>(groupType.Groups.Cast<DB.Group>().Select(x => x.Id));
+            var newGroups = new HashSet<ARDB.ElementId>(groupType.Groups.Cast<ARDB.Group>().Select(x => x.Id));
             newGroups.ExceptWith(oldGroups);
 
-            if(newGroups.FirstOrDefault() is DB.ElementId newGroupId)
-              group = newGroupId.IsValid() ? document.GetElement(newGroupId) as DB.Group : default;
+            if(newGroups.FirstOrDefault() is ARDB.ElementId newGroupId)
+              group = newGroupId.IsValid() ? document.GetElement(newGroupId) as ARDB.Group : default;
           }
         }
 

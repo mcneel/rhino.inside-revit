@@ -2,14 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+  using External.DB.Extensions;
+  using Kernel.Attributes;
+
   public class BuildingPadByOutline : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("ADE71474-5F00-4BD5-9D1E-D518B42137F2");
@@ -25,26 +26,26 @@ namespace RhinoInside.Revit.GH.Components.Site
     )
     { }
 
-    static readonly DB.BuiltInParameter[] ParametersMask = new DB.BuiltInParameter[]
+    static readonly ARDB.BuiltInParameter[] ParametersMask = new ARDB.BuiltInParameter[]
     {
-      DB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-      DB.BuiltInParameter.ELEM_FAMILY_PARAM,
-      DB.BuiltInParameter.ELEM_TYPE_PARAM,
-      DB.BuiltInParameter.LEVEL_PARAM,
-      DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM
+      ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+      ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+      ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+      ARDB.BuiltInParameter.LEVEL_PARAM,
+      ARDB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM
     };
 
     void ReconstructBuildingPadByOutline
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [Description("New BuildingPad"), NickName("BP")]
-      ref DB.Architecture.BuildingPad buildingPad,
+      ref ARDB.Architecture.BuildingPad buildingPad,
 
       IList<Rhino.Geometry.Curve> boundary,
-      Optional<DB.BuildingPadType> type,
-      Optional<DB.Level> level
+      Optional<ARDB.BuildingPadType> type,
+      Optional<ARDB.Level> level
     )
     {
       SolveOptionalLevel(document, boundary, ref level, out var boundaryBBox);
@@ -55,15 +56,15 @@ namespace RhinoInside.Revit.GH.Components.Site
       {
         ChangeElementType(ref buildingPad, type);
 
-        buildingPad.get_Parameter(DB.BuiltInParameter.LEVEL_PARAM).Update(level.Value.Id);
+        buildingPad.get_Parameter(ARDB.BuiltInParameter.LEVEL_PARAM).Update(level.Value.Id);
 
         buildingPad.SetBoundary(curveLoops);
       }
       else
       {
-        SolveOptionalType(document, ref type, DB.ElementTypeGroup.BuildingPadType, (doc, param) => DB.BuildingPadType.CreateDefault(doc), nameof(type));
+        SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.BuildingPadType, (doc, param) => ARDB.BuildingPadType.CreateDefault(doc), nameof(type));
 
-        var newPad = DB.Architecture.BuildingPad.Create
+        var newPad = ARDB.Architecture.BuildingPad.Create
         (
           document,
           type.Value.Id,
@@ -74,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Site
         ReplaceElement(ref buildingPad, newPad, ParametersMask);
       }
 
-      buildingPad?.get_Parameter(DB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Update(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
+      buildingPad?.get_Parameter(ARDB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Update(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
     }
   }
 }

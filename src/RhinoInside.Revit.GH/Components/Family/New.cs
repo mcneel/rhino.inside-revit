@@ -3,16 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Rhino.Geometry;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
 using Grasshopper.Kernel.Parameters;
+using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   public class FamilyNew : TransactionalComponent
   {
     public override Guid ComponentGuid => new Guid("82523911-309F-4A66-A4B9-CF21E0AC250E");
@@ -126,10 +127,10 @@ namespace RhinoInside.Revit.GH.Components
       base.VariableParameterMaintenance();
     }
 
-    public static Dictionary<string, DB.ElementId> GetMaterialIdsByName(DB.Document doc)
+    public static Dictionary<string, ARDB.ElementId> GetMaterialIdsByName(ARDB.Document doc)
     {
-      var collector = new DB.FilteredElementCollector(doc);
-      return collector.OfClass(typeof(DB.Material)).OfType<DB.Material>().
+      var collector = new ARDB.FilteredElementCollector(doc);
+      return collector.OfClass(typeof(ARDB.Material)).OfType<ARDB.Material>().
         GroupBy(x => x.Name).
         ToDictionary(x => x.Key, x => x.First().Id);
     }
@@ -151,11 +152,11 @@ namespace RhinoInside.Revit.GH.Components
       return (scriptVariable as Rhino.Geometry.GeometryBase)?.DuplicateShallow();
     }
 
-    class PlaneComparer : IComparer<KeyValuePair<double[], DB.SketchPlane>>
+    class PlaneComparer : IComparer<KeyValuePair<double[], ARDB.SketchPlane>>
     {
       public static PlaneComparer Instance = new PlaneComparer();
 
-      int IComparer<KeyValuePair<double[], DB.SketchPlane>>.Compare(KeyValuePair<double[], DB.SketchPlane> x, KeyValuePair<double[], DB.SketchPlane> y)
+      int IComparer<KeyValuePair<double[], ARDB.SketchPlane>>.Compare(KeyValuePair<double[], ARDB.SketchPlane> x, KeyValuePair<double[], ARDB.SketchPlane> y)
       {
         var abcdX = x.Key;
         var abcdY = y.Key;
@@ -182,16 +183,16 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    DB.Category MapCategory(DB.Document project, DB.Document family, DB.ElementId categoryId, bool createIfNotExist = false)
+    ARDB.Category MapCategory(ARDB.Document project, ARDB.Document family, ARDB.ElementId categoryId, bool createIfNotExist = false)
     {
       if (-3000000 < categoryId.IntegerValue && categoryId.IntegerValue < -2000000)
         return family.GetCategory(categoryId);
 
       try
       {
-        if (DB.Category.GetCategory(project, categoryId) is DB.Category category)
+        if (ARDB.Category.GetCategory(project, categoryId) is ARDB.Category category)
         {
-          if (family.OwnerFamily.FamilyCategory.SubCategories.Contains(category.Name) && family.OwnerFamily.FamilyCategory.SubCategories.get_Item(category.Name) is DB.Category subCategory)
+          if (family.OwnerFamily.FamilyCategory.SubCategories.Contains(category.Name) && family.OwnerFamily.FamilyCategory.SubCategories.get_Item(category.Name) is ARDB.Category subCategory)
             return subCategory;
 
           if (createIfNotExist)
@@ -203,13 +204,13 @@ namespace RhinoInside.Revit.GH.Components
       return null;
     }
 
-    DB.GraphicsStyle MapGraphicsStyle(DB.Document project, DB.Document family, DB.ElementId graphicsStyleId, bool createIfNotExist = false)
+    ARDB.GraphicsStyle MapGraphicsStyle(ARDB.Document project, ARDB.Document family, ARDB.ElementId graphicsStyleId, bool createIfNotExist = false)
     {
       try
       {
-        if (project.GetElement(graphicsStyleId) is DB.GraphicsStyle graphicsStyle)
+        if (project.GetElement(graphicsStyleId) is ARDB.GraphicsStyle graphicsStyle)
         {
-          if (family.OwnerFamily.FamilyCategory.SubCategories.Contains(graphicsStyle.GraphicsStyleCategory.Name) && family.OwnerFamily.FamilyCategory.SubCategories.get_Item(graphicsStyle.GraphicsStyleCategory.Name) is DB.Category subCategory)
+          if (family.OwnerFamily.FamilyCategory.SubCategories.Contains(graphicsStyle.GraphicsStyleCategory.Name) && family.OwnerFamily.FamilyCategory.SubCategories.get_Item(graphicsStyle.GraphicsStyleCategory.Name) is ARDB.Category subCategory)
             return subCategory.GetGraphicsStyle(graphicsStyle.GraphicsStyleType);
 
           if (createIfNotExist)
@@ -222,28 +223,28 @@ namespace RhinoInside.Revit.GH.Components
       return null;
     }
 
-    static DB.ElementId MapMaterial(DB.Document project, DB.Document family, DB.ElementId materialId, bool createIfNotExist = false)
+    static ARDB.ElementId MapMaterial(ARDB.Document project, ARDB.Document family, ARDB.ElementId materialId, bool createIfNotExist = false)
     {
-      if (project.GetElement(materialId) is DB.Material material)
+      if (project.GetElement(materialId) is ARDB.Material material)
       {
-        using (var collector = new DB.FilteredElementCollector(family).OfClass(typeof(DB.Material)))
+        using (var collector = new ARDB.FilteredElementCollector(family).OfClass(typeof(ARDB.Material)))
         {
-          if (collector.Cast<DB.Material>().Where(x => x.Name == material.Name).FirstOrDefault() is DB.Material familyMaterial)
+          if (collector.Cast<ARDB.Material>().Where(x => x.Name == material.Name).FirstOrDefault() is ARDB.Material familyMaterial)
             return familyMaterial.Id;
         }
 
         if (createIfNotExist)
-          return DB.Material.Create(family, material.Name);
+          return ARDB.Material.Create(family, material.Name);
       }
 
-      return DB.ElementId.InvalidElementId;
+      return ARDB.ElementId.InvalidElementId;
     }
 
-    class DeleteElementEnumerator<T> : IEnumerator<T> where T : DB.Element
+    class DeleteElementEnumerator<T> : IEnumerator<T> where T : ARDB.Element
     {
       readonly IEnumerator<T> enumerator;
       public DeleteElementEnumerator(IEnumerable<T> e) { enumerator = e.GetEnumerator(); }
-      readonly List<DB.Element> elementsToDelete = new List<DB.Element>();
+      readonly List<ARDB.Element> elementsToDelete = new List<ARDB.Element>();
 
       public void Dispose()
       {
@@ -271,32 +272,32 @@ namespace RhinoInside.Revit.GH.Components
 
     bool Add
     (
-      DB.Document doc,
-      DB.Document familyDoc,
+      ARDB.Document doc,
+      ARDB.Document familyDoc,
       Brep brep,
-      DeleteElementEnumerator<DB.GenericForm> forms
+      DeleteElementEnumerator<ARDB.GenericForm> forms
     )
     {
       forms.MoveNext();
-      if (brep.ToSolid() is DB.Solid solid)
+      if (brep.ToSolid() is ARDB.Solid solid)
       {
-        if (forms.Current is DB.FreeFormElement freeForm)
+        if (forms.Current is ARDB.FreeFormElement freeForm)
         {
           freeForm.UpdateSolidGeometry(solid);
           forms.DeleteCurrent = false;
         }
-        else freeForm = DB.FreeFormElement.Create(familyDoc, solid);
+        else freeForm = ARDB.FreeFormElement.Create(familyDoc, solid);
 
-        brep.TryGetUserString(DB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out bool cutting, false);
-        freeForm.get_Parameter(DB.BuiltInParameter.ELEMENT_IS_CUTTING).Update(cutting ? 1 : 0);
+        brep.TryGetUserString(ARDB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out bool cutting, false);
+        freeForm.get_Parameter(ARDB.BuiltInParameter.ELEMENT_IS_CUTTING).Update(cutting ? 1 : 0);
 
         if (!cutting)
         {
-          DB.Category familySubCategory = null;
+          ARDB.Category familySubCategory = null;
           if
           (
-            brep.TryGetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId subCategoryId) &&
-            DB.Category.GetCategory(doc, subCategoryId) is DB.Category subCategory
+            brep.TryGetUserString(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out ARDB.ElementId subCategoryId) &&
+            ARDB.Category.GetCategory(doc, subCategoryId) is ARDB.Category subCategory
           )
           {
             if (subCategory.Parent.Id == familyDoc.OwnerFamily.FamilyCategory.Id)
@@ -313,19 +314,19 @@ namespace RhinoInside.Revit.GH.Components
           }
 
           if (familySubCategory is null)
-            freeForm.get_Parameter(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Update(DB.ElementId.InvalidElementId);
+            freeForm.get_Parameter(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Update(ARDB.ElementId.InvalidElementId);
           else
             freeForm.Subcategory = familySubCategory;
 
-          brep.TryGetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
-          freeForm.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
+          brep.TryGetUserString(ARDB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
+          freeForm.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
 
-          brep.TryGetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
-          freeForm.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
+          brep.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
+          freeForm.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
 
-          brep.TryGetUserString(DB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out DB.ElementId materialId);
+          brep.TryGetUserString(ARDB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out ARDB.ElementId materialId);
           var familyMaterialId = MapMaterial(doc, familyDoc, materialId, true);
-          freeForm.get_Parameter(DB.BuiltInParameter.MATERIAL_ID_PARAM).Update(familyMaterialId);
+          freeForm.get_Parameter(ARDB.BuiltInParameter.MATERIAL_ID_PARAM).Update(familyMaterialId);
         }
 
         return cutting;
@@ -336,25 +337,25 @@ namespace RhinoInside.Revit.GH.Components
 
     void Add
     (
-      DB.Document doc,
-      DB.Document familyDoc,
+      ARDB.Document doc,
+      ARDB.Document familyDoc,
       Curve curve,
-      List<KeyValuePair<double[], DB.SketchPlane>> planesSet,
-      DeleteElementEnumerator<DB.CurveElement> curves
+      List<KeyValuePair<double[], ARDB.SketchPlane>> planesSet,
+      DeleteElementEnumerator<ARDB.CurveElement> curves
     )
     {
       if (curve.TryGetPlane(out var plane))
       {
-        var familyGraphicsStyle = default(DB.GraphicsStyle);
+        var familyGraphicsStyle = default(ARDB.GraphicsStyle);
         {
-          DB.Category familySubCategory = null;
+          ARDB.Category familySubCategory = null;
           if
           (
-            curve.TryGetUserString(DB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out DB.ElementId subCategoryId) &&
-            doc.GetCategory(subCategoryId) is DB.Category subCategory
+            curve.TryGetUserString(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out ARDB.ElementId subCategoryId) &&
+            doc.GetCategory(subCategoryId) is ARDB.Category subCategory
           )
           {
-            if (subCategoryId.IntegerValue == (int) DB.BuiltInCategory.OST_InvisibleLines)
+            if (subCategoryId.IntegerValue == (int) ARDB.BuiltInCategory.OST_InvisibleLines)
             {
               familySubCategory = MapCategory(doc, familyDoc, subCategoryId, true);
             }
@@ -375,33 +376,33 @@ namespace RhinoInside.Revit.GH.Components
             }
           }
 
-          curve.TryGetUserString(DB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), out var graphicsStyleType, DB.GraphicsStyleType.Projection);
+          curve.TryGetUserString(ARDB.BuiltInParameter.FAMILY_CURVE_GSTYLE_PLUS_INVISIBLE.ToString(), out var graphicsStyleType, ARDB.GraphicsStyleType.Projection);
 
           familyGraphicsStyle = familySubCategory?.GetGraphicsStyle(graphicsStyleType);
         }
 
-        curve.TryGetUserString(DB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out bool symbolic, true);
-        curve.TryGetUserString(DB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
-        curve.TryGetUserString(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
+        curve.TryGetUserString(ARDB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out bool symbolic, true);
+        curve.TryGetUserString(ARDB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
+        curve.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
 
-        if (familyDoc.OwnerFamily.FamilyCategory.Id.IntegerValue == (int) DB.BuiltInCategory.OST_DetailComponents)
+        if (familyDoc.OwnerFamily.FamilyCategory.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_DetailComponents)
         {
-          using (var collector = new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.View)))
+          using (var collector = new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.View)))
           {
-            var view = collector.FirstElement() as DB.View;
+            var view = collector.FirstElement() as ARDB.View;
             foreach (var c in curve.ToCurveMany())
             {
               curves.MoveNext();
 
-              if (curves.Current is DB.DetailCurve detailCurve && detailCurve.GeometryCurve.IsSameKindAs(c))
+              if (curves.Current is ARDB.DetailCurve detailCurve && detailCurve.GeometryCurve.IsSameKindAs(c))
               {
                 detailCurve.SetGeometryCurve(c, true);
                 curves.DeleteCurrent = false;
               }
               else detailCurve = familyDoc.FamilyCreate.NewDetailCurve(view, c);
 
-              detailCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
-              detailCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
+              detailCurve.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
+              detailCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
 
               if (familyGraphicsStyle is object)
                 detailCurve.LineStyle = familyGraphicsStyle;
@@ -414,10 +415,10 @@ namespace RhinoInside.Revit.GH.Components
         else
         {
           var abcd = plane.GetPlaneEquation();
-          int index = planesSet.BinarySearch(new KeyValuePair<double[], DB.SketchPlane>(abcd, null), PlaneComparer.Instance);
+          int index = planesSet.BinarySearch(new KeyValuePair<double[], ARDB.SketchPlane>(abcd, null), PlaneComparer.Instance);
           if (index < 0)
           {
-            var entry = new KeyValuePair<double[], DB.SketchPlane>(abcd, DB.SketchPlane.Create(familyDoc, plane.ToPlane()));
+            var entry = new KeyValuePair<double[], ARDB.SketchPlane>(abcd, ARDB.SketchPlane.Create(familyDoc, plane.ToPlane()));
             index = ~index;
             planesSet.Insert(index, entry);
           }
@@ -429,30 +430,30 @@ namespace RhinoInside.Revit.GH.Components
 
             if (symbolic)
             {
-              if (curves.Current is DB.SymbolicCurve symbolicCurve && symbolicCurve.GeometryCurve.IsSameKindAs(c))
+              if (curves.Current is ARDB.SymbolicCurve symbolicCurve && symbolicCurve.GeometryCurve.IsSameKindAs(c))
               {
                 symbolicCurve.SetSketchPlaneAndCurve(sketchPlane, c);
                 curves.DeleteCurrent = false;
               }
               else symbolicCurve = familyDoc.FamilyCreate.NewSymbolicCurve(c, sketchPlane);
 
-              symbolicCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
-              symbolicCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
+              symbolicCurve.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
+              symbolicCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
 
               if (familyGraphicsStyle is object)
                 symbolicCurve.Subcategory = familyGraphicsStyle;
             }
             else
             {
-              if (curves.Current is DB.ModelCurve modelCurve && modelCurve.GeometryCurve.IsSameKindAs(c))
+              if (curves.Current is ARDB.ModelCurve modelCurve && modelCurve.GeometryCurve.IsSameKindAs(c))
               {
                 modelCurve.SetSketchPlaneAndCurve(sketchPlane, c);
                 curves.DeleteCurrent = false;
               }
               else modelCurve = familyDoc.FamilyCreate.NewModelCurve(c, sketchPlane);
 
-              modelCurve.get_Parameter(DB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
-              modelCurve.get_Parameter(DB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
+              modelCurve.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
+              modelCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
 
               if (familyGraphicsStyle is object)
                 modelCurve.Subcategory = familyGraphicsStyle;
@@ -464,22 +465,22 @@ namespace RhinoInside.Revit.GH.Components
 
     void Add
     (
-      DB.Document doc,
-      DB.Document familyDoc,
+      ARDB.Document doc,
+      ARDB.Document familyDoc,
       IEnumerable<Curve> loops,
-      DB.HostObject host,
-      DeleteElementEnumerator<DB.Opening> openings
+      ARDB.HostObject host,
+      DeleteElementEnumerator<ARDB.Opening> openings
     )
     {
       var profile = loops.SelectMany(x => x.ToCurveMany()).ToCurveArray();
       var opening = familyDoc.FamilyCreate.NewOpening(host, profile);
     }
 
-    static string GetFamilyTemplateFileName(DB.ElementId categoryId, Autodesk.Revit.ApplicationServices.LanguageType language)
+    static string GetFamilyTemplateFileName(ARDB.ElementId categoryId, Autodesk.Revit.ApplicationServices.LanguageType language)
     {
       if (categoryId.TryGetBuiltInCategory(out var builtInCategory))
       {
-        if (builtInCategory == DB.BuiltInCategory.OST_Mass)
+        if (builtInCategory == ARDB.BuiltInCategory.OST_Mass)
         {
           switch (language)
           {
@@ -530,7 +531,7 @@ namespace RhinoInside.Revit.GH.Components
       return null;
     }
 
-    static string GetFamilyTemplateFilePath(DB.ElementId categoryId, Autodesk.Revit.ApplicationServices.Application app)
+    static string GetFamilyTemplateFilePath(ARDB.ElementId categoryId, Autodesk.Revit.ApplicationServices.Application app)
     {
       string fileName = GetFamilyTemplateFileName(categoryId, app.Language);
       var templateFilePath = fileName is null ? string.Empty : Path.Combine(app.FamilyTemplatePath, $"{fileName}.rft");
@@ -559,8 +560,8 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.TryGetData(DA, "Overwrite Parameters", out bool? overwriteParameters)) return;
       if (!overwriteParameters.HasValue) overwriteParameters = overwrite;
       if (!Params.GetData(DA, "Name", out string name)) return;
-      if (!Params.GetData(DA, "Category", out DB.ElementId categoryId)) categoryId = DB.ElementId.InvalidElementId;
-      var updateCategory = categoryId != DB.ElementId.InvalidElementId;
+      if (!Params.GetData(DA, "Category", out ARDB.ElementId categoryId)) categoryId = ARDB.ElementId.InvalidElementId;
+      var updateCategory = categoryId != ARDB.ElementId.InvalidElementId;
 
       var geometry = new List<IGH_GeometricGoo>();
       var updateGeometry = !(!DA.GetDataList("Geometry", geometry) && Params.Input[Params.IndexOfInputParam("Geometry")].SourceCount == 0);
@@ -616,16 +617,16 @@ namespace RhinoInside.Revit.GH.Components
 
                 if (updateGeometry)
                 {
-                  using (var forms = new DeleteElementEnumerator<DB.GenericForm>(new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.GenericForm)).Cast<DB.GenericForm>().ToArray()))
-                  using (var curves = new DeleteElementEnumerator<DB.CurveElement>(new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.CurveElement)).Cast<DB.CurveElement>().Where(x => x.Category.Id.IntegerValue != (int) DB.BuiltInCategory.OST_SketchLines).ToArray()))
-                  using (var openings = new DeleteElementEnumerator<DB.Opening>(new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.Opening)).Cast<DB.Opening>().ToArray()))
+                  using (var forms = new DeleteElementEnumerator<ARDB.GenericForm>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.GenericForm)).Cast<ARDB.GenericForm>().ToArray()))
+                  using (var curves = new DeleteElementEnumerator<ARDB.CurveElement>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.CurveElement)).Cast<ARDB.CurveElement>().Where(x => x.Category.Id.IntegerValue != (int) ARDB.BuiltInCategory.OST_SketchLines).ToArray()))
+                  using (var openings = new DeleteElementEnumerator<ARDB.Opening>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.Opening)).Cast<ARDB.Opening>().ToArray()))
                   using (var ctx = GeometryEncoder.Context.Push(familyDoc))
                   {
                     ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
                       AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
 
                     bool hasVoids = false;
-                    var planesSet = new List<KeyValuePair<double[], DB.SketchPlane>>();
+                    var planesSet = new List<KeyValuePair<double[], ARDB.SketchPlane>>();
                     var planesSetComparer = new PlaneComparer();
                     var loops = new List<Rhino.Geometry.Curve>();
 
@@ -658,16 +659,16 @@ namespace RhinoInside.Revit.GH.Components
 
                     if (loops.Count > 0)
                     {
-                      using (var hosts = new DB.FilteredElementCollector(familyDoc).OfClass(typeof(DB.HostObject)))
+                      using (var hosts = new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.HostObject)))
                       {
-                        if (hosts.Where(x => x is DB.Wall || x is DB.Ceiling).FirstOrDefault() is DB.HostObject host)
+                        if (hosts.Where(x => x is ARDB.Wall || x is ARDB.Ceiling).FirstOrDefault() is ARDB.HostObject host)
                           Add(doc, familyDoc, loops, host, openings);
                         else
                           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No suitable host object is been found");
                       }
                     }
 
-                    familyDoc.OwnerFamily.get_Parameter(DB.BuiltInParameter.FAMILY_ALLOW_CUT_WITH_VOIDS).Update(hasVoids ? 1 : 0);
+                    familyDoc.OwnerFamily.get_Parameter(ARDB.BuiltInParameter.FAMILY_ALLOW_CUT_WITH_VOIDS).Update(hasVoids ? 1 : 0);
                   }
                 }
 
@@ -689,7 +690,7 @@ namespace RhinoInside.Revit.GH.Components
                 try { family.Name = name; }
                 catch (Autodesk.Revit.Exceptions.ArgumentException e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message); }
 
-                if (doc.GetElement(family.GetFamilySymbolIds().First()) is DB.FamilySymbol symbol)
+                if (doc.GetElement(family.GetFamilySymbolIds().First()) is ARDB.FamilySymbol symbol)
                   symbol.Name = name;
 
                 CommitTransaction(doc, transaction);

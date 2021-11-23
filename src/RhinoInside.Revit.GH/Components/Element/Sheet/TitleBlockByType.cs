@@ -1,14 +1,15 @@
 using System;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.GH.ElementTracking;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Exceptions;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.Sheet
+namespace RhinoInside.Revit.GH.Components.TitleBlocks
 {
+  using Convert.Geometry;
+  using Exceptions;
+  using External.DB.Extensions;
+  using GH.ElementTracking;
+
   [ComponentVersion(introduced: "1.2.4")]
   public class TitleBlockByType : ElementTrackerComponent
   {
@@ -45,7 +46,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
           NickName = "T",
           Description = $"{_TitleBlock_} type",
           Optional = true,
-          SelectedBuiltInCategory = DB.BuiltInCategory.OST_TitleBlocks
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_TitleBlocks
         },
         ParamRelevance.Primary
       ),
@@ -77,11 +78,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
     };
 
     const string _TitleBlock_ = "Title Block";
-    static readonly DB.BuiltInParameter[] ExcludeUniqueProperties = default;
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties = default;
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var OST_TitleBlocks = new DB.ElementId(DB.BuiltInCategory.OST_TitleBlocks);
+      var OST_TitleBlocks = new ARDB.ElementId(ARDB.BuiltInCategory.OST_TitleBlocks);
 
       // Input
       if (!Params.TryGetData(DA, "Sheet", out Types.ViewSheet sheet, x => x.IsValid)) return;
@@ -102,13 +103,13 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       }
 
       // Previous Output
-      Params.ReadTrackedElement(_TitleBlock_, sheet.Document, out DB.FamilyInstance titleBlock);
+      Params.ReadTrackedElement(_TitleBlock_, sheet.Document, out ARDB.FamilyInstance titleBlock);
 
       StartTransaction(sheet.Document);
       {
         titleBlock = Reconstruct
         (
-          titleBlock, location.HasValue? location.Value.ToXYZ() : DB.XYZ.Zero,
+          titleBlock, location.HasValue? location.Value.ToXYZ() : ARDB.XYZ.Zero,
           type.Value,
           sheet.Value
         );
@@ -118,7 +119,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       }
     }
 
-    bool Reuse(DB.XYZ location, DB.FamilyInstance titleBlock, DB.FamilySymbol type)
+    bool Reuse(ARDB.XYZ location, ARDB.FamilyInstance titleBlock, ARDB.FamilySymbol type)
     {
       if (titleBlock is null) return false;
       if (titleBlock.GetTypeId() != type.Id)
@@ -130,9 +131,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       return true;
     }
 
-    DB.FamilyInstance Create(DB.XYZ location, DB.FamilySymbol type, DB.ViewSheet sheet)
+    ARDB.FamilyInstance Create(ARDB.XYZ location, ARDB.FamilySymbol type, ARDB.ViewSheet sheet)
     {
-      var titleBlock = default(DB.FamilyInstance);
+      var titleBlock = default(ARDB.FamilyInstance);
 
       if (titleBlock is null)
         titleBlock = sheet.Document.Create.NewFamilyInstance(location, type, sheet);
@@ -140,7 +141,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       return titleBlock;
     }
 
-    DB.FamilyInstance Reconstruct(DB.FamilyInstance titleBlock, DB.XYZ location, DB.FamilySymbol type, DB.ViewSheet sheet)
+    ARDB.FamilyInstance Reconstruct(ARDB.FamilyInstance titleBlock, ARDB.XYZ location, ARDB.FamilySymbol type, ARDB.ViewSheet sheet)
     {
       if (!Reuse(location, titleBlock, type))
       {

@@ -1,10 +1,10 @@
 using Rhino.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
   /// <summary>
-  /// Converts <see cref="Extrusion"/> to be transfered to a <see cref="DB.Solid"/>.
+  /// Converts <see cref="Extrusion"/> to be transfered to a <see cref="ARDB.Solid"/>.
   /// </summary>
   static class ExtrusionEncoder
   {
@@ -17,12 +17,12 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Transfer
-    internal static DB.Solid ToSolid(/*const*/ Extrusion extrusion, double factor)
+    internal static ARDB.Solid ToSolid(/*const*/ Extrusion extrusion, double factor)
     {
       return BrepEncoder.ToSolid(extrusion.ToBrep(), factor);
     }
 
-    internal static DB.Mesh ToMesh(/*const*/ Extrusion extrusion, double factor)
+    internal static ARDB.Mesh ToMesh(/*const*/ Extrusion extrusion, double factor)
     {
       using (var mp = MeshingParameters.Default)
       {

@@ -4,14 +4,15 @@ using System.IO;
 using System.Linq;
 using Rhino;
 using Rhino.Geometry;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
+  using External.DB;
+  using External.DB.Extensions;
+
   /// <summary>
-  /// Converts a "complex" <see cref="Brep"/> to be transfered to a <see cref="DB.Solid"/>.
+  /// Converts a "complex" <see cref="Brep"/> to be transfered to a <see cref="ARDB.Solid"/>.
   /// </summary>
   static class BrepEncoder
   {
@@ -188,7 +189,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Transfer
-    internal static DB.Mesh ToMesh(/*const*/ Brep brep, double factor)
+    internal static ARDB.Mesh ToMesh(/*const*/ Brep brep, double factor)
     {
       using (var mp = MeshingParameters.Default)
       {
@@ -215,10 +216,10 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    internal static DB.Solid ToSolid(/*const*/Brep brep, double factor)
+    internal static ARDB.Solid ToSolid(/*const*/Brep brep, double factor)
     {
       // Try on existing solids already in memory.
-      if (GeometryCache.TryGetExistingGeometry(brep, factor, out DB.Solid existing, out var hash))
+      if (GeometryCache.TryGetExistingGeometry(brep, factor, out ARDB.Solid existing, out var hash))
       {
 #if DEBUG
         GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Using cached value {GeometryCache.HashToString(hash)}…", default);
@@ -237,7 +238,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       return default;
     }
 
-    static DB.Solid AuditSolid(Brep brep, DB.Solid solid)
+    static ARDB.Solid AuditSolid(Brep brep, ARDB.Solid solid)
     {
       if (brep.IsSolid)
       {
@@ -257,7 +258,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       // DirectShape geometry has aditional validation
       switch(GeometryEncoder.Context.Peek.Element)
       {
-        case DB.DirectShape ds:
+        case ARDB.DirectShape ds:
           if (!ds.IsValidGeometry(solid))
           {
             GeometryEncoder.Context.Peek.RuntimeMessage(20, "Geometry does not satisfy DirectShape validation criteria", brep.InHostUnits());
@@ -265,8 +266,8 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
           break;
 
-        case DB.DirectShapeType dst:
-          if (!dst.IsValidShape(new DB.Solid[] { solid }))
+        case ARDB.DirectShapeType dst:
+          if (!dst.IsValidShape(new ARDB.Solid[] { solid }))
           {
             GeometryEncoder.Context.Peek.RuntimeMessage(20, "Geometry does not satisfy DirectShapeType validation criteria", brep.InHostUnits());
             return default;
@@ -277,7 +278,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       return solid;
     }
 
-    internal static bool TryGetSolid(/*const*/Brep brep, double factor, out DB.Solid solid)
+    internal static bool TryGetSolid(/*const*/Brep brep, double factor, out ARDB.Solid solid)
     {
       solid = default;
 
@@ -299,22 +300,22 @@ namespace RhinoInside.Revit.Convert.Geometry
         }
       }
 
-      // Try using DB.BRepBuilder
+      // Try using ARDB.BRepBuilder
       {
         var raw = ToRawBrep(brep, factor);
 
-        if (ToSolid(raw) is DB.Solid converted)
+        if (ToSolid(raw) is ARDB.Solid converted)
         {
           solid = converted;
           return true;
         }
       }
 
-      // Try using DB.ShapeImporter | DB.Document.Import
+      // Try using ARDB.ShapeImporter | ARDB.Document.Import
       {
         GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using SAT…", default);
 
-        if (ToSAT(brep, factor) is DB.Solid imported)
+        if (ToSAT(brep, factor) is ARDB.Solid imported)
         {
           solid = imported;
           return true;
@@ -330,31 +331,31 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="brep"></param>
     /// <returns></returns>
-    internal static DB.Solid ToSolid(/*const*/ Brep brep)
+    internal static ARDB.Solid ToSolid(/*const*/ Brep brep)
     {
       if (brep is null)
         return null;
 
       try
       {
-        var brepType = DB.BRepType.OpenShell;
+        var brepType = ARDB.BRepType.OpenShell;
         switch (brep.SolidOrientation)
         {
-          case BrepSolidOrientation.Inward: brepType = DB.BRepType.Void; break;
-          case BrepSolidOrientation.Outward: brepType = DB.BRepType.Solid; break;
+          case BrepSolidOrientation.Inward: brepType = ARDB.BRepType.Void; break;
+          case BrepSolidOrientation.Outward: brepType = ARDB.BRepType.Solid; break;
         }
 
-        using (var builder = new DB.BRepBuilder(brepType))
+        using (var builder = new ARDB.BRepBuilder(brepType))
         {
 #if REVIT_2018
           builder.SetAllowShortEdges();
           builder.AllowRemovalOfProblematicFaces();
 #endif
 
-          var brepEdges = new List<DB.BRepBuilderGeometryId>[brep.Edges.Count];
+          var brepEdges = new List<ARDB.BRepBuilderGeometryId>[brep.Edges.Count];
           foreach (var face in brep.Faces)
           {
-            var surfaceGeom = default(DB.BRepBuilderSurfaceGeometry);
+            var surfaceGeom = default(ARDB.BRepBuilderSurfaceGeometry);
             try { surfaceGeom = Raw.RawEncoder.ToHost(face); }
             catch (Autodesk.Revit.Exceptions.ArgumentException e)
             {
@@ -402,7 +403,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                   var edgeIds = brepEdges[edge.EdgeIndex];
                   if (edgeIds is null)
                   {
-                    edgeIds = brepEdges[edge.EdgeIndex] = new List<DB.BRepBuilderGeometryId>();
+                    edgeIds = brepEdges[edge.EdgeIndex] = new List<ARDB.BRepBuilderGeometryId>();
                     edgeIds.AddRange(ToBRepBuilderEdgeGeometry(edge).Select(e => builder.AddEdge(e)));
                   }
 
@@ -486,38 +487,38 @@ namespace RhinoInside.Revit.Convert.Geometry
       return null;
     }
 
-    static DB.Line ToEdgeCurve(Line line)
+    static ARDB.Line ToEdgeCurve(Line line)
     {
       var length = line.Length;
       bool isShort = length < Revit.ShortCurveTolerance;
       var factor = isShort ? 1.0 / length : UnitConverter.NoScale;
 
-      var curve = DB.Line.CreateBound
+      var curve = ARDB.Line.CreateBound
       (
         line.From.ToXYZ(factor),
         line.To.ToXYZ(factor)
       );
 
-      return isShort ? (DB.Line) curve.CreateTransformed(DB.Transform.Identity.ScaleBasis(length)) : curve;
+      return isShort ? (ARDB.Line) curve.CreateTransformed(ARDB.Transform.Identity.ScaleBasis(length)) : curve;
     }
 
-    static DB.Arc ToEdgeCurve(Arc arc)
+    static ARDB.Arc ToEdgeCurve(Arc arc)
     {
       var length = arc.Length;
       bool isShort = length < Revit.ShortCurveTolerance;
       var factor = isShort ? 1.0 / length : UnitConverter.NoScale;
 
-      var curve = DB.Arc.Create
+      var curve = ARDB.Arc.Create
       (
         arc.StartPoint.ToXYZ(factor),
         arc.EndPoint.ToXYZ(factor),
         arc.MidPoint.ToXYZ(factor)
       );
 
-      return isShort ? (DB.Arc) curve.CreateTransformed(DB.Transform.Identity.ScaleBasis(length)) : curve;
+      return isShort ? (ARDB.Arc) curve.CreateTransformed(ARDB.Transform.Identity.ScaleBasis(length)) : curve;
     }
 
-    static DB.Curve ToEdgeCurve(NurbsCurve nurbs)
+    static ARDB.Curve ToEdgeCurve(NurbsCurve nurbs)
     {
       var length = nurbs.GetLength();
       bool isShort = length < Revit.ShortCurveTolerance;
@@ -529,25 +530,25 @@ namespace RhinoInside.Revit.Convert.Geometry
       var rational = nurbs.IsRational;
       var points = nurbs.Points;
       var count = points.Count;
-      var controlPoints = new DB.XYZ[count];
+      var controlPoints = new ARDB.XYZ[count];
       var weights = rational ? new double[count] : default;
 
       for (int p = 0; p < count; ++p)
       {
         var location = points[p].Location;
-        controlPoints[p] = new DB.XYZ(location.X * factor, location.Y * factor, location.Z * factor);
+        controlPoints[p] = new ARDB.XYZ(location.X * factor, location.Y * factor, location.Z * factor);
         if (rational) weights[p] = points[p].Weight;
       }
 
       var curve = rational ?
-        DB.NurbSpline.CreateCurve(degree, knots, controlPoints, weights) :
-        DB.NurbSpline.CreateCurve(degree, knots, controlPoints);
+        ARDB.NurbSpline.CreateCurve(degree, knots, controlPoints, weights) :
+        ARDB.NurbSpline.CreateCurve(degree, knots, controlPoints);
 
-      curve = isShort ? curve.CreateTransformed(DB.Transform.Identity.ScaleBasis(1.0 / factor)) : curve;
+      curve = isShort ? curve.CreateTransformed(ARDB.Transform.Identity.ScaleBasis(1.0 / factor)) : curve;
       return curve;
     }
 
-    static IEnumerable<DB.Curve> ToEdgeCurve(PolyCurve curve)
+    static IEnumerable<ARDB.Curve> ToEdgeCurve(PolyCurve curve)
     {
       if (curve.RemoveShortSegments(Revit.VertexTolerance))
       {
@@ -570,7 +571,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    static IEnumerable<DB.Line> ToEdgeCurveMany(PolylineCurve curve)
+    static IEnumerable<ARDB.Line> ToEdgeCurveMany(PolylineCurve curve)
     {
       if (curve.RemoveShortSegments(Revit.VertexTolerance))
       {
@@ -593,7 +594,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    static IEnumerable<DB.Arc> ToEdgeCurveMany(ArcCurve curve)
+    static IEnumerable<ARDB.Arc> ToEdgeCurveMany(ArcCurve curve)
     {
       if (curve.IsClosed(Revit.ShortCurveTolerance * 1.01))
       {
@@ -614,7 +615,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       else yield return ToEdgeCurve(curve.Arc);
     }
 
-    static IEnumerable<DB.Curve> ToEdgeCurveMany(PolyCurve curve)
+    static IEnumerable<ARDB.Curve> ToEdgeCurveMany(PolyCurve curve)
     {
       if (curve.RemoveShortSegments(Revit.VertexTolerance))
       {
@@ -631,7 +632,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    static IEnumerable<DB.Curve> ToEdgeCurveMany(NurbsCurve curve)
+    static IEnumerable<ARDB.Curve> ToEdgeCurveMany(NurbsCurve curve)
     {
       // Reparametrize edgeCurve here to avoid two knots overlap due tolerance.
       // In case overlap happens curve will be splitted in more segments.
@@ -704,7 +705,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    static IEnumerable<DB.Curve> ToEdgeCurveMany(Curve curve)
+    static IEnumerable<ARDB.Curve> ToEdgeCurveMany(Curve curve)
     {
       switch (curve)
       {
@@ -744,12 +745,12 @@ namespace RhinoInside.Revit.Convert.Geometry
             foreach (var c in ToEdgeCurveMany(nurbsForm))
               yield return c;
           }
-          else throw new ConversionException($"Unable to convert {curve} to DB.Curve");
+          else throw new ConversionException($"Unable to convert {curve} to {typeof(ARDB.Curve)}");
           yield break;
       }
     }
 
-    static IEnumerable<DB.BRepBuilderEdgeGeometry> ToBRepBuilderEdgeGeometry(BrepEdge edge)
+    static IEnumerable<ARDB.BRepBuilderEdgeGeometry> ToBRepBuilderEdgeGeometry(BrepEdge edge)
     {
       var edgeCurve = edge.EdgeCurve.Trim(edge.Domain) ?? edge.EdgeCurve.DuplicateCurve();
       if (edgeCurve is null || edge.IsShort(Revit.VertexTolerance, edge.Domain))
@@ -784,15 +785,15 @@ namespace RhinoInside.Revit.Convert.Geometry
           continue;
         }
 
-        yield return DB.BRepBuilderEdgeGeometry.Create(segment);
+        yield return ARDB.BRepBuilderEdgeGeometry.Create(segment);
       }
     }
     #endregion
 
     #region IO Support Methods
-    static DB.Document ioDocument;
-    static DB.Document IODocument => ioDocument.IsValid() ? ioDocument :
-      ioDocument = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial);
+    static ARDB.Document ioDocument;
+    static ARDB.Document IODocument => ioDocument.IsValid() ? ioDocument :
+      ioDocument = Revit.ActiveDBApplication.NewProjectDocument(ARDB.UnitSystem.Imperial);
 
     static FileInfo NewSwapFileInfo(string extension)
     {
@@ -853,27 +854,27 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    static bool TryGetSolidFromInstance(DB.Document doc, DB.ElementId elementId, DB.XYZ center, out DB.Solid solid)
+    static bool TryGetSolidFromInstance(ARDB.Document doc, ARDB.ElementId elementId, ARDB.XYZ center, out ARDB.Solid solid)
     {
-      if (doc.GetElement(elementId) is DB.Element element)
+      if (doc.GetElement(elementId) is ARDB.Element element)
       {
-        using (var options = new DB.Options() { DetailLevel = DB.ViewDetailLevel.Fine })
+        using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Fine })
         {
-          /// <see cref="DB.GeometryInstance.GetInstanceGeometry"/> is like calling
-          /// <see cref="DB.SolidUtils.CreateTransformed"/> on <see cref="DB.GeometryInstance.SymbolGeometry"/>.
+          /// <see cref="ARDB.GeometryInstance.GetInstanceGeometry"/> is like calling
+          /// <see cref="ARDB.SolidUtils.CreateTransformed"/> on <see cref="ARDB.GeometryInstance.SymbolGeometry"/>.
           /// It creates a transformed copy of the solid that will survive the Rollback.
           /// Unfortunately Paint information lives in the element so even if we paint the
           /// instance before doing the duplicate this information is lost after Rollback.
           if
           (
-            element.get_Geometry(options) is DB.GeometryElement geometryElement &&
-            geometryElement.First() is DB.GeometryInstance instance &&
-            instance.GetSymbolGeometry().First() is DB.Solid symbolSolid
+            element.get_Geometry(options) is ARDB.GeometryElement geometryElement &&
+            geometryElement.First() is ARDB.GeometryInstance instance &&
+            instance.GetSymbolGeometry().First() is ARDB.Solid symbolSolid
           )
           {
             var solidBBox = symbolSolid.GetBoundingBox();
-            var translate = DB.Transform.CreateTranslation(new DB.XYZ(0.0, 0.0, center.Z - solidBBox.Transform.Origin.Z));
-            solid = DB.SolidUtils.CreateTransformed(symbolSolid, translate);
+            var translate = ARDB.Transform.CreateTranslation(new ARDB.XYZ(0.0, 0.0, center.Z - solidBBox.Transform.Origin.Z));
+            solid = ARDB.SolidUtils.CreateTransformed(symbolSolid, translate);
             return true;
           }
         }
@@ -885,7 +886,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region SAT
-    internal static DB.Solid ToSAT(/*const*/ Brep brep, double factor)
+    internal static ARDB.Solid ToSAT(/*const*/ Brep brep, double factor)
     {
       var FileSAT = NewSwapFileInfo("sat");
       try
@@ -894,24 +895,24 @@ namespace RhinoInside.Revit.Convert.Geometry
         {
           var doc = GeometryEncoder.Context.Peek.Document ?? IODocument;
 
-          if (DB.ShapeImporter.IsServiceAvailable())
+          if (ARDB.ShapeImporter.IsServiceAvailable())
           {
-            using (var importer = new DB.ShapeImporter())
+            using (var importer = new ARDB.ShapeImporter())
             {
               var list = importer.Convert(doc, FileSAT.FullName);
-              if (list.OfType<DB.Solid>().FirstOrDefault() is DB.Solid shape)
+              if (list.OfType<ARDB.Solid>().FirstOrDefault() is ARDB.Solid shape)
                 return shape;
 
               GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit Data conversion service failed to import geometry", default);
 
-              // Looks like DB.Document.Import do more cleaning while importing, let's try it.
+              // Looks like ARDB.Document.Import do more cleaning while importing, let's try it.
               //return null;
             }
           }
           else GeometryEncoder.Context.Peek.RuntimeMessage(255, "Revit Data conversion service is not available", default);
 
           // In case we don't have a destination document we create a new one here.
-          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial))
+          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(ARDB.UnitSystem.Imperial))
           {
             try
             {
@@ -920,11 +921,11 @@ namespace RhinoInside.Revit.Convert.Geometry
               {
                 using
                 (
-                  var OptionsSAT = new DB.SATImportOptions()
+                  var OptionsSAT = new ARDB.SATImportOptions()
                   {
-                    ReferencePoint = DB.XYZ.Zero,
-                    Placement = DB.ImportPlacement.Origin,
-                    CustomScale = DB.UnitUtils.Convert
+                    ReferencePoint = ARDB.XYZ.Zero,
+                    Placement = ARDB.ImportPlacement.Origin,
+                    CustomScale = ARDB.UnitUtils.Convert
                     (
                       factor,
                       External.DB.Schemas.UnitType.Feet,
@@ -934,8 +935,8 @@ namespace RhinoInside.Revit.Convert.Geometry
                 )
                 {
                   // Create a 3D view to import the SAT file
-                  var typeId = doc.GetDefaultElementTypeId(DB.ElementTypeGroup.ViewType3D);
-                  var view = DB.View3D.CreatePerspective(doc, typeId);
+                  var typeId = doc.GetDefaultElementTypeId(ARDB.ElementTypeGroup.ViewType3D);
+                  var view = ARDB.View3D.CreatePerspective(doc, typeId);
 
                   var instanceId = doc.Import(FileSAT.FullName, OptionsSAT, view);
                   var center = brep.GetBoundingBox(accurate: true).Center.ToXYZ(factor);
@@ -969,7 +970,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region 3DM
-    internal static DB.Solid To3DM(/*const*/ Brep brep, double factor)
+    internal static ARDB.Solid To3DM(/*const*/ Brep brep, double factor)
     {
       var File3DM = NewSwapFileInfo("3dm");
       try
@@ -978,12 +979,12 @@ namespace RhinoInside.Revit.Convert.Geometry
         {
           var doc = GeometryEncoder.Context.Peek.Document ?? IODocument;
 
-          if (DB.ShapeImporter.IsServiceAvailable())
+          if (ARDB.ShapeImporter.IsServiceAvailable())
           {
-            using (var importer = new DB.ShapeImporter())
+            using (var importer = new ARDB.ShapeImporter())
             {
               var list = importer.Convert(doc, File3DM.FullName);
-              if (list.OfType<DB.Solid>().FirstOrDefault() is DB.Solid shape)
+              if (list.OfType<ARDB.Solid>().FirstOrDefault() is ARDB.Solid shape)
                 return shape;
 
               GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit Data conversion service failed to import geometry", default);
@@ -996,7 +997,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
 #if REVIT_2022
           // In case we don't have a destination document we create a new one here.
-          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial))
+          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(ARDB.UnitSystem.Imperial))
           {
             try
             {
@@ -1005,11 +1006,11 @@ namespace RhinoInside.Revit.Convert.Geometry
               {
                 using
                 (
-                  var Options3DM = new DB.ImportOptions3DM()
+                  var Options3DM = new ARDB.ImportOptions3DM()
                   {
-                    ReferencePoint = DB.XYZ.Zero,
-                    Placement = DB.ImportPlacement.Origin,
-                    CustomScale = DB.UnitUtils.Convert
+                    ReferencePoint = ARDB.XYZ.Zero,
+                    Placement = ARDB.ImportPlacement.Origin,
+                    CustomScale = ARDB.UnitUtils.Convert
                     (
                       factor,
                       External.DB.Schemas.UnitType.Feet,
@@ -1019,8 +1020,8 @@ namespace RhinoInside.Revit.Convert.Geometry
                 )
                 {
                   // Create a 3D view to import the 3DM file
-                  var typeId = doc.GetDefaultElementTypeId(DB.ElementTypeGroup.ViewType3D);
-                  var view = DB.View3D.CreatePerspective(doc, typeId);
+                  var typeId = doc.GetDefaultElementTypeId(ARDB.ElementTypeGroup.ViewType3D);
+                  var view = ARDB.View3D.CreatePerspective(doc, typeId);
 
                   var instanceId = doc.Import(File3DM.FullName, Options3DM, view);
                   var center = brep.GetBoundingBox(accurate: true).Center.ToXYZ(factor);
@@ -1055,17 +1056,17 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Debug
-    static bool IsEquivalent(this DB.Solid solid, Brep brep)
+    static bool IsEquivalent(this ARDB.Solid solid, Brep brep)
     {
       var hit = new bool[brep.Faces.Count];
 
-      foreach (var face in solid.Faces.Cast<DB.Face>())
+      foreach (var face in solid.Faces.Cast<ARDB.Face>())
       {
         double[] samples = { 0.0, 1.0 / 5.0, 2.0 / 5.0, 3.0 / 5.0, 4.0 / 5.0, 1.0 };
 
-        foreach (var edges in face.EdgeLoops.Cast<DB.EdgeArray>())
+        foreach (var edges in face.EdgeLoops.Cast<ARDB.EdgeArray>())
         {
-          foreach (var edge in edges.Cast<DB.Edge>())
+          foreach (var edge in edges.Cast<ARDB.Edge>())
           {
             foreach (var sample in samples)
             {
@@ -1083,7 +1084,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           foreach (var vertex in mesh.Vertices)
           {
             // Recover real position on face
-            if (face.Project(vertex) is DB.IntersectionResult result)
+            if (face.Project(vertex) is ARDB.IntersectionResult result)
             {
               using (result)
               {

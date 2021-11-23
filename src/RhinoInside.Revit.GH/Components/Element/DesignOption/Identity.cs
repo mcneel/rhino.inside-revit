@@ -2,7 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
-namespace RhinoInside.Revit.GH.Components.DesignOption
+namespace RhinoInside.Revit.GH.Components.DesignOptions
 {
   public class DesignOptionSetIdentity : ZuiComponent
   {

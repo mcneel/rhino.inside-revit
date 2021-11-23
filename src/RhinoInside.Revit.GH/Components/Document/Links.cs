@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Documents
 {
+  using External.DB.Extensions;
+
   public class DocumentLinks : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("EBCCFDD8-9F3B-44F4-A209-72D06C8082A5");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "L";
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.RevitLinkType));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.RevitLinkType));
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -60,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components
 
       // Note: linked documents that are not loaded in Revit memory,
       // are not reported since no interaction can be done if not loaded
-      var docs = new List<DB.Document>();
+      var docs = new List<ARDB.Document>();
       using (var documents = Revit.ActiveDBApplication.Documents)
       {
         /* NOTES:
@@ -74,16 +75,16 @@ namespace RhinoInside.Revit.GH.Components
          *    "BIM 360://Default Test/Project Files/Linked_Project2.rvt"
          */
         // get all external model references
-        foreach (var id in DB.ExternalFileUtils.GetAllExternalFileReferences(doc))
+        foreach (var id in ARDB.ExternalFileUtils.GetAllExternalFileReferences(doc))
         {
           // inspect the reference, and ...
-          var reference = DB.ExternalFileUtils.GetExternalFileReference(doc, id);
-          if (reference.ExternalFileReferenceType == DB.ExternalFileReferenceType.RevitLink)
+          var reference = ARDB.ExternalFileUtils.GetExternalFileReference(doc, id);
+          if (reference.ExternalFileReferenceType == ARDB.ExternalFileReferenceType.RevitLink)
           {
             // grab the model path
-            var modelPath = reference.PathType == DB.PathType.Relative ? reference.GetAbsolutePath() : reference.GetPath();
+            var modelPath = reference.PathType == ARDB.PathType.Relative ? reference.GetAbsolutePath() : reference.GetPath();
             // look into the loaded documents and find the one with the same path
-            if (documents.Cast<DB.Document>().Where(x => x.IsLinked && modelPath.IsEquivalent(x.GetModelPath())).FirstOrDefault() is DB.Document linkedDoc)
+            if (documents.Cast<ARDB.Document>().Where(x => x.IsLinked && modelPath.IsEquivalent(x.GetModelPath())).FirstOrDefault() is ARDB.Document linkedDoc)
               // if found, add that to the output list
               docs.Add(linkedDoc);
           }
@@ -95,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components
         // element types inside the host model
 
         // find all the revit link types in the host model
-        using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.RevitLinkType)))
+        using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.RevitLinkType)))
         {
           foreach (var revitLinkType in collector)
           {
@@ -110,7 +111,7 @@ namespace RhinoInside.Revit.GH.Components
               if (refInfo.TryGetValue("LinkedModelModelId", out linkedDocId))
               {
                 // look into the loaded documents and find the one with the same 'cloud' path
-                var linkedDoc = documents.Cast<DB.Document>()
+                var linkedDoc = documents.Cast<ARDB.Document>()
                                          .Where(x => x.IsLinked &&
                                                      x.GetCloudModelPath().GetModelGUID() == Guid.Parse(linkedDocId))
                                          .FirstOrDefault();

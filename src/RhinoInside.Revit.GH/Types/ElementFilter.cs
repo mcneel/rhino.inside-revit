@@ -1,27 +1,28 @@
 using System;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using External.DB;
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Selection Filter")]
   public class SelectionFilterElement : Element
   {
-    protected override Type ValueType => typeof(DB.SelectionFilterElement);
-    public new DB.SelectionFilterElement Value => base.Value as DB.SelectionFilterElement;
+    protected override Type ValueType => typeof(ARDB.SelectionFilterElement);
+    public new ARDB.SelectionFilterElement Value => base.Value as ARDB.SelectionFilterElement;
 
     public SelectionFilterElement() { }
-    public SelectionFilterElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public SelectionFilterElement(DB.SelectionFilterElement value) : base(value) { }
+    public SelectionFilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public SelectionFilterElement(ARDB.SelectionFilterElement value) : base(value) { }
 
     public override bool CastTo<Q>(out Q target)
     {
       if (base.CastTo<Q>(out target))
         return true;
 
-      if (Value is DB.SelectionFilterElement value)
+      if (Value is ARDB.SelectionFilterElement value)
       {
         if (typeof(Q).IsAssignableFrom(typeof(ElementFilter)))
         {
@@ -37,19 +38,19 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Parameter Filter")]
   public class ParameterFilterElement : Element
   {
-    protected override Type ValueType => typeof(DB.ParameterFilterElement);
-    public new DB.ParameterFilterElement Value => base.Value as DB.ParameterFilterElement;
+    protected override Type ValueType => typeof(ARDB.ParameterFilterElement);
+    public new ARDB.ParameterFilterElement Value => base.Value as ARDB.ParameterFilterElement;
 
     public ParameterFilterElement() { }
-    public ParameterFilterElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public ParameterFilterElement(DB.ParameterFilterElement value) : base(value) { }
+    public ParameterFilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public ParameterFilterElement(ARDB.ParameterFilterElement value) : base(value) { }
 
     public override bool CastTo<Q>(out Q target)
     {
       if (base.CastTo<Q>(out target))
         return true;
 
-      if (Value is DB.ParameterFilterElement value)
+      if (Value is ARDB.ParameterFilterElement value)
       {
         if (typeof(Q).IsAssignableFrom(typeof(ElementFilter)))
         {
@@ -62,7 +63,7 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
-  public class ElementFilter : GH_Goo<DB.ElementFilter>
+  public class ElementFilter : GH_Goo<ARDB.ElementFilter>
   {
     public override string TypeName => "Revit Element Filter";
     public override string TypeDescription => "Represents a Revit element filter";
@@ -70,11 +71,11 @@ namespace RhinoInside.Revit.GH.Types
     public sealed override IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
     public ElementFilter() { }
-    public ElementFilter(DB.ElementFilter filter) : base(filter) { }
+    public ElementFilter(ARDB.ElementFilter filter) : base(filter) { }
 
     public override bool CastFrom(object source)
     {
-      if (source is DB.ElementFilter filter)
+      if (source is ARDB.ElementFilter filter)
       {
         Value = filter;
         return true;
@@ -85,7 +86,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(DB.ElementFilter)))
+      if (typeof(Q).IsAssignableFrom(typeof(ARDB.ElementFilter)))
       {
         target = (Q) (object) Value;
         return true;
@@ -106,7 +107,7 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
-  public class FilterRule : GH_Goo<DB.FilterRule>
+  public class FilterRule : GH_Goo<ARDB.FilterRule>
   {
     public override string TypeName => "Revit Filter Rule";
     public override string TypeDescription => "Represents a Revit filter rule";
@@ -114,11 +115,11 @@ namespace RhinoInside.Revit.GH.Types
     public sealed override IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
     public FilterRule() { }
-    public FilterRule(DB.FilterRule filter) : base(filter) { }
+    public FilterRule(ARDB.FilterRule filter) : base(filter) { }
 
     public override bool CastFrom(object source)
     {
-      if (source is DB.FilterRule rule)
+      if (source is ARDB.FilterRule rule)
       {
         Value = rule;
         return true;
@@ -129,7 +130,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(DB.FilterRule)))
+      if (typeof(Q).IsAssignableFrom(typeof(ARDB.FilterRule)))
       {
         target = (Q) (object) Value;
         return true;

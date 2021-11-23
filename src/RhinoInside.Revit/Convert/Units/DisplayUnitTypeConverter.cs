@@ -1,21 +1,22 @@
 using System.Diagnostics;
-using RhinoInside.Revit.External.DB.Extensions;
 using static System.Math;
 using static Rhino.RhinoMath;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.Convert.Units
 {
+  using External.DB.Extensions;
+
   static class DisplayUnitTypeConverter
   {
 #if DEBUG
     static DisplayUnitTypeConverter()
     {
 #if REVIT_2021
-      var lengthUnits = DB.UnitUtils.GetValidUnits(DBXS.SpecType.Measurable.Length);
+      var lengthUnits = ARDB.UnitUtils.GetValidUnits(DBXS.SpecType.Measurable.Length);
 #else
-      var lengthUnits = DB.UnitUtils.GetValidDisplayUnits(DB.UnitType.UT_Length);
+      var lengthUnits = ARDB.UnitUtils.GetValidDisplayUnits(ARDB.UnitType.UT_Length);
 #endif
       // Verify all conversions are implementd.
       foreach (var unit in lengthUnits)
@@ -65,7 +66,7 @@ namespace RhinoInside.Revit.Convert.Units
       return DBXS.UnitType.Empty;
     }
 
-    public static Rhino.UnitSystem ToUnitSystem(this DB.Units value, out int distanceDisplayPrecision)
+    public static Rhino.UnitSystem ToUnitSystem(this ARDB.Units value, out int distanceDisplayPrecision)
     {
       var lengthFormatoptions = value.GetFormatOptions(DBXS.SpecType.Measurable.Length);
       distanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);

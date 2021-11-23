@@ -5,7 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Elements
 {
   public abstract class GraphicalElementTransform : TransactionalChainComponent
   {
@@ -265,7 +265,7 @@ namespace RhinoInside.Revit.GH.Components
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Obsolete
+namespace RhinoInside.Revit.GH.Components.Elements.Obsolete
 {
   [Obsolete("Obsolete since 2020-10-19")]
   public class ElementPlacement : ZuiComponent

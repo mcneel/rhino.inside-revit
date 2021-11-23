@@ -1,14 +1,12 @@
 using System;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using ARDB = Autodesk.Revit.DB;
 
-using RhinoInside.Revit.GH.ElementTracking;
-
-using DB = Autodesk.Revit.DB;
-
-namespace RhinoInside.Revit.GH.Components.Element.Sheet
+namespace RhinoInside.Revit.GH.Components.Sheets
 {
+  using ElementTracking;
+
   [ComponentVersion(introduced: "1.2.4")]
   public class SheetByNumber_Placeholder : BaseSheetByNumber<PlaceholderSheetHandler>
   {
@@ -95,10 +93,10 @@ namespace RhinoInside.Revit.GH.Components.Element.Sheet
       // Note: see notes on SheetHandler.Name parameter
       if (!Params.TryGetData(DA, "Sheet Name", out string name, x => !string.IsNullOrEmpty(x))) return;
 
-      Params.TryGetData(DA, "Template", out DB.ViewSheet template);
+      Params.TryGetData(DA, "Template", out ARDB.ViewSheet template);
 
       // find any tracked sheet
-      Params.ReadTrackedElement(_Sheet_.name, doc.Value, out DB.ViewSheet sheet);
+      Params.ReadTrackedElement(_Sheet_.name, doc.Value, out ARDB.ViewSheet sheet);
 
       // update, or create
       StartTransaction(doc.Value);

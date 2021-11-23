@@ -1,7 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
@@ -21,9 +21,9 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
 
-      ListItems.Add(new GH_ValueListItem("Isotropic", ((int) DB.StructuralBehavior.Isotropic).ToString()));
-      ListItems.Add(new GH_ValueListItem("Orthotropic", ((int) DB.StructuralBehavior.Orthotropic).ToString()));
-      ListItems.Add(new GH_ValueListItem("Transverse Isotropic", ((int) DB.StructuralBehavior.TransverseIsotropic).ToString()));
+      ListItems.Add(new GH_ValueListItem("Isotropic", ((int) ARDB.StructuralBehavior.Isotropic).ToString()));
+      ListItems.Add(new GH_ValueListItem("Orthotropic", ((int) ARDB.StructuralBehavior.Orthotropic).ToString()));
+      ListItems.Add(new GH_ValueListItem("Transverse Isotropic", ((int) ARDB.StructuralBehavior.TransverseIsotropic).ToString()));
     }
   }
 #endif

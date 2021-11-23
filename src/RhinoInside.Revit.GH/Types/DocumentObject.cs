@@ -2,18 +2,19 @@ using System;
 using System.Reflection;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using External.DB.Extensions;
+
   /// <summary>
   /// Interface to wrap classes that are defined into <see cref="Autodesk.Revit.DB"/> namespace.
-  /// For example: <see cref="DB.Document"/>
+  /// For example: <see cref="ARDB.Document"/>
   /// </summary>
   public interface IGH_DocumentObject : IGH_Goo
   {
-    DB.Document Document { get; }
+    ARDB.Document Document { get; }
     object Value { get; }
   }
 
@@ -95,10 +96,10 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     protected DocumentObject() { }
-    protected DocumentObject(DB.Document doc, object val) { document = doc; value = val; }
+    protected DocumentObject(ARDB.Document doc, object val) { document = doc; value = val; }
 
-    DB.Document document = default;
-    public DB.Document Document
+    ARDB.Document document = default;
+    public ARDB.Document Document
     {
       get => document?.IsValidObject != true ? null : document;
       protected set
@@ -140,7 +141,7 @@ namespace RhinoInside.Revit.GH.Types
 
   /// <summary>
   /// Interface to wrap classes that can be created-duplicated-updated-deleted without starting a Revit Transaction.
-  /// For example: <see cref="DB.CompoundStructureLayer"/>
+  /// For example: <see cref="ARDB.CompoundStructureLayer"/>
   /// </summary>
   public interface IGH_ValueObject : IGH_DocumentObject
   {
@@ -173,12 +174,12 @@ namespace RhinoInside.Revit.GH.Types
 
     protected ValueObject() { }
 
-    protected ValueObject(DB.Document doc, object val) : base(doc, val) { }
+    protected ValueObject(ARDB.Document doc, object val) : base(doc, val) { }
   }
 
   /// <summary>
   /// Interface to wrap classes that can not be created-duplicated-updated-deleted without starting a Revit Transaction.
-  /// For example: <see cref="DB.CurtainGrid"/>, <see cref="DB.Parameter"/>
+  /// For example: <see cref="ARDB.CurtainGrid"/>, <see cref="ARDB.Parameter"/>
   /// </summary>
   public interface IGH_ReferenceObject : IGH_DocumentObject
   {
@@ -193,7 +194,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     protected ReferenceObject() { }
 
-    protected ReferenceObject(DB.Document doc, object val) : base(doc, val) { }
+    protected ReferenceObject(ARDB.Document doc, object val) : base(doc, val) { }
 
     #region System.Object
     public bool Equals(ReferenceObject other) => other is object &&

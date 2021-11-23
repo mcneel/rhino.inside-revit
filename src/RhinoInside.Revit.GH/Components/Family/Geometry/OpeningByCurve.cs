@@ -2,7 +2,7 @@ using System;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Families
 {
   public class FamilyGeometryOpeningByCurve : Component
   {

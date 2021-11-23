@@ -6,8 +6,7 @@ using System.Windows.Forms;
 using Autodesk.Revit.UI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using RhinoInside.Revit.External.DB;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.ElementTracking
 {
@@ -23,8 +22,8 @@ namespace RhinoInside.Revit.GH.ElementTracking
     /// <param name="value"></param>
     /// <param name="elementName"></param>
     /// <returns>True if the parameter is present</returns>
-    public static bool ReadTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document doc, out T value)
-      where T : DB.Element
+    public static bool ReadTrackedElement<T>(this GH_ComponentParamServer parameters, string name, ARDB.Document doc, out T value)
+      where T : ARDB.Element
     {
       var index = parameters.Output.IndexOf(name, out var parameter);
       if (parameter is IGH_TrackingParam tracking)
@@ -39,8 +38,8 @@ namespace RhinoInside.Revit.GH.ElementTracking
       return false;
     }
 
-    public static void WriteTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document document, T value)
-      where T : DB.Element
+    public static void WriteTrackedElement<T>(this GH_ComponentParamServer parameters, string name, ARDB.Document document, T value)
+      where T : ARDB.Element
     {
       var index = parameters.Output.IndexOf(name, out var parameter);
       if (parameter is IGH_TrackingParam tracking)
@@ -51,8 +50,8 @@ namespace RhinoInside.Revit.GH.ElementTracking
         throw new InvalidOperationException($"Parameter '{name}' is missing");
     }
 
-    public static IEnumerable<T> TrackedElements<T>(this GH_ComponentParamServer parameters, string name, DB.Document document)
-      where T : DB.Element
+    public static IEnumerable<T> TrackedElements<T>(this GH_ComponentParamServer parameters, string name, ARDB.Document document)
+      where T : ARDB.Element
     {
       var index = parameters.Output.IndexOf(name, out var parameter);
       if (parameter is IGH_TrackingParam tracking)
@@ -66,12 +65,12 @@ namespace RhinoInside.Revit.GH.ElementTracking
 
   internal static class TrackingParamGooExtensions
   {
-    public static bool ReadTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document doc, out T value)
+    public static bool ReadTrackedElement<T>(this GH_ComponentParamServer parameters, string name, ARDB.Document doc, out T value)
       where T : Types.IGH_ElementId
     {
       if
       (
-        TrackingParamElementExtensions.ReadTrackedElement(parameters, name, doc, out DB.Element element) &&
+        TrackingParamElementExtensions.ReadTrackedElement(parameters, name, doc, out ARDB.Element element) &&
         Types.Element.FromElement(element) is T t
       )
       {
@@ -83,16 +82,16 @@ namespace RhinoInside.Revit.GH.ElementTracking
       return false;
     }
 
-    public static void WriteTrackedElement<T>(this GH_ComponentParamServer parameters, string name, DB.Document document, T value)
+    public static void WriteTrackedElement<T>(this GH_ComponentParamServer parameters, string name, ARDB.Document document, T value)
       where T : Types.IGH_ElementId
     {
-      TrackingParamElementExtensions.WriteTrackedElement(parameters, name, document, value.Value as DB.Element);
+      TrackingParamElementExtensions.WriteTrackedElement(parameters, name, document, value.Value as ARDB.Element);
     }
 
-    public static IEnumerable<T> TrackedElements<T>(this GH_ComponentParamServer parameters, string name, DB.Document document)
+    public static IEnumerable<T> TrackedElements<T>(this GH_ComponentParamServer parameters, string name, ARDB.Document document)
       where T : Types.IGH_ElementId
     {
-      return TrackingParamElementExtensions.TrackedElements<DB.Element>(parameters, name, document).
+      return TrackingParamElementExtensions.TrackedElements<ARDB.Element>(parameters, name, document).
         Select(x => Types.Element.FromElement(x) is T t ? t : default);
     }
   }
@@ -101,12 +100,13 @@ namespace RhinoInside.Revit.GH.ElementTracking
 namespace RhinoInside.Revit.GH.Parameters
 {
   using ElementTracking;
-  using RhinoInside.Revit.External.DB.Extensions;
+  using External.DB;
+  using External.DB.Extensions;
 
   public abstract class Element<T, R> : ElementIdParam<T, R>,
     IGH_TrackingParam
     where T : class, Types.IGH_Element
-    where R : DB.Element
+    where R : ARDB.Element
   {
     protected Element(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public virtual void Menu_AppendActions(ToolStripDropDown menu)
     {
-      if (Revit.ActiveUIDocument?.Document is DB.Document doc)
+      if (Revit.ActiveUIDocument?.Document is ARDB.Document doc)
       {
         if (Kind == GH_ParamKind.output && Attributes.GetTopLevel.DocObject is Components.ReconstructElementComponent)
         {
@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    bool HasTrackedElements => ToElementIds(VolatileData).Any(x => ElementStream.IsElementTracked(x.Value as DB.Element));
+    bool HasTrackedElements => ToElementIds(VolatileData).Any(x => ElementStream.IsElementTracked(x.Value as ARDB.Element));
 
     async Task<(bool Committed, IList<string> Messages)> ReleaseElementsAsync()
     {
@@ -176,13 +176,13 @@ namespace RhinoInside.Revit.GH.Parameters
 
       foreach (var document in ToElementIds(VolatileData).GroupBy(x => x.Document))
       {
-        using (var tx = new DB.Transaction(document.Key, "Release Elements"))
+        using (var tx = new ARDB.Transaction(document.Key, "Release Elements"))
         {
-          if (tx.Start() == DB.TransactionStatus.Started)
+          if (tx.Start() == ARDB.TransactionStatus.Started)
           {
-            var list = new List<DB.ElementId>();
+            var list = new List<ARDB.ElementId>();
 
-            foreach (var element in document.Select(x => x.Value).OfType<DB.Element>())
+            foreach (var element in document.Select(x => x.Value).OfType<ARDB.Element>())
             {
               if (ElementStream.ReleaseElement(element))
               {
@@ -199,13 +199,13 @@ namespace RhinoInside.Revit.GH.Parameters
               else
                 messages.Add($"{list.Count} elements were released at '{document.Key.Title.TripleDot(16)}' document and are no longer synchronized.");
 
-              using (var message = new DB.FailureMessage(ExternalFailures.ElementFailures.TrackedElementReleased))
+              using (var message = new ARDB.FailureMessage(ExternalFailures.ElementFailures.TrackedElementReleased))
               {
                 message.SetFailingElements(list);
                 document.Key.PostFailure(message);
               }
 
-              committed |= await tx.CommitAsync() == DB.TransactionStatus.Committed;
+              committed |= await tx.CommitAsync() == ARDB.TransactionStatus.Committed;
             }
           }
         }
@@ -251,7 +251,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         try
         {
-          using (var transaction = new DB.Transaction(doc, "Pin elements"))
+          using (var transaction = new ARDB.Transaction(doc, "Pin elements"))
           {
             transaction.Start();
 
@@ -280,7 +280,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         try
         {
-          using (var transaction = new DB.Transaction(doc, "Unpin elements"))
+          using (var transaction = new ARDB.Transaction(doc, "Unpin elements"))
           {
             transaction.Start();
 
@@ -301,14 +301,14 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       var committed = false;
       messages = new List<GH_RuntimeMessage>();
-      var groups = new List<DB.TransactionGroup>();
+      var groups = new List<ARDB.TransactionGroup>();
 
       try
       {
         foreach (var document in ToElementIds(VolatileData).GroupBy(x => x.Document))
         {
           // Look for all disctint non built-in elements
-          var elementIds = new HashSet<DB.ElementId>
+          var elementIds = new HashSet<ARDB.ElementId>
           (
             document.Where(x => !x.Id.IsBuiltInId() && x.Value is object).Select(x => x.Id),
             default(ElementIdEqualityComparer)
@@ -316,30 +316,30 @@ namespace RhinoInside.Revit.GH.Parameters
 
           if (elementIds.Count > 0)
           {
-            var group = new DB.TransactionGroup(document.Key, "Delete Elements")
+            var group = new ARDB.TransactionGroup(document.Key, "Delete Elements")
             { IsFailureHandlingForcedModal = true };
 
-            if (group.Start() != DB.TransactionStatus.Started) continue;
+            if (group.Start() != ARDB.TransactionStatus.Started) continue;
             groups.Add(group);
 
-            using (var tx = new DB.Transaction(document.Key, "Delete Elements"))
+            using (var tx = new ARDB.Transaction(document.Key, "Delete Elements"))
             {
               tx.SetFailureHandlingOptions(tx.GetFailureHandlingOptions().SetDelayedMiniWarnings(false));
 
-              if (tx.Start() == DB.TransactionStatus.Started)
+              if (tx.Start() == ARDB.TransactionStatus.Started)
               {
                 // Show feedback on Revit
-                using (var message = new DB.FailureMessage(ExternalFailures.ElementFailures.ConfirmDeleteElement))
+                using (var message = new ARDB.FailureMessage(ExternalFailures.ElementFailures.ConfirmDeleteElement))
                 {
                   message.SetFailingElements(elementIds);
                   document.Key.PostFailure(message);
                 }
 
-                if (tx.Commit() == DB.TransactionStatus.Committed)
+                if (tx.Commit() == ARDB.TransactionStatus.Committed)
                 {
                   tx.Start();
                   document.Key.Delete(elementIds);
-                  committed |= tx.Commit() == DB.TransactionStatus.Committed;
+                  committed |= tx.Commit() == ARDB.TransactionStatus.Committed;
 
                   if (committed)
                   {
@@ -457,7 +457,7 @@ namespace RhinoInside.Revit.GH.Parameters
       using (ElementStreams) ElementStreams = default;
     }
 
-    IEnumerable<TOutput> IGH_TrackingParam.GetTrackedElements<TOutput>(DB.Document doc)
+    IEnumerable<TOutput> IGH_TrackingParam.GetTrackedElements<TOutput>(ARDB.Document doc)
     {
       if (TrackingMode == TrackingMode.Reconstruct)
         return ElementStreams[doc].Cast<TOutput>();
@@ -465,7 +465,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return Enumerable.Empty<TOutput>();
     }
 
-    bool IGH_TrackingParam.ReadTrackedElement<TOutput>(DB.Document doc, out TOutput element)
+    bool IGH_TrackingParam.ReadTrackedElement<TOutput>(ARDB.Document doc, out TOutput element)
     {
       if (TrackingMode == TrackingMode.Reconstruct)
       {
@@ -481,7 +481,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return false;
     }
 
-    void IGH_TrackingParam.WriteTrackedElement<TInput>(DB.Document doc, TInput element)
+    void IGH_TrackingParam.WriteTrackedElement<TInput>(ARDB.Document doc, TInput element)
     {
       if (TrackingMode > TrackingMode.Disabled)
         ElementStreams[doc].Write(element as R);
@@ -489,7 +489,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class Element : Element<Types.IGH_Element, DB.Element>
+  public class Element : Element<Types.IGH_Element, ARDB.Element>
   {
     public override GH_Exposure Exposure => GH_Exposure.septenary;
     public override Guid ComponentGuid => new Guid("F3EA4A9C-B24F-4587-A358-6A7E6D8C028B");

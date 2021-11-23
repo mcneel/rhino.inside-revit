@@ -5,17 +5,17 @@ using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
+using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
-namespace RhinoInside.Revit.GH.Components.ParameterElement
+namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
   public class QueryParameters : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D82D9FC3-FC74-4C54-AAE1-CB4D806741DB");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.ParameterElement));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.ParameterElement));
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -69,13 +69,13 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       ParamDefinition.Create<Parameters.ParameterKey>("Parameter", "K", "Parameters list", GH_ParamAccess.list)
     };
 
-    IEnumerable<(DB.Definition Definition, DB.Binding Binding)>
-    GetAllProjectParameters(DB.Document document)
+    IEnumerable<(ARDB.Definition Definition, ARDB.Binding Binding)>
+    GetAllProjectParameters(ARDB.Document document)
     {
       using (var iterator = document.ParameterBindings.ForwardIterator())
       {
         while (iterator.MoveNext())
-          yield return (iterator.Key, iterator.Current as DB.Binding);
+          yield return (iterator.Key, iterator.Current as ARDB.Binding);
       }
     }
 
@@ -89,7 +89,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
       if (!Params.TryGetData(DA, "Type", out Types.ParameterType type, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Group", out Types.ParameterGroup group, x => x.IsValid)) return;
 
-      var parameters = Enumerable.Empty<DB.InternalDefinition>();
+      var parameters = Enumerable.Empty<ARDB.InternalDefinition>();
 
       // Project or Family parameters
       if (doc.IsFamilyDocument)
@@ -98,19 +98,19 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
         {
           switch (binding.Value)
           {
-            case DBX.ParameterBinding.Instance:
-              parameters = doc.FamilyManager.Parameters.Cast<DB.FamilyParameter>().
-                Where(x => x.IsInstance == true).Select(x => x.Definition as DB.InternalDefinition);
+            case ERDB.ParameterBinding.Instance:
+              parameters = doc.FamilyManager.Parameters.Cast<ARDB.FamilyParameter>().
+                Where(x => x.IsInstance == true).Select(x => x.Definition as ARDB.InternalDefinition);
               break;
 
-            case DBX.ParameterBinding.Type:
-              parameters = doc.FamilyManager.Parameters.Cast<DB.FamilyParameter>().
-                Where(x => x.IsInstance == false).Select(x => x.Definition as DB.InternalDefinition);
+            case ERDB.ParameterBinding.Type:
+              parameters = doc.FamilyManager.Parameters.Cast<ARDB.FamilyParameter>().
+                Where(x => x.IsInstance == false).Select(x => x.Definition as ARDB.InternalDefinition);
               break;
           }
         }
-        else parameters = doc.FamilyManager.Parameters.Cast<DB.FamilyParameter>().
-            Select(x => x.Definition as DB.InternalDefinition);
+        else parameters = doc.FamilyManager.Parameters.Cast<ARDB.FamilyParameter>().
+            Select(x => x.Definition as ARDB.InternalDefinition);
       }
       else
       {
@@ -118,35 +118,35 @@ namespace RhinoInside.Revit.GH.Components.ParameterElement
         {
           switch (binding.Value)
           {
-            case DBX.ParameterBinding.Instance:
+            case ERDB.ParameterBinding.Instance:
               parameters = GetAllProjectParameters(doc).
-                Where(x => x.Binding is DB.InstanceBinding).
+                Where(x => x.Binding is ARDB.InstanceBinding).
                 Select(x => x.Definition).
-                OfType<DB.InternalDefinition>();
+                OfType<ARDB.InternalDefinition>();
               break;
 
-            case DBX.ParameterBinding.Type:
+            case ERDB.ParameterBinding.Type:
               parameters = GetAllProjectParameters(doc).
-                Where(x => x.Binding is DB.TypeBinding).
+                Where(x => x.Binding is ARDB.TypeBinding).
                 Select(x => x.Definition).
-                OfType<DB.InternalDefinition>();
+                OfType<ARDB.InternalDefinition>();
               break;
           }
         }
         else parameters = GetAllProjectParameters(doc).
                 Select(x => x.Definition).
-                OfType<DB.InternalDefinition>();
+                OfType<ARDB.InternalDefinition>();
       }
 
       // Global parameters
-      if (DB.GlobalParametersManager.AreGlobalParametersAllowed(doc))
+      if (ARDB.GlobalParametersManager.AreGlobalParametersAllowed(doc))
       {
-        var globals = DB.GlobalParametersManager.GetAllGlobalParameters(doc).
-          Select(x => (doc.GetElement(x) as DB.GlobalParameter).GetDefinition());
+        var globals = ARDB.GlobalParametersManager.GetAllGlobalParameters(doc).
+          Select(x => (doc.GetElement(x) as ARDB.GlobalParameter).GetDefinition());
 
         if (binding is null)
           parameters = parameters.Concat(globals);
-        else if (binding.Value == DBX.ParameterBinding.Global)
+        else if (binding.Value == ERDB.ParameterBinding.Global)
           parameters = globals;
       }
 

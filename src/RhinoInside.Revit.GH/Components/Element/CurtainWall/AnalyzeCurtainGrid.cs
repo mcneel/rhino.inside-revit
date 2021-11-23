@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Walls
 {
   public class AnalyzeCurtainGrid : AnalysisComponent
   {
@@ -126,9 +126,9 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Curtain Grid", ref curtainGridGoo))
         return;
 
-      if (curtainGridGoo.Document is DB.Document doc && curtainGridGoo.Value is DB.CurtainGrid cgrid)
+      if (curtainGridGoo.Document is ARDB.Document doc && curtainGridGoo.Value is ARDB.CurtainGrid cgrid)
       {
-        DA.SetDataList("Cells", cgrid.GetCurtainCells().Select(x => new Types.DataObject<DB.CurtainCell>(x, sourceDoc: doc)));
+        DA.SetDataList("Cells", cgrid.GetCurtainCells().Select(x => new Types.DataObject<ARDB.CurtainCell>(x, sourceDoc: doc)));
         DA.SetDataList("Mullions", cgrid.GetMullionIds().Select(x => Types.Mullion.FromElementId(doc, x)));
         DA.SetDataList("Panels", cgrid.GetPanelIds().Select(x => Types.Element.FromElementId(doc, x)));
 

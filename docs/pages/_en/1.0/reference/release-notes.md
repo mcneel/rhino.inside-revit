@@ -6,6 +6,17 @@ group: Deployment & Configs
 
 <!-- most recent release should be on top -->
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.4 RC3" version="v1.4.7997.16502" pre_release=true time="11/23/2021" %}
+
+- A major work in 1.4 is cleaning up and preparing the {{ site.terms.rir }} API. In this release we added an option to see the documentation for current state of the API in python editor (`EditPythonScript` command)
+
+![]({{ "/static/images/release_notes/pythoneditor-docs.png" | prepend: site.baseurl }})
+
+- Fixed *Select All* and *Invert Selection* on **Value Set Picker**
+- Fixed {% include ltr/comp.html uuid='79daea3a-' %} when *Categories* input contains nulls
+- Fixed {% include ltr/comp.html uuid='97d71aa8-' %} component when managing nulls
+
+
 {% include ltr/release-header.html title="v1.4 RC2" version="v1.4.7989.18759" pre_release=true time="11/16/2021" %}
 
 - Fix for `DB.InternalOrigin` on Revit 2020.2

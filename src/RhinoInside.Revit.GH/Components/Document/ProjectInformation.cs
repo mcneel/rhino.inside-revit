@@ -2,9 +2,9 @@ using System;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Documents
 {
   public class ProjectInformation : TransactionalChainComponent
   {
@@ -77,7 +77,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var info = default(DB.ProjectInfo);
+      var info = default(ARDB.ProjectInfo);
 
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Project", out var doc)) return;
       if (doc.IsFamilyDocument || (info = doc.ProjectInformation) == null)

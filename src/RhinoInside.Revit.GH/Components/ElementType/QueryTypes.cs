@@ -2,17 +2,18 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.ElementTypes
 {
+  using External.DB;
+  using External.DB.Extensions;
+
   public class QueryTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("7B00F940-4C6E-4F3F-AB81-C3EED430DE96");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override DB.ElementFilter ElementFilter => new DB.ElementIsElementTypeFilter(false);
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementIsElementTypeFilter(false);
 
     public QueryTypes() : base
     (
@@ -48,16 +49,16 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
       if (!Params.TryGetData(DA, "Family Name", out string familyName)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
-      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
       if (!(category?.Document is null || doc.Equals(category.Document)))
         throw new System.ArgumentException("Wrong Document.", "Category");
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
-        if (kind is object && CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true) is DB.ElementFilter kindFilter)
+        if (kind is object && CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true) is ARDB.ElementFilter kindFilter)
           elementCollector = elementCollector.WherePasses(kindFilter);
 
         if (category is object)
@@ -66,13 +67,13 @@ namespace RhinoInside.Revit.GH.Components
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, ref familyName, out var familyNameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, ref familyName, out var familyNameFilter))
           elementCollector = elementCollector.WherePasses(familyNameFilter);
 
-        if (TryGetFilterStringParam(DB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
 
-        var elementTypes = elementCollector.Cast<DB.ElementType>();
+        var elementTypes = elementCollector.Cast<ARDB.ElementType>();
 
         if (familyName is object)
           elementTypes = elementTypes.Where(x => x.FamilyName.IsSymbolNameLike(familyName));

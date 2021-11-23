@@ -5,7 +5,7 @@ using System.Linq;
 using Eto.Drawing;
 using Eto.Forms;
 using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.AddIn.Forms
 {
@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.AddIn.Forms
   {
     const string ImportOptions = "ImportOptions";
 
-    readonly DB.Document Document;
+    readonly ARDB.Document Document;
     readonly ImageView imageView = new ImageView();
     readonly DropDown fileSelector = new DropDown();
     readonly Button fileBrowser = new Button() { Text = "…" };
@@ -27,10 +27,10 @@ namespace RhinoInside.Revit.AddIn.Forms
     readonly ComboBox typeName = new ComboBox() { AutoComplete = true };
 
     public string FileName => fileSelector.SelectedKey;
-    public DB.ImportPlacement Placement => (DB.ImportPlacement) Enum.Parse(typeof(DB.ImportPlacement), placementSelector.SelectedKey);
+    public ARDB.ImportPlacement Placement => (ARDB.ImportPlacement) Enum.Parse(typeof(ARDB.ImportPlacement), placementSelector.SelectedKey);
     public bool VisibleLayersOnly => bool.Parse(layersSelector.SelectedKey);
-    public DB.ElementId CategoryId => new DB.ElementId(int.Parse(categorySelector.SelectedKey));
-    public DB.WorksetId WorksetId => worksetSelector.SelectedKey is null ? DB.WorksetId.InvalidWorksetId: new DB.WorksetId(int.Parse(worksetSelector.SelectedKey));
+    public ARDB.ElementId CategoryId => new ARDB.ElementId(int.Parse(categorySelector.SelectedKey));
+    public ARDB.WorksetId WorksetId => worksetSelector.SelectedKey is null ? ARDB.WorksetId.InvalidWorksetId: new ARDB.WorksetId(int.Parse(worksetSelector.SelectedKey));
 #if REVIT_2022
     public string FamilyName => familyName.Text;
 #else
@@ -81,9 +81,9 @@ namespace RhinoInside.Revit.AddIn.Forms
       // Placement
       {
         //placementSelector.Items.Add("Center to Origin", DB.ImportPlacement.Centered.ToString());
-        placementSelector.Items.Add("Origin to Origin", DB.ImportPlacement.Origin.ToString());
+        placementSelector.Items.Add("Origin to Origin", ARDB.ImportPlacement.Origin.ToString());
         //placementSelector.Items.Add("Shared Coordinates to Origin", DB.ImportPlacement.Shared.ToString());
-        placementSelector.Items.Add("Base Point to Origin", DB.ImportPlacement.Site.ToString());
+        placementSelector.Items.Add("Base Point to Origin", ARDB.ImportPlacement.Site.ToString());
         placementSelector.SelectedIndex = 0;
       }
 
@@ -135,9 +135,9 @@ namespace RhinoInside.Revit.AddIn.Forms
       // Placement
       {
         //placementSelector.Items.Add("Center to Center", DB.ImportPlacement.Centered.ToString());
-        placementSelector.Items.Add("Origin to Origin", DB.ImportPlacement.Origin.ToString());
+        placementSelector.Items.Add("Origin to Origin", ARDB.ImportPlacement.Origin.ToString());
         //placementSelector.Items.Add("By Shared Coordinates", DB.ImportPlacement.Shared.ToString());
-        placementSelector.Items.Add("Base Point to Base Point", DB.ImportPlacement.Site.ToString());
+        placementSelector.Items.Add("Base Point to Base Point", ARDB.ImportPlacement.Site.ToString());
         placementSelector.SelectedIndex = 0;
       }
 
@@ -149,7 +149,7 @@ namespace RhinoInside.Revit.AddIn.Forms
             categorySelector.Items.Add(new ListItem { Key = category.Id.ToString(), Text = category.Name });
         }
 
-        categorySelector.SelectedKey = ((int) DB.BuiltInCategory.OST_GenericModel).ToString();
+        categorySelector.SelectedKey = ((int) ARDB.BuiltInCategory.OST_GenericModel).ToString();
         categorySelector.SelectedKeyChanged += CategorySelector_SelectedKeyChanged;
       }
 
@@ -159,11 +159,11 @@ namespace RhinoInside.Revit.AddIn.Forms
         worksetSelector.Enabled = true;
 
         var wsTable = Document.GetWorksetTable();
-        foreach (var workset in new DB.FilteredWorksetCollector(Document).OfKind(DB.WorksetKind.UserWorkset))
+        foreach (var workset in new ARDB.FilteredWorksetCollector(Document).OfKind(ARDB.WorksetKind.UserWorkset))
           worksetSelector.Items.Add(new ListItem { Key = workset.Id.ToString(), Text = workset.Name });
 
         var activeWorkset = wsTable.GetWorkset(wsTable.GetActiveWorksetId());
-        if (activeWorkset.Kind == DB.WorksetKind.UserWorkset)
+        if (activeWorkset.Kind == ARDB.WorksetKind.UserWorkset)
           worksetSelector.SelectedKey = activeWorkset.Id.ToString();
       }
 
@@ -227,9 +227,9 @@ namespace RhinoInside.Revit.AddIn.Forms
       };
     }
 
-    IEnumerable<DB.Category> DirectShapeCategories =>
+    IEnumerable<ARDB.Category> DirectShapeCategories =>
       BuiltInCategoryExtension.BuiltInCategories.
-      Where(categoryId => DB.DirectShape.IsValidCategoryId(new DB.ElementId(categoryId), Document)).
+      Where(categoryId => ARDB.DirectShape.IsValidCategoryId(new ARDB.ElementId(categoryId), Document)).
       Select(categoryId => Document.GetCategory(categoryId)).
       Where(x => x is object);
 
@@ -243,12 +243,12 @@ namespace RhinoInside.Revit.AddIn.Forms
     {
       familyName.Items.Clear();
 
-      using (var collector = new DB.FilteredElementCollector(Document))
+      using (var collector = new ARDB.FilteredElementCollector(Document))
       {
         var familyNames = collector.WhereElementIsElementType().
-          WhereElementIsKindOf(typeof(DB.DirectShapeType)).
+          WhereElementIsKindOf(typeof(ARDB.DirectShapeType)).
           OfCategoryId(CategoryId).
-          OfType<DB.DirectShapeType>().
+          OfType<ARDB.DirectShapeType>().
           Select(x => x.FamilyName).
           Distinct().
           OrderBy(x => x);
@@ -262,16 +262,16 @@ namespace RhinoInside.Revit.AddIn.Forms
     {
       typeName.Items.Clear();
 
-      using (var collector = new DB.FilteredElementCollector(Document))
+      using (var collector = new ARDB.FilteredElementCollector(Document))
       {
         var typeCollector = collector.WhereElementIsElementType().
-          WhereElementIsKindOf(typeof(DB.DirectShapeType)).
+          WhereElementIsKindOf(typeof(ARDB.DirectShapeType)).
           OfCategoryId(CategoryId);
 
         if (!string.IsNullOrEmpty(familyName))
-          typeCollector = typeCollector.WhereParameterEqualsTo(DB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, familyName);
+          typeCollector = typeCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, familyName);
 
-        foreach (var name in typeCollector.OfType<DB.DirectShapeType>().Select(x => x.Name).Distinct().OrderBy(x => x))
+        foreach (var name in typeCollector.OfType<ARDB.DirectShapeType>().Select(x => x.Name).Distinct().OrderBy(x => x))
           typeName.Items.Add(name);
       }
     }
@@ -319,7 +319,7 @@ namespace RhinoInside.Revit.AddIn.Forms
 
     private void ImportButton_Click(object sender, EventArgs e)
     {
-      if (!DB.NamingUtils.IsValidName(FamilyName))
+      if (!ARDB.NamingUtils.IsValidName(FamilyName))
       {
         MessageBox.Show
         (
@@ -334,7 +334,7 @@ namespace RhinoInside.Revit.AddIn.Forms
         return;
       }
 
-      if (!DB.NamingUtils.IsValidName(TypeName))
+      if (!ARDB.NamingUtils.IsValidName(TypeName))
       {
         MessageBox.Show
         (
@@ -349,15 +349,15 @@ namespace RhinoInside.Revit.AddIn.Forms
         return;
       }
 
-      using (var collector = new DB.FilteredElementCollector(Document))
+      using (var collector = new ARDB.FilteredElementCollector(Document))
       {
         var typeCollector = collector.WhereElementIsElementType().
-          WhereElementIsKindOf(typeof(DB.DirectShapeType)).
+          WhereElementIsKindOf(typeof(ARDB.DirectShapeType)).
           OfCategoryId(CategoryId).
-          WhereParameterEqualsTo(DB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, FamilyName).
-          WhereParameterEqualsTo(DB.BuiltInParameter.ALL_MODEL_TYPE_NAME, TypeName);
+          WhereParameterEqualsTo(ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, FamilyName).
+          WhereParameterEqualsTo(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, TypeName);
 
-        if (typeCollector.FirstElement() is DB.DirectShapeType)
+        if (typeCollector.FirstElement() is ARDB.DirectShapeType)
         {
           switch
           (

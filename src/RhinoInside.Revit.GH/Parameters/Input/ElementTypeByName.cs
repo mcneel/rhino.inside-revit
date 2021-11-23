@@ -4,12 +4,13 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using Grasshopper.Kernel.Types;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
+  using External.DB;
+  using External.DB.Extensions;
+
   public class ElementTypeByName : ValueList
   {
     public override Guid ComponentGuid => new Guid("D3FB53D3-9118-4F11-A32D-AECB30AA418D");
@@ -37,17 +38,17 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       if (familyName.Length == 0 || familyName[0] == '\'')
         return;
 
-      if (Revit.ActiveDBDocument is DB.Document doc)
+      if (Revit.ActiveDBDocument is ARDB.Document doc)
       {
         int selectedItemsCount = 0;
-        using (var collector = new DB.FilteredElementCollector(doc))
+        using (var collector = new ARDB.FilteredElementCollector(doc))
         {
           var elementCollector = collector.WhereElementIsElementType();
 
-          if (Components.ElementCollectorComponent.TryGetFilterStringParam(DB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, ref familyName, out var familyNameFilter))
+          if (Components.ElementCollectorComponent.TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, ref familyName, out var familyNameFilter))
             elementCollector = elementCollector.WherePasses(familyNameFilter);
 
-          var elementTypes = elementCollector.Cast<DB.ElementType>();
+          var elementTypes = elementCollector.Cast<ARDB.ElementType>();
 
           if (familyName is object)
             elementTypes = elementTypes.Where(x => x.GetFamilyName().IsSymbolNameLike(familyName));
@@ -71,10 +72,10 @@ namespace RhinoInside.Revit.GH.Parameters.Input
         else if (selectedItemsCount == 0 && ListMode != GH_ValueListMode.CheckList)
         {
           var defaultElementTypeIds = new HashSet<string>();
-          foreach (var typeGroup in Enum.GetValues(typeof(DB.ElementTypeGroup)).Cast<DB.ElementTypeGroup>())
+          foreach (var typeGroup in Enum.GetValues(typeof(ARDB.ElementTypeGroup)).Cast<ARDB.ElementTypeGroup>())
           {
             var elementTypeId = Revit.ActiveDBDocument.GetDefaultElementTypeId(typeGroup);
-            if (elementTypeId != DB.ElementId.InvalidElementId)
+            if (elementTypeId != ARDB.ElementId.InvalidElementId)
               defaultElementTypeIds.Add(elementTypeId.IntegerValue.ToString());
           }
 
@@ -89,10 +90,10 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       var selectedItems = ListItems.Where(x => x.Selected).Select(x => x.Expression).ToList();
       ListItems.Clear();
 
-      if (Revit.ActiveDBDocument is DB.Document doc)
+      if (Revit.ActiveDBDocument is ARDB.Document doc)
       {
         int selectedItemsCount = 0;
-        using (var collector = new DB.FilteredElementCollector(doc))
+        using (var collector = new ARDB.FilteredElementCollector(doc))
         using (var elementTypeCollector = collector.WhereElementIsElementType())
         {
           foreach (var goo in goos)
@@ -102,8 +103,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
             {
               switch (e.Value)
               {
-                case DB.Family family:
-                  foreach (var elementType in elementTypeCollector.Cast<DB.ElementType>())
+                case ARDB.Family family:
+                  foreach (var elementType in elementTypeCollector.Cast<ARDB.ElementType>())
                   {
                     if (elementType.GetFamilyName() != family.Name)
                       continue;
@@ -116,7 +117,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
                     selectedItemsCount += item.Selected ? 1 : 0;
                   }
                   break;
-                case DB.ElementType elementType:
+                case ARDB.ElementType elementType:
                 {
                   var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), elementType.UniqueId);
                   var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, $"\"{referenceId}\"");
@@ -126,9 +127,9 @@ namespace RhinoInside.Revit.GH.Parameters.Input
                   selectedItemsCount += item.Selected ? 1 : 0;
                 }
                 break;
-                case DB.Element element:
+                case ARDB.Element element:
                 {
-                  var type = doc.GetElement(element.GetTypeId()) as DB.ElementType;
+                  var type = doc.GetElement(element.GetTypeId()) as ARDB.ElementType;
                   var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), type.UniqueId);
                   var item = new GH_ValueListItem(type.GetFamilyName() + " : " + type.Name, $"\"{referenceId}\"");
                   item.Selected = selectedItems.Contains(item.Expression);
@@ -144,7 +145,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
               var c = new Types.Category();
               if (c.CastFrom(goo))
               {
-                foreach (var elementType in elementTypeCollector.WhereCategoryIdEqualsTo(c.Id).Cast<DB.ElementType>())
+                foreach (var elementType in elementTypeCollector.WhereCategoryIdEqualsTo(c.Id).Cast<ARDB.ElementType>())
                 {
                   var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), elementType.UniqueId);
                   var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, $"\"{referenceId}\"");
@@ -166,10 +167,10 @@ namespace RhinoInside.Revit.GH.Parameters.Input
         if (ListItems.Count > 0 && selectedItemsCount == 0 && ListMode != GH_ValueListMode.CheckList)
         {
           var defaultElementTypeIds = new HashSet<string>();
-          foreach (var typeGroup in Enum.GetValues(typeof(DB.ElementTypeGroup)).Cast<DB.ElementTypeGroup>())
+          foreach (var typeGroup in Enum.GetValues(typeof(ARDB.ElementTypeGroup)).Cast<ARDB.ElementTypeGroup>())
           {
             var elementTypeId = doc.GetDefaultElementTypeId(typeGroup);
-            if (elementTypeId != DB.ElementId.InvalidElementId)
+            if (elementTypeId != ARDB.ElementId.InvalidElementId)
             {
               var type = doc.GetElement(elementTypeId);
               var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), type.UniqueId);

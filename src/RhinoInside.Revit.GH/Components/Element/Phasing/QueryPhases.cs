@@ -3,7 +3,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Phasing
 {
@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Phasing
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "Q";
 
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.Phase));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.Phase));
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -61,22 +61,22 @@ namespace RhinoInside.Revit.GH.Components.Phasing
         return;
 
       if (!Params.TryGetData(DA, "Name", out string name)) return;
-      if (!Params.TryGetData(DA, "Filter", out DB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var phasesCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
           phasesCollector = phasesCollector.WherePasses(filter);
 
-        if (name is object && TryGetFilterStringParam(DB.BuiltInParameter.PHASE_NAME, ref name, out var nameFilter))
+        if (name is object && TryGetFilterStringParam(ARDB.BuiltInParameter.PHASE_NAME, ref name, out var nameFilter))
           phasesCollector = phasesCollector.WherePasses(nameFilter);
 
-        var phases = collector.Cast<DB.Phase>();
+        var phases = collector.Cast<ARDB.Phase>();
 
         if (name is object)
-          phases = phases.Where(x => x.get_Parameter(DB.BuiltInParameter.PHASE_NAME).AsString().IsSymbolNameLike(name));
+          phases = phases.Where(x => x.get_Parameter(ARDB.BuiltInParameter.PHASE_NAME).AsString().IsSymbolNameLike(name));
 
         DA.SetDataList
         (

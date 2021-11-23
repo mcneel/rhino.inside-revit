@@ -1,11 +1,12 @@
 using System;
 using System.IO;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Views
 {
+  using External.DB.Extensions;
+
   public class ViewExportImage : Component
   {
     public override Guid ComponentGuid => new Guid("4A962A0C-46A0-4A5F-B727-6747B715A975");
@@ -30,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components
       manager.AddBooleanParameter("Overwrite", "O", "Overwrite file", GH_ParamAccess.item, false);
 
       var fileType = new Parameters.Param_Enum<Types.ImageFileType>();
-      fileType.PersistentData.Append(new Types.ImageFileType(DB.ImageFileType.PNG));
+      fileType.PersistentData.Append(new Types.ImageFileType(ARDB.ImageFileType.PNG));
       manager.AddParameter(fileType, "File Type", "FT", "The file type used for export", GH_ParamAccess.item);
 
       var imageResolution = new Parameters.Param_Enum<Types.ImageResolution>();
@@ -52,7 +53,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var view = default(DB.View);
+      var view = default(ARDB.View);
       if (!DA.GetData("View", ref view))
         return;
 
@@ -68,15 +69,15 @@ namespace RhinoInside.Revit.GH.Components
       if (!DA.GetData("Overwrite", ref overwrite))
         return;
 
-      var fileType = default(DB.ImageFileType);
+      var fileType = default(ARDB.ImageFileType);
       if (!DA.GetData("File Type", ref fileType))
         return;
 
-      var resolution = default(DB.ImageResolution);
+      var resolution = default(ARDB.ImageResolution);
       if (!DA.GetData("Resolution", ref resolution))
         return;
 
-      var fitDirection = default(DB.FitDirectionType);
+      var fitDirection = default(ARDB.FitDirectionType);
       if (!DA.GetData("Fit Direction", ref fitDirection))
         return;
 
@@ -88,35 +89,35 @@ namespace RhinoInside.Revit.GH.Components
       {
         var selectedIds = uiDoc.Selection.GetElementIds();
         if (selectedIds.Count > 0)
-          uiDoc.Selection.SetElementIds(new DB.ElementId[] { });
+          uiDoc.Selection.SetElementIds(new ARDB.ElementId[] { });
 
         try
         {
-          var viewName = DB.ImageExportOptions.GetFileName(view.Document, view.Id);
-          var options = new DB.ImageExportOptions()
+          var viewName = ARDB.ImageExportOptions.GetFileName(view.Document, view.Id);
+          var options = new ARDB.ImageExportOptions()
           {
-            ZoomType = DB.ZoomFitType.FitToPage,
+            ZoomType = ARDB.ZoomFitType.FitToPage,
             FitDirection = fitDirection, // DB.FitDirectionType.Horizontal,
             PixelSize = pixelSize,    // 2048,
             ImageResolution = resolution,   // DB.ImageResolution.DPI_72,
             ShadowViewsFileType = fileType,     // DB.ImageFileType.PNG,
             HLRandWFViewsFileType = fileType,     // DB.ImageFileType.PNG,
-            ExportRange = DB.ExportRange.SetOfViews,
+            ExportRange = ARDB.ExportRange.SetOfViews,
             FilePath = folder + Path.DirectorySeparatorChar
           };
 
-          options.SetViewsAndSheets(new DB.ElementId[] { view.Id });
+          options.SetViewsAndSheets(new ARDB.ElementId[] { view.Id });
 
           var filePath = Path.Combine(options.FilePath, viewName);
           switch (options.ShadowViewsFileType)
           {
-            case DB.ImageFileType.BMP: filePath += ".bmp"; break;
-            case DB.ImageFileType.JPEGLossless: filePath += ".jpg"; break;
-            case DB.ImageFileType.JPEGMedium: filePath += ".jpg"; break;
-            case DB.ImageFileType.JPEGSmallest: filePath += ".jpg"; break;
-            case DB.ImageFileType.PNG: filePath += ".png"; break;
-            case DB.ImageFileType.TARGA: filePath += ".tga"; break;
-            case DB.ImageFileType.TIFF: filePath += ".tif"; break;
+            case ARDB.ImageFileType.BMP: filePath += ".bmp"; break;
+            case ARDB.ImageFileType.JPEGLossless: filePath += ".jpg"; break;
+            case ARDB.ImageFileType.JPEGMedium: filePath += ".jpg"; break;
+            case ARDB.ImageFileType.JPEGSmallest: filePath += ".jpg"; break;
+            case ARDB.ImageFileType.PNG: filePath += ".png"; break;
+            case ARDB.ImageFileType.TARGA: filePath += ".tga"; break;
+            case ARDB.ImageFileType.TIFF: filePath += ".tif"; break;
           }
 
           if (!overwrite && File.Exists(filePath))

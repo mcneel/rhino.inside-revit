@@ -5,18 +5,19 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.DocObjects;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Line Pattern")]
   public class LinePatternElement : Element, Bake.IGH_BakeAwareElement
   {
     #region IGH_Goo
     public override bool IsValid => (Id?.TryGetBuiltInLinePattern(out var _) == true) || base.IsValid;
 
-    protected override Type ValueType => typeof(DB.LinePatternElement);
+    protected override Type ValueType => typeof(ARDB.LinePatternElement);
 
     public sealed override bool CastFrom(object source)
     {
@@ -24,9 +25,9 @@ namespace RhinoInside.Revit.GH.Types
         return true;
 
       var document = Revit.ActiveDBDocument;
-      var patternId = DB.ElementId.InvalidElementId;
+      var patternId = ARDB.ElementId.InvalidElementId;
 
-      if (source is ValueTuple<DB.Document, DB.ElementId> tuple)
+      if (source is ValueTuple<ARDB.Document, ARDB.ElementId> tuple)
       {
         (document, patternId) = tuple;
       }
@@ -42,8 +43,8 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (source)
       {
-        case int integer: patternId = new DB.ElementId(integer); break;
-        case DB.ElementId id: patternId = id; break;
+        case int integer: patternId = new ARDB.ElementId(integer); break;
+        case ARDB.ElementId id: patternId = id; break;
       }
 
       if (patternId.TryGetBuiltInLinePattern(out var _))
@@ -57,10 +58,10 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     public LinePatternElement() { }
-    public LinePatternElement(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public LinePatternElement(DB.LinePatternElement value) : base(value) { }
+    public LinePatternElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public LinePatternElement(ARDB.LinePatternElement value) : base(value) { }
 
-    public static new LinePatternElement FromElementId(DB.Document doc, DB.ElementId id)
+    public static new LinePatternElement FromElementId(ARDB.Document doc, ARDB.ElementId id)
     {
       if (id.IsLinePatternId(doc))
         return new LinePatternElement(doc, id);
@@ -70,11 +71,11 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_BakeAwareElement
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
-      BakeElement(new Dictionary<DB.ElementId, Guid>(), true, doc, att, out guid);
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
     public bool BakeElement
     (
-      IDictionary<DB.ElementId, Guid> idMap,
+      IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
       RhinoDoc doc,
       ObjectAttributes att,
@@ -85,12 +86,12 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      if (Id == DB.LinePatternElement.GetSolidPatternId())
+      if (Id == ARDB.LinePatternElement.GetSolidPatternId())
       {
         idMap.Add(Id, guid = new Guid("{3999bed5-78ee-4d73-a059-032224c6fd55}"));
         return true;
       }
-      else if (Value is DB.LinePatternElement linePattern)
+      else if (Value is ARDB.LinePatternElement linePattern)
       {
         // 2. Check if already exist
         var index = doc.Linetypes.Find(linePattern.Name);
@@ -113,9 +114,9 @@ namespace RhinoInside.Revit.GH.Types
                 {
                   switch (x.Type)
                   {
-                    case DB.LinePatternSegmentType.Dash: return x.Length * +feet;
-                    case DB.LinePatternSegmentType.Space: return x.Length * -feet;
-                    case DB.LinePatternSegmentType.Dot: return 0.0;
+                    case ARDB.LinePatternSegmentType.Dash: return x.Length * +feet;
+                    case ARDB.LinePatternSegmentType.Space: return x.Length * -feet;
+                    case ARDB.LinePatternSegmentType.Dot: return 0.0;
                     default: throw new ArgumentOutOfRangeException();
                   }
                 }
@@ -151,7 +152,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.LinePatternElement linePattern)
+        if (Value is ARDB.LinePatternElement linePattern)
         {
           var factor = Convert.Geometry.UnitConverter.ToRhinoUnits;
 
@@ -163,9 +164,9 @@ namespace RhinoInside.Revit.GH.Types
               {
                 switch (x.Type)
                 {
-                  case DB.LinePatternSegmentType.Dash: return x.Length * +factor;
-                  case DB.LinePatternSegmentType.Space: return x.Length * -factor;
-                  case DB.LinePatternSegmentType.Dot: return 0.0;
+                  case ARDB.LinePatternSegmentType.Dash: return x.Length * +factor;
+                  case ARDB.LinePatternSegmentType.Space: return x.Length * -factor;
+                  case ARDB.LinePatternSegmentType.Dot: return 0.0;
                   default: throw new ArgumentOutOfRangeException();
                 }
               }
@@ -177,7 +178,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       set
       {
-        if (Value is DB.LinePatternElement linePattern)
+        if (Value is ARDB.LinePatternElement linePattern)
         {
           var factor = Convert.Geometry.UnitConverter.ToHostUnits;
 
@@ -191,9 +192,9 @@ namespace RhinoInside.Revit.GH.Types
                 (
                   x =>
                   {
-                    if (x < 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Space, -x * factor);
-                    if (x > 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Dash, +x * factor);
-                    if (x == 0.0) return new DB.LinePatternSegment(DB.LinePatternSegmentType.Dot, 0.0);
+                    if (x < 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Space, -x * factor);
+                    if (x > 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Dash, +x * factor);
+                    if (x == 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Dot, 0.0);
                     throw new ArgumentOutOfRangeException();
                   }
                 ).ToArray()

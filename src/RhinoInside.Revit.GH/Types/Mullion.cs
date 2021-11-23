@@ -1,21 +1,19 @@
 using System;
-using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
-using DBX = RhinoInside.Revit.External.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+
   [Kernel.Attributes.Name("Mullion")]
   public class Mullion : FamilyInstance
   {
-    protected override Type ValueType => typeof(DB.Mullion);
-    public static explicit operator DB.Mullion(Mullion value) => value?.Value;
-    public new DB.Mullion Value => base.Value as DB.Mullion;
+    protected override Type ValueType => typeof(ARDB.Mullion);
+    public static explicit operator ARDB.Mullion(Mullion value) => value?.Value;
+    public new ARDB.Mullion Value => base.Value as ARDB.Mullion;
 
     public Mullion() { }
-    public Mullion(DB.Mullion value) : base(value) { }
+    public Mullion(ARDB.Mullion value) : base(value) { }
 
     public override Rhino.Geometry.Curve Curve => Value?.LocationCurve.ToCurve();
   }
@@ -23,19 +21,19 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Mullion Position")]
   public class MullionPosition : ElementType
   {
-    protected override Type ValueType => typeof(DB.ElementType);
+    protected override Type ValueType => typeof(ARDB.ElementType);
 
     public MullionPosition() { }
-    public MullionPosition(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public MullionPosition(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
 
     public override string Name
     {
       get
       {
-        switch ((DBX.BuiltInMullionPositionId) Id.IntegerValue)
+        switch ((External.DB.BuiltInMullionPositionId) Id.IntegerValue)
         {
-          case DBX.BuiltInMullionPositionId.PerpendicularToFace: return "Perpendicular To Face";
-          case DBX.BuiltInMullionPositionId.ParallelToGround:    return "Parallel To Ground";
+          case External.DB.BuiltInMullionPositionId.PerpendicularToFace: return "Perpendicular To Face";
+          case External.DB.BuiltInMullionPositionId.ParallelToGround:    return "Parallel To Ground";
         }
 
         return base.Name;
@@ -46,19 +44,19 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Mullion Profile")]
   public class MullionProfile : ElementType
   {
-    protected override Type ValueType => typeof(DB.ElementType);
+    protected override Type ValueType => typeof(ARDB.ElementType);
 
     public MullionProfile() { }
-    public MullionProfile(DB.Document doc, DB.ElementId id) : base(doc, id) { }
+    public MullionProfile(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
 
     public override string Name
     {
       get
       {
-        switch ((DBX.BuiltInMullionProfileId) Id.IntegerValue)
+        switch ((External.DB.BuiltInMullionProfileId) Id.IntegerValue)
         {
-          case DBX.BuiltInMullionProfileId.Rectangular: return "Rectangular";
-          case DBX.BuiltInMullionProfileId.Circular:    return "Circular";
+          case External.DB.BuiltInMullionProfileId.Rectangular: return "Rectangular";
+          case External.DB.BuiltInMullionProfileId.Circular:    return "Circular";
         }
 
         return base.Name;

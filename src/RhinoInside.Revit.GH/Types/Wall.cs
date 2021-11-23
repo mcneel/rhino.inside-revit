@@ -1,26 +1,27 @@
 using System;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+
   [Kernel.Attributes.Name("Wall")]
   public class Wall : HostObject
   {
-    protected override Type ValueType => typeof(DB.Wall);
-    public static explicit operator DB.Wall(Wall value) => value?.Value;
-    public new DB.Wall Value => base.Value as DB.Wall;
+    protected override Type ValueType => typeof(ARDB.Wall);
+    public static explicit operator ARDB.Wall(Wall value) => value?.Value;
+    public new ARDB.Wall Value => base.Value as ARDB.Wall;
 
     public Wall() { }
-    public Wall(DB.Wall host) : base(host) { }
+    public Wall(ARDB.Wall host) : base(host) { }
 
     #region Location
     public override Plane Location
     {
       get
       {
-        if (Value?.Location is DB.LocationCurve curveLocation)
+        if (Value?.Location is ARDB.LocationCurve curveLocation)
         {
           var start = curveLocation.Curve.Evaluate(0.0, normalized: true).ToPoint3d();
           var end = curveLocation.Curve.Evaluate(1.0, normalized: true).ToPoint3d();
@@ -71,7 +72,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       set
       {
-        if (value is object && Value is DB.Wall wall && wall.Location is DB.LocationCurve)
+        if (value is object && Value is ARDB.Wall wall && wall.Location is ARDB.LocationCurve)
         {
           if (!IsValidCurve(value, out var log))
             throw new ArgumentException(nameof(Curve), log);
@@ -105,36 +106,36 @@ namespace RhinoInside.Revit.GH.Types
     #region Joins
     public override bool? IsJoinAllowedAtStart
     {
-      get =>  Value is DB.Wall wall ?
-        DB.WallUtils.IsWallJoinAllowedAtEnd(wall, 0) :
+      get =>  Value is ARDB.Wall wall ?
+        ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, 0) :
         default;
 
       set
       {
-        if (value is object && Value is DB.Wall wall && value != IsJoinAllowedAtEnd)
+        if (value is object && Value is ARDB.Wall wall && value != IsJoinAllowedAtEnd)
         {
           if (value == true)
-            DB.WallUtils.AllowWallJoinAtEnd(wall, 0);
+            ARDB.WallUtils.AllowWallJoinAtEnd(wall, 0);
           else
-            DB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
+            ARDB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
         }
       }
     }
 
     public override bool? IsJoinAllowedAtEnd
     {
-      get => Value is DB.Wall wall ?
-        DB.WallUtils.IsWallJoinAllowedAtEnd(wall, 1) :
+      get => Value is ARDB.Wall wall ?
+        ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, 1) :
         default;
 
       set
       {
-        if (value is object && Value is DB.Wall wall && value != IsJoinAllowedAtEnd)
+        if (value is object && Value is ARDB.Wall wall && value != IsJoinAllowedAtEnd)
         {
           if (value == true)
-            DB.WallUtils.AllowWallJoinAtEnd(wall, 1);
+            ARDB.WallUtils.AllowWallJoinAtEnd(wall, 1);
           else
-            DB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
+            ARDB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
         }
       }
     }

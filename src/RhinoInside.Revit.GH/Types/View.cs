@@ -4,27 +4,27 @@ using System.IO;
 using Grasshopper.Kernel.Types;
 using Rhino.Display;
 using Rhino.Geometry;
-using Rhino.Render;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Drawing;
-using RhinoInside.Revit.External.DB.Extensions;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using Convert.System.Drawing;
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("View")]
   public interface IGH_View : IGH_Element { }
 
   [Kernel.Attributes.Name("View")]
   public class View : Element, IGH_View
   {
-    protected override Type ValueType => typeof(DB.View);
-    public static explicit operator DB.View(View value) => value?.Value;
-    public new DB.View Value => base.Value as DB.View;
+    protected override Type ValueType => typeof(ARDB.View);
+    public static explicit operator ARDB.View(View value) => value?.Value;
+    public new ARDB.View Value => base.Value as ARDB.View;
 
     public View() { }
-    public View(DB.Document doc, DB.ElementId id) : base(doc, id) { }
-    public View(DB.View view) : base(view) { }
+    public View(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public View(ARDB.View view) : base(view) { }
 
     public override bool CastTo<Q>(out Q target)
     {
@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.View view && !view.IsTemplate && ViewType is ViewType viewType)
+        if (Value is ARDB.View view && !view.IsTemplate && ViewType is ViewType viewType)
         {
           FormattableString formatable = $"{viewType} : {view.Name}";
           return formatable.ToString(CultureInfo.CurrentUICulture);
@@ -83,14 +83,14 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public ViewType ViewType => Value is DB.View view ?
+    public ViewType ViewType => Value is ARDB.View view ?
       new ViewType(view.ViewType) : default;
 
     public Interval[] Outline
     {
       get
       {
-        if (Value is DB.View view)
+        if (Value is ARDB.View view)
         {
           var outline = view.Outline;
           var modelUnits = Revit.ModelUnits;
@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Plane Location => Value is DB.View view ? new Plane
+    public Plane Location => Value is ARDB.View view ? new Plane
     (
       view.Origin.ToPoint3d(),
       view.RightDirection.ToVector3d(),
@@ -120,7 +120,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.View view)
+        if (Value is ARDB.View view)
         {
           var box = view.get_BoundingBox(default).ToBox();
           var outline = Outline;
@@ -141,15 +141,15 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DB.View view)
+        if (Value is ARDB.View view)
         {
           var swapFolder = Path.Combine(Core.SwapFolder, view.Document.GetFingerprintGUID().ToString());
           Directory.CreateDirectory(swapFolder);
 
           var rect = view.GetOutlineRectangle().ToRectangle();
           var fitDirection = rect.Width > rect.Height ?
-            DB.FitDirectionType.Horizontal :
-            DB.FitDirectionType.Vertical;
+            ARDB.FitDirectionType.Horizontal :
+            ARDB.FitDirectionType.Vertical;
           var pixelSize = Math.Max(rect.Width, rect.Height);
           if (pixelSize == 0) return default;
           pixelSize = Math.Min(4096, pixelSize);
@@ -158,25 +158,25 @@ namespace RhinoInside.Revit.GH.Types
           {
             var selectedIds = uiDoc.Selection.GetElementIds();
             if (selectedIds.Count > 0)
-              uiDoc.Selection.SetElementIds(new DB.ElementId[] { });
+              uiDoc.Selection.SetElementIds(new ARDB.ElementId[] { });
 
             try
             {
-              var options = new DB.ImageExportOptions()
+              var options = new ARDB.ImageExportOptions()
               {
-                ZoomType = DB.ZoomFitType.FitToPage,
+                ZoomType = ARDB.ZoomFitType.FitToPage,
                 FitDirection = fitDirection,
                 PixelSize = pixelSize,
-                ImageResolution = DB.ImageResolution.DPI_72,
-                ShadowViewsFileType = DB.ImageFileType.PNG,
-                HLRandWFViewsFileType = DB.ImageFileType.PNG,
-                ExportRange = DB.ExportRange.SetOfViews,
+                ImageResolution = ARDB.ImageResolution.DPI_72,
+                ShadowViewsFileType = ARDB.ImageFileType.PNG,
+                HLRandWFViewsFileType = ARDB.ImageFileType.PNG,
+                ExportRange = ARDB.ExportRange.SetOfViews,
                 FilePath = swapFolder + Path.DirectorySeparatorChar
               };
-              options.SetViewsAndSheets(new DB.ElementId[] { view.Id });
+              options.SetViewsAndSheets(new ARDB.ElementId[] { view.Id });
               view.Document.ExportImage(options);
 
-              var viewName = DB.ImageExportOptions.GetFileName(view.Document, view.Id);
+              var viewName = ARDB.ImageExportOptions.GetFileName(view.Document, view.Id);
               var filename = Path.Combine(options.FilePath, viewName) + ".png";
               var texturename = Path.Combine(options.FilePath, view.UniqueId) + ".png";
 

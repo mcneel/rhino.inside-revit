@@ -4,15 +4,16 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.Geometry.Raw;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.GH.Kernel.Attributes;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
 #if REVIT_2019
+  using Convert.Geometry;
+  using Convert.Geometry.Raw;
+  using Convert.System.Collections.Generic;
+  using Kernel.Attributes;
+
   public class TopographyByMesh : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("E6EA0A85-E118-4BFD-B01E-86BA22155938");
@@ -31,10 +32,10 @@ namespace RhinoInside.Revit.GH.Components.Site
     void ReconstructTopographyByMesh
     (
       [Optional, NickName("DOC")]
-      DB.Document document,
+      ARDB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), Description("New Topography")]
-      ref DB.Architecture.TopographySurface topography,
+      ref ARDB.Architecture.TopographySurface topography,
 
       Mesh mesh,
       [Optional] IList<Curve> regions
@@ -46,16 +47,16 @@ namespace RhinoInside.Revit.GH.Components.Site
       mesh.Vertices.CullUnused();
 
       var xyz = mesh.Vertices.ConvertAll(RawEncoder.AsXYZ);
-      var facets = new List<DB.PolymeshFacet>(mesh.Faces.Count);
+      var facets = new List<ARDB.PolymeshFacet>(mesh.Faces.Count);
 
       var faceCount = mesh.Faces.Count;
       for (int f = 0; f < faceCount; ++f)
       {
         var face = mesh.Faces[f];
 
-        facets.Add(new DB.PolymeshFacet(face.A, face.B, face.C));
+        facets.Add(new ARDB.PolymeshFacet(face.A, face.B, face.C));
         if (face.IsQuad)
-          facets.Add(new DB.PolymeshFacet(face.C, face.D, face.A));
+          facets.Add(new ARDB.PolymeshFacet(face.C, face.D, face.A));
       }
 
       //if (element is DB.Architecture.TopographySurface topography)
@@ -74,18 +75,18 @@ namespace RhinoInside.Revit.GH.Components.Site
       //}
       //else
       {
-        if (!DB.Architecture.TopographySurface.ArePointsDistinct(xyz))
+        if (!ARDB.Architecture.TopographySurface.ArePointsDistinct(xyz))
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"At least two vertices have coincident XY values");
-        else if (!DB.Architecture.TopographySurface.IsValidFaceSet(facets, xyz))
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"At least one face is not valid for {typeof(DB.Architecture.TopographySurface).Name}");
+        else if (!ARDB.Architecture.TopographySurface.IsValidFaceSet(facets, xyz))
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"At least one face is not valid for {typeof(ARDB.Architecture.TopographySurface).Name}");
         else
-          ReplaceElement(ref topography, DB.Architecture.TopographySurface.Create(document, xyz, facets));
+          ReplaceElement(ref topography, ARDB.Architecture.TopographySurface.Create(document, xyz, facets));
       }
 
       if (topography is object && regions?.Count > 0)
       {
         var curveLoops = regions.Select(region => region.ToCurveLoop());
-        DB.Architecture.SiteSubRegion.Create(document, curveLoops.ToList(), topography.Id);
+        ARDB.Architecture.SiteSubRegion.Create(document, curveLoops.ToList(), topography.Id);
       }
     }
   }

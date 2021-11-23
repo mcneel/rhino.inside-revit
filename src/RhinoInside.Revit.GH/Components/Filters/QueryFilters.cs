@@ -3,9 +3,9 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using DB = Autodesk.Revit.DB;
+using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components
+namespace RhinoInside.Revit.GH.Components.Filters
 {
   public class QueryFilters : ElementCollectorComponent
   {
@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
     public override GH_Exposure Exposure => GH_Exposure.septenary;
     protected override string IconTag => "F";
 
-    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.FilterElement));
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.FilterElement));
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -63,17 +63,17 @@ namespace RhinoInside.Revit.GH.Components
       string name = null;
       DA.GetData("Name", ref name);
 
-      using (var collector = new DB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var filtersCollector = collector.WherePasses(ElementFilter);
 
-        var filters = filtersCollector.TakeWhileIsNotEscapeKeyDown(this).Cast<DB.FilterElement>();
+        var filters = filtersCollector.TakeWhileIsNotEscapeKeyDown(this).Cast<ARDB.FilterElement>();
 
         if (!string.IsNullOrEmpty(name))
           filters = filters.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("Parameter Filters", filters.Where(x => x is DB.ParameterFilterElement));
-        DA.SetDataList("Selection Filters", filters.Where(x => x is DB.SelectionFilterElement));
+        DA.SetDataList("Parameter Filters", filters.Where(x => x is ARDB.ParameterFilterElement));
+        DA.SetDataList("Selection Filters", filters.Where(x => x is ARDB.SelectionFilterElement));
       }
     }
   }
