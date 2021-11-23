@@ -89,8 +89,8 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       double topOffset = double.NaN;
 #if REVIT_2021
       // if wall slant is supported grab the slant angle
-      var slantParam = wall.get_Parameter(DB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL);
-      if (slantParam is DB.Parameter)
+      var slantParam = wall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL);
+      if (slantParam is ARDB.Parameter)
       {
         // and calculate the cuvre offset at the top based on the curve slant angle
         //     O = top offset distance

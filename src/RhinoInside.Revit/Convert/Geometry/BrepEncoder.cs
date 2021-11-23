@@ -300,7 +300,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         }
       }
 
-      // Try using DB.BRepBuilder
+      // Try using ARDB.BRepBuilder
       {
         var raw = ToRawBrep(brep, factor);
 
@@ -311,7 +311,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         }
       }
 
-      // Try using DB.ShapeImporter | DB.Document.Import
+      // Try using ARDB.ShapeImporter | ARDB.Document.Import
       {
         GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using SAT…", default);
 
@@ -745,7 +745,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             foreach (var c in ToEdgeCurveMany(nurbsForm))
               yield return c;
           }
-          else throw new ConversionException($"Unable to convert {curve} to DB.Curve");
+          else throw new ConversionException($"Unable to convert {curve} to {typeof(ARDB.Curve)}");
           yield break;
       }
     }
@@ -905,7 +905,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
               GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit Data conversion service failed to import geometry", default);
 
-              // Looks like DB.Document.Import do more cleaning while importing, let's try it.
+              // Looks like ARDB.Document.Import do more cleaning while importing, let's try it.
               //return null;
             }
           }
@@ -997,7 +997,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
 #if REVIT_2022
           // In case we don't have a destination document we create a new one here.
-          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(DB.UnitSystem.Imperial))
+          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(ARDB.UnitSystem.Imperial))
           {
             try
             {
@@ -1006,11 +1006,11 @@ namespace RhinoInside.Revit.Convert.Geometry
               {
                 using
                 (
-                  var Options3DM = new DB.ImportOptions3DM()
+                  var Options3DM = new ARDB.ImportOptions3DM()
                   {
-                    ReferencePoint = DB.XYZ.Zero,
-                    Placement = DB.ImportPlacement.Origin,
-                    CustomScale = DB.UnitUtils.Convert
+                    ReferencePoint = ARDB.XYZ.Zero,
+                    Placement = ARDB.ImportPlacement.Origin,
+                    CustomScale = ARDB.UnitUtils.Convert
                     (
                       factor,
                       External.DB.Schemas.UnitType.Feet,
@@ -1020,8 +1020,8 @@ namespace RhinoInside.Revit.Convert.Geometry
                 )
                 {
                   // Create a 3D view to import the 3DM file
-                  var typeId = doc.GetDefaultElementTypeId(DB.ElementTypeGroup.ViewType3D);
-                  var view = DB.View3D.CreatePerspective(doc, typeId);
+                  var typeId = doc.GetDefaultElementTypeId(ARDB.ElementTypeGroup.ViewType3D);
+                  var view = ARDB.View3D.CreatePerspective(doc, typeId);
 
                   var instanceId = doc.Import(File3DM.FullName, Options3DM, view);
                   var center = brep.GetBoundingBox(accurate: true).Center.ToXYZ(factor);

@@ -581,7 +581,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
   //DA.SetData("", structAsset?.MetalResistanceCalculationStrength);
 
   // API: Values are not represented in the API
-  // DB.BuiltInParameter.PROPERTY_SET_KEYWORDS
+  // ARDB.BuiltInParameter.PROPERTY_SET_KEYWORDS
   //DA.SetData("Tension Parallel to Grain", );
   //DA.SetData("Tension Perpendicular to Grain", );
   //DA.SetData("Average Modulus", );
@@ -608,15 +608,15 @@ namespace RhinoInside.Revit.GH.Components.Materials
     public string Description { get; set; }
 
     // Note: Keywords are not exposed by the API for the structural asset
-    //[APIAssetBuiltInProp(DB.BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
+    //[APIAssetBuiltInProp(ARDB.BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Keywords", "K", "")]
     //public string Keywords { get; set; }
 
-    //[APIAssetBuiltInProp(DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
+    //[APIAssetBuiltInProp(ARDB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Source", "S", "Physical asset source")]
     //public string Source { get; set; }
 
-    //[APIAssetBuiltInProp(DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
+    //[APIAssetBuiltInProp(ARDB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Source URL", "SU", "Physical asset source url")]
     //public string SourceURL { get; set; }
 
@@ -786,15 +786,15 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
     // Note: Keywords are not exposed by the API for the structural asset
     // Disabling thermal asset keywords for consistency
-    //[APIAssetBuiltInProp(DB.BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
+    //[APIAssetBuiltInProp(ARDB.BuiltInParameter.PROPERTY_SET_KEYWORDS, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Keywords", "K", "")]
     //public string Keywords { get; set; }
 
-    //[APIAssetBuiltInProp(DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
+    //[APIAssetBuiltInProp(ARDB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Source", "S", "Thermal asset source")]
     //public string Source { get; set; }
 
-    //[APIAssetBuiltInProp(DB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
+    //[APIAssetBuiltInProp(ARDB.BuiltInParameter.MATERIAL_ASSET_PARAM_SOURCE_URL, typeof(string))]
     //[AssetGHParameter(typeof(Param_String), "Source URL", "SU", "Thermal asset source url")]
     //public string SourceURL { get; set; }
 

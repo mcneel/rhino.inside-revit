@@ -191,7 +191,7 @@ namespace RhinoInside.Revit.GH.Components
 #if REVIT_2022
         var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
 
-        ReplaceElement(ref ceiling, DB.Ceiling.Create(document, curveLoops, type.Value.Id, level.Value.Id, default, 0.0), parametersMask);
+        ReplaceElement(ref ceiling, ARDB.Ceiling.Create(document, curveLoops, type.Value.Id, level.Value.Id, default, 0.0), parametersMask);
 #else
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is only supported on Revit 2022 or above.");
 #endif

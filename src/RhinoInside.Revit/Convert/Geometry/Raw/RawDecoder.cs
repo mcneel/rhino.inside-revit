@@ -570,7 +570,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       try
       {
 #if REVIT_2021
-        using (var surface = DB.ExportUtils.GetNurbsSurfaceDataForSurface(face.GetSurface()))
+        using (var surface = ARDB.ExportUtils.GetNurbsSurfaceDataForSurface(face.GetSurface()))
           nurbsSurface = ToRhino(surface, face.GetBoundingBox());
 #else
         using (var surface = ARDB.ExportUtils.GetNurbsSurfaceDataForFace(face))
@@ -674,11 +674,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     }
 
 #if REVIT_2021
-    static NurbsSurface ToRhino(DB.HermiteSurface surface, DB.BoundingBoxUV bboxUV)
+    static NurbsSurface ToRhino(ARDB.HermiteSurface surface, ARDB.BoundingBoxUV bboxUV)
     {
       try
       {
-        using (var surfaceData = DB.ExportUtils.GetNurbsSurfaceDataForSurface(surface))
+        using (var surfaceData = ARDB.ExportUtils.GetNurbsSurfaceDataForSurface(surface))
           return ToRhino(surfaceData, bboxUV);
       }
       catch (Autodesk.Revit.Exceptions.ApplicationException) { }
@@ -686,7 +686,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return null;
     }
 
-    static Surface ToRhino(DB.OffsetSurface surface, DB.BoundingBoxUV bboxUV)
+    static Surface ToRhino(ARDB.OffsetSurface surface, ARDB.BoundingBoxUV bboxUV)
     {
       var basis = surface.GetBasisSurface();
       var distance = surface.GetOffsetDistance();
@@ -711,7 +711,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         case ARDB.RuledSurface ruled:             return ToRhino(ruled, bboxUV);
         case ARDB.HermiteSurface hermite:         return ToRhino(hermite, bboxUV);
 #if REVIT_2021
-        case DB.OffsetSurface offset:           return ToRhino(offset, bboxUV);
+        case ARDB.OffsetSurface offset:           return ToRhino(offset, bboxUV);
 #endif
         default: throw new NotImplementedException();
       }
@@ -1054,17 +1054,17 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 #if REVIT_2021
       switch (mesh.DistributionOfNormals)
       {
-        case DB.DistributionOfNormals.AtEachPoint:
+        case ARDB.DistributionOfNormals.AtEachPoint:
           if (mesh.NumberOfNormals == result.Vertices.Count)
           {
             foreach (var xyz in mesh.GetNormals())
               result.Normals.Add(xyz.X, xyz.Y, xyz.Z);
           }
           break;
-        case DB.DistributionOfNormals.OnePerFace:
+        case ARDB.DistributionOfNormals.OnePerFace:
           result.FaceNormals.ComputeFaceNormals();
           break;
-        case DB.DistributionOfNormals.OnEachFacet:
+        case ARDB.DistributionOfNormals.OnEachFacet:
           if (mesh.NumberOfNormals == result.Faces.Count)
           {
             foreach (var xyz in mesh.GetNormals())

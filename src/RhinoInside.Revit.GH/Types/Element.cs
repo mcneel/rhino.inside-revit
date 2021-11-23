@@ -126,8 +126,8 @@ namespace RhinoInside.Revit.GH.Types
     public static readonly Dictionary<Type, Func<ARDB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<ARDB.Element, Element>>()
     {
 #if REVIT_2021
-      { typeof(DB.InternalOrigin),          (element)=> new InternalOrigin        (element as DB.InternalOrigin)    },
-      { typeof(DB.BasePoint),               (element)=> new BasePoint             (element as DB.BasePoint)         },
+      { typeof(ARDB.InternalOrigin),          (element)=> new InternalOrigin        (element as ARDB.InternalOrigin)    },
+      { typeof(ARDB.BasePoint),               (element)=> new BasePoint             (element as ARDB.BasePoint)         },
 #endif
       { typeof(ARDB.DesignOption),            (element)=> new DesignOption          (element as ARDB.DesignOption)      },
       { typeof(ARDB.Phase),                   (element)=> new Phase                 (element as ARDB.Phase)             },

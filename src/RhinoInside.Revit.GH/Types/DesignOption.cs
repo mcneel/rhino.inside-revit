@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
     (
       new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_DesignOptionSets),
 #if REVIT_2021
-      new ARDB.ElementParameterFilter(new DB.HasValueFilterRule(new DB.ElementId(DB.BuiltInParameter.OPTION_SET_NAME)))
+      new ARDB.ElementParameterFilter(new ARDB.HasValueFilterRule(new ARDB.ElementId(ARDB.BuiltInParameter.OPTION_SET_NAME)))
 #else
       new ARDB.ElementParameterFilter
       (

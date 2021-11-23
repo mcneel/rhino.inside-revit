@@ -212,7 +212,7 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case DB.ForgeTypeId f: Value = f; break;
+          case ARDB.ForgeTypeId f: Value = f; break;
 #else
           case int i: Value = (ARDB.DisplayUnitType) i; break;
           case ARDB.DisplayUnitType u: Value = u; break;
@@ -294,7 +294,7 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case DB.ForgeTypeId f: Value = f; break;
+          case ARDB.ForgeTypeId f: Value = f; break;
 #else
           case int i: Value = (EDBS.SpecType) (ARDB.ParameterType) i; break;
           case ARDB.ParameterType u: Value = (EDBS.SpecType) u; break;
@@ -352,7 +352,7 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case DB.ForgeTypeId f: Value = f; break;
+          case ARDB.ForgeTypeId f: Value = f; break;
 #endif
 #if !REVIT_2022
           case int i: Value = (ARDB.BuiltInParameterGroup) i; break;
@@ -411,7 +411,7 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case DB.ForgeTypeId f: Value = f; break;
+          case ARDB.ForgeTypeId f: Value = f; break;
 #endif
 #if !REVIT_2022
           case int i: Value = (ARDB.BuiltInParameter) i; break;
@@ -470,7 +470,7 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case DB.ForgeTypeId f: Value = f; break;
+          case ARDB.ForgeTypeId f: Value = f; break;
 #endif
 #if !REVIT_2022
           case int i: Value = (ARDB.BuiltInCategory) i; break;

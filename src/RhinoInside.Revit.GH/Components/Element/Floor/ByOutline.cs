@@ -195,7 +195,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 #if REVIT_2022
         var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
 
-        ReplaceElement(ref floor, DB.Floor.Create(document, curveLoops, type.Value.Id, level.Value.Id, structural, default, 0.0), parametersMask);
+        ReplaceElement(ref floor, ARDB.Floor.Create(document, curveLoops, type.Value.Id, level.Value.Id, structural, default, 0.0), parametersMask);
 #else
         var curveArray = boundary[0].ToCurveArray();
 

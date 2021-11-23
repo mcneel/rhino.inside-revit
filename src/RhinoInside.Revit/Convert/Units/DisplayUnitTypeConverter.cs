@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.Convert.Units
     static DisplayUnitTypeConverter()
     {
 #if REVIT_2021
-      var lengthUnits = DB.UnitUtils.GetValidUnits(DBXS.SpecType.Measurable.Length);
+      var lengthUnits = ARDB.UnitUtils.GetValidUnits(DBXS.SpecType.Measurable.Length);
 #else
       var lengthUnits = ARDB.UnitUtils.GetValidDisplayUnits(ARDB.UnitType.UT_Length);
 #endif

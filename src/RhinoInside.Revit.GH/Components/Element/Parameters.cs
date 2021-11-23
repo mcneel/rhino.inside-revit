@@ -477,7 +477,7 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
             {
               var host = UnitConverter.InHostUnits(number, specTypeId);
 #if REVIT_2021
-              var formated = DB.UnitFormatUtils.Format(element.Document.GetUnits(), specTypeId, host, forEditing: false, formatOptions);
+              var formated = ARDB.UnitFormatUtils.Format(element.Document.GetUnits(), specTypeId, host, forEditing: false, formatOptions);
 #else
               var formated = ARDB.UnitFormatUtils.Format(element.Document.GetUnits(), specTypeId, host, maxAccuracy: false, forEditing: false, formatOptions);
 #endif

@@ -575,7 +575,7 @@ namespace RhinoInside.Revit.GH.Types
             case ARDB.HermiteSurface _:     faceType = "Hermite Face"; break;
             case ARDB.Plane _:              faceType = "Planar Face"; break;
 #if REVIT_2021
-            case DB.OffsetSurface _:      faceType = "Offset Face"; break;
+            case ARDB.OffsetSurface _:      faceType = "Offset Face"; break;
 #endif
             case ARDB.RevolvedSurface _:    faceType = "Revolved Face"; break;
             case ARDB.RuledSurface _:       faceType = "Ruled Face"; break;

@@ -348,7 +348,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
           var list = colorProp.GetValueAsDoubles();
           return new Rhino.Display.ColorRGBA(list[0], list[1], list[2], list[3]);
 
-        //case DB.Visual.AssetPropertyDoubleMatrix44 matrixProp:
+        //case ARDB.Visual.AssetPropertyDoubleMatrix44 matrixProp:
         //  break;
 
         case ARDB.Visual.AssetPropertyEnum enumProp:
@@ -357,7 +357,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
         case ARDB.Visual.AssetPropertyFloat floatProp:
           return floatProp.Value;
 
-        //case DB.Visual.AssetPropertyFloatArray floatArray:
+        //case ARDB.Visual.AssetPropertyFloatArray floatArray:
         //  break;
 
         case ARDB.Visual.AssetPropertyInt64 int64Prop:
@@ -366,10 +366,10 @@ namespace RhinoInside.Revit.GH.Components.Materials
         case ARDB.Visual.AssetPropertyInteger intProp:
           return intProp.Value;
 
-        //case DB.Visual.AssetPropertyList listProp:
+        //case ARDB.Visual.AssetPropertyList listProp:
         //  break;
 
-        //case DB.Visual.AssetPropertyReference refProp:
+        //case ARDB.Visual.AssetPropertyReference refProp:
         //  break;
 
         case ARDB.Visual.AssetPropertyString textProp:
@@ -569,7 +569,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
             AssetData.GetSchemaDataType(
               // Asset schema names end in "Schema" e.g. "UnifiedBitmapSchema"
               // They do not match the names for API wrapper
-              // types e.g. "DB.Visual.UnifiedBitmap"
+              // types e.g. "ARDB.Visual.UnifiedBitmap"
               // lets remove the extra stuff
               connectedAsset.Name.Replace("Schema", "")
               );

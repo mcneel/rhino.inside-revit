@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
@@ -319,7 +319,6 @@
     <Compile Include="Components\Element\Sheet\QuerySheets.cs" />
     <Compile Include="Components\Element\Sheet\SheetByNumber_Assembly.cs" />
     <Compile Include="Components\Element\Sheet\SheetByNumber_Placeholder.cs" />
-    <Compile Include="Components\Element\Sheet\QuerySheets.cs" />
     <Compile Include="Components\Element\Sheet\SheetIdentity.cs" />
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
     <Compile Include="Components\Element\Sketch\Deconstruct.cs" />
