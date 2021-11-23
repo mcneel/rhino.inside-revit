@@ -386,7 +386,7 @@ namespace RhinoInside.Revit.GH.Types
       get => new FillPatternElement(Document, SurfaceForegroundPatternId);
       set
       {
-        if (value is object && Value is DB.Material material && value.Id != material.SurfacePatternId)
+        if (value is object && Value is ARDB.Material material && value.Id != material.SurfacePatternId)
         {
           AssertValidDocument(value, nameof(SurfaceForegroundPattern));
           material.SurfacePatternId = value.Id;
@@ -394,12 +394,12 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public DB.ElementId SurfaceForegroundPatternId
+    public ARDB.ElementId SurfaceForegroundPatternId
     {
       get => Value?.SurfacePatternId;
       set
       {
-        if (value is object && Value is DB.Material material && value != material.SurfacePatternId)
+        if (value is object && Value is ARDB.Material material && value != material.SurfacePatternId)
           material.SurfacePatternId = value;
       }
     }
@@ -409,7 +409,7 @@ namespace RhinoInside.Revit.GH.Types
       get => Value?.SurfacePatternColor.ToColor();
       set
       {
-        if (value is object && Value is DB.Material material)
+        if (value is object && Value is ARDB.Material material)
         {
           using (var color = value.Value.ToColor())
           {
@@ -426,7 +426,7 @@ namespace RhinoInside.Revit.GH.Types
       set { }
     }
 
-    public DB.ElementId SurfaceBackgroundPatternId
+    public ARDB.ElementId SurfaceBackgroundPatternId
     {
       get => default;
       set { }
@@ -443,7 +443,7 @@ namespace RhinoInside.Revit.GH.Types
       get => new FillPatternElement(Document, CutForegroundPatternId);
       set
       {
-        if (value is object && Value is DB.Material material && value.Id != material.CutPatternId)
+        if (value is object && Value is ARDB.Material material && value.Id != material.CutPatternId)
         {
           AssertValidDocument(value, nameof(CutForegroundPattern));
           material.CutPatternId = value.Id;
@@ -451,12 +451,12 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public DB.ElementId CutForegroundPatternId
+    public ARDB.ElementId CutForegroundPatternId
     {
       get => Value?.CutPatternId;
       set
       {
-        if (value is object && Value is DB.Material material && value != material.CutPatternId)
+        if (value is object && Value is ARDB.Material material && value != material.CutPatternId)
           material.CutPatternId = value;
       }
     }
@@ -466,7 +466,7 @@ namespace RhinoInside.Revit.GH.Types
       get => Value?.CutPatternColor.ToColor();
       set
       {
-        if (value is object && Value is DB.Material material)
+        if (value is object && Value is ARDB.Material material)
         {
           using (var color = value.Value.ToColor())
           {
@@ -483,7 +483,7 @@ namespace RhinoInside.Revit.GH.Types
       set { }
     }
 
-    public DB.ElementId CutBackgroundPatternId
+    public ARDB.ElementId CutBackgroundPatternId
     {
       get => default;
       set { }
