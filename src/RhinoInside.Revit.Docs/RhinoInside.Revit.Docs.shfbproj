@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Import the common properties to support NuGet restore -->
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\Directory.Build.props" />
+
+  <PropertyGroup>
+    <ProjectGuid>{7e340714-ca6b-4b13-81c9-f9dbfba079f2}</ProjectGuid>
+    <SHFBSchemaVersion>2017.9.26.0</SHFBSchemaVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <FrameworkVersion>.NET Framework 4.8</FrameworkVersion>
+    <AssemblyName>RhinoInside.Revit.API</AssemblyName>
+    <RootNamespace>RhinoInside.Revit.API</RootNamespace>
+    <Name>RhinoInside.Revit API</Name>
+  </PropertyGroup>
+
+  <!-- SHFB properties -->
+  <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
+    <OutputPath>help\Debug $(RevitVersion)\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.Contains('Release'))">
+    <OutputPath>help\Release $(RevitVersion)\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <HtmlHelpName>RhinoInside.Revit API</HtmlHelpName>
+    <Language>en-US</Language>
+    <HelpFileFormat>HtmlHelp1, Website</HelpFileFormat>
+    <SyntaxFilters>C#</SyntaxFilters>
+    <PresentationStyle>VS2013</PresentationStyle>
+    <CleanIntermediates>True</CleanIntermediates>
+    <KeepLogFile>True</KeepLogFile>
+    <DisableCodeBlockComponent>False</DisableCodeBlockComponent>
+    <IndentHtml>False</IndentHtml>
+    <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
+    <SaveComponentCacheCapacity>100</SaveComponentCacheCapacity>
+    <DocumentationSources Condition="$(Configuration.Contains('Debug'))">
+      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\x64\Debug $(RevitVersion)\RhinoInside.Revit.xml" />
+      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\x64\Debug $(RevitVersion)\RhinoInside.Revit.dll" />
+    </DocumentationSources>
+    <DocumentationSources Condition="$(Configuration.Contains('Release'))">
+      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\x64\Release $(RevitVersion)\RhinoInside.Revit.xml" />
+      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\x64\Release $(RevitVersion)\RhinoInside.Revit.dll" />
+    </DocumentationSources>
+    <HelpTitle>RhinoInside.Revit API Documentation</HelpTitle>
+    <!-- Needs to be set by build script -->
+    <HelpFileVersion>1.0.0.0</HelpFileVersion>
+    <NamingMethod>Guid</NamingMethod>
+    <ContentPlacement>AboveNamespaces</ContentPlacement>
+    <RootNamespaceContainer>True</RootNamespaceContainer>
+    <NamespaceGrouping>False</NamespaceGrouping>
+    <MaximumGroupParts>2</MaximumGroupParts>
+    <Preliminary>False</Preliminary>
+    <SdkLinkTarget>Blank</SdkLinkTarget>
+    <CopyrightHref>https://discourse.mcneel.com/c/rhino-inside/Revit</CopyrightHref>
+    <CopyrightText>Report wishes and bugs at discourse.mcneel.com</CopyrightText>
+    <FooterText></FooterText>
+    <WarnOnMissingSourceContext>False</WarnOnMissingSourceContext>
+    <HtmlSdkLinkType>Msdn</HtmlSdkLinkType>
+    <BinaryTOC>False</BinaryTOC>
+    <IncludeFavorites>False</IncludeFavorites>
+    <WebsiteSdkLinkType>Msdn</WebsiteSdkLinkType>
+    <AppendMarkdownFileExtensionsToUrls>False</AppendMarkdownFileExtensionsToUrls>
+  </PropertyGroup>
+  <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
+			 the build.  The others are optional common platform types that may appear. -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' "></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' "></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' "></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' "></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Win32' "></PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' "></PropertyGroup>
+  <!-- Import the common build targets during NuGet restore because before the packages are being installed, $(SHFBROOT) is not set yet -->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="'$(MSBuildRestoreSessionId)' != ''" />
+  <!-- Import the SHFB build targets during build -->
+  <Import Project="$(SHFBROOT)\SandcastleHelpFileBuilder.targets" Condition="'$(MSBuildRestoreSessionId)' == ''" />
+  <!-- The pre-build and post-build event properties must appear *after* the targets file import in order to be
+			 evaluated correctly. -->
+  <PropertyGroup>
+    <PreBuildEvent></PreBuildEvent>
+    <PostBuildEvent></PostBuildEvent>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup Condition="$(Configuration.Contains('Debug'))">
+    <Reference Include="RhinoInside.Revit.External">
+      <HintPath>..\RhinoInside.Revit.External\bin\x64\Debug $(RevitVersion)\RhinoInside.Revit.External.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="$(Configuration.Contains('Release'))">
+    <Reference Include="RhinoInside.Revit.External">
+      <HintPath>..\RhinoInside.Revit.External\bin\x64\Release $(RevitVersion)\RhinoInside.Revit.External.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
