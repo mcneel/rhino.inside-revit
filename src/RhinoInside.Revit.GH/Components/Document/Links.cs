@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
-using ARDB = Autodesk.Revit.DB;
+using DB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Documents
 {
-  using External.DB.Extensions;
-
   public class DocumentLinks : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("EBCCFDD8-9F3B-44F4-A209-72D06C8082A5");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "L";
-    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.RevitLinkType));
+    protected override DB.ElementFilter ElementFilter => new DB.ElementClassFilter(typeof(DB.RevitLinkType));
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -59,73 +57,21 @@ namespace RhinoInside.Revit.GH.Components.Documents
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      // Note: linked documents that are not loaded in Revit memory,
+      // Note:
+      // linked documents that are not loaded in Revit memory,
       // are not reported since no interaction can be done if not loaded
-      var docs = new List<ARDB.Document>();
-      using (var documents = Revit.ActiveDBApplication.Documents)
+      var docs = new Dictionary<string, DB.Document>();
+      using (var collector = new DB.FilteredElementCollector(doc).OfClass(typeof(DB.RevitLinkInstance)))
       {
-        /* NOTES:
-         * 1) On a cloud host model with links (that are also on cloud)
-         *    .GetAllExternalFileReferences does not return the "File" references
-         *    to the linked cloud models
-         * 2) doc.PathName is not equal to DB.ExternalResourceReference.InSessionPath
-         *    e.g. Same modle but reported paths are different. Respectively:
-         *    "BIM 360://Default Test/Host_Model1.rvt"
-         *    vs
-         *    "BIM 360://Default Test/Project Files/Linked_Project2.rvt"
-         */
-        // get all external model references
-        foreach (var id in ARDB.ExternalFileUtils.GetAllExternalFileReferences(doc))
+        foreach (DB.RevitLinkInstance linkInstance in collector.Cast<DB.RevitLinkInstance>())
         {
-          // inspect the reference, and ...
-          var reference = ARDB.ExternalFileUtils.GetExternalFileReference(doc, id);
-          if (reference.ExternalFileReferenceType == ARDB.ExternalFileReferenceType.RevitLink)
-          {
-            // grab the model path
-            var modelPath = reference.PathType == ARDB.PathType.Relative ? reference.GetAbsolutePath() : reference.GetPath();
-            // look into the loaded documents and find the one with the same path
-            if (documents.Cast<ARDB.Document>().Where(x => x.IsLinked && modelPath.IsEquivalent(x.GetModelPath())).FirstOrDefault() is ARDB.Document linkedDoc)
-              // if found, add that to the output list
-              docs.Add(linkedDoc);
-          }
+          var linkedDoc = linkInstance.GetLinkDocument();
+          if (!docs.ContainsKey(linkedDoc.PathName))
+            docs[linkedDoc.PathName] = linkedDoc;
         }
-
-#if REVIT_2020
-        // if no document is reported using DB.ExternalFileUtils then links
-        // are in the cloud. try getting linked documents from DB.RevitLinkType
-        // element types inside the host model
-
-        // find all the revit link types in the host model
-        using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.RevitLinkType)))
-        {
-          foreach (var revitLinkType in collector)
-          {
-            // extract the path of external document that is wrapped by the revit link type
-            var linkInfo = revitLinkType.GetExternalResourceReferences().FirstOrDefault();
-            if (linkInfo.Key != null && linkInfo.Value.HasValidDisplayPath())
-            {
-              // stores custom info about the reference (project::model ids)
-              var refInfo = linkInfo.Value.GetReferenceInformation();
-              // try to grab the linked cloud doc id from the info dict
-              string linkedDocId;
-              if (refInfo.TryGetValue("LinkedModelModelId", out linkedDocId))
-              {
-                // look into the loaded documents and find the one with the same 'cloud' path
-                var linkedDoc = documents.Cast<ARDB.Document>()
-                                         .Where(x => x.IsLinked &&
-                                                     x.GetCloudModelPath().GetModelGUID() == Guid.Parse(linkedDocId))
-                                         .FirstOrDefault();
-                // if found add that to the output list
-                if (linkedDoc != null)
-                  docs.Add(linkedDoc);
-              }
-            }
-          }
-        }
-#endif
-
-        DA.SetDataList("Documents", docs);
       }
+
+      DA.SetDataList("Documents", docs.Values);
     }
   }
 }
