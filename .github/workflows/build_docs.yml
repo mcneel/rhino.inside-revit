@@ -9,7 +9,7 @@ jobs:
       - uses: microsoft/setup-msbuild@v1
 
       - name: install sandcastle
-        uses: uses: crazy-max/ghaction-chocolatey@v1
+        uses: crazy-max/ghaction-chocolatey@v1
         with:
           args: --yes install sandcastle
 
