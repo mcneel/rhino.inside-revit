@@ -2,29 +2,43 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- Import the common properties to support NuGet restore -->
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="$(MSBuildThisFileDirectory)\..\Directory.Build.props" />
-
   <PropertyGroup>
     <ProjectGuid>{7e340714-ca6b-4b13-81c9-f9dbfba079f2}</ProjectGuid>
     <SHFBSchemaVersion>2017.9.26.0</SHFBSchemaVersion>
+    <PlugInConfigurations>
+      <PlugInConfig id="Assembly Binding Redirection" enabled="True">
+        <configuration useGAC="false">
+          <assemblyBinding />
+          <ignoreIfUnresolved>
+            <assemblyIdentity name="BusinessObjects.Licensing.KeycodeDecoder" />
+            <assemblyIdentity name="Microsoft.VisualStudio.TestTools.UITest.Playback" />
+            <assemblyIdentity name="Eto" />
+            <assemblyIdentity name="Eto.Wpf" />
+            <assemblyIdentity name="RhinoCommon" />
+            <assemblyIdentity name="Rhino.UI" />
+            <assemblyIdentity name="Grasshopper" />
+            <assemblyIdentity name="GH_IO" />
+            <assemblyIdentity name="RevitAPI" />
+            <assemblyIdentity name="RevitAPIUI" />
+            <assemblyIdentity name="AdWindows" />
+          </ignoreIfUnresolved>
+        </configuration>
+      </PlugInConfig>
+    </PlugInConfigurations>
   </PropertyGroup>
-
   <PropertyGroup>
     <FrameworkVersion>.NET Framework 4.8</FrameworkVersion>
     <AssemblyName>RhinoInside.Revit.API</AssemblyName>
     <RootNamespace>RhinoInside.Revit.API</RootNamespace>
     <Name>RhinoInside.Revit API</Name>
   </PropertyGroup>
-
   <!-- SHFB properties -->
   <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
     <OutputPath>help\Debug $(RevitVersion)\</OutputPath>
   </PropertyGroup>
-
   <PropertyGroup Condition="$(Configuration.Contains('Release'))">
     <OutputPath>help\Release $(RevitVersion)\</OutputPath>
   </PropertyGroup>
-
   <PropertyGroup>
     <HtmlHelpName>RhinoInside.Revit API</HtmlHelpName>
     <Language>en-US</Language>
