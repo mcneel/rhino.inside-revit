@@ -1,8 +1,8 @@
-name: build
+name: build_docs
 on: workflow_dispatch
 
 jobs:
-  buildDocs:
+  build_docs:
     name: Build RIR API Documentation
     runs-on: windows-latest
     steps:
