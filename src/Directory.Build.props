@@ -19,7 +19,7 @@
     </PropertyGroup>
 
     <!-- global build configurations -->
-    <PropertyGroup>
+    <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
         <SchemaVersion>2.0</SchemaVersion>
         <LangVersion>7.3</LangVersion>
         <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -94,7 +94,7 @@
     </PropertyGroup>
 
     <!-- shared references -->
-    <ItemGroup>
+    <ItemGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
         <Reference Include="Microsoft.CSharp" />
         <Reference Include="Microsoft.VisualBasic" />
         <Reference Include="PresentationCore" />
@@ -110,7 +110,7 @@
         <Reference Include="WindowsBase" />
     </ItemGroup>
 
-    <ItemGroup Condition="$(Configuration.Contains('Debug'))">
+    <ItemGroup Condition="$(Configuration.Contains('Debug')) AND '$(MSBuildProjectExtension)'=='.csproj'">
         <Reference Include="Eto">
             <HintPath>$(Rhino7InstallDir)Eto.dll</HintPath>
             <Private>False</Private>
@@ -149,10 +149,10 @@
         </Reference>
     </ItemGroup>
 
-    <ItemGroup Condition="$(Configuration.Contains('Release'))">
+    <ItemGroup Condition="$(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)'=='.csproj'">
         <PackageReference Include="RhinoCommon" Version="7.9.21222.15001" IncludeAssets="compile; build" />
-        <PackageReference Include="RhinoWindows" Version="7.9.21222.15001" IncludeAssets="build; compile" />
+        <PackageReference Include="RhinoWindows" Version="7.9.21222.15001" IncludeAssets="compile; build" />
         <PackageReference Include="Grasshopper" Version="7.9.21222.15001" IncludeAssets="compile; build" />
-        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="build; compile" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="compile; build" />
     </ItemGroup>
 </Project>
