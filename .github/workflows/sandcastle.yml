@@ -1,0 +1,16 @@
+name: build
+on: workflow_run
+
+jobs:
+  buildDocs:
+    name: Build RIR API Documentation
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: microsoft/setup-msbuild@v1
+
+      - name: Install SandCastle
+        run: choco --yes install sandcastle
+
+      - name: Build Docs
+        run: msbuild script\cibuild_docs.msbuild -v:m
