@@ -18,6 +18,12 @@
         <Rhino7PluginsDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugPluginsDir)', '$(Rhino7DefaultPluginsDir)'))</Rhino7PluginsDir>
     </PropertyGroup>
 
+    <!-- sandcastle root dir -->
+    <PropertyGroup>
+        <PackagesDir>$(RIRSourceDir)..\packages\</PackagesDir>
+        <SHFBROOT>$(PackagesDir)EWSoftware.SHFB.2021.11.7\tools\</SHFBROOT>
+    </PropertyGroup>
+
     <!-- global build configurations -->
     <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
         <SchemaVersion>2.0</SchemaVersion>
