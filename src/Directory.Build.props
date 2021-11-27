@@ -25,6 +25,7 @@
     </PropertyGroup>
 
     <!-- global build configurations -->
+    <!-- only for csproj projects -->
     <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
         <SchemaVersion>2.0</SchemaVersion>
         <LangVersion>7.3</LangVersion>
@@ -82,6 +83,11 @@
         <DefineConstants>$(DefineConstants);REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
     </PropertyGroup>
 
+    <!-- revit install dir based on revit version -->
+    <PropertyGroup>
+        <RevitInstallPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\</RevitInstallPath>
+    </PropertyGroup>
+
     <!-- dbg vs release build configurations -->
     <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
         <DebugSymbols>true</DebugSymbols>
@@ -100,6 +106,7 @@
     </PropertyGroup>
 
     <!-- shared references -->
+    <!-- only for csproj projects -->
     <ItemGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
         <Reference Include="Microsoft.CSharp" />
         <Reference Include="Microsoft.VisualBasic" />
@@ -116,43 +123,18 @@
         <Reference Include="WindowsBase" />
     </ItemGroup>
 
+    <!-- debg vs release references -->
+    <!-- only for csproj projects -->
     <ItemGroup Condition="$(Configuration.Contains('Debug')) AND '$(MSBuildProjectExtension)'=='.csproj'">
-        <Reference Include="Eto">
-            <HintPath>$(Rhino7InstallDir)Eto.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="Eto.Wpf">
-            <HintPath>$(Rhino7InstallDir)Eto.Wpf.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="RhinoCommon">
-            <HintPath>$(Rhino7InstallDir)RhinoCommon.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="Rhino.UI">
-            <HintPath>$(Rhino7InstallDir)Rhino.UI.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="GH_IO">
-            <HintPath>$(Rhino7PluginsDir)Grasshopper\GH_IO.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="Grasshopper">
-            <HintPath>$(Rhino7PluginsDir)Grasshopper\Grasshopper.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="RevitAPI">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPI.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="RevitAPIUI">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\RevitAPIUI.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="AdWindows">
-            <HintPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\AdWindows.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
+        <Reference Include="Eto" HintPath="$(Rhino7InstallDir)Eto.dll" Private="False" />
+        <Reference Include="Eto.Wpf" HintPath="$(Rhino7InstallDir)Eto.Wpf.dll" Private="False" />
+        <Reference Include="RhinoCommon" HintPath="$(Rhino7InstallDir)RhinoCommon.dll" Private="False" />
+        <Reference Include="Rhino.UI" HintPath="$(Rhino7InstallDir)Rhino.UI.dll" Private="False" />
+        <Reference Include="GH_IO" HintPath="$(Rhino7InstallDir)Grasshopper\GH_IO.dll.dll" Private="False" />
+        <Reference Include="Grasshopper" HintPath="$(Rhino7InstallDir)Grasshopper\Grasshopper.dll" Private="False" />
+        <Reference Include="RevitAPI" HintPath="$(RevitInstallPath)RevitAPI.dll" Private="False" />
+        <Reference Include="RevitAPIUI" HintPath="$(RevitInstallPath)RevitAPIUI.dll" Private="False" />
+        <Reference Include="AdWindows" HintPath="$(RevitInstallPath)AdWindows.dll" Private="False" />
     </ItemGroup>
 
     <ItemGroup Condition="$(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)'=='.csproj'">
