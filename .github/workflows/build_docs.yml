@@ -11,7 +11,7 @@ jobs:
       - name: install sandcastle
         uses: crazy-max/ghaction-chocolatey@v1
         with:
-          args: --yes install sandcastle
+          args: install sandcastle --yes
 
       - name: build documentation
         run: msbuild script\cibuild_docs.msbuild -v:m
