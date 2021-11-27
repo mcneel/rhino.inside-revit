@@ -15,3 +15,9 @@ jobs:
 
       - name: build documentation
         run: msbuild script\cibuild_docs.msbuild -v:m
+      
+      - name: upload docs
+        uses: actions/upload-artifact@v2
+        with:
+          name: all-docs
+          path: src/RhinoInside.Revit.Docs/help
