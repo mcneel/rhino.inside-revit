@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- known paths -->
+    <PropertyGroup>
+        <RIRSourceDir>$(MSBuildThisFileDirectory)</RIRSourceDir>
+    </PropertyGroup>
+
+    <!-- rhino installed path -->
+    <PropertyGroup>
+        <!-- system -->
+        <Rhino7DefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Path', null, RegistryView.Registry64))</Rhino7DefaultInstallDir>
+        <Rhino7DebugInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Path', null, RegistryView.Registry64))</Rhino7DebugInstallDir>
+        <!-- plugins -->
+        <Rhino7DefaultPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DefaultPluginsDir>
+        <Rhino7DebugPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</Rhino7DebugPluginsDir>
+        <!-- USE THESE -->
+        <Rhino7InstallDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugInstallDir)', '$(Rhino7DefaultInstallDir)'))</Rhino7InstallDir>
+        <Rhino7PluginsDir>$([MSBuild]::ValueOrDefault('$(Rhino7DebugPluginsDir)', '$(Rhino7DefaultPluginsDir)'))</Rhino7PluginsDir>
+    </PropertyGroup>
+
+    <!-- sandcastle root dir -->
+    <PropertyGroup>
+        <PackagesDir>$(RIRSourceDir)..\packages\</PackagesDir>
+        <SHFBROOT>$(PackagesDir)EWSoftware.SHFB.2021.11.7\tools\</SHFBROOT>
+    </PropertyGroup>
+
+    <!-- global build configurations -->
+    <!-- only for csproj projects -->
+    <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
+        <SchemaVersion>2.0</SchemaVersion>
+        <LangVersion>7.3</LangVersion>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <TargetFrameworkProfile />
+        <!-- target -->
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <TargetFramework>net48</TargetFramework>
+        <PlatformTarget>x64</PlatformTarget>
+        <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+        <!-- constants are provided for revit versions that are not supported anymore -->
+        <DefineConstants>REVIT_2017</DefineConstants>
+        <!-- any unknown config is considered Debug -->
+        <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+        <!-- any unknown platform is considered AnyCPU -->
+        <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    </PropertyGroup>
+
+    <!-- build configurations for each revit -->
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2018|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2018|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2019|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2019|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2020|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2020|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2021|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2021|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2022|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2022|x64'"></PropertyGroup>
+
+    <!-- revit-specific build configurations -->
+    <PropertyGroup Condition="$(Configuration.Contains('2018'))">
+        <RevitVersion>2018</RevitVersion>
+        <RevitApiVersion>2018.0.2</RevitApiVersion>
+        <DefineConstants>$(DefineConstants);REVIT_2018</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="$(Configuration.Contains('2019'))">
+        <RevitVersion>2019</RevitVersion>
+        <RevitApiVersion>2019.0.1</RevitApiVersion>
+        <DefineConstants>$(DefineConstants);REVIT_2018;REVIT_2019</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="$(Configuration.Contains('2020'))">
+        <RevitVersion>2020</RevitVersion>
+        <RevitApiVersion>2020.0.0</RevitApiVersion>
+        <DefineConstants>$(DefineConstants);REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="$(Configuration.Contains('2021'))">
+        <RevitVersion>2021</RevitVersion>
+        <RevitApiVersion>2021.1.0</RevitApiVersion>
+        <DefineConstants>$(DefineConstants);REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="$(Configuration.Contains('2022'))">
+        <RevitVersion>2022</RevitVersion>
+        <RevitApiVersion>2022.0.0</RevitApiVersion>
+        <DefineConstants>$(DefineConstants);REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
+    </PropertyGroup>
+
+    <!-- revit install dir based on revit version -->
+    <PropertyGroup>
+        <RevitInstallPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\</RevitInstallPath>
+    </PropertyGroup>
+
+    <!-- dbg vs release build configurations -->
+    <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
+        <DebugSymbols>true</DebugSymbols>
+        <OutputPath>bin\$(PlatformTarget)\Debug $(RevitVersion)\</OutputPath>
+        <DefineConstants>$(DefineConstants);TRACE;DEBUG</DefineConstants>
+        <DebugType>full</DebugType>
+        <ErrorReport>prompt</ErrorReport>
+        <ConfigurationType>Debug</ConfigurationType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$(Configuration.Contains('Release'))">
+        <DebugSymbols>true</DebugSymbols>
+        <OutputPath>bin\$(PlatformTarget)\Release $(RevitVersion)\</OutputPath>
+        <Optimize>true</Optimize>
+        <ConfigurationType>Release</ConfigurationType>
+    </PropertyGroup>
+
+    <!-- shared references -->
+    <!-- only for csproj projects -->
+    <ItemGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
+        <Reference Include="Microsoft.CSharp" />
+        <Reference Include="Microsoft.VisualBasic" />
+        <Reference Include="PresentationCore" />
+        <Reference Include="PresentationFramework" />
+        <Reference Include="System" />
+        <Reference Include="System.Core" RequiredTargetFramework="4.0" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Drawing" />
+        <Reference Include="System.IO.Compression" />
+        <Reference Include="System.Management.Automation" />
+        <Reference Include="System.Windows.Forms" />
+        <Reference Include="System.Xml" />
+        <Reference Include="WindowsBase" />
+    </ItemGroup>
+
+    <!-- debg vs release references -->
+    <!-- only for csproj projects -->
+    <ItemGroup Condition="$(Configuration.Contains('Debug')) AND '$(MSBuildProjectExtension)'=='.csproj'">
+        <Reference Include="Eto" HintPath="$(Rhino7InstallDir)Eto.dll" Private="False" />
+        <Reference Include="Eto.Wpf" HintPath="$(Rhino7InstallDir)Eto.Wpf.dll" Private="False" />
+        <Reference Include="RhinoCommon" HintPath="$(Rhino7InstallDir)RhinoCommon.dll" Private="False" />
+        <Reference Include="Rhino.UI" HintPath="$(Rhino7InstallDir)Rhino.UI.dll" Private="False" />
+        <Reference Include="GH_IO" HintPath="$(Rhino7InstallDir)Grasshopper\GH_IO.dll.dll" Private="False" />
+        <Reference Include="Grasshopper" HintPath="$(Rhino7InstallDir)Grasshopper\Grasshopper.dll" Private="False" />
+        <Reference Include="RevitAPI" HintPath="$(RevitInstallPath)RevitAPI.dll" Private="False" />
+        <Reference Include="RevitAPIUI" HintPath="$(RevitInstallPath)RevitAPIUI.dll" Private="False" />
+        <Reference Include="AdWindows" HintPath="$(RevitInstallPath)AdWindows.dll" Private="False" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)'=='.csproj'">
+        <PackageReference Include="RhinoCommon" Version="7.9.21222.15001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoWindows" Version="7.9.21222.15001" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.9.21222.15001" IncludeAssets="compile; build" />
+        <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="compile; build" />
+    </ItemGroup>
+</Project>

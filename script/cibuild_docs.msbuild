@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="Build" DependsOnTargets="Compile;BuildDocs"></Target>
+
+  <Target Name="Compile">
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2018" />
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2019" />
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2020" />
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2021" />
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release 2022" />
+  </Target>
+
+  <Target Name="BuildDocs">
+    <MSBuild Projects="..\src\RhinoInside.Revit.Docs.sln" Targets="Restore;Build" Properties="Configuration=Release 2018" />
+    <MSBuild Projects="..\src\RhinoInside.Revit.Docs.sln" Targets="Restore;Build" Properties="Configuration=Release 2019" />
+    <MSBuild Projects="..\src\RhinoInside.Revit.Docs.sln" Targets="Restore;Build" Properties="Configuration=Release 2020" />
+    <MSBuild Projects="..\src\RhinoInside.Revit.Docs.sln" Targets="Restore;Build" Properties="Configuration=Release 2021" />
+    <MSBuild Projects="..\src\RhinoInside.Revit.Docs.sln" Targets="Restore;Build" Properties="Configuration=Release 2022" />
+  </Target>
+</Project>

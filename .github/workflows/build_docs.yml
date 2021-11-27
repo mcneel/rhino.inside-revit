@@ -8,10 +8,16 @@ jobs:
       - uses: actions/checkout@v2
       - uses: microsoft/setup-msbuild@v1
 
-      - name: install sandcastle
-        uses: crazy-max/ghaction-chocolatey@v1
-        with:
-          args: --yes install sandcastle
+      - name: prep sandcastle
+        run: |
+          nuget install EWSoftware.SHFB -o packages
+          nuget install EWSoftware.SHFB.NETFramework -o packages
 
       - name: build documentation
         run: msbuild script\cibuild_docs.msbuild -v:m
+      
+      - name: upload docs
+        uses: actions/upload-artifact@v2
+        with:
+          name: all-docs
+          path: src/RhinoInside.Revit.Docs/help
