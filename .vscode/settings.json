@@ -1,6 +1,8 @@
 {
     "python.linting.pylintEnabled": true,
-    "python.linting.pylintArgs": ["--max-line-length=80"],
+    "python.linting.pylintArgs": [
+        "--max-line-length=80"
+    ],
     "python.linting.pylintUseMinimalCheckers": false,
     "python.linting.pycodestyleEnabled": false,
     "python.linting.flake8Enabled": false,
@@ -12,4 +14,17 @@
     "python.formatting.blackArgs": [
         "--line-length=80"
     ],
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/bin": true,
+        "**/obj": true,
+        "**/RhinoInside.Revit.Docs/help": true,
+        "**/*.csproj.user": true,
+        "**/*.vcxproj.user": true,
+    }
 }
