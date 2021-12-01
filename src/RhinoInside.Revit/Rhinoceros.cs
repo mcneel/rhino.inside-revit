@@ -389,7 +389,7 @@ namespace RhinoInside.Revit
     {
       if (doc is object)
       {
-        var maxDistanceTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, doc.ModelUnitSystem);
+        var maxDistanceTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, doc.ModelUnitSystem);
         if (doc.ModelAbsoluteTolerance > maxDistanceTolerance)
           doc.ModelAbsoluteTolerance = maxDistanceTolerance;
 
@@ -478,7 +478,7 @@ namespace RhinoInside.Revit
                 case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
                   doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
-                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, RevitModelUnitSystem);
+                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, RevitModelUnitSystem);
                   doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
                   AdjustViewConstructionPlanes(doc);
                   break;
@@ -486,7 +486,7 @@ namespace RhinoInside.Revit
                 case Autodesk.Revit.UI.TaskDialogResult.CommandLink3:
                   doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
-                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, GH.Guest.ModelUnitSystem);
+                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, GH.Guest.ModelUnitSystem);
                   doc.AdjustModelUnitSystem(GH.Guest.ModelUnitSystem, true);
                   AdjustViewConstructionPlanes(doc);
                   break;
@@ -519,7 +519,7 @@ namespace RhinoInside.Revit
           rhinoDoc.ModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
           rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
           rhinoDoc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
-          rhinoDoc.ModelAbsoluteTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, rhinoDoc.ModelUnitSystem);
+          rhinoDoc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, rhinoDoc.ModelUnitSystem);
           //switch (rhinoDoc.ModelUnitSystem)
           //{
           //  case UnitSystem.None: break;

@@ -10,10 +10,10 @@ namespace RhinoInside.Revit.Convert.Geometry
   /// <summary>
   /// This class is used to convert geometry to be stored in a <see cref="ARDB.DirectShape"/>.
   /// </summary>
-  public static class ShapeEncoder
+  static class ShapeEncoder
   {
     public static ARDB.GeometryObject[] ToShape(this GeometryBase geometry) => ToShape(geometry, UnitConverter.ToHostUnits);
-    public static ARDB.GeometryObject[] ToShape(this GeometryBase geometry, double factor)
+    internal static ARDB.GeometryObject[] ToShape(this GeometryBase geometry, double factor)
     {
       switch (geometry)
       {

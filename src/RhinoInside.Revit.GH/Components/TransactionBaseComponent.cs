@@ -31,9 +31,9 @@ namespace RhinoInside.Revit.GH.Components
         case Rhino.UnitSystem.None:
         case Rhino.UnitSystem.Inches:
         case Rhino.UnitSystem.Feet:
-          return UnitConverter.ConvertFromHostUnits
+          return UnitConverter.ConvertFromInternalUnits
           (
-            Math.Round(UnitConverter.ConvertToHostUnits(meters, Rhino.UnitSystem.Meters)),
+            Math.Round(UnitConverter.ConvertToInternalUnits(meters, Rhino.UnitSystem.Meters)),
             modelUnitSystem
           );
         default:

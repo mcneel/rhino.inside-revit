@@ -167,12 +167,12 @@ namespace RhinoInside.Revit.GH.Types
             var dictionary = PreviewConverter.ZipByMaterial(materialElements, meshes, outMesh);
             if (outMesh.Faces.Count > 0)
             {
-              materials = dictionary.Keys.Select(x => x.ToDisplayMaterial(null)).Concat(Enumerable.Repeat(new Rhino.Display.DisplayMaterial(), 1)).ToArray();
+              materials = dictionary.Keys.Select(DisplayMaterialConverter.ToDisplayMaterial).Concat(Enumerable.Repeat(new Rhino.Display.DisplayMaterial(), 1)).ToArray();
               meshes = dictionary.Values.Concat(Enumerable.Repeat(outMesh, 1)).ToArray();
             }
             else
             {
-              materials = dictionary.Keys.Select(x => x.ToDisplayMaterial(null)).ToArray();
+              materials = dictionary.Keys.Select(DisplayMaterialConverter.ToDisplayMaterial).ToArray();
               meshes = dictionary.Values.ToArray();
             }
           }

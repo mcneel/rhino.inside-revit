@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.Convert.Display
 {
   using Geometry;
 
-  public static class PreviewConverter
+  static class PreviewConverter
   {
     static bool SkipGeometryObject(ARDB.GeometryObject geometryObject, ARDB.Document doc)
     {
@@ -18,11 +18,11 @@ namespace RhinoInside.Revit.Convert.Display
     }
 
     #region GetPreviewMaterials
-    internal static Dictionary<ARDB.Material, Rhino.Geometry.Mesh> ZipByMaterial
+    internal static Dictionary<ARDB.Material, Mesh> ZipByMaterial
     (
       ARDB.Material[] materialElements,
-      Rhino.Geometry.Mesh[] meshes,
-      Rhino.Geometry.Mesh outMesh = default
+      Mesh[] meshes,
+      Mesh outMesh = default
     )
     {
       if (materialElements is null || meshes is null) return null;
@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.Convert.Display
         else
         {
           if (!dictionary.TryGetValue(materialElements[index], out var mesh0))
-            dictionary.Add(materialElements[index], mesh0 = new Rhino.Geometry.Mesh());
+            dictionary.Add(materialElements[index], mesh0 = new Mesh());
 
           mesh0.Append(meshes[index]);
         }
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.Convert.Display
               continue;
 
             var f = Geometry.Raw.RawDecoder.ToRhino(mesh);
-            UnitConverter.Scale(f, UnitConverter.ToRhinoUnits);
+            f.Scale(UnitConverter.ToRhinoUnits);
 
             yield return f ?? new Rhino.Geometry.Mesh();
             break;
@@ -174,7 +174,7 @@ namespace RhinoInside.Revit.Convert.Display
 
             var faceMesh = face.Triangulate(meshingParameters.LevelOfDetail());
             var f = Geometry.Raw.RawDecoder.ToRhino(faceMesh);
-            UnitConverter.Scale(f, UnitConverter.ToRhinoUnits);
+            f.Scale(UnitConverter.ToRhinoUnits);
 
             yield return f ?? new Rhino.Geometry.Mesh();
             break;
@@ -192,7 +192,7 @@ namespace RhinoInside.Revit.Convert.Display
             {
               var faceMesh = face.Triangulate(meshingParameters.LevelOfDetail());
               var f = Geometry.Raw.RawDecoder.ToRhino(faceMesh);
-              UnitConverter.Scale(f, UnitConverter.ToRhinoUnits);
+              f.Scale(UnitConverter.ToRhinoUnits);
 
               yield return f ?? new Rhino.Geometry.Mesh();
             }

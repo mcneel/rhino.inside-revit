@@ -219,7 +219,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
                   value = UnitConverter.Convert
                   (
                     value,
-                    UnitConverter.ExternalUnitSystem,
+                    UnitConverter.Model.UnitSystem,
                     UnitConverter.InternalUnitSystem,
                     dimensionality
                   );
@@ -234,7 +234,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
                     UnitConverter.Convert
                     (
                       Revit.VertexTolerance,
-                      UnitConverter.ExternalUnitSystem,
+                      UnitConverter.Model.UnitSystem,
                       UnitConverter.InternalUnitSystem,
                       Math.Abs(dimensionality)
                     );

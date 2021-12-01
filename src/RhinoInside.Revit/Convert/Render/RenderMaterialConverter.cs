@@ -19,8 +19,18 @@ namespace RhinoInside.Revit.Convert.Render
   using Convert.System.Drawing;
   using External.DB.Extensions;
 
+  /// <summary>
+  /// Represents a converter for converting <see cref="RenderMaterial"/> values
+  /// back and forth Revit and Rhino.
+  /// </summary>
   public static class RenderMaterialConverter
   {
+    /// <summary>
+    /// Converts the specified Material to an equivalent Rhino RenderMaterial.
+    /// </summary>
+    /// <param name="material">The material to convert.</param>
+    /// <param name="rhinoDoc">The document to associate the resulting material with.</param>
+    /// <returns>A Rhino RenderMaterial that is equivalent to the provided value.</returns>
     public static RenderMaterial ToRenderMaterial(this ARDB.Material material, RhinoDoc rhinoDoc)
     {
       var renderMaterial = RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, rhinoDoc);
@@ -77,7 +87,7 @@ namespace RhinoInside.Revit.Convert.Render
 
     class SimulatedProceduralTexture : SimulatedTexture
     {
-      public SimulatedProceduralTexture(Guid contentType) { ContentType = contentType; }
+      public SimulatedProceduralTexture(Guid contentType) : base(RhinoDoc.ActiveDoc) { ContentType = contentType; }
       public readonly Guid ContentType;
       public readonly Dictionary<string, object> Fields = new Dictionary<string, object>();
     }
@@ -178,7 +188,7 @@ namespace RhinoInside.Revit.Convert.Render
 
     static SimulatedTexture ToSimulatedTexture(string path)
     {
-      return new SimulatedTexture()
+      return new SimulatedTexture(RhinoDoc.ActiveDoc)
       {
         Filename = path,
         ProjectionMode = SimulatedTexture.ProjectionModes.WcsBox,
@@ -1198,6 +1208,5 @@ namespace RhinoInside.Revit.Convert.Render
         }
       }
     }
-
   }
 }

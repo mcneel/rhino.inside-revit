@@ -11,7 +11,11 @@ namespace RhinoInside.Revit.Convert.DocObjects
   using External.DB.Extensions;
   using External.UI.Extensions;
 
-  public static class ViewportInfoConverter
+  /// <summary>
+  /// Represents a converter for converting <see cref="ViewportInfo"/> values
+  /// back and forth Revit and Rhino.
+  /// </summary>
+  static class ViewportInfoConverter
   {
     class CameraInfo : ARDB.IExportContext
     {
