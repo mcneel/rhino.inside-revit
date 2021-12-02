@@ -251,7 +251,13 @@ namespace RhinoInside.Revit
         }
       }
 
-      public static void SendEmail(UIX.UIHostApplication app, string subject, bool includeAddinsList, IEnumerable<string> attachments)
+      public static void SendEmail
+      (
+        UIX.UIHostApplication app,
+        string subject,
+        bool includeAddinsList,
+        IEnumerable<string> attachments
+      )
       {
         var services = app.Services;
         var now = DateTime.Now.ToString("yyyyMMddTHHmmssZ");
@@ -273,10 +279,16 @@ namespace RhinoInside.Revit
 
         var revitVersion = $"{services.SubVersionNumber} ({services.VersionBuild})";
 
-        SendEmail(subject, reportFilePath, revitVersion, includeAddinsList, attachments);
+        SendEmail(subject, reportFilePath, revitVersion, attachments);
       }
 
-      static void SendEmail(string subject, string ReportFilePath, string revitVersion, bool includeAddinsList, IEnumerable<string> attachments)
+      static void SendEmail
+      (
+        string subject,
+        string ReportFilePath,
+        string revitVersion,
+        IEnumerable<string> attachments
+      )
       {
         foreach (var file in attachments)
         {
@@ -358,14 +370,16 @@ namespace RhinoInside.Revit
         Directory.CreateDirectory(SafeModeFolder);
 
         Settings.AddIns.GetInstalledAddins(Core.Host.Services.VersionNumber, out var AddinFiles);
-        if (AddinFiles.Where(x => Path.GetFileName(x) == "RhinoInside.Revit.addin").FirstOrDefault() is string RhinoInsideRevitAddinFile)
+        if (AddinFiles.FirstOrDefault(x => Path.GetFileName(x) == "RhinoInside.Revit.addin") is string RhinoInsideRevitAddinFile)
         {
           var SafeModeAddinFile = Path.Combine(SafeModeFolder, Path.GetFileName(RhinoInsideRevitAddinFile));
           File.Copy(RhinoInsideRevitAddinFile, SafeModeAddinFile, true);
 
           if (Settings.AddIns.LoadFrom(SafeModeAddinFile, out var SafeModeAddin))
           {
-            SafeModeAddin.First().Assembly = Assembly.GetExecutingAssembly().Location;
+            var addin = SafeModeAddin.First();
+            var assembly = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(addin.Assembly));
+            SafeModeAddin.First().Assembly = assembly;
             Settings.AddIns.SaveAs(SafeModeAddin, SafeModeAddinFile);
           }
 
@@ -375,22 +389,23 @@ namespace RhinoInside.Revit
             journal.WriteLine("' ");
             journal.WriteLine("Dim Jrn");
             journal.WriteLine("Set Jrn = CrsJournalScript");
-            journal.WriteLine(" Jrn.RibbonEvent \"TabActivated:Add-Ins\"");
-            journal.WriteLine(" Jrn.RibbonEvent \"Execute external command:CustomCtrl_%CustomCtrl_%Add-Ins%Rhinoceros%CommandRhinoInside:RhinoInside.Revit.UI.CommandRhinoInside\"");
+            journal.WriteLine($" Jrn.RibbonEvent \"TabActivated:{Core.Product}\"");
+            journal.WriteLine($" Jrn.RibbonEvent \"Execute external command:CustomCtrl_%CustomCtrl_%{Core.Product}%More%CommandStart:RhinoInside.Revit.AddIn.Commands.CommandStart\"");
+            journal.WriteLine($" Jrn.RibbonEvent \"Execute external command:CustomCtrl_%CustomCtrl_%{Core.Product}%Rhinoceros%CommandRhino:RhinoInside.Revit.AddIn.Commands.CommandRhino\"");
           }
-
+#if DEBUG
           var batchFile = Path.Combine(SafeModeFolder, "RhinoInside.Revit-SafeMode.bat");
           using (var batch = File.CreateText(batchFile))
           {
             batch.WriteLine($"\"{Process.GetCurrentProcess().MainModule.FileName}\" \"{Path.GetFileName(journalFile)}\"");
           }
-
+#endif
           var si = new ProcessStartInfo()
           {
             FileName = Process.GetCurrentProcess().MainModule.FileName,
             Arguments = $"\"{journalFile}\""
           };
-          using (var RevitApp = Process.Start(si)) { RevitApp.WaitForExit(); }
+          using (var RevitApp = Process.Start(si)) RevitApp.WaitForExit();
         }
       }
 
