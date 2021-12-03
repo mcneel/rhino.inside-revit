@@ -140,27 +140,27 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     /// <summary>
-    /// Converts <paramref name="length"/> from <paramref name="source"/> units to <paramref name="target"/> units.
+    /// Converts <paramref name="value"/> from <paramref name="source"/> units to <paramref name="target"/> units.
     /// </summary>
-    /// <param name="length"></param>
+    /// <param name="value"></param>
     /// <param name="source"></param>
     /// <param name="target"></param>
     /// <param name="dimensionality"> 0 = factor, 1 = length, 2 = area, 3 = volumen </param>
-    /// <returns>Returns <paramref name="length"/> expressed in <paramref name="target"/> unit system.</returns>
+    /// <returns>Returns <paramref name="value"/> expressed in <paramref name="target"/> unit system.</returns>
     /// <remarks>
     /// This method may return <see cref="double.NaN"/> if the conversion is not defined.
     /// </remarks>
-    internal static double Convert(double length, UnitSystem source, UnitSystem target, int dimensionality = 1)
+    internal static double Convert(double value, UnitSystem source, UnitSystem target, int dimensionality = 1)
     {
       // Fast path.
       switch (dimensionality)
       {
-        case -1: return Convert(length, InternalUnits(target), InternalUnits(source));
-        case 0: return length;
-        case +1: return Convert(length, InternalUnits(source), InternalUnits(target));
+        case -1: return Convert(value, InternalUnits(target), InternalUnits(source));
+        case 0: return value;
+        case +1: return Convert(value, InternalUnits(source), InternalUnits(target));
       }
 
-      return Convert(length, Math.Pow(InternalUnits(source), dimensionality), Math.Pow(InternalUnits(target), dimensionality));
+      return Convert(value, Math.Pow(InternalUnits(source), dimensionality), Math.Pow(InternalUnits(target), dimensionality));
     }
 
     static double Convert(double value, double den, double num)

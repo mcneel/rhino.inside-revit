@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       // RiR is not loaded yet. This allows keyboard shortcuts to be assigned.
       if (!Properties.AddInOptions.Session.CompactTab)
       {
-        Core.Host.ActivateRibbonTab(Core.Product);
+        Core.Host.ActivateRibbonTab(TabName);
 
         if (CreateRhinocerosPanel())
           CreateGrasshopperPanel();
@@ -84,7 +84,7 @@ namespace RhinoInside.Revit.AddIn.Commands
           }
           else
           {
-            Core.Host.ActivateRibbonTab(Core.Product);
+            Core.Host.ActivateRibbonTab(TabName);
           }
 
           return Result.Succeeded;
@@ -114,7 +114,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
           if (Properties.AddInOptions.Session.CompactTab)
           {
-            Core.Host.CreateRibbonTab(Core.Product);
+            Core.Host.CreateRibbonTab(TabName);
 
             // Register UI on Revit
             if (CreateRhinocerosPanel())
@@ -172,7 +172,11 @@ namespace RhinoInside.Revit.AddIn.Commands
               )
                 External.ActivationGate.Exit += ShowShortcutHelp;
             }
-            catch (Exception e) { Core.ReportException(e, uiCtrlApp); }
+            catch (Exception e)
+            {
+              ErrorReport.TraceException(e, uiCtrlApp);
+              ErrorReport.ReportException(e, uiCtrlApp);
+            }
           }
         }
 
@@ -183,7 +187,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       if (Properties.AddInOptions.Session.CompactTab)
       {
-        ribbonPanel = uiCtrlApp.CreateRibbonPanel(Core.Product);
+        ribbonPanel = uiCtrlApp.CreateRibbonPanel(TabName);
 
         // Add launch RhinoInside push button,
         CreateStartButton("Add-Ins");
@@ -193,11 +197,11 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
       else
       {
-        uiCtrlApp.CreateRibbonTab(Core.Product);
-        ribbonPanel = uiCtrlApp.CreateRibbonPanel(Core.Product, "More");
+        uiCtrlApp.CreateRibbonTab(TabName);
+        ribbonPanel = uiCtrlApp.CreateRibbonPanel(TabName, "More");
 
         // Add launch RhinoInside push button.
-        CreateStartButton(Core.Product);
+        CreateStartButton(TabName);
       }
 
       // add slideout and the rest of the buttons
@@ -221,7 +225,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       if (!AssemblyResolver.References.ContainsKey("RhinoCommon"))
         return false;
 
-      rhinoPanel = Core.Host.CreateRibbonPanel(Core.Product, Core.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
+      rhinoPanel = Core.Host.CreateRibbonPanel(TabName, Core.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
 
       CommandRhino.CreateUI(rhinoPanel);
       CommandRhinoOpenViewport.CreateUI(rhinoPanel);
@@ -240,7 +244,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       if (!AssemblyResolver.References.ContainsKey("Grasshopper"))
         return;
 
-      grasshopperPanel = Core.Host.CreateRibbonPanel(Core.Product, "Grasshopper");
+      grasshopperPanel = Core.Host.CreateRibbonPanel(TabName, "Grasshopper");
       CommandGrasshopper.CreateUI(grasshopperPanel);
       CommandGrasshopperPreview.CreateUI(grasshopperPanel);
       CommandGrasshopperSolver.CreateUI(grasshopperPanel);
@@ -304,13 +308,13 @@ namespace RhinoInside.Revit.AddIn.Commands
       // collapse panel if in compact mode
       if (Properties.AddInOptions.Current.CompactRibbon)
       {
-        rhinoPanel?.Collapse(Core.Product);
-        grasshopperPanel?.Collapse(Core.Product);
+        rhinoPanel?.Collapse(TabName);
+        grasshopperPanel?.Collapse(TabName);
       }
       else
       {
-        rhinoPanel?.Expand(Core.Product);
-        grasshopperPanel?.Expand(Core.Product);
+        rhinoPanel?.Expand(TabName);
+        grasshopperPanel?.Expand(TabName);
       }
     }
 

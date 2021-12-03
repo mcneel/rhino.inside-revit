@@ -22,8 +22,6 @@ namespace RhinoInside.Revit.AddIn.Commands
       return null;
     }
 
-    public readonly string AddinTabName = Core.Product;
-
     public bool HasPanel(string tabName, string panelName)
     {
       if (GetAdwndRibbonTab(tabName) is Autodesk.Windows.RibbonTab tab)
@@ -33,11 +31,11 @@ namespace RhinoInside.Revit.AddIn.Commands
       return false;
     }
 
-    public bool HasAddinPanel(string panelName) => HasPanel(AddinTabName, panelName);
+    public bool HasAddinPanel(string panelName) => HasPanel(Command.TabName, panelName);
 
     public void CreateTab(string tabName) => _app.CreateRibbonTab(tabName);
 
-    public void CreateAddinTab() => CreateTab(AddinTabName);
+    public void CreateAddinTab() => CreateTab(Command.TabName);
 
     public RibbonPanel CreatePanel(string tabName, string panelName) =>
       _app.CreateRibbonPanel(tabName, panelName);
@@ -68,7 +66,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       return false;
     }
 
-    public RibbonPanel CreateAddinPanel(string panelName) => CreatePanel(AddinTabName, panelName);
-    public bool RemoveAddinPanel(string panelName) => RemovePanel(AddinTabName, panelName);
+    public RibbonPanel CreateAddinPanel(string panelName) => CreatePanel(Command.TabName, panelName);
+    public bool RemoveAddinPanel(string panelName) => RemovePanel(Command.TabName, panelName);
   }
 }

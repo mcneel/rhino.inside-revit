@@ -132,11 +132,12 @@ namespace RhinoInside.Revit.AddIn.Commands
         else if (curState.Contains(pkg) && !_lastState.Contains(pkg))
         {
           if (LinkedScripts.HasUI(pkg, ribbon))
-            TaskDialog.Show(
-              Core.Product,
+            TaskDialog.Show
+            (
+              title: $"{Core.Product}.{Core.Platform}",
               $"Package \"{pkg.Name}\" has been previously loaded in to the Revit UI." +
               "Restart Revit for changes to take effect."
-              );
+            );
           else
             LinkedScripts.CreateUI(pkg, ribbon);
         }

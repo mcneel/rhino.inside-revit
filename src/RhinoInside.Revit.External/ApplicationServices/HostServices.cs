@@ -27,6 +27,7 @@ namespace RhinoInside.Revit.External.ApplicationServices
 
     #region Journaling
     public abstract string RecordingJournalFilename { get; }
+    public abstract void WriteJournalComment(string comment, bool timeStamp);
     #endregion
 
     #region Folders
@@ -87,6 +88,7 @@ namespace RhinoInside.Revit.External.ApplicationServices
 
     #region Journaling
     public override string RecordingJournalFilename => _app.RecordingJournalFilename;
+    public override void WriteJournalComment(string comment, bool timeStamp) => _app.WriteJournalComment(comment, timeStamp);
     #endregion
 
     #region Folders
@@ -138,6 +140,7 @@ namespace RhinoInside.Revit.External.ApplicationServices
 
     #region Journaling
     public override string RecordingJournalFilename => _app.RecordingJournalFilename;
+    public override void WriteJournalComment(string comment, bool timeStamp) => _app.WriteJournalComment(comment, timeStamp);
     #endregion
 
     #region Folders

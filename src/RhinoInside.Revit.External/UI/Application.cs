@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Microsoft.Win32.SafeHandles;
-using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit.External.UI
 {
@@ -28,10 +26,6 @@ namespace RhinoInside.Revit.External.UI
 
         Instances.TryGetValue(activeAddInId, out var addIn);
         return addIn;
-
-        //return uiControlledApplication.LoadedApplications.
-        //  OfType<ExternalApplication>().
-        //  FirstOrDefault(x => x.GetGUID() == activeAddInId);
       }
     }
     internal static WindowHandle HostMainWindow { get; private set; } = WindowHandle.Zero;
@@ -46,9 +40,7 @@ namespace RhinoInside.Revit.External.UI
       if (Instances.ContainsKey(addInId))
         return Result.Failed;
 
-      Instances.Add(addInId, this);
-
-      if (Instances.Count == 1)
+      if (Instances.Count == 0)
       {
         uiControlledApplication = app;
 #if REVIT_2019
@@ -57,6 +49,8 @@ namespace RhinoInside.Revit.External.UI
         HostMainWindow = new WindowHandle(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle);
 #endif
       }
+
+      Instances.Add(addInId, this);
 
       var result = Result.Failed;
       try
@@ -137,7 +131,7 @@ namespace RhinoInside.Revit.External.UI
     WindowHandle MainWindow { get; }
 
     bool DoEvents();
- }
+  }
 
   internal struct HostedApplication : IHostedApplication
   {

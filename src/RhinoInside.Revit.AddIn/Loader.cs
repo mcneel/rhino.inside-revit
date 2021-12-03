@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Autodesk.Revit.UI;
 using static RhinoInside.Revit.Diagnostics;
 using UIX = RhinoInside.Revit.External.UI;
@@ -56,13 +53,8 @@ namespace RhinoInside.Revit.AddIn
       if (fatal)
         Core.CurrentStatus = Core.Status.Crashed;
 
-      var RhinoInside_dmp = Path.Combine
-      (
-        Path.GetDirectoryName(app.Application.RecordingJournalFilename),
-        Path.GetFileNameWithoutExtension(app.Application.RecordingJournalFilename) + ".RhinoInside.Revit.dmp"
-      );
-
-      return MiniDumper.Write(RhinoInside_dmp);
+      ErrorReport.DumpException(e, app);
+      return true;
     }
 
     public override void ReportException(Exception e, UIApplication app, object sender)
@@ -72,16 +64,7 @@ namespace RhinoInside.Revit.AddIn
       //
       // Would you like to save a recovery file? "{TileName}(Recovery)".rvt
 
-      var RhinoInside_dmp = Path.Combine
-      (
-        Path.GetDirectoryName(app.Application.RecordingJournalFilename),
-        Path.GetFileNameWithoutExtension(app.Application.RecordingJournalFilename) + ".RhinoInside.Revit.dmp"
-      );
-
-      var attachments = e.Data["Attachments"] as IEnumerable<string> ?? Enumerable.Empty<string>();
-      e.Data["Attachments"] = attachments.Append(RhinoInside_dmp).ToArray();
-
-      Core.ReportException(e, app);
+      ErrorReport.ReportException(e, app);
     }
 
     static void StartupOnApplicationInitialized()
