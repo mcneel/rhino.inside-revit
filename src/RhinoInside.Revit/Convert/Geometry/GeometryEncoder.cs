@@ -10,12 +10,8 @@ namespace RhinoInside.Revit.Convert.Geometry
   using External.DB.Extensions;
 
   /// <summary>
-  /// Methods in this class do a full geometry conversion.
+  /// Converts a Rhino geometry type to an equivalent Revit geometry type.
   /// </summary>
-  /// <remarks>
-  /// <para>It converts geometry from Active Rhino model units to Revit internal units.</para>
-  /// <para>For direct conversion methods see <see cref="Raw.RawEncoder"/> class.</para>
-  /// </remarks>
   public static class GeometryEncoder
   {
     #region Context
@@ -76,107 +72,157 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
     #endregion
 
-    #region Geometry values
+    #region Points and Vectors
+    /// <summary>
+    /// Converts the specified Point2f to an equivalent UV point.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit UV that is equivalent to the provided value.</returns>
     public static ARDB::UV ToUV(this Point2f value)
     {
       double factor = UnitConverter.ToHostUnits;
       return new ARDB::UV(value.X * factor, value.Y * factor);
     }
-    public static ARDB::UV ToUV(this Point2f value, double factor)
+    internal static ARDB::UV ToUV(this Point2f value, double factor)
     {
       return factor == 1.0 ?
         new ARDB::UV(value.X, value.Y) :
         new ARDB::UV(value.X * factor, value.Y * factor);
     }
 
+    /// <summary>
+    /// Converts the specified Point2d to an equivalent UV point.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit UV that is equivalent to the provided value.</returns>
     public static ARDB::UV ToUV(this Point2d value)
     {
       double factor = UnitConverter.ToHostUnits;
       return new ARDB::UV(value.X * factor, value.Y * factor);
     }
-    public static ARDB::UV ToUV(this Point2d value, double factor)
+    internal static ARDB::UV ToUV(this Point2d value, double factor)
     {
       return factor == 1.0 ?
         new ARDB::UV(value.X, value.Y) :
         new ARDB::UV(value.X * factor, value.Y * factor);
     }
 
+    /// <summary>
+    /// Converts the specified Vector2f to an equivalent UV vector.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit UV that is equivalent to the provided value.</returns>
     public static ARDB::UV ToUV(this Vector2f value)
     {
       return new ARDB::UV(value.X, value.Y);
     }
-    public static ARDB::UV ToUV(this Vector2f value, double factor)
+    internal static ARDB::UV ToUV(this Vector2f value, double factor)
     {
       return factor == 1.0 ?
         new ARDB::UV(value.X, value.Y) :
         new ARDB::UV(value.X * factor, value.Y * factor);
     }
 
+    /// <summary>
+    /// Converts the specified Vector2d to an equivalent UV vector.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit UV that is equivalent to the provided value.</returns>
     public static ARDB::UV ToUV(this Vector2d value)
     {
       return new ARDB::UV(value.X, value.Y);
     }
-    public static ARDB::UV ToUV(this Vector2d value, double factor)
+    internal static ARDB::UV ToUV(this Vector2d value, double factor)
     {
       return factor == 1.0 ?
         new ARDB::UV(value.X, value.Y) :
         new ARDB::UV(value.X * factor, value.Y * factor);
     }
 
+    /// <summary>
+    /// Converts the specified Point3f to an equivalent XYZ point.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit XYZ that is equivalent to the provided value.</returns>
     public static ARDB::XYZ ToXYZ(this Point3f value)
     {
       double factor = UnitConverter.ToHostUnits;
       return new ARDB::XYZ(value.X * factor, value.Y * factor, value.Z * factor);
     }
-    public static ARDB::XYZ ToXYZ(this Point3f value, double factor)
+    internal static ARDB::XYZ ToXYZ(this Point3f value, double factor)
     {
       return factor == 1.0 ?
         new ARDB::XYZ(value.X, value.Y, value.Z) :
         new ARDB::XYZ(value.X * factor, value.Y * factor, value.Z * factor);
     }
 
+    /// <summary>
+    /// Converts the specified Point3d to an equivalent XYZ point.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit XYZ that is equivalent to the provided value.</returns>
     public static ARDB::XYZ ToXYZ(this Point3d value)
     {
       double factor = UnitConverter.ToHostUnits;
       return new ARDB::XYZ(value.X * factor, value.Y * factor, value.Z * factor);
     }
-    public static ARDB::XYZ ToXYZ(this Point3d value, double factor)
+    internal static ARDB::XYZ ToXYZ(this Point3d value, double factor)
     {
       return factor == 1.0 ?
         new ARDB::XYZ(value.X, value.Y, value.Z) :
         new ARDB::XYZ(value.X * factor, value.Y * factor, value.Z * factor);
     }
 
+    /// <summary>
+    /// Converts the specified Vector3f to an equivalent XYZ vector.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit XYZ that is equivalent to the provided value.</returns>
     public static ARDB::XYZ ToXYZ(this Vector3f value)
     {
       return new ARDB::XYZ(value.X, value.Y, value.Z);
     }
-    public static ARDB::XYZ ToXYZ(this Vector3f value, double factor)
+    internal static ARDB::XYZ ToXYZ(this Vector3f value, double factor)
     {
       return factor == 1.0 ?
         new ARDB::XYZ(value.X, value.Y, value.Z) :
         new ARDB::XYZ(value.X * factor, value.Y * factor, value.Z * factor);
     }
 
+    /// <summary>
+    /// Converts the specified Vector3d to an equivalent XYZ vector.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit XYZ that is equivalent to the provided value.</returns>
     public static ARDB::XYZ ToXYZ(this Vector3d value)
     {
       return new ARDB::XYZ(value.X, value.Y, value.Z);
     }
-    public static ARDB::XYZ ToXYZ(this Vector3d value, double factor)
+    internal static ARDB::XYZ ToXYZ(this Vector3d value, double factor)
     {
       return factor == 1.0 ?
         new ARDB::XYZ(value.X, value.Y, value.Z) :
         new ARDB::XYZ(value.X * factor, value.Y * factor, value.Z * factor);
     }
 
+    /// <summary>
+    /// Converts the specified Plane to an equivalent Revit Plane.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Plane that is equivalent to the provided value.</returns>
     public static ARDB.Plane ToPlane(this Plane value) => ToPlane(value, UnitConverter.ToHostUnits);
-    public static ARDB.Plane ToPlane(this Plane value, double factor)
+    internal static ARDB.Plane ToPlane(this Plane value, double factor)
     {
       return ARDB.Plane.CreateByOriginAndBasis(value.Origin.ToXYZ(factor), value.XAxis.ToXYZ(), value.YAxis.ToXYZ());
     }
 
+    /// <summary>
+    /// Converts the specified Transform to an equivalent Revit Transform.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Transfrom that is equivalent to the provided value.</returns>
     public static ARDB.Transform ToTransform(this Transform value) => ToTransform(value, UnitConverter.ToHostUnits);
-    public static ARDB.Transform ToTransform(this Transform value, double factor)
+    internal static ARDB.Transform ToTransform(this Transform value, double factor)
     {
       Debug.Assert(value.IsAffine);
 
@@ -190,8 +236,13 @@ namespace RhinoInside.Revit.Convert.Geometry
       return result;
     }
 
+    /// <summary>
+    /// Converts the specified BoundingBox to an equivalent Revit BoundingBoxXYZ.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit BoundingBoxXYZ that is equivalent to the provided value.</returns>
     public static ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(this BoundingBox value) => ToBoundingBoxXYZ(value, UnitConverter.ToHostUnits);
-    public static ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(this BoundingBox value, double factor)
+    internal static ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(this BoundingBox value, double factor)
     {
       return new ARDB.BoundingBoxXYZ
       {
@@ -201,8 +252,13 @@ namespace RhinoInside.Revit.Convert.Geometry
       };
     }
 
+    /// <summary>
+    /// Converts the specified Box to an equivalent Revit BoundingBoxXYZ.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit BoundingBoxXYZ that is equivalent to the provided value.</returns>
     public static ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(this Box value) => ToBoundingBoxXYZ(value, UnitConverter.ToHostUnits);
-    public static ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(this Box value, double factor)
+    internal static ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(this Box value, double factor)
     {
       return new ARDB.BoundingBoxXYZ
       {
@@ -213,22 +269,37 @@ namespace RhinoInside.Revit.Convert.Geometry
       };
     }
 
+    /// <summary>
+    /// Converts the specified BoundingBox to an equivalent Revit Outline.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Outline that is equivalent to the provided value.</returns>
     public static ARDB.Outline ToOutline(this BoundingBox value) => ToOutline(value, UnitConverter.ToHostUnits);
-    public static ARDB.Outline ToOutline(this BoundingBox value, double factor)
+    internal static ARDB.Outline ToOutline(this BoundingBox value, double factor)
     {
       return new ARDB.Outline(value.Min.ToXYZ(factor), value.Max.ToXYZ(factor));
     }
     #endregion
 
-    #region Curve values
+    #region Curves
+    /// <summary>
+    /// Converts the specified Line to an equivalent Revit Line.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Line that is equivalent to the provided value.</returns>
     public static ARDB.Line ToLine(this Line value) => value.ToLine(UnitConverter.ToHostUnits);
-    public static ARDB.Line ToLine(this Line value, double factor)
+    internal static ARDB.Line ToLine(this Line value, double factor)
     {
       return ARDB.Line.CreateBound(value.From.ToXYZ(factor), value.To.ToXYZ(factor));
     }
 
+    /// <summary>
+    /// Converts the specified Polyline to an equivalent Revit Line array.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Line array that is equivalent to the provided value.</returns>
     public static ARDB.Line[] ToLines(this Polyline value) => value.ToLines(UnitConverter.ToHostUnits);
-    public static ARDB.Line[] ToLines(this Polyline value, double factor)
+    internal static ARDB.Line[] ToLines(this Polyline value, double factor)
     {
       value = value.Duplicate();
       value.DeleteShortSegments(Revit.ShortCurveTolerance / factor);
@@ -250,8 +321,13 @@ namespace RhinoInside.Revit.Convert.Geometry
       return list;
     }
 
+    /// <summary>
+    /// Converts the specified Polyline to an equivalent Revit PolyLine.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit PolyLine that is equivalent to the provided value.</returns>
     public static ARDB.PolyLine ToPolyLine(this Polyline value) => value.ToPolyLine(UnitConverter.ToHostUnits);
-    public static ARDB.PolyLine ToPolyLine(this Polyline value, double factor)
+    internal static ARDB.PolyLine ToPolyLine(this Polyline value, double factor)
     {
       int count = value.Count;
       var points = new ARDB.XYZ[count];
@@ -276,8 +352,13 @@ namespace RhinoInside.Revit.Convert.Geometry
       return ARDB.PolyLine.Create(points);
     }
 
+    /// <summary>
+    /// Converts the specified Arc to an equivalent Revit Arc.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Arc that is equivalent to the provided value.</returns>
     public static ARDB.Arc ToArc(this Arc value) => value.ToArc(UnitConverter.ToHostUnits);
-    public static ARDB.Arc ToArc(this Arc value, double factor)
+    internal static ARDB.Arc ToArc(this Arc value, double factor)
     {
       if (value.IsCircle)
         return ARDB.Arc.Create(value.Plane.ToPlane(factor), value.Radius * factor, 0.0, 2.0 * Math.PI);
@@ -285,16 +366,33 @@ namespace RhinoInside.Revit.Convert.Geometry
         return ARDB.Arc.Create(value.StartPoint.ToXYZ(factor), value.EndPoint.ToXYZ(factor), value.MidPoint.ToXYZ(factor));
     }
 
+    /// <summary>
+    /// Converts the specified Circle to an equivalent closed Revit Arc.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Arc that is equivalent to the provided value.</returns>
     public static ARDB.Arc ToArc(this Circle value) => value.ToArc(UnitConverter.ToHostUnits);
-    public static ARDB.Arc ToArc(this Circle value, double factor)
+    internal static ARDB.Arc ToArc(this Circle value, double factor)
     {
       return ARDB.Arc.Create(value.Plane.ToPlane(factor), value.Radius * factor, 0.0, 2.0 * Math.PI);
     }
 
+    /// <summary>
+    /// Converts the specified Ellipse to an equivalent Revit Curve.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
     public static ARDB.Curve ToCurve(this Ellipse value) => value.ToCurve(new Interval(0.0, 2.0 * Math.PI), UnitConverter.ToHostUnits);
-    public static ARDB.Curve ToCurve(this Ellipse value, double factor) => value.ToCurve(new Interval(0.0, 2.0 * Math.PI), factor);
+    internal static ARDB.Curve ToCurve(this Ellipse value, double factor) => value.ToCurve(new Interval(0.0, 2.0 * Math.PI), factor);
+
+    /// <summary>
+    /// Converts the specified Ellipse to an equivalent Revit Curve.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <param name="interval">Interval where the ellipse is defined.</param>
+    /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
     public static ARDB.Curve ToCurve(this Ellipse value, Interval interval) => value.ToCurve(interval, UnitConverter.ToHostUnits);
-    public static ARDB.Curve ToCurve(this Ellipse value, Interval interval, double factor)
+    internal static ARDB.Curve ToCurve(this Ellipse value, Interval interval, double factor)
     {
 #if REVIT_2018
       return ARDB.Ellipse.CreateCurve(value.Plane.Origin.ToXYZ(factor), value.Radius1 * factor, value.Radius2 * factor, value.Plane.XAxis.ToXYZ(), value.Plane.YAxis.ToXYZ(), interval.Min, interval.Max);
@@ -305,14 +403,26 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region GeometryBase
+
+    #region Points
+    /// <summary>
+    /// Converts the specified Point to an equivalent Revit Point.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Point that is equivalent to the provided value.</returns>
     public static ARDB.Point ToPoint(this Point value) => value.ToPoint(UnitConverter.ToHostUnits);
-    public static ARDB.Point ToPoint(this Point value, double factor)
+    internal static ARDB.Point ToPoint(this Point value, double factor)
     {
       return ARDB.Point.Create(value.Location.ToXYZ(factor));
     }
 
+    /// <summary>
+    /// Converts the specified PointCloud to an equivalent Revit Point array.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Point array that is equivalent to the provided value.</returns>
     public static ARDB.Point[] ToPoints(this PointCloud value) => value.ToPoints(UnitConverter.ToHostUnits);
-    public static ARDB.Point[] ToPoints(this PointCloud value, double factor)
+    internal static ARDB.Point[] ToPoints(this PointCloud value, double factor)
     {
       var array = new ARDB.Point[value.Count];
       int index = 0;
@@ -335,12 +445,24 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       return array;
     }
+    #endregion
 
+    #region Curves
+    /// <summary>
+    /// Converts the specified LineCurve to an equivalent Revit Curve.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
     public static ARDB.Curve ToCurve(this LineCurve value) => value.Line.ToLine(UnitConverter.ToHostUnits);
-    public static ARDB.Curve ToCurve(this LineCurve value, double factor) => value.Line.ToLine(factor);
+    internal static ARDB.Curve ToCurve(this LineCurve value, double factor) => value.Line.ToLine(factor);
 
+    /// <summary>
+    /// Converts the specified PolylineCurve to an equivalent Revit Curve.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
     public static ARDB.Curve ToCurve(this PolylineCurve value) => ToCurve(value, UnitConverter.ToHostUnits);
-    public static ARDB.Curve ToCurve(this PolylineCurve value, double factor)
+    internal static ARDB.Curve ToCurve(this PolylineCurve value, double factor)
     {
       if (value.TryGetLine(out var line, Revit.VertexTolerance * factor))
         return line.ToLine(factor);
@@ -348,11 +470,21 @@ namespace RhinoInside.Revit.Convert.Geometry
       throw new ConversionException("Failed to convert non G1 continuous curve.");
     }
 
+    /// <summary>
+    /// Converts the specified ArcCurve to an equivalent Revit Curve.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
     public static ARDB.Curve ToCurve(this ArcCurve value) => value.Arc.ToArc(UnitConverter.ToHostUnits);
-    public static ARDB.Curve ToCurve(this ArcCurve value, double factor) => value.Arc.ToArc(factor);
+    internal static ARDB.Curve ToCurve(this ArcCurve value, double factor) => value.Arc.ToArc(factor);
 
+    /// <summary>
+    /// Converts the specified NurbsCurve to an equivalent Revit Curve.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
     public static ARDB.Curve ToCurve(this NurbsCurve value) => value.ToCurve(UnitConverter.ToHostUnits);
-    public static ARDB.Curve ToCurve(this NurbsCurve value, double factor)
+    internal static ARDB.Curve ToCurve(this NurbsCurve value, double factor)
     {
       if (value.TryGetEllipse(out var ellipse, out var interval, Revit.VertexTolerance * factor))
         return ellipse.ToCurve(interval, factor);
@@ -383,8 +515,13 @@ namespace RhinoInside.Revit.Convert.Geometry
       return NurbsSplineEncoder.ToNurbsSpline(value, factor);
     }
 
+    /// <summary>
+    /// Converts the specified PolyCurve to an equivalent Revit Curve.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
     public static ARDB.Curve ToCurve(this PolyCurve value) => ToCurve(value, UnitConverter.ToHostUnits);
-    public static ARDB.Curve ToCurve(this PolyCurve value, double factor)
+    internal static ARDB.Curve ToCurve(this PolyCurve value, double factor)
     {
       var curve = value.Simplify
       (
@@ -401,8 +538,13 @@ namespace RhinoInside.Revit.Convert.Geometry
         return curve.ToCurve(factor);
     }
 
+    /// <summary>
+    /// Converts the specified Curve to an equivalent Revit Curve.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
     public static ARDB.Curve ToCurve(this Curve value) => value.ToCurve(UnitConverter.ToHostUnits);
-    public static ARDB.Curve ToCurve(this Curve value, double factor)
+    internal static ARDB.Curve ToCurve(this Curve value, double factor)
     {
       switch (value)
       {
@@ -426,6 +568,11 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
+    /// <summary>
+    /// Converts the specified Curve to an equivalent Revit CurveLoop.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit CurveLoop that is equivalent to the provided value.</returns>
     public static ARDB.CurveLoop ToCurveLoop(this Curve value)
     {
       value = value.InOtherUnits(UnitConverter.ToHostUnits);
@@ -434,6 +581,11 @@ namespace RhinoInside.Revit.Convert.Geometry
       return ARDB.CurveLoop.Create(value.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToList());
     }
 
+    /// <summary>
+    /// Converts the specified Curve to an equivalent Revit CurveArray.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit CurveArray that is equivalent to the provided value.</returns>
     public static ARDB.CurveArray ToCurveArray(this Curve value)
     {
       value = value.InOtherUnits(UnitConverter.ToHostUnits);
@@ -442,7 +594,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       return value.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToCurveArray();
     }
 
-    public static ARDB.CurveArrArray ToCurveArrayArray(this IList<Curve> value)
+    internal static ARDB.CurveArrArray ToCurveArrArray(this IList<Curve> value)
     {
       var curveArrayArray = new ARDB.CurveArrArray();
       foreach (var curve in value)
@@ -450,39 +602,85 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       return curveArrayArray;
     }
+    #endregion
 
-    #region ToSolid
+    #region Solids
+    /// <summary>
+    /// Converts the specified Brep to an equivalent Revit Solid.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Solid that is equivalent to the provided value.</returns>
     public static ARDB.Solid ToSolid(this Brep value) => BrepEncoder.ToSolid(value, UnitConverter.ToHostUnits);
-    public static ARDB.Solid ToSolid(this Brep value, double factor) => BrepEncoder.ToSolid(value, factor);
+    internal static ARDB.Solid ToSolid(this Brep value, double factor) => BrepEncoder.ToSolid(value, factor);
 
+    /// <summary>
+    /// Converts the specified Extrusion to an equivalent Revit Solid.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Solid that is equivalent to the provided value.</returns>
     public static ARDB.Solid ToSolid(this Extrusion value) => ExtrusionEncoder.ToSolid(value, UnitConverter.ToHostUnits);
-    public static ARDB.Solid ToSolid(this Extrusion value, double factor) => ExtrusionEncoder.ToSolid(value, factor);
+    internal static ARDB.Solid ToSolid(this Extrusion value, double factor) => ExtrusionEncoder.ToSolid(value, factor);
 
+    /// <summary>
+    /// Converts the specified SubD to an equivalent Revit Solid.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Solid that is equivalent to the provided value.</returns>
     public static ARDB.Solid ToSolid(this SubD value) => SubDEncoder.ToSolid(value, UnitConverter.ToHostUnits);
-    public static ARDB.Solid ToSolid(this SubD value, double factor) => SubDEncoder.ToSolid(value, factor);
+    internal static ARDB.Solid ToSolid(this SubD value, double factor) => SubDEncoder.ToSolid(value, factor);
 
+    /// <summary>
+    /// Converts the specified Mesh to an equivalent Revit Solid.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Solid that is equivalent to the provided value.</returns>
     public static ARDB.Solid ToSolid(this Mesh value) => Raw.RawEncoder.ToHost(MeshEncoder.ToRawBrep(value, UnitConverter.ToHostUnits));
-    public static ARDB.Solid ToSolid(this Mesh value, double factor) => Raw.RawEncoder.ToHost(MeshEncoder.ToRawBrep(value, factor));
+    internal static ARDB.Solid ToSolid(this Mesh value, double factor) => Raw.RawEncoder.ToHost(MeshEncoder.ToRawBrep(value, factor));
     #endregion
 
-    #region ToMesh
+    #region Meshes
+    /// <summary>
+    /// Converts the specified Brep to an equivalent Revit Mesh.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Mesh that is equivalent to the provided value.</returns>
     public static ARDB.Mesh ToMesh(this Brep value) => BrepEncoder.ToMesh(value, UnitConverter.NoScale);
-    public static ARDB.Mesh ToMesh(this Brep value, double factor) => BrepEncoder.ToMesh(value, factor);
+    internal static ARDB.Mesh ToMesh(this Brep value, double factor) => BrepEncoder.ToMesh(value, factor);
 
+    /// <summary>
+    /// Converts the specified Extrusion to an equivalent Revit Mesh.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Mesh that is equivalent to the provided value.</returns>
     public static ARDB.Mesh ToMesh(this Extrusion value) => ExtrusionEncoder.ToMesh(value, UnitConverter.NoScale);
-    public static ARDB.Mesh ToMesh(this Extrusion value, double factor) => ExtrusionEncoder.ToMesh(value, factor);
+    internal static ARDB.Mesh ToMesh(this Extrusion value, double factor) => ExtrusionEncoder.ToMesh(value, factor);
 
+    /// <summary>
+    /// Converts the specified SubD to an equivalent Revit Mesh.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Mesh that is equivalent to the provided value.</returns>
     public static ARDB.Mesh ToMesh(this SubD value) => SubDEncoder.ToMesh(value, UnitConverter.NoScale);
-    public static ARDB.Mesh ToMesh(this SubD value, double factor) => SubDEncoder.ToMesh(value, factor);
+    internal static ARDB.Mesh ToMesh(this SubD value, double factor) => SubDEncoder.ToMesh(value, factor);
 
+    /// <summary>
+    /// Converts the specified Mesh to an equivalent Revit Mesh.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit Mesh that is equivalent to the provided value.</returns>
     public static ARDB.Mesh ToMesh(this Mesh value) => MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(value, UnitConverter.ToHostUnits));
-    public static ARDB.Mesh ToMesh(this Mesh value, double factor) => MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(value, factor));
+    internal static ARDB.Mesh ToMesh(this Mesh value, double factor) => MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(value, factor));
     #endregion
 
-    public static ARDB.GeometryObject ToGeometryObject(this GeometryBase geometry) => ToGeometryObject(geometry, UnitConverter.ToHostUnits);
-    public static ARDB.GeometryObject ToGeometryObject(this GeometryBase geometry, double scaleFactor)
+    /// <summary>
+    /// Converts the specified GeomertyBase object to an equivalent Revit GeometryObject.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Revit GeometryObject that is equivalent to the provided value.</returns>
+    public static ARDB.GeometryObject ToGeometryObject(this GeometryBase value) => ToGeometryObject(value, UnitConverter.ToHostUnits);
+    internal static ARDB.GeometryObject ToGeometryObject(this GeometryBase value, double scaleFactor)
     {
-      switch (geometry)
+      switch (value)
       {
         case Point point:         return point.ToPoint(scaleFactor);
         case Curve curve:         return curve.ToCurve(scaleFactor);
@@ -492,21 +690,21 @@ namespace RhinoInside.Revit.Convert.Geometry
         case Mesh mesh:           return mesh.ToMesh(scaleFactor);
 
         default:
-          if (geometry.HasBrepForm)
+          if (value.HasBrepForm)
           {
-            var brepForm = Brep.TryConvertBrep(geometry);
+            var brepForm = Brep.TryConvertBrep(value);
             if (BrepEncoder.EncodeRaw(ref brepForm, scaleFactor))
               return BrepEncoder.ToSolid(brepForm);
           }
           break;
       }
 
-      throw new ConversionException($"Unable to convert {geometry} to Autodesk.Revit.DB.GeometryObject");
+      throw new ConversionException($"Unable to convert {value} to Autodesk.Revit.DB.GeometryObject");
     }
     #endregion
 
-    public static IEnumerable<ARDB.Point> ToPointMany(this PointCloud value) => value.ToPointMany(UnitConverter.ToHostUnits);
-    public static IEnumerable<ARDB.Point> ToPointMany(this PointCloud value, double factor)
+    internal static IEnumerable<ARDB.Point> ToPointMany(this PointCloud value) => value.ToPointMany(UnitConverter.ToHostUnits);
+    internal static IEnumerable<ARDB.Point> ToPointMany(this PointCloud value, double factor)
     {
       if (factor == 1.0)
       {
@@ -526,8 +724,8 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    public static IEnumerable<ARDB.Curve> ToCurveMany(this NurbsCurve value) => value.ToCurveMany(UnitConverter.ToHostUnits);
-    public static IEnumerable<ARDB.Curve> ToCurveMany(this NurbsCurve value, double factor)
+    internal static IEnumerable<ARDB.Curve> ToCurveMany(this NurbsCurve value) => value.ToCurveMany(UnitConverter.ToHostUnits);
+    internal static IEnumerable<ARDB.Curve> ToCurveMany(this NurbsCurve value, double factor)
     {
       // Convert to Raw form
       value = value.DuplicateCurve() as NurbsCurve;
@@ -609,8 +807,8 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    public static IEnumerable<ARDB.Curve> ToCurveMany(this PolylineCurve value) => value.ToCurveMany(UnitConverter.ToHostUnits);
-    public static IEnumerable<ARDB.Curve> ToCurveMany(this PolylineCurve value, double factor)
+    internal static IEnumerable<ARDB.Curve> ToCurveMany(this PolylineCurve value) => value.ToCurveMany(UnitConverter.ToHostUnits);
+    internal static IEnumerable<ARDB.Curve> ToCurveMany(this PolylineCurve value, double factor)
     {
       // Convert to Raw form
       value = value.DuplicateCurve() as PolylineCurve;
@@ -634,8 +832,8 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    public static IEnumerable<ARDB.Curve> ToCurveMany(this PolyCurve value) => value.ToCurveMany(UnitConverter.ToHostUnits);
-    public static IEnumerable<ARDB.Curve> ToCurveMany(this PolyCurve value, double factor)
+    internal static IEnumerable<ARDB.Curve> ToCurveMany(this PolyCurve value) => value.ToCurveMany(UnitConverter.ToHostUnits);
+    internal static IEnumerable<ARDB.Curve> ToCurveMany(this PolyCurve value, double factor)
     {
       // Convert to Raw form
       value = value.DuplicateCurve() as PolyCurve;
@@ -652,8 +850,8 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
     }
 
-    public static IEnumerable<ARDB.Curve> ToCurveMany(this Curve value) => value.ToCurveMany(UnitConverter.ToHostUnits);
-    public static IEnumerable<ARDB.Curve> ToCurveMany(this Curve curve, double factor)
+    internal static IEnumerable<ARDB.Curve> ToCurveMany(this Curve value) => value.ToCurveMany(UnitConverter.ToHostUnits);
+    internal static IEnumerable<ARDB.Curve> ToCurveMany(this Curve curve, double factor)
     {
       switch (curve)
       {

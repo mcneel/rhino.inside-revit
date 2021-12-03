@@ -73,14 +73,13 @@ namespace RhinoInside.Revit
           args.Add("/stopwatch");
         }
 
-        var hostWnd = Core.KeepUIOnTop ?
-          hostMainWindow.Handle : IntPtr.Zero;
-
+        var hostWnd = Core.KeepUIOnTop ? hostMainWindow.Handle : IntPtr.Zero;
         core = new RhinoCore(args.ToArray(), WindowStyle.Hidden, hostWnd);
       }
       catch (Exception e)
       {
-        Core.ReportException(e, Core.Host);
+        ErrorReport.TraceException(e, Core.Host);
+        ErrorReport.ReportException(e, Core.Host);
         Core.CurrentStatus = Core.Status.Failed;
         return false;
       }
@@ -322,21 +321,21 @@ namespace RhinoInside.Revit
                             Environment.NewLine + "Do you want to report this problem by email to tech@mcneel.com?",
               ExpandedContent = expandedContent,
               FooterText = "Press CTRL+C to copy this information to Clipboard",
-              CommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons.Yes | Autodesk.Revit.UI.TaskDialogCommonButtons.Cancel,
-              DefaultButton = Autodesk.Revit.UI.TaskDialogResult.Yes
+              CommonButtons = ARUI.TaskDialogCommonButtons.Yes | ARUI.TaskDialogCommonButtons.Cancel,
+              DefaultButton = ARUI.TaskDialogResult.Yes
             }
           )
           {
-            if (taskDialog.Show() == Autodesk.Revit.UI.TaskDialogResult.Yes)
+            if (taskDialog.Show() == ARUI.TaskDialogResult.Yes)
             {
               ErrorReport.SendEmail
               (
-                Revit.ActiveUIApplication,
-                taskDialog.MainInstruction,
-                false,
-                new string[]
+                Core.Host,
+                subject: taskDialog.MainInstruction,
+                includeAddinsList: false,
+                attachments: new string[]
                 {
-                  Revit.ActiveUIApplication.Application.RecordingJournalFilename
+                  Core.Host.Services.RecordingJournalFilename
                 }
               );
             }
@@ -389,7 +388,7 @@ namespace RhinoInside.Revit
     {
       if (doc is object)
       {
-        var maxDistanceTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, doc.ModelUnitSystem);
+        var maxDistanceTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, doc.ModelUnitSystem);
         if (doc.ModelAbsoluteTolerance > maxDistanceTolerance)
           doc.ModelAbsoluteTolerance = maxDistanceTolerance;
 
@@ -478,7 +477,7 @@ namespace RhinoInside.Revit
                 case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
                   doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
-                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, RevitModelUnitSystem);
+                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, RevitModelUnitSystem);
                   doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
                   AdjustViewConstructionPlanes(doc);
                   break;
@@ -486,7 +485,7 @@ namespace RhinoInside.Revit
                 case Autodesk.Revit.UI.TaskDialogResult.CommandLink3:
                   doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
-                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, GH.Guest.ModelUnitSystem);
+                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, GH.Guest.ModelUnitSystem);
                   doc.AdjustModelUnitSystem(GH.Guest.ModelUnitSystem, true);
                   AdjustViewConstructionPlanes(doc);
                   break;
@@ -519,7 +518,7 @@ namespace RhinoInside.Revit
           rhinoDoc.ModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
           rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
           rhinoDoc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
-          rhinoDoc.ModelAbsoluteTolerance = UnitConverter.ConvertFromHostUnits(Revit.VertexTolerance, rhinoDoc.ModelUnitSystem);
+          rhinoDoc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, rhinoDoc.ModelUnitSystem);
           //switch (rhinoDoc.ModelUnitSystem)
           //{
           //  case UnitSystem.None: break;

@@ -87,41 +87,37 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     #region File
     /// <summary>
-    /// The file name of the document's disk file without extension.
+    /// The document's title.
     /// </summary>
     /// <param name="doc"></param>
-    /// <returns>The mode title</returns>
+    /// <returns>The file name of the document's disk file without extension.</returns>
+    /// <remarks>
+    /// This method returns an non empty string even if the project has not been saved yet.
+    /// </remarks>
     public static string GetTitle(this Document doc)
     {
-#if REVIT_2022
-      return doc.IsFamilyDocument ? Path.GetFileNameWithoutExtension(doc.Title) : doc.Title;
-#else
-      return Path.GetFileNameWithoutExtension(doc.Title);
-#endif
+      // Document.Title may contain the extension
+      // on some Revit versions or depending on user settings.
+      // To avoid the corner case where the file was called "Project.rvt.rvt",
+      // we try first with the Document.PathName.
+      return string.IsNullOrEmpty(doc.PathName) ?
+        Path.GetFileNameWithoutExtension(doc.Title) :
+        Path.GetFileNameWithoutExtension(doc.PathName);
     }
 
     /// <summary>
-    /// The file name of the document's disk file with extension.
+    /// The document's file name.
     /// </summary>
     /// <param name="doc"></param>
-    /// <returns>The model file name</returns>
+    /// <returns>The file name of the document's disk file with extension.</returns>
     /// <remarks>
-    /// This method returns an empty string if the project has not been saved.
-    /// Note that the file name returned will be empty if a document is detached.
-    /// <see cref="Document.IsDetached"/>
+    /// This method returns an non empty string even if the project has not been saved yet.
     /// </remarks>
     public static string GetFileName(this Document doc)
     {
-      /// <summary>
-      /// To enforce the method remarks, we need to check IsDetached here.
-      /// </summary>
-      if (doc is null || doc.IsDetached)
-        return string.Empty;
-
-      if (!string.IsNullOrEmpty(doc.PathName))
-        return Path.GetFileName(doc.PathName);
-
-      return doc.GetTitle() + (doc.IsFamilyDocument ? ".rfa" : ".rvt");
+      return string.IsNullOrEmpty(doc.PathName) ?
+        Path.GetFileNameWithoutExtension(doc.Title) + (doc.IsFamilyDocument ? ".rfa" : ".rvt") :
+        Path.GetFileName(doc.PathName);        
     }
 
     /// <summary>

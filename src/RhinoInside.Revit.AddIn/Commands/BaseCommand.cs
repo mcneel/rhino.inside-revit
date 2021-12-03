@@ -12,6 +12,9 @@ namespace RhinoInside.Revit.AddIn.Commands
   /// </summary>
   public abstract class Command : External.UI.ExternalCommand
   {
+    internal static readonly string TabName = "Rhino.Inside";
+
+    #region Image
     // FIXME: find a way to detect the scaling on Revit.RevitScreen
     static double RevitScreenScaleFactor => 1.0;
 
@@ -63,6 +66,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         );
       }
     }
+    #endregion
 
     #region Ribbon item creation
     internal static SplitButtonData NewSplitButtonData<CommandType>(string text, string image, string tooltip, string url = default)

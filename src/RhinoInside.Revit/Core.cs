@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows;
-using System.Windows.Interop;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
@@ -30,6 +27,7 @@ namespace RhinoInside.Revit
     #region ProductInfo
     public static string Company => "McNeel";
     public static string Product => "Rhino.Inside";
+    public static string Platform => "Revit";
     public static string WebSite => $@"https://www.rhino3d.com/inside/revit/{Version.Major}.0/";
 
     internal static readonly string SwapFolder = Path.Combine(Path.GetTempPath(), Company, Product, $"V{Core.Version.Major}.{Core.Version.Minor}");
@@ -125,7 +123,7 @@ namespace RhinoInside.Revit
     }
     #endregion
 
-    #region IExternalApplication Members
+    #region IExternalApplication
     static UIX.UIHostApplication host;
     internal static UIX.UIHostApplication Host
     {
@@ -133,10 +131,7 @@ namespace RhinoInside.Revit
       private set { if (!ReferenceEquals(host, value)) { host?.Dispose(); host = value; } }
     }
 
-    internal static Result OnStartup
-    (
-      UIControlledApplication uiCtrlApp
-    )
+    internal static Result OnStartup(UIControlledApplication uiCtrlApp)
     {
       if (uiCtrlApp.IsLateAddinLoading) return Result.Failed;
 
@@ -168,6 +163,7 @@ namespace RhinoInside.Revit
           {
             Host.Services.ApplicationInitialized -= applicationInitialized;
             if (CurrentStatus < Status.Available) return;
+
             Host = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
           };
         }
@@ -194,35 +190,6 @@ namespace RhinoInside.Revit
           External.ActivationGate.SetHostWindow(IntPtr.Zero);
           Host = null;
         }
-      }
-    }
-
-    public static void ReportException(Exception e, UIX.UIHostApplication app)
-    {
-      // Show the most inner exception
-      while (e.InnerException is object)
-        e = e.InnerException;
-
-      if (MessageBox.Show
-      (
-        owner: app.GetMainWindow(),
-        caption: $"{app.ActiveAddInId.GetAddInName()} {Version} - Oops! Something went wrong :(",
-        icon: MessageBoxImage.Error,
-        messageBoxText: $"'{e.GetType().FullName}' at {e.Source}." + Environment.NewLine +
-                        Environment.NewLine + e.Message + Environment.NewLine +
-                        Environment.NewLine + "Do you want to report this problem by email to tech@mcneel.com?",
-        button: MessageBoxButton.YesNo,
-        defaultResult: MessageBoxResult.Yes
-      ) == MessageBoxResult.Yes)
-      {
-        var attachments = e.Data["Attachments"] as IEnumerable<string> ?? Enumerable.Empty<string>();
-        ErrorReport.SendEmail
-        (
-          app,
-          $"Rhino.Inside Revit failed - {e.GetType().FullName}",
-          false,
-          attachments.Prepend(app.Services.RecordingJournalFilename)
-        );
       }
     }
     #endregion

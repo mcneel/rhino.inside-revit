@@ -248,15 +248,17 @@ namespace RhinoInside.Revit.AddIn.Properties
     }
 
     // Data store information
-    private static string DataDirectoryPath => Path.Combine(Core.Company, Core.Product, "Revit", $"{Core.Version.Major}.0");
-    private static string AdminDataDirectory => Path.Combine(
+    private static string DataDirectoryPath => Path.Combine(Core.Company, Core.Product, Core.Platform, $"{Core.Version.Major}.0");
+    private static string AdminDataDirectory => Path.Combine
+    (
       Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
       DataDirectoryPath
-      );
-    private static string UserDataDirectory => Path.Combine(
+    );
+    private static string UserDataDirectory => Path.Combine
+    (
       Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
       DataDirectoryPath
-      );
+    );
     private static string OptionsFileName = "Options.xml";
     private static string AdminOptionsFilePath => Path.Combine(AdminDataDirectory, OptionsFileName);
     private static string UserOptionsFilePath => Path.Combine(UserDataDirectory, OptionsFileName);

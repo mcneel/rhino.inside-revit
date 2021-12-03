@@ -155,7 +155,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         case ARDB.DoubleParameterValue d:
         {
           var value = SpecType.IsMeasurableSpec(parameter.GetDefinition().GetDataType(), out var spec) ?
-            UnitConverter.InRhinoUnits(d.Value, spec) :
+            UnitConvertible.InRhinoUnits(d.Value, spec) :
             d.Value;
 
           return new GH_Number(value);
@@ -231,7 +231,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
               throw new InvalidCastException();
 
             d.Value = SpecType.IsMeasurableSpec(parameter.GetDefinition().GetDataType(), out var spec) ?
-              UnitConverter.InHostUnits(real, spec) :
+              UnitConvertible.InHostUnits(real, spec) :
               real;
 
             parameter.SetValue(d);

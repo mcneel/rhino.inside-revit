@@ -10,6 +10,8 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Interop;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
@@ -251,7 +253,13 @@ namespace RhinoInside.Revit
         }
       }
 
-      public static void SendEmail(UIX.UIHostApplication app, string subject, bool includeAddinsList, IEnumerable<string> attachments)
+      public static void SendEmail
+      (
+        UIX.UIHostApplication app,
+        string subject,
+        bool includeAddinsList,
+        IEnumerable<string> attachments
+      )
       {
         var services = app.Services;
         var now = DateTime.Now.ToString("yyyyMMddTHHmmssZ");
@@ -273,10 +281,16 @@ namespace RhinoInside.Revit
 
         var revitVersion = $"{services.SubVersionNumber} ({services.VersionBuild})";
 
-        SendEmail(subject, reportFilePath, revitVersion, includeAddinsList, attachments);
+        SendEmail(subject, reportFilePath, revitVersion, attachments);
       }
 
-      static void SendEmail(string subject, string ReportFilePath, string revitVersion, bool includeAddinsList, IEnumerable<string> attachments)
+      static void SendEmail
+      (
+        string subject,
+        string ReportFilePath,
+        string revitVersion,
+        IEnumerable<string> attachments
+      )
       {
         foreach (var file in attachments)
         {
@@ -337,9 +351,9 @@ namespace RhinoInside.Revit
                 SendEmail
                 (
                   Core.Host,
-                  "Rhino.Inside Revit failed to load",
-                  !taskDialog.WasVerificationChecked(),
-                  new string[]
+                  subject: "Rhino.Inside Revit failed to load",
+                  includeAddinsList: !taskDialog.WasVerificationChecked(),
+                  attachments: new string[]
                   {
                     Core.Host.Services.RecordingJournalFilename,
                     RhinoDebugMessages_txt,
@@ -358,39 +372,43 @@ namespace RhinoInside.Revit
         Directory.CreateDirectory(SafeModeFolder);
 
         Settings.AddIns.GetInstalledAddins(Core.Host.Services.VersionNumber, out var AddinFiles);
-        if (AddinFiles.Where(x => Path.GetFileName(x) == "RhinoInside.Revit.addin").FirstOrDefault() is string RhinoInsideRevitAddinFile)
+        if (AddinFiles.FirstOrDefault(x => Path.GetFileName(x) == "RhinoInside.Revit.addin") is string RhinoInsideRevitAddinFile)
         {
           var SafeModeAddinFile = Path.Combine(SafeModeFolder, Path.GetFileName(RhinoInsideRevitAddinFile));
           File.Copy(RhinoInsideRevitAddinFile, SafeModeAddinFile, true);
 
           if (Settings.AddIns.LoadFrom(SafeModeAddinFile, out var SafeModeAddin))
           {
-            SafeModeAddin.First().Assembly = Assembly.GetExecutingAssembly().Location;
+            var addin = SafeModeAddin.First();
+            var assembly = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(addin.Assembly));
+            SafeModeAddin.First().Assembly = assembly;
             Settings.AddIns.SaveAs(SafeModeAddin, SafeModeAddinFile);
           }
 
           var journalFile = Path.Combine(SafeModeFolder, "RhinoInside.Revit-SafeMode.txt");
           using (var journal = File.CreateText(journalFile))
           {
+            var TabName = "Rhino.Inside";
             journal.WriteLine("' ");
             journal.WriteLine("Dim Jrn");
             journal.WriteLine("Set Jrn = CrsJournalScript");
-            journal.WriteLine(" Jrn.RibbonEvent \"TabActivated:Add-Ins\"");
-            journal.WriteLine(" Jrn.RibbonEvent \"Execute external command:CustomCtrl_%CustomCtrl_%Add-Ins%Rhinoceros%CommandRhinoInside:RhinoInside.Revit.UI.CommandRhinoInside\"");
+            journal.WriteLine($" Jrn.RibbonEvent \"TabActivated:{TabName}\"");
+            journal.WriteLine($" Jrn.RibbonEvent \"Execute external command:CustomCtrl_%CustomCtrl_%{TabName}%More%CommandStart:RhinoInside.Revit.AddIn.Commands.CommandStart\"");
+            journal.WriteLine($" Jrn.RibbonEvent \"Execute external command:CustomCtrl_%CustomCtrl_%{TabName}%Rhinoceros%CommandRhino:RhinoInside.Revit.AddIn.Commands.CommandRhino\"");
           }
-
+#if DEBUG
           var batchFile = Path.Combine(SafeModeFolder, "RhinoInside.Revit-SafeMode.bat");
           using (var batch = File.CreateText(batchFile))
           {
             batch.WriteLine($"\"{Process.GetCurrentProcess().MainModule.FileName}\" \"{Path.GetFileName(journalFile)}\"");
           }
-
+#endif
           var si = new ProcessStartInfo()
           {
             FileName = Process.GetCurrentProcess().MainModule.FileName,
             Arguments = $"\"{journalFile}\""
           };
-          using (var RevitApp = Process.Start(si)) { RevitApp.WaitForExit(); }
+          using (var RevitApp = Process.Start(si)) RevitApp.WaitForExit();
         }
       }
 
@@ -452,6 +470,65 @@ namespace RhinoInside.Revit
           if (deleteKey)
             try { Registry.CurrentUser.DeleteSubKey(SDKRegistryKeyName); }
             catch { }
+        }
+      }
+
+      public static void DumpException(Exception e, UIX.UIHostApplication app)
+      {
+        var RhinoInside_dmp = Path.Combine
+        (
+          Path.GetDirectoryName(app.Services.RecordingJournalFilename),
+          Path.GetFileNameWithoutExtension(app.Services.RecordingJournalFilename) + ".RhinoInside.Revit.dmp"
+        );
+
+        if (MiniDumper.Write(RhinoInside_dmp))
+        {
+          var attachments = e.Data["Attachments"] as IEnumerable<string> ?? Enumerable.Empty<string>();
+          e.Data["Attachments"] = attachments.Append(RhinoInside_dmp).ToArray();
+        }
+      }
+
+      public static void TraceException(Exception e, UIX.UIHostApplication app)
+      {
+        var comment = $@"Managed exception caught from external API application '{e.Source}' in method '{e.TargetSite}' Exception type: '<{e.GetType().FullName}>,' Exception method: '<{e.Message}>,' Stack trace '   {e.StackTrace}";
+        comment = comment.Replace(Environment.NewLine, $"{Environment.NewLine}'");
+        app.Services.WriteJournalComment(comment, true);
+      }
+
+      public static void ReportException(Exception e, UIX.UIHostApplication app)
+      {
+        var attachments = Enumerable.Empty<string>();
+        while (e.InnerException is object)
+        {
+          if (e.Data["Attachments"] is IEnumerable<string> attach)
+            attachments.Concat(attach);
+
+          // Show the most inner exception
+          e = e.InnerException;
+        }
+
+        if (MessageBox.Show
+        (
+          owner: app.GetMainWindow(),
+          caption: $"{Core.Product}.{Core.Platform} {Core.Version} - Oops! Something went wrong :(",
+          icon: MessageBoxImage.Error,
+          messageBoxText: $"'{e.GetType().FullName}' at {e.Source}." + Environment.NewLine +
+                          Environment.NewLine + e.Message + Environment.NewLine +
+                          Environment.NewLine + "Do you want to report this problem by email to tech@mcneel.com?",
+          button: MessageBoxButton.YesNo,
+          defaultResult: MessageBoxResult.Yes
+        ) == MessageBoxResult.Yes)
+        {
+          if (e.Data["Attachments"] is IEnumerable<string> attach)
+            attachments.Concat(attach);
+
+          SendEmail
+          (
+            app,
+            subject: $"{Core.Product}.{Core.Platform} - {e.GetType().FullName}",
+            includeAddinsList: false,
+            attachments: attachments.Prepend(app.Services.RecordingJournalFilename)
+          );
         }
       }
     }

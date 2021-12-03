@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       var pkgName = Path.GetFileName(Path.GetDirectoryName(location));
 
       // Looks for Rhino.Inside/Revit/ or Rhino.Inside/Revit/x.x insdie the package
-      var pkgAddinContents = Path.Combine(location, Core.Product, "Revit");
+      var pkgAddinContents = Path.Combine(location, Core.Product, Core.Platform);
       var pkgAddinSpecificContents = Path.Combine(pkgAddinContents, $"{Core.Version.Major}.0");
 
       // load specific scripts if available, otherwise load for any Rhino.Inside.Revit

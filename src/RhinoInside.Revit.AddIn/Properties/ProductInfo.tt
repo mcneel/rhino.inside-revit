@@ -16,7 +16,7 @@ ushort Revision = 0;
 string Release = "";
 string Metadata = "";
 
-using (var reader = new StreamReader(this.Host.ResolvePath($"../../ProductInfo.xml")))
+using (var reader = new StreamReader(this.Host.ResolvePath("../../ProductInfo.xml")))
 {
   var serializer = new XmlSerializer(typeof(ProductInfo));
   product = serializer.Deserialize(reader) as ProductInfo;

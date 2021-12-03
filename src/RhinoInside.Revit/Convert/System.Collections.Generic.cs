@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RhinoInside.Revit.Convert.System.Collections.Generic
 {
-  public static class ArrayConverter
+  static class ArrayConverter
   {
     /// <summary>
     /// Converts an array of one type to an array of another type.
@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.Convert.System.Collections.Generic
     }
   }
 
-  public static class IListConverter
+  static class IListConverter
   {
     /// <summary>
     /// Converts an IList of one type to an IList of another type.
@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.Convert.System.Collections.Generic
     }
   }
 
-  public static class ICollectionConverter
+  static class ICollectionConverter
   {
     /// <summary>
     /// Converts an ICollection of one type to a List of another type.
@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.Convert.System.Collections.Generic
     }
   }
 
-  public static class IEnumerableConverter
+  static class IEnumerableConverter
   {
     public static IEnumerable<TOutput> Convert<TInput, TOutput>(this IEnumerable<TInput> input, Converter<TInput, TOutput> converter)
     {
