@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.Settings
 
     static void LoadFromResources(string keyboardShortcutsId, out Shortcuts shortcuts)
     {
-      using (var ReadFileStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream($"RhinoInside.Revit.{keyboardShortcutsId}"))
+      using (var ReadFileStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream($"RhinoInside.Revit.External.{keyboardShortcutsId}"))
       {
         var serializer = new XmlSerializer(typeof(Shortcuts));
         shortcuts = serializer.Deserialize(ReadFileStream) as Shortcuts;
@@ -120,7 +120,7 @@ namespace RhinoInside.Revit.Settings
         bool shortcutUpdated = false;
         try
         {
-          var shortcutItem = shortcuts.Where(x => x.CommandId == commandId).First();
+          var shortcutItem = shortcuts.First(x => x.CommandId == commandId);
           if (shortcutItem.Shortcuts is null)
           {
             shortcutItem.Shortcuts = commandShortcuts;
@@ -148,7 +148,7 @@ namespace RhinoInside.Revit.Settings
       catch (Exception e)
       {
         e.Data.Add("Attachments", new string[] { keyboardShortcutsPath });
-        throw e;
+        throw;
       }
     }
  }
