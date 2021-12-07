@@ -6,6 +6,12 @@ group: Deployment & Configs
 
 <!-- most recent release should be on top -->
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.4 RC5" version="v1.4.8007.15883" pre_release=true time="12/07/2021" %}
+
+- Continued work on {{ site.terms.rir }} API
+- {% include ltr/comp.html uuid='3a5f6af7-' %} defaults to temp folder when **Folder** input is not provided
+- Minor Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.4 RC4" version="v1.4.8004.19290" pre_release=true time="11/30/2021" %}
 
 - Minor Fixes and Improvements
