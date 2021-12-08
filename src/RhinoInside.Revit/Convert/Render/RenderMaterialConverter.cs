@@ -17,6 +17,7 @@ using SD = System.Drawing;
 namespace RhinoInside.Revit.Convert.Render
 {
   using Convert.System.Drawing;
+  using Convert.Units;
   using External.DB.Extensions;
 
   /// <summary>
@@ -171,16 +172,16 @@ namespace RhinoInside.Revit.Convert.Render
 
       var offset = Rhino.Geometry.Vector2d.Zero;
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetX) is AssetPropertyDistance offsetX)
-        offset.X = ARDB.UnitUtils.Convert(offsetX.Value, offsetX.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
+        offset.X = ARDB.UnitUtils.Convert(offsetX.Value, offsetX.GetUnitTypeId(), RhinoDoc.ActiveDoc.ModelUnitSystem.ToUnitType());
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetY) is AssetPropertyDistance offsetY)
-        offset.Y = ARDB.UnitUtils.Convert(offsetY.Value, offsetY.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
+        offset.Y = ARDB.UnitUtils.Convert(offsetY.Value, offsetY.GetUnitTypeId(), RhinoDoc.ActiveDoc.ModelUnitSystem.ToUnitType());
       texture.Offset = offset;
 
       var repeat = new Rhino.Geometry.Vector2d(1.0, 1.0);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleX) is AssetPropertyDistance scaleX)
-        repeat.X = 1.0 / ARDB.UnitUtils.Convert(scaleX.Value, scaleX.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
+        repeat.X = 1.0 / ARDB.UnitUtils.Convert(scaleX.Value, scaleX.GetUnitTypeId(), RhinoDoc.ActiveDoc.ModelUnitSystem.ToUnitType());
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleY) is AssetPropertyDistance scaleY)
-        repeat.Y = 1.0 / ARDB.UnitUtils.Convert(scaleY.Value, scaleY.GetUnitTypeId(), External.DB.Schemas.UnitType.Meters);
+        repeat.Y = 1.0 / ARDB.UnitUtils.Convert(scaleY.Value, scaleY.GetUnitTypeId(), RhinoDoc.ActiveDoc.ModelUnitSystem.ToUnitType());
       texture.Repeat = repeat;
 
       return texture;
@@ -326,6 +327,7 @@ namespace RhinoInside.Revit.Convert.Render
       else if (asset.Name == "PlasticVinylSchema") GetPlasticVinylSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "WaterSchema") GetWaterSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "MirrorSchema") GetMirrorSchemaParameters(asset, ref materialParams);
+      else if (asset.Name == "MasonryCMUSchema") GetMasonryCMUSchemaParameters(asset, ref materialParams);
       else return false;
 
       return true;
@@ -1207,6 +1209,62 @@ namespace RhinoInside.Revit.Convert.Render
           material.ReflectivityColor = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
         }
       }
+    }
+
+    static void GetMasonryCMUSchemaParameters(Asset asset, ref BasicMaterialParameters material)
+    {
+      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Cube;
+
+      if (asset.FindByName(MasonryCMU.MasonryCMUColor) is AssetPropertyDoubleArray4d diffuse)
+      {
+        material.Diffuse = ToColor4f(diffuse);
+        material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+
+        if (asset.FindByName(MasonryCMU.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+        {
+          if (asset.FindByName(MasonryCMU.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+          {
+            var tintColor = ToColor4f(tint);
+            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
+          }
+        }
+
+        material.ReflectivityColor = material.Diffuse;
+      }
+
+      if (asset.FindByName(MasonryCMU.MasonryCMUPatternMap) is AssetPropertyReference bumpMap)
+        material.BumpTexture = ToSimulatedTexture(bumpMap.GetSingleConnectedAsset());
+
+      if (asset.FindByName(MasonryCMU.MasonryCMUPatternHeight) is AssetPropertyDouble bumpAmount)
+        material.BumpTextureAmount = bumpAmount.Value * 0.5;
+
+      double polish = 0.0;
+      if (asset.FindByName(MasonryCMU.MasonryCMUApplication) is AssetPropertyInteger application)
+      {
+        switch ((MasonryCMUApplicationType) application.Value)
+        {
+          case MasonryCMUApplicationType.Glossy: polish = 0.85; break;
+          case MasonryCMUApplicationType.Matte: polish = 0.3; break;
+          case MasonryCMUApplicationType.Unfinished: polish = 0.1; break;
+        }
+      }
+
+      if (asset.FindByName(MasonryCMU.MasonryCMUType) is AssetPropertyInteger type)
+      {
+        switch ((MasonryCMUType) type.Value)
+        {
+          case MasonryCMUType.Cmu: break;
+          case MasonryCMUType.Masonry: break;
+        }
+      }
+
+      material.Shine = polish;
+      material.Specular = new Color4f((float) polish, (float) polish, (float) polish, 1.0f);
+      material.Reflectivity = polish;
+
+      material.FresnelEnabled = true;
+      material.PolishAmount = polish;
+      material.ClarityAmount = 1.0;
     }
   }
 }
