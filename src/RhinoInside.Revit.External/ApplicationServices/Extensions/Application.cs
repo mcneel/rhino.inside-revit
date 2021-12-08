@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.IO;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.ApplicationServices;
+using System.Linq;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.External.ApplicationServices.Extensions
 {
@@ -61,6 +63,35 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
       }
 
       return 1033;
+    }
+
+    /// <summary>
+    /// Queries for all open <see cref="Autodesk.Revit.DB.Document"/> in Revit UI.
+    /// </summary>
+    /// <param name="app"></param>
+    /// <param name="projects"></param>
+    /// <param name="families"></param>
+    public static void GetOpenDocuments(this Application app, out IList<Document> projects, out IList<Document> families)
+    {
+      using (var documents = app.Documents)
+      {
+        projects = new List<Document>();
+        families = new List<Document>();
+
+        foreach (var doc in documents.Cast<Document>())
+        {
+          if (doc.IsLinked)
+            continue;
+
+          if (doc.GetActiveView() is null)
+            continue;
+
+          if (doc.IsFamilyDocument)
+            families.Add(doc);
+          else
+            projects.Add(doc);
+        }
+      }
     }
   }
 
