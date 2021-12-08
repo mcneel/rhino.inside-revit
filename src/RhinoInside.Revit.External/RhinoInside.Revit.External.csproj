@@ -212,7 +212,6 @@
     <Compile Include="DB\CurtainPanelSystemFamily.cs" />
     <Compile Include="DB\ElementKind.cs" />
     <Compile Include="DB\ElevationBase.cs" />
-    <Compile Include="DB\Extensions\Application.cs" />
     <Compile Include="DB\Extensions\BasePoint.cs" />
     <Compile Include="DB\Extensions\BoundingBoxUV.cs" />
     <Compile Include="DB\Extensions\Category.cs" />
@@ -231,6 +230,7 @@
     <Compile Include="DB\Extensions\Level.cs" />
     <Compile Include="DB\Extensions\LinePattern.cs" />
     <Compile Include="DB\Extensions\Mesh.cs" />
+    <Compile Include="DB\Extensions\ModelPath.cs" />
     <Compile Include="DB\Extensions\Parameter.cs" />
     <Compile Include="DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="DB\Extensions\ProjectLocation.cs" />

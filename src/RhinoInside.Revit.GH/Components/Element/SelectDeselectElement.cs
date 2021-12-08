@@ -8,7 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
-  using External.DB.Extensions;
+  using External.ApplicationServices.Extensions;
 
   public class SelectDeselectElement : ZuiComponent
   {

@@ -3,7 +3,8 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Documents
 {
-  using External.DB.Extensions;
+  using External.ApplicationServices.Extensions;
+
   public class AllDocuments : Component
   {
     public override Guid ComponentGuid => new Guid("5B935CA4-E96D-4E8F-A36E-31708017634B");
