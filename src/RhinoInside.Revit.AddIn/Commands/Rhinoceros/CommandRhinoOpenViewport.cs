@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         name: CommandName,
         iconName: "Ribbon.Rhinoceros.OpenViewport.png",
         tooltip: "Opens a floating viewport",
-        url: "reference/rir-interface#rhino-options"
+        url: "reference/rir-interface#rhinoceros-panel"
       );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
