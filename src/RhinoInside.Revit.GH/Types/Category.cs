@@ -235,33 +235,33 @@ namespace RhinoInside.Revit.GH.Types
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
       BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
+    static readonly double[] PlotWeights = new double[]
+    {
+      0.0,
+      0.003,
+      0.003,
+      0.003,
+      0.004,
+      0.006,
+      0.009,
+      0.013,
+      0.018,
+      0.025,
+      0.035,
+      0.050,
+      0.065,
+      0.085,
+      0.110,
+      0.150,
+      0.200
+    };
+
     static double ToPlotWeight(int? value)
     {
       if (!value.HasValue) return -1.0;
 
-      var size = new double[]
-      {
-        0.0,
-        0.003,
-        0.003,
-        0.003,
-        0.004,
-        0.006,
-        0.009,
-        0.013,
-        0.018,
-        0.025,
-        0.035,
-        0.050,
-        0.065,
-        0.085,
-        0.110,
-        0.150,
-        0.200
-      };
-
-      if (0 < value.Value && value.Value < 17)
-        return Convert.Geometry.UnitConverter.Convert(size[value.Value], Rhino.UnitSystem.Inches, Rhino.UnitSystem.Millimeters);
+      if (0 < value.Value && value.Value < PlotWeights.Length)
+        return Convert.Geometry.UnitConverter.Convert(PlotWeights[value.Value], Rhino.UnitSystem.Inches, Rhino.UnitSystem.Millimeters);
 
       return 0.0;
     }

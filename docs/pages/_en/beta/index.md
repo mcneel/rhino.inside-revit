@@ -22,6 +22,7 @@ Grasshopper is a visual programming environment tightly integrated with Rhino’
 {% include ltr/home.html
    inside_text=".Inside.Revit"
    version=site.versions.beta
+   redirect_downloads=true
 
    banner_video="https://www.youtube.com/embed/KUHdJqVyhZI?showinfo=0&rel=0&modestbranding=1"
 

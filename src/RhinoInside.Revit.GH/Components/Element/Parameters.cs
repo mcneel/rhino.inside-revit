@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH
           var value = parameter.AsDouble();
 
           if (ERDB.Schemas.SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec))
-            value = UnitConverter.InRhinoUnits(value, spec);
+            value = UnitConvertible.InRhinoUnits(value, spec);
 
           return new GH_Number(value);
 
@@ -155,7 +155,7 @@ namespace RhinoInside.Revit.GH
           return parameter.Update
           (
             ERDB.Schemas.SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
-            UnitConverter.InHostUnits(real, spec) :
+            UnitConvertible.InHostUnits(real, spec) :
             real
           );
 
@@ -324,7 +324,7 @@ namespace RhinoInside.Revit.GH
         case ARDB.StorageType.Double:
           var value = parameter.AsDouble();
           return ERDB.Schemas.SpecType.IsMeasurableSpec(parameter.Definition.GetDataType(), out var spec) ?
-            Convert.Geometry.UnitConverter.InRhinoUnits(value, spec) :
+            UnitConvertible.InRhinoUnits(value, spec) :
             value;
 
         case ARDB.StorageType.String:
@@ -475,7 +475,7 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
 
             using (var formatOptions = new ARDB.FormatValueOptions() { AppendUnitSymbol = true })
             {
-              var host = UnitConverter.InHostUnits(number, specTypeId);
+              var host = UnitConvertible.InHostUnits(number, specTypeId);
 #if REVIT_2021
               var formated = ARDB.UnitFormatUtils.Format(element.Document.GetUnits(), specTypeId, host, forEditing: false, formatOptions);
 #else

@@ -387,10 +387,10 @@ namespace RhinoInside.Revit
 
                   ErrorReport.SendEmail
                   (
-                    Core.Host,
-                    $"Rhino.Inside Revit failed - openNURBS Conflict",
-                    true,
-                    new string[]
+                    app: Core.Host,
+                    subject: $"{Core.Product}.{Core.Platform} - openNURBS Conflict",
+                    includeAddinsList: true,
+                    attachments: new string[]
                     {
                       Core.Host.Services.RecordingJournalFilename,
                       RhinoInside_dmp

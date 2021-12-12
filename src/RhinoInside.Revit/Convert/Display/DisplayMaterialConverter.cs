@@ -2,23 +2,23 @@ using Rhino;
 using Rhino.Display;
 using Rhino.Render;
 using ARDB = Autodesk.Revit.DB;
-using SD = System.Drawing;
 
 namespace RhinoInside.Revit.Convert.Display
 {
+  using Convert.Render;
   using Convert.System.Drawing;
 
-  public static class DisplayMaterialConverter
+  /// <summary>
+  /// Represents a converter for converting <see cref="DisplayMaterial"/> values
+  /// back and forth Revit and Rhino.
+  /// </summary>
+  static class DisplayMaterialConverter
   {
-    static readonly DisplayMaterial DefaultMaterial = new DisplayMaterial(SD.Color.WhiteSmoke);
-    public static DisplayMaterial ToDisplayMaterial(this ARDB.Material material, DisplayMaterial parentMaterial)
+    public static DisplayMaterial ToDisplayMaterial(this ARDB.Material material)
     {
-      if (material is null)
-        return parentMaterial ?? DefaultMaterial;
-
       if(RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
       {
-        using (var renderMaterial = Render.RenderMaterialConverter.ToRenderMaterial(material, rhinoDoc))
+        using (var renderMaterial = material.ToRenderMaterial(rhinoDoc))
         {
           if (renderMaterial?.SimulatedMaterial(RenderTexture.TextureGeneration.Allow) is Rhino.DocObjects.Material rhinoMaterial)
             return new DisplayMaterial(rhinoMaterial);

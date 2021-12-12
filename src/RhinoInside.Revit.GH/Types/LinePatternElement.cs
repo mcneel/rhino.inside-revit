@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Types
         // 3. Update if necessary
         if (index < 0 || overwrite)
         {
-          var feet = Convert.Geometry.UnitConverter.ConvertFromHostUnits(1.0, Rhino.UnitSystem.Millimeters);
+          var feet = Convert.Geometry.UnitConverter.ConvertFromInternalUnits(1.0, Rhino.UnitSystem.Millimeters);
 
           using (var pattern = linePattern.GetLinePattern())
           {
