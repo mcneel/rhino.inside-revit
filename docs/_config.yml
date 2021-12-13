@@ -41,7 +41,7 @@ url: "" # the base hostname & protocol for your site
 version: 1.0
 language: en
 # revit api version used to generate api links on apidoc.co
-revit_api: 2020
+revit_api: 2022
 
 # Ruby and Jekyll Settings
 plugins:

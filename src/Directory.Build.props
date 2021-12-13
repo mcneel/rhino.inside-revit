@@ -3,6 +3,7 @@
     <!-- known paths -->
     <PropertyGroup>
         <RIRSourceDir>$(MSBuildThisFileDirectory)</RIRSourceDir>
+        <RIRDocsDir>$(MSBuildThisFileDirectory)..\docs</RIRDocsDir>
     </PropertyGroup>
 
     <!-- rhino installed path -->

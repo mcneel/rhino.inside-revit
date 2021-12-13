@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<HelpKI>
+  <HelpKINode Title="ActiveDBApplication property" Url="html/ed353c11-b92d-d177-2b33-9347ab8b9a56.htm" />
+  <HelpKINode Title="ActiveDBDocument property" Url="html/09e83018-443c-710d-0cfd-ffac08dc0e66.htm" />
+  <HelpKINode Title="ActiveUIApplication property" Url="html/f7e4e8fb-10e9-e99f-08b6-2ef3f8dc2bc9.htm" />
+  <HelpKINode Title="ActiveUIDocument property" Url="html/fd485d19-a6dc-021c-7690-a58984cdff75.htm" />
+  <HelpKINode Title="AngleTolerance property" Url="html/879e30f6-93ea-ac3d-b406-53d82a883256.htm" />
+  <HelpKINode Title="ColorConverter class">
+    <HelpKINode Title="ColorConverter Class" Url="html/4542de3f-a494-7522-3bf5-e942f52c858a.htm" />
+    <HelpKINode Title="ColorConverter Class" Url="html/40df3757-4368-438a-6587-cb6567eb52d5.htm" />
+    <HelpKINode Title="ColorConverter Class" Url="html/de669233-a2a0-a402-82dc-75fb8bfea54e.htm" />
+    <HelpKINode Title="methods" Url="html/28107510-8790-9f8b-5270-50749defc3b0.htm" />
+    <HelpKINode Title="methods" Url="html/4ac3ea4f-18cf-e6fc-5603-92184353efa2.htm" />
+    <HelpKINode Title="methods" Url="html/d2b15e11-8bb2-d3ea-0cbd-d82a74e1b95a.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ColorConverter.ToColor method">
+    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/d5c4be91-520c-b214-1ddd-452aacda4ef4.htm" />
+    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/bd493dda-cbf1-a2b0-588b-1045abb5e50a.htm" />
+    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/a066cf76-aa1f-fa22-9460-84622494da73.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ColorWithTransparencyConverter class">
+    <HelpKINode Title="ColorWithTransparencyConverter Class" Url="html/81af04ff-8082-0303-62a9-19e8917f32a5.htm" />
+    <HelpKINode Title="methods" Url="html/28e39af3-b9c6-d46a-80b0-d9a0c768b3a6.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ColorWithTransparencyConverter.ToColor method" Url="html/001118ff-0da4-e125-c4f7-c8337562c826.htm" />
+  <HelpKINode Title="ColorWithTransparencyConverter.ToColorWithTransparency method" Url="html/97bfc358-c29c-fd8f-f704-dbf5a8aa1124.htm" />
+  <HelpKINode Title="ConvertFromInternalUnits method" Url="html/cc8ca42c-2e9f-b2ec-e986-44be660cd232.htm" />
+  <HelpKINode Title="ConvertToInternalUnits method" Url="html/e2a5c609-c2b4-1742-932a-81023d3c8ef1.htm" />
+  <HelpKINode Title="GeometryDecoder class">
+    <HelpKINode Title="GeometryDecoder Class" Url="html/f0b6fe2b-654e-7b38-918f-50486daa6536.htm" />
+    <HelpKINode Title="methods" Url="html/9a1737e1-9eae-bea7-fb83-159d1d437cd0.htm" />
+  </HelpKINode>
+  <HelpKINode Title="GeometryDecoder.ToBoundingBox method" Url="html/7a8b279f-0e9a-d06a-3365-ec252a231e1d.htm" />
+  <HelpKINode Title="GeometryDecoder.ToBox method" Url="html/d3412746-f9fd-abcb-e6db-9e64192bb92d.htm" />
+  <HelpKINode Title="GeometryDecoder.ToBrep method" Url="html/0013b64d-a2bc-6adf-7d1c-742636ef1086.htm" />
+  <HelpKINode Title="GeometryDecoder.ToCurve method" Url="html/4a13cbed-e207-5824-b64e-a1450a386710.htm" />
+  <HelpKINode Title="GeometryDecoder.ToCurves method" Url="html/5136b134-a27c-3dc6-4590-2e45c96aae47.htm" />
+  <HelpKINode Title="GeometryDecoder.ToMesh method" Url="html/99c2feae-34d8-d4f0-0ae9-b64dd156c377.htm" />
+  <HelpKINode Title="GeometryDecoder.ToPlane method" Url="html/ff2bd82d-d94d-9433-77b5-e7b8b968c7b8.htm" />
+  <HelpKINode Title="GeometryDecoder.ToPoint method" Url="html/4420852d-4593-5554-36d7-1e97264d5da6.htm" />
+  <HelpKINode Title="GeometryDecoder.ToPoint2d method" Url="html/fc88ef44-c1b2-96e5-c4db-0710b092ddc0.htm" />
+  <HelpKINode Title="GeometryDecoder.ToPoint3d method" Url="html/96149714-4e5c-1a8f-9457-1fbca0587dc4.htm" />
+  <HelpKINode Title="GeometryDecoder.ToPolyCurves method" Url="html/7832fe53-75ce-920e-6138-ec3718592eb0.htm" />
+  <HelpKINode Title="GeometryDecoder.ToPolylineCurve method" Url="html/0c0456b7-63ea-a647-3828-4da81196542a.htm" />
+  <HelpKINode Title="GeometryDecoder.ToTransform method" Url="html/a4e6a281-a9a4-19a2-3ba9-535beca898c6.htm" />
+  <HelpKINode Title="GeometryDecoder.ToVector2d method" Url="html/6b696c74-893d-b5e4-6f88-60f48d86d5dc.htm" />
+  <HelpKINode Title="GeometryDecoder.ToVector3d method" Url="html/87c85188-daa7-2f0a-affe-e5c466bccae0.htm" />
+  <HelpKINode Title="GeometryEncoder class">
+    <HelpKINode Title="GeometryEncoder Class" Url="html/895fa450-6e7b-9ec2-ef70-cc072d561cbc.htm" />
+    <HelpKINode Title="methods" Url="html/60addec6-c02e-d735-2594-b60785f80d05.htm" />
+  </HelpKINode>
+  <HelpKINode Title="GeometryEncoder.ToArc method" Url="html/ee0a5184-adb0-6adf-44b2-0dfc50f98271.htm" />
+  <HelpKINode Title="GeometryEncoder.ToBoundingBoxXYZ method" Url="html/9d08802e-c656-5e0e-6273-8c57881844f5.htm" />
+  <HelpKINode Title="GeometryEncoder.ToCurve method" Url="html/599d6d67-ae0b-07e1-d5f4-bdec6f28b47b.htm" />
+  <HelpKINode Title="GeometryEncoder.ToCurveArray method" Url="html/0ff6426e-7299-8ffe-8981-6e4cd37004b7.htm" />
+  <HelpKINode Title="GeometryEncoder.ToCurveLoop method" Url="html/ff2e3e37-e630-cf30-e5be-ab9eb2cf7668.htm" />
+  <HelpKINode Title="GeometryEncoder.ToGeometryObject method" Url="html/5054f77a-8c71-611a-1de5-43b75a7fe4f0.htm" />
+  <HelpKINode Title="GeometryEncoder.ToLine method" Url="html/f56e8673-ccf3-ba69-30bf-a94378dda6ba.htm" />
+  <HelpKINode Title="GeometryEncoder.ToLines method" Url="html/f65d1a36-9a25-022d-a9d0-52dcdda61074.htm" />
+  <HelpKINode Title="GeometryEncoder.ToMesh method" Url="html/9a1c131b-cc77-7be2-9065-a2db16c602b7.htm" />
+  <HelpKINode Title="GeometryEncoder.ToOutline method" Url="html/90832cdc-fad0-c4a2-eb35-5d86caa000ab.htm" />
+  <HelpKINode Title="GeometryEncoder.ToPlane method" Url="html/d1432b22-8a51-ac7b-86b0-93af5ae74f00.htm" />
+  <HelpKINode Title="GeometryEncoder.ToPoint method" Url="html/1774ea5f-625a-009d-ce87-f38692f1b34a.htm" />
+  <HelpKINode Title="GeometryEncoder.ToPoints method" Url="html/0319e83e-4d40-b622-df6f-d935dc7d0a1d.htm" />
+  <HelpKINode Title="GeometryEncoder.ToPolyLine method" Url="html/48333f89-5426-cf36-ab49-7b2d0f7fee10.htm" />
+  <HelpKINode Title="GeometryEncoder.ToSolid method" Url="html/d3ce8ec3-c80b-cad9-7e6d-18303d5a673c.htm" />
+  <HelpKINode Title="GeometryEncoder.ToTransform method" Url="html/2a429780-af03-407c-77bb-a88e513147a3.htm" />
+  <HelpKINode Title="GeometryEncoder.ToUV method" Url="html/31ea1b28-94c2-fd84-ab9b-9269f34366ee.htm" />
+  <HelpKINode Title="GeometryEncoder.ToXYZ method" Url="html/66076506-a144-64a8-9068-bb39e360f229.htm" />
+  <HelpKINode Title="InvokeInHostContext method" Url="html/259b900e-a5ae-cb9c-0040-7ea3bb5fe462.htm" />
+  <HelpKINode Title="Model field" Url="html/0fa16ba2-9870-2265-b35c-b3ebf4a93b58.htm" />
+  <HelpKINode Title="ModelUnits property" Url="html/979781d1-9bcf-cb3a-a08c-debca7d47557.htm" />
+  <HelpKINode Title="Page field" Url="html/79bee3b5-6a0d-2864-1d90-22c6dccdc927.htm" />
+  <HelpKINode Title="RectangleConverter class">
+    <HelpKINode Title="RectangleConverter Class" Url="html/bcb7cc00-494c-b398-044d-45ad6cf7664b.htm" />
+    <HelpKINode Title="methods" Url="html/b88bde59-0114-b072-b83d-7154de940bb0.htm" />
+  </HelpKINode>
+  <HelpKINode Title="RectangleConverter.ToRectangle method" Url="html/3850e592-71f5-c72c-1463-6efd9ef23ba3.htm" />
+  <HelpKINode Title="RenderMaterialConverter class">
+    <HelpKINode Title="RenderMaterialConverter Class" Url="html/3ea4a546-e7b3-e09a-78c6-207f56d3c8f3.htm" />
+    <HelpKINode Title="methods" Url="html/ab21e0c0-ae37-398d-4b7e-48c5f7edafa8.htm" />
+  </HelpKINode>
+  <HelpKINode Title="RenderMaterialConverter.ToRenderMaterial method" Url="html/39fa370e-9c5f-96a7-e499-b00fd0951507.htm" />
+  <HelpKINode Title="Revit class">
+    <HelpKINode Title="Revit Class" Url="html/8b41745b-8ab8-7d19-1b77-49226b743c2e.htm" />
+    <HelpKINode Title="properties" Url="html/57eca5b5-fe0b-6767-9774-9596af99a5cc.htm" />
+  </HelpKINode>
+  <HelpKINode Title="Revit.ActiveDBApplication property" Url="html/ed353c11-b92d-d177-2b33-9347ab8b9a56.htm" />
+  <HelpKINode Title="Revit.ActiveDBDocument property" Url="html/09e83018-443c-710d-0cfd-ffac08dc0e66.htm" />
+  <HelpKINode Title="Revit.ActiveUIApplication property" Url="html/f7e4e8fb-10e9-e99f-08b6-2ef3f8dc2bc9.htm" />
+  <HelpKINode Title="Revit.ActiveUIDocument property" Url="html/fd485d19-a6dc-021c-7690-a58984cdff75.htm" />
+  <HelpKINode Title="Revit.AngleTolerance property" Url="html/879e30f6-93ea-ac3d-b406-53d82a883256.htm" />
+  <HelpKINode Title="Revit.ModelUnits property" Url="html/979781d1-9bcf-cb3a-a08c-debca7d47557.htm" />
+  <HelpKINode Title="Revit.ShortCurveTolerance property" Url="html/41f09bdb-6b5c-12fb-5347-8cbd9cae1d88.htm" />
+  <HelpKINode Title="Revit.VertexTolerance property" Url="html/2ba198f0-02a4-0e1e-606e-d7415086486a.htm" />
+  <HelpKINode Title="Rhinoceros class">
+    <HelpKINode Title="Rhinoceros Class" Url="html/d1cee63d-64d9-08ea-e181-23230704a113.htm" />
+    <HelpKINode Title="methods" Url="html/1d63d69c-7e72-e929-73c7-8be9bb320f29.htm" />
+  </HelpKINode>
+  <HelpKINode Title="Rhinoceros.InvokeInHostContext method" Url="html/259b900e-a5ae-cb9c-0040-7ea3bb5fe462.htm" />
+  <HelpKINode Title="Rhinoceros.RunScriptAsync method" Url="html/aa3f1805-5e51-d9fb-b74a-29c530ae0716.htm" />
+  <HelpKINode Title="Rhinoceros.ShowAsync method" Url="html/cc39a71f-d6a1-f8f7-0c70-41eb56869acd.htm" />
+  <HelpKINode Title="RhinoInside.Revit namespace" Url="html/38991fe9-66b1-4f24-1e34-1f6af8cc6d56.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.Eto.Drawing namespace" Url="html/bf4a95c7-cd21-b3f6-b168-5df7d1e3a318.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.Eto.Drawing.ColorConverter class" Url="html/40df3757-4368-438a-6587-cb6567eb52d5.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.Geometry namespace" Url="html/49621746-8ea8-385a-d14e-8f5dac51a58a.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.Geometry.GeometryDecoder class" Url="html/f0b6fe2b-654e-7b38-918f-50486daa6536.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.Geometry.GeometryEncoder class" Url="html/895fa450-6e7b-9ec2-ef70-cc072d561cbc.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.Geometry.UnitConverter class" Url="html/26565b61-64dc-05bf-c8f4-e28c75828afb.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.Render namespace" Url="html/d04d1d8c-1d04-d580-7b4d-3c05dd40580e.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.Render.RenderMaterialConverter class" Url="html/3ea4a546-e7b3-e09a-78c6-207f56d3c8f3.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.System.Drawing namespace" Url="html/b09f0574-fb00-fb82-cdd3-9bcc685d40d7.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.System.Drawing.ColorConverter class" Url="html/4542de3f-a494-7522-3bf5-e942f52c858a.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.System.Drawing.ColorWithTransparencyConverter class" Url="html/81af04ff-8082-0303-62a9-19e8917f32a5.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.System.Drawing.RectangleConverter class" Url="html/bcb7cc00-494c-b398-044d-45ad6cf7664b.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.System.Windows.Media namespace" Url="html/d0598434-cbab-1d75-bff9-4efe057742e5.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Convert.System.Windows.Media.ColorConverter class" Url="html/de669233-a2a0-a402-82dc-75fb8bfea54e.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Revit class" Url="html/8b41745b-8ab8-7d19-1b77-49226b743c2e.htm" />
+  <HelpKINode Title="RhinoInside.Revit.Rhinoceros class" Url="html/d1cee63d-64d9-08ea-e181-23230704a113.htm" />
+  <HelpKINode Title="RunScriptAsync method" Url="html/aa3f1805-5e51-d9fb-b74a-29c530ae0716.htm" />
+  <HelpKINode Title="ShortCurveTolerance property" Url="html/41f09bdb-6b5c-12fb-5347-8cbd9cae1d88.htm" />
+  <HelpKINode Title="ShowAsync method" Url="html/cc39a71f-d6a1-f8f7-0c70-41eb56869acd.htm" />
+  <HelpKINode Title="ToArc method" Url="html/ee0a5184-adb0-6adf-44b2-0dfc50f98271.htm" />
+  <HelpKINode Title="ToBoundingBox method" Url="html/7a8b279f-0e9a-d06a-3365-ec252a231e1d.htm" />
+  <HelpKINode Title="ToBoundingBoxXYZ method" Url="html/9d08802e-c656-5e0e-6273-8c57881844f5.htm" />
+  <HelpKINode Title="ToBox method" Url="html/d3412746-f9fd-abcb-e6db-9e64192bb92d.htm" />
+  <HelpKINode Title="ToBrep method" Url="html/0013b64d-a2bc-6adf-7d1c-742636ef1086.htm" />
+  <HelpKINode Title="ToColor method">
+    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/bd493dda-cbf1-a2b0-588b-1045abb5e50a.htm" />
+    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/d5c4be91-520c-b214-1ddd-452aacda4ef4.htm" />
+    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/a066cf76-aa1f-fa22-9460-84622494da73.htm" />
+    <HelpKINode Title="ColorWithTransparencyConverter.ToColor Method " Url="html/001118ff-0da4-e125-c4f7-c8337562c826.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ToColorWithTransparency method" Url="html/97bfc358-c29c-fd8f-f704-dbf5a8aa1124.htm" />
+  <HelpKINode Title="ToCurve method">
+    <HelpKINode Title="GeometryDecoder.ToCurve Method " Url="html/4a13cbed-e207-5824-b64e-a1450a386710.htm" />
+    <HelpKINode Title="GeometryEncoder.ToCurve Method " Url="html/599d6d67-ae0b-07e1-d5f4-bdec6f28b47b.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ToCurveArray method" Url="html/0ff6426e-7299-8ffe-8981-6e4cd37004b7.htm" />
+  <HelpKINode Title="ToCurveLoop method" Url="html/ff2e3e37-e630-cf30-e5be-ab9eb2cf7668.htm" />
+  <HelpKINode Title="ToCurves method" Url="html/5136b134-a27c-3dc6-4590-2e45c96aae47.htm" />
+  <HelpKINode Title="ToGeometryObject method" Url="html/5054f77a-8c71-611a-1de5-43b75a7fe4f0.htm" />
+  <HelpKINode Title="ToLine method" Url="html/f56e8673-ccf3-ba69-30bf-a94378dda6ba.htm" />
+  <HelpKINode Title="ToLines method" Url="html/f65d1a36-9a25-022d-a9d0-52dcdda61074.htm" />
+  <HelpKINode Title="ToMesh method">
+    <HelpKINode Title="GeometryDecoder.ToMesh Method " Url="html/99c2feae-34d8-d4f0-0ae9-b64dd156c377.htm" />
+    <HelpKINode Title="GeometryEncoder.ToMesh Method " Url="html/9a1c131b-cc77-7be2-9065-a2db16c602b7.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ToOutline method" Url="html/90832cdc-fad0-c4a2-eb35-5d86caa000ab.htm" />
+  <HelpKINode Title="ToPlane method">
+    <HelpKINode Title="GeometryDecoder.ToPlane Method " Url="html/ff2bd82d-d94d-9433-77b5-e7b8b968c7b8.htm" />
+    <HelpKINode Title="GeometryEncoder.ToPlane Method " Url="html/d1432b22-8a51-ac7b-86b0-93af5ae74f00.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ToPoint method">
+    <HelpKINode Title="GeometryDecoder.ToPoint Method " Url="html/4420852d-4593-5554-36d7-1e97264d5da6.htm" />
+    <HelpKINode Title="GeometryEncoder.ToPoint Method " Url="html/1774ea5f-625a-009d-ce87-f38692f1b34a.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ToPoint2d method" Url="html/fc88ef44-c1b2-96e5-c4db-0710b092ddc0.htm" />
+  <HelpKINode Title="ToPoint3d method" Url="html/96149714-4e5c-1a8f-9457-1fbca0587dc4.htm" />
+  <HelpKINode Title="ToPoints method" Url="html/0319e83e-4d40-b622-df6f-d935dc7d0a1d.htm" />
+  <HelpKINode Title="ToPolyCurves method" Url="html/7832fe53-75ce-920e-6138-ec3718592eb0.htm" />
+  <HelpKINode Title="ToPolyLine method" Url="html/48333f89-5426-cf36-ab49-7b2d0f7fee10.htm" />
+  <HelpKINode Title="ToPolylineCurve method" Url="html/0c0456b7-63ea-a647-3828-4da81196542a.htm" />
+  <HelpKINode Title="ToRectangle method" Url="html/3850e592-71f5-c72c-1463-6efd9ef23ba3.htm" />
+  <HelpKINode Title="ToRenderMaterial method" Url="html/39fa370e-9c5f-96a7-e499-b00fd0951507.htm" />
+  <HelpKINode Title="ToSolid method" Url="html/d3ce8ec3-c80b-cad9-7e6d-18303d5a673c.htm" />
+  <HelpKINode Title="ToTransform method">
+    <HelpKINode Title="GeometryDecoder.ToTransform Method " Url="html/a4e6a281-a9a4-19a2-3ba9-535beca898c6.htm" />
+    <HelpKINode Title="GeometryEncoder.ToTransform Method " Url="html/2a429780-af03-407c-77bb-a88e513147a3.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ToUV method" Url="html/31ea1b28-94c2-fd84-ab9b-9269f34366ee.htm" />
+  <HelpKINode Title="ToVector2d method" Url="html/6b696c74-893d-b5e4-6f88-60f48d86d5dc.htm" />
+  <HelpKINode Title="ToVector3d method" Url="html/87c85188-daa7-2f0a-affe-e5c466bccae0.htm" />
+  <HelpKINode Title="ToXYZ method" Url="html/66076506-a144-64a8-9068-bb39e360f229.htm" />
+  <HelpKINode Title="UnitConverter class">
+    <HelpKINode Title="UnitConverter Class" Url="html/26565b61-64dc-05bf-c8f4-e28c75828afb.htm" />
+    <HelpKINode Title="constructor" Url="html/0ede079e-3c60-0e0d-d404-7ed887714f2b.htm" />
+    <HelpKINode Title="fields" Url="html/0f99398e-d0c9-4d89-17dc-1c021f2dae8c.htm" />
+    <HelpKINode Title="methods" Url="html/fcf051c1-53ed-04de-f482-62aaf269f0fd.htm" />
+    <HelpKINode Title="properties" Url="html/a1257956-7d28-b4fb-6f58-3f288d29895f.htm" />
+  </HelpKINode>
+  <HelpKINode Title="UnitConverter.ConvertFromInternalUnits method" Url="html/cc8ca42c-2e9f-b2ec-e986-44be660cd232.htm" />
+  <HelpKINode Title="UnitConverter.ConvertToInternalUnits method" Url="html/e2a5c609-c2b4-1742-932a-81023d3c8ef1.htm" />
+  <HelpKINode Title="UnitConverter.Model field" Url="html/0fa16ba2-9870-2265-b35c-b3ebf4a93b58.htm" />
+  <HelpKINode Title="UnitConverter.Page field" Url="html/79bee3b5-6a0d-2864-1d90-22c6dccdc927.htm" />
+  <HelpKINode Title="UnitConverter.UnitConverter constructor" Url="html/0ede079e-3c60-0e0d-d404-7ed887714f2b.htm" />
+  <HelpKINode Title="UnitConverter.UnitSystem property" Url="html/1cc44871-e6a0-8406-2366-6b4e5d121c6a.htm" />
+  <HelpKINode Title="UnitSystem property" Url="html/1cc44871-e6a0-8406-2366-6b4e5d121c6a.htm" />
+  <HelpKINode Title="VertexTolerance property" Url="html/2ba198f0-02a4-0e1e-606e-d7415086486a.htm" />
+</HelpKI>

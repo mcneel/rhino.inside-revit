@@ -3,6 +3,7 @@
   <!-- Import the common properties to support NuGet restore -->
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <NoWarn>LWW0001</NoWarn>
     <ProjectGuid>{7e340714-ca6b-4b13-81c9-f9dbfba079f2}</ProjectGuid>
     <SHFBSchemaVersion>2017.9.26.0</SHFBSchemaVersion>
     <ComponentPath>$(PackagesDir)EWSoftware.SHFB.NETFramework.4.8.0.1</ComponentPath>
@@ -39,7 +40,7 @@
     <OutputPath>help\Debug $(RevitVersion)\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('Release'))">
-    <OutputPath>help\Release $(RevitVersion)\</OutputPath>
+    <OutputPath>$(RIRDocsDir)\api\$(RevitVersion)\</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <HtmlHelpName>RhinoInside.Revit API</HtmlHelpName>
