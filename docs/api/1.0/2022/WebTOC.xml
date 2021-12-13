@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <HelpTOC>
 
-  <HelpTOCNode Id="139dfbd7-eb16-44e5-bccf-aa09424183e2" Title="Namespaces" Url="html/97fbe2c3-5952-7462-aa9e-3ff3afe7f415.htm">
-    <HelpTOCNode Id="f2b23b38-f531-45d8-8fce-73f2976eeadb" Title="RhinoInside.Revit" Url="html/38991fe9-66b1-4f24-1e34-1f6af8cc6d56.htm">
-      <HelpTOCNode Id="d1bb37eb-e3a6-4fad-9eea-83fde4d775a0" Title="Revit Class" Url="html/8b41745b-8ab8-7d19-1b77-49226b743c2e.htm">
-        <HelpTOCNode Id="6020274b-8cd8-4379-8ca3-f6aea385c788" Title="Revit Properties" Url="html/57eca5b5-fe0b-6767-9774-9596af99a5cc.htm">
+  <HelpTOCNode Id="9de685b4-f5b8-4f70-9fec-733d236b6c32" Title="Namespaces" Url="html/97fbe2c3-5952-7462-aa9e-3ff3afe7f415.htm">
+    <HelpTOCNode Id="70455e1f-600b-47e0-bfd0-8b36cb488833" Title="RhinoInside.Revit" Url="html/38991fe9-66b1-4f24-1e34-1f6af8cc6d56.htm">
+      <HelpTOCNode Id="a49c31ba-9924-44ee-8839-88d333be2af9" Title="Revit Class" Url="html/8b41745b-8ab8-7d19-1b77-49226b743c2e.htm">
+        <HelpTOCNode Id="b15a34b2-47fa-4046-bc2a-1065c76e1ed0" Title="Revit Properties" Url="html/57eca5b5-fe0b-6767-9774-9596af99a5cc.htm">
           <HelpTOCNode Title="ActiveDBApplication Property " Url="html/ed353c11-b92d-d177-2b33-9347ab8b9a56.htm" />
           <HelpTOCNode Title="ActiveDBDocument Property " Url="html/09e83018-443c-710d-0cfd-ffac08dc0e66.htm" />
           <HelpTOCNode Title="ActiveUIApplication Property " Url="html/f7e4e8fb-10e9-e99f-08b6-2ef3f8dc2bc9.htm" />
@@ -15,9 +15,9 @@
           <HelpTOCNode Title="VertexTolerance Property " Url="html/2ba198f0-02a4-0e1e-606e-d7415086486a.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="4a6da632-d942-45a2-9093-bc48b4991c77" Title="Rhinoceros Class" Url="html/d1cee63d-64d9-08ea-e181-23230704a113.htm">
-        <HelpTOCNode Id="4152b685-36fb-4298-8a64-ff5417dc4c91" Title="Rhinoceros Methods" Url="html/1d63d69c-7e72-e929-73c7-8be9bb320f29.htm">
-          <HelpTOCNode Id="26b1d384-c7a1-461c-b9e1-a2c12e0820d3" Title="InvokeInHostContext Method " Url="html/259b900e-a5ae-cb9c-0040-7ea3bb5fe462.htm">
+      <HelpTOCNode Id="eae79e2a-e984-4030-a11e-5077ba908696" Title="Rhinoceros Class" Url="html/d1cee63d-64d9-08ea-e181-23230704a113.htm">
+        <HelpTOCNode Id="a5d2841a-e0c4-41d1-9bd2-405bec34d74e" Title="Rhinoceros Methods" Url="html/1d63d69c-7e72-e929-73c7-8be9bb320f29.htm">
+          <HelpTOCNode Id="1632e841-04df-42ab-a44a-3eb3a2dd3e3b" Title="InvokeInHostContext Method " Url="html/259b900e-a5ae-cb9c-0040-7ea3bb5fe462.htm">
             <HelpTOCNode Title="InvokeInHostContext Method (Action)" Url="html/a391156f-48a4-7162-5538-f4acd17a2b0d.htm" />
             <HelpTOCNode Title="InvokeInHostContext(T) Method (Func(T))" Url="html/3ed04ce1-2772-309b-79b0-76b031113f57.htm" />
           </HelpTOCNode>
@@ -26,30 +26,30 @@
         </HelpTOCNode>
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="e1b2f3cc-83f7-47be-8dc7-e46f85b27546" Title="RhinoInside.Revit.Convert.Eto.Drawing" Url="html/bf4a95c7-cd21-b3f6-b168-5df7d1e3a318.htm">
-      <HelpTOCNode Id="36a26070-3019-4250-bbbb-a60e81248309" Title="ColorConverter Class" Url="html/40df3757-4368-438a-6587-cb6567eb52d5.htm">
-        <HelpTOCNode Id="b3c58eee-b941-4141-a47c-e8d130fee1e2" Title="ColorConverter Methods" Url="html/d2b15e11-8bb2-d3ea-0cbd-d82a74e1b95a.htm">
-          <HelpTOCNode Id="649160da-1bb8-410f-bc50-10cdccb0fdfa" Title="ToColor Method " Url="html/bd493dda-cbf1-a2b0-588b-1045abb5e50a.htm">
+    <HelpTOCNode Id="21f6cc71-4c4a-42d4-83a5-2092e2d29a46" Title="RhinoInside.Revit.Convert.Eto.Drawing" Url="html/bf4a95c7-cd21-b3f6-b168-5df7d1e3a318.htm">
+      <HelpTOCNode Id="b47e1d3e-07c6-455d-b97d-ceb88456e110" Title="ColorConverter Class" Url="html/40df3757-4368-438a-6587-cb6567eb52d5.htm">
+        <HelpTOCNode Id="a56cfcc3-f8ed-4e4e-9a98-770931fc45d9" Title="ColorConverter Methods" Url="html/d2b15e11-8bb2-d3ea-0cbd-d82a74e1b95a.htm">
+          <HelpTOCNode Id="6eed44e9-e045-4c45-9751-c5424baaca22" Title="ToColor Method " Url="html/bd493dda-cbf1-a2b0-588b-1045abb5e50a.htm">
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/6f846c50-03e8-2317-5013-d95dc4f908a6.htm" />
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/5eb9bc74-e55b-1506-6249-e2dfc95c8ce2.htm" />
           </HelpTOCNode>
         </HelpTOCNode>
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="046fc992-6b22-48fd-8f0f-112424d836db" Title="RhinoInside.Revit.Convert.Geometry" Url="html/49621746-8ea8-385a-d14e-8f5dac51a58a.htm">
-      <HelpTOCNode Id="2e4ca1d5-ae25-4443-86e6-541956135809" Title="GeometryDecoder Class" Url="html/f0b6fe2b-654e-7b38-918f-50486daa6536.htm">
-        <HelpTOCNode Id="7ca5abbc-1a92-4f2e-a500-3a617fa19015" Title="GeometryDecoder Methods" Url="html/9a1737e1-9eae-bea7-fb83-159d1d437cd0.htm">
-          <HelpTOCNode Id="8c1b5a75-5058-4c2d-a5ca-b96ad6d05736" Title="ToBoundingBox Method " Url="html/7a8b279f-0e9a-d06a-3365-ec252a231e1d.htm">
+    <HelpTOCNode Id="b928b857-fa34-4d6f-ac10-63f60de93caf" Title="RhinoInside.Revit.Convert.Geometry" Url="html/49621746-8ea8-385a-d14e-8f5dac51a58a.htm">
+      <HelpTOCNode Id="92654757-24d5-4a04-9318-77acbaa25189" Title="GeometryDecoder Class" Url="html/f0b6fe2b-654e-7b38-918f-50486daa6536.htm">
+        <HelpTOCNode Id="ee1a36c5-266c-42c1-a864-e919df1e8e28" Title="GeometryDecoder Methods" Url="html/9a1737e1-9eae-bea7-fb83-159d1d437cd0.htm">
+          <HelpTOCNode Id="cbe91701-cc56-44f0-b3ea-c977f506cabd" Title="ToBoundingBox Method " Url="html/7a8b279f-0e9a-d06a-3365-ec252a231e1d.htm">
             <HelpTOCNode Title="ToBoundingBox Method (BoundingBoxXYZ)" Url="html/e8231c7f-3e7d-190e-b144-d4fe1e6143c7.htm" />
             <HelpTOCNode Title="ToBoundingBox Method (Outline)" Url="html/ee1c750b-d251-3f47-9568-ab1691d8202b.htm" />
             <HelpTOCNode Title="ToBoundingBox Method (BoundingBoxXYZ, Transform)" Url="html/81c6a4b0-34fa-d0de-5b79-bdfeb5bc0a9e.htm" />
           </HelpTOCNode>
           <HelpTOCNode Title="ToBox Method " Url="html/d3412746-f9fd-abcb-e6db-9e64192bb92d.htm" />
-          <HelpTOCNode Id="8980991f-3733-48b4-b6d9-e9caa15dcd73" Title="ToBrep Method " Url="html/0013b64d-a2bc-6adf-7d1c-742636ef1086.htm">
+          <HelpTOCNode Id="a1d5a64d-748a-4992-94f6-848bcde73eff" Title="ToBrep Method " Url="html/0013b64d-a2bc-6adf-7d1c-742636ef1086.htm">
             <HelpTOCNode Title="ToBrep Method (Face)" Url="html/e995374e-2d04-cb31-d982-6cfbe2c3452d.htm" />
             <HelpTOCNode Title="ToBrep Method (Solid)" Url="html/745c1010-ab5b-2b52-7a1c-192370807a10.htm" />
           </HelpTOCNode>
-          <HelpTOCNode Id="21fd6f05-c78c-436e-aa29-5b18c00d50f5" Title="ToCurve Method " Url="html/4a13cbed-e207-5824-b64e-a1450a386710.htm">
+          <HelpTOCNode Id="35863d88-b7ac-4d71-bf1f-4d9fce47a80b" Title="ToCurve Method " Url="html/4a13cbed-e207-5824-b64e-a1450a386710.htm">
             <HelpTOCNode Title="ToCurve Method (Arc)" Url="html/ad673c33-6a5e-c090-a9ba-802c645f5fda.htm" />
             <HelpTOCNode Title="ToCurve Method (Curve)" Url="html/9faaa196-5576-2709-4b5f-b611174bd7b1.htm" />
             <HelpTOCNode Title="ToCurve Method (CurveLoop)" Url="html/59020b5b-a904-46be-8412-101b2e7994a5.htm" />
@@ -72,17 +72,17 @@
           <HelpTOCNode Title="ToVector3d Method " Url="html/87c85188-daa7-2f0a-affe-e5c466bccae0.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="a6544bc1-642c-4796-a1bc-85c682d29a8b" Title="GeometryEncoder Class" Url="html/895fa450-6e7b-9ec2-ef70-cc072d561cbc.htm">
-        <HelpTOCNode Id="e3b15ae3-74fa-414b-93ea-5de5bdce5e5e" Title="GeometryEncoder Methods" Url="html/60addec6-c02e-d735-2594-b60785f80d05.htm">
-          <HelpTOCNode Id="bf3b2ca9-0a64-4dcc-98ad-a060075b8525" Title="ToArc Method " Url="html/ee0a5184-adb0-6adf-44b2-0dfc50f98271.htm">
+      <HelpTOCNode Id="8973b29e-5d3e-40d3-ab2a-47fd07225184" Title="GeometryEncoder Class" Url="html/895fa450-6e7b-9ec2-ef70-cc072d561cbc.htm">
+        <HelpTOCNode Id="d924888d-a6b2-477a-ac8c-dee9dd443396" Title="GeometryEncoder Methods" Url="html/60addec6-c02e-d735-2594-b60785f80d05.htm">
+          <HelpTOCNode Id="542bead9-d352-4389-ac5e-def5fff02064" Title="ToArc Method " Url="html/ee0a5184-adb0-6adf-44b2-0dfc50f98271.htm">
             <HelpTOCNode Title="ToArc Method (Arc)" Url="html/9808589f-677b-a971-7630-a9a0851d45f7.htm" />
             <HelpTOCNode Title="ToArc Method (Circle)" Url="html/ebf2ceaf-4e60-c2ac-1382-65f76762bc3c.htm" />
           </HelpTOCNode>
-          <HelpTOCNode Id="aaed0c54-2c58-47db-9573-3d6e00ff7004" Title="ToBoundingBoxXYZ Method " Url="html/9d08802e-c656-5e0e-6273-8c57881844f5.htm">
+          <HelpTOCNode Id="93f39be5-983d-4543-8e62-efa51aaceaa1" Title="ToBoundingBoxXYZ Method " Url="html/9d08802e-c656-5e0e-6273-8c57881844f5.htm">
             <HelpTOCNode Title="ToBoundingBoxXYZ Method (BoundingBox)" Url="html/c9043c99-7d03-27cd-9ed3-dee9fe0994ca.htm" />
             <HelpTOCNode Title="ToBoundingBoxXYZ Method (Box)" Url="html/3f11a993-6195-68b3-03e8-c2a626b29572.htm" />
           </HelpTOCNode>
-          <HelpTOCNode Id="d9d469d9-a0ca-40de-bf44-48171da41ce4" Title="ToCurve Method " Url="html/599d6d67-ae0b-07e1-d5f4-bdec6f28b47b.htm">
+          <HelpTOCNode Id="c856c48f-285c-464a-b4b1-c910b7a4e0c9" Title="ToCurve Method " Url="html/599d6d67-ae0b-07e1-d5f4-bdec6f28b47b.htm">
             <HelpTOCNode Title="ToCurve Method (ArcCurve)" Url="html/8eed8d04-42dc-b887-ab77-63f50ccf9faa.htm" />
             <HelpTOCNode Title="ToCurve Method (Curve)" Url="html/af8f998f-5251-35b1-e896-4184d0dcfcb5.htm" />
             <HelpTOCNode Title="ToCurve Method (Ellipse)" Url="html/a8505bfb-662f-4994-c92e-cccfada7e799.htm" />
@@ -97,7 +97,7 @@
           <HelpTOCNode Title="ToGeometryObject Method " Url="html/5054f77a-8c71-611a-1de5-43b75a7fe4f0.htm" />
           <HelpTOCNode Title="ToLine Method " Url="html/f56e8673-ccf3-ba69-30bf-a94378dda6ba.htm" />
           <HelpTOCNode Title="ToLines Method " Url="html/f65d1a36-9a25-022d-a9d0-52dcdda61074.htm" />
-          <HelpTOCNode Id="a322ab34-d06c-4b6e-8d3f-cd4dfbe2848e" Title="ToMesh Method " Url="html/9a1c131b-cc77-7be2-9065-a2db16c602b7.htm">
+          <HelpTOCNode Id="b7d120ae-4312-4489-893a-fafef26f78f8" Title="ToMesh Method " Url="html/9a1c131b-cc77-7be2-9065-a2db16c602b7.htm">
             <HelpTOCNode Title="ToMesh Method (Brep)" Url="html/742fcfce-3f44-c9ba-4417-49ddd9e30dfa.htm" />
             <HelpTOCNode Title="ToMesh Method (Extrusion)" Url="html/db37a351-5d93-aef0-a83e-b6dcc6356e2a.htm" />
             <HelpTOCNode Title="ToMesh Method (Mesh)" Url="html/734e7212-593d-8416-ea35-ad7ec904c5de.htm" />
@@ -108,20 +108,20 @@
           <HelpTOCNode Title="ToPoint Method " Url="html/1774ea5f-625a-009d-ce87-f38692f1b34a.htm" />
           <HelpTOCNode Title="ToPoints Method " Url="html/0319e83e-4d40-b622-df6f-d935dc7d0a1d.htm" />
           <HelpTOCNode Title="ToPolyLine Method " Url="html/48333f89-5426-cf36-ab49-7b2d0f7fee10.htm" />
-          <HelpTOCNode Id="eb36321b-f62c-492e-ad8e-736bcbb01065" Title="ToSolid Method " Url="html/d3ce8ec3-c80b-cad9-7e6d-18303d5a673c.htm">
+          <HelpTOCNode Id="2ef3ce97-9de1-4bd6-a40e-26ff9dee8330" Title="ToSolid Method " Url="html/d3ce8ec3-c80b-cad9-7e6d-18303d5a673c.htm">
             <HelpTOCNode Title="ToSolid Method (Brep)" Url="html/efe0d06c-2afd-e88e-4df6-78b167abd2fb.htm" />
             <HelpTOCNode Title="ToSolid Method (Extrusion)" Url="html/0af1097e-40ca-5c13-ff08-7a42e49a686c.htm" />
             <HelpTOCNode Title="ToSolid Method (Mesh)" Url="html/5cccbee0-36db-cb2e-1c8e-a56d06d2cd03.htm" />
             <HelpTOCNode Title="ToSolid Method (SubD)" Url="html/bd377741-1641-591f-4770-1dd8bde5647a.htm" />
           </HelpTOCNode>
           <HelpTOCNode Title="ToTransform Method " Url="html/2a429780-af03-407c-77bb-a88e513147a3.htm" />
-          <HelpTOCNode Id="d46b06d1-7d8f-48d3-872e-a4dde3c6fe99" Title="ToUV Method " Url="html/31ea1b28-94c2-fd84-ab9b-9269f34366ee.htm">
+          <HelpTOCNode Id="f8315232-7508-456b-bd2b-a58c173966f2" Title="ToUV Method " Url="html/31ea1b28-94c2-fd84-ab9b-9269f34366ee.htm">
             <HelpTOCNode Title="ToUV Method (Point2d)" Url="html/653a39d3-284c-1c1f-9cf3-6d2db13b9a52.htm" />
             <HelpTOCNode Title="ToUV Method (Point2f)" Url="html/0a2f5d07-d62e-b467-e3ac-4938d2ddf8ed.htm" />
             <HelpTOCNode Title="ToUV Method (Vector2d)" Url="html/de074a9d-44b5-07ac-6f8b-298560e8b99b.htm" />
             <HelpTOCNode Title="ToUV Method (Vector2f)" Url="html/678d62af-8a86-339c-e58c-b967f7a939cc.htm" />
           </HelpTOCNode>
-          <HelpTOCNode Id="b3256188-9556-4b6e-b095-6e5cf0da875b" Title="ToXYZ Method " Url="html/66076506-a144-64a8-9068-bb39e360f229.htm">
+          <HelpTOCNode Id="43aa82c4-bcb9-4fd2-a468-773ec98034f8" Title="ToXYZ Method " Url="html/66076506-a144-64a8-9068-bb39e360f229.htm">
             <HelpTOCNode Title="ToXYZ Method (Point3d)" Url="html/30e48624-1153-1b64-5293-77f5691031f1.htm" />
             <HelpTOCNode Title="ToXYZ Method (Point3f)" Url="html/a9aff8cd-2736-2159-a032-43721a1d2523.htm" />
             <HelpTOCNode Title="ToXYZ Method (Vector3d)" Url="html/b12d3e70-c549-568b-389f-2d4e70eb6947.htm" />
@@ -129,62 +129,62 @@
           </HelpTOCNode>
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="c91a0d13-0a93-447e-b352-ff0de150186d" Title="UnitConverter Class" Url="html/26565b61-64dc-05bf-c8f4-e28c75828afb.htm">
+      <HelpTOCNode Id="b3da8834-d43b-4cf5-8718-9fcf89533772" Title="UnitConverter Class" Url="html/26565b61-64dc-05bf-c8f4-e28c75828afb.htm">
         <HelpTOCNode Title="UnitConverter Constructor " Url="html/0ede079e-3c60-0e0d-d404-7ed887714f2b.htm" />
-        <HelpTOCNode Id="701f1a7b-a094-4be0-aef4-42f1b3291648" Title="UnitConverter Properties" Url="html/a1257956-7d28-b4fb-6f58-3f288d29895f.htm">
+        <HelpTOCNode Id="95b56758-0c70-4c9a-b9c6-1fccdf52a869" Title="UnitConverter Properties" Url="html/a1257956-7d28-b4fb-6f58-3f288d29895f.htm">
           <HelpTOCNode Title="UnitSystem Property " Url="html/1cc44871-e6a0-8406-2366-6b4e5d121c6a.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="061ca664-8085-4a11-8c2f-7bb9ae20f1af" Title="UnitConverter Methods" Url="html/fcf051c1-53ed-04de-f482-62aaf269f0fd.htm">
-          <HelpTOCNode Id="8d9a4cdc-8c0e-4b01-978b-d25b87cabe20" Title="ConvertFromInternalUnits Method " Url="html/cc8ca42c-2e9f-b2ec-e986-44be660cd232.htm">
+        <HelpTOCNode Id="ffee8e13-9b2a-4a6a-8b3f-d97b1bb9897f" Title="UnitConverter Methods" Url="html/fcf051c1-53ed-04de-f482-62aaf269f0fd.htm">
+          <HelpTOCNode Id="268ce742-cc50-4f9f-b049-0eb775c2d980" Title="ConvertFromInternalUnits Method " Url="html/cc8ca42c-2e9f-b2ec-e986-44be660cd232.htm">
             <HelpTOCNode Title="ConvertFromInternalUnits Method (Double)" Url="html/35141d18-94a5-1494-c513-d40fbb25c193.htm" />
             <HelpTOCNode Title="ConvertFromInternalUnits Method (Double, UnitSystem)" Url="html/f944fb5c-63b8-18b8-a096-edeb3f3c306f.htm" />
           </HelpTOCNode>
-          <HelpTOCNode Id="f43e94b5-1c89-43ad-8bc1-234dea66fbb4" Title="ConvertToInternalUnits Method " Url="html/e2a5c609-c2b4-1742-932a-81023d3c8ef1.htm">
+          <HelpTOCNode Id="f8d5949c-56c3-42d8-bc67-e5a81be8a2df" Title="ConvertToInternalUnits Method " Url="html/e2a5c609-c2b4-1742-932a-81023d3c8ef1.htm">
             <HelpTOCNode Title="ConvertToInternalUnits Method (Double)" Url="html/049f780d-e6d1-18c0-c94f-1b896b254be0.htm" />
             <HelpTOCNode Title="ConvertToInternalUnits Method (Double, UnitSystem)" Url="html/8b9169c4-d89f-b438-72a9-1763a611689b.htm" />
           </HelpTOCNode>
         </HelpTOCNode>
-        <HelpTOCNode Id="22aba299-cdcf-4e34-a4e8-035dfab82504" Title="UnitConverter Fields" Url="html/0f99398e-d0c9-4d89-17dc-1c021f2dae8c.htm">
+        <HelpTOCNode Id="63c0f5fe-619f-4ea9-a4d4-93926870ec29" Title="UnitConverter Fields" Url="html/0f99398e-d0c9-4d89-17dc-1c021f2dae8c.htm">
           <HelpTOCNode Title="Model Field" Url="html/0fa16ba2-9870-2265-b35c-b3ebf4a93b58.htm" />
           <HelpTOCNode Title="Page Field" Url="html/79bee3b5-6a0d-2864-1d90-22c6dccdc927.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="f6948e55-2cf6-43e7-b3a3-c567414adb4a" Title="RhinoInside.Revit.Convert.Render" Url="html/d04d1d8c-1d04-d580-7b4d-3c05dd40580e.htm">
-      <HelpTOCNode Id="79fd3a5f-4fda-4a20-b00b-92c31997c891" Title="RenderMaterialConverter Class" Url="html/3ea4a546-e7b3-e09a-78c6-207f56d3c8f3.htm">
-        <HelpTOCNode Id="76030cb3-2a09-439f-b507-d0e714e82f91" Title="RenderMaterialConverter Methods" Url="html/ab21e0c0-ae37-398d-4b7e-48c5f7edafa8.htm">
+    <HelpTOCNode Id="e738eda6-71b6-4899-bdf8-9aea29a33500" Title="RhinoInside.Revit.Convert.Render" Url="html/d04d1d8c-1d04-d580-7b4d-3c05dd40580e.htm">
+      <HelpTOCNode Id="3c2a9eba-8bdb-458c-95b3-e124670acdcd" Title="RenderMaterialConverter Class" Url="html/3ea4a546-e7b3-e09a-78c6-207f56d3c8f3.htm">
+        <HelpTOCNode Id="7a0e2632-1d74-442a-b86c-7eba0084d145" Title="RenderMaterialConverter Methods" Url="html/ab21e0c0-ae37-398d-4b7e-48c5f7edafa8.htm">
           <HelpTOCNode Title="ToRenderMaterial Method " Url="html/39fa370e-9c5f-96a7-e499-b00fd0951507.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="0fac45d1-4cc3-4678-973f-1dfcac90dfb0" Title="RhinoInside.Revit.Convert.System.Drawing" Url="html/b09f0574-fb00-fb82-cdd3-9bcc685d40d7.htm">
-      <HelpTOCNode Id="f51e0d69-3229-4b40-9673-97f0f9fc791b" Title="ColorConverter Class" Url="html/4542de3f-a494-7522-3bf5-e942f52c858a.htm">
-        <HelpTOCNode Id="db00d595-3fb6-42b9-bcaf-2c2cc503617e" Title="ColorConverter Methods" Url="html/4ac3ea4f-18cf-e6fc-5603-92184353efa2.htm">
-          <HelpTOCNode Id="01ea0349-3d14-432e-a12c-a9493d8e0688" Title="ToColor Method " Url="html/a066cf76-aa1f-fa22-9460-84622494da73.htm">
+    <HelpTOCNode Id="53685450-1739-428e-a895-25b14d33c659" Title="RhinoInside.Revit.Convert.System.Drawing" Url="html/b09f0574-fb00-fb82-cdd3-9bcc685d40d7.htm">
+      <HelpTOCNode Id="4f2b8a6d-0515-421e-b237-7f83b6ddc55c" Title="ColorConverter Class" Url="html/4542de3f-a494-7522-3bf5-e942f52c858a.htm">
+        <HelpTOCNode Id="882b2c74-dee3-4dd8-8dde-f0783b12a917" Title="ColorConverter Methods" Url="html/4ac3ea4f-18cf-e6fc-5603-92184353efa2.htm">
+          <HelpTOCNode Id="75181e6b-83ec-46a7-8e51-f419d6c63cfc" Title="ToColor Method " Url="html/a066cf76-aa1f-fa22-9460-84622494da73.htm">
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/f80bfc2f-2cf4-c0bf-a200-01e46322a92c.htm" />
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/53f93c06-ae32-08f6-a179-5625711a0e44.htm" />
           </HelpTOCNode>
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="de37059b-44a3-4904-838c-da1e93455f59" Title="ColorWithTransparencyConverter Class" Url="html/81af04ff-8082-0303-62a9-19e8917f32a5.htm">
-        <HelpTOCNode Id="a5f926fe-18e1-4af1-9613-91d01b3e0cb8" Title="ColorWithTransparencyConverter Methods" Url="html/28e39af3-b9c6-d46a-80b0-d9a0c768b3a6.htm">
+      <HelpTOCNode Id="e64f3e8f-82d9-481b-8bbb-4da78dbee3b4" Title="ColorWithTransparencyConverter Class" Url="html/81af04ff-8082-0303-62a9-19e8917f32a5.htm">
+        <HelpTOCNode Id="406da589-43b6-4378-98ba-b22e1661870d" Title="ColorWithTransparencyConverter Methods" Url="html/28e39af3-b9c6-d46a-80b0-d9a0c768b3a6.htm">
           <HelpTOCNode Title="ToColor Method " Url="html/001118ff-0da4-e125-c4f7-c8337562c826.htm" />
           <HelpTOCNode Title="ToColorWithTransparency Method " Url="html/97bfc358-c29c-fd8f-f704-dbf5a8aa1124.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="f4dbb9f6-0c68-491e-acf7-7a14b5b5fc00" Title="RectangleConverter Class" Url="html/bcb7cc00-494c-b398-044d-45ad6cf7664b.htm">
-        <HelpTOCNode Id="ba2d2bcf-11b3-48c7-b4ab-23334b47b655" Title="RectangleConverter Methods" Url="html/b88bde59-0114-b072-b83d-7154de940bb0.htm">
-          <HelpTOCNode Id="cf9876ad-35d7-42f0-acae-fe9997124b4c" Title="ToRectangle Method " Url="html/3850e592-71f5-c72c-1463-6efd9ef23ba3.htm">
+      <HelpTOCNode Id="0bdf8c60-41dd-41a8-a0e8-8826989b2a84" Title="RectangleConverter Class" Url="html/bcb7cc00-494c-b398-044d-45ad6cf7664b.htm">
+        <HelpTOCNode Id="9778b98f-82f2-497e-b414-36bc67b02ed9" Title="RectangleConverter Methods" Url="html/b88bde59-0114-b072-b83d-7154de940bb0.htm">
+          <HelpTOCNode Id="a15e90c1-00d3-40da-a914-79ff11a9c391" Title="ToRectangle Method " Url="html/3850e592-71f5-c72c-1463-6efd9ef23ba3.htm">
             <HelpTOCNode Title="ToRectangle Method (Rectangle)" Url="html/7d89c90e-c366-af32-0116-0e2e1ccd0689.htm" />
             <HelpTOCNode Title="ToRectangle Method (Rectangle)" Url="html/63c16c05-210a-38d1-e65b-1469040f5a14.htm" />
           </HelpTOCNode>
         </HelpTOCNode>
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="af2d9d71-cdca-4b14-a886-454f6f4f17a6" Title="RhinoInside.Revit.Convert.System.Windows.Media" Url="html/d0598434-cbab-1d75-bff9-4efe057742e5.htm">
-      <HelpTOCNode Id="5f7de70a-ce50-475f-870a-b62705846ed0" Title="ColorConverter Class" Url="html/de669233-a2a0-a402-82dc-75fb8bfea54e.htm">
-        <HelpTOCNode Id="be26b481-6d91-438f-8256-40114696f59b" Title="ColorConverter Methods" Url="html/28107510-8790-9f8b-5270-50749defc3b0.htm">
-          <HelpTOCNode Id="f136f7ca-9caa-4270-851c-528019f764a1" Title="ToColor Method " Url="html/d5c4be91-520c-b214-1ddd-452aacda4ef4.htm">
+    <HelpTOCNode Id="725c3b69-916e-4ba3-84d8-4c5da4bcae27" Title="RhinoInside.Revit.Convert.System.Windows.Media" Url="html/d0598434-cbab-1d75-bff9-4efe057742e5.htm">
+      <HelpTOCNode Id="587a3387-9226-4da0-befe-c9215c3545db" Title="ColorConverter Class" Url="html/de669233-a2a0-a402-82dc-75fb8bfea54e.htm">
+        <HelpTOCNode Id="30219c66-3100-4935-9c19-0da741b03c47" Title="ColorConverter Methods" Url="html/28107510-8790-9f8b-5270-50749defc3b0.htm">
+          <HelpTOCNode Id="61e229f3-1315-49ac-853d-75d31ae3cea0" Title="ToColor Method " Url="html/d5c4be91-520c-b214-1ddd-452aacda4ef4.htm">
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/9d029112-2509-f0f4-bd48-6050770935ae.htm" />
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/c4f5dbe9-d251-e987-92c3-ff387c4321a4.htm" />
           </HelpTOCNode>
