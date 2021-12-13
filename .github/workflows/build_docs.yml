@@ -8,13 +8,13 @@ jobs:
       - uses: actions/checkout@v2
       - uses: microsoft/setup-msbuild@v1
 
-      - name: prep sandcastle
-        run: |
-          nuget install EWSoftware.SHFB -o packages
-          nuget install EWSoftware.SHFB.NETFramework -o packages
+      # - name: prep sandcastle
+      #   run: |
+      #     nuget install EWSoftware.SHFB -o packages
+      #     nuget install EWSoftware.SHFB.NETFramework -o packages
 
-      - name: build documentation
-        run: msbuild script\cibuild_docs.msbuild -v:m
+      # - name: build documentation
+      #   run: msbuild script\cibuild_docs.msbuild -v:m
 
       # - name: upload docs
       #   uses: actions/upload-artifact@v2
@@ -23,4 +23,4 @@ jobs:
       #     path: docs/api
 
       - name: commit & publish
-        run: script\publish_docs.sh docs\api
+        run: bash script\publish_docs.sh docs\api
