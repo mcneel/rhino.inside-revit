@@ -15,9 +15,12 @@ jobs:
 
       - name: build documentation
         run: msbuild script\cibuild_docs.msbuild -v:m
-      
-      - name: upload docs
-        uses: actions/upload-artifact@v2
-        with:
-          name: all-docs
-          path: docs/api
+
+      # - name: upload docs
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: all-docs
+      #     path: docs/api
+
+      - name: commit & publish
+        run: script\publish_docs.sh docs\api
