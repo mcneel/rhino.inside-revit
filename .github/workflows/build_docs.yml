@@ -14,13 +14,13 @@ jobs:
           nuget install EWSoftware.SHFB.NETFramework -o packages
 
       - name: build documentation
-        run: msbuild script\cibuild_docs.msbuild -v:m
+        run: msbuild script/cibuild_docs.msbuild -v:m
 
       # - name: upload docs
       #   uses: actions/upload-artifact@v2
       #   with:
       #     name: all-docs
-      #     path: docs/api
+      #     path: docs/api/1.0
 
       - name: commit & publish
-        run: bash script\publish_docs.sh docs\api
+        run: bash script/publish_docs.sh docs/api/1.0

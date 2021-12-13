@@ -6,8 +6,8 @@ group: Developer Interface
 
 ### Reference
 
-- {% include rir_api_root.html version="2022" %}
-- {% include rir_api_root.html version="2021" %}
-- {% include rir_api_root.html version="2020" %}
-- {% include rir_api_root.html version="2019" %}
-- {% include rir_api_root.html version="2018" %}
+- {% include rir_api_root.html version="1.0" revit="2022" %}
+- {% include rir_api_root.html version="1.0" revit="2021" %}
+- {% include rir_api_root.html version="1.0" revit="2020" %}
+- {% include rir_api_root.html version="1.0" revit="2019" %}
+- {% include rir_api_root.html version="1.0" revit="2018" %}

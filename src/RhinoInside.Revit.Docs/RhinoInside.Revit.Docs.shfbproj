@@ -37,10 +37,10 @@
   </PropertyGroup>
   <!-- SHFB properties -->
   <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
-    <OutputPath>help\Debug $(RevitVersion)\</OutputPath>
+    <OutputPath>$(RIRDocsDir)\api\1.0\$(RevitVersion)\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('Release'))">
-    <OutputPath>$(RIRDocsDir)\api\$(RevitVersion)\</OutputPath>
+    <OutputPath>$(RIRDocsDir)\api\1.0\$(RevitVersion)\</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <HtmlHelpName>RhinoInside.Revit API</HtmlHelpName>
