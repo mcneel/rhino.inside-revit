@@ -28,8 +28,8 @@ echo
 echo "==> Setting up git access..."
 
 # set up git user
-# git config user.name ?
-# git config user.email ?
+git config user.name Bozo
+git config user.email bozo@mcneel.com
 
 echo
 echo "==> Committing..."
@@ -44,6 +44,4 @@ git status -s
 
 echo
 echo "==> Publishing..."
-
-# push new docs (skip if nothing committed above)
-# git push origin HEAD:$GIT_BRANCH
+git push "https://bozo@mcneel.com:${{ secrets.API_TOKEN_GITHUB }}@github.com/mcneel/rhino.inside-revit.git"
