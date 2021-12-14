@@ -2,7 +2,7 @@
 
 # Rhino.Inside® Revit
 
-[![Build status](https://github.com/mcneel/rhino.inside-revit/actions/workflows/main.yml/badge.svg)
+![Build status](https://github.com/mcneel/rhino.inside-revit/actions/workflows/main.yml/badge.svg)
 
 Please see the [Rhino.Inside.Revit Wiki](https://www.rhino3d.com/inside/revit/)
 for more information on how to use the project. Sections listed below provide
