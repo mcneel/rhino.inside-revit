@@ -243,6 +243,7 @@
     <Compile Include="GH\Kernel.cs" />
     <Compile Include="GH\PreviewServer.cs" />
     <Compile Include="Guest.cs" />
+    <Compile Include="NamespaceDoc.cs" />
     <Compile Include="Rhinoceros.cs" />
     <Compile Include="Rhinoceros.DebugLogging.cs" />
     <Compile Include="Rhinoceros.PreviewServer.cs" />
