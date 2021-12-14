@@ -302,7 +302,7 @@ namespace RhinoInside.Revit
     static DateTime BuildDate => new DateTime(2000, 1, 1).AddDays(Version.Build).AddSeconds(Version.Revision * 2);
 
     public static Version Version => Assembly.GetExecutingAssembly().GetName().Version;
-    public static string DisplayVersion => $"{Version} ({BuildDate})";
+    public static string DisplayVersion => $"{Version} ({BuildDate:s})";
     #endregion
 
     #region Expiration

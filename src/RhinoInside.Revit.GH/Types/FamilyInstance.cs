@@ -279,9 +279,9 @@ namespace RhinoInside.Revit.GH.Types
 
       set
       {
-        if (value is object &&  Value is ARDB.FamilyInstance frame)
+        if (value is object &&  Value is ARDB.FamilyInstance frame && value != IsJoinAllowedAtStart)
         {
-          if (frame.StructuralType != ARDB.Structure.StructuralType.NonStructural)
+          if (frame.StructuralType == ARDB.Structure.StructuralType.NonStructural)
             throw new InvalidOperationException("Join at start can not be set for this element.");
 
           InvalidateGraphics();
@@ -302,9 +302,9 @@ namespace RhinoInside.Revit.GH.Types
 
       set
       {
-        if (value is object && Value is ARDB.FamilyInstance frame)
+        if (value is object && Value is ARDB.FamilyInstance frame && value != IsJoinAllowedAtEnd)
         {
-          if (frame.StructuralType != ARDB.Structure.StructuralType.NonStructural)
+          if (frame.StructuralType == ARDB.Structure.StructuralType.NonStructural)
             throw new InvalidOperationException("Join at end can not be set for this element.");
 
           InvalidateGraphics();

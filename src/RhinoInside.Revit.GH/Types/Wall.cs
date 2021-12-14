@@ -114,6 +114,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is ARDB.Wall wall && value != IsJoinAllowedAtEnd)
         {
+          InvalidateGraphics();
+
           if (value == true)
             ARDB.WallUtils.AllowWallJoinAtEnd(wall, 0);
           else
@@ -132,6 +134,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is ARDB.Wall wall && value != IsJoinAllowedAtEnd)
         {
+          InvalidateGraphics();
+
           if (value == true)
             ARDB.WallUtils.AllowWallJoinAtEnd(wall, 1);
           else

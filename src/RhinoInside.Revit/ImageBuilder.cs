@@ -183,7 +183,7 @@ namespace RhinoInside.Revit
           return System.Windows.Media.PixelFormats.Bgr24;
 
         case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
-          return System.Windows.Media.PixelFormats.Bgr32;
+          return System.Windows.Media.PixelFormats.Bgra32;
         case System.Drawing.Imaging.PixelFormat.Format32bppPArgb:
           return System.Windows.Media.PixelFormats.Pbgra32;
         case System.Drawing.Imaging.PixelFormat.Format32bppRgb:
