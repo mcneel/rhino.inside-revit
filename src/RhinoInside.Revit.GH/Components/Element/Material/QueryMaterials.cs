@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
       new ParamDefinition (new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Class", "C", "Material class", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Material name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true)
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary)
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -58,17 +58,10 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
-      string @class = null;
-      DA.GetData("Class", ref @class);
-
-      string name = null;
-      DA.GetData("Name", ref name);
-
-      ARDB.ElementFilter filter = null;
-      DA.GetData("Filter", ref filter);
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      Params.TryGetData(DA, "Class", out string @class);
+      Params.TryGetData(DA, "Name", out string name);
+      Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
       using (var collector = new ARDB.FilteredElementCollector(doc))
       {

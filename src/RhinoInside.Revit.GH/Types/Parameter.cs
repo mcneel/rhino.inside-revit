@@ -743,11 +743,11 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public External.DB.ParameterBinding Binding
+    public External.DB.ParameterScope Scope
     {
       get
       {
-        if (!IsReferencedData) return External.DB.ParameterBinding.Unknown;
+        if (!IsReferencedData) return External.DB.ParameterScope.Unknown;
 
         if (Document is ARDB.Document doc)
         {
@@ -760,30 +760,30 @@ namespace RhinoInside.Revit.GH.Types
               default;
 
             return familyParameter is null ?
-              External.DB.ParameterBinding.Unknown :
+              External.DB.ParameterScope.Unknown :
               familyParameter.IsInstance ?
-              External.DB.ParameterBinding.Instance :
-              External.DB.ParameterBinding.Type;
+              External.DB.ParameterScope.Instance :
+              External.DB.ParameterScope.Type;
           }
           else switch (Value)
           {
-            case ARDB.GlobalParameter _: return External.DB.ParameterBinding.Global;
+            case ARDB.GlobalParameter _: return External.DB.ParameterScope.Global;
             case ARDB.ParameterElement parameterElement:
               var definition = parameterElement.GetDefinition();
               if (!Id.IsBuiltInId())
               {
                 switch (doc.ParameterBindings.get_Item(definition))
                 {
-                  case ARDB.InstanceBinding _: return External.DB.ParameterBinding.Instance;
-                  case ARDB.TypeBinding _: return External.DB.ParameterBinding.Type;
+                  case ARDB.InstanceBinding _: return External.DB.ParameterScope.Instance;
+                  case ARDB.TypeBinding _: return External.DB.ParameterScope.Type;
                 }
               }
 
-              return External.DB.ParameterBinding.Unknown;
+              return External.DB.ParameterScope.Unknown;
           }
         }
 
-        return External.DB.ParameterBinding.Unknown;
+        return External.DB.ParameterScope.Unknown;
       }
     }
     #endregion

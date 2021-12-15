@@ -11,6 +11,7 @@ using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
+  [ComponentVersion(introduced: "1.0", updated: "1.4")]
   public class QueryParameters : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D82D9FC3-FC74-4C54-AAE1-CB4D806741DB");
@@ -57,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.ParameterBinding>>("Binding", "B", "Category type", optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ParameterScope>>("Scope", "S", "Parameter scope", optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Parameter name", optional: true),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ParameterType>>("Type", "T", "Parameter type", optional: true),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ParameterGroup>>("Group", "G", "Parameter group", optional: true, relevance: ParamRelevance.Primary),
@@ -68,6 +69,14 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     {
       ParamDefinition.Create<Parameters.ParameterKey>("Parameter", "K", "Parameters list", GH_ParamAccess.list)
     };
+
+    public override void AddedToDocument(GH_Document document)
+    {
+      base.AddedToDocument(document);
+
+      if (Params.Input<IGH_Param>("Binding") is IGH_Param binding)
+        binding.Name = "Scope";
+    }
 
     IEnumerable<(ARDB.Definition Definition, ARDB.Binding Binding)>
     GetAllProjectParameters(ARDB.Document document)
@@ -84,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      if (!Params.TryGetData(DA, "Binding", out Types.ParameterBinding binding, x => x.IsValid)) return;
+      if (!Params.TryGetData(DA, "Scope", out Types.ParameterScope scope, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => x is object)) return;
       if (!Params.TryGetData(DA, "Type", out Types.ParameterType type, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Group", out Types.ParameterGroup group, x => x.IsValid)) return;
@@ -94,16 +103,16 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       // Project or Family parameters
       if (doc.IsFamilyDocument)
       {
-        if (binding is object)
+        if (scope is object)
         {
-          switch (binding.Value)
+          switch (scope.Value)
           {
-            case ERDB.ParameterBinding.Instance:
+            case ERDB.ParameterScope.Instance:
               parameters = doc.FamilyManager.Parameters.Cast<ARDB.FamilyParameter>().
                 Where(x => x.IsInstance == true).Select(x => x.Definition as ARDB.InternalDefinition);
               break;
 
-            case ERDB.ParameterBinding.Type:
+            case ERDB.ParameterScope.Type:
               parameters = doc.FamilyManager.Parameters.Cast<ARDB.FamilyParameter>().
                 Where(x => x.IsInstance == false).Select(x => x.Definition as ARDB.InternalDefinition);
               break;
@@ -114,18 +123,18 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       }
       else
       {
-        if (binding is object)
+        if (scope is object)
         {
-          switch (binding.Value)
+          switch (scope.Value)
           {
-            case ERDB.ParameterBinding.Instance:
+            case ERDB.ParameterScope.Instance:
               parameters = GetAllProjectParameters(doc).
                 Where(x => x.Binding is ARDB.InstanceBinding).
                 Select(x => x.Definition).
                 OfType<ARDB.InternalDefinition>();
               break;
 
-            case ERDB.ParameterBinding.Type:
+            case ERDB.ParameterScope.Type:
               parameters = GetAllProjectParameters(doc).
                 Where(x => x.Binding is ARDB.TypeBinding).
                 Select(x => x.Definition).
@@ -144,9 +153,9 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         var globals = ARDB.GlobalParametersManager.GetAllGlobalParameters(doc).
           Select(x => (doc.GetElement(x) as ARDB.GlobalParameter).GetDefinition());
 
-        if (binding is null)
+        if (scope is null)
           parameters = parameters.Concat(globals);
-        else if (binding.Value == ERDB.ParameterBinding.Global)
+        else if (scope.Value == ERDB.ParameterScope.Global)
           parameters = globals;
       }
 

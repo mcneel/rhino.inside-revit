@@ -109,6 +109,7 @@
     <Compile Include="Components\Element\Material\PhyscialMaterialAssetComponents.cs" />
     <Compile Include="Components\Element\Material\BaseAssetTypes.cs" />
     <Compile Include="Components\Element\Material\ModifyAppearanceAssets.cs" />
+    <Compile Include="Components\Element\Material\QueryAppearanceAssets.cs" />
     <Compile Include="Components\Element\Material\QueryAssetsOfMaterial.cs" />
     <Compile Include="Components\Element\Material\ModifyAssetsOfMaterial.cs" />
     <Compile Include="Components\Element\Material\ConstructProceduralAssets.cs" />

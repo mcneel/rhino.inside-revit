@@ -69,11 +69,11 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       ),
       //new ParamDefinition
       //(
-      //  new Parameters.Param_Enum<Types.ParameterBinding>()
+      //  new Parameters.Param_Enum<Types.ParameterScope>()
       //  {
-      //    Name = "Binding",
-      //    NickName = "B",
-      //    Description = "Parameter binding",
+      //    Name = "Scope",
+      //    NickName = "S",
+      //    Description = "Parameter scope",
       //    Optional = true
       //  },
       //  ParamRelevance.Primary
@@ -116,11 +116,11 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       ),
       //new ParamDefinition
       //(
-      //  new Parameters.Param_Enum<Types.ParameterBinding>()
+      //  new Parameters.Param_Enum<Types.ParameterScope>()
       //  {
-      //    Name = "Binding",
-      //    NickName = "B",
-      //    Description = "Parameter binding",
+      //    Name = "Scope",
+      //    NickName = "S",
+      //    Description = "Parameter scope",
       //  },
       //  ParamRelevance.Primary
       //),
@@ -144,13 +144,13 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       // Input
       if (!Parameters.ParameterKey.GetProjectParameter(this, DA, _Parameter_, out var key)) return;
       if (!Params.TryGetData(DA, "Varies", out bool? varies)) return;
-      if (!Params.TryGetData(DA, "Binding", out Types.ParameterBinding binding, x => x.IsValid && x.Value != ERDB.ParameterBinding.Unknown)) return;
+      if (!Params.TryGetData(DA, "Scope", out Types.ParameterScope scope, x => x.IsValid && x.Value != ERDB.ParameterScope.Unknown)) return;
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
 
       var doc = key.Document;
 
       var definition = key.Value?.GetDefinition();
-      if (binding is object || varies is object || categories is object)
+      if (scope is object || varies is object || categories is object)
       {
         if (key.Id.IsBuiltInId() || key.Value is ARDB.GlobalParameter || doc?.IsFamilyDocument == true)
           throw new InvalidOperationException("This operation is only supported on project parameters");
@@ -160,14 +160,14 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         if (varies != default && definition.VariesAcrossGroups != varies.Value)
           definition.SetAllowVaryBetweenGroups(doc, varies.Value);
 
-        var parameterBinding = binding?.Value ?? ERDB.ParameterBinding.Unknown;
+        var parameterScope = scope?.Value ?? ERDB.ParameterScope.Unknown;
         var parameterCategories = categories?.Select(x => x.APIObject).OfType<ARDB.Category>().ToList();
 
         UpdateBinding
         (
           key.Value,
           definition,
-          parameterBinding,
+          parameterScope,
           parameterCategories
         );
       }
@@ -176,28 +176,28 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       if (definition is object)
       {
         Params.TrySetData(DA, "Varies", () => definition.VariesAcrossGroups);
-        Params.TrySetData(DA, "Binding", () => definition.GetParameterBinding(key.Document));
+        Params.TrySetData(DA, "Scope", () => definition.GetParameterScope(key.Document));
         Params.TrySetDataList(DA, "Categories", () =>
           (key.Document.ParameterBindings.get_Item(definition) as ARDB.ElementBinding)?.Categories.Cast<ARDB.Category>());
       }
     }
 
-    ERDB.ParameterBinding ToParameterBinding(ARDB.Binding binding)
+    ERDB.ParameterScope ToParameterScope(ARDB.Binding binding)
     {
       switch (binding)
       {
-        case ARDB.InstanceBinding _: return ERDB.ParameterBinding.Instance;
-        case ARDB.TypeBinding _: return ERDB.ParameterBinding.Type;
-        default: return ERDB.ParameterBinding.Unknown;
+        case ARDB.InstanceBinding _: return ERDB.ParameterScope.Instance;
+        case ARDB.TypeBinding _: return ERDB.ParameterScope.Type;
+        default: return ERDB.ParameterScope.Unknown;
       }
     }
 
-    ARDB.Binding CreateBinding(ERDB.ParameterBinding binding, ARDB.CategorySet categorySet)
+    ARDB.Binding CreateBinding(ERDB.ParameterScope scope, ARDB.CategorySet categorySet)
     {
-      switch (binding)
+      switch (scope)
       {
-        case ERDB.ParameterBinding.Instance: return new ARDB.InstanceBinding(categorySet);
-        case ERDB.ParameterBinding.Type: return new ARDB.TypeBinding(categorySet);
+        case ERDB.ParameterScope.Instance: return new ARDB.InstanceBinding(categorySet);
+        case ERDB.ParameterScope.Type: return new ARDB.TypeBinding(categorySet);
       }
       return default;
     }
@@ -206,7 +206,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     (
       ARDB.ParameterElement parameter,
       ARDB.InternalDefinition definition,
-      ERDB.ParameterBinding parameterBinding,
+      ERDB.ParameterScope parameterScope,
       IList<ARDB.Category> categories
     )
     {
@@ -214,12 +214,12 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       var doc = parameter.Document;
       var binding = doc.ParameterBindings.get_Item(definition);
       var categorySet = (binding as ARDB.ElementBinding)?.Categories ?? new ARDB.CategorySet();
-      var bindingType = ToParameterBinding(binding);
+      var bindingScope = ToParameterScope(binding);
 
-      if (parameterBinding != ERDB.ParameterBinding.Unknown && bindingType != parameterBinding)
+      if (parameterScope != ERDB.ParameterScope.Unknown && bindingScope != parameterScope)
       {
         reinsert = true;
-        binding = CreateBinding(parameterBinding, categorySet);
+        binding = CreateBinding(parameterScope, categorySet);
       }
 
       if (categories?.Count == 0)
