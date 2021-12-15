@@ -243,8 +243,8 @@
     <Compile Include="DB\ExternalFailures.cs" />
     <Compile Include="DB\FloorFunction.cs" />
     <Compile Include="DB\NumericTolerance.cs" />
-    <Compile Include="DB\ParameterBinding.cs" />
     <Compile Include="DB\ParameterClass.cs" />
+    <Compile Include="DB\ParameterScope.cs" />
     <Compile Include="DB\Schemas\CategoryId.cs" />
     <Compile Include="DB\Schemas\CategoryId.Enum.cs" />
     <Compile Include="DB\Schemas\CategoryId.Values.cs" />

@@ -3,7 +3,7 @@ using System;
 namespace RhinoInside.Revit.External.DB
 {
   [Flags]
-  public enum ParameterBinding
+  public enum ParameterScope
   {
     Unknown,
     Instance = 1,

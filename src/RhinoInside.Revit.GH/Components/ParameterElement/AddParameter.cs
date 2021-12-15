@@ -9,6 +9,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
   using External.DB.Extensions;
   using ElementTracking;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.4")]
   public class AddParameter : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("84AB6F3C-BB4B-48E4-9175-B7F40791BB7F");
@@ -49,13 +50,13 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       ),
       new ParamDefinition
       (
-        new Parameters.Param_Enum<Types.ParameterBinding>()
+        new Parameters.Param_Enum<Types.ParameterScope>()
         {
-          Name = "Binding",
-          NickName = "B",
-          Description = "Parameter binding",
+          Name = "Scope",
+          NickName = "S",
+          Description = "Parameter scope",
         }.
-        SetDefaultVale(ERDB.ParameterBinding.Instance)
+        SetDefaultVale(ERDB.ParameterScope.Instance)
       ),
     };
 
@@ -72,6 +73,14 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         }
       ),
     };
+
+    public override void AddedToDocument(GH_Document document)
+    {
+      base.AddedToDocument(document);
+
+      if (Params.Input<IGH_Param>("Binding") is IGH_Param binding)
+        binding.Name = "Scope";
+    }
 
     const string _Parameter_ = "Parameter";
     string UserSharedParametersFilename;
@@ -114,7 +123,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Params.GetData(DA, "Definition", out Types.ParameterKey key, x => x.IsValid)) return;
-      if (!Params.GetData(DA, "Binding", out Types.ParameterBinding binding, x => x.IsValid && x.Value != ERDB.ParameterBinding.Unknown)) return;
+      if (!Params.GetData(DA, "Scope", out Types.ParameterScope scope, x => x.IsValid && x.Value != ERDB.ParameterScope.Unknown)) return;
 
       if (key.DataType is null)
         throw new Exceptions.RuntimeErrorException($"Unknown data-type for parameter '{key.Name}'");
@@ -127,7 +136,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
       StartTransaction(doc.Value);
       {
-        parameter = Reconstruct(parameter, doc.Value, key, binding.Value);
+        parameter = Reconstruct(parameter, doc.Value, key, scope.Value);
 
         Params.WriteTrackedElement(_Parameter_, doc.Value, parameter);
         DA.SetData(_Parameter_, parameter);
@@ -162,7 +171,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     (
       ARDB.ParameterElement parameter,
       Types.ParameterKey key,
-      ERDB.ParameterBinding parameterBinding
+      ERDB.ParameterScope parameterScope
     )
     {
       if (parameter is null) return false;
@@ -188,7 +197,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       if (parameter.GetDefinition() is ARDB.InternalDefinition definition)
       {
         if ((ERDB.Schemas.DataType) definition.GetDataType() != key.DataType) return false;
-        if (definition.GetParameterBinding(parameter.Document) != parameterBinding) return false;
+        if (definition.GetParameterScope(parameter.Document) != parameterScope) return false;
 
         if (definition.GetGroupType() != key.Group)
           definition.SetGroupType(key.Group);
@@ -203,7 +212,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     (
       ARDB.ParameterElement parameter,
       Types.ParameterKey key,
-      ERDB.ParameterBinding parameterBinding
+      ERDB.ParameterScope parameterScope
     )
     {
       if (parameter is null) return false;
@@ -228,10 +237,10 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
             manager.RenameParameter(familyParameter, key.Name);
           }
 
-          if (parameterBinding == ERDB.ParameterBinding.Instance && !familyParameter.IsInstance)
+          if (parameterScope == ERDB.ParameterScope.Instance && !familyParameter.IsInstance)
             manager.MakeInstance(familyParameter);
 
-          if (parameterBinding == ERDB.ParameterBinding.Type && familyParameter.IsInstance)
+          if (parameterScope == ERDB.ParameterScope.Type && familyParameter.IsInstance)
             manager.MakeType(familyParameter);
 
           if (definition.GetGroupType() != key.Group)
@@ -266,7 +275,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     (
       ARDB.Document doc,
       Types.ParameterKey key,
-      ERDB.ParameterBinding parameterBinding
+      ERDB.ParameterScope parameterScope
     )
     {
       using (var collector = new ARDB.FilteredElementCollector(doc))
@@ -302,13 +311,13 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
             var categories = doc.GetBuiltInCategoriesWithParameters().Select(x => doc.GetCategory(x)).ToList();
 
             var binding = default(ARDB.ElementBinding);
-            switch (parameterBinding)
+            switch (parameterScope)
             {
-              case ERDB.ParameterBinding.Instance:
+              case ERDB.ParameterScope.Instance:
                 binding = new ARDB.InstanceBinding(categorySet);
                 break;
 
-              case ERDB.ParameterBinding.Type:
+              case ERDB.ParameterScope.Type:
                 binding = new ARDB.TypeBinding(categorySet);
                 break;
             }
@@ -334,7 +343,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     (
       ARDB.Document doc,
       Types.ParameterKey key,
-      ERDB.ParameterBinding parameterBinding
+      ERDB.ParameterScope parameterScope
     )
     {
       if (key.GUID.HasValue)
@@ -367,8 +376,8 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
             try
             {
               var familyParam = key.Group is object ?
-                doc.FamilyManager.AddParameter(definition, key.Group, parameterBinding == ERDB.ParameterBinding.Instance) :
-                doc.FamilyManager.AddParameter(definition, ARDB.BuiltInParameterGroup.INVALID, parameterBinding == ERDB.ParameterBinding.Instance);
+                doc.FamilyManager.AddParameter(definition, key.Group, parameterScope == ERDB.ParameterScope.Instance) :
+                doc.FamilyManager.AddParameter(definition, ARDB.BuiltInParameterGroup.INVALID, parameterScope == ERDB.ParameterScope.Instance);
               return doc.GetElement(familyParam.Id) as ARDB.ParameterElement;
             }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
@@ -386,14 +395,14 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
           key.Name,
           key.Group,
           ARDB.Category.GetCategory(doc, categoryId),
-          parameterBinding == ERDB.ParameterBinding.Instance
+          parameterScope == ERDB.ParameterScope.Instance
         ) :
         doc.FamilyManager.AddParameter
         (
           key.Name,
           key.Group,
           key.DataType,
-          parameterBinding == ERDB.ParameterBinding.Instance
+          parameterScope == ERDB.ParameterScope.Instance
         );
 
         doc.FamilyManager.SetDescription(familyParam, key.Description ?? string.Empty);
@@ -409,10 +418,10 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       ARDB.ParameterElement parameter,
       ARDB.Document doc,
       Types.ParameterKey key,
-      ERDB.ParameterBinding parameterBinding
+      ERDB.ParameterScope parameterScope
     )
     {
-      if (parameterBinding == ERDB.ParameterBinding.Global)
+      if (parameterScope == ERDB.ParameterScope.Global)
       {
         if (!ReuseGlobalParameter(parameter, key))
         {
@@ -422,18 +431,18 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       }
       else if (doc.IsFamilyDocument)
       {
-        if (!ReuseFamilyParameter(parameter, key, parameterBinding))
+        if (!ReuseFamilyParameter(parameter, key, parameterScope))
         {
           parameter?.Document.Delete(parameter.Id);
-          parameter = CreateFamilyParameter(doc, key, parameterBinding);
+          parameter = CreateFamilyParameter(doc, key, parameterScope);
         }
       }
       else
       {
-        if (!ReuseProjectParameter(parameter, key, parameterBinding))
+        if (!ReuseProjectParameter(parameter, key, parameterScope))
         {
           parameter?.Document.Delete(parameter.Id);
-          parameter = CreateProjectParameter(doc, key, parameterBinding);
+          parameter = CreateProjectParameter(doc, key, parameterScope);
         }
       }
 
