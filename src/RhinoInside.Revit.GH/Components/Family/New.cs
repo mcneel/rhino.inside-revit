@@ -476,15 +476,54 @@ namespace RhinoInside.Revit.GH.Components.Families
       var opening = familyDoc.FamilyCreate.NewOpening(host, profile);
     }
 
-    static string GetFamilyTemplateFileName(ARDB.ElementId categoryId, Autodesk.Revit.ApplicationServices.LanguageType language)
+    static bool TryGetDefaultLanguageFolderName(ARDB.Document doc, out string folderName)
+    {
+      switch (doc.Application.Language)
+      {
+        case Autodesk.Revit.ApplicationServices.LanguageType.English_USA:
+        case Autodesk.Revit.ApplicationServices.LanguageType.English_GB:
+          switch (doc.DisplayUnitSystem)
+          {
+            case ARDB.DisplayUnit.METRIC:   folderName = "English";           return true;
+            case ARDB.DisplayUnit.IMPERIAL: folderName = "English-Imperial";  return true;
+          }
+          break;
+        case Autodesk.Revit.ApplicationServices.LanguageType.German:              folderName = "German"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Spanish:             folderName = "Spanish"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.French:              folderName = "French"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Italian:             folderName = "Italian"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Dutch:               folderName = "Dutch"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Chinese_Simplified:  folderName = "Chinese"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Chinese_Traditional: folderName = "Traditional Chinese"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Japanese:            folderName = "Japanese"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Korean:              folderName = "Korean"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Russian:             folderName = "Russian"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Czech:               folderName = "Czech"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Polish:              folderName = "Polish"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Hungarian:           folderName = "Hungarian"; return true;
+        case Autodesk.Revit.ApplicationServices.LanguageType.Brazilian_Portuguese:folderName = "Portuguese"; return true;
+      }
+
+      folderName = default;
+      return false;
+    }
+
+    static string GetDefaultTemplateFileName(ARDB.Document doc, ARDB.ElementId categoryId)
     {
       if (categoryId.TryGetBuiltInCategory(out var builtInCategory))
       {
         if (builtInCategory == ARDB.BuiltInCategory.OST_Mass)
         {
-          switch (language)
+          switch (doc.Application.Language)
           {
-            case Autodesk.Revit.ApplicationServices.LanguageType.English_USA: return @"Conceptual Mass\Metric Mass";
+            case Autodesk.Revit.ApplicationServices.LanguageType.English_USA:
+            case Autodesk.Revit.ApplicationServices.LanguageType.English_GB:
+              switch (doc.DisplayUnitSystem)
+              {
+                case ARDB.DisplayUnit.METRIC:   return @"Conceptual Mass\Metric Mass";
+                case ARDB.DisplayUnit.IMPERIAL: return @"Conceptual Mass\Mass";
+              }
+              break;
             case Autodesk.Revit.ApplicationServices.LanguageType.German: return @"Entwurfskörper\M_Körper";
             case Autodesk.Revit.ApplicationServices.LanguageType.Spanish: return @"Masas conceptuales\Masa métrica";
             case Autodesk.Revit.ApplicationServices.LanguageType.French: return @"Volume conceptuel\Volume métrique";
@@ -498,18 +537,22 @@ namespace RhinoInside.Revit.GH.Components.Families
             case Autodesk.Revit.ApplicationServices.LanguageType.Polish: return @"Bryła koncepcyjna\Bryła (metryczna)";
             case Autodesk.Revit.ApplicationServices.LanguageType.Hungarian: return null;
             case Autodesk.Revit.ApplicationServices.LanguageType.Brazilian_Portuguese: return @"Massa conceitual\Massa métrica";
-#if REVIT_2018
-            case Autodesk.Revit.ApplicationServices.LanguageType.English_GB: return @"Conceptual Mass\Mass";
-#endif
           }
 
           return null;
         }
       }
 
-      switch (language)
+      switch (doc.Application.Language)
       {
-        case Autodesk.Revit.ApplicationServices.LanguageType.English_USA: return @"Metric Generic Model";
+        case Autodesk.Revit.ApplicationServices.LanguageType.English_USA:
+        case Autodesk.Revit.ApplicationServices.LanguageType.English_GB:
+          switch (doc.DisplayUnitSystem)
+          {
+            case ARDB.DisplayUnit.METRIC:   return @"Metric Generic Model";
+            case ARDB.DisplayUnit.IMPERIAL: return @"Generic Model";
+          }
+          break;
         case Autodesk.Revit.ApplicationServices.LanguageType.German: return @"Allgemeines Modell";
         case Autodesk.Revit.ApplicationServices.LanguageType.Spanish: return @"Modelo genérico métrico";
         case Autodesk.Revit.ApplicationServices.LanguageType.French: return @"Modèle générique métrique";
@@ -523,33 +566,96 @@ namespace RhinoInside.Revit.GH.Components.Families
         case Autodesk.Revit.ApplicationServices.LanguageType.Polish: return @"Model ogólny (metryczny)";
         case Autodesk.Revit.ApplicationServices.LanguageType.Hungarian: return null;
         case Autodesk.Revit.ApplicationServices.LanguageType.Brazilian_Portuguese: return @"Modelo genérico métrico";
-#if REVIT_2018
-        case Autodesk.Revit.ApplicationServices.LanguageType.English_GB: return @"Generic Model";
-#endif
       }
 
       return null;
     }
 
-    static string GetFamilyTemplateFilePath(ARDB.ElementId categoryId, Autodesk.Revit.ApplicationServices.Application app)
+    static string GetDefaultTemplatePath(ARDB.Document doc, ARDB.ElementId categoryId)
     {
-      string fileName = GetFamilyTemplateFileName(categoryId, app.Language);
-      var templateFilePath = fileName is null ? string.Empty : Path.Combine(app.FamilyTemplatePath, $"{fileName}.rft");
+      if (GetDefaultTemplateFileName(doc, categoryId) is string fileName)
+      {
+        if (TryGetDefaultLanguageFolderName(doc, out var language))
+        {
+          return Path.Combine
+          (
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            "Autodesk",
+            $"RVT {doc.Application.VersionNumber}",
+            "Family Templates",
+            language,
+            fileName + ".rft"
+          );
+        }
+      }
 
-      if (File.Exists(templateFilePath))
-        return templateFilePath;
+      return null;
+    }
 
-      // Emergency template file path
-      fileName = GetFamilyTemplateFileName(categoryId, Autodesk.Revit.ApplicationServices.LanguageType.English_USA);
-      return Path.Combine
-      (
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)),
-        "Autodesk",
-        $"RVT {app.VersionNumber}",
-        "Family Templates",
-        "English",
-        $"{fileName}.rft"
-      );
+    static bool FindTemplatePath(ARDB.Document doc, ref string templatePath, out bool pathWasRelative)
+    {
+      pathWasRelative = !Path.IsPathRooted(templatePath);
+
+      // Validate input
+      foreach (var invalid in Path.GetInvalidPathChars())
+      {
+        if (templatePath.Contains(invalid))
+          return false;
+      }
+
+      var components = templatePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+      foreach (var component in components.Skip(pathWasRelative ? 0 : 1))
+      {
+        foreach (var invalid in Path.GetInvalidFileNameChars())
+        {
+          if (component.Contains(invalid))
+            return false;
+        }
+      }
+
+      if (!pathWasRelative)
+        return File.Exists(templatePath);
+
+      var folders = new List<string>();
+      {
+        // 1. Look next to the project
+        if (File.Exists(doc.PathName))
+          folders.Add(Path.GetDirectoryName(doc.PathName));
+
+        // 2. Look into `Application.FamilyTemplatePath`
+        if (Directory.Exists(doc.Application.FamilyTemplatePath))
+          folders.Add(doc.Application.FamilyTemplatePath);
+
+        // 3. Look into default family templates path
+        {
+          var defaultFamilyTemplatePath = Path.Combine
+          (
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            "Autodesk",
+            $"RVT {doc.Application.VersionNumber}",
+            "Family Templates"
+          );
+
+          if (!folders.Contains(defaultFamilyTemplatePath) && Directory.Exists(defaultFamilyTemplatePath))
+            folders.Add(defaultFamilyTemplatePath);
+        }
+      }
+
+      // Look into each folder for the first match
+      foreach (var folder in folders)
+      {
+        var template = components.Length == 1 ?
+          Directory.EnumerateFiles(folder, components[0], SearchOption.AllDirectories).FirstOrDefault() :
+          Path.GetFullPath(Path.Combine(folder, templatePath));
+
+        if (File.Exists(template))
+        {
+          templatePath = template;
+          return true;
+        }
+      }
+
+      return false;
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -571,14 +677,26 @@ namespace RhinoInside.Revit.GH.Components.Families
       var templatePath = string.Empty;
       if (familyIsNew)
       {
+        var isDefaultPath = false;
         if (!DA.GetData("Template", ref templatePath))
-          templatePath = GetFamilyTemplateFilePath(categoryId, doc.Application);
+        {
+          templatePath = GetDefaultTemplatePath(doc, categoryId);
+          isDefaultPath = templatePath is object;
+        }
 
         if (!Path.HasExtension(templatePath))
           templatePath += ".rft";
 
-        if (!Path.IsPathRooted(templatePath))
-          templatePath = Path.Combine(doc.Application.FamilyTemplatePath, templatePath);
+        if (FindTemplatePath(doc, ref templatePath, out var pathWasRelative))
+        {
+          if (pathWasRelative || isDefaultPath)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Using template file from '{templatePath}'");
+        }
+        else
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to found Template file '{templatePath}'.");
+          return;
+        }
       }
       else
       {
