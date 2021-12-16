@@ -45,6 +45,28 @@ namespace RhinoInside.Revit.GH.Types
 
     public RevitLinkInstance() { }
     public RevitLinkInstance(ARDB.RevitLinkInstance instance) : base(instance) { }
+
+    public override string DisplayName
+    {
+      get
+      {
+        if (Value is ARDB.RevitLinkInstance instance)
+          return instance.Name;
+
+        return base.DisplayName;
+      }
+    }
+
+    public override string Name
+    {
+      get
+      {
+        if (Value is ARDB.RevitLinkInstance instance)
+          return instance.get_Parameter(ARDB.BuiltInParameter.RVT_LINK_INSTANCE_NAME).AsString();
+
+        return base.Name;
+      }
+    }
   }
 
   [Kernel.Attributes.Name("Import Symbol")]

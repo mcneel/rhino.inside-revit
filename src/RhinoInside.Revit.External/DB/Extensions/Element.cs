@@ -513,6 +513,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (typeof(Zone).IsAssignableFrom(type))
         return BuiltInParameter.ZONE_NAME;
 
+      if (typeof(RevitLinkInstance).IsAssignableFrom(type))
+        return BuiltInParameter.RVT_LINK_INSTANCE_NAME;
+
       return BuiltInParameter.INVALID;
     }
 
