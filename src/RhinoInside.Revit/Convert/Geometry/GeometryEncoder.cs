@@ -239,6 +239,32 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Converts the specified BoundingBox to an equivalent Revit BoundingBoxXYZ.
     /// </summary>
+    /// <example>
+    /// 
+    /// <code language="python" title="Python (Static Class)">
+    /// import clr
+    /// clr.AddReference("RhinoInside.Revit")
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryEncoder as ge
+    /// ...
+    /// ge.ToBoundingBoxXYZ(bbox)
+    /// </code>
+    /// 
+    /// <code language="python" title="Python (Extension Methods)">
+    /// import clr
+    /// clr.AddReference("RhinoInside.Revit")
+    /// import RhinoInside.Revit.Convert.Geometry
+    /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
+    /// ...
+    /// bbox.ToBoundingBoxXYZ()
+    /// </code>
+    /// 
+    /// <code language="csharp">
+    /// using RhinoInside.Revit.Convert.Geometry;
+    /// ...
+    /// bbox.ToBoundingBoxXYZ()
+    /// </code>
+    /// 
+    /// </example>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit BoundingBoxXYZ that is equivalent to the provided value.</returns>
     public static ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(this BoundingBox value) => ToBoundingBoxXYZ(value, UnitConverter.ToHostUnits);
