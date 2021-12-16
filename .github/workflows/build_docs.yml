@@ -9,7 +9,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           token: ${{ secrets.API_TOKEN_GITHUB }}
-      
+
       - name: prep msbuild
         uses: microsoft/setup-msbuild@v1
 
@@ -22,10 +22,16 @@ jobs:
       - name: build documentation
         run: msbuild script/cibuild_docs.msbuild -v:m
 
-      - name: commit & publish
-        run: |
-          git config user.name mcneel-build
-          git config user.email bozo@mcneel.com
-          git add -A docs/api/
-          git commit -m "Publish!"
-          git push
+      - name: upload docs
+        uses: actions/upload-artifact@v2
+        with:
+          name: all-docs
+          path: docs/api/1.0
+
+      # - name: commit & publish
+      #   run: |
+      #     git config user.name mcneel-build
+      #     git config user.email bozo@mcneel.com
+      #     git add -A docs/api/
+      #     git commit -m "Publish!"
+      #     git push
