@@ -16,7 +16,8 @@ jobs:
       - name: prep sandcastle
         run: |
           nuget install EWSoftware.SHFB -o packages
-          nuget install EWSoftware.SHFB.NETFramework -o packages
+          nuget install EWSoftware.SHFB.NETFramework -o packages\components
+          nuget install ResolveThirdPartyReferenceLinks -o packages\components -version "0.1.0-beta"
 
       - name: build documentation
         run: msbuild script/cibuild_docs.msbuild -v:m

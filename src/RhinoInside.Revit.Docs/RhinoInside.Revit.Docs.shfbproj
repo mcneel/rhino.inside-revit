@@ -6,7 +6,7 @@
     <NoWarn>LWW0001</NoWarn>
     <ProjectGuid>{7e340714-ca6b-4b13-81c9-f9dbfba079f2}</ProjectGuid>
     <SHFBSchemaVersion>2017.9.26.0</SHFBSchemaVersion>
-    <ComponentPath>$(PackagesDir)EWSoftware.SHFB.NETFramework.4.8.0.1</ComponentPath>
+    <ComponentPath>$(PackagesDir)components</ComponentPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <PlugInConfigurations>
       <PlugInConfig id="Assembly Binding Redirection" enabled="True">
@@ -31,7 +31,30 @@
     <ComponentConfigurations>
       <ComponentConfig id="Resolve ThirdParty Reference Links" enabled="True">
         <component id="Resolve ThirdParty Reference Links">
-          <options value="$(RevitVersion)" />
+          <configuration>
+            <urlProviders>
+              <!-- URL provider for Autodesk Revit API Documentation -->
+              <formattedProvider title="Revit URL Provider">
+                <targetMatcher pattern="T:Autodesk\.Revit\..+" />
+                <urlFormatter format="https://api.apidocs.co/resolve/revit/{revitVersion}/?asset_id={target}" />
+                <parameters>
+                  <parameter name="revitVersion" default="" />
+                </parameters>
+              </formattedProvider>
+              <!-- URL provider for RhinoCommon Documentation -->
+              <formattedProvider title="RhinoCommon URL Provider">
+                <targetMatcher pattern="T:Rhino\.Geometry\..+" />
+                <targetFormatter>
+                  <steps>
+                    <replace pattern="T:" with="T_" />
+                    <replace pattern="\." with="_" />
+                  </steps>
+                </targetFormatter>
+                <urlFormatter format="https://developer.rhino3d.com/api/RhinoCommon/html/{target}.htm" />
+              </formattedProvider>
+            </urlProviders>
+          </configuration>
+          <revitVersion value="$(RevitVersion)" />
         </component>
       </ComponentConfig>
     </ComponentConfigurations>
@@ -119,10 +142,5 @@
     <Reference Include="RhinoInside.Revit.External">
       <HintPath>..\RhinoInside.Revit.External\bin\x64\Release $(RevitVersion)\RhinoInside.Revit.External.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="ResolveThirdPartyReferenceLinks">
-      <Version>1.0.0</Version>
-    </PackageReference>
   </ItemGroup>
 </Project>
