@@ -241,15 +241,13 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <example>
     /// 
-    /// <code language="python" title="Python (Static Class)">
-    /// import clr
-    /// clr.AddReference("RhinoInside.Revit")
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryEncoder as ge
+    /// <code language="csharp">
+    /// using RhinoInside.Revit.Convert.Geometry;
     /// ...
-    /// ge.ToBoundingBoxXYZ(bbox)
+    /// bbox.ToBoundingBoxXYZ()
     /// </code>
     /// 
-    /// <code language="python" title="Python (Extension Methods)">
+    /// <code language="Python">
     /// import clr
     /// clr.AddReference("RhinoInside.Revit")
     /// import RhinoInside.Revit.Convert.Geometry
@@ -258,10 +256,12 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// bbox.ToBoundingBoxXYZ()
     /// </code>
     /// 
-    /// <code language="csharp">
-    /// using RhinoInside.Revit.Convert.Geometry;
+    /// <code language="python" title="Python (using static method)">
+    /// import clr
+    /// clr.AddReference("RhinoInside.Revit")
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryEncoder as ge
     /// ...
-    /// bbox.ToBoundingBoxXYZ()
+    /// ge.ToBoundingBoxXYZ(bbox)
     /// </code>
     /// 
     /// </example>
