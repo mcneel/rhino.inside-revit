@@ -9,17 +9,24 @@ jobs:
         uses: actions/checkout@v2
         with:
           token: ${{ secrets.API_TOKEN_GITHUB }}
-      
+
       - name: prep msbuild
         uses: microsoft/setup-msbuild@v1
 
       - name: prep sandcastle
         run: |
           nuget install EWSoftware.SHFB -o packages
-          nuget install EWSoftware.SHFB.NETFramework -o packages
+          nuget install EWSoftware.SHFB.NETFramework -o packages\components
+          nuget install ResolveThirdPartyReferenceLinks -o packages\components -version "0.1.0-beta"
 
       - name: build documentation
         run: msbuild script/cibuild_docs.msbuild -v:m
+
+      # - name: upload docs
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: all-docs
+      #     path: docs/api/1.0
 
       - name: commit & publish
         run: |

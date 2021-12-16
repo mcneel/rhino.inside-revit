@@ -28,12 +28,12 @@ namespace RhinoInside.Revit.GH.Types
 
   [
     ComponentGuid("2A5D36DD-CD94-4306-963B-D9312DAEB0F9"),
-    Name("Parameter Binding"),
-    Description("Contains a collection of Revit parameter binding type values"),
+    Name("Parameter Scope"),
+    Description("Contains a collection of Revit parameter scope type values"),
   ]
-  public class ParameterBinding : GH_Enum<External.DB.ParameterBinding>
+  public class ParameterScope : GH_Enum<External.DB.ParameterScope>
   {
-    public override bool IsEmpty => Value == External.DB.ParameterBinding.Unknown;
+    public override bool IsEmpty => Value == External.DB.ParameterScope.Unknown;
   }
 
   [

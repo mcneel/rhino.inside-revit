@@ -6,7 +6,7 @@
     <NoWarn>LWW0001</NoWarn>
     <ProjectGuid>{7e340714-ca6b-4b13-81c9-f9dbfba079f2}</ProjectGuid>
     <SHFBSchemaVersion>2017.9.26.0</SHFBSchemaVersion>
-    <ComponentPath>$(PackagesDir)EWSoftware.SHFB.NETFramework.4.8.0.1</ComponentPath>
+    <ComponentPath>$(PackagesDir)components</ComponentPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <PlugInConfigurations>
       <PlugInConfig id="Assembly Binding Redirection" enabled="True">
@@ -28,6 +28,45 @@
         </configuration>
       </PlugInConfig>
     </PlugInConfigurations>
+    <ComponentConfigurations>
+      <ComponentConfig id="Resolve ThirdParty Reference Links" enabled="True">
+        <component id="Resolve ThirdParty Reference Links">
+          <configuration>
+            <urlProviders>
+              <!-- URL provider for Autodesk Revit API Documentation -->
+              <formattedProvider title="Revit URL Provider">
+                <targetMatcher pattern="T:Autodesk\.Revit\..+" />
+                <urlFormatter format="https://api.apidocs.co/resolve/revit/{revitVersion}/?asset_id={target}" />
+                <parameters>
+                  <parameter name="revitVersion" default="" />
+                </parameters>
+              </formattedProvider>
+              <!-- URL provider for RhinoCommon Documentation -->
+              <formattedProvider title="RhinoCommon URL Provider">
+                <targetMatcher pattern="T:Rhino\.Geometry\..+" />
+                <targetFormatter>
+                  <steps>
+                    <replace pattern="T:" with="T_" />
+                    <replace pattern="\." with="_" />
+                  </steps>
+                </targetFormatter>
+                <urlFormatter format="https://developer.rhino3d.com/api/RhinoCommon/html/{target}.htm" />
+              </formattedProvider>
+            </urlProviders>
+          </configuration>
+          <revitVersion value="$(RevitVersion)" />
+        </component>
+      </ComponentConfig>
+      <ComponentConfig id="Code Block Component" enabled="True">
+        <component id="Code Block Component">
+          <basePath value="{@HtmlEncProjectFolder}" />
+          <outputPaths>{@HelpFormatOutputPaths}</outputPaths>
+          <allowMissingSource value="false" />
+          <removeRegionMarkers value="false" />
+          <colorizer syntaxFile="{@CoreComponentsFolder}Colorizer\highlight.xml" styleFile="{@CoreComponentsFolder}Colorizer\highlight.xsl" stylesheet="{@CoreComponentsFolder}Colorizer\highlight.css" scriptFile="{@CoreComponentsFolder}Colorizer\highlight.js" disabled="{@DisableCodeBlockComponent}" language="cs" tabSize="0" numberLines="true" outlining="true" keepSeeTags="false" defaultTitle="true" />
+        </component>
+      </ComponentConfig>
+    </ComponentConfigurations>
   </PropertyGroup>
   <PropertyGroup>
     <FrameworkVersion>.NET Framework 4.8</FrameworkVersion>
@@ -65,7 +104,7 @@
     <HelpTitle>RhinoInside.Revit API Documentation</HelpTitle>
     <!-- Needs to be set by build script -->
     <HelpFileVersion>1.0.0.0</HelpFileVersion>
-    <NamingMethod>Guid</NamingMethod>
+    <NamingMethod>MemberName</NamingMethod>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
     <RootNamespaceContainer>True</RootNamespaceContainer>
     <NamespaceGrouping>False</NamespaceGrouping>

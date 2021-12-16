@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
@@ -24,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddNumberParameter("Orientation", "O", "None=0, OutWard=1, Inward=-1", GH_ParamAccess.item);
+      manager.AddIntegerParameter("Orientation", "O", "Open=0, OutWard=1, Inward=-1", GH_ParamAccess.item);
     }
 
     protected override void SolveInstance(IGH_DataAccess DA)

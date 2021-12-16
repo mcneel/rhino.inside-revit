@@ -376,7 +376,7 @@ namespace RhinoInside.Revit.GH.Parameters
       ParameterName = p.Definition.Name;
       ParameterType = p.Definition.GetDataType();
       ParameterGroup = p.Definition.GetGroupType();
-      ParameterBinding = p.Element is ARDB.ElementType ? ERDB.ParameterBinding.Type : ERDB.ParameterBinding.Instance;
+      ParameterScope = p.Element is ARDB.ElementType ? ERDB.ParameterScope.Type : ERDB.ParameterScope.Instance;
 
       if (p.IsShared)
       {
@@ -419,8 +419,8 @@ namespace RhinoInside.Revit.GH.Parameters
         Description = $"Shared parameter {ParameterSharedGUID.Value:B}\n{Description}";
       else if (ParameterBuiltInId != EDBS.ParameterId.Empty)
         Description = $"BuiltIn Parameter \"{ParameterBuiltInId.FullName}\"\n{Description}";
-      else if (ParameterBinding != ERDB.ParameterBinding.Unknown)
-        Description = $"{ParameterClass} parameter ({ParameterBinding})\n{Description}";
+      else if (ParameterScope != ERDB.ParameterScope.Unknown)
+        Description = $"{ParameterClass} parameter ({ParameterScope})\n{Description}";
       else
         Description = $"{ParameterClass} parameter\n{Description}";
     }
@@ -428,7 +428,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public string ParameterName { get; private set; } = string.Empty;
     public EDBS.DataType ParameterType { get; private set; } = EDBS.DataType.Empty;
     public EDBS.ParameterGroup ParameterGroup { get; private set; } = EDBS.ParameterGroup.Empty;
-    public ERDB.ParameterBinding ParameterBinding { get; private set; } = ERDB.ParameterBinding.Unknown;
+    public ERDB.ParameterScope ParameterScope { get; private set; } = ERDB.ParameterScope.Unknown;
     public ERDB.ParameterClass ParameterClass { get; private set; } = ERDB.ParameterClass.Any;
     public EDBS.ParameterId ParameterBuiltInId { get; private set; } = EDBS.ParameterId.Empty;
     public Guid? ParameterSharedGUID { get; private set; } = default;
@@ -467,9 +467,9 @@ namespace RhinoInside.Revit.GH.Parameters
         case string schema: ParameterGroup = new EDBS.ParameterGroup(schema); break;
       }
 
-      var parameterBinding = (int) ERDB.ParameterBinding.Unknown;
-      reader.TryGetInt32("ParameterBinding", ref parameterBinding);
-      ParameterBinding = (ERDB.ParameterBinding) parameterBinding;
+      var parameterScope = (int) ERDB.ParameterScope.Unknown;
+      reader.TryGetInt32("ParameterScope", ref parameterScope);
+      ParameterScope = (ERDB.ParameterScope) parameterScope;
 
       ParameterBuiltInId = EDBS.ParameterId.Empty;
       switch (GetValue("ParameterBuiltInId"))
@@ -491,7 +491,7 @@ namespace RhinoInside.Revit.GH.Parameters
         ParameterClass = ERDB.ParameterClass.Shared;
       else if (ParameterBuiltInId != EDBS.ParameterId.Empty)
         ParameterClass = ERDB.ParameterClass.BuiltIn;
-      else if (ParameterBinding != ERDB.ParameterBinding.Unknown)
+      else if (ParameterScope != ERDB.ParameterScope.Unknown)
         ParameterClass = ERDB.ParameterClass.Project;
 
       return true;
@@ -511,8 +511,8 @@ namespace RhinoInside.Revit.GH.Parameters
       if (ParameterType != EDBS.DataType.Empty)
         writer.SetString("ParameterType", ParameterType.FullName);
 
-      if (ParameterBinding != ERDB.ParameterBinding.Unknown)
-        writer.SetInt32("ParameterBinding", (int) ParameterBinding);
+      if (ParameterScope != ERDB.ParameterScope.Unknown)
+        writer.SetInt32("ParameterScope", (int) ParameterScope);
 
       if (ParameterBuiltInId != EDBS.ParameterId.Empty)
         writer.SetString("ParameterBuiltInId", ParameterBuiltInId.FullName);
@@ -534,7 +534,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (ParameterBuiltInId != EDBS.ParameterId.Empty)
         return ParameterBuiltInId.GetHashCode();
 
-      return new { ParameterName, ParameterType, ParameterBinding, ParameterClass }.GetHashCode();
+      return new { ParameterName, ParameterType, ParameterScope, ParameterClass }.GetHashCode();
     }
 
     public override bool Equals(object obj)
@@ -549,7 +549,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
         return ParameterName == value.ParameterName &&
                ParameterType == value.ParameterType &&
-               ParameterBinding == value.ParameterBinding &&
+               ParameterScope == value.ParameterScope &&
                ParameterClass == value.ParameterClass;
       }
 
@@ -564,7 +564,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (ParameterBuiltInId != EDBS.ParameterId.Empty)
         return element.GetParameter(ParameterBuiltInId);
 
-      return element.GetParameter(ParameterName, ParameterType, ParameterBinding, ParameterClass);
+      return element.GetParameter(ParameterName, ParameterType, ParameterScope, ParameterClass);
     }
   }
 }

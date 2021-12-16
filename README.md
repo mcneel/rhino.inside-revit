@@ -2,7 +2,7 @@
 
 # Rhino.Inside® Revit
 
-[![Build status](https://ci.appveyor.com/api/projects/status/9ot0iyjqwb1jdn6m/branch/master?svg=true)](https://ci.appveyor.com/project/mcneel/rhino-inside-revit/branch/master)
+![Build status](https://github.com/mcneel/rhino.inside-revit/actions/workflows/main.yml/badge.svg)
 
 Please see the [Rhino.Inside.Revit Wiki](https://www.rhino3d.com/inside/revit/)
 for more information on how to use the project. Sections listed below provide

@@ -421,9 +421,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return parameters.FirstOrDefault(x => !x.IsReadOnly) ?? parameters.FirstOrDefault();
     }
 
-    public static Parameter GetParameter(this Element element, string name, Schemas.DataType type, ParameterBinding parameterBinding, ParameterClass set)
+    public static Parameter GetParameter(this Element element, string name, Schemas.DataType type, ParameterScope scope, ParameterClass set)
     {
-      if (element is ElementType ? parameterBinding != ParameterBinding.Type : parameterBinding != ParameterBinding.Instance)
+      if (element is ElementType ? scope != ParameterScope.Type : scope != ParameterScope.Instance)
         return null;
 
       return GetParameter(element, name, type, set);
