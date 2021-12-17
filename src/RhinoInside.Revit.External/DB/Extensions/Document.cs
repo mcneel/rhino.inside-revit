@@ -678,27 +678,24 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (active.IsGraphicalView())
         return active;
 
-      using (var app = new Autodesk.Revit.UI.UIApplication(doc.Application))
+      return HostedApplication.Active.InvokeInHostContext(() =>
       {
-        return HostedApplication.Active.InvokeInHostContext(() =>
+        using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
         {
-          using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+          var activeView = uiDocument.ActiveGraphicalView;
+
+          if (activeView is null)
           {
-            var activeView = uiDocument.ActiveGraphicalView;
+            var openViews = uiDocument.GetOpenUIViews().
+                Select(x => doc.GetElement(x.ViewId) as View).
+                Where(x => x.IsGraphicalView());
 
-            if (activeView is null)
-            {
-              var openViews = uiDocument.GetOpenUIViews().
-                  Select(x => doc.GetElement(x.ViewId) as View).
-                  Where(x => x.IsGraphicalView());
-
-              activeView = openViews.FirstOrDefault();
-            }
-
-            return activeView;
+            activeView = openViews.FirstOrDefault();
           }
-        });
-      }
+
+          return activeView;
+        }
+      });
     }
 
     /// <summary>
@@ -708,26 +705,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The active <see cref="Autodesk.Revit.DB.View"/></returns>
     public static View GetActiveView(this Document doc)
     {
-      using (var app = new Autodesk.Revit.UI.UIApplication(doc.Application))
+      var active = doc.ActiveView;
+      if (active is object)
+        return active;
+
+      return HostedApplication.Active.InvokeInHostContext(() =>
       {
-        return HostedApplication.Active.InvokeInHostContext(() =>
+        using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
         {
-          using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+          var activeView = uiDocument.ActiveView;
+
+          if (activeView is null)
           {
-            var activeView = uiDocument.ActiveView;
+            var openViews = uiDocument.GetOpenUIViews().
+                Select(x => doc.GetElement(x.ViewId) as View);
 
-            if (activeView is null)
-            {
-              var openViews = uiDocument.GetOpenUIViews().
-                  Select(x => doc.GetElement(x.ViewId) as View);
-
-              activeView = openViews.FirstOrDefault();
-            }
-
-            return activeView;
+            activeView = openViews.FirstOrDefault();
           }
-        });
-      }
+
+          return activeView;
+        }
+      });
     }
     #endregion
 
