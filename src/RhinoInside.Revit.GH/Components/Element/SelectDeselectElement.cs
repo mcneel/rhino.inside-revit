@@ -131,13 +131,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
           // Make Selection effective
           foreach (var selection in Selection)
           {
-            Rhinoceros.InvokeInHostContext(() =>
+            using (var uiDocument = new Autodesk.Revit.UI.UIDocument(selection.Key))
             {
-              using (var uiDocument = new Autodesk.Revit.UI.UIDocument(selection.Key))
-              {
-                uiDocument.Selection.SetElementIds(selection.Value);
-              }
-            });
+              uiDocument.Selection.SetElementIds(selection.Value);
+            }
           }
 
           // Update Selected output
