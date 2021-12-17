@@ -64,66 +64,66 @@ namespace RhinoInside.Revit.GH.Components.Families
       if (!DA.GetData("Backups", ref backups))
         return;
 
-      if (Revit.ActiveDBDocument.EditFamily(family) is ARDB.Document familyDoc) using (familyDoc)
+      if (family.Document.EditFamily(family) is ARDB.Document familyDoc) using (familyDoc)
+      {
+        var view = default(ARDB.View);
+        if (DA.GetData("Preview View", ref view))
         {
-          var view = default(ARDB.View);
-          if (DA.GetData("Preview View", ref view))
-          {
-            if (!view.Document.Equals(familyDoc))
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Title}' is not a valid view in document {familyDoc.GetFileName()}"); return;
-          }
+          if (!view.Document.Equals(familyDoc))
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Title}' is not a valid view in document {familyDoc.GetFileName()}"); return;
+        }
 
-          try
+        try
+        {
+          if (string.IsNullOrEmpty(filePath))
           {
-            if (string.IsNullOrEmpty(filePath))
+            if (overwrite)
             {
-              if (overwrite)
+              using (var saveOptions = new ARDB.SaveOptions() { Compact = compact })
               {
-                using (var saveOptions = new ARDB.SaveOptions() { Compact = compact })
-                {
-                  if (view is object)
-                    saveOptions.PreviewViewId = view.Id;
+                if (view is object)
+                  saveOptions.PreviewViewId = view.Id;
 
-                  familyDoc.Save(saveOptions);
-                  DA.SetData("Family", family);
-                }
+                familyDoc.Save(saveOptions);
+                DA.SetData("Family", family);
               }
-              else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect data from 'Path'.");
+            }
+            else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect data from 'Path'.");
+          }
+          else
+          {
+            if (filePath.Last() == Path.DirectorySeparatorChar)
+              filePath = Path.Combine(filePath, familyDoc.Title);
+
+            if (Path.IsPathRooted(filePath) && filePath.Contains(Path.DirectorySeparatorChar))
+            {
+              if (!Path.HasExtension(filePath))
+                filePath += ".rfa";
+
+              using (var saveAsOptions = new ARDB.SaveAsOptions() { OverwriteExistingFile = overwrite, Compact = compact })
+              {
+                if (backups > -1)
+                  saveAsOptions.MaximumBackups = backups;
+
+                if (view is object)
+                  saveAsOptions.PreviewViewId = view.Id;
+
+                familyDoc.SaveAs(filePath, saveAsOptions);
+                DA.SetData("Family", family);
+              }
             }
             else
             {
-              if (filePath.Last() == Path.DirectorySeparatorChar)
-                filePath = Path.Combine(filePath, familyDoc.Title);
-
-              if (Path.IsPathRooted(filePath) && filePath.Contains(Path.DirectorySeparatorChar))
-              {
-                if (!Path.HasExtension(filePath))
-                  filePath += ".rfa";
-
-                using (var saveAsOptions = new ARDB.SaveAsOptions() { OverwriteExistingFile = overwrite, Compact = compact })
-                {
-                  if (backups > -1)
-                    saveAsOptions.MaximumBackups = backups;
-
-                  if (view is object)
-                    saveAsOptions.PreviewViewId = view.Id;
-
-                  familyDoc.SaveAs(filePath, saveAsOptions);
-                  DA.SetData("Family", family);
-                }
-              }
-              else
-              {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path should be absolute.");
-              }
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path should be absolute.");
             }
           }
-          catch (Autodesk.Revit.Exceptions.InvalidOperationException e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message); }
-          finally
-          {
-            familyDoc.Release();
-          }
         }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message); }
+        finally
+        {
+          familyDoc.Release();
+        }
+      }
     }
   }
 }
