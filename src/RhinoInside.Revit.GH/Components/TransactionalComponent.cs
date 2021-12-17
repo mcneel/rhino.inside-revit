@@ -538,9 +538,9 @@ namespace RhinoInside.Revit.GH.Components
     {
       base.BeforeSolveInstance();
 
-      var currentDocumentOnly = CurrentDocumentOnly;
+      var currentDocument = CurrentDocumentOnly ? Revit.ActiveDBDocument : default;
       foreach (var output in Params.Output.OfType<IGH_TrackingParam>())
-        output.OpenTrackingParam(currentDocumentOnly);
+        output.OpenTrackingParam(currentDocument);
     }
 
     protected override void AfterSolveInstance()

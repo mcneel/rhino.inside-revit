@@ -62,7 +62,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
       // Note: linked documents that are not loaded in Revit memory,
       // are not reported since no interaction can be done if not loaded
       var docs = new List<ARDB.Document>();
-      using (var documents = Revit.ActiveDBApplication.Documents)
+      using (var documents = doc.Application.Documents)
       {
         /* NOTES:
          * 1) On a cloud host model with links (that are also on cloud)

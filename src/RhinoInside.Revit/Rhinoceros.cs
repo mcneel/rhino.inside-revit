@@ -144,7 +144,7 @@ namespace RhinoInside.Revit
       if (string.IsNullOrEmpty(Rhino.ApplicationSettings.FileSettings.TemplateFile))
       {
         UpdateDocumentUnits(RhinoDoc.ActiveDoc);
-        UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveDBDocument);
+        UpdateDocumentUnits(RhinoDoc.ActiveDoc, Revit.ActiveUIDocument?.Document);
       }
 
       // Load Guests
@@ -374,7 +374,7 @@ namespace RhinoInside.Revit
       if (e.Document is RhinoDoc)
       {
         UpdateDocumentUnits(e.Document);
-        UpdateDocumentUnits(e.Document, Revit.ActiveDBDocument);
+        UpdateDocumentUnits(e.Document, Revit.ActiveUIDocument?.Document);
       }
     }
 

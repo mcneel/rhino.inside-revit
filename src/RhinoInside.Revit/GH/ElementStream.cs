@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
   {
     ElementStreamMode StreamMode { get; set; }
 
-    void OpenTrackingParam(bool currentDocumentOnly);
+    void OpenTrackingParam(ARDB.Document document);
     void CloseTrackingParam();
 
     IEnumerable<T> GetTrackedElements<T>(ARDB.Document doc) where T : ARDB.Element;
@@ -87,21 +87,21 @@ namespace RhinoInside.Revit.GH.ElementTracking
     readonly ARDB.BuiltInCategory CategoryId;
     readonly Dictionary<ARDB.Document, ElementStream<T>> streams = new Dictionary<ARDB.Document, ElementStream<T>>();
 
-    public ElementStreamDictionary(ElementStreamId streamId, ElementStreamMode mode, ARDB.BuiltInCategory categoryId = default)
+    public ElementStreamDictionary(ARDB.Document document, ElementStreamId streamId, ElementStreamMode mode, ARDB.BuiltInCategory categoryId = default)
     {
       Mode = mode;
       Id = streamId;
       CategoryId = categoryId;
 
-      Open();
+      Open(document);
     }
 
     void IDisposable.Dispose() => Close();
 
-    void Open()
+    void Open(ARDB.Document currentDocument)
     {
       var documents = Mode.HasFlag(ElementStreamMode.CurrentDocument) ?
-        Enumerable.Repeat(Revit.ActiveDBDocument, 1) :
+        Enumerable.Repeat(currentDocument, 1) :
         Revit.ActiveDBApplication.Documents.Cast<ARDB.Document>();
 
       foreach (var document in documents)

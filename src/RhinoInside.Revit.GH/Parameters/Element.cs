@@ -424,14 +424,14 @@ namespace RhinoInside.Revit.GH.Parameters
 
     internal ElementStreamDictionary<R> ElementStreams;
 
-    void IGH_TrackingParam.OpenTrackingParam(bool currentDocumentOnly)
+    void IGH_TrackingParam.OpenTrackingParam(ARDB.Document document)
     {
       if (TrackingMode == TrackingMode.NotApplicable) return;
 
       // Open an ElementStreamDictionary to store ouput param on multiple documents
       var streamId = new ElementStreamId(this, string.Empty);
-      var streamMode = ((IGH_TrackingParam) this).StreamMode | (currentDocumentOnly ? ElementStreamMode.CurrentDocument : default);
-      ElementStreams = new ElementStreamDictionary<R>(streamId, streamMode);
+      var streamMode = ((IGH_TrackingParam) this).StreamMode | (document is object ? ElementStreamMode.CurrentDocument : default);
+      ElementStreams = new ElementStreamDictionary<R>(document, streamId, streamMode);
 
       // This deletes all elements tracked from previous iterations.
       // It helps to avoid name collisions on named elements.
