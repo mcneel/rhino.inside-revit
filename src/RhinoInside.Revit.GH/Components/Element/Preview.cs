@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var element = default(ARDB.Element);
-      if (!DA.GetData("Element", ref element))
+      if (!DA.GetData(0, ref element))
         return;
 
       var scope = default(IDisposable);
@@ -55,17 +55,17 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
       using (scope)
       {
-        var relativeTolerance = 0.5;
-        if (DA.GetData(2, ref relativeTolerance))
+        var quality = 0.5;
+        if (DA.GetData(2, ref quality))
         {
-          if (0.0 > relativeTolerance || relativeTolerance > 1.0)
+          if (0.0 > quality || quality > 1.0)
           {
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Parameter '{Params.Input[2].Name}' range is [0.0, 1.0].");
             return;
           }
         }
 
-        var meshingParameters = !double.IsNaN(relativeTolerance) ? new Rhino.Geometry.MeshingParameters(relativeTolerance, Revit.VertexTolerance) : null;
+        var meshingParameters = !double.IsNaN(quality) ? new MeshingParameters(quality, GeometryObjectTolerance.Internal.VertexTolerance) : null;
         Types.GeometricElement.BuildPreview(element, meshingParameters, detailLevel, out var materials, out var meshes, out var wires);
 
         for (int m = 0; m < meshes?.Length; ++m)

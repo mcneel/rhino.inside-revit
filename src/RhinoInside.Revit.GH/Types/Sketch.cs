@@ -117,7 +117,9 @@ namespace RhinoInside.Revit.GH.Types
       // Extract base surface
       if (surface is object)
       {
-        double trimTolerance = Revit.VertexTolerance * 0.1;
+        var tol = GeometryObjectTolerance.Model;
+        var trimTolerance = tol.VertexTolerance * 0.1;
+
         int si = brep.AddSurface(surface);
 
         if (surface is PlaneSurface)
@@ -156,7 +158,7 @@ namespace RhinoInside.Revit.GH.Types
           {
             for (int j = i + 1; j < edgeLoops.Length; ++j)
             {
-              var containment = Curve.PlanarClosedCurveRelationship(trims[i], trims[j], Plane.WorldXY, Revit.VertexTolerance * Revit.ModelUnits);
+              var containment = Curve.PlanarClosedCurveRelationship(trims[i], trims[j], Plane.WorldXY, tol.VertexTolerance);
               if (containment == RegionContainment.MutualIntersection)
               {
                 edgeLoops[i].type = BrepLoopType.Outer;
@@ -237,7 +239,7 @@ namespace RhinoInside.Revit.GH.Types
               edgeLoops[index].trims.Append(trim);
             }
 
-            edgeLoops[index].trims.MakeClosed(Revit.VertexTolerance);
+            edgeLoops[index].trims.MakeClosed(tol.VertexTolerance);
 
             ++index;
           }
@@ -265,7 +267,7 @@ namespace RhinoInside.Revit.GH.Types
           {
             foreach (var shell in shells.Reverse())
             {
-              var containment = Curve.PlanarClosedCurveRelationship(innerLoop.trims, shell[0].trims, Plane.WorldXY, Revit.VertexTolerance);
+              var containment = Curve.PlanarClosedCurveRelationship(innerLoop.trims, shell[0].trims, Plane.WorldXY, tol.VertexTolerance);
               if (containment == RegionContainment.AInsideB)
               {
                 shell.Add(innerLoop);

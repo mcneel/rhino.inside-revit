@@ -89,20 +89,6 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
-    protected static bool TryGetFilterLengthParam(ARDB.BuiltInParameter paramId, double pattern, out ARDB.ElementFilter filter)
-    {
-      var rule = new ARDB.FilterDoubleRule
-      (
-        new ARDB.ParameterValueProvider(new ARDB.ElementId(paramId)),
-        new ARDB.FilterNumericEquals(),
-        pattern,
-        Revit.VertexTolerance
-      );
-
-      filter = new ARDB.ElementParameterFilter(rule, false);
-      return true;
-    }
-
     protected internal static bool TryGetFilterStringParam(ARDB.BuiltInParameter paramId, ref string pattern, out ARDB.ElementFilter filter)
     {
       if (pattern is string subPattern)

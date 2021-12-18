@@ -45,6 +45,7 @@ namespace RhinoInside.Revit.GH.Components
         if (profiles.Length != boundaries.Count)
           return false;
 
+        var tol = GeometryObjectTolerance.Model;
         var loops = sketch.GetAllModelCurves();
         var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
@@ -55,11 +56,11 @@ namespace RhinoInside.Revit.GH.Components
 
           if
           (
-            !Curve.GetDistancesBetweenCurves(profiles[pi], profile, Revit.VertexTolerance * Revit.ModelUnits, out var max, out var _, out var _, out var _, out var _, out var _) ||
-            max > Revit.VertexTolerance * Revit.ModelUnits
+            !Curve.GetDistancesBetweenCurves(profiles[pi], profile, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
+            max > tol.VertexTolerance
           )
           {
-            var segments = profile.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance) ?
+            var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
               polyCurve.DuplicateSegments() :
               profile.Split(profile.Domain.Mid);
 
@@ -78,7 +79,7 @@ namespace RhinoInside.Revit.GH.Components
                 if
                 (
                   edge.GeometryCurve is ARDB.HermiteSpline &&
-                  segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance * Revit.ModelUnits)
+                  segment.TryGetHermiteSpline(out var points, out var start, out var end, tol.VertexTolerance)
                 )
                 {
                   using (var tangents = new ARDB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
@@ -131,6 +132,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (boundary is null) return;
 
+      var tol = GeometryObjectTolerance.Model;
       var normal = default(Vector3d); var maxArea = 0.0;
       var index = 0; var maxIndex = 0;
       foreach (var loop in boundary)
@@ -139,10 +141,10 @@ namespace RhinoInside.Revit.GH.Components
         var plane = default(Plane);
         if
         (
-          loop.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits) ||
+          loop.IsShort(tol.ShortCurveTolerance) ||
           !loop.IsClosed ||
-          !loop.TryGetPlane(out plane, Revit.VertexTolerance) ||
-          plane.ZAxis.IsParallelTo(Vector3d.ZAxis, Revit.AngleTolerance) == 0
+          !loop.TryGetPlane(out plane, tol.VertexTolerance) ||
+          plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
         )
           ThrowArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.");
 

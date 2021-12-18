@@ -6,6 +6,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
+  using Convert.Geometry;
+
   [Obsolete("Obsolete since 2020-06-01")]
   public class QueryWallTypes : ElementCollectorComponent
   {
@@ -78,7 +80,18 @@ namespace RhinoInside.Revit.GH.Components.Walls
         }
 
         // DB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM only works with Basic wall types
-        if (width.IsValid && wallKind == ARDB.WallKind.Basic && TryGetFilterDoubleParam(ARDB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM, width.Mid / Revit.ModelUnits, Revit.VertexTolerance + (width.Length * 0.5 / Revit.ModelUnits), out var widthFilter))
+        if
+        (
+          width.IsValid &&
+          wallKind == ARDB.WallKind.Basic &&
+          TryGetFilterDoubleParam
+          (
+            ARDB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM,
+            width.Mid / Revit.ModelUnits,
+            GeometryObjectTolerance.Internal.VertexTolerance + (width.Length * 0.5 / Revit.ModelUnits),
+            out var widthFilter
+          )
+        )
           elementCollector = elementCollector.WherePasses(widthFilter);
 
         var elements = collector.Cast<ARDB.WallType>();

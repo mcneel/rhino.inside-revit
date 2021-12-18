@@ -21,25 +21,25 @@ namespace RhinoInside.Revit.GH
   {
     static GH_Document ActiveDefinition => Instances.ActiveCanvas?.Document;
 
-    List<ParamPrimitive> primitives = new List<ParamPrimitive>();
+    readonly List<ParamPrimitive> primitives = new List<ParamPrimitive>();
     Rhino.Geometry.BoundingBox primitivesBoundingBox = Rhino.Geometry.BoundingBox.Empty;
     int RebuildPrimitives = 1;
 
     public static GH_PreviewMode PreviewMode = GH_PreviewMode.Shaded;
 
-    static Rhino.Geometry.MeshingParameters previewCurrentMeshParameters = new Rhino.Geometry.MeshingParameters(0.15, Revit.ShortCurveTolerance);
+    static readonly Rhino.Geometry.MeshingParameters previewCurrentMeshParameters = Rhino.Geometry.MeshingParameters.Default;
     static Rhino.Geometry.MeshingParameters PreviewCurrentMeshParameters
     {
       get
       {
         previewCurrentMeshParameters.RelativeTolerance = 0.15;
-        previewCurrentMeshParameters.MinimumEdgeLength = Revit.ShortCurveTolerance * Revit.ModelUnits;
+        previewCurrentMeshParameters.MinimumEdgeLength = GeometryObjectTolerance.Model.ShortCurveTolerance;
 
         if (ActiveDefinition?.PreviewCurrentMeshParameters() is Rhino.Geometry.MeshingParameters parameters)
         {
           previewCurrentMeshParameters.MinimumTolerance = parameters.MinimumTolerance;
           previewCurrentMeshParameters.RelativeTolerance = parameters.RelativeTolerance;
-          previewCurrentMeshParameters.MinimumEdgeLength = Math.Max(Revit.ShortCurveTolerance * Revit.ModelUnits, parameters.MinimumEdgeLength);
+          previewCurrentMeshParameters.MinimumEdgeLength = Math.Max(previewCurrentMeshParameters.MinimumEdgeLength, parameters.MinimumEdgeLength);
           previewCurrentMeshParameters.Tolerance = parameters.Tolerance;
           previewCurrentMeshParameters.GridAmplification = parameters.GridAmplification;
           previewCurrentMeshParameters.GridAspectRatio = parameters.GridAspectRatio;

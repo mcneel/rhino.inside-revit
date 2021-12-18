@@ -175,11 +175,6 @@ namespace RhinoInside.Revit
     public static Autodesk.Revit.UI.UIDocument                    ActiveUIDocument => ActiveUIApplication?.ActiveUIDocument;
     public static Autodesk.Revit.DB.Document                      ActiveDBDocument => ActiveUIDocument?.Document;
 
-    private const double AbsoluteTolerance                        = (1.0 / 12.0) / 16.0; // 1/16″ in feet
-    public static double AngleTolerance                           => ActiveDBApplication?.AngleTolerance       ?? Math.PI / 1800.0; // 0.1° in rad
-    public static double ShortCurveTolerance                      => ActiveDBApplication?.ShortCurveTolerance  ?? AbsoluteTolerance / 2.0;
-    public static double VertexTolerance                          => ActiveDBApplication?.VertexTolerance      ?? AbsoluteTolerance / 10.0;
-
     public static double ModelUnits                               => UnitConverter.ToRhinoUnits; // 1 feet in Rhino units
     #endregion
   }

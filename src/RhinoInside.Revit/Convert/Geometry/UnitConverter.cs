@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Rhino;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
@@ -15,16 +16,19 @@ namespace RhinoInside.Revit.Convert.Geometry
   {
     #region Default Instances
     /// <summary>
+    /// Identity <see cref="UnitConverter"/>.
+    /// </summary>
+    public static readonly UnitConverter Identity = new UnitConverter(UnitSystem.None);
+
+    /// <summary>
     /// Default <see cref="UnitConverter"/> for converting to and from Rhino model unit system.
     /// </summary>
-    public static UnitConverter Model = new UnitConverter
-      (() => RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters);
+    public static readonly UnitConverter Model = new UnitConverter(ActiveSpace.ModelSpace, default);
 
     /// <summary>
     /// Default <see cref="UnitConverter"/> for converting to and from Rhino page unit system.
     /// </summary>
-    public static UnitConverter Page = new UnitConverter
-      (() => RhinoDoc.ActiveDoc?.PageUnitSystem ?? UnitSystem.Millimeters);
+    public static readonly UnitConverter Page = new UnitConverter(ActiveSpace.PageSpace, default);
     #endregion
 
     #region Implementation Details
@@ -183,12 +187,34 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Methods
+    UnitConverter(Func<UnitSystem> unitSystem) => this.unitSystem = unitSystem;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="UnitConverter"/> class to the indicated unit system.
     /// </summary>
     /// <param name="unitSystem">A Rhino unit system to be used in conversions.</param>
-    public UnitConverter(UnitSystem unitSystem) => this.unitSystem = () => unitSystem;
-    UnitConverter(Func<UnitSystem> unitSystem) => this.unitSystem = unitSystem;
+    public UnitConverter(UnitSystem unitSystem)
+    {
+      if (unitSystem == UnitSystem.Unset || !Enum.IsDefined(typeof(UnitSystem), unitSystem))
+        throw new ArgumentOutOfRangeException(nameof(unitSystem));
+
+      this.unitSystem = () => unitSystem;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UnitConverter"/> class referencing the indicated Rhino document.
+    /// </summary>
+    /// <param name="space">A Rhino space to take unit system from.</param>
+    /// <param name="rhinoDoc">A Rhino document to be used in conversions, null to reference <see cref="RhinoDoc.ActiveDoc"/>.</param>
+    public UnitConverter(ActiveSpace space, RhinoDoc rhinoDoc = default)
+    {
+      switch (space)
+      {
+        case ActiveSpace.ModelSpace: unitSystem = () => (rhinoDoc ?? RhinoDoc.ActiveDoc)?.ModelUnitSystem ?? UnitSystem.Meters; break;
+        case ActiveSpace.PageSpace:  unitSystem = () => (rhinoDoc ?? RhinoDoc.ActiveDoc)?.PageUnitSystem  ?? UnitSystem.Millimeters; break;
+        default: throw new ArgumentOutOfRangeException(nameof(space));
+      }
+    }
 
     /// <summary>
     /// External unit system used to convert.
@@ -525,5 +551,87 @@ namespace RhinoInside.Revit.Convert.Geometry
       return InOtherUnits(value, spec, rhinoDoc.ModelUnitSystem, UnitConverter.InternalUnitSystem);
     }
     #endregion
+  }
+
+  /// <summary>
+  /// Tolerance values to be used on <see cref="Autodesk.Revit.DB.GeometryObject"/> instances.
+  /// </summary>
+  readonly struct GeometryObjectTolerance
+  {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GeometryObjectTolerance"/> using to the indicated unit system.
+    /// </summary>
+    /// <param name="unitSystem">A <see cref="Rhino.UnitSystem"/> to be used in conversions.</param>
+    public GeometryObjectTolerance(UnitSystem unitSystem)
+    {
+      if (unitSystem == UnitSystem.None)
+      {
+        AngleTolerance = Internal.AngleTolerance;
+        VertexTolerance = Internal.VertexTolerance;
+        ShortCurveTolerance = Internal.ShortCurveTolerance;
+      }
+      else
+      {
+        AngleTolerance = Internal.AngleTolerance;
+        VertexTolerance = UnitConverter.ConvertFromInternalUnits(Internal.VertexTolerance, unitSystem);
+        ShortCurveTolerance = UnitConverter.ConvertFromInternalUnits(Internal.ShortCurveTolerance, unitSystem);
+      }
+    }
+
+    internal GeometryObjectTolerance(double angle, double vertex, double curve)
+    {
+      AngleTolerance = angle;
+      VertexTolerance = vertex;
+      ShortCurveTolerance = curve;
+    }
+
+    /// <summary>
+    /// Angle tolerance.
+    /// </summary>
+    /// <remarks>
+    /// Value is in radians. Two angle measurements closer than this value are considered identical.
+    /// </remarks>
+    public readonly double AngleTolerance;
+
+    /// <summary>
+    /// Vertex tolerance.
+    /// </summary>
+    /// <remarks>
+    /// Two points within this distance are considered coincident.
+    /// </remarks>
+    public readonly double VertexTolerance;
+
+    /// <summary>
+    /// Curve length tolerance
+    /// </summary>
+    /// <remarks>
+    /// A curve shorter than this distance is considered degenerated.
+    /// </remarks>
+    public readonly double ShortCurveTolerance;
+
+    // Initialized to NaN to notice if Internal is used before is assigned.
+    //
+    //private const double AbsoluteTolerance = (1.0 / 12.0) / 16.0; // 1/16″ in feet
+    //public static GeometryObjectTolerance Internal { get; internal set; } = new GeometryObjectTolerance
+    //(
+    //  angle:  Math.PI / 1800.0, // 0.1° in rad,
+    //  vertex: AbsoluteTolerance / 10.0,
+    //  curve:  AbsoluteTolerance / 2.0
+    //);
+
+    /// <summary>
+    /// Default <see cref="GeometryObjectTolerance"/> to be used on <see cref="Autodesk.Revit.DB.GeometryObject"/> instances.
+    /// </summary>
+    public static GeometryObjectTolerance Internal  { get; internal set; } = new GeometryObjectTolerance(double.NaN, double.NaN, double.NaN);
+
+    /// <summary>
+    /// Default <see cref="GeometryObjectTolerance"/> expresed in Rhino model unit system.
+    /// </summary>
+    public static GeometryObjectTolerance Model     => new GeometryObjectTolerance(UnitConverter.Model.UnitSystem);
+
+    /// <summary>
+    /// Default <see cref="GeometryObjectTolerance"/> expresed in Rhino page unit system.
+    /// </summary>
+    public static GeometryObjectTolerance Page      => new GeometryObjectTolerance(UnitConverter.Page.UnitSystem);
   }
 }

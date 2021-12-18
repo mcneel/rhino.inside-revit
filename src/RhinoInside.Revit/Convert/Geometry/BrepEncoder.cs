@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.Convert.Geometry
   static class BrepEncoder
   {
     #region Tolerances
-    static double JoinTolerance => Math.Sqrt(Revit.VertexTolerance * Revit.VertexTolerance + Revit.VertexTolerance * Revit.VertexTolerance);
+    static double JoinTolerance => Math.Sqrt(Math.Pow(GeometryObjectTolerance.Internal.VertexTolerance, 2.0) * 2.0);
     static double EdgeTolerance => JoinTolerance * 0.5;
     #endregion
 
@@ -33,13 +33,14 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (scaleFactor != 1.0 && !brep.Scale(scaleFactor))
         return default;
 
+      var tol = GeometryObjectTolerance.Internal;
       var bbox = brep.GetBoundingBox(false);
-      if (!bbox.IsValid || bbox.Diagonal.Length < Revit.ShortCurveTolerance)
+      if (!bbox.IsValid || bbox.Diagonal.Length < tol.ShortCurveTolerance)
         return default;
 
       // Split and Shrink faces
       {
-        brep.Faces.SplitKinkyFaces(Revit.AngleTolerance, true);
+        brep.Faces.SplitKinkyFaces(tol.AngleTolerance, true);
         brep.Faces.SplitClosedFaces(0);
         brep.Faces.ShrinkFaces();
       }
@@ -60,12 +61,13 @@ namespace RhinoInside.Revit.Convert.Geometry
     static BrepIssues AuditBrep(Brep brep)
     {
       var options = default(BrepIssues);
+      var tol = GeometryObjectTolerance.Internal;
 
       // Edges
       {
         foreach (var edge in brep.Edges)
         {
-          if (edge.Tolerance > Revit.VertexTolerance)
+          if (edge.Tolerance > tol.VertexTolerance)
           {
             options |= BrepIssues.OutOfToleranceEdges;
             GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains out of tolerance edges, it will be rebuilt.", edge);
@@ -100,6 +102,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       if(options != BrepIssues.Nothing)
       {
+        var tol = GeometryObjectTolerance.Internal;
         var edgesToUnjoin = brep.Edges.Select(x => x.EdgeIndex);
         var shells = brep.UnjoinEdges(edgesToUnjoin);
         if (shells.Length == 0)
@@ -117,11 +120,11 @@ namespace RhinoInside.Revit.Convert.Geometry
 
             int edgeCount = edges.Count;
             for (int ei = 0; ei < edgeCount; ++ei)
-              edges.SplitKinkyEdge(ei, Revit.AngleTolerance);
+              edges.SplitKinkyEdge(ei, tol.AngleTolerance);
 
             kinkyEdges += edges.Count - edgeCount;
-            microEdges += edges.RemoveNakedMicroEdges(Revit.VertexTolerance, cleanUp: true);
-            mergedEdges += edges.MergeAllEdges(Revit.AngleTolerance) - edgeCount;
+            microEdges += edges.RemoveNakedMicroEdges(tol.VertexTolerance, cleanUp: true);
+            mergedEdges += edges.MergeAllEdges(tol.AngleTolerance) - edgeCount;
           }
 
           // Faces
@@ -163,7 +166,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 #endif
 
         //var join = shells;
-        var join = Brep.JoinBreps(shells, Revit.VertexTolerance);
+        var join = Brep.JoinBreps(shells, tol.VertexTolerance);
         if (join.Length == 1) brep = join[0];
         else
         {
@@ -171,14 +174,14 @@ namespace RhinoInside.Revit.Convert.Geometry
           foreach (var shell in join)
             merge.Append(shell);
 
-          //var joined = merge.JoinNakedEdges(Revit.VertexTolerance);
+          //var joined = merge.JoinNakedEdges(tol.VertexTolerance);
           brep = merge;
         }
 
 #if DEBUG
         foreach (var edge in brep.Edges)
         {
-          if (edge.Tolerance > Revit.VertexTolerance)
+          if (edge.Tolerance > tol.VertexTolerance)
             GeometryEncoder.Context.Peek.RuntimeMessage(255, $"DEBUG - Geometry contains out of tolerance edges", edge);
         }
 #endif
@@ -193,7 +196,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       using (var mp = MeshingParameters.Default)
       {
-        mp.Tolerance = 0.0;// Revit.VertexTolerance / factor;
+        mp.Tolerance = 0.0;// GeometryObjectTolerance.Internal.VertexTolerance / factor;
         mp.MinimumTolerance = 0.0;
         mp.RelativeTolerance = 0.0;
 
@@ -285,14 +288,15 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Try convert flat extrusions under tolerance as surfaces
       if (brep.TryGetExtrusion(out var extrusion))
       {
+        var tol = GeometryObjectTolerance.Internal;
         var height = extrusion.PathStart.DistanceTo(extrusion.PathEnd);
-        if (height < Revit.VertexTolerance / factor)
+        if (height < tol.VertexTolerance / factor)
         {
           var curves = new List<Curve>(extrusion.ProfileCount);
           for (int p = 0; p < extrusion.ProfileCount; ++p)
             curves.Add(extrusion.Profile3d(p, 0.5));
 
-          var regions = Brep.CreatePlanarBreps(curves, Revit.VertexTolerance / factor);
+          var regions = Brep.CreatePlanarBreps(curves, tol.VertexTolerance / factor);
           if (regions.Length != 1)
             return false;
 
@@ -338,6 +342,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       try
       {
+        var tol = GeometryObjectTolerance.Internal;
         var brepType = ARDB.BRepType.OpenShell;
         switch (brep.SolidOrientation)
         {
@@ -425,7 +430,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                 catch (Autodesk.Revit.Exceptions.ArgumentsInconsistentException e)
                 {
                   error = true;
-                  var message = e.Message.Replace("(as identified by Application.ShortCurveTolerance)", $"({Revit.ShortCurveTolerance * Revit.ModelUnits})");
+                  var message = e.Message.Replace("(as identified by Application.ShortCurveTolerance)", $"({GeometryObjectTolerance.Model.ShortCurveTolerance})");
                   message = message.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0];
                   GeometryEncoder.Context.Peek.RuntimeMessage(20, message, edge);
                   break;
@@ -490,7 +495,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     static ARDB.Line ToEdgeCurve(Line line)
     {
       var length = line.Length;
-      bool isShort = length < Revit.ShortCurveTolerance;
+      var isShort = length < GeometryObjectTolerance.Internal.ShortCurveTolerance;
       var factor = isShort ? 1.0 / length : UnitConverter.NoScale;
 
       var curve = ARDB.Line.CreateBound
@@ -505,7 +510,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     static ARDB.Arc ToEdgeCurve(Arc arc)
     {
       var length = arc.Length;
-      bool isShort = length < Revit.ShortCurveTolerance;
+      var isShort = length < GeometryObjectTolerance.Internal.ShortCurveTolerance;
       var factor = isShort ? 1.0 / length : UnitConverter.NoScale;
 
       var curve = ARDB.Arc.Create
@@ -521,7 +526,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     static ARDB.Curve ToEdgeCurve(NurbsCurve nurbs)
     {
       var length = nurbs.GetLength();
-      bool isShort = length < Revit.ShortCurveTolerance;
+      var isShort = length < GeometryObjectTolerance.Internal.ShortCurveTolerance;
       var factor = isShort ? 1.0 / length : UnitConverter.NoScale;
 
       var degree = nurbs.Degree;
@@ -550,7 +555,8 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<ARDB.Curve> ToEdgeCurve(PolyCurve curve)
     {
-      if (curve.RemoveShortSegments(Revit.VertexTolerance))
+      var tol = GeometryObjectTolerance.Internal;
+      if (curve.RemoveShortSegments(tol.VertexTolerance))
       {
 #if DEBUG
         GeometryEncoder.Context.Peek.RuntimeMessage(10, "Edge micro-segment removed.", curve);
@@ -573,7 +579,8 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<ARDB.Line> ToEdgeCurveMany(PolylineCurve curve)
     {
-      if (curve.RemoveShortSegments(Revit.VertexTolerance))
+      var tol = GeometryObjectTolerance.Internal;
+      if (curve.RemoveShortSegments(tol.VertexTolerance))
       {
 #if DEBUG
         GeometryEncoder.Context.Peek.RuntimeMessage(10, "Edge micro-segment removed.", curve);
@@ -596,7 +603,8 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<ARDB.Arc> ToEdgeCurveMany(ArcCurve curve)
     {
-      if (curve.IsClosed(Revit.ShortCurveTolerance * 1.01))
+      var tol = GeometryObjectTolerance.Internal;
+      if (curve.IsClosed(tol.ShortCurveTolerance * 1.01))
       {
         var interval = curve.Domain;
         double min = interval.Min, mid = interval.Mid, max = interval.Max;
@@ -617,7 +625,8 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<ARDB.Curve> ToEdgeCurveMany(PolyCurve curve)
     {
-      if (curve.RemoveShortSegments(Revit.VertexTolerance))
+      var tol = GeometryObjectTolerance.Internal;
+      if (curve.RemoveShortSegments(tol.VertexTolerance))
       {
 #if DEBUG
         GeometryEncoder.Context.Peek.RuntimeMessage(10, "Edge micro-segment removed.", curve);
@@ -677,7 +686,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         yield break;
       }
-      else if (curve.IsClosed(Revit.VertexTolerance))
+      else if (curve.IsClosed(GeometryObjectTolerance.Internal.VertexTolerance))
       {
         var segments = curve.DuplicateSegments();
         if (segments.Length == 1)
@@ -752,8 +761,9 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<ARDB.BRepBuilderEdgeGeometry> ToBRepBuilderEdgeGeometry(BrepEdge edge)
     {
+      var tol = GeometryObjectTolerance.Internal;
       var edgeCurve = edge.EdgeCurve.Trim(edge.Domain) ?? edge.EdgeCurve.DuplicateCurve();
-      if (edgeCurve is null || edge.IsShort(Revit.VertexTolerance, edge.Domain))
+      if (edgeCurve is null || edge.IsShort(tol.VertexTolerance, edge.Domain))
       {
         GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Micro edge skipped.", edge);
         yield break;
@@ -766,18 +776,18 @@ namespace RhinoInside.Revit.Convert.Geometry
       (
         CurveSimplifyOptions.AdjustG1 |
         CurveSimplifyOptions.Merge,
-        Revit.VertexTolerance,
-        Revit.AngleTolerance
+        tol.VertexTolerance,
+        tol.AngleTolerance
       ) ?? edgeCurve;
 
       foreach (var segment in ToEdgeCurveMany(edgeCurve))
       {
         var segmentLength = segment.Length;
 
-        if (segmentLength <= Revit.ShortCurveTolerance)
+        if (segmentLength <= tol.ShortCurveTolerance)
           GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Geometry contains short edges.{Environment.NewLine}Geometry with short edges may not be as reliable as fully valid geometry.", Raw.RawDecoder.ToRhino(segment));
 
-        if (segmentLength <= Revit.VertexTolerance)
+        if (segmentLength <= tol.VertexTolerance)
         {
 #if DEBUG
           GeometryEncoder.Context.Peek.RuntimeMessage(20, $"The curve is degenerate (its length is too close to zero).", Raw.RawDecoder.ToRhino(segment));
@@ -860,11 +870,11 @@ namespace RhinoInside.Revit.Convert.Geometry
       {
         using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Fine })
         {
-          /// <see cref="ARDB.GeometryInstance.GetInstanceGeometry"/> is like calling
-          /// <see cref="ARDB.SolidUtils.CreateTransformed"/> on <see cref="ARDB.GeometryInstance.SymbolGeometry"/>.
-          /// It creates a transformed copy of the solid that will survive the Rollback.
-          /// Unfortunately Paint information lives in the element so even if we paint the
-          /// instance before doing the duplicate this information is lost after Rollback.
+          // <see cref="ARDB.GeometryInstance.GetInstanceGeometry"/> is like calling
+          // <see cref="ARDB.SolidUtils.CreateTransformed"/> on <see cref="ARDB.GeometryInstance.SymbolGeometry"/>.
+          // It creates a transformed copy of the solid that will survive the Rollback.
+          // Unfortunately Paint information lives in the element so even if we paint the
+          // instance before doing the duplicate this information is lost after Rollback.
           if
           (
             element.get_Geometry(options) is ARDB.GeometryElement geometryElement &&
@@ -1058,6 +1068,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     #region Debug
     static bool IsEquivalent(this ARDB.Solid solid, Brep brep)
     {
+      var tol = GeometryObjectTolerance.Model;
       var hit = new bool[brep.Faces.Count];
 
       foreach (var face in solid.Faces.Cast<ARDB.Face>())
@@ -1072,7 +1083,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             {
               var point = edge.Evaluate(sample).ToPoint3d();
 
-              if (!brep.ClosestPoint(point, out var closest, out var ci, out var s, out var t, Revit.VertexTolerance * Revit.ModelUnits, out var normal))
+              if (!brep.ClosestPoint(point, out var closest, out var ci, out var s, out var t, tol.VertexTolerance, out var normal))
                 return false;
             }
           }
@@ -1091,7 +1102,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                 var point = result.XYZPoint.ToPoint3d();
 
                 // Check if is on Brep
-                if (!brep.ClosestPoint(point, out var closest, out var ci, out var s, out var t, Revit.VertexTolerance * Revit.ModelUnits, out var normal))
+                if (!brep.ClosestPoint(point, out var closest, out var ci, out var s, out var t, tol.VertexTolerance, out var normal))
                   return false;
 
                 if (ci.ComponentIndexType == ComponentIndexType.BrepFace)

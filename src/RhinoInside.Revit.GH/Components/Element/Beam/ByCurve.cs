@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Rhino;
+using Rhino.DocObjects;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
@@ -66,7 +68,7 @@ namespace RhinoInside.Revit.GH.Components
       if
       (
         curve.IsClosed ||
-        !curve.IsPlanar(Revit.VertexTolerance * Revit.ModelUnits) ||
+        !curve.IsPlanar(GeometryObjectTolerance.Model.VertexTolerance) ||
         curve.GetNextDiscontinuity(Rhino.Geometry.Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, out var _)
       )
         ThrowArgumentException(nameof(curve), "Curve must be a C1 continuous planar non closed curve.");

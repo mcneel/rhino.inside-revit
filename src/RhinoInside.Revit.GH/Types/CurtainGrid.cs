@@ -159,6 +159,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       var result = cells.Count > 0;
 
+      var tol = GeometryObjectTolerance.Internal;
       foreach (var cell in cells)
       {
         foreach (var loop in cell.CurveLoops.Cast<ARDB.CurveArray>())
@@ -167,7 +168,7 @@ namespace RhinoInside.Revit.GH.Types
           {
             var center = curve.Evaluate(0.5, true);
             var distance = face.Project(center).Distance;
-            if (distance > Revit.VertexTolerance)
+            if (distance > tol.VertexTolerance)
               return false;
           }
         }

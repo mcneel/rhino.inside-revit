@@ -36,17 +36,18 @@ namespace RhinoInside.Revit.GH.Components
         if (profiles.Length != 1)
           return false;
 
+        var tol = GeometryObjectTolerance.Model;
         var plane = sketch.SketchPlane.GetPlane().ToPlane();
         var profile = Curve.ProjectToPlane(boundary, plane);
 
         if
         (
-          !Curve.GetDistancesBetweenCurves(profiles[0], profile, Revit.VertexTolerance * Revit.ModelUnits, out var max, out var _, out var _, out var _, out var _, out var _) ||
-          max > Revit.VertexTolerance * Revit.ModelUnits
+          !Curve.GetDistancesBetweenCurves(profiles[0], profile, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
+          max > tol.VertexTolerance
         )
         {
           var hack = new ARDB.XYZ(1.0, 1.0, 0.0);
-          var segments = profile.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance) ?
+          var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
             polyCurve.DuplicateSegments() :
             profile.Split(profile.Domain.Mid);
 
@@ -65,7 +66,7 @@ namespace RhinoInside.Revit.GH.Components
               if
               (
                 edge.GeometryCurve is ARDB.HermiteSpline &&
-                segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance * Revit.ModelUnits)
+                segment.TryGetHermiteSpline(out var points, out var start, out var end, tol.VertexTolerance)
               )
               {
                 using (var tangents = new ARDB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
@@ -117,12 +118,13 @@ namespace RhinoInside.Revit.GH.Components
       Optional<ARDB.Level> level
     )
     {
+      var tol = GeometryObjectTolerance.Model;
       if
       (
         boundary is null ||
-        boundary.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits) ||
+        boundary.IsShort(tol.ShortCurveTolerance) ||
         !boundary.IsClosed ||
-        !boundary.TryGetPlane(out var boundaryPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
+        !boundary.TryGetPlane(out var boundaryPlane, tol.VertexTolerance) ||
         boundaryPlane.ZAxis.IsParallelTo(Vector3d.ZAxis) == 0
       )
         ThrowArgumentException(nameof(boundary), "Boundary curve should be a valid horizontal planar closed curve.");

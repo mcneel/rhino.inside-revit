@@ -135,7 +135,7 @@ namespace RhinoInside.Revit
     {
       if (uiCtrlApp.IsLateAddinLoading) return Result.Failed;
 
-      using (Logger.LogScope())
+      using (var scope = Logger.LogScope())
       {
         // Check if the AddIn can startup
         {
@@ -144,6 +144,7 @@ namespace RhinoInside.Revit
         }
 
         // Ensure we have a SwapFolder
+        scope.LogTrace("Creating SwapFolder…", SwapFolder);
         Directory.CreateDirectory(SwapFolder);
 
         ErrorReport.OnLoadStackTraceFilePath =
@@ -164,7 +165,14 @@ namespace RhinoInside.Revit
             Host.Services.ApplicationInitialized -= applicationInitialized;
             if (CurrentStatus < Status.Available) return;
 
-            Host = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
+            var app = sender as Autodesk.Revit.ApplicationServices.Application;
+            Host = new UIApplication(app);
+            Convert.Geometry.GeometryObjectTolerance.Internal = new Convert.Geometry.GeometryObjectTolerance
+            (
+              app.AngleTolerance,
+              app.VertexTolerance,
+              app.ShortCurveTolerance
+            );
           };
         }
 

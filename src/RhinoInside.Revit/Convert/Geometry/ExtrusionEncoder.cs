@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       using (var mp = MeshingParameters.Default)
       {
-        mp.Tolerance = 0.0;// Revit.VertexTolerance / factor;
+        mp.Tolerance = 0.0;// GeometryObjectTolerance.Internal.VertexTolerance / factor;
         mp.MinimumTolerance = 0.0;
         mp.RelativeTolerance = 0.0;
 

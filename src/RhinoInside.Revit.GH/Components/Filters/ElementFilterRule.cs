@@ -233,7 +233,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
                     1e-6 :
                     UnitConverter.Convert
                     (
-                      Revit.VertexTolerance,
+                      GeometryObjectTolerance.Internal.VertexTolerance,
                       UnitConverter.Model.UnitSystem,
                       UnitConverter.InternalUnitSystem,
                       Math.Abs(dimensionality)

@@ -94,8 +94,10 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
       if (element.GetSketch() is ARDB.Sketch sketch)
       {
+        var tol = GeometryObjectTolerance.Model;
+
         var plane = sketch.SketchPlane.GetPlane().ToPlane();
-        if (normal.IsParallelTo(plane.Normal, Revit.AngleTolerance) == 0)
+        if (normal.IsParallelTo(plane.Normal, tol.AngleTolerance) == 0)
           return false;
 
         var profiles = sketch.Profile.ToPolyCurves();
@@ -110,11 +112,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
           if
           (
-            !Curve.GetDistancesBetweenCurves(profiles[pi], profile, Revit.VertexTolerance * Revit.ModelUnits, out var max, out var _, out var _, out var _, out var _, out var _) ||
-            max > Revit.VertexTolerance * Revit.ModelUnits
+            !Curve.GetDistancesBetweenCurves(profiles[pi], profile, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
+            max > tol.VertexTolerance
           )
           {
-            var segments = profile.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance) ?
+            var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
               polyCurve.DuplicateSegments():
               profile.Split(profile.Domain.Mid);
 
@@ -133,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
                 if
                 (
                   edge.GeometryCurve is ARDB.HermiteSpline &&
-                  segment.TryGetHermiteSpline(out var points, out var start, out var end, Revit.VertexTolerance * Revit.ModelUnits)
+                  segment.TryGetHermiteSpline(out var points, out var start, out var end, tol.VertexTolerance)
                 )
                 {
                   using (var tangents = new ARDB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
@@ -187,17 +189,19 @@ namespace RhinoInside.Revit.GH.Components.Walls
     {
       if (profile.Count < 1) return;
 
+      var tol = GeometryObjectTolerance.Model;
       var normal = default(Vector3d);
       var maxArea = 0.0;
       foreach (var boundary in profile)
       {
-        var plane = default(Plane);
+        var boundaryPlane = default(Plane);
         if
         (
            boundary is null ||
+           boundary.IsShort(tol.ShortCurveTolerance) ||
           !boundary.IsClosed ||
-          !boundary.TryGetPlane(out plane, Revit.VertexTolerance) ||
-          !plane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, Revit.AngleTolerance)
+          !boundary.TryGetPlane(out boundaryPlane, tol.VertexTolerance) ||
+          !boundaryPlane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance)
         )
           ThrowArgumentException(nameof(profile), "Boundary profile should be a valid vertical planar closed curve.");
 
@@ -212,9 +216,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
           if (properties.Area > maxArea)
           {
             maxArea = properties.Area;
-            normal = plane.Normal;
+            normal = boundaryPlane.Normal;
 
-            var orientation = boundary.ClosedCurveOrientation(plane);
+            var orientation = boundary.ClosedCurveOrientation(boundaryPlane);
             if (orientation == CurveOrientation.CounterClockwise)
               normal.Reverse();
           }

@@ -388,11 +388,12 @@ namespace RhinoInside.Revit
     {
       if (doc is object)
       {
-        var maxDistanceTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, doc.ModelUnitSystem);
+        var revitTol = GeometryObjectTolerance.Internal;
+        var maxDistanceTolerance = UnitConverter.ConvertFromInternalUnits(revitTol.VertexTolerance, doc.ModelUnitSystem);
         if (doc.ModelAbsoluteTolerance > maxDistanceTolerance)
           doc.ModelAbsoluteTolerance = maxDistanceTolerance;
 
-        var maxAngleTolerance = Revit.AngleTolerance;
+        var maxAngleTolerance = revitTol.AngleTolerance;
         if (doc.ModelAngleToleranceRadians > maxAngleTolerance)
           doc.ModelAngleToleranceRadians = maxAngleTolerance;
       }
@@ -405,6 +406,7 @@ namespace RhinoInside.Revit
 
       if (Revit.ActiveUIDocument?.Document is ARDB.Document revitDoc)
       {
+        var revitTol = GeometryObjectTolerance.Internal;
         var units = revitDoc.GetUnits();
         var RevitModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
         var GrasshopperModelUnitSystem = GH.Guest.ModelUnitSystem != UnitSystem.Unset ? GH.Guest.ModelUnitSystem : doc.ModelUnitSystem;
@@ -440,21 +442,21 @@ namespace RhinoInside.Revit
             }
             else
             {
-              taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink2, $"Use {RevitModelUnitSystem} like Revit", $"Scale Rhino model by {UnitConverter.Convert(1.0, doc.ModelUnitSystem, RevitModelUnitSystem)}");
-              taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink2;
+              taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink2, $"Use {RevitModelUnitSystem} like Revit", $"Scale Rhino model by {UnitConverter.Convert(1.0, doc.ModelUnitSystem, RevitModelUnitSystem)}");
+              taskDialog.DefaultButton = ARUI.TaskDialogResult.CommandLink2;
             }
 
             if (hasUnits)
             {
               if (doc.IsOpening)
               {
-                taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink1, $"Continue in {doc.ModelUnitSystem}", $"Rhino and Grasshopper will work in {doc.ModelUnitSystem}");
-                taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink1;
+                taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink1, $"Continue in {doc.ModelUnitSystem}", $"Rhino and Grasshopper will work in {doc.ModelUnitSystem}");
+                taskDialog.DefaultButton = ARUI.TaskDialogResult.CommandLink1;
               }
               else
               {
-                taskDialog.CommonButtons = Autodesk.Revit.UI.TaskDialogCommonButtons.Ok;
-                taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.Ok;
+                taskDialog.CommonButtons = ARUI.TaskDialogCommonButtons.Ok;
+                taskDialog.DefaultButton = ARUI.TaskDialogResult.Ok;
               }
             }
 
@@ -463,8 +465,8 @@ namespace RhinoInside.Revit
               taskDialog.ExpandedContent += $"{Environment.NewLine}Documents opened in Grasshopper were working in {GH.Guest.ModelUnitSystem}";
               if (GrasshopperModelUnitSystem != doc.ModelUnitSystem && GrasshopperModelUnitSystem != RevitModelUnitSystem)
               {
-                taskDialog.AddCommandLink(Autodesk.Revit.UI.TaskDialogCommandLinkId.CommandLink3, $"Adjust Rhino model to {GH.Guest.ModelUnitSystem} like Grasshopper", $"Scale Rhino model by {UnitConverter.Convert(1.0, doc.ModelUnitSystem, GH.Guest.ModelUnitSystem)}");
-                taskDialog.DefaultButton = Autodesk.Revit.UI.TaskDialogResult.CommandLink3;
+                taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink3, $"Adjust Rhino model to {GH.Guest.ModelUnitSystem} like Grasshopper", $"Scale Rhino model by {UnitConverter.Convert(1.0, doc.ModelUnitSystem, GH.Guest.ModelUnitSystem)}");
+                taskDialog.DefaultButton = ARUI.TaskDialogResult.CommandLink3;
               }
             }
 
@@ -474,18 +476,18 @@ namespace RhinoInside.Revit
             {
               switch (result)
               {
-                case Autodesk.Revit.UI.TaskDialogResult.CommandLink2:
-                  doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
+                case ARUI.TaskDialogResult.CommandLink2:
+                  doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
-                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, RevitModelUnitSystem);
+                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(revitTol.VertexTolerance, RevitModelUnitSystem);
                   doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
                   AdjustViewConstructionPlanes(doc);
                   break;
 
-                case Autodesk.Revit.UI.TaskDialogResult.CommandLink3:
-                  doc.ModelAngleToleranceRadians = Revit.AngleTolerance;
+                case ARUI.TaskDialogResult.CommandLink3:
+                  doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
-                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, GH.Guest.ModelUnitSystem);
+                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(revitTol.VertexTolerance, GH.Guest.ModelUnitSystem);
                   doc.AdjustModelUnitSystem(GH.Guest.ModelUnitSystem, true);
                   AdjustViewConstructionPlanes(doc);
                   break;
@@ -506,19 +508,21 @@ namespace RhinoInside.Revit
       bool docModified = rhinoDoc.Modified;
       try
       {
+        var revitTol = GeometryObjectTolerance.Internal;
+
         if (revitDoc is null)
         {
           rhinoDoc.ModelUnitSystem = UnitSystem.None;
-          rhinoDoc.ModelAbsoluteTolerance = Revit.VertexTolerance;
-          rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
+          rhinoDoc.ModelAbsoluteTolerance = revitTol.VertexTolerance;
+          rhinoDoc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
         }
         else if (rhinoDoc.ModelUnitSystem == UnitSystem.None)
         {
           var units = revitDoc.GetUnits();
           rhinoDoc.ModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
-          rhinoDoc.ModelAngleToleranceRadians = Revit.AngleTolerance;
+          rhinoDoc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
           rhinoDoc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
-          rhinoDoc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(Revit.VertexTolerance, rhinoDoc.ModelUnitSystem);
+          rhinoDoc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(revitTol.VertexTolerance, rhinoDoc.ModelUnitSystem);
           //switch (rhinoDoc.ModelUnitSystem)
           //{
           //  case UnitSystem.None: break;
@@ -593,7 +597,18 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Rhino UI
+    /// <summary>
+    /// Executes the specified delegate on Revit API context.
+    /// </summary>
+    /// <param name="action">A delegate that contains a method to be called in Revit API context.</param>
     public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
+
+    /// <summary>
+    /// Executes the specified delegate on Revit API context.
+    /// </summary>
+    /// <typeparam name="T">The return type of the <paramref name="func"/>.</typeparam>
+    /// <param name="func">A delegate that contains a method to be called in Revit API context.</param>
+    /// <returns>The return value from the function being invoked.</returns>
     public static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
 
     internal static bool Exposed

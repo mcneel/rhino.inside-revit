@@ -261,7 +261,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         polycurve.AppendSegment(curve.ToCurve());
 
       if(!value.IsOpen())
-        polycurve.MakeClosed(Revit.VertexTolerance * Revit.ModelUnits);
+        polycurve.MakeClosed(GeometryObjectTolerance.Model.VertexTolerance);
 
       return polycurve;
     }
@@ -301,7 +301,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         foreach (var curve in curveArray.Cast<ARDB.Curve>())
           polycurve.AppendSegment(curve.ToCurve());
 
-        polycurve.MakeClosed(Revit.VertexTolerance * Revit.ModelUnits);
+        polycurve.MakeClosed(GeometryObjectTolerance.Model.VertexTolerance);
 
         list[index++] = polycurve;
       }

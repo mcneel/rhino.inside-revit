@@ -8,6 +8,7 @@ namespace RhinoInside.Revit.GH.Components
   using Convert.Geometry;
   using External.DB.Extensions;
   using Kernel.Attributes;
+  using Rhino;
 
   public class RailingByCurve : ReconstructElementComponent
   {
@@ -41,11 +42,12 @@ namespace RhinoInside.Revit.GH.Components
     {
       SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.StairsRailingType, nameof(type));
       SolveOptionalLevel(document, curve, ref level, out var bbox);
+      var tol = GeometryObjectTolerance.Model;
 
       // Axis
       var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.GetHeight() * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
       curve = Rhino.Geometry.Curve.ProjectToPlane(curve, levelPlane);
-      curve = curve.Simplify(Rhino.Geometry.CurveSimplifyOptions.All, Revit.VertexTolerance * Revit.ModelUnits, Revit.AngleTolerance) ?? curve;
+      curve = curve.Simplify(Rhino.Geometry.CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? curve;
 
       // Type
       ChangeElementTypeId(ref railing, type.Value.Id);

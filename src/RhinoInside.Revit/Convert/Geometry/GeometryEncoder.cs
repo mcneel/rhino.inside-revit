@@ -302,7 +302,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal static ARDB.Line[] ToLines(this Polyline value, double factor)
     {
       value = value.Duplicate();
-      value.DeleteShortSegments(Revit.ShortCurveTolerance / factor);
+      value.DeleteShortSegments(GeometryObjectTolerance.Internal.ShortCurveTolerance / factor);
 
       int count = value.Count;
       var list = new ARDB.Line[Math.Max(0, count - 1)];
@@ -464,7 +464,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Curve ToCurve(this PolylineCurve value) => ToCurve(value, UnitConverter.ToHostUnits);
     internal static ARDB.Curve ToCurve(this PolylineCurve value, double factor)
     {
-      if (value.TryGetLine(out var line, Revit.VertexTolerance * factor))
+      if (value.TryGetLine(out var line, GeometryObjectTolerance.Internal.VertexTolerance * factor))
         return line.ToLine(factor);
 
       throw new ConversionException("Failed to convert non G1 continuous curve.");
@@ -486,10 +486,11 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Curve ToCurve(this NurbsCurve value) => value.ToCurve(UnitConverter.ToHostUnits);
     internal static ARDB.Curve ToCurve(this NurbsCurve value, double factor)
     {
-      if (value.TryGetEllipse(out var ellipse, out var interval, Revit.VertexTolerance * factor))
+      var tol = GeometryObjectTolerance.Internal;
+      if (value.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance * factor))
         return ellipse.ToCurve(interval, factor);
 
-      var gap = Revit.ShortCurveTolerance * 1.01 / factor;
+      var gap = tol.ShortCurveTolerance * 1.01 / factor;
       if (value.IsClosed(gap))
       {
         var length = value.GetLength();
@@ -523,12 +524,13 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Curve ToCurve(this PolyCurve value) => ToCurve(value, UnitConverter.ToHostUnits);
     internal static ARDB.Curve ToCurve(this PolyCurve value, double factor)
     {
+      var tol = GeometryObjectTolerance.Internal;
       var curve = value.Simplify
       (
         CurveSimplifyOptions.AdjustG1 |
         CurveSimplifyOptions.Merge,
-        Revit.VertexTolerance * factor,
-        Revit.AngleTolerance
+        tol.VertexTolerance * factor,
+        tol.AngleTolerance
       )
       ?? value;
 
@@ -576,7 +578,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.CurveLoop ToCurveLoop(this Curve value)
     {
       value = value.InOtherUnits(UnitConverter.ToHostUnits);
-      value.CombineShortSegments(Revit.ShortCurveTolerance);
+      value.CombineShortSegments(GeometryObjectTolerance.Internal.ShortCurveTolerance);
 
       return ARDB.CurveLoop.Create(value.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToList());
     }
@@ -589,7 +591,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.CurveArray ToCurveArray(this Curve value)
     {
       value = value.InOtherUnits(UnitConverter.ToHostUnits);
-      value.CombineShortSegments(Revit.ShortCurveTolerance);
+      value.CombineShortSegments(GeometryObjectTolerance.Internal.ShortCurveTolerance);
 
       return value.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToCurveArray();
     }
@@ -730,7 +732,8 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Convert to Raw form
       value = value.DuplicateCurve() as NurbsCurve;
       if (factor != 1.0) value.Scale(factor);
-      value.CombineShortSegments(Revit.ShortCurveTolerance);
+      var tol = GeometryObjectTolerance.Internal;
+      value.CombineShortSegments(tol.ShortCurveTolerance);
 
       // Transfer
       if (value.Degree == 1)
@@ -743,7 +746,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           for (int p = 1; p < pointCount; ++p)
           {
             end = curvePoints[p].Location.ToXYZ(UnitConverter.NoScale);
-            if (end.DistanceTo(start) < Revit.ShortCurveTolerance)
+            if (end.DistanceTo(start) < tol.ShortCurveTolerance)
               continue;
 
             yield return ARDB.Line.CreateBound(start, end);
@@ -751,7 +754,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
         }
       }
-      else if (value.TryGetPolyCurve(out var polyCurve, Revit.AngleTolerance))
+      else if (value.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance))
       {
         foreach (var segment in ToCurveMany(polyCurve, UnitConverter.NoScale))
           yield return segment;
@@ -760,7 +763,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
       else if (value.Degree == 2)
       {
-        if (value.IsRational && value.TryGetEllipse(out var ellipse, out var interval, Revit.VertexTolerance))
+        if (value.IsRational && value.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance))
         {
           // Only degree 2 rational NurbCurves should be transferred as an Arc-Ellipse
           // to avoid unexpected Arcs-Ellipses near linear with gigantic radius.
@@ -779,7 +782,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
         }
       }
-      else if (value.IsClosed(Revit.ShortCurveTolerance * 1.01))
+      else if (value.IsClosed(tol.ShortCurveTolerance * 1.01))
       {
         var segments = value.DuplicateSegments();
         if (segments.Length == 1)
@@ -813,7 +816,8 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Convert to Raw form
       value = value.DuplicateCurve() as PolylineCurve;
       if(factor != 1.0) value.Scale(factor);
-      value.CombineShortSegments(Revit.ShortCurveTolerance);
+      var tol = GeometryObjectTolerance.Internal;
+      value.CombineShortSegments(tol.ShortCurveTolerance);
 
       // Transfer
       int pointCount = value.PointCount;
@@ -823,7 +827,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         for (int p = 1; p < pointCount; ++p)
         {
           end = value.Point(p).ToXYZ(UnitConverter.NoScale);
-          if (start.DistanceTo(end) > Revit.ShortCurveTolerance)
+          if (start.DistanceTo(end) > tol.ShortCurveTolerance)
           {
             yield return ARDB.Line.CreateBound(start, end);
             start = end;
@@ -838,8 +842,9 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Convert to Raw form
       value = value.DuplicateCurve() as PolyCurve;
       if (factor != 1.0) value.Scale(factor);
+      var tol = GeometryObjectTolerance.Internal;
       value.RemoveNesting();
-      value.CombineShortSegments(Revit.ShortCurveTolerance);
+      value.CombineShortSegments(tol.ShortCurveTolerance);
 
       // Transfer
       int segmentCount = value.SegmentCount;

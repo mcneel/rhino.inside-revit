@@ -48,13 +48,14 @@ namespace RhinoInside.Revit.GH.Components.Site
 
       //if (element is DB.Architecture.TopographySurface topography)
       //{
+      //  var tol = GeometryObjectTolerance.Model;
       //  using (var scope = new DB.Architecture.TopographyEditScope(topography.Document, NickName))
       //  {
       //    scope.Start(topography.Id);
 
       //    var boundaryPoints = topography.GetBoundaryPoints();
       //    var bbox = new BoundingBox(boundaryPoints.Convert(GeometryDecoder.ToPoint3d));
-      //    bbox.Inflate(Revit.VertexTolerance * Revit.ModelUnits * 10.0);
+      //    bbox.Inflate(tol.VertexTolerance * 10.0);
       //    var bboxCorners = bbox.GetCorners().Take(4).Convert(GeometryEncoder.ToXYZ).ToArray();
 
       //    using (var tx = new DB.Transaction(topography.Document, NickName))

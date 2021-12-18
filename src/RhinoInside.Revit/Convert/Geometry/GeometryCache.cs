@@ -159,6 +159,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     static byte[] GetGeometryHashCode(GeometryBase geometry, double factor)
     {
       float Round(double value) => (float) (value * factor);
+      var tol = GeometryObjectTolerance.Internal;
 
       using (var stream = new MemoryStream())
       {
@@ -179,7 +180,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
               foreach (var surface in brep.Surfaces)
               {
-                var nurbs = surface as NurbsSurface ?? surface.ToNurbsSurface(Revit.VertexTolerance * factor, out var accuracy);
+                var nurbs = surface as NurbsSurface ?? surface.ToNurbsSurface(tol.VertexTolerance * factor, out var accuracy);
                 writer.Write(nurbs.OrderU);
                 writer.Write(nurbs.OrderV);
                 var rational = nurbs.IsRational;

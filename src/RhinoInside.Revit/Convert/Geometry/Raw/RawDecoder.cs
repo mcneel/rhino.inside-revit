@@ -255,7 +255,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     #region Surfaces
     static PlaneSurface FromPlane(ARDB.XYZ origin, ARDB.XYZ xDir, ARDB.XYZ yDir, ARDB.XYZ zDir, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var ctol = relativeTolerance * Revit.ShortCurveTolerance;
+      var tol = GeometryObjectTolerance.Internal;
+      var ctol = relativeTolerance * tol.ShortCurveTolerance;
       var uu = new Interval(bboxUV.Min.U - ctol, bboxUV.Max.U + ctol);
       var vv = new Interval(bboxUV.Min.V - ctol, bboxUV.Max.V + ctol);
 
@@ -291,8 +292,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static RevSurface FromConicalSurface(ARDB.XYZ origin, ARDB.XYZ xDir, ARDB.XYZ yDir, ARDB.XYZ zDir, double halfAngle, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var atol = relativeTolerance * Revit.AngleTolerance * 10.0;
-      var ctol = relativeTolerance * Revit.ShortCurveTolerance;
+      var tol = GeometryObjectTolerance.Internal;
+      var atol = relativeTolerance * tol.AngleTolerance * 10.0;
+      var ctol = relativeTolerance * tol.ShortCurveTolerance;
       var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
       var vv = new Interval(bboxUV.Min.V - ctol, bboxUV.Max.V + ctol);
 
@@ -346,8 +348,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static RevSurface FromCylindricalSurface(ARDB.XYZ origin, ARDB.XYZ xDir, ARDB.XYZ yDir, ARDB.XYZ zDir, double radius, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var atol = relativeTolerance * Revit.AngleTolerance;
-      var ctol = relativeTolerance * Revit.ShortCurveTolerance;
+      var tol = GeometryObjectTolerance.Internal;
+      var atol = relativeTolerance * tol.AngleTolerance;
+      var ctol = relativeTolerance * tol.ShortCurveTolerance;
       var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
       var vv = new Interval(bboxUV.Min.V - ctol, bboxUV.Max.V + ctol);
 
@@ -398,8 +401,9 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static RevSurface FromRevolvedSurface(ARDB.XYZ origin, ARDB.XYZ xDir, ARDB.XYZ yDir, ARDB.XYZ zDir, ARDB.Curve curve, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var atol = relativeTolerance * Revit.AngleTolerance;
-      var ctol = relativeTolerance * Revit.ShortCurveTolerance;
+      var tol = GeometryObjectTolerance.Internal;
+      var atol = relativeTolerance * tol.AngleTolerance;
+      var ctol = relativeTolerance * tol.ShortCurveTolerance;
       var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
 
       var plane = new Plane
@@ -444,7 +448,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static Surface FromExtrudedSurface(IList<ARDB.Curve> curves, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var ctol = relativeTolerance * Revit.ShortCurveTolerance;
+      var tol = GeometryObjectTolerance.Internal;
+      var ctol = relativeTolerance * tol.ShortCurveTolerance;
 
       var axis = new LineCurve
       (
@@ -469,7 +474,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static Surface FromRuledSurface(IList<ARDB.Curve> curves, ARDB.XYZ start, ARDB.XYZ end, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var ctol = relativeTolerance * Revit.ShortCurveTolerance;
+      var tol = GeometryObjectTolerance.Internal;
+      var ctol = relativeTolerance * tol.ShortCurveTolerance;
 
       var cs = curves.Where(x => x is object).Select
       (
@@ -607,7 +613,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       if (nurbsSurface is object)
       {
-        double ctol = relativeTolerance * Revit.ShortCurveTolerance * 5.0;
+        var tol = GeometryObjectTolerance.Internal;
+        double ctol = relativeTolerance * tol.ShortCurveTolerance * 5.0;
         if (ctol != 0.0)
         {
           // Extend using smooth way avoids creating C2 discontinuities
@@ -691,7 +698,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       var basis = surface.GetBasisSurface();
       var distance = surface.GetOffsetDistance();
 
-      var offset = ToRhino(basis, bboxUV).Offset(distance, Revit.VertexTolerance);
+      var offset = ToRhino(basis, bboxUV).Offset(distance, GeometryObjectTolerance.Internal.VertexTolerance);
       if (!surface.IsOrientationSameAsBasisSurface())
         offset = offset.Reverse(0);
 
@@ -749,6 +756,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static int AddSurface(Brep brep, ARDB.Face face, out List<BrepBoundary>[] shells, Dictionary<ARDB.Edge, BrepEdge> brepEdges = null)
     {
+      var tol = GeometryObjectTolerance.Internal;
+
       // Extract base surface
       if (ToRhinoSurface(face, out var parametricOrientation) is Surface surface)
       {
@@ -829,7 +838,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
             var start = loop.orientation[eA] > 0 ? (loop.edges[eA]).PointAtEnd   : (loop.edges[eA]).PointAtStart;
             var end   = loop.orientation[eB] > 0 ? (loop.edges[eB]).PointAtStart : (loop.edges[eB]).PointAtEnd;
 
-            if (start.EpsilonEquals(end, Revit.VertexTolerance))
+            if (start.EpsilonEquals(end, tol.VertexTolerance))
             {
               var startTrim = new Point2d(trims[tA].PointAtEnd);
               var endTrim = new Point2d(trims[tB].PointAtStart);
@@ -850,7 +859,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
             }
           }
 
-          loop.trims.MakeClosed(Revit.VertexTolerance);
+          loop.trims.MakeClosed(tol.VertexTolerance);
 
           switch (loop.trims.ClosedCurveOrientation())
           {
@@ -880,7 +889,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           {
             foreach (var shell in shells)
             {
-              var containment = Curve.PlanarClosedCurveRelationship(edgeLoop.trims, shell[0].trims, Plane.WorldXY, Revit.VertexTolerance);
+              var containment = Curve.PlanarClosedCurveRelationship(edgeLoop.trims, shell[0].trims, Plane.WorldXY, tol.VertexTolerance);
               if (containment == RegionContainment.AInsideB)
               {
                 shell.Add(edgeLoop);
@@ -967,7 +976,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         brep.IsValidWithLog(out var log);
         Debug.WriteLine($"{MethodInfo.GetCurrentMethod().DeclaringType.FullName}.{MethodInfo.GetCurrentMethod().Name}()\n{log}");
 #endif
-        brep.Repair(Revit.VertexTolerance);
+        brep.Repair(GeometryObjectTolerance.Internal.VertexTolerance);
       }
 
       return brep;
@@ -1017,7 +1026,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           brep.IsValidWithLog(out var log);
           Debug.WriteLine($"{MethodInfo.GetCurrentMethod().DeclaringType.FullName}.{MethodInfo.GetCurrentMethod().Name}()\n{log}");
 #endif
-          brep.Repair(Revit.VertexTolerance);
+          brep.Repair(GeometryObjectTolerance.Internal.VertexTolerance);
         }
       }
 

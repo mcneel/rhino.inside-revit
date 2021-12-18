@@ -7,8 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
-  using External.DB.Extensions;
+  using Convert.Geometry;
   using ElementTracking;
+  using External.DB.Extensions;
   using Kernel.Attributes;
 
   public class WallByCurve : ReconstructElementComponent
@@ -105,20 +106,22 @@ namespace RhinoInside.Revit.GH.Components.Walls
       [Optional] ARDB.Structure.StructuralWallUsage structuralUsage
     )
     {
+      var tol = GeometryObjectTolerance.Model;
+
 #if REVIT_2020
       if
       (
-        !(curve.IsLinear(Revit.VertexTolerance * Revit.ModelUnits) || curve.IsArc(Revit.VertexTolerance * Revit.ModelUnits) || curve.IsEllipse(Revit.VertexTolerance * Revit.ModelUnits)) ||
-        !curve.TryGetPlane(out var axisPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
-        axisPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis, Revit.AngleTolerance) == 0
+        !(curve.IsLinear(tol.VertexTolerance) || curve.IsArc(tol.VertexTolerance) || curve.IsEllipse(tol.VertexTolerance)) ||
+        !curve.TryGetPlane(out var axisPlane, tol.VertexTolerance) ||
+        axisPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis, tol.AngleTolerance) == 0
       )
         ThrowArgumentException(nameof(curve), "Curve must be a horizontal line, arc or ellipse curve.");
 #else
       if
       (
-        !(curve.IsLinear(Revit.VertexTolerance * Revit.ModelUnits) || curve.IsArc(Revit.VertexTolerance * Revit.ModelUnits)) ||
-        !curve.TryGetPlane(out var axisPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
-        axisPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis, Revit.AngleTolerance) == 0
+        !(curve.IsLinear(tol.VertexTolerance) || curve.IsArc(tol.VertexTolerance)) ||
+        !curve.TryGetPlane(out var axisPlane, tol.VertexTolerance) ||
+        axisPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis, tol.AngleTolerance) == 0
       )
         ThrowArgumentException(nameof(curve), "Curve must be a horizontal line or arc curve.");
 #endif
