@@ -1,5 +1,5 @@
 ---
-title: Rhino.Inside.Revit Plugins
+title: "API: Creating Plugins"
 order: 21
 group: Developer Interface
 ---
