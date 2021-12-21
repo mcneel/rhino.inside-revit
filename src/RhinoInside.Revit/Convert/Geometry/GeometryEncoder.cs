@@ -241,10 +241,12 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <example>
     /// 
+    /// Using <see cref="ToBoundingBoxXYZ" /> as extension method:
+    ///
     /// <code language="csharp">
     /// using RhinoInside.Revit.Convert.Geometry;
     /// ...
-    /// bbox.ToBoundingBoxXYZ()
+    /// var revitBBox = rhinoBBox.ToBoundingBoxXYZ()
     /// </code>
     /// 
     /// <code language="Python">
@@ -253,15 +255,23 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// ...
-    /// bbox.ToBoundingBoxXYZ()
+    /// revit_bbox = rhino_bbox.ToBoundingBoxXYZ()
     /// </code>
     /// 
-    /// <code language="python" title="Python (using static method)">
+    /// Using <see cref="ToBoundingBoxXYZ" /> as static method:
+    ///
+    /// <code language="csharp">
+    /// using RhinoInside.Revit.Convert.Geometry;
+    /// ...
+    /// var revitBBox = GeometryEncoder.ToBoundingBoxXYZ(rhinoBBox)
+    /// </code>
+    /// 
+    /// <code language="Python">
     /// import clr
     /// clr.AddReference("RhinoInside.Revit")
     /// import RhinoInside.Revit.Convert.Geometry.GeometryEncoder as ge
     /// ...
-    /// ge.ToBoundingBoxXYZ(bbox)
+    /// revit_bbox = ge.ToBoundingBoxXYZ(rhino_bbox)
     /// </code>
     /// 
     /// </example>
