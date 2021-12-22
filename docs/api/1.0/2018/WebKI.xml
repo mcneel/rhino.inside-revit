@@ -6,17 +6,17 @@
   <HelpKINode Title="ActiveUIDocument property" Url="html/P_RhinoInside_Revit_Revit_ActiveUIDocument.htm" />
   <HelpKINode Title="AngleTolerance property" Url="html/P_RhinoInside_Revit_Revit_AngleTolerance.htm" />
   <HelpKINode Title="ColorConverter class">
-    <HelpKINode Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm" />
-    <HelpKINode Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Drawing_ColorConverter.htm" />
     <HelpKINode Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter.htm" />
+    <HelpKINode Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Drawing_ColorConverter.htm" />
+    <HelpKINode Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm" />
     <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm" />
-    <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter.htm" />
     <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Drawing_ColorConverter.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter.htm" />
   </HelpKINode>
   <HelpKINode Title="ColorConverter.ToColor method">
-    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter_ToColor.htm" />
     <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Drawing_ColorConverter_ToColor.htm" />
     <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter_ToColor.htm" />
+    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter_ToColor.htm" />
   </HelpKINode>
   <HelpKINode Title="ColorWithTransparencyConverter class">
     <HelpKINode Title="ColorWithTransparencyConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter.htm" />
@@ -126,9 +126,9 @@
   <HelpKINode Title="ToBox method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBox.htm" />
   <HelpKINode Title="ToBrep method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBrep.htm" />
   <HelpKINode Title="ToColor method">
-    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter_ToColor.htm" />
     <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter_ToColor.htm" />
     <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Drawing_ColorConverter_ToColor.htm" />
+    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter_ToColor.htm" />
     <HelpKINode Title="ColorWithTransparencyConverter.ToColor Method " Url="html/M_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter_ToColor.htm" />
   </HelpKINode>
   <HelpKINode Title="ToColorWithTransparency method" Url="html/M_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter_ToColorWithTransparency.htm" />
