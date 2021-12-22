@@ -42,13 +42,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_point2d: Point2d = revit_uvpoint.ToPoint2d()
+    /// rhino_point2d = revit_uvpoint.ToPoint2d() # type: RG.Point2d
     /// </code>
     /// 
     /// Using <see cref="ToPoint2d(ARDB.UV)" /> as static method:
@@ -62,12 +64,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_point2d: Point2d = gd.ToPoint2d(revit_uvpoint)
+    /// rhino_point2d = GD.ToPoint2d(revit_uvpoint) # type: RG.Point2d
     /// </code>
     ///
     /// </example>
@@ -92,13 +96,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_vector2d: Vector2d = revit_uvpoint.ToVector2d()
+    /// rhino_vector2d = revit_uvpoint.ToVector2d() # type: RG.Vector2d
     /// </code>
     /// 
     /// Using <see cref="ToVector2d(ARDB.UV)" /> as static method:
@@ -112,12 +118,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_vector2d: Point2d = gd.ToVector2d(revit_uvpoint)
+    /// rhino_vector2d = GD.ToVector2d(revit_uvpoint) # type: RG.Point2d
     /// </code>
     ///
     /// </example>
@@ -142,13 +150,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_point3d: Point3d = revit_point.ToPoint3d()
+    /// rhino_point3d = revit_point.ToPoint3d() # type: RG.Point3d
     /// </code>
     /// 
     /// Using <see cref="ToPoint3d(ARDB.XYZ)" /> as static method:
@@ -162,12 +172,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_point3d: Point3d = gd.ToPoint3d(revit_point)
+    /// rhino_point3d = GD.ToPoint3d(revit_point) # type: RG.Point3d
     /// </code>
     ///
     /// </example>
@@ -192,13 +204,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_vector3d: Vector3d = revit_point.ToVector3d()
+    /// rhino_vector3d = revit_point.ToVector3d() # type: RG.Vector3d
     /// </code>
     /// 
     /// Using <see cref="ToVector3d(ARDB.XYZ)" /> as static method:
@@ -212,12 +226,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_vector3d: Vector3d = gd.ToVector3d(revit_point)
+    /// rhino_vector3d = GD.ToVector3d(revit_point) # type: RG.Vector3d
     /// </code>
     ///
     /// </example>
@@ -242,13 +258,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_plane: Plane = revit_plane.ToPlane()
+    /// rhino_plane = revit_plane.ToPlane() # type: RG.Plane
     /// </code>
     /// 
     /// Using <see cref="ToPlane(ARDB.Plane)" /> as static method:
@@ -262,12 +280,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_plane: Plane = gd.ToPlane(revit_plane)
+    /// rhino_plane = GD.ToPlane(revit_plane) # type: RG.Plane
     /// </code>
     ///
     /// </example>
@@ -292,13 +312,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_transform: Transform = revit_transform.ToTransform()
+    /// rhino_transform = revit_transform.ToTransform() # type: RG.Transform
     /// </code>
     /// 
     /// Using <see cref="ToTransform(ARDB.Transform)" /> as static method:
@@ -312,12 +334,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_transform: Transform = gd.ToTransform(revit_transform)
+    /// rhino_transform = GD.ToTransform(revit_transform) # type: RG.Transform
     /// </code>
     ///
     /// </example>
@@ -342,13 +366,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_bbox: BoundingBox = revit_bbox.ToBoundingBox()
+    /// rhino_bbox = revit_bbox.ToBoundingBox() # type: RG.BoundingBox
     /// </code>
     /// 
     /// Using <see cref="ToBoundingBox(ARDB.BoundingBoxXYZ)" /> as static method:
@@ -362,12 +388,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_bbox: BoundingBox = gd.ToBoundingBox(revit_bbox)
+    /// rhino_bbox = GD.ToBoundingBox(revit_bbox) # type: RG.BoundingBox
     /// </code>
     ///
     /// </example>
@@ -392,13 +420,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_bbox: BoundingBox, transform: Transform = revit_bbox.ToBoundingBox()
+    /// rhino_bbox: BoundingBox, transform = revit_bbox.ToBoundingBox() # type: RG.Transform
     /// </code>
     /// 
     /// Using <see cref="ToBoundingBox(ARDB.BoundingBoxXYZ)" /> as static method:
@@ -412,12 +442,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_bbox: BoundingBox, transform: Transform = gd.ToBoundingBox(revit_bbox)
+    /// rhino_bbox: BoundingBox, transform = GD.ToBoundingBox(revit_bbox) # type: RG.Transform
     /// </code>
     ///
     /// </example>
@@ -463,13 +495,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_bbox: BoundingBox = revit_outline.ToBoundingBox()
+    /// rhino_bbox = revit_outline.ToBoundingBox() # type: RG.BoundingBox
     /// </code>
     /// 
     /// Using <see cref="ToBoundingBox(ARDB.Outline)" /> as static method:
@@ -483,12 +517,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_bbox: BoundingBox = gd.ToBoundingBox(revit_outline)
+    /// rhino_bbox = GD.ToBoundingBox(revit_outline) # type: RG.BoundingBox
     /// </code>
     ///
     /// </example>
@@ -515,13 +551,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_box: Box = revit_bbox.ToBox()
+    /// rhino_box = revit_bbox.ToBox() # type: RG.Box
     /// </code>
     /// 
     /// Using <see cref="ToBox(ARDB.BoundingBoxXYZ)" /> as static method:
@@ -535,12 +573,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_box: Box = gd.ToBox(revit_bbox)
+    /// rhino_box = GD.ToBox(revit_bbox) # type: RG.Box
     /// </code>
     ///
     /// </example>
@@ -556,7 +596,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       (
         new Plane
         (
-          origin :    new Point3d (transform.M03, transform.M13, transform.M23),
+          origin: new Point3d(transform.M03, transform.M13, transform.M23),
           xDirection: new Vector3d(transform.M00, transform.M10, transform.M20),
           yDirection: new Vector3d(transform.M01, transform.M11, transform.M21)
         ),
@@ -584,13 +624,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_point: Point = revit_point.ToPoint()
+    /// rhino_point = revit_point.ToPoint() # type: RG.Point
     /// </code>
     /// 
     /// Using <see cref="ToPoint(ARDB.Point)" /> as static method:
@@ -604,12 +646,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_point: Point = gd.ToPoint(revit_point)
+    /// rhino_point = GD.ToPoint(revit_point) # type: RG.Point
     /// </code>
     ///
     /// </example>
@@ -634,13 +678,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_curve: Curve = revit_line.ToCurve()
+    /// rhino_curve = revit_line.ToCurve() # type: RG.Curve
     /// </code>
     /// 
     /// Using <see cref="ToCurve(ARDB.Line)" /> as static method:
@@ -654,12 +700,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_curve: Curve = gd.ToCurve(revit_line)
+    /// rhino_curve = GD.ToCurve(revit_line) # type: RG.Curve
     /// </code>
     ///
     /// </example>
@@ -684,13 +732,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_curve: Curve = revit_arc.ToCurve()
+    /// rhino_curve = revit_arc.ToCurve() # type: RG.Curve
     /// </code>
     /// 
     /// Using <see cref="ToCurve(ARDB.Arc)" /> as static method:
@@ -704,12 +754,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_curve: Curve = gd.ToCurve(revit_arc)
+    /// rhino_curve = GD.ToCurve(revit_arc) # type: RG.Curve
     /// </code>
     ///
     /// </example>
@@ -734,13 +786,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_curve: Curve = revit_ellipse.ToCurve()
+    /// rhino_curve = revit_ellipse.ToCurve() # type: RG.Curve
     /// </code>
     /// 
     /// Using <see cref="ToCurve(ARDB.Ellipse)" /> as static method:
@@ -754,12 +808,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_curve: Curve = gd.ToCurve(revit_ellipse)
+    /// rhino_curve = GD.ToCurve(revit_ellipse) # type: RG.Curve
     /// </code>
     ///
     /// </example>
@@ -784,13 +840,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_curve: Curve = revit_nurbsspline.ToCurve()
+    /// rhino_curve = revit_nurbsspline.ToCurve() # type: RG.Curve
     /// </code>
     /// 
     /// Using <see cref="ToCurve(ARDB.NurbSpline)" /> as static method:
@@ -804,12 +862,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_curve: Curve = gd.ToCurve(revit_nurbsspline)
+    /// rhino_curve = GD.ToCurve(revit_nurbsspline) # type: RG.Curve
     /// </code>
     ///
     /// </example>
@@ -834,13 +894,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_curve: Curve = revit_hermitespline.ToCurve()
+    /// rhino_curve = revit_hermitespline.ToCurve() # type: RG.Curve
     /// </code>
     /// 
     /// Using <see cref="ToCurve(ARDB.HermiteSpline)" /> as static method:
@@ -854,12 +916,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_curve: Curve = gd.ToCurve(revit_hermitespline)
+    /// rhino_curve = GD.ToCurve(revit_hermitespline) # type: RG.Curve
     /// </code>
     ///
     /// </example>
@@ -884,13 +948,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_curve: Curve = revit_helix.ToCurve()
+    /// rhino_curve = revit_helix.ToCurve() # type: RG.Curve
     /// </code>
     /// 
     /// Using <see cref="ToCurve(ARDB.CylindricalHelix)" /> as static method:
@@ -904,12 +970,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_curve: Curve = gd.ToCurve(revit_helix)
+    /// rhino_curve = GD.ToCurve(revit_helix) # type: RG.Curve
     /// </code>
     ///
     /// </example>
@@ -934,13 +1002,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_curve: Curve = revit_curve.ToCurve()
+    /// rhino_curve = revit_curve.ToCurve() # type: RG.Curve
     /// </code>
     /// 
     /// Using <see cref="ToCurve(ARDB.Curve)" /> as static method:
@@ -954,12 +1024,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_curve: Curve = gd.ToCurve(revit_curve)
+    /// rhino_curve = GD.ToCurve(revit_curve) # type: RG.Curve
     /// </code>
     ///
     /// </example>
@@ -984,13 +1056,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_polylinecurve: PolylineCurve = revit_polyline.ToPolylineCurve()
+    /// rhino_polylinecurve = revit_polyline.ToPolylineCurve() # type: RG.PolylineCurve
     /// </code>
     /// 
     /// Using <see cref="ToPolylineCurve(ARDB.PolyLine)" /> as static method:
@@ -1004,12 +1078,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_polylinecurve: PolylineCurve = gd.ToPolylineCurve(revit_polyline)
+    /// rhino_polylinecurve = GD.ToPolylineCurve(revit_polyline) # type: RG.PolylineCurve
     /// </code>
     ///
     /// </example>
@@ -1034,13 +1110,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_brep: Brep = revit_face.ToBrep()
+    /// rhino_brep = revit_face.ToBrep() # type: RG.Brep
     /// </code>
     /// 
     /// Using <see cref="ToBrep(ARDB.Face)" /> as static method:
@@ -1054,12 +1132,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_brep: Brep = gd.ToBrep(revit_face)
+    /// rhino_brep = GD.ToBrep(revit_face) # type: RG.Brep
     /// </code>
     ///
     /// </example>
@@ -1084,13 +1164,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_brep: Brep = revit_solid.ToBrep()
+    /// rhino_brep = revit_solid.ToBrep() # type: RG.Brep
     /// </code>
     /// 
     /// Using <see cref="ToBrep(ARDB.Solid)" /> as static method:
@@ -1104,12 +1186,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_brep: Brep = gd.ToBrep(revit_solid)
+    /// rhino_brep = GD.ToBrep(revit_solid) # type: RG.Brep
     /// </code>
     ///
     /// </example>
@@ -1134,13 +1218,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_mesh: Mesh = revit_mesh.ToMesh()
+    /// rhino_mesh = revit_mesh.ToMesh() # type: RG.Mesh
     /// </code>
     /// 
     /// Using <see cref="ToMesh(ARDB.Mesh)" /> as static method:
@@ -1154,12 +1240,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_mesh: Mesh = gd.ToMesh(revit_mesh)
+    /// rhino_mesh = GD.ToMesh(revit_mesh) # type: RG.Mesh
     /// </code>
     ///
     /// </example>
@@ -1185,13 +1273,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_curve: Curve = revit_curveloop.ToCurve()
+    /// rhino_curve = revit_curveloop.ToCurve() # type: RG.Curve
     /// </code>
     /// 
     /// Using <see cref="ToCurve(ARDB.CurveLoop)" /> as static method:
@@ -1205,12 +1295,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_curve: Curve = gd.ToCurve(revit_curveloop)
+    /// rhino_curve = GD.ToCurve(revit_curveloop) # type: RG.Curve
     /// </code>
     ///
     /// </example>
@@ -1226,7 +1318,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       foreach (var curve in curveLoop)
         polycurve.AppendSegment(curve.ToCurve());
 
-      if(!curveLoop.IsOpen())
+      if (!curveLoop.IsOpen())
         polycurve.MakeClosed(Revit.VertexTolerance * Revit.ModelUnits);
 
       return polycurve;
@@ -1248,14 +1340,16 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
     /// from System import Array
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_curves: Array[Curve] = revit_curvearray.ToCurves()
+    /// rhino_curves = revit_curvearray.ToCurves() # type: RG.Array[Curve]
     /// </code>
     /// 
     /// Using <see cref="ToCurves(ARDB.CurveArray)" /> as static method:
@@ -1269,13 +1363,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
     /// from System import Array
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_curve: Array[Curve] = gd.ToCurves(revit_curvearray)
+    /// rhino_curve = GD.ToCurves(revit_curvearray) # type: RG.Array[Curve]
     /// </code>
     ///
     /// </example>
@@ -1309,14 +1405,16 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
     /// from System import Array
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_curves: Array[PolyCurve] = revit_curvearray.ToPolyCurves()
+    /// rhino_curves = revit_curvearray.ToPolyCurves() # type: RG.Array[PolyCurve]
     /// </code>
     /// 
     /// Using <see cref="ToPolyCurves(ARDB.CurveArrArray)" /> as static method:
@@ -1330,13 +1428,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// 
     /// <code language="Python">
     /// import clr
+    /// clr.AddReference("RhinoCommon")
     /// clr.AddReference("RevitAPI")
     /// clr.AddReference("RhinoInside.Revit")
     /// from System import Array
+    /// import Rhino.Geometry as RG
     /// import Autodesk.Revit.DB as DB
-    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as gd
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_curve: Array[PolyCurve] = gd.ToPolyCurves(revit_curvearray)
+    /// rhino_curve = GD.ToPolyCurves(revit_curvearray) # type: RG.Array[PolyCurve]
     /// </code>
     ///
     /// </example>

@@ -27,11 +27,63 @@ namespace RhinoInside.Revit.Convert.Render
   public static class RenderMaterialConverter
   {
     /// <summary>
-    /// Converts the specified Material to an equivalent Rhino RenderMaterial.
+    /// Converts the specified <see cref="ARDB.Material" /> to an equivalent <see cref="Rhino.Render.RenderMaterial" /> in given <see cref="Rhino.RhinoDoc" />.
     /// </summary>
-    /// <param name="material">The material to convert.</param>
-    /// <param name="rhinoDoc">The document to associate the resulting material with.</param>
-    /// <returns>A Rhino RenderMaterial that is equivalent to the provided value.</returns>
+    /// <example>
+    /// 
+    /// Using <see cref="ToRenderMaterial(ARDB.Material, RhinoDoc)" /> as extension method:
+    ///
+    /// <code language="csharp">
+    /// using Rhino;
+    /// using DB = Autodesk.Revit.DB;
+    /// using RhinoInside.Revit.Convert.Render;
+    ///
+    /// RhinoDoc doc = Rhino.RhinoDoc.ActiveDoc;
+    /// RenderMaterial rhinoMaterial = revitMaterial.ToRenderMaterial(doc);
+    /// </code>
+    /// 
+    /// <code language="Python">
+    /// import clr
+    /// clr.AddReference("RhinoCommon")
+    /// clr.AddReference("RevitAPI")
+    /// clr.AddReference("RhinoInside.Revit")
+    /// from Rhino.Render import RenderMaterial
+    /// import Autodesk.Revit.DB as DB
+    /// import RhinoInside.Revit.Convert.Render
+    /// clr.ImportExtensions(RhinoInside.Revit.Convert.Render)
+    /// 
+    /// rhino_material = revit_material.ToRenderMaterial()	# type: RenderMaterial
+    /// </code>
+    /// 
+    /// Using <see cref="ToRenderMaterial(ARDB.Material, RhinoDoc)" /> as static method:
+    ///
+    /// <code language="csharp">
+    /// using Rhino;
+    /// using DB = Autodesk.Revit.DB;
+    /// using RhinoInside.Revit.Convert.Render;
+    ///
+    /// RhinoDoc doc = Rhino.RhinoDoc.ActiveDoc;
+    /// RenderMaterial rhinoMaterial = RenderMaterialConverter.ToRenderMaterial(revitMaterial, doc);
+    /// </code>
+    /// 
+    /// <code language="Python">
+    /// import clr
+    /// clr.AddReference("RhinoCommon")
+    /// clr.AddReference("RevitAPI")
+    /// clr.AddReference("RhinoInside.Revit")
+    /// from Rhino import RhinoDoc
+    /// from Rhino.Render import RenderMaterial
+    /// import Autodesk.Revit.DB as DB
+    /// import RhinoInside.Revit.Convert.Render.RenderMaterialConverter as RMC
+    ///
+    /// doc = RhinoDoc.ActiveDoc	# type: RhinoDoc
+    /// rhino_material = RMC.ToRenderMaterial(revit_material, doc)	# type: RenderMaterial
+    /// </code>
+    ///
+    /// </example>
+    /// <param name="material">Revit material to convert.</param>
+    /// <param name="rhinoDoc">Rhino document to associate the resulting material with.</param>
+    /// <returns>Rhino renderMaterial that is equivalent to the provided Revit material.</returns>
     public static RenderMaterial ToRenderMaterial(this ARDB.Material material, RhinoDoc rhinoDoc)
     {
       var renderMaterial = RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, rhinoDoc);

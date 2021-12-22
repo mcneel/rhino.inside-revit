@@ -43,7 +43,7 @@
               </formattedProvider>
               <!-- URL provider for RhinoCommon Documentation -->
               <formattedProvider title="RhinoCommon URL Provider">
-                <targetMatcher pattern="T:Rhino\.Geometry\..+" />
+                <targetMatcher pattern="T:Rhino\..+" />
                 <targetFormatter>
                   <steps>
                     <replace pattern="T:" with="T_" />
@@ -51,6 +51,17 @@
                   </steps>
                 </targetFormatter>
                 <urlFormatter format="https://developer.rhino3d.com/api/RhinoCommon/html/{target}.htm" />
+              </formattedProvider>
+              <!-- URL provider for Eto Documentation -->
+              <formattedProvider title="Eto URL Provider">
+                <targetMatcher pattern="T:Eto\..+" />
+                <targetFormatter>
+                  <steps>
+                    <replace pattern="T:" with="T_" />
+                    <replace pattern="\." with="_" />
+                  </steps>
+                </targetFormatter>
+                <urlFormatter format="http://pages.picoe.ca/docs/api/html/{target}.htm" />
               </formattedProvider>
             </urlProviders>
           </configuration>
@@ -63,7 +74,7 @@
           <outputPaths>{@HelpFormatOutputPaths}</outputPaths>
           <allowMissingSource value="false" />
           <removeRegionMarkers value="false" />
-          <colorizer syntaxFile="{@CoreComponentsFolder}Colorizer\highlight.xml" styleFile="{@CoreComponentsFolder}Colorizer\highlight.xsl" stylesheet="{@CoreComponentsFolder}Colorizer\highlight.css" scriptFile="{@CoreComponentsFolder}Colorizer\highlight.js" disabled="{@DisableCodeBlockComponent}" language="cs" tabSize="0" numberLines="true" outlining="true" keepSeeTags="false" defaultTitle="true" />
+          <colorizer syntaxFile="{@CoreComponentsFolder}Colorizer\highlight.xml" styleFile="{@CoreComponentsFolder}Colorizer\highlight.xsl" stylesheet="{@CoreComponentsFolder}Colorizer\highlight.css" scriptFile="{@CoreComponentsFolder}Colorizer\highlight.js" disabled="{@DisableCodeBlockComponent}" language="cs" tabSize="0" numberLines="false" outlining="true" keepSeeTags="false" defaultTitle="true" />
         </component>
       </ComponentConfig>
       <ComponentConfig id="Syntax Component" enabled="True">
