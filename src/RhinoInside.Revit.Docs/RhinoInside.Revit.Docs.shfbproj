@@ -192,12 +192,14 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="icons\" />
-    <Content Include="icons\CodeExample.png" />
     <Content Include="icons\pubclass.gif" />
     <Content Include="icons\pubmethod.gif" />
+    <Content Include="icons\pubfield.gif" />
+    <Content Include="icons\pubproperty.gif" />
+    <Content Include="icons\protmethod.gif" />
     <Content Include="icons\static.gif" />
-    <Content Include="icons\SectionCollapsed.png" />
-    <Content Include="icons\SectionExpanded.png" />
+    <Content Include="icons\Search.png" />
+    <Content Include="icons\CodeExample.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="icons\favicon.ico" />

@@ -174,6 +174,7 @@ form#SearchForm input {
 
 form#SearchForm button {
     background: url('../icons/Search.png') no-repeat scroll center;
+    background-size: 16px 16px;
     float: right;
     border: 0;
     margin: 7px 7px 0 0;
