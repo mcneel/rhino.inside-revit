@@ -1,4 +1,4 @@
-﻿//===============================================================================================================
+//===============================================================================================================
 // System  : Sandcastle Help File Builder
 // File    : branding-Website.js
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
@@ -307,7 +307,9 @@ function OnMouseDown(event)
 // Resize the TOC as the sizer is dragged
 function OnMouseMove(event)
 {
-    tocWidth = (event.clientX > 700) ? 700 : (event.clientX < 100) ? 100 : event.clientX;
+    var toc = document.getElementById("leftNav");
+    tocWidth = (event.clientX > 700) ? 700 : (event.clientX < 200) ? 200 : event.clientX;
+    tocWidth -= toc.offsetLeft;
 
     ResizeToc();
 }
