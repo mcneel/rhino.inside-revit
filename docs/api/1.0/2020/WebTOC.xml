@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <HelpTOC>
 
-  <HelpTOCNode Id="976c8391-bb32-4edf-8b58-f5a5f70c51a6" Title="Namespaces" Url="html/R_Project_RhinoInside_Revit_API.htm">
-    <HelpTOCNode Id="27e22cf5-fecd-4796-9318-2833b63317b1" Title="RhinoInside.Revit" Url="html/N_RhinoInside_Revit.htm">
-      <HelpTOCNode Id="402a7ab6-e00b-4c8a-8c1f-c2b31772dd50" Title="Revit Class" Url="html/T_RhinoInside_Revit_Revit.htm">
-        <HelpTOCNode Id="4fef1ee9-a5cc-4e1a-829f-50b6987084e0" Title="Revit Properties" Url="html/Properties_T_RhinoInside_Revit_Revit.htm">
+  <HelpTOCNode Id="507866e7-2733-4bf1-848f-418c916e9c67" Title="Namespaces" Url="html/R_Project_RhinoInside_Revit_API.htm">
+    <HelpTOCNode Id="4a62f4a0-048f-44f0-a8fb-751efba6b890" Title="RhinoInside.Revit" Url="html/N_RhinoInside_Revit.htm">
+      <HelpTOCNode Id="341ed026-4b2e-4e9a-bcdb-7a83ae10d658" Title="Revit Class" Url="html/T_RhinoInside_Revit_Revit.htm">
+        <HelpTOCNode Id="7b23e5ac-af4f-4825-8e87-7f582387531a" Title="Revit Properties" Url="html/Properties_T_RhinoInside_Revit_Revit.htm">
           <HelpTOCNode Title="ActiveDBApplication Property " Url="html/P_RhinoInside_Revit_Revit_ActiveDBApplication.htm" />
           <HelpTOCNode Title="ActiveDBDocument Property " Url="html/P_RhinoInside_Revit_Revit_ActiveDBDocument.htm" />
           <HelpTOCNode Title="ActiveUIApplication Property " Url="html/P_RhinoInside_Revit_Revit_ActiveUIApplication.htm" />
@@ -15,9 +15,9 @@
           <HelpTOCNode Title="VertexTolerance Property " Url="html/P_RhinoInside_Revit_Revit_VertexTolerance.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="95245a8b-378f-4ba5-bab1-469beb5b5c77" Title="Rhinoceros Class" Url="html/T_RhinoInside_Revit_Rhinoceros.htm">
-        <HelpTOCNode Id="3f97e212-1aee-43bd-8951-a31fdc1fd8a1" Title="Rhinoceros Methods" Url="html/Methods_T_RhinoInside_Revit_Rhinoceros.htm">
-          <HelpTOCNode Id="2218f6e0-3f5c-4047-bd11-52cd84604ff0" Title="InvokeInHostContext Method " Url="html/Overload_RhinoInside_Revit_Rhinoceros_InvokeInHostContext.htm">
+      <HelpTOCNode Id="400d90a9-673c-43f8-b605-2d68586d6b13" Title="Rhinoceros Class" Url="html/T_RhinoInside_Revit_Rhinoceros.htm">
+        <HelpTOCNode Id="09257709-7394-4563-9b39-7625046ec46e" Title="Rhinoceros Methods" Url="html/Methods_T_RhinoInside_Revit_Rhinoceros.htm">
+          <HelpTOCNode Id="a7ee28b0-98db-4b34-984b-5c474617d1ec" Title="InvokeInHostContext Method " Url="html/Overload_RhinoInside_Revit_Rhinoceros_InvokeInHostContext.htm">
             <HelpTOCNode Title="InvokeInHostContext Method (Action)" Url="html/M_RhinoInside_Revit_Rhinoceros_InvokeInHostContext.htm" />
             <HelpTOCNode Title="InvokeInHostContext(T) Method (Func(T))" Url="html/M_RhinoInside_Revit_Rhinoceros_InvokeInHostContext__1.htm" />
           </HelpTOCNode>
@@ -26,30 +26,30 @@
         </HelpTOCNode>
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="4a595ef2-99e2-4f77-a119-82dba5e3462c" Title="RhinoInside.Revit.Convert.Eto.Drawing" Url="html/N_RhinoInside_Revit_Convert_Eto_Drawing.htm">
-      <HelpTOCNode Id="e3547b74-de57-46e8-93d4-2a92be59bfe9" Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm">
-        <HelpTOCNode Id="fe207a56-7f16-443b-b133-a2bc4880b7cd" Title="ColorConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm">
-          <HelpTOCNode Id="62c29cd8-81b4-470d-8bb0-68e90fcf2d64" Title="ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter_ToColor.htm">
+    <HelpTOCNode Id="7fc366fc-3c16-4e46-8031-d410f80080f8" Title="RhinoInside.Revit.Convert.Eto.Drawing" Url="html/N_RhinoInside_Revit_Convert_Eto_Drawing.htm">
+      <HelpTOCNode Id="0bd54190-67f8-44c3-b8ee-af5a923f0714" Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm">
+        <HelpTOCNode Id="c3b756c5-774f-4948-8982-b0ae48c197bf" Title="ColorConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm">
+          <HelpTOCNode Id="98f87d67-8404-40b0-ac20-ae0cd62aef62" Title="ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter_ToColor.htm">
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/M_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter_ToColor.htm" />
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/M_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter_ToColor_1.htm" />
           </HelpTOCNode>
         </HelpTOCNode>
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="1f30f472-a28e-408b-9281-03e3cd290e79" Title="RhinoInside.Revit.Convert.Geometry" Url="html/N_RhinoInside_Revit_Convert_Geometry.htm">
-      <HelpTOCNode Id="924feb51-dd1f-4b47-b06f-0ccf6bd4f004" Title="GeometryDecoder Class" Url="html/T_RhinoInside_Revit_Convert_Geometry_GeometryDecoder.htm">
-        <HelpTOCNode Id="72e0f360-ea17-4d0b-8714-2b3eb72c6aeb" Title="GeometryDecoder Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Geometry_GeometryDecoder.htm">
-          <HelpTOCNode Id="c4772938-5ac6-47b1-8159-d3cf5a3222c8" Title="ToBoundingBox Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBoundingBox.htm">
+    <HelpTOCNode Id="b1f234df-b291-4a39-a5b3-96958481945e" Title="RhinoInside.Revit.Convert.Geometry" Url="html/N_RhinoInside_Revit_Convert_Geometry.htm">
+      <HelpTOCNode Id="62c32bae-861c-4016-825b-6cac47c53e66" Title="GeometryDecoder Class" Url="html/T_RhinoInside_Revit_Convert_Geometry_GeometryDecoder.htm">
+        <HelpTOCNode Id="16f4b09e-145f-435d-a0bd-d7768ff0984b" Title="GeometryDecoder Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Geometry_GeometryDecoder.htm">
+          <HelpTOCNode Id="6e6277f4-bf2f-4ed0-9201-683c86f32be9" Title="ToBoundingBox Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBoundingBox.htm">
             <HelpTOCNode Title="ToBoundingBox Method (BoundingBoxXYZ)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBoundingBox.htm" />
             <HelpTOCNode Title="ToBoundingBox Method (Outline)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBoundingBox_2.htm" />
             <HelpTOCNode Title="ToBoundingBox Method (BoundingBoxXYZ, Transform)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBoundingBox_1.htm" />
           </HelpTOCNode>
           <HelpTOCNode Title="ToBox Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBox.htm" />
-          <HelpTOCNode Id="47713a88-42bf-4c7d-8c97-da0c66e06933" Title="ToBrep Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBrep.htm">
+          <HelpTOCNode Id="1b9e0574-5f84-4b71-b1f8-5b4cb9df87af" Title="ToBrep Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBrep.htm">
             <HelpTOCNode Title="ToBrep Method (Face)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBrep.htm" />
             <HelpTOCNode Title="ToBrep Method (Solid)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBrep_1.htm" />
           </HelpTOCNode>
-          <HelpTOCNode Id="4c8b4e48-34df-461a-8f7e-a72fa9a44258" Title="ToCurve Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToCurve.htm">
+          <HelpTOCNode Id="94783ac7-7523-4cc7-a2bf-614b1d330914" Title="ToCurve Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToCurve.htm">
             <HelpTOCNode Title="ToCurve Method (Arc)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToCurve.htm" />
             <HelpTOCNode Title="ToCurve Method (Curve)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToCurve_1.htm" />
             <HelpTOCNode Title="ToCurve Method (CurveLoop)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToCurve_2.htm" />
@@ -72,17 +72,17 @@
           <HelpTOCNode Title="ToVector3d Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToVector3d.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="b72f5735-6cb0-4711-9b07-62ff874ac389" Title="GeometryEncoder Class" Url="html/T_RhinoInside_Revit_Convert_Geometry_GeometryEncoder.htm">
-        <HelpTOCNode Id="96fc15f0-e14a-4a63-b433-2c67e7e0644e" Title="GeometryEncoder Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Geometry_GeometryEncoder.htm">
-          <HelpTOCNode Id="2bdf300f-05f9-469f-a844-fc2ee0e6adaa" Title="ToArc Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToArc.htm">
+      <HelpTOCNode Id="fc832704-8e64-4a37-95a3-277d2a2c0395" Title="GeometryEncoder Class" Url="html/T_RhinoInside_Revit_Convert_Geometry_GeometryEncoder.htm">
+        <HelpTOCNode Id="f9cd8c9d-0fe8-4987-ba2c-2b01e4197405" Title="GeometryEncoder Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Geometry_GeometryEncoder.htm">
+          <HelpTOCNode Id="ac9e0a2f-4b7d-4ab7-9a97-b82b4388a7c6" Title="ToArc Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToArc.htm">
             <HelpTOCNode Title="ToArc Method (Arc)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToArc.htm" />
             <HelpTOCNode Title="ToArc Method (Circle)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToArc_1.htm" />
           </HelpTOCNode>
-          <HelpTOCNode Id="2f7ef02d-f920-4185-aefc-61c8265580ad" Title="ToBoundingBoxXYZ Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToBoundingBoxXYZ.htm">
+          <HelpTOCNode Id="70fcfba7-e5d4-4c46-9d0f-413e5a3692f0" Title="ToBoundingBoxXYZ Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToBoundingBoxXYZ.htm">
             <HelpTOCNode Title="ToBoundingBoxXYZ Method (BoundingBox)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToBoundingBoxXYZ.htm" />
             <HelpTOCNode Title="ToBoundingBoxXYZ Method (Box)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToBoundingBoxXYZ_1.htm" />
           </HelpTOCNode>
-          <HelpTOCNode Id="9fa4aae9-f794-4922-814c-1e234c5f8c21" Title="ToCurve Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToCurve.htm">
+          <HelpTOCNode Id="defec55d-67d3-4843-a646-977900fdb041" Title="ToCurve Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToCurve.htm">
             <HelpTOCNode Title="ToCurve Method (ArcCurve)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToCurve.htm" />
             <HelpTOCNode Title="ToCurve Method (Curve)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToCurve_1.htm" />
             <HelpTOCNode Title="ToCurve Method (Ellipse)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToCurve_2.htm" />
@@ -97,7 +97,7 @@
           <HelpTOCNode Title="ToGeometryObject Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToGeometryObject.htm" />
           <HelpTOCNode Title="ToLine Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToLine.htm" />
           <HelpTOCNode Title="ToLines Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToLines.htm" />
-          <HelpTOCNode Id="2ccb302f-4501-49b6-9dc1-c2bf6d2c4abc" Title="ToMesh Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToMesh.htm">
+          <HelpTOCNode Id="2b199363-e5b9-4598-b2ef-9fbff068d7ed" Title="ToMesh Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToMesh.htm">
             <HelpTOCNode Title="ToMesh Method (Brep)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToMesh.htm" />
             <HelpTOCNode Title="ToMesh Method (Extrusion)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToMesh_1.htm" />
             <HelpTOCNode Title="ToMesh Method (Mesh)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToMesh_2.htm" />
@@ -108,20 +108,20 @@
           <HelpTOCNode Title="ToPoint Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPoint.htm" />
           <HelpTOCNode Title="ToPoints Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPoints.htm" />
           <HelpTOCNode Title="ToPolyLine Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPolyLine.htm" />
-          <HelpTOCNode Id="de443af8-9780-4b9a-a89e-dee7848d0ad5" Title="ToSolid Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToSolid.htm">
+          <HelpTOCNode Id="c3599d18-b38f-4fa7-8978-dd94c819aac7" Title="ToSolid Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToSolid.htm">
             <HelpTOCNode Title="ToSolid Method (Brep)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToSolid.htm" />
             <HelpTOCNode Title="ToSolid Method (Extrusion)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToSolid_1.htm" />
             <HelpTOCNode Title="ToSolid Method (Mesh)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToSolid_2.htm" />
             <HelpTOCNode Title="ToSolid Method (SubD)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToSolid_3.htm" />
           </HelpTOCNode>
           <HelpTOCNode Title="ToTransform Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToTransform.htm" />
-          <HelpTOCNode Id="7315dd52-0f90-4afc-9459-9320c5f47514" Title="ToUV Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToUV.htm">
+          <HelpTOCNode Id="f2a58bdb-c5e4-4aaa-847d-5728b481ae1d" Title="ToUV Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToUV.htm">
             <HelpTOCNode Title="ToUV Method (Point2d)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToUV.htm" />
             <HelpTOCNode Title="ToUV Method (Point2f)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToUV_1.htm" />
             <HelpTOCNode Title="ToUV Method (Vector2d)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToUV_2.htm" />
             <HelpTOCNode Title="ToUV Method (Vector2f)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToUV_3.htm" />
           </HelpTOCNode>
-          <HelpTOCNode Id="17f3b1ad-7ca5-4bf3-b697-d75b85fa204b" Title="ToXYZ Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToXYZ.htm">
+          <HelpTOCNode Id="747100ab-fa4e-47b9-b5b1-417c0b456e4d" Title="ToXYZ Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToXYZ.htm">
             <HelpTOCNode Title="ToXYZ Method (Point3d)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToXYZ.htm" />
             <HelpTOCNode Title="ToXYZ Method (Point3f)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToXYZ_1.htm" />
             <HelpTOCNode Title="ToXYZ Method (Vector3d)" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToXYZ_2.htm" />
@@ -129,62 +129,62 @@
           </HelpTOCNode>
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="9fd7aab7-a839-4f13-90a9-52db636d2833" Title="UnitConverter Class" Url="html/T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm">
+      <HelpTOCNode Id="58ae8dab-37ed-47d0-950b-134b562691e2" Title="UnitConverter Class" Url="html/T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm">
         <HelpTOCNode Title="UnitConverter Constructor " Url="html/M_RhinoInside_Revit_Convert_Geometry_UnitConverter__ctor.htm" />
-        <HelpTOCNode Id="78cba94d-a5a5-4799-960c-c173be3f62b5" Title="UnitConverter Properties" Url="html/Properties_T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm">
+        <HelpTOCNode Id="daea3b2b-d084-46d9-8df7-0eacaef5485e" Title="UnitConverter Properties" Url="html/Properties_T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm">
           <HelpTOCNode Title="UnitSystem Property " Url="html/P_RhinoInside_Revit_Convert_Geometry_UnitConverter_UnitSystem.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="f910bf40-a5c7-4bba-b9dd-b2c608df07e2" Title="UnitConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm">
-          <HelpTOCNode Id="368be03a-7c4e-4b88-8faf-53009bc80382" Title="ConvertFromInternalUnits Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertFromInternalUnits.htm">
+        <HelpTOCNode Id="3bec385a-0ac2-4c35-a9bc-51215f050baf" Title="UnitConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm">
+          <HelpTOCNode Id="d36e83be-eb30-40d0-85f9-6f8d57551247" Title="ConvertFromInternalUnits Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertFromInternalUnits.htm">
             <HelpTOCNode Title="ConvertFromInternalUnits Method (Double)" Url="html/M_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertFromInternalUnits.htm" />
             <HelpTOCNode Title="ConvertFromInternalUnits Method (Double, UnitSystem)" Url="html/M_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertFromInternalUnits_1.htm" />
           </HelpTOCNode>
-          <HelpTOCNode Id="293756c0-bdb2-46e8-ba96-24a149621d0e" Title="ConvertToInternalUnits Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertToInternalUnits.htm">
+          <HelpTOCNode Id="b25a02fa-8d22-40c7-a2f7-4747bf3aa428" Title="ConvertToInternalUnits Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertToInternalUnits.htm">
             <HelpTOCNode Title="ConvertToInternalUnits Method (Double)" Url="html/M_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertToInternalUnits.htm" />
             <HelpTOCNode Title="ConvertToInternalUnits Method (Double, UnitSystem)" Url="html/M_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertToInternalUnits_1.htm" />
           </HelpTOCNode>
         </HelpTOCNode>
-        <HelpTOCNode Id="4b3763ef-a646-4e3f-b621-d14cb452a42c" Title="UnitConverter Fields" Url="html/Fields_T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm">
+        <HelpTOCNode Id="be73a80e-dbe9-425c-98be-3273b6b0ee26" Title="UnitConverter Fields" Url="html/Fields_T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm">
           <HelpTOCNode Title="Model Field" Url="html/F_RhinoInside_Revit_Convert_Geometry_UnitConverter_Model.htm" />
           <HelpTOCNode Title="Page Field" Url="html/F_RhinoInside_Revit_Convert_Geometry_UnitConverter_Page.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="0059e84b-0b7a-49a9-aaad-adacf71b1dce" Title="RhinoInside.Revit.Convert.Render" Url="html/N_RhinoInside_Revit_Convert_Render.htm">
-      <HelpTOCNode Id="8477c20c-0040-426d-b717-7e920c289cd1" Title="RenderMaterialConverter Class" Url="html/T_RhinoInside_Revit_Convert_Render_RenderMaterialConverter.htm">
-        <HelpTOCNode Id="b6eafbf4-7641-4d7f-84dc-e6e927b9734a" Title="RenderMaterialConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Render_RenderMaterialConverter.htm">
+    <HelpTOCNode Id="8020d946-2194-483e-9ed2-577074eb7644" Title="RhinoInside.Revit.Convert.Render" Url="html/N_RhinoInside_Revit_Convert_Render.htm">
+      <HelpTOCNode Id="cb1b284d-0326-4de1-8287-8898456e8875" Title="RenderMaterialConverter Class" Url="html/T_RhinoInside_Revit_Convert_Render_RenderMaterialConverter.htm">
+        <HelpTOCNode Id="84f8578e-877d-4b69-9520-b317dae7a1a3" Title="RenderMaterialConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Render_RenderMaterialConverter.htm">
           <HelpTOCNode Title="ToRenderMaterial Method " Url="html/M_RhinoInside_Revit_Convert_Render_RenderMaterialConverter_ToRenderMaterial.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="0593b594-111c-4a25-b742-92f61639c324" Title="RhinoInside.Revit.Convert.System.Drawing" Url="html/N_RhinoInside_Revit_Convert_System_Drawing.htm">
-      <HelpTOCNode Id="fed5587e-7932-4df4-9941-04af67178d24" Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Drawing_ColorConverter.htm">
-        <HelpTOCNode Id="f5a90aa2-a223-4b31-bb80-f870a2e670c4" Title="ColorConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Drawing_ColorConverter.htm">
-          <HelpTOCNode Id="ec6050a5-807a-4efb-b1fd-661566018a14" Title="ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Drawing_ColorConverter_ToColor.htm">
+    <HelpTOCNode Id="250a14fc-2c39-4d7a-991e-c74387ba3488" Title="RhinoInside.Revit.Convert.System.Drawing" Url="html/N_RhinoInside_Revit_Convert_System_Drawing.htm">
+      <HelpTOCNode Id="f2be504b-3e66-4014-929e-ed28d6093251" Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Drawing_ColorConverter.htm">
+        <HelpTOCNode Id="afc8ccee-d542-41dc-a771-3b632efdbb8e" Title="ColorConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Drawing_ColorConverter.htm">
+          <HelpTOCNode Id="1ed74900-d8dd-411a-aabb-e2e9cee872a1" Title="ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Drawing_ColorConverter_ToColor.htm">
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/M_RhinoInside_Revit_Convert_System_Drawing_ColorConverter_ToColor.htm" />
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/M_RhinoInside_Revit_Convert_System_Drawing_ColorConverter_ToColor_1.htm" />
           </HelpTOCNode>
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="78c11e82-4f4a-4b56-92ca-ac7287b41e97" Title="ColorWithTransparencyConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter.htm">
-        <HelpTOCNode Id="8f087630-ac63-42c0-b0e9-f974b605145f" Title="ColorWithTransparencyConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter.htm">
+      <HelpTOCNode Id="0f1165c0-288b-4537-8704-671254f73cfc" Title="ColorWithTransparencyConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter.htm">
+        <HelpTOCNode Id="8030f1f1-366d-4634-8ec2-1787ef72ba4c" Title="ColorWithTransparencyConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter.htm">
           <HelpTOCNode Title="ToColor Method " Url="html/M_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter_ToColor.htm" />
           <HelpTOCNode Title="ToColorWithTransparency Method " Url="html/M_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter_ToColorWithTransparency.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="8fd22afb-fd70-4439-b650-42007eed0d0d" Title="RectangleConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Drawing_RectangleConverter.htm">
-        <HelpTOCNode Id="5751a9ae-c1b8-4261-8797-09d35ffdf9ea" Title="RectangleConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Drawing_RectangleConverter.htm">
-          <HelpTOCNode Id="937fc956-c9e1-4786-85e4-5f8da25b7466" Title="ToRectangle Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Drawing_RectangleConverter_ToRectangle.htm">
+      <HelpTOCNode Id="2b84e3dc-af17-45a2-a9ef-328174658931" Title="RectangleConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Drawing_RectangleConverter.htm">
+        <HelpTOCNode Id="be2c361f-189f-4c4d-b44e-ee2210417962" Title="RectangleConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Drawing_RectangleConverter.htm">
+          <HelpTOCNode Id="a00d42f1-eb7f-4c88-baf4-2dd18aa61a4f" Title="ToRectangle Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Drawing_RectangleConverter_ToRectangle.htm">
             <HelpTOCNode Title="ToRectangle Method (Rectangle)" Url="html/M_RhinoInside_Revit_Convert_System_Drawing_RectangleConverter_ToRectangle.htm" />
             <HelpTOCNode Title="ToRectangle Method (Rectangle)" Url="html/M_RhinoInside_Revit_Convert_System_Drawing_RectangleConverter_ToRectangle_1.htm" />
           </HelpTOCNode>
         </HelpTOCNode>
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="eba81901-e6e1-48ba-8c7c-6be5a106fea0" Title="RhinoInside.Revit.Convert.System.Windows.Media" Url="html/N_RhinoInside_Revit_Convert_System_Windows_Media.htm">
-      <HelpTOCNode Id="ac7c6d82-72a6-4124-a776-1da924dabb42" Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter.htm">
-        <HelpTOCNode Id="fb1c405b-a3fc-4a82-9d52-6b1d776e08e4" Title="ColorConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter.htm">
-          <HelpTOCNode Id="e5479f79-5777-437a-8f91-73e384f53d33" Title="ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter_ToColor.htm">
+    <HelpTOCNode Id="a16070e0-5a8d-47cb-b33e-9cbc0e84fd02" Title="RhinoInside.Revit.Convert.System.Windows.Media" Url="html/N_RhinoInside_Revit_Convert_System_Windows_Media.htm">
+      <HelpTOCNode Id="c6dc36c8-a288-49c2-9688-476b1fa06935" Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter.htm">
+        <HelpTOCNode Id="1c9c5072-dc12-4c8e-b88d-a54888bcf5ff" Title="ColorConverter Methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter.htm">
+          <HelpTOCNode Id="e52c3ed5-07c8-41c0-9d47-3bad42d3e237" Title="ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter_ToColor.htm">
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/M_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter_ToColor.htm" />
             <HelpTOCNode Title="ToColor Method (Color)" Url="html/M_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter_ToColor_1.htm" />
           </HelpTOCNode>
