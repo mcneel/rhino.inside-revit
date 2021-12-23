@@ -415,7 +415,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// using DB = Autodesk.Revit.DB;
     /// using RhinoInside.Revit.Convert.Geometry;
     /// 
-    /// BoundingBox rhinoBBox = revitBBox.ToBoundingBox(out var Transform transform);
+    /// BoundingBox rhinoBBox = revitBBox.ToBoundingBox(out Transform transform);
     /// </code>
     /// 
     /// <code language="Python">
@@ -428,7 +428,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// import RhinoInside.Revit.Convert.Geometry
     /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
     /// 
-    /// rhino_bbox: BoundingBox, transform = revit_bbox.ToBoundingBox() # type: RG.Transform
+    /// rhino_bbox, transform = revit_bbox.ToBoundingBox() # type: (BoundingBox, RG.Transform)
     /// </code>
     /// 
     /// Using <see cref="ToBoundingBox(ARDB.BoundingBoxXYZ)" /> as static method:
@@ -437,7 +437,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// using DB = Autodesk.Revit.DB;
     /// using RhinoInside.Revit.Convert.Geometry;
     /// 
-    /// BoundingBox rhinoBBox = GeometryEncoder.ToBoundingBox(revitBBox, out var Transform transform)
+    /// BoundingBox rhinoBBox = GeometryEncoder.ToBoundingBox(revitBBox, out Transform transform)
     /// </code>
     /// 
     /// <code language="Python">
@@ -449,7 +449,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// import Autodesk.Revit.DB as DB
     /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
     /// 
-    /// rhino_bbox: BoundingBox, transform = GD.ToBoundingBox(revit_bbox) # type: RG.Transform
+    /// rhino_bbox, transform = GD.ToBoundingBox(revit_bbox) # type: (BoundingBox, RG.Transform)
     /// </code>
     ///
     /// </example>
