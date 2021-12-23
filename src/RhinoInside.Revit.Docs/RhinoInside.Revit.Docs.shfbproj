@@ -91,6 +91,20 @@
         </component>
       </ComponentConfig>
     </ComponentConfigurations>
+    <TransformComponentArguments>
+      <Argument Key="logoFile" Value="" />
+      <Argument Key="logoHeight" Value="" />
+      <Argument Key="logoWidth" Value="" />
+      <Argument Key="logoAltText" Value="" />
+      <Argument Key="logoPlacement" Value="left" />
+      <Argument Key="logoAlignment" Value="left" />
+      <Argument Key="logoUrl" Value="" />
+      <Argument Key="maxVersionParts" Value="" />
+      <Argument Key="defaultLanguage" Value="cs" />
+      <Argument Key="includeEnumValues" Value="true" />
+      <Argument Key="baseSourceCodeUrl" Value="" />
+      <Argument Key="requestExampleUrl" Value="" />
+    </TransformComponentArguments>
   </PropertyGroup>
   <PropertyGroup>
     <FrameworkVersion>.NET Framework 4.8</FrameworkVersion>
@@ -125,7 +139,7 @@
       <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\x64\Release $(RevitVersion)\RhinoInside.Revit.xml" />
       <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\x64\Release $(RevitVersion)\RhinoInside.Revit.dll" />
     </DocumentationSources>
-    <HelpTitle>RhinoInside.Revit API Documentation</HelpTitle>
+    <HelpTitle>Rhino.Inside.Revit API</HelpTitle>
     <!-- Needs to be set by build script -->
     <HelpFileVersion>1.0.0.0</HelpFileVersion>
     <NamingMethod>MemberName</NamingMethod>
@@ -175,6 +189,22 @@
     <Reference Include="RhinoInside.Revit.External">
       <HintPath>..\RhinoInside.Revit.External\bin\x64\Release $(RevitVersion)\RhinoInside.Revit.External.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="icons\" />
+    <Content Include="icons\CodeExample.png" />
+    <Content Include="icons\pubclass.gif" />
+    <Content Include="icons\pubmethod.gif" />
+    <Content Include="icons\static.gif" />
+    <Content Include="icons\SectionCollapsed.png" />
+    <Content Include="icons\SectionExpanded.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icons\favicon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="scripts\" />
+    <Content Include="scripts\branding-Website.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="styles\" />
