@@ -18,7 +18,7 @@ jobs:
           nuget install EWSoftware.SHFB -o packages
           nuget install EWSoftware.SHFB.NETFramework -o packages\components
           nuget install ResolveThirdPartyReferenceLinks -o packages\components -version "0.1.0-beta"
-          nuget install PythonSyntaxGenerator -o packages\components -version "0.1.0-beta2"
+          nuget install PythonSyntaxGenerator -o packages\components -version "0.1.0-beta3"
 
       - name: build documentation
         run: msbuild script/cibuild_docs.msbuild -v:m
