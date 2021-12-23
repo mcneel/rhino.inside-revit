@@ -174,4 +174,9 @@
       <HintPath>..\RhinoInside.Revit.External\bin\x64\Release $(RevitVersion)\RhinoInside.Revit.External.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="styles\" />
+    <Content Include="styles\branding.css" />
+    <Content Include="styles\branding-Website.css" />
+  </ItemGroup>
 </Project>
