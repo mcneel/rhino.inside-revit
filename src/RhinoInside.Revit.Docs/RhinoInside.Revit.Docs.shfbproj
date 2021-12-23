@@ -43,10 +43,11 @@
               </formattedProvider>
               <!-- URL provider for RhinoCommon Documentation -->
               <formattedProvider title="RhinoCommon URL Provider">
-                <targetMatcher pattern="T:Rhino\..+" />
+                <targetMatcher pattern="[TN]:Rhino\..+" />
                 <targetFormatter>
                   <steps>
                     <replace pattern="T:" with="T_" />
+                    <replace pattern="N:" with="N_" />
                     <replace pattern="\." with="_" />
                   </steps>
                 </targetFormatter>
@@ -54,10 +55,11 @@
               </formattedProvider>
               <!-- URL provider for Eto Documentation -->
               <formattedProvider title="Eto URL Provider">
-                <targetMatcher pattern="T:Eto\..+" />
+                <targetMatcher pattern="[TN]:Eto\..+" />
                 <targetFormatter>
                   <steps>
                     <replace pattern="T:" with="T_" />
+                    <replace pattern="N:" with="N_" />
                     <replace pattern="\." with="_" />
                   </steps>
                 </targetFormatter>
