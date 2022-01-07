@@ -505,16 +505,16 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!string.IsNullOrEmpty(ParameterName))
         writer.SetString("ParameterName", ParameterName);
 
-      if (ParameterGroup != EDBS.ParameterGroup.Empty)
+      if (!EDBS.ParameterGroup.IsNullOrEmpty(ParameterGroup))
         writer.SetString("ParameterGroup", ParameterGroup.FullName);
 
-      if (ParameterType != EDBS.DataType.Empty)
+      if (!EDBS.DataType.IsNullOrEmpty(ParameterType))
         writer.SetString("ParameterType", ParameterType.FullName);
 
       if (ParameterScope != ERDB.ParameterScope.Unknown)
         writer.SetInt32("ParameterScope", (int) ParameterScope);
 
-      if (ParameterBuiltInId != EDBS.ParameterId.Empty)
+      if (!EDBS.ParameterId.IsNullOrEmpty(ParameterBuiltInId))
         writer.SetString("ParameterBuiltInId", ParameterBuiltInId.FullName);
 
       if (ParameterSharedGUID.HasValue)
@@ -531,7 +531,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (ParameterSharedGUID.HasValue)
         return ParameterSharedGUID.Value.GetHashCode();
 
-      if (ParameterBuiltInId != EDBS.ParameterId.Empty)
+      if (!EDBS.ParameterId.IsNullOrEmpty(ParameterBuiltInId))
         return ParameterBuiltInId.GetHashCode();
 
       return new { ParameterName, ParameterType, ParameterScope, ParameterClass }.GetHashCode();
@@ -544,7 +544,7 @@ namespace RhinoInside.Revit.GH.Parameters
         if (ParameterSharedGUID.HasValue)
           return value.ParameterSharedGUID.HasValue && ParameterSharedGUID == value.ParameterSharedGUID.Value;
 
-        if (ParameterBuiltInId != EDBS.ParameterId.Empty)
+        if (!EDBS.ParameterId.IsNullOrEmpty(ParameterBuiltInId))
           return ParameterBuiltInId == value.ParameterBuiltInId;
 
         return ParameterName == value.ParameterName &&
@@ -561,7 +561,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (ParameterSharedGUID.HasValue)
         return element.get_Parameter(ParameterSharedGUID.Value);
 
-      if (ParameterBuiltInId != EDBS.ParameterId.Empty)
+      if (!EDBS.ParameterId.IsNullOrEmpty(ParameterBuiltInId))
         return element.GetParameter(ParameterBuiltInId);
 
       return element.GetParameter(ParameterName, ParameterType, ParameterScope, ParameterClass);
