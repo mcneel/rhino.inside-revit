@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Types
     Name("Element Kind"),
     Description("Contains a collection of Revit element kind values"),
   ]
-  public class ElementKind : GH_Enum<External.DB.ElementKind>
+  public class ElementKind : GH_Flags<External.DB.ElementKind>
   {
     public override bool IsEmpty => Value == External.DB.ElementKind.None;
   }
@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Types
   ]
   public class ViewDiscipline : GH_Enum<ARDB.ViewDiscipline>
   {
-    public override bool IsEmpty => Value == 0;
+    public override bool IsEmpty => Value == default;
   }
 
   [

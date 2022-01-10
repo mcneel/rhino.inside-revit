@@ -21,13 +21,19 @@ namespace RhinoInside.Revit.GH.Types
     string Text { get; }
   }
 
+  public interface IGH_Flags
+  {
+    bool HasFlag(IGH_Flags flag);
+    void SetFlag(IGH_Flags flag, bool value);
+  }
+
   public static class GH_Enumerate
   {
     public static IReadOnlyCollection<T> GetValues<T>() where T : new()
     {
       var enumType = typeof(T);
       if (!typeof(IGH_Enumerate).IsAssignableFrom(typeof(T)))
-        throw new ArgumentException($"{enumType.Name} does not implement interface {typeof(IGH_Enumerate).FullName}", nameof(T));
+        throw new ArgumentException($"{enumType} does not implement interface {typeof(IGH_Enumerate)}", nameof(T));
 
       var _EnumValues_ = enumType.GetProperty("EnumValues", BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static, null, typeof(IReadOnlyCollection<T>), Type.EmptyTypes, null);
       if (_EnumValues_ != null)
@@ -76,7 +82,8 @@ namespace RhinoInside.Revit.GH.Types
     /// <summary>
     /// Gets the validity of this instance. Enums are valid if are defined.
     /// </summary>
-    public override bool IsValid => Enum.IsDefined(UnderlyingEnumType, Value);
+    public override bool IsValid => Enum.IsDefined(UnderlyingEnumType, Value) ||
+      UnderlyingEnumType.GetCustomAttribute<FlagsAttribute>() is object;
 
     /// <summary>
     /// Checks if this Enumerate value is the Empty value. Override this property to define an Empty value.
@@ -327,8 +334,16 @@ namespace RhinoInside.Revit.GH.Types
           if (IsEmpty) return string.Empty;
           else if (IsValid)
           {
-            try { return GetNamedValues(GetType())[Value]; }
-            catch (KeyNotFoundException) { return $"#{Value:D}"; }
+            if (UnderlyingEnumType.GetCustomAttribute<FlagsAttribute>() is object)
+            {
+              // TODO: Translate result using GetNammedValues.
+              return ScriptVariable().ToString();
+            }
+            else
+            {
+              try { return GetNamedValues(GetType())[Value]; }
+              catch (KeyNotFoundException) { return $"#{Value:D}"; }
+            }
           }
 
           return default;
@@ -528,6 +543,39 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
   }
+
+  public abstract class GH_Flags<T> : GH_Enum<T>, IGH_Flags
+  where T : struct, Enum
+  {
+    static GH_Flags()
+    {
+      if (typeof(T).GetCustomAttribute<FlagsAttribute>() is null)
+        throw new InvalidOperationException($"Type {typeof(T)} does not have {nameof(FlagsAttribute)}.");
+    }
+
+    public GH_Flags() { }
+    public GH_Flags(T value) : base(value) { }
+
+    public bool HasFlag(IGH_Flags flag)
+    {
+      if (!(flag is GH_Flags<T> fT))
+        throw new System.InvalidCastException();
+
+      return Value.HasFlag(fT.Value);
+    }
+
+    public void SetFlag(IGH_Flags flag, bool value)
+    {
+      if (!(flag is GH_Flags<T> fT))
+        throw new System.InvalidCastException();
+
+      var self = (int) (object) Value;
+      var other = (int) (object) fT.Value;
+
+      var result = value ? self | other : self & ~other;
+      Value = (T) (object) result;
+    }
+  }
 }
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -546,8 +594,14 @@ namespace RhinoInside.Revit.GH.Parameters
                                       (Bitmap) Properties.Resources.ResourceManager.GetObject(typeof(T).Name + "_ValueList") ??     // try with _ValueList e.g. WallFunction_ValueList
                                       Instances.ComponentServer.EmitObjectIcon(GenericDataParamComponentGuid);          // default to GH icon
 
-    public Param_Enum() :
-    base
+    static readonly Guid? componentGuid = typeof(T).GetCustomAttribute<ComponentGuidAttribute>()?.Value;
+    public override Guid ComponentGuid => componentGuid ??
+      throw new NotImplementedException($"{typeof(T)} has no {nameof(ComponentGuid)}, please use {typeof(ComponentGuidAttribute)}");
+
+    static readonly GH_Exposure exposure = typeof(T).GetCustomAttribute<ExposureAttribute>()?.Value ?? GH_Exposure.hidden;
+    public override GH_Exposure Exposure => exposure;
+
+    public Param_Enum() : base
     (
       typeof(T).Name,
       typeof(T).Name,
@@ -556,45 +610,24 @@ namespace RhinoInside.Revit.GH.Parameters
       string.Empty
     )
     {
-      exposure = Exposure;
+      (this as IGH_ObjectProxy).Exposure = Exposure;
 
-      if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(NameAttribute)) is NameAttribute name)
+      if (typeof(T).GetCustomAttribute<NameAttribute>() is NameAttribute name)
         Name = name.Name;
 
-      if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(NickNameAttribute)) is NickNameAttribute nickname)
+      if (typeof(T).GetCustomAttribute<NickNameAttribute>() is NickNameAttribute nickname)
         NickName = nickname.NickName;
 
-      if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(DescriptionAttribute)) is DescriptionAttribute description)
+      if (typeof(T).GetCustomAttribute<DescriptionAttribute>() is DescriptionAttribute description)
         Description = description.Description;
 
-      if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(CategoryAttribute)) is CategoryAttribute category)
+      if (typeof(T).GetCustomAttribute<CategoryAttribute>() is CategoryAttribute category)
       {
         Category = category.Category;
         SubCategory = category.SubCategory;
       }
     }
 
-    public override Guid ComponentGuid
-    {
-      get
-      {
-        if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(ComponentGuidAttribute)) is ComponentGuidAttribute componentGuid)
-          return componentGuid.Value;
-
-        throw new NotImplementedException($"{typeof(T).FullName} has no {nameof(ComponentGuid)}, please use {typeof(ComponentGuidAttribute).FullName}");
-      }
-    }
-
-    public override GH_Exposure Exposure
-    {
-      get
-      {
-        if (typeof(T).GetTypeInfo().GetCustomAttribute(typeof(ExposureAttribute)) is ExposureAttribute exposure)
-          return exposure.Value;
-
-        return GH_Exposure.hidden;
-      }
-    }
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
     protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
 
@@ -627,7 +660,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       if (Types.GH_Enumerate.GetValues<T>() is T[] values)
       {
-        if (values.Length < 7)
+        if (values.Length < 7 || (Optional && typeof(Types.IGH_Flags).IsAssignableFrom(typeof(T))))
         {
           Menu_AppendSeparator(menu);
           foreach (var e in values)
@@ -635,8 +668,16 @@ namespace RhinoInside.Revit.GH.Parameters
             if (e.IsEmpty) continue;
             var tag = e.Duplicate() as T;
 
-            var item = Menu_AppendItem(menu, tag.Text, Menu_NamedValueClicked, SourceCount == 0, e.Equals(current));
-            item.Tag = tag;
+            if (current is Types.IGH_Flags currentF && tag is Types.IGH_Flags tagF)
+            {
+              var item = Menu_AppendItem(menu, tag.Text, Menu_NamedValueClicked, SourceCount == 0, currentF.HasFlag(tagF));
+              item.Tag = tag;
+            }
+            else
+            {
+              var item = Menu_AppendItem(menu, tag.Text, Menu_NamedValueClicked, SourceCount == 0, tag.Equals(current));
+              item.Tag = tag;
+            }
           }
           Menu_AppendSeparator(menu);
         }
@@ -698,9 +739,21 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (item.Tag is T value)
         {
+          if
+          (
+            Optional &&
+            PersistentDataCount == 1 &&
+            PersistentData.get_FirstItem(true) is T data &&
+            value is Types.IGH_Flags flag &&
+            data is Types.IGH_Flags self
+          )
+            self.SetFlag(flag, !self.HasFlag(flag));
+          else
+            data = value.Duplicate() as T;
+
           RecordPersistentDataEvent($"Set: {value}");
           PersistentData.Clear();
-          PersistentData.Append(value.Duplicate() as T);
+          PersistentData.Append(data);
           OnObjectChanged(GH_ObjectEventType.PersistentData);
 
           ExpireSolution(true);
@@ -766,11 +819,10 @@ namespace RhinoInside.Revit.GH.Parameters
     Guid IGH_ObjectProxy.Guid => ComponentGuid;
     Bitmap IGH_ObjectProxy.Icon => Icon;
     IGH_InstanceDescription IGH_ObjectProxy.Desc => this;
+    GH_Exposure IGH_ObjectProxy.Exposure { get; set; } = exposure;
 
-    GH_Exposure exposure;
-    GH_Exposure IGH_ObjectProxy.Exposure { get => exposure; set => exposure = value; }
-
-    IGH_DocumentObject IGH_ObjectProxy.CreateInstance() => new Param_Enum<T>();
+    protected virtual IGH_DocumentObject CreateInstance() => new Param_Enum<T>();
+    IGH_DocumentObject IGH_ObjectProxy.CreateInstance() => CreateInstance();
     IGH_ObjectProxy IGH_ObjectProxy.DuplicateProxy() => (IGH_ObjectProxy) MemberwiseClone();
     #endregion
   }
