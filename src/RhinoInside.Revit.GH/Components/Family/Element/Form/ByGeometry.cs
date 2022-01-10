@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Families
                 (
                   !cutting,
                   referenceArray,
-                  extrusion.PathLineCurve().Line.Direction.ToXYZ(UnitConverter.ToHostUnits)
+                  extrusion.PathLineCurve().Line.Direction.ToXYZ(GeometryEncoder.ModelScaleFactor)
                 )
               );
               return;

@@ -823,7 +823,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       using (var rhinoDoc = RhinoDoc.CreateHeadless(default))
       {
-        if (factor == UnitConverter.ToHostUnits)
+        if (factor == GeometryEncoder.ModelScaleFactor)
         {
           rhinoDoc.ModelUnitSystem = activeDoc.ModelUnitSystem;
           rhinoDoc.ModelAbsoluteTolerance = activeDoc.ModelAbsoluteTolerance;

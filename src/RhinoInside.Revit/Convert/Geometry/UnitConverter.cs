@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.Convert.Geometry
   /// Represents a converter for converting measurable values back and forth
   /// the Revit internal unit system and a external Rhino unit system.
   /// </summary>
-  public class UnitConverter
+  class UnitConverter
   {
     #region Default Instances
     /// <summary>
@@ -104,14 +104,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal const double NoScale = 1.0;
 
     /// <summary>
-    /// Factor for converting a value from Revit internal units to active Rhino document units.
+    /// Factor for converting a length from Revit internal units to active Rhino document units.
     /// </summary>
-    internal static double ToRhinoUnits => internalUnits[(int) Model.UnitSystem];
+    internal static double ToModelLength => internalUnits[(int) Model.UnitSystem];
 
     /// <summary>
-    /// Factor for converting a value from active Rhino document units to Revit internal units.
+    /// Factor for converting a length from active Rhino document units to Revit internal units.
     /// </summary>
-    internal static double ToHostUnits => 1.0 / internalUnits[(int) Model.UnitSystem];
+    internal static double ToInternalLength => 1.0 / internalUnits[(int) Model.UnitSystem];
     #endregion
 
     #region Static Methods
@@ -254,12 +254,12 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     internal double ConvertFromInternalUnits(double value, EDBS.SpecType spec)
     {
-      return Convert(value, spec, UnitSystem, InternalUnitSystem);
+      return Convert(value, spec, InternalUnitSystem, UnitSystem);
     }
 
     internal double ConvertToInternalUnits(double value, EDBS.SpecType spec)
     {
-      return Convert(value, spec, InternalUnitSystem, UnitSystem);
+      return Convert(value, spec, UnitSystem, InternalUnitSystem);
     }
     #endregion
   }
@@ -438,40 +438,40 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     #region InRhinoUnits
     public static Interval InRhinoUnits(this Interval value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Point3f InRhinoUnits(this Point3f value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Point3d InRhinoUnits(this Point3d value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Vector3d InRhinoUnits(this Vector3d value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Vector3f InRhinoUnits(this Vector3f value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Transform InRhinoUnits(this Transform value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static BoundingBox InRhinoUnits(this BoundingBox value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Plane InRhinoUnits(this Plane value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Line InRhinoUnits(this Line value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Arc InRhinoUnits(this Arc value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Circle InRhinoUnits(this Circle value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Ellipse InRhinoUnits(this Ellipse value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     /// <summary>
     /// Duplicates and scales <paramref name="value"/> to be stored in Acitve Rhino document units.
@@ -480,7 +480,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value"></param>
     /// <returns>Returns a scaled duplicate of the input <paramref name="value"/> in Active Rhino document units.</returns>
     public static G InRhinoUnits<G>(this G value) where G : GeometryBase
-    { Scale(value = (G) value.Duplicate(), UnitConverter.ToRhinoUnits); return value; }
+    { Scale(value = (G) value.Duplicate(), UnitConverter.ToModelLength); return value; }
 
     internal static double InRhinoUnits(double value, EDBS.SpecType spec) =>
       InOtherUnits(value, spec, UnitConverter.InternalUnitSystem, UnitConverter.Model.UnitSystem);
@@ -496,40 +496,40 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     #region InHostUnits
     public static Interval InHostUnits(this Interval value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Point3f InHostUnits(this Point3f value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Point3d InHostUnits(this Point3d value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Vector3d InHostUnits(this Vector3d value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Vector3f InHostUnits(this Vector3f value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Transform InHostUnits(this Transform value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static BoundingBox InHostUnits(this BoundingBox value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Plane InHostUnits(this Plane value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Line InHostUnits(this Line value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Arc InHostUnits(this Arc value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Circle InHostUnits(this Circle value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Ellipse InHostUnits(this Ellipse value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     /// <summary>
     /// Duplicates and scales <paramref name="value"/> to be stored Revit internal units.
@@ -538,7 +538,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value"></param>
     /// <returns>Returns a duplicate of <paramref name="value"/> in Revit internal units.</returns>
     public static G InHostUnits<G>(this G value) where G : GeometryBase
-    { Scale(value = (G) value.Duplicate(), UnitConverter.ToHostUnits); return value; }
+    { Scale(value = (G) value.Duplicate(), UnitConverter.ToInternalLength); return value; }
 
     internal static double InHostUnits(double value, EDBS.SpecType spec) =>
       InOtherUnits(value, spec, UnitConverter.Model.UnitSystem, UnitConverter.InternalUnitSystem);

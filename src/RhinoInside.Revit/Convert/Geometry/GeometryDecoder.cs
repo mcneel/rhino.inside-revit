@@ -25,6 +25,31 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
     #endregion
 
+    #region Static Properties
+    /// <summary>
+    /// Default scale factor applied during the decoding to change
+    /// from Revit internal units to active Rhino document model units.
+    /// </summary>
+    /// <remarks>
+    /// This factor should be applied to Revit internal length values
+    /// in order to obtain Rhino model length values.
+    /// <code>
+    /// RhinoModelLength = RevitInternalLength * <see cref="GeometryDecoder.ModelScaleFactor"/>
+    /// </code>
+    /// </remarks>
+    public static double ModelScaleFactor => UnitConverter.ToModelLength;
+    #endregion
+
+    #region Length
+    /// <summary>
+    /// Converts the specified length to an equivalent Rhino model length.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Rhino model length that is equivalent to the provided value.</returns>
+    internal static double ToModelLength(double value) => ToModelLength(value, ModelScaleFactor);
+    internal static double ToModelLength(double value, double factor) => value * factor;
+    #endregion
+
     #region Points and Vectors
     /// <summary>
     /// Converts the specified UV point to an equivalent Rhino Point2d.
@@ -32,7 +57,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Point2d that is equivalent to the provided value.</returns>
     public static Point2d ToPoint2d(this ARDB.UV value)
-    { var rhino = RawDecoder.AsPoint2d(value); UnitConvertible.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.AsPoint2d(value); UnitConvertible.Scale(ref rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified UV vector to an equivalent Rhino Vector2d.
@@ -48,7 +73,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Point3d that is equivalent to the provided value.</returns>
     public static Point3d ToPoint3d(this ARDB.XYZ value)
-    { var rhino = RawDecoder.AsPoint3d(value); UnitConvertible.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.AsPoint3d(value); UnitConvertible.Scale(ref rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified XYZ vector to an equivalent Rhino Vector3d.
@@ -64,7 +89,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Plane that is equivalent to the provided value.</returns>
     public static Plane ToPlane(this ARDB.Plane value)
-    { var rhino = RawDecoder.AsPlane(value); UnitConvertible.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.AsPlane(value); UnitConvertible.Scale(ref rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified Plane to an equivalent Rhino Transform.
@@ -72,7 +97,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Transform that is equivalent to the provided value.</returns>
     public static Transform ToTransform(this ARDB.Transform value)
-    { var rhino = RawDecoder.AsTransform(value); UnitConvertible.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.AsTransform(value); UnitConvertible.Scale(ref rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified BoundingBoxXYZ to an equivalent Rhino BoundingBox.
@@ -80,7 +105,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino BoundingBox that is equivalent to the provided value.</returns>
     public static BoundingBox ToBoundingBox(this ARDB.BoundingBoxXYZ value)
-    { var rhino = RawDecoder.AsBoundingBox(value); UnitConvertible.Scale(ref rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.AsBoundingBox(value); UnitConvertible.Scale(ref rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified BoundingBoxXYZ to an equivalent Rhino BoundingBox.
@@ -91,8 +116,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static BoundingBox ToBoundingBox(this ARDB.BoundingBoxXYZ value, out Transform transform)
     {
       var rhino = RawDecoder.AsBoundingBox(value, out transform);
-      UnitConvertible.Scale(ref rhino, UnitConverter.ToRhinoUnits);
-      UnitConvertible.Scale(ref transform, UnitConverter.ToRhinoUnits);
+      UnitConvertible.Scale(ref rhino, ModelScaleFactor);
+      UnitConvertible.Scale(ref transform, ModelScaleFactor);
       return rhino;
     }
 
@@ -129,8 +154,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static Box ToBox(this ARDB.BoundingBoxXYZ value)
     {
       var rhino = RawDecoder.AsBoundingBox(value, out var transform);
-      UnitConvertible.Scale(ref rhino, UnitConverter.ToRhinoUnits);
-      UnitConvertible.Scale(ref transform, UnitConverter.ToRhinoUnits);
+      UnitConvertible.Scale(ref rhino, ModelScaleFactor);
+      UnitConvertible.Scale(ref transform, ModelScaleFactor);
 
       return new Box
       (
@@ -148,21 +173,26 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region GeometryBase
+
+    #region Points
     /// <summary>
     /// Converts the specified Point to an equivalent Rhino Point.
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Point that is equivalent to the provided value.</returns>
-    public static Point ToPoint(this ARDB.Point value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    public static Point ToPoint(this ARDB.Point value) => ToPoint(value, ModelScaleFactor);
+    internal static Point ToPoint(this ARDB.Point value, double factor)
+    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, factor); return rhino; }
+    #endregion
 
+    #region Curves
     /// <summary>
     /// Converts the specified Line to an equivalent Rhino Curve.
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Curve that is equivalent to the provided value.</returns>
     public static Curve ToCurve(this ARDB.Line value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified Arc to an equivalent Rhino Curve.
@@ -170,7 +200,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Curve that is equivalent to the provided value.</returns>
     public static Curve ToCurve(this ARDB.Arc value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified Ellipse to an equivalent Rhino Curve.
@@ -178,7 +208,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Curve that is equivalent to the provided value.</returns>
     public static Curve ToCurve(this ARDB.Ellipse value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified NurbSpline to an equivalent Rhino Curve.
@@ -186,7 +216,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Curve that is equivalent to the provided value.</returns>
     public static Curve ToCurve(this ARDB.NurbSpline value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified HermiteSpline to an equivalent Rhino Curve.
@@ -194,7 +224,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Curve that is equivalent to the provided value.</returns>
     public static Curve ToCurve(this ARDB.HermiteSpline value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified CylindricalHelix to an equivalent Rhino Curve.
@@ -202,15 +232,16 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Curve that is equivalent to the provided value.</returns>
     public static Curve ToCurve(this ARDB.CylindricalHelix value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified Curve to an equivalent Rhino Curve.
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Curve that is equivalent to the provided value.</returns>
-    public static Curve ToCurve(this ARDB.Curve value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    public static Curve ToCurve(this ARDB.Curve value) => ToCurve(value, ModelScaleFactor);
+    internal static Curve ToCurve(this ARDB.Curve value, double factor)
+    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, factor); return rhino; }
 
     /// <summary>
     /// Converts the specified PolyLine to an equivalent Rhino PolylineCurve.
@@ -218,32 +249,81 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino PolylineCurve that is equivalent to the provided value.</returns>
     public static PolylineCurve ToPolylineCurve(this ARDB.PolyLine value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, ModelScaleFactor); return rhino; }
+    #endregion
 
+    #region Solids
     /// <summary>
     /// Converts the specified Face to an equivalent Rhino Brep.
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Brep that is equivalent to the provided value.</returns>
     public static Brep ToBrep(this ARDB.Face value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified Solid to an equivalent Rhino Brep.
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Brep that is equivalent to the provided value.</returns>
-    public static Brep ToBrep(this ARDB.Solid value)
-    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, UnitConverter.ToRhinoUnits); return rhino; }
+    public static Brep ToBrep(this ARDB.Solid value) => ToBrep(value, ModelScaleFactor);
+    internal static Brep ToBrep(this ARDB.Solid value, double factor)
+    { var rhino = RawDecoder.ToRhino(value); UnitConvertible.Scale(rhino, factor); return rhino; }
+    #endregion
 
+    #region Meshes
     /// <summary>
     /// Converts the specified Mesh to an equivalent Rhino Mesh.
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Mesh that is equivalent to the provided value.</returns>
-    public static Mesh ToMesh(this ARDB.Mesh value) =>
-      MeshDecoder.FromRawMesh(MeshDecoder.ToRhino(value), UnitConverter.ToRhinoUnits);
+    public static Mesh ToMesh(this ARDB.Mesh value) => ToMesh(value, ModelScaleFactor);
+    internal static Mesh ToMesh(this ARDB.Mesh value, double factor) =>
+      MeshDecoder.FromRawMesh(MeshDecoder.ToRhino(value), factor);
     #endregion
+
+    /// <summary>
+    /// Converts the specified GeomertyObject to an equivalent Revit GeometryBase object.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Rhino GeometryBase object that is equivalent to the provided value.</returns>
+    public static GeometryBase ToGeometryBase(this ARDB.GeometryObject value) => ToGeometryBase(value, ModelScaleFactor);
+    internal static GeometryBase ToGeometryBase(this ARDB.GeometryObject value, double factor)
+    {
+      switch (value)
+      {
+        case ARDB.Point point: return point.ToPoint(factor);
+        case ARDB.Curve curve: return curve.ToCurve(factor);
+        case ARDB.Solid solid: return solid.ToBrep(factor);
+        case ARDB.Mesh mesh:   return mesh.ToMesh(factor);
+      }
+
+      throw new ConversionException($"Unable to convert {value} to ${nameof(GeometryBase)}");
+    }
+    #endregion
+
+    #region CurveLoop
+    /// <summary>
+    /// Converts the specified CurveLoop to an equivalent Rhino Curve array.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <param name="converter">Expression used to convert each <see cref="ARDB.Curve"/> into TOutput.</param>
+    /// <returns>A TOutput array that is equivalent to the provided value.</returns>
+    public static TOutput[] ToArray<TOutput>
+    (
+      this ARDB.CurveLoop value,
+      Converter<ARDB.Curve, TOutput> converter
+    )
+    {
+      var count = value.NumberOfCurves();
+      var curves = new TOutput[count];
+
+      var index = 0;
+      foreach (var curve in value)
+        curves[index++] = converter(curve);
+
+      return curves;
+    }
 
     /// <summary>
     /// Converts the specified CurveLoop to an equivalent Rhino Curve.
@@ -252,63 +332,114 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <returns>A Rhino Curve that is equivalent to the provided value.</returns>
     public static Curve ToCurve(this ARDB.CurveLoop value)
     {
-      if (value.NumberOfCurves() == 1)
-        return value.First().ToCurve();
+      var count = value.NumberOfCurves();
+      if (count == 0) return default;
+      if (count == 1) return value.First().ToCurve();
 
+      return ToPolyCurve(value);
+    }
+
+    /// <summary>
+    /// Converts the specified CurveLoop to an equivalent Rhino PolyCurve.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Rhino PolyCurve that is equivalent to the provided value.</returns>
+    public static PolyCurve ToPolyCurve(this ARDB.CurveLoop value)
+    {
       var polycurve = new PolyCurve();
-
       foreach (var curve in value)
         polycurve.AppendSegment(curve.ToCurve());
 
-      if(!value.IsOpen())
+      if (!value.IsOpen())
         polycurve.MakeClosed(GeometryObjectTolerance.Model.VertexTolerance);
 
       return polycurve;
     }
+    #endregion
 
-    /// <summary>
-    /// Converts the specified CurveArray to an equivalent Rhino Curve array.
-    /// </summary>
-    /// <param name="value">A value to convert.</param>
-    /// <returns>A Rhino Curve array that is equivalent to the provided value.</returns>
-    public static Curve[] ToCurves(this ARDB.CurveArray value)
+    #region CurveArray
+    internal static TOuput[] ToArray<TOuput>(this ARDB.CurveArray value, Converter<ARDB.Curve, TOuput> converter)
     {
       var count = value.Size;
-      var curves = new Curve[count];
+      var curves = new TOuput[count];
 
       int index = 0;
-      foreach (var curve in value.Cast<ARDB.Curve>())
-        curves[index++] = curve.ToCurve();
+      foreach (var curve in value)
+        curves[index++] = converter((ARDB.Curve) curve);
 
       return curves;
     }
 
     /// <summary>
-    /// Converts the specified CurveArrArray to an equivalent PolyCurve array.
+    /// Converts the specified CurveArrArray to a Rhino Curve IEnumerable.
     /// </summary>
     /// <param name="value">A value to convert.</param>
-    /// <returns>A Rhino PolyCurve array that is equivalent to the provided value.</returns>
-    public static PolyCurve[] ToPolyCurves(this ARDB.CurveArrArray value)
+    /// <returns>A Rhino Curve IEnumerable that is equivalent to the provided value.</returns>
+    public static IEnumerable<Curve> ToCurveMany(this ARDB.CurveArray value)
     {
-      var count = value.Size;
-      var list = new PolyCurve[count];
-
-      int index = 0;
-      foreach (var curveArray in value.Cast<ARDB.CurveArray>())
-      {
-        var polycurve = new PolyCurve();
-
-        foreach (var curve in curveArray.Cast<ARDB.Curve>())
-          polycurve.AppendSegment(curve.ToCurve());
-
-        polycurve.MakeClosed(GeometryObjectTolerance.Model.VertexTolerance);
-
-        list[index++] = polycurve;
-      }
-
-      return list;
+      foreach (object curve in value)
+        yield return ToCurve((ARDB.Curve) curve);
     }
 
+    /// <summary>
+    /// Converts the specified CurveArray to an equivalent Rhino Curve.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Rhino Curve that is equivalent to the provided value.</returns>
+    public static Curve ToCurve(this ARDB.CurveArray value)
+    {
+      var count = value.Size;
+      if (count == 0) return null;
+      if (count == 1) return value.get_Item(0).ToCurve();
+
+      return ToPolyCurve(value);
+    }
+
+    /// <summary>
+    /// Converts the specified CurveArray to an equivalent Rhino PolyCurve.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Rhino PolyCurve that is equivalent to the provided value.</returns>
+    public static PolyCurve ToPolyCurve(this ARDB.CurveArray value)
+    {
+      var count = value.Size;
+      var polycurve = new PolyCurve();
+      for (int c = 0; c < count; ++c)
+        polycurve.AppendSegment(value.get_Item(c).ToCurve());
+
+      polycurve.MakeClosed(GeometryObjectTolerance.Model.VertexTolerance);
+      return polycurve;
+    }
+    #endregion
+
+    #region CurveArrArray
+    internal static TOutput[] ToArray<TOutput>
+    (
+      this ARDB.CurveArrArray value,
+      Converter<ARDB.CurveArray, TOutput> converter
+    )
+    {
+      var array = new TOutput[value.Size];
+      int index = 0;
+      foreach (var item in value)
+        array[index++] = converter((ARDB.CurveArray) item);
+
+      return array;
+    }
+
+    /// <summary>
+    /// Converts the specified CurveArrArray to a Rhino PolyCurve IEnumerable.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Rhino PolyCurve IEnumerable that is equivalent to the provided value.</returns>
+    public static IEnumerable<Curve> ToCurveMany(this ARDB.CurveArrArray value)
+    {
+      foreach (object curve in value)
+        yield return ToCurve((ARDB.CurveArray) curve);
+    }
+    #endregion
+
+    #region Graphics
     /// <summary>
     /// Update Context from <see cref="ARDB.GeometryObject"/> <paramref name="geometryObject"/>
     /// </summary>
@@ -417,5 +548,6 @@ namespace RhinoInside.Revit.Convert.Geometry
         }
       }
     }
+    #endregion
   }
 }

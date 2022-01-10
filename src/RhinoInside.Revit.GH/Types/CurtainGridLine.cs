@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -6,7 +7,6 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
-  using Convert.System.Collections.Generic;
 
   [Kernel.Attributes.Name("Curtain Grid Line")]
   public class CurtainGridLine : HostObject
@@ -25,9 +25,9 @@ namespace RhinoInside.Revit.GH.Types
       {
         var points = gridLine.FullCurve?.Tessellate();
         if (points is object)
-          args.Pipeline.DrawPatternedPolyline(points.Convert(GeometryDecoder.ToPoint3d), args.Color, 0x00000101, args.Thickness, false);
+          args.Pipeline.DrawPatternedPolyline(points.Select(GeometryDecoder.ToPoint3d), args.Color, 0x00000101, args.Thickness, false);
 
-        foreach (var segment in gridLine.ExistingSegmentCurves.ToCurves())
+        foreach (var segment in gridLine.ExistingSegmentCurves.ToCurveMany())
         {
           if(segment is object)
             args.Pipeline.DrawCurve(segment, args.Color, args.Thickness);

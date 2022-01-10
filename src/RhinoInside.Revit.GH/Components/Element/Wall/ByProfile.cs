@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         if (normal.IsParallelTo(plane.Normal, tol.AngleTolerance) == 0)
           return false;
 
-        var profiles = sketch.Profile.ToPolyCurves();
+        var profiles = sketch.Profile.ToArray(GeometryDecoder.ToPolyCurve);
         if (profiles.Length != boundaries.Count)
           return false;
 

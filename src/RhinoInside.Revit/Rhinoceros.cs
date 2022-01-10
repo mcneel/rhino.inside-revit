@@ -23,6 +23,9 @@ namespace RhinoInside.Revit
   using External.ApplicationServices.Extensions;
   using static Diagnostics;
 
+  /// <summary>
+  /// Provides a set of static (Shared in Visual Basic) methods for accessing Rhinoceros API from Rhino.Inside.
+  /// </summary>
   public static partial class Rhinoceros
   {
     #region Revit Interface

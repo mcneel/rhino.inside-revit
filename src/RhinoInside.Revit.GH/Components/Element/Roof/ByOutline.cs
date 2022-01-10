@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (element.GetSketch() is ARDB.Sketch sketch)
       {
-        var profiles = sketch.Profile.ToPolyCurves();
+        var profiles = sketch.Profile.ToArray(GeometryDecoder.ToPolyCurve);
         if (profiles.Length != 1)
           return false;
 

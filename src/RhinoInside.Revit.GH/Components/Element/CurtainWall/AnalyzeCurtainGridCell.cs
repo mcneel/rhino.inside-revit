@@ -63,8 +63,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
       // same might happen with .PlanarizedCurveLoops but not fully tested
       try
       {
-        DA.SetDataList("Curves", cell.CurveLoops?.ToPolyCurves());
-        DA.SetDataList("Planarized Curves", cell.PlanarizedCurveLoops?.ToPolyCurves());
+        DA.SetDataList("Curves", cell.CurveLoops?.ToCurveMany());
+        DA.SetDataList("Planarized Curves", cell.PlanarizedCurveLoops?.ToCurveMany());
       }
       // silence the empty exception
       catch { }

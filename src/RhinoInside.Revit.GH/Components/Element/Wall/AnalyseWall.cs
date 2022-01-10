@@ -186,7 +186,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
       PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM, "Height");
       PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.CURVE_ELEM_LENGTH, "Length");
-      DA.SetData("Width", UnitConverter.Model.ConvertFromInternalUnits(wallInstance.GetWidth()));
+      DA.SetData("Width", wallInstance.GetWidth() * GeometryDecoder.ModelScaleFactor);
 #if REVIT_2021
       PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL, "Slant Angle");
 #else

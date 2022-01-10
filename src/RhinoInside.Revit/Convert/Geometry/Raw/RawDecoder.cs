@@ -1043,7 +1043,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       var result = new Mesh();
 
       result.Vertices.Capacity = mesh.Vertices.Count;
-      result.Vertices.AddVertices(mesh.Vertices.Convert(AsPoint3d));
+      result.Vertices.AddVertices(mesh.Vertices.Select(AsPoint3d));
 
       var faceCount = mesh.NumTriangles;
       result.Faces.Capacity = faceCount;

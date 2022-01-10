@@ -66,13 +66,4 @@ namespace RhinoInside.Revit.Convert.System.Collections.Generic
       return output;
     }
   }
-
-  static class IEnumerableConverter
-  {
-    public static IEnumerable<TOutput> Convert<TInput, TOutput>(this IEnumerable<TInput> input, Converter<TInput, TOutput> converter)
-    {
-      foreach (var item in input)
-        yield return converter(item);
-    }
-  }
 }

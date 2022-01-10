@@ -11,7 +11,13 @@ namespace RhinoInside.Revit.Convert.Display
   {
     static bool SkipGeometryObject(ARDB.GeometryObject geometryObject, ARDB.Document doc)
     {
-      if (doc.GetElement(geometryObject.GraphicsStyleId) is ARDB.GraphicsStyle style)
+      if (geometryObject is null)
+        return true;
+
+      if (geometryObject.Visibility != ARDB.Visibility.Visible)
+        return true;
+
+      if (doc?.GetElement(geometryObject.GraphicsStyleId) is ARDB.GraphicsStyle style)
         return style.GraphicsStyleCategory.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_LightingFixtureSource;
 
       return false;
@@ -33,7 +39,7 @@ namespace RhinoInside.Revit.Convert.Display
       {
         if (materialElements[index] is null)
         {
-          if (!(outMesh is null))
+          if (outMesh is object)
             outMesh.Append(meshes[index]);
         }
         else
@@ -53,14 +59,14 @@ namespace RhinoInside.Revit.Convert.Display
     /// </summary>
     /// <remarks>
     /// Empty <see cref="ARDB.Mesh"/> and empty <see cref="ARDB.Solid"/> will be skipped,
-    /// so output <see cref="IEnumerable{T}"/> may be shorter than the input.
+    /// so output <see cref="IEnumerable{ARDB.Material}"/> may be shorter than the input.
     /// Output is warranted to be free of nulls.
     /// </remarks>
     /// <param name="geometries"></param>
     /// <param name="doc"></param>
     /// <param name="currentMaterial"></param>
     /// <returns>An <see cref="IEnumerable{ARDB.Material}"/></returns>
-    /// <seealso cref="GetPreviewMeshes(IEnumerable{ARDB.GeometryObject}, MeshingParameters)"/>
+    /// <seealso cref="GetPreviewMeshes(IEnumerable{ARDB.GeometryObject}, ARDB.Document, MeshingParameters)"/>
     internal static IEnumerable<ARDB.Material> GetPreviewMaterials
     (
       this IEnumerable<ARDB.GeometryObject> geometries,
@@ -70,7 +76,7 @@ namespace RhinoInside.Revit.Convert.Display
     {
       foreach (var geometry in geometries)
       {
-        if (geometry.Visibility != ARDB.Visibility.Visible)
+        if (SkipGeometryObject(geometry, doc))
           continue;
 
         switch (geometry)
@@ -82,9 +88,6 @@ namespace RhinoInside.Revit.Convert.Display
 
           case ARDB.Mesh mesh:
             if (mesh.NumTriangles <= 0)
-              continue;
-
-            if (SkipGeometryObject(geometry, doc))
               continue;
 
             yield return doc.GetElement(mesh.MaterialElementId) as ARDB.Material ?? currentMaterial;
@@ -122,12 +125,13 @@ namespace RhinoInside.Revit.Convert.Display
     /// </summary>
     /// <remarks>
     /// Empty <see cref="ARDB.Mesh"/> and empty <see cref="ARDB.Solid"/> will be skipped,
-    /// so output <see cref="IEnumerable{T}"/> may be shorter than the input.
+    /// so output <see cref="IEnumerable{Rhino.Geometry.Mesh}"/> may be shorter than the input.
     /// Output is warranted to be free of nulls, an empty <see cref="Mesh"/> is returned in case of error.
     /// </remarks>
     /// <param name="geometries"></param>
+    /// <param name="doc"></param>
     /// <param name="meshingParameters"></param>
-    /// <returns>An <see cref="IEnumerable{Mesh}"/></returns>
+    /// <returns>An <see cref="IEnumerable{Rhino.Geometry.Mesh}"/></returns>
     /// <seealso cref="GetPreviewMaterials(IEnumerable{ARDB.GeometryObject}, ARDB.Document, ARDB.Material)"/>
     internal static IEnumerable<Mesh> GetPreviewMeshes
     (
@@ -138,7 +142,7 @@ namespace RhinoInside.Revit.Convert.Display
     {
       foreach (var geometry in geometries)
       {
-        if (geometry.Visibility != ARDB.Visibility.Visible)
+        if (SkipGeometryObject(geometry, doc))
           continue;
 
         switch (geometry)
@@ -158,25 +162,19 @@ namespace RhinoInside.Revit.Convert.Display
             if (mesh.NumTriangles <= 0)
               continue;
 
-            if (SkipGeometryObject(geometry, doc))
-              continue;
-
             var f = Geometry.Raw.RawDecoder.ToRhino(mesh);
-            f.Scale(UnitConverter.ToRhinoUnits);
+            f.Scale(GeometryDecoder.ModelScaleFactor);
 
-            yield return f ?? new Rhino.Geometry.Mesh();
+            yield return f ?? new Mesh();
             break;
           }
           case ARDB.Face face:
           {
-            if (SkipGeometryObject(geometry, doc))
-              continue;
-
             var faceMesh = face.Triangulate(meshingParameters.LevelOfDetail());
             var f = Geometry.Raw.RawDecoder.ToRhino(faceMesh);
-            f.Scale(UnitConverter.ToRhinoUnits);
+            f.Scale(GeometryDecoder.ModelScaleFactor);
 
-            yield return f ?? new Rhino.Geometry.Mesh();
+            yield return f ?? new Mesh();
             break;
           }
           case ARDB.Solid solid:
@@ -184,17 +182,14 @@ namespace RhinoInside.Revit.Convert.Display
             if (solid.Faces.IsEmpty)
               continue;
 
-            if (SkipGeometryObject(geometry, doc))
-              continue;
-
             var solidFaces = solid.Faces.OfType<ARDB.Face>();
             foreach (var face in solidFaces)
             {
               var faceMesh = face.Triangulate(meshingParameters.LevelOfDetail());
               var f = Geometry.Raw.RawDecoder.ToRhino(faceMesh);
-              f.Scale(UnitConverter.ToRhinoUnits);
+              f.Scale(GeometryDecoder.ModelScaleFactor);
 
-              yield return f ?? new Rhino.Geometry.Mesh();
+              yield return f ?? new Mesh();
             }
             break;
           }
@@ -211,7 +206,7 @@ namespace RhinoInside.Revit.Convert.Display
     {
       foreach (var geometry in geometries)
       {
-        if (geometry?.Visibility != ARDB.Visibility.Visible)
+        if (SkipGeometryObject(geometry, default))
           continue;
 
         switch (geometry)

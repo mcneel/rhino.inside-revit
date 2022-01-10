@@ -477,8 +477,7 @@ namespace RhinoInside.Revit
           {
             ARDB.DirectContext3D.DrawContext.SetWorldTransform
             (
-              ARDB.Transform.Identity.ScaleBasis
-              (UnitConverter.Model.ConvertToInternalUnits(1.0))
+              ARDB.Transform.Identity.ScaleBasis(GeometryEncoder.ModelScaleFactor)
             );
 
             foreach (var primitive in primitives)

@@ -339,7 +339,10 @@ namespace RhinoInside.Revit.GH
         if (!BuildScene(dBView).IsValid)
           return;
 
-        ARDB3D.DrawContext.SetWorldTransform(ARDB.Transform.Identity.ScaleBasis(UnitConverter.ToHostUnits));
+        ARDB3D.DrawContext.SetWorldTransform
+        (
+          ARDB.Transform.Identity.ScaleBasis(GeometryEncoder.ModelScaleFactor)
+        );
 
         var CropBox = dBView.CropBox.ToBoundingBox();
 

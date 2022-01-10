@@ -56,7 +56,7 @@ namespace RhinoInside.Revit
         bool failed = false;
         switch (assemblyName.Name)
         {
-          case "Eto": failed = !Rhinoceros.InitEto(); break;
+          case "Eto":         failed = !Rhinoceros.InitEto(); break;
           case "RhinoCommon": failed = !Rhinoceros.InitRhinoCommon(); break;
           case "Grasshopper": failed = !Rhinoceros.InitGrasshopper(); break;
         }
@@ -121,7 +121,7 @@ namespace RhinoInside.Revit
         domain.AssemblyResolve += AssemblyResolving;
 
         foreach (var invocation in invocationList)
-          AppDomain.CurrentDomain.AssemblyResolve += invocation as ResolveEventHandler;
+          domain.AssemblyResolve += invocation as ResolveEventHandler;
       }
 
       // Search Rhino stuff

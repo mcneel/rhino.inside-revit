@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
@@ -8,7 +9,6 @@ namespace RhinoInside.Revit.GH.Components
   using Convert.Geometry;
   using External.DB.Extensions;
   using Kernel.Attributes;
-  using Rhino;
 
   public class RailingByCurve : ReconstructElementComponent
   {
@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Components
       [Description("New Railing"), ParamType(typeof(Parameters.GraphicalElement))]
       ref ARDB.Architecture.Railing railing,
 
-      Rhino.Geometry.Curve curve,
+      Curve curve,
       Optional<ARDB.Architecture.RailingType> type,
       Optional<ARDB.Level> level,
       [Optional] ARDB.Element host,
@@ -45,14 +45,18 @@ namespace RhinoInside.Revit.GH.Components
       var tol = GeometryObjectTolerance.Model;
 
       // Axis
-      var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.GetHeight() * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
-      curve = Rhino.Geometry.Curve.ProjectToPlane(curve, levelPlane);
-      curve = curve.Simplify(Rhino.Geometry.CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? curve;
+      var levelPlane = new Plane
+      (
+        new Point3d(0.0, 0.0, level.Value.GetHeight() * GeometryDecoder.ModelScaleFactor),
+        Vector3d.ZAxis
+      );
+      curve = Curve.ProjectToPlane(curve, levelPlane);
+      curve = curve.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? curve;
 
       // Type
       ChangeElementTypeId(ref railing, type.Value.Id);
 
-      ARDB.Architecture.Railing newRail = null;
+      var newRail = default(ARDB.Architecture.Railing);
       if (railing is ARDB.Architecture.Railing previousRail)
       {
         newRail = previousRail;
@@ -91,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components
         using (var heightOffset = newRail.get_Parameter(ARDB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET))
         {
           if (!heightOffset.IsReadOnly)
-            heightOffset.Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
+            heightOffset.Update(bbox.Min.Z * GeometryEncoder.ModelScaleFactor - level.Value.GetHeight());
         }
 
         newRail.HostId = host?.Id ?? ARDB.ElementId.InvalidElementId;

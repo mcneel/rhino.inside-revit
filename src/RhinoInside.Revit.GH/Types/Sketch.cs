@@ -62,14 +62,14 @@ namespace RhinoInside.Revit.GH.Types
     public override Brep Surface => Region;
 
     bool profileIsValid;
-    PolyCurve[] profile;
-    public PolyCurve[] Profile
+    Curve[] profile;
+    public Curve[] Profile
     {
       get
       {
         if (!profileIsValid)
         {
-          profile = Value?.Profile.ToPolyCurves();
+          profile = Value?.Profile.ToArray(GeometryDecoder.ToCurve);
           profileIsValid = true;
         }
 
@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (!regionIsValid && Value is ARDB.Sketch sketch)
         {
-          var loops = sketch.Profile.ToPolyCurves().Where(x => x.IsClosed).ToArray();
+          var loops = sketch.Profile.ToCurveMany().Where(x => x.IsClosed).ToArray();
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
           var loopsBox = BoundingBox.Empty;
