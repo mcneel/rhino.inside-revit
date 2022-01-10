@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     #region Static Properties
     /// <summary>
-    /// Default scale factor applied during the decoding to change
+    /// Default scale factor applied during the geometry decoding to change
     /// from Revit internal units to active Rhino document model units.
     /// </summary>
     /// <remarks>
@@ -303,13 +303,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region CurveLoop
-    /// <summary>
-    /// Converts the specified CurveLoop to an equivalent Rhino Curve array.
-    /// </summary>
-    /// <param name="value">A value to convert.</param>
-    /// <param name="converter">Expression used to convert each <see cref="ARDB.Curve"/> into TOutput.</param>
-    /// <returns>A TOutput array that is equivalent to the provided value.</returns>
-    public static TOutput[] ToArray<TOutput>
+    internal static TOutput[] ToArray<TOutput>
     (
       this ARDB.CurveLoop value,
       Converter<ARDB.Curve, TOutput> converter

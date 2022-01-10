@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     #region Static Properties
     /// <summary>
-    /// Default scale factor applied during the encoding to change
+    /// Default scale factor applied during the geometry encoding to change
     /// from active Rhino document model units to Revit internal units.
     /// </summary>
     /// <remarks>
