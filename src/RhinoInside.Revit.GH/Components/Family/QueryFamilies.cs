@@ -10,6 +10,7 @@ namespace RhinoInside.Revit.GH.Components.Families
   using External.DB;
   using External.DB.Extensions;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.4")]
   public class QueryFamilies : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("B6C377BA-BC46-495C-8250-F09DB0219C91");
@@ -30,10 +31,10 @@ namespace RhinoInside.Revit.GH.Components.Families
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.ElementKind>>("Kind", "K", string.Empty, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.Category>("Category", "C", string.Empty, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_String>("Name", "N", string.Empty, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ElementKind>>("Kind", "K", "Kind to match", defaultValue: ElementKind.System | ElementKind.Component, optional: true),
+      ParamDefinition.Create<Parameters.Category>                     ("Category", "C",  optional: true),
+      ParamDefinition.Create<Param_String>                            ("Family Name", "FN", optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>                ("Filter", "F", "Filter", optional: true),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -41,6 +42,14 @@ namespace RhinoInside.Revit.GH.Components.Families
     {
       ParamDefinition.Create<Param_String>("Families", "F", "Family list", GH_ParamAccess.list)
     };
+
+    public override void AddedToDocument(GH_Document document)
+    {
+      base.AddedToDocument(document);
+
+      if (Params.Input<IGH_Param>("Name") is IGH_Param name)
+        name.Name = "Family Name";
+    }
 
     struct FamilyNameComparer : IEqualityComparer<ARDB.ElementType>
     {
@@ -74,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
       if (!Params.TryGetData(DA, "Kind", out Types.ElementKind kind)) return;
       if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
-      if (!Params.TryGetData(DA, "Name", out string name)) return;
+      if (!Params.TryGetData(DA, "Family Name", out string familyName)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
       using (var collector = new ARDB.FilteredElementCollector(doc))
@@ -90,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Families
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
 
-        if (TryGetFilterStringParam(ARDB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref name, out var nameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref familyName, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
 
         var familiesSet = new HashSet<ARDB.ElementType>
@@ -101,9 +110,9 @@ namespace RhinoInside.Revit.GH.Components.Families
           default(FamilyNameComparer)
         );
 
-        var families = name is null ?
+        var families = familyName is null ?
           familiesSet :
-          familiesSet.Where(x => x.FamilyName.IsSymbolNameLike(name));
+          familiesSet.Where(x => x.FamilyName.IsSymbolNameLike(familyName));
 
         DA.SetDataList
         (

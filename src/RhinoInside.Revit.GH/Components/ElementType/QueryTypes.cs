@@ -9,6 +9,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
   using External.DB;
   using External.DB.Extensions;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.4")]
   public class QueryTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("7B00F940-4C6E-4F3F-AB81-C3EED430DE96");
@@ -29,11 +30,11 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.ElementKind>>("Kind", "K", string.Empty, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.Category>("Category", "C", string.Empty, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_String>("Family Name", "FN", string.Empty, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_String>("Name", "N",string.Empty, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ElementKind>>("Kind", "K", "Kind to match", ElementKind.System | ElementKind.Component, optional: true),
+      ParamDefinition.Create<Parameters.Category>                     ("Category", "C", optional: true),
+      ParamDefinition.Create<Param_String>                            ("Family Name", "FN", optional: true),
+      ParamDefinition.Create<Param_String>                            ("Type Name", "TN", optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>                ("Filter", "F", "Filter", optional: true),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -42,13 +43,21 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
       ParamDefinition.Create<Parameters.ElementType>("Types", "T", "Element types list", GH_ParamAccess.list)
     };
 
+    public override void AddedToDocument(GH_Document document)
+    {
+      base.AddedToDocument(document);
+
+      if (Params.Input<IGH_Param>("Name") is IGH_Param name)
+        name.Name = "Type Name";
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
       if (!Params.TryGetData(DA, "Kind", out Types.ElementKind kind)) return;
       if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
       if (!Params.TryGetData(DA, "Family Name", out string familyName)) return;
-      if (!Params.TryGetData(DA, "Name", out string name)) return;
+      if (!Params.TryGetData(DA, "Type Name", out string typeName)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
       if (!(category?.Document is null || doc.Equals(category.Document)))
@@ -70,7 +79,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, ref familyName, out var familyNameFilter))
           elementCollector = elementCollector.WherePasses(familyNameFilter);
 
-        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref typeName, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
 
         var elementTypes = elementCollector.Cast<ARDB.ElementType>();
@@ -78,8 +87,8 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
         if (familyName is object)
           elementTypes = elementTypes.Where(x => x.FamilyName.IsSymbolNameLike(familyName));
 
-        if (name is object)
-          elementTypes = elementTypes.Where(x => x.Name.IsSymbolNameLike(name));
+        if (typeName is object)
+          elementTypes = elementTypes.Where(x => x.Name.IsSymbolNameLike(typeName));
 
         DA.SetDataList
         (

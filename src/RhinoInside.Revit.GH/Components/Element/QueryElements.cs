@@ -7,7 +7,6 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
-  using Convert.System.Collections.Generic;
   using External.DB;
   using External.DB.Extensions;
 
@@ -157,7 +156,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
               elementCollector;
 
             return elements.
-              Convert(Types.Element.FromElement).
+              Select(Types.Element.FromElement).
               TakeWhileIsNotEscapeKeyDown(this);
           }) &&
           limit <= (Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_))?.Count ?? 0)
@@ -239,7 +238,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           "Elements",
           elementCollector.
           Where(x => Types.GraphicalElement.IsValidElement(x)).
-          Convert(Types.GraphicalElement.FromElement).
+          Select(Types.GraphicalElement.FromElement).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

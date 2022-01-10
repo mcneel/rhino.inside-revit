@@ -6,6 +6,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
+  [ComponentVersion(introduced: "1.0", updated: "1.4")]
   public class QueryViewTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("51E306BD-4736-4B7D-B2FF-B23E0717EEBB");
@@ -28,16 +29,24 @@ namespace RhinoInside.Revit.GH.Components.Views
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewFamily>>("Family", "F", string.Empty, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_String>("Name", "N", "View Type name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewFamily>>("Family", "F", optional: true),
+      ParamDefinition.Create<Param_String>("Type Name", "TN", "View Type name", optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.ElementType>("Types", "T", "Views Types list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.ElementType>("Types", "T", "View Types list", GH_ParamAccess.list)
     };
+
+    public override void AddedToDocument(GH_Document document)
+    {
+      base.AddedToDocument(document);
+
+      if (Params.Input<IGH_Param>("Name") is IGH_Param name)
+        name.Name = "Type Name";
+    }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -47,8 +56,8 @@ namespace RhinoInside.Revit.GH.Components.Views
       var viewFamily = ARDB.ViewFamily.Invalid;
       DA.GetData("Family", ref viewFamily);
 
-      string name = null;
-      DA.GetData("Name", ref name);
+      string typeName = null;
+      DA.GetData("Type Name", ref typeName);
 
       var filter = default(ARDB.ElementFilter);
       DA.GetData("Filter", ref filter);
@@ -60,7 +69,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
 
-        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref typeName, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
 
         var types = collector.Cast<ARDB.ViewFamilyType>();
@@ -68,8 +77,8 @@ namespace RhinoInside.Revit.GH.Components.Views
         if (viewFamily != ARDB.ViewFamily.Invalid)
           types = types.Where(x => x.ViewFamily == viewFamily);
 
-        if (!string.IsNullOrEmpty(name))
-          types = types.Where(x => x.Name.IsSymbolNameLike(name));
+        if (!string.IsNullOrEmpty(typeName))
+          types = types.Where(x => x.Name.IsSymbolNameLike(typeName));
 
         DA.SetDataList
         (
