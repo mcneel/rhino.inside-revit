@@ -14,6 +14,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A <see cref="Color"/> that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static Color ToColor(this ARDB.Color value)
     {
       return value.IsValid ?
@@ -26,6 +27,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A <see cref="ARDB.Color"/> that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Color ToColor(this Color value)
     {
       return value.ToArgb() == 0 ?
@@ -44,6 +46,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A <see cref="Color"/> that is equivalent to the provided value.</returns>
+    /// <since>1.1</since>
     public static Color ToColor(this ARDB.ColorWithTransparency value)
     {
       return value.IsValidObject ?
@@ -56,6 +59,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A <see cref="ARDB.ColorWithTransparency"/> that is equivalent to the provided value.</returns>
+    /// <since>1.1</since>
     public static ARDB.ColorWithTransparency ToColorWithTransparency(this Color value)
     {
       return new ARDB.ColorWithTransparency(value.R, value.G, value.B, 0xFFu - value.A);
@@ -72,6 +76,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A <see cref="Rectangle"/> that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static Rectangle ToRectangle(this ARDB.Rectangle value)
     {
       return new Rectangle(value.Left, value.Top, value.Right - value.Left, value.Bottom - value.Top);
@@ -82,6 +87,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A <see cref="ARDB.Rectangle"/> that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Rectangle ToRectangle(this Rectangle value)
     {
       return new ARDB.Rectangle(value.Left, value.Top, value.Right, value.Bottom);

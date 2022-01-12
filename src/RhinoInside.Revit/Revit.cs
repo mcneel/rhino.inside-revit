@@ -176,6 +176,7 @@ namespace RhinoInside.Revit
     /// <remarks>
     /// Provides access to windows, documents, events used at UI level.
     /// </remarks>
+    /// <since>1.0</since>
     public static ARUI.UIApplication ActiveUIApplication => Core.Host.Value as ARUI.UIApplication;
 
     /// <summary>
@@ -184,16 +185,19 @@ namespace RhinoInside.Revit
     /// <remarks>
     /// Provides access to tolerances, documents, events used at databse level.
     /// </remarks>
+    /// <since>1.0</since>
     public static ARAS.Application ActiveDBApplication => ActiveUIApplication?.Application;
 
     /// <summary>
     /// Gets the active <see cref="ARUI.UIDocument"/> in the Revit UI.
     /// </summary>
+    /// <since>1.0</since>
     public static ARUI.UIDocument ActiveUIDocument => ActiveUIApplication?.ActiveUIDocument;
 
     /// <summary>
     /// Gets the active <see cref="ARDB.Document"/> in the Revit UI.
     /// </summary>
+    /// <since>1.0</since>
     public static ARDB.Document ActiveDBDocument => ActiveUIDocument?.Document;
 
     internal static double ModelUnits => Convert.Geometry.UnitConverter.ToModelLength; // 1 feet in Rhino model units

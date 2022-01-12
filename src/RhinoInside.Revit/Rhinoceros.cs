@@ -604,7 +604,8 @@ namespace RhinoInside.Revit
     /// Executes the specified delegate on Revit UI context.
     /// </summary>
     /// <param name="action">A delegate that contains a method to be called in Revit API context.</param>
-    //[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never), Obsolete("Please use Revit.Invoke method. This method will be removed on v1.5")]
+    /// <since>1.0</since>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)/*, Obsolete("Please use Revit.Invoke method. This method will be removed on v1.5")*/]
     public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
 
     /// <summary>
@@ -613,7 +614,8 @@ namespace RhinoInside.Revit
     /// <typeparam name="T">The return type of the <paramref name="func"/>.</typeparam>
     /// <param name="func">A delegate that contains a method to be called in Revit API context.</param>
     /// <returns>The return value from the function being invoked.</returns>
-    //[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never), Obsolete("Please use Revit.Invoke method. This method will be removed on v1.5")]
+    /// <since>1.0</since>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)/*, Obsolete("Please use Revit.Invoke method. This method will be removed on v1.5")*/]
     public static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
 
     internal static bool Exposed

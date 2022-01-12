@@ -32,6 +32,7 @@ namespace RhinoInside.Revit.Convert.Render
     /// <param name="material">The material to convert.</param>
     /// <param name="rhinoDoc">The document to associate the resulting material with.</param>
     /// <returns>A Rhino RenderMaterial that is equivalent to the provided value.</returns>
+    /// <since>1.3</since>
     public static RenderMaterial ToRenderMaterial(this ARDB.Material material, RhinoDoc rhinoDoc)
     {
       var renderMaterial = RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, rhinoDoc);

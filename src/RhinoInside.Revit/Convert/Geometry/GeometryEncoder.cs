@@ -84,6 +84,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// RevitInternalLength = RhinoModelLength * <see cref="GeometryEncoder.ModelScaleFactor"/>
     /// </code>
     /// </remarks>
+    /// <since>1.4</since>
     public static double ModelScaleFactor => 1.0 / UnitConverter.ToModelLength;
     #endregion
 
@@ -93,7 +94,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit internal length that is equivalent to the provided value.</returns>
-    internal static double ToInternalLength(double value) => ToInternalLength(value, ModelScaleFactor);
+    /// <since>1.4</since>
+    public static double ToInternalLength(double value) => ToInternalLength(value, ModelScaleFactor);
     internal static double ToInternalLength(double value, double factor) => value * factor;
     #endregion
 
@@ -103,6 +105,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit UV that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB::UV ToUV(this Point2f value)
     {
       double factor = ModelScaleFactor;
@@ -120,6 +123,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit UV that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB::UV ToUV(this Point2d value)
     {
       double factor = ModelScaleFactor;
@@ -137,6 +141,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit UV that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB::UV ToUV(this Vector2f value)
     {
       return new ARDB::UV(value.X, value.Y);
@@ -153,6 +158,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit UV that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB::UV ToUV(this Vector2d value)
     {
       return new ARDB::UV(value.X, value.Y);
@@ -169,6 +175,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit XYZ that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB::XYZ ToXYZ(this Point3f value)
     {
       double factor = ModelScaleFactor;
@@ -186,6 +193,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit XYZ that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB::XYZ ToXYZ(this Point3d value)
     {
       double factor = ModelScaleFactor;
@@ -203,6 +211,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit XYZ that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB::XYZ ToXYZ(this Vector3f value)
     {
       return new ARDB::XYZ(value.X, value.Y, value.Z);
@@ -219,6 +228,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit XYZ that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB::XYZ ToXYZ(this Vector3d value)
     {
       return new ARDB::XYZ(value.X, value.Y, value.Z);
@@ -235,6 +245,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Plane that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Plane ToPlane(this Plane value) => ToPlane(value, ModelScaleFactor);
     internal static ARDB.Plane ToPlane(this Plane value, double factor)
     {
@@ -246,6 +257,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Transfrom that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Transform ToTransform(this Transform value) => ToTransform(value, ModelScaleFactor);
     internal static ARDB.Transform ToTransform(this Transform value, double factor)
     {
@@ -266,6 +278,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit BoundingBoxXYZ that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(this BoundingBox value) => ToBoundingBoxXYZ(value, ModelScaleFactor);
     internal static ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(this BoundingBox value, double factor)
     {
@@ -282,6 +295,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit BoundingBoxXYZ that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(this Box value) => ToBoundingBoxXYZ(value, ModelScaleFactor);
     internal static ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(this Box value, double factor)
     {
@@ -299,6 +313,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Outline that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Outline ToOutline(this BoundingBox value) => ToOutline(value, ModelScaleFactor);
     internal static ARDB.Outline ToOutline(this BoundingBox value, double factor)
     {
@@ -312,6 +327,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Line that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Line ToLine(this Line value) => value.ToLine(ModelScaleFactor);
     internal static ARDB.Line ToLine(this Line value, double factor)
     {
@@ -323,6 +339,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit PolyLine that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.PolyLine ToPolyLine(this Polyline value) => value.ToPolyLine(ModelScaleFactor);
     internal static ARDB.PolyLine ToPolyLine(this Polyline value, double factor)
     {
@@ -354,6 +371,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Arc that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Arc ToArc(this Arc value) => value.ToArc(ModelScaleFactor);
     internal static ARDB.Arc ToArc(this Arc value, double factor)
     {
@@ -368,6 +386,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Arc that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Arc ToArc(this Circle value) => value.ToArc(ModelScaleFactor);
     internal static ARDB.Arc ToArc(this Circle value, double factor)
     {
@@ -379,6 +398,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Curve ToCurve(this Ellipse value) => value.ToCurve(new Interval(0.0, 2.0 * Math.PI), ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this Ellipse value, double factor) => value.ToCurve(new Interval(0.0, 2.0 * Math.PI), factor);
 
@@ -388,6 +408,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value">A value to convert.</param>
     /// <param name="interval">Interval where the ellipse is defined.</param>
     /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Curve ToCurve(this Ellipse value, Interval interval) => value.ToCurve(interval, ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this Ellipse value, Interval interval, double factor)
     {
@@ -407,6 +428,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Point that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Point ToPoint(this Point value) => value.ToPoint(ModelScaleFactor);
     internal static ARDB.Point ToPoint(this Point value, double factor)
     {
@@ -418,6 +440,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Point that is equivalent to the provided value.</returns>
+    /// <since>1.4</since>
     public static ARDB.Point ToPoint(this PointCloudItem value) => ToPoint(value, ModelScaleFactor);
     internal static ARDB.Point ToPoint(this PointCloudItem value, double factor)
     {
@@ -431,6 +454,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Curve ToCurve(this LineCurve value) => value.Line.ToLine(ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this LineCurve value, double factor) => value.Line.ToLine(factor);
 
@@ -439,6 +463,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Curve ToCurve(this PolylineCurve value) => ToCurve(value, ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this PolylineCurve value, double factor)
     {
@@ -453,6 +478,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Curve ToCurve(this ArcCurve value) => value.Arc.ToArc(ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this ArcCurve value, double factor) => value.Arc.ToArc(factor);
 
@@ -461,6 +487,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Curve ToCurve(this NurbsCurve value) => value.ToCurve(ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this NurbsCurve value, double factor)
     {
@@ -499,6 +526,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Curve ToCurve(this PolyCurve value) => ToCurve(value, ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this PolyCurve value, double factor)
     {
@@ -523,6 +551,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Curve that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Curve ToCurve(this Curve value) => value.ToCurve(ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this Curve value, double factor)
     {
@@ -553,6 +582,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit CurveLoop that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.CurveLoop ToCurveLoop(this Curve value)
     {
       value = value.InOtherUnits(ModelScaleFactor);
@@ -566,6 +596,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit CurveArray that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.CurveArray ToCurveArray(this Curve value)
     {
       value = value.InOtherUnits(ModelScaleFactor);
@@ -599,6 +630,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Solid that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Solid ToSolid(this Brep value) => BrepEncoder.ToSolid(value, ModelScaleFactor);
     internal static ARDB.Solid ToSolid(this Brep value, double factor) => BrepEncoder.ToSolid(value, factor);
 
@@ -607,6 +639,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Solid that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Solid ToSolid(this Extrusion value) => ExtrusionEncoder.ToSolid(value, ModelScaleFactor);
     internal static ARDB.Solid ToSolid(this Extrusion value, double factor) => ExtrusionEncoder.ToSolid(value, factor);
 
@@ -615,6 +648,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Solid that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Solid ToSolid(this SubD value) => SubDEncoder.ToSolid(value, ModelScaleFactor);
     internal static ARDB.Solid ToSolid(this SubD value, double factor) => SubDEncoder.ToSolid(value, factor);
 
@@ -623,6 +657,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Solid that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Solid ToSolid(this Mesh value) => Raw.RawEncoder.ToHost(MeshEncoder.ToRawBrep(value, ModelScaleFactor));
     internal static ARDB.Solid ToSolid(this Mesh value, double factor) => Raw.RawEncoder.ToHost(MeshEncoder.ToRawBrep(value, factor));
     #endregion
@@ -633,6 +668,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Mesh that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Mesh ToMesh(this Brep value) => BrepEncoder.ToMesh(value, UnitConverter.NoScale);
     internal static ARDB.Mesh ToMesh(this Brep value, double factor) => BrepEncoder.ToMesh(value, factor);
 
@@ -641,6 +677,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Mesh that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Mesh ToMesh(this Extrusion value) => ExtrusionEncoder.ToMesh(value, UnitConverter.NoScale);
     internal static ARDB.Mesh ToMesh(this Extrusion value, double factor) => ExtrusionEncoder.ToMesh(value, factor);
 
@@ -649,6 +686,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Mesh that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Mesh ToMesh(this SubD value) => SubDEncoder.ToMesh(value, UnitConverter.NoScale);
     internal static ARDB.Mesh ToMesh(this SubD value, double factor) => SubDEncoder.ToMesh(value, factor);
 
@@ -657,6 +695,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit Mesh that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB.Mesh ToMesh(this Mesh value) => MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(value, ModelScaleFactor));
     internal static ARDB.Mesh ToMesh(this Mesh value, double factor) => MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(value, factor));
     #endregion
@@ -666,6 +705,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Revit GeometryObject that is equivalent to the provided value.</returns>
+    /// <since>1.4</since>
     public static ARDB.GeometryObject ToGeometryObject(this GeometryBase value) => ToGeometryObject(value, ModelScaleFactor);
     internal static ARDB.GeometryObject ToGeometryObject(this GeometryBase value, double scaleFactor)
     {

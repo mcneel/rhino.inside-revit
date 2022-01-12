@@ -14,6 +14,7 @@ namespace RhinoInside.Revit.Convert.System.Windows.Media
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A <see cref="Color"/> that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static Color ToColor(this ARDB.Color value)
     {
       return value.IsValid ?
@@ -26,6 +27,7 @@ namespace RhinoInside.Revit.Convert.System.Windows.Media
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A <see cref="ARDB.Color"/> that is equivalent to the provided value.</returns>
+    /// <since>1.0</since>
     public static ARDB::Color ToColor(this Color value)
     {
       return value.B == 0 && value.G == 0 && value.R == 0 && value.A == 0 ?
