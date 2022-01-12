@@ -171,32 +171,32 @@ namespace RhinoInside.Revit
     internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
 
     /// <summary>
-    /// Provides access to the active UI session <see cref="ARUI.UIApplication"/>.
+    /// Gets the active <see cref="ARUI.UIApplication"/> in the current UI session.
     /// </summary>
     /// <remarks>
     /// Provides access to windows, documents, events used at UI level.
     /// </remarks>
-    public static ARUI.UIApplication    ActiveUIApplication => Core.Host.Value as ARUI.UIApplication;
+    public static ARUI.UIApplication ActiveUIApplication => Core.Host.Value as ARUI.UIApplication;
 
     /// <summary>
-    /// Provides access to the active DB session <see cref="ARAS.Application"/>.
+    /// Gets the active <see cref="ARAS.Application"/> in the current DB session.
     /// </summary>
     /// <remarks>
     /// Provides access to tolerances, documents, events used at databse level.
     /// </remarks>
-    public static ARAS.Application      ActiveDBApplication => ActiveUIApplication?.Application;
+    public static ARAS.Application ActiveDBApplication => ActiveUIApplication?.Application;
 
     /// <summary>
-    /// Provides access to the active <see cref="ARUI.UIDocument"/> in the Revit UI.
+    /// Gets the active <see cref="ARUI.UIDocument"/> in the Revit UI.
     /// </summary>
-    public static ARUI.UIDocument       ActiveUIDocument => ActiveUIApplication?.ActiveUIDocument;
+    public static ARUI.UIDocument ActiveUIDocument => ActiveUIApplication?.ActiveUIDocument;
 
     /// <summary>
-    /// Provides access to the active <see cref="ARDB.Document"/> in the Revit UI.
+    /// Gets the active <see cref="ARDB.Document"/> in the Revit UI.
     /// </summary>
-    public static ARDB.Document         ActiveDBDocument => ActiveUIDocument?.Document;
+    public static ARDB.Document ActiveDBDocument => ActiveUIDocument?.Document;
 
-    internal static double              ModelUnits        => Convert.Geometry.UnitConverter.ToModelLength; // 1 feet in Rhino model units
+    internal static double ModelUnits => Convert.Geometry.UnitConverter.ToModelLength; // 1 feet in Rhino model units
     #endregion
   }
 }

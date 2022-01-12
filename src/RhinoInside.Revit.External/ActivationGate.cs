@@ -186,7 +186,7 @@ namespace RhinoInside.Revit.External
     /// </summary>
     public static bool IsOpen
     {
-      get => isOpen;
+      get => isOpen && HostMainWindow.ThreadId == ThreadHandle.CurrentThreadId;
       private set
       {
         if (isOpen == value)
@@ -312,7 +312,6 @@ namespace RhinoInside.Revit.External
         #endregion
       }
     }
-
     /// <summary>
     /// Creates an awaitable task that asynchronously yields back to the current context when
     /// gate is open next time and Revit API is fully available.

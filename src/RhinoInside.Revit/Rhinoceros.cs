@@ -601,17 +601,19 @@ namespace RhinoInside.Revit
 
     #region Rhino UI
     /// <summary>
-    /// Executes the specified delegate on Revit API context.
+    /// Executes the specified delegate on Revit UI context.
     /// </summary>
     /// <param name="action">A delegate that contains a method to be called in Revit API context.</param>
+    //[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never), Obsolete("Please use Revit.Invoke method. This method will be removed on v1.5")]
     public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
 
     /// <summary>
-    /// Executes the specified delegate on Revit API context.
+    /// Executes the specified delegate on Revit UI context.
     /// </summary>
     /// <typeparam name="T">The return type of the <paramref name="func"/>.</typeparam>
     /// <param name="func">A delegate that contains a method to be called in Revit API context.</param>
     /// <returns>The return value from the function being invoked.</returns>
+    //[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never), Obsolete("Please use Revit.Invoke method. This method will be removed on v1.5")]
     public static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
 
     internal static bool Exposed
@@ -728,7 +730,7 @@ namespace RhinoInside.Revit
 
     static void MainLoop(object sender, EventArgs e)
     {
-      if (!Command.InScriptRunnerCommand()) 
+      if (!Command.InScriptRunnerCommand())
       {
         if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
         {
@@ -758,14 +760,14 @@ namespace RhinoInside.Revit
       MainWindow.BringToFront();
     }
 
-    public static async void ShowAsync()
+    internal static async void ShowAsync()
     {
       await External.ActivationGate.Yield();
 
       Show();
     }
 
-    public static async void RunScriptAsync(string script, bool activate)
+    internal static async void RunScriptAsync(string script, bool activate)
     {
       if (string.IsNullOrWhiteSpace(script))
         return;
