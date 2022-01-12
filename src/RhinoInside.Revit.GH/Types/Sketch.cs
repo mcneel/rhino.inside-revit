@@ -52,55 +52,67 @@ namespace RhinoInside.Revit.GH.Types
 
     public override void DrawViewportMeshes(GH_PreviewMeshArgs args)
     {
-      if(Region is object)
-        args.Pipeline.DrawBrepShaded(Region, args.Material);
+      if(TrimmedSurface is object)
+        args.Pipeline.DrawBrepShaded(TrimmedSurface, args.Material);
     }
     #endregion
 
     #region Location
-    public override Plane Location => Value?.SketchPlane.GetPlane().ToPlane() ?? base.Location;
-    public override Brep Surface => Region;
+    protected override void SubInvalidateGraphics()
+    {
+      profile = default;
+      region = default;
 
-    bool profileIsValid;
-    Curve[] profile;
+      base.SubInvalidateGraphics();
+    }
+
+    public override Plane Location => Value?.SketchPlane.GetPlane().ToPlane() ?? base.Location;
+
+    (bool HasValue, Curve[] Value) profile;
     public Curve[] Profile
     {
       get
       {
-        if (!profileIsValid)
+        if (!profile.HasValue && Value is ARDB.Sketch sketch)
         {
-          profile = Value?.Profile.ToArray(GeometryDecoder.ToCurve);
-          profileIsValid = true;
+          profile.Value = sketch.Profile.ToArray(GeometryDecoder.ToCurve);
+          profile.HasValue = true;
         }
 
-        return profile;
+        return profile.Value;
       }
     }
 
-    bool regionIsValid;
-    Brep region;
-    public Brep Region
+    (bool HasValue, Brep Value) region;
+    public override Brep TrimmedSurface
     {
       get
       {
-        if (!regionIsValid && Value is ARDB.Sketch sketch)
+        if (!region.HasValue && Value is ARDB.Sketch sketch)
         {
           var loops = sketch.Profile.ToCurveMany().Where(x => x.IsClosed).ToArray();
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
-          var loopsBox = BoundingBox.Empty;
-          foreach (var loop in loops)
-            loopsBox.Union(loop.GetBoundingBox(plane, out var _));
+          if (loops.Length > 0)
+          {
+            var loopsBox = BoundingBox.Empty;
+            foreach (var loop in loops)
+              loopsBox.Union(loop.GetBoundingBox(plane, out var _));
 
-          var planeSurface = new PlaneSurface(plane, new Interval(loopsBox.Min.X, loopsBox.Max.X), new Interval(loopsBox.Min.Y, loopsBox.Max.Y));
+            var planeSurface = new PlaneSurface
+            (
+              plane,
+              new Interval(loopsBox.Min.X, loopsBox.Max.X),
+              new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
+            );
 
-          if(loops.Length > 0)
-            region = CreateTrimmedSurface(planeSurface, loops);
+            region.Value = CreateTrimmedSurface(planeSurface, loops);
+          }
 
-          regionIsValid = true;
+          region.HasValue = true;
         }
 
-        return region;
+        return region.Value;
       }
     }
 
