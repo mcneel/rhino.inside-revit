@@ -1,11 +1,8 @@
 using System;
 using Grasshopper.Kernel;
-using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.ModelElements
 {
-  using Convert.Geometry;
-
   public class SketchDeconstruct : Component
   {
     public override Guid ComponentGuid => new Guid("F9BC3F5E-7415-485E-B74C-5CB855B818B8");
@@ -15,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     public SketchDeconstruct() : base
     (
       name: "Deconstruct Sketch",
-      nickname: "SketchD",
+      nickname: "DecSktch",
       description: string.Empty,
       category: "Revit",
       subCategory: "Model"
@@ -30,17 +27,16 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(new Parameters.SketchPlane(), "Sketch Plane", "SP", "Sketch plane", GH_ParamAccess.item);
-      manager.AddCurveParameter("Profile", "PC", "Sketch profile curves", GH_ParamAccess.list);
+      manager.AddCurveParameter("Profile", "P", "Sketch profile curves", GH_ParamAccess.list);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      ARDB.Sketch sketch = null;
-      if (!DA.GetData("Sketch", ref sketch))
+      if (!Params.GetData(DA, "Sketch", out Types.Sketch sketch, x => x.IsValid))
         return;
 
-      DA.SetData("Sketch Plane", sketch?.SketchPlane);
-      DA.SetDataList("Profile", sketch?.Profile.ToPolyCurves());
+      DA.SetData("Sketch Plane", sketch?.Value.SketchPlane);
+      DA.SetDataList("Profile", sketch?.Profile);
     }
   }
 }

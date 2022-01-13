@@ -85,9 +85,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
 
       DA.SetData("Curve", gridLine.FullCurve.ToCurve());
-      DA.SetDataList("Segments", gridLine.AllSegmentCurves.ToCurves());
-      DA.SetDataList("Existing Segments", gridLine.ExistingSegmentCurves.ToCurves());
-      DA.SetDataList("Skipped Segments", gridLine.SkippedSegmentCurves.ToCurves());
+      DA.SetDataList("Segments", gridLine.AllSegmentCurves.ToCurveMany());
+      DA.SetDataList("Existing Segments", gridLine.ExistingSegmentCurves.ToCurveMany());
+      DA.SetDataList("Skipped Segments", gridLine.SkippedSegmentCurves.ToCurveMany());
 
       // find attached mullions
       const double EPSILON = 0.1;

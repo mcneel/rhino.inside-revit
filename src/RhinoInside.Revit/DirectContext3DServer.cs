@@ -794,18 +794,19 @@ namespace RhinoInside.Revit
             }
             else if (geometry is Curve curve)
             {
-              using (var polyline = curve.ToPolyline(Revit.ShortCurveTolerance * Revit.ModelUnits, Revit.AngleTolerance * 100.0, Revit.ShortCurveTolerance * Revit.ModelUnits, 0.0))
+              var tol = Convert.Geometry.GeometryObjectTolerance.Model;
+              using (var polyline = curve.ToPolyline(tol.ShortCurveTolerance, tol.AngleTolerance * 100.0, tol.ShortCurveTolerance, 0.0))
               {
                 if (polyline?.ToPolyline() is Polyline pline)
                 {
 
                   // Reduce too complex polylines.
                   {
-                    var tol = Revit.VertexTolerance * Revit.ModelUnits;
+                    var ctol = tol.VertexTolerance;
                     while (pline.Count > 0x4000)
                     {
-                      tol *= 2.0;
-                      if (pline.ReduceSegments(tol) == 0)
+                      ctol *= 2.0;
+                      if (pline.ReduceSegments(ctol) == 0)
                         break;
                     }
                   }

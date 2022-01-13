@@ -624,7 +624,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                     }
                     break;
                   case Curve curve:
-                    if (curve.TryGetPlane(out var plane, Revit.VertexTolerance))
+                    if (curve.TryGetPlane(out var plane, GeometryObjectTolerance.Internal.VertexTolerance / scaleFactor))
                     {
                       if (curve.ToCurve(scaleFactor) is ARDB.Curve crv)
                       {

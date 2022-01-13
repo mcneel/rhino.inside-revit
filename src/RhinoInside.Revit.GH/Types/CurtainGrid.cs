@@ -46,23 +46,13 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
       {
-        var mesh = new Mesh();
-        foreach (var curve in Curves)
-        {
-          if (curve.SegmentCount == 4)
-          {
-            var face = new MeshFace
-            (
-              mesh.Vertices.Add(curve.SegmentCurve(0).PointAtStart),
-              mesh.Vertices.Add(curve.SegmentCurve(1).PointAtStart),
-              mesh.Vertices.Add(curve.SegmentCurve(2).PointAtStart),
-              mesh.Vertices.Add(curve.SegmentCurve(3).PointAtStart)
-            );
-            mesh.Faces.AddFace(face);
-          }
-        }
+        target = (Q) (object) (Mesh is Mesh mesh ? new GH_Mesh(mesh) : default);
+        return true;
+      }
 
-        target = (Q) (object) new GH_Mesh(mesh);
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
+      {
+        target = (Q) (object) (Brep is Brep brep ? new GH_Brep(brep) : default);
         return true;
       }
 
@@ -159,6 +149,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       var result = cells.Count > 0;
 
+      var tol = GeometryObjectTolerance.Internal;
       foreach (var cell in cells)
       {
         foreach (var loop in cell.CurveLoops.Cast<ARDB.CurveArray>())
@@ -167,7 +158,7 @@ namespace RhinoInside.Revit.GH.Types
           {
             var center = curve.Evaluate(0.5, true);
             var distance = face.Project(center).Distance;
-            if (distance > Revit.VertexTolerance)
+            if (distance > tol.VertexTolerance)
               return false;
           }
         }
@@ -219,29 +210,123 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    PolyCurve[] curves;
     static readonly PolyCurve[] EmptyCurves = new PolyCurve[0];
+
+    PolyCurve[] planarCurves;
+    public PolyCurve[] PlanarCurves
+    {
+      get
+      {
+        if (planarCurves is null)
+        {
+          planarCurves = Value is ARDB.CurtainGrid grid ?
+            planarCurves = grid.GetCurtainCells().SelectMany
+            (
+              x =>
+              {
+                try { return x.PlanarizedCurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
+                catch { return EmptyCurves; }
+              }
+            ).
+            ToArray() :
+            EmptyCurves;
+        }
+
+        return planarCurves;
+      }
+    }
+
+    public Mesh Mesh
+    {
+      get
+      {
+        if (Value is ARDB.CurtainGrid)
+        {
+          var mp = new MeshingParameters(0.0, GeometryObjectTolerance.Model.ShortCurveTolerance)
+          {
+            Tolerance = GeometryObjectTolerance.Model.VertexTolerance,
+            SimplePlanes = true,
+            JaggedSeams = true,
+            RefineGrid = false,
+            GridMinCount = 1,
+            GridMaxCount = 1,
+            GridAspectRatio = 0
+          };
+
+          var mesh = new Mesh();
+          mesh.Append(PlanarCurves.Select
+          (
+            x =>
+            {
+              var m = Mesh.CreateFromPlanarBoundary(x, mp, mp.Tolerance);
+              m.MergeAllCoplanarFaces(GeometryObjectTolerance.Model.VertexTolerance, GeometryObjectTolerance.Model.AngleTolerance);
+              return m;
+            })
+          );
+          return mesh;
+        }
+
+        return default;
+      }
+    }
+
+    PolyCurve[] curves;
     public PolyCurve[] Curves
     {
       get
       {
         if (curves is null)
         {
-          if (Value is ARDB.CurtainGrid grid)
-            curves = grid.GetCurtainCells().Cast<ARDB.CurtainCell>().SelectMany
+          curves = Value is ARDB.CurtainGrid grid ?
+            grid.GetCurtainCells().SelectMany
             (
               x =>
               {
-                try { return x.CurveLoops.ToPolyCurves(); }
+                try { return x.CurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
                 catch { return EmptyCurves; }
               }
-            ).ToArray();
-          else curves = EmptyCurves;
+            ).
+            ToArray():
+            EmptyCurves;
         }
 
         return curves;
       }
     }
+
+    public Brep Brep
+    {
+      get
+      {
+        if (Value is ARDB.CurtainGrid)
+        {
+          var brep = Brep.MergeBreps
+          (
+            PlanarCurves.SelectMany
+            (
+              x =>
+              Brep.CreatePlanarBreps(x, GeometryObjectTolerance.Model.VertexTolerance)
+            ),
+            RhinoMath.UnsetValue
+          );
+          if (brep?.IsValid == false)
+            brep.Repair(GeometryObjectTolerance.Model.VertexTolerance);
+
+          return brep;
+        }
+
+        return default;
+      }
+    }
+
+    public IEnumerable<Curve> GridLineU => Value is ARDB.CurtainGrid grid ?
+      grid.GetUGridLineIds().Select(x => (Document.GetElement(x) as ARDB.CurtainGridLine).FullCurve.ToCurve()) :
+      default;
+
+    public IEnumerable<Curve> GridLineV => Value is ARDB.CurtainGrid grid ?
+      grid.GetVGridLineIds().Select(x => (Document.GetElement(x) as ARDB.CurtainGridLine).FullCurve.ToCurve()) :
+      default;
+
     #endregion
   }
 }

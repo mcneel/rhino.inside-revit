@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element is DBInternalOrigin &&
-             element.Category.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_IOS_GeoSite;
+             element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_IOS_GeoSite;
     }
 
     public InternalOrigin() { }

@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.Convert.Geometry
   static class MeshEncoder
   {
     #region Tolerances
-    internal static readonly double ShortEdgeTolerance = 2.0 * Revit.VertexTolerance;
+    internal static readonly double ShortEdgeTolerance = 2.0 * GeometryObjectTolerance.Internal.VertexTolerance;
     #endregion
 
     #region Encode
@@ -29,10 +29,11 @@ namespace RhinoInside.Revit.Convert.Geometry
       mesh = mesh.DuplicateShallow() as Mesh;
       if (EncodeRaw(ref mesh, scaleFactor))
       {
-        // Revit needs Solid edges to be greater than Revit.ShortCurveTolerance
-        mesh.Vertices.Align(Revit.ShortCurveTolerance, default);
-        mesh.Vertices.Align(Revit.ShortCurveTolerance, mesh.GetNakedEdgePointStatus().Select(x => !x));
-        mesh.Weld(Revit.AngleTolerance);
+        // Revit needs Solid edges to be greater than GeometryObjectTolerance.Internal.ShortCurveTolerance
+        var tol = GeometryObjectTolerance.Internal;
+        mesh.Vertices.Align(tol.ShortCurveTolerance, default);
+        mesh.Vertices.Align(tol.ShortCurveTolerance, mesh.GetNakedEdgePointStatus().Select(x => !x));
+        mesh.Weld(tol.AngleTolerance);
 
         return Brep.CreateFromMesh(mesh, true);
       }
@@ -118,6 +119,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static bool TryRebuildMesh(Mesh mesh, MeshIssues issues, double factor)
     {
+      var tol = GeometryObjectTolerance.Internal;
       var nGonCount = mesh.Ngons.Count;
 
       if (issues.HasFlag(MeshIssues.ShortEdges) && mesh.Ngons.Count == 0)
@@ -125,7 +127,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         mesh.Ngons.Count = 0;
         mesh.Vertices.Align(ShortEdgeTolerance / factor, mesh.GetNakedEdgePointStatus().Select(x => !x));
         mesh.Vertices.Align(ShortEdgeTolerance / factor, default);
-        mesh.Weld(Revit.AngleTolerance);
+        mesh.Weld(tol.AngleTolerance);
       }
 
       var degenerated = mesh.Faces.CullDegenerateFaces();
@@ -142,10 +144,10 @@ namespace RhinoInside.Revit.Convert.Geometry
         (
           nGonCount == 1 &&
           Plane.FitPlaneToPoints(mesh.Vertices.ToPoint3dArray(), out var _, out var deviation) == PlaneFitResult.Success &&
-          deviation <= Revit.VertexTolerance / factor
+          deviation <= tol.VertexTolerance / factor
         )
         {
-          mesh.Ngons.AddPlanarNgons(Revit.VertexTolerance / factor, 4, 2, true);
+          mesh.Ngons.AddPlanarNgons(tol.VertexTolerance / factor, 4, 2, true);
         }
       }
 
@@ -158,6 +160,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// Replaces <see cref="Raw.RawEncoder.ToHost(Mesh)"/> to catch Revit Exceptions and handle Ngons
     /// </summary>
     /// <param name="mesh"></param>
+    /// <param name="factor"></param>
     /// <returns></returns>
     internal static ARDB.Mesh ToMesh(Mesh mesh, double factor = UnitConverter.NoScale)
     {
@@ -233,6 +236,8 @@ namespace RhinoInside.Revit.Convert.Geometry
           vertices[v] *= factor;
       }
 
+      var tol = GeometryObjectTolerance.Internal;
+
       var isSolid = mesh.SolidOrientation() != 0;
       builder.OpenConnectedFaceSet(isSolid);
       var faces = 0;
@@ -268,7 +273,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           if (Plane.FitPlaneToPoints(faceVertices, out var _, out var deviation) == PlaneFitResult.Failure)
             continue;
 
-          if (deviation > Revit.VertexTolerance)
+          if (deviation > tol.VertexTolerance)
             continue;
         }
 
@@ -338,11 +343,11 @@ namespace RhinoInside.Revit.Convert.Geometry
               normal.Unitize();
             }
 
-            var loops = Curve.JoinCurves(lines, Revit.VertexTolerance, true);
+            var loops = Curve.JoinCurves(lines, tol.VertexTolerance, true);
 
             for (int i = 0; i < loops.Length; ++i)
             {
-              loops[i] = loops[i].Simplify(CurveSimplifyOptions.All, ShortEdgeTolerance, Revit.AngleTolerance);
+              loops[i] = loops[i].Simplify(CurveSimplifyOptions.All, ShortEdgeTolerance, tol.AngleTolerance);
               loops[i].RemoveShortSegments(ShortEdgeTolerance);
             }
 
@@ -377,12 +382,12 @@ namespace RhinoInside.Revit.Convert.Geometry
         else
         {
           var pline = new PolylineCurve(Array.ConvertAll(ngon.BoundaryVertexIndexList(), vi => vertices[vi]));
-          if (pline.Simplify(CurveSimplifyOptions.All, ShortEdgeTolerance, Revit.AngleTolerance) is PolylineCurve polyline)
+          if (pline.Simplify(CurveSimplifyOptions.All, ShortEdgeTolerance, tol.AngleTolerance) is PolylineCurve polyline)
           {
             polyline.RemoveShortSegments(ShortEdgeTolerance);
             if (polyline.SpanCount > 2)
             {
-              var outerLoopVertices = polyline.ToPolyline().ConvertAll(vi => Raw.RawEncoder.AsXYZ(vi));
+              var outerLoopVertices = polyline.ToPolyline().ConvertAll(Raw.RawEncoder.AsXYZ);
               builder.AddFace(new ARDB.TessellatedFace(outerLoopVertices, GeometryEncoder.Context.Peek.MaterialId));
               faces++;
             }
@@ -414,7 +419,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
           if (Plane.FitPlaneToPoints(fitPoints, out var plane, out var deviation) == PlaneFitResult.Success)
           {
-            var planar = deviation < Revit.VertexTolerance * 0.5;
+            var planar = deviation < tol.VertexTolerance * 0.5;
 
             var A = planar ? plane.ClosestPoint(fitPoints[0]) : fitPoints[0];
             var B = planar ? plane.ClosestPoint(fitPoints[1]) : fitPoints[1];
@@ -427,8 +432,8 @@ namespace RhinoInside.Revit.Convert.Geometry
             var distanceB = planar ? P.DistanceTo(B) : diagonal.DistanceTo(B, false);
             var distanceD = planar ? P.DistanceTo(D) : diagonal.DistanceTo(D, false);
 
-            bool validB = Math.Abs(distanceB) > +Revit.VertexTolerance;
-            bool validD = Math.Abs(distanceD) > +Revit.VertexTolerance;
+            bool validB = Math.Abs(distanceB) > +tol.VertexTolerance;
+            bool validD = Math.Abs(distanceD) > +tol.VertexTolerance;
 
             quad[0] = Raw.RawEncoder.AsXYZ(A);
             quad[1] = Raw.RawEncoder.AsXYZ(B);

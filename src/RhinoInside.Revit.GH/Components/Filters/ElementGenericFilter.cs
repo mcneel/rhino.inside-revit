@@ -134,7 +134,17 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager[manager.AddParameter(new Parameters.Param_Enum<Types.ElementKind>(), "Kind", "K", "Kind to match", GH_ParamAccess.item)].Optional = true;
+      manager.AddParameter
+      (
+        new Parameters.Param_Enum<Types.ElementKind>()
+        {
+          Name = "Kind", NickName = "K",
+          Description = "Kind to match",
+          Optional = true
+        }.
+        SetDefaultVale(ElementKind.System | ElementKind.Component)
+      );
+
       manager[manager.AddTextParameter("Family Name", "FN", "Family Name to match", GH_ParamAccess.item)].Optional = true;
       manager[manager.AddTextParameter("Type Name", "TN", "Type Name to match", GH_ParamAccess.item)].Optional = true;
       base.RegisterInputParams(manager);

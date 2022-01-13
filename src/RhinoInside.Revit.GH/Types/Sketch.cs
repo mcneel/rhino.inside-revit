@@ -52,55 +52,67 @@ namespace RhinoInside.Revit.GH.Types
 
     public override void DrawViewportMeshes(GH_PreviewMeshArgs args)
     {
-      if(Region is object)
-        args.Pipeline.DrawBrepShaded(Region, args.Material);
+      if(TrimmedSurface is object)
+        args.Pipeline.DrawBrepShaded(TrimmedSurface, args.Material);
     }
     #endregion
 
     #region Location
-    public override Plane Location => Value?.SketchPlane.GetPlane().ToPlane() ?? base.Location;
-    public override Brep Surface => Region;
+    protected override void SubInvalidateGraphics()
+    {
+      profile = default;
+      region = default;
 
-    bool profileIsValid;
-    PolyCurve[] profile;
-    public PolyCurve[] Profile
+      base.SubInvalidateGraphics();
+    }
+
+    public override Plane Location => Value?.SketchPlane.GetPlane().ToPlane() ?? base.Location;
+
+    (bool HasValue, Curve[] Value) profile;
+    public Curve[] Profile
     {
       get
       {
-        if (!profileIsValid)
+        if (!profile.HasValue && Value is ARDB.Sketch sketch)
         {
-          profile = Value?.Profile.ToPolyCurves();
-          profileIsValid = true;
+          profile.Value = sketch.Profile.ToArray(GeometryDecoder.ToCurve);
+          profile.HasValue = true;
         }
 
-        return profile;
+        return profile.Value;
       }
     }
 
-    bool regionIsValid;
-    Brep region;
-    public Brep Region
+    (bool HasValue, Brep Value) region;
+    public override Brep TrimmedSurface
     {
       get
       {
-        if (!regionIsValid && Value is ARDB.Sketch sketch)
+        if (!region.HasValue && Value is ARDB.Sketch sketch)
         {
-          var loops = sketch.Profile.ToPolyCurves().Where(x => x.IsClosed).ToArray();
+          var loops = sketch.Profile.ToCurveMany().Where(x => x.IsClosed).ToArray();
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
-          var loopsBox = BoundingBox.Empty;
-          foreach (var loop in loops)
-            loopsBox.Union(loop.GetBoundingBox(plane, out var _));
+          if (loops.Length > 0)
+          {
+            var loopsBox = BoundingBox.Empty;
+            foreach (var loop in loops)
+              loopsBox.Union(loop.GetBoundingBox(plane, out var _));
 
-          var planeSurface = new PlaneSurface(plane, new Interval(loopsBox.Min.X, loopsBox.Max.X), new Interval(loopsBox.Min.Y, loopsBox.Max.Y));
+            var planeSurface = new PlaneSurface
+            (
+              plane,
+              new Interval(loopsBox.Min.X, loopsBox.Max.X),
+              new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
+            );
 
-          if(loops.Length > 0)
-            region = CreateTrimmedSurface(planeSurface, loops);
+            region.Value = CreateTrimmedSurface(planeSurface, loops);
+          }
 
-          regionIsValid = true;
+          region.HasValue = true;
         }
 
-        return region;
+        return region.Value;
       }
     }
 
@@ -117,7 +129,9 @@ namespace RhinoInside.Revit.GH.Types
       // Extract base surface
       if (surface is object)
       {
-        double trimTolerance = Revit.VertexTolerance * 0.1;
+        var tol = GeometryObjectTolerance.Model;
+        var trimTolerance = tol.VertexTolerance * 0.1;
+
         int si = brep.AddSurface(surface);
 
         if (surface is PlaneSurface)
@@ -156,7 +170,7 @@ namespace RhinoInside.Revit.GH.Types
           {
             for (int j = i + 1; j < edgeLoops.Length; ++j)
             {
-              var containment = Curve.PlanarClosedCurveRelationship(trims[i], trims[j], Plane.WorldXY, Revit.VertexTolerance * Revit.ModelUnits);
+              var containment = Curve.PlanarClosedCurveRelationship(trims[i], trims[j], Plane.WorldXY, tol.VertexTolerance);
               if (containment == RegionContainment.MutualIntersection)
               {
                 edgeLoops[i].type = BrepLoopType.Outer;
@@ -237,7 +251,7 @@ namespace RhinoInside.Revit.GH.Types
               edgeLoops[index].trims.Append(trim);
             }
 
-            edgeLoops[index].trims.MakeClosed(Revit.VertexTolerance);
+            edgeLoops[index].trims.MakeClosed(tol.VertexTolerance);
 
             ++index;
           }
@@ -265,7 +279,7 @@ namespace RhinoInside.Revit.GH.Types
           {
             foreach (var shell in shells.Reverse())
             {
-              var containment = Curve.PlanarClosedCurveRelationship(innerLoop.trims, shell[0].trims, Plane.WorldXY, Revit.VertexTolerance);
+              var containment = Curve.PlanarClosedCurveRelationship(innerLoop.trims, shell[0].trims, Plane.WorldXY, tol.VertexTolerance);
               if (containment == RegionContainment.AInsideB)
               {
                 shell.Add(innerLoop);

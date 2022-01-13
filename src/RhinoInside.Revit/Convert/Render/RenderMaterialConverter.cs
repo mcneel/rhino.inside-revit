@@ -84,6 +84,7 @@ namespace RhinoInside.Revit.Convert.Render
     /// <param name="material">Revit material to convert.</param>
     /// <param name="rhinoDoc">Rhino document to associate the resulting material with.</param>
     /// <returns>Rhino renderMaterial that is equivalent to the provided Revit material.</returns>
+    /// <since>1.3</since>
     public static RenderMaterial ToRenderMaterial(this ARDB.Material material, RhinoDoc rhinoDoc)
     {
       var renderMaterial = RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, rhinoDoc);

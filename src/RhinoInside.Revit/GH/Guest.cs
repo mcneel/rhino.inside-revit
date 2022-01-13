@@ -340,7 +340,7 @@ namespace RhinoInside.Revit.GH
         new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Grasshopper", $"Libraries-{Rhinoceros.SchemeName}")),
 
         // %APPDATA%\Grasshopper\Libraries-Inside-Revit-20XX
-        new DirectoryInfo(Folders.DefaultAssemblyFolder.Substring(0, Folders.DefaultAssemblyFolder.Length - 1) + '-' + Rhinoceros.SchemeName)
+        new DirectoryInfo(Folders.DefaultAssemblyFolder.Substring(0, Folders.DefaultAssemblyFolder.Length - 1) + $"-{Rhinoceros.SchemeName}")
       };
 
       var map = new System.Collections.Specialized.OrderedDictionary();

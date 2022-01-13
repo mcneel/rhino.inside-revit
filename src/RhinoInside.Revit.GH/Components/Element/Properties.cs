@@ -371,7 +371,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       else
       {
         DA.SetDataList("Element", elements);
-        Params.TrySetDataList(DA, "Type", () => elements.Select(x => x.Type));
+        Params.TrySetDataList(DA, "Type", () => elements.Select(x => x?.Type));
       }
     }
   }

@@ -37,6 +37,16 @@ namespace RhinoInside.Revit.GH.Types
       Value.EndCap = ARDB.EndCapCondition.NoEndCap;
     }
 
+    public CompoundStructure(ARDB.Document doc, double sampleHeight) : base
+    (
+      doc,
+      ARDB.CompoundStructure.CreateSingleLayerCompoundStructure(sampleHeight / Revit.ModelUnits, ARDB.MaterialFunctionAssignment.None, 1.0, ARDB.ElementId.InvalidElementId)
+    )
+    {
+      Value.OpeningWrapping = ARDB.OpeningWrappingCondition.None;
+      Value.EndCap = ARDB.EndCapCondition.NoEndCap;
+    }
+
     public CompoundStructure(ARDB.Document doc, IList<CompoundStructureLayer> core) : base
     (
       doc,

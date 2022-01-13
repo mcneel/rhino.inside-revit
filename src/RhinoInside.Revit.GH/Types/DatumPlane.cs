@@ -402,7 +402,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override Curve Curve => Value?.Curve.ToCurve();
 
-    public override Brep Surface
+    public override Surface Surface
     {
       get
       {
@@ -426,7 +426,7 @@ namespace RhinoInside.Revit.GH.Types
 
           surface.SetDomain(1, new Interval(bbox.Min.Z, bbox.Max.Z));
 
-          return Brep.CreateFromSurface(surface);
+          return surface;
         }
 
         return default;

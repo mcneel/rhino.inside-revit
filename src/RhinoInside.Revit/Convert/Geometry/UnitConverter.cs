@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Rhino;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
@@ -11,20 +12,23 @@ namespace RhinoInside.Revit.Convert.Geometry
   /// Represents a converter for converting measurable values back and forth
   /// the Revit internal unit system and a external Rhino unit system.
   /// </summary>
-  public class UnitConverter
+  class UnitConverter
   {
     #region Default Instances
     /// <summary>
+    /// Identity <see cref="UnitConverter"/>.
+    /// </summary>
+    public static readonly UnitConverter Identity = new UnitConverter(UnitSystem.None);
+
+    /// <summary>
     /// Default <see cref="UnitConverter"/> for converting to and from Rhino model unit system.
     /// </summary>
-    public static UnitConverter Model = new UnitConverter
-      (() => RhinoDoc.ActiveDoc?.ModelUnitSystem ?? UnitSystem.Meters);
+    public static readonly UnitConverter Model = new UnitConverter(ActiveSpace.ModelSpace, default);
 
     /// <summary>
     /// Default <see cref="UnitConverter"/> for converting to and from Rhino page unit system.
     /// </summary>
-    public static UnitConverter Page = new UnitConverter
-      (() => RhinoDoc.ActiveDoc?.PageUnitSystem ?? UnitSystem.Millimeters);
+    public static readonly UnitConverter Page = new UnitConverter(ActiveSpace.PageSpace, default);
     #endregion
 
     #region Implementation Details
@@ -100,14 +104,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal const double NoScale = 1.0;
 
     /// <summary>
-    /// Factor for converting a value from Revit internal units to active Rhino document units.
+    /// Factor for converting a length from Revit internal units to active Rhino document units.
     /// </summary>
-    internal static double ToRhinoUnits => internalUnits[(int) Model.UnitSystem];
+    internal static double ToModelLength => internalUnits[(int) Model.UnitSystem];
 
     /// <summary>
-    /// Factor for converting a value from active Rhino document units to Revit internal units.
+    /// Factor for converting a length from active Rhino document units to Revit internal units.
     /// </summary>
-    internal static double ToHostUnits => 1.0 / internalUnits[(int) Model.UnitSystem];
+    internal static double ToInternalLength => 1.0 / internalUnits[(int) Model.UnitSystem];
     #endregion
 
     #region Static Methods
@@ -183,12 +187,34 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Methods
+    UnitConverter(Func<UnitSystem> unitSystem) => this.unitSystem = unitSystem;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="UnitConverter"/> class to the indicated unit system.
     /// </summary>
     /// <param name="unitSystem">A Rhino unit system to be used in conversions.</param>
-    public UnitConverter(UnitSystem unitSystem) => this.unitSystem = () => unitSystem;
-    UnitConverter(Func<UnitSystem> unitSystem) => this.unitSystem = unitSystem;
+    public UnitConverter(UnitSystem unitSystem)
+    {
+      if (unitSystem == UnitSystem.Unset || !Enum.IsDefined(typeof(UnitSystem), unitSystem))
+        throw new ArgumentOutOfRangeException(nameof(unitSystem));
+
+      this.unitSystem = () => unitSystem;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UnitConverter"/> class referencing the indicated Rhino document.
+    /// </summary>
+    /// <param name="space">A Rhino space to take unit system from.</param>
+    /// <param name="rhinoDoc">A Rhino document to be used in conversions, null to reference <see cref="RhinoDoc.ActiveDoc"/>.</param>
+    public UnitConverter(ActiveSpace space, RhinoDoc rhinoDoc = default)
+    {
+      switch (space)
+      {
+        case ActiveSpace.ModelSpace: unitSystem = () => (rhinoDoc ?? RhinoDoc.ActiveDoc)?.ModelUnitSystem ?? UnitSystem.Meters; break;
+        case ActiveSpace.PageSpace:  unitSystem = () => (rhinoDoc ?? RhinoDoc.ActiveDoc)?.PageUnitSystem  ?? UnitSystem.Millimeters; break;
+        default: throw new ArgumentOutOfRangeException(nameof(space));
+      }
+    }
 
     /// <summary>
     /// External unit system used to convert.
@@ -228,12 +254,12 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     internal double ConvertFromInternalUnits(double value, EDBS.SpecType spec)
     {
-      return Convert(value, spec, UnitSystem, InternalUnitSystem);
+      return Convert(value, spec, InternalUnitSystem, UnitSystem);
     }
 
     internal double ConvertToInternalUnits(double value, EDBS.SpecType spec)
     {
-      return Convert(value, spec, InternalUnitSystem, UnitSystem);
+      return Convert(value, spec, UnitSystem, InternalUnitSystem);
     }
     #endregion
   }
@@ -412,40 +438,40 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     #region InRhinoUnits
     public static Interval InRhinoUnits(this Interval value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Point3f InRhinoUnits(this Point3f value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Point3d InRhinoUnits(this Point3d value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Vector3d InRhinoUnits(this Vector3d value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Vector3f InRhinoUnits(this Vector3f value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Transform InRhinoUnits(this Transform value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static BoundingBox InRhinoUnits(this BoundingBox value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Plane InRhinoUnits(this Plane value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Line InRhinoUnits(this Line value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Arc InRhinoUnits(this Arc value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Circle InRhinoUnits(this Circle value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     public static Ellipse InRhinoUnits(this Ellipse value)
-    { Scale(ref value, UnitConverter.ToRhinoUnits); return value; }
+    { Scale(ref value, UnitConverter.ToModelLength); return value; }
 
     /// <summary>
     /// Duplicates and scales <paramref name="value"/> to be stored in Acitve Rhino document units.
@@ -454,7 +480,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value"></param>
     /// <returns>Returns a scaled duplicate of the input <paramref name="value"/> in Active Rhino document units.</returns>
     public static G InRhinoUnits<G>(this G value) where G : GeometryBase
-    { Scale(value = (G) value.Duplicate(), UnitConverter.ToRhinoUnits); return value; }
+    { Scale(value = (G) value.Duplicate(), UnitConverter.ToModelLength); return value; }
 
     internal static double InRhinoUnits(double value, EDBS.SpecType spec) =>
       InOtherUnits(value, spec, UnitConverter.InternalUnitSystem, UnitConverter.Model.UnitSystem);
@@ -470,40 +496,40 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     #region InHostUnits
     public static Interval InHostUnits(this Interval value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Point3f InHostUnits(this Point3f value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Point3d InHostUnits(this Point3d value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Vector3d InHostUnits(this Vector3d value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Vector3f InHostUnits(this Vector3f value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Transform InHostUnits(this Transform value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static BoundingBox InHostUnits(this BoundingBox value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Plane InHostUnits(this Plane value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Line InHostUnits(this Line value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Arc InHostUnits(this Arc value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Circle InHostUnits(this Circle value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     public static Ellipse InHostUnits(this Ellipse value)
-    { Scale(ref value, UnitConverter.ToHostUnits); return value; }
+    { Scale(ref value, UnitConverter.ToInternalLength); return value; }
 
     /// <summary>
     /// Duplicates and scales <paramref name="value"/> to be stored Revit internal units.
@@ -512,7 +538,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="value"></param>
     /// <returns>Returns a duplicate of <paramref name="value"/> in Revit internal units.</returns>
     public static G InHostUnits<G>(this G value) where G : GeometryBase
-    { Scale(value = (G) value.Duplicate(), UnitConverter.ToHostUnits); return value; }
+    { Scale(value = (G) value.Duplicate(), UnitConverter.ToInternalLength); return value; }
 
     internal static double InHostUnits(double value, EDBS.SpecType spec) =>
       InOtherUnits(value, spec, UnitConverter.Model.UnitSystem, UnitConverter.InternalUnitSystem);
@@ -525,5 +551,87 @@ namespace RhinoInside.Revit.Convert.Geometry
       return InOtherUnits(value, spec, rhinoDoc.ModelUnitSystem, UnitConverter.InternalUnitSystem);
     }
     #endregion
+  }
+
+  /// <summary>
+  /// Tolerance values to be used on <see cref="Autodesk.Revit.DB.GeometryObject"/> instances.
+  /// </summary>
+  readonly struct GeometryObjectTolerance
+  {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GeometryObjectTolerance"/> using to the indicated unit system.
+    /// </summary>
+    /// <param name="unitSystem">A <see cref="Rhino.UnitSystem"/> to be used in conversions.</param>
+    public GeometryObjectTolerance(UnitSystem unitSystem)
+    {
+      if (unitSystem == UnitSystem.None)
+      {
+        AngleTolerance = Internal.AngleTolerance;
+        VertexTolerance = Internal.VertexTolerance;
+        ShortCurveTolerance = Internal.ShortCurveTolerance;
+      }
+      else
+      {
+        AngleTolerance = Internal.AngleTolerance;
+        VertexTolerance = UnitConverter.ConvertFromInternalUnits(Internal.VertexTolerance, unitSystem);
+        ShortCurveTolerance = UnitConverter.ConvertFromInternalUnits(Internal.ShortCurveTolerance, unitSystem);
+      }
+    }
+
+    internal GeometryObjectTolerance(double angle, double vertex, double curve)
+    {
+      AngleTolerance = angle;
+      VertexTolerance = vertex;
+      ShortCurveTolerance = curve;
+    }
+
+    /// <summary>
+    /// Angle tolerance.
+    /// </summary>
+    /// <remarks>
+    /// Value is in radians. Two angle measurements closer than this value are considered identical.
+    /// </remarks>
+    public readonly double AngleTolerance;
+
+    /// <summary>
+    /// Vertex tolerance.
+    /// </summary>
+    /// <remarks>
+    /// Two points within this distance are considered coincident.
+    /// </remarks>
+    public readonly double VertexTolerance;
+
+    /// <summary>
+    /// Curve length tolerance
+    /// </summary>
+    /// <remarks>
+    /// A curve shorter than this distance is considered degenerated.
+    /// </remarks>
+    public readonly double ShortCurveTolerance;
+
+    // Initialized to NaN to notice if Internal is used before is assigned.
+    //
+    //private const double AbsoluteTolerance = (1.0 / 12.0) / 16.0; // 1/16″ in feet
+    //public static GeometryObjectTolerance Internal { get; internal set; } = new GeometryObjectTolerance
+    //(
+    //  angle:  Math.PI / 1800.0, // 0.1° in rad,
+    //  vertex: AbsoluteTolerance / 10.0,
+    //  curve:  AbsoluteTolerance / 2.0
+    //);
+
+    /// <summary>
+    /// Default <see cref="GeometryObjectTolerance"/> to be used on <see cref="Autodesk.Revit.DB.GeometryObject"/> instances.
+    /// </summary>
+    public static GeometryObjectTolerance Internal  { get; internal set; } = new GeometryObjectTolerance(double.NaN, double.NaN, double.NaN);
+
+    /// <summary>
+    /// Default <see cref="GeometryObjectTolerance"/> expresed in Rhino model unit system.
+    /// </summary>
+    public static GeometryObjectTolerance Model     => new GeometryObjectTolerance(UnitConverter.Model.UnitSystem);
+
+    /// <summary>
+    /// Default <see cref="GeometryObjectTolerance"/> expresed in Rhino page unit system.
+    /// </summary>
+    public static GeometryObjectTolerance Page      => new GeometryObjectTolerance(UnitConverter.Page.UnitSystem);
   }
 }

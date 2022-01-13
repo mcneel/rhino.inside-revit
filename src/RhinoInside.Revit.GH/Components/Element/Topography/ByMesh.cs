@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     )
     {
       mesh = mesh.InHostUnits();
-      while (mesh.CollapseFacesByEdgeLength(false, Revit.VertexTolerance) > 0) ;
+      while (mesh.CollapseFacesByEdgeLength(false, GeometryObjectTolerance.Internal.VertexTolerance) > 0) ;
       mesh.Vertices.CombineIdentical(true, true);
       mesh.Vertices.CullUnused();
 

@@ -63,6 +63,7 @@ namespace RhinoInside.Revit.Convert.System.Windows.Media
     /// </example>
     /// <param name="color">Revit color to convert.</param>
     /// <returns>System color that is equivalent to the provided Revit color.</returns>
+    /// <since>1.0</since>
     public static Color ToColor(this ARDB.Color color)
     {
       return color.IsValid ?
@@ -124,6 +125,7 @@ namespace RhinoInside.Revit.Convert.System.Windows.Media
     /// </example>
     /// <param name="color">System color to convert.</param>
     /// <returns>Revit color that is equivalent to the provided System color.</returns>
+    /// <since>1.0</since>
     public static ARDB.Color ToColor(this Color color)
     {
       return color.B == 0 && color.G == 0 && color.R == 0 && color.A == 0 ?

@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
       if(host.GetSketch() is ARDB.Sketch sketch)
       {
         DA.SetData("Plane", sketch.SketchPlane.GetPlane().ToPlane());
-        DA.SetDataList("Profile", sketch.Profile.ToPolyCurves());
+        DA.SetDataList("Profile", sketch.Profile.ToCurveMany());
       }
     }
   }

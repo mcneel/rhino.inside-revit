@@ -1,31 +1,32 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Events;
-using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using Microsoft.Win32.SafeHandles;
-using RhinoInside.Revit.Convert.Geometry;
+using ARAS = Autodesk.Revit.ApplicationServices;
+using ARDB = Autodesk.Revit.DB;
+using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit
 {
+  /// <summary>
+  /// Provides a set of static (Shared in Visual Basic) methods for accessing Revit API from Rhino.Inside.
+  /// </summary>
   public static partial class Revit
   {
-    internal static Result OnStartup()
+    internal static ARUI.Result OnStartup()
     {
       if (MainWindow.IsZero)
       {
         var result = Core.CheckSetup();
-        if (result != Result.Succeeded)
+        if (result != ARUI.Result.Succeeded)
           return result;
 
         MainWindow = new WindowHandle(Core.Host.MainWindowHandle);
 
         try   { result = Rhinoceros.Startup(); }
-        catch { result = Result.Failed; }
+        catch { result = ARUI.Result.Failed; }
 
-        if (result != Result.Succeeded)
+        if (result != ARUI.Result.Succeeded)
         {
           MainWindow = WindowHandle.Zero;
           return result;
@@ -38,10 +39,10 @@ namespace RhinoInside.Revit
         Core.CurrentStatus = Core.Status.Ready;
       }
 
-      return Result.Succeeded;
+      return ARUI.Result.Succeeded;
     }
 
-    internal static Result Shutdown()
+    internal static ARUI.Result Shutdown()
     {
       Rhinoceros.Shutdown();
 
@@ -54,13 +55,13 @@ namespace RhinoInside.Revit
         MainWindow.SetHandleAsInvalid();
       }
 
-      return Result.Succeeded;
+      return ARUI.Result.Succeeded;
     }
 
     static bool isRefreshActiveViewPending = false;
     internal static void RefreshActiveView() => isRefreshActiveViewPending = true;
 
-    static void OnIdle(object sender, IdlingEventArgs args)
+    static void OnIdle(object sender, ARUI.Events.IdlingEventArgs args)
     {
       if (Core.CurrentStatus > Core.Status.Available)
       {
@@ -69,8 +70,8 @@ namespace RhinoInside.Revit
       }
     }
 
-    internal static event EventHandler<DocumentChangedEventArgs> DocumentChanged;
-    private static void OnDocumentChanged(object sender, DocumentChangedEventArgs args)
+    internal static event EventHandler<ARDB.Events.DocumentChangedEventArgs> DocumentChanged;
+    private static void OnDocumentChanged(object sender, ARDB.Events.DocumentChangedEventArgs args)
     {
       var document = args.GetDocument();
       if (document.Equals(ActiveDBDocument))
@@ -80,7 +81,7 @@ namespace RhinoInside.Revit
     }
 
     #region Idling Actions
-    private static Queue<Action> idlingActions = new Queue<Action>();
+    private static readonly Queue<Action> idlingActions = new Queue<Action>();
     internal static void EnqueueIdlingAction(Action action)
     {
       lock (idlingActions)
@@ -131,14 +132,14 @@ namespace RhinoInside.Revit
       return pendingIdleActions;
     }
 
-    static Queue<Action<Document, bool>> docReadActions = new Queue<Action<Document, bool>>();
-    internal static void EnqueueReadAction(Action<Document, bool> action)
+    static readonly Queue<Action<ARDB.Document, bool>> docReadActions = new Queue<Action<ARDB.Document, bool>>();
+    internal static void EnqueueReadAction(Action<ARDB.Document, bool> action)
     {
       lock (docReadActions)
         docReadActions.Enqueue(action);
     }
 
-    internal static void CancelReadActions() => ProcessReadActions(true);
+    static void CancelReadActions() => ProcessReadActions(true);
     static bool ProcessReadActions(bool cancel = false)
     {
       lock (docReadActions)
@@ -169,18 +170,37 @@ namespace RhinoInside.Revit
     #region Public Properties
     internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
 
-    public static Autodesk.Revit.UI.UIApplication                 ActiveUIApplication => Core.Host.Value as Autodesk.Revit.UI.UIApplication;
-    public static Autodesk.Revit.ApplicationServices.Application  ActiveDBApplication => ActiveUIApplication?.Application;
+    /// <summary>
+    /// Gets the active <see cref="ARUI.UIApplication"/> in the current UI session.
+    /// </summary>
+    /// <remarks>
+    /// Provides access to windows, documents, events used at UI level.
+    /// </remarks>
+    /// <since>1.0</since>
+    public static ARUI.UIApplication ActiveUIApplication => Core.Host.Value as ARUI.UIApplication;
 
-    public static Autodesk.Revit.UI.UIDocument                    ActiveUIDocument => ActiveUIApplication?.ActiveUIDocument;
-    public static Autodesk.Revit.DB.Document                      ActiveDBDocument => ActiveUIDocument?.Document;
+    /// <summary>
+    /// Gets the active <see cref="ARAS.Application"/> in the current DB session.
+    /// </summary>
+    /// <remarks>
+    /// Provides access to tolerances, documents, events used at databse level.
+    /// </remarks>
+    /// <since>1.0</since>
+    public static ARAS.Application ActiveDBApplication => ActiveUIApplication?.Application;
 
-    private const double AbsoluteTolerance                        = (1.0 / 12.0) / 16.0; // 1/16″ in feet
-    public static double AngleTolerance                           => ActiveDBApplication?.AngleTolerance       ?? Math.PI / 1800.0; // 0.1° in rad
-    public static double ShortCurveTolerance                      => ActiveDBApplication?.ShortCurveTolerance  ?? AbsoluteTolerance / 2.0;
-    public static double VertexTolerance                          => ActiveDBApplication?.VertexTolerance      ?? AbsoluteTolerance / 10.0;
+    /// <summary>
+    /// Gets the active <see cref="ARUI.UIDocument"/> in the Revit UI.
+    /// </summary>
+    /// <since>1.0</since>
+    public static ARUI.UIDocument ActiveUIDocument => ActiveUIApplication?.ActiveUIDocument;
 
-    public static double ModelUnits                               => UnitConverter.ToRhinoUnits; // 1 feet in Rhino units
+    /// <summary>
+    /// Gets the active <see cref="ARDB.Document"/> in the Revit UI.
+    /// </summary>
+    /// <since>1.0</since>
+    public static ARDB.Document ActiveDBDocument => ActiveUIDocument?.Document;
+
+    internal static double ModelUnits => Convert.Geometry.UnitConverter.ToModelLength; // 1 feet in Rhino model units
     #endregion
   }
 }

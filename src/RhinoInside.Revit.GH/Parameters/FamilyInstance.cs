@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
   }
 
-  public class Panel : GraphicalElementT<Types.Panel, ARDB.Panel>
+  public class Panel : GraphicalElementT<Types.Panel, ARDB.FamilyInstance>
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("CEF5DD61-BC7D-4E66-AE94-E990B193ACDC");
@@ -53,6 +53,9 @@ namespace RhinoInside.Revit.GH.Parameters
       subcategory: "Revit Primitives"
     )
     { }
+
+    public override bool AllowElement(ARDB.Element elem) => Types.Panel.IsValidElement(elem);
+
   }
 
   public class FamilySymbol : ElementType<Types.IGH_FamilySymbol, ARDB.FamilySymbol>

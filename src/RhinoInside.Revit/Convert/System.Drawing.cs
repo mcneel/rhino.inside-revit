@@ -63,6 +63,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </example>
     /// <param name="color">Revit color to convert.</param>
     /// <returns>System color that is equivalent to the provided Revit color.</returns>
+    /// <since>1.0</since>
     public static Color ToColor(this ARDB.Color color)
     {
       return color.IsValid ?
@@ -124,6 +125,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </example>
     /// <param name="color">System color to convert.</param>
     /// <returns>Revit color that is equivalent to the provided System color.</returns>
+    /// <since>1.0</since>
     public static ARDB.Color ToColor(this Color color)
     {
       return color.ToArgb() == 0 ?
@@ -191,6 +193,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </example>
     /// <param name="color">Revit color to convert.</param>
     /// <returns>System color that is equivalent to the provided Revit color.</returns>
+    /// <since>1.1</since>
     public static Color ToColor(this ARDB.ColorWithTransparency color)
     {
       return color.IsValidObject ?
@@ -252,6 +255,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </example>
     /// <param name="color">System color to convert.</param>
     /// <returns>Revit color that is equivalent to the provided System color.</returns>
+    /// <since>1.1</since>
     public static ARDB.ColorWithTransparency ToColorWithTransparency(this Color color)
     {
       return new ARDB.ColorWithTransparency(color.R, color.G, color.B, 0xFFu - color.A);
@@ -317,6 +321,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </example>
     /// <param name="rectangle">System rectangle to convert.</param>
     /// <returns>Revit rectangle that is equivalent to the provided System rectangle.</returns>
+    /// <since>1.0</since>
     public static Rectangle ToRectangle(this ARDB.Rectangle rectangle)
     {
       return new Rectangle(rectangle.Left, rectangle.Top, rectangle.Right - rectangle.Left, rectangle.Bottom - rectangle.Top);
@@ -376,6 +381,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// </example>
     /// <param name="rectangle">System rectangle to convert.</param>
     /// <returns>Revit rectangle that is equivalent to the provided System rectangle.</returns>
+    /// <since>1.0</since>
     public static ARDB.Rectangle ToRectangle(this Rectangle rectangle)
     {
       return new ARDB.Rectangle(rectangle.Left, rectangle.Top, rectangle.Right, rectangle.Bottom);

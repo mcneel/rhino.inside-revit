@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
                       ToGeometryBaseMany().
                       OfType<Brep>().
                       Where(x => !x.IsNullOrEmpty()).
-                      Convert(ElementGeometryComponent.ToGeometricGoo).
+                      Select(ElementGeometryComponent.ToGeometricGoo).
                       ToList();
 
                     geometries.AppendRange(list, path);
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
                     ToGeometryBaseMany().
                     OfType<Brep>().
                     Where(x => !x.IsNullOrEmpty()).
-                    Convert(ElementGeometryComponent.ToGeometricGoo).
+                    Select(ElementGeometryComponent.ToGeometricGoo).
                     ToList();
 
                   geometries.AppendRange(list, basePath);

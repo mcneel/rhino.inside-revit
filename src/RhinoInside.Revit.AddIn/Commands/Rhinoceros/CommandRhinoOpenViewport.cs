@@ -63,8 +63,8 @@ namespace RhinoInside.Revit.AddIn.Commands
         {
           cplane.Name = name;
           cplane.Plane = plane.ToPlane();
-          cplane.GridSpacing = spacing * Revit.ModelUnits;
-          cplane.SnapSpacing = spacing * Revit.ModelUnits;
+          cplane.GridSpacing = UnitConverter.Model.ConvertFromInternalUnits(spacing);
+          cplane.SnapSpacing = UnitConverter.Model.ConvertFromInternalUnits(spacing);
           var min = bboxUV.Min.ToPoint2d();
           min.X = Math.Round(min.X / cplane.GridSpacing) * cplane.GridSpacing;
           min.Y = Math.Round(min.Y / cplane.GridSpacing) * cplane.GridSpacing;

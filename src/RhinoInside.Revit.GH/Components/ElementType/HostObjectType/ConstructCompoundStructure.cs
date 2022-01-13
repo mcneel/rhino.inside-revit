@@ -98,8 +98,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
         {
           Name = "Sample Height",
           NickName = "SH",
-          Description = "Sample height of compound structure",
-          Optional = true
+          Description = "Sample height of compound structure"
         },
         ParamRelevance.Occasional
       ),
@@ -145,36 +144,26 @@ namespace RhinoInside.Revit.GH.Components.Hosts
       update |= Params.GetData(DA, "Sample Height", out double? sampleHeight);
       update |= Params.GetData(DA, "Cutoff Height", out double? cutoffHeight);
 
-      var structure = update ? new Types.CompoundStructure(doc) : default;
-
-      if(structure is object)
+      if(update)
       {
+        var structure = sampleHeight.HasValue ?
+          new Types.CompoundStructure(doc, sampleHeight.Value) :
+          new Types.CompoundStructure(doc);
+
         structure.SetLayers(exterior, core, interior);
+
         if(minThickness.HasValue) structure.SetWidth(minThickness.Value);
         structure.OpeningWrapping = openingWrapping;
         structure.EndCap = endCaps;
 
-        if (sampleHeight.HasValue)
-        {
-          if (structure.Value.IsVerticallyCompound)
-          {
-            var minSampleHeight = structure.Value?.MinimumSampleHeight ?? 0.0;
-            if (sampleHeight.Value < minSampleHeight)
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Sample Height value is below the minimum sample height");
-
-            structure.SampleHeight = Math.Max(minSampleHeight, sampleHeight.Value);
-          }
-          else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Sample Height is only valid for vertical compound structures");
-        }
-
         if (cutoffHeight.HasValue)
         {
           if (structure.Value.IsVerticallyCompound) structure.CutoffHeight = cutoffHeight;
-          else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Cutoff Height is only valid for vertical compound structures");
+          else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Cutoff Height is only valid on vertical compound structures, please input a valid Sample Height");
         }
-      };
 
-      DA.SetData("Structure", structure);
+        DA.SetData("Structure", structure);
+      };
     }
   }
 }

@@ -235,7 +235,7 @@ namespace RhinoInside.Revit
             return !add || pco.PointCloudGeometry.Count > 0;
 
           if (rhinoObject is CurveObject co)
-            return !add || !co.CurveGeometry.IsShort(Revit.ShortCurveTolerance * Revit.ModelUnits);
+            return !add || !co.CurveGeometry.IsShort(GeometryObjectTolerance.Model.ShortCurveTolerance);
 
           if (rhinoObject is MeshObject mo)
             return !add || mo.MeshGeometry.Faces.Count > 0;
@@ -424,7 +424,7 @@ namespace RhinoInside.Revit
       {
         try
         {
-          if (primitives == null)
+          if (primitives is null)
           {
             if (rhinoObject is PointObject pointObject)
             {
@@ -451,7 +451,7 @@ namespace RhinoInside.Revit
               var renderMeshes = rhinoObject.GetMeshes(MeshType.Render);
               if (renderMeshes?.Length > 0)
               {
-                int vertexCount = renderMeshes.Select((x) => x.Vertices.Count).Sum();
+                int vertexCount = renderMeshes.Sum(x => x.Vertices.Count);
 
                 if (vertexCount > VertexThreshold)
                 {
@@ -473,9 +473,12 @@ namespace RhinoInside.Revit
             }
           }
 
-          if (primitives != null)
+          if (primitives is object)
           {
-            ARDB.DirectContext3D.DrawContext.SetWorldTransform(ARDB.Transform.Identity.ScaleBasis(1.0 / Revit.ModelUnits));
+            ARDB.DirectContext3D.DrawContext.SetWorldTransform
+            (
+              ARDB.Transform.Identity.ScaleBasis(GeometryEncoder.ModelScaleFactor)
+            );
 
             foreach (var primitive in primitives)
             {

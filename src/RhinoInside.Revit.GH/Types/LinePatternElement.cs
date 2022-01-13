@@ -9,6 +9,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Line Pattern")]
@@ -154,7 +155,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.LinePatternElement linePattern)
         {
-          var factor = Convert.Geometry.UnitConverter.ToRhinoUnits;
+          var factor = GeometryDecoder.ModelScaleFactor;
 
           using (var pattern = linePattern.GetLinePattern())
           {
@@ -164,9 +165,9 @@ namespace RhinoInside.Revit.GH.Types
               {
                 switch (x.Type)
                 {
-                  case ARDB.LinePatternSegmentType.Dash: return x.Length * +factor;
+                  case ARDB.LinePatternSegmentType.Dash:  return x.Length * +factor;
                   case ARDB.LinePatternSegmentType.Space: return x.Length * -factor;
-                  case ARDB.LinePatternSegmentType.Dot: return 0.0;
+                  case ARDB.LinePatternSegmentType.Dot:   return 0.0;
                   default: throw new ArgumentOutOfRangeException();
                 }
               }
@@ -180,7 +181,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.LinePatternElement linePattern)
         {
-          var factor = Convert.Geometry.UnitConverter.ToHostUnits;
+          var factor = GeometryEncoder.ModelScaleFactor;
 
           using (var pattern = linePattern.GetLinePattern())
           {
@@ -192,9 +193,9 @@ namespace RhinoInside.Revit.GH.Types
                 (
                   x =>
                   {
-                    if (x < 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Space, -x * factor);
-                    if (x > 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Dash, +x * factor);
-                    if (x == 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Dot, 0.0);
+                    if (x  < 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Space, -x * factor);
+                    if (x  > 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Dash,  +x * factor);
+                    if (x == 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Dot,   0.0);
                     throw new ArgumentOutOfRangeException();
                   }
                 ).ToArray()

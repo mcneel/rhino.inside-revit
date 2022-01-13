@@ -265,11 +265,13 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (Curve.ProjectToPlane(curve, plane) is Curve p)
       {
-        if (p.TryGetLine(out var line, Revit.VertexTolerance * Revit.ModelUnits))
+        var tol = GeometryObjectTolerance.Model;
+
+        if (p.TryGetLine(out var line, tol.VertexTolerance))
           projected = line.ToLine();
-        else if (p.TryGetArc(plane, out var arc, Revit.VertexTolerance * Revit.ModelUnits))
+        else if (p.TryGetArc(plane, out var arc, tol.VertexTolerance))
           projected = arc.ToArc();
-        else if (p.TryGetEllipse(plane, out var ellipse, out var interval, Revit.VertexTolerance * Revit.ModelUnits))
+        else if (p.TryGetEllipse(plane, out var ellipse, out var interval, tol.VertexTolerance))
           projected = ellipse.ToCurve(interval);
         else
           projected = p.ToCurve();

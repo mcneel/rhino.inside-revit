@@ -24,27 +24,28 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.Architecture.BuildingPad pad && pad.GetSketch() is ARDB.Sketch sketch)
         {
-          var center = Point3d.Origin;
+          var center = ARDB.XYZ.Zero;
           var count = 0;
           foreach (var curveArray in sketch.Profile.Cast<ARDB.CurveArray>())
           {
             foreach (var curve in curveArray.Cast<ARDB.Curve>())
             {
               count++;
-              center += curve.Evaluate(0.0, normalized: true).ToPoint3d();
+              center += curve.Evaluate(0.0, normalized: true);
               count++;
-              center += curve.Evaluate(1.0, normalized: true).ToPoint3d();
+              center += curve.Evaluate(1.0, normalized: true);
             }
           }
           center /= count;
 
           if (pad.Document.GetElement(pad.LevelId) is ARDB.Level level)
-            center.Z = level.GetHeight() * Revit.ModelUnits;
+            center = new ARDB.XYZ(center.X, center.Y, level.GetHeight());
 
-          center.Z += Revit.ModelUnits * pad.get_Parameter(ARDB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
+          if (pad.get_Parameter(ARDB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM) is ARDB.Parameter heightAboveLevel)
+            center = new ARDB.XYZ(center.X, center.Y, center.Z + heightAboveLevel.AsDouble());
 
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
-          var origin = center;
+          var origin = center.ToPoint3d();
           var xAxis = plane.XAxis;
           var yAxis = plane.YAxis;
 

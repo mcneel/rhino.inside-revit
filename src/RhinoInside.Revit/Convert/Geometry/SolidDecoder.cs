@@ -17,9 +17,11 @@ namespace RhinoInside.Revit.Convert.Geometry
   {
     static IEnumerable<Curve> ToCurveMany(IEnumerable<ARDB.CurveLoop> loops)
     {
+      var tol = GeometryObjectTolerance.Internal;
+
       foreach (var loop in loops)
       {
-        var curves = Curve.JoinCurves(loop.Select(x => Raw.RawDecoder.ToRhino(x)), Revit.ShortCurveTolerance, false);
+        var curves = Curve.JoinCurves(loop.Select(x => Raw.RawDecoder.ToRhino(x)), tol.ShortCurveTolerance, false);
         if (curves.Length != 1)
           throw new ConversionException("Failed to found one and only one closed loop.");
 
@@ -48,11 +50,12 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static Brep TrimFaces(Brep brep, IEnumerable<Curve> loops)
     {
+      var tol = GeometryObjectTolerance.Internal;
       var brepFaces = new List<Brep>();
 
       foreach (var brepFace in brep?.Faces ?? Enumerable.Empty<BrepFace>())
       {
-        var trimmedBrep = brepFace.Split(loops, Revit.VertexTolerance);
+        var trimmedBrep = brepFace.Split(loops, tol.VertexTolerance);
 
         if (trimmedBrep is object)
         {
@@ -68,7 +71,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             {
               var midPoint = edge.PointAt(edge.Domain.Mid);
 
-              var midPointOnAnyLoop = loops.Where(x => x.ClosestPoint(midPoint, out var _, Revit.VertexTolerance)).Any();
+              var midPointOnAnyLoop = loops.Where(x => x.ClosestPoint(midPoint, out var _, tol.VertexTolerance)).Any();
               if (!midPointOnAnyLoop)
               {
                 trimmedBrep.Faces.RemoveAt(trimmedFace.FaceIndex);
@@ -92,7 +95,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
 
           if (!trimmedBrep.IsValid)
-            trimmedBrep.Repair(Revit.VertexTolerance);
+            trimmedBrep.Repair(tol.VertexTolerance);
 
           trimmedBrep.Compact();
           brepFaces.Add(trimmedBrep);
@@ -101,7 +104,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       return brepFaces.Count == 0 ?
              brep.DuplicateBrep() :
-             JoinAndMerge(brepFaces, Revit.VertexTolerance);
+             JoinAndMerge(brepFaces, tol.VertexTolerance);
     }
 
     internal static Brep ToBrep(ARDB.Face face)
@@ -131,7 +134,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         Cast<ARDB.Face>().
         Select(x => ToBrep(x)).
         ToArray(),
-        Revit.VertexTolerance
+        GeometryObjectTolerance.Internal.VertexTolerance
       );
     }
   }

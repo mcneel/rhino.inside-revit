@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
@@ -8,27 +9,28 @@ namespace RhinoInside.Revit.GH.Components.Walls
   {
     public override Guid ComponentGuid => new Guid("66A9F189-D2BD-4E47-8C97-A469E3DD861B");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
-    protected override string IconTag => "ACGMT";
+    protected override string IconTag => "AMT";
 
-    public AnalyzeCurtainGridMullionType() : base(
+    public AnalyzeCurtainGridMullionType() : base
+    (
       name: "Analyze Mullion Type",
       nickname: "A-MT",
       description: "Analyze given mullion type",
       category: "Revit",
       subCategory: "Wall"
     )
-    {
-    }
+    { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(
+      manager.AddParameter
+      (
         param: new Parameters.ElementType(),
         name: "Mullion Type",
         nickname: "CGMT",
         description: "Curtain Grid Mullion Type",
         access: GH_ParamAccess.item
-        );
+      );
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
@@ -215,9 +217,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
       var radiusParam = mullionType.get_Parameter(ARDB.BuiltInParameter.CIRC_MULLION_RADIUS);
       if (radiusParam != null)
       {
-        var radius = radiusParam.AsDouble() * Revit.ModelUnits;
+        var radius = radiusParam.AsGoo() as GH_Number;
         DA.SetData("Radius", radius);
-        DA.SetData("Thickness", radius * 2.0);
+        DA.SetData("Thickness", radius.Value * 2.0);
       }
     }
   }

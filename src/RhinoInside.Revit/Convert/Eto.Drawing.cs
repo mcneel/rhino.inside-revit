@@ -59,7 +59,8 @@ namespace RhinoInside.Revit.Convert.Eto.Drawing
     ///
     /// </example>
     /// <param name="color">Revit color to convert.</param>
-    /// <returns>Eto color that is equivalent to the provided Revit color.</returns>
+    /// <returns>An Eto color that is equivalent to the provided Revit color.</returns>
+    /// <since>1.0</since>
     public static Color ToColor(this ARDB.Color color)
     {
       return color.IsValid ?
@@ -117,7 +118,8 @@ namespace RhinoInside.Revit.Convert.Eto.Drawing
     ///
     /// </example>
     /// <param name="color">Eto color to convert.</param>
-    /// <returns>Revit color that is equivalent to the provided Eto color.</returns>
+    /// <returns>A Revit color that is equivalent to the provided Eto color.</returns>
+    /// <since>1.0</since>
     public static ARDB::Color ToColor(this Color color)
     {
       return color.ToArgb() == 0 ?

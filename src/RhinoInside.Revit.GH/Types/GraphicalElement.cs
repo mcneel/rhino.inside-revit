@@ -246,7 +246,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
       {
-        var surface = Surface;
+        var surface = TrimmedSurface;
         if (surface is null)
           return false;
 
@@ -256,11 +256,11 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
       {
-        var surface = Surface;
-        if (surface is null)
+        var brep = PolySurface;
+        if (brep is null)
           return false;
 
-        target = (Q) (object) new GH_Brep(surface);
+        target = (Q) (object) new GH_Brep(brep);
         return true;
       }
 
@@ -490,7 +490,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public virtual Brep Surface => null;
+    public virtual Surface Surface => null;
+    public virtual Brep TrimmedSurface => Brep.CreateFromSurface(Surface);
+    public virtual Brep PolySurface => TrimmedSurface;
     #endregion
 
     #region Flip

@@ -57,16 +57,17 @@ namespace RhinoInside.Revit.GH.Components.Grids
       SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.GridType, nameof(type));
       if (name.HasValue && name.Value == default) return;
 
+      var tol = GeometryObjectTolerance.Model;
       if
       (
-        !(curve.IsLinear(Revit.VertexTolerance * Revit.ModelUnits) || curve.IsArc(Revit.VertexTolerance * Revit.ModelUnits)) ||
-        !curve.TryGetPlane(out var axisPlane, Revit.VertexTolerance * Revit.ModelUnits) ||
-        axisPlane.ZAxis.IsParallelTo(Vector3d.ZAxis, Revit.AngleTolerance) == 0
+        !(curve.IsLinear(tol.VertexTolerance) || curve.IsArc(tol.VertexTolerance)) ||
+        !curve.TryGetPlane(out var axisPlane, tol.VertexTolerance) ||
+        axisPlane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
       )
         ThrowArgumentException(nameof(curve), "Curve must be a horizontal line or arc curve.");
 
       var newGrid = grid;
-      if (curve.TryGetLine(out var line, Revit.VertexTolerance * Revit.ModelUnits))
+      if (curve.TryGetLine(out var line, tol.VertexTolerance))
       {
         var newLine = line.ToLine();
         if
@@ -77,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components.Grids
         )
           newGrid = ARDB.Grid.Create(document, line.ToLine());
       }
-      else if (curve.TryGetArc(out var arc, Revit.VertexTolerance * Revit.ModelUnits))
+      else if (curve.TryGetArc(out var arc, tol.VertexTolerance))
       {
         var newArc = arc.ToArc();
         if

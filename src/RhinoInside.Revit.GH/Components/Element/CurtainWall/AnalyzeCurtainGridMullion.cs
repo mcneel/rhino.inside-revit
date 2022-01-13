@@ -1,7 +1,5 @@
 using System;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
@@ -11,15 +9,15 @@ namespace RhinoInside.Revit.GH.Components.Walls
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "ACGM";
 
-    public AnalyzeCurtainGridMullion() : base(
+    public AnalyzeCurtainGridMullion() : base
+    (
       name: "Analyze Mullion",
       nickname: "A-M",
       description: "Analyze given mullion element",
       category: "Revit",
       subCategory: "Wall"
     )
-    {
-    }
+    { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
@@ -65,29 +63,18 @@ namespace RhinoInside.Revit.GH.Components.Walls
       //  description: "Whether curtain grid mullion line is lockable",
       //  access: GH_ParamAccess.item
       //  );
-      //manager.AddNumberParameter(
-      //  name: "Mullion Length",
-      //  nickname: "L",
-      //  description: "Mullion Length",
-      //  access: GH_ParamAccess.item
-      //  );
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // get input
-      ARDB.Mullion mullionInstance = default;
-      if (!DA.GetData("Mullion", ref mullionInstance))
+      if (!Params.GetData(DA, "Mullion", out Types.Mullion mullion, x => x.IsValid))
         return;
 
-      DA.SetData("Type", Types.ElementType.FromElement(mullionInstance.MullionType));
-      DA.SetData("Axis Curve", mullionInstance.LocationCurve?.ToCurve());
-      DA.SetData("Base Point", ((ARDB.LocationPoint) mullionInstance.Location).Point.ToPoint3d());
-      //DA.SetData("Locked", mullionInstance.Lock);
-      //DA.SetData("Lockable", mullionInstance.Lockable);
-      // Length can be acquired from axis curve
-      // Conversion to GH_Curve results in a zero length curve
-      //PipeHostParameter(DA, mullionInstance, DB.BuiltInParameter.CURVE_ELEM_LENGTH, "Mullion Length");
+      DA.SetData("Type", mullion.Type);
+      DA.SetData("Axis Curve", mullion.Curve);
+      DA.SetData("Base Point", mullion.Location.Origin);
+      //DA.SetData("Locked", mullion.Value?.Lock);
+      //DA.SetData("Lockable", mullion.Value?.Lockable);
     }
   }
 }

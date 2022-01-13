@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.Convert.Geometry
   /// </summary>
   static class ShapeEncoder
   {
-    public static ARDB.GeometryObject[] ToShape(this GeometryBase geometry) => ToShape(geometry, UnitConverter.ToHostUnits);
+    public static ARDB.GeometryObject[] ToShape(this GeometryBase geometry) => ToShape(geometry, GeometryEncoder.ModelScaleFactor);
     internal static ARDB.GeometryObject[] ToShape(this GeometryBase geometry, double factor)
     {
       switch (geometry)
@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           return new ARDB.Point[] { point.ToPoint(factor) };
 
         case PointCloud pointCloud:
-          return pointCloud.ToPoints(factor);
+          return pointCloud.Select(x => x.ToPoint(factor)).ToArray();
 
         case Curve curve:
           return curve.ToCurveMany(factor).SelectMany(x => x.ToBoundedCurves()).ToArray();

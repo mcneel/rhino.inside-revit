@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -6,7 +7,6 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.Convert.DocObjects
 {
   using Convert.Geometry;
-  using Convert.System.Collections.Generic;
   using Convert.System.Drawing;
   using External.DB.Extensions;
   using External.UI.Extensions;
@@ -94,9 +94,9 @@ namespace RhinoInside.Revit.Convert.DocObjects
       public double NearDistance      = double.NaN;
       public double FarDistance       = double.NaN;
       public double TargetDistance    = double.NaN;
-      public ARDB.XYZ EyePosition       = ARDB.XYZ.Zero;
-      public ARDB.XYZ ViewDirection     = ARDB.XYZ.BasisZ;
-      public ARDB.XYZ UpDirection       = ARDB.XYZ.BasisY;
+      public ARDB.XYZ EyePosition     = ARDB.XYZ.Zero;
+      public ARDB.XYZ ViewDirection   = ARDB.XYZ.BasisZ;
+      public ARDB.XYZ UpDirection     = ARDB.XYZ.BasisY;
     }
 
     public static bool TryGetViewportInfo(this ARDB.View view, bool useUIView, out ViewportInfo vport)
@@ -143,7 +143,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
               var nearPlane = new Plane(origin - zDirection * near, xDirection, yDirection);
               double left = double.PositiveInfinity, right = double.NegativeInfinity;
               double bottom = double.PositiveInfinity, top = double.NegativeInfinity;
-              foreach (var corner in uiView.GetZoomCorners().Convert(GeometryDecoder.ToPoint3d))
+              foreach (var corner in uiView.GetZoomCorners().Select(GeometryDecoder.ToPoint3d))
               {
                 nearPlane.ClosestParameter(corner, out var u, out var v);
 

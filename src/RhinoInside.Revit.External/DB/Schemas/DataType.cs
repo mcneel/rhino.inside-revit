@@ -77,6 +77,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
 
     static readonly DataType empty = new DataType();
     public static DataType Empty => empty;
+    public static bool IsNullOrEmpty(DataType value) => string.IsNullOrEmpty(value?.id);
 
     public DataType() => id = string.Empty;
     public DataType(string typeId) => id = typeId;
