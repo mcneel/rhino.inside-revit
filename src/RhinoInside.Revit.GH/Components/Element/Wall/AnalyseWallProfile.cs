@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {

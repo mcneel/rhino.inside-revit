@@ -24,8 +24,10 @@ namespace Autodesk.Revit.UI
     /// </summary>
     public static void Highlight(this RibbonItem item, bool updated = false)
     {
+#if REVIT_2018
       if (GetAdwndRibbonItem(item) is ADW.RibbonItem ribbonItem)
         ribbonItem.Highlight = updated ? ADIW.HighlightMode.Updated : ADIW.HighlightMode.New;
+#endif
     }
 
     /// <summary>
@@ -33,8 +35,10 @@ namespace Autodesk.Revit.UI
     /// </summary>
     public static void ClearHighlight(this RibbonItem item)
     {
+#if REVIT_2018
       if (GetAdwndRibbonItem(item) is ADW.RibbonItem ribbonItem)
         ribbonItem.Highlight = ADIW.HighlightMode.None;
+#endif
     }
 
     public static void SetMinWidth(this RibbonItem item, int value)

@@ -15,6 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
   using Convert.System.Drawing;
   using External.DB.Extensions;
   using GH.ElementTracking;
+  using External.ApplicationServices.Extensions;
 
   public class MaterialByColor : ElementTrackerComponent
   {
@@ -209,6 +210,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
     #region AppearanceAssetElement
     bool Reuse(ARDB.AppearanceAssetElement assetElement, string name, GH_Material template)
     {
+#if REVIT_2018
       if (assetElement is null) return false;
       if (name is object) assetElement.Name = name;
 
@@ -243,6 +245,9 @@ namespace RhinoInside.Revit.GH.Components.Materials
       }
 
       return true;
+#else
+      return false;
+#endif
     }
 
     ARDB.AppearanceAssetElement CreateAppearanceAsset(ARDB.Document doc, string name, GH_Material template)
@@ -261,7 +266,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
       }
 
       var assets = doc.Application.GetAssets(AssetType.Appearance);
-      var asset = assets.Where(x => x.Name == "Generic").FirstOrDefault();
+      var asset = assets.FirstOrDefault(x => x.Name == "Generic");
       assetElement = ARDB.AppearanceAssetElement.Create(doc, name, asset);
 
       Reuse(assetElement, default, template);

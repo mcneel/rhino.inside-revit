@@ -108,6 +108,7 @@ namespace RhinoInside.Revit.Convert.Render
       return renderMaterial;
     }
 
+#if REVIT_2018
     class BasicMaterialParameters
     {
       public RenderMaterial.PreviewGeometryType PreviewGeometryType = RenderMaterial.PreviewGeometryType.Scene;
@@ -1319,5 +1320,6 @@ namespace RhinoInside.Revit.Convert.Render
       material.PolishAmount = polish;
       material.ClarityAmount = 1.0;
     }
+#endif
   }
 }

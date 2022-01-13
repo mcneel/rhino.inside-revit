@@ -481,8 +481,10 @@ namespace RhinoInside.Revit.GH.Components.Families
       switch (doc.Application.Language)
       {
         case Autodesk.Revit.ApplicationServices.LanguageType.English_USA:
+#if REVIT_2018
         case Autodesk.Revit.ApplicationServices.LanguageType.English_GB:
-          switch (doc.DisplayUnitSystem)
+#endif
+        switch (doc.DisplayUnitSystem)
           {
             case ARDB.DisplayUnit.METRIC:   folderName = "English";           return true;
             case ARDB.DisplayUnit.IMPERIAL: folderName = "English-Imperial";  return true;
@@ -517,7 +519,9 @@ namespace RhinoInside.Revit.GH.Components.Families
           switch (doc.Application.Language)
           {
             case Autodesk.Revit.ApplicationServices.LanguageType.English_USA:
+#if REVIT_2018
             case Autodesk.Revit.ApplicationServices.LanguageType.English_GB:
+#endif
               switch (doc.DisplayUnitSystem)
               {
                 case ARDB.DisplayUnit.METRIC:   return @"Conceptual Mass\Metric Mass";
@@ -546,7 +550,9 @@ namespace RhinoInside.Revit.GH.Components.Families
       switch (doc.Application.Language)
       {
         case Autodesk.Revit.ApplicationServices.LanguageType.English_USA:
+#if REVIT_2018
         case Autodesk.Revit.ApplicationServices.LanguageType.English_GB:
+#endif
           switch (doc.DisplayUnitSystem)
           {
             case ARDB.DisplayUnit.METRIC:   return @"Metric Generic Model";

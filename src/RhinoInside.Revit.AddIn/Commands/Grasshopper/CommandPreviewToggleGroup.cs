@@ -30,6 +30,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     private static void Grasshopper_AssemblyActivated(object sender, AssemblyLoadEventArgs args)
     {
+#if REVIT_2018
       if (RestoreButton(CommandName) is RadioButtonGroup radioButton)
       {
         switch (GH.PreviewServer.PreviewMode)
@@ -39,6 +40,7 @@ namespace RhinoInside.Revit.AddIn.Commands
           case GH_PreviewMode.Shaded:    radioButton.Current = RestoreButton(CommandGrasshopperPreviewShaded.CommandName) as ToggleButton;    break;
         }
       }
+#endif
     }
 
     /// <summary>

@@ -71,9 +71,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
   {
     internal static Schemas.UnitType GetUnitTypeId(this Autodesk.Revit.DB.Parameter value) => value.DisplayUnitType;
     internal static Schemas.UnitType GetUnitTypeId(this Autodesk.Revit.DB.FamilyParameter value) => value.DisplayUnitType;
-    internal static Schemas.UnitType GetUnitTypeId(this Autodesk.Revit.DB.Visual.AssetPropertyDistance value) => value.DisplayUnitType;
     internal static Schemas.UnitType GetUnitTypeId(this Autodesk.Revit.DB.FormatOptions value) => value.DisplayUnits;
     internal static Schemas.UnitType GetUnitTypeId(this Autodesk.Revit.DB.FamilySizeTableColumn value) => value.DisplayUnitType;
+#if REVIT_2018
+    internal static Schemas.UnitType GetUnitTypeId(this Autodesk.Revit.DB.Visual.AssetPropertyDistance value) => value.DisplayUnitType;
+#else
+    internal static Schemas.UnitType GetUnitTypeId(this Autodesk.Revit.Utility.AssetPropertyDistance value) => value.DisplayUnitType;
+#endif
   }
 }
 #endif

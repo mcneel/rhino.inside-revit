@@ -368,11 +368,13 @@ namespace RhinoInside.Revit.GH
 #else
 namespace RhinoInside.Revit.GH
 {
-  public class PreviewServer
+  internal class PreviewServer
   {
     public void Register() { }
 
     public void Unregister() { }
+
+    public static readonly Grasshopper.Kernel.GH_PreviewMode PreviewMode = Grasshopper.Kernel.GH_PreviewMode.Disabled;
   }
 }
 #endif

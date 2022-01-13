@@ -1213,7 +1213,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 #if REVIT_2018
       return ARDB.Ellipse.CreateCurve(ellipse.Plane.Origin.ToXYZ(factor), ellipse.Radius1 * factor, ellipse.Radius2 * factor, ellipse.Plane.XAxis.ToXYZ(), ellipse.Plane.YAxis.ToXYZ(), interval.Min, interval.Max);
 #else
-      return DB.Ellipse.Create(ellipse.Plane.Origin.ToXYZ(factor), ellipse.Radius1 * factor, ellipse.Radius2 * factor, ellipse.Plane.XAxis.ToXYZ(), ellipse.Plane.YAxis.ToXYZ(), interval.Min, interval.Max);
+      return ARDB.Ellipse.Create(ellipse.Plane.Origin.ToXYZ(factor), ellipse.Radius1 * factor, ellipse.Radius2 * factor, ellipse.Plane.XAxis.ToXYZ(), ellipse.Plane.YAxis.ToXYZ(), interval.Min, interval.Max);
 #endif
     }
     #endregion

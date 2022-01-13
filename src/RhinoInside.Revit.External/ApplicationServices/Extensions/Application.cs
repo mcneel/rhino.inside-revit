@@ -27,9 +27,9 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
     }
 
 #if !REVIT_2018
-    public static IList<Autodesk.Revit.Utility.Asset> GetAssets(this Application app, Autodesk.Revit.Utility.AssetType assetType)
+    public static IEnumerable<Autodesk.Revit.Utility.Asset> GetAssets(this Application app, Autodesk.Revit.Utility.AssetType assetType)
     {
-      return new Autodesk.Revit.Utility.Asset[0];
+      return app.get_Assets(assetType).Cast<Autodesk.Revit.Utility.Asset>();
     }
 
     public static AppearanceAssetElement Duplicate(this AppearanceAssetElement element, string name)
@@ -93,6 +93,15 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
         }
       }
     }
+
+    internal static string GetSubVersionNumber(this Application app)
+    {
+#if REVIT_2018
+      return app.SubVersionNumber;
+#else
+      return $"{app.VersionNumber}.0";
+#endif
+    }
   }
 
   static class ControlledApplicationExtension
@@ -118,6 +127,10 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
       catch (System.MissingMemberException) { return $"{app.VersionNumber}.0"; }
     }
 
+#if REVIT_2018
     static string InternalGetSubVersionNumber(ControlledApplication app) => app.SubVersionNumber;
+#else
+    static string InternalGetSubVersionNumber(ControlledApplication app) => $"{app.VersionNumber}.0";
+#endif
   }
 }

@@ -4,6 +4,8 @@ using Autodesk.Revit.ApplicationServices;
 
 namespace RhinoInside.Revit.External.ApplicationServices
 {
+  using Extensions;
+
   #region HostServices
   public abstract class HostServices : IDisposable
   {
@@ -80,7 +82,7 @@ namespace RhinoInside.Revit.External.ApplicationServices
     public override string VersionName => _app.VersionName;
     public override string VersionNumber => _app.VersionNumber;
     public override string VersionBuild => _app.VersionBuild;
-    public override string SubVersionNumber => _app.SubVersionNumber;
+    public override string SubVersionNumber => _app.GetSubVersionNumber();
 
     public override ProductType Product => _app.Product;
     public override LanguageType Language => _app.Language;
@@ -132,7 +134,7 @@ namespace RhinoInside.Revit.External.ApplicationServices
     public override string VersionName => _app.VersionName;
     public override string VersionNumber => _app.VersionNumber;
     public override string VersionBuild => _app.VersionBuild;
-    public override string SubVersionNumber => _app.SubVersionNumber;
+    public override string SubVersionNumber => _app.GetSubVersionNumber();
 
     public override ProductType Product => _app.Product;
     public override LanguageType Language => _app.Language;

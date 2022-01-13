@@ -934,10 +934,11 @@ namespace RhinoInside.Revit
 #else
 namespace RhinoInside.Revit
 {
-  public abstract class DirectContext3DServer
+  internal abstract class DirectContext3DServer
   {
     public static bool RegenComplete() => true;
     public static long RegenThreshold = 200;
+    public static bool IsAvailable(Autodesk.Revit.DB.View view) => false;
   }
 }
 #endif

@@ -4,6 +4,7 @@ using System.Text;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using static RhinoInside.Revit.Diagnostics;
 
 namespace RhinoInside.Revit.AddIn.Commands
@@ -36,7 +37,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       details.AppendLine($"Rhino: {rhino?.ProductVersion} ({rhino?.FileDescription ?? "not found"})");
 
       var revit = data.Application.Application;
-      details.AppendLine($"Revit: {revit.SubVersionNumber} ({revit.VersionBuild})");
+      details.AppendLine($"Revit: {revit.GetSubVersionNumber()} ({revit.VersionBuild})");
 
       details.AppendLine($"CLR: {ErrorReport.CLRVersion}");
       details.AppendLine($"OS: {Environment.OSVersion}");
