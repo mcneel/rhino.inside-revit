@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </code>
     /// </remarks>
     /// <since>1.4</since>
-    public static double ModelScaleFactor => 1.0 / UnitConverter.ToModelLength;
+    internal static double ModelScaleFactor => 1.0 / UnitConverter.ToModelLength;
     #endregion
 
     #region Length
