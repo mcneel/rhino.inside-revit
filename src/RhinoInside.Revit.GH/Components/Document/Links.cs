@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
@@ -8,7 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Documents
 {
-  [ComponentVersion(introduced: "1.0", updated: "1.5")]
+  [ComponentVersion(introduced: "1.0", updated: "1.4")]
   public class DocumentLinks : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("EBCCFDD8-9F3B-44F4-A209-72D06C8082A5");
@@ -38,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     public DocumentLinks() : base
     (
-      name: "Document Links",
+      name: "Query Document Links",
       nickname: "Links",
       description: "Gets Revit linked models into given document",
       category: "Revit",
