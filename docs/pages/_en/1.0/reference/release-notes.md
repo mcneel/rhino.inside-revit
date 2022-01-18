@@ -6,6 +6,18 @@ group: Deployment & Configs
 
 <!-- most recent release should be on top -->
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.4 RC6" version="v1.4.8048.43002" pre_release=true time="18/01/2022" %}
+
+- Added 'Link' output to 'Document Links' component.
+- Renamed 'Document Links' to 'Query Document Links'.
+- Ranamed 'Binding' to 'Scope' in parameter components.
+- Updated 'Element Dependents' to return original 'Elements' and also 'Referentials'.
+- Fixed 'Element Geometry' and 'Element View Geometry'.
+Now both have an option 'Expand Dependents' in the context menu to extract dependent elements geometry.
+Outputs are grafted accordingly.
+Closes #509.
+- Updated some 'Query' component input parameters names to match Revit parameter name.
+
 {% include ltr/release-header.html title="v1.4 RC5" version="v1.4.8007.15883" pre_release=true time="12/07/2021" %}
 
 - Continued work on {{ site.terms.rir }} API
