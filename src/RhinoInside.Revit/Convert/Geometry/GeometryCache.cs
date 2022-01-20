@@ -54,10 +54,53 @@ namespace RhinoInside.Revit.Convert.Geometry
       public bool Hit = false;
     }
 
-    struct HashComparer : IEqualityComparer<byte[]>
+    internal struct GeometrySignature : IEquatable<GeometrySignature>
     {
-      public bool Equals(byte[] x, byte[] y)
+      readonly byte[] hash;
+
+      internal GeometrySignature(GeometryBase geometry, double factor)
       {
+        using (var stream = new MemoryStream())
+        {
+          using (var writer = new BinaryWriter(stream))
+          {
+            switch (IntPtr.Size)
+            {
+              case sizeof(uint):  writer.Write((uint)  typeof(Brep).TypeHandle.Value); break;
+              case sizeof(ulong): writer.Write((ulong) typeof(Brep).TypeHandle.Value); break;
+              default: throw new NotImplementedException();
+            }
+
+            switch (geometry)
+            {
+              case Brep brep: Write(writer, brep, factor); break;
+              default: throw new NotImplementedException();
+            }
+
+            writer.Flush();
+          }
+
+          using (var sha1 = new SHA1Managed())
+            hash = sha1.ComputeHash(stream.GetBuffer());
+        }
+      }
+
+      public override string ToString()
+      {
+        var hex = new StringBuilder(hash.Length * 2);
+        foreach (var b in hash)
+          hex.AppendFormat("{0:x2}", b);
+
+        return hex.ToString();
+      }
+
+      public override bool Equals(object obj) => obj is GeometrySignature signature && Equals(signature);
+
+      public bool Equals(GeometrySignature other)
+      {
+        var x = hash;
+        var y = other.hash;
+
         if (ReferenceEquals(x, y)) return true;
         if (x is null || y is null) return false;
 
@@ -70,25 +113,129 @@ namespace RhinoInside.Revit.Convert.Geometry
         return true;
       }
 
-      public int GetHashCode(byte[] obj)
+      public override int GetHashCode()
       {
-        int hash = 0;
+        int code = 0;
 
-        if (obj is object)
+        if (hash is object)
         {
-          for (int i = 0; i < obj.Length; ++i)
+          for (int i = 0; i < hash.Length; ++i)
           {
-            var value = (int) obj[i];
-            hash ^= (value << 5) + value;
+            var value = (int) hash[i];
+            code ^= (value << 5) + value;
           }
         }
 
-        return hash;
+        return code;
+      }
+
+      public static bool operator false(GeometrySignature signature) => signature.hash is null;
+      public static bool operator true(GeometrySignature signature) => signature.hash is object;
+
+      public static implicit operator bool(GeometrySignature signature) => signature.hash is object;
+
+      static void Write(BinaryWriter writer, Brep brep, double factor)
+      {
+        var tol = GeometryObjectTolerance.Internal;
+        int    RoundNormalizedKnot(double value) => (int)    Math.Round(value * 1e+9);
+        double RoundWeight        (double value) => (double) Math.Round(value * 1e+9);
+        double RoundLength        (double value) => (double) Math.Round(value / tol.VertexTolerance);
+
+        IEnumerable<int> RoundCurveKnotList(Rhino.Geometry.Collections.NurbsCurveKnotList knots)
+        {
+          var count = knots.Count;
+          var min = knots[0];
+          var max = knots[count - 1];
+          var mid = 0.5 * (min + max);
+          var alpha = 1.0 / (max - min); // normalize factor
+
+          foreach (var k in knots)
+          {
+            double normalized = k <= mid ?
+              (k - min) * alpha + 0.0 :
+              (k - max) * alpha + 1.0;
+
+            yield return RoundNormalizedKnot(normalized);
+          }
+        }
+
+        IEnumerable<int> RoundSurfaceKnotList(Rhino.Geometry.Collections.NurbsSurfaceKnotList knots)
+        {
+          var count = knots.Count;
+          var min = knots[0];
+          var max = knots[count - 1];
+          var mid = 0.5 * (min + max);
+          var alpha = 1.0 / (max - min); // normalize factor
+
+          foreach (var k in knots)
+          {
+            double normalized = k <= mid ?
+              (k - min) * alpha + 0.0 :
+              (k - max) * alpha + 1.0;
+
+            yield return RoundNormalizedKnot(normalized);
+          }
+        }
+
+        writer.Write(brep.Faces.Count);
+        writer.Write(brep.Surfaces.Count);
+        writer.Write(brep.Edges.Count);
+        writer.Write(brep.Curves3D.Count);
+
+        foreach (var face in brep.Faces)
+          writer.Write(face.OrientationIsReversed);
+
+        foreach (var surface in brep.Surfaces)
+        {
+          var nurbs = surface as NurbsSurface ?? surface.ToNurbsSurface(tol.VertexTolerance * factor, out var _);
+          writer.Write(nurbs.OrderU);
+          writer.Write(nurbs.OrderV);
+          var rational = nurbs.IsRational;
+          writer.Write(nurbs.IsRational);
+          writer.Write(nurbs.Points.CountU);
+          writer.Write(nurbs.Points.CountV);
+          foreach (var point in nurbs.Points)
+          {
+            var location = point.Location;
+            writer.Write(RoundLength(location.X * factor));
+            writer.Write(RoundLength(location.Y * factor));
+            writer.Write(RoundLength(location.Z * factor));
+            if (rational) writer.Write(RoundWeight(point.Weight));
+          }
+
+          foreach (var knot in RoundSurfaceKnotList(nurbs.KnotsU)) writer.Write(knot);
+          foreach (var knot in RoundSurfaceKnotList(nurbs.KnotsV)) writer.Write(knot);
+        }
+
+        foreach (var edge in brep.Edges)
+        {
+          var normalizedDomain = edge.EdgeCurve.Domain.NormalizedIntervalAt(edge.Domain);
+          writer.Write(RoundNormalizedKnot(normalizedDomain.T0));
+          writer.Write(RoundNormalizedKnot(normalizedDomain.T1));
+        }
+
+        foreach (var curve in brep.Curves3D)
+        {
+          var nurbs = curve as NurbsCurve ?? curve.ToNurbsCurve();
+          writer.Write(nurbs.Order);
+          var rational = nurbs.IsRational;
+          writer.Write(nurbs.IsRational);
+          writer.Write(nurbs.Points.Count);
+          foreach (var point in nurbs.Points)
+          {
+            var location = point.Location;
+            writer.Write(RoundLength(location.X * factor));
+            writer.Write(RoundLength(location.Y * factor));
+            writer.Write(RoundLength(location.Z * factor));
+            if (rational) writer.Write(RoundWeight(point.Weight));
+          }
+          foreach (var knot in RoundCurveKnotList(nurbs.Knots)) writer.Write(knot);
+        }
       }
     }
 
-    static readonly Dictionary<byte[], SoftReference<ARDB.GeometryObject>> GeometryDictionary =
-      new Dictionary<byte[], SoftReference<ARDB.GeometryObject>>(default(HashComparer));
+    static readonly Dictionary<GeometrySignature, SoftReference<ARDB.GeometryObject>> GeometryDictionary =
+      new Dictionary<GeometrySignature, SoftReference<ARDB.GeometryObject>>();
 
     internal static void StartKeepAliveRegion()
     {
@@ -124,7 +271,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       // Collect unreferenced entries
       {
-        var purge = new List<byte[]>();
+        var purge = new List<GeometrySignature>();
         foreach (var entry in GeometryDictionary)
         {
           if (!entry.Value.IsAlive)
@@ -147,117 +294,27 @@ namespace RhinoInside.Revit.Convert.Geometry
 #endif
     }
 
-    internal static string HashToString(byte[] hash)
+    internal static void AddExistingGeometry(GeometrySignature signature, ARDB.GeometryObject value)
     {
-      var hex = new StringBuilder(hash.Length * 2);
-      foreach (var b in hash)
-        hex.AppendFormat("{0:x2}", b);
-
-      return hex.ToString();
-    }
-
-    static byte[] GetGeometryHashCode(GeometryBase geometry, double factor)
-    {
-      float Round(double value) => (float) (value * factor);
-      var tol = GeometryObjectTolerance.Internal;
-
-      using (var stream = new MemoryStream())
-      {
-        using (var writer = new BinaryWriter(stream))
-        {
-          switch (geometry)
-          {
-            case Brep brep:
-
-              writer.Write(typeof(Brep).Name);
-              writer.Write(brep.Faces.Count);
-              writer.Write(brep.Surfaces.Count);
-              writer.Write(brep.Edges.Count);
-              writer.Write(brep.Curves3D.Count);
-
-              foreach (var face in brep.Faces)
-                writer.Write(face.OrientationIsReversed);
-
-              foreach (var surface in brep.Surfaces)
-              {
-                var nurbs = surface as NurbsSurface ?? surface.ToNurbsSurface(tol.VertexTolerance * factor, out var accuracy);
-                writer.Write(nurbs.OrderU);
-                writer.Write(nurbs.OrderV);
-                var rational = nurbs.IsRational;
-                writer.Write(nurbs.IsRational);
-                writer.Write(nurbs.Points.CountU);
-                writer.Write(nurbs.Points.CountV);
-                foreach (var point in nurbs.Points)
-                {
-                  var location = point.Location;
-                  writer.Write(Round(location.X));
-                  writer.Write(Round(location.Y));
-                  writer.Write(Round(location.Z));
-                  if (rational) writer.Write(point.Weight);
-                }
-                foreach (var knot in nurbs.KnotsU) writer.Write(knot);
-                foreach (var knot in nurbs.KnotsV) writer.Write(knot);
-              }
-
-              foreach (var edge in brep.Edges)
-              {
-                var domain = edge.Domain;
-                writer.Write(domain.T0);
-                writer.Write(domain.T1);
-              }
-
-              foreach (var curve in brep.Curves3D)
-              {
-                var nurbs = curve as NurbsCurve ?? curve.ToNurbsCurve();
-                writer.Write(nurbs.Order);
-                var rational = nurbs.IsRational;
-                writer.Write(nurbs.IsRational);
-                writer.Write(nurbs.Points.Count);
-                foreach (var point in nurbs.Points)
-                {
-                  var location = point.Location;
-                  writer.Write(Round(location.X));
-                  writer.Write(Round(location.Y));
-                  writer.Write(Round(location.Z));
-                  if (rational) writer.Write(point.Weight);
-                }
-                foreach (var knot in nurbs.Knots) writer.Write(knot);
-              }
-
-              break;
-
-            default: throw new NotImplementedException();
-          }
-
-          writer.Flush();
-        }
-
-        using (var sha1 = new SHA1Managed())
-          return sha1.ComputeHash(stream.GetBuffer());
-      }
-    }
-
-    internal static void AddExistingGeometry(byte[] hash, ARDB.GeometryObject value)
-    {
-      if (hash is object && value is object) GeometryDictionary.Add
+      if (signature && value is object) GeometryDictionary.Add
       (
-        hash,
+        signature,
         new SoftReference<ARDB.GeometryObject>(value) { KeepAlive = true, Hit = true }
       );
     }
 
-    internal static bool TryGetExistingGeometry<R, T>(/*const*/ R key, double factor, out T value, out byte[] hash)
+    internal static bool TryGetExistingGeometry<R, T>(/*const*/ R key, double factor, out T value, out GeometrySignature signature)
       where R : GeometryBase
       where T : ARDB.GeometryObject
     {
       if (Policy == CachePolicy.Disabled)
       {
-        hash = default;
+        signature = default;
       }
       else
       {
-        hash = GetGeometryHashCode(key, factor);
-        if (GeometryDictionary.TryGetValue(hash, out var reference))
+        signature = new GeometrySignature(key, factor);
+        if (GeometryDictionary.TryGetValue(signature, out var reference))
         {
           reference.KeepAlive = true;
 
@@ -268,7 +325,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             return true;
           }
 
-          GeometryDictionary.Remove(hash);
+          GeometryDictionary.Remove(signature);
         }
       }
 

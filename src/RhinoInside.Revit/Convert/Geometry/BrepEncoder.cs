@@ -222,10 +222,10 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal static ARDB.Solid ToSolid(/*const*/Brep brep, double factor)
     {
       // Try on existing solids already in memory.
-      if (GeometryCache.TryGetExistingGeometry(brep, factor, out ARDB.Solid existing, out var hash))
+      if (GeometryCache.TryGetExistingGeometry(brep, factor, out ARDB.Solid existing, out var signature))
       {
 #if DEBUG
-        GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Using cached value {GeometryCache.HashToString(hash)}…", default);
+        GeometryEncoder.Context.Peek.RuntimeMessage(10, $"Using cached value {signature}…", default);
 #endif
         return AuditSolid(brep, existing);
       }
@@ -233,7 +233,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Try to convert...
       if (TryGetSolid(brep, factor, out var solid))
       {
-        GeometryCache.AddExistingGeometry(hash, solid);
+        GeometryCache.AddExistingGeometry(signature, solid);
 
         return AuditSolid(brep, solid);
       }
