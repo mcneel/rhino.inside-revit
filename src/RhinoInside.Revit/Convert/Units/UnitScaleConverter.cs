@@ -8,10 +8,10 @@ namespace RhinoInside.Revit.Convert.Units
 {
   using External.DB.Extensions;
 
-  static class UnitTypeConverter
+  static class UnitScaleConverter
   {
 #if DEBUG
-    static UnitTypeConverter()
+    static UnitScaleConverter()
     {
 #if REVIT_2021
       var lengthUnits = ARDB.UnitUtils.GetValidUnits(DBXS.SpecType.Measurable.Length);
