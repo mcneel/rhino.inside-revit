@@ -19,51 +19,19 @@ namespace RhinoInside.Revit.Convert.Units
     public static bool IsNaN(Ratio ratio) => double.IsNaN(ratio.Quotient);
     public static bool IsFinite(Ratio ratio)
     {
-      var quotient = ratio.Quotient;
-      return !double.IsNaN(quotient) && !double.IsInfinity(quotient);
+      return Math.Sign(ratio.Consequent / ratio.Antecedent) != 0;
     }
     public static bool IsNegative(Ratio ratio)
     {
-      var quotient = ratio.Quotient;
-      switch (Math.Sign(quotient))
-      {
-        case -1: return true;
-        case +1: return false;
-        default: return double.IsNegativeInfinity(1.0 / quotient);
-      }
+      return Math.Sign(ratio.Consequent / ratio.Antecedent) == -1;
     }
     public static bool IsPositive(Ratio ratio)
     {
-      var quotient = ratio.Quotient;
-      switch (Math.Sign(quotient))
-      {
-        case -1: return false;
-        case +1: return true;
-        default: return double.IsPositiveInfinity(1.0 / quotient);
-      }
+      return Math.Sign(ratio.Consequent / ratio.Antecedent) == +1;
     }
     public static bool IsInfinity(Ratio ratio) => double.IsInfinity(ratio.Quotient);
     public static bool IsPositiveInfinity(Ratio ratio) => double.IsPositiveInfinity(ratio.Quotient);
     public static bool IsNegativeInfinity(Ratio ratio) => double.IsNegativeInfinity(ratio.Quotient);
-
-    public static bool IsNegative(double value)
-    {
-      switch (Math.Sign(value))
-      {
-        case -1: return true;
-        case +1: return false;
-        default: return double.IsNegativeInfinity(1.0 / value);
-      }
-    }
-    public static bool IsPositive(double value)
-    {
-      switch (Math.Sign(value))
-      {
-        case -1: return false;
-        case +1: return true;
-        default: return double.IsPositiveInfinity(1.0 / value);
-      }
-    }
 
     #region Quotient & Remainder
     public double Quotient => Antecedent / Consequent;
@@ -118,7 +86,7 @@ namespace RhinoInside.Revit.Convert.Units
           if (double.IsPositiveInfinity(value)) return PositiveInfinity;
           break;
         default:
-          var reciprocal = Reciprocal(ratio).Quotient;
+          var reciprocal = ratio.Consequent / ratio.Antecedent;
           if (double.IsNegativeInfinity(reciprocal)) return new Ratio(-0.0);
           if (double.IsPositiveInfinity(reciprocal)) return new Ratio(+0.0);
           return NaN;
@@ -163,8 +131,7 @@ namespace RhinoInside.Revit.Convert.Units
         h2 = x * h1 + h0; h0 = h1; h1 = h2;
         k2 = x * k1 + k0; k0 = k1; k1 = k2;
 
-        var current = h1 / (double) k1;
-        if (current == value)
+        if (((double) h1 / (double) k1) == value)
           break;
       }
 
@@ -423,14 +390,10 @@ namespace RhinoInside.Revit.Convert.Units
       var den = F * t;
 
       // Multiply value by resulting ratio considering magnitude.
-#if NET5_0_OR_GREATER
-      return Math.MinMagnitude(num, value) * (Math.MaxMagnitude(num, value) / den);
-#else
       if (Math.Abs(num) < Math.Abs(value))
         return num * (value / den);
       else
         return value * (num / den);
-#endif
     }
 
     public override string ToString() => Name ?? ((UnitSystem) this).ToString();
