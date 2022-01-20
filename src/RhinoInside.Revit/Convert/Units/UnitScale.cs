@@ -17,18 +17,9 @@ namespace RhinoInside.Revit.Convert.Units
     public static readonly Ratio NaN = default;
 
     public static bool IsNaN(Ratio ratio) => double.IsNaN(ratio.Quotient);
-    public static bool IsFinite(Ratio ratio)
-    {
-      return Math.Sign(ratio.Consequent / ratio.Antecedent) != 0;
-    }
-    public static bool IsNegative(Ratio ratio)
-    {
-      return Math.Sign(ratio.Consequent / ratio.Antecedent) == -1;
-    }
-    public static bool IsPositive(Ratio ratio)
-    {
-      return Math.Sign(ratio.Consequent / ratio.Antecedent) == +1;
-    }
+    public static bool IsFinite(Ratio ratio) => Math.Sign(ratio.Consequent / ratio.Antecedent) != 0;
+    public static bool IsNegative(Ratio ratio) => Math.Sign(ratio.Consequent / ratio.Antecedent) == -1;
+    public static bool IsPositive(Ratio ratio) => Math.Sign(ratio.Consequent / ratio.Antecedent) == +1;
     public static bool IsInfinity(Ratio ratio) => double.IsInfinity(ratio.Quotient);
     public static bool IsPositiveInfinity(Ratio ratio) => double.IsPositiveInfinity(ratio.Quotient);
     public static bool IsNegativeInfinity(Ratio ratio) => double.IsNegativeInfinity(ratio.Quotient);
