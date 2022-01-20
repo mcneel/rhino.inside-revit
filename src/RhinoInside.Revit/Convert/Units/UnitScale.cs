@@ -12,8 +12,8 @@ namespace RhinoInside.Revit.Convert.Units
     public static readonly Ratio MinValue = new Ratio(double.MinValue);
     public static readonly Ratio MaxValue = new Ratio(double.MaxValue);
     public static readonly Ratio Epsilon = new Ratio(double.Epsilon);
-    public static readonly Ratio NegativeInfinity = new Ratio(+1.0, 0.0);
-    public static readonly Ratio PositiveInfinity = new Ratio(-1.0, 0.0);
+    public static readonly Ratio NegativeInfinity = new Ratio(-1.0, 0.0);
+    public static readonly Ratio PositiveInfinity = new Ratio(+1.0, 0.0);
     public static readonly Ratio NaN = default;
 
     public static bool IsNaN(Ratio ratio) => double.IsNaN(ratio.Quotient);
