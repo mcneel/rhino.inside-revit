@@ -16,6 +16,14 @@ namespace RhinoInside.Revit.GH.Parameters
     public Material() : base("Material", "Material", "Contains a collection of Revit material elements", "Params", "Revit Primitives") { }
 
     #region UI
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[]
+      {
+        "Colour", "Shader"
+      }
+    );
+
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalMenuItems(menu);

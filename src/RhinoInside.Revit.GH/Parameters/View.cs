@@ -20,6 +20,11 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override Types.IGH_View InstantiateT() => new Types.View();
 
     #region UI
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Plane", "Box", "Surface", "Shader" }
+    );
+
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalMenuItems(menu);

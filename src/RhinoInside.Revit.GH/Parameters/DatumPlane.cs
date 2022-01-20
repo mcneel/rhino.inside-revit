@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
@@ -103,6 +104,11 @@ namespace RhinoInside.Revit.GH.Parameters
     public Grid() : base("Grid", "Grid", "Contains a collection of Revit grid elements", "Params", "Revit Primitives") { }
 
     #region UI
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Curve", "Surface" }
+    );
+
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
       var Grid = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Grid);

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
@@ -55,6 +57,11 @@ namespace RhinoInside.Revit.GH.Parameters
     public CurtainGridLine() : base("Curtain Grid Line", "Curtain Grid Line", "Contains a collection of Revit curtain grid line elements", "Params", "Revit Primitives") { }
 
     #region UI
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Curve" }
+    );
+
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
       var CurtainGrid = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.CurtainGrid);
@@ -191,6 +198,11 @@ namespace RhinoInside.Revit.GH.Parameters
     public Wall() : base("Wall", "Wall", "Contains a collection of Revit wall elements", "Params", "Revit Primitives") { }
 
     #region UI
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Curve" }
+    );
+
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
       var create = Menu_AppendItem(menu, $"Set new {TypeName}");

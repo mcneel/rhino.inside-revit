@@ -32,7 +32,12 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("BC1B160A-DC04-4139-AB7D-1AECBDE7FF88");
     public Vertex() : base("Vertex", "Vertex", "Contains a collection of Revit vertices", "Params", "Revit Primitives") { }
 
-#region UI methods
+    #region UI methods
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Box", "Point" }
+    );
+
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Vertex> value)
     {
       var values = new List<Types.Vertex>();
@@ -76,7 +81,7 @@ namespace RhinoInside.Revit.GH.Parameters
       value = default;
       return GH_GetterResult.success;
     }
-#endregion
+    #endregion
   }
 
   public class Edge : GeometryObject<Types.Edge, ARDB.Edge>
@@ -85,7 +90,12 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("B79FD0FD-63AE-4776-A0A7-6392A3A58B0D");
     public Edge() : base("Edge", "Edge", "Contains a collection of Revit edges", "Params", "Revit Primitives") { }
 
-#region UI methods
+    #region UI methods
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Box", "Curve" }
+    );
+
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Edge> value)
     {
       var uiDocument = Revit.ActiveUIDocument;
@@ -122,7 +132,7 @@ namespace RhinoInside.Revit.GH.Parameters
       value = default;
       return GH_GetterResult.success;
     }
-#endregion
+    #endregion
   }
 
   public class Face : GeometryObject<Types.Face, ARDB.Face>
@@ -131,7 +141,12 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("759700ED-BC79-4986-A6AB-84921A7C9293");
     public Face() : base("Face", "Face", "Contains a collection of Revit faces", "Params", "Revit Primitives") { }
 
-#region UI methods
+    #region UI methods
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Box", "Surface", "Mesh" }
+    );
+
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Face> value)
     {
       var uiDocument = Revit.ActiveUIDocument;
@@ -168,6 +183,6 @@ namespace RhinoInside.Revit.GH.Parameters
       value = default;
       return GH_GetterResult.success;
     }
-#endregion
+    #endregion
   }
 }

@@ -99,17 +99,17 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_QuickCast
     Point3d IGH_QuickCast.QC_Pt()
     {
-      var location = Location;
-      if (location.IsValid)
-        return location.Origin;
+      var position = Position;
+      if (position.IsValid)
+        return position;
 
       throw new InvalidCastException();
     }
     Vector3d IGH_QuickCast.QC_Vec()
     {
-      var orientation = FacingOrientation;
-      if (orientation.IsValid)
-        return orientation;
+      var direction = Direction;
+      if (direction.IsValid)
+        return direction;
 
       throw new InvalidCastException();
     }
@@ -186,21 +186,31 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
       {
-        var location = Location.Origin;
-        if (!location.IsValid)
+        var position = Position;
+        if (!position.IsValid)
           return false;
 
-        target = (Q) (object) new GH_Point(location);
+        target = (Q) (object) new GH_Point(position);
         return true;
       }
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Vector)))
       {
-        var orientation = FacingOrientation;
-        if (!orientation.IsValid || orientation.IsZero)
+        var direction = Direction;
+        if (!direction.IsValid || direction.IsZero)
           return false;
 
-        target = (Q) (object) new GH_Vector(orientation);
+        target = (Q) (object) new GH_Vector(direction);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
+      {
+        var curve = Curve;
+        if (!curve.IsValid || curve.IsClosed)
+          return false;
+
+        target = (Q) (object) new GH_Line(new Line(curve.PointAtStart, curve.PointAtEnd));
         return true;
       }
 
@@ -463,9 +473,14 @@ namespace RhinoInside.Revit.GH.Types
       };
     }
 
-    public virtual Vector3d FacingOrientation => Location.YAxis;
+    public virtual Point3d Position => Curve is Curve curve ?
+    curve.PointAtStart : Location.Origin;
+    public virtual Vector3d Direction => Curve is Curve curve ?
+    curve.PointAtEnd - curve.PointAtStart : PlaneOrientation;
 
     public virtual Vector3d HandOrientation => Location.XAxis;
+    public virtual Vector3d FacingOrientation => Location.YAxis;
+    public virtual Vector3d PlaneOrientation => Location.ZAxis;
 
     public virtual Curve Curve
     {

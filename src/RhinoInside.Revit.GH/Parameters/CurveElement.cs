@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
@@ -10,5 +12,11 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
 
     public CurveElement() : base("Curve Element", "Curve", "Contains a collection of Revit curve elements", "Params", "Revit Primitives") { }
+    #region UI
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Curve" }
+    );
+    #endregion
   }
 }

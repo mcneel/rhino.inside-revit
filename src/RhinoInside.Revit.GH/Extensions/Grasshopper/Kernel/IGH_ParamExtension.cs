@@ -11,6 +11,11 @@ using Grasshopper.Kernel.Types;
 
 namespace Grasshopper.Kernel
 {
+  interface IGH_ConvertibleParam
+  {
+    IEnumerable<string> ConvertsTo { get; }
+  }
+
   static class IGH_DocumentObjectExtension
   {
     public static IGH_DocumentObject GetTopLevelObject(this IGH_DocumentObject docObject)
@@ -213,6 +218,42 @@ namespace Grasshopper.Kernel
       };
 
       Menu_AppendConnect(param, menu, DefaultConnectMenuHandler);
+    }
+
+    public static void Menu_AppendConvert(this IGH_Param param, ToolStripDropDown menu)
+    {
+      if (param is IGH_ConvertibleParam convertible)
+      {
+        EventHandler ConverMenuHandler = (sender, e) =>
+        {
+          if (sender is ToolStripMenuItem item && item.Tag is Guid componentGuid)
+          {
+            var obj = Instances.ComponentServer.EmitObject(componentGuid);
+            if (obj is null)
+              return;
+
+            if (param.ConnectNewObject(obj))
+              obj.ExpireSolution(true);
+          }
+        };
+
+        if ((param.Kind == GH_ParamKind.floating || param.Kind == GH_ParamKind.output))
+        {
+          var parameters = convertible.ConvertsTo.Distinct().
+          Select(x => Instances.ComponentServer.FindObjectByName(x, ignoreWhiteSpace: false, ignoreCapitalisation: false)).
+          Where(x => x.SDKCompliant && !x.Obsolete && x.Exposure != GH_Exposure.hidden && typeof(IGH_Param).IsAssignableFrom(x.Type));
+
+          if (parameters.Any())
+          {
+            var convert = GH_DocumentObject.Menu_AppendItem(menu, "Convert") as ToolStripMenuItem;
+            foreach (var parameter in parameters.OrderBy(x => x.Desc.Name).OrderBy(x => x.Exposure))
+            {
+              var item = GH_DocumentObject.Menu_AppendItem(convert.DropDown, parameter.Desc.Name, ConverMenuHandler, parameter.Icon);
+              item.Tag = parameter.Guid;
+            }
+          }
+        }
+      }
     }
 
     internal static IGH_Param CreateTwin(this IGH_Param param)

@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Parameters
   }
 
   [ComponentVersion(introduced: "0.0", updated: "1.3")]
-  public abstract class PersistentParam<T> : GH_PersistentParam<T>, IGH_InitCodeAware, IGH_PersistentStateAwareObject
+  public abstract class PersistentParam<T> : GH_PersistentParam<T>, IGH_InitCodeAware, IGH_PersistentStateAwareObject, IGH_ConvertibleParam
     where T : class, IGH_Goo
   {
     protected override /*sealed*/ Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
@@ -268,6 +268,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       Menu_AppendWireDisplay(menu);
       this.Menu_AppendConnect(menu);
+      this.Menu_AppendConvert(menu);
       Menu_AppendDisconnectWires(menu);
 
       Menu_AppendPreProcessParameter(menu);
@@ -361,6 +362,11 @@ namespace RhinoInside.Revit.GH.Parameters
 
       return base.Prompt_ManageCollection(values);
     }
+    #endregion
+
+    #region IGH_ConvertibleParam
+    IEnumerable<string> IGH_ConvertibleParam.ConvertsTo => ConvertsTo;
+    protected virtual IEnumerable<string> ConvertsTo => Enumerable.Empty<string>();
     #endregion
 
     #region IGH_PersistentStateAwareObject

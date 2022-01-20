@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
@@ -37,6 +39,13 @@ namespace RhinoInside.Revit.GH.Parameters
       subcategory: "Revit Primitives"
     )
     { }
+
+    #region UI
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Curve" }
+    );
+    #endregion
   }
 
   public class Panel : GraphicalElementT<Types.Panel, ARDB.FamilyInstance>
