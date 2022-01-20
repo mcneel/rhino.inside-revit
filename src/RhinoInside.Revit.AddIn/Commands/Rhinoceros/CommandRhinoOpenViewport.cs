@@ -8,6 +8,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 {
   using Convert.DocObjects;
   using Convert.Geometry;
+  using Convert.Units;
   using External.DB.Extensions;
 
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
@@ -39,10 +40,11 @@ namespace RhinoInside.Revit.AddIn.Commands
       if (ctrlIsPressed && data.View.TryGetViewportInfo(useUIView: true, out var vport))
       {
         var rhinoDoc = Rhino.RhinoDoc.ActiveDoc;
+        var modelScale = UnitScale.GetModelScale(rhinoDoc);
         bool imperial = rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Feet || rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Inches;
         var spacing = imperial ?
-        UnitConverter.Convert(1.0, Rhino.UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
-        UnitConverter.Convert(1.0, Rhino.UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
+        UnitScale.Convert(1.0, UnitScale.Yards, modelScale) :
+        UnitScale.Convert(1.0, UnitScale.Meters, modelScale);
 
         var cplane = new Rhino.DocObjects.ConstructionPlane()
         {
@@ -63,8 +65,8 @@ namespace RhinoInside.Revit.AddIn.Commands
         {
           cplane.Name = name;
           cplane.Plane = plane.ToPlane();
-          cplane.GridSpacing = UnitConverter.Model.ConvertFromInternalUnits(spacing);
-          cplane.SnapSpacing = UnitConverter.Model.ConvertFromInternalUnits(spacing);
+          cplane.GridSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
+          cplane.SnapSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
           var min = bboxUV.Min.ToPoint2d();
           min.X = Math.Round(min.X / cplane.GridSpacing) * cplane.GridSpacing;
           min.Y = Math.Round(min.Y / cplane.GridSpacing) * cplane.GridSpacing;

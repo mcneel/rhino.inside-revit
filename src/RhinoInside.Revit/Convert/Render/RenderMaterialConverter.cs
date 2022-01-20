@@ -19,6 +19,8 @@ namespace RhinoInside.Revit.Convert.Render
   using Convert.System.Drawing;
   using Convert.Units;
   using External.DB.Extensions;
+  using RhinoInside.Revit.Convert.Geometry;
+  using DBXS = External.DB.Schemas;
 
   /// <summary>
   /// Represents a converter for converting <see cref="RenderMaterial"/> values
@@ -224,18 +226,24 @@ namespace RhinoInside.Revit.Convert.Render
       if (asset.FindByName(UnifiedBitmap.TextureWAngle) is AssetPropertyDouble angle)
         texture.Rotation = RhinoMath.ToRadians(angle.Value);
 
+      var activeModelScale = UnitScale.GetModelScale(RhinoDoc.ActiveDoc);
+
       var offset = Rhino.Geometry.Vector2d.Zero;
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetX) is AssetPropertyDistance offsetX)
-        offset.X = ARDB.UnitUtils.Convert(offsetX.Value, offsetX.GetUnitTypeId(), RhinoDoc.ActiveDoc.ModelUnitSystem.ToUnitType());
+        offset.X = ARDB.UnitUtils.Convert(offsetX.Value, offsetX.GetUnitTypeId(), DBXS.UnitType.Meters) /
+                   activeModelScale;
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetY) is AssetPropertyDistance offsetY)
-        offset.Y = ARDB.UnitUtils.Convert(offsetY.Value, offsetY.GetUnitTypeId(), RhinoDoc.ActiveDoc.ModelUnitSystem.ToUnitType());
+        offset.Y = ARDB.UnitUtils.Convert(offsetY.Value, offsetY.GetUnitTypeId(), DBXS.UnitType.Meters) /
+                   activeModelScale;
       texture.Offset = offset;
 
       var repeat = new Rhino.Geometry.Vector2d(1.0, 1.0);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleX) is AssetPropertyDistance scaleX)
-        repeat.X = 1.0 / ARDB.UnitUtils.Convert(scaleX.Value, scaleX.GetUnitTypeId(), RhinoDoc.ActiveDoc.ModelUnitSystem.ToUnitType());
+        repeat.X = activeModelScale /
+                   ARDB.UnitUtils.Convert(scaleX.Value, scaleX.GetUnitTypeId(), DBXS.UnitType.Meters);
       if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleY) is AssetPropertyDistance scaleY)
-        repeat.Y = 1.0 / ARDB.UnitUtils.Convert(scaleY.Value, scaleY.GetUnitTypeId(), RhinoDoc.ActiveDoc.ModelUnitSystem.ToUnitType());
+        repeat.Y = activeModelScale /
+                   ARDB.UnitUtils.Convert(scaleY.Value, scaleY.GetUnitTypeId(), DBXS.UnitType.Meters);
       texture.Repeat = repeat;
 
       return texture;

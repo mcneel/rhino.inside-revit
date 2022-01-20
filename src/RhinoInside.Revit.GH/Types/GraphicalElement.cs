@@ -8,6 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using Convert.Units;
   using External.DB.Extensions;
 
   /// <summary>
@@ -459,12 +460,12 @@ namespace RhinoInside.Revit.GH.Types
       {
         Plane = location,
         GridSpacing = imperial ?
-        UnitConverter.Convert(1.0, Rhino.UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
-        UnitConverter.Convert(1.0, Rhino.UnitSystem.Meters, rhinoDoc.ModelUnitSystem),
+        UnitScale.Convert(1.0, UnitScale.Yards, UnitScale.GetModelScale(rhinoDoc)) :
+        UnitScale.Convert(1.0, UnitScale.Meters ,UnitScale.GetModelScale(rhinoDoc)),
 
         SnapSpacing = imperial ?
-        UnitConverter.Convert(1.0, Rhino.UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
-        UnitConverter.Convert(1.0, Rhino.UnitSystem.Meters, rhinoDoc.ModelUnitSystem),
+        UnitScale.Convert(1.0, UnitScale.Yards, UnitScale.GetModelScale(rhinoDoc)) :
+        UnitScale.Convert(1.0, UnitScale.Meters, UnitScale.GetModelScale(rhinoDoc)),
 
         GridLineCount = 70,
         ThickLineFrequency = imperial ? 6 : 5,

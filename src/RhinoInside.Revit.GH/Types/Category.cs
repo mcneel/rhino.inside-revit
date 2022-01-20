@@ -9,6 +9,7 @@ using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Units;
   using Convert.System.Drawing;
   using External.DB.Extensions;
 
@@ -261,7 +262,7 @@ namespace RhinoInside.Revit.GH.Types
       if (!value.HasValue) return -1.0;
 
       if (0 < value.Value && value.Value < PlotWeights.Length)
-        return Convert.Geometry.UnitConverter.Convert(PlotWeights[value.Value], Rhino.UnitSystem.Inches, Rhino.UnitSystem.Millimeters);
+        return UnitScale.Convert(PlotWeights[value.Value], UnitScale.Inches, UnitScale.Millimeters);
 
       return 0.0;
     }

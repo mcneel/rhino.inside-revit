@@ -8,6 +8,7 @@ using Microsoft.Win32.SafeHandles;
 using Rhino;
 using Rhino.Commands;
 using Rhino.Display;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using Rhino.Input;
 using Rhino.PlugIns;
@@ -392,7 +393,7 @@ namespace RhinoInside.Revit
       if (doc is object)
       {
         var revitTol = GeometryObjectTolerance.Internal;
-        var maxDistanceTolerance = UnitConverter.ConvertFromInternalUnits(revitTol.VertexTolerance, doc.ModelUnitSystem);
+        var maxDistanceTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, UnitScale.GetModelScale(doc));
         if (doc.ModelAbsoluteTolerance > maxDistanceTolerance)
           doc.ModelAbsoluteTolerance = maxDistanceTolerance;
 
@@ -411,13 +412,13 @@ namespace RhinoInside.Revit
       {
         var revitTol = GeometryObjectTolerance.Internal;
         var units = revitDoc.GetUnits();
-        var RevitModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
-        var GrasshopperModelUnitSystem = GH.Guest.ModelUnitSystem != UnitSystem.Unset ? GH.Guest.ModelUnitSystem : doc.ModelUnitSystem;
-        if (doc.ModelUnitSystem != RevitModelUnitSystem || doc.ModelUnitSystem != GrasshopperModelUnitSystem)
+        var RevitModelUnitScale = units.ToUnitScale(out var distanceDisplayPrecision);
+        var GrasshopperModelUnitScale = GH.Guest.ModelUnitScale != UnitScale.Unset ? GH.Guest.ModelUnitScale : UnitScale.GetModelScale(doc);
+        if (UnitScale.GetModelScale(doc) != RevitModelUnitScale || UnitScale.GetModelScale(doc) != GrasshopperModelUnitScale)
         {
           var hasUnits = doc.ModelUnitSystem != UnitSystem.Unset && doc.ModelUnitSystem != UnitSystem.None;
           var expandedContent = doc.IsOpening ?
-            $"The Rhino model you are opening is in {doc.ModelUnitSystem}{Environment.NewLine}Revit document '{revitDoc.Title}' length units are {RevitModelUnitSystem}" :
+            $"The Rhino model you are opening is in {UnitScale.GetModelScale(doc)}{Environment.NewLine}Revit document '{revitDoc.Title}' length units are {RevitModelUnitScale}" :
             string.Empty;
 
           using
@@ -428,7 +429,7 @@ namespace RhinoInside.Revit
               TitleAutoPrefix = true,
               AllowCancellation = hasUnits,
               MainInstruction = hasUnits ? (doc.IsOpening ? "Model units mismatch." : "Model units mismatch warning.") : "Rhino model has no units.",
-              MainContent = doc.IsOpening ? "What units do you want to use?" : $"Revit document '{revitDoc.Title}' length units are {RevitModelUnitSystem}." + (hasUnits ? $"{Environment.NewLine}Rhino is working in {doc.ModelUnitSystem}." : string.Empty),
+              MainContent = doc.IsOpening ? "What units do you want to use?" : $"Revit document '{revitDoc.Title}' length units are {RevitModelUnitScale}." + (hasUnits ? $"{Environment.NewLine}Rhino is working in {doc.ModelUnitSystem}." : string.Empty),
               ExpandedContent = expandedContent,
               FooterText = "Current version: " + Core.DisplayVersion
             }
@@ -445,7 +446,7 @@ namespace RhinoInside.Revit
             }
             else
             {
-              taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink2, $"Use {RevitModelUnitSystem} like Revit", $"Scale Rhino model by {UnitConverter.Convert(1.0, doc.ModelUnitSystem, RevitModelUnitSystem)}");
+              taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink2, $"Use {RevitModelUnitScale} like Revit", $"Scale Rhino model by {UnitScale.Convert(1.0, UnitScale.GetModelScale(doc), RevitModelUnitScale)}");
               taskDialog.DefaultButton = ARUI.TaskDialogResult.CommandLink2;
             }
 
@@ -463,12 +464,12 @@ namespace RhinoInside.Revit
               }
             }
 
-            if (GH.Guest.ModelUnitSystem != UnitSystem.Unset)
+            if (GH.Guest.ModelUnitScale != UnitScale.Unset)
             {
-              taskDialog.ExpandedContent += $"{Environment.NewLine}Documents opened in Grasshopper were working in {GH.Guest.ModelUnitSystem}";
-              if (GrasshopperModelUnitSystem != doc.ModelUnitSystem && GrasshopperModelUnitSystem != RevitModelUnitSystem)
+              taskDialog.ExpandedContent += $"{Environment.NewLine}Documents opened in Grasshopper were working in {GH.Guest.ModelUnitScale}";
+              if (GrasshopperModelUnitScale != UnitScale.GetModelScale(doc) && GrasshopperModelUnitScale != RevitModelUnitScale)
               {
-                taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink3, $"Adjust Rhino model to {GH.Guest.ModelUnitSystem} like Grasshopper", $"Scale Rhino model by {UnitConverter.Convert(1.0, doc.ModelUnitSystem, GH.Guest.ModelUnitSystem)}");
+                taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink3, $"Adjust Rhino model to {GH.Guest.ModelUnitScale} like Grasshopper", $"Scale Rhino model by {UnitScale.Convert(1.0, UnitScale.GetModelScale(doc), GH.Guest.ModelUnitScale)}");
                 taskDialog.DefaultButton = ARUI.TaskDialogResult.CommandLink3;
               }
             }
@@ -482,16 +483,16 @@ namespace RhinoInside.Revit
                 case ARUI.TaskDialogResult.CommandLink2:
                   doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
-                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(revitTol.VertexTolerance, RevitModelUnitSystem);
-                  doc.AdjustModelUnitSystem(RevitModelUnitSystem, true);
+                  doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, RevitModelUnitScale);
+                  UnitScale.SetModelUnitSystem(doc, RevitModelUnitScale, scale: true);
                   AdjustViewConstructionPlanes(doc);
                   break;
 
                 case ARUI.TaskDialogResult.CommandLink3:
                   doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
-                  doc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(revitTol.VertexTolerance, GH.Guest.ModelUnitSystem);
-                  doc.AdjustModelUnitSystem(GH.Guest.ModelUnitSystem, true);
+                  doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, GH.Guest.ModelUnitScale);
+                  UnitScale.SetModelUnitSystem(doc, GH.Guest.ModelUnitScale, scale: true);
                   AdjustViewConstructionPlanes(doc);
                   break;
 
@@ -522,10 +523,11 @@ namespace RhinoInside.Revit
         else if (rhinoDoc.ModelUnitSystem == UnitSystem.None)
         {
           var units = revitDoc.GetUnits();
-          rhinoDoc.ModelUnitSystem = units.ToUnitSystem(out var distanceDisplayPrecision);
+          var modelUnitScale = units.ToUnitScale(out var distanceDisplayPrecision);
+          UnitScale.SetModelUnitSystem(rhinoDoc, modelUnitScale, scale: false);
           rhinoDoc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
           rhinoDoc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
-          rhinoDoc.ModelAbsoluteTolerance = UnitConverter.ConvertFromInternalUnits(revitTol.VertexTolerance, rhinoDoc.ModelUnitSystem);
+          rhinoDoc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, UnitScale.GetModelScale(rhinoDoc));
           //switch (rhinoDoc.ModelUnitSystem)
           //{
           //  case UnitSystem.None: break;
@@ -566,15 +568,16 @@ namespace RhinoInside.Revit
     {
       if (viewport.ParentView?.Document is RhinoDoc rhinoDoc)
       {
-        bool imperial = rhinoDoc.ModelUnitSystem == UnitSystem.Feet || rhinoDoc.ModelUnitSystem == UnitSystem.Inches;
+        var modelUnitScale = UnitScale.GetModelScale(rhinoDoc);
+        bool imperial = modelUnitScale == UnitScale.Feet || modelUnitScale == UnitScale.Inches;
 
         var modelGridSpacing = imperial ?
-        UnitConverter.Convert(1.0, UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
-        UnitConverter.Convert(1.0, UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
+        UnitScale.Convert(1.0, UnitScale.Yards, modelUnitScale) :
+        UnitScale.Convert(1.0, UnitScale.Meters, modelUnitScale);
 
         var modelSnapSpacing = imperial ?
-        UnitConverter.Convert(1.0, UnitSystem.Yards, rhinoDoc.ModelUnitSystem) :
-        UnitConverter.Convert(1.0, UnitSystem.Meters, rhinoDoc.ModelUnitSystem);
+        UnitScale.Convert(1.0, UnitScale.Yards, modelUnitScale) :
+        UnitScale.Convert(1.0, UnitScale.Meters, modelUnitScale);
 
         var modelThickLineFrequency = imperial ? 6 : 5;
 

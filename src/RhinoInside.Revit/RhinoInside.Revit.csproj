@@ -30,11 +30,12 @@
     <Compile Include="Convert\Geometry\SubDEncoder.cs" />
     <Compile Include="Convert\Geometry\UnitConverter.cs" />
     <Compile Include="Convert\Render\RenderMaterialConverter.cs" />
-    <Compile Include="Convert\Units\DisplayUnitTypeConverter.cs" />
     <Compile Include="Convert\Eto.Drawing.cs" />
     <Compile Include="Convert\System.Collections.Generic.cs" />
     <Compile Include="Convert\System.Drawing.cs" />
     <Compile Include="Convert\System.Windows.Media.cs" />
+    <Compile Include="Convert\Units\UnitScale.cs" />
+    <Compile Include="Convert\Units\UnitTypeConverter.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="Diagnostics.cs" />
     <Compile Include="GH\Bake.cs" />

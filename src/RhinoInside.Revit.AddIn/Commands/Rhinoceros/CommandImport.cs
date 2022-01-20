@@ -19,6 +19,7 @@ using Rhino.FileIO;
 using Rhino.DocObjects;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Drawing;
+using RhinoInside.Revit.Convert.Units;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.DB.Schemas;
 
@@ -442,7 +443,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
         using (var model = File3dm.Read(filePath))
         {
-          var scaleFactor = UnitConverter.ConvertToInternalUnits(1.0, model.Settings.ModelUnitSystem);
+          var scaleFactor = UnitScale.Convert(1.0, (UnitScale) model.Settings.ModelUnitSystem, UnitScale.Internal);
 
           using (var trans = new ARDB.Transaction(doc, "Import 3D Model"))
           {
@@ -563,7 +564,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     {
       using (var model = File3dm.Read(filePath))
       {
-        var scaleFactor = UnitConverter.ConvertToInternalUnits(1.0, model.Settings.ModelUnitSystem);
+        var scaleFactor = UnitScale.Convert(1.0, (UnitScale) model.Settings.ModelUnitSystem, UnitScale.Internal);
         var translationVector = Point3d.Origin - ImportPlacement(model, placement);
 
         using (var trans = new ARDB.Transaction(doc, "Import 3D Model"))

@@ -15,6 +15,7 @@ using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH
 {
+  using Convert.Geometry;
   using Convert.Units;
   using External.DB;
   using External.DB.Extensions;
@@ -466,30 +467,30 @@ namespace RhinoInside.Revit.GH
     #endregion
 
     #region Revit Document
-    static UnitSystem revitUnitSystem = UnitSystem.Unset;
-    static UnitSystem modelUnitSystem = UnitSystem.Unset;
-    public static UnitSystem ModelUnitSystem
+    static UnitScale revitUnitScale = UnitScale.Unset;
+    static UnitScale modelUnitScale = UnitScale.Unset;
+    public static UnitScale ModelUnitScale
     {
-      get => Instances.ActiveCanvas is null ? UnitSystem.Unset : modelUnitSystem;
-      private set => modelUnitSystem = value;
+      get => Instances.ActiveCanvas is null ? UnitScale.Unset : modelUnitScale;
+      private set => modelUnitScale = value;
     }
 
     void DocumentEditor_Activated(object sender, EventArgs e)
     {
-      var revitUS = UnitSystem.Unset;
+      var revitUS = UnitScale.Unset;
 
       if (Revit.ActiveUIDocument?.Document is ARDB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
-        revitUS = units.ToUnitSystem(out var _);
+        revitUS = units.ToUnitScale(out var _);
       }
 
       if (RhinoDoc.ActiveDoc is RhinoDoc doc)
       {
         var hasUnits = doc.ModelUnitSystem != UnitSystem.Unset && doc.ModelUnitSystem != UnitSystem.None;
-        if (revitUnitSystem != revitUS || !hasUnits)
+        if (revitUnitScale != revitUS || !hasUnits)
         {
-          revitUnitSystem = revitUS;
+          revitUnitScale = revitUS;
           Rhinoceros.AuditUnits(doc);
         }
       }
@@ -914,7 +915,7 @@ namespace RhinoInside.Revit.GH
         }
       }
 
-      ModelUnitSystem = RhinoDoc.ActiveDoc.ModelUnitSystem;
+      ModelUnitScale = UnitScale.GetModelScale(RhinoDoc.ActiveDoc);
     }
     #endregion
   }

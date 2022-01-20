@@ -12,6 +12,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
   using Convert.Geometry;
   using Convert.Units;
   using External.DB.Extensions;
+  using DBXS = External.DB.Schemas;
 
   public abstract class BaseAssetComponent<T>
     : TransactionalChainComponent where T : AppearanceAssetData, new()
@@ -323,11 +324,11 @@ namespace RhinoInside.Revit.GH.Components.Materials
           return boolProp.Value;
 
         case ARDB.Visual.AssetPropertyDistance distProp:
-          return ARDB.UnitUtils.Convert
+          return UnitScale.Convert
           (
-            distProp.Value,
-            distProp.GetUnitTypeId(),
-            (Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters).ToUnitType()
+            ARDB.UnitUtils.Convert(distProp.Value, distProp.GetUnitTypeId(), DBXS.UnitType.Meters),
+            UnitScale.Meters,
+            UnitScale.GetModelScale(Rhino.RhinoDoc.ActiveDoc)
           );
 
         case ARDB.Visual.AssetPropertyDouble doubleProp:
@@ -475,8 +476,8 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
           distProp.Value = ARDB.UnitUtils.Convert
           (
-            value,
-            (Rhino.RhinoDoc.ActiveDoc?.ModelUnitSystem ?? Rhino.UnitSystem.Meters).ToUnitType(),
+            UnitScale.Convert(value, UnitScale.GetModelScale(Rhino.RhinoDoc.ActiveDoc), UnitScale.Meters),
+            DBXS.UnitType.Meters,
             distProp.GetUnitTypeId()
           );
           break;

@@ -10,6 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using Convert.Units;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Line Pattern")]
@@ -103,7 +104,7 @@ namespace RhinoInside.Revit.GH.Types
         // 3. Update if necessary
         if (index < 0 || overwrite)
         {
-          var feet = Convert.Geometry.UnitConverter.ConvertFromInternalUnits(1.0, Rhino.UnitSystem.Millimeters);
+          var feet = UnitConverter.InternalUnitScale / UnitScale.Millimeters;
 
           using (var pattern = linePattern.GetLinePattern())
           {
@@ -115,9 +116,9 @@ namespace RhinoInside.Revit.GH.Types
                 {
                   switch (x.Type)
                   {
-                    case ARDB.LinePatternSegmentType.Dash: return x.Length * +feet;
-                    case ARDB.LinePatternSegmentType.Space: return x.Length * -feet;
-                    case ARDB.LinePatternSegmentType.Dot: return 0.0;
+                    case ARDB.LinePatternSegmentType.Dash:  return +x.Length * feet;
+                    case ARDB.LinePatternSegmentType.Space: return -x.Length * feet;
+                    case ARDB.LinePatternSegmentType.Dot:   return 0.0;
                     default: throw new ArgumentOutOfRangeException();
                   }
                 }

@@ -11,6 +11,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
+  using Convert.Units;
   using ElementTracking;
   using Exceptions;
   using External.DB.Extensions;
@@ -25,20 +26,17 @@ namespace RhinoInside.Revit.GH.Components
     #region Solve Optional values
     protected static double LiteralLengthValue(double meters)
     {
-      var modelUnitSystem = Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem;
-      switch (modelUnitSystem)
+      var modelUnitScale = UnitScale.GetModelScale(Rhino.RhinoDoc.ActiveDoc);
+      if (modelUnitScale == UnitScale.None || modelUnitScale == UnitScale.Inches || modelUnitScale == UnitScale.Feet)
       {
-        case Rhino.UnitSystem.None:
-        case Rhino.UnitSystem.Inches:
-        case Rhino.UnitSystem.Feet:
-          return UnitConverter.ConvertFromInternalUnits
-          (
-            Math.Round(UnitConverter.ConvertToInternalUnits(meters, Rhino.UnitSystem.Meters)),
-            modelUnitSystem
-          );
-        default:
-          return UnitConverter.Convert(meters, Rhino.UnitSystem.Meters, modelUnitSystem);
+        return UnitScale.Convert
+        (
+          Math.Round(UnitScale.Convert(meters, UnitScale.Meters, UnitScale.Internal)),
+          UnitScale.Internal,
+          modelUnitScale
+        );
       }
+      else return UnitScale.Convert(meters, UnitScale.Meters, modelUnitScale);
     }
 
     protected static void ChangeElementTypeId<T>(ref T element, ARDB.ElementId elementTypeId) where T : ARDB.Element

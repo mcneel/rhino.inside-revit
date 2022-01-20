@@ -1,6 +1,4 @@
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
@@ -8,6 +6,8 @@ using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
+  using Units;
+
   /// <summary>
   /// Represents a converter for converting measurable values back and forth
   /// the Revit internal unit system and a external Rhino unit system.
@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Identity <see cref="UnitConverter"/>.
     /// </summary>
-    public static readonly UnitConverter Identity = new UnitConverter(UnitSystem.None);
+    public static readonly UnitConverter Identity = new UnitConverter(UnitScale.None);
 
     /// <summary>
     /// Default <see cref="UnitConverter"/> for converting to and from Rhino model unit system.
@@ -32,69 +32,13 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Implementation Details
-    static UnitConverter()
-    {
-      internalUnits = new double[]
-      {
-        1.0,              // None
-        304800.0,         // Microns
-        304.8,            // Millimeters
-        30.48,            // Centimeters
-        0.3048,           // Meters
-        0.0003048,        // Kilometers
-        12000000.0,       // Microinches
-        12000.0,          // Mils
-        12.0,             // Inches
-        1.0,              // Feet
-        1.0 / 5280.0,     // Miles
-        double.NaN,       // CustomUnits
-        3048000000.0,     // Angstroms
-        304800000.0,      // Nanometers
-        3.048,            // Decimeters
-        0.03048,          // Dekameters
-        0.003048,         // Hectometers
-        3.048e-7,         // Megameters
-        3.048e-10,        // Gigameters
-        1.0 / 3.0,        // Yards
-        864.0,            // PrinterPoints
-        72.0,             // PrinterPicas
-        0.3048 / 1852.0,  // NauticalMiles
-        0.3048 / 149597870700.0,  // AstronomicalUnits
-        0.3048 / 9460730472580800.0,  // LightYears
-        0.3048 / 149597870700.0 * 648000.0 / Math.PI, // Parsecs
-      };
-
-      // Length - 1, because we don handle UnitSystem.Unset here.
-      Debug.Assert(internalUnits.Length == Enum.GetValues(typeof(UnitSystem)).Length - 1);
-    }
-
-    static readonly double[] internalUnits;
-
     /// <summary>
-    /// <see cref="internalUnits"/> accessor with validation.
-    /// </summary>
-    /// <param name="unitSystem"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static double InternalUnits(UnitSystem unitSystem)
-    {
-      // IsDefined is too slow for the occasion
-      //if (!Enum.IsDefined(typeof(UnitSystem), unitSystem) || unitSystem == UnitSystem.Unset)
-      //  throw new ArgumentOutOfRangeException(nameof(unitSystem));
-      Debug.Assert(Enum.IsDefined(typeof(UnitSystem), unitSystem) && unitSystem != UnitSystem.Unset);
-
-      return UnitSystem.None > unitSystem || unitSystem > UnitSystem.Parsecs ?
-        double.NaN :
-        internalUnits[(int) unitSystem];
-    }
-
-    /// <summary>
-    /// Revit Internal Unit System.
+    /// Revit Internal Unit Scale.
     /// </summary>
     /// <remarks>
-    /// It returns <see cref="Rhino.UnitSystem.Feet"/>.
+    /// It returns <see cref="UnitScale.Feet"/>.
     /// </remarks>
-    internal const UnitSystem InternalUnitSystem = UnitSystem.Feet;
+    internal static readonly UnitScale InternalUnitScale = UnitScale.Internal;
     #endregion
 
     #region Internal Factors
@@ -106,12 +50,12 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Factor for converting a length from Revit internal units to active Rhino document units.
     /// </summary>
-    internal static double ToModelLength => internalUnits[(int) Model.UnitSystem];
+    internal static double ToModelLength => (double) (InternalUnitScale.Ratio / Model.UnitScale.Ratio);
 
     /// <summary>
     /// Factor for converting a length from active Rhino document units to Revit internal units.
     /// </summary>
-    internal static double ToInternalLength => 1.0 / internalUnits[(int) Model.UnitSystem];
+    internal static double ToInternalLength => (double) (Model.UnitScale.Ratio / InternalUnitScale.Ratio);
     #endregion
 
     #region Static Methods
@@ -124,9 +68,9 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <remarks>
     /// This method may return <see cref="double.NaN"/> if the conversion is not defined.
     /// </remarks>
-    public static double ConvertFromInternalUnits(double length, UnitSystem target)
+    public static double ConvertFromInternalUnits(double length, UnitScale target)
     {
-      return length * InternalUnits(target);
+      return length * (InternalUnitScale.Ratio / target.Ratio);
     }
 
     /// <summary>
@@ -138,9 +82,9 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <remarks>
     /// This method may return <see cref="double.NaN"/> if the conversion is not defined.
     /// </remarks>
-    public static double ConvertToInternalUnits(double length, UnitSystem source)
+    public static double ConvertToInternalUnits(double length, UnitScale source)
     {
-      return length / InternalUnits(source);
+      return length * (source.Ratio / InternalUnitScale.Ratio);
     }
 
     /// <summary>
@@ -154,31 +98,20 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <remarks>
     /// This method may return <see cref="double.NaN"/> if the conversion is not defined.
     /// </remarks>
-    internal static double Convert(double value, UnitSystem source, UnitSystem target, int dimensionality = 1)
+    internal static double Convert(double value, UnitScale source, UnitScale target, int dimensionality = 1)
     {
       // Fast path.
       switch (dimensionality)
       {
-        case -1: return Convert(value, InternalUnits(target), InternalUnits(source));
-        case 0: return value;
-        case +1: return Convert(value, InternalUnits(source), InternalUnits(target));
+        case -1: return value * (target.Ratio / source.Ratio);
+        case  0: return value;
+        case +1: return value * (source.Ratio / target.Ratio);
       }
 
-      return Convert(value, Math.Pow(InternalUnits(source), dimensionality), Math.Pow(InternalUnits(target), dimensionality));
+      return value * (Ratio.Pow(source.Ratio, dimensionality) / Ratio.Pow(target.Ratio, dimensionality));
     }
 
-    static double Convert(double value, double den, double num)
-    {
-      if (num == den)
-        return value;
-
-      if (Math.Abs(num) < Math.Abs(value))
-        return num * (value / den);
-      else
-        return value * (num / den);
-    }
-
-    static double Convert(double value, EDBS.SpecType type, UnitSystem from, UnitSystem to)
+    static double Convert(double value, EDBS.SpecType type, UnitScale from, UnitScale to)
     {
       return type.TryGetLengthDimensionality(out var dimensionality) ?
         Convert(value, from, to, dimensionality) :
@@ -187,18 +120,18 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region Methods
-    UnitConverter(Func<UnitSystem> unitSystem) => this.unitSystem = unitSystem;
+    UnitConverter(Func<UnitScale> scale) => unitScale = scale;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UnitConverter"/> class to the indicated unit system.
     /// </summary>
-    /// <param name="unitSystem">A Rhino unit system to be used in conversions.</param>
-    public UnitConverter(UnitSystem unitSystem)
+    /// <param name="scale">A Rhino unit system to be used in conversions.</param>
+    public UnitConverter(UnitScale scale)
     {
-      if (unitSystem == UnitSystem.Unset || !Enum.IsDefined(typeof(UnitSystem), unitSystem))
-        throw new ArgumentOutOfRangeException(nameof(unitSystem));
+      if (scale == UnitScale.Unset)
+        throw new ArgumentOutOfRangeException(nameof(scale));
 
-      this.unitSystem = () => unitSystem;
+      unitScale = () => scale;
     }
 
     /// <summary>
@@ -208,12 +141,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="rhinoDoc">A Rhino document to be used in conversions, null to reference <see cref="RhinoDoc.ActiveDoc"/>.</param>
     public UnitConverter(ActiveSpace space, RhinoDoc rhinoDoc = default)
     {
-      switch (space)
-      {
-        case ActiveSpace.ModelSpace: unitSystem = () => (rhinoDoc ?? RhinoDoc.ActiveDoc)?.ModelUnitSystem ?? UnitSystem.Meters; break;
-        case ActiveSpace.PageSpace:  unitSystem = () => (rhinoDoc ?? RhinoDoc.ActiveDoc)?.PageUnitSystem  ?? UnitSystem.Millimeters; break;
-        default: throw new ArgumentOutOfRangeException(nameof(space));
-      }
+      unitScale = () => new UnitScale(rhinoDoc ?? RhinoDoc.ActiveDoc, space);
     }
 
     /// <summary>
@@ -223,8 +151,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <para>This external unit system use to be the active Rhino document model or page units.</para>
     /// <para>The internal unit system is always the Revit unit system for lengths (feet).</para>
     /// </remarks>
-    public UnitSystem UnitSystem => unitSystem();
-    readonly Func<UnitSystem> unitSystem;
+    public UnitScale UnitScale => unitScale();
+    readonly Func<UnitScale> unitScale;
 
     /// <summary>
     /// Converts a length from internal to external unit system.
@@ -234,10 +162,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <remarks>
     /// This method may return <see cref="double.NaN"/> if the conversion is not defined.
     /// </remarks>
-    public double ConvertFromInternalUnits(double length)
-    {
-      return length * InternalUnits(UnitSystem);
-    }
+    public double ConvertFromInternalUnits(double length) => ConvertFromInternalUnits(length, UnitScale);
 
     /// <summary>
     /// Converts a length from external to internal unit system.
@@ -247,19 +172,16 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <remarks>
     /// This method may return <see cref="double.NaN"/> if the conversion is not defined.
     /// </remarks>
-    public double ConvertToInternalUnits(double length)
-    {
-      return length / InternalUnits(UnitSystem);
-    }
+    public double ConvertToInternalUnits(double length) => ConvertToInternalUnits(length, UnitScale);
 
     internal double ConvertFromInternalUnits(double value, EDBS.SpecType spec)
     {
-      return Convert(value, spec, InternalUnitSystem, UnitSystem);
+      return Convert(value, spec, InternalUnitScale, UnitScale);
     }
 
     internal double ConvertToInternalUnits(double value, EDBS.SpecType spec)
     {
-      return Convert(value, spec, UnitSystem, InternalUnitSystem);
+      return Convert(value, spec, UnitScale, InternalUnitScale);
     }
     #endregion
   }
@@ -428,7 +350,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal static G InOtherUnits<G>(this G value, double factor) where G : GeometryBase
     { value = (G) value.Duplicate(); if(factor != 1.0) Scale(value, factor); return value; }
 
-    static double InOtherUnits(double value, EDBS.SpecType type, UnitSystem from, UnitSystem to)
+    static double InOtherUnits(double value, EDBS.SpecType type, UnitScale from, UnitScale to)
     {
       return type.TryGetLengthDimensionality(out var dimensionality) ?
         UnitConverter.Convert(value, from, to, dimensionality) :
@@ -483,14 +405,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     { Scale(value = (G) value.Duplicate(), UnitConverter.ToModelLength); return value; }
 
     internal static double InRhinoUnits(double value, EDBS.SpecType spec) =>
-      InOtherUnits(value, spec, UnitConverter.InternalUnitSystem, UnitConverter.Model.UnitSystem);
+      InOtherUnits(value, spec, UnitConverter.InternalUnitScale, UnitConverter.Model.UnitScale);
 
     internal static double InRhinoUnits(double value, EDBS.SpecType type, RhinoDoc rhinoDoc)
     {
       if (rhinoDoc is null)
         throw new ArgumentNullException(nameof(rhinoDoc));
 
-      return InOtherUnits(value, type, UnitConverter.InternalUnitSystem, rhinoDoc.ModelUnitSystem);
+      return InOtherUnits(value, type, UnitConverter.InternalUnitScale, UnitScale.GetModelScale(rhinoDoc));
     }
     #endregion
 
@@ -541,14 +463,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     { Scale(value = (G) value.Duplicate(), UnitConverter.ToInternalLength); return value; }
 
     internal static double InHostUnits(double value, EDBS.SpecType spec) =>
-      InOtherUnits(value, spec, UnitConverter.Model.UnitSystem, UnitConverter.InternalUnitSystem);
+      InOtherUnits(value, spec, UnitConverter.Model.UnitScale, UnitConverter.InternalUnitScale);
 
     internal static double InHostUnits(double value, EDBS.SpecType spec, RhinoDoc rhinoDoc)
     {
       if (rhinoDoc is null)
         return double.NaN;
 
-      return InOtherUnits(value, spec, rhinoDoc.ModelUnitSystem, UnitConverter.InternalUnitSystem);
+      return InOtherUnits(value, spec, UnitScale.GetModelScale(rhinoDoc), UnitConverter.InternalUnitScale);
     }
     #endregion
   }
@@ -561,20 +483,20 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Initializes a new instance of the <see cref="GeometryObjectTolerance"/> using to the indicated unit system.
     /// </summary>
-    /// <param name="unitSystem">A <see cref="Rhino.UnitSystem"/> to be used in conversions.</param>
-    public GeometryObjectTolerance(UnitSystem unitSystem)
+    /// <param name="scale">A <see cref="Rhino.UnitSystem"/> to be used in conversions.</param>
+    public GeometryObjectTolerance(UnitScale scale)
     {
-      if (unitSystem == UnitSystem.None)
+      if (scale == UnitScale.None)
       {
-        AngleTolerance = Internal.AngleTolerance;
-        VertexTolerance = Internal.VertexTolerance;
+        AngleTolerance      = Internal.AngleTolerance;
+        VertexTolerance     = Internal.VertexTolerance;
         ShortCurveTolerance = Internal.ShortCurveTolerance;
       }
       else
       {
-        AngleTolerance = Internal.AngleTolerance;
-        VertexTolerance = UnitConverter.ConvertFromInternalUnits(Internal.VertexTolerance, unitSystem);
-        ShortCurveTolerance = UnitConverter.ConvertFromInternalUnits(Internal.ShortCurveTolerance, unitSystem);
+        AngleTolerance      = Internal.AngleTolerance;
+        VertexTolerance     = UnitScale.Convert(Internal.VertexTolerance, UnitScale.Internal, scale);
+        ShortCurveTolerance = UnitScale.Convert(Internal.ShortCurveTolerance, UnitScale.Internal, scale);
       }
     }
 
@@ -627,11 +549,11 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Default <see cref="GeometryObjectTolerance"/> expresed in Rhino model unit system.
     /// </summary>
-    public static GeometryObjectTolerance Model     => new GeometryObjectTolerance(UnitConverter.Model.UnitSystem);
+    public static GeometryObjectTolerance Model     => new GeometryObjectTolerance(UnitConverter.Model.UnitScale);
 
     /// <summary>
     /// Default <see cref="GeometryObjectTolerance"/> expresed in Rhino page unit system.
     /// </summary>
-    public static GeometryObjectTolerance Page      => new GeometryObjectTolerance(UnitConverter.Page.UnitSystem);
+    public static GeometryObjectTolerance Page      => new GeometryObjectTolerance(UnitConverter.Page.UnitScale);
   }
 }
