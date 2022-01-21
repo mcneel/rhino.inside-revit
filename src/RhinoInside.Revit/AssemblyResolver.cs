@@ -325,7 +325,12 @@ namespace RhinoInside.Revit
           var assembly = Assembly.LoadFrom(location.assemblyName.CodeBase);
           //var assembly = Assembly.LoadFile(new Uri(location.assemblyName.CodeBase).LocalPath);
 
-          Debug.Assert(assembly.CodeBase.ToLower() == location.assemblyName.CodeBase.ToLower());
+          Debug.Assert
+          (
+            assembly.CodeBase.ToLowerInvariant() == location.assemblyName.CodeBase.ToLowerInvariant(),
+            $"Expected = {location.assemblyName.CodeBase}" + Environment.NewLine +
+            $"Loaded = {assembly.CodeBase}"
+          );
 
           // Add again loaded assembly
           references.Add(requested.Name, location);
