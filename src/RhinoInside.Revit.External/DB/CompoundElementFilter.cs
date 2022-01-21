@@ -379,7 +379,7 @@ namespace Autodesk.Revit.DB
 #if DEBUG
       foreach (var element in VisibleElementIds.Select(x => Document.GetElement(x)))
       {
-        Debug.Assert(!(element is ElementType), "casting operator needs to be adjusted");
+        Debug.Assert(!(element is ElementType), $"Casting operator may need to be adjusted to accept {element}");
         Debug.Assert
         (
           element.OwnerViewId == viewId ||
