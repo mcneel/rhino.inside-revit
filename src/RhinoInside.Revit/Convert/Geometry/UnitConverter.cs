@@ -141,7 +141,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <param name="rhinoDoc">A Rhino document to be used in conversions, null to reference <see cref="RhinoDoc.ActiveDoc"/>.</param>
     public UnitConverter(ActiveSpace space, RhinoDoc rhinoDoc = default)
     {
-      unitScale = () => new UnitScale(rhinoDoc ?? RhinoDoc.ActiveDoc, space);
+      unitScale = () => UnitScale.GetUnitScale(rhinoDoc ?? RhinoDoc.ActiveDoc, space);
     }
 
     /// <summary>
