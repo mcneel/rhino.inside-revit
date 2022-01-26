@@ -65,16 +65,27 @@ When Revit loads a model, it also loads all the linked models into the memory as
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-Use the {% include ltr/comp.html uuid='ebccfdd8' %} component shown here to get all the documents that are linked into the active (or given) document
+{% include youtube_player.html id="UkIW-0U0-Yk" %}
 
-![]({{ "/static/images/guides/revit-links-doclinks.png" | prepend: site.baseurl }})
+Use the {% include ltr/comp.html uuid='ebccfdd8' %} component shown here to get all the documents that are linked into the active (or given) document.
+
+![]({{ "/static/images/guides/revit-links-doclinks-1.4.png" | prepend: site.baseurl }})
+
+The links output contains the document name, Location, Shared Location Name and the unique instance ID for that link.
+
+The documents output contains the name of the linked document and can be used in the document input of the query components.
 
 ## Querying Linked Elements
 
 Use the {% include ltr/comp.html uuid='0f7da57e' %} component shown here to access elements if a given document. The input document can be a linked document as well.
 
-![]({{ "/static/images/guides/revit-links-querywalls.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-links-querywalls1.4.png" | prepend: site.baseurl }})
 
-You can chain the {% include ltr/comp.html uuid='5b935ca4' %} component into the {% include ltr/comp.html uuid='ebccfdd8' %} component to grab all the linked documents from all the open documents:
+When the {% include ltr/comp.html uuid='0f7da57e' %} component is used to find elements in linked models, will import in their base orientation as they sit in the linked model. Linked elements then must be oriented to the location of the link instance in the host project. See the [Linked Geometry Orientation](#linked-geometry-orientation) below.
 
-![]({{ "/static/images/guides/revit-links-querywalls-alldocs.png" | prepend: site.baseurl }})
+
+## Linked Geometry Orientation
+
+The graphic elements will come into the file as they are oriented in their base project. It is necessary to orient the geometry into the location of the link instance.  Use the Orient Component for this:
+
+![]({{ "/static/images/guides/revit-links-doclinks-orient.png" | prepend: site.baseurl }})
