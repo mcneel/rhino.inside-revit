@@ -20,6 +20,15 @@ namespace RhinoInside.Revit
       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP");
 
     #region AssemblyReference
+
+    delegate bool InitAssembly();
+    static readonly Dictionary<string, InitAssembly> InternalAssemblies = new Dictionary<string, InitAssembly>()
+    {
+      { "Eto",          Rhinoceros.InitEto },
+      { "RhinoCommon",  Rhinoceros.InitRhinoCommon },
+      { "Grasshopper",  Rhinoceros.InitGrasshopper },
+    };
+
     public sealed class AssemblyReference
     {
       internal AssemblyReference(AssemblyName name)
@@ -54,12 +63,8 @@ namespace RhinoInside.Revit
         Assembly = assembly;
 
         bool failed = false;
-        switch (assemblyName.Name)
-        {
-          case "Eto":         failed = !Rhinoceros.InitEto(); break;
-          case "RhinoCommon": failed = !Rhinoceros.InitRhinoCommon(); break;
-          case "Grasshopper": failed = !Rhinoceros.InitGrasshopper(); break;
-        }
+        if (InternalAssemblies.TryGetValue(assemblyName.Name, out var InitAssembly))
+          failed = !InitAssembly();
 
         if (failed)
           throw new InvalidOperationException($"Failed to activate {assembly.FullName}");
@@ -131,34 +136,44 @@ namespace RhinoInside.Revit
         {
           try
           {
-            var installFolder = new DirectoryInfo(InstallPath);
-            foreach (var dll in installFolder.EnumerateFiles("*.dll", SearchOption.AllDirectories))
+            var installFolders = new DirectoryInfo[]
             {
-              try
+              new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)),
+              new DirectoryInfo(InstallPath)
+            };
+
+            foreach (var installFolder in installFolders)
+            {
+              foreach (var dll in installFolder.EnumerateFiles("*.dll", SearchOption.AllDirectories))
               {
-                // https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles?view=netframework-4.8
-                // If the specified extension is exactly three characters long,
-                // the method returns files with extensions that begin with the specified extension.
-                // For example, "*.xls" returns both "book.xls" and "book.xlsx"
-                if (dll.Extension.ToLower() != ".dll") continue;
-
-                var assemblyName = AssemblyName.GetAssemblyName(dll.FullName);
-                var assemblyReference = new AssemblyReference(assemblyName);
-
-                if (references.TryGetValue(assemblyName.Name, out var location))
+                try
                 {
-                  if (location.assemblyName.Version >= assemblyName.Version) continue;
-                  references.Remove(assemblyName.Name);
-                }
+                  // https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles?view=netframework-4.8
+                  // If the specified extension is exactly three characters long,
+                  // the method returns files with extensions that begin with the specified extension.
+                  // For example, "*.xls" returns both "book.xls" and "book.xlsx"
+                  if (dll.Extension.ToLower() != ".dll") continue;
 
-                references.Add(assemblyName.Name, assemblyReference);
+                  var assemblyName = AssemblyName.GetAssemblyName(dll.FullName);
+                  var assemblyReference = new AssemblyReference(assemblyName);
+
+                  if (references.TryGetValue(assemblyName.Name, out var location))
+                  {
+                    if (location.assemblyName.Version >= assemblyName.Version) continue;
+                    references.Remove(assemblyName.Name);
+                  }
+
+                  references.Add(assemblyName.Name, assemblyReference);
+                }
+                catch { }
               }
-              catch { }
             }
           }
           catch { }
         }
       });
+
+      Resolving += AssemblyResolve;
     }
 
     static bool enabled;
@@ -217,8 +232,10 @@ namespace RhinoInside.Revit
       }
     }
 
-    static void ActivationGate_Enter(object sender, EventArgs e) => Resolving += AssemblyResolve;
-    static void ActivationGate_Exit(object sender, EventArgs e) => Resolving -= AssemblyResolve;
+    static readonly uint InternalThreadId = ThreadHandle.CurrentThreadId;
+    static bool InternalAssembliesOnly = true;
+    static void ActivationGate_Enter(object sender, EventArgs e) => InternalAssembliesOnly = false;
+    static void ActivationGate_Exit(object sender, EventArgs e) => InternalAssembliesOnly = true;
 
     static Assembly AssemblyResolve(object sender, ResolveEventArgs args)
     {
@@ -226,55 +243,68 @@ namespace RhinoInside.Revit
       if (assemblyName.Name.EndsWith(".resources", StringComparison.OrdinalIgnoreCase))
         return default;
 
-      if (Logger.Active)
+      var internalAssembliesOnly = InternalAssembliesOnly;
+      try
       {
-        using (var scope = Logger.LogScope
-        (
-          "AppDomain.AssemblyResolve",
-          $"Requesting Assembly = {GetRequestingAssembly(args).FullName}",
-          $"Requires = '{args.Name}'"
-        ))
+        if (InternalAssembliesOnly && !InternalAssemblies.ContainsKey(assemblyName.Name))
+          return default;
+
+        internalAssembliesOnly = false;
+
+        if (Logger.Active)
         {
-          var resolved = default(Assembly);
-          foreach (ResolveEventHandler resolver in InvocationList)
+          using (var scope = Logger.LogScope
+          (
+            "AppDomain.AssemblyResolve",
+            $"Requesting Assembly = {GetRequestingAssembly(args).FullName}",
+            $"Requires = '{args.Name}'"
+          ))
           {
-            var type = MethodInfo.GetCurrentMethod().DeclaringType;
-            var info = type.GetMethod(nameof(AssemblyResolving), BindingFlags.NonPublic | BindingFlags.Static);
-            if (resolver.Method == info)
+            var resolved = default(Assembly);
+            foreach (ResolveEventHandler resolver in InvocationList)
             {
-              resolved = ResolveAssembly(args.RequestingAssembly, new AssemblyName(args.Name));
-            }
-            else
-            {
-              try { resolved = resolver(sender, args); }
-              catch (Exception) { }
+              var type = MethodInfo.GetCurrentMethod().DeclaringType;
+              var info = type.GetMethod(nameof(AssemblyResolving), BindingFlags.NonPublic | BindingFlags.Static);
+              if (resolver.Method == info)
+              {
+                resolved = ResolveAssembly(args.RequestingAssembly, new AssemblyName(args.Name));
+              }
+              else
+              {
+                try { resolved = resolver(sender, args); }
+                catch (Exception) { }
+              }
+
+              if (resolved is object)
+              {
+                scope.Log
+                (
+                  resolved.FullName == args.Name ?
+                  Logger.Severity.Succeded :
+                  Logger.Severity.Information,
+                  $"Resolved",
+                  $"Resolver = '{resolver.Method.DeclaringType.Assembly}'",
+                  $"Got = '{resolved.FullName}'",
+                  $"Location = '{resolved.Location}'"
+                );
+                break;
+              }
             }
 
-            if (resolved is object)
-            {
-              scope.Log
-              (
-                resolved.FullName == args.Name ?
-                Logger.Severity.Succeded :
-                Logger.Severity.Information,
-                $"Resolved",
-                $"Resolver = '{resolver.Method.DeclaringType.Assembly}'",
-                $"Got = '{resolved.FullName}'",
-                $"Location = '{resolved.Location}'"
-              );
-              break;
-            }
+            if (resolved is null)
+              scope.LogWarning("Not Resolved");
+
+            return resolved;
           }
-
-          if (resolved is null)
-            scope.LogWarning("Not Resolved");
-
-          return resolved;
+        }
+        else
+        {
+          return ResolveAssembly(args.RequestingAssembly, new AssemblyName(args.Name));
         }
       }
-      else
+      finally
       {
-        return ResolveAssembly(args.RequestingAssembly, new AssemblyName(args.Name));
+        InternalAssembliesOnly = internalAssembliesOnly;
       }
     }
 
@@ -314,6 +344,10 @@ namespace RhinoInside.Revit
 
         if (location.Assembly is null)
         {
+          // Never load an Internal assembly from an other thread than the UI thread.
+          if (ThreadHandle.CurrentThreadId != InternalThreadId && InternalAssemblies.ContainsKey(location.assemblyName.Name))
+            return default;
+
           // Remove it to not try again if it fails and avoid recursion.
           references.Remove(requested.Name);
 
