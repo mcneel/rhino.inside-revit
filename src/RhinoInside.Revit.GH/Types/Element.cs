@@ -200,35 +200,29 @@ namespace RhinoInside.Revit.GH.Types
 
       if (element is ARDB.PropertySetElement pset)
       {
-        if (StructuralAssetElement.IsValidElement(element))
-          return new StructuralAssetElement(pset);
-        else if (ThermalAssetElement.IsValidElement(element))
-          return new ThermalAssetElement(pset);
+        if (StructuralAssetElement.IsValidElement(element))   return new StructuralAssetElement(pset);
+        else if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
       }
       else if (GraphicalElement.IsValidElement(element))
       {
         if (InstanceElement.IsValidElement(element))
         {
-          if (Panel.IsValidElement(element))
-            return new Panel(element as ARDB.FamilyInstance);
+          if (Panel.IsValidElement(element))                  return new Panel(element as ARDB.FamilyInstance);
 
           return new InstanceElement(element);
         }
 #if !REVIT_2021
-        else if (InternalOrigin.IsValidElement(element))
-          return new InternalOrigin(element as ARDB.BasePoint);
-        else if (BasePoint.IsValidElement(element))
-          return new BasePoint(element as ARDB.BasePoint);
+        else if (InternalOrigin.IsValidElement(element))      return new InternalOrigin(element as ARDB.BasePoint);
+        else if (BasePoint.IsValidElement(element))           return new BasePoint(element as ARDB.BasePoint);
 #endif
-        else if (GeometricElement.IsValidElement(element))
-          return new GeometricElement(element);
+        else if (SectionBox.IsValidElement(element))          return new SectionBox(element);
+        else if (GeometricElement.IsValidElement(element))    return new GeometricElement(element);
 
         return new GraphicalElement(element);
       }
       else
       {
-        if (DesignOptionSet.IsValidElement(element))
-          return new DesignOptionSet(element);
+        if (DesignOptionSet.IsValidElement(element))          return new DesignOptionSet(element);
       }
 
       return new Element(element);

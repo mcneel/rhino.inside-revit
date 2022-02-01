@@ -83,9 +83,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value is ARDB.Element)
       {
-        var bbox = BoundingBox;
-        if (bbox.Transform(xform))
-          return bbox;
+        var box = Box;
+        if (box.Transform(xform))
+          return box.BoundingBox;
       }
 
       return NaN.BoundingBox;
@@ -302,15 +302,17 @@ namespace RhinoInside.Revit.GH.Types
             return element.GetBoundingBoxXYZ().ToBox();
 
           var xform = Transform.ChangeBasis(Plane.WorldXY, plane);
-          var bbox = GetBoundingBox(xform);
-
-          return new Box
-          (
-            plane,
-            new Interval(bbox.Min.X, bbox.Max.X),
-            new Interval(bbox.Min.Y, bbox.Max.Y),
-            new Interval(bbox.Min.Z, bbox.Max.Z)
-          );
+          var bbox = BoundingBox;
+          if (bbox.Transform(xform))
+          {
+            return new Box
+            (
+              plane,
+              new Interval(bbox.Min.X, bbox.Max.X),
+              new Interval(bbox.Min.Y, bbox.Max.Y),
+              new Interval(bbox.Min.Z, bbox.Max.Z)
+            );
+          }
         }
 
         return NaN.Box;

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}</ProjectGuid>
@@ -216,6 +216,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Types\AssemblyInstance.cs" />
+    <Compile Include="Types\SectionBox.cs" />
     <Compile Include="Types\Workset.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />

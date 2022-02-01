@@ -390,9 +390,9 @@ namespace RhinoInside.Revit.Convert.Units
       var (F, f) = from.Ratio;
       var (T, t) = to.Ratio;
 
-      // Reciprocal(F) ⨯ T
-      var num = f * T;
-      var den = F * t;
+      // F ⨯ Reciprocal(T)
+      var num = F * t;
+      var den = f * T;
 
       // Multiply value by resulting ratio considering magnitude.
       if (Math.Abs(num) < Math.Abs(value))

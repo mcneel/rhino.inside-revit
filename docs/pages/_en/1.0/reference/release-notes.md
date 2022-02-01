@@ -5,6 +5,12 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.5 RC2" version="v1.5.8067.36154" time="01/02/2022" %}
+
+- Fixed 'Element Material Quantities'.
+- Added Types.SectionBox type.
+- Fixed [#531](https://github.com/mcneel/rhino.inside-revit/issues/531).
+
 {% include ltr/release-header.html title="v1.4 Stable" version="v1.4.8053.19650" time="21/01/2022" %}
 
 - Includes all changes under 1.4RC releases listed below

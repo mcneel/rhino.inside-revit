@@ -182,7 +182,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override void ResetValue()
     {
       // Some categories are slow to found,
-      // Category referenmce seem to be generated on demand and the reference become invalid "sudently".
+      // Category reference seem to be generated on demand and the reference become invalid "sudently".
       // so we can not catch the reference but the name is used many times in UI and needs to be fast.
       fullName = default;
 
@@ -401,7 +401,12 @@ namespace RhinoInside.Revit.GH.Types
           return segments[segments.Length - 1];
         }
 
-        return default;
+        return base.Name;
+      }
+      set
+      {
+        base.Name = value;
+        fullName = null;
       }
     }
 

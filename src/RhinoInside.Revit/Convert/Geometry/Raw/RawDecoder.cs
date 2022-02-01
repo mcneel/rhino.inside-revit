@@ -242,7 +242,34 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         case ARDB.HermiteSpline hermite: return ToRhino(hermite);
         case ARDB.NurbSpline nurb: return ToRhino(nurb);
         case ARDB.CylindricalHelix helix: return ToRhino(helix);
-        default: throw new NotImplementedException();
+        default:
+          if (!curve.IsBound && !curve.IsCyclic)
+            throw new ArgumentException("Unbound non-cyclic curves are not supported.");
+
+          var tol = GeometryObjectTolerance.Internal;
+          var crv = curve.IsCyclic && !curve.IsBound ?
+            Curve.CreateInterpolatedCurve
+            (
+              curve.Tessellate().Select(AsPoint3d), degree: 3, CurveKnotStyle.ChordPeriodic
+            ) :
+            Curve.CreateInterpolatedCurve
+            (
+              curve.Tessellate().Select(AsPoint3d), degree: 3, CurveKnotStyle.Chord,
+              AsVector3d(curve.ComputeDerivatives(0.0, normalized: true).BasisX),
+              AsVector3d(curve.ComputeDerivatives(1.0, normalized: true).BasisX)
+            );
+
+          crv.Domain = new Interval
+          (
+            curve.IsBound ? curve.GetEndParameter(0) : 0.0,
+            curve.IsBound ? curve.GetEndParameter(1) : curve.IsCyclic ? curve.Period : 1.0
+          );
+
+          crv = crv.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ??
+                crv.Fit(degree: 3, tol.VertexTolerance, tol.AngleTolerance) ??
+                crv;
+
+          return crv;
       }
     }
 
