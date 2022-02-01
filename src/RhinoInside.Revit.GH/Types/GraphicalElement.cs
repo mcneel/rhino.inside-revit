@@ -302,15 +302,17 @@ namespace RhinoInside.Revit.GH.Types
             return element.GetBoundingBoxXYZ().ToBox();
 
           var xform = Transform.ChangeBasis(Plane.WorldXY, plane);
-          var bbox = GetBoundingBox(xform);
-
-          return new Box
-          (
-            plane,
-            new Interval(bbox.Min.X, bbox.Max.X),
-            new Interval(bbox.Min.Y, bbox.Max.Y),
-            new Interval(bbox.Min.Z, bbox.Max.Z)
-          );
+          var bbox = BoundingBox;
+          if (bbox.Transform(xform))
+          {
+            return new Box
+            (
+              plane,
+              new Interval(bbox.Min.X, bbox.Max.X),
+              new Interval(bbox.Min.Y, bbox.Max.Y),
+              new Interval(bbox.Min.Z, bbox.Max.Z)
+            );
+          }
         }
 
         return NaN.Box;
