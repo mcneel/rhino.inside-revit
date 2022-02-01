@@ -48,8 +48,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
       var materialIds = new List<Types.Material>();
       if (DA.GetDataList("Materials", materialIds))
       {
-        DA.SetDataList("Volume", materialIds.Select(x => x.Id is null ? default(double?) : element.Value.GetMaterialVolume(x.Id) * area));
-        DA.SetDataList("Area",   materialIds.Select(x => x.Id is null ? default(double?) : element.Value.GetMaterialArea(x.Id, false) * volume));
+        DA.SetDataList("Volume", materialIds.Select(x => x.Id is null ? default(double?) : element.Value.GetMaterialVolume(x.Id) * volume));
+        DA.SetDataList("Area",   materialIds.Select(x => x.Id is null ? default(double?) : element.Value.GetMaterialArea(x.Id, false) * area));
       }
 
       var paintIds = new List<Types.Material>();
