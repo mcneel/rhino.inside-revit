@@ -5,11 +5,15 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.5 RC2" version="v1.5.8067.36154" time="01/02/2022" %}
+{% include ltr/release-header.html title="v1.5 RC2" version="v1.5.8067.36154" pre_release=true time="01/02/2022" %}
 
-- Fixed 'Element Material Quantities'.
-- Added Types.SectionBox type.
+- Fixed unit conversions on {% include ltr/comp.html uuid='8a162ee6-' %} component
+- Added `Types.SectionBox` type.
 - Fixed [#531](https://github.com/mcneel/rhino.inside-revit/issues/531).
+
+{% include ltr/release-header.html title="v1.5 RC1" version="v1.5.8056.10037" pre_release=true time="21/01/2022" %}
+
+- Minor Fixes and Improvements
 
 {% include ltr/release-header.html title="v1.4 Stable" version="v1.4.8053.19650" time="21/01/2022" %}
 
