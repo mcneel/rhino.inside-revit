@@ -5,7 +5,7 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.5 RC2" version="v1.5.8067.36154" pre_release=true time="01/02/2022" %}
+{% include ltr/release-header.html title="v1.5 RC2" version="v1.5.8067.24664" pre_release=true time="01/02/2022" %}
 
 - Fixed unit conversions on {% include ltr/comp.html uuid='8a162ee6-' %} component
 - Added `Types.SectionBox` type.
