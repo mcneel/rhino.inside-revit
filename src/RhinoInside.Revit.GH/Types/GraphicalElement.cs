@@ -83,9 +83,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value is ARDB.Element)
       {
-        var bbox = BoundingBox;
-        if (bbox.Transform(xform))
-          return bbox;
+        var box = Box;
+        if (box.Transform(xform))
+          return box.BoundingBox;
       }
 
       return NaN.BoundingBox;
