@@ -667,15 +667,18 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var document))
       {
-        StartTransaction(document.Value);
-        Iterate
-        (
-          DA,
-          document.Value,
-          (ARDB.Document doc, ref ARDB.Element current) => TrySolveInstance(DA, doc, ref current)
-        );
+        if (document.IsValid)
+        {
+          StartTransaction(document.Value);
+          Iterate
+          (
+            DA,
+            document.Value,
+            (ARDB.Document doc, ref ARDB.Element current) => TrySolveInstance(DA, doc, ref current)
+          );
+        }
       }
-      else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "There is no active Revit document");
+      else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input parameter Document failed to collect data");
     }
 
     delegate void CommitAction(ARDB.Document doc, ref ARDB.Element element);
