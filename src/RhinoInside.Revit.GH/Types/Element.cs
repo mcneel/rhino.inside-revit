@@ -195,36 +195,41 @@ namespace RhinoInside.Revit.GH.Types
           return activator(element);
       }
 
-      if (DocumentExtension.AsCategory(element) is ARDB.Category category)
-        return new Category(category);
-
-      if (element is ARDB.PropertySetElement pset)
+      if (element.Category is null)
       {
-        if (StructuralAssetElement.IsValidElement(element))   return new StructuralAssetElement(pset);
-        else if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
+        if (DocumentExtension.AsCategory(element) is ARDB.Category category)
+          return new Category(category);
       }
-      else if (GraphicalElement.IsValidElement(element))
+      else if (element.Category.Id.TryGetBuiltInCategory(out var bic))
       {
-
-        if (element.Category.Id.TryGetBuiltInCategory(out var bic))
+        switch (bic)
         {
-          switch (bic)
-          {
 #if !REVIT_2021
-            case ARDB.BuiltInCategory.OST_IOS_GeoSite:
-              if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element as ARDB.BasePoint);
-              if (BasePoint.IsValidElement(element)) return new BasePoint(element as ARDB.BasePoint);
-              break;
+          case ARDB.BuiltInCategory.OST_IOS_GeoSite:
+            if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element);
+            if (BasePoint.IsValidElement(element)) return new BasePoint(element as ARDB.BasePoint);
+            break;
 #endif
-            case ARDB.BuiltInCategory.OST_VolumeOfInterest:
-              if (ScopeBox.IsValidElement(element)) return new ScopeBox(element);
-              break;
-            case ARDB.BuiltInCategory.OST_SectionBox:
-              if (SectionBox.IsValidElement(element)) return new SectionBox(element);
-              break;
-          }
-        }
+          case ARDB.BuiltInCategory.OST_VolumeOfInterest:
+            if (ScopeBox.IsValidElement(element)) return new ScopeBox(element);
+            break;
 
+          case ARDB.BuiltInCategory.OST_SectionBox:
+            if (SectionBox.IsValidElement(element)) return new SectionBox(element);
+            break;
+
+          case ARDB.BuiltInCategory.OST_PropertySet:
+            if (element is ARDB.PropertySetElement pset)
+            {
+              if (StructuralAssetElement.IsValidElement(element)) return new StructuralAssetElement(pset);
+              else if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
+            }
+            break;
+        }
+      }
+
+      if (GraphicalElement.IsValidElement(element))
+      {
         if (InstanceElement.IsValidElement(element))
         {
           if (Panel.IsValidElement(element)) return new Panel(element as ARDB.FamilyInstance);

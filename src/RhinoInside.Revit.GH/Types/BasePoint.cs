@@ -119,29 +119,29 @@ namespace RhinoInside.Revit.GH.Types
 namespace RhinoInside.Revit.GH.Types
 {
 #if REVIT_2021
-  using DBInternalOrigin = Autodesk.Revit.DB.InternalOrigin;
+  using ARDB_InternalOrigin = ARDB.InternalOrigin;
 #elif REVIT_2020
-  using DBInternalOrigin = Autodesk.Revit.DB.Element;
+  using ARDB_InternalOrigin = ARDB.Element;
 #else
-  using DBInternalOrigin = Autodesk.Revit.DB.BasePoint;
+  using ARDB_InternalOrigin = ARDB.BasePoint;
 #endif
 
   [Kernel.Attributes.Name("Internal Origin")]
   public class InternalOrigin : GraphicalElement
   {
-    protected override Type ValueType => typeof(DBInternalOrigin);
-    public new DBInternalOrigin Value => base.Value as DBInternalOrigin;
+    protected override Type ValueType => typeof(ARDB_InternalOrigin);
+    public new ARDB_InternalOrigin Value => base.Value as ARDB_InternalOrigin;
 
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
-      return element is DBInternalOrigin &&
+      return element is ARDB_InternalOrigin &&
              element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_IOS_GeoSite;
     }
 
     public InternalOrigin() { }
     public InternalOrigin(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
-    public InternalOrigin(DBInternalOrigin point) : base(point)
+    public InternalOrigin(ARDB_InternalOrigin point) : base(point)
     {
 #if !REVIT_2021
       if (!IsValidElement(point))
@@ -153,7 +153,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is DBInternalOrigin point)
+        if (Value is ARDB_InternalOrigin point)
           return point.Category.Name;
 
         return base.DisplayName;
@@ -161,13 +161,13 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_PreviewData
-    public override BoundingBox ClippingBox => Value is DBInternalOrigin ?
+    public override BoundingBox ClippingBox => Value is ARDB_InternalOrigin ?
       new BoundingBox(Point3d.Origin, Point3d.Origin):
       NaN.BoundingBox;
 
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (Value is DBInternalOrigin)
+      if (Value is ARDB_InternalOrigin)
       {
         var location = Location;
         var pointStyle = Rhino.Display.PointStyle.ActivePoint;
@@ -182,7 +182,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public override Plane Location => Value is DBInternalOrigin ?
+    public override Plane Location => Value is ARDB_InternalOrigin ?
       Plane.WorldXY : base.Location;
     #endregion
   }
