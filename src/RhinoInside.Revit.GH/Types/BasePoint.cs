@@ -141,13 +141,16 @@ namespace RhinoInside.Revit.GH.Types
 
     public InternalOrigin() { }
     public InternalOrigin(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
-    public InternalOrigin(ARDB_InternalOrigin point) : base(point)
+
+#if REVIT_2021
+    public InternalOrigin(ARDB_InternalOrigin point) : base(point) {}
+#else
+    public InternalOrigin(ARDB.Element point) : base(point)
     {
-#if !REVIT_2021
       if (!IsValidElement(point))
         throw new ArgumentException("Invalid Element", nameof(point));
-#endif
     }
+#endif
 
     public override string DisplayName
     {
