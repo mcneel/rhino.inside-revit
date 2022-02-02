@@ -205,18 +205,34 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (GraphicalElement.IsValidElement(element))
       {
+
+        if (element.Category.Id.TryGetBuiltInCategory(out var bic))
+        {
+          switch (bic)
+          {
+#if !REVIT_2021
+            case ARDB.BuiltInCategory.OST_IOS_GeoSite:
+              if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element as ARDB.BasePoint);
+              if (BasePoint.IsValidElement(element)) return new BasePoint(element as ARDB.BasePoint);
+              break;
+#endif
+            case ARDB.BuiltInCategory.OST_VolumeOfInterest:
+              if (ScopeBox.IsValidElement(element)) return new ScopeBox(element);
+              break;
+            case ARDB.BuiltInCategory.OST_SectionBox:
+              if (SectionBox.IsValidElement(element)) return new SectionBox(element);
+              break;
+          }
+        }
+
         if (InstanceElement.IsValidElement(element))
         {
-          if (Panel.IsValidElement(element))                  return new Panel(element as ARDB.FamilyInstance);
+          if (Panel.IsValidElement(element)) return new Panel(element as ARDB.FamilyInstance);
 
           return new InstanceElement(element);
         }
-#if !REVIT_2021
-        else if (InternalOrigin.IsValidElement(element))      return new InternalOrigin(element as ARDB.BasePoint);
-        else if (BasePoint.IsValidElement(element))           return new BasePoint(element as ARDB.BasePoint);
-#endif
-        else if (SectionBox.IsValidElement(element))          return new SectionBox(element);
-        else if (GeometricElement.IsValidElement(element))    return new GeometricElement(element);
+        if (GeometricElement.IsValidElement(element))
+            return new GeometricElement(element);
 
         return new GraphicalElement(element);
       }
