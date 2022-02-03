@@ -603,13 +603,25 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Rhino UI
+    [ThreadStatic]
+    static bool InHostContext = false;
+
     /// <summary>
     /// Executes the specified delegate on Revit UI context.
     /// </summary>
     /// <param name="action">A delegate that contains a method to be called in Revit API context.</param>
     /// <since>1.0</since>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)/*, Obsolete("Please use Revit.Invoke method. This method will be removed on v1.5")*/]
-    public static void InvokeInHostContext(Action action) => core.InvokeInHostContext(action);
+    public static void InvokeInHostContext(Action action)
+    {
+      if (InHostContext) action();
+      else try
+      {
+        InHostContext = true;
+        core.InvokeInHostContext(action);
+      }
+      finally { InHostContext = false; }
+    }
 
     /// <summary>
     /// Executes the specified delegate on Revit UI context.
@@ -619,7 +631,16 @@ namespace RhinoInside.Revit
     /// <returns>The return value from the function being invoked.</returns>
     /// <since>1.0</since>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)/*, Obsolete("Please use Revit.Invoke method. This method will be removed on v1.5")*/]
-    public static T InvokeInHostContext<T>(Func<T> func) => core.InvokeInHostContext(func);
+    public static T InvokeInHostContext<T>(Func<T> func)
+    {
+      if (InHostContext) return func();
+      else try
+      {
+        InHostContext = true;
+        return core.InvokeInHostContext(func);
+      }
+      finally { InHostContext = false; }
+    }
 
     internal static bool Exposed
     {
