@@ -387,10 +387,10 @@ namespace RhinoInside.Revit.GH.Types
         var axis = NaN.Vector3d;
         var perp = NaN.Vector3d;
 
-        if (Value is ARDB.Grid grid)
+        if (Curve is Curve curve)
         {
-          var start = grid.Curve.Evaluate(0.0, normalized: true).ToPoint3d();
-          var end = grid.Curve.Evaluate(1.0, normalized: true).ToPoint3d();
+          var start = curve.PointAtStart;
+          var end = curve.PointAtEnd;
           axis = end - start;
           origin = start + (axis * 0.5);
           perp = axis.PerpVector();
@@ -400,16 +400,15 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Curve Curve => Value?.Curve.ToCurve();
+    public override Curve Curve => Value?.Curve.CreateReversed().ToCurve();
 
     public override Surface Surface
     {
       get
       {
-        if (Value is ARDB.Grid grid)
+        if (Curve is Curve curve)
         {
           var bbox = BoundingBox;
-          var curve = grid.Curve.ToCurve();
 
           var curveA = curve.DuplicateCurve(); curveA.Translate(0.0, 0.0, bbox.Min.Z - curve.PointAtStart.Z);
           var curveB = curve.DuplicateCurve(); curveB.Translate(0.0, 0.0, bbox.Max.Z - curve.PointAtStart.Z);

@@ -1,6 +1,4 @@
 using System;
-using System.Linq;
-using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -9,9 +7,11 @@ namespace RhinoInside.Revit.GH.Components.Grids
 {
   using Convert.Geometry;
   using ElementTracking;
-  using Kernel.Attributes;
+  using Grasshopper.Kernel.Parameters;
+  using RhinoInside.Revit.External.DB.Extensions;
+  using RhinoInside.Revit.GH.Exceptions;
 
-  public class GridByCurve : ReconstructElementComponent
+  public class GridByCurve : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("CEC2B3DF-C6BA-414F-BECE-E3DAEE2A3F2C");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -26,96 +26,159 @@ namespace RhinoInside.Revit.GH.Components.Grids
     )
     { }
 
-    public override void OnStarted(ARDB.Document document)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      base.OnStarted(document);
+      new ParamDefinition(new Parameters.Document() { Optional = true }, ParamRelevance.Occasional),
+      new ParamDefinition
+      (
+        new Param_Curve()
+        {
+          Name = "Curve",
+          NickName = "C",
+          Description = "Grid curve",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_String()
+        {
+          Name = "Name",
+          NickName = "N",
+          Description = "Grid Name",
+        },
+        ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ElementType()
+        {
+          Name = "Type",
+          NickName = "T",
+          Description = "Grid Type",
+          Optional = true,
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Grids
+        },
+        ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Level()
+        {
+          Name = "Template",
+          NickName = "T",
+          Description = "Template Level",
+          Optional = true
+        },
+        ParamRelevance.Occasional
+      ),
+    };
 
-      if (Params.Input<IGH_Param>("Name").DataType != GH_ParamData.@void)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.Grid()
+        {
+          Name = _Grid_,
+          NickName = _Grid_.Substring(0, 1),
+          Description = $"Output {_Grid_}",
+        }
+      ),
+    };
+
+    const string _Grid_ = "Grid";
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+      ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+      ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+      ARDB.BuiltInParameter.DATUM_TEXT
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      // Input
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return;
+      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
+      if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.GridType type, doc, ARDB.ElementTypeGroup.GridType)) return;
+      Params.TryGetData(DA, "Template", out ARDB.Grid template);
+
+      // Previous Output
+      Params.ReadTrackedElement(_Grid_, doc.Value, out ARDB.Grid grid);
+
+      StartTransaction(doc.Value);
       {
-        // Rename all previous grids to avoid name conflicts
-        var grids = Params.TrackedElements<ARDB.Grid>("Grid", document);
-        var pinnedGrids = grids.Where(x => x.Pinned);
+        var untracked = Existing(_Grid_, doc.Value, ref grid, name, categoryId: ARDB.BuiltInCategory.OST_Grids);
 
-        foreach (var grid in pinnedGrids)
-          grid.Name = Guid.NewGuid().ToString();
+        grid = Reconstruct(grid, doc.Value, curve, type, name, template);
+
+        Params.WriteTrackedElement(_Grid_, doc.Value, untracked ? default : grid);
+        DA.SetData(_Grid_, grid);
       }
     }
 
-    void ReconstructGridByCurve
-    (
-      [Optional, NickName("DOC")]
-      ARDB.Document document,
-
-      [Description("New Grid")]
-      ref ARDB.Grid grid,
-
-      Curve curve,
-      Optional<ARDB.GridType> type,
-      Optional<string> name
-    )
+    bool Reuse(ARDB.Grid grid, Curve curve, ARDB.GridType type, ARDB.Grid template)
     {
-      SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.GridType, nameof(type));
-      if (name.HasValue && name.Value == default) return;
+      if (grid is null) return false;
+
+      var tol = GeometryObjectTolerance.Internal;
+      var gridCurve = grid.Curve.CreateReversed();
+      var newCurve = curve.ToCurve();
+      if (!gridCurve.IsAlmostEqualTo(newCurve, tol.VertexTolerance))
+        return false;
+
+      if (type is object && grid.GetTypeId() != type.Id) grid.ChangeTypeId(type.Id);
+      grid.CopyParametersFrom(template, ExcludeUniqueProperties);
+      return true;
+    }
+
+    ARDB.Grid Create(ARDB.Document doc, Curve curve, ARDB.GridType type, ARDB.Grid template)
+    {
+      var grid = default(ARDB.Grid);
 
       var tol = GeometryObjectTolerance.Model;
-      if
-      (
-        !(curve.IsLinear(tol.VertexTolerance) || curve.IsArc(tol.VertexTolerance)) ||
-        !curve.TryGetPlane(out var axisPlane, tol.VertexTolerance) ||
-        axisPlane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
-      )
-        ThrowArgumentException(nameof(curve), "Curve must be a horizontal line or arc curve.");
-
-      var newGrid = grid;
       if (curve.TryGetLine(out var line, tol.VertexTolerance))
       {
-        var newLine = line.ToLine();
-        if
-        (
-          !(grid?.Curve is ARDB.Line oldLine) ||
-          !oldLine.GetEndPoint(0).IsAlmostEqualTo(newLine.GetEndPoint(0)) ||
-          !oldLine.GetEndPoint(1).IsAlmostEqualTo(newLine.GetEndPoint(1))
-        )
-          newGrid = ARDB.Grid.Create(document, line.ToLine());
+        grid = ARDB.Grid.Create(doc, line.ToLine());
       }
       else if (curve.TryGetArc(out var arc, tol.VertexTolerance))
       {
-        var newArc = arc.ToArc();
-        if
-        (
-          !(grid?.Curve is ARDB.Arc oldArc) ||
-          !oldArc.GetEndPoint(0).IsAlmostEqualTo(newArc.GetEndPoint(0)) ||
-          !oldArc.GetEndPoint(1).IsAlmostEqualTo(newArc.GetEndPoint(1)) ||
-          !oldArc.Evaluate(0.5, true).IsAlmostEqualTo(newArc.Evaluate(0.5, true))
-        )
-          newGrid = ARDB.Grid.Create(document, newArc);
+        grid = ARDB.Grid.Create(doc, arc.ToArc());
       }
       else
       {
-        ThrowArgumentException(nameof(curve), "Curve must be a horizontal line or arc curve.");
+        throw new RuntimeArgumentException("Curve", "Curve must be a horizontal line or arc curve.");
       }
 
-      ChangeElementTypeId(ref newGrid, type.Value.Id);
+      if (type is object && type.Id != grid.GetTypeId())
+        grid.ChangeTypeId(type.Id);
 
-      if (name.HasValue && newGrid.Name != name.Value)
-        newGrid.Name = name.Value;
+      return grid;
+    }
 
-      var parametersMask = name.IsMissing ?
-        new ARDB.BuiltInParameter[]
+    ARDB.Grid Reconstruct(ARDB.Grid grid, ARDB.Document doc, Curve curve, ARDB.GridType type, string name, ARDB.Grid template)
+    {
+      if (!Reuse(grid, curve, type, template))
+      {
+        var newGrid = Create(doc, curve, type, template);
+        grid.ReplaceElement(newGrid, ExcludeUniqueProperties);
+
+        if (grid is object)
         {
-          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          ARDB.BuiltInParameter.ELEM_TYPE_PARAM
-        } :
-        new ARDB.BuiltInParameter[]
-        {
-          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
-          ARDB.BuiltInParameter.DATUM_TEXT
-        };
+          name = name ?? grid.Name;
+          grid.Document.Delete(grid.Id);
+        }
 
-      ReplaceElement(ref grid, newGrid, parametersMask);
+        grid = newGrid;
+      }
+
+      if (name is object && grid.Name != name)
+        grid.Name = name;
+
+      return grid;
     }
   }
 }

@@ -455,7 +455,7 @@ namespace RhinoInside.Revit.GH.Components
         try
         {
           if (chain.HasStarted())
-            Status = IsAborted || RunCount <= 0 ? chain.RollBack() : chain.Commit();
+            Status = IsAborted ? chain.RollBack() : chain.Commit();
         }
         catch (Exception e)
         {
