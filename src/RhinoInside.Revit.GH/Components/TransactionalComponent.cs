@@ -13,6 +13,8 @@ using ERDB = RhinoInside.Revit.External.DB;
 namespace RhinoInside.Revit.GH.Components
 {
   using ElementTracking;
+  using RhinoInside.Revit.External.DB.Extensions;
+
   class TransactionalComponentFailuresPreprocessor : ARDB.IFailuresPreprocessor
   {
     readonly IGH_ActiveObject ActiveObject;
@@ -549,6 +551,46 @@ namespace RhinoInside.Revit.GH.Components
         output.CloseTrackingParam();
 
       base.AfterSolveInstance();
+    }
+
+    /// <summary>
+    /// Check if there is a non tracked element with the desired name.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="paramName"></param>
+    /// <param name="document"></param>
+    /// <param name="elementName"></param>
+    /// <param name="element"></param>
+    /// <param name="categoryId"></param>
+    /// <returns></returns>
+    protected bool Existing<T>(string paramName, ARDB.Document document, ref T element, string elementName, string parentName = default, ARDB.BuiltInCategory? categoryId = default)
+      where T : ARDB.Element
+    {
+      if (element?.Name != elementName)
+      {
+        // Query for an existing element with the requested category and name.
+        if (!string.IsNullOrWhiteSpace(elementName) && document.TryGetElement(out T existing, elementName, parentName, categoryId))
+        {
+          if (existing.Id != element?.Id)
+          {
+            if (Params.IsTrackedElement(paramName, existing))
+            {
+              // If existing is still tracked change its name to avoid collisions.
+              existing.Name = existing.UniqueId;
+            }
+            else
+            {
+              if (TrackingMode != TrackingMode.Disabled)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Reusing but not tracking {existing.GetType().Name} '{elementName}'");
+
+              element = existing;
+              return true;
+            }
+          }
+        }
+      }
+
+      return false;
     }
 
     #region IGH_TrackingComponent

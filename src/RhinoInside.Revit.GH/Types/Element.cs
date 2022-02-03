@@ -195,28 +195,49 @@ namespace RhinoInside.Revit.GH.Types
           return activator(element);
       }
 
-      if (DocumentExtension.AsCategory(element) is ARDB.Category category)
-        return new Category(category);
-
-      if (element is ARDB.PropertySetElement pset)
+      if (element.Category is null)
       {
-        if (StructuralAssetElement.IsValidElement(element))   return new StructuralAssetElement(pset);
-        else if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
+        if (DocumentExtension.AsCategory(element) is ARDB.Category category)
+          return new Category(category);
       }
-      else if (GraphicalElement.IsValidElement(element))
+      else if (element.Category.Id.TryGetBuiltInCategory(out var bic))
+      {
+        switch (bic)
+        {
+#if !REVIT_2021
+          case ARDB.BuiltInCategory.OST_IOS_GeoSite:
+            if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element);
+            if (BasePoint.IsValidElement(element)) return new BasePoint(element as ARDB.BasePoint);
+            break;
+#endif
+          case ARDB.BuiltInCategory.OST_VolumeOfInterest:
+            if (ScopeBox.IsValidElement(element)) return new ScopeBox(element);
+            break;
+
+          case ARDB.BuiltInCategory.OST_SectionBox:
+            if (SectionBox.IsValidElement(element)) return new SectionBox(element);
+            break;
+
+          case ARDB.BuiltInCategory.OST_PropertySet:
+            if (element is ARDB.PropertySetElement pset)
+            {
+              if (StructuralAssetElement.IsValidElement(element)) return new StructuralAssetElement(pset);
+              else if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
+            }
+            break;
+        }
+      }
+
+      if (GraphicalElement.IsValidElement(element))
       {
         if (InstanceElement.IsValidElement(element))
         {
-          if (Panel.IsValidElement(element))                  return new Panel(element as ARDB.FamilyInstance);
+          if (Panel.IsValidElement(element)) return new Panel(element as ARDB.FamilyInstance);
 
           return new InstanceElement(element);
         }
-#if !REVIT_2021
-        else if (InternalOrigin.IsValidElement(element))      return new InternalOrigin(element as ARDB.BasePoint);
-        else if (BasePoint.IsValidElement(element))           return new BasePoint(element as ARDB.BasePoint);
-#endif
-        else if (SectionBox.IsValidElement(element))          return new SectionBox(element);
-        else if (GeometricElement.IsValidElement(element))    return new GeometricElement(element);
+        if (GeometricElement.IsValidElement(element))
+            return new GeometricElement(element);
 
         return new GraphicalElement(element);
       }
@@ -451,34 +472,42 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual bool CanBeRenamed() => Value.CanBeRenamed();
 
-    public bool SetIncrementalName(string name)
+    public virtual string NextIncrementalName(string prefix)
     {
-      if (!ARDB.NamingUtils.IsValidName(name))
-        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(name));
-
       if (Value is ARDB.Element element)
       {
-        {
-          var index = name.LastIndexOf(' ');
-          if (index >= 0)
-          {
-            if (int.TryParse(name.Substring(index + 1), out var _))
-              name = name.Substring(0, index);
-          }
-        }
+        var categoryId = element.Category is ARDB.Category category &&
+          category.Id.TryGetBuiltInCategory(out var builtInCategory) ?
+          builtInCategory : default(ARDB.BuiltInCategory?);
 
+        var nextName = element.Document.NextIncrementalName
+        (
+          prefix,
+          element.GetType(),
+          element is ARDB.ElementType type ? type.GetFamilyName() : default,
+          categoryId
+        );
+
+        return nextName;
+      }
+
+      return default;
+    }
+
+    public bool SetIncrementalName(string prefix)
+    {
+      if (!ARDB.NamingUtils.IsValidName(prefix))
+        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(prefix));
+
+      if (Value is ARDB.Element)
+      {
+        var prefixed = DocumentExtension.TryParseNameId(Name, out var elementPrefix, out var _);
+        if (!prefixed || prefix != elementPrefix)
         {
-          int index = 0;
-          while (true)
+          if (NextIncrementalName(prefix) is string next)
           {
-            try
-            {
-              if (index == 0) { index++; element.Name = name; }
-              else element.Name = $"{name} {index++}";
-              return true;
-            }
-            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-            catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+            Name = next;
+            return true;
           }
         }
       }

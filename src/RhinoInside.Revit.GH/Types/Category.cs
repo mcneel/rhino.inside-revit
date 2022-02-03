@@ -12,6 +12,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Units;
   using Convert.System.Drawing;
   using External.DB.Extensions;
+  using System.Linq;
 
   [Kernel.Attributes.Name("Category")]
   public class Category : Element, Bake.IGH_BakeAwareElement
@@ -391,6 +392,23 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
+
+    public override string NextIncrementalName(string prefix)
+    {
+      if (APIObject is ARDB.Category category)
+      {
+        var nextName = category.Parent?.SubCategories.
+          Cast<ARDB.Category>().
+          Select(x => x.Name).
+          WhereNamePrefixedWith(prefix).
+          NextNameOrDefault() ?? prefix;
+
+        return nextName;
+      }
+
+      return default;
+    }
+
     public override string Name
     {
       get

@@ -61,6 +61,16 @@ namespace RhinoInside.Revit.GH.ElementTracking
 
       return Enumerable.Empty<T>();
     }
+
+    public static bool IsTrackedElement<T>(this GH_ComponentParamServer parameters, string name, T value)
+      where T : ARDB.Element
+    {
+      var index = parameters.Output.IndexOf(name, out var parameter);
+      if (parameter is IGH_TrackingParam tracking)
+        return tracking.IsTrackedElement(value);
+
+      return false;
+    }
   }
 
   internal static class TrackingParamGooExtensions
@@ -85,7 +95,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
     public static void WriteTrackedElement<T>(this GH_ComponentParamServer parameters, string name, ARDB.Document document, T value)
       where T : Types.IGH_ElementId
     {
-      TrackingParamElementExtensions.WriteTrackedElement(parameters, name, document, value.Value as ARDB.Element);
+      TrackingParamElementExtensions.WriteTrackedElement(parameters, name, document, value?.Value as ARDB.Element);
     }
 
     public static IEnumerable<T> TrackedElements<T>(this GH_ComponentParamServer parameters, string name, ARDB.Document document)
@@ -485,6 +495,14 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (TrackingMode > TrackingMode.Disabled)
         ElementStreams[doc].Write(element as R);
+    }
+
+    bool IGH_TrackingParam.IsTrackedElement<TInput>(TInput element)
+    {
+      if (TrackingMode > TrackingMode.Disabled)
+        return ElementStreams[element.Document].Contains(element as R);
+
+      return false;
     }
     #endregion
   }

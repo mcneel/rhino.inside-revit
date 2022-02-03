@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
@@ -11,24 +7,24 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using ARDBSectionBox = Autodesk.Revit.DB.Element;
+  using ARDB_SectionBox = ARDB.Element;
 
   [Kernel.Attributes.Name("Section Box")]
   class SectionBox : GraphicalElement
   {
-    protected override Type ValueType => typeof(ARDBSectionBox);
-    public new ARDBSectionBox Value => base.Value as ARDBSectionBox;
+    protected override Type ValueType => typeof(ARDB_SectionBox);
+    public new ARDB_SectionBox Value => base.Value as ARDB_SectionBox;
 
-    protected override bool SetValue(ARDBSectionBox element) => IsValidElement(element) && base.SetValue(element);
-    public static new bool IsValidElement(ARDBSectionBox element)
+    protected override bool SetValue(ARDB_SectionBox element) => IsValidElement(element) && base.SetValue(element);
+    public static new bool IsValidElement(ARDB_SectionBox element)
     {
-      return element.GetType() == typeof(ARDBSectionBox) &&
+      return element.GetType() == typeof(ARDB_SectionBox) &&
              element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_SectionBox;
     }
 
     public SectionBox() { }
     public SectionBox(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
-    public SectionBox(ARDBSectionBox box) : base(box)
+    public SectionBox(ARDB_SectionBox box) : base(box)
     {
       if (!IsValidElement(box))
         throw new ArgumentException("Invalid Element", nameof(box));
@@ -48,7 +44,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDBSectionBox box)
+        if (Value is ARDB_SectionBox box)
         {
           if (box.GetFirstDependent<ARDB.View>() is ARDB.View3D view)
           {
@@ -66,7 +62,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDBSectionBox box)
+        if (Value is ARDB_SectionBox box)
         {
           if (box.GetFirstDependent<ARDB.View>() is ARDB.View3D view)
           {

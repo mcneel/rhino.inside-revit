@@ -47,8 +47,8 @@ namespace RhinoInside.Revit.GH.Components.Materials
           Name = "Name",
           NickName = "N",
           Description = "Asset Name",
-          Optional = true
-        }
+        },
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -92,9 +92,10 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       StartTransaction(doc.Value);
       {
+        var untracked = Existing(_Asset_, doc.Value, ref asset, name);
         asset = Reconstruct(asset, doc.Value, name, template);
 
-        Params.WriteTrackedElement(_Asset_, doc.Value, asset);
+        Params.WriteTrackedElement(_Asset_, doc.Value, untracked ? default : asset);
         DA.SetData(_Asset_, asset);
       }
     }
@@ -102,7 +103,8 @@ namespace RhinoInside.Revit.GH.Components.Materials
     bool Reuse(ARDB.AppearanceAssetElement assetElement, string name, ARDB.AppearanceAssetElement template)
     {
       if (assetElement is null) return false;
-      if (name is object) assetElement.Name = name;
+      if (name is object) { if (assetElement.Name != name) assetElement.Name = name; }
+      else assetElement.SetIncrementalName(template?.Name ?? _Asset_);
 
       if (template is object)
       {
@@ -119,16 +121,12 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       // Make sure the name is unique
       {
-        if (name is null)
-          name = template?.Name ?? schema;
-
-        name = doc.GetNamesakeElements
+        name = doc.NextIncrementalName
         (
-          typeof(ARDB.AppearanceAssetElement), name, categoryId: ARDB.BuiltInCategory.INVALID
-        ).
-        Select(x => x.Name).
-        WhereNamePrefixedWith(name).
-        NextNameOrDefault() ?? name;
+          name ?? template?.Name ?? _Asset_,
+          typeof(ARDB.AppearanceAssetElement),
+          categoryId: ARDB.BuiltInCategory.INVALID
+        );
       }
 
       // Try to duplicate template

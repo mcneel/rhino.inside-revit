@@ -101,31 +101,23 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var element = default(Types.Element);
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element)) return;
 
       // Set
+      if
+      (
+        Params.GetData(DA, "Name", out string name) &&
+        element.IsValid && element.Name != name
+      )
       {
-        var _Name_ = Params.IndexOfInputParam("Name");
-        if (_Name_ >= 0 && Params.Input[_Name_].DataType != GH_ParamData.@void)
-        {
-          var name = default(string);
-          if (DA.GetData(_Name_, ref name) && name != string.Empty)
-          {
-            StartTransaction(element.Document);
-            ElementSetName(element, name);
-          }
-        }
+        StartTransaction(element.Document);
+        ElementSetName(element, name);
       }
 
       // Get
       {
         DA.SetData("Element", element);
-
-        var _Name_ = Params.IndexOfOutputParam("Name");
-        if(_Name_ >= 0)
-          DA.SetData(_Name_, element.Name);
+        Params.TrySetData(DA, "Name", () => element.Name);
       }
     }
 
@@ -235,9 +227,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var element = default(Types.Element);
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element)) return;
 
       DA.SetData("Element", element);
       DA.SetData("Category", element.Category);
@@ -314,14 +304,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ),
     };
 
-
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetDataList(DA, "Element", out IList<Types.Element> elements)) return;
 
       if (Params.GetDataList(DA, "Type", out IList<Types.ElementType> types))
       {
-        var newTypes = Params.IndexOfInputParam("Type") < 0 ? default : new List<Types.ElementType>();
+        var outputTypes = Params.IndexOfOutputParam("Type") < 0 ? default : new List<Types.ElementType>();
         var typesSets = new Dictionary<Types.ElementType, List<ARDB.ElementId>>();
 
         int index = 0;
@@ -329,14 +318,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           if (element is object && types.ElementAtOrLast(index) is Types.ElementType type)
           {
-            newTypes?.Add(element is object ? type : default);
+            outputTypes?.Add(element is object ? type : default);
 
             if (!typesSets.TryGetValue(type, out var entry))
               typesSets.Add(type, new List<ARDB.ElementId> { element.Id });
             else
               entry.Add(element.Id);
           }
-          else newTypes?.Add(default);
+          else outputTypes?.Add(default);
 
           index++;
         }
@@ -365,8 +354,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
           )
         );
 
-        if (newTypes is object)
-          DA.SetDataList("Type", newTypes);
+        if (outputTypes is object)
+          Params.TrySetDataList(DA, "Type", () => outputTypes);
       }
       else
       {

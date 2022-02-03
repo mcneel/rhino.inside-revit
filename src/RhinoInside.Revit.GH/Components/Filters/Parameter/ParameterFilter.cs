@@ -53,8 +53,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
           Name = "Name",
           NickName = "N",
           Description = "Selection filter name",
-          Optional = true,
-        }
+        },
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -108,10 +108,12 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
       StartTransaction(doc.Value);
       {
+        var untracked = Existing(_ParameterFilter_, doc.Value, ref ruleFilter, name);
+
         var categoryIds = categories?.Where(x => doc.Value.IsEquivalent(x.Document)).Select(x => x.Id).ToList();
         ruleFilter = Reconstruct(ruleFilter, doc.Value, name, categoryIds, filter?.Value, default);
 
-        Params.WriteTrackedElement(_ParameterFilter_, doc.Value, ruleFilter);
+        Params.WriteTrackedElement(_ParameterFilter_, doc.Value, untracked ? default : ruleFilter);
         DA.SetData(_ParameterFilter_, ruleFilter);
       }
     }
@@ -126,7 +128,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
     )
     {
       if (ruleFilter is null) return false;
-      if (name is object) ruleFilter.Name = name;
+      if (name is object) { if (ruleFilter.Name != name) ruleFilter.Name = name; }
+      else ruleFilter.SetIncrementalName(template?.Name ?? _ParameterFilter_);
       if (categoryIds is object) ruleFilter.SetCategories(categoryIds);
       if (filter is object) ruleFilter.SetElementFilter(filter);
       else ruleFilter.ClearRules();
@@ -147,16 +150,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
       // Make sure the name is unique
       {
-        if (name is null)
-          name = template?.Name ?? _ParameterFilter_;
-
-        name = doc.GetNamesakeElements
+        name = doc.NextIncrementalName
         (
-          typeof(ARDB.FilterElement), name
-        ).
-        Select(x => x.Name).
-        WhereNamePrefixedWith(name).
-        NextNameOrDefault() ?? name;
+          name ?? template?.Name ?? _ParameterFilter_,
+          typeof(ARDB.ParameterFilterElement)
+        );
       }
 
       // Try to duplicate template
@@ -166,9 +164,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         (
           template.Document,
           new ARDB.ElementId[] { template.Id },
-          doc,
-          default,
-          default
+          doc, default, default
         );
 
         ruleFilter = ids.Select(x => doc.GetElement(x)).OfType<ARDB.ParameterFilterElement>().FirstOrDefault();

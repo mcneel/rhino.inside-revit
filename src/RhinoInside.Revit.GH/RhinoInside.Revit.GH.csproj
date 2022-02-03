@@ -216,8 +216,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Types\AssemblyInstance.cs" />
-    <Compile Include="Types\SectionBox.cs" />
-    <Compile Include="Types\Workset.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_Enum.cs" />
@@ -337,6 +335,8 @@
     <Compile Include="Types\ProjectLocation.cs" />
     <Compile Include="Types\Roof.cs" />
     <Compile Include="Types\DataType.cs" />
+    <Compile Include="Types\ScopeBox.cs" />
+    <Compile Include="Types\SectionBox.cs" />
     <Compile Include="Types\Sketch.cs" />
     <Compile Include="Types\SketchPlane.cs" />
     <Compile Include="Types\Material.cs" />
@@ -351,6 +351,7 @@
     <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\Mullion.cs" />
     <Compile Include="Types\Wall.cs" />
+    <Compile Include="Types\Workset.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Types
         return $"Revit {name?.Name ?? type.Name}";
       }
     }
-    string IGH_Goo.TypeDescription => $"Represents a Revit {((IGH_Goo) this).TypeName.ToLowerInvariant()}";
+    string IGH_Goo.TypeDescription => $"Represents a {((IGH_Goo) this).TypeName.ToLowerInvariant()}";
     public virtual bool IsValid => Document.IsValid();
     public virtual string IsValidWhyNot => document.IsValidWithLog(out var log) ? default : log;
     IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) (this as ICloneable)?.Clone();

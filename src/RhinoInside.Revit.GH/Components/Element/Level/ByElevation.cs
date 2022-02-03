@@ -39,6 +39,16 @@ namespace RhinoInside.Revit.GH.Components.Levels
       ),
       new ParamDefinition
       (
+        new Param_String()
+        {
+          Name = "Name",
+          NickName = "N",
+          Description = "Level Name",
+        },
+        ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
         new Parameters.ElementType()
         {
           Name = "Type",
@@ -48,16 +58,6 @@ namespace RhinoInside.Revit.GH.Components.Levels
           SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Levels
         },
         ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
-        new Param_String()
-        {
-          Name = "Name",
-          NickName = "N",
-          Description = "Level Name",
-          Optional = true,
-        }
       ),
       new ParamDefinition
       (
@@ -100,9 +100,9 @@ namespace RhinoInside.Revit.GH.Components.Levels
     {
       // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
-      if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.LevelType type, doc, ARDB.ElementTypeGroup.LevelType)) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
       if (!Parameters.Elevation.GetData(this, DA, "Elevation", out var height, doc)) return;
+      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
+      if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.LevelType type, doc, ARDB.ElementTypeGroup.LevelType)) return;
       Params.TryGetData(DA, "Template", out ARDB.Level template);
 
       // Previous Output
@@ -110,9 +110,10 @@ namespace RhinoInside.Revit.GH.Components.Levels
 
       StartTransaction(doc.Value);
       {
+        var untracked = Existing(_Level_, doc.Value, ref level, name, categoryId: ARDB.BuiltInCategory.OST_Levels);
         level = Reconstruct(level, doc.Value, height / Revit.ModelUnits, type, name, template);
 
-        Params.WriteTrackedElement(_Level_, doc.Value, level);
+        Params.WriteTrackedElement(_Level_, doc.Value, untracked ? default : level);
         DA.SetData(_Level_, level);
       }
     }
@@ -137,9 +138,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
         (
           template.Document,
           new ARDB.ElementId[] { template.Id },
-          doc,
-          default,
-          default
+          doc, default, default
         );
 
         level = ids.Select(x => doc.GetElement(x)).OfType<ARDB.Level>().FirstOrDefault();
@@ -160,11 +159,16 @@ namespace RhinoInside.Revit.GH.Components.Levels
     {
       if (!Reuse(level, height, type, template))
       {
-        level = level.ReplaceElement
-        (
-          Create(doc, height, type, template),
-          ExcludeUniqueProperties
-        );
+        var newLevel = Create(doc, height, type, template);
+        level.ReplaceElement(newLevel, ExcludeUniqueProperties);
+
+        if (level is object)
+        {
+          name = name ?? level.Name;
+          level.Document.Delete(level.Id);
+        }
+
+        level = newLevel;
       }
 
       if (name is object && level.Name != name)

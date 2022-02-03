@@ -66,6 +66,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
 
     bool ReadTrackedElement<T>(ARDB.Document doc, out T element) where T : ARDB.Element;
     void WriteTrackedElement<T>(ARDB.Document doc, T element) where T : ARDB.Element;
+    bool IsTrackedElement<T>(T element) where T : ARDB.Element;
   }
 
   #region ElementStream
@@ -335,6 +336,14 @@ namespace RhinoInside.Revit.GH.ElementTracking
 
       if (Id.Authority is object && Id.Name is object && element is object)
         TrackedElementsDictionary.Add(element, Id.Authority, Id.Name, Enumerator.Position);
+    }
+
+    public bool Contains(T element)
+    {
+      if (!TrackedElementsDictionary.TryGetValue(element, out var _, out var authority, out var _, out var index))
+        return false;
+
+      return index > Enumerator.Position && default(AuthorityComparer).Equals(authority, Id.Authority);
     }
 
     #region IEnumerable

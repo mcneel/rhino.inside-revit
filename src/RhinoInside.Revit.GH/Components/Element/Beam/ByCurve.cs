@@ -38,16 +38,19 @@ namespace RhinoInside.Revit.GH.Components
 
       foreach (var beam in pinnedBeams)
       {
-        if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
+        if (beam.StructuralType != ARDB.Structure.StructuralType.NonStructural)
         {
-          ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(beam, 0);
-          ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(beam, 0);
-        }
+          if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
+          {
+            ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(beam, 0);
+            ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(beam, 0);
+          }
 
-        if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 1))
-        {
-          ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(beam, 1);
-          ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(beam, 1);
+          if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 1))
+          {
+            ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(beam, 1);
+            ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(beam, 1);
+          }
         }
       }
     }
@@ -109,16 +112,19 @@ namespace RhinoInside.Revit.GH.Components
           level.Value,
           ARDB.Structure.StructuralType.Beam
         );
+        
+        if (beam.StructuralType != ARDB.Structure.StructuralType.NonStructural)
+        {
+          if (beam is object && ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
+            ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 0);
+          else
+            ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 0);
 
-        if (beam is object && ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
-          ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 0);
-        else
-          ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 0);
-
-        if (beam is object && ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 1))
-          ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 1);
-        else
-          ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 1);
+          if (beam is object && ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 1))
+            ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 1);
+          else
+            ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 1);
+        }
 
         newBeam.get_Parameter(ARDB.BuiltInParameter.Y_JUSTIFICATION)?.Update((int) ARDB.Structure.YJustification.Origin);
         newBeam.get_Parameter(ARDB.BuiltInParameter.Z_JUSTIFICATION)?.Update((int) ARDB.Structure.ZJustification.Origin);
