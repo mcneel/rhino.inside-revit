@@ -63,11 +63,11 @@ namespace RhinoInside.Revit.GH.Components.Grids
       ),
       new ParamDefinition
       (
-        new Parameters.Level()
+        new Parameters.Grid()
         {
           Name = "Template",
           NickName = "T",
-          Description = "Template Level",
+          Description = "Template grid",
           Optional = true
         },
         ParamRelevance.Occasional
