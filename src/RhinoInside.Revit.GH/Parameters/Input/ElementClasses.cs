@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   public class ElementClasses : Grasshopper.Special.ValueSet<GH_String>
   {
     public override Guid ComponentGuid => new Guid("F432D672-FA9D-48B1-BABB-CFF8BEF38787");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
 
     protected override System.Drawing.Bitmap Icon =>
       ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       nickname: "Element Classes",
       description: "Provides a picker for Revit element classes",
       category: "Revit",
-      subcategory: "Input"
+      subcategory: "Filter"
     )
     {
       IconDisplayMode = GH_IconDisplayMode.name;

@@ -305,8 +305,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Name
     public static bool SetIncrementalName(this Element element, string prefix)
     {
-      DocumentExtension.TryParseNameId(element.Name, out var p, out var _);
-      if (prefix != p)
+      var prefixed = DocumentExtension.TryParseNameId(element.Name, out var p, out var _);
+      if (!prefixed || prefix != p)
       {
         var categoryId = element.Category is Category category &&
           category.Id.TryGetBuiltInCategory(out var builtInCategory) ?

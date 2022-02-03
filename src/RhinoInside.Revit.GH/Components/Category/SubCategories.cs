@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
       if (!category.IsValid) return false;
       if (!category.APIObject.Parent.IsEquivalent(parent.APIObject)) return false;
       if (name is object) category.Name = name;
-      else category.SetIncrementalName(template?.Name ?? $"{parent.Name} 0");      
+      else category.SetIncrementalName(template?.Name ?? parent.Name);      
 
       if (template?.IsValid == true)
       {
@@ -162,12 +162,13 @@ namespace RhinoInside.Revit.GH.Components.Categories
 
       // Make sure the name is unique
       {
-        name = template?.Name ?? $"{parent.Name} 0";
+        name = template?.Name ?? parent.Name;
+        DocumentExtension.TryParseNameId(name, out var prefix, out var _);
         name = parent.APIObject.SubCategories.
           Cast<ARDB.Category>().
           Select(x => x.Name).
-          WhereNamePrefixedWith(name).
-          NextNameOrDefault() ?? name;
+          WhereNamePrefixedWith(prefix).
+          NextNameOrDefault() ?? $"{prefix} 0";
       }
 
       // Try to duplicate template

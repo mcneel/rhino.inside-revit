@@ -151,8 +151,24 @@ namespace RhinoInside.Revit.GH.Components.Elements
               {
                 var element = Types.Element.FromElementId(doc.Value, copiedElement.Id);
 
-                try { element.SetIncrementalName(copiedElement.source.Value.name); }
-                catch (ArgumentException) { /* Invalid characters in the original name use to be view {3D} */ }
+                if
+                (
+                  // element.CanBeRenamed() && // More precise but slow.
+                  ElementExtension.GetNameParameter(element.GetType()) != ARDB.BuiltInParameter.INVALID &&
+                  element.Name == copiedElement.source.Value.name
+                )
+                {
+                  try
+                  {
+                    element.SetIncrementalName(copiedElement.source.Value.name);
+                    AddRuntimeMessage
+                    (
+                      GH_RuntimeMessageLevel.Warning,
+                      $"{(element as Grasshopper.Kernel.Types.IGH_Goo).TypeName} \"{copiedElement.source.Value.name}\" has been renamed to \"{element.Name}\" to avoid conflicts with the existing Element. {{{element.Id}}}"
+                    );
+                  }
+                  catch (ArgumentException) { /* Invalid characters in the original name use to be view {3D} */ }
+                }
 
                 // Populate duplicates Stream for the next iteration with unique duplicates
                 foreach (var index in copiedElement.source.Value.twins)

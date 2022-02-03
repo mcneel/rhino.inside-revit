@@ -501,8 +501,8 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Value is ARDB.Element)
       {
-        DocumentExtension.TryParseNameId(Name, out var elementPrefix, out var _);
-        if (prefix != elementPrefix)
+        var prefixed = DocumentExtension.TryParseNameId(Name, out var elementPrefix, out var _);
+        if (!prefixed || prefix != elementPrefix)
         {
           if (NextIncrementalName(prefix) is string next)
           {

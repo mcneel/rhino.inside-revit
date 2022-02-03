@@ -337,15 +337,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return element is object;
     }
 
-    public static string NextIncrementalName(this Document document, string prefix, Type type, string parentName = default, BuiltInCategory? categoryId = default)
+    public static string NextIncrementalName(this Document document, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
     {
+      TryParseNameId(name, out var prefix, out var _);
       return document.GetNamesakeElements
       (
         prefix, type, parentName, categoryId
       ).
       Select(x => x.Name).
       WhereNamePrefixedWith(prefix).
-      NextNameOrDefault() ?? prefix;
+      NextNameOrDefault() ?? $"{prefix} 1";
     }
 
     internal static IEnumerable<Element> GetNamesakeElements(this Document doc, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
