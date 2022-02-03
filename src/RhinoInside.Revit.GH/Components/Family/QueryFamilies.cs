@@ -45,10 +45,10 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     public override void AddedToDocument(GH_Document document)
     {
-      base.AddedToDocument(document);
-
       if (Params.Input<IGH_Param>("Name") is IGH_Param name)
         name.Name = "Family Name";
+
+      base.AddedToDocument(document);
     }
 
     struct FamilyNameComparer : IEqualityComparer<ARDB.ElementType>

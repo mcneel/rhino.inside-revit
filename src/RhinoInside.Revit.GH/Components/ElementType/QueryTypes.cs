@@ -45,10 +45,10 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
 
     public override void AddedToDocument(GH_Document document)
     {
-      base.AddedToDocument(document);
-
       if (Params.Input<IGH_Param>("Name") is IGH_Param name)
         name.Name = "Type Name";
+
+      base.AddedToDocument(document);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

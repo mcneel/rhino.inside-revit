@@ -76,10 +76,10 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
     public override void AddedToDocument(GH_Document document)
     {
-      base.AddedToDocument(document);
-
       if (Params.Input<IGH_Param>("Binding") is IGH_Param binding)
         binding.Name = "Scope";
+
+      base.AddedToDocument(document);
     }
 
     const string _Parameter_ = "Parameter";
