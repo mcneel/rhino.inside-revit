@@ -337,7 +337,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return element is object;
     }
 
-    internal static IEnumerable<Element> GetNamesakeElements(this Document doc, Type type, string name, string parentName = default, BuiltInCategory? categoryId = default)
+    public static string NextIncrementalName(this Document document, string prefix, Type type, string parentName = default, BuiltInCategory? categoryId = default)
+    {
+      return document.GetNamesakeElements
+      (
+        prefix, type, parentName, categoryId
+      ).
+      Select(x => x.Name).
+      WhereNamePrefixedWith(prefix).
+      NextNameOrDefault() ?? prefix;
+    }
+
+    internal static IEnumerable<Element> GetNamesakeElements(this Document doc, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
     {
       var enumerable = Enumerable.Empty<Element>();
 
@@ -346,6 +357,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (typeof(ElementType).IsAssignableFrom(type))
         {
           enumerable = new FilteredElementCollector(doc).
+          WhereElementIsElementType().
           WhereElementIsKindOf(type).
           WhereCategoryIdEqualsTo(categoryId).
           WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
@@ -354,6 +366,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         else
         {
           var elementCollector = new FilteredElementCollector(doc).
+          WhereElementIsNotElementType().
           WhereElementIsKindOf(type).
           WhereCategoryIdEqualsTo(categoryId);
 
@@ -409,7 +422,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       // Remove number sufix from name and trailing spaces.
       TryParseNameId(name.Trim(), out name, out var _);
 
-      var last = doc.GetNamesakeElements(type, name, parentName, categoryId).
+      var last = doc.GetNamesakeElements(name, type, parentName, categoryId).
         OrderBy(x => x.Name, default(ElementNameComparer)).LastOrDefault();
 
       if (last is object)
@@ -425,6 +438,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static IEnumerable<string> WhereNamePrefixedWith(this IEnumerable<string> enumerable, string prefix)
     {
+      TryParseNameId(prefix, out prefix, out var _);
+
       foreach (var value in enumerable)
       {
         if (!value.StartsWith(prefix)) continue;

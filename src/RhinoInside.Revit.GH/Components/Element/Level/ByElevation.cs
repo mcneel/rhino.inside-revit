@@ -39,6 +39,16 @@ namespace RhinoInside.Revit.GH.Components.Levels
       ),
       new ParamDefinition
       (
+        new Param_String()
+        {
+          Name = "Name",
+          NickName = "N",
+          Description = "Level Name",
+        },
+        ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
         new Parameters.ElementType()
         {
           Name = "Type",
@@ -48,16 +58,6 @@ namespace RhinoInside.Revit.GH.Components.Levels
           SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Levels
         },
         ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
-        new Param_String()
-        {
-          Name = "Name",
-          NickName = "N",
-          Description = "Level Name",
-          Optional = true,
-        }
       ),
       new ParamDefinition
       (
@@ -110,9 +110,10 @@ namespace RhinoInside.Revit.GH.Components.Levels
 
       StartTransaction(doc.Value);
       {
+        var untracked = Existing(_Level_, doc.Value, ref level, name, categoryId: ARDB.BuiltInCategory.OST_Levels);
         level = Reconstruct(level, doc.Value, height / Revit.ModelUnits, type, name, template);
 
-        Params.WriteTrackedElement(_Level_, doc.Value, level);
+        Params.WriteTrackedElement(_Level_, doc.Value, untracked ? default : level);
         DA.SetData(_Level_, level);
       }
     }

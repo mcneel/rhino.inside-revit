@@ -125,34 +125,39 @@ namespace RhinoInside.Revit.GH.Components.Elements
               sourceNonBuiltIn.Count, ElementIdComparer.Ascending
             );
 
-            foreach (var sourceElement in sourceNonBuiltIn)
+            foreach (var (index, element) in sourceNonBuiltIn)
             {
-              if (!map.TryGetValue(sourceElement.element.Id, out var entry))
-                map.Add(sourceElement.element.Id, entry = (sourceElement.element.Name, new List<int>()));
+              if (!map.TryGetValue(element.Id, out var entry))
+                map.Add(element.Id, entry = (element.Name, new List<int>()));
 
-              entry.twins.Add(sourceElement.index);
+              entry.twins.Add(index);
             }
 
-            // Duplicate elements
-            var copiedElements = ARDB.ElementTransformUtils.CopyElements
-            (
-              document.Key,
-              map.Keys,
-              doc.Value,
-              default,
-              default
-            );
-
-            foreach (var copiedElement in copiedElements.Zip(map, (Id, source) => (Id, source)))
+            using (var options = new ARDB.CopyPasteOptions())
             {
-              var element = Types.Element.FromElementId(doc.Value, copiedElement.Id);
+              options.SetDuplicateTypeNamesHandler(default(DuplicateTypeNamesHandler));
 
-              try { element.SetIncrementalName(copiedElement.source.Value.name); }
-              catch (ArgumentException) { /* Invalid characters in the original name use to be view {3D} */ }
+              // Duplicate elements
+              var copiedElements = ARDB.ElementTransformUtils.CopyElements
+              (
+                document.Key,
+                map.Keys,
+                doc.Value,
+                default,
+                options
+              );
 
-              // Populate duplicates Stream for the next iteration with unique duplicates
-              foreach (var index in copiedElement.source.Value.twins)
-                duplicates[index] = element;
+              foreach (var copiedElement in copiedElements.Zip(map, (Id, source) => (Id, source)))
+              {
+                var element = Types.Element.FromElementId(doc.Value, copiedElement.Id);
+
+                try { element.SetIncrementalName(copiedElement.source.Value.name); }
+                catch (ArgumentException) { /* Invalid characters in the original name use to be view {3D} */ }
+
+                // Populate duplicates Stream for the next iteration with unique duplicates
+                foreach (var index in copiedElement.source.Value.twins)
+                  duplicates[index] = element;
+              }
             }
           }
         }
@@ -164,6 +169,12 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
         DA.SetDataList(_Duplicates_, duplicates);
       }
+    }
+
+    struct DuplicateTypeNamesHandler : ARDB.IDuplicateTypeNamesHandler
+    {
+      public ARDB.DuplicateTypeAction OnDuplicateTypeNamesFound(ARDB.DuplicateTypeNamesHandlerArgs args) =>
+        ARDB.DuplicateTypeAction.UseDestinationTypes;
     }
   }
 }

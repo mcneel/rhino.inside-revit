@@ -472,34 +472,42 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual bool CanBeRenamed() => Value.CanBeRenamed();
 
-    public bool SetIncrementalName(string name)
+    public virtual string NextIncrementalName(string prefix)
     {
-      if (!ARDB.NamingUtils.IsValidName(name))
-        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(name));
-
       if (Value is ARDB.Element element)
       {
-        {
-          var index = name.LastIndexOf(' ');
-          if (index >= 0)
-          {
-            if (int.TryParse(name.Substring(index + 1), out var _))
-              name = name.Substring(0, index);
-          }
-        }
+        var categoryId = element.Category is ARDB.Category category &&
+          category.Id.TryGetBuiltInCategory(out var builtInCategory) ?
+          builtInCategory : default(ARDB.BuiltInCategory?);
 
+        var nextName = element.Document.NextIncrementalName
+        (
+          prefix,
+          element.GetType(),
+          element is ARDB.ElementType type ? type.GetFamilyName() : default,
+          categoryId
+        );
+
+        return nextName;
+      }
+
+      return default;
+    }
+
+    public bool SetIncrementalName(string prefix)
+    {
+      if (!ARDB.NamingUtils.IsValidName(prefix))
+        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(prefix));
+
+      if (Value is ARDB.Element)
+      {
+        DocumentExtension.TryParseNameId(Name, out var elementPrefix, out var _);
+        if (prefix != elementPrefix)
         {
-          int index = 0;
-          while (true)
+          if (NextIncrementalName(prefix) is string next)
           {
-            try
-            {
-              if (index == 0) { index++; element.Name = name; }
-              else element.Name = $"{name} {index++}";
-              return true;
-            }
-            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-            catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+            Name = next;
+            return true;
           }
         }
       }

@@ -302,6 +302,36 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
+    #region Name
+    public static bool SetIncrementalName(this Element element, string prefix)
+    {
+      DocumentExtension.TryParseNameId(element.Name, out var p, out var _);
+      if (prefix != p)
+      {
+        var categoryId = element.Category is Category category &&
+          category.Id.TryGetBuiltInCategory(out var builtInCategory) ?
+          builtInCategory : default(BuiltInCategory?);
+
+        var nextName = element.Document.NextIncrementalName
+        (
+          prefix,
+          element.GetType(),
+          element is ElementType type ? type.GetFamilyName() : default,
+          categoryId
+        );
+
+        if (nextName != element.Name)
+        {
+          element.Name = nextName;
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    #endregion
+
     #region Parameter
     struct ParameterEqualityComparer : IEqualityComparer<Parameter>
     {

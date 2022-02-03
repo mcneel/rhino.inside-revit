@@ -69,7 +69,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
     static readonly ParamDefinition[] inputs =
     {
       ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category"),
-      ParamDefinition.Create<Param_String>("Name", "N", "SubCategory name", optional: true),
+      ParamDefinition.Create<Param_String>("Name", "N", "SubCategory name", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Category>("Template", "T", "Template category", optional: true, relevance: ParamRelevance.Occasional),
     };
 
@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
     {
       if (!Params.GetData(DA, "Parent", out Types.Category parent)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => x is object)) return;
-      Params.TryGetData(DA, "Template", out Types.Category template);
+      if (!Params.TryGetData(DA, "Template", out Types.Category template, x => x.IsValid)) return;
 
       // Previous Output
       Params.ReadTrackedElement(_SubCategory_, parent.Document, out ARDB.Element element);
@@ -97,11 +97,42 @@ namespace RhinoInside.Revit.GH.Components.Categories
 
       StartTransaction(parent.Document);
       {
+        var untracked = Existing(parent, name, ref category);
+
+        // Reconstruct category.
         category = Reconstruct(category, parent, name, template);
 
-        Params.WriteTrackedElement(_SubCategory_, parent.Document, category.Value);
+        // Save it back if it is tracked.
+        Params.WriteTrackedElement(_SubCategory_, parent.Document, untracked ? default : category.Value);
         DA.SetData(_SubCategory_, category);
       }
+    }
+
+    bool Existing(Types.Category parent, string name, ref Types.Category category)
+    {
+      if (category.APIObject?.Parent.Id != parent.Id || category?.Name != name)
+      {
+        // Query for an existing category with the requested parent and name.
+        if (!string.IsNullOrWhiteSpace(name) && parent.APIObject.SubCategories.Contains(name))
+        {
+          var existing = new Types.Category(parent.APIObject.SubCategories.get_Item(name));
+          if (existing.Id != category.Id)
+          {
+            if (Params.IsTrackedElement(_SubCategory_, existing.Value))
+            {
+              // If existing is still tracked change its name to avoid collisions.
+              existing.Name = existing.UniqueID;
+            }
+            else
+            {
+              category = existing;
+              return true;
+            }
+          }
+        }
+      }
+
+      return false;
     }
 
     bool Reuse(Types.Category category, Types.Category parent, string name, Types.Category template)
@@ -109,6 +140,8 @@ namespace RhinoInside.Revit.GH.Components.Categories
       if (!category.IsValid) return false;
       if (!category.APIObject.Parent.IsEquivalent(parent.APIObject)) return false;
       if (name is object) category.Name = name;
+      else category.SetIncrementalName(template?.Name ?? $"{parent.Name} 0");      
+
       if (template?.IsValid == true)
       {
         category.LineColor = template.LineColor;
@@ -129,9 +162,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
 
       // Make sure the name is unique
       {
-        if (name is null)
-          name = template?.Name ?? parent.Name;
-
+        name = template?.Name ?? $"{parent.Name} 0";
         name = parent.APIObject.SubCategories.
           Cast<ARDB.Category>().
           Select(x => x.Name).
@@ -140,15 +171,13 @@ namespace RhinoInside.Revit.GH.Components.Categories
       }
 
       // Try to duplicate template
-      if (template?.Id.IsBuiltInId() == false)
+      if (template is object && (!template.Id.IsBuiltInId() && template.APIObject.Parent.Id == parent.Id))
       {
         var ids = ARDB.ElementTransformUtils.CopyElements
         (
           template.Document,
           new ARDB.ElementId[] { template.Id },
-          doc,
-          default,
-          default
+          doc, default, default
         );
 
         category = ids.Select(x => Types.Category.FromElementId(doc, x)).OfType<Types.Category>().FirstOrDefault();
@@ -160,15 +189,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
         using (var categories = doc.Settings.Categories)
           category = Types.Category.FromCategory(categories.NewSubcategory(parent.APIObject, name));
 
-        if (template?.Id.IsBuiltInId() == true)
-        {
-          category.LineColor = template.LineColor;
-          category.Material = template.Material;
-          category.ProjectionLinePattern = template.ProjectionLinePattern;
-          category.CutLinePattern = template.CutLinePattern;
-          category.ProjectionLineWeight = template.ProjectionLineWeight;
-          category.CutLineWeight = template.CutLineWeight;
-        }
+        Reuse(category, parent, category.Name, template);
       }
 
       return category;

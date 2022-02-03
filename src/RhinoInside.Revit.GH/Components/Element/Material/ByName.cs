@@ -45,8 +45,8 @@ namespace RhinoInside.Revit.GH.Components.Materials
           Name = "Name",
           NickName = "N",
           Description = "Material Name",
-          Optional = true
-        }
+        },
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -93,9 +93,10 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       StartTransaction(doc.Value);
       {
+        var untracked = Existing(_Material_, doc.Value, ref material, name, categoryId: ARDB.BuiltInCategory.OST_Materials);
         material = Reconstruct(material, doc.Value, name, template);
 
-        Params.WriteTrackedElement(_Material_, doc.Value, material);
+        Params.WriteTrackedElement(_Material_, doc.Value, untracked ? default : material);
         DA.SetData(_Material_, material);
       }
     }
@@ -103,7 +104,8 @@ namespace RhinoInside.Revit.GH.Components.Materials
     bool Reuse(ARDB.Material material, string name, ARDB.Material template)
     {
       if (material is null) return false;
-      if (name is object) material.Name = name;
+      if (name is object) { if (material.Name != name) material.Name = name; }
+      else material.SetIncrementalName(template?.Name ?? _Material_);
 
       material.CopyParametersFrom(template, ExcludeUniqueProperties);
       return true;
@@ -115,16 +117,12 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       // Make sure the name is unique
       {
-        if (name is null)
-          name = template?.Name ?? _Material_;
-
-        name = doc.GetNamesakeElements
+        name = doc.NextIncrementalName
         (
-          typeof(ARDB.Material), name, categoryId: ARDB.BuiltInCategory.OST_Materials
-        ).
-        Select(x => x.Name).
-        WhereNamePrefixedWith(name).
-        NextNameOrDefault() ?? name;
+          name ?? template?.Name ?? _Material_,
+          typeof(ARDB.Material),
+          categoryId: ARDB.BuiltInCategory.OST_Materials
+        );
       }
 
       // Try to duplicate template
@@ -140,9 +138,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
           (
             template.Document,
             new ARDB.ElementId[] { template.Id },
-            doc,
-            default,
-            default
+            doc, default, default
           );
 
           material = ids.Select(x => doc.GetElement(x)).OfType<ARDB.Material>().FirstOrDefault();

@@ -45,8 +45,8 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
           Name = "Name",
           NickName = "N",
           Description = "Line pattern Name",
-          Optional = true
-        }
+        },
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -90,9 +90,10 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
 
       StartTransaction(doc.Value);
       {
+        var untracked = Existing(_LinePattern_, doc.Value, ref pattern, name);
         pattern = Reconstruct(pattern, doc.Value, name, template);
 
-        Params.WriteTrackedElement(_LinePattern_, doc.Value, pattern);
+        Params.WriteTrackedElement(_LinePattern_, doc.Value, untracked ? default : pattern);
         DA.SetData(_LinePattern_, pattern);
       }
     }
@@ -100,7 +101,9 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
     bool Reuse(ARDB.LinePatternElement pattern, string name, ARDB.LinePatternElement template)
     {
       if (pattern is null) return false;
-      if (name is object) pattern.Name = name;
+      if (name is object) { if (pattern.Name != name) pattern.Name = name; }
+      else pattern.SetIncrementalName(template?.Name ?? _LinePattern_);
+
       if (template is object)
       {
         using (var oldDashes = pattern.GetLinePattern())
@@ -121,16 +124,12 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
 
       // Make sure the name is unique
       {
-        if (name is null)
-          name = template?.Name ?? _LinePattern_;
-
-        name = doc.GetNamesakeElements
+        name = doc.NextIncrementalName
         (
-          typeof(ARDB.LinePatternElement), name, categoryId: ARDB.BuiltInCategory.INVALID
-        ).
-        Select(x => x.Name).
-        WhereNamePrefixedWith(name).
-        NextNameOrDefault() ?? name;
+          name ?? template?.Name ?? _LinePattern_,
+          typeof(ARDB.SelectionFilterElement),
+          categoryId: ARDB.BuiltInCategory.INVALID
+        );
       }
 
       // Try to duplicate template
@@ -141,9 +140,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
           (
             template.Document,
             new ARDB.ElementId[] { template.Id },
-            doc,
-            default,
-            default
+            doc, default, default
           );
 
           pattern = ids.Select(x => doc.GetElement(x)).OfType<ARDB.LinePatternElement>().FirstOrDefault();
