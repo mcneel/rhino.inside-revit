@@ -1,75 +1,143 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.ModelElements
 {
-  using Kernel.Attributes;
+  using ElementTracking;
+  using External.DB.Extensions;
+  using Grasshopper.Kernel.Parameters;
 
-  public class GroupTypeCreate : ReconstructElementComponent
+  [ComponentVersion(introduced: "1.0", updated: "1.5")]
+  public class GroupTypeCreate : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("39E42448-1C1C-4140-BC37-7399ABF82117");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public GroupTypeCreate() : base
     (
-      name: "Create GroupType",
+      name: "Create Group Type",
       nickname: "GroupType",
-      description: "Given a collection of elements, it adds a GroupType to the active Revit document",
+      description: "Given a collection of elements, it adds a Group type to the active Revit document",
       category: "Revit",
       subCategory: "Model"
     )
     { }
 
-    void ReconstructGroupTypeCreate
-    (
-      [Optional, NickName("DOC")]
-      ARDB.Document document,
-
-      [Description("New Group Type"), NickName("GT")]
-      ref ARDB.GroupType groupType,
-
-      IList<ARDB.Element> elements,
-      Optional<string> name
-    )
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      var elementIds = ARDB.ElementTransformUtils.CopyElements(document, elements.Where(x => x.Document.Equals(document)).Select(x => x.Id).ToList(), ARDB.XYZ.Zero);
-
-      if (groupType is ARDB.GroupType oldGroupType)
-      {
-        // To avoid name conflicts we rename the old GroupType that will be deleted
-        oldGroupType.Name = Guid.NewGuid().ToString();
-
-        var newGroup = document.IsFamilyDocument ?
-                        document.FamilyCreate.NewGroup(elementIds):
-                        document.Create.NewGroup(elementIds);
-        groupType = newGroup.GroupType;
-        document.Delete(newGroup.Id);
-
-        // Update other occurrences of oldGroupType
-        foreach (var twinGroup in oldGroupType.Groups.Cast<ARDB.Group>())
-          twinGroup.GroupType = groupType;
-      }
-      else
-      {
-        var newGroup = document.IsFamilyDocument ?
-                        document.FamilyCreate.NewGroup(elementIds) :
-                        document.Create.NewGroup(elementIds);
-        groupType = newGroup.GroupType;
-        document.Delete(newGroup.Id);
-      }
-
-      if (groupType is object && name.HasValue)
-      {
-        try { groupType.Name = name.Value; }
-        catch (Autodesk.Revit.Exceptions.ArgumentException e)
+      new ParamDefinition(new Parameters.Document() { Optional = true }, ParamRelevance.Occasional),
+      new ParamDefinition
+      (
+        new Param_String()
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{e.Message.Replace($".{Environment.NewLine}", ". ")}");
+          Name = "Name",
+          NickName = "N",
+          Description = "Group Name",
+        },
+        ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Elements",
+          NickName = "E",
+          Description = "Group elements",
+          Access = GH_ParamAccess.list
         }
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.ElementType()
+        {
+          Name = _GroupType_,
+          NickName = _GroupType_.Substring(0, 1),
+          Description = $"Output {_GroupType_}",
+        }
+      ),
+    };
+
+    const string _GroupType_ = "Group Type";
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME,
+      ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME,
+    };
+
+    public override void AddedToDocument(GH_Document document)
+    {
+      if (Params.Output<IGH_Param>("GroupType") is IGH_Param groupType)
+        groupType.Name = "Group Type";
+
+      base.AddedToDocument(document);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      // Input
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
+      if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elementIds)) return;
+
+      // Previous Output
+      Params.ReadTrackedElement(_GroupType_, doc.Value, out ARDB.GroupType type);
+
+      StartTransaction(doc.Value);
+      {
+        var untracked = Existing(_GroupType_, doc.Value, ref type, name, categoryId: ARDB.BuiltInCategory.OST_IOSModelGroups);
+        type = Reconstruct(type, doc.Value, name, elementIds.Select(x => x.Id).ToList());
+
+        Params.WriteTrackedElement(_GroupType_, doc.Value, untracked ? default : type);
+        DA.SetData(_GroupType_, type);
       }
+    }
+
+    bool Reuse(ARDB.GroupType groupType, IList<ARDB.ElementId> elementIds)
+    {
+      return false;
+    }
+
+    ARDB.GroupType Create(ARDB.Document doc, IList<ARDB.ElementId> elementIds)
+    {
+      var elementIdsCopy = ARDB.ElementTransformUtils.CopyElements(doc, elementIds, ARDB.XYZ.Zero);
+      var newGroup = doc.IsFamilyDocument ?
+                     doc.FamilyCreate.NewGroup(elementIdsCopy) :
+                     doc.Create.NewGroup(elementIdsCopy);
+      var groupType = newGroup.GroupType;
+      doc.Delete(newGroup.Id);
+
+      return groupType;
+    }
+
+    ARDB.GroupType Reconstruct(ARDB.GroupType groupType, ARDB.Document doc, string name, IList<ARDB.ElementId> elementIds)
+    {
+      if (!Reuse(groupType, elementIds))
+      {
+        var newGroupType = Create(doc, elementIds);
+        groupType.ReplaceElement(newGroupType, ExcludeUniqueProperties);
+
+        if (groupType is object)
+        {
+          name = name ?? groupType.Name;
+          groupType.Document.Delete(groupType.Id);
+        }
+
+        groupType = newGroupType;
+      }
+
+      if (name is object && groupType.Name != name)
+        groupType.Name = name;
+
+      return groupType;
     }
   }
 }
