@@ -138,7 +138,6 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       {
         parameter = Reconstruct(parameter, doc.Value, key, scope.Value);
 
-        Params.WriteTrackedElement(_Parameter_, doc.Value, parameter);
         DA.SetData(_Parameter_, parameter);
       }
     }
@@ -161,6 +160,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         if (definition.GetGroupType() != key.Group)
           definition.SetGroupType(key.Group);
 
+        Params.WriteTrackedElement(_Parameter_, parameter.Document, parameter);
         return true;
       }
 
@@ -202,6 +202,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         if (definition.GetGroupType() != key.Group)
           definition.SetGroupType(key.Group);
 
+        Params.WriteTrackedElement(_Parameter_, parameter.Document, parameter);
         return true;
       }
 
@@ -246,6 +247,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
           if (definition.GetGroupType() != key.Group)
             definition.SetGroupType(key.Group);
 
+          Params.WriteTrackedElement(_Parameter_, parameter.Document, parameter);
           return true;
         }
       }
@@ -264,10 +266,15 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         throw new InvalidOperationException("Global parameters are only allowed on project documents.");
 
       if (!ARDB.GlobalParametersManager.IsUniqueName(doc, key.Name))
-        throw new InvalidOperationException($"A global parameter named '{key.Name}' already exists in the document.");
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A global parameter named '{key.Name}' already exists in the document.");
+        return doc.GetElement(ARDB.GlobalParametersManager.FindByName(doc, key.Name)) as ARDB.ParameterElement;
+      }
 
       var parameter = ARDB.GlobalParameter.Create(doc, key.Name, key.DataType ?? ERDB.Schemas.SpecType.String.Text);
       parameter.GetDefinition().SetGroupType(key.Group);
+
+      Params.WriteTrackedElement(_Parameter_, doc, parameter);
       return parameter;
     }
 
@@ -284,9 +291,12 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         (
           collector.OfClass(typeof(ARDB.ParameterElement)).
           WhereParameterEqualsTo(ARDB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY, 1).
-          Any(x => !(x is ARDB.GlobalParameter) && x.Name == key.Name)
+          Where(x => !(x is ARDB.GlobalParameter) && x.Name == key.Name).FirstOrDefault() is ARDB.ParameterElement existing
         )
-          throw new InvalidOperationException($"A project parameter with the name '{key.Name}' is already defined on document '{doc.GetTitle()}'.");
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A project parameter with the name '{key.Name}' is already defined on document '{doc.GetTitle()}'.");
+          return existing;
+        }
       }
 
       if (key.CastTo(out ARDB.ExternalDefinitionCreationOptions options))
@@ -332,7 +342,9 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
             }
           }
 
-          return ARDB.SharedParameterElement.Lookup(doc, definition.GUID);
+          var parameter = ARDB.SharedParameterElement.Lookup(doc, definition.GUID);
+          Params.WriteTrackedElement(_Parameter_, doc, parameter);
+          return parameter;
         }
       }
 
@@ -354,9 +366,12 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
           (
             collector.OfClass(typeof(ARDB.ParameterElement)).
             WhereParameterEqualsTo(ARDB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY, 0).
-            Any(x => !(x is ARDB.GlobalParameter) && x.Name == key.Name)
+            Where(x => !(x is ARDB.GlobalParameter) && x.Name == key.Name).FirstOrDefault() is ARDB.ParameterElement existing
           )
-            throw new InvalidOperationException($"A family parameter with the name '{key.Name}' is already defined on document '{doc.GetTitle()}'.");
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A family parameter with the name '{key.Name}' is already defined on document '{doc.GetTitle()}'.");
+            return existing;
+          }
         }
 
         if (key.CastTo(out ARDB.ExternalDefinitionCreationOptions options))
