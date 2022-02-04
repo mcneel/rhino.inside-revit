@@ -139,8 +139,8 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
               var _Definitions_ = Params.IndexOfOutputParam("Definition");
               if (_Group_ >= 0 || _Definitions_ >= 0)
               {
-                var groupPath = DA.ParameterTargetPath(_Group_);
-                var definitionsPath = DA.ParameterTargetPath(_Definitions_);
+                var groupPath       = _Group_ >= 0       ? DA.ParameterTargetPath(_Group_)       : new GH_Path();
+                var definitionsPath = _Definitions_ >= 0 ? DA.ParameterTargetPath(_Definitions_) : new GH_Path();
 
                 var groups = new GH_Structure<GH_String>();
                 var definitions = new GH_Structure<Types.ParameterKey>();
