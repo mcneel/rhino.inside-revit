@@ -169,6 +169,7 @@
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridPanel.cs" />
     <Compile Include="Components\Element\Wall\ByProfile.cs" />
     <Compile Include="Components\Element\Wall\QueryWalls.cs" />
+    <Compile Include="Components\Element\Release.cs" />
     <Compile Include="Components\Workset\Active.cs" />
     <Compile Include="Components\Workset\ElementWorkset.cs" />
     <Compile Include="Components\Workset\Identity.cs" />
