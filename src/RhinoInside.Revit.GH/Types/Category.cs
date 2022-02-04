@@ -397,11 +397,12 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (APIObject is ARDB.Category category)
       {
+        DocumentExtension.TryParseNameId(prefix, out prefix, out var _);
         var nextName = category.Parent?.SubCategories.
           Cast<ARDB.Category>().
           Select(x => x.Name).
           WhereNamePrefixedWith(prefix).
-          NextNameOrDefault() ?? prefix;
+          NextNameOrDefault() ?? $"{prefix} 1";
 
         return nextName;
       }
