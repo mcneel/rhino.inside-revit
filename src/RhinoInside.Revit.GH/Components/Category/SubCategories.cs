@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
       if (!category.IsValid) return false;
       if (!category.APIObject.Parent.IsEquivalent(parent.APIObject)) return false;
       if (name is object) category.Name = name;
-      else category.SetIncrementalName(template?.Name ?? parent.Name);      
+      else category.SetIncrementalName(template?.Name ?? parent.Name);
 
       if (template?.IsValid == true)
       {
@@ -161,6 +161,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
       var doc = parent.Document;
 
       // Make sure the name is unique
+      if (name is null)
       {
         name = template?.Name ?? parent.Name;
         DocumentExtension.TryParseNameId(name, out var prefix, out var _);
