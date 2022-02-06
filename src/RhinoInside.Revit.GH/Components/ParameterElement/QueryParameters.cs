@@ -78,16 +78,6 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       base.AddedToDocument(document);
     }
 
-    IEnumerable<(ARDB.Definition Definition, ARDB.Binding Binding)>
-    GetAllProjectParameters(ARDB.Document document)
-    {
-      using (var iterator = document.ParameterBindings.ForwardIterator())
-      {
-        while (iterator.MoveNext())
-          yield return (iterator.Key, iterator.Current as ARDB.Binding);
-      }
-    }
-
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
@@ -98,66 +88,11 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       if (!Params.TryGetData(DA, "Type", out Types.ParameterType type, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Group", out Types.ParameterGroup group, x => x.IsValid)) return;
 
-      var parameters = Enumerable.Empty<ARDB.InternalDefinition>();
-
-      // Project or Family parameters
-      if (doc.IsFamilyDocument)
-      {
-        if (scope is object)
-        {
-          switch (scope.Value)
-          {
-            case ERDB.ParameterScope.Instance:
-              parameters = doc.FamilyManager.Parameters.Cast<ARDB.FamilyParameter>().
-                Where(x => x.IsInstance == true).Select(x => x.Definition as ARDB.InternalDefinition);
-              break;
-
-            case ERDB.ParameterScope.Type:
-              parameters = doc.FamilyManager.Parameters.Cast<ARDB.FamilyParameter>().
-                Where(x => x.IsInstance == false).Select(x => x.Definition as ARDB.InternalDefinition);
-              break;
-          }
-        }
-        else parameters = doc.FamilyManager.Parameters.Cast<ARDB.FamilyParameter>().
-            Select(x => x.Definition as ARDB.InternalDefinition);
-      }
-      else
-      {
-        if (scope is object)
-        {
-          switch (scope.Value)
-          {
-            case ERDB.ParameterScope.Instance:
-              parameters = GetAllProjectParameters(doc).
-                Where(x => x.Binding is ARDB.InstanceBinding).
-                Select(x => x.Definition).
-                OfType<ARDB.InternalDefinition>();
-              break;
-
-            case ERDB.ParameterScope.Type:
-              parameters = GetAllProjectParameters(doc).
-                Where(x => x.Binding is ARDB.TypeBinding).
-                Select(x => x.Definition).
-                OfType<ARDB.InternalDefinition>();
-              break;
-          }
-        }
-        else parameters = GetAllProjectParameters(doc).
-                Select(x => x.Definition).
-                OfType<ARDB.InternalDefinition>();
-      }
-
-      // Global parameters
-      if (ARDB.GlobalParametersManager.AreGlobalParametersAllowed(doc))
-      {
-        var globals = ARDB.GlobalParametersManager.GetAllGlobalParameters(doc).
-          Select(x => (doc.GetElement(x) as ARDB.GlobalParameter).GetDefinition());
-
-        if (scope is null)
-          parameters = parameters.Concat(globals);
-        else if (scope.Value == ERDB.ParameterScope.Global)
-          parameters = globals;
-      }
+      var parameters = doc.GetParameterDefinitions
+      (
+        scope is object ? scope.Value :
+        ERDB.ParameterScope.Instance | ERDB.ParameterScope.Type | ERDB.ParameterScope.Global
+      ).Select(x => x.Definition);
 
       if (!string.IsNullOrEmpty(name))
         parameters = parameters.Where(x => x.Name.IsSymbolNameLike(name));

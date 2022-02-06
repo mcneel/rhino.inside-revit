@@ -576,6 +576,66 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
     #endregion
 
+    #region Parameters
+    public static IEnumerable<(InternalDefinition Definition, ParameterScope Scope)> GetParameterDefinitions(this Document doc, ParameterScope scope)
+    {
+      if (scope.HasFlag(ParameterScope.Instance) || scope.HasFlag(ParameterScope.Type))
+      {
+        if (doc.IsFamilyDocument)
+        {
+          foreach (var parameter in doc.FamilyManager.Parameters.Cast<FamilyParameter>())
+          {
+            if (parameter.Definition is InternalDefinition definition)
+            {
+              var bindingScope = parameter.IsInstance ? ParameterScope.Instance : ParameterScope.Type;
+              if (scope.HasFlag(bindingScope))
+                yield return (definition, bindingScope);
+            }
+          }
+        }
+        else
+        {
+          using (var iterator = doc.ParameterBindings.ForwardIterator())
+          {
+            while (iterator.MoveNext())
+            {
+              if (iterator.Key is InternalDefinition definition)
+              {
+                var bindingScope = ParameterScope.Unknown;
+                bindingScope |= iterator.Current is InstanceBinding ? ParameterScope.Instance : ParameterScope.Unknown;
+                bindingScope |= iterator.Current is TypeBinding ?     ParameterScope.Type     : ParameterScope.Unknown;
+
+                if (scope.HasFlag(bindingScope))
+                  yield return (definition, bindingScope);
+              }
+            }
+          }
+        }
+      }
+
+      if (scope.HasFlag(ParameterScope.Global) && GlobalParametersManager.AreGlobalParametersAllowed(doc))
+      {
+        foreach (var id in GlobalParametersManager.GetAllGlobalParameters(doc))
+        {
+          if (doc.GetElement(id) is GlobalParameter parameter)
+          {
+            if (parameter.GetDefinition() is InternalDefinition definition)
+            {
+              yield return (definition, ParameterScope.Global);
+            }
+          }
+        }
+      }
+    }
+
+    public static bool TryGetParameter(this Document doc, out ParameterElement parameterElement, string parameterName, ParameterScope scope)
+    {
+      var (definition, _) = doc.GetParameterDefinitions(scope).Where(x => x.Definition.Name == parameterName).FirstOrDefault();
+      parameterElement = doc.GetElement(definition.Id) as ParameterElement;
+      return parameterElement is object;
+    }
+    #endregion
+
     #region Family
     public static bool TryGetFamily(this Document doc, string name, out Family family, ElementId clueCategoryId = default)
     {
