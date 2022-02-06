@@ -631,7 +631,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool TryGetParameter(this Document doc, out ParameterElement parameterElement, string parameterName, ParameterScope scope)
     {
       var (definition, _) = doc.GetParameterDefinitions(scope).Where(x => x.Definition.Name == parameterName).FirstOrDefault();
-      parameterElement = doc.GetElement(definition.Id) as ParameterElement;
+      parameterElement = doc.GetElement(definition?.Id ?? ElementId.InvalidElementId) as ParameterElement;
       return parameterElement is object;
     }
     #endregion
