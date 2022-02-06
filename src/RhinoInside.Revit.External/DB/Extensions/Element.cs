@@ -558,7 +558,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         if (category.Id.TryGetBuiltInCategory(out var builtInCategory) == true)
         {
-          switch(builtInCategory)
+          switch (builtInCategory)
           {
             case BuiltInCategory.OST_DesignOptionSets: return BuiltInParameter.OPTION_SET_NAME;
             case BuiltInCategory.OST_VolumeOfInterest: return BuiltInParameter.VOLUME_OF_INTEREST_NAME;
@@ -693,7 +693,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (param is null)
           throw new System.InvalidOperationException();
 
-        if(param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Boolean.YesNo)
+        if (param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Boolean.YesNo)
           throw new System.InvalidCastException();
 
         param.Update(value ? 1 : 0);
@@ -732,6 +732,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       to.CopyParametersFrom(from, mask);
       return to;
+    }
+    #endregion
+
+    #region CloneElement
+    public static T CloneElement<T>(this T template, Document destination = null) where T : Element
+    {
+      try
+      {
+        destination = destination ?? template.Document;
+        var ids = ElementTransformUtils.CopyElements
+        (
+          template.Document,
+          new ElementId[] { template.Id },
+          destination, default, default
+        );
+
+        return ids.Select(x => destination.GetElement(x)).OfType<T>().FirstOrDefault();
+      }
+      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+
+      return null;
     }
     #endregion
   }
