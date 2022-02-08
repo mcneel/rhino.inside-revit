@@ -859,7 +859,10 @@ namespace RhinoInside.Revit.GH
           e.Document.ExpireSolution();
 
         if (rolledback)
-          e.Document.Undo();
+        {
+               if (e.Document.UndoServer.RedoCount > 0) e.Document.Redo();
+          else if (e.Document.UndoServer.UndoCount > 0) e.Document.Undo();
+        }
       }
     }
 
