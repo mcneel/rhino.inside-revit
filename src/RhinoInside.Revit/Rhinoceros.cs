@@ -385,7 +385,14 @@ namespace RhinoInside.Revit
     static void EndOpenDocumentInitialViewUpdate(object sender, DocumentEventArgs e)
     {
       if (e.Document.IsOpening)
-        AuditUnits(e.Document);
+      {
+        EventHandler idle = default;
+        RhinoApp.Idle += idle = (s, a) =>
+        {
+          RhinoApp.Idle -= idle;
+          AuditUnits(e.Document, allowNoScale: true);
+        };
+      }
     }
 
     static void AuditTolerances(RhinoDoc doc)
@@ -403,7 +410,7 @@ namespace RhinoInside.Revit
       }
     }
 
-    internal static void AuditUnits(RhinoDoc doc)
+    internal static void AuditUnits(RhinoDoc doc, bool allowNoScale = false)
     {
       if (Command.InScriptRunnerCommand())
         return;
@@ -418,28 +425,33 @@ namespace RhinoInside.Revit
         if (RhinoModelUnitScale != RevitModelUnitScale || RhinoModelUnitScale != GrasshopperModelUnitScale)
         {
           var hasUnits = doc.ModelUnitSystem != UnitSystem.Unset && doc.ModelUnitSystem != UnitSystem.None;
-          var expandedContent = doc.IsOpening ?
+          var expandedContent = allowNoScale ?
             $"The Rhino model you are opening is in {RhinoModelUnitScale}{Environment.NewLine}Revit document '{revitDoc.Title}' length units are {RevitModelUnitScale}" :
             string.Empty;
+
+          var dialogId = !allowNoScale && hasUnits ?
+            "Rhino.Inside.Revit.DocumentUnitsWarning" : // Shown when Grasshopper window is activated and Revit and Rhino units do not coincide.
+            "Rhino.Inside.Revit.DocumentUnitsMismatch"; // Shown when a new Rhino document is opened and units do not coincide with Revit active document units.
 
           using
           (
             var taskDialog = new ARUI.TaskDialog("Units")
             {
+              Id = dialogId,
               MainIcon = External.UI.TaskDialogIcons.IconInformation,
               TitleAutoPrefix = true,
               AllowCancellation = hasUnits,
-              MainInstruction = hasUnits ? (doc.IsOpening ? "Model units mismatch." : "Model units mismatch warning.") : "Rhino model has no units.",
-              MainContent = doc.IsOpening ? "What units do you want to use?" : $"Revit document '{revitDoc.Title}' length units are {RevitModelUnitScale}." + (hasUnits ? $"{Environment.NewLine}Rhino is working in {RhinoModelUnitScale}." : string.Empty),
+              MainInstruction = hasUnits ? (allowNoScale ? "Model units mismatch." : "Model units mismatch warning.") : "Rhino model has no units.",
+              MainContent = allowNoScale ? "What units do you want to use?" : $"Revit document '{revitDoc.Title}' length units are {RevitModelUnitScale}." + (hasUnits ? $"{Environment.NewLine}Rhino is working in {RhinoModelUnitScale}." : string.Empty),
               ExpandedContent = expandedContent,
               FooterText = "Current version: " + Core.DisplayVersion
             }
           )
           {
-            if (!doc.IsOpening && hasUnits)
+            if (!allowNoScale && hasUnits)
             {
 #if REVIT_2020
-              taskDialog.EnableDoNotShowAgain("RhinoInside.Revit.DocumentUnitsMismatch", true, "Do not show again");
+              taskDialog.EnableDoNotShowAgain(taskDialog.Id, true, "Do not show again");
 #else
               // Without the ability of checking DoNotShowAgain this may be too anoying.
               return;
@@ -458,7 +470,7 @@ namespace RhinoInside.Revit
 
             if (hasUnits)
             {
-              if (doc.IsOpening)
+              if (allowNoScale)
               {
                 taskDialog.AddCommandLink
                 (
@@ -490,43 +502,41 @@ namespace RhinoInside.Revit
               }
             }
 
+            var active = WindowHandle.ActiveWindow;
             var result = taskDialog.Show();
-
-            EventHandler idle = default;
-            RhinoApp.Idle += idle = (s, a) =>
+            var undoRecord = doc.BeginUndoRecord("Revit Units");
+            try
             {
-              RhinoApp.Idle -= idle;
-
-              var ur = doc.BeginUndoRecord("Revit Units");
-              try
+              switch (result)
               {
-                switch (result)
-                {
-                  case ARUI.TaskDialogResult.CommandLink2:
-                    doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
-                    doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
-                    doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, RevitModelUnitScale);
-                    UnitScale.SetModelUnitSystem(doc, RevitModelUnitScale, scale: true);
-                    AdjustViewConstructionPlanes(doc);
-                    break;
+                case ARUI.TaskDialogResult.CommandLink2:
+                  doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
+                  doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
+                  doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, RevitModelUnitScale);
+                  UnitScale.SetModelUnitSystem(doc, RevitModelUnitScale, scale: true);
+                  AdjustViewConstructionPlanes(doc);
+                  break;
 
-                  case ARUI.TaskDialogResult.CommandLink3:
-                    doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
-                    doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
-                    doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, GH.Guest.ModelUnitScale);
-                    UnitScale.SetModelUnitSystem(doc, GH.Guest.ModelUnitScale, scale: true);
-                    AdjustViewConstructionPlanes(doc);
-                    break;
+                case ARUI.TaskDialogResult.CommandLink3:
+                  doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
+                  doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
+                  doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, GH.Guest.ModelUnitScale);
+                  UnitScale.SetModelUnitSystem(doc, GH.Guest.ModelUnitScale, scale: true);
+                  AdjustViewConstructionPlanes(doc);
+                  break;
 
-                  default:
-                    AuditTolerances(doc);
-                    break;
-                }
+                default:
+                  AuditTolerances(doc);
+                  break;
               }
-              finally { doc.EndUndoRecord(ur); }
+            }
+            finally
+            {
+              WindowHandle.ActiveWindow = active;
+              doc.EndUndoRecord(undoRecord);
+            }
 
-              doc.ClearUndoRecords(ur, purgeDeletedObjects: true);
-            };
+            doc.ClearUndoRecords(undoRecord, purgeDeletedObjects: true);
           }
         }
       }
