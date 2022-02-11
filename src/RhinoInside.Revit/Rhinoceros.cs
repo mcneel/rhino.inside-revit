@@ -390,7 +390,7 @@ namespace RhinoInside.Revit
         RhinoApp.Idle += idle = (s, a) =>
         {
           RhinoApp.Idle -= idle;
-          AuditUnits(e.Document, allowNoScale: true);
+          InvokeInHostContext(() => AuditUnits(e.Document, allowNoScale: true));
         };
       }
     }
