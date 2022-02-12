@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.GH.Components
           ARDB.Structure.StructuralType.Beam
         );
         
-        if (beam.StructuralType != ARDB.Structure.StructuralType.NonStructural)
+        if (beam is object && beam.StructuralType != ARDB.Structure.StructuralType.NonStructural)
         {
           if (beam is object && ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
             ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 0);
