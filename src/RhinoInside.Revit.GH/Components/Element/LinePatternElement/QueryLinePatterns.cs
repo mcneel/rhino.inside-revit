@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
           Concat(collector.Cast<ARDB.LinePatternElement>().Select(x => new Types.LinePatternElement(x)));
 
         if (!string.IsNullOrEmpty(name))
-          patterns = patterns.Where(x => x.Name.IsSymbolNameLike(name));
+          patterns = patterns.Where(x => x.Nomen.IsSymbolNameLike(name));
 
         DA.SetDataList
         (

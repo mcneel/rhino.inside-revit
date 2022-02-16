@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -11,6 +12,37 @@ namespace RhinoInside.Revit.GH.Components
 
     protected virtual ARDB.ElementFilter ElementFilter { get; } = default;
     public override bool NeedsToBeExpired
+    (
+      ARDB.Document document,
+      ICollection<ARDB.ElementId> added,
+      ICollection<ARDB.ElementId> deleted,
+      ICollection<ARDB.ElementId> modified
+    )
+    {
+      // Check if the change is on a document this component is querying.
+      if (!MayNeedToBeExpired(document))
+        return false;
+
+      // Check inputs with persistent data
+      if (base.NeedsToBeExpired(document, added, deleted, modified))
+        return true;
+
+      // Check if any element may pass the filter
+      return MayNeedToBeExpired(document, added, deleted, modified);
+    }
+
+    protected bool MayNeedToBeExpired(ARDB.Document document)
+    {
+      if (Params.Input<Parameters.Document>("Document") is Parameters.Document Document)
+        return Document.VolatileData.AllData(true).Cast<Types.Document>().Select(x => x.Value).Contains(document);
+
+      if (Parameters.Document.TryGetCurrentDocument(this, out var currentDocument))
+        return document.Equals(currentDocument.Value);
+
+      return false;
+    }
+
+    protected virtual bool MayNeedToBeExpired
     (
       ARDB.Document document,
       ICollection<ARDB.ElementId> added,

@@ -120,7 +120,7 @@ namespace RhinoInside.Revit.GH.Components.Families
                             document.Create.NewFamilyInstances2(dataList);
 
         if (newElementIds.Count != 1)
-          throw new InvalidOperationException();
+          throw new Exceptions.RuntimeErrorException("Failed to create Family Instance element.");
 
         var newElement = document.GetElement(newElementIds.First()) as ARDB.FamilyInstance;
 

@@ -83,7 +83,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+
       if (!Params.TryGetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
+      else Params.TrySetDataList(DA, "Elements", () => elements);
 
       StartTransaction(doc.Value);
       {
@@ -128,7 +130,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
             foreach (var (index, element) in sourceNonBuiltIn)
             {
               if (!map.TryGetValue(element.Id, out var entry))
-                map.Add(element.Id, entry = (element.Name, new List<int>()));
+                map.Add(element.Id, entry = (element.Nomen, new List<int>()));
 
               entry.twins.Add(index);
             }
@@ -154,17 +156,17 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 if
                 (
                   // element.CanBeRenamed() && // More precise but slow.
-                  ElementExtension.GetNameParameter(element.GetType()) != ARDB.BuiltInParameter.INVALID &&
-                  element.Name == copiedElement.source.Value.name
+                  ElementExtension.GetNomenParameter(element.GetType()) != ARDB.BuiltInParameter.INVALID &&
+                  element.Nomen == copiedElement.source.Value.name
                 )
                 {
                   try
                   {
-                    element.SetIncrementalName(copiedElement.source.Value.name);
+                    element.SetIncrementalNomen(copiedElement.source.Value.name);
                     AddRuntimeMessage
                     (
                       GH_RuntimeMessageLevel.Warning,
-                      $"{(element as Grasshopper.Kernel.Types.IGH_Goo).TypeName} \"{copiedElement.source.Value.name}\" has been renamed to \"{element.Name}\" to avoid conflicts with the existing Element. {{{element.Id}}}"
+                      $"{(element as Grasshopper.Kernel.Types.IGH_Goo).TypeName} \"{copiedElement.source.Value.name}\" has been renamed to \"{element.Nomen}\" to avoid conflicts with the existing Element. {{{element.Id}}}"
                     );
                   }
                   catch (ArgumentException) { /* Invalid characters in the original name use to be view {3D} */ }
@@ -177,8 +179,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
             }
           }
         }
-
-        Params.TrySetDataList(DA, "Elements", () => elements);
 
         for (int i = 0; i < duplicates.Length; ++i)
           Params.WriteTrackedElement(_Duplicates_, doc.Value, duplicates[i]);

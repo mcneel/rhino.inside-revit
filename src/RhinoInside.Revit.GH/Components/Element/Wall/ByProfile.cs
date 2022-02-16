@@ -203,15 +203,12 @@ namespace RhinoInside.Revit.GH.Components.Walls
           !boundary.TryGetPlane(out boundaryPlane, tol.VertexTolerance) ||
           !boundaryPlane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance)
         )
-          ThrowArgumentException(nameof(profile), "Boundary profile should be a valid vertical planar closed curve.");
+          ThrowArgumentException(nameof(profile), "Boundary profile should be a valid vertical planar closed curve.", boundary);
 
         using (var properties = AreaMassProperties.Compute(boundary))
         {
           if (properties is null)
-          {
-            AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, "Failed to compute Boundary Area", boundary);
-            throw new Exceptions.RuntimeErrorException();
-          }
+            ThrowArgumentException(nameof(profile), "Failed to compute Boundary Area", boundary);
 
           if (properties.Area > maxArea)
           {

@@ -476,7 +476,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
-      if (typeof(Q) == typeof(T))
+      if (typeof(Q).IsAssignableFrom(typeof(T)))
       {
         target = (Q) (object) Value;
         return true;

@@ -80,29 +80,32 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // Input
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      Params.TryGetData(DA, "Template", out ARDB.LinePatternElement template);
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      // Previous Output
-      Params.ReadTrackedElement(_LinePattern_, doc.Value, out ARDB.LinePatternElement pattern);
+      ReconstructElement<ARDB.LinePatternElement>
+      (
+        doc.Value, _LinePattern_, (pattern) =>
+        {
+          // Input
+          if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          Params.TryGetData(DA, "Template", out ARDB.LinePatternElement template);
 
-      StartTransaction(doc.Value);
-      {
-        var untracked = Existing(_LinePattern_, doc.Value, ref pattern, name);
-        pattern = Reconstruct(pattern, doc.Value, name, template);
+          // Compute
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_LinePattern_, out var untracked, ref pattern, doc.Value, name))
+            pattern = Reconstruct(pattern, doc.Value, name, template);
 
-        Params.WriteTrackedElement(_LinePattern_, doc.Value, untracked ? default : pattern);
-        DA.SetData(_LinePattern_, pattern);
-      }
+          DA.SetData(_LinePattern_, pattern);
+          return untracked ? null : pattern;
+        }
+      );
     }
 
     bool Reuse(ARDB.LinePatternElement pattern, string name, ARDB.LinePatternElement template)
     {
       if (pattern is null) return false;
       if (name is object) { if (pattern.Name != name) pattern.Name = name; }
-      else pattern.SetIncrementalName(template?.Name ?? _LinePattern_);
+      else pattern.SetIncrementalNomen(template?.Name ?? _LinePattern_);
 
       if (template is object)
       {
@@ -123,11 +126,12 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
       var pattern = default(ARDB.LinePatternElement);
 
       // Make sure the name is unique
+      if (name is null)
       {
-        name = doc.NextIncrementalName
+        name = doc.NextIncrementalNomen
         (
           name ?? template?.Name ?? _LinePattern_,
-          typeof(ARDB.SelectionFilterElement),
+          typeof(ARDB.LinePatternElement),
           categoryId: ARDB.BuiltInCategory.INVALID
         );
       }

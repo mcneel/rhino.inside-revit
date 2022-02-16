@@ -62,7 +62,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         {
           Name = "Varies",
           NickName = "V",
-          Description = "Varies across groups",
+          Description = "Parameter value can vary by group instance",
           Optional = true,
         },
         ParamRelevance.Primary

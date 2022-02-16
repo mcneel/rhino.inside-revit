@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         var definition = new Types.ParameterKey()
         {
           //GUID = guid,
-          Name = name,
+          Nomen = name,
           DataType = type.Value,
           Group = group.Value,
           Description = description,

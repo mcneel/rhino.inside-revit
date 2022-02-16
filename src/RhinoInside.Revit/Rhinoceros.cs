@@ -385,7 +385,14 @@ namespace RhinoInside.Revit
     static void EndOpenDocumentInitialViewUpdate(object sender, DocumentEventArgs e)
     {
       if (e.Document.IsOpening)
-        AuditUnits(e.Document);
+      {
+        EventHandler idle = default;
+        RhinoApp.Idle += idle = (s, a) =>
+        {
+          RhinoApp.Idle -= idle;
+          InvokeInHostContext(() => AuditUnits(e.Document, allowNoScale: true));
+        };
+      }
     }
 
     static void AuditTolerances(RhinoDoc doc)
@@ -403,7 +410,7 @@ namespace RhinoInside.Revit
       }
     }
 
-    internal static void AuditUnits(RhinoDoc doc)
+    internal static void AuditUnits(RhinoDoc doc, bool allowNoScale = false)
     {
       if (Command.InScriptRunnerCommand())
         return;
@@ -413,32 +420,38 @@ namespace RhinoInside.Revit
         var revitTol = GeometryObjectTolerance.Internal;
         var units = revitDoc.GetUnits();
         var RevitModelUnitScale = units.ToUnitScale(out var distanceDisplayPrecision);
-        var GrasshopperModelUnitScale = GH.Guest.ModelUnitScale != UnitScale.Unset ? GH.Guest.ModelUnitScale : UnitScale.GetModelScale(doc);
-        if (UnitScale.GetModelScale(doc) != RevitModelUnitScale || UnitScale.GetModelScale(doc) != GrasshopperModelUnitScale)
+        var RhinoModelUnitScale = UnitScale.GetModelScale(doc);
+        var GrasshopperModelUnitScale = GH.Guest.ModelUnitScale != UnitScale.Unset ? GH.Guest.ModelUnitScale : RhinoModelUnitScale;
+        if (RhinoModelUnitScale != RevitModelUnitScale || RhinoModelUnitScale != GrasshopperModelUnitScale)
         {
           var hasUnits = doc.ModelUnitSystem != UnitSystem.Unset && doc.ModelUnitSystem != UnitSystem.None;
-          var expandedContent = doc.IsOpening ?
-            $"The Rhino model you are opening is in {UnitScale.GetModelScale(doc)}{Environment.NewLine}Revit document '{revitDoc.Title}' length units are {RevitModelUnitScale}" :
+          var expandedContent = allowNoScale ?
+            $"The Rhino model you are opening is in {RhinoModelUnitScale}{Environment.NewLine}Revit document '{revitDoc.Title}' length units are {RevitModelUnitScale}" :
             string.Empty;
+
+          var dialogId = !allowNoScale && hasUnits ?
+            "Rhino.Inside.Revit.DocumentUnitsWarning" : // Shown when Grasshopper window is activated and Revit and Rhino units do not coincide.
+            "Rhino.Inside.Revit.DocumentUnitsMismatch"; // Shown when a new Rhino document is opened and units do not coincide with Revit active document units.
 
           using
           (
             var taskDialog = new ARUI.TaskDialog("Units")
             {
+              Id = dialogId,
               MainIcon = External.UI.TaskDialogIcons.IconInformation,
               TitleAutoPrefix = true,
               AllowCancellation = hasUnits,
-              MainInstruction = hasUnits ? (doc.IsOpening ? "Model units mismatch." : "Model units mismatch warning.") : "Rhino model has no units.",
-              MainContent = doc.IsOpening ? "What units do you want to use?" : $"Revit document '{revitDoc.Title}' length units are {RevitModelUnitScale}." + (hasUnits ? $"{Environment.NewLine}Rhino is working in {doc.ModelUnitSystem}." : string.Empty),
+              MainInstruction = hasUnits ? (allowNoScale ? "Model units mismatch." : "Model units mismatch warning.") : "Rhino model has no units.",
+              MainContent = allowNoScale ? "What units do you want to use?" : $"Revit document '{revitDoc.Title}' length units are {RevitModelUnitScale}." + (hasUnits ? $"{Environment.NewLine}Rhino is working in {RhinoModelUnitScale}." : string.Empty),
               ExpandedContent = expandedContent,
               FooterText = "Current version: " + Core.DisplayVersion
             }
           )
           {
-            if (!doc.IsOpening && hasUnits)
+            if (!allowNoScale && hasUnits)
             {
 #if REVIT_2020
-              taskDialog.EnableDoNotShowAgain("RhinoInside.Revit.DocumentUnitsMismatch", true, "Do not show again");
+              taskDialog.EnableDoNotShowAgain(taskDialog.Id, true, "Do not show again");
 #else
               // Without the ability of checking DoNotShowAgain this may be too anoying.
               return;
@@ -446,15 +459,25 @@ namespace RhinoInside.Revit
             }
             else
             {
-              taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink2, $"Use {RevitModelUnitScale} like Revit", $"Scale Rhino model by {UnitScale.Convert(1.0, UnitScale.GetModelScale(doc), RevitModelUnitScale)}");
+              taskDialog.AddCommandLink
+              (
+                ARUI.TaskDialogCommandLinkId.CommandLink2,
+                $"Use {RevitModelUnitScale} like Revit",
+                hasUnits ? $"Scale Rhino model by {UnitScale.Convert(1.0, RhinoModelUnitScale, RevitModelUnitScale)}" : string.Empty
+              );
               taskDialog.DefaultButton = ARUI.TaskDialogResult.CommandLink2;
             }
 
             if (hasUnits)
             {
-              if (doc.IsOpening)
+              if (allowNoScale)
               {
-                taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink1, $"Continue in {doc.ModelUnitSystem}", $"Rhino and Grasshopper will work in {doc.ModelUnitSystem}");
+                taskDialog.AddCommandLink
+                (
+                  ARUI.TaskDialogCommandLinkId.CommandLink1,
+                  $"Continue in {RhinoModelUnitScale}",
+                  $"Rhino and Grasshopper will work in {RhinoModelUnitScale}"
+                );
                 taskDialog.DefaultButton = ARUI.TaskDialogResult.CommandLink1;
               }
               else
@@ -466,16 +489,22 @@ namespace RhinoInside.Revit
 
             if (GH.Guest.ModelUnitScale != UnitScale.Unset)
             {
-              taskDialog.ExpandedContent += $"{Environment.NewLine}Documents opened in Grasshopper were working in {GH.Guest.ModelUnitScale}";
-              if (GrasshopperModelUnitScale != UnitScale.GetModelScale(doc) && GrasshopperModelUnitScale != RevitModelUnitScale)
+              taskDialog.ExpandedContent += $"{Environment.NewLine}Documents opened in Grasshopper were working in {GrasshopperModelUnitScale}";
+              if (GrasshopperModelUnitScale != RhinoModelUnitScale && GrasshopperModelUnitScale != RevitModelUnitScale)
               {
-                taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink3, $"Adjust Rhino model to {GH.Guest.ModelUnitScale} like Grasshopper", $"Scale Rhino model by {UnitScale.Convert(1.0, UnitScale.GetModelScale(doc), GH.Guest.ModelUnitScale)}");
+                taskDialog.AddCommandLink
+                (
+                  ARUI.TaskDialogCommandLinkId.CommandLink3,
+                  $"Adjust Rhino model to {GrasshopperModelUnitScale} like Grasshopper",
+                  hasUnits ? $"Scale Rhino model by {UnitScale.Convert(1.0, RhinoModelUnitScale, GrasshopperModelUnitScale)}" : string.Empty
+                );
                 taskDialog.DefaultButton = ARUI.TaskDialogResult.CommandLink3;
               }
             }
 
+            var active = WindowHandle.ActiveWindow;
             var result = taskDialog.Show();
-            var ur = doc.BeginUndoRecord("Revit Units");
+            var undoRecord = doc.BeginUndoRecord("Revit Units");
             try
             {
               switch (result)
@@ -501,7 +530,13 @@ namespace RhinoInside.Revit
                   break;
               }
             }
-            finally { doc.EndUndoRecord(ur); }
+            finally
+            {
+              WindowHandle.ActiveWindow = active;
+              doc.EndUndoRecord(undoRecord);
+            }
+
+            doc.ClearUndoRecords(undoRecord, purgeDeletedObjects: true);
           }
         }
       }

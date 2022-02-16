@@ -1,4 +1,5 @@
 using System;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
@@ -9,6 +10,38 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     public override Guid ComponentGuid => new Guid("B6349DDA-4486-44EB-9AF7-3D13404A3F3E");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "A";
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      var hasInputDocument = Params.Input<Parameters.Document>("Document") is object;
+      {
+        var activeApp = Revit.ActiveUIApplication;
+        var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.DesignOptions);
+        Menu_AppendItem
+        (
+          menu, $"Open Design Options…",
+          async (sender, arg) =>
+          {
+            using (var scope = new External.UI.EditScope(activeApp))
+            {
+              var activeDoc = activeApp.ActiveUIDocument.Document;
+              var activeDesignOption = ARDB.DesignOption.GetActiveDesignOptionId(activeDoc);
+              var changes = await scope.ExecuteCommandAsync(commandId);
+              if (changes.GetSummary(activeDoc, out var _, out var _, out var _) > 0)
+              {
+                if (activeDesignOption != ARDB.DesignOption.GetActiveDesignOptionId(activeDoc))
+                  ExpireSolution(true);
+              }
+            }
+          },
+          !hasInputDocument && activeApp.CanPostCommand(commandId), false
+        );
+      }
+    }
+    #endregion
 
     public DesignOptionActive() : base
     (

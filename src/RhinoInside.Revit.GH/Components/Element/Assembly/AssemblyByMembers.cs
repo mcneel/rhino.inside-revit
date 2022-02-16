@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.ElementTracking;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Assemblies
 {
-  [ComponentVersion(introduced: "1.2", updated: "1.2.4")]
+  [ComponentVersion(introduced: "1.2", updated: "1.5")]
   public class AssemblyByMembers : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("6915b697-f10d-4bc8-8faa-f25438f393a8");
@@ -16,27 +15,24 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
 
     public AssemblyByMembers() : base
     (
-      name: "Add Assembly",
-      nickname: "Assembly",
+      name: "Assemble Elements",
+      nickname: "Assemble",
       description: "Create a new assembly instance",
       category: "Revit",
       subCategory: "Assembly"
     )
     { }
 
-    static readonly (string name, string nickname, string tip) _Assembly_
-      = (name: "Assembly", nickname: "A", tip: "Created assembly instance");
-
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.GraphicalElement()
         {
           Name = "Members",
           NickName = "M",
-          Description = $"Elements to be members of the new assembly",
+          Description = "Elements to be members of the new assembly",
           Access = GH_ParamAccess.list
         },
         ParamRelevance.Primary
@@ -45,20 +41,9 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       (
         new Parameters.Category()
         {
-          Name = "Category",
+          Name = "Naming Category",
           NickName = "C",
-          Description = $"Category of the new assembly",
-          Optional = true
-        },
-        ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
-        new Param_String()
-        {
-          Name = "Name",
-          NickName = "N",
-          Description = $"Name of the new assembly",
+          Description = "Category that drives the default naming scheme for the assembly instance",
           Optional = true
         },
         ParamRelevance.Primary
@@ -69,10 +54,10 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
         {
           Name = "Template",
           NickName = "T",
-          Description = $"Template sheet (only sheet parameters are copied)",
+          Description = "Template assembly",
           Optional = true
         },
-        ParamRelevance.Primary
+        ParamRelevance.Occasional
       ),
     };
 
@@ -83,84 +68,76 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       (
         new Parameters.AssemblyInstance()
         {
-          Name = _Assembly_.name,
-          NickName = _Assembly_.nickname,
-          Description = _Assembly_.tip,
+          Name = _Assembly_,
+          NickName = _Assembly_.Substring(0, 1),
+          Description = $"Output {_Assembly_}",
         }
       )
     };
 
+    const string _Assembly_ = "Assembly";
     static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
       ARDB.BuiltInParameter.ASSEMBLY_NAMING_CATEGORY,
-      ARDB.BuiltInParameter.ASSEMBLY_NAME,
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // active document
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      var members = new List<ARDB.Element>();
-      if (!DA.GetDataList("Members", members))
-        return;
-
-      Params.TryGetData(DA, "Category", out ARDB.Category category);
-      Params.TryGetData(DA, "Name", out string name);
-      Params.TryGetData(DA, "Template", out ARDB.AssemblyInstance template);
-
-      // find any tracked sheet
-      Params.ReadTrackedElement(_Assembly_.name, doc.Value, out ARDB.AssemblyInstance assembly);
-
-      // update, or create
-      StartTransaction(doc.Value);
-      {
-        assembly = Reconstruct(assembly, doc.Value, new AssemblyHandler(members, category)
+      ReconstructElement<ARDB.AssemblyInstance>
+      (
+        doc.Value, _Assembly_, (assembly) =>
         {
-          Name = name,
-          Template = template
-        });
+          // Input
+          if (!Params.GetDataList(DA, "Members", out IList<Types.GraphicalElement> members)) return null;
+          var memberIds = members.Where(x => x.IsValid && x.Document.Equals(doc.Value)).Select(x => x.Id).ToArray();
 
-        Params.WriteTrackedElement(_Assembly_.name, doc.Value, assembly);
-        DA.SetData(_Assembly_.name, assembly);
-      }
+          Params.TryGetData(DA, "Naming Category", out Types.Category category, x => x.IsValid);
+          var categoryId = category?.Id ?? doc.Value.GetElement(memberIds[0]).Category.Id;
+
+          Params.TryGetData(DA, "Template", out ARDB.AssemblyInstance template);
+
+          // Compute
+          StartTransaction(doc.Value);
+          {
+            assembly = Reconstruct(assembly, doc.Value, memberIds, categoryId, template);
+          }
+
+          DA.SetData(_Assembly_, assembly);
+          return assembly;
+        }
+      );
     }
 
-    bool Reuse(ARDB.AssemblyInstance assembly, AssemblyHandler handler)
+    bool Reuse(ARDB.AssemblyInstance assembly, IList<ARDB.ElementId> members, ARDB.ElementId categoryId, ARDB.AssemblyInstance template)
     {
-      bool rejected;
+      if (assembly is null) return false;
 
-      // if categories are different, do not use
-      rejected = assembly.NamingCategoryId is ARDB.ElementId categoryId
-          && !categoryId.Equals(handler.CategoryId);
+      assembly.SetMemberIds(members);
+      assembly.NamingCategoryId = categoryId;
 
-      if (rejected)
-      {
-        // let's change the sheet number so other sheets can be created with same id
-        handler.ExpireAssembly(assembly);
-        return false;
-      }
-
-      assembly.CopyParametersFrom(handler.Template, ExcludeUniqueProperties);
-      handler.UpdateAssembly(assembly);
+      assembly.CopyParametersFrom(template, ExcludeUniqueProperties);
       return true;
     }
 
-    ARDB.AssemblyInstance Create(ARDB.Document doc, AssemblyHandler handler)
+    ARDB.AssemblyInstance Create(ARDB.Document doc, IList<ARDB.ElementId> members, ARDB.ElementId categoryId, ARDB.AssemblyInstance template)
     {
-      var assembly = handler.CreateAssembly(doc);
-      assembly.CopyParametersFrom(handler.Template, ExcludeUniqueProperties);
+      var assembly = ARDB.AssemblyInstance.Create(doc, members, categoryId);
+      assembly.CopyParametersFrom(template, ExcludeUniqueProperties);
       return assembly;
     }
 
-    ARDB.AssemblyInstance Reconstruct(ARDB.AssemblyInstance assembly, ARDB.Document doc, AssemblyHandler handler)
+    ARDB.AssemblyInstance Reconstruct(ARDB.AssemblyInstance assembly, ARDB.Document doc, IList<ARDB.ElementId> members, ARDB.ElementId categoryId, ARDB.AssemblyInstance template)
     {
-      if (assembly is null || !Reuse(assembly, handler))
+      if (!Reuse(assembly, members, categoryId, template))
+      {
         assembly = assembly.ReplaceElement
         (
-          Create(doc, handler),
+          Create(doc, members, categoryId, template),
           ExcludeUniqueProperties
         );
+      }
 
       return assembly;
     }

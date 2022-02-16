@@ -419,8 +419,6 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value is ARDB.Element element)
       {
-        InvalidateGraphics();
-
         GetLocation(out var origin, out var basisX, out var basisY);
         var basisZ = basisX.CrossProduct(basisY);
 
@@ -432,7 +430,10 @@ namespace RhinoInside.Revit.GH.Types
             double angle = basisZ.AngleTo(newBasisZ);
 
             using (var axis = ARDB.Line.CreateUnbound(origin, axisDirection))
+            {
               ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
+              InvalidateGraphics();
+            }
 
             GetLocation(out origin, out basisX, out basisY);
             basisZ = basisX.CrossProduct(basisY);
@@ -442,13 +443,19 @@ namespace RhinoInside.Revit.GH.Types
           {
             double angle = basisX.AngleOnPlaneTo(newBasisX, newBasisZ);
             using (var axis = ARDB.Line.CreateUnbound(origin, newBasisZ))
+            {
               ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
+              InvalidateGraphics();
+            }
           }
 
           {
             var trans = newOrigin - origin;
             if (!trans.IsZeroLength())
+            {
               ARDB.ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
+              InvalidateGraphics();
+            }
           }
         }
       }
@@ -539,7 +546,7 @@ namespace RhinoInside.Revit.GH.Types
           var Flipped = element.GetType().GetProperty("Flipped");
 
           if (Flip is null || Flipped is null)
-            throw new InvalidOperationException("Facing can not be flipped for this element.");
+            throw new Exceptions.RuntimeException($"Facing can not be flipped for element. {{{element.Id.IntegerValue}}}");
 
           if ((bool) Flipped.GetValue(element) != value)
           {
@@ -559,7 +566,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value.HasValue && Value is ARDB.Element element)
         {
           if (!CanFlipHand)
-            throw new InvalidOperationException("Hand can not be flipped for this element.");
+            throw new Exceptions.RuntimeException($"Hand can not be flipped for this element. {{{element.Id.IntegerValue}}}");
 
           if (HandFlipped != value)
             throw new MissingMemberException(element.GetType().FullName, nameof(HandFlipped));
@@ -576,7 +583,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value.HasValue && Value is ARDB.Element element)
         {
           if (!CanFlipWorkPlane)
-            throw new InvalidOperationException("Work Plane can not be flipped for this element.");
+            throw new Exceptions.RuntimeException($"Work Plane can not be flipped for this element. {{{element.Id.IntegerValue}}}");
 
           if (WorkPlaneFlipped != value)
             throw new MissingMemberException(element.GetType().FullName, nameof(WorkPlaneFlipped));

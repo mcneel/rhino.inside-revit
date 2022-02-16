@@ -6,7 +6,6 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.ModelElements
 {
-  using ElementTracking;
   using External.DB.Extensions;
   using Grasshopper.Kernel.Parameters;
 
@@ -83,22 +82,25 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // Input
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elementIds)) return;
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      // Previous Output
-      Params.ReadTrackedElement(_GroupType_, doc.Value, out ARDB.GroupType type);
+      ReconstructElement<ARDB.GroupType>
+      (
+        doc.Value, _GroupType_, (type) =>
+        {
+          // Input
+          if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elementIds)) return null;
 
-      StartTransaction(doc.Value);
-      {
-        var untracked = Existing(_GroupType_, doc.Value, ref type, name, categoryId: ARDB.BuiltInCategory.OST_IOSModelGroups);
-        type = Reconstruct(type, doc.Value, name, elementIds.Select(x => x.Id).ToList());
+          // Compute
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_GroupType_, out var untracked, ref type, doc.Value, name, categoryId: ARDB.BuiltInCategory.OST_IOSModelGroups))
+            type = Reconstruct(type, doc.Value, name, elementIds.Select(x => x.Id).ToList());
 
-        Params.WriteTrackedElement(_GroupType_, doc.Value, untracked ? default : type);
-        DA.SetData(_GroupType_, type);
-      }
+          DA.SetData(_GroupType_, type);
+          return untracked ? null : type;
+        }
+      );
     }
 
     bool Reuse(ARDB.GroupType groupType, IList<ARDB.ElementId> elementIds)

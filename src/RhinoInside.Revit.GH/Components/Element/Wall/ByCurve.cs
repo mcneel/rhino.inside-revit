@@ -49,18 +49,10 @@ namespace RhinoInside.Revit.GH.Components.Walls
         var location = wall.Location as ARDB.LocationCurve;
 
         if (ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, 0))
-        {
           ARDB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
-          ARDB.WallUtils.AllowWallJoinAtEnd(wall, 0);
-          location.set_JoinType(0, joinType0);
-        }
 
         if (ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, 1))
-        {
           ARDB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
-          ARDB.WallUtils.AllowWallJoinAtEnd(wall, 1);
-          location.set_JoinType(1, joinType1);
-        }
       }
     }
 
@@ -69,11 +61,17 @@ namespace RhinoInside.Revit.GH.Components.Walls
     {
       base.OnPrepare(documents);
 
-      // Reenable new joined walls
-      foreach (var wallToJoin in joinedWalls)
+      if (joinedWalls.Count > 0)
       {
-        ARDB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 0);
-        ARDB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 1);
+        // Wall joins need regenerated geometry to work properly.
+        foreach (var doc in documents)
+          doc.Regenerate();
+
+        foreach (var wallToJoin in joinedWalls)
+        {
+          ARDB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 0);
+          ARDB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 1);
+        }
       }
 
       joinedWalls = new List<ARDB.Wall>();
@@ -81,12 +79,12 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     static readonly ARDB.FailureDefinitionId[] failureDefinitionIdsToFix = new ARDB.FailureDefinitionId[]
     {
+      ARDB.BuiltInFailures.JoinElementsFailures.CannotJoinElementsError,
       ARDB.BuiltInFailures.CreationFailures.CannotMakeWall,
       ARDB.BuiltInFailures.CreationFailures.CannotDrawWallsError,
       ARDB.BuiltInFailures.CreationFailures.CannotDrawWalls,
-      ARDB.BuiltInFailures.JoinElementsFailures.CannotJoinElementsError,
     };
-    protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix;
+    protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix.Reverse();
 
     void ReconstructWallByCurve
     (
@@ -115,7 +113,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         !curve.TryGetPlane(out var axisPlane, tol.VertexTolerance) ||
         axisPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis, tol.AngleTolerance) == 0
       )
-        ThrowArgumentException(nameof(curve), "Curve must be a horizontal line, arc or ellipse curve.");
+        ThrowArgumentException(nameof(curve), "Curve must be a horizontal line, arc or ellipse curve.", curve);
 #else
       if
       (
@@ -123,7 +121,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         !curve.TryGetPlane(out var axisPlane, tol.VertexTolerance) ||
         axisPlane.ZAxis.IsParallelTo(Rhino.Geometry.Vector3d.ZAxis, tol.AngleTolerance) == 0
       )
-        ThrowArgumentException(nameof(curve), "Curve must be a horizontal line or arc curve.");
+        ThrowArgumentException(nameof(curve), "Curve must be a horizontal line or arc curve.", curve);
 #endif
 
       SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.WallType, nameof(type));
@@ -133,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       // Curve
       var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.GetHeight() * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
       if(!TryGetCurveAtPlane(curve, levelPlane, out var centerLine))
-        ThrowArgumentException(nameof(curve), "Failed to project curve in the level plane.");
+        ThrowArgumentException(nameof(curve), "Failed to project curve in the level plane.", curve);
 
       // Height
       if (!height.HasValue)
@@ -203,6 +201,12 @@ namespace RhinoInside.Revit.GH.Components.Walls
           structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing
         );
 
+        // Wait to join at the end of the Transaction
+        {
+          ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 0);
+          ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 1);
+        }
+
         // Walls are created with the last LocationLine used in the Revit editor!!
         //newWall.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM).Update((int) WallLocationLine.WallCenterline);
 
@@ -222,7 +226,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         ReplaceElement(ref wall, newWall, parametersMask);
       }
 
-      if (newWall != null)
+      if (newWall is object)
       {
         newWall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Value.Id);
         newWall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
@@ -243,11 +247,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
         // Setup joins in a last step
         if (allowJoins) joinedWalls.Add(newWall);
-        else
-        {
-          ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 0);
-          ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 1);
-        }
       }
     }
   }

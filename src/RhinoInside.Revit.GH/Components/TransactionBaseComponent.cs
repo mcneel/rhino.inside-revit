@@ -326,6 +326,7 @@ namespace RhinoInside.Revit.GH.Components
       { typeof(ARDB.Category),                  (typeof(Parameters.Category),         typeof(Types.Category))         },
       { typeof(ARDB.Family),                    (typeof(Parameters.Family),           typeof(Types.Family))           },
       { typeof(ARDB.View),                      (typeof(Parameters.View),             typeof(Types.View))             },
+      { typeof(ARDB.ViewFamilyType),            (typeof(Parameters.ViewFamilyType),   typeof(Types.ViewFamilyType))   },
       { typeof(ARDB.Group),                     (typeof(Parameters.Group),            typeof(Types.Group))            },
 
       { typeof(ARDB.CurveElement),              (typeof(Parameters.CurveElement),     typeof(Types.CurveElement))     },
@@ -582,14 +583,14 @@ namespace RhinoInside.Revit.GH.Components
 
     protected void ThrowArgumentNullException(string paramName, string description = null) => throw new RuntimeArgumentNullException(FirstCharUpper(paramName), description ?? string.Empty);
 
-    protected void ThrowArgumentException(string paramName, string description = null)
+    protected void ThrowArgumentException(string paramName, string description = null, object value = default)
     {
       if (description is null)
         description = "Input value is not valid.";
 
       description = description.TrimEnd(Environment.NewLine.ToCharArray());
 
-      throw new RuntimeArgumentException(FirstCharUpper(paramName), description);
+      throw new RuntimeArgumentException(FirstCharUpper(paramName), description, value);
     }
 
     protected bool ThrowIfNotValid(string paramName, Point3d value)
@@ -603,8 +604,12 @@ namespace RhinoInside.Revit.GH.Components
       if (value is null) ThrowArgumentNullException(paramName);
       if (!value.IsValidWithLog(out var log))
       {
-        AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, default, value);
-        ThrowArgumentException(paramName, $"Input geometry is not valid.{Environment.NewLine}{log}");
+        ThrowArgumentException
+        (
+          paramName,
+          $"Input geometry is not valid.{Environment.NewLine}{log}",
+          value
+        );
       }
 
       return true;
@@ -669,69 +674,21 @@ namespace RhinoInside.Revit.GH.Components
       {
         if (document.IsValid)
         {
-          StartTransaction(document.Value);
-          Iterate
+          if (GH_Document.IsEscapeKeyDown())
+            DA.AbortComponentSolution();
+
+          ReconstructElement<ARDB.Element>
           (
-            DA,
-            document.Value,
-            (ARDB.Document doc, ref ARDB.Element current) => TrySolveInstance(DA, doc, ref current)
+            document.Value, Params.Output[0].Name, current =>
+            {
+              TrySolveInstance(DA, document.Value, ref current);
+              DA.SetData(0, current);
+              return current;
+            }
           );
         }
       }
       else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input parameter Document failed to collect data");
-    }
-
-    delegate void CommitAction(ARDB.Document doc, ref ARDB.Element element);
-
-    void Iterate(IGH_DataAccess DA, ARDB.Document doc, CommitAction action)
-    {
-      // Previous Output
-      var trackedParam = Params.Output[0];
-      Params.ReadTrackedElement(trackedParam.Name, doc, out ARDB.Element previous);
-      var element = previous; 
-
-      if (element?.DesignOption?.Id is ARDB.ElementId elementDesignOptionId)
-      {
-        var activeDesignOptionId = ARDB.DesignOption.GetActiveDesignOptionId(element.Document);
-
-        if (elementDesignOptionId != activeDesignOptionId)
-          element = null;
-      }
-
-      var graphical = element is object && Types.GraphicalElement.IsValidElement(element);
-      var pinned = element?.Pinned != false;
-
-      try
-      {
-        if(!graphical || pinned)
-          action(doc, ref element);
-      }
-      catch (RuntimeArgumentNullException)
-      {
-        // Grasshopper components use to send a Null when
-        // they receive a Null without throwing any error
-        element = null;
-      }
-      catch (RuntimeArgumentException e)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-        element = null;
-      }
-      finally
-      {
-        Params.WriteTrackedElement(trackedParam.Name, doc, element);
-        DA.SetData(trackedParam.Name, element);
-
-        if (Types.GraphicalElement.IsValidElement(element))
-        {
-          // In case element is crated on this iteratrion we pin it here by default
-          if (pinned && !element.Pinned)
-          {
-            try { element.Pinned = true; }
-            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
-          }
-        }
-      }
     }
 
     void TrySolveInstance
@@ -801,8 +758,8 @@ namespace RhinoInside.Revit.GH.Components
     {
       base.OnDone(status);
     }
-    #region IGH_ElementIdBakeAwareObject
 
+    #region IGH_ElementIdBakeAwareObject
     IEnumerable<Types.IGH_GraphicalElement> GetElementsToBake(ARDB.Document document) =>
       Params.Output.Where(x => x is Kernel.IGH_ElementIdParam).
       SelectMany(x => x.VolatileData.AllData(true).OfType<Types.IGH_GraphicalElement>()).

@@ -139,14 +139,14 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public override string Name
+    public override string Nomen
     {
       get
       {
         if (Id is object && Id.TryGetBuiltInLinePattern(out var builtInLinePattern))
           return $"{builtInLinePattern}";
 
-        return base.Name;
+        return base.Nomen;
       }
     }
 

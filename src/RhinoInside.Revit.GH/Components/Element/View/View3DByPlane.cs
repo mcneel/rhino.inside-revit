@@ -9,6 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Views
   using External.DB.Extensions;
   using Kernel.Attributes;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.5")]
   public class View3DByPlane : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("F7B775C9-05E0-40F7-85E9-5CC2EF79731E");
@@ -33,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       ref ARDB.View3D view3D,
 
       Rhino.Geometry.Plane plane,
-      Optional<ARDB.ElementType> type,
+      Optional<ARDB.ViewFamilyType> type,
       Optional<string> name,
       Optional<bool> perspective
     )

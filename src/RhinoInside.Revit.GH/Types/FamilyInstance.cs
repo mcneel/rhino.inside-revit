@@ -208,7 +208,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value.HasValue && Value is ARDB.FamilyInstance instance)
         {
           if (!instance.CanFlipFacing)
-            throw new InvalidOperationException("Facing can not be flipped for this element.");
+            throw new Exceptions.RuntimeErrorException("Facing can not be flipped for this element.");
 
           if (instance.FacingFlipped != value)
           {
@@ -233,7 +233,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value.HasValue && Value is ARDB.FamilyInstance instance)
         {
           if (!instance.CanFlipHand)
-            throw new InvalidOperationException("Hand can not be flipped for this element.");
+            throw new Exceptions.RuntimeErrorException("Hand can not be flipped for this element.");
 
           if (instance.HandFlipped != value)
           {
@@ -258,7 +258,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value.HasValue && Value is ARDB.FamilyInstance instance)
         {
           if (!instance.CanFlipWorkPlane)
-            throw new InvalidOperationException("Work Plane can not be flipped for this element.");
+            throw new Exceptions.RuntimeErrorException("Work Plane can not be flipped for this element.");
 
           if (instance.IsWorkPlaneFlipped != value)
           {
@@ -282,7 +282,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object &&  Value is ARDB.FamilyInstance frame && value != IsJoinAllowedAtStart)
         {
           if (frame.StructuralType == ARDB.Structure.StructuralType.NonStructural)
-            throw new InvalidOperationException("Join at start can not be set for this element.");
+            throw new Exceptions.RuntimeErrorException("Join at start can not be set for this element.");
 
           InvalidateGraphics();
 
@@ -305,7 +305,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object && Value is ARDB.FamilyInstance frame && value != IsJoinAllowedAtEnd)
         {
           if (frame.StructuralType == ARDB.Structure.StructuralType.NonStructural)
-            throw new InvalidOperationException("Join at end can not be set for this element.");
+            throw new Exceptions.RuntimeErrorException("Join at end can not be set for this element.");
 
           InvalidateGraphics();
 

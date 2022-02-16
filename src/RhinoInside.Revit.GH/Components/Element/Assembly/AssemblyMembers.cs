@@ -10,12 +10,12 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
   public class AssemblyMembers : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("33ead71b-647b-4783-b0ce-c840cd50c15d");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
-    protected override string IconTag => "AAS";
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    public AssemblyMembers() : base(
+    public AssemblyMembers() : base
+    (
       name: "Assembly Members",
-      nickname: "AM",
+      nickname: "Members",
       description: "Get-Set accessor for assembly members",
       category: "Revit",
       subCategory: "Assembly"
@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       ),
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.GraphicalElement()
         {
           Name = "Members",
           NickName = "M",
@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       ),
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.GraphicalElement()
         {
           Name = "Members",
           NickName = "M",
@@ -73,30 +73,23 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var assembly = default(ARDB.AssemblyInstance);
-      if (!DA.GetData("Assembly", ref assembly))
-        return;
+      if (!Params.GetData(DA, "Assembly", out ARDB.AssemblyInstance assembly, x => x is object)) return;
+      else DA.SetData("Assembly", assembly);
 
-      var _Members_ = Params.IndexOfInputParam("Members");
-      if (_Members_ >= 0 && Params.Input[_Members_].DataType != GH_ParamData.@void)
+      if (Params.GetDataList(DA, "Members", out IList<ARDB.Element> members))
       {
-        ARDB.ElementId prevNamingCategoryId = assembly.NamingCategoryId;
-        var newMembers = new List<ARDB.Element>();
-        if (DA.GetDataList("Members", newMembers))
-        {
-          // set the assembly members to a new list. previous is cleared
-          var memberdIds = newMembers.Select(x => x.Id).ToList();
-          var handler = new AssemblyHandler(memberdIds, assembly.NamingCategoryId);
+        var prevNamingCategoryId = assembly.NamingCategoryId;
+        var memberdIds = members.OfType<ARDB.Element>().Select(x => x.Id).ToList();
 
-          StartTransaction(assembly.Document);
-          handler.UpdateAssemblyMembers(assembly);
+        StartTransaction(assembly.Document);
 
-          if (!assembly.NamingCategoryId.Equals(prevNamingCategoryId))
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "The naming category of given assembly automatically changed to match the new members");
-        }
+        // set the assembly members to a new list. previous is cleared
+        if (memberdIds.Count == 0 || ARDB.AssemblyInstance.AreElementsValidForAssembly(assembly.Document, memberdIds, assembly.Id))
+          assembly.SetMemberIds(memberdIds);
+        else
+          throw new Exception("At least one element is not valid to be a memeber of this assembly.");
       }
 
-      DA.SetData("Assembly", assembly);
       DA.SetDataList("Members", assembly.GetMemberIds().Select(x => Types.Element.FromElementId(assembly.Document, x)));
     }
   }

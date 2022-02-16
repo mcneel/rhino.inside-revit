@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object && Value is ARDB.Wall wall && wall.Location is ARDB.LocationCurve)
         {
           if (!IsValidCurve(value, out var log))
-            throw new ArgumentException(nameof(Curve), log);
+            throw new Exceptions.RuntimeArgumentException(nameof(Curve), log, value);
 
           var tol = GeometryObjectTolerance.Model;
 
@@ -86,19 +86,21 @@ namespace RhinoInside.Revit.GH.Types
               if (value.TryGetLine(out var valueLine, tol.VertexTolerance))
                 base.Curve = new LineCurve(valueLine);
               else
-                throw new ArgumentException(nameof(Curve), "Curve should be a line like curve.");
+                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be a line like curve.", value);
               break;
+
             case ArcCurve _:
               if (value.TryGetArc(out var valueArc, tol.VertexTolerance))
                 base.Curve = new ArcCurve(valueArc);
               else
-                throw new ArgumentException(nameof(Curve), "Curve should be an arc like curve.");
+                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be an arc like curve.", value);
               break;
+
             case NurbsCurve _:
               if (value.TryGetEllipse(out var _, tol.VertexTolerance))
                 base.Curve = value;
               else
-                throw new ArgumentException(nameof(Curve), "Curve should be an ellipse like curve.");
+                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be an ellipse like curve.", value);
               break;
           }
         }

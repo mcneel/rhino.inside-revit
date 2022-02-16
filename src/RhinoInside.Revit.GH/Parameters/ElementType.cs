@@ -340,7 +340,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         var data = Types.ElementType.FromElementId(document.Value, document.Value.GetDefaultElementTypeId(typeGroup));
         if (data is null)
-          throw new Exceptions.RuntimeWarningException($"No suitable {typeGroup} has been found.");
+          throw new Exceptions.RuntimeArgumentException(name, $"No suitable {typeGroup} has been found.");
 
         type = data as TOutput;
         if (type is null)
@@ -352,11 +352,50 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         case ARDB.Element element:
           if (!document.Value.IsEquivalent(element.Document))
-            throw new Exceptions.RuntimeErrorException("Failed to assign a type from a diferent document.");
+            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
           break;
         case Types.IGH_ElementId id:
           if (!document.Value.IsEquivalent(id.Document))
-            throw new Exceptions.RuntimeErrorException("Failed to assign a type from a diferent document.");
+            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
+          break;
+      }
+
+      return true;
+    }
+
+    public static bool GetDataOrDefault<TOutput>
+    (
+      IGH_Component component,
+      IGH_DataAccess DA,
+      string name,
+      out TOutput type,
+      Types.Document document,
+      ARDB.BuiltInCategory categoryId
+    )
+      where TOutput : class
+    {
+      if (!component.Params.TryGetData(DA, name, out type)) return false;
+      if (type is null)
+      {
+        var data = Types.ElementType.FromElementId(document.Value, document.Value.GetDefaultFamilyTypeId(new ARDB.ElementId(categoryId)));
+        if (data is null)
+          throw new Exceptions.RuntimeArgumentException(name, $"No suitable {categoryId} type has been found.");
+
+        type = data as TOutput;
+        if (type is null)
+          return data.CastTo(out type);
+      }
+
+      // Validate document
+      switch (type)
+      {
+        case ARDB.Element element:
+          if (!document.Value.IsEquivalent(element.Document))
+            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
+          break;
+        case Types.IGH_ElementId id:
+          if (!document.Value.IsEquivalent(id.Document))
+            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
           break;
       }
 

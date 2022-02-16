@@ -60,7 +60,6 @@
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyByLocation.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyByMembers.cs" />
-    <Compile Include="Components\Element\Assembly\AssemblyHandler.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyMembers.cs" />
     <Compile Include="Components\Element\Assembly\DisassembleAssembly.cs" />
     <Compile Include="Components\Element\Assembly\QueryAssemblies.cs" />
@@ -138,7 +137,6 @@
     <Compile Include="Components\Element\Roof\ByOutline.cs" />
     <Compile Include="Components\Element\SelectDeselectElement.cs" />
     <Compile Include="Components\Element\Sheet\TitleBlockByType.cs" />
-    <Compile Include="Components\Element\Sheet\BaseSheetTypes.cs" />
     <Compile Include="Components\Element\Sheet\QuerySheets.cs" />
     <Compile Include="Components\Element\Sheet\SheetByNumber_Assembly.cs" />
     <Compile Include="Components\Element\Sheet\SheetByNumber_Placeholder.cs" />
@@ -169,6 +167,7 @@
     <Compile Include="Components\Element\CurtainWall\AnalyzeCurtainGridPanel.cs" />
     <Compile Include="Components\Element\Wall\ByProfile.cs" />
     <Compile Include="Components\Element\Wall\QueryWalls.cs" />
+    <Compile Include="Components\Element\Release.cs" />
     <Compile Include="Components\Workset\Active.cs" />
     <Compile Include="Components\Workset\ElementWorkset.cs" />
     <Compile Include="Components\Workset\Identity.cs" />

@@ -201,4 +201,21 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
   }
+
+  [Kernel.Attributes.Name("View Type")]
+  public interface IGH_ViewFamilyType : IGH_ElementType { }
+
+  [Kernel.Attributes.Name("View Type")]
+  public class ViewFamilyType : ElementType, IGH_ViewFamilyType
+  {
+    protected override Type ValueType => typeof(ARDB.ViewFamilyType);
+    public new ARDB.ViewFamilyType Value => base.Value as ARDB.ViewFamilyType;
+
+    public ViewFamilyType() { }
+    protected ViewFamilyType(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public ViewFamilyType(ARDB.ViewFamilyType elementType) : base(elementType) { }
+
+    public ViewFamily ViewFamily => Value is ARDB.ViewFamilyType type ?
+      new ViewFamily(type.ViewFamily) : default;
+  }
 }

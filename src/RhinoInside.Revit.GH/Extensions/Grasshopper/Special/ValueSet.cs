@@ -841,39 +841,42 @@ namespace Grasshopper.Special
               }
               else if (ListBounds.Contains(canvasLocation) && canvas.Viewport.Zoom >= GH_Viewport.ZoomDefault * 0.8f /*&& Owner.DataType == GH_ParamData.remote*/)
               {
-                var scrolledCanvasLocation = e.CanvasLocation;
-                if (!ScrollerBounds.IsEmpty)
-                  scrolledCanvasLocation.Y += ((Owner.ListItems.Count * ItemHeight) - ListBounds.Height) * ScrollRatio;
-
-                bool keepSelection = (Control.ModifierKeys & Keys.Control) != Keys.None;
-                bool rangeSelection = (Control.ModifierKeys & Keys.Shift) != Keys.None;
-                int lastItemIndex = 0;
-
-                bool sel = LastItemIndex < Owner.ListItems.Count ? Owner.ListItems[LastItemIndex].Selected : false;
-                for (int i = 0; i < Owner.ListItems.Count; i++)
+                if (Owner.ListItems.Count > 0)
                 {
-                  if (Owner.ListItems[i].BoxName.Contains(scrolledCanvasLocation))
+                  var scrolledCanvasLocation = e.CanvasLocation;
+                  if (!ScrollerBounds.IsEmpty)
+                    scrolledCanvasLocation.Y += ((Owner.ListItems.Count * ItemHeight) - ListBounds.Height) * ScrollRatio;
+
+                  bool keepSelection = (Control.ModifierKeys & Keys.Control) != Keys.None;
+                  bool rangeSelection = (Control.ModifierKeys & Keys.Shift) != Keys.None;
+                  int lastItemIndex = 0;
+
+                  bool sel = LastItemIndex < Owner.ListItems.Count ? Owner.ListItems[LastItemIndex].Selected : false;
+                  for (int i = 0; i < Owner.ListItems.Count; i++)
                   {
-                    Owner.ListItems[i].Selected ^= true;
-                    lastItemIndex = i;
+                    if (Owner.ListItems[i].BoxName.Contains(scrolledCanvasLocation))
+                    {
+                      Owner.ListItems[i].Selected ^= true;
+                      lastItemIndex = i;
+                    }
+                    else if (!keepSelection)
+                    {
+                      Owner.ListItems[i].Selected = false;
+                    }
                   }
-                  else if (!keepSelection)
+
+                  if (rangeSelection)
                   {
-                    Owner.ListItems[i].Selected = false;
+                    int min = Math.Min(lastItemIndex, LastItemIndex);
+                    int max = Math.Max(lastItemIndex, LastItemIndex);
+
+                    for (int i = min; i <= max; i++)
+                      Owner.ListItems[i].Selected = sel;
                   }
+
+                  LastItemIndex = lastItemIndex;
+                  Owner.ResetPersistentData(Owner.SelectedItems.Select(x => x.Value), "Change selection");
                 }
-
-                if (rangeSelection)
-                {
-                  int min = Math.Min(lastItemIndex, LastItemIndex);
-                  int max = Math.Max(lastItemIndex, LastItemIndex);
-
-                  for (int i = min; i <= max; i++)
-                    Owner.ListItems[i].Selected = sel;
-                }
-
-                LastItemIndex = lastItemIndex;
-                Owner.ResetPersistentData(Owner.SelectedItems.Select(x => x.Value), "Change selection");
 
                 return GH_ObjectResponse.Handled;
               }

@@ -97,25 +97,29 @@ namespace RhinoInside.Revit.GH.Components.Filters
     const string _ParameterFilter_ = "Parameter Filter";
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
-      if (!Params.TryGetData(DA, "Filter", out Types.ElementFilter filter)) return;
 
-      // Previous Output
-      Params.ReadTrackedElement(_ParameterFilter_, doc.Value, out ARDB.ParameterFilterElement ruleFilter);
+      ReconstructElement<ARDB.ParameterFilterElement>
+      (
+        doc.Value, _ParameterFilter_, (ruleFilter) =>
+        {
+          // Input
+          if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return null;
+          if (!Params.TryGetData(DA, "Filter", out Types.ElementFilter filter)) return null;
 
-      StartTransaction(doc.Value);
-      {
-        var untracked = Existing(_ParameterFilter_, doc.Value, ref ruleFilter, name);
+          // Compute
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_ParameterFilter_, out var untracked, ref ruleFilter, doc.Value, name))
+          {
+            var categoryIds = categories?.Where(x => doc.Value.IsEquivalent(x.Document)).Select(x => x.Id).ToList();
+            ruleFilter = Reconstruct(ruleFilter, doc.Value, name, categoryIds, filter?.Value, default);
+          }
 
-        var categoryIds = categories?.Where(x => doc.Value.IsEquivalent(x.Document)).Select(x => x.Id).ToList();
-        ruleFilter = Reconstruct(ruleFilter, doc.Value, name, categoryIds, filter?.Value, default);
-
-        Params.WriteTrackedElement(_ParameterFilter_, doc.Value, untracked ? default : ruleFilter);
-        DA.SetData(_ParameterFilter_, ruleFilter);
-      }
+          DA.SetData(_ParameterFilter_, ruleFilter);
+          return untracked ? null : ruleFilter;
+        }
+      );
     }
 
     bool Reuse
@@ -129,7 +133,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     {
       if (ruleFilter is null) return false;
       if (name is object) { if (ruleFilter.Name != name) ruleFilter.Name = name; }
-      else ruleFilter.SetIncrementalName(template?.Name ?? _ParameterFilter_);
+      else ruleFilter.SetIncrementalNomen(template?.Name ?? _ParameterFilter_);
       if (categoryIds is object) ruleFilter.SetCategories(categoryIds);
       if (filter is object) ruleFilter.SetElementFilter(filter);
       else ruleFilter.ClearRules();
@@ -150,7 +154,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
       // Make sure the name is unique
       {
-        name = doc.NextIncrementalName
+        name = doc.NextIncrementalNomen
         (
           name ?? template?.Name ?? _ParameterFilter_,
           typeof(ARDB.ParameterFilterElement)

@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Families
     )
     {
       if (!document.IsFamilyDocument)
-        throw new InvalidOperationException("This component can only run in Family editor");
+        throw new Exceptions.RuntimeArgumentException("Document", "This component can only run on a Family document");
 
       var planes = new List<Rhino.Geometry.Plane>();
       foreach (var profile in profiles)

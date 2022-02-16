@@ -91,11 +91,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var element = default(Types.Element);
-      if (!DA.GetData("Element", ref element))
-        return;
-
-      DA.SetData("Element", element);
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      else DA.SetData("Element", element);
 
       if (Params.GetData(DA, "Selected", out bool? selected))
       {

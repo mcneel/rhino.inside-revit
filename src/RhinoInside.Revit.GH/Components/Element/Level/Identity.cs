@@ -37,30 +37,35 @@ namespace RhinoInside.Revit.GH.Components.Levels
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Level", out Types.Level level, x => x.IsValid))
-        return;
+      if (!Params.GetData(DA, "Level", out Types.Level level, x => x.IsValid)) return;
+      else Params.TrySetData(DA, "Level", () => level);
 
-      bool update = false;
-      update |= Params.GetData(DA, "Elevation", out double? elevation);
-      update |= Params.GetData(DA, "Structural", out bool? structural);
-      update |= Params.GetData(DA, "Building Story", out bool? buildingStory);
+      Params.TrySetData(DA, "Name", () => level.Nomen);
+      Params.TrySetData(DA, "Plan View", () => new Types.View(level.Document, level.Value.FindAssociatedPlanViewId()));
 
-      if (update)
+      if
+      (
+        Params.GetData(DA, "Elevation", out double? elevation) |
+        Params.GetData(DA, "Structural", out bool? structural) |
+        Params.GetData(DA, "Building Story", out bool? buildingStory)
+      )
       {
-        StartTransaction(level.Document);
-        if(elevation.HasValue)
-          level.SetElevationAbove(Params.Output<Parameters.Elevation>("Elevation").ElevationBase, elevation.Value);
+        UpdateElement
+        (
+          level.Value, () =>
+          {
+            if (elevation.HasValue)
+              level.SetElevationAbove(Params.Output<Parameters.Elevation>("Elevation").ElevationBase, elevation.Value);
 
-        level.IsStructural = structural;
-        level.IsBuildingStory = buildingStory;
+            level.IsStructural = structural;
+            level.IsBuildingStory = buildingStory;
+          }
+        );
       }
 
-      Params.TrySetData(DA, "Level", () => level);
-      Params.TrySetData(DA, "Name", () => level.Name);
       Params.TrySetData(DA, "Elevation", () => level.GetElevationAbove(Params.Output<Parameters.Elevation>("Elevation").ElevationBase));
       Params.TrySetData(DA, "Structural", () => level.IsStructural);
       Params.TrySetData(DA, "Building Story", () => level.IsBuildingStory);
-      Params.TrySetData(DA, "Plan View", () => new Types.View(level.Document, level.Value.FindAssociatedPlanViewId()));
     }
   }
 }

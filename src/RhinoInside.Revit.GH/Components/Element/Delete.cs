@@ -403,9 +403,10 @@ namespace RhinoInside.Revit.GH.Components.Elements.Obsolete
                              GroupBy(x => x.Document).
                              ToList();
 
+      
       var options = new External.DB.TransactionHandlingOptions
       {
-        FailuresPreprocessor = new TransactionalComponentFailuresPreprocessor(this)
+        FailuresPreprocessor = CreateFailuresPreprocessor()
       };
 
       using (var chain = new External.DB.TransactionChain(options, Name))

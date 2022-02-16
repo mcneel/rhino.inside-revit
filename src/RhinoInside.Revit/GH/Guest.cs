@@ -512,7 +512,7 @@ namespace RhinoInside.Revit.GH
     }
     #endregion
 
-    #region DocumentChanged
+    #region Revit Document Changed
     void OnDocumentChanged(object sender, ARDB.Events.DocumentChangedEventArgs e)
     {
 #if DEBUG
@@ -527,6 +527,13 @@ namespace RhinoInside.Revit.GH
       {
         foreach (GH_Document definition in Instances.DocumentServer)
         {
+          var activeDefinition = definition.SolutionState == GH_ProcessStep.Process;
+#if !DEBUG
+          // Prevent delayed solutions in Release.
+          if (activeDefinition)
+            continue;
+#endif
+
           var change = new DocumentChangedEvent()
           {
             Operation = e.Operation,
@@ -534,23 +541,46 @@ namespace RhinoInside.Revit.GH
             Definition = definition
           };
 
-          foreach (var obj in definition.Objects)
+          foreach (var obj in definition.Objects.OfType<IGH_ActiveObject>())
           {
+            if (obj.Locked)
+              continue;
+
+            // Will be computed in this solution
+            if (activeDefinition && obj.Phase == GH_SolutionPhase.Blank)
+              continue;
+
+            // obj is the ActiveObject that rised this event
+            if (obj.Phase == GH_SolutionPhase.Computing)
+              continue;
+
             if (obj is Kernel.IGH_ElementIdParam persistentParam)
             {
-              if (persistentParam.Locked)
-                continue;
-
               if (persistentParam.NeedsToBeExpired(document, added, deleted, modified))
                 change.ExpiredObjects.Add(persistentParam);
             }
             else if (obj is Kernel.IGH_ElementIdComponent persistentComponent)
             {
-              if (persistentComponent.Locked)
-                continue;
-
               if (persistentComponent.NeedsToBeExpired(document, added, deleted, modified))
+              {
                 change.ExpiredObjects.Add(persistentComponent);
+              }
+              else
+              {
+                foreach (var output in persistentComponent.Params.Output.OfType<Kernel.IGH_ElementIdParam>())
+                {
+                  if (output.Recipients.Count > 0 && output.NeedsToBeExpired(document, added, deleted, modified))
+                  {
+                    foreach (var recipient in output.Recipients)
+                    {
+                      if (activeDefinition && recipient.Phase == GH_SolutionPhase.Blank)
+                        continue;
+
+                      change.ExpiredObjects.Add(recipient.Attributes.GetTopLevel.DocObject as IGH_ActiveObject);
+                    }
+                  }
+                }
+              }
             }
           }
 
@@ -600,12 +630,26 @@ namespace RhinoInside.Revit.GH
 
           FlushQueue.Raise();
         }
+#if DEBUG
+        else if (!System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Escape))
+        {          
+          value.Definition.ScheduleSolution
+          (
+            delay: 500,
+            definition =>
+            {
+              foreach (var expired in value.ExpiredObjects)
+                expired.ExpireSolution(false);
+            }
+          );
+        }
+#endif
       }
 
       public ARDB.Events.UndoOperation Operation;
       public ARDB.Document Document;
       public GH_Document Definition;
-      public readonly List<IGH_ActiveObject> ExpiredObjects = new List<IGH_ActiveObject>();
+      public readonly HashSet<IGH_ActiveObject> ExpiredObjects = new HashSet<IGH_ActiveObject>();
 
       GH_Document NewSolution()
       {
@@ -859,7 +903,10 @@ namespace RhinoInside.Revit.GH
           e.Document.ExpireSolution();
 
         if (rolledback)
-          e.Document.Undo();
+        {
+               if (e.Document.UndoServer.RedoCount > 0) e.Document.Redo();
+          else if (e.Document.UndoServer.UndoCount > 0) e.Document.Undo();
+        }
       }
     }
 

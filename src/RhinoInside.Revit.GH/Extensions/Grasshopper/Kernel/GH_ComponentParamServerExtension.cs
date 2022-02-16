@@ -6,8 +6,37 @@ using Grasshopper.Kernel.Types;
 
 namespace Grasshopper.Kernel
 {
+  interface IGH_RuntimeContract
+  {
+    bool RequiresFailed
+    (
+      IGH_DataAccess access,
+      int index,
+      object value,
+      string message = default
+    );
+    //bool Ensures<T>(IGH_DataAccess dataAccess, int index, Func<bool> predicate);
+    //bool Assert<T>(IGH_DataAccess dataAccess, int index, Func<bool> predicate);
+  }
+
   static class GH_ComponentParamServerExtension
   {
+    static bool Requires<T>
+    (
+      IGH_Component component,
+      IGH_DataAccess access, int index,
+      T value, Predicate<T> predicate
+    )
+    {
+      if (predicate(value)) return true;
+
+      if (component is IGH_RuntimeContract contract)
+        return contract.RequiresFailed(access, index, value);
+
+      component.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Input parameter '{component.Params.Input[index].NickName}' collected invalid data.");
+      return false;
+    }
+
     internal static int IndexOf(this IList<IGH_Param> list, string name, out IGH_Param value)
     {
       value = default;
@@ -55,30 +84,22 @@ namespace Grasshopper.Kernel
     public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value)
       where T : struct => GetData(parameters, DA, name, out value, x => true);
 
-    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value, Func<T, bool> validate)
+    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value, Predicate<T> predicate)
       where T : struct
     {
+      value = default;
+
       var index = parameters.Input.IndexOf(name, out var param);
       if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
       {
-        T val = default;
-        if (!DA.GetData(index, ref val)) { value = default; return false; }
-        if (!validate(val))
-        {
-          parameters.Owner.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{name} value is not valid.");
-          value = default;
-          return false;
-        }
-
-        value = val;
-        return true;
+        if (!DA.GetData(index, ref value)) { value = default; return false; }
+        return Requires(parameters.Owner, DA, index, value.Value, predicate);
       }
 
-      value = default;
       return true;
     }
 
-    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value, Func<T, bool> validate)
+    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value, Predicate<T> predicate)
       where T : class
     {
       value = default;
@@ -87,40 +108,28 @@ namespace Grasshopper.Kernel
       if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
       {
         if (!DA.GetData(index, ref value)) return false;
-        if (!validate(value))
-        {
-          parameters.Owner.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{name} value is not valid.");
-          return false;
-        }
+        return Requires(parameters.Owner, DA, index, value, predicate);
       }
 
       return true;
     }
 
-    public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value, Func<T?, bool> validate)
+    public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value, Predicate<T> predicate)
       where T : struct
     {
+      value = default;
+
       var index = parameters.Input.IndexOf(name, out var param);
       if (param?.DataType > GH_ParamData.@void)
       {
-        T val = default;
-        if (!DA.GetData(index, ref val)) { value = default; return false; }
-        if (!validate(val))
-        {
-          parameters.Owner.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{name} value is not valid.");
-          value = default;
-          return false;
-        }
-
-        value = val;
-        return true;
+        if (!DA.GetData(index, ref value)) { value = default; return false; }
+        return Requires(parameters.Owner, DA, index, value.Value, predicate);
       }
 
-      value = default;
       return false;
     }
 
-    public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value, Func<T, bool> validate)
+    public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value, Predicate<T> predicate)
       where T : class
     {
       value = default;
@@ -129,13 +138,7 @@ namespace Grasshopper.Kernel
       if (param?.DataType > GH_ParamData.@void)
       {
         if (!DA.GetData(index, ref value)) return false;
-        if (!validate(value))
-        {
-          parameters.Owner.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Input parameter {name} collected some invalid data.");
-          return false;
-        }
-
-        return true;
+        return Requires(parameters.Owner, DA, index, value, predicate);
       }
 
       return false;
@@ -335,6 +338,5 @@ namespace Grasshopper.Kernel
         yield return element;
       }
     }
-
   }
 }

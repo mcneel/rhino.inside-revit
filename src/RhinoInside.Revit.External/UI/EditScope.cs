@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.External.UI
 
       modified = new HashSet<ElementId>(modifiedMap.Keys);
 
-      return added.Count + deleted.Count + modified.Count;
+      return count;
     }
   }
 

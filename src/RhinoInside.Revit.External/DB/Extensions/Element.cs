@@ -82,34 +82,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return ElementKind.None;
     }
 
-    public static bool CanBeRenamed(this Element element)
-    {
-      if (element is null) return false;
-
-      using (element.Document.RollBackScope())
-      {
-        try { element.Name = Guid.NewGuid().ToString("N"); }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-      }
-
-      return true;
-    }
-
-    public static bool IsNameInUse(this Element element, string name)
-    {
-      if (element is null) return false;
-
-      using (element.Document.RollBackScope())
-      {
-        try { element.Name = name; }
-        // The caller needs to see this exception to know this element can not be renamed.
-        //catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-        catch (Autodesk.Revit.Exceptions.ArgumentException) { return true; }
-      }
-
-      return element.Name == name;
-    }
-
     public static BoundingBoxXYZ GetBoundingBoxXYZ(this Element element, out View view)
     {
       view = element.ViewSpecific ? element.Document.GetElement(element.OwnerViewId) as View : default;
@@ -302,17 +274,57 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
-    #region Name
-    public static bool SetIncrementalName(this Element element, string prefix)
+    #region Nomen
+
+    // `Element.Name` does not always access the true denomination of the element.
+    //
+    // In cases like `ViewSheet` the true denomination is the "Sheet Number" parameter.
+    // Denomination is used here as the element property that identifies it univocaly from the UI.
+    // Is the property that produce a "Name" collision in case is duplicated.
+    //
+    // In other cases like 'Design Options' the Name parameter may come decorated
+    // this makes `Element.Name` not useful for searching or comparing namesake elements.
+    // Nomen is undecorated in thos case.
+
+    public static bool CanBeRenominated(this Element element)
     {
-      var prefixed = DocumentExtension.TryParseNameId(element.Name, out var p, out var _);
+      if (element is null) return false;
+
+      using (element.Document.RollBackScope())
+      {
+        try { element.SetElementNomen(Guid.NewGuid().ToString("N")); }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+      }
+
+      return true;
+    }
+
+    public static bool IsNomenInUse(this Element element, string name)
+    {
+      if (element is null) return false;
+
+      var nomen = element.GetElementNomen(out var nomenParameter);
+      using (element.Document.RollBackScope())
+      {
+        try { element.SetElementNomen(nomenParameter, name); }
+        // The caller should see this exception to know this element can not be renamed.
+        //catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+        catch (Autodesk.Revit.Exceptions.ArgumentException) { return true; }
+      }
+
+      return nomen == name;
+    }
+
+    public static bool SetIncrementalNomen(this Element element, string prefix)
+    {
+      var prefixed = DocumentExtension.TryParseNomenId(element.Name, out var p, out var _);
       if (!prefixed || prefix != p)
       {
         var categoryId = element.Category is Category category &&
           category.Id.TryGetBuiltInCategory(out var builtInCategory) ?
           builtInCategory : default(BuiltInCategory?);
 
-        var nextName = element.Document.NextIncrementalName
+        var nextName = element.Document.NextIncrementalNomen
         (
           prefix,
           element.GetType(),
@@ -320,9 +332,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
           categoryId
         );
 
-        if (nextName != element.Name)
+        if (nextName != element.GetElementNomen(out var nomenParameter))
         {
-          element.Name = nextName;
+          element.SetElementNomen(nomenParameter, nextName);
           return true;
         }
       }
@@ -330,6 +342,159 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
+    internal static BuiltInParameter GetNomenParameter(Type type)
+    {
+      // `DB.Family` parameter `ALL_MODEL_FAMILY_NAME` use to be `null`.
+      //
+      // if (typeof(Family).IsAssignableFrom(type))
+      //   return BuiltInParameter.ALL_MODEL_FAMILY_NAME;
+
+      if (typeof(ElementType).IsAssignableFrom(type))
+        return BuiltInParameter.ALL_MODEL_TYPE_NAME;
+
+      if (typeof(DatumPlane).IsAssignableFrom(type))
+        return BuiltInParameter.DATUM_TEXT;
+
+      if (typeof(ViewSheet).IsAssignableFrom(type))
+        return BuiltInParameter.SHEET_NUMBER;
+
+      if (typeof(View).IsAssignableFrom(type))
+        return BuiltInParameter.VIEW_NAME;
+
+      if (typeof(Viewport).IsAssignableFrom(type))
+        return BuiltInParameter.VIEWPORT_VIEW_NAME;
+
+      if (typeof(PropertySetElement).IsAssignableFrom(type))
+        return BuiltInParameter.PROPERTY_SET_NAME;
+
+      // MATERIAL_NAME is read-only
+      //if (typeof(Material).IsAssignableFrom(type))
+      //  return BuiltInParameter.MATERIAL_NAME;
+
+      if (typeof(DesignOption).IsAssignableFrom(type))
+        return BuiltInParameter.OPTION_NAME;
+
+      if (typeof(Phase).IsAssignableFrom(type))
+        return BuiltInParameter.PHASE_NAME;
+
+      if (typeof(AreaScheme).IsAssignableFrom(type))
+        return BuiltInParameter.AREA_SCHEME_NAME;
+
+      if (typeof(Room).IsAssignableFrom(type))
+        return BuiltInParameter.ROOM_NAME;
+
+      if (typeof(Zone).IsAssignableFrom(type))
+        return BuiltInParameter.ZONE_NAME;
+
+      if (typeof(RevitLinkInstance).IsAssignableFrom(type))
+        return BuiltInParameter.RVT_LINK_INSTANCE_NAME;
+
+      return BuiltInParameter.INVALID;
+    }
+
+    static BuiltInParameter GetNomenParameter(Element element)
+    {
+      var builtInParameter = GetNomenParameter(element.GetType());
+      if (builtInParameter != BuiltInParameter.INVALID) return builtInParameter;
+
+      if (element.Category is Category category)
+      {
+        if (category.Id.TryGetBuiltInCategory(out var builtInCategory) == true)
+        {
+          switch (builtInCategory)
+          {
+            case BuiltInCategory.OST_DesignOptionSets: return BuiltInParameter.OPTION_SET_NAME;
+            case BuiltInCategory.OST_VolumeOfInterest: return BuiltInParameter.VOLUME_OF_INTEREST_NAME;
+          }
+        }
+      }
+
+      return BuiltInParameter.INVALID;
+    }
+
+    internal static string GetElementNomen(this Element element, out BuiltInParameter nomenParameter)
+    {
+      nomenParameter = GetNomenParameter(element);
+      if (nomenParameter != BuiltInParameter.INVALID)
+        return GetParameterValue<string>(element, nomenParameter);
+      else
+        return element.Name;
+    }
+
+    public static string GetElementNomen(this Element element) =>
+      GetElementNomen(element, out var _);
+
+    internal static void SetElementNomen(this Element element, BuiltInParameter nomenParameter, string name)
+    {
+      if
+      (
+        !(element is ElementType) &&
+        nomenParameter != BuiltInParameter.INVALID &&
+        element.get_Parameter(nomenParameter) is Parameter parameter &&
+        !parameter.IsReadOnly
+      )
+      {
+        parameter.Update(name);
+      }
+      else if (element.Name != name)
+      {
+        element.Name = name;
+      }
+    }
+
+    public static void SetElementNomen(this Element element, string nomen) =>
+      SetElementNomen(element, GetNomenParameter(element), nomen);
+
+    internal static ElementId GetNamesakeElement(Document target, Document source, ElementId elementId)
+    {
+      if (elementId.IsBuiltInId() || target.IsEquivalent(source))
+        return elementId;
+
+      if (source.GetElement(elementId) is Element element)
+      {
+        if (element is ElementType type)
+        {
+          using (var collector = new FilteredElementCollector(target))
+          {
+            return collector.WhereElementIsElementType().
+              WhereElementIsKindOf(element.GetType()).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
+              WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, type.GetFamilyName()).
+              WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, type.Name).
+              FirstElementId();
+          }
+        }
+        if (element is AppearanceAssetElement asset)
+        {
+          return AppearanceAssetElement.GetAppearanceAssetElementByName(target, asset.Name)?.Id ?? ElementId.InvalidElementId;
+        }
+        else
+        {
+          var nomen = element.GetElementNomen(out var nomenParameter);
+          using (var collector = new FilteredElementCollector(target))
+          {
+            if (nomenParameter != BuiltInParameter.INVALID)
+            {
+              return collector.WhereElementIsNotElementType().
+              WhereElementIsKindOf(element.GetType()).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
+              WhereParameterEqualsTo(nomenParameter, nomen).
+              FirstElementId();
+            }
+            else
+            {
+              return collector.WhereElementIsNotElementType().
+              WhereElementIsKindOf(element.GetType()).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
+              Where(x => x.Name == nomen).Select(x => x.Id).FirstOrDefault() ??
+              ElementId.InvalidElementId;
+            }
+          }
+        }
+      }
+
+      return ElementId.InvalidElementId;
+    }
     #endregion
 
     #region Parameter
@@ -500,127 +665,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
     }
 
-    internal static BuiltInParameter GetNameParameter(Type type)
-    {
-      // `DB.Family` parameter `ALL_MODEL_FAMILY_NAME` use to be `null`.
-      //
-      // if (typeof(Family).IsAssignableFrom(type))
-      //   return BuiltInParameter.ALL_MODEL_FAMILY_NAME;
-
-      if (typeof(ElementType).IsAssignableFrom(type))
-        return BuiltInParameter.ALL_MODEL_TYPE_NAME;
-
-      if (typeof(DatumPlane).IsAssignableFrom(type))
-        return BuiltInParameter.DATUM_TEXT;
-
-      if (typeof(View).IsAssignableFrom(type))
-        return BuiltInParameter.VIEW_NAME;
-
-      if (typeof(Viewport).IsAssignableFrom(type))
-        return BuiltInParameter.VIEWPORT_VIEW_NAME;
-
-      if (typeof(PropertySetElement).IsAssignableFrom(type))
-        return BuiltInParameter.PROPERTY_SET_NAME;
-
-      if (typeof(AssemblyInstance).IsAssignableFrom(type))
-        return BuiltInParameter.ASSEMBLY_NAME;
-
-      if (typeof(Material).IsAssignableFrom(type))
-        return BuiltInParameter.MATERIAL_NAME;
-
-      if (typeof(DesignOption).IsAssignableFrom(type))
-        return BuiltInParameter.OPTION_NAME;
-
-      if (typeof(Phase).IsAssignableFrom(type))
-        return BuiltInParameter.PHASE_NAME;
-
-      if (typeof(AreaScheme).IsAssignableFrom(type))
-        return BuiltInParameter.AREA_SCHEME_NAME;
-
-      if (typeof(Room).IsAssignableFrom(type))
-        return BuiltInParameter.ROOM_NAME;
-
-      if (typeof(Zone).IsAssignableFrom(type))
-        return BuiltInParameter.ZONE_NAME;
-
-      if (typeof(RevitLinkInstance).IsAssignableFrom(type))
-        return BuiltInParameter.RVT_LINK_INSTANCE_NAME;
-
-      return BuiltInParameter.INVALID;
-    }
-
-    static BuiltInParameter GetNameParameter(Element element)
-    {
-      var builtInParameter = GetNameParameter(element.GetType());
-      if (builtInParameter != BuiltInParameter.INVALID) return builtInParameter;
-
-      if (element.Category is Category category)
-      {
-        if (category.Id.TryGetBuiltInCategory(out var builtInCategory) == true)
-        {
-          switch(builtInCategory)
-          {
-            case BuiltInCategory.OST_DesignOptionSets: return BuiltInParameter.OPTION_SET_NAME;
-            case BuiltInCategory.OST_VolumeOfInterest: return BuiltInParameter.VOLUME_OF_INTEREST_NAME;
-          }
-        }
-      }
-
-      return BuiltInParameter.INVALID;
-    }
-
-    internal static ElementId GetNamesakeElement(Document target, Document source, ElementId elementId)
-    {
-      if (elementId.IsBuiltInId() || target.IsEquivalent(source))
-        return elementId;
-
-      if (source.GetElement(elementId) is Element element)
-      {
-        if (element is ElementType type)
-        {
-          using (var collector = new FilteredElementCollector(target))
-          {
-            return collector.WhereElementIsElementType().
-              WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
-              WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, type.GetFamilyName()).
-              WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, type.Name).
-              FirstElementId();
-          }
-        }
-        if (element is AppearanceAssetElement)
-        {
-          return AppearanceAssetElement.GetAppearanceAssetElementByName(target, element.Name)?.Id ?? ElementId.InvalidElementId;
-        }
-        else
-        {
-          using (var collector = new FilteredElementCollector(target))
-          {
-            var name = element.Name;
-            var nameParameterId = GetNameParameter(element);
-            if (nameParameterId != BuiltInParameter.INVALID)
-            {
-              return collector.WhereElementIsNotElementType().
-              WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
-              WhereParameterEqualsTo(nameParameterId, name).
-              FirstElementId();
-            }
-            else
-            {
-              return collector.WhereElementIsNotElementType().
-              WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
-              Where(x => x.Name == name).Select(x => x.Id).FirstOrDefault() ??
-              ElementId.InvalidElementId;
-            }
-          }
-        }
-      }
-
-      return ElementId.InvalidElementId;
-    }
-
     public static T GetParameterValue<T>(this Element element, BuiltInParameter paramId)
     {
       using (var param = element.get_Parameter(paramId))
@@ -693,7 +737,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (param is null)
           throw new System.InvalidOperationException();
 
-        if(param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Boolean.YesNo)
+        if (param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Boolean.YesNo)
           throw new System.InvalidCastException();
 
         param.Update(value ? 1 : 0);
@@ -732,6 +776,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       to.CopyParametersFrom(from, mask);
       return to;
+    }
+    #endregion
+
+    #region CloneElement
+    public static T CloneElement<T>(this T template, Document destination = null) where T : Element
+    {
+      try
+      {
+        destination = destination ?? template.Document;
+        var ids = ElementTransformUtils.CopyElements
+        (
+          template.Document,
+          new ElementId[] { template.Id },
+          destination, default, default
+        );
+
+        return ids.Select(x => destination.GetElement(x)).OfType<T>().FirstOrDefault();
+      }
+      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+
+      return null;
     }
     #endregion
   }

@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       }
 
       Params.TrySetData(DA, "Guid", () => key.GUID);
-      Params.TrySetData(DA, "Name", () => key.Name);
+      Params.TrySetData(DA, "Name", () => key.Nomen);
       Params.TrySetData(DA, "Type", () => key.DataType);
       Params.TrySetData(DA, "Group", () => key.Group);
       Params.TrySetData(DA, "Description", () => key.Description);

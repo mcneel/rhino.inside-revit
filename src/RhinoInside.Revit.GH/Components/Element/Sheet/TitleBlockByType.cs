@@ -1,4 +1,5 @@
 using System;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
@@ -6,11 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.TitleBlocks
 {
   using Convert.Geometry;
-  using Exceptions;
   using External.DB.Extensions;
-  using GH.ElementTracking;
 
-  [ComponentVersion(introduced: "1.2.4")]
+  [ComponentVersion(introduced: "1.2.4", updated: "1.5")]
   public class TitleBlockByType : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("F2F3D866-5A62-40C0-A85B-C417183E0A52");
@@ -40,6 +39,17 @@ namespace RhinoInside.Revit.GH.Components.TitleBlocks
       ),
       new ParamDefinition
       (
+        new Param_Plane()
+        {
+          Name = "Location",
+          NickName = "L",
+          Description = $"Location where to place the {_TitleBlock_} on given Sheet",
+          Optional = true,
+        },
+        ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
         new Parameters.FamilySymbol()
         {
           Name = "Type",
@@ -49,17 +59,6 @@ namespace RhinoInside.Revit.GH.Components.TitleBlocks
           SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_TitleBlocks
         },
         ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
-        new Param_Point()
-        {
-          Name = "Location",
-          NickName = "L",
-          Description = $"Location where to place the {_TitleBlock_} on given Sheet",
-          Optional = true,
-        },
-        ParamRelevance.Occasional
       ),
     };
 
@@ -82,74 +81,76 @@ namespace RhinoInside.Revit.GH.Components.TitleBlocks
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var OST_TitleBlocks = new ARDB.ElementId(ARDB.BuiltInCategory.OST_TitleBlocks);
-
-      // Input
       if (!Params.TryGetData(DA, "Sheet", out Types.ViewSheet sheet, x => x.IsValid)) return;
-      if (!Params.TryGetData(DA, "Type", out Types.FamilySymbol type,
-        x => x.IsValid && x.Document.Equals(sheet.Document) && x.Category.Id == OST_TitleBlocks)) return;
-      if (!Params.TryGetData(DA, "Location", out Rhino.Geometry.Point3d? location, x => x.IsValid)) return;
 
-      if (type is null)
-      {
-        type = Types.FamilySymbol.FromElementId<Types.FamilySymbol>
-        (
-          sheet.Document,
-          sheet.Document.GetDefaultFamilyTypeId(OST_TitleBlocks)
-        );
+      ReconstructElement<ARDB.FamilyInstance>
+      (
+        sheet.Document, _TitleBlock_, (titleBlock) =>
+        {
+          // Input
+          if (!Params.TryGetData(DA, "Location", out Plane? location, x => x.IsValid)) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, Types.Document.FromValue(sheet.Document), ARDB.BuiltInCategory.OST_TitleBlocks)) return null;
 
-        if (!type.IsValid)
-          throw new RuntimeArgumentException(nameof(type), "No default title block type has been found.");
-      }
+          // Compute
+          StartTransaction(sheet.Document);
+          {
+            titleBlock = Reconstruct
+            (
+              titleBlock,
+              location.HasValue ? location.Value : Plane.WorldXY,
+              type.Value,
+              sheet.Value
+            );
+          }
 
-      // Previous Output
-      Params.ReadTrackedElement(_TitleBlock_, sheet.Document, out ARDB.FamilyInstance titleBlock);
-
-      StartTransaction(sheet.Document);
-      {
-        titleBlock = Reconstruct
-        (
-          titleBlock, location.HasValue? location.Value.ToXYZ() : ARDB.XYZ.Zero,
-          type.Value,
-          sheet.Value
-        );
-
-        Params.WriteTrackedElement(_TitleBlock_, sheet.Document, titleBlock);
-        DA.SetData(_TitleBlock_, titleBlock);
-      }
+          DA.SetData(_TitleBlock_, titleBlock);
+          return titleBlock;
+        }
+      );
     }
 
-    bool Reuse(ARDB.XYZ location, ARDB.FamilyInstance titleBlock, ARDB.FamilySymbol type)
+    bool Reuse(ARDB.FamilyInstance titleBlock, ARDB.FamilySymbol type)
     {
       if (titleBlock is null) return false;
-      if (titleBlock.GetTypeId() != type.Id)
-        titleBlock.ChangeTypeId(type.Id);
-
-      titleBlock.GetLocation(out var _, out var basisX, out var basisY);
-      titleBlock.SetLocation(location, basisX, basisY);
+      if (titleBlock.GetTypeId() != type.Id) titleBlock.ChangeTypeId(type.Id);
 
       return true;
     }
 
-    ARDB.FamilyInstance Create(ARDB.XYZ location, ARDB.FamilySymbol type, ARDB.ViewSheet sheet)
+    ARDB.FamilyInstance Reconstruct
+    (
+      ARDB.FamilyInstance titleBlock,
+      Plane location, ARDB.FamilySymbol type, ARDB.ViewSheet sheet
+    )
     {
-      var titleBlock = default(ARDB.FamilyInstance);
-
-      if (titleBlock is null)
-        titleBlock = sheet.Document.Create.NewFamilyInstance(location, type, sheet);
-
-      return titleBlock;
-    }
-
-    ARDB.FamilyInstance Reconstruct(ARDB.FamilyInstance titleBlock, ARDB.XYZ location, ARDB.FamilySymbol type, ARDB.ViewSheet sheet)
-    {
-      if (!Reuse(location, titleBlock, type))
+      if (!Reuse(titleBlock, type))
       {
         titleBlock = titleBlock.ReplaceElement
         (
-          Create(location, type, sheet),
+          sheet.Document.Create.NewFamilyInstance(location.Origin.ToXYZ(), type, sheet),
           ExcludeUniqueProperties
         );
+      }
+
+      var newOrigin = location.Origin.ToXYZ();
+      var newBasisX = location.XAxis.ToXYZ();
+      var newBasisY = location.YAxis.ToXYZ();
+      titleBlock.GetLocation(out var origin, out var basisX, out var basisY);
+
+      if
+      (
+        !origin.IsAlmostEqualTo(newOrigin) ||
+        !basisX.IsAlmostEqualTo(newBasisX) ||
+        !basisY.IsAlmostEqualTo(newBasisY)
+      )
+      {
+        var pinned = titleBlock.Pinned;
+        try
+        {
+          titleBlock.Pinned = false;
+          titleBlock.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
+        }
+        finally { titleBlock.Pinned = pinned; }
       }
 
       return titleBlock;

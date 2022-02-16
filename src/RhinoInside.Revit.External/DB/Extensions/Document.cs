@@ -298,8 +298,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
     #endregion
 
-    #region Name
-    internal static bool TryGetElement<T>(this Document doc, out T element, string name, string parentName = default, BuiltInCategory? categoryId = default) where T : Element
+    #region Nomen
+    internal static bool TryGetElement<T>(this Document doc, out T element, string nomen, string parentName = default, BuiltInCategory? categoryId = default) where T : Element
     {
       if (typeof(ElementType).IsAssignableFrom(typeof(T)))
       {
@@ -309,13 +309,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
           WhereElementIsKindOf(typeof(T)).
           WhereCategoryIdEqualsTo(categoryId).
           WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
-          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, name).
+          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, nomen).
           OfType<T>().FirstOrDefault();
         }
       }
       else if (typeof(AppearanceAssetElement).IsAssignableFrom(typeof(T)))
       {
-        element = name is object ? AppearanceAssetElement.GetAppearanceAssetElementByName(doc, name) as T : default;
+        element = nomen is object ? AppearanceAssetElement.GetAppearanceAssetElementByName(doc, nomen) as T : default;
       }
       else
       {
@@ -325,10 +325,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
           WhereElementIsKindOf(typeof(T)).
           WhereCategoryIdEqualsTo(categoryId);
 
-          var nameParameter = ElementExtension.GetNameParameter(typeof(T));
+          var nameParameter = ElementExtension.GetNomenParameter(typeof(T));
           var enumerable = nameParameter != BuiltInParameter.INVALID ?
-            elementCollector.WhereParameterEqualsTo(nameParameter, name) :
-            elementCollector.Where(x => x.Name == name);
+            elementCollector.WhereParameterEqualsTo(nameParameter, nomen) :
+            elementCollector.Where(x => x.Name == nomen);
 
           element = enumerable.OfType<T>().FirstOrDefault();
         }
@@ -337,16 +337,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return element is object;
     }
 
-    public static string NextIncrementalName(this Document document, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
+    public static string NextIncrementalNomen(this Document document, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
     {
-      TryParseNameId(name, out var prefix, out var _);
+      TryParseNomenId(name, out var prefix, out var _);
       return document.GetNamesakeElements
       (
         prefix, type, parentName, categoryId
       ).
       Select(x => x.Name).
-      WhereNamePrefixedWith(prefix).
-      NextNameOrDefault() ?? $"{prefix} 1";
+      WhereNomenPrefixedWith(prefix).
+      NextNomenOrDefault() ?? $"{prefix} 1";
     }
 
     internal static IEnumerable<Element> GetNamesakeElements(this Document doc, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
@@ -371,7 +371,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           WhereElementIsKindOf(type).
           WhereCategoryIdEqualsTo(categoryId);
 
-          var nameParameter = ElementExtension.GetNameParameter(type);
+          var nameParameter = ElementExtension.GetNomenParameter(type);
           enumerable = nameParameter != BuiltInParameter.INVALID ?
             elementCollector.WhereParameterBeginsWith(nameParameter, name) :
             elementCollector.Where(x => x.Name.StartsWith(name));
@@ -386,13 +386,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
         (
           x =>
           {
-            TryParseNameId(x.Name, out var prefix, out var _);
+            TryParseNomenId(x.Name, out var prefix, out var _);
             return prefix == name;
           }
         );
     }
 
-    internal static bool TryParseNameId(string name, out string prefix, out int id)
+    internal static bool TryParseNomenId(string name, out string prefix, out int id)
     {
       id = default;
       var index = name.LastIndexOf(' ');
@@ -409,26 +409,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    internal static int? GetIncrementalName(this Document doc, Type type, ref string name, string parentName = default, BuiltInCategory? categoryId = default)
+    internal static int? GetIncrementalNomen(this Document doc, Type type, ref string nomen, string parentName = default, BuiltInCategory? categoryId = default)
     {
-      if (name is null)
-        throw new ArgumentNullException(nameof(name));
+      if (nomen is null)
+        throw new ArgumentNullException(nameof(nomen));
 
-      if (name is null)
-        throw new ArgumentNullException(nameof(name));
+      if (nomen is null)
+        throw new ArgumentNullException(nameof(nomen));
 
-      if (!NamingUtils.IsValidName(name))
-        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(name));
+      if (!NamingUtils.IsValidName(nomen))
+        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(nomen));
 
       // Remove number sufix from name and trailing spaces.
-      TryParseNameId(name.Trim(), out name, out var _);
+      TryParseNomenId(nomen.Trim(), out nomen, out var _);
 
-      var last = doc.GetNamesakeElements(name, type, parentName, categoryId).
-        OrderBy(x => x.Name, default(ElementNameComparer)).LastOrDefault();
+      var last = doc.GetNamesakeElements(nomen, type, parentName, categoryId).
+        OrderBy(x => x.GetElementNomen(), default(ElementNameComparer)).LastOrDefault();
 
       if (last is object)
       {
-        if (TryParseNameId(last.Name, out name, out var id))
+        if (TryParseNomenId(last.GetElementNomen(), out nomen, out var id))
           return id + 1;
 
         return 1;
@@ -437,28 +437,28 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return default;
     }
 
-    internal static IEnumerable<string> WhereNamePrefixedWith(this IEnumerable<string> enumerable, string prefix)
+    internal static IEnumerable<string> WhereNomenPrefixedWith(this IEnumerable<string> enumerable, string prefix)
     {
-      TryParseNameId(prefix, out prefix, out var _);
+      TryParseNomenId(prefix, out prefix, out var _);
 
       foreach (var value in enumerable)
       {
         if (!value.StartsWith(prefix)) continue;
 
-        TryParseNameId(value, out var name, out var _);
+        TryParseNomenId(value, out var name, out var _);
         if (name != prefix) continue;
 
         yield return value;
       }
     }
 
-    internal static string NextNameOrDefault(this IEnumerable<string> enumerable)
+    internal static string NextNomenOrDefault(this IEnumerable<string> enumerable)
     {
       var last = enumerable.OrderBy(x => x, default(ElementNameComparer)).LastOrDefault();
 
       if (last is object)
       {
-        TryParseNameId(last, out var next, out var id);
+        TryParseNomenId(last, out var next, out var id);
         return $"{next} {id + 1}";
       }
 
@@ -573,6 +573,66 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return BuiltInCategoriesWithParameters;
+    }
+    #endregion
+
+    #region Parameters
+    public static IEnumerable<(InternalDefinition Definition, ParameterScope Scope)> GetParameterDefinitions(this Document doc, ParameterScope scope)
+    {
+      if (scope.HasFlag(ParameterScope.Instance) || scope.HasFlag(ParameterScope.Type))
+      {
+        if (doc.IsFamilyDocument)
+        {
+          foreach (var parameter in doc.FamilyManager.Parameters.Cast<FamilyParameter>())
+          {
+            if (parameter.Definition is InternalDefinition definition)
+            {
+              var bindingScope = parameter.IsInstance ? ParameterScope.Instance : ParameterScope.Type;
+              if (scope.HasFlag(bindingScope))
+                yield return (definition, bindingScope);
+            }
+          }
+        }
+        else
+        {
+          using (var iterator = doc.ParameterBindings.ForwardIterator())
+          {
+            while (iterator.MoveNext())
+            {
+              if (iterator.Key is InternalDefinition definition)
+              {
+                var bindingScope = ParameterScope.Unknown;
+                bindingScope |= iterator.Current is InstanceBinding ? ParameterScope.Instance : ParameterScope.Unknown;
+                bindingScope |= iterator.Current is TypeBinding ?     ParameterScope.Type     : ParameterScope.Unknown;
+
+                if (scope.HasFlag(bindingScope))
+                  yield return (definition, bindingScope);
+              }
+            }
+          }
+        }
+      }
+
+      if (scope.HasFlag(ParameterScope.Global) && GlobalParametersManager.AreGlobalParametersAllowed(doc))
+      {
+        foreach (var id in GlobalParametersManager.GetAllGlobalParameters(doc))
+        {
+          if (doc.GetElement(id) is GlobalParameter parameter)
+          {
+            if (parameter.GetDefinition() is InternalDefinition definition)
+            {
+              yield return (definition, ParameterScope.Global);
+            }
+          }
+        }
+      }
+    }
+
+    public static bool TryGetParameter(this Document doc, out ParameterElement parameterElement, string parameterName, ParameterScope scope)
+    {
+      var (definition, _) = doc.GetParameterDefinitions(scope).Where(x => x.Definition.Name == parameterName).FirstOrDefault();
+      parameterElement = doc.GetElement(definition?.Id ?? ElementId.InvalidElementId) as ParameterElement;
+      return parameterElement is object;
     }
     #endregion
 

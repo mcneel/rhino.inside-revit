@@ -6,7 +6,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  [ComponentVersion(introduced: "1.0", updated: "1.4")]
+  [ComponentVersion(introduced: "1.0", updated: "1.5")]
   public class QueryViewTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("51E306BD-4736-4B7D-B2FF-B23E0717EEBB");
@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.ElementType>("Types", "T", "View Types list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.ViewFamilyType>("Types", "T", "View Types list", GH_ParamAccess.list)
     };
 
     public override void AddedToDocument(GH_Document document)

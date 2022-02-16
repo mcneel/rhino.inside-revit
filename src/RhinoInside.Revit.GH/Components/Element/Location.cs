@@ -12,8 +12,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected GraphicalElementTransform(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected override bool FixUnhandledFailures => false;
-
     protected bool KeepJoins { get; set; } = false;
 
     #region UI
@@ -161,27 +159,23 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var element = default(Types.GraphicalElement);
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
+      else DA.SetData("Element", element);
 
-      if (!Params.TryGetData(DA, "Location", out Plane? location, x => x.IsValid) && location.HasValue)
-        return;
-
-      if(location.HasValue)
+      if (Params.GetData(DA, "Location", out Plane? location, x => x.IsValid))
       {
-        StartTransaction(element.Document);
-
-        using (!KeepJoins ? (element as Types.InstanceElement)?.DisableJoinsScope() : default)
+        UpdateElement(element.Value, () =>
         {
-          var pinned = element.Pinned;
-          element.Pinned = false;
-          element.Location = location.Value;
-          element.Pinned = pinned;
-        }
+          using (!KeepJoins ? (element as Types.InstanceElement)?.DisableJoinsScope() : default)
+          {
+            var pinned = element.Pinned;
+            element.Pinned = false;
+            element.Location = location.Value;
+            element.Pinned = pinned;
+          }
+        });
       }
 
-      DA.SetData("Element", element);
       DA.SetData("Location", element.Location);
       Params.TrySetData(DA, "Hand", () => element.HandOrientation);
       Params.TrySetData(DA, "Facing", () => element.FacingOrientation);
@@ -243,23 +237,20 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
+      else DA.SetData("Element", element);
 
-      if (!Params.TryGetData(DA, "Curve", out Curve curve, x => x.IsValid) && curve is object)
-        return;
-
-      if(curve is object)
+      if (Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid))
       {
-        StartTransaction(element.Document);
-
-        using (!KeepJoins ? (element as Types.InstanceElement)?.DisableJoinsScope() : default)
+        UpdateElement(element.Value, () =>
         {
-          element.Curve = curve;
-        }
+          using (!KeepJoins ? (element as Types.InstanceElement)?.DisableJoinsScope() : default)
+          {
+            element.Curve = curve;
+          }
+        });
       }
 
-      DA.SetData("Element", element);
       DA.SetData("Curve", element.Curve);
     }
   }

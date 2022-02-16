@@ -70,23 +70,12 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var element = default(Types.Element);
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      else DA.SetData("Element", element);
 
-      var _Pinned_ = Params.IndexOfInputParam("Pinned");
-      if (_Pinned_ >= 0 && Params.Input[_Pinned_].DataType != GH_ParamData.@void)
-      {
-        bool pinned = false;
-        if (DA.GetData(_Pinned_, ref pinned))
-        {
-          StartTransaction(element.Document);
+      if (Params.GetData(DA, "Pinned", out bool? pinned))
+        UpdateElement(element.Value, () => element.Pinned = pinned);
 
-          element.Pinned = pinned;
-        }
-      }
-
-      DA.SetData("Element", element);
       DA.SetData("Pinned", element.Pinned);
     }
   }
