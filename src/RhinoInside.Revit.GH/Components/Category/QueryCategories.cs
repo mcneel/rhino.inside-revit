@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
     public override GH_Exposure Exposure => GH_Exposure.primary;
 
-    public override bool NeedsToBeExpired
+    protected override bool MayNeedToBeExpired
     (
       ARDB.Document document,
       ICollection<ARDB.ElementId> added,

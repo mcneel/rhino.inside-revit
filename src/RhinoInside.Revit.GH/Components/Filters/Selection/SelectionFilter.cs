@@ -87,24 +87,28 @@ namespace RhinoInside.Revit.GH.Components.Filters
     const string _SelectionFilter_ = "Selection Filter";
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      if (!Params.TryGetDataList(DA, "Elements", out IList<Types.IGH_GraphicalElement> elements)) return;
 
-      // Previous Output
-      Params.ReadTrackedElement(_SelectionFilter_, doc.Value, out ARDB.SelectionFilterElement selection);
+      ReconstructElement<ARDB.SelectionFilterElement>
+      (
+        doc.Value, _SelectionFilter_, (selection) =>
+        {
+          // Input
+          if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          if (!Params.TryGetDataList(DA, "Elements", out IList<Types.IGH_GraphicalElement> elements)) return null;
 
-      StartTransaction(doc.Value);
-      {
-        var untracked = Existing(_SelectionFilter_, doc.Value, ref selection, name);
+          // Compute
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_SelectionFilter_, out var untracked, ref selection, doc.Value, name))
+          {
+            var elementIds = elements?.Where(x => doc.Value.IsEquivalent(x.Document)).Select(x => x.Id).ToList();
+            selection = Reconstruct(selection, doc.Value, name, elementIds, default);
+          }
 
-        var elementIds = elements?.Where(x => doc.Value.IsEquivalent(x.Document)).Select(x => x.Id).ToList();
-        selection = Reconstruct(selection, doc.Value, name, elementIds, default);
-
-        Params.WriteTrackedElement(_SelectionFilter_, doc.Value, untracked ? default : selection);
-        DA.SetData(_SelectionFilter_, selection);
-      }
+          DA.SetData(_SelectionFilter_, selection);
+          return untracked ? null : selection;
+        }
+      );
     }
 
     bool Reuse
@@ -117,7 +121,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     {
       if (selection is null) return false;
       if (name is object) { if (selection.Name != name) selection.Name = name; }
-      else selection.SetIncrementalName(template?.Name ?? _SelectionFilter_);
+      else selection.SetIncrementalNomen(template?.Name ?? _SelectionFilter_);
       if (elementIds is object) selection.SetElementIds(elementIds);
       selection.CopyParametersFrom(template);
       return true;
@@ -135,7 +139,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
       // Make sure the name is unique
       {
-        name = doc.NextIncrementalName
+        name = doc.NextIncrementalNomen
         (
           name ?? template?.Name ?? _SelectionFilter_,
           typeof(ARDB.SelectionFilterElement)

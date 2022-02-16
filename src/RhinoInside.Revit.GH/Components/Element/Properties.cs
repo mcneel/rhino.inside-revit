@@ -75,50 +75,36 @@ namespace RhinoInside.Revit.GH.Components.Elements
     };
 
     Dictionary<Types.Element, string> renames;
-    protected void ElementSetName(Types.Element element, string value)
+    protected void ElementSetNomen(Types.Element element, string value)
     {
-      if (TransactionExtent == TransactionExtent.Component)
+      if (string.IsNullOrEmpty(value))
+        return;
+
+      if (renames is null)
+        renames = new Dictionary<Types.Element, string>();
+
+      if (renames.TryGetValue(element, out var nomen))
       {
-        if (string.IsNullOrEmpty(value))
+        if (nomen == value)
           return;
 
-        if (renames is null)
-          renames = new Dictionary<Types.Element, string>();
-
-        if (renames.TryGetValue(element, out var name))
-        {
-          if (name == value)
-            return;
-
-          renames.Remove(element);
-        }
-        else element.Name = Guid.NewGuid().ToString();
-
-        renames.Add(element, value);
+        renames.Remove(element);
       }
-      else element.Name = value;
+      else element.Nomen = Guid.NewGuid().ToString();
+
+      renames.Add(element, value);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Element", out Types.Element element)) return;
-
-      // Set
-      if
-      (
-        Params.GetData(DA, "Name", out string name) &&
-        element.IsValid && element.Name != name
-      )
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      if (Params.GetData(DA, "Name", out string name))
       {
-        StartTransaction(element.Document);
-        ElementSetName(element, name);
+        UpdateElement(element.Value, () => ElementSetNomen(element, name));
       }
 
-      // Get
-      {
-        DA.SetData("Element", element);
-        Params.TrySetData(DA, "Name", () => element.Name);
-      }
+      DA.SetData("Element", element);
+      Params.TrySetData(DA, "Name", () => element.Nomen);
     }
 
     Dictionary<string, string> namesMap;
@@ -133,13 +119,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           if (namesMap is object)
           {
-            var elementName = rename.Key.Name;
-            if (!namesMap.ContainsKey(elementName))
-              namesMap.Add(rename.Key.Name, rename.Value);
+            var nomen = rename.Key.Nomen;
+            if (!namesMap.ContainsKey(nomen))
+              namesMap.Add(rename.Key.Nomen, rename.Value);
           }
 
           // Update elements to the final names
-          rename.Key.Name = rename.Value;
+          rename.Key.Nomen = rename.Value;
         }
       }
     }
@@ -157,8 +143,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
           {
             if (item is GH_String text)
             {
-              if (namesMap.TryGetValue(text.Value, out var name))
-                text.Value = name;
+              if (namesMap.TryGetValue(text.Value, out var nomen))
+                text.Value = nomen;
               else
                 text.Value = null;
             }
@@ -307,7 +293,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetDataList(DA, "Element", out IList<Types.Element> elements)) return;
-
       if (Params.GetDataList(DA, "Type", out IList<Types.ElementType> types))
       {
         var outputTypes = Params.IndexOfOutputParam("Type") < 0 ? default : new List<Types.ElementType>();
@@ -333,13 +318,17 @@ namespace RhinoInside.Revit.GH.Components.Elements
         var map = new Dictionary<ARDB.ElementId, ARDB.ElementId>();
         foreach (var type in typesSets)
         {
-          StartTransaction(type.Key.Document);
-
-          foreach (var entry in ARDB.Element.ChangeTypeId(type.Key.Document, type.Value, type.Key.Id))
-          {
-            if (map.ContainsKey(entry.Key)) map.Remove(entry.Key);
-            map.Add(entry.Key, entry.Value);
-          }
+          UpdateDocument
+          (
+            type.Key.Document, () =>
+            {
+              foreach (var entry in ARDB.Element.ChangeTypeId(type.Key.Document, type.Value, type.Key.Id))
+              {
+                if (map.ContainsKey(entry.Key)) map.Remove(entry.Key);
+                map.Add(entry.Key, entry.Value);
+              }
+            }
+          );
         }
 
         DA.SetDataList
@@ -354,8 +343,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           )
         );
 
-        if (outputTypes is object)
-          Params.TrySetDataList(DA, "Type", () => outputTypes);
+        Params.TrySetDataList(DA, "Type", () => outputTypes);
       }
       else
       {

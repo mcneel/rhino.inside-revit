@@ -75,23 +75,27 @@ namespace RhinoInside.Revit.GH.Components
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
+      else Params.TrySetDataList(DA, "Elements", () => elements);
 
-      if (Params.GetData(DA, "Released", out bool? released) && released == true)
+      if (Params.TryGetData(DA, "Released", out bool? released) && released == true)
       {
         var sets = elements.GroupBy(x => x.Document).ToArray();
         foreach (var set in sets)
         {
-          StartTransaction(set.Key);
-
-          foreach (var element in set.Where(x => x?.IsValid == true))
-          {
-            element.Pinned = false;
-            ElementTracking.TrackedElementsDictionary.Remove(element.Value);
-          }
+          UpdateDocument
+          (
+            set.Key, () =>
+            {
+              foreach (var element in set.Where(x => x?.IsValid == true))
+              {
+                element.Pinned = false;
+                ElementTracking.TrackedElementsDictionary.Remove(element.Value);
+              }
+            }
+          );
         }
       }
 
-      Params.TrySetDataList(DA, "Elements", () => elements);
       Params.TrySetDataList
       (
         DA, "Released", () =>

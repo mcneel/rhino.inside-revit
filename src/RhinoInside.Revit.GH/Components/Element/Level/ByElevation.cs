@@ -98,24 +98,27 @@ namespace RhinoInside.Revit.GH.Components.Levels
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
-      if (!Parameters.Elevation.GetData(this, DA, "Elevation", out var height, doc)) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.LevelType type, doc, ARDB.ElementTypeGroup.LevelType)) return;
-      Params.TryGetData(DA, "Template", out ARDB.Level template);
 
-      // Previous Output
-      Params.ReadTrackedElement(_Level_, doc.Value, out ARDB.Level level);
+      ReconstructElement<ARDB.Level>
+      (
+        doc.Value, _Level_, (level) =>
+        {
+          // Input
+          if (!Parameters.Elevation.GetData(this, DA, "Elevation", out var height, doc)) return null;
+          if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.LevelType type, doc, ARDB.ElementTypeGroup.LevelType)) return null;
+          Params.TryGetData(DA, "Template", out ARDB.Level template);
 
-      StartTransaction(doc.Value);
-      {
-        var untracked = Existing(_Level_, doc.Value, ref level, name, categoryId: ARDB.BuiltInCategory.OST_Levels);
-        level = Reconstruct(level, doc.Value, height / Revit.ModelUnits, type, name, template);
+          // Compute
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_Level_, out var untracked, ref level, doc.Value, name, categoryId: ARDB.BuiltInCategory.OST_Levels))
+            level = Reconstruct(level, doc.Value, height / Revit.ModelUnits, type, name, template);
 
-        Params.WriteTrackedElement(_Level_, doc.Value, untracked ? default : level);
-        DA.SetData(_Level_, level);
-      }
+          DA.SetData(_Level_, level);
+          return untracked ? null : level;
+        }
+      );
     }
 
     bool Reuse(ARDB.Level level, double height, ARDB.LevelType type, ARDB.Level template)
@@ -134,23 +137,18 @@ namespace RhinoInside.Revit.GH.Components.Levels
       // Try to duplicate template
       if (template is object)
       {
-        var ids = ARDB.ElementTransformUtils.CopyElements
-        (
-          template.Document,
-          new ARDB.ElementId[] { template.Id },
-          doc, default, default
-        );
-
-        level = ids.Select(x => doc.GetElement(x)).OfType<ARDB.Level>().FirstOrDefault();
+        level = template.CloneElement(doc);
+        level?.SetHeight(height);
       }
 
+      // Else create a brand new
       if (level is null)
+      {
         level = ARDB.Level.Create(doc, height);
-      else
-        level.SetHeight(height);
+        level.CopyParametersFrom(template, ExcludeUniqueProperties);
+      }
 
-      if (type is object && type.Id != level.GetTypeId())
-        level.ChangeTypeId(type.Id);
+      if (type is object) level.ChangeTypeId(type.Id);
 
       return level;
     }
@@ -159,16 +157,11 @@ namespace RhinoInside.Revit.GH.Components.Levels
     {
       if (!Reuse(level, height, type, template))
       {
-        var newLevel = Create(doc, height, type, template);
-        level.ReplaceElement(newLevel, ExcludeUniqueProperties);
-
-        if (level is object)
-        {
-          name = name ?? level.Name;
-          level.Document.Delete(level.Id);
-        }
-
-        level = newLevel;
+        level = level.ReplaceElement
+        (
+          Create(doc, height, type, template),
+          ExcludeUniqueProperties
+        );
       }
 
       if (name is object && level.Name != name)

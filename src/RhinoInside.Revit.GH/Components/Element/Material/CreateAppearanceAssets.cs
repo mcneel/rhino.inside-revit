@@ -82,29 +82,31 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // Input
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      Params.TryGetData(DA, "Template", out ARDB.AppearanceAssetElement template);
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      // Previous Output
-      Params.ReadTrackedElement(_Asset_, doc.Value, out ARDB.AppearanceAssetElement asset);
+      ReconstructElement<ARDB.AppearanceAssetElement>
+      (
+        doc.Value, _Asset_, (asset) =>
+        {
+          // Input
+          if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          Params.TryGetData(DA, "Template", out ARDB.AppearanceAssetElement template);
 
-      StartTransaction(doc.Value);
-      {
-        var untracked = Existing(_Asset_, doc.Value, ref asset, name);
-        asset = Reconstruct(asset, doc.Value, name, template);
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_Asset_, out var untracked, ref asset, doc.Value, name))
+            asset = Reconstruct(asset, doc.Value, name, template);
 
-        Params.WriteTrackedElement(_Asset_, doc.Value, untracked ? default : asset);
-        DA.SetData(_Asset_, asset);
-      }
+          DA.SetData(_Asset_, asset);
+          return untracked ? null : asset;
+        }
+      );
     }
 
     bool Reuse(ARDB.AppearanceAssetElement assetElement, string name, ARDB.AppearanceAssetElement template)
     {
       if (assetElement is null) return false;
       if (name is object) { if (assetElement.Name != name) assetElement.Name = name; }
-      else assetElement.SetIncrementalName(template?.Name ?? _Asset_);
+      else assetElement.SetIncrementalNomen(template?.Name ?? _Asset_);
 
       if (template is object)
       {
@@ -121,7 +123,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       // Make sure the name is unique
       {
-        name = doc.NextIncrementalName
+        name = doc.NextIncrementalNomen
         (
           name ?? template?.Name ?? _Asset_,
           typeof(ARDB.AppearanceAssetElement),

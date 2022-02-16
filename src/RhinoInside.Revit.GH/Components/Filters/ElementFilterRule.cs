@@ -122,14 +122,14 @@ namespace RhinoInside.Revit.GH.Components.Filters
         return;
 
       if (!parameterKey.IsReferencedData)
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Conversion from '{parameterKey.Name}' to Parameter may be ambiguous. Please use 'BuiltInParameter Picker' or a 'Parameter' Param");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Conversion from '{parameterKey.Nomen}' to Parameter may be ambiguous. Please use 'BuiltInParameter Picker' or a 'Parameter' Param");
 
       if (!TryGetParameterDefinition(parameterKey.Document, parameterKey.Id, out var storageType, out var dataType))
       {
         if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
         else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Name}' in Revit document.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Nomen}' in Revit document.");
 
         return;
       }
@@ -368,7 +368,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         return;
 
       if (!parameterKey.IsReferencedData)
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Conversion from '{parameterKey.Name}' to Parameter may be ambiguous. Please use 'BuiltInParameter Picker' or a 'Parameter' Param");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Conversion from '{parameterKey.Nomen}' to Parameter may be ambiguous. Please use 'BuiltInParameter Picker' or a 'Parameter' Param");
 
       var inverted = false;
       if (!DA.GetData("Inverted", ref inverted))
@@ -379,7 +379,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
         else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Name}' in Revit document.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Nomen}' in Revit document.");
 
         return;
       }

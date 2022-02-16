@@ -83,29 +83,32 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // Input
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      Params.TryGetData(DA, "Template", out ARDB.Material template);
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      // Previous Output
-      Params.ReadTrackedElement(_Material_, doc.Value, out ARDB.Material material);
+      ReconstructElement<ARDB.Material>
+      (
+        doc.Value, _Material_, (material) =>
+        {
+          // Input
+          if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          Params.TryGetData(DA, "Template", out ARDB.Material template);
 
-      StartTransaction(doc.Value);
-      {
-        var untracked = Existing(_Material_, doc.Value, ref material, name, categoryId: ARDB.BuiltInCategory.OST_Materials);
-        material = Reconstruct(material, doc.Value, name, template);
+          // Compute
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_Material_, out var untracked, ref material, doc.Value, name, categoryId: ARDB.BuiltInCategory.OST_Materials))
+            material = Reconstruct(material, doc.Value, name, template);
 
-        Params.WriteTrackedElement(_Material_, doc.Value, untracked ? default : material);
-        DA.SetData(_Material_, material);
-      }
+          DA.SetData(_Material_, material);
+          return untracked ? null : material;
+        }
+      );
     }
 
     bool Reuse(ARDB.Material material, string name, ARDB.Material template)
     {
       if (material is null) return false;
       if (name is object) { if (material.Name != name) material.Name = name; }
-      else material.SetIncrementalName(template?.Name ?? _Material_);
+      else material.SetIncrementalNomen(template?.Name ?? _Material_);
 
       material.CopyParametersFrom(template, ExcludeUniqueProperties);
       return true;
@@ -116,10 +119,11 @@ namespace RhinoInside.Revit.GH.Components.Materials
       var material = default(ARDB.Material);
 
       // Make sure the name is unique
+      if (name is null)
       {
-        name = doc.NextIncrementalName
+        name = doc.NextIncrementalNomen
         (
-          name ?? template?.Name ?? _Material_,
+          template?.Name ?? _Material_,
           typeof(ARDB.Material),
           categoryId: ARDB.BuiltInCategory.OST_Materials
         );
@@ -147,7 +151,10 @@ namespace RhinoInside.Revit.GH.Components.Materials
       }
 
       if (material is null)
+      {
         material = doc.GetElement(ARDB.Material.Create(doc, name)) as ARDB.Material;
+        Reuse(material, name, template);
+      }
 
       return material;
     }

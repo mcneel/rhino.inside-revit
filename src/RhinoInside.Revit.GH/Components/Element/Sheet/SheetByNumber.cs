@@ -5,10 +5,10 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Sheets
 {
-  using ElementTracking;
+  using RhinoInside.Revit.External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.2", updated: "1.2.1")]
-  public class SheetByNumber : BaseSheetByNumber<SheetHandler>
+  [ComponentVersion(introduced: "1.2", updated: "1.5")]
+  public class SheetByNumber : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("704d9c1b-fc56-4407-87cf-720047ae5875");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
@@ -17,12 +17,19 @@ namespace RhinoInside.Revit.GH.Components.Sheets
     (
       name: "Add Sheet",
       nickname: "Sheet",
-      description: "Create a new sheet in Revit with given number and name"
+      description: "Create a new sheet in Revit with given number and name",
+      category: "Revit",
+      subCategory: "View"
     )
     { }
 
-    static readonly (string name, string nickname, string tip) _Sheet_
-    = (name: "Sheet", nickname: "S", tip: "Output Sheet");
+    const string _Sheet_ = "Sheet";
+    public static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+      ARDB.BuiltInParameter.SHEET_NUMBER,
+      ARDB.BuiltInParameter.SHEET_NAME,
+    };
 
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
@@ -44,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
         {
           Name = "Sheet Number",
           NickName = "NUM",
-          Description = $"{_Sheet_.name} Number"
+          Description = $"Sheet Number"
         }
       ),
       new ParamDefinition
@@ -53,18 +60,21 @@ namespace RhinoInside.Revit.GH.Components.Sheets
         {
           Name = "Sheet Name",
           NickName = "N",
-          Description = $"{_Sheet_.name} Name",
-        }
+          Description = $"Sheet Name",
+          Optional = true,
+        },
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
-        new Param_Boolean
+        new Parameters.ViewFamilyType()
         {
-          Name = "Appears In Sheet List",
-          NickName = "AISL",
-          Description = $"Whether sheet appears on sheet lists",
-          Optional = true
-        }
+          Name = "Type",
+          NickName = "T",
+          Description = "View Type",
+          Optional = true,
+        },
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -75,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           Description = $"Template sheet (only sheet parameters are copied)",
           Optional = true
         },
-        ParamRelevance.Primary
+        ParamRelevance.Occasional
       ),
     };
 
@@ -86,43 +96,55 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       (
         new Parameters.ViewSheet()
         {
-          Name = _Sheet_.name,
-          NickName = _Sheet_.nickname,
-          Description = _Sheet_.tip,
+          Name = _Sheet_,
+          NickName = _Sheet_.Substring(0, 1),
+          Description = $"Output {_Sheet_}",
         }
       ),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // active document
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      // sheet input data
-      if (!Params.TryGetData(DA, "Sheet Number", out string number, x => !string.IsNullOrEmpty(x))) return;
-      // Note: see notes on SheetHandler.Name parameter
-      if (!Params.TryGetData(DA, "Sheet Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-
-      Params.TryGetData(DA, "Appears In Sheet List", out bool? scheduled);
-
-      Params.TryGetData(DA, "Template", out ARDB.ViewSheet template);
-
-      // find any tracked sheet
-      Params.ReadTrackedElement(_Sheet_.name, doc.Value, out ARDB.ViewSheet sheet);
-
-      // update, or create
-      StartTransaction(doc.Value);
-      {
-        sheet = Reconstruct(sheet, doc.Value, new SheetHandler(number)
+      ReconstructElement<ARDB.ViewSheet>
+      (
+        doc.Value, _Sheet_, (sheet) =>
         {
-          Name = name,
-          SheetScheduled = scheduled,
-          Template = template
-        });
+          // Input
+          if (!Params.TryGetData(DA, "Sheet Number", out string number, x => !string.IsNullOrEmpty(x))) return null;
+          if (!Params.TryGetData(DA, "Sheet Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.ViewFamilyType type, doc, ARDB.ElementTypeGroup.ViewTypeSheet)) return null;
+          Params.TryGetData(DA, "Template", out ARDB.ViewSheet template);
 
-        Params.WriteTrackedElement(_Sheet_.name, doc.Value, sheet);
-        DA.SetData(_Sheet_.name, sheet);
-      }
+          // Compute
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_Sheet_, out var untracked, ref sheet, doc.Value, number))
+            sheet = Reconstruct(sheet, doc.Value, number, name, type, template);
+
+          DA.SetData(_Sheet_, sheet);
+          return untracked ? null : sheet;
+        }
+      );
+    }
+
+    ARDB.ViewSheet Reconstruct
+    (
+      ARDB.ViewSheet sheet,
+      ARDB.Document doc,
+      string number, string name,
+      ARDB.ViewFamilyType type,
+      ARDB.ViewSheet template
+    )
+    {
+      sheet = sheet ?? ARDB.ViewSheet.Create(doc, ARDB.ElementId.InvalidElementId);
+      sheet.CopyParametersFrom(template, ExcludeUniqueProperties);
+
+      if (number is object) sheet?.get_Parameter(ARDB.BuiltInParameter.SHEET_NUMBER).Update(number);
+      if (name is object) sheet?.get_Parameter(ARDB.BuiltInParameter.SHEET_NAME).Update(name);
+      if (type is object && sheet.GetTypeId() != type.Id) sheet.ChangeTypeId(type.Id);
+
+      return sheet;
     }
   }
 }

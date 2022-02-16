@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Families
     )
     {
       if (!document.IsFamilyDocument)
-        throw new InvalidOperationException("This component can only run on a Family document");
+        throw new Exceptions.RuntimeArgumentException("Document", "This component can only run on a Family document");
 
       brep.TryGetUserString(ARDB.BuiltInParameter.ELEMENT_IS_CUTTING.ToString(), out bool cutting, false);
 

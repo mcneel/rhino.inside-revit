@@ -47,6 +47,16 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public string SheetName
+    {
+      get => Value?.Name;
+      set
+      {
+        if (value is object && Value?.Name != value)
+          Value.Name = value;
+      }
+    }
+
     public string SheetIssueDate
     {
       get => Value?.GetParameterValue<string>(ARDB.BuiltInParameter.SHEET_ISSUE_DATE);

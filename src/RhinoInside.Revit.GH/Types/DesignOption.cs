@@ -62,7 +62,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.DesignOption option)
         {
           var set = Document.GetElement(option.get_Parameter(ARDB.BuiltInParameter.OPTION_SET_ID).AsElementId());
-          return $"{set.Name}\\{Name}";
+          return $"{set.Name}\\{Nomen}";
         }
         else if (Document is null && Id == ARDB.ElementId.InvalidElementId)
         {
@@ -77,25 +77,23 @@ namespace RhinoInside.Revit.GH.Types
     public DesignOption(ARDB.DesignOption value) : base(value) { }
     public DesignOption(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
 
-    public override string Name
+    public override string Nomen
     {
       get
       {
-        if (Value is ARDB.DesignOption option)
-          return option.get_Parameter(ARDB.BuiltInParameter.OPTION_NAME).AsString();
-        else if (Document is null && Id == ARDB.ElementId.InvalidElementId)
+        if (Document is null && Id == ARDB.ElementId.InvalidElementId)
           return "Main Model";
 
-        return default;
+        return base.Nomen;
       }
       set
       {
         if (value is object)
         {
-          if (Value is ARDB.DesignOption option)
-            option.get_Parameter(ARDB.BuiltInParameter.OPTION_NAME).Update(value);
-          else if (Document is null && Id == ARDB.ElementId.InvalidElementId && value != "Main Model")
-            throw new InvalidOperationException($"Design option 'Main Model' does not support assignment of a user-specified name.");
+          if (Document is null && Id == ARDB.ElementId.InvalidElementId && value != "Main Model")
+            throw new InvalidOperationException("Design option 'Main Model' does not support assignment of a user-specified name.");
+
+          base.Nomen = Nomen;
         }
       }
     }

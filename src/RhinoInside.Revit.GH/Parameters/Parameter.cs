@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Parameters
         if (!Document.TryGetCurrentDocument(component, out var document))
           return false;
 
-        var keyName = key.Name;
+        var keyName = key.Nomen;
         var parameterId = document.Value.IsFamilyDocument ?
               document.Value.FamilyManager.
               get_Parameter(keyName)?.Id ??
@@ -40,9 +40,9 @@ namespace RhinoInside.Revit.GH.Parameters
         if (key is object) return true;
 
         if (document.Value.IsFamilyDocument)
-          throw new Exceptions.RuntimeWarningException($"Family parameter '{keyName}' is not defined on document '{document.Title}'");
+          throw new Exceptions.RuntimeArgumentException(name, $"Family parameter '{keyName}' is not defined on document '{document.Title}'");
         else
-          throw new Exceptions.RuntimeWarningException($"Global parameter '{keyName}' is not defined on document '{document.Title}'");
+          throw new Exceptions.RuntimeArgumentException(name, $"Global parameter '{keyName}' is not defined on document '{document.Title}'");
       }
 
       return key.IsValid;
@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Parameters
         if (!Document.TryGetCurrentDocument(component, out var document))
           return false;
 
-        var keyName = key.Name;
+        var keyName = key.Nomen;
         if (!document.Value.IsFamilyDocument)
         {
           var parameterId = ARDB.ElementId.InvalidElementId;
@@ -77,10 +77,10 @@ namespace RhinoInside.Revit.GH.Parameters
           if (key is object) return true;
         }
 
-        throw new Exceptions.RuntimeWarningException($"Project parameter '{keyName}' is not defined on document '{document.Title}'");
+        throw new Exceptions.RuntimeArgumentException(name, $"Project parameter '{keyName}' is not defined on document '{document.Title}'");
       }
       else if (key.Document.IsFamilyDocument || key.Value is ARDB.GlobalParameter)
-        throw new Exceptions.RuntimeWarningException($"Parameter '{key.Name}' is not a valid reference to a project parameter");
+        throw new Exceptions.RuntimeArgumentException(name, $"Parameter '{key.Nomen}' is not a valid reference to a project parameter");
 
       return key.IsValid;
     }
@@ -346,9 +346,20 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (data.Value is ARDB.Parameter parameter && parameter.Definition is ARDB.Definition definition)
         {
-          return parameter.HasValue ?
-            $"{definition.Name} : {(parameter.StorageType == ARDB.StorageType.String ? parameter.AsString() : parameter.AsValueString())}" :
-            $"{definition.Name} : <null>";
+          if (parameter.HasValue)
+          {
+            var text = string.Empty;
+            if (parameter.StorageType == ARDB.StorageType.String)
+              text = parameter.AsString();
+            else if (parameter.Element.GetParameterFormatOptions(parameter.Id) is ARDB.FormatOptions options)
+              using (options) { text = parameter.AsValueString(options); }
+            else
+              text = parameter.AsValueString();
+
+            return $"{definition.Name} : {text}";
+          }
+
+          return $"{definition.Name} : <null>";
         }
       }
       catch { }

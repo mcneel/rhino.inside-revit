@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Parameters
         var levels = collector.Cast<ARDB.Level>().
           OrderBy(x => x.GetHeight()).
           Select(x => new Types.Level(x)).
-          OrderBy(x => x.Name, default(ElementNameComparer)).
+          OrderBy(x => x.Nomen, default(ElementNameComparer)).
           ToList();
 
         foreach (var level in levels)
@@ -156,7 +156,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         var items = collector.Cast<ARDB.Grid>().
           Select(x => new Types.Grid(x)).
-          OrderBy(x => x.Name, default(ElementNameComparer)).
+          OrderBy(x => x.Nomen, default(ElementNameComparer)).
           ToList();
 
         foreach (var item in items)

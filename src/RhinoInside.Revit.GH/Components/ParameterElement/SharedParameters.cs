@@ -1,10 +1,12 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.ParameterElements
@@ -156,7 +158,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
                   var dPath = definitionsPath.AppendElement(index);
                   definitions.EnsurePath(dPath);
-                  foreach (var definition in parameterGroup.Definitions)
+                  foreach (var definition in parameterGroup.Definitions.OrderBy(x => x.Name, default(ElementNameComparer)))
                   {
                     if (name is object && !Operator.IsSymbolNameLike(definition.Name, name))
                       continue;

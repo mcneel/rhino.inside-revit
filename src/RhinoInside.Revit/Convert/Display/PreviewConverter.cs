@@ -187,7 +187,7 @@ namespace RhinoInside.Revit.Convert.Display
             {
               var faceMesh = face.Triangulate(meshingParameters.LevelOfDetail());
               var f = Geometry.Raw.RawDecoder.ToRhino(faceMesh);
-              f.Scale(GeometryDecoder.ModelScaleFactor);
+              f?.Scale(GeometryDecoder.ModelScaleFactor);
 
               yield return f ?? new Mesh();
             }

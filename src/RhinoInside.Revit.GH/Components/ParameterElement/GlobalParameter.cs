@@ -152,6 +152,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
           return new GH_Integer(value);
         }
+
         case ARDB.DoubleParameterValue d:
         {
           var value = SpecType.IsMeasurableSpec(parameter.GetDefinition().GetDataType(), out var spec) ?
@@ -179,7 +180,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         }
 
         default:
-          throw new NotImplementedException();
+          throw new NotImplementedException($"Unssuported Global parameter type {parameterValue.GetType()}");
       }
     }
 
@@ -250,10 +251,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
             if (!element.CastFrom(value))
               throw new InvalidCastException();
 
-            if (!parameter.Document.IsEquivalent(element.Document))
-              throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Name);
-
-            id.Value = element.Id;
+            id.Value = ElementExtension.GetNamesakeElement(parameter.Document, element.Document, element.Id);
             parameter.SetValue(id);
             return true;
 
@@ -279,7 +277,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         DA.SetData("Parameter", key);
         Params.TrySetData(DA, "Value", () => GetGoo(global));
       }
-      else throw new Exceptions.RuntimeWarningException($"Parameter '{key.Name}' is not a valid reference to a global parameter");
+      else throw new Exceptions.RuntimeArgumentException("Value", $"Parameter '{key.Nomen}' is not a valid reference to a global parameter");
     }
   }
 }

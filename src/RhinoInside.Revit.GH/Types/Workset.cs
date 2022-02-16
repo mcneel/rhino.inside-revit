@@ -26,16 +26,18 @@ namespace RhinoInside.Revit.GH.Types
     public override string ToString()
     {
       var valid = IsValid;
-      string Invalid = Id == ARDB.WorksetId.InvalidWorksetId?
-        string.Empty :
-        IsReferencedData ?
-        (valid ? /*"Referenced "*/ "" : "Unresolved ") :
-        (valid ? string.Empty : "Invalid ");
+      string Invalid = Id == ARDB.WorksetId.InvalidWorksetId ?
+        (string.IsNullOrWhiteSpace(UniqueID) ? string.Empty : "Unresolved ") :
+        valid ? string.Empty :
+        (IsReferencedData ? "❌ Deleted " : "⚠ Invalid ");
       string TypeName = ((IGH_Goo) this).TypeName;
       string InstanceName = DisplayName ?? string.Empty;
 
+      if (!string.IsNullOrWhiteSpace(InstanceName))
+        InstanceName = $" : {InstanceName}";
+
       if (!IsReferencedData)
-        return $"{Invalid}{TypeName} : {InstanceName}";
+        return $"{Invalid}{TypeName}{InstanceName}";
 
       string InstanceId = valid ? $" : id {Id.IntegerValue}" : $" : {UniqueID}";
 
@@ -45,7 +47,7 @@ namespace RhinoInside.Revit.GH.Types
           InstanceId = $"{InstanceId} @ {Document?.GetFileName() ?? DocumentGUID.ToString("B")}";
       }
 
-      return $"{Invalid}{TypeName} : {InstanceName}{InstanceId}";
+      return $"{Invalid}{TypeName}{InstanceName}{InstanceId}";
     }
     #endregion
 

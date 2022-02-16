@@ -57,14 +57,14 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override string Name
+    public override string Nomen
     {
       get
       {
         if (Value is ARDB.RevitLinkInstance instance)
           return instance.get_Parameter(ARDB.BuiltInParameter.RVT_LINK_INSTANCE_NAME).AsString();
 
-        return base.Name;
+        return base.Nomen;
       }
     }
   }

@@ -89,45 +89,50 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+
       // Input
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
       if (!Params.GetData(DA, "Shader", out GH_Material template)) return;
 
+      // Compute
       var templateName = GetTemplateName(template);
 
-      if (Params.ReadTrackedElement(_Material_, doc.Value, out ARDB.Material material))
-      {
-        StartTransaction(doc.Value);
-
-        var untracked = Existing(_Material_, doc.Value, ref material, name, categoryId: ARDB.BuiltInCategory.OST_Materials);
-        material = Reconstruct(material, doc.Value, name, templateName, template);
-
-        Params.WriteTrackedElement(_Material_, doc.Value, untracked ? default : material);
-        DA.SetData(_Material_, material);
-      }
-
-      if (Params.ReadTrackedElement(_Asset_, doc.Value, out ARDB.AppearanceAssetElement asset))
-      {
-        StartTransaction(doc.Value);
-
-        var untracked = Existing(_Asset_, doc.Value, ref asset, name, categoryId: ARDB.BuiltInCategory.INVALID);
-        asset = Reconstruct(asset, doc.Value, name, templateName, template);
-
-        if (material is object && asset is object)
+      var mat = ReconstructElement<ARDB.Material>
+      (
+        doc.Value, _Material_, (material) =>
         {
-          material.AppearanceAssetId = asset.Id;
-          material.UseRenderAppearanceForShading = true;
-        }
-        else
-        {
-          material.AppearanceAssetId = ARDB.ElementId.InvalidElementId;
-          material.UseRenderAppearanceForShading = false;
-        }
+          StartTransaction(doc.Value);
 
-        Params.WriteTrackedElement(_Asset_, doc.Value, untracked ? default : asset);
-        DA.SetData(_Asset_, asset);
-      }
+          if (CanReconstruct(_Material_, out var untracked, ref material, doc.Value, name, categoryId: ARDB.BuiltInCategory.OST_Materials))
+            material = Reconstruct(material, doc.Value, name, templateName, template);
+
+          DA.SetData(_Material_, material);
+          return untracked ? null : material;
+        }
+      );
+
+      ReconstructElement<ARDB.AppearanceAssetElement>
+      (
+        doc.Value, _Asset_, (asset) =>
+        {
+          StartTransaction(doc.Value);
+
+          if (CanReconstruct(_Asset_, out var untracked, ref asset, doc.Value, name, categoryId: ARDB.BuiltInCategory.INVALID))
+          {
+            asset = Reconstruct(asset, doc.Value, name, templateName, template);
+
+            if (mat is object && asset is object)
+            {
+              mat.AppearanceAssetId = asset.Id;
+              mat.UseRenderAppearanceForShading = true;
+            }
+          }
+
+          DA.SetData(_Asset_, asset);
+          return untracked ? null : asset;
+        }
+      );
     }
 
     #region Utils
@@ -170,7 +175,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
     {
       if (material is null) return false;
       if (name is object) { if (material.Name != name) material.Name = name; }
-      else material.SetIncrementalName(templateName ?? _Material_);
+      else material.SetIncrementalNomen(templateName ?? _Material_);
 
       material.Color = template.Value.Diffuse.ToColor();
       material.Transparency = (int) Math.Round(template.Value.Transparency * 100.0);
@@ -185,7 +190,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       // Make sure the name is unique
       {
-        name = doc.NextIncrementalName
+        name = doc.NextIncrementalNomen
         (
           name ?? templateName ?? _Material_,
           typeof(ARDB.Material),
@@ -227,7 +232,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
 #if REVIT_2018
       if (assetElement is null) return false;
       if (name is object) { if (assetElement.Name != name) assetElement.Name = name; }
-      else assetElement.SetIncrementalName(templateName ?? _Asset_);
+      else assetElement.SetIncrementalNomen(templateName ?? _Asset_);
 
       using (var mat = template.MaterialBestGuess())
       using (var editScope = new AppearanceAssetEditScope(assetElement.Document))
@@ -271,7 +276,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       // Make sure the name is unique
       {
-        name = doc.NextIncrementalName
+        name = doc.NextIncrementalNomen
         (
           name ?? templateName ?? _Asset_,
           typeof(ARDB.AppearanceAssetElement),

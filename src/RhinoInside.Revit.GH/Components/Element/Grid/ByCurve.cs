@@ -99,25 +99,27 @@ namespace RhinoInside.Revit.GH.Components.Grids
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // Input
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
-      if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.GridType type, doc, ARDB.ElementTypeGroup.GridType)) return;
-      Params.TryGetData(DA, "Template", out ARDB.Grid template);
 
-      // Previous Output
-      Params.ReadTrackedElement(_Grid_, doc.Value, out ARDB.Grid grid);
+      ReconstructElement<ARDB.Grid>
+      (
+        doc.Value, _Grid_, (grid) =>
+        {
+          // Input
+          if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
+          if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.GridType type, doc, ARDB.ElementTypeGroup.GridType)) return null;
+          Params.TryGetData(DA, "Template", out ARDB.Grid template);
 
-      StartTransaction(doc.Value);
-      {
-        var untracked = Existing(_Grid_, doc.Value, ref grid, name, categoryId: ARDB.BuiltInCategory.OST_Grids);
+          // Compute
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_Grid_, out var untracked, ref grid, doc.Value, name, categoryId: ARDB.BuiltInCategory.OST_Grids))
+            grid = Reconstruct(grid, doc.Value, curve, type, name, template);
 
-        grid = Reconstruct(grid, doc.Value, curve, type, name, template);
-
-        Params.WriteTrackedElement(_Grid_, doc.Value, untracked ? default : grid);
-        DA.SetData(_Grid_, grid);
-      }
+          DA.SetData(_Grid_, grid);
+          return untracked ? null : grid;
+        }
+      );
     }
 
     bool Reuse(ARDB.Grid grid, Curve curve, ARDB.GridType type, ARDB.Grid template)
@@ -139,22 +141,34 @@ namespace RhinoInside.Revit.GH.Components.Grids
     {
       var grid = default(ARDB.Grid);
 
-      var tol = GeometryObjectTolerance.Model;
-      if (curve.TryGetLine(out var line, tol.VertexTolerance))
+      // Try to duplicate template
       {
-        grid = ARDB.Grid.Create(doc, line.ToLine());
-      }
-      else if (curve.TryGetArc(out var arc, tol.VertexTolerance))
-      {
-        grid = ARDB.Grid.Create(doc, arc.ToArc());
-      }
-      else
-      {
-        throw new RuntimeArgumentException("Curve", "Curve must be a horizontal line or arc curve.");
+        // There is no known way to change the curve after
+        //grid = template?.CloneElement(doc);
+        //grid.SetCurveInView(ARDB.DatumExtentType.Model, view, curve.ToCurve());
       }
 
-      if (type is object && type.Id != grid.GetTypeId())
-        grid.ChangeTypeId(type.Id);
+      // Else create a brand new
+      if (grid is null)
+      {
+        var tol = GeometryObjectTolerance.Model;
+        if (curve.TryGetLine(out var line, tol.VertexTolerance))
+        {
+          grid = ARDB.Grid.Create(doc, line.ToLine());
+        }
+        else if (curve.TryGetArc(out var arc, tol.VertexTolerance))
+        {
+          grid = ARDB.Grid.Create(doc, arc.ToArc());
+        }
+        else
+        {
+          throw new RuntimeArgumentException("Curve", "Curve must be a horizontal line or arc curve.", curve);
+        }
+
+        grid.CopyParametersFrom(template, ExcludeUniqueProperties);
+      }
+
+      if (type is object) grid.ChangeTypeId(type.Id);
 
       return grid;
     }
@@ -163,16 +177,11 @@ namespace RhinoInside.Revit.GH.Components.Grids
     {
       if (!Reuse(grid, curve, type, template))
       {
-        var newGrid = Create(doc, curve, type, template);
-        grid.ReplaceElement(newGrid, ExcludeUniqueProperties);
-
-        if (grid is object)
-        {
-          name = name ?? grid.Name;
-          grid.Document.Delete(grid.Id);
-        }
-
-        grid = newGrid;
+        grid = grid.ReplaceElement
+        (
+          Create(doc, curve, type, template),
+          ExcludeUniqueProperties
+        );
       }
 
       if (name is object && grid.Name != name)

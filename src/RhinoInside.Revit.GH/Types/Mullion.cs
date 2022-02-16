@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
     public MullionPosition() { }
     public MullionPosition(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
 
-    public override string Name
+    public override string Nomen
     {
       get
       {
@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Types
           case External.DB.BuiltInMullionPositionId.ParallelToGround:    return "Parallel To Ground";
         }
 
-        return base.Name;
+        return base.Nomen;
       }
     }
   }
@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Types
     public MullionProfile() { }
     public MullionProfile(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
 
-    public override string Name
+    public override string Nomen
     {
       get
       {
@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Types
           case External.DB.BuiltInMullionProfileId.Circular:    return "Circular";
         }
 
-        return base.Name;
+        return base.Nomen;
       }
     }
   }

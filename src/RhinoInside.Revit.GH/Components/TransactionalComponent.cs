@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -7,40 +8,45 @@ using Autodesk.Revit.UI.Events;
 using GH_IO.Serialization;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Data;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Convert.Geometry;
   using ElementTracking;
-  using RhinoInside.Revit.External.DB.Extensions;
+  using External.DB.Extensions;
 
   class TransactionalComponentFailuresPreprocessor : ARDB.IFailuresPreprocessor
   {
     readonly IGH_ActiveObject ActiveObject;
     readonly IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix;
-    readonly bool FixUnhandledFailures;
+    readonly ARDB.FailureProcessingResult FailureProcessingMode;
 
     public TransactionalComponentFailuresPreprocessor
     (
-      IGH_ActiveObject activeObject
+      IGH_ActiveObject activeObject,
+      IEnumerable<ARDB.FailureDefinitionId> failureDefinitionIdsToFix
+    ) :
+    this
+    (
+      activeObject,
+      failureDefinitionIdsToFix,
+      ARDB.FailureProcessingResult.ProceedWithRollBack
     )
-    {
-      ActiveObject = activeObject;
-      FailureDefinitionIdsToFix = default;
-      FixUnhandledFailures = true;
-    }
+    { }
 
     public TransactionalComponentFailuresPreprocessor
     (
       IGH_ActiveObject activeObject,
       IEnumerable<ARDB.FailureDefinitionId> failureDefinitionIdsToFix,
-      bool fixUnhandledFailures
+      ARDB.FailureProcessingResult failureProcessingMode
     )
     {
       ActiveObject = activeObject;
       FailureDefinitionIdsToFix = failureDefinitionIdsToFix;
-      FixUnhandledFailures = fixUnhandledFailures;
+      FailureProcessingMode = failureProcessingMode;
     }
 
     static string GetDescriptionMessage(ARDB.FailureMessageAccessor error)
@@ -67,10 +73,10 @@ namespace RhinoInside.Revit.GH.Components
       var level = GH_RuntimeMessageLevel.Remark;
       switch (error.GetSeverity())
       {
-        case ARDB.FailureSeverity.None:               level = GH_RuntimeMessageLevel.Remark; break;
+        case ARDB.FailureSeverity.None:               level = GH_RuntimeMessageLevel.Remark;  break;
         case ARDB.FailureSeverity.Warning:            level = GH_RuntimeMessageLevel.Warning; break;
-        case ARDB.FailureSeverity.Error:              level = GH_RuntimeMessageLevel.Error; break;
-        case ARDB.FailureSeverity.DocumentCorruption: level = GH_RuntimeMessageLevel.Error; break;
+        case ARDB.FailureSeverity.Error:              level = GH_RuntimeMessageLevel.Error;   break;
+        case ARDB.FailureSeverity.DocumentCorruption: level = GH_RuntimeMessageLevel.Error;   break;
       }
 
       string solvedMark = string.Empty;
@@ -91,13 +97,14 @@ namespace RhinoInside.Revit.GH.Components
         message += idsCount++ == 0 ? $" {{{id.IntegerValue}" : $", {id.IntegerValue}";
       if (idsCount > 0) message += "} ";
 
-      ActiveObject.AddRuntimeMessage(level, message);
+      ActiveObject?.AddRuntimeMessage(level, message);
     }
 
     ARDB.FailureProcessingResult FixFailures(ARDB.FailuresAccessor failuresAccessor, IEnumerable<ARDB.FailureDefinitionId> failureIds)
     {
       foreach (var failureId in failureIds)
       {
+        var solved = 0;
         foreach (var error in failuresAccessor.GetFailureMessages().Where(x => x.GetFailureDefinitionId() == failureId))
         {
           if (!failuresAccessor.IsFailureResolutionPermitted(error))
@@ -107,66 +114,88 @@ namespace RhinoInside.Revit.GH.Components
           if (failuresAccessor.GetAttemptedResolutionTypes(error).Any())
             continue;
 
-          AddRuntimeMessage(error, true);
+          AddRuntimeMessage(error, solved: true);
 
           failuresAccessor.ResolveFailure(error);
+          solved++;
         }
 
-        if (failuresAccessor.CanCommitPendingTransaction())
+        if (solved > 0)
           return ARDB.FailureProcessingResult.ProceedWithCommit;
       }
 
       return ARDB.FailureProcessingResult.Continue;
     }
 
-    public virtual ARDB.FailureProcessingResult PreprocessFailures(ARDB.FailuresAccessor failuresAccessor)
+    public ARDB.FailureProcessingResult PreprocessFailures(ARDB.FailuresAccessor failuresAccessor)
     {
-      if (!failuresAccessor.IsTransactionBeingCommitted())
-        return ARDB.FailureProcessingResult.Continue;
+#if DEBUG
+      var tranasction = failuresAccessor.GetTransactionName();
+      var failureMessages = failuresAccessor.GetFailureMessages().Select
+      (
+        error =>
+        (
+          Severity: error.GetSeverity(),
+          Description: error.GetDescriptionText(),
+          FailingElements: error.GetFailingElementIds().Select(x => failuresAccessor.GetDocument().GetElement(x)).ToArray(),
+          AdditionalElements: error.GetAdditionalElementIds().Select(x => failuresAccessor.GetDocument().GetElement(x)).ToArray(),
 
-      if (failuresAccessor.GetSeverity() >= ARDB.FailureSeverity.DocumentCorruption)
-        return ARDB.FailureProcessingResult.ProceedWithRollBack;
+          Caption: error.HasResolutions() ? error.GetDefaultResolutionCaption() : string.Empty,
+          CurrentResolution: error.HasResolutions() ? error.GetCurrentResolutionType() : ARDB.FailureResolutionType.Invalid,
+          Resolutions: ((ARDB.FailureResolutionType[]) Enum.GetValues(typeof(ARDB.FailureResolutionType))).Where(x => error.HasResolutionOfType(x)).ToArray()
+        )
+      ).ToArray();
+#endif
+      var severity = failuresAccessor.GetSeverity();
 
-      if (failuresAccessor.GetSeverity() >= ARDB.FailureSeverity.Error)
+      if (failuresAccessor.IsTransactionBeingCommitted())
       {
-        // Handled failures in order
-        if (FailureDefinitionIdsToFix is IEnumerable<ARDB.FailureDefinitionId> failureDefinitionIdsToFix)
+        if
+        (
+          severity >= ARDB.FailureSeverity.Error &&
+          FailureProcessingMode <= ARDB.FailureProcessingResult.ProceedWithCommit
+        )
         {
-          var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
-          if (result != ARDB.FailureProcessingResult.Continue)
-            return result;
-        }
+          // Handled failures in order
+          if (FailureDefinitionIdsToFix is IEnumerable<ARDB.FailureDefinitionId> failureDefinitionIdsToFix)
+          {
+            var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
+            if (result != ARDB.FailureProcessingResult.Continue)
+              return result;
+          }
 
-        // Unhandled failures in incomming order
-        if (FixUnhandledFailures)
-        {
-          var unhandledFailureDefinitionIds = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
-          var result = FixFailures(failuresAccessor, unhandledFailureDefinitionIds);
-          if (result != ARDB.FailureProcessingResult.Continue)
-            return result;
+          // Unhandled failures in incomming order
+          {
+            var unhandledFailureDefinitionIds = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
+            var result = FixFailures(failuresAccessor, unhandledFailureDefinitionIds);
+            if (result != ARDB.FailureProcessingResult.Continue)
+              return result;
+          }
         }
       }
 
-      var severity = failuresAccessor.GetSeverity();
       if (severity >= ARDB.FailureSeverity.Warning)
       {
         // Unsolved failures or warnings
-        foreach (var error in failuresAccessor.GetFailureMessages().OrderBy(error => error.GetSeverity()))
-          AddRuntimeMessage(error, false);
+        foreach (var error in failuresAccessor.GetFailureMessages())
+          AddRuntimeMessage(error);
 
-        failuresAccessor.DeleteAllWarnings();
+        if (FailureProcessingMode != ARDB.FailureProcessingResult.WaitForUserInput)
+          failuresAccessor.DeleteAllWarnings();
       }
 
-      if (severity >= ARDB.FailureSeverity.Error)
-        return ARDB.FailureProcessingResult.ProceedWithRollBack;
+      if (FailureProcessingMode != ARDB.FailureProcessingResult.WaitForUserInput)
+      {
+        if (severity >= ARDB.FailureSeverity.Error)
+          return ARDB.FailureProcessingResult.ProceedWithRollBack;
+      }
 
       return ARDB.FailureProcessingResult.Continue;
     }
   }
 
-  public abstract class TransactionalComponent :
-    ZuiComponent,
-    ARDB.ITransactionFinalizer
+  [ComponentVersion(introduced: "1.0", updated: "1.5")]
+  public abstract class TransactionalComponent : ZuiComponent, ARDB.ITransactionFinalizer
   {
     protected TransactionalComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
@@ -301,14 +330,16 @@ namespace RhinoInside.Revit.GH.Components
     //protected override void AfterSolveInstance() {}
 
     #region IFailuresPreprocessor
-
     // Override to add handled failures to your component (Order is important).
     protected virtual IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => null;
-    protected virtual bool FixUnhandledFailures => true;
+
+    public ARDB.FailureProcessingResult FailureProcessingMode { get; set; } = ARDB.FailureProcessingResult.Continue;
+
+    protected override bool AbortOnContinuableException => FailureProcessingMode > ARDB.FailureProcessingResult.ProceedWithCommit;
 
     protected virtual ARDB.IFailuresPreprocessor CreateFailuresPreprocessor()
     {
-      return new TransactionalComponentFailuresPreprocessor(this, FailureDefinitionIdsToFix, FixUnhandledFailures);
+      return new TransactionalComponentFailuresPreprocessor(this, FailureDefinitionIdsToFix, FailureProcessingMode);
     }
     #endregion
 
@@ -325,9 +356,34 @@ namespace RhinoInside.Revit.GH.Components
         Status = ARDB.TransactionStatus.RolledBack;
     }
     #endregion
+
+    #region IO
+    public override bool Read(GH_IReader reader)
+    {
+      if (!base.Read(reader))
+        return false;
+
+      int mode = (int) ARDB.FailureProcessingResult.Continue;
+      reader.TryGetInt32("FailureProcessingMode", ref mode);
+      FailureProcessingMode = (ARDB.FailureProcessingResult) mode;
+
+      return true;
+    }
+
+    public override bool Write(GH_IWriter writer)
+    {
+      if (!base.Write(writer))
+        return false;
+
+      if (FailureProcessingMode != ARDB.FailureProcessingResult.Continue)
+        writer.SetInt32("FailureProcessingMode", (int) FailureProcessingMode);
+
+      return true;
+    }
+    #endregion
   }
 
-  public enum TransactionExtent
+  enum TransactionExtent
   {
     Default,
     Component,
@@ -341,19 +397,20 @@ namespace RhinoInside.Revit.GH.Components
     : base(name, nickname, description, category, subCategory)
     { }
 
-    protected override bool AbortOnUnhandledException => TransactionExtent == TransactionExtent.Component;
+    TransactionExtent TransactionExtent => TransactionExtent.Component;
 
-    TransactionExtent transactionExtent = TransactionExtent.Default;
-    protected TransactionExtent TransactionExtent
+    public override bool RequiresFailed
+    (
+      IGH_DataAccess access, int index, object value,
+      string message
+    )
     {
-      get => transactionExtent == TransactionExtent.Default ? TransactionExtent.Component : transactionExtent;
-      set
-      {
-        if (Phase == GH_SolutionPhase.Computing)
-          throw new InvalidOperationException();
+      if (base.RequiresFailed(access, index, value, message)) return true;
 
-        transactionExtent = value;
-      }
+      if (FailureProcessingMode >= ARDB.FailureProcessingResult.ProceedWithRollBack)
+        access.AbortComponentSolution();
+
+      return false;
     }
 
     ERDB.TransactionChain chain;
@@ -404,47 +461,64 @@ namespace RhinoInside.Revit.GH.Components
         new ERDB.TransactionHandlingOptions
         {
           FailuresPreprocessor = CreateFailuresPreprocessor(),
-          TransactionNotification = this
+          TransactionNotification = this,
+          KeepFailuresAfterRollback = FailureProcessingMode == ARDB.FailureProcessingResult.WaitForUserInput
         },
         Name
       );
-
     }
 
     // Step 2.
     protected sealed override void SolveInstance(IGH_DataAccess DA)
     {
-      if (TransactionExtent == TransactionExtent.Component)
-      {
-        base.SolveInstance(DA);
-      }
-      else
+      base.SolveInstance(DA);
+
+      if (TransactionExtent != TransactionExtent.Component)
       {
         try
         {
-          base.SolveInstance(DA);
-
-          if (chain.HasStarted())
-            Status = chain.Commit();
-        }
-        catch
-        {
-          Status = chain.RollBack();
+          Status = ARDB.TransactionStatus.Pending;
+          Status = IsAborted ? chain.RollBack() : chain.Commit();
         }
         finally
         {
           switch (Status)
           {
             case ARDB.TransactionStatus.Uninitialized:
-            case ARDB.TransactionStatus.Started:
+              break;
+
             case ARDB.TransactionStatus.Committed:
               break;
+
             default:
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {Status} and aborted.");
               break;
           }
         }
       }
+    }
+
+    protected override bool TryCatchException(IGH_DataAccess DA, Exception e)
+    {
+      if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
+      {
+        for (int o = 0; o < Params.Output.Count; ++o)
+        {
+          switch (Params.Output[o].Access)
+          {
+            case GH_ParamAccess.item: DA.SetData    (o, default);                 break;
+            case GH_ParamAccess.list: DA.SetDataList(o, default);                 break;
+            case GH_ParamAccess.tree: DA.SetDataTree(o, default(IGH_Structure));  break;
+          }
+        }
+      }
+
+      if (base.TryCatchException(DA, e))
+        return true;
+
+      if (TransactionExtent != TransactionExtent.Component)
+        Status = chain.RollBack();
+
+      return false;
     }
 
     // Step 3.
@@ -452,28 +526,35 @@ namespace RhinoInside.Revit.GH.Components
     {
       using (chain)
       {
-        try
+        if (chain.HasStarted())
         {
-          if (chain.HasStarted())
-            Status = IsAborted ? chain.RollBack() : chain.Commit();
-        }
-        catch (Exception e)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-          ResetData();
-        }
-        finally
-        {
-          switch (Status)
+          try
           {
-            case ARDB.TransactionStatus.Uninitialized:
-            case ARDB.TransactionStatus.Started:
-            case ARDB.TransactionStatus.Committed:
-              break;
-            default:
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {Status} and aborted.");
-              ResetData();
-              break;
+            Status = ARDB.TransactionStatus.Pending;
+            Status = IsAborted ? chain.RollBack() : chain.Commit();
+          }
+          catch (Exception e)
+          {
+            Status = ARDB.TransactionStatus.Error;
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+            ResetData();
+          }
+          finally
+          {
+            switch (Status)
+            {
+              case ARDB.TransactionStatus.Uninitialized:
+                break;
+
+              case ARDB.TransactionStatus.Committed:
+                ClearInvalidOutputElements();
+                break;
+
+              default:
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Transaction {Status} and aborted.");
+                ResetData();
+                break;
+            }
           }
         }
 
@@ -481,6 +562,50 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       base.AfterSolveInstance();
+    }
+
+    protected void UpdateDocument(ARDB.Document document, Action solve)
+    {
+      StartTransaction(document);
+
+      if (FailureProcessingMode <= ARDB.FailureProcessingResult.ProceedWithCommit)
+      {
+        using (var sub = new ARDB.SubTransaction(document))
+        {
+          sub.Start();
+          solve();
+          sub.Commit();
+        }
+      }
+      else solve();
+    }
+
+    protected void UpdateElement(ARDB.Element element, Action solve) => UpdateDocument(element.Document, solve);
+
+    /// <summary>
+    /// Set to null those output elements that are invalid.
+    /// </summary>
+    void ClearInvalidOutputElements()
+    {
+      foreach (var output in Params.Output)
+      {
+        if (!typeof(Types.IGH_ElementId).IsAssignableFrom(output.Type))
+          continue;
+
+        var data = output.VolatileData;
+        var pathCount = data.PathCount;
+        for (int p = 0; p < pathCount; ++p)
+        {
+          var branch = data.get_Branch(p);
+
+          var count = branch.Count;
+          for (int e = 0; e < count; ++e)
+          {
+            if (branch[e] is Types.IGH_ElementId id && !id.IsValid)
+              branch[e] = null;
+          }
+        }
+      }
     }
 
     #region ERDB.ITransactionNotification
@@ -511,9 +636,32 @@ namespace RhinoInside.Revit.GH.Components
       if(dialogBoxShowing != default)
       {
         Revit.ActiveUIApplication.DialogBoxShowing -= dialogBoxShowing;
+        dialogBoxShowing = null;
+        using (editScope) editScope = default;
+      }
+    }
+    #endregion
 
-        if (editScope is IDisposable disposable)
-          disposable.Dispose();
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      {
+        Menu_AppendSeparator(menu);
+        var failures = Menu_AppendItem(menu, "Error Mode");
+
+        var skip = Menu_AppendItem(failures.DropDown, "⏭ Skip", (s, a) => { FailureProcessingMode = ARDB.FailureProcessingResult.Continue; ExpireSolution(true); }, true, FailureProcessingMode == ARDB.FailureProcessingResult.Continue);
+        skip.ToolTipText = $"Any failing element will be skipped.{Environment.NewLine}A null will be returned in its place.";
+
+        var @continue = Menu_AppendItem(failures.DropDown, "⏯ Continue", (s, a) => { FailureProcessingMode = ARDB.FailureProcessingResult.ProceedWithCommit; ExpireSolution(true); }, true, FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit);
+        @continue.ToolTipText = $"If suitable, a default resolution will be applied.{Environment.NewLine}Otherwise, a null will be returned.";
+
+        var cancel = Menu_AppendItem(failures.DropDown, "⏪ Cancel", (s, a) => { FailureProcessingMode = ARDB.FailureProcessingResult.ProceedWithRollBack; ExpireSolution(true); }, true, FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithRollBack);
+        cancel.ToolTipText = $"A failing element will cancel the whole '{Name}' operation.{Environment.NewLine}Nothing will be returned in this case.";
+
+        var custom = Menu_AppendItem(failures.DropDown, "⏸ Pause…", (s, a) => { FailureProcessingMode = ARDB.FailureProcessingResult.WaitForUserInput; ExpireSolution(true); }, true, FailureProcessingMode == ARDB.FailureProcessingResult.WaitForUserInput);
+        custom.ToolTipText = $"Do a pause and let me decide.{Environment.NewLine}Shows Revit failures report dialog.";
       }
     }
     #endregion
@@ -553,44 +701,167 @@ namespace RhinoInside.Revit.GH.Components
       base.AfterSolveInstance();
     }
 
+    protected T ReconstructElement<T>(ARDB.Document document, string parameterName, Func<T, T> func) where T : ARDB.Element
+    {
+      var output = default(T);
+
+      if (Params.ReadTrackedElement(parameterName, document, out T input))
+      {
+        if (input?.DesignOption?.Id is ARDB.ElementId elementDesignOptionId)
+        {
+          var activeDesignOptionId = ARDB.DesignOption.GetActiveDesignOptionId(input.Document);
+
+          if (elementDesignOptionId != activeDesignOptionId)
+            input = null;
+        }
+
+        var graphical = input is object && Types.GraphicalElement.IsValidElement(input);
+        var pinned = input?.Pinned != false;
+
+        try
+        {
+          if (!graphical || pinned)
+            UpdateDocument(document, () => output = func(input));
+          else
+            output = input;
+        }
+        finally
+        {
+          Params.WriteTrackedElement(parameterName, document, output);
+
+          if (Types.GraphicalElement.IsValidElement(output))
+          {
+            // In case element is crated on this iteratrion we pin it here by default
+            if (pinned && !output.Pinned)
+            {
+              try { output.Pinned = true; }
+              catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+            }
+          }
+        }
+      }
+
+      return output;
+    }
+
     /// <summary>
     /// Check if there is a non tracked element with the desired name.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="paramName"></param>
     /// <param name="document"></param>
-    /// <param name="elementName"></param>
+    /// <param name="elementNomen"></param>
     /// <param name="element"></param>
     /// <param name="categoryId"></param>
     /// <returns></returns>
-    protected bool Existing<T>(string paramName, ARDB.Document document, ref T element, string elementName, string parentName = default, ARDB.BuiltInCategory? categoryId = default)
+    protected bool CanReconstruct<T>
+    (
+      string paramName,
+      out bool untracked,
+      ref T element,
+      ARDB.Document document,
+      string elementNomen,
+      string parentNomen = default, ARDB.BuiltInCategory? categoryId = default
+    )
       where T : ARDB.Element
     {
-      if (element?.Name != elementName)
-      {
-        // Query for an existing element with the requested category and name.
-        if (!string.IsNullOrWhiteSpace(elementName) && document.TryGetElement(out T existing, elementName, parentName, categoryId))
+      return CanReconstruct
+      (
+        paramName,
+        out untracked,
+        ref element,
+        document,
+        elementNomen,
+        (doc, name) =>
         {
-          if (existing.Id != element?.Id)
-          {
-            if (Params.IsTrackedElement(paramName, existing))
-            {
-              // If existing is still tracked change its name to avoid collisions.
-              existing.Name = existing.UniqueId;
-            }
-            else
-            {
-              if (TrackingMode != TrackingMode.Disabled)
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Reusing but not tracking {existing.GetType().Name} '{elementName}'");
+          doc.TryGetElement(out T existing, name, parentNomen, categoryId);
+          return existing;
+        }
+      );
+    }
 
-              element = existing;
-              return true;
-            }
+    protected internal bool CanReconstruct<T>
+    (
+      string paramName,
+      out bool untracked,
+      ref T element,
+      ARDB.Document document,
+      string elementNomen,
+      Func<ARDB.Document, string, T> GetElement
+    )
+      where T : ARDB.Element
+    {
+      var nomenParameter = ARDB.BuiltInParameter.INVALID;
+      if
+      (
+        !string.IsNullOrWhiteSpace(elementNomen) &&
+        element?.GetElementNomen(out nomenParameter) != elementNomen
+      )
+      {
+        // Query for an existing element.
+        if (GetElement(document, elementNomen) is T existing)
+        {
+          Debug.Assert(existing.Id != element?.Id);
+
+          if (Params.IsTrackedElement(paramName, existing))
+          {
+            // If existing is tracked and still pending to be precessed
+            // change its name to avoid collisions.
+            existing.SetElementNomen(nomenParameter, existing.UniqueId);
+          }
+          else
+          {
+            untracked = true;
+            return (element = PostNomenAlreadyInUse(existing)) is object;
           }
         }
       }
 
-      return false;
+      untracked = false;
+      return true;
+    }
+
+    protected T PostNomenAlreadyInUse<T>(T existing)
+      where T: ARDB.Element
+    {
+      if (existing is object)
+      {
+        var nomen = existing.GetElementNomen(out var nomemParameter);
+        var label = ((ERDB.Schemas.ParameterId) nomemParameter).Label;
+        if (string.IsNullOrWhiteSpace(label)) label = "name";
+        var message = $"The {label.ToLowerInvariant()} '{nomen}' is already in use.";
+
+        if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, message);
+          return null;
+        }
+
+        if (FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{message} Using existing.");
+          return existing;
+        }
+
+        if (FailureProcessingMode == ARDB.FailureProcessingResult.WaitForUserInput)
+        {
+          var failureId = existing is ARDB.ViewSheet ?
+            ARDB.BuiltInFailures.SheetFailures.SheetNumberDuplicated :
+            ARDB.BuiltInFailures.GeneralFailures.NameNotUnique;
+
+          using (var failure = new ARDB.FailureMessage(failureId))
+          {
+            failure.SetFailingElement(existing.Id);
+            existing.Document.PostFailure(failure);
+          }
+
+          return null;
+        }
+
+        throw new Exceptions.RuntimeException(message);
+      }
+
+      throw new Exceptions.RuntimeException();
     }
 
     #region IGH_TrackingComponent
@@ -640,7 +911,6 @@ namespace RhinoInside.Revit.GH.Components
       {
         if (Params.Output.OfType<IGH_TrackingParam>().FirstOrDefault() is IGH_Param output)
         {
-          Menu_AppendSeparator(menu);
           var tracking = Menu_AppendItem(menu, "Tracking Mode");
 
           var append = Menu_AppendItem(tracking.DropDown, "Disabled", (s, a) => { TrackingMode = TrackingMode.Disabled; ExpireSolution(true); }, true, TrackingMode == TrackingMode.Disabled);

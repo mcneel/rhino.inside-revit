@@ -393,16 +393,16 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Properties
 
-    public override string NextIncrementalName(string prefix)
+    public override string NextIncrementalNomen(string prefix)
     {
       if (APIObject is ARDB.Category category)
       {
-        DocumentExtension.TryParseNameId(prefix, out prefix, out var _);
+        DocumentExtension.TryParseNomenId(prefix, out prefix, out var _);
         var nextName = category.Parent?.SubCategories.
           Cast<ARDB.Category>().
           Select(x => x.Name).
-          WhereNamePrefixedWith(prefix).
-          NextNameOrDefault() ?? $"{prefix} 1";
+          WhereNomenPrefixedWith(prefix).
+          NextNomenOrDefault() ?? $"{prefix} 1";
 
         return nextName;
       }
@@ -410,7 +410,7 @@ namespace RhinoInside.Revit.GH.Types
       return default;
     }
 
-    public override string Name
+    public override string Nomen
     {
       get
       {
@@ -420,11 +420,11 @@ namespace RhinoInside.Revit.GH.Types
           return segments[segments.Length - 1];
         }
 
-        return base.Name;
+        return base.Nomen;
       }
       set
       {
-        base.Name = value;
+        base.Nomen = value;
         fullName = null;
       }
     }

@@ -60,8 +60,8 @@ namespace RhinoInside.Revit.GH.Types
         $"Unresolved {typeName} : {DisplayName}"
       ) :
       (
-        ModelURI is null ? $"Invalid {typeName}" :
-        $"Not loaded {typeName} : {DisplayName}"
+        ModelURI is null ? $"⚠ Invalid {typeName}" :
+        $"❌ Not loaded {typeName} : {DisplayName}"
       );
 
       return tip;

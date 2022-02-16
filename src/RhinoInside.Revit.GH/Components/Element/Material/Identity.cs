@@ -92,7 +92,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       Params.TrySetData(DA, "Material", () => material);
 
-      Params.TrySetData(DA, "Name", () => material.Name);
+      Params.TrySetData(DA, "Name", () => material.Nomen);
       Params.TrySetData(DA, "Description", () => material.Description);
       Params.TrySetData(DA, "Class", () => material.MaterialClass);
       Params.TrySetData(DA, "Comments", () => material.Comments);
@@ -144,7 +144,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
           return;
 
         DA.SetData("Class", material.MaterialClass);
-        DA.SetData("Name", material.Name);
+        DA.SetData("Name", material.Nomen);
       }
     }
   }

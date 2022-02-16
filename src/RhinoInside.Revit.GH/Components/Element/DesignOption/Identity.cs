@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     {
       if (!Params.GetData(DA, "Design Option Set", out Types.DesignOptionSet set)) return;
 
-      Params.TrySetData(DA, "Name", () => set.Name);
+      Params.TrySetData(DA, "Name", () => set.Nomen);
       Params.TrySetDataList(DA, "Design Options", () => set.Options);
     }
   }
@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
       if (!Params.GetData(DA, "Design Option", out Types.DesignOption option)) return;
 
       Params.TrySetData(DA, "Design Option Set", () => option.OptionSet);
-      Params.TrySetData(DA, "Name", () => option.Name);
+      Params.TrySetData(DA, "Name", () => option.Nomen);
       Params.TrySetData(DA, "Primary", () => option.IsPrimary);
     }
   }

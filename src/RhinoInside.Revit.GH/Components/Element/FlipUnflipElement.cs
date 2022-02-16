@@ -37,9 +37,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Param_Boolean()
         {
-          Name = "Facing",
-          NickName = "F",
-          Description = "New state for Element Facing flipping",
+          Name = "Hand",
+          NickName = "H",
+          Description = "New state for Element Hand flipping",
           Optional = true
         },
         ParamRelevance.Primary
@@ -48,9 +48,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Param_Boolean()
         {
-          Name = "Hand",
-          NickName = "H",
-          Description = "New state for Element Hand flipping",
+          Name = "Facing",
+          NickName = "F",
+          Description = "New state for Element Facing flipping",
           Optional = true
         },
         ParamRelevance.Primary
@@ -84,18 +84,18 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Param_Boolean()
         {
-          Name = "Facing",
-          NickName = "F",
-          Description = "State for Element Face flipping",
+          Name = "Hand",
+          NickName = "H",
+          Description = "State for Element Hand flipping",
         }
       ),
       new ParamDefinition
       (
         new Param_Boolean()
         {
-          Name = "Hand",
-          NickName = "H",
-          Description = "State for Element Hand flipping",
+          Name = "Facing",
+          NickName = "F",
+          Description = "State for Element Face flipping",
         }
       ),
       new ParamDefinition
@@ -111,68 +111,27 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      Types.GraphicalElement element = default;
-      if (!DA.GetData("Element", ref element))
-        return;
+      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
+      else DA.SetData("Element", element);
 
-      bool? facing = default;
+      if
+      (
+        Params.GetData(DA, "Hand", out bool? hand) |
+        Params.GetData(DA, "Facing", out bool? facing) |
+        Params.GetData(DA, "Work Plane", out bool? workplane)
+      )
       {
-        var _Facing_ = Params.IndexOfInputParam("Facing");
-        if (_Facing_ >= 0 && Params.Input[_Facing_].DataType != GH_ParamData.@void)
-        {
-          bool flipped = false;
-          if (DA.GetData(_Facing_, ref flipped))
-            facing = flipped;
-        }
-        if (facing.HasValue && !element.CanFlipFacing)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Facing can not be flipped for this element. {{{element.Id.IntegerValue}}}");
-          return;
-        }
+        UpdateElement
+        (
+          element.Value, () =>
+          {
+            element.HandFlipped = hand;
+            element.FacingFlipped = facing;
+            element.WorkPlaneFlipped = workplane;
+          }
+        );
       }
 
-      bool? hand = default;
-      {
-        var _Hand_ = Params.IndexOfInputParam("Hand");
-        if (_Hand_ >= 0 && Params.Input[_Hand_].DataType != GH_ParamData.@void)
-        {
-          bool flipped = false;
-          if (DA.GetData(_Hand_, ref flipped))
-            hand = flipped;
-        }
-        if (hand.HasValue && !element.CanFlipFacing)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Hand can not be flipped for this element. {{{element.Id.IntegerValue}}}");
-          return;
-        }
-      }
-
-      bool? workplane = default;
-      {
-        var _WorkPlane_ = Params.IndexOfInputParam("Work Plane");
-        if (_WorkPlane_ >= 0 && Params.Input[_WorkPlane_].DataType != GH_ParamData.@void)
-        {
-          bool flipped = false;
-          if (DA.GetData(_WorkPlane_, ref flipped))
-            workplane = flipped;
-        }
-        if (workplane.HasValue && !element.CanFlipWorkPlane)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Work Plane can not be flipped for this element. {{{element.Id.IntegerValue}}}");
-          return;
-        }
-      }
-
-      if (facing.HasValue || hand.HasValue || workplane.HasValue)
-      {
-        StartTransaction(element.Document);
-
-        element.FacingFlipped = facing;
-        element.HandFlipped = hand;
-        element.WorkPlaneFlipped = workplane;
-      }
-
-      DA.SetData("Element", element);
       DA.SetData("Facing", element.FacingFlipped);
       DA.SetData("Hand", element.HandFlipped);
       DA.SetData("Work Plane", element.WorkPlaneFlipped);

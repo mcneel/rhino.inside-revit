@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       {
         StartTransaction(sheet.Document);
         sheet.SheetNumber = number;
-        sheet.Name = name;
+        sheet.SheetName = name;
         sheet.SheetIssueDate = date;
         sheet.SheetScheduled = scheduled;
       }
@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       Params.TrySetData(DA, "Sheet", () => sheet);
       Params.TrySetData(DA, "Placeholder", () => sheet.IsPlaceholder);
       Params.TrySetData(DA, "Sheet Number", () => sheet.SheetNumber);
-      Params.TrySetData(DA, "Sheet Name", () => sheet.Name);
+      Params.TrySetData(DA, "Sheet Name", () => sheet.SheetName);
       Params.TrySetData(DA, "Sheet Issue Date", () => sheet.SheetIssueDate);
       Params.TrySetData(DA, "Appears In Sheet List", () => sheet.SheetScheduled);
     }

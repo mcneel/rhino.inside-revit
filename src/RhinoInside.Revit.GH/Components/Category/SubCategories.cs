@@ -85,62 +85,47 @@ namespace RhinoInside.Revit.GH.Components.Categories
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Parent", out Types.Category parent)) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => x is object)) return;
-      if (!Params.TryGetData(DA, "Template", out Types.Category template, x => x.IsValid)) return;
+      if (!Params.GetData(DA, "Parent", out Types.Category parent, x => x.IsValid)) return;
 
-      // Previous Output
-      Params.ReadTrackedElement(_SubCategory_, parent.Document, out ARDB.Element element);
-      var category = element is object ?
-        Types.Category.FromCategory(DocumentExtension.AsCategory(element)) :
-        new Types.Category();
-
-      StartTransaction(parent.Document);
-      {
-        var untracked = Existing(parent, name, ref category);
-
-        // Reconstruct category.
-        category = Reconstruct(category, parent, name, template);
-
-        // Save it back if it is tracked.
-        Params.WriteTrackedElement(_SubCategory_, parent.Document, untracked ? default : category.Value);
-        DA.SetData(_SubCategory_, category);
-      }
-    }
-
-    bool Existing(Types.Category parent, string name, ref Types.Category category)
-    {
-      if (category.APIObject?.Parent.Id != parent.Id || category?.Name != name)
-      {
-        // Query for an existing category with the requested parent and name.
-        if (!string.IsNullOrWhiteSpace(name) && parent.APIObject.SubCategories.Contains(name))
+      ReconstructElement<ARDB.Element>
+      (
+        parent.Document, _SubCategory_, (element) =>
         {
-          var existing = new Types.Category(parent.APIObject.SubCategories.get_Item(name));
-          if (existing.Id != category.Id)
-          {
-            if (Params.IsTrackedElement(_SubCategory_, existing.Value))
-            {
-              // If existing is still tracked change its name to avoid collisions.
-              existing.Name = existing.UniqueID;
-            }
-            else
-            {
-              category = existing;
-              return true;
-            }
-          }
-        }
-      }
+          // Input
+          if (!Params.TryGetData(DA, "Name", out string name, x => x is object)) return null;
+          if (!Params.TryGetData(DA, "Template", out Types.Category template, x => x.IsValid)) return null;
 
-      return false;
+          // Compute
+          StartTransaction(parent.Document);
+          if
+          (
+            CanReconstruct
+            (
+              _SubCategory_, out var untracked, ref element,
+              parent.Document, name,
+              (d, n) => parent.APIObject.SubCategories.Contains(name) ?
+                d.GetElement(parent.APIObject.SubCategories.get_Item(name).Id) : null
+            )
+          )
+          {
+            var category = Types.Category.FromCategory(DocumentExtension.AsCategory(element));
+            category = Reconstruct(category, parent, name, template);
+            element = category.Value;
+
+            DA.SetData(_SubCategory_, category);
+          }
+
+          return untracked ? null : element;
+        }
+      );
     }
 
     bool Reuse(Types.Category category, Types.Category parent, string name, Types.Category template)
     {
-      if (!category.IsValid) return false;
+      if (category is null) return false;
       if (!category.APIObject.Parent.IsEquivalent(parent.APIObject)) return false;
-      if (name is object) category.Name = name;
-      else category.SetIncrementalName(template?.Name ?? parent.Name);
+      if (name is object) category.Nomen = name;
+      else category.SetIncrementalNomen(template?.Nomen ?? parent.Nomen);
 
       if (template?.IsValid == true)
       {
@@ -163,13 +148,13 @@ namespace RhinoInside.Revit.GH.Components.Categories
       // Make sure the name is unique
       if (name is null)
       {
-        name = template?.Name ?? parent.Name;
-        DocumentExtension.TryParseNameId(name, out var prefix, out var _);
+        name = template?.Nomen ?? parent.Nomen;
+        DocumentExtension.TryParseNomenId(name, out var prefix, out var _);
         name = parent.APIObject.SubCategories.
           Cast<ARDB.Category>().
           Select(x => x.Name).
-          WhereNamePrefixedWith(prefix).
-          NextNameOrDefault() ?? $"{prefix} 0";
+          WhereNomenPrefixedWith(prefix).
+          NextNomenOrDefault() ?? $"{prefix} 0";
       }
 
       // Try to duplicate template
@@ -183,7 +168,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
         );
 
         category = ids.Select(x => Types.Category.FromElementId(doc, x)).OfType<Types.Category>().FirstOrDefault();
-        category.Name = name;
+        category.Nomen = name;
       }
 
       if (category is null)
@@ -191,7 +176,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
         using (var categories = doc.Settings.Categories)
           category = Types.Category.FromCategory(categories.NewSubcategory(parent.APIObject, name));
 
-        Reuse(category, parent, category.Name, template);
+        Reuse(category, parent, category.Nomen, template);
       }
 
       return category;
@@ -201,13 +186,13 @@ namespace RhinoInside.Revit.GH.Components.Categories
     {
       if (!Reuse(category, parent, name, template))
       {
-        var element = category.Value;
+        var element = category?.Value;
         element = element.ReplaceElement
         (
           Create(parent, name, template).Value,
           ExcludeUniqueProperties
         );
-        category.SetValue(element.Document, element.Id);
+        category = Types.Category.FromElementId(element.Document, element.Id);
       }
 
       return category;

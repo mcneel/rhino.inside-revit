@@ -7,8 +7,8 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.ElementTypes
 {
   using External.DB.Extensions;
-  using ElementTracking;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.5")]
   public class ElementTypeDuplicate : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("5ED7E612-E5C6-4F0E-AA69-814CF2478F7E");
@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
     public ElementTypeDuplicate() : base
     (
       name: "Duplicate Type",
-      nickname: "TypeDup",
+      nickname: "Duplicate",
       description: "Create a Revit type by name",
       category: "Revit",
       subCategory: "Type"
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
       (
         new Param_String()
         {
-          Name = "Name",
+          Name = "Type Name",
           NickName = "N",
           Description = "Type Name",
         },
@@ -83,22 +83,25 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // Input
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      if (!Params.GetData(DA, "Type", out Types.ElementType template, x => x.IsValid)) return;
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      // Previous Output
-      Params.ReadTrackedElement(_Type_, doc.Value, out ARDB.ElementType type);
+      ReconstructElement<ARDB.ElementType>
+      (
+        doc.Value, _Type_, (type) =>
+        {
+          // Input
+          if (!Params.TryGetData(DA, "Type Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          if (!Params.GetData(DA, "Type", out Types.ElementType template, x => x.IsValid)) return null;
 
-      StartTransaction(doc.Value);
-      {
-        var untracked = Existing(_Type_, doc.Value, ref type, name, template.FamilyName, (ARDB.BuiltInCategory) template.Category.Id.IntegerValue);
-        type = Reconstruct(type, doc.Value, name, template.Value);
+          // Compute
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_Type_, out var untracked, ref type, doc.Value, name, template.FamilyName, (ARDB.BuiltInCategory) template.Category.Id.IntegerValue))
+            type = Reconstruct(type, doc.Value, name, template.Value);
 
-        Params.WriteTrackedElement(_Type_, doc.Value, untracked ? default : type);
-        DA.SetData(_Type_, type);
-      }
+          DA.SetData(_Type_, type);
+          return untracked ? null : type;
+        }
+      );
     }
 
     bool Reuse(ARDB.ElementType type, string name, ARDB.ElementType template)
@@ -106,7 +109,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
       if (type is null) return false;
       if (type.FamilyName != template.FamilyName) return false;
       if (name is object) { if (type.Name != name) type.Name = name; }
-      else type.SetIncrementalName(template?.Name ?? _Type_);
+      else type.SetIncrementalNomen(template?.Name ?? _Type_);
 
       if (type is ARDB.HostObjAttributes hostElementType && type is ARDB.HostObjAttributes hostType)
         hostElementType.SetCompoundStructure(hostType.GetCompoundStructure());
@@ -120,24 +123,28 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
       var type = default(ARDB.ElementType);
 
       // Make sure the name is unique
+      if (name is null)
       {
-        name = doc.NextIncrementalName
+        name = doc.NextIncrementalNomen
         (
-          name ?? template?.Name ?? _Type_,
+          template?.Name ?? _Type_,
           template.GetType(),
           template.FamilyName,
-          (ARDB.BuiltInCategory) template.Category.Id.IntegerValue
+          template.Category is ARDB.Category category ?
+          (ARDB.BuiltInCategory) category.Id.IntegerValue :
+          ARDB.BuiltInCategory.INVALID
         );
       }
 
       // Try to duplicate template
       if (template is object)
       {
-        if (doc.Equals(template.Document))
-        {
-          type = template.Duplicate(name);
-        }
-        else
+        // `View.Duplicate` fails with ARDB.ViewFamilyType
+        //if (doc.Equals(template.Document))
+        //{
+        //  type = template.Duplicate(name);
+        //}
+        //else
         {
           var ids = ARDB.ElementTransformUtils.CopyElements
           (

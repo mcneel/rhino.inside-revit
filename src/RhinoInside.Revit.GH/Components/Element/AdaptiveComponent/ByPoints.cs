@@ -75,10 +75,7 @@ namespace RhinoInside.Revit.GH.Components
                             document.Create.NewFamilyInstances2( creationData );
 
         if (newElementIds.Count != 1)
-        {
-          document.Delete(newElementIds);
-          throw new InvalidOperationException();
-        }
+          throw new Exceptions.RuntimeErrorException("Failed to create Family Instance element.");
 
         var parametersMask = new ARDB.BuiltInParameter[]
         {

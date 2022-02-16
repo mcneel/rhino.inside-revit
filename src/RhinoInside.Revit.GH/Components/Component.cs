@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components
   }
 
   [ComponentVersion(introduced: "0.0", updated: "1.3")]
-  public abstract class Component : GH_Component, Kernel.IGH_ElementIdComponent
+  public abstract class Component : GH_Component, Kernel.IGH_ElementIdComponent, IGH_RuntimeContract
   {
     protected Component(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory)
@@ -151,7 +151,7 @@ namespace RhinoInside.Revit.GH.Components
     #region IGH_ActiveObject
     Exception unhandledException;
     protected bool IsAborted => unhandledException is object;
-    protected virtual bool AbortOnUnhandledException => false;
+    protected virtual bool AbortOnContinuableException => false;
 
     static Component ComputingComponent;
     public sealed override void ComputeData()
@@ -188,75 +188,82 @@ namespace RhinoInside.Revit.GH.Components
       {
         TrySolveInstance(DA);
       }
-      catch (Exceptions.RuntimeArgumentNullException e)
-      {
-        // Grasshopper components use to send a Null when
-        // they receive a Null without throwing any error
-      }
-      catch (Exceptions.RuntimeArgumentException e)
-      {
-        if (AbortOnUnhandledException)
-          unhandledException = e;
-
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
-      }
-      catch (Exceptions.RuntimeWarningException e)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message);
-      }
-      catch (Exceptions.RuntimeErrorException e)
-      {
-        if (AbortOnUnhandledException)
-          unhandledException = e;
-
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
-      }
-      catch (Autodesk.Revit.Exceptions.ArgumentOutOfRangeException e)
-      {
-        if (AbortOnUnhandledException)
-          unhandledException = e;
-
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Value is out of range");
-      }
-      catch (Autodesk.Revit.Exceptions.ArgumentException e)
-      {
-        if (AbortOnUnhandledException)
-          unhandledException = e;
-
-        var message = e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0];
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {message}");
-      }
-      catch (Autodesk.Revit.Exceptions.ApplicationException e)
-      {
-        if (AbortOnUnhandledException)
-          unhandledException = e;
-
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-      }
-      catch (System.MissingMemberException e)
-      {
-        unhandledException = e;
-
-        if (e.Message.Contains("Autodesk.Revit.DB."))
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Please consider update Revit to the latest revision.{Environment.NewLine}{e.Message.TripleDot(128)}");
-        else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-      }
       catch (System.Exception e)
       {
-        if (AbortOnUnhandledException)
-          unhandledException = e;
-
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
-      }
-
-      if (unhandledException is object)
-      {
-        DA.AbortComponentSolution();
-        Phase = GH_SolutionPhase.Failed;
+        if (!TryCatchException(DA, e))
+        {
+          ResetData();
+          DA.AbortComponentSolution();
+          Phase = GH_SolutionPhase.Failed;
+        }
       }
     }
+
     protected abstract void TrySolveInstance(IGH_DataAccess DA);
+    protected virtual bool TryCatchException(IGH_DataAccess DA, Exception e)
+    {
+      switch(e)
+      {
+        case Exceptions.RuntimeArgumentNullException _:
+          // Grasshopper components use to send a Null when
+          // they receive a Null without throwing any error
+          return true;
+
+        case Exceptions.RuntimeArgumentException argument:
+          if (!AbortOnContinuableException)
+          {
+            AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, argument.Value as Rhino.Geometry.GeometryBase);
+            return true;
+          }
+
+          AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, argument.Message, argument.Value as Rhino.Geometry.GeometryBase);
+          break;
+
+        case Exceptions.RuntimeException _:
+          if (!AbortOnContinuableException)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message);
+            return true;
+          }
+
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
+          break;
+
+        case Exceptions.RuntimeWarningException _:
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message);
+          break;
+
+        case Exceptions.RuntimeErrorException _:
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
+          break;
+
+        case Autodesk.Revit.Exceptions.ArgumentOutOfRangeException _:
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Value is out of range");
+          break;
+
+        case Autodesk.Revit.Exceptions.ArgumentException _:
+          var message = e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0];
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {message}");
+          break;
+
+        case Autodesk.Revit.Exceptions.ApplicationException _:
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+          break;
+
+        case System.MissingMemberException _:
+          if (e.Message.Contains("Autodesk.Revit.DB."))
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Please consider update Revit to the latest revision.{Environment.NewLine}{e.Message.TripleDot(128)}");
+          else
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+          break;
+
+        case System.Exception _:
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
+          break;
+      }
+
+      return false;
+    }
     #endregion
 
     #region IGH_PreviewObject
@@ -383,13 +390,10 @@ namespace RhinoInside.Revit.GH.Components
       ICollection<ARDB.ElementId> modified
     )
     {
-      // Changes made by this should not expire this.
-      if (ReferenceEquals(ComputingComponent, this)) return false;
-
       // Only Query-Collector components need to be expired when something is added.
       if (modified.Count > 0 || deleted.Count > 0)
       {
-        // Only inputs with persitent data or outputs are considered source of data.
+        // Only inputs with persitent data are considered source of data.
         var persistentInputs = Params.Input.
           Where(x => x.DataType == GH_ParamData.local).
           OfType<Kernel.IGH_ElementIdParam>();
@@ -400,16 +404,38 @@ namespace RhinoInside.Revit.GH.Components
           if (param.NeedsToBeExpired(document, EmptyElementIds, deleted, modified))
             return true;
         }
-
-        // Check outputs
-        foreach (var output in Params.Output.OfType<Kernel.IGH_ElementIdParam>())
-        {
-          if (output.NeedsToBeExpired(document, EmptyElementIds, deleted, modified))
-            return true;
-        }
       }
 
       return false;
+    }
+    #endregion
+
+    #region IGH_RuntimeContract
+    public virtual bool RequiresFailed
+    (
+      IGH_DataAccess access, int index, object value,
+      string message
+    )
+    {
+      var failureMessage = $"Input parameter '{Params.Input[index].NickName}' collected invalid data.";
+
+      if (value is Rhino.Geometry.GeometryBase geometry)
+      {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+          // If we have no message try to get a more accurate reason
+          if (!geometry.IsValidWithLog(out message))
+            failureMessage += Environment.NewLine + message;
+        }
+        else failureMessage += Environment.NewLine + message;
+      }
+      else
+      {
+        if (!string.IsNullOrWhiteSpace(message))
+          failureMessage += Environment.NewLine + message;
+      }
+
+      throw new Exceptions.RuntimeArgumentException(Params.Input[index].Name, failureMessage, value);
     }
     #endregion
   }

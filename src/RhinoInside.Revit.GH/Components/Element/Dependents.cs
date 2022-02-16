@@ -88,8 +88,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Element", out Types.Element element)) return;
-      Params.GetData(DA, "Filter", out ARDB.ElementFilter filter);
+      else Params.TrySetData(DA, "Element", () => element);
 
+      Params.GetData(DA, "Filter", out ARDB.ElementFilter filter);
       filter = CompoundElementFilter.Intersect
       (
         new ARDB.ExclusionFilter(new ARDB.ElementId[] { element.Id }),
@@ -100,7 +101,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
         )
       );
 
-      Params.TrySetData(DA, "Element", () => element);
       if (element.Value is object)
       {
         if (Params.IndexOfOutputParam("Referentials") >= 0)

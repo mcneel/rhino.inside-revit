@@ -305,23 +305,26 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // Input
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      if (!Params.GetData(DA, "Class", out Types.StructuralAssetClass type, x => x.IsValid)) return;
-      Params.TryGetData(DA, "Template", out ARDB.PropertySetElement template);
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      // Previous Output
-      Params.ReadTrackedElement(_Asset_, doc.Value, out ARDB.PropertySetElement asset);
+      ReconstructElement<ARDB.PropertySetElement>
+      (
+        doc.Value, _Asset_, (asset) =>
+        {
+          // Input
+          if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          if (!Params.GetData(DA, "Class", out Types.StructuralAssetClass type, x => x.IsValid)) return null;
+          Params.TryGetData(DA, "Template", out ARDB.PropertySetElement template);
 
-      StartTransaction(doc.Value);
-      {
-        var untracked = Existing(_Asset_, doc.Value, ref asset, name);
-        asset = Reconstruct(asset, doc.Value, name, type.Value, template);
+          // Compute
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_Asset_, out var untracked, ref asset, doc.Value, name))
+            asset = Reconstruct(asset, doc.Value, name, type.Value, template);
 
-        Params.WriteTrackedElement(_Asset_, doc.Value, untracked ? default : asset);
-        DA.SetData(_Asset_, asset);
-      }
+          DA.SetData(_Asset_, asset);
+          return untracked ? null : asset;
+        }
+      );
     }
 
     bool Reuse(ARDB.PropertySetElement assetElement, string name, ARDB.StructuralAssetClass type, ARDB.PropertySetElement template)
@@ -334,7 +337,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
       else return false;
 
       if (name is object) { if (assetElement.Name != name) assetElement.Name = name; }
-      else assetElement.SetIncrementalName(template?.Name ?? _Asset_);
+      else assetElement.SetIncrementalNomen(template?.Name ?? _Asset_);
       if (template?.GetStructuralAsset() is ARDB.StructuralAsset)
       {
         template.CopyParametersFrom(template, ExcludeUniqueProperties);
@@ -349,7 +352,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       // Make sure the name is unique
       {
-        name = doc.NextIncrementalName
+        name = doc.NextIncrementalNomen
         (
           name ?? template?.Name ?? _Asset_,
           typeof(ARDB.SelectionFilterElement),
@@ -590,23 +593,26 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // Input
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
-      if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
-      if (!Params.GetData(DA, "Class", out Types.ThermalMaterialType type, x => x.IsValid)) return;
-      Params.TryGetData(DA, "Template", out ARDB.PropertySetElement template);
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      // Previous Output
-      Params.ReadTrackedElement(_Asset_, doc.Value, out ARDB.PropertySetElement asset);
+      ReconstructElement<ARDB.PropertySetElement>
+      (
+        doc.Value, _Asset_, (asset) =>
+        {
+          // Input
+          if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
+          if (!Params.GetData(DA, "Class", out Types.ThermalMaterialType type, x => x.IsValid)) return null;
+          Params.TryGetData(DA, "Template", out ARDB.PropertySetElement template);
 
-      StartTransaction(doc.Value);
-      {
-        var untracked = Existing(_Asset_, doc.Value, ref asset, name);
-        asset = Reconstruct(asset, doc.Value, name, type.Value, template);
+          // Compute
+          StartTransaction(doc.Value);
+          if (CanReconstruct(_Asset_, out var untracked, ref asset, doc.Value, name))
+            asset = Reconstruct(asset, doc.Value, name, type.Value, template);
 
-        Params.WriteTrackedElement(_Asset_, doc.Value, untracked ? default : asset);
-        DA.SetData(_Asset_, asset);
-      }
+          DA.SetData(_Asset_, asset);
+          return untracked ? null : asset;
+        }
+      );
     }
 
     bool Reuse(ARDB.PropertySetElement assetElement, string name, ARDB.ThermalMaterialType type, ARDB.PropertySetElement template)
@@ -619,9 +625,8 @@ namespace RhinoInside.Revit.GH.Components.Materials
       }
       else return false;
 
-
       if (name is object) { if (assetElement.Name != name) assetElement.Name = name; }
-      else assetElement.SetIncrementalName(template?.Name ?? _Asset_);
+      else assetElement.SetIncrementalNomen(template?.Name ?? _Asset_);
 
       if (template?.GetThermalAsset() is ARDB.ThermalAsset templateAsset)
       {
@@ -638,7 +643,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       // Make sure the name is unique
       {
-        name = doc.NextIncrementalName
+        name = doc.NextIncrementalNomen
         (
           name ?? template?.Name ?? _Asset_,
           typeof(ARDB.SelectionFilterElement),

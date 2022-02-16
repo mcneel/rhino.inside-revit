@@ -8,14 +8,13 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
   [ComponentVersion(introduced: "1.2")]
   public class DisassembleAssembly : TransactionalChainComponent
   {
-    public override Guid ComponentGuid => new Guid("ff0f49ca-16ec-4287-8bd8-b903b6a6e781");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
-    protected override string IconTag => "DAS";
+    public override Guid ComponentGuid => new Guid("FF0F49CA-16EC-4287-8BD8-B903B6A6E781");
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public DisassembleAssembly() : base
     (
       name: "Disassemble Assembly",
-      nickname: "DAS",
+      nickname: "Disassemble",
       description: "Disassemble given assembly and release the members",
       category: "Revit",
       subCategory: "Assembly"

@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override string DisplayName => Name ?? (IsReferencedData ? string.Empty : "<None>");
+    public override string DisplayName => Nomen ?? (IsReferencedData ? string.Empty : "<None>");
     #endregion
 
     #region ReferenceObject
@@ -146,6 +146,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.AppearanceAssetElement),  (element)=> new AppearanceAssetElement(element as ARDB.AppearanceAssetElement)},
 
       { typeof(ARDB.View),                    (element)=> new View                  (element as ARDB.View)              },
+      { typeof(ARDB.ViewFamilyType),          (element)=> new ViewFamilyType        (element as ARDB.ViewFamilyType)    },
       { typeof(ARDB.ViewSheet),               (element)=> new ViewSheet             (element as ARDB.ViewSheet)         },
 
       { typeof(ARDB.Instance),                (element)=> new Instance              (element as ARDB.Instance)          },
@@ -452,12 +453,12 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       [System.ComponentModel.Description("A human readable name for the Element.")]
-      public string Name => owner.Name;
+      public string Name => owner.Nomen;
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-#region Properties
+    #region Properties
     public bool CanDelete => IsValid && ARDB.DocumentValidation.CanDeleteElement(Document, Id);
 
     public bool? Pinned
@@ -470,9 +471,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public virtual bool CanBeRenamed() => Value.CanBeRenamed();
+    public virtual bool CanBeRenominated() => Value.CanBeRenominated();
 
-    public virtual string NextIncrementalName(string prefix)
+    public virtual string NextIncrementalNomen(string prefix)
     {
       if (Value is ARDB.Element element)
       {
@@ -480,7 +481,7 @@ namespace RhinoInside.Revit.GH.Types
           category.Id.TryGetBuiltInCategory(out var builtInCategory) ?
           builtInCategory : default(ARDB.BuiltInCategory?);
 
-        var nextName = element.Document.NextIncrementalName
+        var nextName = element.Document.NextIncrementalNomen
         (
           prefix,
           element.GetType(),
@@ -494,19 +495,19 @@ namespace RhinoInside.Revit.GH.Types
       return default;
     }
 
-    public bool SetIncrementalName(string prefix)
+    public bool SetIncrementalNomen(string prefix)
     {
       if (!ARDB.NamingUtils.IsValidName(prefix))
-        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(prefix));
+        throw new Exceptions.RuntimeArgumentException(nameof(prefix), "Element name contains prohibited characters and is invalid.");
 
       if (Value is ARDB.Element)
       {
-        var prefixed = DocumentExtension.TryParseNameId(Name, out var elementPrefix, out var _);
+        var prefixed = DocumentExtension.TryParseNomenId(Nomen, out var elementPrefix, out var _);
         if (!prefixed || prefix != elementPrefix)
         {
-          if (NextIncrementalName(prefix) is string next)
+          if (NextIncrementalNomen(prefix) is string next)
           {
-            Name = next;
+            Nomen = next;
             return true;
           }
         }
@@ -515,10 +516,10 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public bool SetUniqueName(string name)
+    public bool SetUniqueNomen(string name)
     {
       if (!ARDB.NamingUtils.IsValidName(name))
-        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(name));
+        throw new Exceptions.RuntimeArgumentException(nameof(name), "Element name contains prohibited characters and is invalid.");
 
       if (Value is ARDB.Element element)
       {
@@ -533,27 +534,30 @@ namespace RhinoInside.Revit.GH.Types
           }
         }
 
-        element.Name = string.IsNullOrEmpty(name) ? $"({element.UniqueId})" : $"{name} ({element.UniqueId})";
+        element.SetElementNomen
+        (
+          string.IsNullOrEmpty(name) ? $"({element.UniqueId})" : $"{name} ({element.UniqueId})"
+        );
         return true;
       }
 
       return false;
     }
 
-    public virtual string Name
+    public virtual string Nomen
     {
-      get => Rhinoceros.InvokeInHostContext(() => Value?.Name);
+      get => Rhinoceros.InvokeInHostContext(() => Value?.GetElementNomen());
       set
       {
-        if (value is object && value != Name)
+        if (value is object && value != Nomen)
         {
           if (Id.IsBuiltInId())
           {
-            throw new InvalidOperationException($"BuiltIn {((IGH_Goo) this).TypeName.ToLowerInvariant()} '{DisplayName}' does not support assignment of a user-specified name.");
+            throw new Exceptions.RuntimeErrorException($"BuiltIn {((IGH_Goo) this).TypeName.ToLowerInvariant()} '{DisplayName}' does not support assignment of a user-specified name.");
           }
           else if (Value is ARDB.Element element)
           {
-            element.Name = value;
+            element.SetElementNomen(value);
           }
         }
       }
@@ -616,9 +620,9 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
-#endregion
+    #endregion
 
-#region Identity Data
+    #region Identity Data
     public virtual string Description
     {
       get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
@@ -702,6 +706,6 @@ namespace RhinoInside.Revit.GH.Types
           Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.Update(value);
       }
     }
-#endregion
+    #endregion
   }
 }

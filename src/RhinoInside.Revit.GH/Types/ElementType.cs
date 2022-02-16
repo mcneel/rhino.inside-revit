@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Value is ARDB.ElementType type && type.GetFamilyName() is string familyName && familyName.Length > 0)
-          return $"{familyName} : {Name}";
+          return $"{familyName} : {Nomen}";
 
         return base.DisplayName;
       }

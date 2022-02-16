@@ -38,15 +38,17 @@ namespace RhinoInside.Revit.GH.Types
     {
       var valid = IsValid;
       string Invalid = Id == ARDB.ElementId.InvalidElementId ?
-        string.Empty :
-        IsReferencedData ?
-        (valid ? /*"Referenced "*/ "" : "Unresolved ") :
-        (valid ? string.Empty : "Invalid ");
+        (string.IsNullOrWhiteSpace(UniqueID) ? string.Empty : "Unresolved ") :
+        valid ? string.Empty :
+        (IsReferencedData ? "❌ Deleted " : "⚠ Invalid ");
       string TypeName = ((IGH_Goo) this).TypeName;
       string InstanceName = DisplayName ?? string.Empty;
 
+      if (!string.IsNullOrWhiteSpace(InstanceName))
+        InstanceName = $" : {InstanceName}";
+
       if (!IsReferencedData)
-        return $"{Invalid}{TypeName} : {InstanceName}";
+        return $"{Invalid}{TypeName}{InstanceName}";
 
       string InstanceId = valid ? $" : id {Id.IntegerValue}" : $" : {UniqueID}";
 
@@ -56,7 +58,7 @@ namespace RhinoInside.Revit.GH.Types
           InstanceId = $"{InstanceId} @ {Document?.GetFileName() ?? DocumentGUID.ToString("B")}";
       }
 
-      return $"{Invalid}{TypeName} : {InstanceName}{InstanceId}";
+      return $"{Invalid}{TypeName}{InstanceName}{InstanceId}";
     }
     #endregion
 
@@ -217,10 +219,20 @@ namespace RhinoInside.Revit.GH.Types
         public override bool CanResetValue(object component) { return false; }
         public override void SetValue(object component, object value) { }
         public override Type PropertyType => typeof(string);
-        public override object GetValue(object component) =>
-          parameter.Element is object && parameter.Definition is object ?
-          (parameter.StorageType == ARDB.StorageType.String ? parameter.AsString() :
-          parameter.AsValueString()) : null;
+        public override object GetValue(object component)
+        {
+          if (parameter.Element is object && parameter.Definition is object)
+          {
+            if (parameter.StorageType == ARDB.StorageType.String)
+              return parameter.AsString();
+
+            return parameter.Element.GetParameterFormatOptions(parameter.Id) is ARDB.FormatOptions options ?
+              parameter.AsValueString(options) :
+              parameter.AsValueString();
+          }
+
+          return null;
+        }
       }
     }
 
