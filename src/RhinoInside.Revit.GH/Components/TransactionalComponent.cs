@@ -805,7 +805,7 @@ namespace RhinoInside.Revit.GH.Components
 
           if (Params.IsTrackedElement(paramName, existing))
           {
-            // If existing is tracked and still pending to be precessed
+            // If existing is tracked and still pending to be processed
             // change its name to avoid collisions.
             existing.SetElementNomen(nomenParameter, existing.UniqueId);
           }

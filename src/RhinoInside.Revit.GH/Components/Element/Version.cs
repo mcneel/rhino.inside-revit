@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 #if !REVIT_2021
     protected override void BeforeSolveInstance()
     {
-      AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'Modified' output is only supported on Revit 2021 or above.");
+      AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "'Updated' output is only supported on Revit 2021 or above.");
       base.BeforeSolveInstance();
     }
 #endif
