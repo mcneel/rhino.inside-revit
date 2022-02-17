@@ -340,14 +340,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static Autodesk.Revit.DB.StorageType ToStorageType(this Schemas.DataType dataType)
     {
-      if (SpecToStorageType.TryGetValue(dataType, out var storage))
-        return storage;
+      if (dataType is object)
+      {
+        if (SpecToStorageType.TryGetValue(dataType, out var storage))
+          return storage;
 
-      if (Schemas.CategoryId.IsCategoryId(dataType, out var _))
-        return Autodesk.Revit.DB.StorageType.ElementId;
+        if (Schemas.CategoryId.IsCategoryId(dataType, out var _))
+          return Autodesk.Revit.DB.StorageType.ElementId;
 
-      if (Schemas.SpecType.IsMeasurableSpec(dataType, out var _))
-        return Autodesk.Revit.DB.StorageType.Double;
+        if (Schemas.SpecType.IsMeasurableSpec(dataType, out var _))
+          return Autodesk.Revit.DB.StorageType.Double;
+      }
 
       return Autodesk.Revit.DB.StorageType.None;
     }

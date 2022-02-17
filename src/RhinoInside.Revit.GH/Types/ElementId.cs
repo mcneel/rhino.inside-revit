@@ -198,9 +198,9 @@ namespace RhinoInside.Revit.GH.Types
               description = "read only " + description;
 
             description = $"{parameterClass} {description} parameter.{Environment.NewLine}{Environment.NewLine}";
-            description += $"ParameterId : {((External.DB.Schemas.ParameterId)parameter.GetTypeId()).FullName}";
+            description += $"ParameterId : {((External.DB.Schemas.ParameterId) parameter.GetTypeId()).FullName}";
 
-            if(parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
+            if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
               description += $"{Environment.NewLine}BuiltInParameter : {builtInParameter.ToStringGeneric()}";
 
             return description;
@@ -265,11 +265,11 @@ namespace RhinoInside.Revit.GH.Types
       {
         switch (other.QC_Type)
         {
-          case GH_QuickCastType.@bool:    return other.QC_Bool() == ((IGH_QuickCast) this).QC_Bool() ? 0.0 : 1.0;
-          case GH_QuickCastType.@int:     return Math.Abs(other.QC_Int() - ((IGH_QuickCast) this).QC_Int());
-          case GH_QuickCastType.num:      return Math.Abs(other.QC_Num() - ((IGH_QuickCast) this).QC_Num());
-          case GH_QuickCastType.pt:       return other.QC_Pt().DistanceTo(((IGH_QuickCast) this).QC_Pt());
-          case GH_QuickCastType.vec:      return new Point3d(other.QC_Vec()).DistanceTo(new Point3d(((IGH_QuickCast) this).QC_Vec()));
+          case GH_QuickCastType.@bool: return other.QC_Bool() == ((IGH_QuickCast) this).QC_Bool() ? 0.0 : 1.0;
+          case GH_QuickCastType.@int: return Math.Abs(other.QC_Int() - ((IGH_QuickCast) this).QC_Int());
+          case GH_QuickCastType.num: return Math.Abs(other.QC_Num() - ((IGH_QuickCast) this).QC_Num());
+          case GH_QuickCastType.pt: return other.QC_Pt().DistanceTo(((IGH_QuickCast) this).QC_Pt());
+          case GH_QuickCastType.vec: return new Point3d(other.QC_Vec()).DistanceTo(new Point3d(((IGH_QuickCast) this).QC_Vec()));
           case GH_QuickCastType.interval:
             var otherInterval = other.QC_Interval();
             var thisInterval = ((IGH_QuickCast) this).QC_Interval();
@@ -313,6 +313,10 @@ namespace RhinoInside.Revit.GH.Types
     public override string DisplayName => IsReferencedData ?
       Id is null ? "INVALID" : Id.IntegerValue.ToString() :
       "<None>";
+    #endregion
+
+    #region Version
+    public abstract bool? IsReadOnly { get; }
     #endregion
   }
 }

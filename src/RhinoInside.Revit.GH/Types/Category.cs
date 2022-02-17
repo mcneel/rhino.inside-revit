@@ -391,8 +391,12 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region Properties
+    #region Version
+    public override bool? IsReadOnly => APIObject is ARDB.Category category ?
+      category.IsReadOnly || (Document?.IsReadOnly == true) : default(bool?);
+    #endregion
 
+    #region Properties
     public override string NextIncrementalNomen(string prefix)
     {
       if (APIObject is ARDB.Category category)
