@@ -215,6 +215,8 @@ namespace RhinoInside.Revit.GH.Types
       }
       protected set => base.Value = value;
     }
+
+    public abstract bool? IsEditable { get; }
     #endregion
 
     #region GH_ISerializable

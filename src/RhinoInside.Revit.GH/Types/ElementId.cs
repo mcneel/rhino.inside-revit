@@ -314,9 +314,5 @@ namespace RhinoInside.Revit.GH.Types
       Id is null ? "INVALID" : Id.IntegerValue.ToString() :
       "<None>";
     #endregion
-
-    #region Version
-    public abstract bool? IsReadOnly { get; }
-    #endregion
   }
 }

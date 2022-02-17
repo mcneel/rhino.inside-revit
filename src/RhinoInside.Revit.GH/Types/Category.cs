@@ -392,8 +392,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Version
-    public override bool? IsReadOnly => APIObject is ARDB.Category category ?
-      category.IsReadOnly || (Document?.IsReadOnly == true) : default(bool?);
+    public override bool? IsEditable => APIObject is ARDB.Category category ?
+      !category.IsReadOnly && (Document?.IsLinked == false) : default(bool?);
     #endregion
 
     #region Properties

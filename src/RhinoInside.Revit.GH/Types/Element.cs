@@ -459,8 +459,8 @@ namespace RhinoInside.Revit.GH.Types
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
     #region Version
-    public override bool? IsReadOnly => !IsValid ?
-      default(bool?) : Id.IsBuiltInId() || (Document?.IsReadOnly == true);
+    public override bool? IsEditable => IsValid ?
+      !Id.IsBuiltInId() && (Document?.IsLinked == false) : default(bool?);
 
     public (Guid? Created, Guid? Updated) Version
     {

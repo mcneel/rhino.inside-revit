@@ -210,7 +210,7 @@ namespace RhinoInside.Revit.GH.Types
     public virtual BoundingBox ClippingBox => BoundingBox;
 
     #region Version
-    public override bool? IsReadOnly => Value?.IsReadOnly;
+    public override bool? IsEditable => Value?.IsReadOnly;
     #endregion
   }
 

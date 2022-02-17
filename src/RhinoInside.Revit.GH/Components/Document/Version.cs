@@ -32,8 +32,8 @@ namespace RhinoInside.Revit.GH.Components.Document
     static readonly ParamDefinition[] outputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_Boolean>("Modifiable", "M", "Identifies if the document is read-only or can possibly be modified", relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Param_Boolean>("Modified", "MD", "Identifies if the document has been modified since it was opened", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Editable", "ED", "Identifies if the document is read-only or can possibly be modified", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Modified", "M", "Identifies if the document has been modified since it was opened", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Guid>("Version", "V", "Document episode when it was last saved", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Integer>("Number Of Saves", "N", "The number of times the document has been saved", relevance: ParamRelevance.Primary),
     };
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components.Document
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       else Params.TrySetData(DA, "Document", () => doc);
 
-      Params.TrySetData(DA, "Modifiable", () => doc.IsReadOnly == false);
+      Params.TrySetData(DA, "Editable", () => doc.IsEditable);
       Params.TrySetData(DA, "Modified", () => doc.IsModified);
 
       var version = doc.Version;

@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(new Parameters.Element(), "Element", "E", string.Empty, GH_ParamAccess.item);
-      manager.AddParameter(new Param_Boolean(), "Modifiable", "M", "Identifies if the element is read-only or can possibly be modified", GH_ParamAccess.item);
+      manager.AddParameter(new Param_Boolean(), "Editable", "ED", "Identifies if the element is read-only or can possibly be modified", GH_ParamAccess.item);
       manager.AddParameter(new Param_Guid(), "Created", "C", "Document episode when Element was created", GH_ParamAccess.item);
       manager.AddParameter(new Param_Guid(), "Updated", "U", "Document episode when Element was updated last time", GH_ParamAccess.item);
     }
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
       else DA.SetData("Element", element);
 
-      DA.SetData("Modifiable", !element.IsReadOnly);
+      DA.SetData("Editable", element.IsEditable);
 
       var (created, updated) = element.Version;
       DA.SetData("Created", created);

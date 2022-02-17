@@ -519,7 +519,8 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Version
     public bool? IsModified => Value?.IsModified;
-    public bool? IsReadOnly => Value?.IsReadOnly;
+    public bool? IsEditable => Value is ARDB.Document document ?
+      document.IsLinked : default(bool?);
 
     public (Guid VersionGUID, int NumberOfSaves)? Version
     {
