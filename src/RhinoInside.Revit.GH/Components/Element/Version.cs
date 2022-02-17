@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       manager.AddParameter(new Parameters.Element(), "Element", "E", string.Empty, GH_ParamAccess.item);
       manager.AddParameter(new Param_Boolean(), "Modifiable", "M", "Identifies if the element is read-only or can possibly be modified", GH_ParamAccess.item);
       manager.AddParameter(new Param_Guid(), "Created", "C", "Document episode when Element was created", GH_ParamAccess.item);
-      manager.AddParameter(new Param_Guid(), "Updated", "M", "Document episode when Element was updated last time", GH_ParamAccess.item);
+      manager.AddParameter(new Param_Guid(), "Updated", "U", "Document episode when Element was updated last time", GH_ParamAccess.item);
     }
 
 #if !REVIT_2021
