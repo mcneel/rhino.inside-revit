@@ -1,6 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.External.DB.Extensions;
 using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
