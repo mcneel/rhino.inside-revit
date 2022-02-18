@@ -81,15 +81,6 @@ namespace RhinoInside.Revit.GH.Components.Materials
       return outputs.ToArray();
     }
 
-    protected static ARDB.PropertySetElement FindPropertySetElement(ARDB.Document doc, string name)
-    {
-      using (var collector = new ARDB.FilteredElementCollector(doc).
-             OfClass(typeof(ARDB.PropertySetElement)).
-             WhereParameterEqualsTo(ARDB.BuiltInParameter.PROPERTY_SET_NAME, name))
-      {
-        return collector.FirstElement() as ARDB.PropertySetElement;
-      }
-    }
 
     // determines matching assets based on any builtin properties
     // that are marked exclusive

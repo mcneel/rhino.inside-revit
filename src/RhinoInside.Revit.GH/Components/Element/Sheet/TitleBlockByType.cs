@@ -148,7 +148,7 @@ namespace RhinoInside.Revit.GH.Components.TitleBlocks
         try
         {
           titleBlock.Pinned = false;
-          titleBlock.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
+          titleBlock.SetLocation(newOrigin, newBasisX, newBasisY);
         }
         finally { titleBlock.Pinned = pinned; }
       }
