@@ -5,19 +5,18 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.5 RC3" version="v1.5.8082.32720" pre_release=true time="16/02/2022" %}
+{% include ltr/release-header.html title="v1.5 RC3" version="v1.5.8082.16096" pre_release=true time="16/02/2022" %}
 
-- 'Active Design Option' now has "Open Design Options…" context menu option.
-- Added 'Release Elements' component.
-- Added 'Error Mode' context menu.
-- Now all named elements creation components use preexisting elements when working in error-mode 'Continue'.
+- {% include ltr/comp.html uuid='b6349dda-' %} now has "Open Design Options…" context menu option.
+- Added {% include ltr/comp.html uuid='8621421d-' %} component.
+- Added *Error Mode* context menu: Now all named elements creation components use preexisting elements when working in error-mode 'Continue'.
 
-- Fix on 'Add Beam', now it checks if family is "Structural Framing" before enabling-disabling joins.
-- Fixed 'Duplicate Element' component when managing unnamed elements.
-- Fixed a bug on selection 'Value Set' when there are no elements on the list.
+- Fix on {% include ltr/comp.html uuid='26411aa6-' %}, now it checks if family is *Structural Framing* before enabling-disabling joins.
+- Fix on the {% include ltr/comp.html uuid='26411aa6-' %} component when working in tracking-mode 'Reuse'.
+- Fixed {% include ltr/comp.html uuid='f4c12aa0-' %} component when managing unnamed elements.
+- Fixed a bug on selection *Value Set* when there are no elements on the list.
 - Fixed a bug when user Undo a grasshopper object creation operation on components that track elements.
-- Fixed a problem when Revit is working in "US Survey Feet" units.
-- Fix on the 'Add Beam' component when working in tracking-mode 'Reuse'.
+- Fixed a problem when Revit is working in *US Survey Feet* units.
 
 {% include ltr/release-header.html title="v1.5 RC2" version="v1.5.8067.24664" pre_release=true time="01/02/2022" %}
 

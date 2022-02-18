@@ -648,6 +648,18 @@
     "uuid": "2dc4b866-54db-4ce6-94c0-c51b33d35b49"
   }, 
   {
+    "desc": "Contains a collection of Revit view types", 
+    "iconsrc": null, 
+    "icontag": "V", 
+    "panel": "Revit Primitives", 
+    "since": "1.5", 
+    "tab": "Params", 
+    "title": "View Type", 
+    "typename": "ViewFamilyType", 
+    "until": null, 
+    "uuid": "972b6fbe-b3e4-4576-b86d-d2ba380a4757"
+  }, 
+  {
     "desc": "Contains a collection of Revit sheet view elements", 
     "iconsrc": "/static/images/GH/ViewSheet.png", 
     "icontag": null, 
@@ -675,7 +687,7 @@
     "desc": "Provides a picker for built-in categories", 
     "iconsrc": "/static/images/GH/BuiltInCategories.png", 
     "icontag": null, 
-    "panel": "Input", 
+    "panel": "Category", 
     "since": null, 
     "tab": "Revit", 
     "title": "Built-In Categories", 
@@ -867,7 +879,7 @@
     "desc": "Provides a picker for Revit element classes", 
     "iconsrc": "/static/images/GH/ElementClasses.png", 
     "icontag": null, 
-    "panel": "Input", 
+    "panel": "Filter", 
     "since": null, 
     "tab": "Revit", 
     "title": "Element Classes", 
@@ -1114,6 +1126,18 @@
     "typename": "RoofByOutline", 
     "until": null, 
     "uuid": "198e152b-6636-4d90-9443-ae77b8b1475e"
+  }, 
+  {
+    "desc": "Release elements on Revit document", 
+    "iconsrc": null, 
+    "icontag": "E", 
+    "panel": "Element", 
+    "since": "1.5", 
+    "tab": "Revit", 
+    "title": "Release Element", 
+    "typename": "ElementRelease", 
+    "until": null, 
+    "uuid": "8621421d-b642-4c26-a88b-1760b9d97c91"
   }, 
   {
     "desc": "Given its Definition, it adds a new Parameter into the Revit document", 
@@ -2922,7 +2946,7 @@
     "panel": "Assembly", 
     "since": "1.2", 
     "tab": "Revit", 
-    "title": "Add Assembly (Location)", 
+    "title": "Add Assembly", 
     "typename": "AssemblyByLocation", 
     "until": null, 
     "uuid": "26feb2e9-6476-4ba7-a553-1d0300674d1d"
@@ -2934,7 +2958,7 @@
     "panel": "Assembly", 
     "since": "1.2", 
     "tab": "Revit", 
-    "title": "Add Assembly", 
+    "title": "Assemble Elements", 
     "typename": "AssemblyByMembers", 
     "until": null, 
     "uuid": "6915b697-f10d-4bc8-8faa-f25438f393a8"
@@ -3292,7 +3316,7 @@
     "iconsrc": "/static/images/GH/View3DByPlane.png", 
     "icontag": null, 
     "panel": "View", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Add 3D View", 
     "typename": "View3DByPlane", 
@@ -3528,13 +3552,13 @@
     "uuid": "bc64525a-10b6-46db-a134-cf803738b1a0"
   }, 
   {
-    "desc": "Given a collection of elements, it adds a GroupType to the active Revit document", 
+    "desc": "Given a collection of elements, it adds a Group type to the active Revit document", 
     "iconsrc": "/static/images/GH/GroupTypeCreate.png", 
     "icontag": null, 
     "panel": "Model", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
-    "title": "Create GroupType", 
+    "title": "Create Group Type", 
     "typename": "GroupTypeCreate", 
     "until": null, 
     "uuid": "39e42448-1c1c-4140-bc37-7399abf82117"
@@ -3624,11 +3648,11 @@
     "uuid": "d67b341f-46e4-4532-980e-42ce035470cf"
   }, 
   {
-    "desc": "Given a Name, it duplicates an ElementType into the active Revit document", 
+    "desc": "Create a Revit type by name", 
     "iconsrc": "/static/images/GH/ElementTypeDuplicate.png", 
     "icontag": null, 
     "panel": "Type", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Duplicate Type", 
     "typename": "ElementTypeDuplicate", 
