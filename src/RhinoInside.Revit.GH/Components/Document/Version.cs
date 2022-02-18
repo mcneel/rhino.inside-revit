@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Document
     (
       name: "Document Version",
       nickname: "Version",
-      description: string.Empty,
+      description: "Document version information",
       category: "Revit",
       subCategory: "Document"
     )
@@ -32,10 +32,10 @@ namespace RhinoInside.Revit.GH.Components.Document
     static readonly ParamDefinition[] outputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_Boolean>("Editable", "ED", "Identifies if the document is read-only or can possibly be modified", relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Param_Boolean>("Modified", "M", "Identifies if the document has been modified since it was opened", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Editable", "EB", "Identifies if the document is read-only or can possibly be modified", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Edited", "E", "Identifies if the document has been modified since it was opened", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Guid>("Version", "V", "Document episode when it was last saved", relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Param_Integer>("Number Of Saves", "N", "The number of times the document has been saved", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Integer>("Saves", "S", "The number of times the document has been saved", relevance: ParamRelevance.Primary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -44,13 +44,13 @@ namespace RhinoInside.Revit.GH.Components.Document
       else Params.TrySetData(DA, "Document", () => doc);
 
       Params.TrySetData(DA, "Editable", () => doc.IsEditable);
-      Params.TrySetData(DA, "Modified", () => doc.IsModified);
+      Params.TrySetData(DA, "Edited", () => doc.IsModified);
 
       var version = doc.Version;
       if (version.HasValue)
       {
         Params.TrySetData(DA, "Version", () => version.Value.VersionGUID);
-        Params.TrySetData(DA, "Number Of Saves", () => version.Value.NumberOfSaves);
+        Params.TrySetData(DA, "Saves", () => version.Value.NumberOfSaves);
       }
     }
   }

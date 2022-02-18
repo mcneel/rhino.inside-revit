@@ -604,6 +604,7 @@ namespace RhinoInside.Revit.GH.Types
 
 
   [
+    ComponentVersion(introduced: "1.2"),
     ComponentGuid("CE75343A-FC1B-4246-B7AD-A0FC0DE050A4"),
     Name("Checkout Status"),
     Description("Represents checkout status"),
@@ -617,6 +618,26 @@ namespace RhinoInside.Revit.GH.Types
         { (int) ARDB.CheckoutStatus.OwnedByCurrentUser, "Owned by current user" },
         { (int) ARDB.CheckoutStatus.OwnedByOtherUser,   "Owned by other user" },
         { (int) ARDB.CheckoutStatus.NotOwned,           "Not Owned" },
+      }
+    );
+  }
+
+  [
+    ComponentVersion(introduced: "1.6"),
+    ComponentGuid("DC6E20DD-37C9-4E17-A415-298614CFB00E"),
+    Name("Model Updates Status"),
+    Description("Represents model update status"),
+  ]
+  public class ModelUpdatesStatus : GH_Enum<ARDB.ModelUpdatesStatus>
+  {
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) ARDB.ModelUpdatesStatus.CurrentWithCentral, "Current With Central" },
+        { (int) ARDB.ModelUpdatesStatus.NotYetInCentral,    "Not Yet In Central" },
+        { (int) ARDB.ModelUpdatesStatus.DeletedInCentral,   "Deleted In Central" },
+        { (int) ARDB.ModelUpdatesStatus.UpdatedInCentral,   "Updated In Central" },
       }
     );
   }

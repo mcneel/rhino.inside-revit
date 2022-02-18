@@ -1,38 +1,97 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
   [ComponentVersion(introduced: "1.6")]
-  public class ElementVersion : Component
+  public class ElementVersion : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("3848C899-CC07-4397-855D-961E907C09D9");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     protected override string IconTag => string.Empty;
 
-
-    public ElementVersion()
-    : base("Element Version", "Version", string.Empty, "Revit", "Element")
+    public ElementVersion() : base
+    (
+      name: "Element Version",
+      nickname: "Version",
+      description: "Element version information",
+      category: "Revit",
+      subCategory: "Element"
+    )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", string.Empty, GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Element to access version.",
+        }
+      ),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Element(), "Element", "E", string.Empty, GH_ParamAccess.item);
-      manager.AddParameter(new Param_Boolean(), "Editable", "ED", "Identifies if the element is read-only or can possibly be modified", GH_ParamAccess.item);
-      manager.AddParameter(new Param_Guid(), "Created", "C", "Document episode when Element was created", GH_ParamAccess.item);
-      manager.AddParameter(new Param_Guid(), "Updated", "U", "Document episode when Element was updated last time", GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Element", NickName = "E",
+          Description = "Element to access version."
+        }, ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean()
+        {
+          Name = "Editable", NickName = "EB",
+          Description = "Identifies if the element is read-only or can possibly be modified"
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Guid()
+        {
+          Name = "Created", NickName = "C",
+          Description = "Document episode when Element was created"
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Guid()
+        {
+          Name = "Version", NickName = "V",
+          Description = "Document episode when Element was edited last time."
+        },
+#if REVIT_2021
+        ParamRelevance.Primary
+#else
+        ParamRelevance.Occasional
+#endif
+      ),
+      new ParamDefinition
+      (
+        new Param_String()
+        {
+          Name = "Edited By", NickName = "EB",
+          Description = "Identifies the user last edited the element."
+        }, ParamRelevance.Secondary
+      ),
+    };
 
 #if !REVIT_2021
     protected override void BeforeSolveInstance()
     {
-      AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "'Updated' output is only supported on Revit 2021 or above.");
+      if (Params.IndexOfOutputParam("Version") >= 0)
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "'Version' episode information is only available on Revit 2021 or above.");
+
       base.BeforeSolveInstance();
     }
 #endif
@@ -40,13 +99,23 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
-      else DA.SetData("Element", element);
+      else Params.TrySetData(DA, "Element", () => element);
 
-      DA.SetData("Editable", element.IsEditable);
+      Params.TrySetData(DA, "Editable", () => element.IsEditable);
 
-      var (created, updated) = element.Version;
-      DA.SetData("Created", created);
-      DA.SetData("Updated", updated);
+      var (created, version) = element.Version;
+      Params.TrySetData(DA, "Created", () => created);
+      Params.TrySetData(DA, "Version", () => version);
+
+      Params.TrySetData
+      (
+        DA, "Edited By",
+        () =>
+        {
+          var editedBy = element.Value.GetParameter(ERDB.Schemas.ParameterId.EditedBy)?.AsString();
+          return string.IsNullOrEmpty(editedBy) ? null : editedBy;
+        }
+      );
     }
   }
 }
