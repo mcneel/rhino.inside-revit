@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -15,6 +16,25 @@ namespace RhinoInside.Revit.GH.Types
     public AssemblyInstance(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public AssemblyInstance(ARDB.AssemblyInstance assembly) : base(assembly) { }
 
+    #region Location
+    public override BoundingBox BoundingBox
+    {
+      get
+      {
+        if (Value is ARDB.AssemblyInstance instance)
+        {
+          var bbox = BoundingBox.Empty;
+
+          foreach (var element in instance.GetMemberIds().Select(instance.Document.GetElement))
+            bbox.Union(element.get_BoundingBox(default).ToBoundingBox());
+
+          return bbox;
+        }
+
+        return NaN.BoundingBox;
+      }
+    }
+
     public override Plane Location
     {
       get
@@ -27,16 +47,7 @@ namespace RhinoInside.Revit.GH.Types
 
         return NaN.Plane;
       }
-      set
-      {
-        if (Value is ARDB.AssemblyInstance instance && value.IsValid && value != Location)
-        {
-          using(var transform = Transform.PlaneToPlane(Plane.WorldXY, value).ToTransform())
-            instance.SetTransform(transform);
-
-          InvalidateGraphics();
-        }
-      }
     }
+    #endregion
   }
 }
