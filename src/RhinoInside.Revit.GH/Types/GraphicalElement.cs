@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
@@ -142,7 +143,16 @@ namespace RhinoInside.Revit.GH.Types
     /// </summary>
     public virtual BoundingBox ClippingBox => BoundingBox;
 
-    public virtual void DrawViewportWires(GH_PreviewWireArgs args) { }
+    public virtual void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      var bbox = ClippingBox;
+      if (!bbox.IsValid)
+        return;
+
+      foreach (var edge in bbox.GetEdges() ?? Enumerable.Empty<Line>())
+        args.Pipeline.DrawPatternedLine(edge.From, edge.To, args.Color, 0x00003333, args.Thickness);
+    }
+
     public virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
