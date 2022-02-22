@@ -5,6 +5,26 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.5 RC4" version="v1.5.8088.16096" pre_release=true time="22/02/2022" %}
+
+- Fixed `AssemblyInstance.Location.set`. 
+- Implemented `AssemblyInstance.BoundingBox`
+- Now {% include ltr/comp.html uuid='ef607c2a-' %} displays the *BoundingBox* by default.
+- Fixed `Types.BasePoint.ClippingBox` when the element is not available.
+
+{% include ltr/release-header.html title="v1.5 RC3" version="v1.5.8082.16096" pre_release=true time="16/02/2022" %}
+
+- {% include ltr/comp.html uuid='b6349dda-' %} now has "Open Design Options…" context menu option.
+- Added {% include ltr/comp.html uuid='8621421d-' %} component.
+- Added *Error Mode* context menu: Now all named elements creation components use preexisting elements when working in error-mode 'Continue'.
+
+- Fix on {% include ltr/comp.html uuid='26411aa6-' %}, now it checks if family is *Structural Framing* before enabling-disabling joins.
+- Fix on the {% include ltr/comp.html uuid='26411aa6-' %} component when working in tracking-mode 'Reuse'.
+- Fixed {% include ltr/comp.html uuid='f4c12aa0-' %} component when managing unnamed elements.
+- Fixed a bug on selection *Value Set* when there are no elements on the list.
+- Fixed a bug when user Undo a grasshopper object creation operation on components that track elements.
+- Fixed a problem when Revit is working in *US Survey Feet* units.
+
 {% include ltr/release-header.html title="v1.5 RC2" version="v1.5.8067.24664" pre_release=true time="01/02/2022" %}
 
 - Fixed unit conversions on {% include ltr/comp.html uuid='8a162ee6-' %} component
@@ -198,3 +218,4 @@ group: Deployment & Configs
 {% include ltr/release-header.html title="v1.0 Stable / v1.1 RC1" version="1.0.7894.17525 / v1.1.7894.19956" time="08/12/2021" %}
 
 Finally!! 🎉 See [announcement post here](https://discourse.mcneel.com/t/rhino-inside-revit-version-1-0-released/128738?u=eirannejad)
+****
