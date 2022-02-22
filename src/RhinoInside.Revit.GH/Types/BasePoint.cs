@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.GH.Types
           );
         }
 
-        return NaN.BoundingBox;
+        return BoundingBox.Empty;
       }
     }
 
