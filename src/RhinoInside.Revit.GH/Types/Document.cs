@@ -518,6 +518,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Version
+    public Guid? ExportID => Value?.GetExportID();
+
     public bool? IsModified => Value?.IsModified;
     public bool? IsEditable => Value is ARDB.Document document ?
       !document.IsLinked : default(bool?);
