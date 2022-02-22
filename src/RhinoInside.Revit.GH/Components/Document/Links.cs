@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
   public class DocumentLinks : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("EBCCFDD8-9F3B-44F4-A209-72D06C8082A5");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "L";
     protected override ARDB.ElementFilter ElementFilter => External.DB.CompoundElementFilter.Union
     (
@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     public DocumentLinks() : base
     (
-      name: "Query Document Links",
+      name: "Query Revit Links",
       nickname: "Links",
       description: "Gets Revit linked models into given document",
       category: "Revit",
