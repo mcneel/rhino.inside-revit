@@ -59,6 +59,7 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
+    <Compile Include="Components\Element\Opening\AddShaftOpening.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyByLocation.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyByMembers.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyMembers.cs" />
