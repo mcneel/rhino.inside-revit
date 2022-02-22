@@ -167,6 +167,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.ReferencePlane),          (element)=> new ReferencePlane        (element as ARDB.ReferencePlane)    },
       { typeof(ARDB.SpatialElement),          (element)=> new SpatialElement        (element as ARDB.SpatialElement)    },
       { typeof(ARDB.Group),                   (element)=> new Group                 (element as ARDB.Group)             },
+      { typeof(ARDB.Opening),                 (element)=> new Opening               (element as ARDB.Opening)           },
       { typeof(ARDB.HostObject),              (element)=> new HostObject            (element as ARDB.HostObject)        },
       { typeof(ARDB.MEPCurve),                (element)=> new MEPCurve              (element as ARDB.MEPCurve)          },
       { typeof(ARDB.CurtainSystem),           (element)=> new CurtainSystem         (element as ARDB.CurtainSystem)     },
