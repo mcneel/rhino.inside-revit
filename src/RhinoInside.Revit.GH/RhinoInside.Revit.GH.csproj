@@ -208,7 +208,6 @@
     <Compile Include="Components\ParameterElement\QueryParameters.cs" />
     <Compile Include="Components\ParameterElement\SharedParameters.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="Parameters\Input\Openings_ValueList.cs" />
     <Compile Include="Optional.cs" />
     <Compile Include="Parameters\AssemblyInstance.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
