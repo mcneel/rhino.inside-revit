@@ -5,11 +5,11 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.5 RC4" version="v1.5.8088.16096" pre_release=true time="22/02/2022" %}
+{% include ltr/release-header.html title="v1.5 RC4" version="v1.5.8088.12286" pre_release=true time="22/02/2022" %}
 
 - Fixed `AssemblyInstance.Location.set`. 
 - Implemented `AssemblyInstance.BoundingBox`
-- Now `GraphicalElement` displays the `BoundingBox` by default.
+- Now {% include ltr/comp.html uuid='ef607c2a-' %} displays the *BoundingBox* by default.
 - Fixed `Types.BasePoint.ClippingBox` when the element is not available.
 
 {% include ltr/release-header.html title="v1.5 RC3" version="v1.5.8082.16096" pre_release=true time="16/02/2022" %}
