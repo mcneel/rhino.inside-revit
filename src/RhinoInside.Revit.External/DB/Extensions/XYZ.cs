@@ -274,4 +274,36 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return principal;
     }
   }
+
+  public static class TransformExtension
+  {
+    public static void SetOrientation
+    (
+      this Transform transform,
+      XYZ origin0, XYZ basisX0, XYZ basisY0, XYZ basisZ0,
+      XYZ origin1, XYZ basisX1, XYZ basisY1, XYZ basisZ1
+    )
+    {
+      var t0 = Transform.CreateTranslation(-origin0);
+
+      var f0 = Transform.Identity;
+      f0.BasisX = new XYZ(basisX0.X, basisY0.X, basisZ0.X);
+      f0.BasisY = new XYZ(basisX0.Y, basisY0.Y, basisZ0.Y);
+      f0.BasisZ = new XYZ(basisX0.Z, basisY0.Z, basisZ0.Z);
+
+      var f1 = Transform.Identity;
+      f0.BasisX = basisX1;
+      f0.BasisY = basisY1;
+      f0.BasisZ = basisZ1;
+
+      var t1 = Transform.CreateTranslation( origin1);
+
+      var planeToPlane = t1 *f1 * f0 * t0;
+
+      transform.Origin = planeToPlane.Origin;
+      transform.BasisX = planeToPlane.BasisX;
+      transform.BasisY = planeToPlane.BasisY;
+      transform.BasisZ = planeToPlane.BasisZ;
+    }
+  }
 }

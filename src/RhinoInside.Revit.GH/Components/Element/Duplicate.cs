@@ -1,19 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
   using ElementTracking;
   using External.DB.Extensions;
+  using Convert.Geometry;
 
   public class ElementDuplicate : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("F4C12AA0-A87B-4209-BD7B-4A189E4F4F0E");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
-    protected override string IconTag => "D";
+    protected override string IconTag => string.Empty;
 
     public ElementDuplicate() : base
     (
@@ -39,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           Description = "Destination document",
           Optional = true
         },
-        ParamRelevance.Primary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -191,6 +194,153 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       public ARDB.DuplicateTypeAction OnDuplicateTypeNamesFound(ARDB.DuplicateTypeNamesHandlerArgs args) =>
         ARDB.DuplicateTypeAction.UseDestinationTypes;
+    }
+  }
+
+  [ComponentVersion(introduced: "1.6")]
+  public class ElementClone : ElementTrackerComponent
+  {
+    public override Guid ComponentGuid => new Guid("0EA8D61A-5FED-471D-A69D-B695DFBA5581");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override string IconTag => string.Empty;
+
+    public ElementClone() : base
+    (
+      name: "Clone Element",
+      nickname: "Clone",
+      description: "Clone document element on several locations",
+      category: "Revit",
+      subCategory: "Element"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.Document()
+        {
+          Name = "Document",
+          NickName = "DOC",
+          Description = "Destination document",
+          Optional = true
+        },
+        ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Element to duplicate",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_Plane
+        {
+          Name = "Location",
+          NickName = "L",
+          Description = "Location to place the new element. Point and plane are accepted",
+          Access = GH_ParamAccess.list,
+        }
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = _Clones_,
+          NickName = _Clones_.Substring(0, 1),
+          Access = GH_ParamAccess.list,
+        }
+      ),
+    };
+
+    const string _Clones_ = "Clones";
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+      ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+
+      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
+      if (!Params.GetDataList(DA, "Location", out IList<Plane?> locations) || locations is null) return;
+
+      bool first = true;
+      var clones = new List<Types.GraphicalElement>(locations.Count);
+      foreach (var location in locations)
+      {
+        var clone = default(Types.GraphicalElement);
+
+        if (first && element.Document.IsEquivalent(doc.Value))
+        {
+          StartTransaction(element.Document);
+          clone = element;
+          first = false;
+        }
+        else
+        {
+          clone = Types.GraphicalElement.FromElement
+          (
+            ReconstructElement<ARDB.Element>
+            (
+              doc.Value, _Clones_,
+              x =>
+              {
+                if (location.HasValue && location.Value.IsValid)
+                {
+                  if
+                  (
+                    x?.GetType()   == element.Value.GetType() &&
+                    x.Category.Id  == element.Category.Id &&
+                    x.ViewSpecific == element.ViewSpecific &&
+                    x.OwnerViewId  == element.Value.OwnerViewId
+                  )
+                  {
+                    if (x.GetTypeId() != element.Type.Id)
+                      x = x.Document.GetElement(x.ChangeTypeId(element.Type.Id)) ?? x;
+
+                    x.CopyParametersFrom(element.Value, ExcludeUniqueProperties);
+                    return x;
+                  }
+
+                  return element.Value.CloneElement(doc.Value);
+                }
+
+                return default;
+              }
+            )
+          ) as Types.GraphicalElement;
+        }
+
+        if (location.HasValue && location.Value.IsValid)
+        {
+          if (clone is object && !clone.Location.EpsilonEquals(location.Value, GeometryObjectTolerance.Model.VertexTolerance))
+          {
+            using ((clone as Types.InstanceElement)?.DisableJoinsScope())
+            {
+              var pinned = clone.Pinned;
+              clone.Pinned = false;
+              clone.Location = location.Value;
+              clone.Pinned = pinned;
+            }
+          }
+        }
+
+        clones.Add(clone);
+      }
+      DA.SetDataList(_Clones_, clones);
     }
   }
 }
