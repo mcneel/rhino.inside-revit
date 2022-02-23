@@ -247,6 +247,16 @@ namespace RhinoInside.Revit.GH.Components.Elements
           Access = GH_ParamAccess.list,
         }
       ),
+      new ParamDefinition
+      (
+        new Parameters.View()
+        {
+          Name = "View",
+          NickName = "V",
+          Description = "Target View",
+        },
+        ParamRelevance.Secondary
+      ),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -276,53 +286,67 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
       if (!Params.GetDataList(DA, "Location", out IList<Plane?> locations) || locations is null) return;
+      if (!Params.TryGetData(DA, "View", out Types.View view)) return;
 
-      bool first = true;
       var clones = new List<Types.GraphicalElement>(locations.Count);
       foreach (var location in locations)
       {
-        var clone = default(Types.GraphicalElement);
-
-        if (first && element.Document.IsEquivalent(doc.Value))
-        {
-          StartTransaction(element.Document);
-          clone = element;
-          first = false;
-        }
-        else
-        {
-          clone = Types.GraphicalElement.FromElement
+        var clone = Types.GraphicalElement.FromElement
+        (
+          ReconstructElement<ARDB.Element>
           (
-            ReconstructElement<ARDB.Element>
-            (
-              doc.Value, _Clones_,
-              x =>
+            doc.Value, _Clones_,
+            x =>
+            {
+              if (location.HasValue && location.Value.IsValid)
               {
-                if (location.HasValue && location.Value.IsValid)
+                if
+                (
+                  x?.GetType()   == element.Value.GetType() &&
+                  x.Category.Id  == element.Category.Id &&
+                  x.ViewSpecific == element.ViewSpecific &&
+                  x.OwnerViewId == (view?.Id ?? element.Value.OwnerViewId)
+                )
                 {
-                  if
-                  (
-                    x?.GetType()   == element.Value.GetType() &&
-                    x.Category.Id  == element.Category.Id &&
-                    x.ViewSpecific == element.ViewSpecific &&
-                    x.OwnerViewId  == element.Value.OwnerViewId
-                  )
-                  {
-                    if (x.GetTypeId() != element.Type.Id)
-                      x = x.Document.GetElement(x.ChangeTypeId(element.Type.Id)) ?? x;
+                  if (x.GetTypeId() != element.Type.Id)
+                    x = x.Document.GetElement(x.ChangeTypeId(element.Type.Id)) ?? x;
 
-                    x.CopyParametersFrom(element.Value, ExcludeUniqueProperties);
-                    return x;
-                  }
-
-                  return element.Value.CloneElement(doc.Value);
+                  x.CopyParametersFrom(element.Value, ExcludeUniqueProperties);
+                  return x;
                 }
 
-                return default;
+                if (view?.IsValid == true && element.ViewSpecific != true)
+                {
+                  switch (FailureProcessingMode)
+                  {
+                    case ARDB.FailureProcessingResult.Continue:
+                      AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Cannot clone the specified element into '{view.Nomen}' view. {{{element.Id}}}");
+                      return null;
+                    case ARDB.FailureProcessingResult.ProceedWithCommit:
+                      AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Cannot paste the specified element into '{view.Nomen}' view. {{{element.Id}}}");
+                      break;
+                    case ARDB.FailureProcessingResult.WaitForUserInput:
+                      using (var failure = new ARDB.FailureMessage(ARDB.BuiltInFailures.CopyPasteFailures.CannotPasteInView))
+                      {
+                        failure.SetFailingElement(view.Id);
+                        failure.SetAdditionalElement(element.Id);
+                        doc.Value.PostFailure(failure);
+                      }
+                      return null;
+
+                    default: throw new Exceptions.RuntimeException();
+                  }
+                }
+
+                return view is object && element.ViewSpecific == true ?
+                  element.Value.CloneElement(view.Value) :
+                  element.Value.CloneElement(doc.Value);
               }
-            )
-          ) as Types.GraphicalElement;
-        }
+
+              return default;
+            }
+          )
+        ) as Types.GraphicalElement;
 
         if (location.HasValue && location.Value.IsValid)
         {
