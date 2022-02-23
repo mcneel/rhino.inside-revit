@@ -200,7 +200,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
     (
-      new string[] { "Curve" }
+      new string[] { "Curve", "Surface" }
     );
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
