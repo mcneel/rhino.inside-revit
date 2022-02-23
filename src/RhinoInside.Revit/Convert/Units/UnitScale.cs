@@ -434,9 +434,9 @@ namespace RhinoInside.Revit.Convert.Units
       if (system == UnitSystem.CustomUnits)
         doc.SetCustomUnitSystem(space == ActiveSpace.ModelSpace, name, meters, scale);
       else if (space == ActiveSpace.ModelSpace)
-        doc.ModelUnitSystem = system;
+        doc.AdjustModelUnitSystem(system, scale);
       else if (space == ActiveSpace.PageSpace)
-        doc.PageUnitSystem = system;
+        doc.AdjustPageUnitSystem(system, scale);
     }
 
     public static UnitScale GetActiveScale (RhinoDoc doc) => GetUnitScale(doc, ActiveSpace.None);
