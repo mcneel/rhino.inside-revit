@@ -422,7 +422,7 @@ namespace RhinoInside.Revit.Convert.Units
         new UnitScale(system, Ratio.Rationalize(meters), name) :
         new UnitScale(system);
     }
-    internal static void SetUnitSystem(RhinoDoc doc, ActiveSpace space, UnitScale value, bool scale = true)
+    internal static void SetUnitScale(RhinoDoc doc, ActiveSpace space, UnitScale value, bool scale = true)
     {
       if (doc is null)
         throw new ArgumentNullException(nameof(doc));
@@ -443,12 +443,12 @@ namespace RhinoInside.Revit.Convert.Units
     public static UnitScale GetModelScale  (RhinoDoc doc) => GetUnitScale(doc, ActiveSpace.ModelSpace);
     public static UnitScale GetPageScale   (RhinoDoc doc) => GetUnitScale(doc, ActiveSpace.PageSpace);
 
-    public static void SetActiveUnitSystem(RhinoDoc doc, UnitScale value, bool scale /*= true*/) =>
-      SetUnitSystem(doc, ActiveSpace.None, value, scale);
-    public static void SetModelUnitSystem(RhinoDoc doc, UnitScale value, bool scale /*= true*/) =>
-      SetUnitSystem(doc, ActiveSpace.ModelSpace, value, scale);
-    public static void SetPageUnitSystem(RhinoDoc doc, UnitScale value, bool scale /*= true*/) =>
-      SetUnitSystem(doc, ActiveSpace.PageSpace, value, scale);
+    public static void SetActiveUnitScale(RhinoDoc doc, UnitScale value, bool scale /*= true*/) =>
+      SetUnitScale(doc, ActiveSpace.None, value, scale);
+    public static void SetModelUnitScale(RhinoDoc doc, UnitScale value, bool scale /*= true*/) =>
+      SetUnitScale(doc, ActiveSpace.ModelSpace, value, scale);
+    public static void SetPageUnitScale(RhinoDoc doc, UnitScale value, bool scale /*= true*/) =>
+      SetUnitScale(doc, ActiveSpace.PageSpace, value, scale);
     #endregion
   }
 }
