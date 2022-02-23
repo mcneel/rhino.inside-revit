@@ -513,7 +513,7 @@ namespace RhinoInside.Revit
                   doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
                   doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, RevitModelUnitScale);
-                  UnitScale.SetModelUnitSystem(doc, RevitModelUnitScale, scale: true);
+                  UnitScale.SetModelUnitScale(doc, RevitModelUnitScale, scale: true);
                   AdjustViewConstructionPlanes(doc);
                   break;
 
@@ -521,7 +521,7 @@ namespace RhinoInside.Revit
                   doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
                   doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, GH.Guest.ModelUnitScale);
-                  UnitScale.SetModelUnitSystem(doc, GH.Guest.ModelUnitScale, scale: true);
+                  UnitScale.SetModelUnitScale(doc, GH.Guest.ModelUnitScale, scale: true);
                   AdjustViewConstructionPlanes(doc);
                   break;
 
@@ -559,7 +559,7 @@ namespace RhinoInside.Revit
         {
           var units = revitDoc.GetUnits();
           var modelUnitScale = units.ToUnitScale(out var distanceDisplayPrecision);
-          UnitScale.SetModelUnitSystem(rhinoDoc, modelUnitScale, scale: false);
+          UnitScale.SetModelUnitScale(rhinoDoc, modelUnitScale, scale: false);
           rhinoDoc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
           rhinoDoc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
           rhinoDoc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, UnitScale.GetModelScale(rhinoDoc));
