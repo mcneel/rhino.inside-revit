@@ -5,7 +5,7 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.5 RC4" version="v1.5.8088.16096" pre_release=true time="22/02/2022" %}
+{% include ltr/release-header.html title="v1.5 RC4" version="v1.5.8088.12286" pre_release=true time="22/02/2022" %}
 
 - Fixed `AssemblyInstance.Location.set`. 
 - Implemented `AssemblyInstance.BoundingBox`
