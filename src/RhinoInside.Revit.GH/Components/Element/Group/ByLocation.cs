@@ -43,6 +43,9 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       if (!location.IsValid)
         ThrowArgumentException(nameof(location), "Should be a valid plane.");
 
+      if (!type.Category.Id.TryGetBuiltInCategory(out var bic) || bic != ARDB.BuiltInCategory.OST_IOSModelGroups)
+        ThrowArgumentException(nameof(type), $"'{type.Name}' is not a Model Group Type.");
+
       SolveOptionalLevel(document, location.Origin, ref level, out var bbox);
 
       ChangeElementTypeId(ref group, type.Id);
