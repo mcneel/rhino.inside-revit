@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Elements",
           NickName = "E",
-          Description = "Elements to Duplicate",
+          Description = "Source elements",
           Access = GH_ParamAccess.list
         }
       ),
@@ -234,7 +234,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to duplicate",
+          Description = "Source element",
         }
       ),
       new ParamDefinition
@@ -266,8 +266,19 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.GraphicalElement()
         {
+          Name = "Element",
+          NickName = "E",
+          Description = "Source element",
+        },
+        ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
           Name = _Clones_,
           NickName = _Clones_.Substring(0, 1),
+          Description = "Cloned elements",
           Access = GH_ParamAccess.list,
         }
       ),
@@ -285,6 +296,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
 
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
+      else Params.TrySetData(DA, "Element", () => element);
+
       if (!Params.GetDataList(DA, "Location", out IList<Plane?> locations) || locations is null) return;
       if (!Params.TryGetData(DA, "View", out Types.View view)) return;
 
