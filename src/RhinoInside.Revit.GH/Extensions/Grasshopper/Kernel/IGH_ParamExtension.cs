@@ -237,7 +237,7 @@ namespace Grasshopper.Kernel
           }
         };
 
-        if ((param.Kind == GH_ParamKind.floating || param.Kind == GH_ParamKind.output))
+        if ((param.Kind == GH_ParamKind.floating || param.Kind == GH_ParamKind.output) && param.Recipients.Count == 0)
         {
           var parameters = convertible.ConvertsTo.Distinct().
           Select(x => Instances.ComponentServer.FindObjectByName(x, ignoreWhiteSpace: false, ignoreCapitalisation: false)).
