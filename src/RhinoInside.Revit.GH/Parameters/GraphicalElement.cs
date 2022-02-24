@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI methods
     protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
     (
-      new string[] { "Point", "Vector", "Plane", "Box" /*, "Transform" */}
+      new string[] { "Point", "Vector", "Plane", "Box", "Rectangle" /*, "Transform" */}
     );
 
     protected override GH_GetterResult Prompt_Singular(ref T value)
