@@ -1,19 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
   using ElementTracking;
   using External.DB.Extensions;
+  using Convert.Geometry;
 
   public class ElementDuplicate : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("F4C12AA0-A87B-4209-BD7B-4A189E4F4F0E");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
-    protected override string IconTag => "D";
+    protected override string IconTag => string.Empty;
 
     public ElementDuplicate() : base
     (
@@ -39,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           Description = "Destination document",
           Optional = true
         },
-        ParamRelevance.Primary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -47,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Elements",
           NickName = "E",
-          Description = "Elements to Duplicate",
+          Description = "Source elements",
           Access = GH_ParamAccess.list
         }
       ),
@@ -191,6 +194,190 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       public ARDB.DuplicateTypeAction OnDuplicateTypeNamesFound(ARDB.DuplicateTypeNamesHandlerArgs args) =>
         ARDB.DuplicateTypeAction.UseDestinationTypes;
+    }
+  }
+
+  [ComponentVersion(introduced: "1.6")]
+  public class ElementClone : ElementTrackerComponent
+  {
+    public override Guid ComponentGuid => new Guid("0EA8D61A-5FED-471D-A69D-B695DFBA5581");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override string IconTag => string.Empty;
+
+    public ElementClone() : base
+    (
+      name: "Clone Element",
+      nickname: "Clone",
+      description: "Clone document element on several locations",
+      category: "Revit",
+      subCategory: "Element"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.Document()
+        {
+          Name = "Document",
+          NickName = "DOC",
+          Description = "Destination document",
+          Optional = true
+        },
+        ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Source element",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_Plane
+        {
+          Name = "Location",
+          NickName = "L",
+          Description = "Location to place the new element. Point and plane are accepted",
+          Access = GH_ParamAccess.list,
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.View()
+        {
+          Name = "View",
+          NickName = "V",
+          Description = "Target View",
+        },
+        ParamRelevance.Secondary
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Source element",
+        },
+        ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = _Clones_,
+          NickName = _Clones_.Substring(0, 1),
+          Description = "Cloned elements",
+          Access = GH_ParamAccess.list,
+        }
+      ),
+    };
+
+    const string _Clones_ = "Clones";
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+      ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+
+      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
+      else Params.TrySetData(DA, "Element", () => element);
+
+      if (!Params.GetDataList(DA, "Location", out IList<Plane?> locations) || locations is null) return;
+      if (!Params.TryGetData(DA, "View", out Types.View view)) return;
+
+      var clones = new List<Types.GraphicalElement>(locations.Count);
+      foreach (var location in locations)
+      {
+        var clone = Types.GraphicalElement.FromElement
+        (
+          ReconstructElement<ARDB.Element>
+          (
+            doc.Value, _Clones_,
+            x =>
+            {
+              if (location.HasValue && location.Value.IsValid)
+              {
+                if
+                (
+                  x?.GetType()   == element.Value.GetType() &&
+                  x.Category.Id  == element.Category.Id &&
+                  x.ViewSpecific == element.ViewSpecific &&
+                  x.OwnerViewId == (view?.Id ?? element.Value.OwnerViewId)
+                )
+                {
+                  if (x.GetTypeId() != element.Type.Id)
+                    x = x.Document.GetElement(x.ChangeTypeId(element.Type.Id)) ?? x;
+
+                  x.CopyParametersFrom(element.Value, ExcludeUniqueProperties);
+                  return x;
+                }
+
+                if (view?.IsValid == true && element.ViewSpecific != true)
+                {
+                  switch (FailureProcessingMode)
+                  {
+                    case ARDB.FailureProcessingResult.Continue:
+                      AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Cannot clone the specified element into '{view.Nomen}' view. {{{element.Id}}}");
+                      return null;
+                    case ARDB.FailureProcessingResult.ProceedWithCommit:
+                      AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Cannot paste the specified element into '{view.Nomen}' view. {{{element.Id}}}");
+                      break;
+                    case ARDB.FailureProcessingResult.WaitForUserInput:
+                      using (var failure = new ARDB.FailureMessage(ARDB.BuiltInFailures.CopyPasteFailures.CannotPasteInView))
+                      {
+                        failure.SetFailingElement(view.Id);
+                        failure.SetAdditionalElement(element.Id);
+                        doc.Value.PostFailure(failure);
+                      }
+                      return null;
+
+                    default: throw new Exceptions.RuntimeException();
+                  }
+                }
+
+                return view is object && element.ViewSpecific == true ?
+                  element.Value.CloneElement(view.Value) :
+                  element.Value.CloneElement(doc.Value);
+              }
+
+              return default;
+            }
+          )
+        ) as Types.GraphicalElement;
+
+        if (location.HasValue && location.Value.IsValid)
+        {
+          if (clone is object && !clone.Location.EpsilonEquals(location.Value, GeometryObjectTolerance.Model.VertexTolerance))
+          {
+            using ((clone as Types.InstanceElement)?.DisableJoinsScope())
+            {
+              var pinned = clone.Pinned;
+              clone.Pinned = false;
+              clone.Location = location.Value;
+              clone.Pinned = pinned;
+            }
+          }
+        }
+
+        clones.Add(clone);
+      }
+      DA.SetDataList(_Clones_, clones);
     }
   }
 }

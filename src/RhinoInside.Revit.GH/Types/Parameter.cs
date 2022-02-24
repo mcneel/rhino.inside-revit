@@ -274,8 +274,8 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       [System.ComponentModel.Description("Forge Id.")]
-      public External.DB.Schemas.ParameterId SchemaId => owner.Id.TryGetBuiltInParameter(out var bip) ?
-        (External.DB.Schemas.ParameterId) bip : default;
+      public ERDB.Schemas.ParameterId SchemaId => owner.Id.TryGetBuiltInParameter(out var bip) ?
+        (ERDB.Schemas.ParameterId) bip : default;
       #endregion
 
       #region Definition

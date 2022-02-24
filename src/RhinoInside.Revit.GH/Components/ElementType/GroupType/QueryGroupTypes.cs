@@ -12,7 +12,11 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "G";
 
-    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.GroupType));
+    protected override ARDB.ElementFilter ElementFilter => External.DB.CompoundElementFilter.Intersect
+    (
+      new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_IOSModelGroups),
+      new ARDB.ElementClassFilter(typeof(ARDB.GroupType))
+    );
 
     public QueryGroupTypes() : base
     (
@@ -51,15 +55,15 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
 
       using (var collector = new ARDB.FilteredElementCollector(doc))
       {
-        var viewsCollector = collector.WherePasses(ElementFilter);
+        var typesCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          viewsCollector = viewsCollector.WherePasses(filter);
+          typesCollector = typesCollector.WherePasses(filter);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
-          viewsCollector = viewsCollector.WherePasses(nameFilter);
+          typesCollector = typesCollector.WherePasses(nameFilter);
 
-        var groupTypes = collector.Cast<ARDB.GroupType>();
+        var groupTypes = typesCollector.Cast<ARDB.GroupType>();
 
         if (!string.IsNullOrEmpty(name))
           groupTypes = groupTypes.Where(x => x.Name.IsSymbolNameLike(name));

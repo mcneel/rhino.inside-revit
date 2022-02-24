@@ -117,7 +117,7 @@ namespace RhinoInside.Revit.GH.Types
       switch (data)
       {
         case ARDB.Category category: return new Category(category);
-        case ARDB.Element  element:  return Element.FromElement(element);
+        case ARDB.Element element: return Element.FromElement(element);
       }
 
       return null;
@@ -167,6 +167,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.ReferencePlane),          (element)=> new ReferencePlane        (element as ARDB.ReferencePlane)    },
       { typeof(ARDB.SpatialElement),          (element)=> new SpatialElement        (element as ARDB.SpatialElement)    },
       { typeof(ARDB.Group),                   (element)=> new Group                 (element as ARDB.Group)             },
+      { typeof(ARDB.Opening),                 (element)=> new Opening               (element as ARDB.Opening)           },
       { typeof(ARDB.HostObject),              (element)=> new HostObject            (element as ARDB.HostObject)        },
       { typeof(ARDB.MEPCurve),                (element)=> new MEPCurve              (element as ARDB.MEPCurve)          },
       { typeof(ARDB.CurtainSystem),           (element)=> new CurtainSystem         (element as ARDB.CurtainSystem)     },
@@ -238,13 +239,13 @@ namespace RhinoInside.Revit.GH.Types
           return new InstanceElement(element);
         }
         if (GeometricElement.IsValidElement(element))
-            return new GeometricElement(element);
+          return new GeometricElement(element);
 
         return new GraphicalElement(element);
       }
       else
       {
-        if (DesignOptionSet.IsValidElement(element))          return new DesignOptionSet(element);
+        if (DesignOptionSet.IsValidElement(element)) return new DesignOptionSet(element);
       }
 
       return new Element(element);
@@ -270,7 +271,7 @@ namespace RhinoInside.Revit.GH.Types
       return new Element(doc, id);
     }
 
-    public static T FromElementId<T>(ARDB.Document doc, ARDB.ElementId id) where T : Element, new ()
+    public static T FromElementId<T>(ARDB.Document doc, ARDB.ElementId id) where T : Element, new()
     {
       if (doc is null || id is null) return default;
       if (id == ARDB.ElementId.InvalidElementId) return new T();
@@ -318,11 +319,11 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (ValueType.IsInstanceOfType(element))
       {
-        Document     = element.Document;
+        Document = element.Document;
         DocumentGUID = Document.GetFingerprintGUID();
-        id           = element.Id;
-        UniqueID     = element.UniqueId;
-        base.Value   = element;
+        id = element.Id;
+        UniqueID = element.UniqueId;
+        base.Value = element;
         return true;
       }
 
@@ -457,6 +458,31 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
+
+    #region Version
+    public Guid? ExportID => Document?.GetExportID(Id);
+
+    public override bool? IsEditable => IsValid ?
+      !Id.IsBuiltInId() && (Document?.IsLinked == false) : default(bool?);
+
+    public (Guid? Created, Guid? Updated) Version
+    {
+      get
+      {
+        var created = default(Guid?);
+        if (UniqueId.TryParse(UniqueID, out var episode, out var _) && episode != default)
+          created = episode;
+
+        var updated = default(Guid?);
+#if REVIT_2021
+        if (Value is ARDB.Element element)
+          updated = element.VersionGuid;
+#endif
+
+        return (created, updated);
+      }
+    }
+    #endregion
 
     #region Properties
     public bool CanDelete => IsValid && ARDB.DocumentValidation.CanDeleteElement(Document, Id);

@@ -1243,6 +1243,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementClone {
+            get {
+                object obj = ResourceManager.GetObject("ElementClone", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementDelete {
             get {
                 object obj = ResourceManager.GetObject("ElementDelete", resourceCulture);

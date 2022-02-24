@@ -4,6 +4,7 @@ using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
+using RhinoInside.Revit.Convert.Geometry;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
@@ -166,6 +167,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       {
         UpdateElement(element.Value, () =>
         {
+          if (element.Location.EpsilonEquals(location.Value, GeometryObjectTolerance.Model.VertexTolerance))
+            return;
+
           using (!KeepJoins ? (element as Types.InstanceElement)?.DisableJoinsScope() : default)
           {
             var pinned = element.Pinned;

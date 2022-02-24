@@ -68,6 +68,8 @@ namespace RhinoInside.Revit.GH.Types
     public ARDB.WorksetId Id => id;
 
     public override string DisplayName => Value.Name;
+
+    public override bool? IsEditable => Value?.IsEditable;
     #endregion
 
     #region IGH_Goo

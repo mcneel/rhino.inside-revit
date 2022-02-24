@@ -515,7 +515,36 @@ namespace RhinoInside.Revit.GH.Types
     public UnitSystem DisplayUnitSystem => Value is ARDB.Document document ?
       new UnitSystem { Value = (ARDB.UnitSystem) document.DisplayUnitSystem } :
       default;
+    #endregion
 
+    #region Version
+    public Guid? ExportID => Value?.GetExportID();
+
+    public bool? IsModified => Value?.IsModified;
+    public bool? IsEditable => Value is ARDB.Document document ?
+      !document.IsLinked : default(bool?);
+
+    public (Guid VersionGUID, int NumberOfSaves)? Version
+    {
+      get
+      {
+        if (Value is ARDB.Document document)
+        {
+          using (var version = ARDB.Document.GetDocumentVersion(document))
+            return (version.VersionGUID, version.NumberOfSaves);
+        }
+        else if (File.Exists(PathName))
+        {
+          using (var info = ARDB.BasicFileInfo.Extract(PathName))
+          {
+            using (var version = info.GetDocumentVersion())
+              return (version.VersionGUID, version.NumberOfSaves);
+          }
+        }
+
+        return default;
+      }
+    }
     #endregion
 
     #region Worksharing

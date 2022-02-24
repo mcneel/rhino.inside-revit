@@ -106,6 +106,46 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+
+    public override Surface Surface
+    {
+      get
+      {
+        if (Curve is Curve axis)
+        {
+          var location = Location;
+          var origin = location.Origin;
+          var domain = Domain;
+
+          var p0 = new Plane(new Point3d(origin.X, origin.Y, domain.T0), Vector3d.ZAxis);
+          var p1 = new Plane(new Point3d(origin.X, origin.Y, domain.T1), Vector3d.ZAxis);
+
+          var axis0 = Curve.ProjectToPlane(axis, p0);
+          var axis1 = Curve.ProjectToPlane(axis, p1);
+
+#if REVIT_2021
+          if (Value.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL) is ARDB.Parameter slantAngle)
+          {
+            var angle = slantAngle.AsDouble();
+            if (angle > 0.0)
+            {
+              var offset0 = (domain.T0 - origin.Z) * Math.Tan(angle);
+              var offset1 = (domain.T1 - origin.Z) * Math.Tan(angle);
+
+              var edge0 = axis0.Offset(p0, offset0, GeometryObjectTolerance.Model.VertexTolerance, CurveOffsetCornerStyle.Smooth);
+              var edge1 = axis1.Offset(p1, offset1, GeometryObjectTolerance.Model.VertexTolerance, CurveOffsetCornerStyle.Smooth);
+
+              axis0 = edge0?.Length == 1 ? edge0[0].Fit(3, GeometryObjectTolerance.Model.VertexTolerance, GeometryObjectTolerance.Model.AngleTolerance) : axis0;
+              axis1 = edge1?.Length == 1 ? edge1[0].Fit(3, GeometryObjectTolerance.Model.VertexTolerance, GeometryObjectTolerance.Model.AngleTolerance) : axis1;
+            }
+          }
+#endif
+          return NurbsSurface.CreateRuledSurface(axis0, axis1);
+        }
+
+        return base.Surface;
+      }
+    }
     #endregion
 
     #region Joins

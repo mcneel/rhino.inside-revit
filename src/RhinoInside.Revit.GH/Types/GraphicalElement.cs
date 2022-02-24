@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Types
       get => Guid.Empty;
       set { if (value != Guid.Empty) throw new InvalidOperationException(); }
     }
-    bool IGH_GeometricGoo.IsReferencedGeometry => IsReferencedData;
+    bool IGH_GeometricGoo.IsReferencedGeometry => false;
     bool IGH_GeometricGoo.IsGeometryLoaded => IsReferencedDataLoaded;
 
     void IGH_GeometricGoo.ClearCaches() => UnloadReferencedData();
@@ -412,8 +412,8 @@ namespace RhinoInside.Revit.GH.Types
       }
       set
       {
-        var plane = value.ToPlane();
-        SetLocation(plane.Origin, plane.XVec, plane.YVec);
+        using (var plane = value.ToPlane())
+          SetLocation(plane.Origin, plane.XVec, plane.YVec);
       }
     }
 
@@ -433,6 +433,28 @@ namespace RhinoInside.Revit.GH.Types
         var basisZ = basisX.CrossProduct(basisY);
 
         var newBasisZ = newBasisX.CrossProduct(newBasisY);
+
+        using (var IsCurveDrivenFilter = new ARDB.ElementIsCurveDrivenFilter())
+        {
+          if (IsCurveDrivenFilter.PassesFilter(element) && element.Location is ARDB.LocationCurve curveLocation)
+          {
+            var orientation = ARDB.Transform.Identity;
+            orientation.SetOrientation
+            (
+              origin, basisX, basisY, basisZ,
+              newOrigin, newBasisX, newBasisY, newBasisZ
+            );
+
+            if (!orientation.IsIdentity)
+            {
+              var curve = curveLocation.Curve.CreateTransformed(orientation);
+              curveLocation.Curve = curve;
+            }
+
+            return;
+          }
+        }
+
         {
           if (!basisZ.IsParallelTo(newBasisZ))
           {

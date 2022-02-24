@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
           Name = "File",
           NickName = "F",
           Description = "Shared parameters file path",
-          FileFilter = "Shared parameters file(*.txt)|*.txt"
+          FileFilter = "Shared parameters file (*.txt)|*.txt"
         },
         ParamRelevance.Occasional
       ),

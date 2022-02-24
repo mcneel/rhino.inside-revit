@@ -34,6 +34,7 @@
     <Compile Include="Components\Document\ProjectInformation.cs" />
     <Compile Include="Components\Document\ProjectLocation.cs" />
     <Compile Include="Components\Document\Save.cs" />
+    <Compile Include="Components\Document\Version.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
     <Compile Include="Components\ElementType\ExportImage.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
+    <Compile Include="Components\Element\Opening\AddShaftOpening.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyByLocation.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyByMembers.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyMembers.cs" />
@@ -116,6 +118,7 @@
     <Compile Include="Components\Element\Material\DeconstructProceduralAssets.cs" />
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Material\QueryMaterials.cs" />
+    <Compile Include="Components\Element\Opening\OpeningBoundaryProfile.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
     <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
     <Compile Include="Components\Element\FamilyInstance\AnalyzeInstanceSpace.cs" />
@@ -147,6 +150,7 @@
     <Compile Include="Components\Element\Topography\ByMesh.cs" />
     <Compile Include="Components\Element\Topography\ByPoints.cs" />
     <Compile Include="Components\Element\Properties.cs" />
+    <Compile Include="Components\Element\Version.cs" />
     <Compile Include="Components\Element\View\Active.cs" />
     <Compile Include="Components\Element\View\ClusterViewsByType.cs" />
     <Compile Include="Components\Element\View\ExportImage.cs" />
@@ -327,6 +331,7 @@
     <Compile Include="Types\InstanceElement.cs" />
     <Compile Include="Types\LinePatternElement.cs" />
     <Compile Include="Types\MEPCurve.cs" />
+    <Compile Include="Types\Opening.cs" />
     <Compile Include="Types\Panel.cs" />
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />

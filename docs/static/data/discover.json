@@ -588,8 +588,8 @@
     },
     {
         "title": "Becoming a computational designer with Rhino.Inside.Revit",
-        "url": "https://creativeinsider.podbean.com/e/0030-make-your-big-dreams-buildable/",
-        "thumbnail": "https://pbcdn1.podbean.com/imglogo/image-logo/8287361/20_05_01-Cover-art.jpg",
+        "url": "https://youtu.be/1jC_2xtWkaM",
+        "thumbnail": "http://i3.ytimg.com/vi/1jC_2xtWkaM/hqdefault.jpg",
         "author": "The Creative Insider Podcast",
         "authorUrl": "https://www.creativeinsiderpodcast.com/",
         "description": "Olly Thomas is a BIM Specialist at BIG New York. Olly is also part of the international architectural collective PIXELS Among all the activities he does he also educates people about parametrical design and BIM and how to make your ideas buildable.",
@@ -642,6 +642,29 @@
         "tags": [
             "presentation",
             "discussion"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "highlight": true,
+        "title": "Rhino to Revit Automated",
+        "url": "https://youtu.be/DBQNvOrP7Hs",
+        "thumbnail": "/static/images/discover/conveyer-v3.png",
+        "author": "Nathan Miller @ Proving Ground",
+        "authorUrl": "https://apps.provingground.io/",
+        "description": "This webinar provides an early preview of Conveyor V3. Conveyor v3 introduces NEW features and workflows to further streamline Rhino-Revit integration. In this webinar, Nathan Miller will discuss the capabilities of Conveyor v3 and how the tools support users of any skill level... no coding or Grasshopper skills required!",
+        "kinds": [
+            "tutorial",
+            "article",
+            "example",
+            "video"
+        ],
+        "tags": [
+            "convert",
+            "tutorial"
         ],
         "versions" : [
             "beta",

@@ -208,6 +208,10 @@ namespace RhinoInside.Revit.GH.Types
     /// Not necessarily accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for display.
     /// </summary>
     public virtual BoundingBox ClippingBox => BoundingBox;
+
+    #region Version
+    public override bool? IsEditable => Value?.IsReadOnly;
+    #endregion
   }
 
   [Name("Revit Vertex")]
