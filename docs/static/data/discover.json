@@ -973,7 +973,7 @@
     {
         "title": "Solar Analysis with Rhino.Inside.Revit",
         "url": "https://vimeo.com/363977394",
-        "thumbnail": "https://i.vimeocdn.com/video/819279340_1280x720.jpg",
+        "thumbnail": "/static/images/discover/SEPP65-solar-access.jpg",
         "author": "Paul Wintour @ Parametric Monkey",
         "authorUrl": "https://parametricmonkey.com/",
         "description": "One of the most frequent requests I receive is about running solar access analysis within Revit. Despite the fact that it is still quicker and more accurate to export to Grasshopper, run the analysis and push the results back, many still prefer to stay within Revit. So I decided to do a quick proof-of-concept and I'm proud to announce that it works perfectly using Rhino.Inside.Revit",
