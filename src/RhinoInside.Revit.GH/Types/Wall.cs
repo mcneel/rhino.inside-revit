@@ -117,11 +117,11 @@ namespace RhinoInside.Revit.GH.Types
           var origin = location.Origin;
           var domain = Domain;
 
-          var p0 = new Plane(new Point3d(origin.X, origin.Y, domain.T0), Vector3d.ZAxis);
-          var p1 = new Plane(new Point3d(origin.X, origin.Y, domain.T1), Vector3d.ZAxis);
+          var axis0 = axis.DuplicateCurve();
+          axis0.Translate(new Vector3d(0.0, 0.0, domain.T0 - origin.Z));
 
-          var axis0 = Curve.ProjectToPlane(axis, p0);
-          var axis1 = Curve.ProjectToPlane(axis, p1);
+          var axis1 = axis.DuplicateCurve();
+          axis1.Translate(new Vector3d(0.0, 0.0, domain.T1 - origin.Z));
 
 #if REVIT_2021
           if (Value.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL) is ARDB.Parameter slantAngle)
@@ -132,18 +132,27 @@ namespace RhinoInside.Revit.GH.Types
               var offset0 = (domain.T0 - origin.Z) * Math.Tan(angle);
               var offset1 = (domain.T1 - origin.Z) * Math.Tan(angle);
 
-              var edge0 = axis0.Offset(p0, offset0, GeometryObjectTolerance.Model.VertexTolerance, CurveOffsetCornerStyle.Smooth);
-              var edge1 = axis1.Offset(p1, offset1, GeometryObjectTolerance.Model.VertexTolerance, CurveOffsetCornerStyle.Smooth);
+              // We need to use `ARDB.Curve.CreateOffset` to obtain same kind of "offset"
+              // else the resulting surface is not parameterized like Revit.
+              // This is important to evaluate rectangular openings on that surface.
+              var o0 = axis0.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset0), ARDB.XYZ.BasisZ);
+              var o1 = axis1.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset1), ARDB.XYZ.BasisZ);
 
-              axis0 = edge0?.Length == 1 ? edge0[0].Fit(3, GeometryObjectTolerance.Model.VertexTolerance, GeometryObjectTolerance.Model.AngleTolerance) : axis0;
-              axis1 = edge1?.Length == 1 ? edge1[0].Fit(3, GeometryObjectTolerance.Model.VertexTolerance, GeometryObjectTolerance.Model.AngleTolerance) : axis1;
+              axis0 = o0.ToCurve();
+              axis1 = o1.ToCurve();
             }
           }
 #endif
-          return NurbsSurface.CreateRuledSurface(axis0, axis1);
+
+          if (NurbsSurface.CreateRuledSurface(axis0, axis1) is Surface surface)
+          {
+            surface.SetDomain(0, new Interval(0.0, axis.GetLength()));
+            surface.SetDomain(1, domain);
+            return surface;
+          }
         }
 
-        return base.Surface;
+        return null;
       }
     }
     #endregion
