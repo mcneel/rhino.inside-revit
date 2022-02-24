@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
@@ -43,22 +44,54 @@ namespace RhinoInside.Revit.GH.Components.Element.Opening
         description: "Profile curve of a given opening element",
         access: GH_ParamAccess.item
         );
+      manager.AddPlaneParameter(
+        name: "Plane",
+        nickname: "P",
+        description: "Plane of a given opening element",
+        access: GH_ParamAccess.item
+        );
     }
 
-    public Rhino.Geometry.Curve GetRhinoBoundaryFromRectBoundary(IList<ARDB.XYZ> pts)
-    {
-      ARDB.PolyLine pline = ARDB.PolyLine.Create(pts);
-      var polyline = GeometryDecoder.ToPolylineCurve(pline);
-      return polyline.ToNurbsCurve();
-    }
-
-    public Rhino.Geometry.Curve GetRhinoBoundaryFromWallOpening(ARDB.Opening opening)
+    public Plane GetOpeningPlaneFromRectBoundary(ARDB.Opening opening)
     {
       var p0 = opening.BoundaryRect[0].ToPoint3d();
       var p1 = opening.BoundaryRect[1].ToPoint3d();
-      var host = opening.Host as ARDB.Wall;
-      var plane = new Rhino.Geometry.Plane(p0, host.GetOrientationVector().ToVector3d());
-      return new Rhino.Geometry.Rectangle3d(plane, p0, p1).ToNurbsCurve();
+      var p2 = new Point3d(p0.X, p0.Y, p1.Z);
+      var p3 = new Point3d(p1.X, p1.Y, p0.Z);
+
+      var line = new Line(p0, p1);
+      var center = line.PointAt(0.5);
+      var xAxis = p3 - p0;
+      var yAxis = p2 - p0;
+      return new Plane(center, xAxis, yAxis);
+    }
+
+    public Curve GetRhinoBoundaryFromRectBoundary(ARDB.Opening opening)
+    {
+      var p0 = opening.BoundaryRect[0].ToPoint3d();
+      var p1 = opening.BoundaryRect[1].ToPoint3d();
+      var p2 = new Point3d(p0.X, p0.Y, p1.Z);
+      var p3 = new Point3d(p1.X, p1.Y, p0.Z);
+      var pline = new Polyline(new List<Point3d>() { p0, p2, p1, p3, p0 });
+      
+      return pline.ToNurbsCurve();
+    }
+
+    public Plane GetOpeningPlaneFromCurvBoundary(Curve curve)
+    {
+      Plane plane = default;
+      if (curve.TryGetPlane(out plane))
+      {
+        var amp = AreaMassProperties.Compute(curve);
+        plane.Origin = amp.Centroid;
+      }
+      return plane;
+    }
+
+    public Curve GetRhinoBoundaryFromCurvBoundary(ARDB.Opening opening)
+    {
+      var curves = GeometryDecoder.ToCurveMany(opening.BoundaryCurves);
+      return Curve.JoinCurves(curves)[0];
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -67,18 +100,19 @@ namespace RhinoInside.Revit.GH.Components.Element.Opening
       if (!DA.GetData("Opening", ref opening))
         return;
 
-      if ((ARDB.BuiltInCategory)opening.Category.Id.IntegerValue == ARDB.BuiltInCategory.OST_SWallRectOpening)
+      if (opening.IsRectBoundary)
       {
-        if (opening.BoundaryRect != null)
-          DA.SetData("Profile Curve", GetRhinoBoundaryFromWallOpening(opening));
+        DA.SetData("Profile Curve", GetRhinoBoundaryFromRectBoundary(opening));
+        DA.SetData("Plane", GetOpeningPlaneFromRectBoundary(opening));
       }
+
       else
       {
-        if (opening.IsRectBoundary)
-          DA.SetData("Profile Curve", GetRhinoBoundaryFromRectBoundary(opening.BoundaryRect));
-        else
-          DA.SetData("Profile Curve", GeometryDecoder.ToCurve(opening.BoundaryCurves).ToNurbsCurve());
-      } 
+        var curve = GetRhinoBoundaryFromCurvBoundary(opening);
+        DA.SetData("Profile Curve", curve);
+        DA.SetData("Plane", GetOpeningPlaneFromCurvBoundary(curve));
+      }
+        
     }
   }
 }
