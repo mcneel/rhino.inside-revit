@@ -351,9 +351,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
                   }
                 }
 
-                return view is object && element.ViewSpecific == true ?
-                  element.Value.CloneElement(view.Value) :
-                  element.Value.CloneElement(doc.Value);
+                return element.Value.CloneElement(doc.Value, view?.Value);
               }
 
               return default;
