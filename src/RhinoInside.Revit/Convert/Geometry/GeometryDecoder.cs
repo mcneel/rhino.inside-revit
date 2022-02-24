@@ -1462,18 +1462,22 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     /// <summary>
-    /// Converts the specified CurveArray to an equivalent Rhino Curve.
+    /// Converts the specified CurveArray to an array of C0 continuous Rhino Curves.
     /// </summary>
     /// <param name="value">A value to convert.</param>
-    /// <returns>A Rhino Curve that is equivalent to the provided value.</returns>
-    /// <since>1.4</since>
-    public static Curve ToCurve(this ARDB.CurveArray value)
+    /// <returns>An array of C0 continuous Rhino Curve that is equivalent to the provided value.</returns>
+    /// <since>1.6</since>
+    public static Curve[] ToCurves(this ARDB.CurveArray value)
     {
       var count = value.Size;
-      if (count == 0) return null;
-      if (count == 1) return value.get_Item(0).ToCurve();
+      var segments = new Curve[count];
 
-      return ToPolyCurve(value);
+      for (int c = 0; c < count; ++c)
+        segments[c] = value.get_Item(c).ToCurve();
+
+      return segments.Length > 1 ?
+        Curve.JoinCurves(segments, GeometryObjectTolerance.Internal.VertexTolerance) :
+        segments;
     }
 
     /// <summary>
@@ -1510,15 +1514,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     /// <summary>
-    /// Converts the specified CurveArrArray to a Rhino PolyCurve IEnumerable.
+    /// Converts the specified CurveArrArray to a Rhino Curve IEnumerable.
     /// </summary>
     /// <param name="value">A value to convert.</param>
-    /// <returns>A Rhino PolyCurve IEnumerable that is equivalent to the provided value.</returns>
+    /// <returns>A Rhino Curve IEnumerable that is equivalent to the provided value.</returns>
     /// <since>1.4</since>
     public static IEnumerable<Curve> ToCurveMany(this ARDB.CurveArrArray value)
     {
-      foreach (object curve in value)
-        yield return ToCurve((ARDB.CurveArray) curve);
+      return value.Cast<ARDB.CurveArray>().SelectMany(ToCurves);
     }
     #endregion
 

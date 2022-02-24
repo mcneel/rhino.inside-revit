@@ -175,8 +175,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     public static NurbsCurve ToRhino(ARDB.HermiteSpline hermite)
     {
       var nurbsCurve = ToRhino(ARDB.NurbSpline.Create(hermite));
-      nurbsCurve.Domain = new Interval(hermite.GetEndParameter(0), hermite.GetEndParameter(1));
-      return nurbsCurve;
+      var trim = new Interval(hermite.GetEndParameter(0), hermite.GetEndParameter(1));
+      return nurbsCurve.Trim(trim) as NurbsCurve ?? nurbsCurve;
     }
 
     public static NurbsCurve ToRhino(ARDB.NurbSpline nurb)

@@ -779,19 +779,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region CloneElement
-    public static T CloneElement<T>(this T template, Document destinationDocument = null) where T : Element
+    public static T CloneElement<T>(this T template, Document destinationDocument = null, View destinationView = null) where T : Element
     {
       try
       {
         var sourceDocument = template.Document;
-        destinationDocument = destinationDocument ?? template.Document;
+        destinationDocument = destinationDocument ?? sourceDocument;
 
         var ids = default(ICollection<ElementId>);
         if (template.ViewSpecific)
         {
           var sourceView = sourceDocument.GetElement(template.OwnerViewId) as View;
-          var destinationView = sourceView;
-          if (!sourceDocument.Equals(destinationDocument))
+          destinationView = destinationView ?? sourceView;
+
+          if (!destinationDocument.Equals(destinationView.Document))
           {
             var bic = BuiltInCategory.INVALID;
             sourceView.Category?.Id.TryGetBuiltInCategory(out bic);
@@ -800,57 +801,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
               OfType<View>().
               Where(x => !x.IsTemplate && x.ViewType == sourceView.ViewType).
               FirstOrDefault();
-
-          }
-
-          if (destinationView is object)
-          {
-            ids = ElementTransformUtils.CopyElements
-            (
-              sourceView,
-              new ElementId[] { template.Id },
-              destinationView, default, default
-            );
-          }
-        }
-        else
-        {
-          ids = ElementTransformUtils.CopyElements
-          (
-            sourceDocument,
-            new ElementId[] { template.Id },
-            destinationDocument, default, default
-          );
-        }
-
-        return ids.Select(x => destinationDocument.GetElement(x)).OfType<T>().FirstOrDefault();
-      }
-      catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-
-      return null;
-    }
-
-    public static T CloneElement<T>(this T template, View destinationView) where T : Element
-    {
-      try
-      {
-        var sourceDocument = template.Document;
-        var destinationDocument = destinationView.Document;
-
-        var ids = default(ICollection<ElementId>);
-        if (template.ViewSpecific)
-        {
-          var sourceView = sourceDocument.GetElement(template.OwnerViewId) as View;
-          if (!sourceDocument.Equals(destinationDocument))
-          {
-            var bic = BuiltInCategory.INVALID;
-            sourceView.Category?.Id.TryGetBuiltInCategory(out bic);
-            destinationView = destinationDocument.
-              GetNamesakeElements(sourceView.GetElementNomen(), sourceView.GetType(), categoryId: bic).
-              OfType<View>().
-              Where(x => !x.IsTemplate && x.ViewType == sourceView.ViewType).
-              FirstOrDefault();
-
           }
 
           if (destinationView is object)
