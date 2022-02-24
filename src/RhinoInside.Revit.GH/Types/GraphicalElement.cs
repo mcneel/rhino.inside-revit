@@ -245,6 +245,16 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Rectangle)))
+      {
+        var rectangle = Rectangle;
+        if (!rectangle.IsValid)
+          return false;
+
+        target = (Q) (object) new GH_Rectangle(rectangle);
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
       {
         var curve = Curve;
@@ -326,6 +336,18 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return NaN.Box;
+      }
+    }
+
+    public virtual Rectangle3d Rectangle
+    {
+      get
+      {
+        var box = Box;
+        if (box.IsValid)
+          return new Rectangle3d(box.Plane, box.X, box.Y);
+
+        return Rectangle3d.Unset;
       }
     }
 
