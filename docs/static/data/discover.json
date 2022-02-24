@@ -113,6 +113,28 @@
         ]
     },
     {
+        "title": "Revit: Rhino Workflow Course",
+        "url": "https://www.linkedin.com/learning/revit-rhino-workflow",
+        "thumbnail": "/static/images/discover/olivia-morgan-rir.jpg",
+        "author": "Olivia Morgan",
+        "authorUrl": "https://www.linkedin.com/learning/instructors/olivia-morgan",
+        "description": "Rhino and Revit both have a firm place in the architecture and construction workflow. Rhino is an ideal program to model complex forms for iterative conceptual projects while Revit excels in creating BIM driven projects with layers of information. In this course instructor Olivia Morgan shows you how to seamlessly move between these programs in a safe and practical workflow.",
+        "kinds": [
+            "course",
+            "free trial",
+            "purchase"
+        ],
+        "tags": [
+            "course",
+            "workflow",
+            "tutorial"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
         "highlight": true,
         "title": "Complete Workshop for Inside.Revit",
         "url": "core-studio-workshop",
@@ -1135,6 +1157,26 @@
             "1.0"
         ]
     },
+    {
+        "title": "Place Objects Randomly into a Topography",
+        "url": "https://youtu.be/ZcXl8jKZEv4",
+        "thumbnail": "https://i3.ytimg.com/vi/ZcXl8jKZEv4/maxresdefault.jpg",
+        "author": "BIMGeek",
+        "authorUrl": "https://www.youtube.com/channel/UCLwgBbBfZLcqqbta10a_fpQ",
+        "description": "I created a tutorial on placing objects randomly on a topography using Grasshopper inside Revit and created a forest model as an example case.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "tutorial",
+            "workflow"
+        ],
+        "versions" : [
+            "1.0"
+        ]
+    },
+
     {
         "title": "How to Automate Setting Revit Materials Per Panel",
         "url": "https://youtu.be/nujhKF2hoHM",
