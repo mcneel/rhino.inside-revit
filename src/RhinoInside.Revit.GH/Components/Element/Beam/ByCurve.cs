@@ -28,6 +28,9 @@ namespace RhinoInside.Revit.GH.Components
     )
     { }
 
+    static bool IsStructuralFraming(ARDB.FamilyInstance frame) =>
+      frame.Category.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming;
+
     public override void OnStarted(ARDB.Document document)
     {
       base.OnStarted(document);
@@ -38,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components
 
       foreach (var beam in pinnedBeams)
       {
-        if (beam.StructuralType != ARDB.Structure.StructuralType.NonStructural)
+        if (IsStructuralFraming(beam))
         {
           if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
           {
@@ -113,14 +116,14 @@ namespace RhinoInside.Revit.GH.Components
           ARDB.Structure.StructuralType.Beam
         );
         
-        if (beam is object && beam.StructuralType != ARDB.Structure.StructuralType.NonStructural)
+        if (beam is object && IsStructuralFraming(beam))
         {
-          if (beam is object && ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
+          if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 0))
             ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 0);
           else
             ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 0);
 
-          if (beam is object && ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 1))
+          if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, 1))
             ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(newBeam, 1);
           else
             ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(newBeam, 1);
