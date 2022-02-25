@@ -5,7 +5,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Opening")]
 
-  class Opening : InstanceElement
+  public class Opening : InstanceElement
   {
     protected override Type ValueType => typeof(ARDB.Opening);
     public new ARDB.Opening Value => base.Value as ARDB.Opening;
