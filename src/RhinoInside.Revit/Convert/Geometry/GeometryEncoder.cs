@@ -1782,7 +1782,10 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       var curveArray = new ARDB.CurveArray();
       foreach (var curve in value)
-        curveArray.Append(curve.ToCurve());
+      {
+        foreach (var segment in curve.ToCurveMany())
+          curveArray.Append(segment);
+      }
 
       return curveArray;
     }
