@@ -30,8 +30,8 @@ namespace RhinoInside.Revit.GH.Components.Hosts
     {
       manager.AddParameter(new Parameters.GraphicalElement(), "Inserts", "INS", "Embedded inserts", GH_ParamAccess.list);
       manager.AddParameter(new Parameters.GraphicalElement(), "Shared", "SHI", "Embedded shared inserts", GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.Element(), "Shadows", "S", "Embedded shadows", GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.Element(), "Openings", "O", "Embedded rectangular openings", GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.GraphicalElement(), "Shadows", "S", "Embedded shadows", GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.GraphicalElement(), "Openings", "O", "Embedded openings", GH_ParamAccess.list);
       manager.AddParameter(new Parameters.HostObject(), "Walls", "W", "Embedded walls", GH_ParamAccess.list);
     }
 
@@ -52,6 +52,10 @@ namespace RhinoInside.Revit.GH.Components.Hosts
 
       var openings = new HashSet<ARDB.ElementId>(host.Value.FindInserts(true, false, false, false));
       openings.ExceptWith(inserts);
+
+      foreach(var opening in host.Value.GetDependentElements(new ARDB.ElementClassFilter(typeof(ARDB.Opening))))
+        openings.Add(opening);
+
       DA.SetDataList("Openings", openings.Select(x => Types.Element.FromElementId(doc, x)));
 
       var shadows = new HashSet<ARDB.ElementId>(host.Value.FindInserts(false, true, false, false));
