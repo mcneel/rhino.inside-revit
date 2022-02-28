@@ -73,7 +73,9 @@ namespace RhinoInside.Revit.Convert.Geometry
 
             switch (geometry)
             {
-              case Brep brep: Write(writer, brep, factor); break;
+              case Curve curve:     Write(writer, curve, factor);   break;
+              case Surface surface: Write(writer, surface, factor); break;
+              case Brep brep:       Write(writer, brep, factor);    break;
               default: throw new NotImplementedException();
             }
 
@@ -134,13 +136,14 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       public static implicit operator bool(GeometrySignature signature) => signature.hash is object;
 
-      static void Write(BinaryWriter writer, Brep brep, double factor)
-      {
-        var tol = GeometryObjectTolerance.Internal;
-        int    RoundNormalizedKnot(double value) => (int)    Math.Round(value * 1e+9);
-        double RoundWeight        (double value) => (double) Math.Round(value * 1e+9);
-        double RoundLength        (double value) => (double) Math.Round(value / tol.VertexTolerance);
 
+      static readonly GeometryObjectTolerance Tolerance = GeometryObjectTolerance.Internal;
+      static int RoundNormalizedKnot(double value) => (int) Math.Round(value * 1e+9);
+      static double RoundWeight     (double value) => (double) Math.Round(value * 1e+9);
+      static double RoundLength     (double value) => (double) Math.Round(value / Tolerance.VertexTolerance);
+
+      static void Write(BinaryWriter writer, Curve curve, double factor)
+      {
         IEnumerable<int> RoundCurveKnotList(Rhino.Geometry.Collections.NurbsCurveKnotList knots)
         {
           var count = knots.Count;
@@ -159,6 +162,25 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
         }
 
+        var nurbs = curve as NurbsCurve ?? curve.ToNurbsCurve();
+        writer.Write(nurbs.Order);
+        var rational = nurbs.IsRational;
+        writer.Write(nurbs.IsRational);
+        writer.Write(nurbs.Points.Count);
+        foreach (var point in nurbs.Points)
+        {
+          var location = point.Location;
+          writer.Write(RoundLength(location.X * factor));
+          writer.Write(RoundLength(location.Y * factor));
+          writer.Write(RoundLength(location.Z * factor));
+          if (rational) writer.Write(RoundWeight(point.Weight));
+        }
+        foreach (var knot in RoundCurveKnotList(nurbs.Knots)) writer.Write(knot);
+
+      }
+
+      static void Write(BinaryWriter writer, Surface surface, double factor)
+      {
         IEnumerable<int> RoundSurfaceKnotList(Rhino.Geometry.Collections.NurbsSurfaceKnotList knots)
         {
           var count = knots.Count;
@@ -177,6 +199,29 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
         }
 
+        var nurbs = surface as NurbsSurface ?? surface.ToNurbsSurface(Tolerance.VertexTolerance * factor, out var _);
+        writer.Write(nurbs.OrderU);
+        writer.Write(nurbs.OrderV);
+        var rational = nurbs.IsRational;
+        writer.Write(nurbs.IsRational);
+        writer.Write(nurbs.Points.CountU);
+        writer.Write(nurbs.Points.CountV);
+        foreach (var point in nurbs.Points)
+        {
+          var location = point.Location;
+          writer.Write(RoundLength(location.X * factor));
+          writer.Write(RoundLength(location.Y * factor));
+          writer.Write(RoundLength(location.Z * factor));
+          if (rational) writer.Write(RoundWeight(point.Weight));
+        }
+
+        foreach (var knot in RoundSurfaceKnotList(nurbs.KnotsU)) writer.Write(knot);
+        foreach (var knot in RoundSurfaceKnotList(nurbs.KnotsV)) writer.Write(knot);
+
+      }
+
+      static void Write(BinaryWriter writer, Brep brep, double factor)
+      {
         writer.Write(brep.Faces.Count);
         writer.Write(brep.Surfaces.Count);
         writer.Write(brep.Edges.Count);
@@ -186,26 +231,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           writer.Write(face.OrientationIsReversed);
 
         foreach (var surface in brep.Surfaces)
-        {
-          var nurbs = surface as NurbsSurface ?? surface.ToNurbsSurface(tol.VertexTolerance * factor, out var _);
-          writer.Write(nurbs.OrderU);
-          writer.Write(nurbs.OrderV);
-          var rational = nurbs.IsRational;
-          writer.Write(nurbs.IsRational);
-          writer.Write(nurbs.Points.CountU);
-          writer.Write(nurbs.Points.CountV);
-          foreach (var point in nurbs.Points)
-          {
-            var location = point.Location;
-            writer.Write(RoundLength(location.X * factor));
-            writer.Write(RoundLength(location.Y * factor));
-            writer.Write(RoundLength(location.Z * factor));
-            if (rational) writer.Write(RoundWeight(point.Weight));
-          }
-
-          foreach (var knot in RoundSurfaceKnotList(nurbs.KnotsU)) writer.Write(knot);
-          foreach (var knot in RoundSurfaceKnotList(nurbs.KnotsV)) writer.Write(knot);
-        }
+          Write(writer, surface, factor);
 
         foreach (var edge in brep.Edges)
         {
@@ -215,22 +241,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         }
 
         foreach (var curve in brep.Curves3D)
-        {
-          var nurbs = curve as NurbsCurve ?? curve.ToNurbsCurve();
-          writer.Write(nurbs.Order);
-          var rational = nurbs.IsRational;
-          writer.Write(nurbs.IsRational);
-          writer.Write(nurbs.Points.Count);
-          foreach (var point in nurbs.Points)
-          {
-            var location = point.Location;
-            writer.Write(RoundLength(location.X * factor));
-            writer.Write(RoundLength(location.Y * factor));
-            writer.Write(RoundLength(location.Z * factor));
-            if (rational) writer.Write(RoundWeight(point.Weight));
-          }
-          foreach (var knot in RoundCurveKnotList(nurbs.Knots)) writer.Write(knot);
-        }
+          Write(writer, curve, factor);
       }
     }
 
