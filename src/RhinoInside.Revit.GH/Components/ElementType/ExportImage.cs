@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
       manager.AddParameter(new Parameters.ElementType(), "Type", "T", "ElementType to query for its prview", GH_ParamAccess.item);
 
       var folderPath = new Grasshopper.Kernel.Parameters.Param_FilePath();
-      manager[manager.AddParameter(folderPath, "Folder", "F", $"Default is {Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)}\\%ProjectTitle%", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddParameter(folderPath, "Folder", "F", "Default folder", GH_ParamAccess.item)].Optional = true;
 
       manager.AddBooleanParameter("Overwrite", "O", "Overwrite file", GH_ParamAccess.item, false);
 
@@ -50,6 +50,15 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
     {
       var imageFilePath = new Grasshopper.Kernel.Parameters.Param_FilePath();
       manager.AddParameter(imageFilePath, "Image File", "I", string.Empty, GH_ParamAccess.item);
+    }
+
+    protected override void BeforeSolveInstance()
+    {
+      var Folder = Params.Input<IGH_Param>("Folder");
+      Folder.Description = Folder.DataType != GH_ParamData.@void ?
+        "Default folder" : $"Default is under '{Core.SwapFolder}'";
+
+      base.BeforeSolveInstance();
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
