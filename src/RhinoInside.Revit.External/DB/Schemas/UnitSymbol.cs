@@ -14,14 +14,19 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public UnitSymbol() { }
     public UnitSymbol(string id) : base(id)
     {
-      if (!id.StartsWith("autodesk.unit.symbol"))
+      if (!IsUnitSymbol(id))
         throw new ArgumentException("Invalid argument value", nameof(id));
+    }
+
+    public static bool IsUnitSymbol(string id)
+    {
+      return id.StartsWith("autodesk.unit.symbol");
     }
 
     public static bool IsUnitSymbol(DataType value, out UnitSymbol unitSymbol)
     {
       var typeId = value.TypeId;
-      if (typeId.StartsWith("autodesk.unit.symbol"))
+      if (IsUnitSymbol(typeId))
       {
         unitSymbol = new UnitSymbol(typeId);
         return true;

@@ -15,14 +15,19 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public CategoryId() { }
     public CategoryId(string id) : base(id)
     {
-      if (!id.StartsWith("autodesk.revit.category"))
+      if (!IsCategoryId(id))
         throw new ArgumentException("Invalid argument value", nameof(id));
+    }
+
+    public static bool IsCategoryId(string id)
+    {
+      return id.StartsWith("autodesk.revit.category");
     }
 
     public static bool IsCategoryId(DataType value, out CategoryId categoryId)
     {
       var typeId = value.TypeId;
-      if (typeId.StartsWith("autodesk.revit.category"))
+      if (IsCategoryId(typeId))
       {
         categoryId = new CategoryId(typeId);
         return true;

@@ -15,14 +15,19 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public SpecType() { }
     public SpecType(string id) : base(id)
     {
-      if (!id.StartsWith("autodesk.spec"))
+      if (!IsSpecType(id))
         throw new ArgumentException("Invalid argument value", nameof(id));
+    }
+
+    public static bool IsSpecType(string id)
+    {
+      return id.StartsWith("autodesk.spec");
     }
 
     public static bool IsSpecType(DataType value, out SpecType specType)
     {
       var typeId = value.TypeId;
-      if (typeId.StartsWith("autodesk.spec"))
+      if (IsSpecType(typeId))
       {
         specType = new SpecType(typeId);
         return true;

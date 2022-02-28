@@ -15,8 +15,26 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public ParameterId() { }
     public ParameterId(string id) : base(id)
     {
-      if (!id.StartsWith("autodesk.revit.parameter") && !id.StartsWith("autodesk.parameter.aec"))
+      if (!IsParameterId(id))
         throw new ArgumentException("Invalid argument value", nameof(id));
+    }
+
+    public static bool IsParameterId(string id)
+    {
+      return id.StartsWith("autodesk.parameter.aec") || id.StartsWith("autodesk.revit.parameter");
+    }
+
+    public static bool IsParameterId(DataType value, out ParameterId parameterId)
+    {
+      var typeId = value.TypeId;
+      if (IsParameterId(typeId))
+      {
+        parameterId = new ParameterId(typeId);
+        return true;
+      }
+
+      parameterId = default;
+      return false;
     }
 
 #if REVIT_2021

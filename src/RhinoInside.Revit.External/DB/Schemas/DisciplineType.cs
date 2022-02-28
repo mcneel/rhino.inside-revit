@@ -14,8 +14,13 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public DisciplineType() { }
     public DisciplineType(string id) : base(id)
     {
-      if (!id.StartsWith("autodesk.spec:discipline") && !id.StartsWith("autodesk.spec.discipline"))
+      if (!IsDisciplineType(id))
         throw new ArgumentException("Invalid argument value", nameof(id));
+    }
+
+    public static bool IsDisciplineType(string id)
+    {
+      return id.StartsWith("autodesk.spec:discipline") || id.StartsWith("autodesk.spec.discipline");
     }
 
 #if REVIT_2021

@@ -212,19 +212,23 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case ARDB.ForgeTypeId f: Value = f; break;
+          case ARDB.ForgeTypeId f: Value = f; return true;
 #else
-          case int i: Value = (ARDB.DisplayUnitType) i; break;
-          case ARDB.DisplayUnitType u: Value = u; break;
+          case int i: Value = (ARDB.DisplayUnitType) i; return true;
+          case ARDB.DisplayUnitType u: Value = u; return true;
 #endif
-          case EDBS.DataType s: Value = new EDBS.UnitType(s.TypeId); break;
-          case string t: Value = new EDBS.UnitType(t); break;
-          default: return base.CastFrom(source);
-        }
+          case EDBS.DataType s:
+            if (!EDBS.UnitType.IsUnitType(s, out var id)) break;
+            Value = id; return true;
 
-        return true;
+          case string t:
+            if (!EDBS.UnitType.IsUnitType(t)) break;
+            Value = new EDBS.UnitType(t); return true;
+        }
       }
       catch (ArgumentException) { return false; }
+
+      return base.CastFrom(source);
     }
   }
 
@@ -294,20 +298,24 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case ARDB.ForgeTypeId f: Value = f; break;
+          case ARDB.ForgeTypeId f: Value = f; return true;
 #else
-          case int i: Value = (EDBS.SpecType) (ARDB.ParameterType) i; break;
-          case ARDB.ParameterType u: Value = (EDBS.SpecType) u; break;
-          case ARDB.UnitType t: Value = (EDBS.SpecType) t; break;
+          case int i: Value = (EDBS.SpecType) (ARDB.ParameterType) i; return true;
+          case ARDB.ParameterType u: Value = (EDBS.SpecType) u; return true;
+          case ARDB.UnitType t: Value = (EDBS.SpecType) t; return true;
 #endif
-          case EDBS.DataType s: Value = new EDBS.DataType(s.TypeId); break;
-          case string t: Value = new EDBS.SpecType(t); break;
-          default: return base.CastFrom(source);
-        }
+          case EDBS.DataType s:
+            if (!EDBS.SpecType.IsSpecType(s, out var id)) break;
+            Value = id; return true;
 
-        return true;
+          case string t:
+            if (!EDBS.SpecType.IsSpecType(t)) break;
+            Value = new EDBS.SpecType(t); return true;
+        }
       }
       catch (ArgumentException) { return false; }
+
+      return base.CastFrom(source);
     }
 
     public static Type PickerObjectType => typeof(Parameters.Input.BuiltInParameterTypes);
@@ -352,21 +360,24 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case ARDB.ForgeTypeId f: Value = f; break;
+          case ARDB.ForgeTypeId f: Value = f; return true;
+#else
+          case int i: Value = (ARDB.BuiltInParameterGroup) i; return true;
+          case ARDB.BuiltInParameterGroup u: Value = u; return true;
 #endif
-#if !REVIT_2022
-          case int i: Value = (ARDB.BuiltInParameterGroup) i; break;
-          case ARDB.BuiltInParameterGroup u: Value = u; break;
-#endif
-          case EDBS.ParameterGroup v: Value = v; break;
-          case EDBS.DataType s: Value = new EDBS.ParameterGroup(s.TypeId); break;
-          case string t: Value = new EDBS.ParameterGroup(t); break;
-          default: return base.CastFrom(source);
-        }
+          case EDBS.ParameterGroup v: Value = v; return true;
+          case EDBS.DataType s:
+            if (!EDBS.ParameterGroup.IsParameterGroup(s.TypeId)) break;
+            Value = new EDBS.ParameterGroup(s.TypeId); return true;
 
-        return true;
+          case string t:
+            if (!EDBS.ParameterGroup.IsParameterGroup(t)) break;
+            Value = new EDBS.ParameterGroup(t); return true;
+        }
       }
       catch (ArgumentException) { return false; }
+
+      return base.CastFrom(source);
     }
 
     public static Type PickerObjectType => typeof(Parameters.Input.BuiltInParameterGroups);
@@ -411,21 +422,24 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case ARDB.ForgeTypeId f: Value = f; break;
+          case ARDB.ForgeTypeId f: Value = f; return true;
+#else
+          case int i: Value = (ARDB.BuiltInParameter) i; return true;
+          case ARDB.BuiltInParameter u: Value = u; return true;
 #endif
-#if !REVIT_2022
-          case int i: Value = (ARDB.BuiltInParameter) i; break;
-          case ARDB.BuiltInParameter u: Value = u; break;
-#endif
-          case EDBS.ParameterId v: Value = v; break;
-          case EDBS.DataType s: Value = new EDBS.ParameterId(s.TypeId); break;
-          case string t: Value = new EDBS.ParameterId(t); break;
-          default: return base.CastFrom(source);
-        }
+          case EDBS.ParameterId v: Value = v; return true;
+          case EDBS.DataType s:
+            if (!EDBS.ParameterId.IsParameterId(s, out var id)) break;
+            Value = id; return true;
 
-        return true;
+          case string t:
+            if (!EDBS.ParameterId.IsParameterId(t)) break;
+            Value = new EDBS.ParameterId(t); return true;
+        }
       }
       catch (ArgumentException) { return false; }
+
+      return base.CastFrom(source);
     }
 
     public static Type PickerObjectType => typeof(Parameters.Input.BuiltInParameters);
@@ -470,21 +484,24 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case ARDB.ForgeTypeId f: Value = f; break;
+          case ARDB.ForgeTypeId f: Value = f; return true;
+#else
+          case int i: Value = (ARDB.BuiltInCategory) i; return true;
+          case ARDB.BuiltInCategory u: Value = u; return true;
 #endif
-#if !REVIT_2022
-          case int i: Value = (ARDB.BuiltInCategory) i; break;
-          case ARDB.BuiltInCategory u: Value = u; break;
-#endif
-          case EDBS.CategoryId v: Value = v; break;
-          case EDBS.DataType s: Value = new EDBS.CategoryId(s.TypeId); break;
-          case string t: Value = new EDBS.CategoryId(t); break;
-          default: return base.CastFrom(source);
-        }
+          case EDBS.CategoryId v: Value = v; return true;
+          case EDBS.DataType s:
+            if (!EDBS.CategoryId.IsCategoryId(s, out var id)) break;
+            Value = id; return true;
 
-        return true;
+          case string t:
+            if (!EDBS.CategoryId.IsCategoryId(t)) break;
+            Value = new EDBS.CategoryId(t); return true;
+        }
       }
       catch (ArgumentException) { return false; }
+
+      return base.CastFrom(source);
     }
 
     public static Type PickerObjectType => typeof(Parameters.Input.BuiltInCategories);
