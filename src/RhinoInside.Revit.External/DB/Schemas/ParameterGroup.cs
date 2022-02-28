@@ -21,8 +21,13 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public ParameterGroup() { }
     public ParameterGroup(string id) : base(id)
     {
-      if (!id.StartsWith("autodesk.parameter.group") && !id.StartsWith("autodesk.revit.group"))
+      if (!IsParameterGroup(id))
         throw new ArgumentException("Invalid argument value", nameof(id));
+    }
+
+    public static bool IsParameterGroup(string id)
+    {
+      return id.StartsWith("autodesk.parameter.group") || id.StartsWith("autodesk.revit.group");
     }
 
 #if REVIT_2021
