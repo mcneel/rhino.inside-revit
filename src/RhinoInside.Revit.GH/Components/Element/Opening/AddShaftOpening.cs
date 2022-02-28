@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using ARDB = Autodesk.Revit.DB;
-using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.Convert.System.Collections.Generic;
+using RhinoInside.Revit.External.DB.Extensions;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Openings
 {
@@ -18,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
     (
       name: "Add Shaft Opening",
       nickname: "Shaft",
-      description: "Given its outline curve, it adds a Shaft opening to the active Revit document",
+      description: "Given its outline boundary, it adds a Shaft opening to the active Revit document",
       category: "Revit",
       subCategory: "Host"
     )
@@ -36,8 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
           NickName = "DOC",
           Description = "Document",
           Optional = true
-        },
-        ParamRelevance.Occasional
+        }, ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -45,7 +46,8 @@ namespace RhinoInside.Revit.GH.Components.Openings
         {
           Name = "Boundary",
           NickName = "B",
-          Description = "Boundary to create the shaft opening"
+          Description = "Boundary to create the shaft opening",
+          Access = GH_ParamAccess.list
         }
       ),
       new ParamDefinition
@@ -113,11 +115,29 @@ namespace RhinoInside.Revit.GH.Components.Openings
         doc.Value, _Opening_, (opening) =>
         {
           // Input
-          if (!Params.GetData(DA, "Boundary", out Curve boundary)) return null;
+          if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary)) return null;
           if (!Params.GetData(DA, "Base Constraint", out ARDB.Level baseLevel)) return null;
           if (!Params.TryGetData(DA, "Base Offset", out double? baseOffset)) return null;
           if (!Params.GetData(DA, "Top Constraint", out ARDB.Level topLevel)) return null;
           if (!Params.TryGetData(DA, "Top Offset", out double? topOffset)) return null;
+
+          var tol = GeometryObjectTolerance.Model;
+          var normal = default(Vector3d); var maxArea = 0.0;
+          var index = 0; var maxIndex = 0;
+          foreach (var loop in boundary)
+          {
+            if (loop is null) return null;
+            if
+            (
+              loop.IsShort(tol.ShortCurveTolerance) ||
+              !loop.IsClosed ||
+              !loop.TryGetPlane(out var plane, tol.VertexTolerance) ||
+              plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
+            )
+              throw new Exceptions.RuntimeArgumentException("Boundary", "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.", boundary);
+
+            index++;
+          }
 
           // Compute
           opening = Reconstruct(opening, doc.Value, boundary, baseLevel, baseOffset.HasValue ? baseOffset.Value : 0.0 , topLevel, topOffset.HasValue ? topOffset.Value : 0.0);
@@ -128,47 +148,92 @@ namespace RhinoInside.Revit.GH.Components.Openings
       );
     }
 
-    bool Reuse(ARDB.Opening opening, Curve boundary)
+    bool Reuse(ARDB.Opening opening, IList<Curve> boundaries)
     {
       if (opening is null) return false;
 
-      if (opening.BoundaryCurves is ARDB.CurveArray oldBoundary)
+      if (opening.GetSketch() is ARDB.Sketch sketch)
       {
-        var level = opening.Document.GetElement(opening.LevelId) as ARDB.Level;
-        var levelPlane = new Plane(new Point3d(0.0, 0.0, level.GetHeight() * Revit.ModelUnits), Vector3d.ZAxis);
-        boundary = Curve.ProjectToPlane(boundary, levelPlane);
+        var profiles = sketch.Profile.ToArray(GeometryDecoder.ToPolyCurve);
+        if (profiles.Length != boundaries.Count)
+          return false;
 
-        var newBoundary = boundary.ToCurveArray();
+        var tol = GeometryObjectTolerance.Model;
+        var hack = new ARDB.XYZ(1.0, 1.0, 0.0);
+        var loops = sketch.GetAllModelCurves();
+        var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
-        if (newBoundary.Size != oldBoundary.Size) return false;
-
-        for (int c = 0; c < newBoundary.Size; ++c)
+        var pi = 0;
+        foreach (var boundary in boundaries)
         {
-          if (!newBoundary.get_Item(c).IsAlmostEqualTo(oldBoundary.get_Item(c)))
-            return false;
+          var profile = Curve.ProjectToPlane(boundary, plane);
+
+          if
+          (
+            !Curve.GetDistancesBetweenCurves(profiles[pi], profile, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
+            max > tol.VertexTolerance
+          )
+          {
+            var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
+              polyCurve.DuplicateSegments() :
+              profile.Split(profile.Domain.Mid);
+
+            if (pi < loops.Count)
+            {
+              var loop = loops[pi];
+              if (segments.Length != loop.Count)
+                return false;
+
+              var index = 0;
+              foreach (var edge in loop)
+              {
+                var segment = segments[(++index) % segments.Length];
+
+                var curve = default(ARDB.Curve);
+                if
+                (
+                  edge.GeometryCurve is ARDB.HermiteSpline &&
+                  segment.TryGetHermiteSpline(out var points, out var start, out var end, tol.VertexTolerance)
+                )
+                {
+                  using (var tangents = new ARDB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
+                  {
+                    var xyz = points.ConvertAll(GeometryEncoder.ToXYZ);
+                    curve = ARDB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
+                  }
+                }
+                else curve = segment.ToCurve();
+
+                if (!edge.GeometryCurve.IsAlmostEqualTo(curve))
+                {
+                  // The following line allows SetGeometryCurve to work!!
+                  edge.Location.Move(hack);
+                  edge.SetGeometryCurve(curve, false);
+                }
+              }
+            }
+          }
+
+          pi++;
         }
       }
+      else return false;
 
       return true;
     }
 
-    ARDB.Opening Reconstruct(ARDB.Opening opening, ARDB.Document doc, Curve boundary, ARDB.Level baseLevel, double baseOffset, ARDB.Level topLevel, double topOffset)
+    ARDB.Opening Create(ARDB.Document doc, ARDB.Level baseLevel, ARDB.Level topLevel, IList<Curve> boundary)
+    {
+      return doc.Create.NewOpening(baseLevel, topLevel, boundary.ToCurveArray());
+    }
+
+    ARDB.Opening Reconstruct(ARDB.Opening opening, ARDB.Document doc, IList<Curve> boundary, ARDB.Level baseLevel, double baseOffset, ARDB.Level topLevel, double topOffset)
     {
       if (!Reuse(opening, boundary))
         opening = Create(doc, baseLevel, topLevel, boundary);
 
-      opening.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(baseOffset);
-      opening.get_Parameter(ARDB.BuiltInParameter.WALL_TOP_OFFSET).Update(topOffset);
-
-      return opening;
-    }
-
-    ARDB.Opening Create(ARDB.Document doc, ARDB.Level baseLevel, ARDB.Level topLevel, Curve boundary)
-    {
-      var opening = default(ARDB.Opening);
-
-      if (opening is null)
-        opening = doc.Create.NewOpening(baseLevel, topLevel, boundary.ToCurveArray());
+      opening.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(baseOffset / Revit.ModelUnits);
+      opening.get_Parameter(ARDB.BuiltInParameter.WALL_TOP_OFFSET).Update(topOffset / Revit.ModelUnits);
 
       return opening;
     }
