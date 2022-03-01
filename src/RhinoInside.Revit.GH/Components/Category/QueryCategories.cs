@@ -9,6 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
 {
   using External.DB.Extensions;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.6")]
   public class QueryCategories : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
@@ -56,8 +57,9 @@ namespace RhinoInside.Revit.GH.Components.Categories
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", ARDB.CategoryType.Model, GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", defaultValue: new Types.Category(), GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", optional: true, relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Category name", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Param_Boolean>("Is Subcategory", "ISC", "Is subcategory", defaultValue: false, GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Allows Subcategories", "ASC", "Category allows subcategories to be added", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Allows Parameters", "AP", "Category allows bound parameters", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Has Material Quantities", "HMQ", "Category has material quantities", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
@@ -78,6 +80,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
       if (!Params.TryGetData(DA, "Type", out ARDB.CategoryType? type)) return;
       if (!Params.TryGetData(DA, "Parent", out Types.Category parent)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
+      if (!Params.TryGetData(DA, "Is Subcategory", out bool? isSubcategory)) return;
       if (!Params.TryGetData(DA, "Allows Subcategories", out bool? allowsSubcategories)) return;
       if (!Params.TryGetData(DA, "Allows Parameters", out bool? allowsParameters)) return;
       if (!Params.TryGetData(DA, "Has Material Quantities", out bool? hasMaterialQuantities)) return;
@@ -90,6 +93,9 @@ namespace RhinoInside.Revit.GH.Components.Categories
 
       if (type.HasValue)
         categories = categories.Where(x => x.CategoryType == type);
+
+      if (isSubcategory.HasValue)
+        categories = categories.Where(x => x.Parent is object == isSubcategory.Value);
 
       if (allowsSubcategories.HasValue)
         categories = categories.Where(x => x.CanAddSubcategory == allowsSubcategories);
