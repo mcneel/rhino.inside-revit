@@ -58,9 +58,17 @@ namespace RhinoInside.Revit.GH.Components.Filters
           {
             foreach (var categoryId in categoriesWhereDefined)
             {
-              if (categoryId.IntegerValue == (int) ARDB.BuiltInCategory.OST_Areas) continue;
+              var schedule = default(ARDB.ViewSchedule);
+              if (categoryId.IntegerValue == (int) ARDB.BuiltInCategory.OST_Areas)
+              {
+                using (var collector = new ARDB.FilteredElementCollector(doc))
+                {
+                  var areaSchemeId = collector.OfClass(typeof(ARDB.AreaScheme)).FirstElementId();
+                  schedule = ARDB.ViewSchedule.CreateSchedule(doc, categoryId, areaSchemeId);
+                }
+              }
+              else schedule = ARDB.ViewSchedule.CreateSchedule(doc, categoryId);
 
-              var schedule = ARDB.ViewSchedule.CreateSchedule(doc, categoryId);
               try
               {
                 using (var field = schedule.Definition.AddField(ARDB.ScheduleFieldType.Instance, id))
