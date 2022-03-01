@@ -144,6 +144,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #endif
     }
 #endif
+  
+    public static Schemas.DataType GetDataType(this Autodesk.Revit.DB.ScheduleField field)
+    {
+#if REVIT_2021
+      return (Schemas.DataType) field.GetSpecTypeId();
+#else
+      return (Schemas.SpecType) field.UnitType;
+#endif
+    }  
 
 #if !REVIT_2021
     internal static Schemas.DataType GetDataType(this Autodesk.Revit.DB.ExternalDefinitionCreationOptions value) => value.Type;
