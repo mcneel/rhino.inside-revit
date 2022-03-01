@@ -53,26 +53,59 @@ namespace RhinoInside.Revit.GH.Components.Filters
             Where(cid => ARDB.TableView.GetAvailableParameters(doc, cid).Contains(id)).
             ToArray();
 
-          using (var collector = new ARDB.FilteredElementCollector(doc))
+          // Look into a Schedule table
+          using (var scope = External.DB.DisposableScope.RollBackScope(doc))
           {
-            using
-            (
-              var filteredCollector = categoriesWhereDefined.Length == 0 ?
-              collector.WherePasses(new ARDB.ElementClassFilter(typeof(ARDB.ParameterElement), false)) :
-              categoriesWhereDefined.Length > 1 ?
-                collector.WherePasses(new ARDB.ElementMulticategoryFilter(categoriesWhereDefined)) :
-                collector.WherePasses(new ARDB.ElementCategoryFilter(categoriesWhereDefined[0]))
-            )
+            foreach (var categoryId in categoriesWhereDefined)
             {
-              foreach (var element in filteredCollector)
-              {
-                var parameter = element.get_Parameter(builtInParameter);
-                if (parameter is null)
-                  continue;
+              if (categoryId.IntegerValue == (int) ARDB.BuiltInCategory.OST_Areas) continue;
 
-                dataType = parameter.Definition.GetDataType();
+              var schedule = ARDB.ViewSchedule.CreateSchedule(doc, categoryId);
+              try
+              {
+                using (var field = schedule.Definition.AddField(ARDB.ScheduleFieldType.Instance, id))
+                  dataType = field.GetDataType();
+
                 BuiltInParametersTypes.Add(builtInParameter, dataType);
                 return true;
+              }
+              catch (Autodesk.Revit.Exceptions.ArgumentsInconsistentException) { }
+              try
+              {
+                using (var field = schedule.Definition.AddField(ARDB.ScheduleFieldType.ElementType, id))
+                  dataType = field.GetDataType();
+
+                BuiltInParametersTypes.Add(builtInParameter, dataType);
+                return true;
+              }
+              catch (Autodesk.Revit.Exceptions.ArgumentsInconsistentException) { }
+            }
+          }
+
+          // Look into existig elements
+          if (dataType is null)
+          {
+            using (var collector = new ARDB.FilteredElementCollector(doc))
+            {
+              using
+              (
+                var filteredCollector = categoriesWhereDefined.Length == 0 ?
+                collector.WherePasses(new ARDB.ElementClassFilter(typeof(ARDB.ParameterElement), false)) :
+                categoriesWhereDefined.Length > 1 ?
+                  collector.WherePasses(new ARDB.ElementMulticategoryFilter(categoriesWhereDefined)) :
+                  collector.WherePasses(new ARDB.ElementCategoryFilter(categoriesWhereDefined[0]))
+              )
+              {
+                foreach (var element in filteredCollector)
+                {
+                  var parameter = element.get_Parameter(builtInParameter);
+                  if (parameter is null)
+                    continue;
+
+                  dataType = parameter.Definition.GetDataType();
+                  BuiltInParametersTypes.Add(builtInParameter, dataType);
+                  return true;
+                }
               }
             }
           }
