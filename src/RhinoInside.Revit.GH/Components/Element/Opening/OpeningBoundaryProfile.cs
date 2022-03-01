@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
@@ -11,10 +7,12 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Opening
 {
+  [ComponentVersion(introduced: "1.6")]
   public class OpeningBoundaryProfile : Component
   {
     public override Guid ComponentGuid => new Guid("E76B0F6B-4EE1-413D-825D-4A8EDD86D55F");
-    protected override string IconTag => String.Empty;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    protected override string IconTag => string.Empty;
 
     public OpeningBoundaryProfile() : base
     (
@@ -25,84 +23,62 @@ namespace RhinoInside.Revit.GH.Components.Element.Opening
       subCategory: "Host"
     )
     { }
+
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(
+      manager.AddParameter
+      (
         param: new Parameters.GraphicalElement(),
         name: "Opening",
         nickname: "O",
         description: "Opening object to query for its boundary profile",
         access: GH_ParamAccess.item
-        );
+      );
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddCurveParameter(
-        name: "Profile Curve",
-        nickname: "PC",
-        description: "Profile curves of a given opening element",
-        access: GH_ParamAccess.list
-        );
-      manager.AddPlaneParameter(
+      manager.AddPlaneParameter
+      (
         name: "Plane",
         nickname: "P",
         description: "Plane of a given opening element",
+        access: GH_ParamAccess.item
+      );
+
+      manager.AddCurveParameter
+      (
+        name: "Profile",
+        nickname: "PC",
+        description: "Profile curves of a given opening element",
         access: GH_ParamAccess.list
-        );
+      );
     }
 
-    public List<Plane> GetOpeningPlaneFromRectBoundary(ARDB.Opening opening)
+    public bool TryGetRectBoundary(ARDB.Opening opening, out Plane plane, out Curve profile)
     {
-      var p0 = opening.BoundaryRect[0].ToPoint3d();
-      var p1 = opening.BoundaryRect[1].ToPoint3d();
-      var p2 = new Point3d(p0.X, p0.Y, p1.Z);
-      var p3 = new Point3d(p1.X, p1.Y, p0.Z);
-
-      var line = new Line(p0, p1);
-      var center = line.PointAt(0.5);
-      var xAxis = p3 - p0;
-      var yAxis = p2 - p0;
-
-      return new List<Plane> { new Plane(center, xAxis, yAxis) };
-    }
-
-    public IEnumerable<Curve> GetRhinoBoundaryFromRectBoundary(ARDB.Opening opening)
-    {
-      var p0 = opening.BoundaryRect[0].ToPoint3d();
-      var p1 = opening.BoundaryRect[1].ToPoint3d();
-      var p2 = new Point3d(p0.X, p0.Y, p1.Z);
-      var p3 = new Point3d(p1.X, p1.Y, p0.Z);
-      var pline = new Polyline(new List<Point3d>() { p0, p2, p1, p3, p0 });
-      
-      return new List<Curve> { pline.ToNurbsCurve() };
-    }
-
-    public IEnumerable<Plane> GetOpeningPlaneFromCurvBoundary(IEnumerable<Curve> curves)
-    {
-      List<Plane> planes = new List<Plane>();
-
-      foreach (Curve curve in curves)
+      if (opening.IsRectBoundary)
       {
-        Plane plane = default;
-        if (curve.TryGetPlane(out plane))
-        {
-          var zAxis = plane.ZAxis;
-          var xAxis = zAxis.PerpVector();
-          var yAxis = Vector3d.CrossProduct(zAxis, xAxis);
-          Box worldBox;
-          curve.GetBoundingBox(new Plane(plane.Origin, xAxis, yAxis), out worldBox);
-          planes.Add(new Plane(worldBox.Center, xAxis, yAxis));
-        }
+        var p0 = opening.BoundaryRect[0].ToPoint3d();
+        var p1 = opening.BoundaryRect[1].ToPoint3d();
+        var p2 = new Point3d(p0.X, p0.Y, p1.Z);
+        var p3 = new Point3d(p1.X, p1.Y, p0.Z);
+
+        var line = new Line(p0, p1);
+        var center = line.PointAt(0.5);
+        var xAxis = p3 - p0;
+        var yAxis = p2 - p0;
+
+        plane = new Plane(center, xAxis, yAxis);
+        profile = new PolylineCurve(new Point3d[] { p0, p2, p1, p3, p0 });
+        return true;
       }
-
-      return planes;
-    }
-
-    public IEnumerable<Curve> GetRhinoBoundaryFromCurvBoundary(ARDB.Opening opening)
-    {
-      var curves = GeometryDecoder.ToCurveMany(opening.BoundaryCurves);
-      return Curve.JoinCurves(curves);
+      else
+      {
+        plane = Plane.Unset;
+        profile = default;
+        return false;
+      }
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -111,19 +87,16 @@ namespace RhinoInside.Revit.GH.Components.Element.Opening
       if (!DA.GetData("Opening", ref opening))
         return;
 
-      if (opening.IsRectBoundary)
+      if (TryGetRectBoundary(opening, out var plane, out var profile))
       {
-        DA.SetDataList("Profile Curve", GetRhinoBoundaryFromRectBoundary(opening));
-        DA.SetDataList("Plane", GetOpeningPlaneFromRectBoundary(opening));
+        DA.SetData("Plane", plane);
+        DA.SetData("Profile", profile);
       }
-
-      else
+      else if (opening.GetSketch() is ARDB.Sketch sketch)
       {
-        var curves = GetRhinoBoundaryFromCurvBoundary(opening);
-        DA.SetDataList("Profile Curve", curves);
-        DA.SetDataList("Plane", GetOpeningPlaneFromCurvBoundary(curves));
+        DA.SetData("Plane", sketch.SketchPlane.GetPlane().ToPlane());
+        DA.SetDataList("Profile", sketch.Profile.ToCurveMany());
       }
-        
     }
   }
 }

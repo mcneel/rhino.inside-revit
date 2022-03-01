@@ -10,6 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Openings
 {
+  [ComponentVersion(introduced: "1.6")]
   public class AddShaftOpening : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("657811B7-6662-4FCF-A67A-A65C34FA0651");
@@ -25,7 +26,6 @@ namespace RhinoInside.Revit.GH.Components.Openings
       subCategory: "Host"
     )
     { }
-
 
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
@@ -122,8 +122,6 @@ namespace RhinoInside.Revit.GH.Components.Openings
           if (!Params.TryGetData(DA, "Top Offset", out double? topOffset)) return null;
 
           var tol = GeometryObjectTolerance.Model;
-          var normal = default(Vector3d); var maxArea = 0.0;
-          var index = 0; var maxIndex = 0;
           foreach (var loop in boundary)
           {
             if (loop is null) return null;
@@ -135,8 +133,6 @@ namespace RhinoInside.Revit.GH.Components.Openings
               plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
             )
               throw new Exceptions.RuntimeArgumentException("Boundary", "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.", boundary);
-
-            index++;
           }
 
           // Compute
