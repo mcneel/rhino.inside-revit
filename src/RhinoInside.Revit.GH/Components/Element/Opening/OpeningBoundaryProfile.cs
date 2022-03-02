@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Opening
     {
       manager.AddParameter
       (
-        param: new Parameters.GraphicalElement(),
+        param: new Parameters.Opening(),
         name: "Opening",
         nickname: "O",
         description: "Opening object to query for its boundary profile",

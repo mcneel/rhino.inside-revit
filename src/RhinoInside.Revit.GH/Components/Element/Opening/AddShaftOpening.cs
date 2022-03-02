@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
     {
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.Opening()
         {
           Name = _Opening_,
           NickName = _Opening_.Substring(0, 1),

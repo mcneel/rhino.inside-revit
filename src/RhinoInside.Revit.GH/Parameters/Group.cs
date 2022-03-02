@@ -2,6 +2,7 @@ using System;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
+using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -15,7 +16,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var CreateGroup = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.CreateGroup);
+      var CreateGroup = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.CreateGroup);
       Menu_AppendItem
       (
         menu, $"Set new {TypeName}",
