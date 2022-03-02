@@ -5,7 +5,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
-  public class AnalyzeCurtainGridMullionType : AnalysisComponent
+  public class AnalyzeCurtainGridMullionType : Component
   {
     public override Guid ComponentGuid => new Guid("66A9F189-D2BD-4E47-8C97-A469E3DD861B");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
@@ -167,8 +167,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
       DA.SetData("Mullion System Family", mullionSystemFamily);
 
-      PipeHostParameter(DA, mullionType, ARDB.BuiltInParameter.MULLION_ANGLE, "Angle");
-      PipeHostParameter(DA, mullionType, ARDB.BuiltInParameter.MULLION_OFFSET, "Offset");
+      DA.SetData("Angle", mullionType?.get_Parameter(ARDB.BuiltInParameter.MULLION_ANGLE).AsGoo());
+      DA.SetData("Offset", mullionType?.get_Parameter(ARDB.BuiltInParameter.MULLION_OFFSET).AsGoo());
 
       var profile = new Types.MullionProfile(mullionType.Document, mullionType.get_Parameter(ARDB.BuiltInParameter.MULLION_PROFILE).AsElementId());
       DA.SetData("Profile", profile);
@@ -176,7 +176,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       var position = new Types.MullionPosition(mullionType.Document, mullionType.get_Parameter(ARDB.BuiltInParameter.MULLION_POSITION).AsElementId());
       DA.SetData("Position", position);
 
-      PipeHostParameter(DA, mullionType, ARDB.BuiltInParameter.MULLION_CORNER_TYPE, "Corner Mullion");
+      DA.SetData("Corner Mullion", mullionType?.get_Parameter(ARDB.BuiltInParameter.MULLION_CORNER_TYPE).AsGoo());
 
       // output params are reused for various mullion types
       //

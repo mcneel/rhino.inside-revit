@@ -5,21 +5,21 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
-  public class AnalyzeCurtainGridPanel : AnalysisComponent
+  public class AnalyzeCurtainGridPanel : Component
   {
     public override Guid ComponentGuid => new Guid("08507225-C8DA-44A8-A282-C9B1AF1C61F4");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "ACGP";
 
-    public AnalyzeCurtainGridPanel() : base(
+    public AnalyzeCurtainGridPanel() : base
+    (
       name: "Analyze Panel",
       nickname: "A-P",
       description: "Analyze given panel element",
       category: "Revit",
       subCategory: "Wall"
     )
-    {
-    }
+    { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
@@ -113,8 +113,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
         DA.SetData("Host Panel", null);
       }
 
-      PipeHostParameter(DA, instance, ARDB.BuiltInParameter.GENERIC_WIDTH, "Width");
-      PipeHostParameter(DA, instance, ARDB.BuiltInParameter.GENERIC_HEIGHT, "Height");
+      DA.SetData("Width", instance?.get_Parameter(ARDB.BuiltInParameter.GENERIC_WIDTH).AsGoo());
+      DA.SetData("Height", instance?.get_Parameter(ARDB.BuiltInParameter.GENERIC_HEIGHT).AsGoo());
     }
   }
 }

@@ -4,21 +4,21 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
-  public class AnalyzeCurtainWallType : AnalysisComponent
+  public class AnalyzeCurtainWallType : Component
   {
     public override Guid ComponentGuid => new Guid("D0874F93-0946-42B1-95A9-92C654522BC8");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "ACWT";
 
-    public AnalyzeCurtainWallType() : base(
+    public AnalyzeCurtainWallType() : base
+    (
       name: "Analyze Curtain Wall Type",
       nickname: "A-CWT",
       description: "Analyze given Curtain Wall Type",
       category: "Revit",
       subCategory: "Wall"
     )
-    {
-    }
+    { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
@@ -161,30 +161,30 @@ namespace RhinoInside.Revit.GH.Components.Walls
       if (wallType.Kind == ARDB.WallKind.Curtain)
       {
         // properties of the wall type
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.FUNCTION_PARAM, "Function");
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.ALLOW_AUTO_EMBED, "Automatically Embed");
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.AUTO_PANEL_WALL, "Curtain Panel");
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL, "Join Condition");
+        DA.SetData("Function", wallType.get_Parameter(ARDB.BuiltInParameter.FUNCTION_PARAM).AsGoo());
+        DA.SetData("Automatically Embed", wallType.get_Parameter(ARDB.BuiltInParameter.ALLOW_AUTO_EMBED).AsGoo());
+        DA.SetData("Curtain Panel", wallType.get_Parameter(ARDB.BuiltInParameter.AUTO_PANEL_WALL).AsGoo());
+        DA.SetData("Join Condition", wallType.get_Parameter(ARDB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL).AsGoo());
 
         // layout (vertical)
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.SPACING_LAYOUT_VERT, "Vertical Grid : Layout");
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.SPACING_LENGTH_VERT, "Vertical Grid : Spacing");
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.CURTAINGRID_ADJUST_BORDER_VERT, "Vertical Grid : Adjust for Mullion Size");
+        DA.SetData("Vertical Grid : Layout", wallType.get_Parameter(ARDB.BuiltInParameter.SPACING_LAYOUT_VERT).AsGoo());
+        DA.SetData("Vertical Grid : Spacing", wallType.get_Parameter(ARDB.BuiltInParameter.SPACING_LENGTH_VERT).AsGoo());
+        DA.SetData("Vertical Grid : Adjust for Mullion Size", wallType.get_Parameter(ARDB.BuiltInParameter.CURTAINGRID_ADJUST_BORDER_VERT).AsGoo());
 
         // layout (horizontal)
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.SPACING_LAYOUT_HORIZ, "Horizontal Grid : Layout");
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.SPACING_LENGTH_HORIZ, "Horizontal Grid : Spacing");
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.CURTAINGRID_ADJUST_BORDER_HORIZ, "Horizontal Grid : Adjust for Mullion Size");
+        DA.SetData("Horizontal Grid : Layout", wallType.get_Parameter(ARDB.BuiltInParameter.SPACING_LAYOUT_HORIZ).AsGoo());
+        DA.SetData("Horizontal Grid : Spacing", wallType.get_Parameter(ARDB.BuiltInParameter.SPACING_LENGTH_HORIZ).AsGoo());
+        DA.SetData("Horizontal Grid : Adjust for Mullion Size", wallType.get_Parameter(ARDB.BuiltInParameter.CURTAINGRID_ADJUST_BORDER_HORIZ).AsGoo());
 
         // mullion types(vertical)
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.AUTO_MULLION_INTERIOR_VERT, "Vertical Mullions : Interior Type");
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_VERT, "Vertical Mullions : Border 1 Type");
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_VERT, "Vertical Mullions : Border 2 Type");
+        DA.SetData("Vertical Mullions : Interior Type", wallType.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_INTERIOR_VERT).AsGoo());
+        DA.SetData("Vertical Mullions : Border 1 Type", wallType.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_VERT).AsGoo());
+        DA.SetData("Vertical Mullions : Border 2 Type", wallType.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_VERT).AsGoo());
 
         // mullion types (horizontal)
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.AUTO_MULLION_INTERIOR_HORIZ, "Horizontal Mullions : Interior Type");
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_HORIZ, "Horizontal Mullions : Border 1 Type");
-        PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_HORIZ, "Horizontal Mullions : Border 2 Type");
+        DA.SetData("Horizontal Mullions : Interior Type", wallType.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_INTERIOR_HORIZ).AsGoo());
+        DA.SetData("Horizontal Mullions : Border 1 Type", wallType.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_HORIZ).AsGoo());
+        DA.SetData("Horizontal Mullions : Border 2 Type", wallType.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_HORIZ).AsGoo());
       }
     }
   }

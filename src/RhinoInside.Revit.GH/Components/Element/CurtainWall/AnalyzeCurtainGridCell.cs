@@ -5,7 +5,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
-  public class AnalyzeCurtainGridCell : AnalysisComponent
+  public class AnalyzeCurtainGridCell : Component
   {
     public override Guid ComponentGuid => new Guid("FC7D5729-7D27-453A-A4A2-0E150C749083");
     public override GH_Exposure Exposure => GH_Exposure.septenary;

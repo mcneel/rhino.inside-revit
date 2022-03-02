@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.SpatialElements
 {
-  public class AnalyzeInstanceSpace : AnalysisComponent
+  public class AnalyzeInstanceSpace : Component
   {
     public override Guid ComponentGuid => new Guid("6AC37380-D14F-46BF-835C-611DB8C38E3B");
     public override GH_Exposure Exposure => GH_Exposure.primary;

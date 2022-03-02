@@ -5,13 +5,14 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
-  public class AnalyzeBasicWallType : AnalysisComponent
+  public class AnalyzeBasicWallType : Component
   {
     public override Guid ComponentGuid => new Guid("00A650ED-4CC7-4AD3-BF38-491507315AC5");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "ABWT";
 
-    public AnalyzeBasicWallType() : base(
+    public AnalyzeBasicWallType() : base
+    (
       name: "Analyze Basic Wall Type",
       nickname: "A-BWT",
       description: "Analyze given Basic Wall type",
@@ -64,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       manager.AddParameter(
         param: new Parameters.Param_Enum<Types.WallFunction>(),
         name: "Function",
-        nickname: "WF",
+        nickname: "F",
         description: "Wall Function of given Basic Wall type",
         access: GH_ParamAccess.item
         );
@@ -85,10 +86,10 @@ namespace RhinoInside.Revit.GH.Components.Walls
       DA.SetData("Structure", new Types.CompoundStructure(wallType.Document, wallType.GetCompoundStructure()));
 
       // pipe the wall type parameters directly to component outputs
-      PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM, "Wrapping at Inserts");
-      PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM, "Wrapping at Ends");
-      PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM, "Width");
-      PipeHostParameter(DA, wallType, ARDB.BuiltInParameter.FUNCTION_PARAM, "Function");
+      DA.SetData("Wrapping at Inserts", wallType.get_Parameter(ARDB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM).AsGoo());
+      DA.SetData("Wrapping at Ends", wallType.get_Parameter(ARDB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM).AsGoo());
+      DA.SetData("Width", wallType.get_Parameter(ARDB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM).AsGoo());
+      DA.SetData("Function", wallType.get_Parameter(ARDB.BuiltInParameter.FUNCTION_PARAM).AsGoo());
     }
   }
 }

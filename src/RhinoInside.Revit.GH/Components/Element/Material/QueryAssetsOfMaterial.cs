@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Materials
 {
-  public class QueryAssetsOfMaterial : AnalysisComponent
+  public class QueryAssetsOfMaterial : Component
   {
     public override Guid ComponentGuid =>
       new Guid("1f644064-035a-4fa1-971b-64d7da824f09");

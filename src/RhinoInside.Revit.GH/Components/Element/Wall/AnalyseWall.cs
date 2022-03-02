@@ -6,13 +6,14 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
-  public class AnalyzeWall : AnalysisComponent
+  public class AnalyzeWall : Component
   {
     public override Guid ComponentGuid => new Guid("1169CEB6-381C-4353-8ACE-874938755694");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "AW";
 
-    public AnalyzeWall() : base(
+    public AnalyzeWall() : base
+    (
       name: "Analyze Wall",
       nickname: "A-W",
       description: "Analyze given Wall element",
@@ -116,8 +117,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
         access: GH_ParamAccess.item
         );
       manager.AddNumberParameter(
-        name: "Slant Angle",
-        nickname: "SA",
+        name: "Angle From Vertical",
+        nickname: "AFV",
         description: "Slant angle of the wall",
         access: GH_ParamAccess.item
         );
@@ -167,41 +168,41 @@ namespace RhinoInside.Revit.GH.Components.Walls
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // grab input wall type
-      ARDB.Wall wallInstance = default;
-      if (!DA.GetData("Wall", ref wallInstance))
+      ARDB.Wall wall = default;
+      if (!DA.GetData("Wall", ref wall))
         return;
 
-      DA.SetData("Wall System Family", new Types.WallSystemFamily(wallInstance.WallType.Kind));
-      DA.SetData("Wall Type", Types.ElementType.FromElement(wallInstance.WallType));
-      if (wallInstance.IsStackedWallMember)
-        DA.SetData("Parent Stacked Wall", Types.Element.FromElement(wallInstance.Document.GetElement(wallInstance.StackedWallOwnerId)));
+      DA.SetData("Wall System Family", new Types.WallSystemFamily(wall.WallType.Kind));
+      DA.SetData("Wall Type", Types.ElementType.FromElement(wall.WallType));
+      if (wall.IsStackedWallMember)
+        DA.SetData("Parent Stacked Wall", Types.Element.FromElement(wall.Document.GetElement(wall.StackedWallOwnerId)));
 
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT, "Base Level");
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_BASE_OFFSET, "Base Level Offset");
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_BOTTOM_IS_ATTACHED, "Bottom Is Attached");
+      DA.SetData("Base Level", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).AsGoo());
+      DA.SetData("Base Level Offset", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).AsGoo());
+      DA.SetData("Bottom Is Attached", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_BOTTOM_IS_ATTACHED).AsGoo());
 
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_HEIGHT_TYPE, "Top Level");
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_TOP_OFFSET, "Top Level Offset");
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_TOP_IS_ATTACHED, "Top Is Attached");
+      DA.SetData("Top Level", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).AsGoo());
+      DA.SetData("Top Level Offset", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_TOP_OFFSET).AsGoo());
+      DA.SetData("Top Is Attached", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_TOP_IS_ATTACHED).AsGoo());
 
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM, "Height");
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.CURVE_ELEM_LENGTH, "Length");
-      DA.SetData("Width", wallInstance.GetWidth() * GeometryDecoder.ModelScaleFactor);
 #if REVIT_2021
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL, "Slant Angle");
+      DA.SetData("Angle From Vertical", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).AsGoo());
 #else
-      // if slant is not supported, it is 0
-      DA.SetData("Slant Angle", 0.0);
+      DA.SetData("Angle From Vertical", 0.0);
 #endif
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.HOST_AREA_COMPUTED, "Area");
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.HOST_VOLUME_COMPUTED, "Volume");
+      DA.SetData("Height", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsGoo());
+      DA.SetData("Length", wall?.get_Parameter(ARDB.BuiltInParameter.CURVE_ELEM_LENGTH).AsGoo());
+      DA.SetData("Width", wall.GetWidth() * GeometryDecoder.ModelScaleFactor);
 
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_ATTR_ROOM_BOUNDING, "Is Room Bounding");
+      DA.SetData("Area", wall?.get_Parameter(ARDB.BuiltInParameter.HOST_AREA_COMPUTED).AsGoo());
+      DA.SetData("Volume", wall?.get_Parameter(ARDB.BuiltInParameter.HOST_VOLUME_COMPUTED).AsGoo());
 
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT, "Structural");
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM, "Structural Usage");
+      DA.SetData("Is Room Bounding", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_ATTR_ROOM_BOUNDING).AsGoo());
 
-      DA.SetData("Orientation", wallInstance.GetOrientationVector().ToVector3d());
+      DA.SetData("Structural", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).AsGoo());
+      DA.SetData("Structural Usage", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).AsGoo());
+
+      DA.SetData("Orientation", wall.GetOrientationVector().ToVector3d());
     }
   }
 }

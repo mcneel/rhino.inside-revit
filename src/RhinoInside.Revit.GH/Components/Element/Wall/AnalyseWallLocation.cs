@@ -8,7 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
-  public class AnalyzeWallLocationCurve : AnalysisComponent
+  public class AnalyzeWallLocationCurve : Component
   {
     public override Guid ComponentGuid => new Guid("4C5260C3-B15E-482B-8A1D-38CD868E3E72");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -107,16 +107,16 @@ namespace RhinoInside.Revit.GH.Components.Walls
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // grab input wall type
-      ARDB.Wall wallInstance = default;
-      if (!DA.GetData("Wall", ref wallInstance))
+      ARDB.Wall wall = default;
+      if (!DA.GetData("Wall", ref wall))
         return;
 
-      DA.SetData("Center Curve", wallInstance.GetCenterCurve().ToCurve());
-      PipeHostParameter(DA, wallInstance, ARDB.BuiltInParameter.WALL_KEY_REF_PARAM, "Location Line");
+      DA.SetData("Center Curve", wall.GetCenterCurve().ToCurve());
+      DA.SetData("Location Line", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).AsGoo());
 
-      var offsetPlaneNormal = GetOffsetPlaneNormal(wallInstance);
-      var offsetValue = GetOffsetForLocationCurve(wallInstance);
-      var locationCurve = OffsetLocationCurve(wallInstance.GetLocationCurve().Curve, offsetValue, offsetPlaneNormal);
+      var offsetPlaneNormal = GetOffsetPlaneNormal(wall);
+      var offsetValue = GetOffsetForLocationCurve(wall);
+      var locationCurve = OffsetLocationCurve(wall.GetLocationCurve().Curve, offsetValue, offsetPlaneNormal);
       DA.SetData("Offset Value", offsetValue);
       DA.SetData("Location Curve", locationCurve.ToCurve());
     }
