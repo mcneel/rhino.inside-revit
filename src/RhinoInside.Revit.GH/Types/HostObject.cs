@@ -12,6 +12,11 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Host")]
   public interface IGH_HostObject : IGH_InstanceElement { }
 
+  interface ICurtainGridsAccess
+  {
+    IList<CurtainGrid> CurtainGrids { get; }
+  }
+
   [Kernel.Attributes.Name("Host")]
   public class HostObject : InstanceElement, IGH_HostObject
   {
@@ -75,24 +80,6 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return base.Location;
-      }
-    }
-
-    public IList<CurtainGrid> CurtainGrids
-    {
-      get
-      {
-        var grids = default(IEnumerable<ARDB.CurtainGrid>);
-        switch (Value)
-        {
-          case ARDB.CurtainSystem curtainSystem: grids = curtainSystem.CurtainGrids?.Cast<ARDB.CurtainGrid>(); break;
-          case ARDB.ExtrusionRoof extrusionRoof: grids = extrusionRoof.CurtainGrids?.Cast<ARDB.CurtainGrid>(); break;
-          case ARDB.FootPrintRoof footPrintRoof: grids = footPrintRoof.CurtainGrids?.Cast<ARDB.CurtainGrid>(); break;
-          case ARDB.Wall wall: grids = wall.CurtainGrid is ARDB.CurtainGrid grid ? Enumerable.Repeat(grid, 1) : default; break;
-          default: return new CurtainGrid[0];
-        }
-
-        return grids?.Select(x => new CurtainGrid(Value, x)).ToArray();
       }
     }
   }

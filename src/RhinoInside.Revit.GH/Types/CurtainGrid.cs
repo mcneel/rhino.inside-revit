@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Value is ARDB.CurtainGrid grid)
-          return $"Curtain Grid [{grid.NumULines} x {grid.NumVLines}]";
+          return $"Curtain Grid [{grid.NumVLines + 1} x {grid.NumULines + 1}]";
 
         return "Curtain Grid";
       }

@@ -30,11 +30,10 @@ namespace RhinoInside.Revit.GH.Components.Hosts
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var host = default(Types.HostObject);
-      if (!DA.GetData("Host", ref host) || host is null)
-        return;
+      if (!Params.GetData(DA, "Host", out Types.HostObject host)) return;
 
-      DA.SetDataList("Curtain Grids", host.CurtainGrids);
+      if (host is Types.ICurtainGridsAccess grids)
+        DA.SetDataList("Curtain Grids", grids.CurtainGrids);
     }
   }
 }

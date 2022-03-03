@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -9,10 +10,9 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Roof")]
-  public class Roof : HostObject
+  public class Roof : HostObject, ICurtainGridsAccess
   {
     protected override Type ValueType => typeof(ARDB.RoofBase);
-    public static explicit operator ARDB.RoofBase(Roof value) => value?.Value;
     public new ARDB.RoofBase Value => base.Value as ARDB.RoofBase;
 
     public Roof() { }
@@ -81,5 +81,26 @@ namespace RhinoInside.Revit.GH.Types
         return base.Location;
       }
     }
+
+    #region IGH_CurtainGridsAccess
+    public IList<CurtainGrid> CurtainGrids
+    {
+      get
+      {
+        switch (Value)
+        {
+          case ARDB.ExtrusionRoof extrusionRoof:
+            return extrusionRoof.CurtainGrids?.Cast<ARDB.CurtainGrid>().
+              Select(x => new CurtainGrid(extrusionRoof, x)).ToArray();
+
+          case ARDB.FootPrintRoof footPrintRoof:
+            return footPrintRoof.CurtainGrids?.Cast<ARDB.CurtainGrid>().
+              Select(x => new CurtainGrid(footPrintRoof, x)).ToArray();
+        }
+
+        return default;
+      }
+    }
+    #endregion
   }
 }

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
@@ -7,10 +9,9 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Wall")]
-  public class Wall : HostObject
+  public class Wall : HostObject, ICurtainGridsAccess
   {
     protected override Type ValueType => typeof(ARDB.Wall);
-    public static explicit operator ARDB.Wall(Wall value) => value?.Value;
     public new ARDB.Wall Value => base.Value as ARDB.Wall;
 
     public Wall() { }
@@ -155,6 +156,25 @@ namespace RhinoInside.Revit.GH.Types
         return null;
       }
     }
+
+    //public override Brep PolySurface
+    //{
+    //  get
+    //  {
+    //    if (Value?.CurtainGrid is ARDB.CurtainGrid grid && Surface is Surface surface)
+    //    {
+    //      var loops = grid.GetCurtainCells().SelectMany(x => x.CurveLoops.ToCurveMany()).ToArray();
+    //      return surface.CreateTrimmedSurface(loops, GeometryObjectTolerance.Model.VertexTolerance);
+    //    }
+
+    //    return base.PolySurface;
+    //  }
+    //}
+    #endregion
+
+    #region IGH_CurtainGridsAccess
+    public IList<CurtainGrid> CurtainGrids => Value is ARDB.Wall wall && wall.CurtainGrid is ARDB.CurtainGrid grid?
+      new CurtainGrid[] { new CurtainGrid(wall, grid) } : default;
     #endregion
 
     #region Joins
