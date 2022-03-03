@@ -285,6 +285,27 @@
         ]
     },
     {
+        "highlight": true,
+        "title": "Conveyor and Rhino.Inside.Revit Explained",
+        "url": "https://youtu.be/di13kZQWsl0",
+        "thumbnail": "https://i3.ytimg.com/vi/di13kZQWsl0/maxresdefault.jpg",
+        "author": "Nathan Miller @ Proving Ground",
+        "authorUrl": "https://apps.provingground.io/",
+        "description": "We often get asked how Conveyor is different than Rhino.Inside Revit - the good news is that they are designed to work together!",
+        "kinds": [
+            "overview",
+            "video"
+        ],
+        "tags": [
+            "discussion",
+            "workflow"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
         "title": "BIMThoughts Rhino.Inside.Revit",
         "url": "https://youtu.be/4P5jO4clI5k",
         "thumbnail": "https://i3.ytimg.com/vi/4P5jO4clI5k/maxresdefault.jpg",
