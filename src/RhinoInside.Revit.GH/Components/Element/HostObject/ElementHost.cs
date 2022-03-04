@@ -50,11 +50,6 @@ namespace RhinoInside.Revit.GH.Components.Hosts
         DA.SetData("Host", Types.HostObject.FromElement(opening.Host));
         return;
       }
-      else if (element is ARDB.Sketch sketch)
-      {
-        DA.SetData("Host", Types.HostObject.FromElement(sketch.GetOwner<ARDB.HostObject>()));
-        return;
-      }
       else if (element.get_Parameter(ARDB.BuiltInParameter.HOST_ID_PARAM) is ARDB.Parameter hostId)
       {
         DA.SetData("Host", Types.HostObject.FromElementId(element.Document, hostId.AsElementId()));
