@@ -563,4 +563,122 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
   }
+
+  [Kernel.Attributes.Name("Reference Point")]
+  public class ReferencePoint : GraphicalElement, Bake.IGH_BakeAwareElement
+  {
+    protected override Type ValueType => typeof(ARDB.ReferencePoint);
+    public new ARDB.ReferencePoint Value => base.Value as ARDB.ReferencePoint;
+
+    public ReferencePoint() { }
+    public ReferencePoint(ARDB.ReferencePoint value) : base(value) { }
+
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      if (Value is ARDB.ReferencePoint referencePoint)
+      {
+        return new BoundingBox
+        (
+          new Point3d[]
+          {
+              referencePoint.Position.ToPoint3d(),
+              referencePoint.Position.ToPoint3d()
+          },
+          xform
+        );
+      }
+
+      return base.GetBoundingBox(xform);
+    }
+
+    #region IGH_PreviewData
+    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (Value is ARDB.ReferencePoint referencePoint)
+      {
+        args.Pipeline.DrawPoint
+        (
+          referencePoint.Position.ToPoint3d(),
+          Grasshopper.CentralSettings.PreviewPointStyle,
+          Grasshopper.CentralSettings.PreviewPointRadius,
+          args.Color
+        );
+      }
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      // 3. Update if necessary
+      if (Value is ARDB.ReferencePoint point)
+      {
+        att = att.Duplicate();
+        att.Name = DisplayName;
+        if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
+          att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+        guid = doc.Objects.AddPoint(point.Position.ToPoint3d(), att);
+
+        if (guid != Guid.Empty)
+        {
+          idMap.Add(Id, guid);
+          return true;
+        }
+      }
+
+      return false;
+    }
+    #endregion
+
+    #region Properties
+    public override BoundingBox BoundingBox
+    {
+      get
+      {
+        if (Value is ARDB.ReferencePoint referencePoint)
+        {
+          return new BoundingBox
+          (
+            new Point3d[]
+            {
+              referencePoint.Position.ToPoint3d(),
+              referencePoint.Position.ToPoint3d()
+            }
+          );
+        }
+
+        return NaN.BoundingBox;
+      }
+    }
+
+    public override Plane Location
+    {
+      get
+      {
+        if (Value is ARDB.ReferencePoint referencePoint)
+        {
+          using (var transform = referencePoint.GetCoordinateSystem())
+            return new Plane(transform.Origin.ToPoint3d(), transform.BasisX.ToVector3d(), transform.BasisY.ToVector3d());
+        }
+
+        return NaN.Plane;
+      }
+    }
+    #endregion
+  }
 }

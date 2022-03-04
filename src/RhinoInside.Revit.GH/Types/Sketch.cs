@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Types
     public new ARDB.Sketch Value => base.Value as ARDB.Sketch;
 
     public Sketch() : base() { }
-    public Sketch(ARDB.Sketch sketchPlane) : base(sketchPlane) { }
+    public Sketch(ARDB.Sketch sketch) : base(sketch) { }
 
     public override bool CastFrom(object source)
     {

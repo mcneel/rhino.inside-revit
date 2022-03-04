@@ -165,6 +165,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Level),                   (element)=> new Level                 (element as ARDB.Level)             },
       { typeof(ARDB.Grid),                    (element)=> new Grid                  (element as ARDB.Grid)              },
       { typeof(ARDB.ReferencePlane),          (element)=> new ReferencePlane        (element as ARDB.ReferencePlane)    },
+      { typeof(ARDB.ReferencePoint),          (element)=> new ReferencePoint        (element as ARDB.ReferencePoint)    },
       { typeof(ARDB.SpatialElement),          (element)=> new SpatialElement        (element as ARDB.SpatialElement)    },
       { typeof(ARDB.Group),                   (element)=> new Group                 (element as ARDB.Group)             },
       { typeof(ARDB.Opening),                 (element)=> new Opening               (element as ARDB.Opening)           },
@@ -389,7 +390,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(out target))
+      if (base.CastTo(out target))
         return true;
 
       var element = Value;
