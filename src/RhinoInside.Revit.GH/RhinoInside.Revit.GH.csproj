@@ -117,6 +117,7 @@
     <Compile Include="Components\Element\Material\DeconstructProceduralAssets.cs" />
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Material\QueryMaterials.cs" />
+    <Compile Include="Components\Element\Opening\AddWallOpening.cs" />
     <Compile Include="Components\Element\Opening\OpeningBoundaryProfile.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
     <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
