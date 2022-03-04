@@ -15,10 +15,12 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_FamilyInstance : IGH_InstanceElement { }
 
   [Kernel.Attributes.Name("Component")]
-  public class FamilyInstance : InstanceElement, IGH_FamilyInstance, Bake.IGH_BakeAwareElement
+  public class FamilyInstance : InstanceElement,
+    IGH_FamilyInstance,
+    IHostObjectAccess,
+    Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.FamilyInstance);
-    public static explicit operator ARDB.FamilyInstance(FamilyInstance value) => value?.Value;
     public new ARDB.FamilyInstance Value => base.Value as ARDB.FamilyInstance;
 
     public FamilyInstance() { }
@@ -268,6 +270,11 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+    #endregion
+
+    #region IHostObjectAccess
+    public HostObject Host => Value is ARDB.FamilyInstance instance ?
+      HostObject.FromElement(instance.Host) as HostObject : default;
     #endregion
 
     #region Joins

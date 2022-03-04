@@ -9,15 +9,15 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Ceiling")]
-  public class Ceiling : HostObject
+  public class Ceiling : HostObject, ISketchAccess
   {
     protected override Type ValueType => typeof(ARDB.Ceiling);
-    public static explicit operator ARDB.Ceiling(Ceiling value) => value?.Value;
     public new ARDB.Ceiling Value => base.Value as ARDB.Ceiling;
 
     public Ceiling() { }
     public Ceiling(ARDB.Ceiling ceiling) : base(ceiling) { }
 
+    #region Location
     public override Plane Location
     {
       get
@@ -54,5 +54,11 @@ namespace RhinoInside.Revit.GH.Types
         return base.Location;
       }
     }
+    #endregion
+
+    #region ISketchAccess
+    public Sketch Sketch => Value is ARDB.Ceiling ceiling ?
+      new Sketch(ceiling.GetSketch()) : default;
+    #endregion
   }
 }

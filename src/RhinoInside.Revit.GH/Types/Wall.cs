@@ -7,9 +7,10 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Wall")]
-  public class Wall : HostObject, ICurtainGridsAccess
+  public class Wall : HostObject, ISketchAccess, ICurtainGridsAccess
   {
     protected override Type ValueType => typeof(ARDB.Wall);
     public new ARDB.Wall Value => base.Value as ARDB.Wall;
@@ -172,7 +173,12 @@ namespace RhinoInside.Revit.GH.Types
     //}
     #endregion
 
-    #region IGH_CurtainGridsAccess
+    #region ISketchAccess
+    public Sketch Sketch => Value is ARDB.Wall wall ?
+      new Sketch(wall.GetSketch()) : default;
+    #endregion
+
+    #region ICurtainGridsAccess
     public IList<CurtainGrid> CurtainGrids => Value is ARDB.Wall wall && wall.CurtainGrid is ARDB.CurtainGrid grid?
       new CurtainGrid[] { new CurtainGrid(wall, grid) } : default;
     #endregion

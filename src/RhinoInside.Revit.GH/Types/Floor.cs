@@ -9,15 +9,15 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Floor")]
-  public class Floor : HostObject
+  public class Floor : HostObject, ISketchAccess
   {
     protected override Type ValueType => typeof(ARDB.Floor);
-    public static explicit operator ARDB.Floor(Floor value) => value?.Value;
     public new ARDB.Floor Value => base.Value as ARDB.Floor;
 
     public Floor() { }
     public Floor(ARDB.Floor floor) : base(floor) { }
 
+    #region Location
     public override Plane Location
     {
       get
@@ -54,5 +54,11 @@ namespace RhinoInside.Revit.GH.Types
         return base.Location;
       }
     }
+    #endregion
+
+    #region ISketchAccess
+    public Sketch Sketch => Value is ARDB.Floor floor ?
+      new Sketch(floor.GetSketch()) : default;
+    #endregion
   }
 }
