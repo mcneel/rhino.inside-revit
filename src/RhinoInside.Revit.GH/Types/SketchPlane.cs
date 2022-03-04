@@ -12,7 +12,6 @@ namespace RhinoInside.Revit.GH.Types
   public class SketchPlane : GraphicalElement
   {
     protected override Type ValueType => typeof(ARDB.SketchPlane);
-    public static explicit operator ARDB.SketchPlane(SketchPlane value) => value?.Value;
     public new ARDB.SketchPlane Value => base.Value as ARDB.SketchPlane;
 
     public SketchPlane() : base() { }

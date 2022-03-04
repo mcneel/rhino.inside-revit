@@ -1,13 +1,15 @@
 using System;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components.ModelElements
 {
-  public class SketchDeconstruct : Component
+  [ComponentVersion(introduced: "1.0", updated: "1.6")]
+  public class SketchDeconstruct : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("F9BC3F5E-7415-485E-B74C-5CB855B818B8");
-    protected override string IconTag => "S";
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
+    protected override string IconTag => string.Empty;
 
     public SketchDeconstruct() : base
     (
@@ -19,24 +21,70 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(new Parameters.Sketch(), "Sketch", "S", "Sketch to deconstruct", GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Sketch()
+        {
+          Name = "Sketch",
+          NickName = "S",
+          Description = "Sketch to deconstruct",
+        }
+      ),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.SketchPlane(), "Sketch Plane", "SP", "Sketch plane", GH_ParamAccess.item);
-      manager.AddCurveParameter("Profile", "P", "Sketch profile curves", GH_ParamAccess.list);
-    }
+      new ParamDefinition
+      (
+        new Parameters.Sketch()
+        {
+          Name = "Sketch",
+          NickName = "S",
+          Description = "Sketch element",
+        }, ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Owner",
+          NickName = "O",
+          Description = "Sketch owner element",
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.SketchPlane()
+        {
+          Name = "Sketch Plane",
+          NickName = "SP",
+          Description = "Sketch plane element",
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Curve()
+        {
+          Name = "Profile",
+          NickName = "P",
+          Description = "Sketch profile curves",
+          Access = GH_ParamAccess.list
+        }, ParamRelevance.Primary
+      ),
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Sketch", out Types.Sketch sketch, x => x.IsValid))
-        return;
+      if (!Params.GetData(DA, "Sketch", out Types.Sketch sketch, x => x.IsValid)) return;
+      else Params.TrySetData(DA, "Sketch", () => sketch);
 
-      DA.SetData("Sketch Plane", sketch?.Value.SketchPlane);
-      DA.SetDataList("Profile", sketch?.Profile);
+      Params.TrySetData(DA, "Owner", () => sketch.Owner);
+      Params.TrySetData(DA, "Sketch Plane", () => sketch.SketchPlane);
+      Params.TrySetDataList(DA, "Profile", () => sketch.Profile);
     }
   }
 }

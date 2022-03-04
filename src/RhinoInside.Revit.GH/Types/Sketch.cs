@@ -22,15 +22,10 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
-      var value = source;
-
-      if (source is IGH_Goo goo)
-        value = goo.ScriptVariable();
-
-      if (value is ARDB.HostObject host)
+      if (source is ISketchAccess access)
       {
-        var sketch = host.GetSketch();
-        return sketch is object && SetValue(sketch);
+        var sketch = access.Sketch;
+        return sketch is object && SetValue(sketch.Value);
       }
 
       return base.CastFrom(source);
@@ -119,6 +114,11 @@ namespace RhinoInside.Revit.GH.Types
     #region Owner
     public Element Owner =>
       Value is ARDB.Sketch sketch ? Element.FromElement(sketch.GetOwner<ARDB.Element>()) : default;
+    #endregion
+
+    #region SketchPlane
+    public SketchPlane SketchPlane =>
+      Value is ARDB.Sketch sketch ? SketchPlane.FromElement(sketch.SketchPlane) as SketchPlane : default;
     #endregion
   }
 }
