@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
@@ -21,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
     public AddWallOpening() : base
     (
       name: "Add Wall Opening",
-      nickname: "WO",
+      nickname: "WallOpen",
       description: "Given a host wall, it adds an opening to the active Revit document",
       category: "Revit",
       subCategory: "Host"
@@ -55,9 +53,8 @@ namespace RhinoInside.Revit.GH.Components.Openings
         new Param_Point
         {
           Name = "Point A",
-          NickName = "PtA",
+          NickName = "A",
           Description = "First point to define the wall opening",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition
@@ -65,9 +62,8 @@ namespace RhinoInside.Revit.GH.Components.Openings
         new Param_Point
         {
           Name = "Point B",
-          NickName = "PtB",
+          NickName = "B",
           Description = "Second point to define the wall opening",
-          Access = GH_ParamAccess.item
         }
       ),
     };
@@ -86,7 +82,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
       )
     };
 
-    const string _Opening_ = "Wall Opening";
+    const string _Opening_ = "Opening";
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -94,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
 
       ReconstructElement<ARDB.Opening>
       (
-        doc.Value, _Opening_, (opening) =>
+        doc.Value, _Opening_, opening =>
         {
           // Input
           if (!Params.GetData(DA, "Wall", out ARDB.Wall wall)) return null;
@@ -102,7 +98,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
           if (!Params.GetData(DA, "Point B", out Point3d? pointB)) return null;
 
           // Compute
-          opening = Reconstruct(opening, doc.Value, wall, pointA.HasValue ? pointA.Value : Point3d.Unset, pointB.HasValue ? pointB.Value : Point3d.Unset);
+          opening = Reconstruct(opening, doc.Value, wall, pointA.Value, pointB.Value);
 
           DA.SetData(_Opening_, opening);
           return opening;
@@ -124,21 +120,16 @@ namespace RhinoInside.Revit.GH.Components.Openings
             Math.Abs((maxPt.Z / Revit.ModelUnits) - opening.BoundaryRect[1].Z) > tol.VertexTolerance)
           return false;
         
-
-        ARDB.XYZ ptA, ptB;
-        var locationCurve = wall.GetLocationCurve().Curve.ToCurve();
-
+        var locationCurve = (wall.Location as ARDB.LocationCurve).Curve.ToCurve();
         var scA = locationCurve.ClosestPoint(minPt, out var tA);
         var scB = locationCurve.ClosestPoint(maxPt, out var tB);
-        if (scA && scB)
-        {
-          var minT = Math.Min(tA, tB);
-          var maxT = Math.Max(tA, tB);
-          ptA = locationCurve.PointAt(minT).ToXYZ();
-          ptB = locationCurve.PointAt(maxT).ToXYZ();
-        }
-        else
+        if (!scA || !scB)
           return false;
+
+        var minT = Math.Min(tA, tB);
+        var maxT = Math.Max(tA, tB);
+        var ptA = locationCurve.PointAt(minT).ToXYZ();
+        var ptB = locationCurve.PointAt(maxT).ToXYZ();
 
         var projectedOpeningPoints = opening.BoundaryRect.Select(p => new ARDB.XYZ(p.X, p.Y, ptA.Z));
 
@@ -152,10 +143,11 @@ namespace RhinoInside.Revit.GH.Components.Openings
         //foreach (var pt in opening.BoundaryRect)
         //  isPointCoincident &= pt.IsAlmostEqualTo(recoveredPtA) || pt.IsAlmostEqualTo(recoveredPtB);
 
-        if (!isPointCoincident)
-          return false;
+        if (isPointCoincident)
+          return true;
       }
-      return true;
+
+      return false;
     }
 
     ARDB.Opening Create(ARDB.Document doc, ARDB.Wall wall, ARDB.XYZ pointA, ARDB.XYZ pointB)
