@@ -89,9 +89,19 @@ namespace RhinoInside.Revit.External.DB
       return false;
     }
 
+    internal static ElementFilter InclusionFilter(Element element)
+    {
+#if REVIT_2021
+      return ((ElementFilter) new ElementIdSetFilter(new ElementId[] { element.Id }));
+#else
+      return ((ElementFilter) new ElementIdSetFilter(new ElementId[] { element.Id })).
+             Intersect(ElementClassFilter(element.GetType()));
+#endif
+    }
+
     public static ElementFilter ExclusionFilter(ElementId id, bool inverted = false) => inverted ?
-      (ElementFilter) new ElementIdSetFilter(new ElementId[] { id } ) :
-      (ElementFilter) new ExclusionFilter   (new ElementId[] { id } );
+      (ElementFilter) new ElementIdSetFilter(new ElementId[] { id }) :
+      (ElementFilter) new ExclusionFilter   (new ElementId[] { id }) ;
 
     public static ElementFilter ExclusionFilter(ICollection<ElementId> ids, bool inverted = false) =>
       ids.Count == 0 ?

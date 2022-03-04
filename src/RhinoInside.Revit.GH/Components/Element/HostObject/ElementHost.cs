@@ -35,77 +35,57 @@ namespace RhinoInside.Revit.GH.Components.Hosts
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      ARDB.Element element = null;
-      if (!DA.GetData("Element", ref element) || element is null)
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
       // Special cases
-      if (element is ARDB.FamilyInstance familyInstace)
+      if (element is Types.IHostObjectAccess access)
       {
-        DA.SetData("Host", Types.HostObject.FromElement(familyInstace.Host));
+        DA.SetData("Host", access.Host);
         return;
       }
-      else if (element is ARDB.Opening opening)
-      {
-        DA.SetData("Host", Types.HostObject.FromElement(opening.Host));
-        return;
-      }
-      else if (element.get_Parameter(ARDB.BuiltInParameter.HOST_ID_PARAM) is ARDB.Parameter hostId)
+      else if (element.Value.get_Parameter(ARDB.BuiltInParameter.HOST_ID_PARAM) is ARDB.Parameter hostId)
       {
         DA.SetData("Host", Types.HostObject.FromElementId(element.Document, hostId.AsElementId()));
         return;
       }
 
       // Search geometrically
-      if (element.get_BoundingBox(null) is ARDB.BoundingBoxXYZ bbox)
+      if (element.Value.get_BoundingBox(null) is ARDB.BoundingBoxXYZ bbox)
       {
         using (var collector = new ARDB.FilteredElementCollector(element.Document))
         {
           var elementCollector = collector.OfClass(typeof(ARDB.HostObject));
 
           // Element should be at the same Design Option
-          if (element.DesignOption is ARDB.DesignOption designOption)
+          if (element.Value.DesignOption is ARDB.DesignOption designOption)
             elementCollector = elementCollector.WherePasses(new ARDB.ElementDesignOptionFilter(designOption.Id));
           else
             elementCollector = elementCollector.WherePasses(new ARDB.ElementDesignOptionFilter(ARDB.ElementId.InvalidElementId));
 
-          if (element.Category?.Parent is ARDB.Category hostCategory)
+          if (element.Value.Category?.Parent is ARDB.Category hostCategory)
             elementCollector = elementCollector.OfCategoryId(hostCategory.Id);
 
           var bboxFilter = new ARDB.BoundingBoxIntersectsFilter(new ARDB.Outline(bbox.Min, bbox.Max));
           elementCollector = elementCollector.WherePasses(bboxFilter);
 
-          var classFilter = default(ARDB.ElementFilter);
-          if (element is ARDB.FamilyInstance instance) classFilter = new ARDB.FamilyInstanceFilter(element.Document, instance.GetTypeId());
-          else if (element is ARDB.Area) classFilter = new ARDB.AreaFilter();
-          else if (element is ARDB.AreaTag) classFilter = new ARDB.AreaTagFilter();
-          else if (element is ARDB.Architecture.Room) classFilter = new ARDB.Architecture.RoomFilter();
-          else if (element is ARDB.Architecture.RoomTag) classFilter = new ARDB.Architecture.RoomTagFilter();
-          else if (element is ARDB.Mechanical.Space) classFilter = new ARDB.Mechanical.SpaceFilter();
-          else if (element is ARDB.Mechanical.SpaceTag) classFilter = new ARDB.Mechanical.SpaceTagFilter();
-          else
+          using (var includesFilter = CompoundElementFilter.InclusionFilter(element.Value))
           {
-            if (element is ARDB.CurveElement)
-              classFilter = new ARDB.ElementClassFilter(typeof(ARDB.CurveElement));
-            else
-              classFilter = new ARDB.ElementClassFilter(element.GetType());
-          }
-
-          foreach (var host in elementCollector.Cast<ARDB.HostObject>())
-          {
-            if (host.Id == element.Id)
-              continue;
-
-            if(host.FindInserts(false, true, true, false).Contains(element.Id))
+            foreach (var host in elementCollector.Cast<ARDB.HostObject>())
             {
-              DA.SetData("Host", Types.HostObject.FromElement(host));
-              break;
-            }
-            // Necessary to found Panel walls in a Curtain Wall
-            else if (host.GetDependentElements(classFilter.ThatIncludes(element.Id)).Count > 0)
-            {
-              DA.SetData("Host", Types.HostObject.FromElement(host));
-              break;
+              if (host.Id == element.Id)
+                continue;
+
+              if (host.FindInserts(false, true, true, false).Contains(element.Id))
+              {
+                DA.SetData("Host", Types.HostObject.FromElement(host));
+                break;
+              }
+              // Necessary to found Panel walls in a Curtain Wall
+              else if (host.GetDependentElements(includesFilter).Count > 0)
+              {
+                DA.SetData("Host", Types.HostObject.FromElement(host));
+                break;
+              }
             }
           }
         }

@@ -212,65 +212,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
-    internal static ElementFilter CreateElementClassFilter(Type type)
-    {
-      if (type == typeof(Area))
-        return new AreaFilter();
-
-      if (type == typeof(AreaTag))
-        return new AreaTagFilter();
-
-      if (type == typeof(Room))
-        return new RoomFilter();
-
-      if (type == typeof(RoomTag))
-        return new RoomTagFilter();
-
-      if (type == typeof(Space))
-        return new SpaceFilter();
-
-      if (type == typeof(SpaceTag))
-        return new SpaceTagFilter();
-
-      if (type.IsSubclassOf(typeof(CurveElement)))
-        type = typeof(CurveElement);
-
-      return new ElementClassFilter(type);
-    }
-
     public static T[] GetDependents<T>(this Element element) where T : Element
     {
-      var doc = element.Document;
-      if (typeof(T) == typeof(Element))
+      using
+      (
+        var filter = CompoundElementFilter.ExclusionFilter(element.Id).Intersect
+                    (CompoundElementFilter.ElementClassFilter(typeof(T)))
+      )
       {
-        var ids = element.GetDependentElements(default);
-        return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).ToArray() as T[];
-      }
-      else
-      {
-        using (var filter = CreateElementClassFilter(typeof(T)))
-        {
-          var ids = element.GetDependentElements(filter);
-          return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).OfType<T>().ToArray();
-        }
+        var doc = element.Document;
+        var ids = element.GetDependentElements(filter);
+        return ids.Select(x => doc.GetElement(x)).OfType<T>().ToArray();
       }
     }
 
     public static T GetFirstDependent<T>(this Element element) where T : Element
     {
-      var doc = element.Document;
-      if (typeof(T) == typeof(Element))
+      using
+      (
+        var filter = CompoundElementFilter.ExclusionFilter(element.Id).Intersect
+                    (CompoundElementFilter.ElementClassFilter(typeof(T)))
+      )
       {
-        var ids = element.GetDependentElements(default);
-        return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).FirstOrDefault() as T;
-      }
-      else
-      {
-        using (var filter = CreateElementClassFilter(typeof(T)))
-        {
-          var ids = element.GetDependentElements(filter);
-          return ids.Where(x => x != element.Id).Select(x => doc.GetElement(x)).OfType<T>().FirstOrDefault();
-        }
+        var doc = element.Document;
+        var ids = element.GetDependentElements(filter);
+        return ids.Select(x => doc.GetElement(x)).OfType<T>().FirstOrDefault();
       }
     }
 
