@@ -50,6 +50,7 @@ namespace RhinoInside.Revit.External.DB
     {
       if (filter is LogicalAndFilter and)
       {
+#if REVIT_2019
         bool hasFalse = false, hasTrue = false;
         foreach (var type in and.GetFilters().OfType<ElementIsElementTypeFilter>())
           if (type.Inverted)
@@ -58,6 +59,7 @@ namespace RhinoInside.Revit.External.DB
             hasFalse = true;
 
         return hasTrue && hasFalse;
+#endif
       }
 
       return false;
@@ -76,6 +78,7 @@ namespace RhinoInside.Revit.External.DB
     {
       if (filter is LogicalOrFilter or)
       {
+#if REVIT_2019
         bool hasFalse = false, hasTrue = false;
         foreach (var type in or.GetFilters().OfType<ElementIsElementTypeFilter>())
           if (type.Inverted)
@@ -84,6 +87,7 @@ namespace RhinoInside.Revit.External.DB
             hasFalse = true;
 
         return hasTrue && hasFalse;
+#endif
       }
 
       return false;
