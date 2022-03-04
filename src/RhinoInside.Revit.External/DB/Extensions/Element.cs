@@ -214,30 +214,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static T[] GetDependents<T>(this Element element) where T : Element
     {
-      using
+      var ids = element.GetDependentElements
       (
-        var filter = CompoundElementFilter.ExclusionFilter(element.Id).Intersect
-                    (CompoundElementFilter.ElementClassFilter(typeof(T)))
-      )
-      {
-        var doc = element.Document;
-        var ids = element.GetDependentElements(filter);
-        return ids.Select(x => doc.GetElement(x)).OfType<T>().ToArray();
-      }
+        CompoundElementFilter.ExclusionFilter(element.Id).Intersect
+        (CompoundElementFilter.ElementClassFilter(typeof(T)))
+      );
+
+      var doc = element.Document;
+      return ids.Select(doc.GetElement).OfType<T>().ToArray();
     }
 
     public static T GetFirstDependent<T>(this Element element) where T : Element
     {
-      using
+      var ids = element.GetDependentElements
       (
-        var filter = CompoundElementFilter.ExclusionFilter(element.Id).Intersect
-                    (CompoundElementFilter.ElementClassFilter(typeof(T)))
-      )
-      {
-        var doc = element.Document;
-        var ids = element.GetDependentElements(filter);
-        return ids.Select(x => doc.GetElement(x)).OfType<T>().FirstOrDefault();
-      }
+        CompoundElementFilter.ExclusionFilter(element.Id).Intersect
+        (CompoundElementFilter.ElementClassFilter(typeof(T)))
+      );
+
+      var doc = element.Document;
+      return ids.Select(doc.GetElement).OfType<T>().FirstOrDefault();
     }
 
     #region Nomen
@@ -245,7 +241,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     // `Element.Name` does not always access the true denomination of the element.
     //
     // In cases like `ViewSheet` the true denomination is the "Sheet Number" parameter.
-    // Denomination is used here as the element property that identifies it univocaly from the UI.
+    // Denomination is used here as the element property that identifies it univocaly on the UI.
     // Is the property that produce a "Name" collision in case is duplicated.
     //
     // In other cases like 'Design Options' the Name parameter may come decorated
@@ -527,7 +523,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case ParameterClass.BuiltIn:
           return BuiltInParameterExtension.BuiltInParameterMap.TryGetValue(name, out var parameters) ?
-            parameters.Select(x => element.get_Parameter(x)).Where(x => x?.Definition is object) :
+            parameters.Select(element.get_Parameter).Where(x => x?.Definition is object) :
             Enumerable.Empty<Parameter>();
 
         case ParameterClass.Project:
@@ -789,7 +785,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           );
         }
 
-        return ids.Select(x => destinationDocument.GetElement(x)).OfType<T>().FirstOrDefault();
+        return ids.Select(destinationDocument.GetElement).OfType<T>().FirstOrDefault();
       }
       catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 

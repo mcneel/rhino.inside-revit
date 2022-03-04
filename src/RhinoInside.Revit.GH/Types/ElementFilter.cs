@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(out target))
+      if (base.CastTo(out target))
         return true;
 
       if (Value is ARDB.SelectionFilterElement value)
@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(out target))
+      if (base.CastTo(out target))
         return true;
 
       if (Value is ARDB.ParameterFilterElement value)
@@ -92,18 +92,16 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastTo<Q>(ref target);
+      return base.CastTo(ref target);
     }
 
     public override string ToString()
     {
-      if (!IsValid)
-        return $"Invalid {TypeName}";
+      if (!IsValid)         return $"Invalid {TypeName}";
+      if (Value.IsEmpty())  return "<empty>";
+      if (Value.IsAll())    return "<all>";
 
-      if (ReferenceEquals(Value, CompoundElementFilter.Empty)) return "<empty>";
-      if (ReferenceEquals(Value, CompoundElementFilter.All))  return "<all>";
-
-      return $"{Value.GetType().Name}";
+      return Value.GetType().Name;
     }
   }
 
@@ -136,7 +134,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastTo<Q>(ref target);
+      return base.CastTo(ref target);
     }
 
     public override string ToString()

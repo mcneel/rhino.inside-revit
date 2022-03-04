@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.External.DB
     #endregion
 
     #region Logical Filters
-    public static ElementFilter Empty => new LogicalAndFilter
+    public static ElementFilter Empty { get; } = new LogicalAndFilter
     (
       new ElementFilter[]
       {
@@ -48,9 +48,9 @@ namespace RhinoInside.Revit.External.DB
 
     public static bool IsEmpty(this ElementFilter filter)
     {
+#if REVIT_2019
       if (filter is LogicalAndFilter and)
       {
-#if REVIT_2019
         bool hasFalse = false, hasTrue = false;
         foreach (var type in and.GetFilters().OfType<ElementIsElementTypeFilter>())
           if (type.Inverted)
@@ -59,13 +59,15 @@ namespace RhinoInside.Revit.External.DB
             hasFalse = true;
 
         return hasTrue && hasFalse;
-#endif
       }
 
       return false;
+#else
+      return ReferenceEquals(filter, Empty);
+#endif
     }
 
-    public static ElementFilter All => new LogicalOrFilter
+    public static ElementFilter All { get; } = new LogicalOrFilter
     (
       new ElementFilter[]
       {
@@ -76,9 +78,9 @@ namespace RhinoInside.Revit.External.DB
 
     public static bool IsAll(this ElementFilter filter)
     {
+#if REVIT_2019
       if (filter is LogicalOrFilter or)
       {
-#if REVIT_2019
         bool hasFalse = false, hasTrue = false;
         foreach (var type in or.GetFilters().OfType<ElementIsElementTypeFilter>())
           if (type.Inverted)
@@ -87,10 +89,12 @@ namespace RhinoInside.Revit.External.DB
             hasFalse = true;
 
         return hasTrue && hasFalse;
-#endif
       }
 
       return false;
+#else
+      return ReferenceEquals(filter, All);
+#endif
     }
 
     internal static ElementFilter InclusionFilter(Element element)
@@ -275,9 +279,9 @@ namespace RhinoInside.Revit.External.DB
 
     private static FilterCost GetFilterCost(this ElementFilter filter)
     {
-      if (filter is null)   return FilterCost.Null;
-      if (filter.IsEmpty()) return FilterCost.Empty;
-      if (filter.IsAll())   return FilterCost.All;
+      if (ReferenceEquals(filter, null))    return FilterCost.Null;
+      if (ReferenceEquals(filter, Empty))   return FilterCost.Empty;
+      if (ReferenceEquals(filter, All))     return FilterCost.All;
 
       switch (filter)
       {
