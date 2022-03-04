@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
+using Autodesk.Revit.DB.Mechanical;
 
 namespace RhinoInside.Revit.External.DB
 {
@@ -35,7 +37,7 @@ namespace RhinoInside.Revit.External.DB
     #endregion
 
     #region Logical Filters
-    public static ElementFilter Empty { get; } = new LogicalAndFilter
+    public static ElementFilter Empty => new LogicalAndFilter
     (
       new ElementFilter[]
       {
@@ -44,7 +46,24 @@ namespace RhinoInside.Revit.External.DB
       }
     );
 
-    public static ElementFilter All { get; } = new LogicalOrFilter
+    public static bool IsEmpty(this ElementFilter filter)
+    {
+      if (filter is LogicalAndFilter and)
+      {
+        bool hasFalse = false, hasTrue = false;
+        foreach (var type in and.GetFilters().OfType<ElementIsElementTypeFilter>())
+          if (type.Inverted)
+            hasTrue = true;
+          else
+            hasFalse = true;
+
+        return hasTrue && hasFalse;
+      }
+
+      return false;
+    }
+
+    public static ElementFilter All => new LogicalOrFilter
     (
       new ElementFilter[]
       {
@@ -52,6 +71,27 @@ namespace RhinoInside.Revit.External.DB
         ElementIsElementTypeFilter(false)
       }
     );
+
+    public static bool IsAll(this ElementFilter filter)
+    {
+      if (filter is LogicalOrFilter or)
+      {
+        bool hasFalse = false, hasTrue = false;
+        foreach (var type in or.GetFilters().OfType<ElementIsElementTypeFilter>())
+          if (type.Inverted)
+            hasTrue = true;
+          else
+            hasFalse = true;
+
+        return hasTrue && hasFalse;
+      }
+
+      return false;
+    }
+
+    public static ElementFilter ExclusionFilter(ElementId id, bool inverted = false) => inverted ?
+      (ElementFilter) new ElementIdSetFilter(new ElementId[] { id } ) :
+      (ElementFilter) new ExclusionFilter   (new ElementId[] { id } );
 
     public static ElementFilter ExclusionFilter(ICollection<ElementId> ids, bool inverted = false) =>
       ids.Count == 0 ?
@@ -60,6 +100,21 @@ namespace RhinoInside.Revit.External.DB
     #endregion
 
     #region Generic Filters
+    public static ElementFilter ElementClassFilter(Type type)
+    {
+           if (typeof(Area).IsAssignableFrom(type))         return new AreaFilter();
+      else if (typeof(AreaTag).IsAssignableFrom(type))      return new AreaTagFilter();
+      else if (typeof(Room).IsAssignableFrom(type))         return new RoomFilter();
+      else if (typeof(RoomTag).IsAssignableFrom(type))      return new RoomTagFilter();
+      else if (typeof(Space).IsAssignableFrom(type))        return new SpaceFilter();
+      else if (typeof(SpaceTag).IsAssignableFrom(type))     return new SpaceTagFilter();
+      else if (typeof(CurveElement).IsAssignableFrom(type)) return new ElementClassFilter(typeof(CurveElement));
+      else if (typeof(ElementType) == type)                 return new ElementIsElementTypeFilter();
+      else if (typeof(Element) != type)                     return new ElementClassFilter(type);
+
+      return All;
+    }
+
     public static ElementFilter ElementKindFilter(ElementKind kind, bool? elementType, bool inverted = false)
     {
       var filters = new List<ElementFilter>();
@@ -206,15 +261,15 @@ namespace RhinoInside.Revit.External.DB
 
     private static FilterCost GetFilterCost(this ElementFilter filter)
     {
-      if (ReferenceEquals(filter, null)) return FilterCost.Null;
-      if (ReferenceEquals(filter, Empty)) return FilterCost.Empty;
-      if (ReferenceEquals(filter, All)) return FilterCost.All;
+      if (filter is null)   return FilterCost.Null;
+      if (filter.IsEmpty()) return FilterCost.Empty;
+      if (filter.IsAll())   return FilterCost.All;
 
       switch (filter)
       {
-        case ElementQuickFilter _: return FilterCost.Quick;
-        case ElementLogicalFilter logical: return logical.GetFilterCost();
-        default: return FilterCost.Slow;
+        case ElementQuickFilter _:          return FilterCost.Quick;
+        case ElementLogicalFilter logical:  return logical.GetFilterCost();
+        default:                            return FilterCost.Slow;
       }
     }
 
