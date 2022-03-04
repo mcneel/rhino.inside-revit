@@ -30,10 +30,9 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
     static readonly HashSet<Type> NonFilterableClasses = new HashSet<Type>
     {
-      typeof(ARDB.AreaTagType),
-      typeof(ARDB.AnnotationSymbol),
-      typeof(ARDB.AnnotationSymbolType),
       typeof(ARDB.CombinableElement),
+
+      // ARDB.CurveElement
       typeof(ARDB.CurveByPoints),
       typeof(ARDB.DetailCurve),
       typeof(ARDB.DetailArc),
@@ -47,19 +46,24 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       typeof(ARDB.ModelNurbSpline),
       typeof(ARDB.ModelHermiteSpline),
       typeof(ARDB.SymbolicCurve),
-      typeof(ARDB.DetailCurve),
+      typeof(ARDB.Structure.AreaReinforcementCurve),
+
+      // ARDB.FamilyInstance
       typeof(ARDB.Mullion),
       typeof(ARDB.Panel),
-      typeof(ARDB.SlabEdge),
+      typeof(ARDB.AnnotationSymbol),
 
+      // ARDB.FamilySymbol
+      typeof(ARDB.AreaTagType),
+      typeof(ARDB.AnnotationSymbolType),
       typeof(ARDB.Architecture.RoomTagType),
-      typeof(ARDB.Architecture.Fascia),
-      typeof(ARDB.Architecture.Gutter),
-
+      typeof(ARDB.Structure.TrussType),
       typeof(ARDB.Mechanical.SpaceTagType),
 
-      typeof(ARDB.Structure.TrussType),
-      typeof(ARDB.Structure.AreaReinforcementCurve),
+      // ARDB.HostedSweep
+      typeof(ARDB.SlabEdge),
+      typeof(ARDB.Architecture.Fascia),
+      typeof(ARDB.Architecture.Gutter),
     };
 
     static readonly HashSet<Type> SpecialClasses = new HashSet<Type>
