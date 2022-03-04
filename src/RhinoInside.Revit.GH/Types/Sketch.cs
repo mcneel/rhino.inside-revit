@@ -16,7 +16,6 @@ namespace RhinoInside.Revit.GH.Types
   {
     protected override Type ValueType => typeof(ARDB.Sketch);
     public new ARDB.Sketch Value => base.Value as ARDB.Sketch;
-    public static explicit operator ARDB.Sketch(Sketch value) => value?.Value;
 
     public Sketch() : base() { }
     public Sketch(ARDB.Sketch sketchPlane) : base(sketchPlane) { }
@@ -115,6 +114,11 @@ namespace RhinoInside.Revit.GH.Types
         return region.Value;
       }
     }
+    #endregion
+
+    #region Owner
+    public Element Owner =>
+      Value is ARDB.Sketch sketch ? Element.FromElement(sketch.GetOwner<ARDB.Element>()) : default;
     #endregion
   }
 }

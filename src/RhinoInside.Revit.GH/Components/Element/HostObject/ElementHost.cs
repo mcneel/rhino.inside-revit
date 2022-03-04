@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
       }
       else if (element is ARDB.Sketch sketch)
       {
-        DA.SetData("Host", Types.HostObject.FromElement(sketch.GetHostObject()));
+        DA.SetData("Host", Types.HostObject.FromElement(sketch.GetOwner<ARDB.HostObject>()));
         return;
       }
       else if (element.get_Parameter(ARDB.BuiltInParameter.HOST_ID_PARAM) is ARDB.Parameter hostId)
