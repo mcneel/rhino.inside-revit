@@ -1548,7 +1548,7 @@
     "uuid": "cfb42d90-f9d4-4601-9eef-c624e92a424d"
   }, 
   {
-    "desc": "Filter used to match seletable elements into the given View", 
+    "desc": "Filter used to match selectable elements into the given View", 
     "iconsrc": "/static/images/GH/ElementSelectableInViewFilter.png", 
     "icontag": null, 
     "panel": "Filter", 

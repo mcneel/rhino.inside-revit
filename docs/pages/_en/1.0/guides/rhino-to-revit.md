@@ -28,7 +28,7 @@ And plan views using the categories to control graphics:
 
 ![A Quick Plan in Revit]({{ "/static/images/guides/revit-office-plan.jpg" | prepend: site.baseurl }})
 
-### Rhino objects as DirectShapes
+## Rhino objects as DirectShapes
 
 DirectShapes are the most obvious and many times the easiest way to get Geometry from Rhino into Revit. DirectShapes are generic Revit elements that can contain and categorize arbitrary non-parametric geometry inside the Revit model. However, since the geometry is not parametric, Revit does not know how they are created and can not resolved interactions between DirectShapes and other native elements. An example is that native Revit walls can not be extended to reach a DirectShape roof geometry.
 
@@ -56,7 +56,7 @@ DirectShapes created from smooth NURBS surfaces in Rhino may be imported as smoo
 {% endcapture %}
 {% include ltr/warning_note.html note=api_warning_note %}
 
-### Rhino objects as Loadable Families
+## Rhino objects as Loadable Families
 
 Rhino objects imported as forms inside a Revit family allow for inserting multiple instances of an object and also assigning [subcategories](https://knowledge.autodesk.com/support/revit-products/learn-explore/caas/CloudHelp/cloudhelp/2018/ENU/Revit-Customize/files/GUID-8C1F9882-E4AB-4E03-A735-8C44F19E194B-htm.html). You can use subcategories to control the visibility and graphics of portions of a family within a top level category.
 
@@ -91,7 +91,7 @@ Subcategory properties can be edited in the *Object Styles* dialog:
 
 Subcategories can also be used with [Rule-based View Filters](https://knowledge.autodesk.com/support/revit-products/learn-explore/caas/CloudHelp/cloudhelp/2019/ENU/Revit-DocumentPresent/files/GUID-145815E2-5699-40FE-A358-FFC739DB7C46-htm.html) for additional graphic control.
 
-### Using Revit built-in System Families
+## Using Revit built-in System Families
 
 Using built-in Revit *System Families* such as Walls, Floors, Ceilings, and Roofs can take the most amount of thought, however, the extra effort can be worth it. Advantages of native elements include:
 
