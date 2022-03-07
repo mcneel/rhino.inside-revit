@@ -95,9 +95,9 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      if (Value is ARDB.Level)
+      if (Value is ARDB.Level level)
       {
-        var name = ToString();
+        var name = level.Name;
 
         // 2. Check if already exist
         var index = doc.NamedConstructionPlanes.Find(name);

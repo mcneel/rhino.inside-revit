@@ -142,7 +142,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
             (
               // 'Element Geometry' works with types.
               (options.View is null || !(element is ARDB.ElementType)) &&
-              ElementHasGeometryFilter.PassesFilter(element) &&
+              (options.View is object || ElementHasGeometryFilter.PassesFilter(element)) &&
               visibleInViewFilter?.PassesFilter(element) != false
             )
           )
