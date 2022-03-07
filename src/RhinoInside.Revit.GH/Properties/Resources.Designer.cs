@@ -93,9 +93,29 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddShaftOpening {
+            get {
+                object obj = ResourceManager.GetObject("AddShaftOpening", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddSubCategory {
             get {
                 object obj = ResourceManager.GetObject("AddSubCategory", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddWallOpening {
+            get {
+                object obj = ResourceManager.GetObject("AddWallOpening", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2476,6 +2496,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap Mullion {
             get {
                 object obj = ResourceManager.GetObject("Mullion", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Opening {
+            get {
+                object obj = ResourceManager.GetObject("Opening", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap OpeningBoundaryProfile {
+            get {
+                object obj = ResourceManager.GetObject("OpeningBoundaryProfile", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
