@@ -1683,6 +1683,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementRelease {
+            get {
+                object obj = ResourceManager.GetObject("ElementRelease", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementSelectableInViewFilter {
             get {
                 object obj = ResourceManager.GetObject("ElementSelectableInViewFilter", resourceCulture);
