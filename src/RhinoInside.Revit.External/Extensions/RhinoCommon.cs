@@ -445,6 +445,14 @@ namespace Rhino.Geometry
 
   static class CurveExtension
   {
+    public static bool EpsilonEquals(this Curve curve, Curve other, double epsilon)
+    {
+      return curve.PointAtStart.EpsilonEquals(other.PointAtStart, epsilon) &&
+             curve.PointAtEnd.EpsilonEquals(other.PointAtEnd, epsilon) &&
+             Curve.GetDistancesBetweenCurves(curve, other, epsilon, out var max, out var _, out var _, out var _, out var _, out var _) &&
+             max < epsilon;
+    }
+
     /// <summary>
     /// Gets array of span "knots".
     /// </summary>
