@@ -528,11 +528,10 @@ namespace RhinoInside.Revit.GH
         foreach (GH_Document definition in Instances.DocumentServer)
         {
           var activeDefinition = definition.SolutionState == GH_ProcessStep.Process;
-#if !DEBUG
-          // Prevent delayed solutions in Release.
+
+          // Prevent delayed solutions.
           if (activeDefinition)
             continue;
-#endif
 
           var change = new DocumentChangedEvent()
           {
@@ -921,7 +920,7 @@ namespace RhinoInside.Revit.GH
           obj.ExpireSolution(false);
       }
 
-      Convert.Geometry.GeometryCache.StartKeepAliveRegion();
+      GeometryCache.StartKeepAliveRegion();
       ActiveDocumentStack.Push(e.Document);
       StartTransactionGroups();
     }
@@ -933,7 +932,7 @@ namespace RhinoInside.Revit.GH
 
       CommitTransactionGroups();
       ActiveDocumentStack.Pop();
-      Convert.Geometry.GeometryCache.EndKeepAliveRegion();
+      GeometryCache.EndKeepAliveRegion();
 
       // Warn the user about objects that contain elements modified by Grasshopper.
       {
