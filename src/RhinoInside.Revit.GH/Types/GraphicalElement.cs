@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -158,8 +160,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(out target))
-        return true;
+      target = default;
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Interval)))
       {
@@ -295,7 +296,17 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return false;
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
+      {
+        var mesh = Mesh;
+        if (mesh is null)
+          return false;
+
+        target = (Q) (object) new GH_Mesh(mesh);
+        return true;
+      }
+
+      return base.CastTo(out target);
     }
 
     #region Location
@@ -432,11 +443,13 @@ namespace RhinoInside.Revit.GH.Types
 
         return new Plane(origin, axis, perp);
       }
-      set
-      {
-        using (var plane = value.ToPlane())
-          SetLocation(plane.Origin, plane.XVec, plane.YVec);
-      }
+      set => SetLocation(value, keepJoins: false);
+    }
+
+    public void SetLocation(Plane location, bool keepJoins = false)
+    {
+      using (var plane = location.ToPlane())
+        SetLocation(plane.Origin, plane.XVec, plane.YVec, keepJoins);
     }
 
     void GetLocation(out ARDB.XYZ origin, out ARDB.XYZ basisX, out ARDB.XYZ basisY)
@@ -447,69 +460,81 @@ namespace RhinoInside.Revit.GH.Types
       basisY = plane.YVec;
     }
 
-    void SetLocation(ARDB.XYZ newOrigin, ARDB.XYZ newBasisX, ARDB.XYZ newBasisY)
+    void SetLocation(ARDB.XYZ newOrigin, ARDB.XYZ newBasisX, ARDB.XYZ newBasisY, bool keepJoins)
     {
       if (Value is ARDB.Element element)
       {
         GetLocation(out var origin, out var basisX, out var basisY);
         var basisZ = basisX.CrossProduct(basisY);
-
         var newBasisZ = newBasisX.CrossProduct(newBasisY);
 
-        using (var IsCurveDrivenFilter = new ARDB.ElementIsCurveDrivenFilter())
+        if (element.Location is ARDB.LocationCurve curveLocation)
         {
-          if (IsCurveDrivenFilter.PassesFilter(element) && element.Location is ARDB.LocationCurve curveLocation)
-          {
-            var orientation = ARDB.Transform.Identity;
-            orientation.SetOrientation
-            (
-              origin, basisX, basisY, basisZ,
-              newOrigin, newBasisX, newBasisY, newBasisZ
-            );
+          var orientation = ARDB.Transform.Identity;
+          orientation.SetOrientation
+          (
+            origin, basisX, basisY, basisZ,
+            newOrigin, newBasisX, newBasisY, newBasisZ
+          );
 
-            if (!orientation.IsIdentity)
-            {
-              var curve = curveLocation.Curve.CreateTransformed(orientation);
-              curveLocation.Curve = curve;
-            }
+          if (!orientation.IsIdentity)
+            SetCurve(curveLocation.Curve.CreateTransformed(orientation).ToCurve(), keepJoins);
 
-            return;
-          }
+          return;
         }
 
+        var pinned = element.Pinned;
+        var modified = false;
+
+        try
         {
-          if (!basisZ.IsParallelTo(newBasisZ))
           {
-            var axisDirection = basisZ.CrossProduct(newBasisZ);
-            double angle = basisZ.AngleTo(newBasisZ);
-
-            using (var axis = ARDB.Line.CreateUnbound(origin, axisDirection))
+            if (!basisZ.IsParallelTo(newBasisZ))
             {
-              ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
-              InvalidateGraphics();
+              var axisDirection = basisZ.CrossProduct(newBasisZ);
+              double angle = basisZ.AngleTo(newBasisZ);
+
+              using (var axis = ARDB.Line.CreateUnbound(origin, axisDirection))
+              {
+                element.Pinned = false;
+                ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
+                modified = true;
+              }
+
+              GetLocation(out origin, out basisX, out basisY);
+              basisZ = basisX.CrossProduct(basisY);
             }
 
-            GetLocation(out origin, out basisX, out basisY);
-            basisZ = basisX.CrossProduct(basisY);
+            if (!basisX.IsAlmostEqualTo(newBasisX))
+            {
+              double angle = basisX.AngleOnPlaneTo(newBasisX, newBasisZ);
+              using (var axis = ARDB.Line.CreateUnbound(origin, newBasisZ))
+              {
+                element.Pinned = false;
+                ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
+                modified = true;
+              }
+            }
+
+            {
+              var trans = newOrigin - origin;
+              if (!trans.IsZeroLength())
+              {
+                element.Pinned = false;
+                ARDB.ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
+                modified = true;
+              }
+            }
           }
-
-          if (!basisX.IsAlmostEqualTo(newBasisX))
+        }
+        finally
+        {
+          if (modified)
           {
-            double angle = basisX.AngleOnPlaneTo(newBasisX, newBasisZ);
-            using (var axis = ARDB.Line.CreateUnbound(origin, newBasisZ))
-            {
-              ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
-              InvalidateGraphics();
-            }
-          }
+            if (element.Pinned != pinned)
+              element.Pinned = pinned;
 
-          {
-            var trans = newOrigin - origin;
-            if (!trans.IsZeroLength())
-            {
-              ARDB.ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
-              InvalidateGraphics();
-            }
+            InvalidateGraphics();
           }
         }
       }
@@ -524,7 +549,7 @@ namespace RhinoInside.Revit.GH.Types
         Plane = location,
         GridSpacing = imperial ?
         UnitScale.Convert(1.0, UnitScale.Yards, UnitScale.GetModelScale(rhinoDoc)) :
-        UnitScale.Convert(1.0, UnitScale.Meters ,UnitScale.GetModelScale(rhinoDoc)),
+        UnitScale.Convert(1.0, UnitScale.Meters, UnitScale.GetModelScale(rhinoDoc)),
 
         SnapSpacing = imperial ?
         UnitScale.Convert(1.0, UnitScale.Yards, UnitScale.GetModelScale(rhinoDoc)) :
@@ -551,27 +576,31 @@ namespace RhinoInside.Revit.GH.Types
       get => Value?.Location is ARDB.LocationCurve curveLocation ?
           curveLocation.Curve.ToCurve() :
           default;
-      set
+      set => SetCurve(value, keepJoins: false);
+    }
+
+    public virtual void SetCurve(Curve curve, bool keepJoins = false)
+    {
+      if (Value is ARDB.Element element && curve is object)
       {
-        if (value is object && Value is ARDB.Element element)
+        if (element.Location is ARDB.LocationCurve locationCurve)
         {
-          if (element.Location is ARDB.LocationCurve locationCurve)
+          var newCurve = curve.ToCurve();
+          if (!locationCurve.Curve.IsAlmostEqualTo(newCurve))
           {
-            var curve = value.ToCurve();
-            if (!locationCurve.Curve.IsAlmostEqualTo(curve))
-            {
-              InvalidateGraphics();
-              locationCurve.Curve = curve;
-            }
+            locationCurve.Curve = newCurve;
+            InvalidateGraphics();
           }
-          else throw new InvalidOperationException("Curve can not be set for this element.");
         }
+        else throw new InvalidOperationException("Curve can not be set for this element.");
       }
     }
 
     public virtual Surface Surface => null;
     public virtual Brep TrimmedSurface => Brep.CreateFromSurface(Surface);
     public virtual Brep PolySurface => TrimmedSurface;
+
+    public virtual Mesh Mesh => default;
     #endregion
 
     #region Flip
@@ -645,5 +674,148 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
+  }
+
+  static class ElementJoins
+  {
+    static bool? IsJoinAllowedAtEnd(ARDB.Element element, int end)
+    {
+      switch (element)
+      {
+        case ARDB.Wall wall:
+          return ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, end);
+
+        case ARDB.FamilyInstance instance:
+          if (instance.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming)
+            return ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(instance, end);
+
+          break;
+      }
+
+      return null;
+    }
+
+    static void AllowJoinAtEnd(ARDB.Element element, int end, bool? allow)
+    {
+      if (allow.HasValue && allow.Value != IsJoinAllowedAtEnd(element, end))
+      {
+        switch (element)
+        {
+          case ARDB.Wall wall:
+            if (allow.Value) ARDB.WallUtils.AllowWallJoinAtEnd(wall, end);
+            else ARDB.WallUtils.DisallowWallJoinAtEnd(wall, end);
+
+            return;
+
+          case ARDB.FamilyInstance instance:
+            if (instance.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming)
+            {
+              if (allow.Value) ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(instance, end);
+              else ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(instance, end);
+            }
+            return;
+        }
+
+        switch (end)
+        {
+          case 0: throw new InvalidOperationException("Join at start is not valid for this elemenmt.");
+          case 1: throw new InvalidOperationException("Join at end is not valid for this elemenmt.");
+          default: throw new ArgumentOutOfRangeException($"{nameof(end)} should be 0 for start or 1 for end.");
+        }
+      }
+    }
+
+    struct DisableJoinsDisposable : IDisposable
+    {
+      private readonly List<(ARDB.Element Element, int End)> AllowedJoinEnds;
+
+      public DisableJoinsDisposable(ARDB.Element element)
+      {
+        if (element.Location is ARDB.LocationCurve locationCurve)
+        {
+          AllowedJoinEnds = new List<(ARDB.Element, int)>();
+
+          // Elements at Ends
+          for (int end = 0; end < 2; ++end)
+          {
+            if (IsJoinAllowedAtEnd(element, end) == true)
+            {
+              var elementsAtEnd = locationCurve.get_ElementsAtJoin(end).Cast<ARDB.Element>();
+
+              foreach (var elementAtEnd in elementsAtEnd)
+              {
+                if (elementAtEnd.Id == element.Id) continue;
+                if (elementAtEnd.Location is ARDB.LocationCurve joinCurve)
+                {
+                  if (joinCurve.get_ElementsAtJoin(ERDB.CurveEnd.Start).Cast<ARDB.Element>().Contains(element, ElementEqualityComparer.SameDocument))
+                  {
+                    AllowedJoinEnds.Add((elementAtEnd, ERDB.CurveEnd.Start));
+                    AllowJoinAtEnd(elementAtEnd, ERDB.CurveEnd.Start, allow: false);
+                  }
+
+                  if (joinCurve.get_ElementsAtJoin(ERDB.CurveEnd.End).Cast<ARDB.Element>().Contains(element, ElementEqualityComparer.SameDocument))
+                  {
+                    AllowedJoinEnds.Add((elementAtEnd, ERDB.CurveEnd.End));
+                    AllowJoinAtEnd(elementAtEnd, ERDB.CurveEnd.End, allow: false);
+                  }
+                }
+              }
+
+              AllowedJoinEnds.Add((element, end));
+              AllowJoinAtEnd(element, end, allow: false);
+            }
+          }
+
+          // Elements at Mid
+          using (var collector = new ARDB.FilteredElementCollector(element.Document))
+          {
+            var elementCollector = collector.
+              WherePasses(new ARDB.ElementIsCurveDrivenFilter()).
+              WherePasses(new ARDB.BoundingBoxIntersectsFilter(element.GetOutline())).
+              WherePasses(new ARDB.ExclusionFilter(new ARDB.ElementId[] { element.Id }));
+
+            foreach (var elementAtMid in elementCollector)
+            {
+              if (elementAtMid.Location is ARDB.LocationCurve joinCurve)
+              {
+                if (joinCurve.get_ElementsAtJoin(ERDB.CurveEnd.Start).Cast<ARDB.Element>().Contains(element, ElementEqualityComparer.SameDocument))
+                {
+                  if (IsJoinAllowedAtEnd(elementAtMid, ERDB.CurveEnd.Start) == true)
+                  {
+                    AllowedJoinEnds.Add((elementAtMid, ERDB.CurveEnd.Start));
+                    AllowJoinAtEnd(elementAtMid, ERDB.CurveEnd.Start, allow: false);
+                  }
+                }
+
+                if (joinCurve.get_ElementsAtJoin(ERDB.CurveEnd.End).Cast<ARDB.Element>().Contains(element, ElementEqualityComparer.SameDocument))
+                {
+                  if (IsJoinAllowedAtEnd(elementAtMid, ERDB.CurveEnd.End) == true)
+                  {
+                    AllowedJoinEnds.Add((elementAtMid, ERDB.CurveEnd.End));
+                    AllowJoinAtEnd(elementAtMid, ERDB.CurveEnd.End, allow: false);
+                  }
+                }
+              }
+            }
+          }
+        }
+        else AllowedJoinEnds = default;
+      }
+
+      void IDisposable.Dispose()
+      {
+        if (AllowedJoinEnds is object)
+        {
+          foreach (var join in AllowedJoinEnds.OrderBy(x => x.Element.Id.IntegerValue).ThenBy(x => x.End))
+            AllowJoinAtEnd(join.Element, join.End, allow: true);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Disables this element joins until returned <see cref="IDisposable"/> is disposed.
+    /// </summary>
+    /// <returns>An <see cref="IDisposable"/> that should be disposed to restore <paramref name="element"/> joins state.</returns>
+    public static IDisposable DisableJoinsScope(ARDB.Element element) => new DisableJoinsDisposable(element);
   }
 }

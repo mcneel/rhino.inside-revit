@@ -193,6 +193,25 @@ namespace RhinoInside.Revit.GH.Types
         return base.Curve;
       }
     }
+
+    public override void SetCurve(Curve curve, bool keepJoins = false)
+    {
+      if (curve is object && Value is ARDB.FamilyInstance instance && curve is object)
+      {
+        if (instance.Location is ARDB.LocationCurve locationCurve)
+        {
+          var newCurve = curve.ToCurve();
+          if (!locationCurve.Curve.IsAlmostEqualTo(newCurve))
+          {
+            using (!keepJoins ? ElementJoins.DisableJoinsScope(instance) : default)
+              locationCurve.Curve = newCurve;
+
+            InvalidateGraphics();
+          }
+        }
+        else base.SetCurve(curve, keepJoins);
+      }
+    }
     #endregion
 
     #region Flip
@@ -281,7 +300,7 @@ namespace RhinoInside.Revit.GH.Types
     static bool IsStructuralFraming(ARDB.FamilyInstance frame) =>
       frame.Category.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming;
     
-    public override bool? IsJoinAllowedAtStart
+    public bool? IsJoinAllowedAtStart
     {
       get => Value is ARDB.FamilyInstance frame && IsStructuralFraming(frame) ?
         (bool?) ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(frame, 0) :
@@ -304,7 +323,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool? IsJoinAllowedAtEnd
+    public bool? IsJoinAllowedAtEnd
     {
       get => Value is ARDB.FamilyInstance frame && IsStructuralFraming(frame) ?
         (bool?) ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(frame, 1) :

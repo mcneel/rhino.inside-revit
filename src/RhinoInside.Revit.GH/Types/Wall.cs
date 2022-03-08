@@ -71,41 +71,51 @@ namespace RhinoInside.Revit.GH.Types
       return true;
     }
 
-    public override Curve Curve
+    public override void SetCurve(Curve curve, bool keepJoins = false)
     {
-      set
+      if (Value is ARDB.Wall wall && curve is object)
       {
-        if (value is object && Value is ARDB.Wall wall && wall.Location is ARDB.LocationCurve)
+        if (wall.Location is ARDB.LocationCurve locationCurve)
         {
-          if (!IsValidCurve(value, out var log))
-            throw new Exceptions.RuntimeArgumentException(nameof(Curve), log, value);
+          if (!IsValidCurve(curve, out var log))
+            throw new Exceptions.RuntimeArgumentException(nameof(Curve), log, curve);
 
           var tol = GeometryObjectTolerance.Model;
 
+          var newCurve = default(ARDB.Curve);
           switch (Curve)
           {
             case LineCurve _:
-              if (value.TryGetLine(out var valueLine, tol.VertexTolerance))
-                base.Curve = new LineCurve(valueLine);
+              if (curve.TryGetLine(out var valueLine, tol.VertexTolerance))
+                newCurve = valueLine.ToLine();
               else
-                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be a line like curve.", value);
+                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be a line like curve.", curve);
               break;
 
             case ArcCurve _:
-              if (value.TryGetArc(out var valueArc, tol.VertexTolerance))
-                base.Curve = new ArcCurve(valueArc);
+              if (curve.TryGetArc(out var valueArc, tol.VertexTolerance))
+                newCurve = valueArc.ToArc();
               else
-                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be an arc like curve.", value);
+                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be an arc like curve.", curve);
               break;
 
-            case NurbsCurve _:
-              if (value.TryGetEllipse(out var _, tol.VertexTolerance))
-                base.Curve = value;
+            case Curve _:
+              if (curve.TryGetEllipse(out var _, tol.VertexTolerance))
+                newCurve = curve.ToCurve();
               else
-                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be an ellipse like curve.", value);
+                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be an ellipse like curve.", curve);
               break;
           }
+
+          if (!locationCurve.Curve.IsAlmostEqualTo(newCurve))
+          {
+            using (!keepJoins ? ElementJoins.DisableJoinsScope(wall) : default)
+              locationCurve.Curve = newCurve;
+
+            InvalidateGraphics();
+          }
         }
+        else base.SetCurve(curve, keepJoins);
       }
     }
 
@@ -184,7 +194,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Joins
-    public override bool? IsJoinAllowedAtStart
+    public bool? IsJoinAllowedAtStart
     {
       get =>  Value is ARDB.Wall wall ?
         ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, 0) :
@@ -204,7 +214,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool? IsJoinAllowedAtEnd
+    public bool? IsJoinAllowedAtEnd
     {
       get => Value is ARDB.Wall wall ?
         ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, 1) :

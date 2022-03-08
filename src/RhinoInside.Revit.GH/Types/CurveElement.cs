@@ -9,6 +9,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Curve Element")]
   public class CurveElement : GraphicalElement, Bake.IGH_BakeAwareElement
@@ -76,6 +77,19 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Properties
     public override Curve Curve => Value?.GeometryCurve.ToCurve();
+
+    public override void SetCurve(Curve curve, bool keepJoins = false)
+    {
+      if (Value is ARDB.CurveElement curveElement && curve is object)
+      {
+        var newCurve = curve.ToCurve();
+        if (!curveElement.GeometryCurve.IsAlmostEqualTo(newCurve))
+        {
+          curveElement.SetGeometryCurve(newCurve, overrideJoins: !keepJoins);
+          InvalidateGraphics();
+        }
+      }
+    }
     #endregion
   }
 }

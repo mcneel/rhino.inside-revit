@@ -163,21 +163,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
       else DA.SetData("Element", element);
 
-      if (Params.GetData(DA, "Location", out Plane? location, x => x.IsValid))
+      var tol = GeometryObjectTolerance.Model;
+      if
+      (
+        Params.GetData(DA, "Location", out Plane? location, x => x.IsValid) &&
+        !element.Location.EpsilonEquals(location.Value, tol.VertexTolerance)
+      )
       {
-        UpdateElement(element.Value, () =>
-        {
-          if (element.Location.EpsilonEquals(location.Value, GeometryObjectTolerance.Model.VertexTolerance))
-            return;
-
-          using (!KeepJoins ? (element as Types.InstanceElement)?.DisableJoinsScope() : default)
-          {
-            var pinned = element.Pinned;
-            element.Pinned = false;
-            element.Location = location.Value;
-            element.Pinned = pinned;
-          }
-        });
+        UpdateElement(element.Value, () => element.SetLocation(location.Value, KeepJoins));
       }
 
       DA.SetData("Location", element.Location);
@@ -244,15 +237,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
       else DA.SetData("Element", element);
 
-      if (Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid))
+      var tol = GeometryObjectTolerance.Model;
+      if
+      (
+        Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid) &&
+        !element.Curve.EpsilonEquals(curve, tol.VertexTolerance)
+      )
       {
-        UpdateElement(element.Value, () =>
-        {
-          using (!KeepJoins ? (element as Types.InstanceElement)?.DisableJoinsScope() : default)
-          {
-            element.Curve = curve;
-          }
-        });
+        UpdateElement(element.Value, () => element.SetCurve(curve, KeepJoins));
       }
 
       DA.SetData("Curve", element.Curve);

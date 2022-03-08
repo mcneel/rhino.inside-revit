@@ -359,18 +359,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
           )
         ) as Types.GraphicalElement;
 
-        if (location.HasValue && location.Value.IsValid)
+        if
+        (
+          clone is object &&
+          location.HasValue && location.Value.IsValid &&
+          !clone.Location.EpsilonEquals(location.Value, GeometryObjectTolerance.Model.VertexTolerance)
+        )
         {
-          if (clone is object && !clone.Location.EpsilonEquals(location.Value, GeometryObjectTolerance.Model.VertexTolerance))
-          {
-            using ((clone as Types.InstanceElement)?.DisableJoinsScope())
-            {
-              var pinned = clone.Pinned;
-              clone.Pinned = false;
-              clone.Location = location.Value;
-              clone.Pinned = pinned;
-            }
-          }
+          clone.SetLocation(location.Value);
         }
 
         clones.Add(clone);
