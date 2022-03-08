@@ -1129,8 +1129,8 @@
   }, 
   {
     "desc": "Release elements on Revit document", 
-    "iconsrc": null, 
-    "icontag": "E", 
+    "iconsrc": "/static/images/GH/ElementRelease.png", 
+    "icontag": null, 
     "panel": "Element", 
     "since": "1.5", 
     "tab": "Revit", 
