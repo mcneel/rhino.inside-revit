@@ -90,12 +90,13 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     bool Reuse(ref ARDB.Wall element, IList<Curve> boundaries, Vector3d normal, ARDB.WallType type)
     {
+      return false;
       if (element is null) return false;
 
       if (element.GetSketch() is ARDB.Sketch sketch)
       {
         var tol = GeometryObjectTolerance.Model;
-
+        var hack = new ARDB.XYZ(1.0, 1.0, 0.0);
         var plane = sketch.SketchPlane.GetPlane().ToPlane();
         if (normal.IsParallelTo(plane.Normal, tol.AngleTolerance) == 0)
           return false;
@@ -147,7 +148,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
                 else curve = segment.ToCurve();
 
                 if (!edge.GeometryCurve.IsAlmostEqualTo(curve))
-                  edge.SetGeometryCurve(curve, false);
+                {
+                  // The following line allows SetGeometryCurve to work!!
+                  edge.Location.Move(hack);
+                  edge.SetGeometryCurve(curve, overrideJoins: true);
+                }
               }
             }
           }
@@ -269,8 +274,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
           profile = newProfile;
         }
       }
-
-      normal = -normal;
 
       if (!Reuse(ref wall, profile, normal, type.Value))
       {
