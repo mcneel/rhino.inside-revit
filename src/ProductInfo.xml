@@ -16,7 +16,7 @@ If `ReleaseVersion` contains "wip" the product expires.
   <ReleaseVersion></ReleaseVersion>
   <MetaVersion></MetaVersion>
   <MajorVersion>1</MajorVersion>
-  <MinorVersion>6</MinorVersion>
+  <MinorVersion>7</MinorVersion>
   <!--
   <BuildVersion></BuildVersion>
   <RevisionVersion></RevisionVersion>
