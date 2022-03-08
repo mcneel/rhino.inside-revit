@@ -5,6 +5,24 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.6 RC1" version="v1.6.8102.16819" pre_release=true time="08/03/2022" %}
+
+- Added {% include ltr/comp.html uuid='18d46e90-' %} parameter
+- Added {% include ltr/comp.html uuid='657811b7-' %} component
+- Added {% include ltr/comp.html uuid='c86ed84c-' %} component
+- Added {% include ltr/comp.html uuid='e76b0f6b-' %} component
+- Added {% include ltr/comp.html uuid='3848c899-' %} component
+- Added {% include ltr/comp.html uuid='8a2da785-' %} component
+- Added {% include ltr/comp.html uuid='f68f96ec-' %} component
+- Added {% include ltr/comp.html uuid='0ea8d61a-' %} component
+- Added **Is Subcategory** input to {% include ltr/comp.html uuid='d794361e-' %} component
+- Added **Is Subcategory** input to {% include ltr/comp.html uuid='d150e40e-' %} component
+- Now {% include ltr/comp.html uuid='70ccf7a6-' %} component returns openings on floor, ceiling and roofs
+- Fixed {% include ltr/comp.html uuid='37a8c46f-' %} component. It was failing to update 'Unconnected Height' when the wall is constrained at the top
+- Fixed {% include ltr/comp.html uuid='df634530-' %}  and {% include ltr/comp.html uuid='97e9c6bb-' %}. Now both component filter out non Model groups or types
+- Now first access to `RhinoCommon.dll` loads Rhino
+
+
 {% include ltr/release-header.html title="v1.5" version="v1.5.8101.24584" time="08/03/2022" %}
 
 - Includes all changes under 1.5RC releases listed below
