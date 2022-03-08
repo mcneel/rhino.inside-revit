@@ -370,4 +370,5 @@ script/.packages
 *.yak
 
 # discard xml and sandcastle build files
+src/RhinoInside.Revit/*.xml
 src/RhinoInside.Revit.Docs/Help/
