@@ -1,5 +1,17 @@
 [
   {
+    "desc": "Contains a collection of Revit appearance asset elements", 
+    "iconsrc": "/static/images/GH/AppearanceAsset.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Appearance Asset", 
+    "typename": "AppearanceAsset", 
+    "until": null, 
+    "uuid": "941b2ee3-5423-4fee-9df6-27c77fdb53c9"
+  }, 
+  {
     "desc": "Contains a collection of Revit assemblies", 
     "iconsrc": "/static/images/GH/AssemblyInstance.png", 
     "icontag": null, 
@@ -96,90 +108,6 @@
     "uuid": "24892092-5a53-4a12-8a90-436c2559ff56"
   }, 
   {
-    "desc": "Contains a collection of signed distances along Z axis", 
-    "iconsrc": null, 
-    "icontag": "E", 
-    "panel": "Revit Primitives", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Elevation", 
-    "typename": "Elevation", 
-    "until": null, 
-    "uuid": "63f4a581-6065-4f90-bad2-714da8b97c08"
-  }, 
-  {
-    "desc": "Signed distance interval along Z axis", 
-    "iconsrc": null, 
-    "icontag": "E", 
-    "panel": "Revit Primitives", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Elevation", 
-    "typename": "ElevationInterval", 
-    "until": null, 
-    "uuid": "4150d40a-7c02-4633-b3b5-cfe4b16855b5"
-  }, 
-  {
-    "desc": "Contains a collection of Revit construction phase elements", 
-    "iconsrc": "/static/images/GH/Phase.png", 
-    "icontag": null, 
-    "panel": "Revit Primitives", 
-    "since": "1.2", 
-    "tab": "Params", 
-    "title": "Phase", 
-    "typename": "Phase", 
-    "until": null, 
-    "uuid": "353ffb47-46d6-4fee-8dbd-40e683416531"
-  }, 
-  {
-    "desc": "Wraps TypesTextureData", 
-    "iconsrc": "/static/images/GH/TextureData.png", 
-    "icontag": null, 
-    "panel": "Revit Primitives", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Texture Data", 
-    "typename": "TextureData", 
-    "until": null, 
-    "uuid": "a7c7ecef-066d-4b39-b2e8-01b6d53adfeb"
-  }, 
-  {
-    "desc": "Contains a collection of Revit appearance asset elements", 
-    "iconsrc": "/static/images/GH/AppearanceAsset.png", 
-    "icontag": null, 
-    "panel": "Revit Primitives", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Appearance Asset", 
-    "typename": "AppearanceAsset", 
-    "until": null, 
-    "uuid": "941b2ee3-5423-4fee-9df6-27c77fdb53c9"
-  }, 
-  {
-    "desc": "Contains a collection of Revit fill pattern elements", 
-    "iconsrc": "/static/images/GH/FillPatternElement.png", 
-    "icontag": null, 
-    "panel": "Revit Primitives", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Fill Pattern", 
-    "typename": "FillPatternElement", 
-    "until": null, 
-    "uuid": "efddb3d7-cf2a-4972-b1c4-29374bb89149"
-  }, 
-  {
-    "desc": "Contains a collection of Revit line pattern elements", 
-    "iconsrc": "/static/images/GH/LinePatternElement.png", 
-    "icontag": null, 
-    "panel": "Revit Primitives", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Line Pattern", 
-    "typename": "LinePatternElement", 
-    "until": null, 
-    "uuid": "eb5ab657-ae01-42f0-bf98-071da6d7a2d2"
-  }, 
-  {
     "desc": "Contains a collection of Revit categories", 
     "iconsrc": "/static/images/GH/Category.png", 
     "icontag": null, 
@@ -262,6 +190,30 @@
     "typename": "Document", 
     "until": null, 
     "uuid": "f3427d5c-3793-4e32-b219-8172d56ef04c"
+  }, 
+  {
+    "desc": "Contains a collection of signed distances along Z axis", 
+    "iconsrc": null, 
+    "icontag": "E", 
+    "panel": "Revit Primitives", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Elevation", 
+    "typename": "Elevation", 
+    "until": null, 
+    "uuid": "63f4a581-6065-4f90-bad2-714da8b97c08"
+  }, 
+  {
+    "desc": "Signed distance interval along Z axis", 
+    "iconsrc": null, 
+    "icontag": "E", 
+    "panel": "Revit Primitives", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Elevation", 
+    "typename": "ElevationInterval", 
+    "until": null, 
+    "uuid": "4150d40a-7c02-4633-b3b5-cfe4b16855b5"
   }, 
   {
     "desc": "Contains a collection of Revit elements", 
@@ -370,6 +322,18 @@
     "typename": "FamilySymbol", 
     "until": null, 
     "uuid": "786d9097-df9c-4513-9b5f-278667fbe999"
+  }, 
+  {
+    "desc": "Contains a collection of Revit fill pattern elements", 
+    "iconsrc": "/static/images/GH/FillPatternElement.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Fill Pattern", 
+    "typename": "FillPatternElement", 
+    "until": null, 
+    "uuid": "efddb3d7-cf2a-4972-b1c4-29374bb89149"
   }, 
   {
     "desc": "Contains a collection of Revit vertices", 
@@ -540,6 +504,18 @@
     "uuid": "15ad6bf9-63ad-462b-985d-f6b8c2299465"
   }, 
   {
+    "desc": "Contains a collection of Revit line pattern elements", 
+    "iconsrc": "/static/images/GH/LinePatternElement.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Line Pattern", 
+    "typename": "LinePatternElement", 
+    "until": null, 
+    "uuid": "eb5ab657-ae01-42f0-bf98-071da6d7a2d2"
+  }, 
+  {
     "desc": "Contains a collection of Revit material elements", 
     "iconsrc": "/static/images/GH/Material.png", 
     "icontag": null, 
@@ -550,6 +526,18 @@
     "typename": "Material", 
     "until": null, 
     "uuid": "b18ef2cc-2e67-4a5e-9241-9010fb7d27ce"
+  }, 
+  {
+    "desc": "Contains a collection of Revit opening elements", 
+    "iconsrc": "/static/images/GH/Opening.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "since": "1.6", 
+    "tab": "Params", 
+    "title": "Opening", 
+    "typename": "Opening", 
+    "until": null, 
+    "uuid": "18d46e90-46ba-47df-b11b-ae78748bbda7"
   }, 
   {
     "desc": "Contains a collection of Revit parameters", 
@@ -588,6 +576,18 @@
     "uuid": "43f0e4e9-3dc4-4965-ab80-07e28e203a91"
   }, 
   {
+    "desc": "Contains a collection of Revit construction phase elements", 
+    "iconsrc": "/static/images/GH/Phase.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "since": "1.2", 
+    "tab": "Params", 
+    "title": "Phase", 
+    "typename": "Phase", 
+    "until": null, 
+    "uuid": "353ffb47-46d6-4fee-8dbd-40e683416531"
+  }, 
+  {
     "desc": "Contains a collection of Revit sketch elements", 
     "iconsrc": "/static/images/GH/Sketch.png", 
     "icontag": null, 
@@ -622,6 +622,18 @@
     "typename": "StructuralAsset", 
     "until": null, 
     "uuid": "dde6da63-87bc-4250-9455-5233bfad8683"
+  }, 
+  {
+    "desc": "Wraps TypesTextureData", 
+    "iconsrc": "/static/images/GH/TextureData.png", 
+    "icontag": null, 
+    "panel": "Revit Primitives", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Texture Data", 
+    "typename": "TextureData", 
+    "until": null, 
+    "uuid": "a7c7ecef-066d-4b39-b2e8-01b6d53adfeb"
   }, 
   {
     "desc": "Represents a Revit Thermal Asset", 
@@ -1548,7 +1560,7 @@
     "uuid": "cfb42d90-f9d4-4601-9eef-c624e92a424d"
   }, 
   {
-    "desc": "Filter used to match selectable elements into the given View", 
+    "desc": "Filter used to match seletable elements into the given View", 
     "iconsrc": "/static/images/GH/ElementSelectableInViewFilter.png", 
     "icontag": null, 
     "panel": "Filter", 
@@ -1726,6 +1738,18 @@
     "typename": "ElementWorkset", 
     "until": null, 
     "uuid": "b441ba8c-429e-4f92-90dc-97da3f14eb85"
+  }, 
+  {
+    "desc": "Element ownership status", 
+    "iconsrc": "/static/images/GH/ElementOwnership.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "since": "1.6", 
+    "tab": "Revit", 
+    "title": "Element Ownership", 
+    "typename": "ElementOwnership", 
+    "until": null, 
+    "uuid": "f68f96ec-977a-4103-94ee-932b8108193c"
   }, 
   {
     "desc": "Workset properties Get-Set accessor to workset information", 
@@ -2098,6 +2122,18 @@
     "typename": "ElementParameterSet", 
     "until": null, 
     "uuid": "8f1ee110-7fda-49e0-bed4-e8e0227bc021"
+  }, 
+  {
+    "desc": "Get the boundary profile of the given opening", 
+    "iconsrc": "/static/images/GH/OpeningBoundaryProfile.png", 
+    "icontag": null, 
+    "panel": "Host", 
+    "since": "1.6", 
+    "tab": "Revit", 
+    "title": "Opening Boundary Profile", 
+    "typename": "OpeningBoundaryProfile", 
+    "until": null, 
+    "uuid": "e76b0f6b-4ee1-413d-825d-4a8edd86d55f"
   }, 
   {
     "desc": "Get document appearance assets list", 
@@ -2652,6 +2688,18 @@
     "uuid": "f4c12aa0-a87b-4209-bd7b-4a189e4f4f0e"
   }, 
   {
+    "desc": "Clone document element on several locations", 
+    "iconsrc": "/static/images/GH/ElementClone.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "since": "1.6", 
+    "tab": "Revit", 
+    "title": "Clone Element", 
+    "typename": "ElementClone", 
+    "until": null, 
+    "uuid": "0ea8d61a-5fed-471d-a69d-b695dfba5581"
+  }, 
+  {
     "desc": "Flips or Unflips elements from Revit document", 
     "iconsrc": "/static/images/GH/FlipUnflipElement.png", 
     "icontag": null, 
@@ -2844,6 +2892,18 @@
     "uuid": "fe427d04-1d8f-48be-bfba-eb28ad23fc03"
   }, 
   {
+    "desc": "Element version information", 
+    "iconsrc": "/static/images/GH/ElementVersion.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "since": "1.6", 
+    "tab": "Revit", 
+    "title": "Element Version", 
+    "typename": "ElementVersion", 
+    "until": null, 
+    "uuid": "3848c899-cc07-4397-855d-961e907c09d9"
+  }, 
+  {
     "desc": "Deletes elements from Revit document", 
     "iconsrc": "/static/images/GH/ElementDelete.png", 
     "icontag": null, 
@@ -2998,6 +3058,30 @@
     "typename": "QueryAssemblies", 
     "until": null, 
     "uuid": "fd5b45c3-7f55-4ad8-abbe-e871f95b4988"
+  }, 
+  {
+    "desc": "Given its outline boundary, it adds a Shaft opening to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddShaftOpening.png", 
+    "icontag": null, 
+    "panel": "Host", 
+    "since": "1.6", 
+    "tab": "Revit", 
+    "title": "Add Shaft Opening", 
+    "typename": "AddShaftOpening", 
+    "until": null, 
+    "uuid": "657811b7-6662-4fcf-a67a-a65c34fa0651"
+  }, 
+  {
+    "desc": "Given a host wall, it adds an opening to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddWallOpening.png", 
+    "icontag": null, 
+    "panel": "Host", 
+    "since": "1.6", 
+    "tab": "Revit", 
+    "title": "Add Wall Opening", 
+    "typename": "AddWallOpening", 
+    "until": null, 
+    "uuid": "c86ed84c-2431-4e4f-a890-e5effed43be2"
   }, 
   {
     "desc": "Analyze given Basic Wall type", 
@@ -3628,7 +3712,7 @@
     "iconsrc": null, 
     "icontag": "S", 
     "panel": "Model", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Deconstruct Sketch", 
     "typename": "SketchDeconstruct", 
@@ -3720,6 +3804,18 @@
     "uuid": "ba9c72c5-ec88-450b-b736-be6d827fa2f3"
   }, 
   {
+    "desc": "Document version information", 
+    "iconsrc": "/static/images/GH/DocumentVersion.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "since": "1.6", 
+    "tab": "Revit", 
+    "title": "Document Version", 
+    "typename": "DocumentVersion", 
+    "until": null, 
+    "uuid": "8a2da785-098b-466f-b715-fea46070efcf"
+  }, 
+  {
     "desc": "Gets the active document", 
     "iconsrc": "/static/images/GH/DocumentActive.png", 
     "icontag": null, 
@@ -3750,17 +3846,17 @@
     "panel": "Document", 
     "since": "1.0", 
     "tab": "Revit", 
-    "title": "Query Document Links", 
+    "title": "Query Revit Links", 
     "typename": "DocumentLinks", 
     "until": null, 
     "uuid": "ebccfdd8-9f3b-44f4-a209-72d06c8082a5"
   }, 
   {
-    "desc": "Query document identity information", 
+    "desc": "Basic information about a document identity", 
     "iconsrc": "/static/images/GH/DocumentIdentity.png", 
     "icontag": null, 
     "panel": "Document", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Document Identity", 
     "typename": "DocumentIdentity", 
@@ -3768,11 +3864,11 @@
     "uuid": "94bd655c-77dd-4a88-bddb-b9456c45f06c"
   }, 
   {
-    "desc": "", 
+    "desc": "Basic information about a document file", 
     "iconsrc": "/static/images/GH/DocumentFile.png", 
     "icontag": null, 
     "panel": "Document", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Document File", 
     "typename": "DocumentFile", 
@@ -3780,7 +3876,7 @@
     "uuid": "c1c15806-311a-4a07-9dae-6dbd1d98ec05"
   }, 
   {
-    "desc": "", 
+    "desc": "Worksharing information about a document", 
     "iconsrc": "/static/images/GH/DocumentWorksharing.png", 
     "icontag": null, 
     "panel": "Document", 
@@ -3792,7 +3888,7 @@
     "uuid": "f7d56db0-f1c1-45bb-aa07-196039fff862"
   }, 
   {
-    "desc": "", 
+    "desc": "Cloud information about a document", 
     "iconsrc": "/static/images/GH/DocumentCloud.png", 
     "icontag": null, 
     "panel": "Document", 
@@ -3868,7 +3964,7 @@
     "iconsrc": "/static/images/GH/CategoryIdentity.png", 
     "icontag": null, 
     "panel": "Category", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Category Identity", 
     "typename": "CategoryIdentity", 
@@ -3904,7 +4000,7 @@
     "iconsrc": "/static/images/GH/QueryCategories.png", 
     "icontag": null, 
     "panel": "Category", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Query Categories", 
     "typename": "QueryCategories", 
