@@ -36,6 +36,7 @@
     <Compile Include="DB\CurtainGridLayout.cs" />
     <Compile Include="DB\CurtainMullionSystemFamily.cs" />
     <Compile Include="DB\CurtainPanelSystemFamily.cs" />
+    <Compile Include="DB\CurveEnd.cs" />
     <Compile Include="DB\ElementKind.cs" />
     <Compile Include="DB\ElevationBase.cs" />
     <Compile Include="DB\Extensions\BasePoint.cs" />

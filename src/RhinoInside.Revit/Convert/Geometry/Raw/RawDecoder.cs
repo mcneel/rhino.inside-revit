@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry.Raw
 {
@@ -123,15 +124,19 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return line.IsBound ?
         new LineCurve
         (
-          new Line(AsPoint3d(line.GetEndPoint(0)), AsPoint3d(line.GetEndPoint(1))),
-          line.GetEndParameter(0),
-          line.GetEndParameter(1)
+          new Line
+          (
+            AsPoint3d(line.GetEndPoint(ERDB.CurveEnd.Start)),
+            AsPoint3d(line.GetEndPoint(ERDB.CurveEnd.End))
+          ),
+          line.GetEndParameter(ERDB.CurveEnd.Start),
+          line.GetEndParameter(ERDB.CurveEnd.End)
         ) :
         new LineCurve
         (
           new Line(AsPoint3d(line.Origin) - (15000.0 * AsVector3d(line.Direction)), AsPoint3d(line.Origin) + (15000.0 * AsVector3d(line.Direction))),
-          -15000,
-          +15000
+          -15_000.0,
+          +15_000.0
         );
     }
 
@@ -140,13 +145,22 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       return arc.IsBound ?
         new ArcCurve
         (
-          new Arc(AsPoint3d(arc.GetEndPoint(0)), AsPoint3d(arc.Evaluate(0.5, true)), AsPoint3d(arc.GetEndPoint(1))),
-          arc.GetEndParameter(0),
-          arc.GetEndParameter(1)
+          new Arc
+          (
+            AsPoint3d(arc.GetEndPoint(ERDB.CurveEnd.Start)),
+            AsPoint3d(arc.Evaluate(0.5, normalized: true)),
+            AsPoint3d(arc.GetEndPoint(ERDB.CurveEnd.End))
+          ),
+          arc.GetEndParameter(ERDB.CurveEnd.Start),
+          arc.GetEndParameter(ERDB.CurveEnd.End)
         ) :
         new ArcCurve
         (
-          new Circle(new Plane(AsPoint3d(arc.Center), AsVector3d(arc.XDirection), AsVector3d(arc.YDirection)), arc.Radius),
+          new Circle
+          (
+            new Plane(AsPoint3d(arc.Center), AsVector3d(arc.XDirection), AsVector3d(arc.YDirection)),
+            arc.Radius
+          ),
           0.0,
           2.0 * Math.PI
         );
@@ -160,13 +174,17 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       if (ellipse.IsBound)
       {
-        nurbsCurve.ClosestPoint(AsPoint3d(ellipse.GetEndPoint(0)), out var param0);
+        nurbsCurve.ClosestPoint(AsPoint3d(ellipse.GetEndPoint(ERDB.CurveEnd.Start)), out var param0);
         if (!nurbsCurve.ChangeClosedCurveSeam(param0))
           nurbsCurve.Domain = new Interval(param0, param0 + nurbsCurve.Domain.Length);
 
-        nurbsCurve.ClosestPoint(AsPoint3d(ellipse.GetEndPoint(1)), out var param1);
+        nurbsCurve.ClosestPoint(AsPoint3d(ellipse.GetEndPoint(ERDB.CurveEnd.End)), out var param1);
         nurbsCurve = nurbsCurve.Trim(param0, param1) as NurbsCurve;
-        nurbsCurve.Domain = new Interval(ellipse.GetEndParameter(0), ellipse.GetEndParameter(1));
+        nurbsCurve.Domain = new Interval
+        (
+          ellipse.GetEndParameter(ERDB.CurveEnd.Start),
+          ellipse.GetEndParameter(ERDB.CurveEnd.End)
+        );
       }
 
       return nurbsCurve;
@@ -175,7 +193,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     public static NurbsCurve ToRhino(ARDB.HermiteSpline hermite)
     {
       var nurbsCurve = ToRhino(ARDB.NurbSpline.Create(hermite));
-      var trim = new Interval(hermite.GetEndParameter(0), hermite.GetEndParameter(1));
+      var trim = new Interval
+      (
+        hermite.GetEndParameter(ERDB.CurveEnd.Start),
+        hermite.GetEndParameter(ERDB.CurveEnd.End)
+      );
       return nurbsCurve.Trim(trim) as NurbsCurve ?? nurbsCurve;
     }
 
@@ -227,7 +249,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         helix.Radius
       );
 
-      nurbsCurve.Domain = new Interval(helix.GetEndParameter(0), helix.GetEndParameter(1));
+      nurbsCurve.Domain = new Interval
+      (
+        helix.GetEndParameter(ERDB.CurveEnd.Start),
+        helix.GetEndParameter(ERDB.CurveEnd.End)
+      );
       return nurbsCurve;
     }
 
@@ -261,8 +287,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
           crv.Domain = new Interval
           (
-            curve.IsBound ? curve.GetEndParameter(0) : 0.0,
-            curve.IsBound ? curve.GetEndParameter(1) : curve.IsCyclic ? curve.Period : 1.0
+            curve.IsBound ? curve.GetEndParameter(ERDB.CurveEnd.Start) : 0.0,
+            curve.IsBound ? curve.GetEndParameter(ERDB.CurveEnd.End)   : curve.IsCyclic ? curve.Period : 1.0
           );
 
           crv = crv.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ??
@@ -480,7 +506,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       var axis = new LineCurve
       (
-        new Line(AsPoint3d(curves[0].GetEndPoint(0)), AsPoint3d(curves[1].GetEndPoint(0))),
+        new Line
+        (
+          AsPoint3d(curves[0].GetEndPoint(ERDB.CurveEnd.Start)),
+          AsPoint3d(curves[1].GetEndPoint(ERDB.CurveEnd.Start))
+        ),
         0.0,
         1.0
       );
