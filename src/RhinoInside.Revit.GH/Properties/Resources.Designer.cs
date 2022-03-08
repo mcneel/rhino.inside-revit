@@ -1183,6 +1183,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap DocumentVersion {
+            get {
+                object obj = ResourceManager.GetObject("DocumentVersion", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap DocumentWorksharing {
             get {
                 object obj = ResourceManager.GetObject("DocumentWorksharing", resourceCulture);
@@ -1573,6 +1583,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementOwnership {
+            get {
+                object obj = ResourceManager.GetObject("ElementOwnership", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementOwnerViewFilter {
             get {
                 object obj = ResourceManager.GetObject("ElementOwnerViewFilter", resourceCulture);
@@ -1816,6 +1836,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementUnionFilter {
             get {
                 object obj = ResourceManager.GetObject("ElementUnionFilter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementVersion {
+            get {
+                object obj = ResourceManager.GetObject("ElementVersion", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
