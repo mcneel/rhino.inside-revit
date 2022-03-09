@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
     {
       if (!Params.GetData(DA, "Host", out Types.HostObject host, x => x.IsValid)) return;
 
-      if(Types.Sketch.FromElement(host.Value.GetSketch()) is Types.Sketch sketch)
+      if(host is Types.ISketchAccess access && access.Sketch is Types.Sketch sketch)
       {
         DA.SetData("Plane", sketch.ProfilesPlane);
         DA.SetDataList("Profile", sketch.Profiles);

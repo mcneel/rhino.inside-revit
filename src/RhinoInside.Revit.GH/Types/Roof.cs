@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Roof")]
-  public class Roof : HostObject, ICurtainGridsAccess
+  public class Roof : HostObject, ISketchAccess, ICurtainGridsAccess
   {
     protected override Type ValueType => typeof(ARDB.RoofBase);
     public new ARDB.RoofBase Value => base.Value as ARDB.RoofBase;
@@ -32,55 +32,53 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public double? LevelOffset
+    {
+      get
+      {
+        switch (Value)
+        {
+          case ARDB.ExtrusionRoof extrusionRoof:
+            return extrusionRoof.get_Parameter(ARDB.BuiltInParameter.ROOF_CONSTRAINT_OFFSET_PARAM).AsDouble() * Revit.ModelUnits;
+
+          case ARDB.FootPrintRoof footPrintRoof:
+            return footPrintRoof.get_Parameter(ARDB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM).AsDouble() * Revit.ModelUnits;
+        }
+
+        return default;
+      }
+    }
+
+    #region Location
     public override Plane Location
     {
       get
       {
-        if(Value is ARDB.RoofBase roof && !(roof.Location is ARDB.LocationPoint) && !(roof.Location is ARDB.LocationCurve))
+        if(Sketch is Sketch sketch)
         {
-          if (roof.GetSketch() is ARDB.Sketch sketch)
-          {
-            var center = Point3d.Origin;
-            var count = 0;
-            foreach (var curveArray in sketch.Profile.Cast<ARDB.CurveArray>())
-            {
-              foreach (var curve in curveArray.Cast<ARDB.Curve>())
-              {
-                count++;
-                center += curve.Evaluate(0.0, normalized: true).ToPoint3d();
-                count++;
-                center += curve.Evaluate(1.0, normalized: true).ToPoint3d();
-              }
-            }
-            center /= count;
+          var plane = sketch.ProfilesPlane;
 
-            var levelOffset = 0.0;
-            switch (roof)
-            {
-              case ARDB.FootPrintRoof footPrintRoof:
-                levelOffset = footPrintRoof.get_Parameter(ARDB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM).AsDouble() * Revit.ModelUnits;
-                break;
+          var center = plane.Origin;
+          center.Z = Level.Height + LevelOffset.Value;
 
-              case ARDB.ExtrusionRoof extrusionRoof:
-                levelOffset = extrusionRoof.get_Parameter(ARDB.BuiltInParameter.ROOF_CONSTRAINT_OFFSET_PARAM).AsDouble() * Revit.ModelUnits;
-                break;
-            }
+          var xAxis = plane.XAxis;
+          var yAxis = plane.YAxis;
 
-            var plane = sketch.SketchPlane.GetPlane().ToPlane();
-            var origin = new Point3d(center.X, center.Y, Level.Height + levelOffset);
-            var xAxis = plane.XAxis;
-            var yAxis = plane.YAxis;
+          if (Value is ARDB.ExtrusionRoof)
+            yAxis = plane.ZAxis;
 
-            if (roof is ARDB.ExtrusionRoof)
-              yAxis = plane.ZAxis;
-
-            return new Plane(origin, xAxis, yAxis);
-          }
+          return new Plane(center, xAxis, yAxis);
         }
 
         return base.Location;
       }
     }
+    #endregion
+
+    #region ISketchAccess
+    public Sketch Sketch => Value is ARDB.RoofBase roof ?
+      new Sketch(roof.GetSketch()) : default;
+    #endregion
 
     #region IGH_CurtainGridsAccess
     public IList<CurtainGrid> CurtainGrids

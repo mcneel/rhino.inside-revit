@@ -1,11 +1,9 @@
 using System;
-using System.Linq;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using Convert.Geometry;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Ceiling")]
@@ -17,22 +15,22 @@ namespace RhinoInside.Revit.GH.Types
     public Ceiling() { }
     public Ceiling(ARDB.Ceiling ceiling) : base(ceiling) { }
 
+    public double? LevelOffset =>
+      Value?.get_Parameter(ARDB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM).AsDouble() * Revit.ModelUnits;
+
     #region Location
     public override Plane Location
     {
       get
       {
-        if (Value is ARDB.Ceiling ceiling && Sketch is Sketch sketch)
+        if (Sketch is Sketch sketch)
         {
           var plane = sketch.ProfilesPlane;
 
           var center = plane.Origin;
-          if (ceiling.Document.GetElement(ceiling.LevelId) is ARDB.Level level)
-            center.Z = level.GetHeight() * Revit.ModelUnits;
-
-          center.Z += Revit.ModelUnits * ceiling.get_Parameter(ARDB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
-
+          center.Z = Level.Height + LevelOffset.Value;
           plane.Origin = center;
+
           return plane;
         }
 

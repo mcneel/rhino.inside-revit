@@ -1,11 +1,9 @@
 using System;
-using System.Linq;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using Convert.Geometry;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Floor")]
@@ -17,22 +15,22 @@ namespace RhinoInside.Revit.GH.Types
     public Floor() { }
     public Floor(ARDB.Floor floor) : base(floor) { }
 
+    public double? LevelOffset =>
+      Value?.get_Parameter(ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM).AsDouble() * Revit.ModelUnits;
+
     #region Location
     public override Plane Location
     {
       get
       {
-        if (Value is ARDB.Floor floor && Sketch is Sketch sketch)
+        if (Sketch is Sketch sketch)
         {
           var plane = sketch.ProfilesPlane;
 
           var center = plane.Origin;
-          if (floor.Document.GetElement(floor.LevelId) is ARDB.Level level)
-            center.Z = level.GetHeight() * Revit.ModelUnits;
-
-          center.Z += Revit.ModelUnits * floor.get_Parameter(ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
-
+          center.Z = Level.Height + LevelOffset.Value;
           plane.Origin = center;
+
           return plane;
         }
 

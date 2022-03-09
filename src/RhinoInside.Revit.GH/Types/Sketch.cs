@@ -23,8 +23,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
-      if (source is Element element && element.Value?.GetSketch() is ARDB.Sketch sketchElement)
-        return SetValue(sketchElement);
+      if (source is Element element && element.Value?.GetSketch() is ARDB.Sketch sketch)
+        return SetValue(sketch);
 
       return base.CastFrom(source);
     }
