@@ -350,5 +350,24 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return default;
     }
     #endregion
+
+    #region TryGetCentroid
+    public static bool TryGetCentroid(this IEnumerable<Curve> curves, out XYZ centroid)
+    {
+      centroid = XYZ.Zero;
+      var count = 0;
+      foreach (var curve in curves)
+      {
+        var t0 = curve.IsBound ? curve.GetEndParameter(CurveEnd.Start) : 0.0;
+        var t1 = curve.IsBound ? curve.GetEndParameter(CurveEnd.End) : curve.IsCyclic ? curve.Period : 1.0;
+        centroid += curve.Evaluate(t0, normalized: false);
+        centroid += curve.Evaluate(t1, normalized: false);
+        count += 2;
+      }
+
+      centroid /= count;
+      return count > 0;
+    }
+    #endregion
   }
 }
