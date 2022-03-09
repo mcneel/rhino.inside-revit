@@ -1274,6 +1274,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       return ARDB.Point.Create(point.Location.ToXYZ(factor));
     }
 
+    /// <summary>
     /// Converts the specified PointCloudItem to an equivalent Revit Point.
     /// </summary>
     /// <param name="value">A value to convert.</param>
