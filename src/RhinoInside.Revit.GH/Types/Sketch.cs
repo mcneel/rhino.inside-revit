@@ -69,7 +69,9 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (!profile.HasValue && Value is ARDB.Sketch sketch)
         {
-          profile.Value = sketch.Profile.Cast<ARDB.CurveArray>().SelectMany(GeometryDecoder.ToCurves).ToArray();
+          try { profile.Value = sketch.Profile.Cast<ARDB.CurveArray>().SelectMany(GeometryDecoder.ToCurves).ToArray(); }
+          catch { }
+
           profile.HasValue = true;
         }
 
@@ -113,7 +115,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Owner
     public Element Owner =>
-      Value is ARDB.Sketch sketch ? Element.FromElement(sketch.GetOwner<ARDB.Element>()) : default;
+      Value is ARDB.Sketch sketch ? Element.FromElement(sketch.GetOwner()) : default;
     #endregion
 
     #region SketchPlane
