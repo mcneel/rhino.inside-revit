@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
 #if REVIT_2022
     public static Element GetOwner(this Sketch sketch) =>
-      return sketch.Document.GetElement(sketch.OwnerId);
+      sketch.Document.GetElement(sketch.OwnerId);
 #else
     static readonly ElementFilter SketchOwnerFilter = new ElementMulticlassFilter
     (
