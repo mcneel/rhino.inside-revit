@@ -22,33 +22,18 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.Floor floor && floor.GetSketch() is ARDB.Sketch sketch)
+        if (Value is ARDB.Floor floor && Sketch is Sketch sketch)
         {
-          var center = Point3d.Origin;
-          var count = 0;
-          foreach (var curveArray in sketch.Profile.Cast<ARDB.CurveArray>())
-          {
-            foreach (var curve in curveArray.Cast<ARDB.Curve>())
-            {
-              count++;
-              center += curve.Evaluate(0.0, normalized: true).ToPoint3d();
-              count++;
-              center += curve.Evaluate(1.0, normalized: true).ToPoint3d();
-            }
-          }
-          center /= count;
+          var plane = sketch.ProfilesPlane;
 
+          var center = plane.Origin;
           if (floor.Document.GetElement(floor.LevelId) is ARDB.Level level)
             center.Z = level.GetHeight() * Revit.ModelUnits;
 
           center.Z += Revit.ModelUnits * floor.get_Parameter(ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.AsDouble() ?? 0.0;
 
-          var plane = sketch.SketchPlane.GetPlane().ToPlane();
-          var origin = center;
-          var xAxis = plane.XAxis;
-          var yAxis = plane.YAxis;
-
-          return new Plane(origin, xAxis, yAxis);
+          plane.Origin = center;
+          return plane;
         }
 
         return base.Location;

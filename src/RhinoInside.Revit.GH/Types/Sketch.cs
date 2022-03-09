@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -22,11 +23,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
-      if (source is ISketchAccess access)
-      {
-        var sketch = access.Sketch;
-        return sketch is object && SetValue(sketch.Value);
-      }
+      if (source is Element element && element.Value?.GetSketch() is ARDB.Sketch sketchElement)
+        return SetValue(sketchElement);
 
       return base.CastFrom(source);
     }
@@ -34,13 +32,7 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      var location = Location;
-      if (!location.IsValid)
-        return;
-
-      GH_Plane.DrawPlane(args.Pipeline, location, Grasshopper.CentralSettings.PreviewPlaneRadius, 4, args.Color, System.Drawing.Color.DarkRed, System.Drawing.Color.DarkGreen);
-
-      foreach(var loop in Profile)
+      foreach(var loop in Profiles)
         args.Pipeline.DrawCurve(loop, args.Color, args.Thickness);
     }
 
@@ -54,37 +46,69 @@ namespace RhinoInside.Revit.GH.Types
     #region Location
     protected override void SubInvalidateGraphics()
     {
-      profile = default;
-      region = default;
+      profiles = default;
+      trimmedSurface = default;
 
       base.SubInvalidateGraphics();
     }
 
-    public override Plane Location => Value?.SketchPlane.GetPlane().ToPlane() ?? base.Location;
+    public override Plane Location =>
+      Value?.SketchPlane.GetPlane().ToPlane() ?? NaN.Plane;
 
-    (bool HasValue, Curve[] Value) profile;
-    public Curve[] Profile
+    public Plane ProfilesPlane
     {
       get
       {
-        if (!profile.HasValue && Value is ARDB.Sketch sketch)
+        if (Value is ARDB.Sketch sketch)
         {
-          try { profile.Value = sketch.Profile.Cast<ARDB.CurveArray>().SelectMany(GeometryDecoder.ToCurves).ToArray(); }
-          catch { }
+          var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
-          profile.HasValue = true;
+          var bbox = BoundingBox.Empty;
+          foreach (var profile in Profiles)
+            bbox.Union(profile.GetBoundingBox(plane));
+
+          plane.Origin = plane.PointAt(bbox.Center.X, bbox.Center.Y);
+          return plane;
         }
 
-        return profile.Value;
+        return NaN.Plane;
       }
     }
 
-    (bool HasValue, Brep Value) region;
+    (bool HasValue, Curve[] Value) profiles;
+    public Curve[] Profiles
+    {
+      get
+      {
+        if (!profiles.HasValue && Value is ARDB.Sketch sketch)
+        {
+          try
+          {
+            profiles.Value = sketch.Profile.Cast<ARDB.CurveArray>().SelectMany(GeometryDecoder.ToCurves).ToArray();
+            var plane = sketch.SketchPlane.GetPlane().ToPlane();
+
+            foreach (var profile in profiles.Value)
+            {
+              if (!profile.IsClosed) continue;
+              if (profile.ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
+                profile.Reverse();
+            }
+          }
+          catch { }
+
+          profiles.HasValue = true;
+        }
+
+        return profiles.Value;
+      }
+    }
+
+    (bool HasValue, Brep Value) trimmedSurface;
     public override Brep TrimmedSurface
     {
       get
       {
-        if (!region.HasValue && Value is ARDB.Sketch sketch)
+        if (!trimmedSurface.HasValue && Value is ARDB.Sketch sketch)
         {
           var loops = sketch.Profile.ToCurveMany().Where(x => x.IsClosed).ToArray();
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
@@ -93,7 +117,12 @@ namespace RhinoInside.Revit.GH.Types
           {
             var loopsBox = BoundingBox.Empty;
             foreach (var loop in loops)
-              loopsBox.Union(loop.GetBoundingBox(plane, out var _));
+            {
+              if (loop.ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
+                loop.Reverse();
+
+              loopsBox.Union(loop.GetBoundingBox(plane));
+            }
 
             var planeSurface = new PlaneSurface
             (
@@ -102,13 +131,13 @@ namespace RhinoInside.Revit.GH.Types
               new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
             );
 
-            region.Value = planeSurface.CreateTrimmedSurface(loops, GeometryObjectTolerance.Model.VertexTolerance);
+            trimmedSurface.Value = planeSurface.CreateTrimmedSurface(loops, GeometryObjectTolerance.Model.VertexTolerance);
           }
 
-          region.HasValue = true;
+          trimmedSurface.HasValue = true;
         }
 
-        return region.Value;
+        return trimmedSurface.Value;
       }
     }
     #endregion
