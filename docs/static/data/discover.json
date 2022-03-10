@@ -285,6 +285,26 @@
         ]
     },
     {
+        "title": "Rhino Inside Revit with Ehsan",
+        "url": "https://youtu.be/08kH16QC3ds",
+        "thumbnail": "https://i3.ytimg.com/vi/08kH16QC3ds/maxresdefault.jpg",
+        "author": "Jeffrey Pinheiro, AIA AKA The Revit Kid",
+        "authorUrl": "http://therevitkid.blogspot.com/",
+        "description": "On this episode of BIM After Dark Live Ehsan Iran Nejad returns to the show to talk about Rhino Inside Revit. Have you tried using Rhino and Revit TOGETHER? The truth is, for a long time it kind of sucked to try and use them together... That is, until Rhino.Inside.Revit came along.",
+        "kinds": [
+            "podcast",
+            "video"
+        ],
+        "tags": [
+            "discussion",
+            "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
         "highlight": true,
         "title": "Conveyor and Rhino.Inside.Revit Explained",
         "url": "https://youtu.be/di13kZQWsl0",
@@ -1175,6 +1195,25 @@
         ],
         "versions" : [
             "beta",
+            "1.0"
+        ]
+    },
+    {
+        "title": "Project Objects to Topography",
+        "url": "https://youtu.be/J5tBJeXMO1s",
+        "thumbnail": "https://i3.ytimg.com/vi/J5tBJeXMO1s/maxresdefault.jpg",
+        "author": "BIMGeek",
+        "authorUrl": "https://www.youtube.com/channel/UCLwgBbBfZLcqqbta10a_fpQ",
+        "description": "The topic of this tutorial will be the projection of components into given topography. This is a task that can be automated easily with a simple script.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "tutorial",
+            "workflow"
+        ],
+        "versions" : [
             "1.0"
         ]
     },
