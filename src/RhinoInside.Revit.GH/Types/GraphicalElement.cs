@@ -52,10 +52,7 @@ namespace RhinoInside.Revit.GH.Types
         if (location is object) return true;
       }
 
-      using (var bbox = element.GetBoundingBoxXYZ())
-      {
-        return bbox is object;
-      }
+      return element.HasBoundingBoxXYZ();
     }
 
     protected override void SubInvalidateGraphics()
