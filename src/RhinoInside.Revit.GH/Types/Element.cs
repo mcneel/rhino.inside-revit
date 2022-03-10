@@ -174,7 +174,6 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.CurtainSystem),           (element)=> new CurtainSystem         (element as ARDB.CurtainSystem)     },
       { typeof(ARDB.CurtainGridLine),         (element)=> new CurtainGridLine       (element as ARDB.CurtainGridLine)   },
       { typeof(ARDB.Floor),                   (element)=> new Floor                 (element as ARDB.Floor)             },
-      { typeof(ARDB.Architecture.BuildingPad),(element)=> new BuildingPad           (element as ARDB.Architecture.BuildingPad) },
       { typeof(ARDB.Ceiling),                 (element)=> new Ceiling               (element as ARDB.Ceiling)           },
       { typeof(ARDB.RoofBase),                (element)=> new Roof                  (element as ARDB.RoofBase)          },
       { typeof(ARDB.Wall),                    (element)=> new Wall                  (element as ARDB.Wall)              },
@@ -185,6 +184,9 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.CurveElement),            (element)=> new CurveElement          (element as ARDB.CurveElement)      },
 
       { typeof(ARDB.AssemblyInstance),        (element)=> new AssemblyInstance      (element as ARDB.AssemblyInstance)  },
+
+      { typeof(ARDB.Architecture.BuildingPad),(element)=> new BuildingPad           (element as ARDB.Architecture.BuildingPad) },
+      { typeof(ARDB.Architecture.Railing),    (element)=> new Railing               (element as ARDB.Architecture.Railing) },
     };
 
     public static Element FromElement(ARDB.Element element)
