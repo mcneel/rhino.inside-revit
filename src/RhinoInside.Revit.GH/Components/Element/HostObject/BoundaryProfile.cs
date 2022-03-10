@@ -1,10 +1,8 @@
 using System;
 using Grasshopper.Kernel;
-using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Hosts
 {
-  using Convert.Geometry;
   using External.DB.Extensions;
 
   public class HostObjectBoundaryProfile : Component
@@ -35,14 +33,12 @@ namespace RhinoInside.Revit.GH.Components.Hosts
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      ARDB.HostObject host = null;
-      if (!DA.GetData("Host", ref host) || host is null)
-        return;
+      if (!Params.GetData(DA, "Host", out Types.HostObject host, x => x.IsValid)) return;
 
-      if(host.GetSketch() is ARDB.Sketch sketch)
+      if(host is Types.ISketchAccess access && access.Sketch is Types.Sketch sketch)
       {
-        DA.SetData("Plane", sketch.SketchPlane.GetPlane().ToPlane());
-        DA.SetDataList("Profile", sketch.Profile.ToCurveMany());
+        DA.SetData("Plane", sketch.ProfilesPlane);
+        DA.SetDataList("Profile", sketch.Profiles);
       }
     }
   }

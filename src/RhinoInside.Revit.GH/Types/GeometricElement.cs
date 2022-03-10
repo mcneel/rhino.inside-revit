@@ -30,8 +30,7 @@ namespace RhinoInside.Revit.GH.Types
       if (!GraphicalElement.IsValidElement(element))
         return false;
 
-      using (var options = new ARDB.Options())
-        return element.get_Geometry(options) is object;
+      return element.HasGeometry();
     }
 
     protected override void SubInvalidateGraphics()

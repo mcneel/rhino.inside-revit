@@ -44,21 +44,17 @@ namespace RhinoInside.Revit.GH.Types
         {
           if (opening.IsRectBoundary)
           {
-            var p0 = opening.BoundaryRect[0].ToPoint3d();
-            var p1 = opening.BoundaryRect[1].ToPoint3d();
+            var rect = opening.BoundaryRect;
+            var p0 = rect[0].ToPoint3d();
+            var p1 = rect[1].ToPoint3d();
             var p2 = new Point3d(p0.X, p0.Y, p1.Z);
             var p3 = new Point3d(p1.X, p1.Y, p0.Z);
 
-            var xDirection = p3 - p0;
-            var zDirection = p2 - p0;
-            var yDirection = Vector3d.CrossProduct(zDirection, xDirection);
-
-            return new Plane(p0 + ((p1 - p0) * 0.5), xDirection, yDirection);
+            return new Plane(p0 + ((p1 - p0) * 0.5), p3 - p0, p2 - p0);
           }
-          else if (opening.GetSketch() is ARDB.Sketch sketch)
-            return sketch.SketchPlane.GetPlane().ToPlane();
         }
-        return NaN.Plane;
+
+        return Sketch?.ProfilesPlane ?? NaN.Plane;
       }
     }
 
@@ -69,20 +65,31 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
+        var profiles = default(Curve[]);
         if (Value is ARDB.Opening opening)
         {
           if (opening.IsRectBoundary)
           {
-            var p0 = opening.BoundaryRect[0].ToPoint3d();
-            var p1 = opening.BoundaryRect[1].ToPoint3d();
+            var rect = opening.BoundaryRect;
+            var p0 = rect[0].ToPoint3d();
+            var p1 = rect[1].ToPoint3d();
             var p2 = new Point3d(p0.X, p0.Y, p1.Z);
             var p3 = new Point3d(p1.X, p1.Y, p0.Z);
-            return new Curve[] { new PolylineCurve(new Point3d[] { p0, p2, p1, p3, p0 }) };
+
+            profiles = new Curve[] { new PolylineCurve(new Point3d[] { p0, p2, p1, p3, p0 }) };
           }
-          else return opening.BoundaryCurves.ToCurves();
+          else profiles = opening.BoundaryCurves.ToCurves();
+
+          var plane = Location;
+          foreach (var profile in profiles)
+          {
+            if (!profile.IsClosed) continue;
+            if (profile.ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
+              profile.Reverse();
+          }
         }
 
-        return null;
+        return profiles;
       }
     }
 

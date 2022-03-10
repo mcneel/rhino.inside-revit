@@ -119,6 +119,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return new Outline(new XYZ(minX, minY, minZ), new XYZ(maxX, maxY, maxZ));
     }
 
+    public static bool HasBoundingBoxXYZ(this Element element)
+    {
+      using (var bbox = element.GetBoundingBoxXYZ())
+        return bbox is object;
+    }
+
     public static BoundingBoxXYZ GetBoundingBoxXYZ(this Element element, out View view)
     {
       view = element.ViewSpecific ? element.Document.GetElement(element.OwnerViewId) as View : default;
@@ -129,6 +135,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       using (var view = element.ViewSpecific ? element.Document.GetElement(element.OwnerViewId) as View : default)
         return element.get_BoundingBox(view.IsGraphicalView() ? view : default);
+    }
+
+    public static bool HasGeometry(this Element element)
+    {
+      using
+      (
+        var options = element.ViewSpecific ?
+        new Options() { View = element.Document.GetElement(element.OwnerViewId) as View } :
+        new Options()
+      )
+      using (var geometry = element.get_Geometry(options))
+        return geometry is object;
     }
 
     public static GeometryElement GetGeometry(this Element element, Options options)
@@ -378,11 +396,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (typeof(AreaScheme).IsAssignableFrom(type))
         return BuiltInParameter.AREA_SCHEME_NAME;
 
-      if (typeof(Room).IsAssignableFrom(type))
-        return BuiltInParameter.ROOM_NAME;
-
-      if (typeof(Zone).IsAssignableFrom(type))
-        return BuiltInParameter.ZONE_NAME;
+      if (typeof(SpatialElement).IsAssignableFrom(type))
+        return BuiltInParameter.ROOM_NUMBER;
 
       if (typeof(RevitLinkInstance).IsAssignableFrom(type))
         return BuiltInParameter.RVT_LINK_INSTANCE_NAME;
@@ -412,8 +427,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static string GetElementNomen(this Element element, out BuiltInParameter nomenParameter)
     {
-      nomenParameter = GetNomenParameter(element);
-      if (nomenParameter != BuiltInParameter.INVALID)
+      if ((nomenParameter = GetNomenParameter(element)) != BuiltInParameter.INVALID)
         return GetParameterValue<string>(element, nomenParameter);
       else
         return element.Name;

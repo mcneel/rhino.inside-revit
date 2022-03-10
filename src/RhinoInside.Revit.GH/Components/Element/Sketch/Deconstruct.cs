@@ -84,7 +84,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
 
       Params.TrySetData(DA, "Owner", () => sketch.Owner);
       Params.TrySetData(DA, "Sketch Plane", () => sketch.SketchPlane);
-      Params.TrySetDataList(DA, "Profile", () => sketch.Profile);
+      Params.TrySetDataList(DA, "Profile", () => sketch.Profiles);
     }
   }
 }

@@ -338,6 +338,7 @@
     <Compile Include="Types\DatumPlane.cs" />
     <Compile Include="Types\Phase.cs" />
     <Compile Include="Types\ProjectLocation.cs" />
+    <Compile Include="Types\Railing.cs" />
     <Compile Include="Types\Roof.cs" />
     <Compile Include="Types\DataType.cs" />
     <Compile Include="Types\ScopeBox.cs" />
