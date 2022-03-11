@@ -166,7 +166,6 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Grid),                    (element)=> new Grid                  (element as ARDB.Grid)              },
       { typeof(ARDB.ReferencePlane),          (element)=> new ReferencePlane        (element as ARDB.ReferencePlane)    },
       { typeof(ARDB.ReferencePoint),          (element)=> new ReferencePoint        (element as ARDB.ReferencePoint)    },
-      { typeof(ARDB.SpatialElement),          (element)=> new SpatialElement        (element as ARDB.SpatialElement)    },
       { typeof(ARDB.Group),                   (element)=> new Group                 (element as ARDB.Group)             },
       { typeof(ARDB.Opening),                 (element)=> new Opening               (element as ARDB.Opening)           },
       { typeof(ARDB.HostObject),              (element)=> new HostObject            (element as ARDB.HostObject)        },
@@ -184,6 +183,11 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.CurveElement),            (element)=> new CurveElement          (element as ARDB.CurveElement)      },
 
       { typeof(ARDB.AssemblyInstance),        (element)=> new AssemblyInstance      (element as ARDB.AssemblyInstance)  },
+
+      { typeof(ARDB.SpatialElement),          (element)=> new SpatialElement        (element as ARDB.SpatialElement)    },
+      { typeof(ARDB.Area),                    (element)=> new AreaElement           (element as ARDB.Area)              },
+      { typeof(ARDB.Architecture.Room),       (element)=> new RoomElement           (element as ARDB.Architecture.Room) },
+      { typeof(ARDB.Mechanical.Space),        (element)=> new SpaceElement          (element as ARDB.Mechanical.Space)  },
 
       { typeof(ARDB.Architecture.BuildingPad),(element)=> new BuildingPad           (element as ARDB.Architecture.BuildingPad) },
       { typeof(ARDB.Architecture.Railing),    (element)=> new Railing               (element as ARDB.Architecture.Railing) },
