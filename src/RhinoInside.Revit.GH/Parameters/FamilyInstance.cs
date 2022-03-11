@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class Mullion : GraphicalElementT<Types.Mullion, ARDB.Mullion>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("6D845CBD-1962-4912-80C1-F47FE99AD54A");
 
     public Mullion() : base
@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class Panel : GraphicalElementT<Types.Panel, ARDB.FamilyInstance>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("CEF5DD61-BC7D-4E66-AE94-E990B193ACDC");
 
     public Panel() : base

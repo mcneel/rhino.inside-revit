@@ -792,7 +792,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class GraphicalElement : GraphicalElementT<Types.IGH_GraphicalElement, ARDB.Element>
   {
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("EF607C2A-2F44-43F4-9C39-369CE114B51F");
 
     public GraphicalElement() : base

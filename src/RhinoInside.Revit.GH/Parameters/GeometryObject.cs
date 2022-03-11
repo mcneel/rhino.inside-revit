@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class Vertex : GeometryObject<Types.Vertex, ARDB.Point>
   {
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
     public override Guid ComponentGuid => new Guid("BC1B160A-DC04-4139-AB7D-1AECBDE7FF88");
     public Vertex() : base("Vertex", "Vertex", "Contains a collection of Revit vertices", "Params", "Revit Primitives") { }
 
@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class Edge : GeometryObject<Types.Edge, ARDB.Edge>
   {
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
     public override Guid ComponentGuid => new Guid("B79FD0FD-63AE-4776-A0A7-6392A3A58B0D");
     public Edge() : base("Edge", "Edge", "Contains a collection of Revit edges", "Params", "Revit Primitives") { }
 
@@ -137,7 +137,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class Face : GeometryObject<Types.Face, ARDB.Face>
   {
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
     public override Guid ComponentGuid => new Guid("759700ED-BC79-4986-A6AB-84921A7C9293");
     public Face() : base("Face", "Face", "Contains a collection of Revit faces", "Params", "Revit Primitives") { }
 

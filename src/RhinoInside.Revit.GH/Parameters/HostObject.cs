@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class CurtainGridLine : GraphicalElementT<Types.CurtainGridLine, ARDB.CurtainGridLine>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("A2DD571E-729C-4F69-BD34-2769583D329B");
 
     public CurtainGridLine() : base("Curtain Grid Line", "Curtain Grid Line", "Contains a collection of Revit curtain grid line elements", "Params", "Revit Primitives") { }

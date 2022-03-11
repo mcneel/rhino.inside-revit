@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public class Document : PersistentParam<Types.IGH_Document>
   {
     public override Guid ComponentGuid => new Guid("F3427D5C-3793-4E32-B219-8172D56EF04C");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     protected override string IconTag => "D";
 
     public Document() : base("Document", "DOC", "Contains a collection of Revit documents", "Params", "Revit Primitives")

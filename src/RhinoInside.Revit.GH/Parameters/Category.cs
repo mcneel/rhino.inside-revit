@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class Category : Element<Types.Category, ARDB.Element>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     public override Guid ComponentGuid => new Guid("6722C7A5-EFD3-4119-A7FD-6C8BE892FD04");
 
     public Category() : base("Category", "Category", "Contains a collection of Revit categories", "Params", "Revit Primitives") { }

@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class ViewSheet : Element<Types.IGH_Sheet, ARDB.ViewSheet>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
     public override Guid ComponentGuid => new Guid("3C0D65B7-4173-423C-97E9-C6124E8C258A");
 
     public ViewSheet() : base("Sheet", "Sheet", "Contains a collection of Revit sheet view elements", "Params", "Revit Primitives") { }
