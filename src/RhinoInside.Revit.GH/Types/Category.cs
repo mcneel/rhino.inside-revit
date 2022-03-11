@@ -32,11 +32,12 @@ namespace RhinoInside.Revit.GH.Types
 
       if (source is IGH_Goo goo)
       {
-        if (source is CategoryId id)
+        switch (source)
         {
-          source = (ARDB.BuiltInCategory) id.Value;
+          case IGH_DocumentObject docObject: source = docObject.Value; break;
+          case CategoryId catId:             source = (ARDB.BuiltInCategory) catId.Value; break;
+          default:                           source = goo.ScriptVariable(); break;
         }
-        else source = goo.ScriptVariable();
       }
 
       switch (source)
@@ -49,11 +50,11 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.Family f:            SetValue(f.Document, f.FamilyCategoryId); return true;
         case ARDB.Element e:
           if(e.Category is ARDB.Category category)
-          {
             SetValue(e.Document, category.Id);
-            return true;
-          }
-          break;
+          else
+            SetValue(default, ARDB.ElementId.InvalidElementId);
+
+          return true;
       }
 
       if (categoryId.TryGetBuiltInCategory(out var _))
