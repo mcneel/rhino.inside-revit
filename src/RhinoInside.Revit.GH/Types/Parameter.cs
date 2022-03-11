@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Special;
@@ -449,10 +451,111 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    static readonly Dictionary<ARDB.BuiltInParameter, ERDB.Schemas.DataType> BuiltInParametersTypes =
+      new Dictionary<ARDB.BuiltInParameter, ERDB.Schemas.DataType>();
+
     ERDB.Schemas.DataType dataType;
     public ERDB.Schemas.DataType DataType
     {
-      get => Value?.GetDefinition()?.GetDataType() ?? dataType;
+      get
+      {
+        if (dataType is null && Document is ARDB.Document doc)
+        {
+          if (Id is object && Id.TryGetBuiltInParameter(out var builtInParameter))
+          {
+            if (!BuiltInParametersTypes.TryGetValue(builtInParameter, out dataType))
+            {
+              switch (doc.get_TypeOfStorage(builtInParameter))
+              {
+                case ARDB.StorageType.Integer:
+                  dataType = ERDB.Schemas.SpecType.Int.Integer;
+                  break;
+
+                case ARDB.StorageType.Double:
+                  var categoriesWhereDefined = doc.GetBuiltInCategoriesWithParameters().
+                    Select(bic => new ARDB.ElementId(bic)).
+                    Where(cid => ARDB.TableView.GetAvailableParameters(doc, cid).Contains(Id)).
+                    ToArray();
+
+                  // Look into a Schedule table
+                  using (var scope = ERDB.DisposableScope.RollBackScope(doc))
+                  {
+                    foreach (var categoryId in categoriesWhereDefined)
+                    {
+                      var schedule = default(ARDB.ViewSchedule);
+                      if (ARDB.ViewSchedule.IsValidCategoryForSchedule(categoryId))
+                      {
+                        if (categoryId.IntegerValue == (int) ARDB.BuiltInCategory.OST_Areas)
+                        {
+                          using (var collector = new ARDB.FilteredElementCollector(doc))
+                          {
+                            var areaSchemeId = collector.OfClass(typeof(ARDB.AreaScheme)).FirstElementId();
+                            schedule = ARDB.ViewSchedule.CreateSchedule(doc, categoryId, areaSchemeId);
+                          }
+                        }
+                        else schedule = ARDB.ViewSchedule.CreateSchedule(doc, categoryId);
+                      }
+                      else if (ARDB.ViewSchedule.IsValidCategoryForMaterialTakeoff(categoryId))
+                      {
+                        schedule = ARDB.ViewSchedule.CreateMaterialTakeoff(doc, categoryId);
+                      }
+
+                      if (schedule is object)
+                      {
+                        try
+                        {
+                          using (var field = schedule.Definition.AddField(ARDB.ScheduleFieldType.Instance, Id))
+                            dataType = field.GetDataType();
+
+                          break;
+                        }
+                        catch (Autodesk.Revit.Exceptions.ArgumentsInconsistentException) { }
+
+                        try
+                        {
+                          using (var field = schedule.Definition.AddField(ARDB.ScheduleFieldType.ElementType, Id))
+                            dataType = field.GetDataType();
+
+                          break;
+                        }
+                        catch (Autodesk.Revit.Exceptions.ArgumentsInconsistentException) { }
+                      }
+                      else if (builtInParameter.ToString().EndsWith("_COST"))
+                      {
+                        dataType = ERDB.Schemas.SpecType.Measurable.Currency;
+                        break;
+                      }
+                    }
+
+                    dataType = dataType ?? ERDB.Schemas.SpecType.Measurable.Number;
+                  }
+                  break;
+
+                case ARDB.StorageType.ElementId:
+                  if (builtInParameter.ToString().EndsWith("_IMAGE"))
+                    dataType = ERDB.Schemas.SpecType.Reference.Image;
+                  else if (builtInParameter.ToString().EndsWith("_MATERIAL"))
+                    dataType = ERDB.Schemas.SpecType.Reference.Material;
+
+                  break;
+
+                case ARDB.StorageType.String:
+                  if (builtInParameter.ToString().EndsWith("_COMMENTS"))
+                    dataType = ERDB.Schemas.SpecType.String.Url;
+                  else if (builtInParameter.ToString().EndsWith("_URL"))
+                    dataType = ERDB.Schemas.SpecType.String.Url;
+                  else dataType = ERDB.Schemas.SpecType.String.Text;
+                  break;
+              }
+
+              BuiltInParametersTypes.Add(builtInParameter, dataType);
+            }
+          }
+          else dataType = Value?.GetDefinition()?.GetDataType();
+        }
+
+        return dataType;
+      }
       set
       {
         if (IsReferencedData) throw new InvalidOperationException();
