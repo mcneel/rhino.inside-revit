@@ -28,19 +28,28 @@ namespace RhinoInside.Revit.AddIn.Commands
 #endif
     }
 
+#if REVIT_2018
     private static void Grasshopper_AssemblyActivated(object sender, AssemblyLoadEventArgs args)
     {
-#if REVIT_2018
       if (RestoreButton(CommandName) is RadioButtonGroup radioButton)
       {
-        switch (GH.PreviewServer.PreviewMode)
+        var options = Properties.AddInOptions.Current;
+        GH.PreviewServer.PreviewModeChanged += (_, previous) =>
         {
-          case GH_PreviewMode.Disabled:  radioButton.Current = RestoreButton(CommandGrasshopperPreviewOff.CommandName) as ToggleButton;       break;
-          case GH_PreviewMode.Wireframe: radioButton.Current = RestoreButton(CommandGrasshopperPreviewWireframe.CommandName) as ToggleButton; break;
-          case GH_PreviewMode.Shaded:    radioButton.Current = RestoreButton(CommandGrasshopperPreviewShaded.CommandName) as ToggleButton;    break;
-        }
+          var mode = GH.PreviewServer.PreviewMode;
+          options.CustomOptions.Set("Grasshopper", "PreviewMode", mode.ToString());
+
+          switch (mode)
+          {
+            case GH_PreviewMode.Disabled:  radioButton.Current = RestoreButton(CommandGrasshopperPreviewOff.CommandName) as ToggleButton;       break;
+            case GH_PreviewMode.Wireframe: radioButton.Current = RestoreButton(CommandGrasshopperPreviewWireframe.CommandName) as ToggleButton; break;
+            case GH_PreviewMode.Shaded:    radioButton.Current = RestoreButton(CommandGrasshopperPreviewShaded.CommandName) as ToggleButton;    break;
+          }
+        };
+
+        if (Enum.TryParse(options.CustomOptions.Get("Grasshopper", "PreviewMode"), out GH_PreviewMode previewMode))
+          GH.PreviewServer.PreviewMode = previewMode;
       }
-#endif
     }
 
     /// <summary>
@@ -52,6 +61,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         base.IsCommandAvailable(app, selectedCategories) &&
         DirectContext3DServer.IsAvailable(Revit.ActiveUIDocument?.ActiveGraphicalView);
     }
+#endif
   }
 
 #if REVIT_2018

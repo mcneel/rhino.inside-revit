@@ -268,7 +268,7 @@ namespace RhinoInside.Revit.AddIn.Properties
       // ensure directory exists
       // clear previous contents, or create empty file
       Directory.CreateDirectory(UserDataDirectory);
-      File.WriteAllText(UserOptionsFilePath, "");
+      File.WriteAllText(UserOptionsFilePath, string.Empty);
 
       // serialize options to the empty file
       using (var optsFile = File.OpenWrite(UserOptionsFilePath))
