@@ -71,13 +71,13 @@ namespace RhinoInside.Revit.GH.Types
         if (DocumentGUID == Guid.Empty) return $"DocumentGUID '{Guid.Empty}' is invalid";
         if (!External.DB.UniqueId.TryParse(UniqueID, out var _, out var _)) return $"UniqueID '{UniqueID}' is invalid";
 
-        var id = Id;
         if (Document is null)
         {
           return $"Referenced Revit document '{DocumentGUID}' was closed.";
         }
         else
         {
+          var id = Id;
           if (id is null) return $"Referenced Revit element '{UniqueID}' is not available.";
           if (id == ARDB.ElementId.InvalidElementId) return "Id is equal to InvalidElementId.";
         }

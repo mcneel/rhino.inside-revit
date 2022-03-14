@@ -203,7 +203,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
       {
-        if (EpisodeId == Guid.Empty)
+        if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
         {
           if (((BuiltInCategory) id).IsValid())
             categoryId = new ElementId((BuiltInCategory) id);
@@ -224,7 +224,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
       {
-        if (EpisodeId == Guid.Empty)
+        if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
         {
           if (((BuiltInParameter) id).IsValid())
             parameterId = new ElementId((BuiltInParameter) id);
@@ -245,7 +245,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
       {
-        if (EpisodeId == Guid.Empty)
+        if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
         {
           if (((BuiltInLinePattern) id).IsValid())
             patternId = new ElementId(id);
@@ -264,7 +264,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       elementId = default;
 
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id) && EpisodeId == Guid.Empty)
+      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id) && EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
       {
         if (((BuiltInCategory) id).IsValid())
           elementId = new ElementId((BuiltInCategory) id);

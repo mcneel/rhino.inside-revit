@@ -314,12 +314,13 @@ namespace RhinoInside.Revit.GH.Types
       DocumentGUID = doc.GetFingerprintGUID();
 
       this.id = id;
-      UniqueID = doc?.GetElement(id)?.UniqueId ??
-      (
-        id.IntegerValue < ARDB.ElementId.InvalidElementId.IntegerValue ?
-          UniqueId.Format(Guid.Empty, id.IntegerValue) :
-          string.Empty
-      );
+      if (doc is object && id is object)
+      {
+        UniqueID = id.IntegerValue < 0 ?
+          UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(doc), id.IntegerValue) :
+          doc.GetElement(id)?.UniqueId ?? string.Empty;
+      }
+      else UniqueID = string.Empty;
     }
 
     protected virtual bool SetValue(ARDB.Element element)

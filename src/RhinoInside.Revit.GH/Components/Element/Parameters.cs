@@ -310,12 +310,12 @@ namespace RhinoInside.Revit.GH
 
         case ARDB.StorageType.ElementId:
 
-          var document = parameter.Element?.Document;
+          var document = parameter.Element.Document;
           var documentGUID = document.GetFingerprintGUID();
           var elementId = parameter.AsElementId();
 
           return elementId.IsBuiltInId() ?
-            ERDB.FullUniqueId.Format(documentGUID, ERDB.UniqueId.Format(Guid.Empty, elementId.IntegerValue)) :
+            ERDB.FullUniqueId.Format(documentGUID, ERDB.UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(document), elementId.IntegerValue)) :
             document?.GetElement(elementId) is ARDB.Element element ?
             ERDB.FullUniqueId.Format(documentGUID, element.UniqueId) :
             ERDB.FullUniqueId.Format(Guid.Empty, ERDB.UniqueId.Format(Guid.Empty, ARDB.ElementId.InvalidElementId.IntegerValue));
