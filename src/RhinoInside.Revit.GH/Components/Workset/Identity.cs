@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
           NickName = "W",
           Description = "Workset at which the Element belongs to",
         },
-        ParamRelevance.Primary
+        ParamRelevance.Occasional
       ),
       new ParamDefinition
       (

@@ -53,10 +53,10 @@ namespace RhinoInside.Revit.GH.Components.Worksets
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_String>
-        ("Name", "N", "Workset name", optional: true),
       ParamDefinition.Create<Parameters.Param_Enum<Types.WorksetKind>>
         ("Kind", "K", "Workset kind", defaultValue: ARDB.WorksetKind.UserWorkset, optional: true),
+      ParamDefinition.Create<Param_String>
+        ("Name", "N", "Workset name", optional: true),
     };
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
@@ -67,8 +67,8 @@ namespace RhinoInside.Revit.GH.Components.Worksets
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc) || !doc.IsWorkshared) return;
-      if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Kind", out Types.WorksetKind kind)) return;
+      if (!Params.TryGetData(DA, "Name", out string name)) return;
 
       using (var collector = new ARDB.FilteredWorksetCollector(doc))
       {
