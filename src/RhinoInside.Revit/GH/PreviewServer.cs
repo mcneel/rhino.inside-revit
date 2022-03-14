@@ -25,7 +25,21 @@ namespace RhinoInside.Revit.GH
     Rhino.Geometry.BoundingBox primitivesBoundingBox = Rhino.Geometry.BoundingBox.Empty;
     int RebuildPrimitives = 1;
 
-    public static GH_PreviewMode PreviewMode = GH_PreviewMode.Shaded;
+    static GH_PreviewMode previewMode = GH_PreviewMode.Disabled;
+    public static GH_PreviewMode PreviewMode
+    {
+      get => previewMode;
+      set
+      {
+        if (value == previewMode) return;
+
+        var previous = previewMode;
+        previewMode = value;
+        PreviewModeChanged?.Invoke(default, previous);
+      }
+    }
+
+    public static event EventHandler<GH_PreviewMode> PreviewModeChanged;
 
     static readonly Rhino.Geometry.MeshingParameters previewCurrentMeshParameters = Rhino.Geometry.MeshingParameters.Default;
     static Rhino.Geometry.MeshingParameters PreviewCurrentMeshParameters

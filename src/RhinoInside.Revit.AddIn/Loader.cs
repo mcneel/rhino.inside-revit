@@ -43,7 +43,12 @@ namespace RhinoInside.Revit.AddIn
       return Result.Succeeded;
     }
 
-    protected override Result OnShutdown(UIControlledApplication app) => Core.OnShutdown(app);
+    protected override Result OnShutdown(UIControlledApplication app)
+    {
+      Properties.AddInOptions.Save();
+
+      return Core.OnShutdown(app);
+    }
 
     public override bool CatchException(Exception e, UIApplication app, object sender)
     {
