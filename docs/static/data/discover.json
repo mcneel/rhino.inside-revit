@@ -1157,6 +1157,25 @@
         ]
     },
     {
+        "title": "Check Fire Rating of Doors and Walls",
+        "url": "https://youtu.be/AEdI_E9WQjQ",
+        "thumbnail": "https://i3.ytimg.com/vi/AEdI_E9WQjQ/maxresdefault.jpg",
+        "author": "BIMGeek",
+        "authorUrl": "https://www.youtube.com/channel/UCLwgBbBfZLcqqbta10a_fpQ",
+        "description": "In this tutorial I compared fire rating values of doors and their host walls. Then filtered doors that doesn’t have the same value as their host element. This was fairly simple example to demonstrate how to filter Revit data in Grasshopper.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "tutorial",
+            "workflow"
+        ],
+        "versions" : [
+            "1.0"
+        ]
+    },
+    {
         "title": "Closest grid intersection to Revit elements",
         "url": "https://youtu.be/VWOk1d0RfgI",
         "thumbnail": "https://i3.ytimg.com/vi/VWOk1d0RfgI/maxresdefault.jpg",
