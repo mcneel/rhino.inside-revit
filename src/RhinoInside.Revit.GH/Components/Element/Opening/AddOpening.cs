@@ -12,9 +12,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Opening
 {
   public abstract class AddOpening : ElementTrackerComponent
   {
-    protected AddOpening(string name, string nickname, string description, string category, string subCategory, bool isPerpendicular) : base(name, nickname, description, category, subCategory)
+    protected AddOpening(string name, string nickname, string description, string category, string subCategory) : base(name, nickname, description, category, subCategory)
     {
-      this.IsPerpendicular = isPerpendicular;
     }
 
     protected override ParamDefinition[] Inputs => inputs;
@@ -45,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Opening
         {
           Name = "Boundary",
           NickName = "B",
-          Description = "Boundary to create the shaft opening",
+          Description = "Boundary to create the opening",
           Access = GH_ParamAccess.list
         }
       )
@@ -66,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Opening
     };
 
     const string _Opening_ = "Opening";
-    public bool IsPerpendicular { get; set; }
+    protected virtual bool IsPerpendicular { get; }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
