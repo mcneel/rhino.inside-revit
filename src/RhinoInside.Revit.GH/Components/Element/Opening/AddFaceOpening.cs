@@ -11,6 +11,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Openings
 {
+  [ComponentVersion(introduced: "1.7")]
   public class AddFaceOpening : AddOpening
   {
     public override Guid ComponentGuid => new Guid("69A10E5D-5DF0-4227-95D3-2629529C1DEF");
