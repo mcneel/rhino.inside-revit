@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Parameters
       nickname: "Element Filter",
       description: "Contains a collection of Revit element filters",
       category: "Params",
-      subcategory: "Revit Primitives"
+      subcategory: "Revit"
     )
     { }
   }
@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Parameters
       nickname: "Filter Rule",
       description: "Contains a collection of Revit filter rules",
       category: "Params",
-      subcategory: "Revit Primitives"
+      subcategory: "Revit"
     )
     { }
   }

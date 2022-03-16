@@ -13,7 +13,15 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("EB5AB657-AE01-42F0-BF98-071DA6D7A2D2");
 
-    public LinePatternElement() : base("Line Pattern", "Line Pattern", "Contains a collection of Revit line pattern elements", "Params", "Revit Primitives") { }
+    public LinePatternElement() : base
+    (
+      name: "Line Pattern",
+      nickname: "Line Pattern",
+      description: "Contains a collection of Revit line pattern elements",
+      category: "Params",
+      subcategory: "Revit Elements"
+    )
+    { }
 
     #region UI
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)

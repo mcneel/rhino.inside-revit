@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Parameters
       nickname: "CGrid",
       description: "Contains a collection of Revit curtain grids",
       category: "Params",
-      subcategory: "Revit Primitives"
+      subcategory: "Revit"
     )
     { }
   }
@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Parameters
       nickname: "CCell",
       description: "Contains a collection of Revit curtain grid cells",
       category: "Params",
-      subcategory: "Revit Primitives"
+      subcategory: "Revit"
     )
     { }
   }

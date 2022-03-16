@@ -261,6 +261,7 @@
     <Compile Include="Parameters\AssemblyInstance.cs" />
     <Compile Include="Parameters\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
+    <Compile Include="Parameters\BasePoint.cs" />
     <Compile Include="Parameters\CompoundStructure.cs" />
     <Compile Include="Parameters\CurtainGrid.cs" />
     <Compile Include="Parameters\CurveElement.cs" />
@@ -288,6 +289,7 @@
     <Compile Include="Parameters\Parameter.cs" />
     <Compile Include="Parameters\PersistentParam.cs" />
     <Compile Include="Parameters\Phase.cs" />
+    <Compile Include="Parameters\ProjectLocation.cs" />
     <Compile Include="Parameters\Sketch.cs" />
     <Compile Include="Parameters\SketchPlane.cs" />
     <Compile Include="Parameters\SpatialElement.cs" />

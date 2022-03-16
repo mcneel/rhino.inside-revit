@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
-    public CurveElement() : base("Curve Element", "Curve", "Contains a collection of Revit curve elements", "Params", "Revit Primitives") { }
+    public CurveElement() : base("Curve Element", "Curve", "Contains a collection of Revit curve elements", "Params", "Revit") { }
 
     #region UI
     protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat

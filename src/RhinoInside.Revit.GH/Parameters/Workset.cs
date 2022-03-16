@@ -9,9 +9,9 @@ namespace RhinoInside.Revit.GH.Parameters
   public class Workset : PersistentParam<Types.Workset>
   {
     public override Guid ComponentGuid => new Guid("5C073F7D-6D31-4063-A943-4152E1A799D1");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
 
-    public Workset() : base("Workset", "Workset", "Contains a collection of Revit workset elements", "Params", "Revit Primitives") { }
+    public Workset() : base("Workset", "Workset", "Contains a collection of Revit workset elements", "Params", "Revit") { }
 
     #region UI
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)

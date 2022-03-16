@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     protected override string IconTag => "D";
 
-    public Document() : base("Document", "DOC", "Contains a collection of Revit documents", "Params", "Revit Primitives")
+    public Document() : base("Document", "DOC", "Contains a collection of Revit documents", "Params", "Revit")
     { }
 
     protected override Types.IGH_Document PreferredCast(object data) => Types.Document.FromValue(data);

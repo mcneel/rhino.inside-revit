@@ -8,8 +8,10 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using External.DB.Extensions;
 
+  public interface IGH_BasePoint : IGH_GraphicalElement { }
+
   [Kernel.Attributes.Name("Base Point")]
-  public class BasePoint : GraphicalElement
+  public class BasePoint : GraphicalElement, IGH_BasePoint
   {
     protected override Type ValueType => typeof(ARDB.BasePoint);
     public new ARDB.BasePoint Value => base.Value as ARDB.BasePoint;
@@ -127,7 +129,7 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 
   [Kernel.Attributes.Name("Internal Origin")]
-  public class InternalOrigin : GraphicalElement
+  public class InternalOrigin : GraphicalElement, IGH_BasePoint
   {
     protected override Type ValueType => typeof(ARDB_InternalOrigin);
     public new ARDB_InternalOrigin Value => base.Value as ARDB_InternalOrigin;

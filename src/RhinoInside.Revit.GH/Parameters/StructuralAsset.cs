@@ -6,17 +6,17 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class StructuralAsset : Element<Types.StructuralAssetElement, ARDB.PropertySetElement>
   {
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
-    public override Guid ComponentGuid =>
-      new Guid("dde6da63-87bc-4250-9455-5233bfad8683");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override Guid ComponentGuid => new Guid("dde6da63-87bc-4250-9455-5233bfad8683");
 
-    public StructuralAsset() : base(
-      "Physical Asset",
-      "Physical",
-      "Represents a Revit Physical (Structural) Asset",
-      "Params",
-      "Revit Primitives"
-      )
+    public StructuralAsset() : base
+    (
+      name: "Physical Asset",
+      nickname: "Physical",
+      description: "Contains a collection of Revit structural asset elements",
+      category: "Params",
+      subcategory: "Revit Elements"
+    )
     { }
   }
 }

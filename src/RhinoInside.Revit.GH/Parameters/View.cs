@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.septenary;
     public override Guid ComponentGuid => new Guid("2DC4B866-54DB-4CE6-94C0-C51B33D35B49");
 
-    public View() : base("View", "View", "Contains a collection of Revit view elements", "Params", "Revit Primitives") { }
+    public View() : base("View", "View", "Contains a collection of Revit view elements", "Params", "Revit") { }
 
     protected override Types.IGH_View InstantiateT() => new Types.View();
 
@@ -175,7 +175,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("972B6FBE-B3E4-4576-B86D-D2BA380A4757");
 
-    public ViewFamilyType() : base("View Type", "ViewType", "Contains a collection of Revit view types", "Params", "Revit Primitives") { }
+    public ViewFamilyType() : base("View Type", "ViewType", "Contains a collection of Revit view types", "Params", "Revit") { }
 
     protected override Types.IGH_ViewFamilyType InstantiateT() => new Types.ViewFamilyType();
   }

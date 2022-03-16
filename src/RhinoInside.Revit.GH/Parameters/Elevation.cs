@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Parameters
       NickName = "E";
       Description = "Contains a collection of signed distances along Z axis";
       Category = "Params";
-      SubCategory = "Revit Primitives";
+      SubCategory = "Revit";
     }
 
     public override bool Read(GH_IReader reader)
@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.GH.Parameters
       NickName = "E";
       Description = "Signed distance interval along Z axis";
       Category = "Params";
-      SubCategory = "Revit Primitives";
+      SubCategory = "Revit";
     }
 
     public override bool Read(GH_IReader reader)

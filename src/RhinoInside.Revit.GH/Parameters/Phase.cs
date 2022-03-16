@@ -11,10 +11,10 @@ namespace RhinoInside.Revit.GH.Parameters
   [ComponentVersion(introduced: "1.2")]
   public class Phase : Element<Types.Phase, ARDB.Phase>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("353FFB47-46D6-4FEE-8DBD-40E683416531");
 
-    public Phase() : base("Phase", "Phase", "Contains a collection of Revit construction phase elements", "Params", "Revit Primitives") { }
+    public Phase() : base("Phase", "Phase", "Contains a collection of Revit construction phase elements", "Params", "Revit") { }
 
     #region UI
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)

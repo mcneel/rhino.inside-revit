@@ -512,7 +512,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("F3EA4A9C-B24F-4587-A358-6A7E6D8C028B");
 
-    public Element() : base("Element", "Element", "Contains a collection of Revit elements", "Params", "Revit Primitives") { }
+    public Element() : base("Element", "Element", "Contains a collection of Revit elements", "Params", "Revit") { }
 
     protected override Types.IGH_Element InstantiateT() => new Types.Element();
   }

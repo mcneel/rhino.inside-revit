@@ -9,10 +9,10 @@ namespace RhinoInside.Revit.GH.Parameters
   [ComponentVersion(introduced: "1.6")]
   public class Opening : GraphicalElementT<Types.Opening, ARDB.Opening>
   {
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     public override Guid ComponentGuid => new Guid("18D46E90-46BA-47DF-B11B-AE78748BBDA7");
 
-    public Opening() : base("Opening", "Opening", "Contains a collection of Revit opening elements", "Params", "Revit Primitives") { }
+    public Opening() : base("Opening", "Opening", "Contains a collection of Revit opening elements", "Params", "Revit Elements") { }
 
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)

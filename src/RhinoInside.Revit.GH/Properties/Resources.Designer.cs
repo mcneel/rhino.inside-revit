@@ -63,6 +63,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ActiveProjectLocation {
+            get {
+                object obj = ResourceManager.GetObject("ActiveProjectLocation", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AdaptiveComponent {
             get {
                 object obj = ResourceManager.GetObject("AdaptiveComponent", resourceCulture);
@@ -2043,6 +2053,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap FamilySymbol {
+            get {
+                object obj = ResourceManager.GetObject("FamilySymbol", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap FamilyTypes {
             get {
                 object obj = ResourceManager.GetObject("FamilyTypes", resourceCulture);
@@ -3066,6 +3086,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap SheetIdentity {
             get {
                 object obj = ResourceManager.GetObject("SheetIdentity", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SiteLocation {
+            get {
+                object obj = ResourceManager.GetObject("SiteLocation", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

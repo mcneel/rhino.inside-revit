@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Parameters
       nickname: "Asset Property Double 1D Map",
       description: "Contains a collection of Revit 1D appearance asset properties",
       category: "Params",
-      subcategory: "Revit Primitives"
+      subcategory: "Revit"
     )
     { }
   }

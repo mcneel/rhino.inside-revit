@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Parameters
       nickname: "Asset Property Double 4D Map",
       description: "Contains a collection of Revit 4D appearance asset properties",
       category: "Params",
-      subcategory: "Revit Primitives"
+      subcategory: "Revit"
     )
     { }
   }

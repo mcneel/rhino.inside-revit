@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("A550F532-8C68-460B-91F3-DA0A5A0D42B5");
     public override GH_Exposure Exposure => GH_Exposure.primary;
 
-    public ParameterKey() : base("Parameter", "Parameter", "Contains a collection of Revit parameters", "Params", "Revit Primitives") { }
+    public ParameterKey() : base("Parameter", "Parameter", "Contains a collection of Revit parameters", "Params", "Revit") { }
 
     public static bool GetDocumentParameter(IGH_Component component, IGH_DataAccess DA, string name, out Types.ParameterKey key)
     {
@@ -329,7 +329,7 @@ namespace RhinoInside.Revit.GH.Parameters
       nickname: "Parameter Value",
       description: "Contains a collection of Revit parameter values on an element.",
       category: "Params",
-      subcategory: "Revit Primitives"
+      subcategory: "Revit"
     )
     { }
 
@@ -378,7 +378,7 @@ namespace RhinoInside.Revit.GH.Parameters
       nickname: string.Empty,
       description: string.Empty,
       category: "Params",
-      subcategory: "Revit Primitives"
+      subcategory: "Revit"
     )
     { }
 

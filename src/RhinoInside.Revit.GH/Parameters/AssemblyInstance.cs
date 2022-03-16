@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Parameters
       nickname: "A",
       description: "Contains a collection of Revit assemblies",
       category: "Params",
-      subcategory: "Revit Primitives"
+      subcategory: "Revit"
     )
     { }
   }

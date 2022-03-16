@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.primary;
     public override Guid ComponentGuid => new Guid("6722C7A5-EFD3-4119-A7FD-6C8BE892FD04");
 
-    public Category() : base("Category", "Category", "Contains a collection of Revit categories", "Params", "Revit Primitives") { }
+    public Category() : base("Category", "Category", "Contains a collection of Revit categories", "Params", "Revit") { }
 
     #region UI
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
@@ -129,6 +129,6 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("833E6207-BA60-4C6B-AB8B-96FDA0F91822");
 
-    public GraphicsStyle() : base("Graphics Style", "Graphics Style", "Contains a collection of Revit graphics styles", "Params", "Revit Primitives") { }
+    public GraphicsStyle() : base("Graphics Style", "Graphics Style", "Contains a collection of Revit graphics styles", "Params", "Revit") { }
   }
 }

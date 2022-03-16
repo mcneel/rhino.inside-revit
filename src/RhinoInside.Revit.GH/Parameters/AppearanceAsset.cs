@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class AppearanceAsset : Element<Types.AppearanceAssetElement, ARDB.AppearanceAssetElement>
   {
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("941b2ee3-5423-4fee-9df6-27c77fdb53c9");
 
     public AppearanceAsset() : base
@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Parameters
       "Appearance",
       "Contains a collection of Revit appearance asset elements",
       "Params",
-      "Revit Primitives"
+      "Revit Elements"
     )
     { }
   }

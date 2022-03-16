@@ -259,7 +259,7 @@ namespace RhinoInside.Revit.GH.Components.Elements.Obsolete
   {
     public override Guid ComponentGuid => new Guid("71F196F1-59E8-4714-B9C2-45FAFEEDF426");
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
-    protected override string IconTag => "⌖";
+    protected override string IconTag => string.Empty;
 
     public ElementPlacement() : base
     (

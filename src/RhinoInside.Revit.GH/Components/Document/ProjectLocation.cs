@@ -4,13 +4,13 @@ using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Documents
 {
-  public class ProjectLocation : TransactionalChainComponent
+  public class ActiveProjectLocation : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("B8677884-61E8-4D3F-8ACB-0873B2A40053");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "⌖";
 
-    public ProjectLocation()
+    public ActiveProjectLocation()
     : base
     (
       "Project Location",
@@ -25,17 +25,17 @@ namespace RhinoInside.Revit.GH.Components.Documents
     static readonly ParamDefinition[] inputs =
     {
       ParamDefinition.Create<Parameters.Document>("Project", "P", relevance: ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.GraphicalElement>("Shared Site", "SS", optional: true, relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", optional: true, relevance: ParamRelevance.Secondary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.ElementType>("Site Location", "SL", "Project site location", relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Parameters.GraphicalElement>("Shared Site", "SS", "Current Shared Site", relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Parameters.GraphicalElement>("Survey Point", "SP", relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Parameters.GraphicalElement>("Project Base Point", "PBP", relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Parameters.GraphicalElement>("Internal Origin", "IO", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.SiteLocation>("Site Location", "SL", "Project site location", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "Current Shared Site", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.BasePoint>("Survey Point", "SP", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.BasePoint>("Project Base Point", "PBP", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.BasePoint>("Internal Origin", "IO", relevance: ParamRelevance.Occasional),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
