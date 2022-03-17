@@ -305,10 +305,12 @@ namespace RhinoInside.Revit.GH.Types
           case ARDB.UnitType t: Value = (EDBS.SpecType) t; return true;
 #endif
           case EDBS.DataType s:
+            if (EDBS.DataType.IsNullOrEmpty(s)) { Value = EDBS.DataType.Empty; return true; }
             if (!EDBS.SpecType.IsSpecType(s, out var id)) break;
             Value = id; return true;
 
           case string t:
+            if (string.IsNullOrEmpty(t)) { Value = EDBS.DataType.Empty; return true; }
             if (!EDBS.SpecType.IsSpecType(t)) break;
             Value = new EDBS.SpecType(t); return true;
         }
