@@ -46,7 +46,15 @@ namespace RhinoInside.Revit.GH.Types
         value = goo.ScriptVariable();
 
       if (value is ARDB.View view)
-        return view.GenLevel is null ? false : SetValue(view.GenLevel);
+      {
+        SetValue(view.Document, view.GenLevel?.Id ?? ARDB.ElementId.InvalidElementId);
+        return true;
+      }
+      else if (value is ARDB.Element element)
+      {
+        SetValue(element.Document, element.LevelId);
+        return true;
+      }
 
       return base.CastFrom(source);
     }

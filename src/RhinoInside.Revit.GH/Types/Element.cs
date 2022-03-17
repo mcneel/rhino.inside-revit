@@ -411,6 +411,12 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(IGH_ElementType)))
+      {
+        target = (Q) (object) Type;
+        return true;
+      }
+
       if (element is null)
         return false;
 
