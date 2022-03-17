@@ -6,6 +6,7 @@ using GH_IO.Serialization;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -381,25 +382,47 @@ namespace RhinoInside.Revit.GH.Parameters
         if (data is null)
           throw new Exceptions.RuntimeArgumentException(name, $"No suitable {categoryId} type has been found.");
 
+        if (data is Types.FamilySymbol symbol && !symbol.Value.IsActive)
+          symbol.Value.Activate();
+
         type = data as TOutput;
         if (type is null)
           return data.CastTo(out type);
       }
 
-      // Validate document
+      // Validate type
       switch (type)
       {
         case ARDB.Element element:
+        {
           if (!document.Value.IsEquivalent(element.Document))
             throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
-          break;
-        case Types.IGH_ElementId id:
-          if (!document.Value.IsEquivalent(id.Document))
+
+          if (element.Category.Id.IntegerValue != (int)categoryId)
+            throw new Exceptions.RuntimeArgumentException(name, $"Collected type is not on category '{((ERDB.Schemas.CategoryId) categoryId).Label}'.");
+
+          if (element is ARDB.FamilySymbol symbol && !symbol.IsActive)
+            symbol.Activate();
+
+          return true;
+        }
+
+        case Types.IGH_Element goo:
+        {
+          if (!document.Value.IsEquivalent(goo.Document))
             throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
-          break;
+
+          if (goo.Category.Id.IntegerValue != (int) categoryId)
+            throw new Exceptions.RuntimeArgumentException(name, $"Collected type is not on category '{((ERDB.Schemas.CategoryId) categoryId).Label}'.");
+
+          if (goo is Types.FamilySymbol symbol && !symbol.Value.IsActive)
+            symbol.Value.Activate();
+
+          return true;
+        }
       }
 
-      return true;
+      return false;
     }
   }
 
