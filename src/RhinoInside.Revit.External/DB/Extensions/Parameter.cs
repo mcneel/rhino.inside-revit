@@ -81,6 +81,28 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   static class ParameterExtension
   {
+    public static bool AsBoolean(this Parameter parameter)
+    {
+      return parameter.AsInteger() != 0;
+    }
+
+    public static T AsEnum<T>(this Parameter parameter) where T : Enum
+    {
+      return (T) (object) parameter.AsInteger();
+    }
+
+    public static bool Update(this Parameter parameter, bool value)
+    {
+      if (parameter.HasValue && parameter.AsInteger() == (value ? 1 : 0)) return true;
+      return parameter.Set(value ? 1 : 0);
+    }
+
+    public static bool Update<T>(this Parameter parameter, T value) where T : Enum
+    {
+      if (parameter.HasValue && parameter.AsInteger() == (int) (object) value) return true;
+      return parameter.Set((int) (object) value);
+    }
+
     public static bool Update(this Parameter parameter, int value)
     {
       if (parameter.HasValue && parameter.AsInteger() == value) return true;
