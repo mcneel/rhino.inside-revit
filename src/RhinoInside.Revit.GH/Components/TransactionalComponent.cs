@@ -723,16 +723,42 @@ namespace RhinoInside.Revit.GH.Components
           if (!graphical || pinned)
             UpdateDocument(document, () => output = func(input));
           else
+          {
+            if (graphical)
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Some elements were ignored because are unpinned.");
+
             output = input;
+          }
         }
         finally
         {
           Params.WriteTrackedElement(parameterName, document, output);
 
-          if (Types.GraphicalElement.IsValidElement(output))
+          if (pinned && Types.GraphicalElement.IsValidElement(output))
           {
+            // Reset CreatedPhaseId to last phase available
+            if (!document.IsFamilyDocument && output.CreatedPhaseId != ARDB.ElementId.InvalidElementId && output.ArePhasesModifiable())
+            {
+              using (var phases = document.Phases)
+              {
+                if (!phases.IsEmpty)
+                {
+                  try
+                  {
+                    var createdPhaseId = document.Phases.Cast<ARDB.Phase>().Last().Id;
+                    if (output.CreatedPhaseId != createdPhaseId && output.IsPhaseCreatedValid(createdPhaseId))
+                    {
+                      output.DemolishedPhaseId = ARDB.ElementId.InvalidElementId;
+                      output.CreatedPhaseId = createdPhaseId;
+                    }
+                  }
+                  catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+                }
+              }
+            }
+
             // In case element is crated on this iteratrion we pin it here by default
-            if (pinned && !output.Pinned)
+            if (!output.Pinned)
             {
               try { output.Pinned = true; }
               catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
