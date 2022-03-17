@@ -89,10 +89,10 @@ namespace RhinoInside.Revit.GH.Components.Worksets
       if (Params.GetData(DA, "Workset", out Types.Workset workset))
       {
         StartTransaction(element.Document);
-        element.WorksetId = workset.Id;
+        element.Workset = workset;
       }
 
-      Params.TrySetData(DA, "Workset", () => new Types.Workset(element.Document, element.WorksetId));
+      Params.TrySetData(DA, "Workset", () => element.Workset);
       Params.TrySetData(DA, "Status", () => ARDB.WorksharingUtils.GetModelUpdatesStatus(element.Document, element.Id));
     }
   }

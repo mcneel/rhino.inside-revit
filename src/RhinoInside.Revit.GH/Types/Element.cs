@@ -623,10 +623,17 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public ARDB.WorksetId WorksetId
+    public Workset Workset
     {
-      get => Document?.GetWorksetId(Id);
-      set => Value?.get_Parameter(ARDB.BuiltInParameter.ELEM_PARTITION_PARAM)?.Update(value.IntegerValue);
+      get => new Workset(Document, Document?.GetWorksetId(Id) ?? ARDB.WorksetId.InvalidWorksetId);
+      set
+      {
+        if (value is object && Value is ARDB.Element element)
+        {
+          AssertValidDocument(value, nameof(Workset));
+          element.get_Parameter(ARDB.BuiltInParameter.ELEM_PARTITION_PARAM).Update(value.Id.IntegerValue);
+        }
+      }
     }
 
     public Phase CreatedPhase
