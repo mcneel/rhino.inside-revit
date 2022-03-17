@@ -764,32 +764,38 @@ namespace RhinoInside.Revit.GH.Types
           }
 
           // Elements at Mid
-          using (var collector = new ARDB.FilteredElementCollector(element.Document))
+          if (element.GetOutline() is ARDB.Outline outline)
           {
-            var elementCollector = collector.
-              WherePasses(new ARDB.ElementIsCurveDrivenFilter()).
-              WherePasses(new ARDB.BoundingBoxIntersectsFilter(element.GetOutline())).
-              WherePasses(new ARDB.ExclusionFilter(new ARDB.ElementId[] { element.Id }));
-
-            foreach (var elementAtMid in elementCollector)
+            using (var collector = new ARDB.FilteredElementCollector(element.Document))
             {
-              if (elementAtMid.Location is ARDB.LocationCurve joinCurve)
-              {
-                if (joinCurve.get_ElementsAtJoin(ERDB.CurveEnd.Start).Cast<ARDB.Element>().Contains(element, ElementEqualityComparer.SameDocument))
-                {
-                  if (IsJoinAllowedAtEnd(elementAtMid, ERDB.CurveEnd.Start) == true)
-                  {
-                    AllowedJoinEnds.Add((elementAtMid, ERDB.CurveEnd.Start));
-                    AllowJoinAtEnd(elementAtMid, ERDB.CurveEnd.Start, allow: false);
-                  }
-                }
+              var elementCollector = collector.
+                WhereElementIsNotElementType().
+                WhereElementIsKindOf(element.GetType()).
+                WhereCategoryIdEqualsTo(element.Category?.Id).
+                WherePasses(new ARDB.ElementIsCurveDrivenFilter()).
+                WherePasses(new ARDB.BoundingBoxIntersectsFilter(outline)).
+                WherePasses(new ARDB.ExclusionFilter(new ARDB.ElementId[] { element.Id }));
 
-                if (joinCurve.get_ElementsAtJoin(ERDB.CurveEnd.End).Cast<ARDB.Element>().Contains(element, ElementEqualityComparer.SameDocument))
+              foreach (var elementAtMid in elementCollector)
+              {
+                if (elementAtMid.Location is ARDB.LocationCurve joinCurve)
                 {
-                  if (IsJoinAllowedAtEnd(elementAtMid, ERDB.CurveEnd.End) == true)
+                  if (joinCurve.get_ElementsAtJoin(ERDB.CurveEnd.Start).Cast<ARDB.Element>().Contains(element, ElementEqualityComparer.SameDocument))
                   {
-                    AllowedJoinEnds.Add((elementAtMid, ERDB.CurveEnd.End));
-                    AllowJoinAtEnd(elementAtMid, ERDB.CurveEnd.End, allow: false);
+                    if (IsJoinAllowedAtEnd(elementAtMid, ERDB.CurveEnd.Start) == true)
+                    {
+                      AllowedJoinEnds.Add((elementAtMid, ERDB.CurveEnd.Start));
+                      AllowJoinAtEnd(elementAtMid, ERDB.CurveEnd.Start, allow: false);
+                    }
+                  }
+
+                  if (joinCurve.get_ElementsAtJoin(ERDB.CurveEnd.End).Cast<ARDB.Element>().Contains(element, ElementEqualityComparer.SameDocument))
+                  {
+                    if (IsJoinAllowedAtEnd(elementAtMid, ERDB.CurveEnd.End) == true)
+                    {
+                      AllowedJoinEnds.Add((elementAtMid, ERDB.CurveEnd.End));
+                      AllowJoinAtEnd(elementAtMid, ERDB.CurveEnd.End, allow: false);
+                    }
                   }
                 }
               }
