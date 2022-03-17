@@ -16,6 +16,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Element")]
   public interface IGH_Element : IGH_ElementId
   {
+    Category Category { get; }
     ElementType Type { get; set; }
   }
 
