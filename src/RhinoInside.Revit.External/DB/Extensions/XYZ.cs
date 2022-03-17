@@ -40,6 +40,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return Math.Sqrt(1.0 + (u * u + v * v)) * w;
     }
 
+    public static bool AreAlmostEqual(XYZ a, XYZ b, double tolerance)
+    {
+      return GetLength(a.X - b.X, a.Y - b.Y, a.Z - b.Z, tolerance) < tolerance;
+    }
+
     /// <summary>
     /// Returns a new XYZ whose coordinates are the normalized values from this vector.
     /// </summary>
@@ -113,7 +118,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var A = a.Normalize(tolerance);
       var B = b.Normalize(tolerance);
 
-      return A.IsAlmostEqualTo(A.DotProduct(B) < 0.0 ? -B : B, tolerance);
+      return AreAlmostEqual(A, A.DotProduct(B) < 0.0 ? -B : B, tolerance);
     }
 
     /// <summary>
@@ -131,7 +136,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var A = a.Normalize(tolerance);
       var B = b.Normalize(tolerance);
 
-      return A.IsAlmostEqualTo(B, tolerance);
+      return AreAlmostEqual(A, B, tolerance);
     }
 
     /// <summary>
@@ -171,7 +176,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       var normal = new XYZ(value.X / length, value.Y / length, value.Z / length);
 
-      if (XYZ.Zero.IsAlmostEqualTo(new XYZ(normal.X, normal.Y, 0.0), tolerance))
+      if (new XYZ(normal.X, normal.Y, 0.0).GetLength(tolerance) < tolerance)
         return new XYZ(value.Z, 0.0, -value.X);
       else
         return new XYZ(-value.Y, value.X, 0.0);
@@ -265,7 +270,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var principal = covarianceMatrix.OfVector(previous).Normalize(DenormalUpperBound);
 
       var iterations = 50;
-      while (--iterations > 0 && !previous.IsAlmostEqualTo(principal, tolerance))
+      while (--iterations > 0 && !AreAlmostEqual(previous, principal, tolerance))
       {
         previous = principal;
         principal = covarianceMatrix.OfVector(previous).Normalize(DenormalUpperBound);
