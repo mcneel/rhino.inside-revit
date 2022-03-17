@@ -163,7 +163,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (roof is object)
       {
-        var roofLevelOffset = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
+        var roofLevelOffset = bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation();
         roof.get_Parameter(ARDB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM)?.Update(roofLevelOffset);
       }
     }

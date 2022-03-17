@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
           var height = elevation.Value.InHostUnits() +
             doc.GetBasePointLocation(Params.Input<Parameters.ElevationInterval>("Elevation").ElevationBase).Z;
 
-          levels = levels.Where(x => height.IncludesParameter(x.GetHeight(), false));
+          levels = levels.Where(x => height.IncludesParameter(x.GetElevation(), false));
         }
 
         DA.SetDataList

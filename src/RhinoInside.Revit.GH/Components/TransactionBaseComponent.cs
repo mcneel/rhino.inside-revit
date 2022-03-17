@@ -154,7 +154,7 @@ namespace RhinoInside.Revit.GH.Components
       bool wasMissing = level.IsMissing;
 
       if (wasMissing)
-        level = doc.FindLevelByHeight(height / Revit.ModelUnits) ??
+        level = doc.GetNearestLevel(height / Revit.ModelUnits) ??
                 throw new RuntimeArgumentException(nameof(height), "No suitable level has been found.");
 
       else if (level.Value == null)
@@ -197,7 +197,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
-        var b = doc.FindBaseLevelByHeight(height / Revit.ModelUnits, out var t) ??
+        var b = doc.GetNearestBaseLevel(height / Revit.ModelUnits, out var t) ??
                 t ?? throw new RuntimeArgumentException(nameof(height), "No suitable base level has been found.");
 
         if (!baseLevel.HasValue)
@@ -224,7 +224,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (baseLevel.IsMissing && topLevel.IsMissing)
       {
-        var t = doc.FindTopLevelByHeight(height / Revit.ModelUnits, out var b) ??
+        var t = doc.GetNearestTopLevel(height / Revit.ModelUnits, out var b) ??
                 b ?? throw new RuntimeArgumentException(nameof(height), "No suitable top level has been found.");
 
         if (!topLevel.HasValue)

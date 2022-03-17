@@ -5,6 +5,22 @@ namespace RhinoInside.Revit.External.DB.Extensions
   public static class LevelExtension
   {
     /// <summary>
+    /// Set the signed distance along the Z axis from the World XY plane.
+    /// </summary>
+    /// <remarks>
+    /// Tagged as "Internal Origin" in the UI.
+    /// </remarks>
+    /// <param name="level"></param>
+    /// <param name="elevation"></param>
+    public static void SetElevation(this Level level, double elevation)
+    {
+      var offset = level.ProjectElevation - level.Elevation;
+
+      if(level.Elevation != elevation + offset)
+        level.Elevation = elevation - offset;
+    }
+
+    /// <summary>
     /// Get the signed distance along the Z axis from the World XY plane.
     /// </summary>
     /// <remarks>
@@ -12,25 +28,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </remarks>
     /// <param name="level"></param>
     /// <returns>Level height in Revit internal units.</returns>
-    public static double GetHeight(this Level level)
+    public static double GetElevation(this Level level)
     {
       return level.ProjectElevation;
-    }
-
-    /// <summary>
-    /// Set the signed distance along the Z axis from the World XY plane.
-    /// </summary>
-    /// <remarks>
-    /// Tagged as "Internal Origin" in the UI.
-    /// </remarks>
-    /// <param name="level"></param>
-    /// <param name="height"></param>
-    public static void SetHeight(this Level level, double height)
-    {
-      var offset = level.ProjectElevation - level.Elevation;
-
-      if(level.Elevation != height + offset)
-        level.Elevation = height - offset;
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </summary>
     /// <param name="level"></param>
     /// <returns>Level elevation in Revit internal units.</returns>
-    public static double GetElevationAboveProjectBasePoint(this Level level)
+    public static double GetElevationFromProjectBasePoint(this Level level)
     {
       return level.ProjectElevation - GetBasePointLocation(level.Document, ElevationBase.ProjectBasePoint).Z;
     }
@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </remarks>
     /// <param name="level"></param>
     /// <returns>Level elevation in Revit internal units.</returns>
-    public static double GetElevationAboveSharedBasePoint(this Level level)
+    public static double GetElevationFromSharedBasePoint(this Level level)
     {
       return level.ProjectElevation - GetBasePointLocation(level.Document, ElevationBase.SurveyPoint).Z;
     }

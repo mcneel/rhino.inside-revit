@@ -209,7 +209,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
       if (floor is object)
       {
-        var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
+        var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation();
         floor.get_Parameter(ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
       }
     }

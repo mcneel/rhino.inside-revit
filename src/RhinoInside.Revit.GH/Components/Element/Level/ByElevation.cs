@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
     bool Reuse(ARDB.Level level, double height, ARDB.LevelType type, ARDB.Level template)
     {
       if (level is null) return false;
-      if (level.GetHeight() != height) level.SetHeight(height);
+      if (level.GetElevation() != height) level.SetElevation(height);
       if (type is object && level.GetTypeId() != type.Id) level.ChangeTypeId(type.Id);
       level.CopyParametersFrom(template, ExcludeUniqueProperties);
       return true;
@@ -138,7 +138,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
       if (template is object)
       {
         level = template.CloneElement(doc);
-        level?.SetHeight(height);
+        level?.SetElevation(height);
       }
 
       // Else create a brand new

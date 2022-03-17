@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Site
         ReplaceElement(ref buildingPad, newPad, ParametersMask);
       }
 
-      buildingPad?.get_Parameter(ARDB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Update(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
+      buildingPad?.get_Parameter(ARDB.BuiltInParameter.BUILDINGPAD_HEIGHTABOVELEVEL_PARAM).Update(boundaryBBox.Min.Z / Revit.ModelUnits - level.Value.GetElevation());
     }
   }
 }

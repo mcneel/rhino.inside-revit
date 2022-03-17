@@ -172,8 +172,8 @@ namespace RhinoInside.Revit.GH.Types
             var baseLevelOffset = instance.GetParameterValue<double>(ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM);
             var topLevelOffset = instance.GetParameterValue<double>(ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM);
 
-            var baseElevation = (baseLevel.GetHeight() + baseLevelOffset) * Revit.ModelUnits;
-            var topElevation = (topLevel.GetHeight() + topLevelOffset) * Revit.ModelUnits;
+            var baseElevation = (baseLevel.GetElevation() + baseLevelOffset) * Revit.ModelUnits;
+            var topElevation = (topLevel.GetElevation() + topLevelOffset) * Revit.ModelUnits;
 
             var origin = location.Point.ToPoint3d();
             return new LineCurve

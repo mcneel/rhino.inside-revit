@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
           level.Value, () =>
           {
             if (elevation.HasValue)
-              level.SetElevationAbove(Params.Output<Parameters.Elevation>("Elevation").ElevationBase, elevation.Value);
+              level.SetElevationFrom(Params.Output<Parameters.Elevation>("Elevation").ElevationBase, elevation.Value);
 
             level.IsStructural = structural;
             level.IsBuildingStory = buildingStory;
@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
         );
       }
 
-      Params.TrySetData(DA, "Elevation", () => level.GetElevationAbove(Params.Output<Parameters.Elevation>("Elevation").ElevationBase));
+      Params.TrySetData(DA, "Elevation", () => level.GetElevationFrom(Params.Output<Parameters.Elevation>("Elevation").ElevationBase));
       Params.TrySetData(DA, "Structural", () => level.IsStructural);
       Params.TrySetData(DA, "Building Story", () => level.IsBuildingStory);
     }

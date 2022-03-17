@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Types
           var plane = sketch.ProfilesPlane;
 
           var center = plane.Origin;
-          center.Z = Level.Height + LevelOffset.Value;
+          center.Z = Level.Elevation + LevelOffset.Value;
 
           var xAxis = plane.XAxis;
           var yAxis = plane.YAxis;

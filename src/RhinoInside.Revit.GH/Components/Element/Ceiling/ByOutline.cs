@@ -201,7 +201,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (ceiling is object)
       {
-        var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
+        var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation();
         ceiling.get_Parameter(ARDB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
       }
     }

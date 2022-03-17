@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH.Types
               hostLevelId = host.get_Parameter(ARDB.BuiltInParameter.ROOF_CONSTRAINT_LEVEL_PARAM)?.AsElementId() ?? hostLevelId;
 
             if (host.Document.GetElement(hostLevelId) is ARDB.Level level)
-              center.Z = level.GetHeight() * Revit.ModelUnits;
+              center.Z = level.GetElevation() * Revit.ModelUnits;
 
             var plane = sketch.SketchPlane.GetPlane().ToPlane();
             var origin = center;

@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      var height = Height;
+      var height = Elevation;
       if (double.IsNaN(height))
         return;
 
@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.GH.Types
 
           return new Plane
           (
-            new Point3d(position.X * Revit.ModelUnits, position.Y * Revit.ModelUnits, level.GetHeight() * Revit.ModelUnits),
+            new Point3d(position.X * Revit.ModelUnits, position.Y * Revit.ModelUnits, level.GetElevation() * Revit.ModelUnits),
             Vector3d.XAxis,
             Vector3d.YAxis
           );
@@ -152,20 +152,20 @@ namespace RhinoInside.Revit.GH.Types
     /// <remarks>
     /// World XY plane origin is refered as "Internal Origin" in Revit UI.
     /// </remarks>
-    public double Height
+    public double Elevation
     {
-      get => Value?.GetHeight() * Revit.ModelUnits ?? double.NaN;
-      set => Value?.SetHeight(value / Revit.ModelUnits);
+      get => Value?.GetElevation() * Revit.ModelUnits ?? double.NaN;
+      set => Value?.SetElevation(value / Revit.ModelUnits);
     }
 
-    public double GetElevationAbove(External.DB.ElevationBase elevationBase)
+    public double GetElevationFrom(External.DB.ElevationBase elevationBase)
     {
-      return Height - Document.GetBasePointLocation(elevationBase).Z * Revit.ModelUnits;
+      return Elevation - Document.GetBasePointLocation(elevationBase).Z * Revit.ModelUnits;
     }
 
-    public void SetElevationAbove(External.DB.ElevationBase elevationBase, double value)
+    public void SetElevationFrom(External.DB.ElevationBase elevationBase, double value)
     {
-      Height = Document.GetBasePointLocation(elevationBase).Z * Revit.ModelUnits + value;
+      Elevation = Document.GetBasePointLocation(elevationBase).Z * Revit.ModelUnits + value;
     }
 
     public bool? IsStructural

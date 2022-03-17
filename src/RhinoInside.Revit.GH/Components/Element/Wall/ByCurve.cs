@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       bool levelIsEmpty = SolveOptionalLevel(document, curve, ref level, out var bbox);
 
       // Curve
-      var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.GetHeight() * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
+      var levelPlane = new Rhino.Geometry.Plane(new Rhino.Geometry.Point3d(0.0, 0.0, level.Value.GetElevation() * Revit.ModelUnits), Rhino.Geometry.Vector3d.ZAxis);
       if(!TryGetCurveAtPlane(curve, levelPlane, out var centerLine))
         ThrowArgumentException(nameof(curve), "Failed to project curve in the level plane.", curve);
 
@@ -196,7 +196,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           type.Value.Id,
           level.Value.Id,
           height.Value / Revit.ModelUnits,
-          levelIsEmpty ? bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight() : 0.0,
+          levelIsEmpty ? bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation() : 0.0,
           flipped,
           structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing
         );
@@ -229,7 +229,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       if (newWall is object)
       {
         newWall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Value.Id);
-        newWall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight());
+        newWall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation());
         newWall.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(ARDB.ElementId.InvalidElementId);
         newWall.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update(height.Value / Revit.ModelUnits);
 

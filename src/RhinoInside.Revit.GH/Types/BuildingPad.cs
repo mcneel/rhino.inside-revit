@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Types
           var plane = sketch.ProfilesPlane;
 
           var center = plane.Origin;
-          center.Z = Level.Height + LevelOffset.Value;
+          center.Z = Level.Elevation + LevelOffset.Value;
           plane.Origin = center;
 
           return plane;
