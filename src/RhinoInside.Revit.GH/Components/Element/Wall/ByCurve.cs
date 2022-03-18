@@ -33,21 +33,10 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
       // Disable all previous walls joins
       var walls = Params.TrackedElements<ARDB.Wall>("Wall", document);
-      var pinnedWalls = walls.Where(x => x.Pinned).
-                        Select
-                        (
-                          wall =>
-                          (
-                            wall,
-                            (wall.Location as ARDB.LocationCurve).get_JoinType(0),
-                            (wall.Location as ARDB.LocationCurve).get_JoinType(1)
-                          )
-                        );
+      var pinnedWalls = walls.Where(x => x.Pinned);
 
-      foreach (var (wall, joinType0, joinType1) in pinnedWalls)
+      foreach (var wall in pinnedWalls)
       {
-        var location = wall.Location as ARDB.LocationCurve;
-
         if (ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, 0))
           ARDB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
 
@@ -72,9 +61,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
           ARDB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 0);
           ARDB.WallUtils.AllowWallJoinAtEnd(wallToJoin, 1);
         }
-      }
 
-      joinedWalls = new List<ARDB.Wall>();
+        joinedWalls = new List<ARDB.Wall>();
+      }
     }
 
     static readonly ARDB.FailureDefinitionId[] failureDefinitionIdsToFix = new ARDB.FailureDefinitionId[]
@@ -85,6 +74,19 @@ namespace RhinoInside.Revit.GH.Components.Walls
       ARDB.BuiltInFailures.CreationFailures.CannotDrawWalls,
     };
     protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix.Reverse();
+
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+      ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+      ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+      ARDB.BuiltInParameter.WALL_KEY_REF_PARAM,
+      ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM,
+      ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT,
+      ARDB.BuiltInParameter.WALL_BASE_OFFSET,
+      ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT,
+      ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM
+    };
 
     void ReconstructWallByCurve
     (
@@ -198,7 +200,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           height.Value / Revit.ModelUnits,
           levelIsEmpty ? bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation() : 0.0,
           flipped,
-          structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing
+          structural: true
         );
 
         // Wait to join at the end of the Transaction
@@ -208,22 +210,14 @@ namespace RhinoInside.Revit.GH.Components.Walls
         }
 
         // Walls are created with the last LocationLine used in the Revit editor!!
-        //newWall.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM).Update((int) WallLocationLine.WallCenterline);
+        //newWall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(ARDB.WallLocationLine.WallCenterline);
 
-        var parametersMask = new ARDB.BuiltInParameter[]
-        {
-          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
-          ARDB.BuiltInParameter.WALL_KEY_REF_PARAM,
-          ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM,
-          ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT,
-          ARDB.BuiltInParameter.WALL_BASE_OFFSET,
-          ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT,
-          ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM
-        };
+        // We turn off analytical model off by default
+        newWall.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
 
-        ReplaceElement(ref wall, newWall, parametersMask);
+        ReplaceElement(ref wall, newWall, ExcludeUniqueProperties);
+
+        newWall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT)?.Update(structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing);
       }
 
       if (newWall is object)
@@ -233,15 +227,15 @@ namespace RhinoInside.Revit.GH.Components.Walls
         newWall.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(ARDB.ElementId.InvalidElementId);
         newWall.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update(height.Value / Revit.ModelUnits);
 
-        newWall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update((int) locationLine);
+        newWall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(locationLine);
         if(structuralUsage == ARDB.Structure.StructuralWallUsage.NonBearing)
         {
-          newWall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(0);
+          newWall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(false);
         }
         else
         {
-          newWall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(1);
-          newWall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Update((int) structuralUsage);
+          newWall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(true);
+          newWall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Update(structuralUsage);
         }
 
         if (newWall.Flipped != flipped)

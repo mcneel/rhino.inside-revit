@@ -110,6 +110,16 @@ namespace RhinoInside.Revit.GH.Components.Families
       return succeed;
     }
 
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+      ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+      ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+      ARDB.BuiltInParameter.LEVEL_PARAM,
+      ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM,
+      ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL
+    };
+
     void ReconstructFloorByOutline
     (
       [Optional, NickName("DOC")]
@@ -183,28 +193,25 @@ namespace RhinoInside.Revit.GH.Components.Families
       }
       else if (!Reuse(ref floor, boundary, type.Value, level.Value, structural))
       {
-        var parametersMask = new ARDB.BuiltInParameter[]
-        {
-          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
-          ARDB.BuiltInParameter.LEVEL_PARAM,
-          ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM,
-          ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL
-        };
-
+        var newFloor = default(ARDB.Floor);
 #if REVIT_2022
         var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
 
-        ReplaceElement(ref floor, ARDB.Floor.Create(document, curveLoops, type.Value.Id, level.Value.Id, structural, default, 0.0), parametersMask);
+        newFloor = ARDB.Floor.Create(document, curveLoops, type.Value.Id, level.Value.Id, isStructural: true, default, 0.0);
 #else
         var curveArray = boundary[0].ToCurveArray();
 
         if (type.Value.IsFoundationSlab)
-          ReplaceElement(ref floor, document.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural, ARDB.XYZ.BasisZ), parametersMask);
+          newFloor = document.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural: true, ARDB.XYZ.BasisZ);
         else
-          ReplaceElement(ref floor, document.Create.NewFloor(curveArray, type.Value, level.Value, structural, ARDB.XYZ.BasisZ), parametersMask);
+          newFloor = document.Create.NewFloor(curveArray, type.Value, level.Value, structural: true, ARDB.XYZ.BasisZ);
 #endif
+        // We turn off analytical model off by default
+        newFloor.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+
+        ReplaceElement(ref floor, newFloor, ExcludeUniqueProperties);
+
+        newFloor.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL)?.Update(structural);
       }
 
       if (floor is object)
