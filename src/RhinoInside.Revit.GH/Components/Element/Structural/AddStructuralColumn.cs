@@ -178,7 +178,7 @@ namespace RhinoInside.Revit.GH.Components
         );
 
         // We turn off analytical model off by default
-        column.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL).Update(false);
+        column.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
       }
 
       column.get_Parameter(ARDB.BuiltInParameter.SLANTED_COLUMN_TYPE_PARAM).Update(2);

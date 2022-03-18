@@ -11,17 +11,17 @@ namespace RhinoInside.Revit.GH.Components
   using Exceptions;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.6")]
-  public class AddStructuralBeam : ElementTrackerComponent
+  [ComponentVersion(introduced: "1.7")]
+  public class AddStructuralBrace: ElementTrackerComponent
   {
-    public override Guid ComponentGuid => new Guid("26411AA6-8187-49DF-A908-A292A07918F1");
+    public override Guid ComponentGuid => new Guid("87E0CA19-088E-4A94-9770-180ABC7049AD");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    public AddStructuralBeam() : base
+    public AddStructuralBrace() : base
     (
-      name: "Add Structural Beam",
+      name: "Add Structural Brace",
       nickname: "S-Beam",
-      description: "Given its Axis, it adds a beam element to the active Revit document",
+      description: "Given its Axis, it adds a brace element to the active Revit document",
       category: "Revit",
       subCategory: "Build"
     )
@@ -79,14 +79,14 @@ namespace RhinoInside.Revit.GH.Components
       (
         new Parameters.FamilyInstance()
         {
-          Name = _Beam_,
-          NickName = _Beam_.Substring(0, 1),
-          Description = $"Output {_Beam_}",
+          Name = _Brace,
+          NickName = _Brace.Substring(0, 1),
+          Description = $"Output {_Brace}",
         }
       )
     };
 
-    const string _Beam_ = "Beam";
+    const string _Brace = "Brace";
     static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
       ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
@@ -104,17 +104,12 @@ namespace RhinoInside.Revit.GH.Components
 
       ReconstructElement<ARDB.FamilyInstance>
       (
-        doc.Value, _Beam_, beam =>
+        doc.Value, _Brace, beam =>
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if
-          (
-            curve.IsClosed ||
-            !curve.IsPlanar(GeometryObjectTolerance.Model.VertexTolerance) ||
-            curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, out var _)
-          )
-            throw new RuntimeArgumentException("Curve", "Curve must be a C1 continuous planar non closed curve.", curve);
+          if (!curve.TryGetLine(out var line, GeometryObjectTolerance.Model.VertexTolerance))
+            throw new RuntimeArgumentException("Curve", "Curve must be line like curve.", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
 
@@ -122,9 +117,9 @@ namespace RhinoInside.Revit.GH.Components
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Reference Level", out Types.Level level, doc, bbox.Center.Z)) return null;
 
           // Compute
-          beam = Reconstruct(beam, doc.Value, curve.ToCurve(), type.Value, level.Value);
+          beam = Reconstruct(beam, doc.Value, line.ToLine(), type.Value, level.Value);
 
-          DA.SetData(_Beam_, beam);
+          DA.SetData(_Brace, beam);
           return beam;
         }
       );
@@ -169,12 +164,13 @@ namespace RhinoInside.Revit.GH.Components
             ARDB.Line.CreateBound(ARDB.XYZ.Zero, ARDB.XYZ.BasisZ),
             type,
             level,
-            ARDB.Structure.StructuralType.Beam
+            ARDB.Structure.StructuralType.Brace
           ),
           ExcludeUniqueProperties
         );
 
         // We turn off analytical model off by default
+        beam.Document.Regenerate();
         beam.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
       }
 
