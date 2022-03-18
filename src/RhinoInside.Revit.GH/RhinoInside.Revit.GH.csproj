@@ -65,7 +65,6 @@
     <Compile Include="Components\Element\Assembly\AssemblyMembers.cs" />
     <Compile Include="Components\Element\Assembly\DisassembleAssembly.cs" />
     <Compile Include="Components\Element\Assembly\QueryAssemblies.cs" />
-    <Compile Include="Components\Element\Beam\ByCurve.cs" />
     <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
     <Compile Include="Components\Element\Ceiling\ByOutline.cs" />
     <Compile Include="Components\Element\CompoundStructureGeometry.cs" />
@@ -147,6 +146,7 @@
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
     <Compile Include="Components\Element\Sketch\Deconstruct.cs" />
     <Compile Include="Components\Element\Sheet\SheetByNumber.cs" />
+    <Compile Include="Components\Element\Structural\AddStructuralBeam.cs" />
     <Compile Include="Components\Element\Topography\ByMesh.cs" />
     <Compile Include="Components\Element\Topography\ByPoints.cs" />
     <Compile Include="Components\Element\Properties.cs" />

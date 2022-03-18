@@ -12,12 +12,12 @@ namespace RhinoInside.Revit.GH.Components
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.0", updated: "1.6")]
-  public class ColumnByCurve : ElementTrackerComponent
+  public class AddStructuralColumn : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("47B560AC-1E1D-4576-9F17-BCCF612974D8");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    public ColumnByCurve() : base
+    public AddStructuralColumn() : base
     (
       name: "Add Structural Column",
       nickname: "S-Column",
