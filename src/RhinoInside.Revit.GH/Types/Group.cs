@@ -15,7 +15,6 @@ namespace RhinoInside.Revit.GH.Types
   {
     protected override Type ValueType => typeof(ARDB.Group);
     public new ARDB.Group Value => base.Value as ARDB.Group;
-    public static explicit operator ARDB.Group(Group value) => value?.Value;
 
     public Group() { }
     public Group(ARDB.Group value) : base(value) { }
@@ -35,44 +34,48 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.Group group)
+        if (Value is ARDB.Group group && group.Category.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_IOSModelGroups)
         {
-          var doc = group.Document;
-          using (doc.RollBackScope())
+          try
           {
-            var plane = Plane.WorldXY.ToPlane();
-            var sketchPlane = ARDB.SketchPlane.Create(doc, plane);
-            var circle = ARDB.Arc.Create(plane, 1.0, 0.0, 2.0 * Math.PI);
-            var modelCurve = default(ARDB.ModelCurve);
-            var identity = default(ARDB.Group);
-            if (doc.IsFamilyDocument)
+            var doc = group.Document;
+            using (doc.RollBackScope())
             {
-              modelCurve = doc.FamilyCreate.NewModelCurve(circle, sketchPlane);
-              identity = doc.FamilyCreate.NewGroup(new ARDB.ElementId[] { modelCurve.Id });
-            }
-            else
-            {
-              modelCurve = doc.Create.NewModelCurve(circle, sketchPlane);
-              identity = doc.Create.NewGroup(new ARDB.ElementId[] { modelCurve.Id });
-            }
+              var plane = Plane.WorldXY.ToPlane();
+              var sketchPlane = ARDB.SketchPlane.Create(doc, plane);
+              var circle = ARDB.Arc.Create(plane, 1.0, 0.0, 2.0 * Math.PI);
+              var modelCurve = default(ARDB.ModelCurve);
+              var identity = default(ARDB.Group);
+              if (doc.IsFamilyDocument)
+              {
+                modelCurve = doc.FamilyCreate.NewModelCurve(circle, sketchPlane);
+                identity = doc.FamilyCreate.NewGroup(new ARDB.ElementId[] { modelCurve.Id });
+              }
+              else
+              {
+                modelCurve = doc.Create.NewModelCurve(circle, sketchPlane);
+                identity = doc.Create.NewGroup(new ARDB.ElementId[] { modelCurve.Id });
+              }
 
-            group.ChangeTypeId(identity.GetTypeId());
-            var geometries = group.GetMemberIds();
-            if
-            (
-              geometries.Count == 1 &&
-              group.Document.GetElement(geometries[0]) is ARDB.ModelCurve transformedModelCurve &&
-              transformedModelCurve.GeometryCurve is ARDB.Arc transformedCircle
-            )
-            {
-              return new Plane
+              group.ChangeTypeId(identity.GetTypeId());
+              var geometries = group.GetMemberIds();
+              if
               (
-                transformedCircle.Center.ToPoint3d(),
-                transformedCircle.XDirection.ToVector3d(),
-                transformedCircle.YDirection.ToVector3d()
-              );
+                geometries.Count == 1 &&
+                group.Document.GetElement(geometries[0]) is ARDB.ModelCurve transformedModelCurve &&
+                transformedModelCurve.GeometryCurve is ARDB.Arc transformedCircle
+              )
+              {
+                return new Plane
+                (
+                  transformedCircle.Center.ToPoint3d(),
+                  transformedCircle.XDirection.ToVector3d(),
+                  transformedCircle.YDirection.ToVector3d()
+                );
+              }
             }
           }
+          catch { }
         }
 
         return base.Location;
