@@ -166,14 +166,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           origin = curve.Evaluate(0.5, true);
           basisX = curveDirection.Normalize(0D);
-          basisY = basisX.PerpVector(0D).Normalize(0D);
+          basisY = basisX.PerpVector().Normalize(0D);
           return true;
         }
         else
         {
           origin = curve.Origin;
           basisX = curveDirection.Normalize(0D);
-          basisY = basisX.PerpVector(0D).Normalize(0D);
+          basisY = basisX.PerpVector().Normalize(0D);
           return true;
         }
       }
@@ -306,14 +306,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
             origin = XYZExtension.ComputeMeanPoint(curve.GetCoordinates());
             var axis = start - origin;
             basisX = axis.Normalize(0D);
-            basisY = basisX.PerpVector(0D);
+            basisY = basisX.PerpVector();
           }
           else
           {
             var axis = end - start;
             origin = start + (axis * 0.5);
             basisX = axis.Normalize(0D);
-            basisY = basisX.PerpVector(0D);
+            basisY = basisX.PerpVector();
           }
           return true;
       }

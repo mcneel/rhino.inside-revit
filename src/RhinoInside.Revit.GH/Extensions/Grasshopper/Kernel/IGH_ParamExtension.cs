@@ -246,7 +246,7 @@ namespace Grasshopper.Kernel
           if (parameters.Any())
           {
             var convert = GH_DocumentObject.Menu_AppendItem(menu, "Convert") as ToolStripMenuItem;
-            foreach (var parameter in parameters.OrderBy(x => x.Desc.Name).OrderBy(x => x.Exposure))
+            foreach (var parameter in parameters.OrderBy(x => x.Desc.Category).ThenBy(x => x.Desc.SubCategory).ThenBy(x => x.Desc.Name))
             {
               var item = GH_DocumentObject.Menu_AppendItem(convert.DropDown, parameter.Desc.Name, ConverMenuHandler, parameter.Icon);
               item.Tag = parameter.Guid;

@@ -98,6 +98,22 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual object ScriptVariable() => Value;
 
+    public override bool CastFrom(object source)
+    {
+      var value = source;
+
+      if (source is IGH_Goo goo)
+        value = goo.ScriptVariable();
+
+      if (value is ARDB.Element element)
+      {
+        SetValue(element.Document, element.WorksetId);
+        return true;
+      }
+
+      return base.CastFrom(source);
+    }
+
     public override bool CastTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))

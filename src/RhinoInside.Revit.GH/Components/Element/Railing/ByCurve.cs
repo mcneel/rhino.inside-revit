@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components
       // Axis
       var levelPlane = new Plane
       (
-        new Point3d(0.0, 0.0, level.Value.GetHeight() * GeometryDecoder.ModelScaleFactor),
+        new Point3d(0.0, 0.0, level.Value.GetElevation() * GeometryDecoder.ModelScaleFactor),
         Vector3d.ZAxis
       );
       curve = Curve.ProjectToPlane(curve, levelPlane);
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components
         using (var heightOffset = newRail.get_Parameter(ARDB.BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET))
         {
           if (!heightOffset.IsReadOnly)
-            heightOffset.Update(bbox.Min.Z * GeometryEncoder.ModelScaleFactor - level.Value.GetHeight());
+            heightOffset.Update(bbox.Min.Z * GeometryEncoder.ModelScaleFactor - level.Value.GetElevation());
         }
 
         newRail.HostId = host?.Id ?? ARDB.ElementId.InvalidElementId;

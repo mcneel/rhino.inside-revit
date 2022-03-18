@@ -688,18 +688,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region Level
-    public static Level FindLevelByHeight(this Document doc, double height)
+    public static Level GetNearestLevel(this Document doc, double elevationAboveOrigin)
     {
       Level level = null;
 
-      if (!double.IsNaN(height))
+      if (!double.IsNaN(elevationAboveOrigin))
       {
         var min = double.PositiveInfinity;
         using (var collector = new FilteredElementCollector(doc))
         {
-          foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.GetHeight()))
+          foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.GetElevation()))
           {
-            var distance = Math.Abs(levelN.GetHeight() - height);
+            var distance = Math.Abs(levelN.GetElevation() - elevationAboveOrigin);
             if (distance < min)
             {
               level = levelN;
@@ -712,17 +712,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return level;
     }
 
-    public static Level FindBaseLevelByHeight(this Document doc, double height, out Level topLevel)
+    public static Level GetNearestBaseLevel(this Document doc, double elevationAboveOrigin, out Level topLevel)
     {
-      height += doc.Application.ShortCurveTolerance;
+      elevationAboveOrigin += doc.Application.ShortCurveTolerance;
 
       topLevel = null;
       Level level = null;
       using (var collector = new FilteredElementCollector(doc))
       {
-        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.GetHeight()))
+        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.GetElevation()))
         {
-          if (levelN.GetHeight() <= height) level = levelN;
+          if (levelN.GetElevation() <= elevationAboveOrigin) level = levelN;
           else
           {
             topLevel = levelN;
@@ -733,17 +733,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return level;
     }
 
-    public static Level FindTopLevelByHeight(this Document doc, double height, out Level baseLevel)
+    public static Level GetNearestTopLevel(this Document doc, double elevationAboveOrigin, out Level baseLevel)
     {
-      height -= doc.Application.ShortCurveTolerance;
+      elevationAboveOrigin -= doc.Application.ShortCurveTolerance;
 
       baseLevel = null;
       Level level = null;
       using (var collector = new FilteredElementCollector(doc))
       {
-        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderByDescending(c => c.GetHeight()))
+        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderByDescending(c => c.GetElevation()))
         {
-          if (levelN.GetHeight() >= height) level = levelN;
+          if (levelN.GetElevation() >= elevationAboveOrigin) level = levelN;
           else
           {
             baseLevel = levelN;

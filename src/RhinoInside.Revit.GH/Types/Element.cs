@@ -16,6 +16,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Element")]
   public interface IGH_Element : IGH_ElementId
   {
+    Category Category { get; }
     ElementType Type { get; set; }
   }
 
@@ -415,6 +416,12 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(IGH_ElementType)))
+      {
+        target = (Q) (object) Type;
+        return true;
+      }
+
       if (element is null)
         return false;
 
@@ -621,10 +628,17 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public ARDB.WorksetId WorksetId
+    public Workset Workset
     {
-      get => Document?.GetWorksetId(Id);
-      set => Value?.get_Parameter(ARDB.BuiltInParameter.ELEM_PARTITION_PARAM)?.Update(value.IntegerValue);
+      get => new Workset(Document, Document?.GetWorksetId(Id) ?? ARDB.WorksetId.InvalidWorksetId);
+      set
+      {
+        if (value is object && Value is ARDB.Element element)
+        {
+          AssertValidDocument(value, nameof(Workset));
+          element.get_Parameter(ARDB.BuiltInParameter.ELEM_PARTITION_PARAM).Update(value.Id.IntegerValue);
+        }
+      }
     }
 
     public Phase CreatedPhase

@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
   public class RoofByOutline : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("198E152B-6636-4D90-9443-AE77B8B1475E");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public RoofByOutline() : base
     (
@@ -163,7 +163,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (roof is object)
       {
-        var roofLevelOffset = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
+        var roofLevelOffset = bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation();
         roof.get_Parameter(ARDB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM)?.Update(roofLevelOffset);
       }
     }

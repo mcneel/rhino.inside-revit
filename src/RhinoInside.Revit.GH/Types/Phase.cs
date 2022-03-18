@@ -1,4 +1,5 @@
 using System;
+using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -13,5 +14,29 @@ namespace RhinoInside.Revit.GH.Types
     public Phase(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public Phase(ARDB.Phase value) : base(value) { }
 
+    public override bool CastFrom(object source)
+    {
+      var value = source;
+
+      if (source is IGH_Goo goo)
+        value = goo.ScriptVariable();
+
+      if (value is ARDB.View view)
+      {
+        if (view.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE) is ARDB.Parameter viewPhase)
+          SetValue(view.Document, viewPhase.AsElementId());
+        else
+          SetValue(default, ARDB.ElementId.InvalidElementId);
+
+        return true;
+      }
+      else if (value is ARDB.Element element)
+      {
+        SetValue(element.Document, element.CreatedPhaseId);
+        return true;
+      }
+
+      return base.CastFrom(source);
+    }
   }
 }

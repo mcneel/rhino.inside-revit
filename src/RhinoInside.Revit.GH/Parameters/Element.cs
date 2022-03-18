@@ -122,6 +122,11 @@ namespace RhinoInside.Revit.GH.Parameters
       base(name, nickname, description, category, subcategory)
     { }
 
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Document", "Workset", "Category" }
+    );
+
     protected override T PreferredCast(object data) => data is R ? Types.Element.FromValue(data) as T : null;
 
     internal static IEnumerable<Types.IGH_Element> ToElementIds(IGH_Structure data) =>

@@ -263,7 +263,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       // Show elements sorted Alphabetically.
       ListItems.Sort((x, y) =>
       {
-        var result = (int) (x.Value.Value.GetHeight() - y.Value.Value.GetHeight());
+        var result = (int) (x.Value.Value.GetElevation() - y.Value.Value.GetElevation());
         return result == 0 ? string.CompareOrdinal(x.Name, y.Name) : result;
       });
     }

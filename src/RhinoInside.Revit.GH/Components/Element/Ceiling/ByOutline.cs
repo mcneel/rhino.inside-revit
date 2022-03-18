@@ -19,13 +19,13 @@ namespace RhinoInside.Revit.GH.Components
     public override Guid ComponentGuid => new Guid("A39BBDF2-78F2-4501-BB6E-F9CC3E83516E");
 
 #if REVIT_2022
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 #else
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
     public override bool SDKCompliancy(int exeVersion, int exeServiceRelease) => false;
 #endif
 
-   public CeilingByOutline() : base
+    public CeilingByOutline() : base
     (
       name: "Add Ceiling",
       nickname: "Ceiling",
@@ -201,7 +201,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (ceiling is object)
       {
-        var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetHeight();
+        var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation();
         ceiling.get_Parameter(ARDB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
       }
     }
