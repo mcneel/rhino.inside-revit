@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components
     public ColumnByCurve() : base
     (
       name: "Add Structural Column",
-      nickname: "Structural Column",
+      nickname: "S-Column",
       description: "Given its Axis, it adds a structural column element to the active Revit document",
       category: "Revit",
       subCategory: "Build"

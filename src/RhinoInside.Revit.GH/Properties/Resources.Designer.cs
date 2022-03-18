@@ -113,6 +113,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddStructuralBeam {
+            get {
+                object obj = ResourceManager.GetObject("AddStructuralBeam", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddSubCategory {
             get {
                 object obj = ResourceManager.GetObject("AddSubCategory", resourceCulture);
@@ -466,16 +476,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap Beam {
             get {
                 object obj = ResourceManager.GetObject("Beam", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap BeamByCurve {
-            get {
-                object obj = ResourceManager.GetObject("BeamByCurve", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
