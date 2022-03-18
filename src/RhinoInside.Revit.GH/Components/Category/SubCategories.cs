@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
       nickname: "SubCats",
       description: "Returns a list containing the subcategories of Category",
       category: "Revit",
-      subCategory: "Category"
+      subCategory: "Object Styles"
     )
     { }
 
@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
   public class AddSubCategory : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("8DE336FB-E764-4A8E-BB12-9AECDA19769F");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
 
     public AddSubCategory() : base
     (
@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
       nickname: "SubCat",
       description: "Add a new subcategory to the given category",
       category: "Revit",
-      subCategory: "Category"
+      subCategory: "Object Styles"
     )
     { }
 

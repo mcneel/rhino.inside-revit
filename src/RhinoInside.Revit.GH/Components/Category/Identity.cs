@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
       nickname: "Identity",
       description: "Query category identity information",
       category: "Revit",
-      subCategory: "Category"
+      subCategory: "Object Styles"
     )
     { }
 

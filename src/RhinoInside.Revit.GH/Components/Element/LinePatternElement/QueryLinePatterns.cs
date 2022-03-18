@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
   public class QueryLinePatterns : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("A94000FD-8BCD-49D5-9F00-09BEDB88A123");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
 
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.LinePatternElement));
 
@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
       nickname: "Line Patterns",
       description: "Get document line patterns list",
       category: "Revit",
-      subCategory: "Model"
+      subCategory: "Object Styles"
     )
     { }
 

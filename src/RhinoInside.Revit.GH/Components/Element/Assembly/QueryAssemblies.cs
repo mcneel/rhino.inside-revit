@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
   public class QueryAssemblies : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("fd5b45c3-7f55-4ad8-abbe-e871f95b4988");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.AssemblyInstance));
 
     public QueryAssemblies() : base
@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       nickname: "Assemblies",
       description: "Get all document assemblies",
       category: "Revit",
-      subCategory: "Assembly"
+      subCategory: "Model"
     )
     { }
 

@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
   public class AssemblyByLocation : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("26FEB2E9-6476-4BA7-A553-1D0300674D1D");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
 
     public AssemblyByLocation() : base
     (
@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       nickname: "Assembly",
       description: "Create a new assembly instance at given location",
       category: "Revit",
-      subCategory: "Assembly"
+      subCategory: "Model"
     )
     { }
 

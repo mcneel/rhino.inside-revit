@@ -8,14 +8,14 @@ namespace RhinoInside.Revit.GH.Parameters
   public class CategoryTypes : GH_ValueList
   {
     public override Guid ComponentGuid => new Guid("5FFB1339-8521-44A1-9075-2984637725E9");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
 
     public CategoryTypes()
     {
       Category = "Revit";
-      SubCategory = "Category";
-      Name = "CategoryTypes";
-      NickName = "CategoryTypes";
+      SubCategory = "Object Styles";
+      Name = "Category Types";
+      NickName = "Category Types";
       Description = "Provides a picker of a CategoryType";
 
       ListItems.Clear();

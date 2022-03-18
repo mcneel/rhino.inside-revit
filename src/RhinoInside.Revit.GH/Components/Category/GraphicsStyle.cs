@@ -14,8 +14,14 @@ namespace RhinoInside.Revit.GH.Components.Categories
     public override Guid ComponentGuid => new Guid("46139967-74FC-4820-BA20-B1DC7F30ABDE");
     protected override string IconTag => "G";
 
-    public CategoryGraphicsStyle()
-    : base("Category GraphicsStyle", "GraphicsStyle", string.Empty, "Revit", "Category")
+    public CategoryGraphicsStyle() : base
+    (
+      name: "Category GraphicsStyle",
+      nickname: "GraphicsStyle",
+      description: string.Empty,
+      category: "Revit",
+      subCategory: "Object Styles"
+    )
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
@@ -69,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
       nickname: "Line Styles",
       description: "Get document line styles list",
       category: "Revit",
-      subCategory: "Category"
+      subCategory: "Object Styles"
     )
     { }
 

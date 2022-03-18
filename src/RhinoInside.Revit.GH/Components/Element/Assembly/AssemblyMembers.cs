@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
   public class AssemblyMembers : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("33ead71b-647b-4783-b0ce-c840cd50c15d");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
 
     public AssemblyMembers() : base
     (
@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       nickname: "Members",
       description: "Get-Set accessor for assembly members",
       category: "Revit",
-      subCategory: "Assembly"
+      subCategory: "Model"
     )
     { }
 

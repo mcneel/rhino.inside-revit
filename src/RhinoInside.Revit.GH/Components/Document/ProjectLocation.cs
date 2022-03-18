@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
       "Location",
       "Project location.",
       "Revit",
-      "Document"
+      "Site"
     )
     { }
 

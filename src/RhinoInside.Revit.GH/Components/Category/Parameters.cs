@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
       nickname: "Parameters",
       description: "Gets a list of valid parameters for the specified category that can be used in a table view",
       category: "Revit",
-      subCategory: "Category"
+      subCategory: "Object Styles"
     )
     { }
 

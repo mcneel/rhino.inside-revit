@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
   public class AssemblyByMembers : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("6915b697-f10d-4bc8-8faa-f25438f393a8");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
 
     public AssemblyByMembers() : base
     (
@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       nickname: "Assemble",
       description: "Create a new assembly instance",
       category: "Revit",
-      subCategory: "Assembly"
+      subCategory: "Model"
     )
     { }
 

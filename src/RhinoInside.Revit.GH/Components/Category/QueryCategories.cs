@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
       nickname: "Categories",
       description: "Get document categories list",
       category: "Revit",
-      subCategory: "Category"
+      subCategory: "Object Styles"
     )
     { }
 
