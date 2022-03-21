@@ -5,7 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.Material
+namespace RhinoInside.Revit.GH.Components.Materials
 {
   [ComponentVersion(introduced: "1.4")]
   public class QueryAppearanceAssets : ElementCollectorComponent

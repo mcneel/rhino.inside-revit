@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
   public class QueryLineStyles : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("54082395-7160-4563-B289-215AFDD33A7F");
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.GraphicsStyle));
 
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
       nickname: "Line Styles",
       description: "Get document line styles list",
       category: "Revit",
-      subCategory: "Object Styles"
+      subCategory: "Model"
     )
     { }
 

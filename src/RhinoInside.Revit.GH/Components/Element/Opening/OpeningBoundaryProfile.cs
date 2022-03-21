@@ -1,11 +1,7 @@
 using System;
 using Grasshopper.Kernel;
-using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.Opening
+namespace RhinoInside.Revit.GH.Components.Openings
 {
   [ComponentVersion(introduced: "1.6")]
   public class OpeningBoundaryProfile : Component
