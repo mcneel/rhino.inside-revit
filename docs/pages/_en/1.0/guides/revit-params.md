@@ -8,7 +8,10 @@ thumbnail: /static/images/guides/revit-params.png
 ghdef: revit-params.ghx
 ---
 
-In this guide we will take a look at how to read the parameters from a Revit element using Grasshopper.
+{% capture link_note %}
+In this guide we will take a look at how to read the parameters from a Revit element using Grasshopper. To review how parameters are organized in Revit, see the [Revit Elements:Parameters Guide]({{ site.baseurl }}{% link _en/1.0/guides/revit-revit.md %}#parameters)
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-params.png' %}
 
 ## Inspecting Parameters
 
