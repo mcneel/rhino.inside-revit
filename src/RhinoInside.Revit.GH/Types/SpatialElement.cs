@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string DisplayName => Value is object ? $"{Name} - {Number}" : base.DisplayName;
 
-    #region Lolcation
+    #region Location
     public override Level Level => Level.FromElement(Value?.Level) as Level;
 
     public Curve[] Boundaries
@@ -29,10 +29,16 @@ namespace RhinoInside.Revit.GH.Types
         {
           using (var options = new ARDB.SpatialElementBoundaryOptions())
           {
+            options.SpatialElementBoundaryLocation = ARDB.SpatialElementBoundaryLocation.Center;
+            options.StoreFreeBoundaryFaces = true;
+
             var tol = GeometryObjectTolerance.Model;
-            return spatial.GetBoundarySegments(options).Select
+
+            var plane = Location;
+            var segments = spatial.GetBoundarySegments(options);
+            return segments.Select
             (
-              loop => Curve.JoinCurves(loop.Select(x => x.GetCurve().ToCurve()), tol.VertexTolerance)[0]
+              loop => Curve.JoinCurves(loop.Select(x => Curve.ProjectToPlane(x.GetCurve().ToCurve(), plane)), tol.VertexTolerance, preserveDirection: false)[0]
             ).ToArray();
           }
         }
