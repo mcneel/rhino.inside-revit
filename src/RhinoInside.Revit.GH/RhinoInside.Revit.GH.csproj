@@ -59,6 +59,8 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
+    <Compile Include="Components\Element\Opening\AddFaceOpening.cs" />
+    <Compile Include="Components\Element\Opening\AddOpening.cs" />
     <Compile Include="Components\Element\Opening\AddShaftOpening.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyByLocation.cs" />
     <Compile Include="Components\Element\Assembly\AssemblyByMembers.cs" />
@@ -115,6 +117,7 @@
     <Compile Include="Components\Element\Material\DeconstructProceduralAssets.cs" />
     <Compile Include="Components\Element\Material\Identity.cs" />
     <Compile Include="Components\Element\Material\QueryMaterials.cs" />
+    <Compile Include="Components\Element\Opening\AddVerticalOpening.cs" />
     <Compile Include="Components\Element\Opening\AddWallOpening.cs" />
     <Compile Include="Components\Element\Opening\OpeningBoundaryProfile.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
