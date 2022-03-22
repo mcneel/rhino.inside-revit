@@ -5,7 +5,28 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.6 RC1" version="v1.6.8102.16819" pre_release=true time="08/03/2022" %}
+{% include ltr/release-header.html title="v1.6 RC3" version="v1.6" pre_release=true time="03/22/2022" %}
+
+- Fixed a problem on `ARDB.XYZ.PerpVector` when tolerance is too small.
+- Now 'Convert' context menu is a sorted by parameter category.
+- Added casting from 'Element' to 'Workset', 'Phase', 'Level' and 'Type'.
+- Now all 'Add' components create elements on the last document Phase.
+- Now all 'Add' components create elements with 'Enable Analytical Model' off by default.
+- Fix for 'Add Beam' now it always returns a non joined element.
+- Fixed 'Reset Parameter' component on shared-parameters.
+- Fix for 'Element Curve' when managing structural elements.
+- Fixed 'Element Curve' when workiong with structural beams and structural columns.
+
+{% include ltr/release-header.html title="v1.6 RC2" version="v1.6" pre_release=true time="03/15/2022" %}
+
+- Now `HostObject.Location` returns a plane centered on the profile curves.
+- Now `Opening.Location` returns a plane centered on the profile curves.
+- Implemented casting `SpatialElement` to `Surface`
+- Added `Types.Railing`. This enables 'Element Curve' component on railings.
+- Implemented 'Type' output on 'Parameter Identity' for built-in parameters.
+- Now Grasshopper preview status is persistent between sessions.
+
+{% include ltr/release-header.html title="v1.6 RC1" version="v1.6.8102.16819" pre_release=true time="03/08/2022" %}
 
 - Added {% include ltr/comp.html uuid='18d46e90-' %} parameter
 - Added {% include ltr/comp.html uuid='657811b7-' %} component
@@ -23,19 +44,19 @@ group: Deployment & Configs
 - Now first access to `RhinoCommon.dll` loads Rhino
 
 
-{% include ltr/release-header.html title="v1.5" version="v1.5.8101.24584" time="08/03/2022" %}
+{% include ltr/release-header.html title="v1.5" version="v1.5.8101.24584" time="03/08/2022" %}
 
 - Includes all changes under 1.5RC releases listed below
 - Minor Fixes and Improvements
 
-{% include ltr/release-header.html title="v1.5 RC4" version="v1.5.8088.12286" pre_release=true time="22/02/2022" %}
+{% include ltr/release-header.html title="v1.5 RC4" version="v1.5.8088.12286" pre_release=true time="02/22/2022" %}
 
 - Fixed `AssemblyInstance.Location.set`
 - Implemented `AssemblyInstance.BoundingBox`
 - Now {% include ltr/comp.html uuid='ef607c2a-' %} displays the *BoundingBox* by default.
 - Fixed `Types.BasePoint.ClippingBox` when the element is not available.
 
-{% include ltr/release-header.html title="v1.5 RC3" version="v1.5.8082.16096" pre_release=true time="16/02/2022" %}
+{% include ltr/release-header.html title="v1.5 RC3" version="v1.5.8082.16096" pre_release=true time="02/16/2022" %}
 
 - {% include ltr/comp.html uuid='b6349dda-' %} now has "Open Design Options…" context menu option.
 - Added {% include ltr/comp.html uuid='8621421d-' %} component.
@@ -48,13 +69,13 @@ group: Deployment & Configs
 - Fixed a bug when user Undo a grasshopper object creation operation on components that track elements.
 - Fixed a problem when Revit is working in *US Survey Feet* units.
 
-{% include ltr/release-header.html title="v1.5 RC2" version="v1.5.8067.24664" pre_release=true time="01/02/2022" %}
+{% include ltr/release-header.html title="v1.5 RC2" version="v1.5.8067.24664" pre_release=true time="02/01/2022" %}
 
 - Fixed unit conversions on {% include ltr/comp.html uuid='8a162ee6-' %} component
 - Added `Types.SectionBox` type.
 - Fixed [#531](https://github.com/mcneel/rhino.inside-revit/issues/531).
 
-{% include ltr/release-header.html title="v1.5 RC1" version="v1.5.8056.10037" pre_release=true time="21/01/2022" %}
+{% include ltr/release-header.html title="v1.5 RC1" version="v1.5.8056.10037" pre_release=true time="01/21/2022" %}
 
 - Minor Fixes and Improvements
 
@@ -63,7 +84,7 @@ group: Deployment & Configs
 - Includes all changes under 1.4RC releases listed below
 - New {% include ltr/comp.html uuid='716903d0-' %} component
 
-{% include ltr/release-header.html title="v1.4 RC6" version="v1.4.8048.43002" pre_release=true time="18/01/2022" %}
+{% include ltr/release-header.html title="v1.4 RC6" version="v1.4.8048.43002" pre_release=true time="01/18/2022" %}
 
 - Added 'Link' output to 'Document Links' component.
 - Renamed 'Document Links' to {% include ltr/comp.html uuid='ebccfdd8-' %}.
