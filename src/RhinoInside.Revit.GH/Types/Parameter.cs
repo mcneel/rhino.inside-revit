@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var parameterClass = Class;
-        return parameterClass != External.DB.ParameterClass.Invalid ?
+        return parameterClass != ERDB.ParameterClass.Invalid ?
         $"Revit {Class} Parameter" : "Revit Parameter";
       }
     }
@@ -58,7 +58,12 @@ namespace RhinoInside.Revit.GH.Types
       group = value.GetGroupType();
 
       if (doc.GetElement(value.Id) is ARDB.SharedParameterElement parameter)
+      {
         guid = parameter.GuidValue;
+#if REVIT_2020
+        hideWhenNoValue = parameter.ShouldHideWhenNoValue();
+#endif
+      }
 
       visible = value.Visible;
     }

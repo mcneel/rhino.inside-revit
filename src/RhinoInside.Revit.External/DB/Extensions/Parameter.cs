@@ -151,7 +151,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return true;
 
 #if REVIT_2020
-      if (parameter.IsShared && (parameter.Definition as ExternalDefinition).HideWhenNoValue)
+      if
+      (
+        parameter.IsShared &&
+        (parameter.Element.Document.GetElement(parameter.Id) as SharedParameterElement)?.ShouldHideWhenNoValue() == true
+      )
         return parameter.ClearValue();
 #endif
 
