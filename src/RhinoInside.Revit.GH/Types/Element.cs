@@ -195,12 +195,22 @@ namespace RhinoInside.Revit.GH.Types
       if (!element.IsValid())
         return null;
 
+      // Special FamilyInstance
+      if (element is ARDB.FamilyInstance familyInstance)
+      {
+        if (StructuralFraming.IsValidElement(familyInstance)) return new StructuralFraming(familyInstance);
+        if (StructuralColumn.IsValidElement(familyInstance)) return new StructuralColumn(familyInstance);
+        if (Panel.IsValidElement(element)) return new Panel(familyInstance);
+      }
+
+      // By type
       for (var type = element.GetType(); type != typeof(ARDB.Element); type = type.BaseType)
       {
         if (ActivatorDictionary.TryGetValue(type, out var activator))
           return activator(element);
       }
 
+      // By Category
       if (element.Category is null)
       {
         if (DocumentExtension.AsCategory(element) is ARDB.Category category)
@@ -210,6 +220,9 @@ namespace RhinoInside.Revit.GH.Types
       {
         switch (bic)
         {
+          case ARDB.BuiltInCategory.OST_DesignOptionSets:
+            if (DesignOptionSet.IsValidElement(element)) return new DesignOptionSet(element);
+            break;
 #if !REVIT_2021
           case ARDB.BuiltInCategory.OST_IOS_GeoSite:
             if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element);
@@ -234,22 +247,16 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
+      // By Features
       if (GraphicalElement.IsValidElement(element))
       {
         if (InstanceElement.IsValidElement(element))
-        {
-          if (Panel.IsValidElement(element)) return new Panel(element as ARDB.FamilyInstance);
-
           return new InstanceElement(element);
-        }
+
         if (GeometricElement.IsValidElement(element))
           return new GeometricElement(element);
 
         return new GraphicalElement(element);
-      }
-      else
-      {
-        if (DesignOptionSet.IsValidElement(element)) return new DesignOptionSet(element);
       }
 
       return new Element(element);
