@@ -5,24 +5,18 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  [Kernel.Attributes.Name("Structural Framing")]
-  public class StructuralFraming : FamilyInstance
+  [Kernel.Attributes.Name("Structural Frame")]
+  public class StructuralBeam : FamilyInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
-      switch ((element as ARDB.FamilyInstance)?.StructuralType)
-      {
-        case ARDB.Structure.StructuralType.Beam:
-        case ARDB.Structure.StructuralType.Brace:
-          return element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming;
-      }
-
-      return false;
+      return ((element as ARDB.FamilyInstance)?.StructuralType) == ARDB.Structure.StructuralType.Beam &&
+             element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming;
     }
 
-    public StructuralFraming() { }
-    public StructuralFraming(ARDB.FamilyInstance value) : base(value) { }
+    public StructuralBeam() { }
+    public StructuralBeam(ARDB.FamilyInstance value) : base(value) { }
 
     public override void SetCurve(Curve curve, bool keepJoins = false)
     {
@@ -59,20 +53,28 @@ namespace RhinoInside.Revit.GH.Types
     }
   }
 
+  [Kernel.Attributes.Name("Structural Brace")]
+  public class StructuralBrace : FamilyInstance
+  {
+    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
+    public static new bool IsValidElement(ARDB.Element element)
+    {
+      return ((element as ARDB.FamilyInstance)?.StructuralType) == ARDB.Structure.StructuralType.Brace &&
+             element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming;
+    }
+
+    public StructuralBrace() { }
+    public StructuralBrace(ARDB.FamilyInstance value) : base(value) { }
+  }
+
   [Kernel.Attributes.Name("Structural Column")]
   public class StructuralColumn : FamilyInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
-      
-      switch ((element as ARDB.FamilyInstance)?.StructuralType)
-      {
-        case ARDB.Structure.StructuralType.Column:
-          return element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralColumns;
-      }
-
-      return false;
+      return ((element as ARDB.FamilyInstance)?.StructuralType) == ARDB.Structure.StructuralType.Column &&
+               element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralColumns;
     }
 
     public StructuralColumn() { }

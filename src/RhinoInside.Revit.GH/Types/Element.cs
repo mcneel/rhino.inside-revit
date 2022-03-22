@@ -198,7 +198,8 @@ namespace RhinoInside.Revit.GH.Types
       // Special FamilyInstance
       if (element is ARDB.FamilyInstance familyInstance)
       {
-        if (StructuralFraming.IsValidElement(familyInstance)) return new StructuralFraming(familyInstance);
+        if (StructuralBeam.IsValidElement(familyInstance)) return new StructuralBeam(familyInstance);
+        if (StructuralBrace.IsValidElement(familyInstance)) return new StructuralBrace(familyInstance);
         if (StructuralColumn.IsValidElement(familyInstance)) return new StructuralColumn(familyInstance);
         if (Panel.IsValidElement(element)) return new Panel(familyInstance);
       }
