@@ -19,7 +19,7 @@ Let's bring a single element into a new Grasshopper definition. We can use the {
 
 ![]({{ "/static/images/guides/revit-params-inspect.png" | prepend: site.baseurl }})
 
-Now hold {% include ltr/kb_key.html key='Shift' %} and double-click on the {% include ltr/comp.html uuid='fad33c4b' %} component to see a list of all parameters associated with given element
+Now hold {% include ltr/kb_key.html key='Shift' %} and double-click on the {% include ltr/comp.html uuid='fad33c4b' %} component to see a list of all parameters associated with given element.  THis will include built-in, project and shared parameters associated with the element.
 
 ![]({{ "/static/images/guides/revit-params-inspect-expanded.png" | prepend: site.baseurl }})
 
@@ -27,7 +27,13 @@ You can connect any of these properties, then {% include ltr/kb_key.html key='Ct
 
 ![]({{ "/static/images/guides/revit-params-inspect-collapsed.png" | prepend: site.baseurl }})
 
-### Finding the BuiltInParameter
+### Parameter Scope
+
+Parameters can be attached to the Element Type or singular Instance. Input the {% include ltr/comp.html uuid='ef607c2a' %} directly into the {% include ltr/comp.html uuid='fad33c4b' %} component to inspect both the Instance Parameters.  Get the  {% include ltr/comp.html uuid='fe427d04' %} component into the {% include ltr/comp.html uuid='fad33c4b' %} component to inspect the Type Parameters.  You can see that the available Parameters are different.
+
+![]({{ "/static/images/guides/revit-params-instance-type.png" | prepend: site.baseurl }})
+
+### Finding the Built-In Parameter
 
 Use the {% include ltr/comp.html uuid='c1d96f56' %} component to reference parameters that are built into Revit:
 
