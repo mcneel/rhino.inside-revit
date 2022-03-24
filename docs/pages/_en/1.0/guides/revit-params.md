@@ -19,7 +19,7 @@ Let's bring a single element into a new Grasshopper definition. We can use the {
 
 ![]({{ "/static/images/guides/revit-params-inspect.png" | prepend: site.baseurl }})
 
-Now hold {% include ltr/kb_key.html key='Shift' %} and double-click on the {% include ltr/comp.html uuid='fad33c4b' %} component to see a list of all parameters associated with given element.  THis will include built-in, project and shared parameters associated with the element.
+Now hold {% include ltr/kb_key.html key='Shift' %} and double-click on the {% include ltr/comp.html uuid='fad33c4b' %} component to see a list of all parameters associated with given element.  This will include built-in, project and shared parameters associated with the element.
 
 ![]({{ "/static/images/guides/revit-params-inspect-expanded.png" | prepend: site.baseurl }})
 
@@ -27,23 +27,27 @@ You can connect any of these properties, then {% include ltr/kb_key.html key='Ct
 
 ![]({{ "/static/images/guides/revit-params-inspect-collapsed.png" | prepend: site.baseurl }})
 
+To inspect an existing parameter's definition use the {% include ltr/comp.html uuid='3bde5890' %} component:
+
+![]({{ "/static/images/guides/param-identity.png" | prepend: site.baseurl }})
+
+### Finding an Elements Parameter
+
+To find a parameter associated with an element, pass the element and parameter name to the  {% include ltr/comp.html uuid='44515a6b' %} component:
+
+![]({{ "/static/images/guides/param-find-builtin.png" | prepend: site.baseurl }})
+
 ### Parameter Scope
 
 Parameters can be attached to the Element Type or singular Instance. Input the {% include ltr/comp.html uuid='ef607c2a' %} directly into the {% include ltr/comp.html uuid='fad33c4b' %} component to inspect both the Instance Parameters.  Get the  {% include ltr/comp.html uuid='fe427d04' %} component into the {% include ltr/comp.html uuid='fad33c4b' %} component to inspect the Type Parameters.  You can see that the available Parameters are different.
 
 ![]({{ "/static/images/guides/revit-params-instance-type.png" | prepend: site.baseurl }})
 
-### Finding the Built-In Parameter
+### Finding the Built-In Parameters
 
-Use the {% include ltr/comp.html uuid='c1d96f56' %} component to reference parameters that are built into Revit:
+Use the {% include ltr/comp.html uuid='c1d96f56' %} component to reference parameters that are built into Revit.  Double-click on the title to search for part of the name of the parameter.
 
 ![]({{ "/static/images/guides/revit-params-querybuiltin.png" | prepend: site.baseurl }})
-
-To find a built-in parameter associated with an element parameter, pass the element and parameter name to the *Find BuiltInParameter* shared here.:
-
-![]({{ "/static/images/guides/revit-params-getbuiltin.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Find BuiltInParameter.ghuser' name='Find BuiltInParameter' %}
 
 ## Reading Parameter Values
 
@@ -80,11 +84,11 @@ Notice that the {% include ltr/comp.html uuid='f568d3e7' %} component is only ho
 ![]({{ "/static/images/guides/revit-params-setverify.png" | prepend: site.baseurl }})
 
 
-## Creating Shared Parameters
+## Creating Parameters
 
 The components under the *Parameter* panel in Grasshopper, allow you to create new Shared Parameters in Revit.
 
-{% include ltr/warning_note.html note='Currently Revit API does not support creating project parameters' %}
+{% include ltr/warning_note.html note='Currently Revit API does not support creating project parameters directly.  So project parameters created by Grasshopper are Shared Project Parameters' %}
 
 ![]({{ "/static/images/guides/revit-params-definekeycomp.png" | prepend: site.baseurl }})
 
@@ -99,3 +103,15 @@ Here is how the parameter configuration in Shared Parameters:
 The value of this parameter can later be read or set by passing the parameter name to the {% include ltr/comp.html uuid='f568d3e7' %} component. You can inspect the parameter value using the {% include ltr/comp.html uuid='fad33c4b' %} component, and passing the parameter into {% include ltr/comp.html uuid='3bde5890' %} component:
 
 ![]({{ "/static/images/guides/revit-params-valueinfo.png" | prepend: site.baseurl }})
+
+## Shared Parameters File
+
+Using the {% include ltr/comp.html uuid='7844b410' %} component to read the shared parameter file.  This will return the current file path, the groups and the parameter definitions. The file only contains definitions, Parameters must be added to the current project before values can be set. The {% include ltr/comp.html uuid='84ab6f3c' %} component adds the Parameter and {% include ltr/comp.html uuid='f568d3e7' %} component sets the value in the parameter on an element.
+
+![]({{ "/static/images/guides/param-shared-file.png" | prepend: site.baseurl }})
+
+## Global Parameters
+
+Global parameters must be queried from the current project by using the Global scope into the {% include ltr/comp.html uuid='d82d9fc3' %} component. Then get or set the parameter value using the {% include ltr/comp.html uuid='32e77d86' %} component:
+
+![]({{ "/static/images/guides/param-global.png" | prepend: site.baseurl }})
