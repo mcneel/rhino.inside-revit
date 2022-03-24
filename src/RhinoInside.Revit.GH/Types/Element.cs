@@ -146,9 +146,10 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.FillPatternElement),      (element)=> new FillPatternElement    (element as ARDB.FillPatternElement)},
       { typeof(ARDB.AppearanceAssetElement),  (element)=> new AppearanceAssetElement(element as ARDB.AppearanceAssetElement)},
 
-      { typeof(ARDB.View),                    (element)=> new View                  (element as ARDB.View)              },
       { typeof(ARDB.ViewFamilyType),          (element)=> new ViewFamilyType        (element as ARDB.ViewFamilyType)    },
+      { typeof(ARDB.View),                    (element)=> new View                  (element as ARDB.View)              },
       { typeof(ARDB.ViewSheet),               (element)=> new ViewSheet             (element as ARDB.ViewSheet)         },
+      { typeof(ARDB.ViewPlan),                (element)=> new ViewPlan              (element as ARDB.ViewPlan)          },
 
       { typeof(ARDB.Instance),                (element)=> new Instance              (element as ARDB.Instance)          },
       { typeof(ARDB.ProjectLocation),         (element)=> new ProjectLocation       (element as ARDB.ProjectLocation)   },
@@ -206,6 +207,16 @@ namespace RhinoInside.Revit.GH.Types
         if (StructuralBrace.IsValidElement(familyInstance)) return new StructuralBrace(familyInstance);
         if (StructuralColumn.IsValidElement(familyInstance)) return new StructuralColumn(familyInstance);
         if (Panel.IsValidElement(element)) return new Panel(familyInstance);
+      }
+
+      if (element is ARDB.View view)
+      {
+        switch (view.ViewType)
+        {
+          case ARDB.ViewType.FloorPlan:   return new FloorPlan(view as ARDB.ViewPlan);
+          case ARDB.ViewType.CeilingPlan: return new CeilingPlan(view as ARDB.ViewPlan);
+          case ARDB.ViewType.AreaPlan:    return new AreaPlan(view as ARDB.ViewPlan);
+        }
       }
 
       // By type

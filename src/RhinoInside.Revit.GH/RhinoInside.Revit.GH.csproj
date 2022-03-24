@@ -219,6 +219,9 @@
     <Compile Include="Components\ZuiComponent.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Optional.cs" />
+    <Compile Include="Parameters\Views\View.cs" />
+    <Compile Include="Parameters\Views\ViewPlan.cs" />
+    <Compile Include="Parameters\Views\ViewSheet.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -301,8 +304,6 @@
     <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Parameters\ThermalAsset.cs" />
     <Compile Include="Parameters\ValueList.cs" />
-    <Compile Include="Parameters\View.cs" />
-    <Compile Include="Parameters\ViewSheet.cs" />
     <Compile Include="Parameters\Workset.cs" />
     <Compile Include="Solid.cs" />
     <Compile Include="Types\AppearanceAsset.cs" />
@@ -358,11 +359,12 @@
     <Compile Include="Types\StructuralAsset.cs" />
     <Compile Include="Types\TextureData.cs" />
     <Compile Include="Types\ThermalAsset.cs" />
-    <Compile Include="Types\View.cs" />
-    <Compile Include="Types\ViewSheet.cs" />
     <Compile Include="Types\CurtainGridLine.cs" />
     <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\Mullion.cs" />
+    <Compile Include="Types\Views\View.cs" />
+    <Compile Include="Types\Views\ViewPlan.cs" />
+    <Compile Include="Types\Views\ViewSheet.cs" />
     <Compile Include="Types\Wall.cs" />
     <Compile Include="Types\Workset.cs" />
   </ItemGroup>
