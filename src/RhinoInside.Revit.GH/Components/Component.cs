@@ -212,7 +212,36 @@ namespace RhinoInside.Revit.GH.Components
         case Exceptions.RuntimeArgumentException argument:
           if (!AbortOnContinuableException)
           {
-            AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, argument.Value as Rhino.Geometry.GeometryBase);
+            switch (argument.Value)
+            {
+              case ARDB.Element element:
+              {
+                if (Types.GraphicalElement.FromElement(element) is Types.GraphicalElement ge)
+                {
+                  var inch = Revit.ModelUnits / 12.0;
+                  var box = ge.Box; box.Inflate(inch, inch, inch);
+                  var mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
+                  AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
+                }
+                break;
+              }
+              case Types.GraphicalElement graphicalElement:
+              {
+                var inch = Revit.ModelUnits / 12.0;
+                var box = graphicalElement.Box; box.Inflate(inch, inch, inch);
+                var mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
+                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
+                break;
+              }
+              case Rhino.Geometry.GeometryBase geometry:
+                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, geometry);
+                break;
+
+              default:
+                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, default);
+                break;
+            }
+
             return true;
           }
 
@@ -372,6 +401,9 @@ namespace RhinoInside.Revit.GH.Components
                 break;
               case Rhino.Geometry.Brep brep:
                 args.Display.DrawBrepWires(brep, Color.Orange, curveThickness);
+                break;
+              case Rhino.Geometry.Mesh mesh:
+                args.Display.DrawMeshWires(mesh, Color.Orange, curveThickness);
                 break;
             }
           }
