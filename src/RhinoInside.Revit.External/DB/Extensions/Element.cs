@@ -533,6 +533,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             Where(x => x?.Definition is object).
             Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None), default(ParameterEqualityComparer)).
             OrderBy(x => x.Id.IntegerValue);
+
         case ParameterClass.BuiltIn:
           return BuiltInParameterExtension.BuiltInParameters.
             Select
@@ -544,16 +545,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
               }
             ).
             Where(x => x?.Definition is object);
+
         case ParameterClass.Project:
           return element.Parameters.Cast<Parameter>().
             Where(p => !p.IsShared && p.Id.IntegerValue > 0).
             Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() == 1).
             OrderBy(x => x.Id.IntegerValue);
+
         case ParameterClass.Family:
           return element.Parameters.Cast<Parameter>().
             Where(p => !p.IsShared && p.Id.IntegerValue > 0).
             Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() == 0).
             OrderBy(x => x.Id.IntegerValue);
+
         case ParameterClass.Shared:
           return element.Parameters.Cast<Parameter>().
             Where(p => p.IsShared).
@@ -618,14 +622,25 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static Parameter GetParameter(this Element element, string name, ParameterClass set)
     {
-      var parameters = element.GetParameters(name, set);
-      return parameters.FirstOrDefault(x => !x.IsReadOnly) ?? parameters.FirstOrDefault();
+      return element.GetParameters(name, set).
+        OrderByDescending(x => x.Id.IsBuiltInId()). // Ordered by IsBuiltInId to give priority to built-in parameters.
+        ThenBy(x => x.IsReadOnly).                  // Then by IsReadOnly to give priority non read-only parameters.
+        ThenByDescending                            // Then by storage-type to give priority ElementId parameters over String ones.
+        (
+          x => x.Id.TryGetBuiltInParameter(out var bip) ?
+          x.Element.Document.get_TypeOfStorage(bip) :
+          StorageType.None
+        ).
+        FirstOrDefault();
     }
 
     public static Parameter GetParameter(this Element element, string name, Schemas.DataType type, ParameterClass set)
     {
-      var parameters = element.GetParameters(name, set).Where(x => (Schemas.DataType) x.Definition.GetDataType() == type);
-      return parameters.FirstOrDefault(x => !x.IsReadOnly) ?? parameters.FirstOrDefault();
+      return element.GetParameters(name, set).
+        Where(x => (Schemas.DataType) x.Definition.GetDataType() == type).
+        OrderByDescending(x => x.Id.IsBuiltInId()). // Ordered by IsBuiltInId to give priority to built-in parameters.
+        ThenBy(x => x.IsReadOnly).                  // Then by IsReadOnly to give priority non read-only parameters.
+        FirstOrDefault();
     }
 
     public static Parameter GetParameter(this Element element, string name, Schemas.DataType type, ParameterScope scope, ParameterClass set)
