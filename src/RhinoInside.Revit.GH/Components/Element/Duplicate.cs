@@ -159,7 +159,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 if
                 (
                   // element.CanBeRenamed() && // More precise but slow.
-                  ElementExtension.GetNomenParameter(element.GetType()) != ARDB.BuiltInParameter.INVALID &&
+                  ElementExtension.GetNomenParameter(element.Value.GetType()) != ARDB.BuiltInParameter.INVALID &&
                   element.Nomen == copiedElement.source.Value.name
                 )
                 {

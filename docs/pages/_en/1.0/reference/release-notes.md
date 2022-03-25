@@ -5,28 +5,25 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.6 RC3" version="v1.6" pre_release=true time="03/22/2022" %}
+{% include ltr/release-header.html title="v1.6 RC2" version="v1.6.8119.11754" pre_release=true time="03/22/2022" %}
 
 - Fixed a problem on `ARDB.XYZ.PerpVector` when tolerance is too small.
-- Now 'Convert' context menu is a sorted by parameter category.
-- Added casting from 'Element' to 'Workset', 'Phase', 'Level' and 'Type'.
-- Now all 'Add' components create elements on the last document Phase.
-- Now all 'Add' components create elements with 'Enable Analytical Model' off by default.
-- Fix for 'Add Beam' now it always returns a non joined element.
-- Fixed 'Reset Parameter' component on shared-parameters.
-- Fix for 'Element Curve' when managing structural elements.
-- Fixed 'Element Curve' when workiong with structural beams and structural columns.
-
-{% include ltr/release-header.html title="v1.6 RC2" version="v1.6" pre_release=true time="03/15/2022" %}
-
+- Now *Convert* context menu is a sorted by parameter category.
+- Added casting from {% include ltr/comp.html uuid='f3ea4a9c-' %} to {% include ltr/comp.html uuid='5c073f7d-' %}, {% include ltr/comp.html uuid='353ffb47-' %}, {% include ltr/comp.html uuid='3238f8bc-' %} and {% include ltr/comp.html uuid='97dd546d-' %}.
+- Now all *Add* components create elements on the last document Phase.
+- Now all *Add* components create elements with **Enable Analytical Model** off by default.
+- Fix for {% include ltr/comp.html uuid='26411aa6-' %} now it always returns a non joined element.
+- Fixed {% include ltr/comp.html uuid='2c374e6d-' %} component on shared-parameters.
+- Fix for {% include ltr/comp.html uuid='dcc82eca-' %} when managing structural elements.
+- Fixed {% include ltr/comp.html uuid='dcc82eca-' %} when workiong with structural beams and structural columns.
 - Now `HostObject.Location` returns a plane centered on the profile curves.
 - Now `Opening.Location` returns a plane centered on the profile curves.
 - Implemented casting `SpatialElement` to `Surface`
-- Added `Types.Railing`. This enables 'Element Curve' component on railings.
-- Implemented 'Type' output on 'Parameter Identity' for built-in parameters.
+- Added `Types.Railing`. This enables {% include ltr/comp.html uuid='dcc82eca-' %} component on railings.
+- Implemented *Type* output on {% include ltr/comp.html uuid='3bde5890-' %} for built-in parameters.
 - Now Grasshopper preview status is persistent between sessions.
 
-{% include ltr/release-header.html title="v1.6 RC1" version="v1.6.8102.16819" pre_release=true time="03/08/2022" %}
+{% include ltr/release-header.html title="v1.6 RC1" version="v1.6.8102.16819" pre_release=true time="08/03/2022" %}
 
 - Added {% include ltr/comp.html uuid='18d46e90-' %} parameter
 - Added {% include ltr/comp.html uuid='657811b7-' %} component
