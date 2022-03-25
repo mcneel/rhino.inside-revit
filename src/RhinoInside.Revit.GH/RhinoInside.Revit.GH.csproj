@@ -220,6 +220,7 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="Optional.cs" />
     <Compile Include="Parameters\Views\View.cs" />
+    <Compile Include="Parameters\Views\View3D.cs" />
     <Compile Include="Parameters\Views\ViewPlan.cs" />
     <Compile Include="Parameters\Views\ViewSheet.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -363,6 +364,7 @@
     <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\Mullion.cs" />
     <Compile Include="Types\Views\View.cs" />
+    <Compile Include="Types\Views\View3D.cs" />
     <Compile Include="Types\Views\ViewPlan.cs" />
     <Compile Include="Types\Views\ViewSheet.cs" />
     <Compile Include="Types\Wall.cs" />

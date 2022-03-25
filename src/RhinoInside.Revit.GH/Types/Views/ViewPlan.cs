@@ -46,4 +46,15 @@ namespace RhinoInside.Revit.GH.Types
     public AreaPlan(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public AreaPlan(ARDB.ViewPlan view) : base(view) { }
   }
+
+  [Kernel.Attributes.Name("Structural Plan")]
+  public class StructuralPlan : ViewPlan
+  {
+    protected override Type ValueType => typeof(ARDB.ViewPlan);
+    public new ARDB.ViewPlan Value => base.Value as ARDB.ViewPlan;
+
+    public StructuralPlan() { }
+    public StructuralPlan(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public StructuralPlan(ARDB.ViewPlan view) : base(view) { }
+  }
 }

@@ -7,10 +7,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Sheet")]
-  public interface IGH_Sheet : IGH_View { }
-
-  [Kernel.Attributes.Name("Sheet")]
-  public class ViewSheet : View, IGH_Sheet
+  public class ViewSheet : View
   {
     protected override Type ValueType => typeof(ARDB.ViewSheet);
     public static explicit operator ARDB.ViewSheet(ViewSheet value) => value?.Value;
