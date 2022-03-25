@@ -249,7 +249,7 @@ namespace RhinoInside.Revit.External.DB
     public static ElementFilter ElementTypeFilter(IList<ElementType> elementTypes, bool inverted = false)
     {
       if (elementTypes.Count == 0) return Empty;
-      if (elementTypes.Count == 1) return ElementTypeFilter(elementTypes[0]);
+      if (elementTypes.Count == 1) return ElementTypeFilter(elementTypes[0], inverted);
 
       if (inverted)
       {
