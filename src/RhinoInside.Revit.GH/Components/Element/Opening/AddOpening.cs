@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.Opening
+namespace RhinoInside.Revit.GH.Components.Openings
 {
+  using System.Linq;
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+  using External.DB.Extensions;
+
   public abstract class AddOpening : ElementTrackerComponent
   {
-    protected AddOpening(string name, string nickname, string description, string category, string subCategory) : base(name, nickname, description, category, subCategory)
-    {
-    }
+    protected AddOpening(string name, string nickname, string description, string category, string subCategory) :
+      base(name, nickname, description, category, subCategory)
+    { }
 
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
@@ -33,8 +35,8 @@ namespace RhinoInside.Revit.GH.Components.Element.Opening
       (
         new Parameters.HostObject()
         {
-          Name = "Host Element",
-          NickName = "HE",
+          Name = "Host",
+          NickName = "H",
           Description = "Host to add the opening",
         }
       ),
@@ -76,15 +78,24 @@ namespace RhinoInside.Revit.GH.Components.Element.Opening
         doc.Value, _Opening_, (opening) =>
         {
           // Input
-          if (!Params.GetData(DA, "Host Element", out ARDB.HostObject host)) return null;
+          if (!Params.GetData(DA, "Host", out ARDB.HostObject host)) return null;
           if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary)) return null;
 
-          if (IsPerpendicular == true && host is ARDB.RoofBase)
-            throw new Exceptions.RuntimeArgumentException("Host Element", "Host element should be a floor or a ceiling", host);
+          switch (host)
+          {
+            case ARDB.CeilingAndFloor _:
+              if (IsPerpendicular == false && host.get_Parameter(ARDB.BuiltInParameter.ROOF_SLOPE).HasValue)
+                throw new Exceptions.RuntimeArgumentException("Host", "Host element should be an horizontal floor or a ceiling", host);
+              break;
 
-          if (IsPerpendicular == false && (host is ARDB.Floor || host is ARDB.Ceiling))
-            if (host.get_Parameter(ARDB.BuiltInParameter.ROOF_SLOPE).HasValue.Equals(true))
-              throw new Exceptions.RuntimeArgumentException("Host Element", "Host element should be an horizontal floor or a ceiling", host);
+            case ARDB.RoofBase _:
+              if (IsPerpendicular == true)
+                throw new Exceptions.RuntimeArgumentException("Host", "Host element should be a floor or a ceiling", host);
+              break;
+
+            default:
+              throw new Exceptions.RuntimeArgumentException("Host", "Host element should be a floor, ceiling or roof element", host);
+          }
 
           var tol = GeometryObjectTolerance.Model;
           foreach (var loop in boundary)
@@ -185,27 +196,20 @@ namespace RhinoInside.Revit.GH.Components.Element.Opening
 
     ARDB.Opening Create(ARDB.Document doc, ARDB.HostObject hostElement, IList<Curve> boundary)
     {
-      return doc.Create.NewOpening(hostElement, boundary.ToCurveArray(), this.IsPerpendicular);
+      return doc.Create.NewOpening(hostElement, boundary.ToCurveArray(), IsPerpendicular);
     }
 
     ARDB.Opening Reconstruct(ARDB.Opening opening, ARDB.Document doc, ARDB.HostObject host, IList<Curve> boundary)
     {
-      
       if (IsPerpendicular == false)
       {
-        List<Curve> projectedBoundaries = new List<Curve>();
         if (host.GetSketch() is ARDB.Sketch sketch)
         {
-          foreach (var loop in boundary)
-          {
-            var hostPlane = sketch.SketchPlane.GetPlane().ToPlane();
-            var profile = Curve.ProjectToPlane(loop, hostPlane);
-            projectedBoundaries.Add(profile);
-          }
-        }
-        boundary = projectedBoundaries;
-      }
+          var hostPlane = sketch.SketchPlane.GetPlane().ToPlane();
 
+          boundary = boundary.Select(x => Curve.ProjectToPlane(x, hostPlane)).ToArray();
+        }
+      }
 
       if (!Reuse(opening, host, boundary))
         opening = Create(doc, host, boundary);
