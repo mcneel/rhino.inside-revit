@@ -81,12 +81,8 @@ namespace RhinoInside.Revit.GH.Types
     IGH_GeometricGoo IGH_GeometricGoo.DuplicateGeometry() => (IGH_GeometricGoo) MemberwiseClone();
     public virtual BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is ARDB.Element)
-      {
-        var box = Box;
-        if (box.Transform(xform))
-          return box.BoundingBox;
-      }
+      if (Value is ARDB.Element element)
+        return element.GetBoundingBoxXYZ().ToBoundingBox().GetBoundingBox(xform);
 
       return NaN.BoundingBox;
     }
@@ -312,9 +308,7 @@ namespace RhinoInside.Revit.GH.Types
     /// <summary>
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
     /// </summary>
-    public virtual BoundingBox BoundingBox => Value is ARDB.Element element ?
-      element.GetBoundingBoxXYZ().ToBoundingBox() :
-      NaN.BoundingBox;
+    public BoundingBox BoundingBox => GetBoundingBox(Transform.Identity);
 
     /// <summary>
     /// Box aligned to <see cref="Location"/>
@@ -329,9 +323,8 @@ namespace RhinoInside.Revit.GH.Types
           if (!Location.IsValid)
             return element.GetBoundingBoxXYZ().ToBox();
 
-          var xform = Transform.ChangeBasis(Plane.WorldXY, plane);
-          var bbox = BoundingBox;
-          if (bbox.Transform(xform))
+          var bbox = GetBoundingBox(Transform.ChangeBasis(Plane.WorldXY, plane));
+          if (bbox.IsValid)
           {
             return new Box
             (

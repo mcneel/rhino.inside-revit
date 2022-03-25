@@ -131,8 +131,6 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public override BoundingBox BoundingBox => NaN.BoundingBox;
-
     public override Plane Location
     {
       get
@@ -207,25 +205,6 @@ namespace RhinoInside.Revit.GH.Types
 
     public Grid() { }
     public Grid(ARDB.Grid grid) : base(grid) { }
-
-    public override BoundingBox GetBoundingBox(Transform xform)
-    {
-      if (Value is ARDB.Grid grid)
-      {
-        var bbox = grid.GetExtents().ToBoundingBox();
-        var curve = grid.Curve.ToCurve();
-
-        var curveA = curve.DuplicateCurve(); curveA.Translate(0.0, 0.0, bbox.Min.Z - curve.PointAtStart.Z);
-        var curveB = curve.DuplicateCurve(); curveB.Translate(0.0, 0.0, bbox.Max.Z - curve.PointAtStart.Z);
-
-        bbox = BoundingBox.Empty;
-        bbox.Union(curveA.GetBoundingBox(xform));
-        bbox.Union(curveB.GetBoundingBox(xform));
-        return bbox;
-      }
-
-      return NaN.BoundingBox;
-    }
 
     #region IGH_PreviewData
     IList<Point3d> BoundaryPoints
@@ -371,20 +350,24 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region Properties
-    public override BoundingBox BoundingBox
+    #region Location
+    public override BoundingBox GetBoundingBox(Transform xform)
     {
-      get
+      if (Value is ARDB.Grid grid)
       {
-        if (Value is ARDB.Grid grid)
-        {
-          var bbox = grid.GetExtents().ToBoundingBox();
-          bbox.Union(Curve.GetBoundingBox(true));
-          return bbox;
-        }
+        var bbox = grid.GetExtents().ToBoundingBox();
+        var curve = grid.Curve.ToCurve();
 
-        return NaN.BoundingBox;
+        var curveA = curve.DuplicateCurve(); curveA.Translate(0.0, 0.0, bbox.Min.Z - curve.PointAtStart.Z);
+        var curveB = curve.DuplicateCurve(); curveB.Translate(0.0, 0.0, bbox.Max.Z - curve.PointAtStart.Z);
+
+        bbox = BoundingBox.Empty;
+        bbox.Union(curveA.GetBoundingBox(xform));
+        bbox.Union(curveB.GetBoundingBox(xform));
+        return bbox;
       }
+
+      return NaN.BoundingBox;
     }
 
     public override Plane Location
@@ -452,24 +435,6 @@ namespace RhinoInside.Revit.GH.Types
     public ReferencePlane() { }
     public ReferencePlane(ARDB.ReferencePlane value) : base(value) { }
 
-    public override BoundingBox GetBoundingBox(Transform xform)
-    {
-      if (Value is ARDB.ReferencePlane referencePlane)
-      {
-        return new BoundingBox
-        (
-          new Point3d[]
-          {
-              referencePlane.FreeEnd.ToPoint3d(),
-              referencePlane.BubbleEnd.ToPoint3d()
-          },
-          xform
-        );
-      }
-
-      return base.GetBoundingBox(xform);
-    }
-
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
@@ -532,25 +497,23 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region Properties
-    public override BoundingBox BoundingBox
+    #region Location
+    public override BoundingBox GetBoundingBox(Transform xform)
     {
-      get
+      if (Value is ARDB.ReferencePlane referencePlane)
       {
-        if (Value is ARDB.ReferencePlane referencePlane)
-        {
-          return new BoundingBox
-          (
-            new Point3d[]
-            {
+        return new BoundingBox
+        (
+          new Point3d[]
+          {
               referencePlane.FreeEnd.ToPoint3d(),
               referencePlane.BubbleEnd.ToPoint3d()
-            }
-          );
-        }
-
-        return NaN.BoundingBox;
+          },
+          xform
+        );
       }
+
+      return NaN.BoundingBox;
     }
 
     public override Plane Location
@@ -580,24 +543,6 @@ namespace RhinoInside.Revit.GH.Types
 
     public ReferencePoint() { }
     public ReferencePoint(ARDB.ReferencePoint value) : base(value) { }
-
-    public override BoundingBox GetBoundingBox(Transform xform)
-    {
-      if (Value is ARDB.ReferencePoint referencePoint)
-      {
-        return new BoundingBox
-        (
-          new Point3d[]
-          {
-              referencePoint.Position.ToPoint3d(),
-              referencePoint.Position.ToPoint3d()
-          },
-          xform
-        );
-      }
-
-      return base.GetBoundingBox(xform);
-    }
 
     #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
@@ -653,25 +598,23 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region Properties
-    public override BoundingBox BoundingBox
+    #region Location
+    public override BoundingBox GetBoundingBox(Transform xform)
     {
-      get
+      if (Value is ARDB.ReferencePoint referencePoint)
       {
-        if (Value is ARDB.ReferencePoint referencePoint)
-        {
-          return new BoundingBox
-          (
-            new Point3d[]
-            {
+        return new BoundingBox
+        (
+          new Point3d[]
+          {
               referencePoint.Position.ToPoint3d(),
               referencePoint.Position.ToPoint3d()
-            }
-          );
-        }
-
-        return NaN.BoundingBox;
+          },
+          xform
+        );
       }
+
+      return NaN.BoundingBox;
     }
 
     public override Plane Location

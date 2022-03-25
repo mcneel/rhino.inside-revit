@@ -127,17 +127,20 @@ namespace RhinoInside.Revit.GH.Types
                 var north = surface.IsoCurve(0, v.T1).Trim(u);
                 var west = surface.IsoCurve(1, u.T0).Trim(v);
 
-                north.Reverse();
-                west.Reverse();
+                if (south is object && east is object && north is object && west is object)
+                {
+                  north.Reverse();
+                  west.Reverse();
 
-                var curve = new PolyCurve();
-                curve.AppendSegment(south);
-                curve.AppendSegment(east);
-                curve.AppendSegment(north);
-                curve.AppendSegment(west);
-                curve.MakeClosed(GeometryObjectTolerance.Model.VertexTolerance);
+                  var curve = new PolyCurve();
+                  curve.AppendSegment(south);
+                  curve.AppendSegment(east);
+                  curve.AppendSegment(north);
+                  curve.AppendSegment(west);
+                  curve.MakeClosed(GeometryObjectTolerance.Model.VertexTolerance);
 
-                return new Curve[] { curve };
+                  return new Curve[] { curve };
+                }
               }
             }
           }

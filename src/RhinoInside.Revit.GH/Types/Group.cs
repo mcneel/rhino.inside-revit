@@ -30,6 +30,22 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    #region Location
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      if (Value is ARDB.Group group)
+      {
+        var bbox = BoundingBox.Empty;
+
+        foreach (var element in group.GetMemberIds().Select(x => GraphicalElement.FromElementId(group.Document, x)).OfType<GraphicalElement>())
+          bbox.Union(element.GetBoundingBox(xform));
+
+        return bbox;
+      }
+
+      return NaN.BoundingBox;
+    }
+
     public override Plane Location
     {
       get
@@ -80,17 +96,6 @@ namespace RhinoInside.Revit.GH.Types
 
         return base.Location;
       }
-    }
-
-    #region IGH_PreviewData
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
-    {
-      var bbox = ClippingBox;
-      if (!bbox.IsValid)
-        return;
-
-      foreach (var edge in bbox.GetEdges() ?? Enumerable.Empty<Line>())
-        args.Pipeline.DrawPatternedLine(edge.From, edge.To, args.Color, 0x00003333, args.Thickness);
     }
     #endregion
   }

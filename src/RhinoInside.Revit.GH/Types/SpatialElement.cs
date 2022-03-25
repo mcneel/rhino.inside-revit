@@ -19,6 +19,10 @@ namespace RhinoInside.Revit.GH.Types
     public override string DisplayName => Value is object ? $"{Name} - {Number}" : base.DisplayName;
 
     #region Location
+    public override Plane Location => Value?.Location is ARDB.LocationPoint point ?
+        new Plane(point.Point.ToPoint3d(), Vector3d.XAxis, Vector3d.YAxis) :
+        NaN.Plane;
+
     public override Level Level => Level.FromElement(Value?.Level) as Level;
 
     public Curve[] Boundaries

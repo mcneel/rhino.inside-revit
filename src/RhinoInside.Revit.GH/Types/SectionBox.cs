@@ -39,25 +39,22 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region Properties
-    public override BoundingBox BoundingBox
+    public override BoundingBox GetBoundingBox(Transform xform)
     {
-      get
+      if (Value is ARDB_SectionBox box)
       {
-        if (Value is ARDB_SectionBox box)
+        if (box.GetFirstDependent<ARDB.View>() is ARDB.View3D view)
         {
-          if (box.GetFirstDependent<ARDB.View>() is ARDB.View3D view)
-          {
-            var sectionBox = view.GetSectionBox();
-            sectionBox.Enabled = true;
-            return sectionBox.ToBoundingBox();
-          }
+          var sectionBox = view.GetSectionBox();
+          sectionBox.Enabled = true;
+          return sectionBox.ToBoundingBox().GetBoundingBox(xform);
         }
-
-        return NaN.BoundingBox;
       }
+
+      return NaN.BoundingBox;
     }
 
+    #region Properties
     public override Box Box
     {
       get

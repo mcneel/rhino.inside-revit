@@ -17,22 +17,19 @@ namespace RhinoInside.Revit.GH.Types
     public AssemblyInstance(ARDB.AssemblyInstance assembly) : base(assembly) { }
 
     #region Location
-    public override BoundingBox BoundingBox
+    public override BoundingBox GetBoundingBox(Transform xform)
     {
-      get
+      if (Value is ARDB.AssemblyInstance instance)
       {
-        if (Value is ARDB.AssemblyInstance instance)
-        {
-          var bbox = BoundingBox.Empty;
+        var bbox = BoundingBox.Empty;
 
-          foreach (var element in instance.GetMemberIds().Select(instance.Document.GetElement))
-            bbox.Union(element.get_BoundingBox(default).ToBoundingBox());
+        foreach (var element in instance.GetMemberIds().Select(x => GraphicalElement.FromElementId(instance.Document, x)).OfType<GraphicalElement>())
+          bbox.Union(element.GetBoundingBox(xform));
 
-          return bbox;
-        }
-
-        return NaN.BoundingBox;
+        return bbox;
       }
+
+      return NaN.BoundingBox;
     }
 
     public override Plane Location

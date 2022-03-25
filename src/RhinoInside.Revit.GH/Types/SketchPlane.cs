@@ -44,8 +44,6 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Location
-    public override BoundingBox BoundingBox => NaN.BoundingBox;
-
     public override Plane Location => Value?.GetPlane().ToPlane() ?? base.Location;
     #endregion
   }

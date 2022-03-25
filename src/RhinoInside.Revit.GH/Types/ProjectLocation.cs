@@ -21,19 +21,26 @@ namespace RhinoInside.Revit.GH.Types
     public ProjectLocation() { }
     public ProjectLocation(ARDB.ProjectLocation instance) : base(instance) { }
 
-    #region IGH_PreviewData
-    public override BoundingBox BoundingBox
+    public override BoundingBox GetBoundingBox(Transform xform)
     {
-      get
+      var location = Location;
+      if (location.IsValid)
       {
-        var location = Location;
-        if (location.IsValid)
-          return new BoundingBox(location.Origin, location.Origin);
-
-        return NaN.BoundingBox;
+        return new BoundingBox
+        (
+          new Point3d[]
+          {
+              location.Origin,
+              location.Origin
+          },
+          xform
+        );
       }
+
+      return NaN.BoundingBox;
     }
 
+    #region IGH_PreviewData
     public override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       var location = Location;
