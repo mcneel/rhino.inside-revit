@@ -180,7 +180,7 @@ namespace RhinoInside.Revit.GH.Parameters
   [ComponentVersion(introduced: "1.5")]
   public class ViewFamilyType : ElementType<Types.ViewFamilyType, ARDB.ViewFamilyType>
   {
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
     public override Guid ComponentGuid => new Guid("972B6FBE-B3E4-4576-B86D-D2BA380A4757");
 
     public ViewFamilyType() : base("View Type", "ViewType", "Contains a collection of Revit view types", "Params", "Revit") { }

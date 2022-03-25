@@ -694,6 +694,9 @@
   <data name="View" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\params\view.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="ViewFamilyType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\params\ViewFamilyType.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="View3DByPlane" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\view3dbyplane.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
