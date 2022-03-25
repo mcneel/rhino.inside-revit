@@ -149,6 +149,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.ViewFamilyType),          (element)=> new ViewFamilyType        (element as ARDB.ViewFamilyType)    },
       { typeof(ARDB.View),                    (element)=> new View                  (element as ARDB.View)              },
       { typeof(ARDB.ViewSheet),               (element)=> new ViewSheet             (element as ARDB.ViewSheet)         },
+      { typeof(ARDB.View3D),                  (element)=> new View3D                (element as ARDB.View3D)            },
       { typeof(ARDB.ViewPlan),                (element)=> new ViewPlan              (element as ARDB.ViewPlan)          },
 
       { typeof(ARDB.Instance),                (element)=> new Instance              (element as ARDB.Instance)          },
@@ -213,9 +214,10 @@ namespace RhinoInside.Revit.GH.Types
       {
         switch (view.ViewType)
         {
-          case ARDB.ViewType.FloorPlan:   return new FloorPlan(view as ARDB.ViewPlan);
-          case ARDB.ViewType.CeilingPlan: return new CeilingPlan(view as ARDB.ViewPlan);
-          case ARDB.ViewType.AreaPlan:    return new AreaPlan(view as ARDB.ViewPlan);
+          case ARDB.ViewType.FloorPlan:       return new FloorPlan(view as ARDB.ViewPlan);
+          case ARDB.ViewType.CeilingPlan:     return new CeilingPlan(view as ARDB.ViewPlan);
+          case ARDB.ViewType.AreaPlan:        return new AreaPlan(view as ARDB.ViewPlan);
+          case ARDB.ViewType.EngineeringPlan: return new StructuralPlan(view as ARDB.ViewPlan);
         }
       }
 
