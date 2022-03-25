@@ -110,6 +110,8 @@ namespace RhinoInside.Revit.GH.Components.Openings
     {
       if (opening is null) return false;
 
+      if (!opening.Host.IsEquivalent(wall)) return false;
+
       if (opening.IsRectBoundary)
       {
         var minPt = pointA.Z < pointB.Z ? pointA : pointB;
