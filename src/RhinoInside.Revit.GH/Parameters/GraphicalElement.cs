@@ -484,33 +484,6 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    protected EventHandler Menu_PromptNew(Autodesk.Revit.UI.RevitCommandId commandId) => async (sender, args) =>
-    {
-      var activeApp = Revit.ActiveUIApplication;
-      using (var scope = new External.UI.EditScope(activeApp))
-      {
-        var activeDoc = activeApp.ActiveUIDocument.Document;
-        var changes = await scope.ExecuteCommandAsync(commandId);
-        if (changes.GetSummary(activeDoc, out var added, out var deleted, out var modified) > 0)
-        {
-          RecordPersistentDataEvent("Change data");
-
-          MutableNickName = true;
-          if (Kind == GH_ParamKind.floating)
-          {
-            IconDisplayMode = GH_IconDisplayMode.application;
-            Attributes?.ExpireLayout();
-          }
-
-          PersistentData.Clear();
-          PersistentData.AppendRange(added.Select(x => Types.Element.FromElementId(activeDoc, x)).OfType<T>());
-
-          OnObjectChanged(GH_ObjectEventType.PersistentData);
-          ExpireSolution(true);
-        }
-      }
-    };
-
     private void Menu_HighlightElements(object sender, EventArgs e)
     {
       var uiDocument = Revit.ActiveUIDocument;

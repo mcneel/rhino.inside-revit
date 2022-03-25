@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Autodesk.Revit.UI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using ARDB = Autodesk.Revit.DB;
+using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.ElementTracking
 {
@@ -182,6 +182,33 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
+    protected EventHandler Menu_PromptNew(ARUI.RevitCommandId commandId) => async (sender, args) =>
+    {
+      var activeApp = Revit.ActiveUIApplication;
+      using (var scope = new External.UI.EditScope(activeApp))
+      {
+        var activeDoc = activeApp.ActiveUIDocument.Document;
+        var changes = await scope.ExecuteCommandAsync(commandId);
+        if (changes.GetSummary(activeDoc, out var added, out var deleted, out var modified) > 0)
+        {
+          RecordPersistentDataEvent("Change data");
+
+          MutableNickName = true;
+          if (Kind == GH_ParamKind.floating)
+          {
+            IconDisplayMode = GH_IconDisplayMode.application;
+            Attributes?.ExpireLayout();
+          }
+
+          PersistentData.Clear();
+          PersistentData.AppendRange(added.Select(x => Types.Element.FromElementId(activeDoc, x)).OfType<T>());
+
+          OnObjectChanged(GH_ObjectEventType.PersistentData);
+          ExpireSolution(true);
+        }
+      }
+    };
+
     bool HasTrackedElements => ToElementIds(VolatileData).Any(x => ElementStream.IsElementTracked(x.Value as ARDB.Element));
 
     async Task<(bool Committed, IList<string> Messages)> ReleaseElementsAsync()
@@ -278,7 +305,7 @@ namespace RhinoInside.Revit.GH.Parameters
         }
         catch (Autodesk.Revit.Exceptions.ArgumentException)
         {
-          TaskDialog.Show("Pin elements", $"One or more of the {TypeName} cannot be pinned.");
+          ARUI.TaskDialog.Show("Pin elements", $"One or more of the {TypeName} cannot be pinned.");
         }
       }
     }
@@ -307,7 +334,7 @@ namespace RhinoInside.Revit.GH.Parameters
         }
         catch (Autodesk.Revit.Exceptions.ArgumentException)
         {
-          TaskDialog.Show("Unpin elements", $"One or more of the {TypeName} cannot be unpinned.");
+          ARUI.TaskDialog.Show("Unpin elements", $"One or more of the {TypeName} cannot be unpinned.");
         }
       }
     }
