@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Types
     public ParameterKey(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public ParameterKey(ARDB.ParameterElement element) : base(element) { }
 
-    public ParameterKey(ARDB.Definition value)
+    ParameterKey(ARDB.Definition value)
     {
       name = value.Name;
       dataType = value.GetDataType();
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       guid = value.GUID;
       visible = value.Visible;
-      Description = value.Description;
+      description = value.Description;
       userModifiable = value.UserModifiable;
 #if REVIT_2020
       hideWhenNoValue = value.HideWhenNoValue;
@@ -129,7 +129,19 @@ namespace RhinoInside.Revit.GH.Types
       (name is object && ARDB.NamingUtils.IsValidName(name) || GUID.HasValue);
 
     protected override Type ValueType => typeof(ARDB.ParameterElement);
-    public override object ScriptVariable() => Nomen;
+    public override object ScriptVariable()
+    {
+      if (Id.TryGetBuiltInParameter(out var builtin))
+        return builtin;
+
+      if (IsReferencedData)
+        return Value;
+
+      if (CastTo(out ARDB.ExternalDefinitionCreationOptions external))
+        return external;
+
+      return null;
+    }
 
     public sealed override bool CastFrom(object source)
     {
