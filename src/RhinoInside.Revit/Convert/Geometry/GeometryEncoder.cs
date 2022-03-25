@@ -1274,6 +1274,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       return ARDB.Point.Create(point.Location.ToXYZ(factor));
     }
 
+    /// <summary>
     /// Converts the specified PointCloudItem to an equivalent Revit Point.
     /// </summary>
     /// <param name="value">A value to convert.</param>
@@ -2068,7 +2069,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <returns>Revit mesh that is equivalent to the provided Rhino brep.</returns>
     /// <since>1.0</since>
     public static ARDB.Mesh ToMesh(this Brep brep) =>
-      BrepEncoder.ToMesh(brep, UnitConverter.NoScale);
+      BrepEncoder.ToMesh(brep, ModelScaleFactor);
 
     internal static ARDB.Mesh ToMesh(this Brep brep, double factor) =>
       BrepEncoder.ToMesh(brep, factor);
@@ -2122,7 +2123,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <returns>Revit mesh that is equivalent to the provided Rhino extrusion.</returns>
     /// <since>1.0</since>
     public static ARDB.Mesh ToMesh(this Extrusion extrusion) =>
-      ExtrusionEncoder.ToMesh(extrusion, UnitConverter.NoScale);
+      ExtrusionEncoder.ToMesh(extrusion, ModelScaleFactor);
 
     internal static ARDB.Mesh ToMesh(this Extrusion extrusion, double factor) =>
       ExtrusionEncoder.ToMesh(extrusion, factor);
@@ -2176,7 +2177,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <returns>Revit mesh that is equivalent to the provided Rhino subd.</returns>
     /// <since>1.0</since>
     public static ARDB.Mesh ToMesh(this SubD subd) =>
-      SubDEncoder.ToMesh(subd, UnitConverter.NoScale);
+      SubDEncoder.ToMesh(subd, ModelScaleFactor);
 
     internal static ARDB.Mesh ToMesh(this SubD subd, double factor) =>
       SubDEncoder.ToMesh(subd, factor);
