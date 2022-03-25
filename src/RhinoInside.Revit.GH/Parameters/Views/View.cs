@@ -21,6 +21,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override T InstantiateT() => Activator.CreateInstance<T>();
 
+    protected virtual ARDB.ViewFamily ViewFamily => ARDB.ViewFamily.Invalid;
+
     #region UI
     protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
     (
@@ -46,6 +48,27 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     protected virtual void Menu_AppendPromptNew(ToolStripDropDown menu) { }
+
+    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
+    {
+      if (SourceCount != 0) return;
+      if (Revit.ActiveUIDocument?.Document is null) return;
+
+      Menu_AppendPromptNew(menu);
+
+      var listBox = new ListBox
+      {
+        Sorted = true,
+        BorderStyle = BorderStyle.FixedSingle,
+        Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+      };
+      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+
+      RefreshViewsList(listBox, ViewFamily);
+
+      Menu_AppendCustomItem(menu, listBox);
+    }
 
     protected void RefreshViewsList(ListBox listBox, ARDB.ViewFamily viewFamily, string displayMember = nameof(Types.View.Nomen))
     {

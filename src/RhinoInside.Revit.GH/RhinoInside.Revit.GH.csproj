@@ -222,6 +222,7 @@
     <Compile Include="Parameters\Views\View.cs" />
     <Compile Include="Parameters\Views\View3D.cs" />
     <Compile Include="Parameters\Views\ViewPlan.cs" />
+    <Compile Include="Parameters\Views\ViewSection.cs" />
     <Compile Include="Parameters\Views\ViewSheet.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -366,6 +367,7 @@
     <Compile Include="Types\Views\View.cs" />
     <Compile Include="Types\Views\View3D.cs" />
     <Compile Include="Types\Views\ViewPlan.cs" />
+    <Compile Include="Types\Views\ViewSection.cs" />
     <Compile Include="Types\Views\ViewSheet.cs" />
     <Compile Include="Types\Wall.cs" />
     <Compile Include="Types\Workset.cs" />

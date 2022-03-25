@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
-using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 using ARUI = Autodesk.Revit.UI;
@@ -19,6 +16,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public View3D() : base("3D View", "3D View", "Contains a collection of Revit 3D views", "Params", "Revit") { }
 
     #region UI
+    protected override ARDB.ViewFamily ViewFamily => ARDB.ViewFamily.ThreeDimensional;
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
       base.Menu_AppendActions(menu);
@@ -33,27 +31,6 @@ namespace RhinoInside.Revit.GH.Parameters
           activeApp.CanPostCommand(commandId), false
         );
       }
-    }
-
-    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
-    {
-      if (SourceCount != 0) return;
-      if (Revit.ActiveUIDocument?.Document is null) return;
-
-      Menu_AppendPromptNew(menu);
-
-      var listBox = new ListBox
-      {
-        Sorted = true,
-        BorderStyle = BorderStyle.FixedSingle,
-        Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        Height = (int) (100 * GH_GraphicsUtil.UiScale)
-      };
-      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-
-      RefreshViewsList(listBox, ARDB.ViewFamily.ThreeDimensional);
-
-      Menu_AppendCustomItem(menu, listBox);
     }
     #endregion
   }

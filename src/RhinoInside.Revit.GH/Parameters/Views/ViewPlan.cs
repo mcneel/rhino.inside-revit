@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
-using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 using ARUI = Autodesk.Revit.UI;
@@ -18,6 +15,8 @@ namespace RhinoInside.Revit.GH.Parameters
     public FloorPlan() : base("Floor Plan", "Floor Plan", "Contains a collection of Revit floor plan views", "Params", "Revit") { }
 
     #region UI
+    protected override ARDB.ViewFamily ViewFamily => ARDB.ViewFamily.FloorPlan;
+
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
       var FloorPlanId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.FloorPlan);
@@ -27,27 +26,6 @@ namespace RhinoInside.Revit.GH.Parameters
         Menu_PromptNew(FloorPlanId),
         Revit.ActiveUIApplication.CanPostCommand(FloorPlanId)
       );
-    }
-
-    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
-    {
-      if (SourceCount != 0) return;
-      if (Revit.ActiveUIDocument?.Document is null) return;
-
-      Menu_AppendPromptNew(menu);
-
-      var listBox = new ListBox
-      {
-        Sorted = true,
-        BorderStyle = BorderStyle.FixedSingle,
-        Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        Height = (int) (100 * GH_GraphicsUtil.UiScale)
-      };
-      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-
-      RefreshViewsList(listBox, ARDB.ViewFamily.FloorPlan);
-
-      Menu_AppendCustomItem(menu, listBox);
     }
     #endregion
   }
@@ -61,6 +39,8 @@ namespace RhinoInside.Revit.GH.Parameters
     public CeilingPlan() : base("Ceiling Plan", "Ceiling Plan", "Contains a collection of Revit ceiling plan views", "Params", "Revit") { }
 
     #region UI
+    protected override ARDB.ViewFamily ViewFamily => ARDB.ViewFamily.CeilingPlan;
+
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
       var CeilingPlanId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.ReflectedCeilingPlan);
@@ -70,27 +50,6 @@ namespace RhinoInside.Revit.GH.Parameters
         Menu_PromptNew(CeilingPlanId),
         Revit.ActiveUIApplication.CanPostCommand(CeilingPlanId)
       );
-    }
-
-    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
-    {
-      if (SourceCount != 0) return;
-      if (Revit.ActiveUIDocument?.Document is null) return;
-
-      Menu_AppendPromptNew(menu);
-
-      var listBox = new ListBox
-      {
-        Sorted = true,
-        BorderStyle = BorderStyle.FixedSingle,
-        Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        Height = (int) (100 * GH_GraphicsUtil.UiScale)
-      };
-      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-
-      RefreshViewsList(listBox, ARDB.ViewFamily.CeilingPlan);
-
-      Menu_AppendCustomItem(menu, listBox);
     }
     #endregion
   }
@@ -104,6 +63,8 @@ namespace RhinoInside.Revit.GH.Parameters
     public AreaPlan() : base("Area Plan", "Area Plan", "Contains a collection of Revit area plan views", "Params", "Revit") { }
 
     #region UI
+    protected override ARDB.ViewFamily ViewFamily => ARDB.ViewFamily.AreaPlan;
+
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
       var AreaPlanId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.AreaPlan);
@@ -113,27 +74,6 @@ namespace RhinoInside.Revit.GH.Parameters
         Menu_PromptNew(AreaPlanId),
         Revit.ActiveUIApplication.CanPostCommand(AreaPlanId)
       );
-    }
-
-    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
-    {
-      if (SourceCount != 0) return;
-      if (Revit.ActiveUIDocument?.Document is null) return;
-
-      Menu_AppendPromptNew(menu);
-
-      var listBox = new ListBox
-      {
-        Sorted = true,
-        BorderStyle = BorderStyle.FixedSingle,
-        Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        Height = (int) (100 * GH_GraphicsUtil.UiScale)
-      };
-      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-
-      RefreshViewsList(listBox, ARDB.ViewFamily.AreaPlan);
-
-      Menu_AppendCustomItem(menu, listBox);
     }
     #endregion
   }
@@ -147,6 +87,8 @@ namespace RhinoInside.Revit.GH.Parameters
     public StructuralPlan() : base("Structural Plan", "Structural Plan", "Contains a collection of Revit structural plan views", "Params", "Revit") { }
 
     #region UI
+    protected override ARDB.ViewFamily ViewFamily => ARDB.ViewFamily.StructuralPlan;
+
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
       var StructuralPlanId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.StructuralPlan);
@@ -156,27 +98,6 @@ namespace RhinoInside.Revit.GH.Parameters
         Menu_PromptNew(StructuralPlanId),
         Revit.ActiveUIApplication.CanPostCommand(StructuralPlanId)
       );
-    }
-
-    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
-    {
-      if (SourceCount != 0) return;
-      if (Revit.ActiveUIDocument?.Document is null) return;
-
-      Menu_AppendPromptNew(menu);
-
-      var listBox = new ListBox
-      {
-        Sorted = true,
-        BorderStyle = BorderStyle.FixedSingle,
-        Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        Height = (int) (100 * GH_GraphicsUtil.UiScale)
-      };
-      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
-
-      RefreshViewsList(listBox, ARDB.ViewFamily.StructuralPlan);
-
-      Menu_AppendCustomItem(menu, listBox);
     }
     #endregion
   }

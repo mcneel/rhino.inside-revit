@@ -59,8 +59,17 @@ namespace RhinoInside.Revit.GH.Components.Views
           case ARDB.ViewType.ProjectBrowser:
           case ARDB.ViewType.SystemBrowser:
             continue;
-          case ARDB.ViewType.DrawingSheet: param = new Parameters.ViewSheet(); break;
-          default:                       param = new Parameters.View(); break;
+          case ARDB.ViewType.ThreeD:          param = new Parameters.View3D(); break;
+          case ARDB.ViewType.Walkthrough:     param = new Parameters.View3D(); break;
+          case ARDB.ViewType.FloorPlan:       param = new Parameters.FloorPlan(); break;
+          case ARDB.ViewType.CeilingPlan:     param = new Parameters.CeilingPlan(); break;
+          case ARDB.ViewType.AreaPlan:        param = new Parameters.AreaPlan(); break;
+          case ARDB.ViewType.EngineeringPlan: param = new Parameters.StructuralPlan(); break;
+          case ARDB.ViewType.DrawingSheet:    param = new Parameters.ViewSheet(); break;
+          case ARDB.ViewType.Section:         param = new Parameters.SectionView(); break;
+          case ARDB.ViewType.Elevation:       param = new Parameters.ElevationView(); break;
+          case ARDB.ViewType.Detail:          param = new Parameters.DetailView(); break;
+          default:                            param = new Parameters.View(); break;
         }
 
         param.Name = value.Name;
