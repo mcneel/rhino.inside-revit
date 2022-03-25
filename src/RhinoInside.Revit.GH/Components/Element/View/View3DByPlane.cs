@@ -51,12 +51,12 @@ namespace RhinoInside.Revit.GH.Components.Views
       if (view3D is null)
       {
         var newView = perspective.IsNullOrMissing ?
-        ARDB.View3D.CreatePerspective
+        ARDB.View3D.CreateIsometric
         (
           document,
           type.Value.Id
         ) :
-        ARDB.View3D.CreateIsometric
+        ARDB.View3D.CreatePerspective
         (
           document,
           type.Value.Id
