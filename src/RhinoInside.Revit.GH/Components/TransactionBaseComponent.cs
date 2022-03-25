@@ -325,8 +325,9 @@ namespace RhinoInside.Revit.GH.Components
 
       { typeof(ARDB.Category),                  (typeof(Parameters.Category),         typeof(Types.Category))         },
       { typeof(ARDB.Family),                    (typeof(Parameters.Family),           typeof(Types.Family))           },
-      { typeof(ARDB.View),                      (typeof(Parameters.View),             typeof(Types.View))             },
       { typeof(ARDB.ViewFamilyType),            (typeof(Parameters.ViewFamilyType),   typeof(Types.ViewFamilyType))   },
+      { typeof(ARDB.View),                      (typeof(Parameters.View),             typeof(Types.View))             },
+      { typeof(ARDB.View3D),                    (typeof(Parameters.View3D),           typeof(Types.View3D))           },
       { typeof(ARDB.Group),                     (typeof(Parameters.Group),            typeof(Types.Group))            },
 
       { typeof(ARDB.CurveElement),              (typeof(Parameters.CurveElement),     typeof(Types.CurveElement))     },
