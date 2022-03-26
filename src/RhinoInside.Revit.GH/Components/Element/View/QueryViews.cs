@@ -6,6 +6,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.0", updated: "1.2.1")]
   public class QueryViews : ElementCollectorComponent
   {
@@ -114,7 +116,9 @@ namespace RhinoInside.Revit.GH.Components.Views
           views = views.Where((x) => x.IsAssemblyView == IsAssembly);
 
         if (viewFamily != ARDB.ViewFamily.Invalid)
-          views = views.Where(x => (x.Document.GetElement(x.GetTypeId()) as ARDB.ViewFamilyType)?.ViewFamily == viewFamily);
+          views = views.Where(x => x.GetViewFamily() == viewFamily);
+        else
+          views = views.Where(x => x.GetViewFamily() != viewFamily);
 
         if (name is object)
           views = views.Where(x => x.Name.IsSymbolNameLike(name));

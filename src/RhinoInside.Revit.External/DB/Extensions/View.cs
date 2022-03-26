@@ -6,6 +6,39 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class ViewExtension
   {
+    static ViewFamily ToViewFamily(this ViewType viewType)
+    {
+      switch (viewType)
+      {
+        case ViewType.FloorPlan:          return ViewFamily.FloorPlan;
+        case ViewType.CeilingPlan:        return ViewFamily.CeilingPlan;
+        case ViewType.Elevation:          return ViewFamily.Elevation;
+        case ViewType.ThreeD:             return ViewFamily.ThreeDimensional;
+        case ViewType.Schedule:           return ViewFamily.Schedule;
+        case ViewType.DrawingSheet:       return ViewFamily.Sheet;
+        case ViewType.ProjectBrowser:     return ViewFamily.Invalid;
+        case ViewType.Report:             return ViewFamily.Invalid;
+        case ViewType.DraftingView:       return ViewFamily.Drafting;
+        case ViewType.Legend:             return ViewFamily.Legend;
+        case ViewType.SystemBrowser:      return ViewFamily.Invalid;
+        case ViewType.EngineeringPlan:    return ViewFamily.StructuralPlan;
+        case ViewType.AreaPlan:           return ViewFamily.AreaPlan;
+        case ViewType.Section:            return ViewFamily.Section;
+        case ViewType.Detail:             return ViewFamily.Detail;
+        case ViewType.CostReport:         return ViewFamily.CostReport;
+        case ViewType.LoadsReport:        return ViewFamily.LoadsReport;
+        case ViewType.PresureLossReport:  return ViewFamily.PressureLossReport;
+        case ViewType.ColumnSchedule:     return ViewFamily.GraphicalColumnSchedule;
+        case ViewType.PanelSchedule:      return ViewFamily.PanelSchedule;
+        case ViewType.Walkthrough:        return ViewFamily.Walkthrough;
+        case ViewType.Rendering:          return ViewFamily.ImageView;
+      }
+
+      return ViewFamily.Invalid;
+    }
+
+    public static ViewFamily GetViewFamily(this View view) => view.ViewType.ToViewFamily();
+
     /// <summary>
     /// Checks if the provided <see cref="Autodesk.Revit.DB.ViewType"/> represents a graphical view.
     /// </summary>
