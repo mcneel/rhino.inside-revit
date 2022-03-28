@@ -73,7 +73,7 @@ When working with Shared parameters, you can also pass the parameter UUID to the
 
 ![]({{ "/static/images/guides/revit-params-getfromuuid.png" | prepend: site.baseurl }})
 
-## Updating Parameters
+## Setting Parameter Values
 
 Use the same {% include ltr/comp.html uuid='f568d3e7' %} component to set a parameter value on a Revit element. Keep in mind that some parameters are Read-only and their value can not be overridden.
 
@@ -83,12 +83,26 @@ Notice that the {% include ltr/comp.html uuid='f568d3e7' %} component is only ho
 
 ![]({{ "/static/images/guides/revit-params-setverify.png" | prepend: site.baseurl }})
 
-
 ## Creating Parameters
 
-The components under the *Parameter* panel in Grasshopper, allow you to create new Shared Parameters in Revit.
+The components under the *Parameter* panel in Grasshopper, allow you to create new Parameters in Revit.
 
-{% include ltr/warning_note.html note='Currently Revit API does not support creating project parameters directly.  So project parameters created by Grasshopper are Shared Project Parameters' %}
+The process in creating a few steps process. 
+
+1. A Parameter definition must first be made.
+2. The Parameter then is added to the document
+3. For Project Parameters, additional Category and Group must be set. (Optional)
+4. Then the value of the Parameter may be set on the Element, Type or Global.
+
+Parameter definitions can be created through the {% include ltr/comp.html uuid='134b7171' %} component or be read directly out of a [Shared Parameter File](#Shared_Parameters_File).
+
+Once the definition is created, then the Parameter can be added to the project using the {% include ltr/comp.html uuid='84ab6f3c' %} component. If the scope of the [parameter is Global](#Global_Parameters), then the parameter value can now be set the {% include ltr/comp.html uuid='32e77d86' %} component. [Project Parameters](#Adding_a_Project_parameter) require additional properties to be set before used.
+
+![]({{ "/static/images/guides/param-global-create.png" | prepend: site.baseurl }})
+
+### Adding a Project parameter
+
+Project parameters have addition properties beyond a basic Parameter Definition. Project parameters belong to certain Categories and the values can may vary across elements.
 
 ![]({{ "/static/images/guides/revit-params-definekeycomp.png" | prepend: site.baseurl }})
 
@@ -96,7 +110,9 @@ Create a new parameter by connecting the parameter name to the {% include ltr/co
 
 ![]({{ "/static/images/guides/revit-params-createshared.png" | prepend: site.baseurl }})
 
-Here is how the parameter configuration in Shared Parameters:
+{% include ltr/warning_note.html note='Currently Revit API does not support creating project parameters directly.  So project parameters created by Grasshopper are Shared Project Parameters' %}
+
+Here is the parameter configuration in Shared Parameters:
 
 ![]({{ "/static/images/guides/revit-params-sharedwindow.png" | prepend: site.baseurl }})
 
@@ -115,3 +131,9 @@ Using the {% include ltr/comp.html uuid='7844b410' %} component to read the shar
 Global parameters must be queried from the current project by using the Global scope into the {% include ltr/comp.html uuid='d82d9fc3' %} component. Then get or set the parameter value using the {% include ltr/comp.html uuid='32e77d86' %} component:
 
 ![]({{ "/static/images/guides/param-global.png" | prepend: site.baseurl }})
+
+Add Global parameters to a project thru the stndard [Add Pararameter Process](#creating-parameters).
+
+## Parameter Formula
+
+Use formulas in dimensions and parameters to drive and control parametric content in a model. The {% include ltr/comp.html uuid='21f9f9c6' %} component can be used to create Parameter Formulas using the syntax as covered in the [Valid Formula Syntax and Abbreviations](https://help.autodesk.com/view/RVT/2022/ENU/?guid=GUID-B37EA687-2BDF-4712-9951-2088B2A8E523)
