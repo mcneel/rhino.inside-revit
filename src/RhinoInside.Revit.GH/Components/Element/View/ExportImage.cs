@@ -101,9 +101,9 @@ namespace RhinoInside.Revit.GH.Components.Views
       ),
       ParamDefinition.Create<Param_Interval2D>
       (
-        name: "Crop Extents in View near-plane coordinate system.",
+        name: "Crop Extents",
         nickname: "CE",
-        description:  "Crop extents",
+        description:  "Crop extents in View near-plane coordinate system.",
         optional: true,
         relevance: ParamRelevance.Secondary
       ),
