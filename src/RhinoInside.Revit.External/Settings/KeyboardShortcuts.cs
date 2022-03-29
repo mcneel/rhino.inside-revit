@@ -145,11 +145,15 @@ namespace RhinoInside.Revit.Settings
 
         return shortcutUpdated;
       }
+#if DEBUG
       catch (Exception e)
       {
         e.Data.Add("Attachments", new string[] { keyboardShortcutsPath });
         throw;
       }
+#else
+      catch { return false; }
+#endif
     }
  }
 }
