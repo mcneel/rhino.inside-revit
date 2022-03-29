@@ -151,7 +151,6 @@
     <Compile Include="Components\Element\SpatialElement\AddAreaBoundaryLine.cs" />
     <Compile Include="Components\Element\SpatialElement\AddRoomSeparatorLine.cs" />
     <Compile Include="Components\Element\SpatialElement\AddSpaceSeparatorLine.cs" />
-    <Compile Include="Components\Element\SpatialElement\AnalyseSpatialElement.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBeam.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />

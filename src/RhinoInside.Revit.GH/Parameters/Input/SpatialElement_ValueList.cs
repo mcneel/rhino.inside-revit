@@ -14,14 +14,14 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     {
       Category = "Revit";
       SubCategory = "Input";
-      Name = "Spatial Element";
+      Name = "Spatial Element Categories";
       NickName = "SE";
       Description = "Picker for kind of spatial elements";
 
       ListItems.Clear();
 
-      ListItems.Add(new GH_ValueListItem("Rooms", ((int) ARDB.BuiltInCategory.OST_Rooms).ToString()));
       ListItems.Add(new GH_ValueListItem("Areas", ((int) ARDB.BuiltInCategory.OST_Areas).ToString()));
+      ListItems.Add(new GH_ValueListItem("Rooms", ((int) ARDB.BuiltInCategory.OST_Rooms).ToString()));
       ListItems.Add(new GH_ValueListItem("Spaces", ((int) ARDB.BuiltInCategory.OST_MEPSpaces).ToString()));
     }
   }

@@ -11,6 +11,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.SpatialElement  
 {
+  [ComponentVersion(introduced: "1.7")]
   public class AddAreaBoundaryLine : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("34D68CDC-892B-4525-959D-49C0AC66317E");
@@ -116,6 +117,8 @@ namespace RhinoInside.Revit.GH.Components.SpatialElement
       if (areaBoundary.OwnerViewId != viewPlan.Id) return false;
       var projectedCurve = Curve.ProjectToPlane(curve.ToCurve(), viewPlan.SketchPlane.GetPlane().ToPlane());
       if (!projectedCurve.ToCurve().IsAlmostEqualTo(areaBoundary.GeometryCurve)) return false;
+
+      areaBoundary.SetGeometryCurve(curve, false);
       return true;
     }
 

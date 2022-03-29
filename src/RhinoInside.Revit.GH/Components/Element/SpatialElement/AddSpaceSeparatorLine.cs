@@ -8,6 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.SpatialElement
 {
+  [ComponentVersion(introduced: "1.7")]
   public class AddSpaceSeparatorLine : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("DEA31165-A184-466F-9119-D726472B226E");
@@ -107,12 +108,14 @@ namespace RhinoInside.Revit.GH.Components.SpatialElement
       );
     }
 
-    bool Reuse(ARDB.ModelCurve spaceSeparator, ARDB.Document doc, Curve curve, ARDB.View view)
+    bool Reuse(ARDB.ModelCurve spaceSeparator, Curve curve, ARDB.View view)
     {
       if (spaceSeparator is null) return false;
       if (spaceSeparator.OwnerViewId != view.Id) return false;
       var projectedCurve = Curve.ProjectToPlane(curve, view.SketchPlane.GetPlane().ToPlane());
       if (!projectedCurve.ToCurve().IsAlmostEqualTo(spaceSeparator.GeometryCurve)) return false;
+
+      spaceSeparator.SetGeometryCurve(curve.ToCurve(), false);
       return true;
     }
 
@@ -126,7 +129,7 @@ namespace RhinoInside.Revit.GH.Components.SpatialElement
 
     ARDB.ModelCurve Reconstruct(ARDB.ModelCurve spaceSeparator, ARDB.Document doc, Curve curve, ARDB.View view)
     {
-      if (!Reuse(spaceSeparator, doc, curve, view))
+      if (!Reuse(spaceSeparator, curve, view))
         spaceSeparator = Create(doc, curve, view);
 
       return spaceSeparator;
