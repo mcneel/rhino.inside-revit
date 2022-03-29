@@ -1032,11 +1032,11 @@
     },
     {
         "title": "Lands Design running inside Revit",
-        "url": "https://www.youtube.com/watch?v=anFGSYxjVGE",
-        "thumbnail": "https://i3.ytimg.com/vi/anFGSYxjVGE/maxresdefault.jpg",
+        "url": "https://www.youtube.com/watch?v=_efrxcZodR8",
+        "thumbnail": "https://i3.ytimg.com/vi/_efrxcZodR8/maxresdefault.jpg",
         "author": "Lands Design",
         "authorUrl": "https://www.landsdesign.com/",
-        "description": "This video shows how to generate terrains and plants in Revit using Lands Design, running as a plug-in for Revit with the Rhino Inside technology.",
+        "description": "In this video, you see how a landscape project that has been modeled with Lands Design, can be opened and modified in Revit. All BIM objects in Lands Design can be recognized as Revit corresponding objects. This video introduces a powerful BIM solution for landscape design in Revit.",
         "kinds": [
             "tutorial",
             "video"
