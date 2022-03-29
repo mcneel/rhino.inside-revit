@@ -12,6 +12,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using Convert.System.Drawing;
   using External.DB.Extensions;
+  using Convert.DocObjects;
 
   [Kernel.Attributes.Name("View")]
   public interface IGH_View : IGH_Element { }
@@ -62,6 +63,13 @@ namespace RhinoInside.Revit.GH.Types
       {
         var material = new GH_Material { Value = ToDisplayMaterial() };
         target = (Q) (object) material;
+
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Transform)))
+      {
+        target = (Q) (object) new GH_Transform(GetModelToProjectionTransform());
 
         return true;
       }
@@ -197,6 +205,71 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return default;
+    }
+
+    public Transform GetModelToProjectionTransform()
+    {
+      if (Value is ARDB.View view && view.TryGetViewportInfo(useUIView: false, out var vport))
+      {
+        var project = vport.GetXform(Rhino.DocObjects.CoordinateSystem.World, Rhino.DocObjects.CoordinateSystem.Clip);
+        var scale = Transform.Scale(Plane.WorldXY, vport.FrustumWidth * 0.5, vport.FrustumHeight * 0.5, 1.0);
+        var translate = Transform.Translation
+        (
+          new Vector3d
+          (
+            vport.FrustumLeft + 0.5 * vport.FrustumWidth,
+            vport.FrustumBottom + 0.5 * vport.FrustumHeight,
+            0.0
+          )
+        );
+
+        return translate * scale * project;
+      }
+
+      return Transform.ZeroTransformation;
+    }
+
+    internal UVInterval GetElementsBoundingRectangle(ElementFilter elementFilter) => GetElementsBoundingRectangle(GetModelToProjectionTransform(), elementFilter);
+    internal UVInterval GetElementsBoundingRectangle(Transform projection, ElementFilter elementFilter)
+    {
+      var filter = elementFilter?.Value ?? new ARDB.ElementMulticategoryFilter
+      (
+        new ARDB.BuiltInCategory[] { ARDB.BuiltInCategory.OST_Cameras, ARDB.BuiltInCategory.OST_SectionBox },
+        inverted: true
+      );
+
+      var uv = new BoundingBox
+      (
+        new Point3d(double.MaxValue, double.MaxValue, double.MaxValue),
+        new Point3d(double.MinValue, double.MinValue, double.MinValue)
+      );
+
+      using (var collector = new ARDB.FilteredElementCollector(Document, Id))
+      {
+        var elementCollector = collector.WherePasses(filter);
+
+        foreach (var element in collector)
+        {
+          if (element.get_BoundingBox(Value) is ARDB.BoundingBoxXYZ bboxXYZ)
+          {
+            var bbox = bboxXYZ.ToBoundingBox().GetBoundingBox(projection);
+            if (uv.Contains(bbox.Min) && uv.Contains(bbox.Max))
+              continue;
+
+            foreach (var sample in ElementExtension.GetSamplePoints(element, Value))
+            {
+              var uvw = projection * sample.ToPoint3d();
+              uv.Union(uvw);
+            }
+          }
+        }
+      }
+
+      return new UVInterval
+      (
+        new Interval(uv.Min.X, uv.Max.X),
+        new Interval(uv.Min.Y, uv.Max.Y)
+      );
     }
   }
 

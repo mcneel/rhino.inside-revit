@@ -64,24 +64,28 @@ namespace RhinoInside.Revit.Convert.DocObjects
 
         if (view is ARDB.View3D view3D)
         {
-          using (var exporter = new ARDB.CustomExporter(view3D.Document, camera))
+          try
           {
-            exporter.Export(view3D);
-            return camera;
+            using (var exporter = new ARDB.CustomExporter(view3D.Document, camera))
+            {
+              exporter.Export(view3D);
+              return camera;
+            }
           }
+          catch { }
         }
-        else
+
         {
           var min = view.CropBox.Min;
           var max = view.CropBox.Max;
-          camera.IsPerspective    = false;
+          camera.IsPerspective    = (view as ARDB.View3D)?.IsPerspective ?? false;
           camera.HorizontalExtent = max.X - min.X;
           camera.VerticalExtent   = max.Y - min.Y;
           camera.RightOffset      = min.X + 0.5 * camera.HorizontalExtent;
           camera.UpOffset         = min.Y + 0.5 * camera.VerticalExtent;
           camera.NearDistance     = -max.Z;
           camera.FarDistance      = -min.Z;
-          camera.TargetDistance   = 1e30;
+          camera.TargetDistance   = camera.IsPerspective ? camera.NearDistance : 1e30;
           return camera;
         }
       }

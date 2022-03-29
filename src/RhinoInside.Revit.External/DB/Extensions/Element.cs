@@ -137,6 +137,71 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return element.get_BoundingBox(view.IsGraphicalView() ? view : default);
     }
 
+
+    static bool SkipGeometryObject(GeometryObject geometry, View view)
+    {
+      return geometry is null ||
+      (view.Document.GetElement(geometry.GraphicsStyleId) is GraphicsStyle graphicsStyle &&
+      view.GetCategoryHidden(graphicsStyle.GraphicsStyleCategory.Id));
+    }
+
+    static IEnumerable<XYZ> GetSamplePoints(IEnumerable<GeometryObject> geometries, View view)
+    {
+      foreach (var geometry in geometries)
+      {
+        if (SkipGeometryObject(geometry, view))
+          continue;
+
+        switch (geometry)
+        {
+          case GeometryInstance instance:
+            foreach (var xyz in GetSamplePoints(instance.GetInstanceGeometry(), view))
+              yield return xyz;
+
+          break;
+
+          case Mesh mesh:
+            foreach (var xyz in mesh.Vertices)
+              yield return xyz;
+
+            break;
+
+          case Solid solid:
+            foreach (var face in solid.Faces.Cast<Face>())
+            {
+              foreach (var xyz in face.Triangulate().Vertices)
+                yield return xyz;
+            }
+
+            break;
+
+          case Curve curve:
+            foreach (var xyz in curve.Tessellate())
+              yield return xyz;
+
+            break;
+
+          case PolyLine polyline:
+            foreach (var xyz in polyline.GetCoordinates())
+              yield return xyz;
+
+            break;
+        }
+      }
+    }
+
+    internal static IEnumerable<XYZ> GetSamplePoints(Element element, View view)
+    {
+      var options = new Options() { View = view };
+      using (var geometry = element?.GetGeometry(options))
+      {
+        if (!SkipGeometryObject(geometry, view))
+          return GetSamplePoints(geometry, view);
+      }
+
+      return Enumerable.Empty<XYZ>();
+    }
+
     public static bool HasGeometry(this Element element)
     {
       using
