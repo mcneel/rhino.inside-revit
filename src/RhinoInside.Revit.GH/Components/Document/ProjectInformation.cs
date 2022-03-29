@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "'Project' is not a valid Project document");
         return;
       }
-
+        
       bool update = false;
       update |= Params.GetData(DA, "Organization Name", out string organizationName);
       update |= Params.GetData(DA, "Organization Description", out string organizationDescription);

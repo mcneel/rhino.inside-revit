@@ -33,6 +33,7 @@
     <Compile Include="Components\Document\Passport.cs" />
     <Compile Include="Components\Document\ProjectInformation.cs" />
     <Compile Include="Components\Document\ProjectLocation.cs" />
+    <Compile Include="Components\Document\ProjectLocation_PM.cs" />
     <Compile Include="Components\Document\Save.cs" />
     <Compile Include="Components\Document\Version.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
