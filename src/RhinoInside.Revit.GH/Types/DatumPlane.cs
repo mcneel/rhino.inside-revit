@@ -269,12 +269,12 @@ namespace RhinoInside.Revit.GH.Types
 
         if (args.Viewport.IsParallelProjection && cameraDirection.IsPerpendicularTo(Vector3d.ZAxis))
         {
-          if(grid.IsCurved) return;
+          if (grid.IsCurved) return;
           if (cameraDirection.IsParallelTo(direction) == 0)
             return;
         }
 
-        if(BoundaryPoints is IList<Point3d> boundary && boundary.Count > 0)
+        if (BoundaryPoints is IList<Point3d> boundary && boundary.Count > 0)
         {
           args.Pipeline.DrawPatternedPolyline(boundary, args.Color, 0x0007E30, args.Thickness, true);
 
@@ -408,15 +408,29 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Curve Curve => Value?.Curve.CreateReversed().ToCurve();
+    public override Curve Curve
+    {
+      get
+      {
+        if (Value is ARDB.Grid grid)
+        {
+          return grid.IsCurved ?
+            grid.Curve.CreateReversed().ToCurve() :
+            grid.Curve.ToCurve();
+        }
+
+        return default;
+      }
+    }
 
     public override Surface Surface
     {
       get
       {
-        if (Curve is Curve curve)
+        if (Value is ARDB.Grid grid)
         {
           var bbox = BoundingBox;
+          var curve = grid.Curve.ToCurve();
 
           var curveA = curve.DuplicateCurve(); curveA.Translate(0.0, 0.0, bbox.Min.Z - curve.PointAtStart.Z);
           var curveB = curve.DuplicateCurve(); curveB.Translate(0.0, 0.0, bbox.Max.Z - curve.PointAtStart.Z);

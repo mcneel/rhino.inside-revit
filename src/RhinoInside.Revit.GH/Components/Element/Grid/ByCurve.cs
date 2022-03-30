@@ -107,6 +107,16 @@ namespace RhinoInside.Revit.GH.Components.Grids
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
+
+          var tol = GeometryObjectTolerance.Model;
+          if
+          (
+            !(curve.IsLinear(tol.VertexTolerance) || curve.IsArc(tol.VertexTolerance)) ||
+            !curve.TryGetPlane(out var axisPlane, tol.VertexTolerance) ||
+            axisPlane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
+          )
+            throw new RuntimeArgumentException("Curve", "Curve must be a horizontal line or arc curve.", curve);
+
           if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.GridType type, doc, ARDB.ElementTypeGroup.GridType)) return null;
           Params.TryGetData(DA, "Template", out ARDB.Grid template);
@@ -127,10 +137,41 @@ namespace RhinoInside.Revit.GH.Components.Grids
       if (grid is null) return false;
 
       var tol = GeometryObjectTolerance.Internal;
-      var gridCurve = grid.Curve.CreateReversed();
-      var newCurve = curve.ToCurve();
+      var gridCurve = grid.Curve;
+      var newCurve = grid.IsCurved ? curve.ToCurve().CreateReversed() : curve.ToCurve();
+
       if (!gridCurve.IsAlmostEqualTo(newCurve, tol.VertexTolerance))
-        return false;
+      {
+        if (!gridCurve.IsSameKindAs(newCurve)) return false;
+        if (gridCurve is ARDB.Arc gridArc && newCurve is ARDB.Arc newArc)
+        {
+          // I do not found any way to update the radius ??
+          if (Math.Abs(gridArc.Radius - newArc.Radius) > tol.VertexTolerance)
+            return false;
+        }
+
+        var curves = grid.GetCurvesInView(ARDB.DatumExtentType.Model, grid.Document.ActiveView);
+
+        curves[0].TryGetLocation(out var origin0, out var basisX0, out var basisY0);
+        newCurve.TryGetLocation(out var origin1, out var basisX1, out var basisY1);
+
+        // Move newCurve to same plane as current curve
+        var elevationDelta = origin0.Z - origin1.Z;
+        newCurve = newCurve.CreateTransformed(ARDB.Transform.CreateTranslation(ARDB.XYZ.BasisZ * elevationDelta));
+        newCurve.TryGetLocation(out origin1, out basisX1, out basisY1);
+
+        var pinned = grid.Pinned;
+        grid.Pinned = false;
+
+        grid.Location.Move(origin1 - origin0);
+        using (var axis = ARDB.Line.CreateUnbound(origin1, ARDB.XYZ.BasisZ))
+          grid.Location.Rotate(axis, basisX0.AngleOnPlaneTo(basisX1, ARDB.XYZ.BasisZ));
+
+        grid.SetCurveInView(ARDB.DatumExtentType.Model, grid.Document.ActiveView, newCurve);
+        grid.Pinned = pinned;
+
+        return true;
+      }
 
       if (type is object && grid.GetTypeId() != type.Id) grid.ChangeTypeId(type.Id);
       grid.CopyParametersFrom(template, ExcludeUniqueProperties);
@@ -140,16 +181,6 @@ namespace RhinoInside.Revit.GH.Components.Grids
     ARDB.Grid Create(ARDB.Document doc, Curve curve, ARDB.GridType type, ARDB.Grid template)
     {
       var grid = default(ARDB.Grid);
-
-      // Try to duplicate template
-      {
-        // There is no known way to change the curve after
-        //grid = template?.CloneElement(doc);
-        //grid.SetCurveInView(ARDB.DatumExtentType.Model, view, curve.ToCurve());
-      }
-
-      // Else create a brand new
-      if (grid is null)
       {
         var tol = GeometryObjectTolerance.Model;
         if (curve.TryGetLine(out var line, tol.VertexTolerance))
@@ -177,6 +208,10 @@ namespace RhinoInside.Revit.GH.Components.Grids
     {
       if (!Reuse(grid, curve, type, template))
       {
+        // Avoids conflict in case we are going to assign same name...
+        if (grid is object)
+          grid.Name = grid.UniqueId;
+
         grid = grid.ReplaceElement
         (
           Create(doc, curve, type, template),
