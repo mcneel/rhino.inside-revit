@@ -43,14 +43,14 @@ namespace RhinoInside.Revit.GH.Components.Grids
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc))
         return;
 
       if (!Params.TryGetData(DA, "Name", out string name)) return;
-      if (!Params.TryGetData(DA, "Elevation", out Interval? elevation, x => x.IsValid)) return;
+      if (!Parameters.ElevationInterval.TryGetData(this, DA, "Elevation", out var elevation, doc)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(doc.Value))
       {
         var gridsCollector = collector.WherePasses(ElementFilter);
 
@@ -67,9 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Grids
 
         if (elevation.HasValue)
         {
-          var height = elevation.Value.InHostUnits() +
-            doc.GetBasePointLocation(Params.Input<Parameters.ElevationInterval>("Elevation").ElevationBase).Z;
-
+          var height = elevation.Value.InHostUnits();
           grids = grids.Where
           (
             x =>

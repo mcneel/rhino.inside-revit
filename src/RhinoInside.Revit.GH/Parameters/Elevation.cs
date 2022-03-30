@@ -7,6 +7,7 @@ using Grasshopper.Kernel.Parameters;
 namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
+  using Rhino.Geometry;
 
   public class Elevation : Param_Number
   {
@@ -138,6 +139,7 @@ namespace RhinoInside.Revit.GH.Parameters
       SubCategory = "Revit Primitives";
     }
 
+    #region IO
     public override bool Read(GH_IReader reader)
     {
       if (!base.Read(reader))
@@ -160,7 +162,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
       return true;
     }
+    #endregion
 
+    #region UI
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
       Menu_AppendWireDisplay(menu);
@@ -226,6 +230,26 @@ namespace RhinoInside.Revit.GH.Parameters
         ExpireOwner();
 
       ExpireSolution(true);
+    }
+    #endregion
+
+    public static bool TryGetData
+    (
+      IGH_Component component,
+      IGH_DataAccess DA,
+      string name,
+      out Interval? interval,
+      Types.Document document
+    )
+    {
+      if (!component.Params.TryGetData(DA, name, out interval)) return false;
+      if (interval.HasValue)
+      {
+        var elevationBase = document.Value.GetBasePointLocation(component.Params.Input<ElevationInterval>(name).ElevationBase).Z * Revit.ModelUnits;
+        interval = new Interval(interval.Value.T0 + elevationBase, interval.Value.T1 + elevationBase);
+      }
+
+      return true;
     }
   }
 }

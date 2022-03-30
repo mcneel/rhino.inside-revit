@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Types
             var subWires = new List<Curve>();
             var subMaterials = new List<ARDB.Material>();
 
-            foreach (var dependent in element.GetDependentElements(null).Select(x => element.Document.GetElement(x)))
+            foreach (var dependent in element.GetDependentElements(null).Select(element.Document.GetElement))
             {
               if (dependent.GetBoundingBoxXYZ(out var view) is null)
                 continue;

@@ -377,11 +377,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Value is ARDB.Grid grid)
-        {
-          var bbox = grid.GetExtents().ToBoundingBox();
-          bbox.Union(Curve.GetBoundingBox(true));
-          return bbox;
-        }
+          return grid.GetExtents().ToBoundingBox();
 
         return NaN.BoundingBox;
       }

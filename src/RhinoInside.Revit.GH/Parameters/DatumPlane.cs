@@ -96,6 +96,46 @@ namespace RhinoInside.Revit.GH.Parameters
     }
     #endregion
 
+    public static bool TryGetDataOrDefault<TOutput>
+    (
+      IGH_Component component,
+      IGH_DataAccess DA,
+      string name,
+      out TOutput level,
+      Types.Document document,
+      double elevation
+    )
+      where TOutput : class
+    {
+      if (!component.Params.TryGetData(DA, name, out level)) return false;
+      if (level is null)
+      {
+        var data = Types.Level.FromElement(document.Value.GetNearestLevel(elevation / Revit.ModelUnits));
+        if (data is null)
+          return false;
+
+        level = data as TOutput;
+        if (level is null)
+          return data.CastTo(out level);
+      }
+
+      // Validate document
+      switch (level)
+      {
+        case ARDB.Element element:
+          if (!document.Value.IsEquivalent(element.Document))
+            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
+          break;
+
+        case Types.IGH_ElementId id:
+          if (!document.Value.IsEquivalent(id.Document))
+            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
+          break;
+      }
+
+      return true;
+    }
+
     public static bool GetDataOrDefault<TOutput>
     (
       IGH_Component component,

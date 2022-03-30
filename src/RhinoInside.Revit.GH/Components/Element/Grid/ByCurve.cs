@@ -5,12 +5,13 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Grids
 {
+  using System.Linq;
   using Convert.Geometry;
-  using ElementTracking;
   using Grasshopper.Kernel.Parameters;
-  using RhinoInside.Revit.External.DB.Extensions;
-  using RhinoInside.Revit.GH.Exceptions;
+  using External.DB.Extensions;
+  using GH.Exceptions;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.6")]
   public class GridByCurve : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("CEC2B3DF-C6BA-414F-BECE-E3DAEE2A3F2C");
@@ -38,6 +39,16 @@ namespace RhinoInside.Revit.GH.Components.Grids
           NickName = "C",
           Description = "Grid curve",
         }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ElevationInterval
+        {
+          Name = "Elevation",
+          NickName= "E",
+          Description = "Grid extents interval along z-axis",
+          Optional = true
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -107,6 +118,7 @@ namespace RhinoInside.Revit.GH.Components.Grids
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
+          if (!Parameters.ElevationInterval.TryGetData(this, DA, "Elevation", out var elevation, doc)) return null;
 
           var tol = GeometryObjectTolerance.Model;
           if
@@ -117,6 +129,9 @@ namespace RhinoInside.Revit.GH.Components.Grids
           )
             throw new RuntimeArgumentException("Curve", "Curve must be a horizontal line or arc curve.", curve);
 
+          if (!elevation.HasValue)
+            elevation = new Interval(axisPlane.Origin.Z - 12.0 * Revit.ModelUnits, axisPlane.Origin.Z + 12.0 * Revit.ModelUnits);
+
           if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.GridType type, doc, ARDB.ElementTypeGroup.GridType)) return null;
           Params.TryGetData(DA, "Template", out ARDB.Grid template);
@@ -124,7 +139,7 @@ namespace RhinoInside.Revit.GH.Components.Grids
           // Compute
           StartTransaction(doc.Value);
           if (CanReconstruct(_Grid_, out var untracked, ref grid, doc.Value, name, categoryId: ARDB.BuiltInCategory.OST_Grids))
-            grid = Reconstruct(grid, doc.Value, curve, type, name, template);
+            grid = Reconstruct(grid, doc.Value, curve, elevation.Value, type, name, template);
 
           DA.SetData(_Grid_, grid);
           return untracked ? null : grid;
@@ -150,15 +165,44 @@ namespace RhinoInside.Revit.GH.Components.Grids
             return false;
         }
 
-        var curves = grid.GetCurvesInView(ARDB.DatumExtentType.Model, grid.Document.ActiveView);
+        // Makes Grid cross maximum number of views.
+        // This increases our chances of obtaining a valid view for this Grid.
+        grid.Maximize3DExtents();
+
+        var view = default(ARDB.View);
+        using (var collector = new ARDB.FilteredElementCollector(grid.Document).OfClass(typeof(ARDB.View)))
+        {
+          var views = collector.Cast<ARDB.View>().
+            Where(x => !x.IsTemplate && !x.IsAssemblyView).
+            Where
+            (
+              x =>
+              {
+                switch (x)
+                {
+                  case ARDB.View3D view3D: return true;
+                  case ARDB.ViewPlan viewPlan: return viewPlan.GetUnderlayOrientation() == ARDB.UnderlayOrientation.LookingDown;
+                }
+
+                return false;
+              }
+            ).
+            OrderByDescending(x => x.ViewType);
+
+          view = views.FirstOrDefault();
+        }
+
+        if (view is null) return false;
+
+        var curves = grid.GetCurvesInView(ARDB.DatumExtentType.Model, view);
 
         curves[0].TryGetLocation(out var origin0, out var basisX0, out var basisY0);
-        newCurve.TryGetLocation(out var origin1, out var basisX1, out var basisY1);
+        newCurve.TryGetLocation(out var origin, out var _, out var _);
 
         // Move newCurve to same plane as current curve
-        var elevationDelta = origin0.Z - origin1.Z;
+        var elevationDelta = origin0.Z - origin.Z;
         newCurve = newCurve.CreateTransformed(ARDB.Transform.CreateTranslation(ARDB.XYZ.BasisZ * elevationDelta));
-        newCurve.TryGetLocation(out origin1, out basisX1, out basisY1);
+        newCurve.TryGetLocation(out var origin1, out var basisX1, out var basisY1);
 
         var pinned = grid.Pinned;
         grid.Pinned = false;
@@ -167,10 +211,8 @@ namespace RhinoInside.Revit.GH.Components.Grids
         using (var axis = ARDB.Line.CreateUnbound(origin1, ARDB.XYZ.BasisZ))
           grid.Location.Rotate(axis, basisX0.AngleOnPlaneTo(basisX1, ARDB.XYZ.BasisZ));
 
-        grid.SetCurveInView(ARDB.DatumExtentType.Model, grid.Document.ActiveView, newCurve);
+        grid.SetCurveInView(ARDB.DatumExtentType.Model, view, newCurve);
         grid.Pinned = pinned;
-
-        return true;
       }
 
       if (type is object && grid.GetTypeId() != type.Id) grid.ChangeTypeId(type.Id);
@@ -204,7 +246,7 @@ namespace RhinoInside.Revit.GH.Components.Grids
       return grid;
     }
 
-    ARDB.Grid Reconstruct(ARDB.Grid grid, ARDB.Document doc, Curve curve, ARDB.GridType type, string name, ARDB.Grid template)
+    ARDB.Grid Reconstruct(ARDB.Grid grid, ARDB.Document doc, Curve curve, Interval elevation, ARDB.GridType type, string name, ARDB.Grid template)
     {
       if (!Reuse(grid, curve, type, template))
       {
@@ -221,6 +263,8 @@ namespace RhinoInside.Revit.GH.Components.Grids
 
       if (name is object && grid.Name != name)
         grid.Name = name;
+
+      grid.SetVerticalExtents(elevation.Min / Revit.ModelUnits, elevation.Max / Revit.ModelUnits);
 
       return grid;
     }
