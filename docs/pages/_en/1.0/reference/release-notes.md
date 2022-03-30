@@ -5,6 +5,12 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.6 RC3" version="v1.6.8119.11754" pre_release=true time="03/29/2022" %}
+- Fixed {% include ltr/comp.html uuid='4434c470-' %} when inverted
+- {{ site.terms.rir }} no longer shows an error window when failing to set shortcut for Grasshopper button
+- Minor Fixes and Improvements
+
+
 {% include ltr/release-header.html title="v1.6 RC2" version="v1.6.8119.11754" pre_release=true time="03/22/2022" %}
 
 - Fixed a problem on `ARDB.XYZ.PerpVector` when tolerance is too small.
