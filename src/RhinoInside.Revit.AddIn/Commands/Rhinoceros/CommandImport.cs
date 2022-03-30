@@ -500,6 +500,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                   Point3d.Origin - model.Settings.ModelBasepoint,
                   visibleLayersOnly
                 ).ToArray();
+
                 if (geometryList?.Length > 0)
                 {
                   try { type.AppendShape(geometryList); }
@@ -627,11 +628,10 @@ namespace RhinoInside.Revit.AddIn.Commands
                   case Curve curve:
                     if (curve.TryGetPlane(out var plane, GeometryObjectTolerance.Internal.VertexTolerance / scaleFactor))
                     {
-                      if (curve.ToCurve(scaleFactor) is ARDB.Curve crv)
+                      var sketchPlane = ARDB.SketchPlane.Create(doc, plane.ToPlane(scaleFactor));
+                      foreach(var crv in curve.ToCurveMany(scaleFactor))
                       {
-                        var sketchPlane = ARDB.SketchPlane.Create(doc, plane.ToPlane(scaleFactor));
                         var modelCurve = doc.FamilyCreate.NewModelCurve(crv, sketchPlane);
-
                         elements.Add(modelCurve.Id);
 
                         {
