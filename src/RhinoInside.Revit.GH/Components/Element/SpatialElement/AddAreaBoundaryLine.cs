@@ -116,9 +116,9 @@ namespace RhinoInside.Revit.GH.Components.SpatialElement
       if (areaBoundary is null) return false;
       if (areaBoundary.OwnerViewId != viewPlan.Id) return false;
       var projectedCurve = Curve.ProjectToPlane(curve.ToCurve(), viewPlan.SketchPlane.GetPlane().ToPlane());
-      if (!projectedCurve.ToCurve().IsAlmostEqualTo(areaBoundary.GeometryCurve)) return false;
 
-      areaBoundary.SetGeometryCurve(curve, false);
+      if (!projectedCurve.ToCurve().IsAlmostEqualTo(areaBoundary.GeometryCurve))
+        areaBoundary.SetGeometryCurve(projectedCurve.ToCurve(), false);
       return true;
     }
 
