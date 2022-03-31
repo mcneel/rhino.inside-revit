@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       nickname: "A-IS",
       description: "Analyze spatial elements surrounding the given instance",
       category: "Revit",
-      subCategory: "Room & Area"
+      subCategory: "Spatial"
     )
     { }
 

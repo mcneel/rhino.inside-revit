@@ -1,15 +1,12 @@
 using System;
-using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.SpatialElement  
+namespace RhinoInside.Revit.GH.Components.SpatialElements
 {
   [ComponentVersion(introduced: "1.7")]
   public class AddAreaBoundaryLine : ElementTrackerComponent
@@ -20,27 +17,17 @@ namespace RhinoInside.Revit.GH.Components.SpatialElement
 
     public AddAreaBoundaryLine() : base
     (
-      name: "Add Area Boundary Line",
-      nickname: "AB",
-      description: "Given a Curve, it adds an Area Boundary Line to the given Area Plan",
+      name: "Add Area Boundary",
+      nickname: "AreaBoundary",
+      description: "Given a Curve, it adds an Area boundary line to the given Area Plan",
       category: "Revit",
-      subCategory: "Room & Area"
+      subCategory: "Spatial"
     )
     { }
 
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition
-      (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        }, ParamRelevance.Occasional
-      ),
       new ParamDefinition
       (
         new Parameters.AreaPlan()
@@ -70,27 +57,26 @@ namespace RhinoInside.Revit.GH.Components.SpatialElement
       (
         new Parameters.CurveElement()
         {
-          Name = _AreaBoundaryLine_,
-          NickName = _AreaBoundaryLine_.Substring(0, 1),
-          Description = $"Output {_AreaBoundaryLine_}",
+          Name = _AreaBoundary_,
+          NickName = _AreaBoundary_.Substring(0, 1),
+          Description = $"Output {_AreaBoundary_}",
           Access = GH_ParamAccess.item
         }
       )
     };
 
-    const string _AreaBoundaryLine_ = "Area Boundary Line";
+    const string _AreaBoundary_ = "Area Boundary";
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Params.GetData(DA, "Area Plan", out ARDB.ViewPlan viewPlan)) return;
 
       ReconstructElement<ARDB.ModelCurve>
       (
-        doc.Value, _AreaBoundaryLine_, (areaBoundaryLine) =>
+        viewPlan.Document, _AreaBoundary_, (areaBoundary) =>
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve)) return null;
-          if (!Params.GetData(DA, "Area Plan", out ARDB.ViewPlan viewPlan)) return null;
 
           var tol = GeometryObjectTolerance.Model;
           if
@@ -103,34 +89,37 @@ namespace RhinoInside.Revit.GH.Components.SpatialElement
             throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid horizontal, coplanar and open curve.", curve);
           
           // Compute
-          areaBoundaryLine = Reconstruct(areaBoundaryLine, doc.Value, curve.ToCurve(), viewPlan);
+          areaBoundary = Reconstruct(areaBoundary, viewPlan, curve.ToCurve());
 
-          DA.SetData(_AreaBoundaryLine_, areaBoundaryLine);
-          return areaBoundaryLine;
+          DA.SetData(_AreaBoundary_, areaBoundary);
+          return areaBoundary;
         }
       );
     }
 
-    bool Reuse(ARDB.ModelCurve areaBoundary, ARDB.Curve curve, ARDB.ViewPlan viewPlan)
+    bool Reuse(ARDB.ModelCurve areaBoundary, ARDB.ViewPlan viewPlan, ARDB.Curve curve)
     {
       if (areaBoundary is null) return false;
       if (areaBoundary.OwnerViewId != viewPlan.Id) return false;
-      var projectedCurve = Curve.ProjectToPlane(curve.ToCurve(), viewPlan.SketchPlane.GetPlane().ToPlane());
 
-      if (!projectedCurve.ToCurve().IsAlmostEqualTo(areaBoundary.GeometryCurve))
-        areaBoundary.SetGeometryCurve(projectedCurve.ToCurve(), true);
+      using (var projectedCurve = Curve.ProjectToPlane(curve.ToCurve(), viewPlan.SketchPlane.GetPlane().ToPlane()).ToCurve())
+      {
+        if (!projectedCurve.IsAlmostEqualTo(areaBoundary.GeometryCurve))
+          areaBoundary.SetGeometryCurve(projectedCurve, overrideJoins: true);
+      }
+
       return true;
     }
 
-    ARDB.ModelCurve Create(ARDB.Document doc, ARDB.Curve curve, ARDB.ViewPlan viewplan)
+    ARDB.ModelCurve Create(ARDB.ViewPlan viewplan, ARDB.Curve curve)
     {
-      return doc.Create.NewAreaBoundaryLine(viewplan.SketchPlane, curve, viewplan);
+      return viewplan.Document.Create.NewAreaBoundaryLine(viewplan.SketchPlane, curve, viewplan);
     }
 
-    ARDB.ModelCurve Reconstruct(ARDB.ModelCurve areaBoundaryLine, ARDB.Document doc, ARDB.Curve curve, ARDB.ViewPlan viewPlan)
+    ARDB.ModelCurve Reconstruct(ARDB.ModelCurve areaBoundaryLine, ARDB.ViewPlan viewPlan, ARDB.Curve curve)
     {
-      if (!Reuse(areaBoundaryLine, curve, viewPlan))
-          areaBoundaryLine = Create(doc, curve, viewPlan);
+      if (!Reuse(areaBoundaryLine, viewPlan, curve))
+          areaBoundaryLine = Create(viewPlan, curve);
        
       return areaBoundaryLine;
     }
