@@ -212,14 +212,14 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is ARDB.View view && view.TryGetViewportInfo(useUIView: false, out var vport))
       {
         var project = vport.GetXform(Rhino.DocObjects.CoordinateSystem.World, Rhino.DocObjects.CoordinateSystem.Clip);
-        var scale = Transform.Scale(Plane.WorldXY, vport.FrustumWidth * 0.5, vport.FrustumHeight * 0.5, 1.0);
+        var scale = Transform.Scale(Plane.WorldXY, vport.FrustumWidth * 0.5, vport.FrustumHeight * 0.5, (vport.FrustumFar - vport.FrustumNear) * 0.5);
         var translate = Transform.Translation
         (
           new Vector3d
           (
             vport.FrustumLeft + 0.5 * vport.FrustumWidth,
             vport.FrustumBottom + 0.5 * vport.FrustumHeight,
-            0.0
+            -vport.FrustumNear - (0.5 * (vport.FrustumFar - vport.FrustumNear))
           )
         );
 

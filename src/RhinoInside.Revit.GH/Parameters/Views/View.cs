@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
     (
-      new string[] { "Plane", "Box", "Surface", "Shader" }
+      new string[] { "Transform", "Plane", "Box", "Surface", "Shader" }
     );
 
     public override void Menu_AppendActions(ToolStripDropDown menu)
