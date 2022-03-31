@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.GH.Components.SpatialElement
       var projectedCurve = Curve.ProjectToPlane(curve, view.SketchPlane.GetPlane().ToPlane());
 
       if (!projectedCurve.ToCurve().IsAlmostEqualTo(spaceSeparator.GeometryCurve))
-        spaceSeparator.SetGeometryCurve(projectedCurve.ToCurve(), false);
+        spaceSeparator.SetGeometryCurve(projectedCurve.ToCurve(), true);
       return true;
     }
 
