@@ -5,11 +5,30 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.7 RC1" version="v1.7" pre_release=true time="04/05/2022" %}
+
+- Fixed a bug con command 'Import 3DM' when importing polylines on a family document.
+- Removed warning about wrong characters on the 'KeyboardShortcuts.xml'
+- Added separation line creation components for spatial elements.
+- Added 'Crop Extents', 'Template' and 'Filter' input to 'Export View Image'
+  Added context menu to generate a transparent background image.
+- Added 'View Extents' component.
+- Added '3D view' and 'Structural Plan' view parameters.
+- Added 'Floor Plan' 'Ceiling Plan' and 'Area Plan' parameters.
+- Added 'Section', 'Elevation' and 'Detail' view parameters.
+- Exposed 'View Type' parameter.
+
+{% include ltr/release-header.html title="v1.6 RC4" version="v1.6" pre_release=true time="04/05/2022" %}
+
+- Fixed 'Add Grid' component when Tracking mode is set to 'Update'.
+- Added 'Elevation' input to 'Add Grid'.
+- Fixed a bug con 'Import 3DM' when importing polylines on a family document.
+
 {% include ltr/release-header.html title="v1.6 RC3" version="v1.6.8123.20268" pre_release=true time="03/29/2022" %}
+
 - Fixed {% include ltr/comp.html uuid='4434c470-' %} when inverted
 - {{ site.terms.rir }} no longer shows an error window when failing to set shortcut for Grasshopper button
 - Minor Fixes and Improvements
-
 
 {% include ltr/release-header.html title="v1.6 RC2" version="v1.6.8119.11754" pre_release=true time="03/22/2022" %}
 
