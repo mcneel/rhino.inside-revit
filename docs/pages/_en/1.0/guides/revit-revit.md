@@ -46,15 +46,25 @@ See [Revit: Elements & Instances]({{ site.baseurl }}{% link _en/1.0/guides/revit
 
 ## Parameters
 
-Elements contain parameters so they can carry metadata. For example, height is a property of a *Wall* element and its value is carried by the *Height Parameter*. Let's take a look at various parameter types that we encounter when working with Revit elements.
+Parameter are attached to elements so they can carry metadata. For example, height is a property of a *Wall* element and its value is carried by the *Height Parameter*.
+
+Parameters come in many types:
+
+1. Built-in Parameters
+1. Project/Shared Parameters for Instances or Types
+1. Global Parameters
+
+Let's take a look at various parameter types that we encounter when working with Revit elements.
 
 ### Built-in Parameters
 
-These are the most obvious set of parameters that are built into Revit based on the element type. For example, a Wall, or Room element has a parameter called *Volume*. This parameter does not make sense for a 2D Filled Region element and thus is not associated with that element type.
+These are the most obvious set of parameters that are built into Revit based on the categories and element types. For example, a Wall, or Room element has a parameter called *Volume*. This parameter does not make sense for a 2D Filled Region element and thus is not associated with that element type.
 
 Revit shows the list of built-in parameters in the *Element Properties* panel.
 
 ![]({{ "/static/images/guides/revit-params-parampanel.png" | prepend: site.baseurl }})
+
+Built-in Parameters are commonly defined in every Revit project by default. There is not way to change teh definition of them, only to read and write values to them.
 
 {% capture api_note %}
 In Revit API, all the built-in parameters are represented by the {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %} enumeration
@@ -65,11 +75,17 @@ In Revit API, all the built-in parameters are represented by the {% include api_
 
 Revit allows a user to create a series of custom parameters and apply them globally to selected categories. The *Element Properties* panel displays the project parameters attached to the selected element as well.
 
+Project Parameters may be attached to the Element Type or the Element Instance.
+
+To create a project parameter one must first define a parameter definition.  This is a template that outlines a parameter's Name, DataType, Group and optionally an ID (Guid). The definition is used  then a Parameter may be added to the projects.  Once added to the project, a Parameter instance will be attached to all the element instances, types or Globally to the project. Each Parameter instance can then store a unique value of a specific datatype.
+
+Shared Parameters are simply Project Parameters whos Parameter definitions can be transferred from one project to another thru a from a shared parameter file. Multiple projects can contain common parameter definitions. It is important to note that it is only the definitions that are shared, not the values within the parameters themselves. Shared parameters have a unique ID (Guid) that project parameters do not.
+
 ![]({{ "/static/images/guides/revit-params-projshared.png" | prepend: site.baseurl }})
 
 ### Global Parameters
 
-Global parameters are category-agnostic parameters that could be applied to a range of instance or type parameters across many different Revit categories.
+Global parameters are category-agnostic parameters that could be applied to a range of instance or type parameters across many different Revit categories. Many times these are used for project level data.
 
 ![]({{ "/static/images/guides/revit-params-global.png" | prepend: site.baseurl }})
 

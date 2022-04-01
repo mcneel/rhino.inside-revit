@@ -8,7 +8,10 @@ thumbnail: /static/images/guides/revit-docs.png
 ghdef: revit-docs.ghx
 ---
 
+{% capture link_note %}
 In this guide we will take a look at how to work with Revit Documents and Links using Grasshopper inside Revit.
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-docs.png' %}
 
 ## Querying Open Documents
 

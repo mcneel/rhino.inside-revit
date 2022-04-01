@@ -7,7 +7,10 @@ home: true
 thumbnail: /static/images/guides/revit-types.png
 ---
 
-When working with Revit or Revit API, we are mostly dealing with Revit **Types** and **Custom Families**. This guide takes you through the various Grasshopper components that help you query and create types and families. It is one of the most important aspects of the modeling process that is more about the Data being modeled, rather than geometry:
+{% capture link_note %}
+When working with Revit or Revit API, we are mostly dealing with Revit **Types** and **Custom Families**. This guide takes you through the various Grasshopper components that help you query and create types and families. For an look at how these elements are organized within Revit, see [Revit: Types & Families]({{ site.baseurl }}{% link _en/1.0/guides/revit-revit.md %}#categories-families--types)
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-types.png' %}
 
 ## Querying Types
 
@@ -36,7 +39,6 @@ When querying the custom types that exist in a Revit model, we can find out the 
 Notice that **Duct Systems** for example, is a system type and therefore have no associated custom family definition. Therefore the *Type Family* component is returning `null`.
 
 ![]({{ "/static/images/guides/revit-families04.png" | prepend: site.baseurl }})
-
 
 ## Choosing A Specific Type
 

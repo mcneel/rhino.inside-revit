@@ -7,9 +7,14 @@ home: true
 thumbnail: /static/images/guides/revit-elements.png
 ---
 
+{% capture link_note %}
+This section shows how you can manually reference a specific element and bring that into your Grasshopper definition. Later sections discuss the generic ways of collecting elements of various types. To review  how Revit Elements and Instances are organized see the [Revit: Elements & Instances]({{ site.baseurl }}{% link _en/1.0/guides/revit-revit.md %}#elements--instances) overview.
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-elements.png' %}
+
 ## Referencing Elements
 
-There are more elaborate ways to collect various elements in Revit. This section shows how you can manually reference a specific element and bring that into your Grasshopper definition. Later sections discuss the generic ways of collecting elements of various types.
+There are more elaborate ways to collect various elements in Revit. The most basic way to to directly reference an element.
 
 ### By Selection
 
