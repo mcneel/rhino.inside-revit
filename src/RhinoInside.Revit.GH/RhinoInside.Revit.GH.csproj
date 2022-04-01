@@ -216,6 +216,7 @@
     <Compile Include="Components\Views\Extents.cs" />
     <Compile Include="Components\Views\Identity.cs" />
     <Compile Include="Components\Views\QueryViews.cs" />
+    <Compile Include="Components\Views\SectionBox.cs" />
     <Compile Include="Components\Views\View3DByPlane.cs" />
     <Compile Include="Components\Workset\Active.cs" />
     <Compile Include="Components\Workset\ElementWorkset.cs" />

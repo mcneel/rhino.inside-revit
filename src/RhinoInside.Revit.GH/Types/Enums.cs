@@ -166,6 +166,9 @@ namespace RhinoInside.Revit.GH.Types
         { (int) ARDB.ViewFamily.CostReport,               "Cost Report"               },
         { (int) ARDB.ViewFamily.LoadsReport,              "Loads Report"              },
         { (int) ARDB.ViewFamily.PressureLossReport,       "Pressure Loss Report"      },
+#if REVIT_2020
+        { (int) ARDB.ViewFamily.SystemsAnalysisReport,    "Systems Analysis Report"   },
+#endif
       }
     );
   }
@@ -195,7 +198,7 @@ namespace RhinoInside.Revit.GH.Types
         { (int) ARDB.ViewType.DraftingView,         "Drafting" },
         { (int) ARDB.ViewType.Legend,               "Legend" },
         { (int) ARDB.ViewType.SystemBrowser,        "System Browser" },
-        { (int) ARDB.ViewType.EngineeringPlan,      "Engineering Plan" },
+        { (int) ARDB.ViewType.EngineeringPlan,      "Structural Plan" },
         { (int) ARDB.ViewType.AreaPlan,             "Area Plan" },
         { (int) ARDB.ViewType.Section,              "Section" },
         { (int) ARDB.ViewType.Detail,               "Detail" },
