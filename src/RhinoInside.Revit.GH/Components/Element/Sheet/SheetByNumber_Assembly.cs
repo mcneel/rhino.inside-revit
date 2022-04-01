@@ -118,7 +118,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
 
           // Compute
           StartTransaction(doc.Value);
-          if (CanReconstruct(_Sheet_, out var untracked, ref sheet, doc.Value, number))
+          if (CanReconstruct(_Sheet_, out var untracked, ref sheet, doc.Value, number, ARDB.ViewType.DrawingSheet.ToString()))
             sheet = Reconstruct(sheet, doc.Value, number, name, assembly, default, template);
 
           DA.SetData(_Sheet_, sheet);

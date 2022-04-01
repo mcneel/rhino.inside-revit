@@ -210,6 +210,7 @@
     <Compile Include="Components\TransactionalComponent.cs" />
     <Compile Include="Components\TransactionBaseComponent.cs" />
     <Compile Include="Components\Views\Active.cs" />
+    <Compile Include="Components\Views\AddViewPlan.cs" />
     <Compile Include="Components\Views\ClusterViewsByType.cs" />
     <Compile Include="Components\Views\ExportImage.cs" />
     <Compile Include="Components\Views\Extents.cs" />

@@ -42,8 +42,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           NickName = "DOC",
           Description = "Document",
           Optional = true
-        },
-        ParamRelevance.Occasional
+        }, ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -62,8 +61,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           NickName = "N",
           Description = $"Sheet Name",
           Optional = true,
-        },
-        ParamRelevance.Primary
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -73,8 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           NickName = "T",
           Description = "View Type",
           Optional = true,
-        },
-        ParamRelevance.Occasional
+        }, ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -84,8 +81,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           NickName = "T",
           Description = $"Template sheet (only sheet parameters are copied)",
           Optional = true
-        },
-        ParamRelevance.Occasional
+        }, ParamRelevance.Occasional
       ),
     };
 
@@ -119,7 +115,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
 
           // Compute
           StartTransaction(doc.Value);
-          if (CanReconstruct(_Sheet_, out var untracked, ref sheet, doc.Value, number))
+          if (CanReconstruct(_Sheet_, out var untracked, ref sheet, doc.Value, number, ARDB.ViewType.DrawingSheet.ToString()))
             sheet = Reconstruct(sheet, doc.Value, number, name, type, template);
 
           DA.SetData(_Sheet_, sheet);

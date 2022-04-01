@@ -329,6 +329,22 @@ namespace RhinoInside.Revit.External.DB.Extensions
           OfType<T>().FirstOrDefault();
         }
       }
+      else if (typeof(View).IsAssignableFrom(typeof(T)))
+      {
+        using (var collector = new FilteredElementCollector(doc))
+        {
+          var elementCollector = collector.
+          WhereElementIsKindOf(typeof(T)).
+          WhereCategoryIdEqualsTo(categoryId);
+
+          var nameParameter = ElementExtension.GetNomenParameter(typeof(T));
+          var enumerable = nameParameter != BuiltInParameter.INVALID ?
+            elementCollector.WhereParameterEqualsTo(nameParameter, nomen) :
+            elementCollector.Where(x => x.Name == nomen);
+
+          element = enumerable.Cast<View>().Where(x => !x.IsTemplate && x.ViewType.ToString() == parentName).OfType<T>().FirstOrDefault();
+        }
+      }
       else if (typeof(AppearanceAssetElement).IsAssignableFrom(typeof(T)))
       {
         element = nomen is object ? AppearanceAssetElement.GetAppearanceAssetElementByName(doc, nomen) as T : default;
