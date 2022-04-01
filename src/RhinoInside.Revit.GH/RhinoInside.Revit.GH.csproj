@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}</ProjectGuid>
@@ -233,6 +233,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Surface.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
@@ -311,7 +312,6 @@
     <Compile Include="Parameters\ThermalAsset.cs" />
     <Compile Include="Parameters\ValueList.cs" />
     <Compile Include="Parameters\Workset.cs" />
-    <Compile Include="Solid.cs" />
     <Compile Include="Types\AppearanceAsset.cs" />
     <Compile Include="Types\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Types\AssetPropertyDouble4DMap.cs" />
