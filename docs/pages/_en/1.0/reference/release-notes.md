@@ -7,7 +7,6 @@ group: Deployment & Configs
 <!-- most recent release should be on top -->
 {% include ltr/release-header.html title="v1.7 RC1" version="v1.7" pre_release=true time="04/05/2022" %}
 
-- Fixed a bug con command 'Import 3DM' when importing polylines on a family document.
 - Removed warning about wrong characters on the 'KeyboardShortcuts.xml'
 - Added separation line creation components for spatial elements.
 - Added 'Crop Extents', 'Template' and 'Filter' input to 'Export View Image'.  
