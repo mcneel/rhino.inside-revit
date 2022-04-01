@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.View
 {
@@ -43,8 +45,8 @@ namespace RhinoInside.Revit.GH.Components.View
       ),
       ParamDefinition.Create<Param_Box>
       (
-        name: "Section Box",
-        nickname: "SB",
+        name: "Box",
+        nickname: "B",
         description:  "Section Box extents in world coordinate system.",
         optional: true,
         relevance: ParamRelevance.Primary
@@ -70,10 +72,17 @@ namespace RhinoInside.Revit.GH.Components.View
       ),
       ParamDefinition.Create<Param_Box>
       (
-        name: "Section Box",
-        nickname: "SB",
+        name: "Box",
+        nickname: "B",
         description:  "Section Box in world coordinate system.",
         relevance: ParamRelevance.Primary
+      ),
+      ParamDefinition.Create<Parameters.GraphicalElement>
+      (
+        name: "Section Box",
+        nickname: "SB",
+        description:  "Section Box element.",
+        relevance: ParamRelevance.Occasional
       ),
     };
 
@@ -89,17 +98,23 @@ namespace RhinoInside.Revit.GH.Components.View
       }
       Params.TrySetData(DA, "Active", () => view.Value.IsSectionBoxActive);
 
-      if (Params.GetData(DA, "Section Box", out Box? box))
+      if (Params.GetData(DA, "Box", out Box? box))
       {
         StartTransaction(view.Document);
         view.Value.SetSectionBox(box.Value.ToBoundingBoxXYZ());
       }
-      Params.TrySetData(DA, "Section Box", () =>
+      Params.TrySetData(DA, "Box", () =>
       {
         var sbox = view.Value.GetSectionBox();
         sbox.Enabled = true;
         var sb = sbox.ToBox();
         return sb.IsValid ? new GH_Box(sb) : null;
+      });
+
+      Params.TrySetData(DA, "Section Box", () =>
+      {
+        var ids = view.Value.GetDependentElements(new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_SectionBox));
+        return Types.GraphicalElement.FromElementId(view.Document, ids.FirstOrDefault());
       });
     }
   }
