@@ -10,7 +10,7 @@ group: Deployment & Configs
 - Fixed a bug con command 'Import 3DM' when importing polylines on a family document.
 - Removed warning about wrong characters on the 'KeyboardShortcuts.xml'
 - Added separation line creation components for spatial elements.
-- Added 'Crop Extents', 'Template' and 'Filter' input to 'Export View Image'
+- Added 'Crop Extents', 'Template' and 'Filter' input to 'Export View Image'.  
   Added context menu to generate a transparent background image.
 - Added 'View Extents' component.
 - Added 'View Section Box' component.
