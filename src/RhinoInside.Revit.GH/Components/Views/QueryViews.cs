@@ -30,15 +30,17 @@ namespace RhinoInside.Revit.GH.Components.Views
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewDiscipline>>("Discipline", "D", "View discipline", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewFamily>>("Family", "T", "View family", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_String>("Name", "N", "View name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.View>("Template", "T", "Views template", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Is Template", "IT", "View is template", false, GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Is Printable", "IP", "View is printable", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Is Assembly", "IA", "View is assembly", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.AssemblyInstance>("Assembly", "A", "Assembly the view belongs to", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewDiscipline>>("Discipline", "D", "View discipline", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewFamily>>("View Family", "VF", "View family", optional: true),
+      ParamDefinition.Create<Param_String>("View Name", "VN", "View name", optional: true),
+      ParamDefinition.Create<Param_Boolean>("Is Dependent", "D", "View is dependent", defaultValue: false, optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.View>("View Dependency", "VD", "View depedency", optional: true, relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_Boolean>("Is Template", "IT", "View is template", defaultValue: false, optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.View>("View Template", "T", "View template", optional: true, relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_Boolean>("Is Assembly", "IA", "View is assembly", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.AssemblyInstance>("Associated Assembly", "AA", "The assembly the view is associated with", optional: true, relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_Boolean>("Is Printable", "IP", "View is printable", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true, relevance: ParamRelevance.Secondary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -47,43 +49,40 @@ namespace RhinoInside.Revit.GH.Components.Views
       ParamDefinition.Create<Parameters.View>("Views", "V", "Views list", GH_ParamAccess.list)
     };
 
+    public override void AddedToDocument(GH_Document document)
+    {
+      if (Params.Input<IGH_Param>("Family") is IGH_Param family)
+        family.Name = "View Family";
+
+      if (Params.Input<IGH_Param>("Name") is IGH_Param name)
+        name.Name = "View Name";
+
+      if (Params.Input<IGH_Param>("Template") is IGH_Param template)
+        template.Name = "View Template";
+
+      if (Params.Input<IGH_Param>("Assembly") is IGH_Param assembly)
+        assembly.Name = "Associated Assembly";
+
+      base.AddedToDocument(document);
+    }
+
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
-      var viewDiscipline = default(ARDB.ViewDiscipline);
-      var _Discipline_ = Params.IndexOfInputParam("Discipline");
-      bool nofilterDiscipline = (!DA.GetData(_Discipline_, ref viewDiscipline) && Params.Input[_Discipline_].Sources.Count == 0);
-
-      var viewFamily = ARDB.ViewFamily.Invalid;
-      DA.GetData("Family", ref viewFamily);
-
-      string name = null;
-      DA.GetData("Name", ref name);
-
-      var Template = default(ARDB.View);
-      var _Template_ = Params.IndexOfInputParam("Template");
-      bool nofilterTemplate = (!DA.GetData(_Template_, ref Template) && Params.Input[_Template_].DataType == GH_ParamData.@void);
-
-      bool IsTemplate = false;
-      var _IsTemplate_ = Params.IndexOfInputParam("Is Template");
-      bool nofilterIsTemplate = (!DA.GetData(_IsTemplate_, ref IsTemplate) && Params.Input[_IsTemplate_].DataType == GH_ParamData.@void);
-
-      bool IsPrintable = false;
-      var _IsPrintable_ = Params.IndexOfInputParam("Is Printable");
-      bool nofilterIsPrintable = (!DA.GetData(_IsPrintable_, ref IsPrintable) && Params.Input[_IsPrintable_].DataType == GH_ParamData.@void);
-
-      bool IsAssembly = false;
-      var _IsAssembly_ = Params.IndexOfInputParam("Is Assembly");
-      bool nofilterIsAssembly = (!DA.GetData(_IsAssembly_, ref IsAssembly) && Params.Input[_IsAssembly_].DataType == GH_ParamData.@void);
-
-      var Assembly = default(Types.AssemblyInstance);
-      var _Assembly_ = Params.IndexOfInputParam("Assembly");
-      bool noFilterAssembly = (!DA.GetData(_Assembly_, ref Assembly) && Params.Input[_Assembly_].DataType == GH_ParamData.@void);
-
-      ARDB.ElementFilter filter = null;
-      DA.GetData("Filter", ref filter);
+      if (!Params.TryGetData(DA, "Discipline", out ARDB.ViewDiscipline? viewDiscipline)) return;
+      if (!Params.TryGetData(DA, "View Family", out ARDB.ViewFamily? viewFamily)) return;
+      if (!Params.TryGetData(DA, "View Name", out string viewName)) return;
+      if (!Params.TryGetData(DA, "Is Dependent", out bool? isDependent)) return;
+      if (!Params.TryGetData(DA, "View Dependency", out Types.View viewDependency)) return;
+      if (!Params.TryGetData(DA, "Is Template", out bool? isTemplate)) return;
+      if (!Params.TryGetData(DA, "View Template", out Types.View viewTemplate)) return;
+      if (!Params.TryGetData(DA, "Is Assembly", out bool? isAssembly)) return;
+      if (!Params.TryGetData(DA, "Associated Assembly", out Types.AssemblyInstance assembly)) return;
+      if (!Params.TryGetData(DA, "Is Printable", out bool? isPrintable)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
       using (var collector = new ARDB.FilteredElementCollector(doc))
       {
@@ -92,36 +91,42 @@ namespace RhinoInside.Revit.GH.Components.Views
         if (filter is object)
           viewsCollector = viewsCollector.WherePasses(filter);
 
-        if (!nofilterDiscipline && TryGetFilterIntegerParam(ARDB.BuiltInParameter.VIEW_DISCIPLINE, (int) viewDiscipline, out var viewDisciplineFilter))
+        if (viewDiscipline.HasValue && TryGetFilterIntegerParam(ARDB.BuiltInParameter.VIEW_DISCIPLINE, (int) viewDiscipline, out var viewDisciplineFilter))
           viewsCollector = viewsCollector.WherePasses(viewDisciplineFilter);
 
-        if (TryGetFilterStringParam(ARDB.BuiltInParameter.VIEW_NAME, ref name, out var viewNameFilter))
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.VIEW_NAME, ref viewName, out var viewNameFilter))
           viewsCollector = viewsCollector.WherePasses(viewNameFilter);
 
-        if (!nofilterTemplate && TryGetFilterElementIdParam(ARDB.BuiltInParameter.VIEW_TEMPLATE, Template?.Id ?? ARDB.ElementId.InvalidElementId, out var templateFilter))
+        if (viewTemplate is object && TryGetFilterElementIdParam(ARDB.BuiltInParameter.VIEW_TEMPLATE, viewTemplate.Id, out var templateFilter))
           viewsCollector = viewsCollector.WherePasses(templateFilter);
 
-        if (!noFilterAssembly && TryGetFilterElementIdParam(ARDB.BuiltInParameter.VIEW_ASSOCIATED_ASSEMBLY_INSTANCE_ID, Assembly?.Id ?? ARDB.ElementId.InvalidElementId, out var assemblyFilter))
+        if (assembly is object && TryGetFilterElementIdParam(ARDB.BuiltInParameter.VIEW_ASSOCIATED_ASSEMBLY_INSTANCE_ID, assembly.Id, out var assemblyFilter))
           viewsCollector = viewsCollector.WherePasses(assemblyFilter);
 
         var views = collector.Cast<ARDB.View>();
 
-        if (!nofilterIsTemplate)
-          views = views.Where((x) => x.IsTemplate == IsTemplate);
+        if (viewDependency is object)
+          views = views.Where(x => x.GetPrimaryViewId() == viewDependency.Id);
 
-        if (!nofilterIsPrintable)
-          views = views.Where((x) => x.CanBePrinted == IsPrintable);
+        if (isDependent.HasValue)
+          views = views.Where(x => (x.GetPrimaryViewId() != ARDB.ElementId.InvalidElementId) == isDependent.Value);
 
-        if (!nofilterIsAssembly)
-          views = views.Where((x) => x.IsAssemblyView == IsAssembly);
+        if (isTemplate.HasValue)
+          views = views.Where(x => x.IsTemplate == isTemplate.Value);
 
-        if (viewFamily != ARDB.ViewFamily.Invalid)
+        if (isPrintable.HasValue)
+          views = views.Where(x => x.CanBePrinted == isPrintable.Value);
+
+        if (isAssembly.HasValue)
+          views = views.Where(x => x.IsAssemblyView == isAssembly.Value);
+
+        if (viewFamily.HasValue)
           views = views.Where(x => x.GetViewFamily() == viewFamily);
         else
-          views = views.Where(x => x.GetViewFamily() != viewFamily);
+          views = views.Where(x => x.GetViewFamily() != ARDB.ViewFamily.Invalid);
 
-        if (name is object)
-          views = views.Where(x => x.Name.IsSymbolNameLike(name));
+        if (viewName is object)
+          views = views.Where(x => x.Name.IsSymbolNameLike(viewName));
 
         DA.SetDataList
         (

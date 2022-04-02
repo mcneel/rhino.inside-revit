@@ -6,7 +6,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  [ComponentVersion(introduced: "1.0", updated: "1.5")]
+  [ComponentVersion(introduced: "1.0", updated: "1.7")]
   public class QueryViewTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("51E306BD-4736-4B7D-B2FF-B23E0717EEBB");
@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewFamily>>("Family", "F", optional: true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewFamily>>("View Family", "VF", optional: true),
       ParamDefinition.Create<Param_String>("Type Name", "TN", "View Type name", optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
     };
@@ -42,6 +42,9 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     public override void AddedToDocument(GH_Document document)
     {
+      if (Params.Input<IGH_Param>("Family") is IGH_Param family)
+        family.Name = "View Family";
+
       if (Params.Input<IGH_Param>("Name") is IGH_Param name)
         name.Name = "Type Name";
 
@@ -54,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         return;
 
       var viewFamily = ARDB.ViewFamily.Invalid;
-      DA.GetData("Family", ref viewFamily);
+      DA.GetData("View Family", ref viewFamily);
 
       string typeName = null;
       DA.GetData("Type Name", ref typeName);

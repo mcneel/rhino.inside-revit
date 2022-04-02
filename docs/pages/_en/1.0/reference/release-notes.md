@@ -17,12 +17,13 @@ group: Deployment & Configs
 - Added 'Floor Plan' 'Ceiling Plan' and 'Area Plan' parameters.
 - Added 'Section', 'Elevation' and 'Detail' view parameters.
 - Exposed 'View Type' parameter.
+- Added 'Add Dependent View' component.
 
 {% include ltr/release-header.html title="v1.6 RC4" version="v1.6" pre_release=true time="04/05/2022" %}
 
 - Fixed 'Add Grid' component when Tracking mode is set to 'Update'.
 - Added 'Elevation' input to 'Add Grid'.
-- Fixed a bug con 'Import 3DM' when importing polylines on a family document.
+- Fixed a bug on 'Import 3DM' command when importing polylines on a family document.
 
 {% include ltr/release-header.html title="v1.6 RC3" version="v1.6.8123.20268" pre_release=true time="03/29/2022" %}
 
