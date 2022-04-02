@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       Params.TrySetData(DA, "View Family", () => view.GetViewFamily());
       Params.TrySetData(DA, "View Name", () => view.Name);
       Params.TrySetData(DA, "Is Dependent", () => view.GetPrimaryViewId() != ARDB.ElementId.InvalidElementId);
-      Params.TrySetData(DA, "View Depedency", () => Types.View.FromElementId(view.Document, view.GetPrimaryViewId()));
+      Params.TrySetData(DA, "View Dependency", () => Types.View.FromElementId(view.Document, view.GetPrimaryViewId()));
       Params.TrySetData(DA, "Is Template", () => view.IsTemplate);
       Params.TrySetData(DA, "View Template", () => Types.View.FromElementId(view.Document, view.ViewTemplateId));
       Params.TrySetData(DA, "Is Assembly", () => view.IsAssemblyView);

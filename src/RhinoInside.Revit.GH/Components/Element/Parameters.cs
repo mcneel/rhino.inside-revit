@@ -65,6 +65,8 @@ namespace RhinoInside.Revit.GH
                 case ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM: return new Types.StructuralWallUsage((ARDB.Structure.StructuralWallUsage) integer);
                 case ARDB.BuiltInParameter.WALL_KEY_REF_PARAM: return new Types.WallLocationLine((ARDB.WallLocationLine) integer);
                 case ARDB.BuiltInParameter.FUNCTION_PARAM: return new Types.WallFunction((ARDB.WallFunction) integer);
+                case ARDB.BuiltInParameter.VIEW_DETAIL_LEVEL: return new Types.ViewDetailLevel((ARDB.ViewDetailLevel) integer);
+                case ARDB.BuiltInParameter.VIEW_DISCIPLINE: return new Types.ViewDiscipline((ARDB.ViewDiscipline) integer);
               }
 
               var builtInIntegerName = builtInInteger.ToString();

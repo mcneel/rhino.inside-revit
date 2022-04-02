@@ -119,6 +119,8 @@ namespace RhinoInside.Revit.GH.Types
   ]
   public class ViewDetailLevel : GH_Enum<ARDB.ViewDetailLevel>
   {
+    public ViewDetailLevel() : base(ARDB.ViewDetailLevel.Undefined) { }
+    public ViewDetailLevel(ARDB.ViewDetailLevel value) : base(value) { }
     public override bool IsEmpty => Value == ARDB.ViewDetailLevel.Undefined;
   }
 
@@ -129,6 +131,8 @@ namespace RhinoInside.Revit.GH.Types
   ]
   public class ViewDiscipline : GH_Enum<ARDB.ViewDiscipline>
   {
+    public ViewDiscipline() : base() { }
+    public ViewDiscipline(ARDB.ViewDiscipline value) : base(value) { }
     public override bool IsEmpty => Value == default;
   }
 
