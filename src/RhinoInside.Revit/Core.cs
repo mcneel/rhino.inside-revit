@@ -208,7 +208,7 @@ namespace RhinoInside.Revit
 #elif REVIT_2021
     static readonly Version MinimumRevitVersion = new Version(2021, 1);
 #elif REVIT_2020
-    static readonly Version MinimumRevitVersion = new Version(2020, 0);
+    static readonly Version MinimumRevitVersion = new Version(2020, 1);
 #elif REVIT_2019
     static readonly Version MinimumRevitVersion = new Version(2019, 1);
 #elif REVIT_2018
