@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Components.Categories
     public CategoryObjectStyle()
     : base
     (
-      name: "Category Object Styles",
-      nickname: "CatStyles",
+      name: "Category Style",
+      nickname: "CatStyle",
       description: string.Empty,
       category: "Revit",
       subCategory: "Object Styles"
