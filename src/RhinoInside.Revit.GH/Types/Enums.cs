@@ -304,6 +304,28 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
+    ComponentGuid("BFFC1AF2-CA68-47CD-9CBE-31E9107BEBED"),
+    Name("Spatial Element Boundary Location"),
+    Description("Contains a collection of spatial element boundary location line values"),
+  ]
+  public class SpatialElementBoundaryLocation : GH_Enum<ARDB.SpatialElementBoundaryLocation>
+  {
+    public SpatialElementBoundaryLocation() : base() { }
+    public SpatialElementBoundaryLocation(ARDB.SpatialElementBoundaryLocation value) : base(value) { }
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) ARDB.SpatialElementBoundaryLocation.Finish,        "Finish" },
+        { (int) ARDB.SpatialElementBoundaryLocation.Center,        "Center" },
+        { (int) ARDB.SpatialElementBoundaryLocation.CoreBoundary,  "Core: Boundary" },
+        { (int) ARDB.SpatialElementBoundaryLocation.CoreCenter,    "Core: Center" }
+      }
+    );
+  }
+
+  [
     ComponentGuid("2FEFFADD-BD29-4B19-9682-4CC5947DF11C"),
     Name("Wall System Family"),
     Description("Contains a collection of Revit wall system family"),
