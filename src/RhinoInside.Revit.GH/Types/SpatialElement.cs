@@ -33,12 +33,18 @@ namespace RhinoInside.Revit.GH.Types
         {
           using (var options = new ARDB.SpatialElementBoundaryOptions())
           {
-            options.SpatialElementBoundaryLocation = ARDB.SpatialElementBoundaryLocation.Center;
             options.StoreFreeBoundaryFaces = true;
+            options.SpatialElementBoundaryLocation = spatial is ARDB.Area ?
+              ARDB.SpatialElementBoundaryLocation.Center :
+              ARDB.SpatialElementBoundaryLocation.Finish;
 
             var tol = GeometryObjectTolerance.Model;
-
             var plane = Location;
+            {
+              var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
+              plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
+            }
+
             var segments = spatial.GetBoundarySegments(options);
             return segments.Select
             (
@@ -57,16 +63,21 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Boundaries is Curve[] loops)
         {
-          var plane = Location;
           if (loops.Length > 0)
           {
-            var loopsBox = BoundingBox.Empty;
-            foreach (var loop in loops)
+            var plane = Location;
             {
-              if (loop.ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
-                loop.Reverse();
+              var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
+              plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
+            }
 
-              loopsBox.Union(loop.GetBoundingBox(plane));
+            var loopsBox = BoundingBox.Empty;
+            for (int l = 0; l< loops.Length; ++l)
+            {
+              if (loops[l].ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
+                loops[l].Reverse();
+
+              loopsBox.Union(loops[l].GetBoundingBox(plane));
             }
 
             var planeSurface = new PlaneSurface

@@ -305,6 +305,17 @@ namespace RhinoInside.Revit.GH.Types
       return new Element(doc, id);
     }
 
+    public static Element FromElementId(ARDB.Document doc, ARDB.LinkElementId id)
+    {
+      if (id.HostElementId != ARDB.ElementId.InvalidElementId)
+        return FromElementId(doc, id.HostElementId);
+
+      if (doc.GetElement(id.LinkInstanceId) is ARDB.RevitLinkInstance instance)
+        return FromElementId(instance.GetLinkDocument(), id.LinkedElementId);
+
+      return default;
+    }
+
     public static T FromElementId<T>(ARDB.Document doc, ARDB.ElementId id) where T : Element, new()
     {
       if (doc is null || id is null) return default;
