@@ -10,28 +10,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       switch (viewType)
       {
-        case ViewType.FloorPlan:          return ViewFamily.FloorPlan;
-        case ViewType.CeilingPlan:        return ViewFamily.CeilingPlan;
-        case ViewType.Elevation:          return ViewFamily.Elevation;
-        case ViewType.ThreeD:             return ViewFamily.ThreeDimensional;
-        case ViewType.Schedule:           return ViewFamily.Schedule;
-        case ViewType.DrawingSheet:       return ViewFamily.Sheet;
-        case ViewType.ProjectBrowser:     return ViewFamily.Invalid;
-        case ViewType.Report:             return ViewFamily.Invalid;
-        case ViewType.DraftingView:       return ViewFamily.Drafting;
-        case ViewType.Legend:             return ViewFamily.Legend;
-        case ViewType.SystemBrowser:      return ViewFamily.Invalid;
-        case ViewType.EngineeringPlan:    return ViewFamily.StructuralPlan;
-        case ViewType.AreaPlan:           return ViewFamily.AreaPlan;
-        case ViewType.Section:            return ViewFamily.Section;
-        case ViewType.Detail:             return ViewFamily.Detail;
-        case ViewType.CostReport:         return ViewFamily.CostReport;
-        case ViewType.LoadsReport:        return ViewFamily.LoadsReport;
-        case ViewType.PresureLossReport:  return ViewFamily.PressureLossReport;
-        case ViewType.ColumnSchedule:     return ViewFamily.GraphicalColumnSchedule;
-        case ViewType.PanelSchedule:      return ViewFamily.PanelSchedule;
-        case ViewType.Walkthrough:        return ViewFamily.Walkthrough;
-        case ViewType.Rendering:          return ViewFamily.ImageView;
+        case ViewType.FloorPlan:              return ViewFamily.FloorPlan;
+        case ViewType.CeilingPlan:            return ViewFamily.CeilingPlan;
+        case ViewType.Elevation:              return ViewFamily.Elevation;
+        case ViewType.ThreeD:                 return ViewFamily.ThreeDimensional;
+        case ViewType.Schedule:               return ViewFamily.Schedule;
+        case ViewType.DrawingSheet:           return ViewFamily.Sheet;
+        case ViewType.ProjectBrowser:         return ViewFamily.Invalid;
+        case ViewType.Report:                 return ViewFamily.Invalid;
+        case ViewType.DraftingView:           return ViewFamily.Drafting;
+        case ViewType.Legend:                 return ViewFamily.Legend;
+        case ViewType.SystemBrowser:          return ViewFamily.Invalid;
+        case ViewType.EngineeringPlan:        return ViewFamily.StructuralPlan;
+        case ViewType.AreaPlan:               return ViewFamily.AreaPlan;
+        case ViewType.Section:                return ViewFamily.Section;
+        case ViewType.Detail:                 return ViewFamily.Detail;
+        case ViewType.CostReport:             return ViewFamily.CostReport;
+        case ViewType.LoadsReport:            return ViewFamily.LoadsReport;
+        case ViewType.PresureLossReport:      return ViewFamily.PressureLossReport;
+        case ViewType.ColumnSchedule:         return ViewFamily.GraphicalColumnSchedule;
+        case ViewType.PanelSchedule:          return ViewFamily.PanelSchedule;
+        case ViewType.Walkthrough:            return ViewFamily.Walkthrough;
+        case ViewType.Rendering:              return ViewFamily.ImageView;
+#if REVIT_2020
+        case ViewType.SystemsAnalysisReport:  return ViewFamily.SystemsAnalysisReport;
+#endif
       }
 
       return ViewFamily.Invalid;
