@@ -1,16 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.GH.Components.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.SpatialElement
+namespace RhinoInside.Revit.GH.Components.SpatialElements
 {
   [ComponentVersion(introduced: "1.7")]
   public class SpatialElementGeometry : ZuiComponent
@@ -22,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Element.SpatialElement
     public SpatialElementGeometry() : base
     (
       name: "Spatial Element Geometry",
-      nickname: "SpatialElementGeometry",
+      nickname: "SE-Geometry",
       description: "Get the geometry of the specified spatial element",
       category: "Revit",
       subCategory: "Spatial"
