@@ -8,6 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.Convert.Geometry
 {
   using External.DB.Extensions;
+  using RhinoInside.Revit.Convert.System.Collections.Generic;
 
   /// <summary>
   /// Converts a Rhino geometry type to an equivalent Revit geometry type.
@@ -1665,6 +1666,21 @@ namespace RhinoInside.Revit.Convert.Geometry
         default:
           return curve.ToNurbsCurve().ToCurve(factor);
       }
+    }
+
+    internal static ARDB.HermiteSpline ToHermiteSpline(this Curve curve) => ToHermiteSpline(curve, ModelScaleFactor);
+    internal static ARDB.HermiteSpline ToHermiteSpline(this Curve curve, double factor)
+    {
+      if (curve.TryGetHermiteSpline(out var points, out var start, out var end, GeometryObjectTolerance.Internal.VertexTolerance / factor))
+      {
+        using (var tangents = new ARDB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
+        {
+          var xyz = points.ConvertAll(x => ToXYZ(x, factor));
+          return ARDB.HermiteSpline.Create(xyz, curve.IsClosed, tangents);
+        }
+      }
+
+      return default;
     }
 
     /// <summary>

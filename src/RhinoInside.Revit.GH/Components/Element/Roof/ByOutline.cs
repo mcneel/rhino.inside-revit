@@ -63,19 +63,10 @@ namespace RhinoInside.Revit.GH.Components
               var segment = segments[(++index) % segments.Length];
 
               var curve = default(ARDB.Curve);
-              if
-              (
-                edge.GeometryCurve is ARDB.HermiteSpline &&
-                segment.TryGetHermiteSpline(out var points, out var start, out var end, tol.VertexTolerance)
-              )
-              {
-                using (var tangents = new ARDB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
-                {
-                  var xyz = points.ConvertAll(GeometryEncoder.ToXYZ);
-                  curve = ARDB.HermiteSpline.Create(xyz, segment.IsClosed, tangents);
-                }
-              }
-              else curve = segment.ToCurve();
+              if (edge.GeometryCurve is ARDB.HermiteSpline)
+                curve = segment.ToHermiteSpline();
+              else
+                curve = segment.ToCurve();
 
               if (!edge.GeometryCurve.IsAlmostEqualTo(curve))
               {
