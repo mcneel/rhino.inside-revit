@@ -23,8 +23,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Add(new GH_ValueListItem("Finish", ((int) ARDB.SpatialElementBoundaryLocation.Finish).ToString()));
       ListItems.Add(new GH_ValueListItem("Center", ((int) ARDB.SpatialElementBoundaryLocation.Center).ToString()));
-      ListItems.Add(new GH_ValueListItem("CoreBoundary", ((int) ARDB.SpatialElementBoundaryLocation.CoreBoundary).ToString()));
-      ListItems.Add(new GH_ValueListItem("CoreCenter", ((int) ARDB.SpatialElementBoundaryLocation.CoreCenter).ToString()));
+      ListItems.Add(new GH_ValueListItem("Core Boundary", ((int) ARDB.SpatialElementBoundaryLocation.CoreBoundary).ToString()));
+      ListItems.Add(new GH_ValueListItem("Core Center", ((int) ARDB.SpatialElementBoundaryLocation.CoreCenter).ToString()));
     }
   }
 }
