@@ -12,6 +12,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.SpatialElement
 {
+  [ComponentVersion(introduced: "1.7")]
   public class SpatialElementGeometry : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("419062DF-CD1C-4AEB-B4CA-E19402FE3317");
