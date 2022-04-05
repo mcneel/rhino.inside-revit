@@ -5,6 +5,12 @@ group: Deployment & Configs
 ---
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.6 RC4" version="v1.6.8124.18574" pre_release=true time="04/05/2022" %}
+
+- Fixed {% include ltr/comp.html uuid='cec2b3df-' %} component when Tracking mode is set to *Update*.
+- Added *Elevation* input to {% include ltr/comp.html uuid='cec2b3df-' %}.
+- Fixed a bug on *Import 3DM* command when importing polylines on a family document.
+
 {% include ltr/release-header.html title="v1.6 RC3" version="v1.6.8123.20268" pre_release=true time="03/29/2022" %}
 - Fixed {% include ltr/comp.html uuid='4434c470-' %} when inverted
 - {{ site.terms.rir }} no longer shows an error window when failing to set shortcut for Grasshopper button
