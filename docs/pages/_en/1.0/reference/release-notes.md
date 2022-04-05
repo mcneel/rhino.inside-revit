@@ -18,6 +18,9 @@ group: Deployment & Configs
 - Added 'Section', 'Elevation' and 'Detail' view parameters.
 - Exposed 'View Type' parameter.
 - Added 'Add Dependent View' component.
+- Added 'Add Floor Plan', 'Add Ceiling Plan' and 'Add Structural Plan' components.
+- Added 'Add Area Boundary', 'Add Room Separation' and 'Add Space Separation' components.
+- Added 'Spatial Element Boundary' and 'Spatial Element Geometry' components.
 
 {% include ltr/release-header.html title="v1.6 RC4" version="v1.6" pre_release=true time="04/05/2022" %}
 
