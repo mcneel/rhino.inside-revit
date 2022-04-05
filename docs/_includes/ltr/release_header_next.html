@@ -1,0 +1,13 @@
+<div class="msg-block">
+    <table class="msg-table">
+        <tr>
+            <td class="releasennotes-card-msg">
+                <details class="releasennotes-card-details">
+                    <summary><span class="releasennotes-card-title">{{ include.title }}</span></summary>
+
+                    {{ include.note | markdownify }}
+                </details>
+            </td>
+        </tr>
+    </table>
+</div>

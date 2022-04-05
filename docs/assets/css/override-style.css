@@ -1333,6 +1333,19 @@ small.build-time {
     margin-right: 20px;
 }
 
+.releasennotes-card-details {
+    margin-top: 20px;
+}
+
+.releasennotes-card-msg {
+    padding: 0px 25px 20px 25px;
+    color: #4e4e4e;
+}
+
+.releasennotes-card-title {
+    font-size: 16px;
+}
+
 .video-player {
     margin-bottom: 20px;
 }
