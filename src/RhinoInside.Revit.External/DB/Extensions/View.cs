@@ -32,8 +32,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case ViewType.PanelSchedule:          return ViewFamily.PanelSchedule;
         case ViewType.Walkthrough:            return ViewFamily.Walkthrough;
         case ViewType.Rendering:              return ViewFamily.ImageView;
-#if REVIT_2020
+#if REVIT_2021
         case ViewType.SystemsAnalysisReport:  return ViewFamily.SystemsAnalysisReport;
+#else
+        case (ViewType) 126:                  return (ViewFamily) 121;
 #endif
       }
 

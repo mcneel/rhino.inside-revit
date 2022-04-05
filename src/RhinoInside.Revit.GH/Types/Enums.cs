@@ -170,8 +170,10 @@ namespace RhinoInside.Revit.GH.Types
         { (int) ARDB.ViewFamily.CostReport,               "Cost Report"               },
         { (int) ARDB.ViewFamily.LoadsReport,              "Loads Report"              },
         { (int) ARDB.ViewFamily.PressureLossReport,       "Pressure Loss Report"      },
-#if REVIT_2020
+#if REVIT_2021
         { (int) ARDB.ViewFamily.SystemsAnalysisReport,    "Systems Analysis Report"   },
+#else
+        { (int) 121,                                      "Systems Analysis Report"   },
 #endif
       }
     );
