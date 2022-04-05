@@ -4,18 +4,17 @@
   <HelpKINode Title="ActiveDBDocument property" Url="html/P_RhinoInside_Revit_Revit_ActiveDBDocument.htm" />
   <HelpKINode Title="ActiveUIApplication property" Url="html/P_RhinoInside_Revit_Revit_ActiveUIApplication.htm" />
   <HelpKINode Title="ActiveUIDocument property" Url="html/P_RhinoInside_Revit_Revit_ActiveUIDocument.htm" />
-  <HelpKINode Title="AngleTolerance property" Url="html/P_RhinoInside_Revit_Revit_AngleTolerance.htm" />
   <HelpKINode Title="ColorConverter class">
-    <HelpKINode Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter.htm" />
-    <HelpKINode Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm" />
     <HelpKINode Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Drawing_ColorConverter.htm" />
+    <HelpKINode Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm" />
+    <HelpKINode Title="ColorConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter.htm" />
     <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter.htm" />
-    <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm" />
     <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Drawing_ColorConverter.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm" />
   </HelpKINode>
   <HelpKINode Title="ColorConverter.ToColor method">
-    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter_ToColor.htm" />
     <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Drawing_ColorConverter_ToColor.htm" />
+    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter_ToColor.htm" />
     <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter_ToColor.htm" />
   </HelpKINode>
   <HelpKINode Title="ColorWithTransparencyConverter class">
@@ -24,8 +23,6 @@
   </HelpKINode>
   <HelpKINode Title="ColorWithTransparencyConverter.ToColor method" Url="html/M_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter_ToColor.htm" />
   <HelpKINode Title="ColorWithTransparencyConverter.ToColorWithTransparency method" Url="html/M_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter_ToColorWithTransparency.htm" />
-  <HelpKINode Title="ConvertFromInternalUnits method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertFromInternalUnits.htm" />
-  <HelpKINode Title="ConvertToInternalUnits method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertToInternalUnits.htm" />
   <HelpKINode Title="GeometryDecoder class">
     <HelpKINode Title="GeometryDecoder Class" Url="html/T_RhinoInside_Revit_Convert_Geometry_GeometryDecoder.htm" />
     <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Geometry_GeometryDecoder.htm" />
@@ -34,13 +31,16 @@
   <HelpKINode Title="GeometryDecoder.ToBox method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBox.htm" />
   <HelpKINode Title="GeometryDecoder.ToBrep method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBrep.htm" />
   <HelpKINode Title="GeometryDecoder.ToCurve method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToCurve.htm" />
+  <HelpKINode Title="GeometryDecoder.ToCurveMany method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToCurveMany.htm" />
   <HelpKINode Title="GeometryDecoder.ToCurves method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToCurves.htm" />
+  <HelpKINode Title="GeometryDecoder.ToGeometryBase method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToGeometryBase.htm" />
   <HelpKINode Title="GeometryDecoder.ToMesh method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToMesh.htm" />
+  <HelpKINode Title="GeometryDecoder.ToModelLength method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToModelLength.htm" />
   <HelpKINode Title="GeometryDecoder.ToPlane method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPlane.htm" />
   <HelpKINode Title="GeometryDecoder.ToPoint method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPoint.htm" />
   <HelpKINode Title="GeometryDecoder.ToPoint2d method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPoint2d.htm" />
   <HelpKINode Title="GeometryDecoder.ToPoint3d method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPoint3d.htm" />
-  <HelpKINode Title="GeometryDecoder.ToPolyCurves method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPolyCurves.htm" />
+  <HelpKINode Title="GeometryDecoder.ToPolyCurve method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPolyCurve.htm" />
   <HelpKINode Title="GeometryDecoder.ToPolylineCurve method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPolylineCurve.htm" />
   <HelpKINode Title="GeometryDecoder.ToTransform method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToTransform.htm" />
   <HelpKINode Title="GeometryDecoder.ToVector2d method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToVector2d.htm" />
@@ -55,22 +55,17 @@
   <HelpKINode Title="GeometryEncoder.ToCurveArray method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToCurveArray.htm" />
   <HelpKINode Title="GeometryEncoder.ToCurveLoop method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToCurveLoop.htm" />
   <HelpKINode Title="GeometryEncoder.ToGeometryObject method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToGeometryObject.htm" />
+  <HelpKINode Title="GeometryEncoder.ToInternalLength method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToInternalLength.htm" />
   <HelpKINode Title="GeometryEncoder.ToLine method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToLine.htm" />
-  <HelpKINode Title="GeometryEncoder.ToLines method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToLines.htm" />
   <HelpKINode Title="GeometryEncoder.ToMesh method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToMesh.htm" />
   <HelpKINode Title="GeometryEncoder.ToOutline method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToOutline.htm" />
   <HelpKINode Title="GeometryEncoder.ToPlane method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPlane.htm" />
-  <HelpKINode Title="GeometryEncoder.ToPoint method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPoint.htm" />
-  <HelpKINode Title="GeometryEncoder.ToPoints method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPoints.htm" />
+  <HelpKINode Title="GeometryEncoder.ToPoint method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPoint.htm" />
   <HelpKINode Title="GeometryEncoder.ToPolyLine method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPolyLine.htm" />
   <HelpKINode Title="GeometryEncoder.ToSolid method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToSolid.htm" />
   <HelpKINode Title="GeometryEncoder.ToTransform method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToTransform.htm" />
   <HelpKINode Title="GeometryEncoder.ToUV method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToUV.htm" />
   <HelpKINode Title="GeometryEncoder.ToXYZ method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToXYZ.htm" />
-  <HelpKINode Title="InvokeInHostContext method" Url="html/Overload_RhinoInside_Revit_Rhinoceros_InvokeInHostContext.htm" />
-  <HelpKINode Title="Model field" Url="html/F_RhinoInside_Revit_Convert_Geometry_UnitConverter_Model.htm" />
-  <HelpKINode Title="ModelUnits property" Url="html/P_RhinoInside_Revit_Revit_ModelUnits.htm" />
-  <HelpKINode Title="Page field" Url="html/F_RhinoInside_Revit_Convert_Geometry_UnitConverter_Page.htm" />
   <HelpKINode Title="RectangleConverter class">
     <HelpKINode Title="RectangleConverter Class" Url="html/T_RhinoInside_Revit_Convert_System_Drawing_RectangleConverter.htm" />
     <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Convert_System_Drawing_RectangleConverter.htm" />
@@ -89,24 +84,13 @@
   <HelpKINode Title="Revit.ActiveDBDocument property" Url="html/P_RhinoInside_Revit_Revit_ActiveDBDocument.htm" />
   <HelpKINode Title="Revit.ActiveUIApplication property" Url="html/P_RhinoInside_Revit_Revit_ActiveUIApplication.htm" />
   <HelpKINode Title="Revit.ActiveUIDocument property" Url="html/P_RhinoInside_Revit_Revit_ActiveUIDocument.htm" />
-  <HelpKINode Title="Revit.AngleTolerance property" Url="html/P_RhinoInside_Revit_Revit_AngleTolerance.htm" />
-  <HelpKINode Title="Revit.ModelUnits property" Url="html/P_RhinoInside_Revit_Revit_ModelUnits.htm" />
-  <HelpKINode Title="Revit.ShortCurveTolerance property" Url="html/P_RhinoInside_Revit_Revit_ShortCurveTolerance.htm" />
-  <HelpKINode Title="Revit.VertexTolerance property" Url="html/P_RhinoInside_Revit_Revit_VertexTolerance.htm" />
-  <HelpKINode Title="Rhinoceros class">
-    <HelpKINode Title="Rhinoceros Class" Url="html/T_RhinoInside_Revit_Rhinoceros.htm" />
-    <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Rhinoceros.htm" />
-  </HelpKINode>
-  <HelpKINode Title="Rhinoceros.InvokeInHostContext method" Url="html/Overload_RhinoInside_Revit_Rhinoceros_InvokeInHostContext.htm" />
-  <HelpKINode Title="Rhinoceros.RunScriptAsync method" Url="html/M_RhinoInside_Revit_Rhinoceros_RunScriptAsync.htm" />
-  <HelpKINode Title="Rhinoceros.ShowAsync method" Url="html/M_RhinoInside_Revit_Rhinoceros_ShowAsync.htm" />
+  <HelpKINode Title="Rhinoceros class" Url="html/T_RhinoInside_Revit_Rhinoceros.htm" />
   <HelpKINode Title="RhinoInside.Revit namespace" Url="html/N_RhinoInside_Revit.htm" />
   <HelpKINode Title="RhinoInside.Revit.Convert.Eto.Drawing namespace" Url="html/N_RhinoInside_Revit_Convert_Eto_Drawing.htm" />
   <HelpKINode Title="RhinoInside.Revit.Convert.Eto.Drawing.ColorConverter class" Url="html/T_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter.htm" />
   <HelpKINode Title="RhinoInside.Revit.Convert.Geometry namespace" Url="html/N_RhinoInside_Revit_Convert_Geometry.htm" />
   <HelpKINode Title="RhinoInside.Revit.Convert.Geometry.GeometryDecoder class" Url="html/T_RhinoInside_Revit_Convert_Geometry_GeometryDecoder.htm" />
   <HelpKINode Title="RhinoInside.Revit.Convert.Geometry.GeometryEncoder class" Url="html/T_RhinoInside_Revit_Convert_Geometry_GeometryEncoder.htm" />
-  <HelpKINode Title="RhinoInside.Revit.Convert.Geometry.UnitConverter class" Url="html/T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm" />
   <HelpKINode Title="RhinoInside.Revit.Convert.Render namespace" Url="html/N_RhinoInside_Revit_Convert_Render.htm" />
   <HelpKINode Title="RhinoInside.Revit.Convert.Render.RenderMaterialConverter class" Url="html/T_RhinoInside_Revit_Convert_Render_RenderMaterialConverter.htm" />
   <HelpKINode Title="RhinoInside.Revit.Convert.System.Drawing namespace" Url="html/N_RhinoInside_Revit_Convert_System_Drawing.htm" />
@@ -117,17 +101,14 @@
   <HelpKINode Title="RhinoInside.Revit.Convert.System.Windows.Media.ColorConverter class" Url="html/T_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter.htm" />
   <HelpKINode Title="RhinoInside.Revit.Revit class" Url="html/T_RhinoInside_Revit_Revit.htm" />
   <HelpKINode Title="RhinoInside.Revit.Rhinoceros class" Url="html/T_RhinoInside_Revit_Rhinoceros.htm" />
-  <HelpKINode Title="RunScriptAsync method" Url="html/M_RhinoInside_Revit_Rhinoceros_RunScriptAsync.htm" />
-  <HelpKINode Title="ShortCurveTolerance property" Url="html/P_RhinoInside_Revit_Revit_ShortCurveTolerance.htm" />
-  <HelpKINode Title="ShowAsync method" Url="html/M_RhinoInside_Revit_Rhinoceros_ShowAsync.htm" />
   <HelpKINode Title="ToArc method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToArc.htm" />
   <HelpKINode Title="ToBoundingBox method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBoundingBox.htm" />
   <HelpKINode Title="ToBoundingBoxXYZ method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToBoundingBoxXYZ.htm" />
   <HelpKINode Title="ToBox method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBox.htm" />
   <HelpKINode Title="ToBrep method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToBrep.htm" />
   <HelpKINode Title="ToColor method">
-    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Drawing_ColorConverter_ToColor.htm" />
     <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_Eto_Drawing_ColorConverter_ToColor.htm" />
+    <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Drawing_ColorConverter_ToColor.htm" />
     <HelpKINode Title="ColorConverter.ToColor Method " Url="html/Overload_RhinoInside_Revit_Convert_System_Windows_Media_ColorConverter_ToColor.htm" />
     <HelpKINode Title="ColorWithTransparencyConverter.ToColor Method " Url="html/M_RhinoInside_Revit_Convert_System_Drawing_ColorWithTransparencyConverter_ToColor.htm" />
   </HelpKINode>
@@ -138,14 +119,17 @@
   </HelpKINode>
   <HelpKINode Title="ToCurveArray method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToCurveArray.htm" />
   <HelpKINode Title="ToCurveLoop method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToCurveLoop.htm" />
+  <HelpKINode Title="ToCurveMany method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToCurveMany.htm" />
   <HelpKINode Title="ToCurves method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToCurves.htm" />
+  <HelpKINode Title="ToGeometryBase method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToGeometryBase.htm" />
   <HelpKINode Title="ToGeometryObject method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToGeometryObject.htm" />
+  <HelpKINode Title="ToInternalLength method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToInternalLength.htm" />
   <HelpKINode Title="ToLine method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToLine.htm" />
-  <HelpKINode Title="ToLines method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToLines.htm" />
   <HelpKINode Title="ToMesh method">
     <HelpKINode Title="GeometryDecoder.ToMesh Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToMesh.htm" />
     <HelpKINode Title="GeometryEncoder.ToMesh Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToMesh.htm" />
   </HelpKINode>
+  <HelpKINode Title="ToModelLength method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToModelLength.htm" />
   <HelpKINode Title="ToOutline method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToOutline.htm" />
   <HelpKINode Title="ToPlane method">
     <HelpKINode Title="GeometryDecoder.ToPlane Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPlane.htm" />
@@ -153,12 +137,11 @@
   </HelpKINode>
   <HelpKINode Title="ToPoint method">
     <HelpKINode Title="GeometryDecoder.ToPoint Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPoint.htm" />
-    <HelpKINode Title="GeometryEncoder.ToPoint Method " Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPoint.htm" />
+    <HelpKINode Title="GeometryEncoder.ToPoint Method " Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPoint.htm" />
   </HelpKINode>
   <HelpKINode Title="ToPoint2d method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPoint2d.htm" />
   <HelpKINode Title="ToPoint3d method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPoint3d.htm" />
-  <HelpKINode Title="ToPoints method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPoints.htm" />
-  <HelpKINode Title="ToPolyCurves method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPolyCurves.htm" />
+  <HelpKINode Title="ToPolyCurve method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPolyCurve.htm" />
   <HelpKINode Title="ToPolyLine method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToPolyLine.htm" />
   <HelpKINode Title="ToPolylineCurve method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToPolylineCurve.htm" />
   <HelpKINode Title="ToRectangle method" Url="html/Overload_RhinoInside_Revit_Convert_System_Drawing_RectangleConverter_ToRectangle.htm" />
@@ -172,19 +155,4 @@
   <HelpKINode Title="ToVector2d method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToVector2d.htm" />
   <HelpKINode Title="ToVector3d method" Url="html/M_RhinoInside_Revit_Convert_Geometry_GeometryDecoder_ToVector3d.htm" />
   <HelpKINode Title="ToXYZ method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_GeometryEncoder_ToXYZ.htm" />
-  <HelpKINode Title="UnitConverter class">
-    <HelpKINode Title="UnitConverter Class" Url="html/T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm" />
-    <HelpKINode Title="constructor" Url="html/M_RhinoInside_Revit_Convert_Geometry_UnitConverter__ctor.htm" />
-    <HelpKINode Title="fields" Url="html/Fields_T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm" />
-    <HelpKINode Title="methods" Url="html/Methods_T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm" />
-    <HelpKINode Title="properties" Url="html/Properties_T_RhinoInside_Revit_Convert_Geometry_UnitConverter.htm" />
-  </HelpKINode>
-  <HelpKINode Title="UnitConverter.ConvertFromInternalUnits method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertFromInternalUnits.htm" />
-  <HelpKINode Title="UnitConverter.ConvertToInternalUnits method" Url="html/Overload_RhinoInside_Revit_Convert_Geometry_UnitConverter_ConvertToInternalUnits.htm" />
-  <HelpKINode Title="UnitConverter.Model field" Url="html/F_RhinoInside_Revit_Convert_Geometry_UnitConverter_Model.htm" />
-  <HelpKINode Title="UnitConverter.Page field" Url="html/F_RhinoInside_Revit_Convert_Geometry_UnitConverter_Page.htm" />
-  <HelpKINode Title="UnitConverter.UnitConverter constructor" Url="html/M_RhinoInside_Revit_Convert_Geometry_UnitConverter__ctor.htm" />
-  <HelpKINode Title="UnitConverter.UnitSystem property" Url="html/P_RhinoInside_Revit_Convert_Geometry_UnitConverter_UnitSystem.htm" />
-  <HelpKINode Title="UnitSystem property" Url="html/P_RhinoInside_Revit_Convert_Geometry_UnitConverter_UnitSystem.htm" />
-  <HelpKINode Title="VertexTolerance property" Url="html/P_RhinoInside_Revit_Revit_VertexTolerance.htm" />
 </HelpKI>
