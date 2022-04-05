@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       );
     }
 
-    bool Reuse(ARDB.ViewPlan viewPlan, ARDB.Level level, ARDB.ViewFamilyType type, string name)
+    bool Reuse(ARDB.ViewPlan viewPlan, ARDB.Level level, ARDB.ViewFamilyType type)
     {
       if (viewPlan is null) return false;
       if (!viewPlan.GenLevel.IsEquivalent(level)) return false;
@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     ARDB.ViewPlan Reconstruct(ARDB.ViewPlan viewPlan, ARDB.Level level, ARDB.ViewFamilyType type, string name, ARDB.ViewPlan template)
     {
-      if (!Reuse(viewPlan, level, type, name))
+      if (!Reuse(viewPlan, level, type))
         viewPlan = Create(level, type);
 
       viewPlan.CopyParametersFrom(template, ExcludeUniqueProperties);
