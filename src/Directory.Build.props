@@ -22,7 +22,7 @@
     <!-- sandcastle root dir -->
     <PropertyGroup>
         <PackagesDir>$(RIRSourceDir)..\packages\</PackagesDir>
-        <SHFBROOT>$(PackagesDir)EWSoftware.SHFB.2021.11.7\tools\</SHFBROOT>
+        <SHFBROOT>$(PackagesDir)EWSoftware.SHFB.2022.2.6\tools\</SHFBROOT>
     </PropertyGroup>
 
     <!-- global build configurations -->
