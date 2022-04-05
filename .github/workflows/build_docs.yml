@@ -21,7 +21,7 @@ jobs:
           nuget install PythonSyntaxGenerator -o packages\components -version "0.1.0-beta3"
 
       - name: build documentation
-        run: msbuild script/cibuild_docs.msbuild -v:m
+        run: msbuild script/cibuild_docs.msbuild -v:m /p:TrackFileAccess=false
 
       # - name: upload docs
       #   uses: actions/upload-artifact@v2
