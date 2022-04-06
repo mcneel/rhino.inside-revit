@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
       }
 
       // Search geometrically
-      if (element.Value.get_BoundingBox(null) is ARDB.BoundingBoxXYZ bbox)
+      if (element.Value.GetOutline() is ARDB.Outline outline)
       {
         using (var collector = new ARDB.FilteredElementCollector(element.Document))
         {
@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
           if (element.Value.Category?.Parent is ARDB.Category hostCategory)
             elementCollector = elementCollector.OfCategoryId(hostCategory.Id);
 
-          var bboxFilter = new ARDB.BoundingBoxIntersectsFilter(new ARDB.Outline(bbox.Min, bbox.Max));
+          var bboxFilter = new ARDB.BoundingBoxIntersectsFilter(outline, element.Document.Application.VertexTolerance);
           elementCollector = elementCollector.WherePasses(bboxFilter);
 
           using (var includesFilter = CompoundElementFilter.InclusionFilter(element.Value))
