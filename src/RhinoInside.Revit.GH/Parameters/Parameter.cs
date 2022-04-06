@@ -467,7 +467,9 @@ namespace RhinoInside.Revit.GH.Parameters
       ParameterType = EDBS.DataType.Empty;
       switch (GetValue("ParameterType"))
       {
+#if !REVIT_2023
         case int enumerate: ParameterType = ((ARDB.ParameterType) enumerate).ToDataType(); break;
+#endif
         case string schema: ParameterType = new EDBS.DataType(schema); break;
       }
 

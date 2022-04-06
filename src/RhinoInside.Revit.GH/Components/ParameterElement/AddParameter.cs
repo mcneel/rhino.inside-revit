@@ -299,8 +299,8 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       {
         using (options)
         {
-          if (options.Type == ARDB.ParameterType.Invalid)
-            options.Type = ARDB.ParameterType.Text;
+          if ((ERDB.Schemas.DataType) options.GetDataType() == ERDB.Schemas.DataType.Empty)
+            options.SetDataType(ERDB.Schemas.SpecType.String.Text);
 
           var groupName = key.Group?.LocalizedLabel ?? "Other";
           var group = DefinitionFile.Groups.get_Item(groupName) ??

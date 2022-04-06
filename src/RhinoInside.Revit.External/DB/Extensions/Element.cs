@@ -52,6 +52,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
   internal struct ElementNameComparer : IComparer<string>
   {
     public int Compare(string x, string y) => NamingUtils.CompareNames(x, y);
+
+#if REVIT_2023
+    public static StringComparison StringComparison = StringComparison.OrdinalIgnoreCase;
+#else
+    public static StringComparison StringComparison = StringComparison.Ordinal;
+#endif
   }
 
   public static class ElementExtension

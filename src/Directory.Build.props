@@ -58,6 +58,8 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2021|x64'"></PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2022|x64'"></PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2022|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2023|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2023|x64'"></PropertyGroup>
 
     <!-- revit-specific build configurations -->
     <PropertyGroup Condition="$(Configuration.Contains('2017'))">
@@ -89,6 +91,11 @@
         <RevitVersion>2022</RevitVersion>
         <RevitApiVersion>2022.0.0</RevitApiVersion>
         <DefineConstants>$(DefineConstants);REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="$(Configuration.Contains('2023'))">
+        <RevitVersion>2023</RevitVersion>
+        <RevitApiVersion>2023.0.0</RevitApiVersion>
+        <DefineConstants>$(DefineConstants);REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022;REVIT_2023</DefineConstants>
     </PropertyGroup>
 
     <!-- revit install dir based on revit version -->

@@ -160,6 +160,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #endif
 
     #region ParameterType
+#if !REVIT_2023
 #pragma warning disable CS0618 // Type or member is obsolete
     static readonly Dictionary<Schemas.DataType, int> parameterTypeMap = new Dictionary<Schemas.DataType, int>()
     {
@@ -330,6 +331,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return Autodesk.Revit.DB.ParameterType.Invalid;
     }
 #pragma warning restore CS0618 // Type or member is obsolete
+#endif
     #endregion
 
     #region StorageType
