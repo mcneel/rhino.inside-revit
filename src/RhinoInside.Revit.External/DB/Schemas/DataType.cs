@@ -154,7 +154,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #endif
     }  
 
-#if !REVIT_2021
+#if !REVIT_2022
     internal static Schemas.DataType GetDataType(this Autodesk.Revit.DB.ExternalDefinitionCreationOptions value) => value.Type;
     internal static void SetDataType(this Autodesk.Revit.DB.ExternalDefinitionCreationOptions value, Schemas.DataType dataType) => value.Type = dataType;
 #endif
