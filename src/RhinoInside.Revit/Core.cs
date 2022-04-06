@@ -112,7 +112,7 @@ namespace RhinoInside.Revit
       if (IsExpired())
         status = Status.Obsolete;
       else if (RhinoVersion >= MinimumRhinoVersion)
-        status = NativeLoader.IsolateOpenNurbs() ? Status.Available : Status.Unavailable;
+        status = Status.Available;
 
       Logger.LogTrace
       (
@@ -139,7 +139,8 @@ namespace RhinoInside.Revit
       {
         // Check if the AddIn can startup
         {
-          var result = CanStartup(uiCtrlApp);
+          scope.LogTrace("Starting…", DisplayVersion);
+          var result = Startup(uiCtrlApp);
           if (result != Result.Succeeded) return result;
         }
 
@@ -150,7 +151,6 @@ namespace RhinoInside.Revit
         ErrorReport.OnLoadStackTraceFilePath =
           Path.ChangeExtension(uiCtrlApp.ControlledApplication.RecordingJournalFilename, "log.md");
 
-        Host = uiCtrlApp;
         External.ActivationGate.SetHostWindow(Host.MainWindowHandle);
         AssemblyResolver.Enabled = true;
 
@@ -217,13 +217,13 @@ namespace RhinoInside.Revit
     static readonly Version MinimumRevitVersion = new Version(2017, 0);
 #endif
 
-    static Result CanStartup(UIControlledApplication app)
+    static Result Startup(UIX.UIHostApplication app)
     {
       if (StartupMode == CoreStartupMode.Cancelled)
         return Result.Cancelled;
 
       // Check if Revit.exe is a supported version
-      var RevitVersion = new Version(app.ControlledApplication.GetSubVersionNumber());
+      var RevitVersion = new Version(app.Services.SubVersionNumber);
       if (RevitVersion < MinimumRevitVersion)
       {
         using
@@ -240,10 +240,10 @@ namespace RhinoInside.Revit
             $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n") +
             $"• Version: {RhinoVersion}\n" +
             $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
-            $"\n{app.ControlledApplication.VersionName}\n" +
-            $"• Version: {RevitVersion} ({app.ControlledApplication.VersionBuild})\n" +
+            $"\n{app.Services.VersionName}\n" +
+            $"• Version: {RevitVersion} ({app.Services.VersionBuild})\n" +
             $"• Path: {Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\n" +
-            $"• Language: {app.ControlledApplication.Language}",
+            $"• Language: {app.Services.Language}",
             FooterText = $"Current Revit version: {RevitVersion}"
           }
         )
@@ -258,6 +258,14 @@ namespace RhinoInside.Revit
         return Result.Cancelled;
       }
 
+      // Check if we have 'opennurbs_private.manifest' file on Revit folder.
+      if (status == Status.Available)
+      {
+        if (Status.Available != (status = NativeLoader.IsolateOpenNurbs(app.MainWindowHandle) ? Status.Available : Status.Unavailable))
+          return Result.Failed;
+      }
+
+      Host = app;
       return Result.Succeeded;
     }
 
