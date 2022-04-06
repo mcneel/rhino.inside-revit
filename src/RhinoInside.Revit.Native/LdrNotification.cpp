@@ -259,8 +259,8 @@ BOOL EnsureOpenNurbsPrivateManifest(HWND hWnd, LPCTSTR ManifestFileName)
     (
       hWnd,
       _T("Failed to find 'opennurbs_private.manifest' file in Revit folder.\r\n\r\n")
-      _T("This file is necessary to avoid OpenNURBS conflicts with Revit builtin 3dm importer.\r\n\r\n")
-      _T("Do you want to install it now? The copy operation will ask for admin access to copy this file to Revit folder"),
+      _T("This file is necessary to avoid OpenNURBS conflicts with Revit Built-In 3DM importer.\r\n\r\n")
+      _T("Do you want to install it now?\r\n\r\nThe copy operation will ask for admin rights to copy this file to Revit folder"),
       _T("Rhino.Inside - opennurbs_private.manifest"),
       MB_ICONWARNING | MB_OK
     )
@@ -294,7 +294,7 @@ BOOL EnsureOpenNurbsPrivateManifest(HWND hWnd, LPCTSTR ManifestFileName)
 }
 
 RIR_EXPORT
-BOOL STDAPICALLTYPE LdrIsolateOpenNurbs()
+BOOL STDAPICALLTYPE LdrIsolateOpenNurbs(HWND hHostWnd)
 {
   if (IsWindowsServer())
     return TRUE;
@@ -308,7 +308,10 @@ BOOL STDAPICALLTYPE LdrIsolateOpenNurbs()
       auto size = ManifestFileName + std::size(ManifestFileName) - FileName - 1;
       _tcscpy_s(++FileName, size, _T("opennurbs_private.manifest"));
 
-      if (!EnsureOpenNurbsPrivateManifest(GetActiveWindow(), ManifestFileName))
+      if (hHostWnd == HWND_DESKTOP)
+        hHostWnd = GetActiveWindow();
+
+      if (!EnsureOpenNurbsPrivateManifest(hHostWnd, ManifestFileName))
         return FALSE;
 
       ACTCTX ActCtx {sizeof(ActCtx)};

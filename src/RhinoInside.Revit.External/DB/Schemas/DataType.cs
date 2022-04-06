@@ -154,12 +154,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #endif
     }  
 
-#if !REVIT_2021
+#if !REVIT_2022
     internal static Schemas.DataType GetDataType(this Autodesk.Revit.DB.ExternalDefinitionCreationOptions value) => value.Type;
     internal static void SetDataType(this Autodesk.Revit.DB.ExternalDefinitionCreationOptions value, Schemas.DataType dataType) => value.Type = dataType;
 #endif
 
     #region ParameterType
+#if !REVIT_2023
 #pragma warning disable CS0618 // Type or member is obsolete
     static readonly Dictionary<Schemas.DataType, int> parameterTypeMap = new Dictionary<Schemas.DataType, int>()
     {
@@ -330,6 +331,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return Autodesk.Revit.DB.ParameterType.Invalid;
     }
 #pragma warning restore CS0618 // Type or member is obsolete
+#endif
     #endregion
 
     #region StorageType

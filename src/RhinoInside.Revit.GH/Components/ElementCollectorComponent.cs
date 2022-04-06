@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
@@ -138,12 +139,11 @@ namespace RhinoInside.Revit.GH.Components
             case Operator.CompareMethod.Contains: evaluator = new ARDB.FilterStringContains(); break;
           }
 
-          var rule = new ARDB.FilterStringRule
+          var rule = CompoundElementFilter.FilterStringRule
           (
             new ARDB.ParameterValueProvider(new ARDB.ElementId(paramId)),
             evaluator,
-            subPattern,
-            true
+            subPattern
           );
 
           filter = new ARDB.ElementParameterFilter(rule, inverted);
