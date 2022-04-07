@@ -188,7 +188,7 @@
         <File Id="Addins.2023.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2023\RhinoInside.Revit.dll"/>
         <File Id="Addins.2023.RhinoInside.Revit.xml" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2023\RhinoInside.Revit.xml"/>
         <File Id="Addins.2023.RhinoInside.Revit.External.dll" Source="..\RhinoInside.Revit.External\bin\x64\$(var.Configuration) 2023\RhinoInside.Revit.External.dll"/>
-        <File Id="Addins.2023.RhinoInside.Revit.AddIn.dll" Source="..\RhinoInside.Revit.AddIn\bin\x64\$(var.Configuration) 2022\RhinoInside.Revit.AddIn.dll"/>
+        <File Id="Addins.2023.RhinoInside.Revit.AddIn.dll" Source="..\RhinoInside.Revit.AddIn\bin\x64\$(var.Configuration) 2023\RhinoInside.Revit.AddIn.dll"/>
         <File Id="Addins.2023.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2023\RhinoInside.Revit.GH.gha"/>
         <File Id="Addins.2023.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
         <File Id="Addins.2023.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
