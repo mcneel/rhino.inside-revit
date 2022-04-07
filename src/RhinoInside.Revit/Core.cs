@@ -253,7 +253,7 @@ namespace RhinoInside.Revit
           taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, $"Revit {RevitVersion.Major} Product Updates…");
           if (taskDialog.Show() == TaskDialogResult.CommandLink1)
           {
-            using (Process.Start($@"https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-{RevitVersion.Major}-product-updates.html")) { }
+            using (Process.Start($@"https://knowledge.autodesk.com/support/revit/downloads?release={RevitVersion.Major}")) { }
           }
         }
 
