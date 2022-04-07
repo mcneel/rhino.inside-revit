@@ -714,27 +714,30 @@ namespace RhinoInside.Revit
         // Disable Revit Main Window while in Command
         Revit.MainWindow.Enabled = false;
 
-        var groupName = e.CommandLocalName;
-        var pluginId = PlugIn.IdFromName(e.CommandPluginName);
-        var plugin   = PlugIn.Find(pluginId);
-        var command  = plugin?.GetCommands().Where(x => x.Id == e.CommandId).FirstOrDefault();
-        if
-        (
-          command?.GetType().GetRuntimeProperty("DisplayName") is PropertyInfo info &&
-          info.CanRead &&
-          info.PropertyType == typeof(string) &&
-          info.GetValue(command) is string displayName &&
-          !string.IsNullOrWhiteSpace(displayName)
-        )
+        if (Revit.ActiveUIDocument is ARUI.UIDocument uiDocument)
         {
-          groupName = displayName;
+          var groupName = e.CommandLocalName;
+          var pluginId = PlugIn.IdFromName(e.CommandPluginName);
+          var plugin = PlugIn.Find(pluginId);
+          var command = plugin?.GetCommands().Where(x => x.Id == e.CommandId).FirstOrDefault();
+          if
+          (
+            command?.GetType().GetRuntimeProperty("DisplayName") is PropertyInfo info &&
+            info.CanRead &&
+            info.PropertyType == typeof(string) &&
+            info.GetValue(command) is string displayName &&
+            !string.IsNullOrWhiteSpace(displayName)
+          )
+          {
+            groupName = displayName;
+          }
+
+          CommandGroup = new ARDB.TransactionGroup
+          (uiDocument.Document, groupName)
+          { IsFailureHandlingForcedModal = true };
+
+          CommandGroup.Start();
         }
-
-        CommandGroup = new ARDB.TransactionGroup
-        (Revit.ActiveUIDocument.Document, groupName)
-        { IsFailureHandlingForcedModal = true };
-
-        CommandGroup.Start();
       }
     }
 
@@ -746,7 +749,7 @@ namespace RhinoInside.Revit
 
         try
         {
-          if (CommandGroup.HasStarted())
+          using (CommandGroup) if (CommandGroup?.HasStarted() == true)
           {
             if (Revit.ActiveUIDocument.Document.IsModifiable)
             {
@@ -755,7 +758,7 @@ namespace RhinoInside.Revit
                 groupName = e.CommandEnglishName;
 
               var message = "A Revit transaction or sub-transaction was opened but not closed." + Environment.NewLine +
-                           $"All changes to the active document made by command '{groupName}' will be discarded.";
+                            $"All changes to the active document made by command '{groupName}' will be discarded.";
 
               Rhino.UI.Dialogs.ShowMessage
               (
@@ -774,7 +777,7 @@ namespace RhinoInside.Revit
           }
         }
         catch { }
-        finally { CommandGroup?.Dispose(); CommandGroup = null; }
+        CommandGroup = null;
 
         // Reenable Revit main window
         Revit.MainWindow.Enabled = true;
