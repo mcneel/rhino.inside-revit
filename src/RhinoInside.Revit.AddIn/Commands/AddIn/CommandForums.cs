@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start(@"https://discourse.mcneel.com/c/rhino-inside/Revit")) { }
+      using (System.Diagnostics.Process.Start(@"https://discourse.mcneel.com/c/rhino-inside/revit")) { }
       return Result.Succeeded;
     }
   }
