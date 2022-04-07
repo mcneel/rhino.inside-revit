@@ -21,6 +21,7 @@ group: Deployment & Configs
 - Added 'Add Floor Plan', 'Add Ceiling Plan' and 'Add Structural Plan' components.
 - Added 'Add Area Boundary', 'Add Room Separation' and 'Add Space Separation' components.
 - Added 'Spatial Element Boundary' and 'Spatial Element Geometry' components.
+- Added 'Add Area' component.
 
 ### RC 
 

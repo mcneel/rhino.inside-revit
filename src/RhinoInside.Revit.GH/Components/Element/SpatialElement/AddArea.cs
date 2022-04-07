@@ -1,13 +1,11 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Openings
+namespace RhinoInside.Revit.GH.Components.SpatialElements
 {
   [ComponentVersion(introduced: "1.7")]
   public class AddArea : ElementTrackerComponent
@@ -76,12 +74,12 @@ namespace RhinoInside.Revit.GH.Components.Openings
         {
           // Input
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
-          var p = point.Value.ToXYZ();
+
           // Compute
-          area = Reconstruct(area, viewPlan, new ARDB.UV(p.X, p.Y));
+          var xyz = point.Value.ToXYZ();
+          area = Reconstruct(area, viewPlan, new ARDB.UV(xyz.X, xyz.Y));
 
           DA.SetData(_Output_, area);
-
           return area;
         }
       );
@@ -91,7 +89,6 @@ namespace RhinoInside.Revit.GH.Components.Openings
     {
       if (area is null) return false;
       if (area.LevelId != viewPlan.GenLevel.Id) return false;
-
       if (area.Location is ARDB.LocationPoint locationPoint)
       {
         var target = new ARDB.XYZ(point.U, point.V, viewPlan.GenLevel.ProjectElevation);
