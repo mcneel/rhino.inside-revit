@@ -184,7 +184,7 @@
         <File Id="Addins.2023.RhinoInsideRevit.addin" Source="..\RhinoInside.Revit.AddIn\Properties\RhinoInside.Revit.addin"/>
       </Component>
       
-      <Component Id="Addins.2023.RhinoInsideRevit" Guid="{12FB5005-EE0A-46C7-B595-063F7823C36C}" Directory="INSTALLFOLDER2022">
+      <Component Id="Addins.2023.RhinoInsideRevit" Guid="{12FB5005-EE0A-46C7-B595-063F7823C36C}" Directory="INSTALLFOLDER2023">
         <File Id="Addins.2023.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2023\RhinoInside.Revit.dll"/>
         <File Id="Addins.2023.RhinoInside.Revit.xml" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2023\RhinoInside.Revit.xml"/>
         <File Id="Addins.2023.RhinoInside.Revit.External.dll" Source="..\RhinoInside.Revit.External\bin\x64\$(var.Configuration) 2023\RhinoInside.Revit.External.dll"/>
