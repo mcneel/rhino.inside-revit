@@ -288,8 +288,18 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
           Name = "Boundary",
           NickName = "B",
           Description = "Boundary of the given spatial element",
-          Access = GH_ParamAccess.tree
+          Access = GH_ParamAccess.list
         }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Curve()
+        {
+          Name = "Segments",
+          NickName = "S",
+          Description = "Boundary segments of the given spatial element",
+          Access = GH_ParamAccess.tree
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -315,25 +325,35 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       };
 
       var _Boundary_ = Params.IndexOfOutputParam("Boundary");
-      if (_Boundary_ >= 0) DA.SetDataTree(_Boundary_, GetBoundary(DA.ParameterTargetPath(_Boundary_).AppendElement(DA.ParameterTargetIndex(_Boundary_)), spatialElement, boundaryOptions));
+      var _Segments_ = Params.IndexOfOutputParam("Segments");
+      if (_Segments_ >= 0 || _Boundary_ >= 0)
+      {
+        var index = Math.Max(_Boundary_, _Segments_);
+        var segments = GetSegments(DA.ParameterTargetPath(index).AppendElement(DA.ParameterTargetIndex(index)), spatialElement, boundaryOptions);
+        if (_Boundary_ >= 0)
+        {
+          var tol = GeometryObjectTolerance.Model;
+          DA.SetDataList(_Boundary_, segments.Branches.SelectMany(c => Curve.JoinCurves(c.Select(x => x.Value)/*, tol.VertexTolerance, preserveDirection: true*/)));
+        }
+
+        if (_Segments_ >= 0) DA.SetDataTree(_Segments_, segments);
+      }
 
       var _Elements_ = Params.IndexOfOutputParam("Elements");
       if (_Elements_ >= 0) DA.SetDataTree(_Elements_, GetElements(DA.ParameterTargetPath(_Elements_).AppendElement(DA.ParameterTargetIndex(_Elements_)), spatialElement, boundaryOptions));
     }
 
-    GH_Structure<GH_Curve> GetBoundary(GH_Path path, ARDB.SpatialElement se, ARDB.SpatialElementBoundaryOptions options)
+    GH_Structure<GH_Curve> GetSegments(GH_Path path, ARDB.SpatialElement se, ARDB.SpatialElementBoundaryOptions options)
     {
       var index = 0;
 
       var boundary = new GH_Structure<GH_Curve>();
       foreach (var segments in se.GetBoundarySegments(options))
       {
-        boundary.EnsurePath(path.AppendElement(index));
+        boundary.EnsurePath(path.AppendElement(index++));
 
         foreach (var segment in segments)
           boundary.Append(new GH_Curve(segment.GetCurve().ToCurve()));
-
-        index++;
       }
 
       return boundary;
@@ -346,7 +366,7 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       var elements = new GH_Structure<Types.GraphicalElement>();
       foreach (var segments in element.GetBoundarySegments(options))
       {
-        elements.EnsurePath(path.AppendElement(index));
+        elements.EnsurePath(path.AppendElement(index++));
 
         foreach (var segment in segments)
         {
@@ -355,8 +375,6 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
           else
             elements.Append(Types.GraphicalElement.FromElementId(element.Document, segment.ElementId) as Types.GraphicalElement);
         }
-
-        index++;
       }
 
       return elements;
