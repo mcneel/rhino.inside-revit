@@ -2,12 +2,12 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using Convert.Geometry;
-
   [Kernel.Attributes.Name("Sketch Plane")]
   public class SketchPlane : GraphicalElement
   {
@@ -25,7 +25,13 @@ namespace RhinoInside.Revit.GH.Types
         value = goo.ScriptVariable();
 
       if (value is ARDB.View view)
-        return view.SketchPlane is null ? false : SetValue(view.SketchPlane);
+        return SetValue(view.SketchPlane);
+
+      if (value is ARDB.CurveElement curveElement)
+        return SetValue(curveElement.SketchPlane);
+
+      if (value is ARDB.Level level)
+        return SetValue(level.GetSketchPlane());
 
       return base.CastFrom(source);
     }
