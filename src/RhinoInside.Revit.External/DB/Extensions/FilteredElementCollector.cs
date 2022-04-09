@@ -72,13 +72,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return collector.WherePasses(filter);
     }
 
-    public static FilteredElementCollector WhereParameterEqualsTo(this FilteredElementCollector collector, BuiltInParameter paramId, string value, bool caseSensitive = true)
+    public static FilteredElementCollector WhereParameterEqualsTo(this FilteredElementCollector collector, BuiltInParameter paramId, string value)
     {
       if (value is null) return collector;
 
       using (var provider = new ParameterValueProvider(new ElementId(paramId)))
       using (var evaluator = new FilterStringEquals())
-      using (var rule = new FilterStringRule(provider, evaluator, value, caseSensitive))
+      using (var rule = CompoundElementFilter.FilterStringRule(provider, evaluator, value))
       using (var filter = new ElementParameterFilter(rule))
         return collector.WherePasses(filter);
     }
@@ -94,14 +94,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return collector.WherePasses(filter);
     }
 
-    public static FilteredElementCollector WhereParameterBeginsWith(this FilteredElementCollector collector, BuiltInParameter paramId, string value, bool caseSensitive = true)
+    public static FilteredElementCollector WhereParameterBeginsWith(this FilteredElementCollector collector, BuiltInParameter paramId, string value)
     {
       if (string.IsNullOrEmpty(value))
-        return collector.WhereParameterEqualsTo(paramId, value, caseSensitive);
+        return collector.WhereParameterEqualsTo(paramId, value);
 
       using (var provider = new ParameterValueProvider(new ElementId(paramId)))
       using (var evaluator = new FilterStringBeginsWith())
-      using (var rule = new FilterStringRule(provider, evaluator, value, caseSensitive))
+      using (var rule = CompoundElementFilter.FilterStringRule(provider, evaluator, value))
       using (var filter = new ElementParameterFilter(rule))
         return collector.WherePasses(filter);
     }

@@ -15,8 +15,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     {
       Category = "Revit";
       SubCategory = "Input";
-      Name = "Spatial Element Boundary Location Line";
-      NickName = "BLL";
+      Name = "Spatial Boundary Location";
+      NickName = "SBL";
       Description = "Picker for spatial element boundary location line options";
 
       ListItems.Clear();

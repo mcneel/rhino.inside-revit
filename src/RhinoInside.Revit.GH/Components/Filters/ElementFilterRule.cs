@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 using EDBS = RhinoInside.Revit.External.DB.Schemas;
@@ -219,7 +220,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
         var goo = default(GH_String);
         if (DA.GetData("Value", ref goo) && goo.Value is string value)
-          rule = new ARDB.FilterStringRule(provider, ruleEvaluator, value, true);
+          rule = CompoundElementFilter.FilterStringRule(provider, ruleEvaluator, value);
       }
       else
       {
@@ -450,7 +451,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
         var goo = default(GH_String);
         if (DA.GetData("Value", ref goo))
-          rule = new ARDB.FilterStringRule(provider, ruleEvaluator, goo.Value, true);
+          rule = CompoundElementFilter.FilterStringRule(provider, ruleEvaluator, goo.Value);
       }
 
       if (rule is object)

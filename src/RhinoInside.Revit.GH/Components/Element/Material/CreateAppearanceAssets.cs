@@ -122,6 +122,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
       var assetElement = default(ARDB.AppearanceAssetElement);
 
       // Make sure the name is unique
+      if (name is null)
       {
         name = doc.NextIncrementalNomen
         (

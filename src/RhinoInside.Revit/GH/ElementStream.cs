@@ -665,7 +665,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
         var elementCollector = collector.WherePasses(SchemaFilter);
 
         if (typeof(T) != typeof(ARDB.Element))
-          elementCollector = elementCollector.OfClass(typeof(T));
+          elementCollector = elementCollector.WhereElementIsKindOf(typeof(T));
 
         if (filter != default)
           elementCollector = elementCollector.WherePasses(filter);

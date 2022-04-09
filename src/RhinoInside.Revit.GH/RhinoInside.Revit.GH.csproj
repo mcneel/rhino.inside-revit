@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}</ProjectGuid>
@@ -150,6 +150,7 @@
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
     <Compile Include="Components\Element\Sketch\Deconstruct.cs" />
     <Compile Include="Components\Element\Sheet\SheetByNumber.cs" />
+    <Compile Include="Components\Element\SpatialElement\AddArea.cs" />
     <Compile Include="Components\Element\SpatialElement\AddAreaBoundaryLine.cs" />
     <Compile Include="Components\Element\SpatialElement\AddRoomSeparatorLine.cs" />
     <Compile Include="Components\Element\SpatialElement\AddSpaceSeparatorLine.cs" />
@@ -417,7 +418,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v16.0\TextTemplating\Microsoft.TextTemplating.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TextTemplating\Microsoft.TextTemplating.targets" />
   <PropertyGroup>
     <TransformOnBuild>true</TransformOnBuild>
   </PropertyGroup>

@@ -45,6 +45,9 @@ namespace RhinoInside.Revit.GH.Types
     public AreaPlan() { }
     public AreaPlan(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public AreaPlan(ARDB.ViewPlan view) : base(view) { }
+
+    public override string DisplayName => Value?.AreaScheme is ARDB.AreaScheme scheme ?
+      $"{base.DisplayName} ({scheme.Name})" : base.DisplayName;
   }
 
   [Kernel.Attributes.Name("Structural Plan")]

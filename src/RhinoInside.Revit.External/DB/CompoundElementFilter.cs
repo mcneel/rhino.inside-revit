@@ -34,6 +34,15 @@ namespace RhinoInside.Revit.External.DB
     private static ParameterValueProvider FamilyNameParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ALL_MODEL_FAMILY_NAME));
     private static ParameterValueProvider TypeNameParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ALL_MODEL_TYPE_NAME));
     private static ParameterValueProvider ElemTypeParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ELEM_TYPE_PARAM));
+
+    internal static FilterStringRule FilterStringRule(FilterableValueProvider valueProvider, FilterStringRuleEvaluator evaluator, string ruleString)
+    {
+#if REVIT_2023
+      return new FilterStringRule(valueProvider, evaluator, ruleString);
+#else
+      return new FilterStringRule(valueProvider, evaluator, ruleString, caseSensitive: true);
+#endif
+    }
     #endregion
 
     #region Logical Filters
@@ -210,7 +219,7 @@ namespace RhinoInside.Revit.External.DB
     internal static ElementFilter ElementFamilyNameFilter(string familyName, bool inverted = false)
     {
       using (var evaluator = new FilterStringEquals())
-      using (var rule = new FilterStringRule(FamilyNameParamProvider, evaluator, familyName, caseSensitive: true))
+      using (var rule = FilterStringRule(FamilyNameParamProvider, evaluator, familyName))
       {
         return new ElementParameterFilter(rule, inverted);
       }
@@ -219,7 +228,7 @@ namespace RhinoInside.Revit.External.DB
     internal static ElementFilter ElementTypeNameFilter(string typeName, bool inverted = false)
     {
       using (var evaluator = new FilterStringEquals())
-      using (var rule = new FilterStringRule(TypeNameParamProvider, evaluator, typeName, caseSensitive: true))
+      using (var rule = FilterStringRule(TypeNameParamProvider, evaluator, typeName))
       {
         return new ElementParameterFilter(rule, inverted);
       }

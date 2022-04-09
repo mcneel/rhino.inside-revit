@@ -926,7 +926,7 @@ namespace RhinoInside.Revit
         CharSet = CharSet.Unicode)
       ]
       [return: MarshalAs(UnmanagedType.Bool)]
-      internal static extern bool IsolateOpenNurbs();
+      internal static extern bool IsolateOpenNurbs(IntPtr hHostWnd);
     }
   }
 }

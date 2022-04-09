@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start(@"https://apidocs.co/apps/revit/" + $"{data.Application.Application.VersionNumber}/")) { }
+      using (System.Diagnostics.Process.Start($@"https://apidocs.co/apps/revit/{data.Application.Application.VersionNumber}/")) { }
       return Result.Succeeded;
     }
   }

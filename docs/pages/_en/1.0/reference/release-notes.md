@@ -4,13 +4,13 @@ order: 40
 group: Deployment & Configs
 ---
 
-<!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.7 RC1" version="v1.7" pre_release=true time="04/05/2022" %}
+<!-- list the changes in WIP branch -->
+{% capture rc_release_notes %}
 
-- Removed warning about wrong characters on the 'KeyboardShortcuts.xml'
-- Added separation line creation components for spatial elements.
+### WIP
+
 - Added 'Crop Extents', 'Template' and 'Filter' input to 'Export View Image'.  
-  Added context menu to generate a transparent background image.
+- Added context menu to generate a transparent background image.
 - Added 'View Extents' component.
 - Added 'View Section Box' component.
 - Added '3D view' and 'Structural Plan' view parameters.
@@ -18,12 +18,24 @@ group: Deployment & Configs
 - Added 'Section', 'Elevation' and 'Detail' view parameters.
 - Exposed 'View Type' parameter.
 - Added 'Add Dependent View' component.
+- Added 'Add Floor Plan', 'Add Ceiling Plan' and 'Add Structural Plan' components.
+- Added 'Add Area Boundary', 'Add Room Separation' and 'Add Space Separation' components.
+- Added 'Spatial Element Boundary' and 'Spatial Element Geometry' components.
+- Added 'Add Area' component.
 
-{% include ltr/release-header.html title="v1.6 RC4" version="v1.6" pre_release=true time="04/05/2022" %}
+### RC 
 
-- Fixed 'Add Grid' component when Tracking mode is set to 'Update'.
-- Added 'Elevation' input to 'Add Grid'.
-- Fixed a bug on 'Import 3DM' command when importing polylines on a family document.
+- Added support for Revit 2023.
+
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+<!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.6 RC4" version="v1.6.8124.18574" pre_release=true time="04/05/2022" %}
+
+- Fixed {% include ltr/comp.html uuid='cec2b3df-' %} component when Tracking mode is set to *Update*.
+- Added *Elevation* input to {% include ltr/comp.html uuid='cec2b3df-' %}.
+- Fixed a bug on *Import 3DM* command when importing polylines on a family document.
 
 {% include ltr/release-header.html title="v1.6 RC3" version="v1.6.8123.20268" pre_release=true time="03/29/2022" %}
 
