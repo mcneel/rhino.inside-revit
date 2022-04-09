@@ -16,7 +16,8 @@ namespace RhinoInside.Revit.GH.Types
     public SpatialElement() { }
     public SpatialElement(ARDB.SpatialElement element) : base(element) { }
 
-    public override string DisplayName => Value is object ? $"{Name} - {Number}" : base.DisplayName;
+    public override string DisplayName => Value is ARDB.SpatialElement element ?
+      $"{Name} {Number}{(element.Location is null ? " (Unplaced)" : string.Empty)}" : base.DisplayName;
 
     #region Location
     public override Plane Location => Value?.Location is ARDB.LocationPoint point ?
@@ -99,6 +100,8 @@ namespace RhinoInside.Revit.GH.Types
     #region Properties
     public string Number => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_NUMBER)?.AsString();
     public string Name => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_NAME)?.AsString();
+    public Phase Phase => Value is ARDB.SpatialElement element ?
+      Phase.FromElementId(element.Document, element.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE)?.AsElementId()) as Phase : default;
     #endregion
   }
 
