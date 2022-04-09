@@ -86,10 +86,10 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
             !curve.TryGetPlane(out var plane, tol.VertexTolerance) ||
             plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
           )
-            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid horizontal, coplanar and open curve.", curve);
+            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid horizontal, planar and open curve.", curve);
           
           // Compute
-          areaBoundary = Reconstruct(areaBoundary, viewPlan, curve.ToCurve());
+          areaBoundary = Reconstruct(areaBoundary, viewPlan, curve);
 
           DA.SetData(_AreaBoundary_, areaBoundary);
           return areaBoundary;
@@ -97,12 +97,17 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       );
     }
 
-    bool Reuse(ARDB.ModelCurve areaBoundary, ARDB.ViewPlan viewPlan, ARDB.Curve curve)
+    bool Reuse(ARDB.ModelCurve areaBoundary, ARDB.ViewPlan view, Curve curve)
     {
       if (areaBoundary is null) return false;
-      if (areaBoundary.OwnerViewId != viewPlan.Id) return false;
 
-      using (var projectedCurve = Curve.ProjectToPlane(curve.ToCurve(), viewPlan.SketchPlane.GetPlane().ToPlane()).ToCurve())
+      var genLevel = view.GenLevel;
+      if (areaBoundary.LevelId != genLevel?.Id) return false;
+
+      var levelPlane = Plane.WorldXY;
+      levelPlane.Translate(Vector3d.ZAxis * genLevel.GetElevation() * Revit.ModelUnits);
+
+      using (var projectedCurve = Curve.ProjectToPlane(curve, levelPlane).ToCurve())
       {
         if (!projectedCurve.IsAlmostEqualTo(areaBoundary.GeometryCurve))
           areaBoundary.SetGeometryCurve(projectedCurve, overrideJoins: true);
@@ -111,15 +116,22 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       return true;
     }
 
-    ARDB.ModelCurve Create(ARDB.ViewPlan viewplan, ARDB.Curve curve)
+    ARDB.ModelCurve Create(ARDB.ViewPlan view, Curve curve)
     {
-      return viewplan.Document.Create.NewAreaBoundaryLine(viewplan.SketchPlane, curve, viewplan);
+      if (view.GenLevel is ARDB.Level level)
+      {
+        var sketchPlane = level.GetSketchPlane(ensureSketchPlane: true);
+        using (var projectedCurve = Curve.ProjectToPlane(curve, sketchPlane.GetPlane().ToPlane()))
+          return view.Document.Create.NewAreaBoundaryLine(sketchPlane, projectedCurve.ToCurve(), view);
+      }
+
+      return default;
     }
 
-    ARDB.ModelCurve Reconstruct(ARDB.ModelCurve areaBoundaryLine, ARDB.ViewPlan viewPlan, ARDB.Curve curve)
+    ARDB.ModelCurve Reconstruct(ARDB.ModelCurve areaBoundaryLine, ARDB.ViewPlan view, Curve curve)
     {
-      if (!Reuse(areaBoundaryLine, viewPlan, curve))
-          areaBoundaryLine = Create(viewPlan, curve);
+      if (!Reuse(areaBoundaryLine, view, curve))
+        areaBoundaryLine = Create(view, curve);
        
       return areaBoundaryLine;
     }

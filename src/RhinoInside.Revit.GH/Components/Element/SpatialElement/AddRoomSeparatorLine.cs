@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
   public class AddRoomSeparatorLine : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("34186815-AAF1-44C5-B400-8EE426B14AC8");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => string.Empty;
 
     public AddRoomSeparatorLine() : base
@@ -70,6 +70,11 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "View", out ARDB.View view)) return;
+      if (!(view is ARDB.ViewPlan))
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "View should be a plan view");
+        return;
+      }
 
       ReconstructElement<ARDB.ModelCurve>
       (
@@ -86,10 +91,10 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
             !curve.TryGetPlane(out var plane, tol.VertexTolerance) ||
             plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
           )
-            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid horizontal, coplanar and open curve.", curve);
+            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid horizontal, planar and open curve.", curve);
 
           // Compute
-          roomSeparatorLine = Reconstruct(roomSeparatorLine, view, curve);
+          roomSeparatorLine = Reconstruct(roomSeparatorLine, view as ARDB.ViewPlan, curve);
 
           DA.SetData(_RoomSeparation_, roomSeparatorLine);
           return roomSeparatorLine;
@@ -97,31 +102,42 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       );
     }
 
-    bool Reuse(ARDB.ModelCurve roomSeparator, ARDB.View view, Curve curve)
+    bool Reuse(ARDB.ModelCurve roomSeparator, ARDB.ViewPlan view, Curve curve)
     {
       if (roomSeparator is null) return false;
-      if (roomSeparator.OwnerViewId != view.Id) return false;
 
-      using (var projectedCurve = Curve.ProjectToPlane(curve, view.SketchPlane.GetPlane().ToPlane()).ToCurve())
+      var genLevel = view.GenLevel;
+      if (roomSeparator.LevelId != genLevel?.Id) return false;
+
+      var levelPlane = Plane.WorldXY;
+      levelPlane.Translate(Vector3d.ZAxis * genLevel.GetElevation() * Revit.ModelUnits);
+
+      using (var projectedCurve = Curve.ProjectToPlane(curve, levelPlane).ToCurve())
       {
         if (!projectedCurve.IsAlmostEqualTo(roomSeparator.GeometryCurve))
-          roomSeparator.SetGeometryCurve(projectedCurve, true);
+          roomSeparator.SetGeometryCurve(projectedCurve, overrideJoins: true);
       }
 
       return true;
     }
 
-    ARDB.ModelCurve Create(ARDB.View view, Curve curve)
+    ARDB.ModelCurve Create(ARDB.ViewPlan view, Curve curve)
     {
-      using (var projectedCurve = Curve.ProjectToPlane(curve, view.SketchPlane.GetPlane().ToPlane()))
-      using (var curveArray = new ARDB.CurveArray())
+      if (view.GenLevel is ARDB.Level level)
       {
-        curveArray.Append(projectedCurve.ToCurve());
-        return view.Document.Create.NewRoomBoundaryLines(view.SketchPlane, curveArray, view).get_Item(0);
+        var sketchPlane = level.GetSketchPlane(ensureSketchPlane: true);
+        using (var projectedCurve = Curve.ProjectToPlane(curve, sketchPlane.GetPlane().ToPlane()))
+        using (var curveArray = new ARDB.CurveArray())
+        {
+          curveArray.Append(projectedCurve.ToCurve());
+          return view.Document.Create.NewRoomBoundaryLines(sketchPlane, curveArray, view).get_Item(0);
+        }
       }
+
+      return default;
     }
 
-    ARDB.ModelCurve Reconstruct(ARDB.ModelCurve roomSeparator, ARDB.View view, Curve curve)
+    ARDB.ModelCurve Reconstruct(ARDB.ModelCurve roomSeparator, ARDB.ViewPlan view, Curve curve)
     {
       if (!Reuse(roomSeparator, view, curve))
         roomSeparator = Create(view, curve);

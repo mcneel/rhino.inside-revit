@@ -1,3 +1,4 @@
+using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -97,6 +98,29 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 #endif
+
+    public static SketchPlane GetSketchPlane(this Level level, bool ensureSketchPlane = false)
+    {
+      using (var collector = new FilteredElementCollector(level.Document).OfClass(typeof(SketchPlane)))
+      {
+        var levelName = level.Name;
+        foreach (var sketchPlane in collector.Cast<SketchPlane>())
+        {
+          if (!sketchPlane.IsSuitableForModelElements) continue;
+          if (sketchPlane.Name != levelName) continue;
+          using (var plane = sketchPlane.GetPlane())
+          {
+            if (plane.Origin.Z - level.ProjectElevation < 1e-9 && plane.Normal.IsAlmostEqualTo(XYZ.BasisZ))
+              return sketchPlane;
+          }
+        }
+      }
+
+      if (ensureSketchPlane)
+        return SketchPlane.Create(level.Document, level.Id);
+
+      return default;
+    }
   }
 
   public static class LevelTypeExtension
