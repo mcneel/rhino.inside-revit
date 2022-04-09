@@ -47,6 +47,10 @@ namespace RhinoInside.Revit.GH.Types
       if (element is ARDB.View)
         return false;
 
+      // Unplaced ARDB.SpatialElement is also a GraphicalElement
+      if (element is ARDB.SpatialElement)
+        return true;
+
       using (var location = element.Location)
       {
         if (location is object) return true;
