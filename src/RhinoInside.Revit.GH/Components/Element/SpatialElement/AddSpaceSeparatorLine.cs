@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       nickname: "SpaceSeparation",
       description: "Given the curve, it adds a Space separatoion line to the given Revit view",
       category: "Revit",
-      subCategory: "Spatial"
+      subCategory: "Topology"
     )
     { }
 

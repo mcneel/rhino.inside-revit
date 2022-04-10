@@ -50,6 +50,11 @@ namespace RhinoInside.Revit.GH.Types
         SetValue(view.Document, view.GenLevel?.Id ?? ARDB.ElementId.InvalidElementId);
         return true;
       }
+      else if (value is ARDB.SpatialElement spatialElement)
+      {
+        SetValue(spatialElement.Document, spatialElement.Location is object ? spatialElement.LevelId : ARDB.ElementId.InvalidElementId);
+        return true;
+      }
       else if (value is ARDB.Element element)
       {
         SetValue(element.Document, element.LevelId);
@@ -192,6 +197,17 @@ namespace RhinoInside.Revit.GH.Types
         if (value is null || IsBuildingStory == value) return;
         Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).Update(value.Value ? 1 : 0);
       }
+    }
+
+    public double ComputationHeight
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() * Revit.ModelUnits ?? double.NaN;
+      set => Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.Update(value / Revit.ModelUnits);
+    }
+    public double ComputationElevation
+    {
+      get => Elevation + ComputationHeight;
+      set => ComputationHeight = value - Elevation;
     }
     #endregion
   }

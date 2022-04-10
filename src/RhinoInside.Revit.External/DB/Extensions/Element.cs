@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
@@ -528,6 +529,29 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static void SetElementNomen(this Element element, string nomen) =>
       SetElementNomen(element, GetNomenParameter(element), nomen);
 
+    public static bool SwapElementNomenWith(this Element element, Element other, out BuiltInParameter nomenParameter)
+    {
+      if (element.GetType() != other.GetType())
+        throw new InvalidOperationException($"{nameof(element)} type and {nameof(other)} type should match");
+
+      var elementNomen = element.GetElementNomen(out var elementParameter);
+      if (elementParameter != BuiltInParameter.INVALID)
+      {
+        var otherNomen = other.GetElementNomen(out var otherParameter);
+        if (elementParameter != otherParameter)
+          throw new InvalidOperationException($"{nameof(element)} nomen parameter {elementParameter} doesn't match with {nameof(other)} nomen parameter {otherParameter}");
+
+        other.SetElementNomen(otherParameter, Guid.NewGuid().ToString());
+        element.SetElementNomen(elementParameter, otherNomen);
+        other.SetElementNomen(otherParameter, elementNomen);
+        nomenParameter = elementParameter;
+        return true;
+      }
+
+      nomenParameter = BuiltInParameter.INVALID;
+      return false;
+    }
+
     internal static ElementId GetNamesakeElement(Document target, Document source, ElementId elementId)
     {
       if (elementId.IsBuiltInId() || target.IsEquivalent(source))
@@ -738,6 +762,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           (
             parametersMask is object &&
             param.Definition is InternalDefinition internalDefinition &&
+            internalDefinition.BuiltInParameter != BuiltInParameter.INVALID &&
             parametersMask.Contains(internalDefinition.BuiltInParameter)
           )
             continue;
@@ -872,6 +897,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Replace
     public static T ReplaceElement<T>(this T from, T to, ICollection<BuiltInParameter> mask) where T : Element
     {
+      var nomenParameter = BuiltInParameter.INVALID;
+      if (from?.SwapElementNomenWith(to, out nomenParameter) == true)
+        Debug.Assert(mask.Contains(nomenParameter));
+
       to.CopyParametersFrom(from, mask);
       return to;
     }

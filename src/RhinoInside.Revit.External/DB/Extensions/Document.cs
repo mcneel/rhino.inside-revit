@@ -704,6 +704,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region Level
+    public static Level GetClosestLevel(this Document doc, double elevationAboveOrigin, int direction = 0)
+    {
+      if (direction == 0) return GetNearestLevel(doc, elevationAboveOrigin);
+      if (direction  < 0) return GetNearestBaseLevel(doc, elevationAboveOrigin, out var _);
+      if (direction  > 0) return GetNearestTopLevel(doc, elevationAboveOrigin, out var _);
+
+      return default;
+    }
+
     public static Level GetNearestLevel(this Document doc, double elevationAboveOrigin)
     {
       Level level = null;
@@ -728,7 +737,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return level;
     }
 
-    public static Level GetNearestBaseLevel(this Document doc, double elevationAboveOrigin, out Level topLevel)
+    public static Level GetNearestBaseLevel(this Document doc, double elevationAboveOrigin, out Level topLevel, ElementFilter filter = default)
     {
       elevationAboveOrigin += doc.Application.ShortCurveTolerance;
 
@@ -736,7 +745,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Level level = null;
       using (var collector = new FilteredElementCollector(doc))
       {
-        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.GetElevation()))
+        var levelCollector = filter is object ? collector.WherePasses(filter) : collector;
+        foreach (var levelN in levelCollector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.GetElevation()))
         {
           if (levelN.GetElevation() <= elevationAboveOrigin) level = levelN;
           else
@@ -746,10 +756,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
           }
         }
       }
+
       return level;
     }
 
-    public static Level GetNearestTopLevel(this Document doc, double elevationAboveOrigin, out Level baseLevel)
+    public static Level GetNearestTopLevel(this Document doc, double elevationAboveOrigin, out Level baseLevel, ElementFilter filter = default)
     {
       elevationAboveOrigin -= doc.Application.ShortCurveTolerance;
 
@@ -757,7 +768,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Level level = null;
       using (var collector = new FilteredElementCollector(doc))
       {
-        foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderByDescending(c => c.GetElevation()))
+        var levelCollector = filter is object ? collector.WherePasses(filter) : collector;
+        foreach (var levelN in levelCollector.OfClass(typeof(Level)).Cast<Level>().OrderByDescending(c => c.GetElevation()))
         {
           if (levelN.GetElevation() >= elevationAboveOrigin) level = levelN;
           else
@@ -767,6 +779,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           }
         }
       }
+
       return level;
     }
     #endregion

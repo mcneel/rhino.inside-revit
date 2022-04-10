@@ -24,6 +24,9 @@ namespace RhinoInside.Revit.GH.Types
         new Plane(point.Point.ToPoint3d(), Vector3d.XAxis, Vector3d.YAxis) :
         NaN.Plane;
 
+    public override BoundingBox GetBoundingBox(Transform xform) => IsPlaced ?
+      base.GetBoundingBox(xform) : NaN.BoundingBox;
+
     public override Level Level => Level.FromElement(Value?.Level) as Level;
 
     public Curve[] Boundaries
@@ -98,6 +101,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
+    public bool IsPlaced => Value?.Location is object;
     public string Number => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_NUMBER)?.AsString();
     public string Name => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_NAME)?.AsString();
     public Phase Phase => Value is ARDB.SpatialElement element ?
