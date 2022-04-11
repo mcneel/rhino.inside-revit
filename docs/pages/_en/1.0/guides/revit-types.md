@@ -51,15 +51,14 @@ You can pass the any of the categories above to the {% include ltr/comp.html uui
 
 ## Determining Default Types
 
-When a build tool is launched (e.g. *Place Door*), Revit will automatically select the last-used type for that specific category (e.g. *Doors* for *Place Door* tool). This is called the **Default Type** for that category. This information is helpful when creating elements using the API. Use the component shared below to inspect the default types for the provided category:
+When a build tool is launched (e.g. *Place Door*), Revit will automatically select the last-used type for that specific category (e.g. *Doors* for *Place Door* tool). This is called the **Default Type** for that category. This information is helpful when creating elements using the API. Use the {% include ltr/comp.html uuid='d67b341f' %} component to inspect the default types for the provided category:
 
-![]({{ "/static/images/guides/revit-families05a.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-types-defaulttype.png" | prepend: site.baseurl }})
 
-In case of custom types, the component will return the default `DB.FamilySymbol`:
+In case of families, the script value returned by this component will be the default `DB.FamilySymbol` representing the default type:
 
-![]({{ "/static/images/guides/revit-families05b.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-types-defaultsymbol.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Get Default Type.ghuser' name='Get Default Type' %}
 
 ## Modifying Types
 
