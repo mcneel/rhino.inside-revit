@@ -257,7 +257,7 @@ namespace Grasshopper.Special
       {
         case IGH_ItemDescription item: return item.Description;
         case IGH_GeometricGoo geom: return geom.IsReferencedGeometry ?
-            Rhino.RhinoDoc.ActiveDoc?.Name :
+            Rhino.RhinoDoc.ActiveDoc?.Name ?? "Untitled.3dm" :
             value.TypeDescription;
         case IGH_Goo goo: return goo.TypeDescription;
       }
