@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       nickname: "AreaBoundary",
       description: "Given a Curve, it adds an Area boundary line to the given Area Plan",
       category: "Revit",
-      subCategory: "Spatial"
+      subCategory: "Topology"
     )
     { }
 

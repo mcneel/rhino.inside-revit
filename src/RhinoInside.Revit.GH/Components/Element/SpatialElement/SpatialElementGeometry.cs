@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       nickname: "SE-Geometry",
       description: "Get the geometry of the specified spatial element",
       category: "Revit",
-      subCategory: "Spatial"
+      subCategory: "Topology"
     )
     { }
 
@@ -251,7 +251,7 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       nickname: "SE-Boundary",
       description: "Get the boundary of the specified spatial element",
       category: "Revit",
-      subCategory: "Spatial"
+      subCategory: "Topology"
     )
     { }
 

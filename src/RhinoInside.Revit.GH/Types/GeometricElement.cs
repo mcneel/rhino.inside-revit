@@ -144,14 +144,23 @@ namespace RhinoInside.Revit.GH.Types
       readonly BoundingBox clippingBox;
       public readonly MeshingParameters MeshingParameters;
       public Rhino.Display.DisplayMaterial[] materials;
+      static readonly Rhino.Display.DisplayMaterial[] empty_materials = new Rhino.Display.DisplayMaterial[0];
       public Mesh[] meshes;
+      static readonly Mesh[] empty_meshes = new Mesh[0];
       public Curve[] wires;
+      static readonly Curve[] empty_wires = new Curve[0];
 
       static List<Preview> previewsQueue;
 
       void Build()
       {
-        if (meshes is null && wires is null && materials is null)
+        if (!geometricElement.IsValid || !clippingBox.IsValid)
+        {
+          materials = empty_materials;
+          meshes = empty_meshes;
+          wires = empty_wires;
+        }
+        else if (meshes is null && wires is null && materials is null)
         {
           var element = geometricElement.Document.GetElement(geometricElement.Id);
           if (element is null)
@@ -237,9 +246,6 @@ namespace RhinoInside.Revit.GH.Types
 
       public static Preview OrderNew(GeometricElement element)
       {
-        if (!element.IsValid)
-          return null;
-
         if (previewsQueue is null)
         {
           previewsQueue = new List<Preview>();

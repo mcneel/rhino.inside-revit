@@ -30,6 +30,11 @@ namespace RhinoInside.Revit.GH.Types
 
         return true;
       }
+      else if (value is ARDB.SpatialElement spatialElement)
+      {
+        SetValue(spatialElement.Document, spatialElement.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE).AsElementId());
+        return true;
+      }
       else if (value is ARDB.Element element)
       {
         SetValue(element.Document, element.CreatedPhaseId);
