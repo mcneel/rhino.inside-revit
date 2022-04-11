@@ -1,7 +1,7 @@
 ---
 title: Openings
 order: 48
-thumbnail: /static/images/guides/rir-ghpython.png
+thumbnail: /static/images/guides/revit-opening.png
 group: Modeling
 ---
 
