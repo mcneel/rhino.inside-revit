@@ -82,7 +82,7 @@ Filter for elements only on a specific level.  This component is best used with 
 
 ### By API Class
 
-Use the [Revit API Class names](https://www.revitapidocs.com/2015/eb16114f-69ea-f4de-0d0d-f7388b105a16.htm) to select Elements in the project. The input can be the Element Classes selector or a string of the class name.
+Use the [Revit API Class names](https://www.revitapidocs.com/2015/eb16114f-69ea-f4de-0d0d-f7388b105a16.htm) to select Elements in the project. The input can be the {% include ltr/comp.html uuid='f432d672' %} selector or a string of the class name.
 
 ![]({{ "/static/images/guides/filter-class.png" | prepend: site.baseurl }})
 
