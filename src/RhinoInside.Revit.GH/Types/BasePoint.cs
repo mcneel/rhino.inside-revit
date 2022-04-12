@@ -8,6 +8,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using External.DB.Extensions;
 
+  [Kernel.Attributes.Name("Base Point")]
   public interface IGH_BasePoint : IGH_GraphicalElement { }
 
   [Kernel.Attributes.Name("Base Point")]
