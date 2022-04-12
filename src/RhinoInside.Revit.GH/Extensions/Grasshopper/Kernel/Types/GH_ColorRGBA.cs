@@ -92,6 +92,12 @@ namespace Grasshopper.Kernel.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
+      if (typeof(Q).IsAssignableFrom(typeof(Rhino.Display.ColorRGBA)))
+      {
+        target = (Q) (object) Value;
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Colour)))
       {
         target = (Q) (object) new GH_Colour((System.Drawing.Color) Value);
