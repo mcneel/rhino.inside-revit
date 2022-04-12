@@ -29,12 +29,12 @@ group: Deployment & Configs
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 <!-- most recent release should be on top -->
-{% include ltr/release-header.html title="v1.6 RC5" version="v1.6" pre_release=true time="04/12/2022" %}
+{% include ltr/release-header.html title="v1.6 RC5" version="v1.6.8134.6334" pre_release=true time="04/12/2022" %}
 
-- Added support for Revit 2023.
-- Fixed conversion from `Wall` to `Surface` when slant angle is negative.
-- Fixed a bug on 'Create Appearance Asset'. [#507](https://github.com/mcneel/rhino.inside-revit/issues/507)
-- Updated Revit download link when loaded in an unssuported version.
+- Added support for Revit 2023
+- Fixed conversion from {% include ltr/comp.html uuid='15ad6bf9' %} to Surface when slant angle is negative
+- Fixed a bug on {% include ltr/comp.html uuid='0f251f87' %} [#507](https://github.com/mcneel/rhino.inside-revit/issues/507)
+- Updated Revit download link when loaded in an unsupported version
 
 {% include ltr/release-header.html title="v1.6 RC4" version="v1.6.8124.18574" pre_release=true time="04/05/2022" %}
 

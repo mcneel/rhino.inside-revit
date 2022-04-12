@@ -78,10 +78,9 @@ namespace RhinoInside.Revit.GH.Types
         if (wall.Location is ARDB.LocationCurve locationCurve)
         {
           if (!IsValidCurve(curve, out var log))
-            throw new Exceptions.RuntimeArgumentException(nameof(Curve), log, curve);
+            throw new Exceptions.RuntimeArgumentException(nameof(curve), log, curve);
 
           var tol = GeometryObjectTolerance.Model;
-
           var newCurve = default(ARDB.Curve);
           switch (Curve)
           {
@@ -89,21 +88,21 @@ namespace RhinoInside.Revit.GH.Types
               if (curve.TryGetLine(out var valueLine, tol.VertexTolerance))
                 newCurve = valueLine.ToLine();
               else
-                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be a line like curve.", curve);
+                throw new Exceptions.RuntimeArgumentException(nameof(curve), "Curve should be a line like curve.", curve);
               break;
 
             case ArcCurve _:
               if (curve.TryGetArc(out var valueArc, tol.VertexTolerance))
                 newCurve = valueArc.ToArc();
               else
-                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be an arc like curve.", curve);
+                throw new Exceptions.RuntimeArgumentException(nameof(curve), "Curve should be an arc like curve.", curve);
               break;
 
             case Curve _:
               if (curve.TryGetEllipse(out var _, tol.VertexTolerance))
                 newCurve = curve.ToCurve();
               else
-                throw new Exceptions.RuntimeArgumentException(nameof(Curve), "Curve should be an ellipse like curve.", curve);
+                throw new Exceptions.RuntimeArgumentException(nameof(curve), "Curve should be an ellipse like curve.", curve);
               break;
           }
 
@@ -139,7 +138,7 @@ namespace RhinoInside.Revit.GH.Types
           if (Value.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL) is ARDB.Parameter slantAngle)
           {
             var angle = slantAngle.AsDouble();
-            if (angle > 0.0)
+            if (angle != 0.0)
             {
               var offset0 = (domain.T0 - origin.Z) * Math.Tan(angle);
               var offset1 = (domain.T1 - origin.Z) * Math.Tan(angle);
