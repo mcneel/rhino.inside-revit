@@ -84,9 +84,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.View view && ViewType is ViewType viewType)
+        if (ViewType is ViewType viewType)
         {
-          FormattableString formatable = $"{viewType} : {view.Name}";
+          FormattableString formatable = $"{viewType} : {DisplayName}";
           return formatable.ToString(CultureInfo.CurrentUICulture);
         }
 

@@ -59,13 +59,13 @@ namespace RhinoInside.Revit.Convert.Display
     /// </summary>
     /// <remarks>
     /// Empty <see cref="ARDB.Mesh"/> and empty <see cref="ARDB.Solid"/> will be skipped,
-    /// so output <see cref="IEnumerable{ARDB.Material}"/> may be shorter than the input.
+    /// so output may be shorter than the input.
     /// Output is warranted to be free of nulls.
     /// </remarks>
     /// <param name="geometries"></param>
     /// <param name="doc"></param>
     /// <param name="currentMaterial"></param>
-    /// <returns>An <see cref="IEnumerable{ARDB.Material}"/></returns>
+    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="ARDB.Material"/></returns>
     /// <seealso cref="GetPreviewMeshes(IEnumerable{ARDB.GeometryObject}, ARDB.Document, MeshingParameters)"/>
     internal static IEnumerable<ARDB.Material> GetPreviewMaterials
     (
@@ -125,13 +125,13 @@ namespace RhinoInside.Revit.Convert.Display
     /// </summary>
     /// <remarks>
     /// Empty <see cref="ARDB.Mesh"/> and empty <see cref="ARDB.Solid"/> will be skipped,
-    /// so output <see cref="IEnumerable{Rhino.Geometry.Mesh}"/> may be shorter than the input.
+    /// so output may be shorter than the input.
     /// Output is warranted to be free of nulls, an empty <see cref="Mesh"/> is returned in case of error.
     /// </remarks>
     /// <param name="geometries"></param>
     /// <param name="doc"></param>
     /// <param name="meshingParameters"></param>
-    /// <returns>An <see cref="IEnumerable{Rhino.Geometry.Mesh}"/></returns>
+    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="Mesh"/></returns>
     /// <seealso cref="GetPreviewMaterials(IEnumerable{ARDB.GeometryObject}, ARDB.Document, ARDB.Material)"/>
     internal static IEnumerable<Mesh> GetPreviewMeshes
     (
