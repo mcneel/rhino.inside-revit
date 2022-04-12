@@ -72,7 +72,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(MAT.TextureData)))
       {
-        target = (Q) (object) Value;
+        target = (Q) (object) Value.TextureValue;
         return true;
       }
 
