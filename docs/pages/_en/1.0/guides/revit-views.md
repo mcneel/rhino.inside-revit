@@ -9,7 +9,7 @@ group: Documentation
 ## Querying Views
 
 {% capture api_note %}
-In Revit API, Views of all types are represented by the {% include api_type.html type='Autodesk.Revit.DB.View' title='DB.View' %}
+In Revit API, Views of all types are represented by the {% include api_type.html type='Autodesk.Revit.DB.View' title='DB.View' %}. The {% include ltr/comp.html uuid='2dc4b866' %} primitive in {{ site.terms.rir }} represents Views of all kinds.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 

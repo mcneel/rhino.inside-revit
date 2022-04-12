@@ -9,7 +9,7 @@ group: Documentation
 ## Querying Schedules
 
 {% capture api_note %}
-In Revit API, Schedules are a type of view ({% include api_type.html type='Autodesk.Revit.DB.View' title='DB.View' %}) and are represented by the {% include api_type.html type='Autodesk.Revit.DB.ViewSchedule' title='DB.ViewSchedule' %}. Schedules have a different rendering method. Instead of showing the elements graphically, they list the element and their properties according to the schedule settings, and in a spreadsheet style
+In Revit API, Schedules are a type of view ({% include api_type.html type='Autodesk.Revit.DB.View' title='DB.View' %}) and are represented by the {% include api_type.html type='Autodesk.Revit.DB.ViewSchedule' title='DB.ViewSchedule' %}. Schedules have a different rendering method. Instead of showing the elements graphically, they list the element and their properties according to the schedule settings, and in a spreadsheet style. The {% include ltr/comp.html uuid='2dc4b866' %} primitive in {{ site.terms.rir }} represents Views of all kinds.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 

@@ -49,7 +49,7 @@ The types of *Curtain Mullions* and *Panels* used for a wall are defined in the 
 *Curtain Walls* and *Curtain Systems* are almost identical in definition. The only difference is that *Curtain Walls* are vertical and have directionality so the *Grid* configuration is set for **Vertical** and **Horizontal** grid lines. *Curtain Systems* can be created from *Mass* surfaces and thus are not flowing in a certain direction. Hence the *Grid* configurations is set for **Grid 1** and **Grid 2** axes.
 
 {% capture api_note %}
-In Revit API, *Curtain Walls* are represented by {% include api_type.html type='Autodesk.Revit.DB.Wall' title='DB.Wall' %} and *Curtain Systems* are represented by {% include api_type.html type='Autodesk.Revit.DB.CurtainSystem' title='DB.CurtainSystem' %} 
+In Revit API, *Curtain Walls* are represented by {% include api_type.html type='Autodesk.Revit.DB.Wall' title='DB.Wall' %} and *Curtain Systems* are represented by {% include api_type.html type='Autodesk.Revit.DB.CurtainSystem' title='DB.CurtainSystem' %}. The {% include ltr/comp.html uuid='15ad6bf9' %} primitive in {{ site.terms.rir }} represents Walls of all kinds. There are also specific primitives that contain data related to Curtain Walls e.g. {% include ltr/comp.html uuid='e94b20e9' %}, {% include ltr/comp.html uuid='7519d945' %}, {% include ltr/comp.html uuid='f25fac7b' %}, etc.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
