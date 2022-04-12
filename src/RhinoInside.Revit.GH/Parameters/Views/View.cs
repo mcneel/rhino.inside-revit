@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Parameters
       Menu_AppendCustomItem(menu, listBox);
     }
 
-    protected void RefreshViewsList(ListBox listBox, ARDB.ViewFamily viewFamily, string displayMember = nameof(Types.View.Nomen))
+    protected void RefreshViewsList(ListBox listBox, ARDB.ViewFamily viewFamily, string displayMember = nameof(Types.View.DisplayName))
     {
       var doc = Revit.ActiveUIDocument.Document;
 
