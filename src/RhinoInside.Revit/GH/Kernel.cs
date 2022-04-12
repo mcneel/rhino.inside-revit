@@ -21,7 +21,6 @@ namespace RhinoInside.Revit.GH.Kernel
   /// <summary>
   /// Base interface for all Component types in RhinoInside.Revit.GH that reference Revit elements.
   /// </summary>
-  /// <remarks>
   internal interface IGH_ElementIdComponent : IGH_Component
   {
     bool NeedsToBeExpired
