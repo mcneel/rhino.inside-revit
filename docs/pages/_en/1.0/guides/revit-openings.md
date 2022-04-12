@@ -52,6 +52,22 @@ The dormer opening profile however can still be extracted by the {% include ltr/
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
+
+### Elements Cut by Shaft Opening
+
+As mentioned before, **Shaft Openings** are not hosted on any specific Revit element. To determine elements (Floors in this example) that are cut by a shaft opening, we can use the {% include ltr/comp.html uuid='f5a32842' %} and filter for elements that are colliding with the shaft bounding box. The {% include ltr/comp.html uuid='18d46e90' %} contains the shaft opening we are interested in:
+
+![]({{ "/static/images/guides/revit-opening-filtershaftfloors.png" | prepend: site.baseurl }})
+
+### Element Cut Profile
+
+To extract the boundary profile of a host element (Floors in this example), use the {% include ltr/comp.html uuid='032ad3f7' %} component and extract the Brep of the top or bottom face. Deconstructing this brep will also give you the curves:
+
+![]({{ "/static/images/guides/revit-opening-floorprofile.png" | prepend: site.baseurl }})
+
+![]({{ "/static/images/guides/revit-opening-floorprofile-sc.png" | prepend: site.baseurl }})
+
+
 ## Creating Wall Openings
 
 To create a wall opening, just like when creating a wall opening in Revit UI, you would need two points on the wall surface. These points represent the min and max points of the rectangular cut. {% include ltr/comp.html uuid='c86ed84c' %} component takes the input wall and points and creates an opening element as a result:
