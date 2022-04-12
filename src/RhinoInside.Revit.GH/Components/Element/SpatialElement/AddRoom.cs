@@ -276,6 +276,8 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
                   {
                     // Place testRoom at circuit and test if contains 'Location'.
                     var inside = room.Document.Create.NewRoom(testRoom, circuit)?.IsPointInRoom(location);
+                    testRoom.Unplace();
+
                     if (inside == true)
                     {
                       newCircuit = circuit;
