@@ -93,6 +93,26 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddArea {
+            get {
+                object obj = ResourceManager.GetObject("AddArea", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddAreaBoundaryLine {
+            get {
+                object obj = ResourceManager.GetObject("AddAreaBoundaryLine", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddFaceOpening {
             get {
                 object obj = ResourceManager.GetObject("AddFaceOpening", resourceCulture);
@@ -113,9 +133,49 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddRoom {
+            get {
+                object obj = ResourceManager.GetObject("AddRoom", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddRoomSeparatorLine {
+            get {
+                object obj = ResourceManager.GetObject("AddRoomSeparatorLine", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddShaftOpening {
             get {
                 object obj = ResourceManager.GetObject("AddShaftOpening", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddSpace {
+            get {
+                object obj = ResourceManager.GetObject("AddSpace", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddSpaceSeparatorLine {
+            get {
+                object obj = ResourceManager.GetObject("AddSpaceSeparatorLine", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -436,6 +496,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AppearanceAsset {
             get {
                 object obj = ResourceManager.GetObject("AppearanceAsset", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AreaElement {
+            get {
+                object obj = ResourceManager.GetObject("AreaElement", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -3053,6 +3123,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap RoomElement {
+            get {
+                object obj = ResourceManager.GetObject("RoomElement", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap SelectDeselectElement {
             get {
                 object obj = ResourceManager.GetObject("SelectDeselectElement", resourceCulture);
@@ -3176,6 +3256,56 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap SketchPlaneByPlane {
             get {
                 object obj = ResourceManager.GetObject("SketchPlaneByPlane", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SpaceElement {
+            get {
+                object obj = ResourceManager.GetObject("SpaceElement", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SpatialElement_ValueList {
+            get {
+                object obj = ResourceManager.GetObject("SpatialElement_ValueList", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SpatialElementBoundary {
+            get {
+                object obj = ResourceManager.GetObject("SpatialElementBoundary", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SpatialElementBoundaryLocation_ValueList {
+            get {
+                object obj = ResourceManager.GetObject("SpatialElementBoundaryLocation_ValueList", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SpatialElementGeometry {
+            get {
+                object obj = ResourceManager.GetObject("SpatialElementGeometry", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
