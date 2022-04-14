@@ -133,6 +133,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddDependentView {
+            get {
+                object obj = ResourceManager.GetObject("AddDependentView", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddDetailView {
             get {
                 object obj = ResourceManager.GetObject("AddDetailView", resourceCulture);
@@ -3673,6 +3683,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ViewExtents {
+            get {
+                object obj = ResourceManager.GetObject("ViewExtents", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ViewFamilyType {
             get {
                 object obj = ResourceManager.GetObject("ViewFamilyType", resourceCulture);
@@ -3686,6 +3706,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ViewIdentity {
             get {
                 object obj = ResourceManager.GetObject("ViewIdentity", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ViewSectionBox {
+            get {
+                object obj = ResourceManager.GetObject("ViewSectionBox", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
