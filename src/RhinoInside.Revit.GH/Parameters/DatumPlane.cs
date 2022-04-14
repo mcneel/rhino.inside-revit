@@ -59,15 +59,15 @@ namespace RhinoInside.Revit.GH.Parameters
       var doc = Revit.ActiveUIDocument.Document;
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
-      listBox.DisplayMember = "DisplayName";
+      listBox.DisplayMember = nameof(Types.Level.DisplayName);
       listBox.Items.Clear();
 
       using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.Level)))
       {
         var levels = collector.Cast<ARDB.Level>().
-          OrderBy(x => x.GetElevation()).
           Select(x => new Types.Level(x)).
-          OrderBy(x => x.Nomen, default(ElementNameComparer)).
+          OrderBy(x => x.Elevation).
+          ThenBy(x => x.DisplayName, default(ElementNameComparer)).
           ToList();
 
         foreach (var level in levels)
@@ -230,14 +230,14 @@ namespace RhinoInside.Revit.GH.Parameters
       var doc = Revit.ActiveUIDocument.Document;
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
-      listBox.DisplayMember = "DisplayName";
+      listBox.DisplayMember = nameof(Types.Grid.DisplayName);
       listBox.Items.Clear();
 
       using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.Grid)))
       {
         var items = collector.Cast<ARDB.Grid>().
           Select(x => new Types.Grid(x)).
-          OrderBy(x => x.Nomen, default(ElementNameComparer)).
+          OrderBy(x => x.DisplayName, default(ElementNameComparer)).
           ToList();
 
         foreach (var item in items)
