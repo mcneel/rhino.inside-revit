@@ -13,27 +13,19 @@ namespace RhinoInside.Revit.Convert.Geometry
   /// </summary>
   static class NurbsSplineEncoder
   {
-    static bool KnotAlmostEqualTo(double max, double min) =>
-      KnotAlmostEqualTo(max, min, 1.0e-09);
-
-    static bool KnotAlmostEqualTo(double max, double min, double tol)
+    static bool NormalizedKnotAlmostEqualTo(double max, double min, double tol = 1.0e-09)
     {
-      var length = max - min;
-      if (length <= tol)
-        return true;
+      Debug.Assert(min >= 0.0 && min <= max && max <= 1.0);
 
-      return length <= max * tol;
+      return max - min <= tol;
     }
 
-    static double KnotPrevNotEqual(double max) =>
-      KnotPrevNotEqual(max, 1.0000000E-9 * 1000.0);
-
-    static double KnotPrevNotEqual(double max, double tol)
+    static double KnotPrevNotEqual(double max, double tol = 1.0000000E-9 * 1000.0)
     {
       const double delta2 = 2.0 * 1E-16;
       var value = max - tol - delta2;
 
-      if (!KnotAlmostEqualTo(max, value, tol))
+      if (!NormalizedKnotAlmostEqualTo(max, value, tol))
         return value;
 
       return max - (max * (tol + delta2));
@@ -63,7 +55,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           (list[k] - max) * factor + 1.0;
 
         double next = knots[k + 2];
-        if (KnotAlmostEqualTo(next, current))
+        if (NormalizedKnotAlmostEqualTo(next, current))
         {
           multiplicity++;
           if (multiplicity > degree - 2)

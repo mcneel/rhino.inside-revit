@@ -39,14 +39,17 @@ namespace RhinoInside.Revit.External.DB
     public const double DenormalLowerBound = 4.0 / double.MinValue;
 
     #region IsAlmostEqualTo
-    public static bool IsAlmostEqualTo(double x, double y, double toleance = DefaultTolerance)
+    public static bool IsAlmostEqualTo(double x, double y, double tolerance = DefaultTolerance)
     {
+      if (double.IsInfinity(x) || double.IsInfinity(y))
+        return x == y;
+    
       double min, max;
       if (x < y) { min = x; max = y; }
       else { min = y; max = x; }
 
       var length = max - min;
-      return length <= toleance || length <= max * toleance;
+      return length <= tolerance || length <= Math.Max(Math.Abs(x), Math.Abs(y)) * tolerance;
     }
     #endregion
   }
