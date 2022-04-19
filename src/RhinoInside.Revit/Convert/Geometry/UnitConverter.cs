@@ -3,6 +3,7 @@ using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.Convert.Geometry
@@ -558,8 +559,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static GeometryObjectTolerance Page      => new GeometryObjectTolerance(UnitConverter.Page.UnitScale);
 
     #region AreAlmostEqual
-    public bool AreAlmostEqualAngles(double x, double y) => External.DB.NumericTolerance.IsAlmostEqualTo(x, y, AngleTolerance);
-    public bool AreAlmostEqualLengths(double x, double y) => External.DB.NumericTolerance.IsAlmostEqualTo(x, y, VertexTolerance);
+    public bool AreAlmostEqualAngles(double x, double y) => ERDB.NumericTolerance.AreAlmostEqual(x, y, AngleTolerance);
+    public bool AreAlmostEqualLengths(double x, double y) => ERDB.NumericTolerance.AreAlmostEqual(x, y, VertexTolerance);
     #endregion
   }
 }
