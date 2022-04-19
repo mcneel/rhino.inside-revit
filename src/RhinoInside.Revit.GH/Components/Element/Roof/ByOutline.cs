@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Components
           var hack = new ARDB.XYZ(1.0, 1.0, 0.0);
           var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
             polyCurve.DuplicateSegments() :
-            profile.Split(profile.Domain.Mid);
+            new Curve[] { profile };
 
           var index = 0;
           var loops = sketch.GetAllModelCurves();

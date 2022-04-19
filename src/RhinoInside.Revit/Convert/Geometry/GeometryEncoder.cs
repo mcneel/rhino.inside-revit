@@ -1722,7 +1722,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       curve = curve.InOtherUnits(ModelScaleFactor);
       curve.CombineShortSegments(Tolerance.ShortCurveTolerance);
 
-      return ARDB.CurveLoop.Create(curve.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToList());
+      return ARDB.CurveLoop.Create(curve.ToCurveMany(UnitConverter.NoScale).ToList());
     }
 
     /// <summary>
@@ -1778,7 +1778,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       curve = curve.InOtherUnits(ModelScaleFactor);
       curve.CombineShortSegments(Tolerance.ShortCurveTolerance);
 
-      return curve.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToCurveArray();
+      return curve.ToCurveMany(UnitConverter.NoScale).ToCurveArray();
     }
 
     internal static ARDB.CurveArray ToCurveArray(this IEnumerable<Curve> value)
