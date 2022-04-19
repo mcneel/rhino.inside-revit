@@ -44,15 +44,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
       self.IsBound == other.IsBound &&
       self.Origin.IsAlmostEqualTo(other.Origin, tolerance) &&
       self.Direction.IsAlmostEqualTo(other.Direction, tolerance) &&
-      NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance);
+      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance)) &&
+      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance));
 
     public static bool IsAlmostEqualTo(this Arc self, Arc other, double tolerance = DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
       NumericTolerance.AreAlmostEqual(self.Radius, other.Radius, tolerance) &&
-      NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
+      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance)) &&
+      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance)) &&
       self.Center.IsAlmostEqualTo(other.Center, tolerance) &&
       self.Normal.IsAlmostEqualTo(other.Normal, tolerance) &&
       self.XDirection.IsAlmostEqualTo(other.XDirection, tolerance) &&
@@ -65,8 +65,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       self.Normal.IsAlmostEqualTo(other.Normal, tolerance) &&
       self.XDirection.IsAlmostEqualTo(other.XDirection, tolerance) &&
       self.YDirection.IsAlmostEqualTo(other.YDirection, tolerance) &&
-      NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
+      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance)) &&
+      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance)) &&
       NumericTolerance.AreAlmostEqual(self.RadiusX, other.RadiusX, tolerance) &&
       NumericTolerance.AreAlmostEqual(self.RadiusY, other.RadiusY, tolerance);
 
