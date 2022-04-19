@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     #region IsAlmostEqualTo
-    private static bool IsAlmostEqualTo(IList<XYZ> x, IList<XYZ> y, double toleance)
+    private static bool AreAlmostEqual(IList<XYZ> x, IList<XYZ> y, double toleance)
     {
       var count = x.Count;
       if (count != y.Count) return false;
@@ -27,13 +27,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return true;
     }
 
-    private static bool IsAlmostEqualTo(DoubleArray x, DoubleArray y, double toleance)
+    private static bool AreAlmostEqual(DoubleArray x, DoubleArray y, double toleance)
     {
       var count = x.Size;
       if (count != y.Size) return false;
       for (int p = 0; p < count; ++p)
       {
-        if (!NumericTolerance.IsAlmostEqualTo(x.get_Item(p), y.get_Item(p), toleance))
+        if (!NumericTolerance.AreAlmostEqual(x.get_Item(p), y.get_Item(p), toleance))
           return false;
       }
 
@@ -44,15 +44,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
       self.IsBound == other.IsBound &&
       self.Origin.IsAlmostEqualTo(other.Origin, tolerance) &&
       self.Direction.IsAlmostEqualTo(other.Direction, tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance);
+      NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance);
 
     public static bool IsAlmostEqualTo(this Arc self, Arc other, double tolerance = DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
-      NumericTolerance.IsAlmostEqualTo(self.Radius, other.Radius, tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.Radius, other.Radius, tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
       self.Center.IsAlmostEqualTo(other.Center, tolerance) &&
       self.Normal.IsAlmostEqualTo(other.Normal, tolerance) &&
       self.XDirection.IsAlmostEqualTo(other.XDirection, tolerance) &&
@@ -65,36 +65,36 @@ namespace RhinoInside.Revit.External.DB.Extensions
       self.Normal.IsAlmostEqualTo(other.Normal, tolerance) &&
       self.XDirection.IsAlmostEqualTo(other.XDirection, tolerance) &&
       self.YDirection.IsAlmostEqualTo(other.YDirection, tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.RadiusX, other.RadiusX, tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.RadiusY, other.RadiusY, tolerance);
+      NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.RadiusX, other.RadiusX, tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.RadiusY, other.RadiusY, tolerance);
 
     public static bool IsAlmostEqualTo(this HermiteSpline self, HermiteSpline other, double tolerance = DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
-      IsAlmostEqualTo(self.ControlPoints, other.ControlPoints, tolerance) &&
-      IsAlmostEqualTo(self.Tangents, other.Tangents, tolerance) &&
-      IsAlmostEqualTo(self.Parameters, other.Parameters, tolerance);
+      AreAlmostEqual(self.ControlPoints, other.ControlPoints, tolerance) &&
+      AreAlmostEqual(self.Tangents, other.Tangents, tolerance) &&
+      AreAlmostEqual(self.Parameters, other.Parameters, tolerance);
 
     public static bool IsAlmostEqualTo(this NurbSpline self, NurbSpline other, double tolerance = DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
       self.Degree == other.Degree &&
       self.isRational == other.isRational &&
-      IsAlmostEqualTo(self.CtrlPoints, other.CtrlPoints, tolerance) &&
-      IsAlmostEqualTo(self.Knots, other.Knots, tolerance) &&
-      IsAlmostEqualTo(self.Weights, other.Weights, tolerance);
+      AreAlmostEqual(self.CtrlPoints, other.CtrlPoints, tolerance) &&
+      AreAlmostEqual(self.Knots, other.Knots, tolerance) &&
+      AreAlmostEqual(self.Weights, other.Weights, tolerance);
 
     public static bool IsAlmostEqualTo(this CylindricalHelix self, CylindricalHelix other, double tolerance = DefaultTolerance) =>
       self.IsBound == other.IsBound &&
       self.IsCyclic == other.IsCyclic &&
       self.IsRightHanded == other.IsRightHanded &&
-      NumericTolerance.IsAlmostEqualTo(self.Height, other.Height, tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.Pitch, other.Pitch, tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.Radius, other.Radius, tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      NumericTolerance.IsAlmostEqualTo(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.Height, other.Height, tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.Pitch, other.Pitch, tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.Radius, other.Radius, tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
+      NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
       self.BasePoint.IsAlmostEqualTo(other.BasePoint, tolerance) &&
       self.XVector.IsAlmostEqualTo(other.XVector, tolerance) &&
       self.YVector.IsAlmostEqualTo(other.YVector, tolerance) &&
