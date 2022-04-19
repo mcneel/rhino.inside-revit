@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}</ProjectGuid>
@@ -232,13 +232,6 @@
     <Compile Include="Components\ZuiComponent.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Optional.cs" />
-    <Compile Include="Parameters\Input\SpatialElementBoundaryLocation_ValueList.cs" />
-    <Compile Include="Parameters\Views\View.cs" />
-    <Compile Include="Parameters\Views\View3D.cs" />
-    <Compile Include="Parameters\Views\ViewPlan.cs" />
-    <Compile Include="Parameters\Views\ViewSection.cs" />
-    <Compile Include="Parameters\Views\ViewSheet.cs" />
-    <Compile Include="Parameters\Input\SpatialElement_ValueList.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -273,6 +266,8 @@
     <Compile Include="Parameters\Input\LayerFunction_ValueList.cs" />
     <Compile Include="Parameters\Input\OpeningWrappingCondition_ValueList.cs" />
     <Compile Include="Parameters\Input\BuiltInParameterTypes.cs" />
+    <Compile Include="Parameters\Input\SpatialElement_ValueList.cs" />
+    <Compile Include="Parameters\Input\SpatialElementBoundaryLocation_ValueList.cs" />
     <Compile Include="Parameters\Input\StructuralAssetBehaviour_ValueList.cs" />
     <Compile Include="Parameters\Input\StructuralAssetClass_ValueList.cs" />
     <Compile Include="Parameters\Input\ThermalMaterialType_ValueList.cs" />
@@ -307,6 +302,7 @@
     <Compile Include="Parameters\Group.cs" />
     <Compile Include="Parameters\HostObject.cs" />
     <Compile Include="Parameters\ID.cs" />
+    <Compile Include="Parameters\LevelConstraint.cs" />
     <Compile Include="Parameters\LinePatternElement.cs" />
     <Compile Include="Parameters\Material.cs" />
     <Compile Include="Parameters\Opening.cs" />
@@ -322,6 +318,11 @@
     <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Parameters\ThermalAsset.cs" />
     <Compile Include="Parameters\ValueList.cs" />
+    <Compile Include="Parameters\Views\View.cs" />
+    <Compile Include="Parameters\Views\View3D.cs" />
+    <Compile Include="Parameters\Views\ViewPlan.cs" />
+    <Compile Include="Parameters\Views\ViewSection.cs" />
+    <Compile Include="Parameters\Views\ViewSheet.cs" />
     <Compile Include="Parameters\Workset.cs" />
     <Compile Include="Types\AppearanceAsset.cs" />
     <Compile Include="Types\AssetPropertyDouble1DMap.cs" />

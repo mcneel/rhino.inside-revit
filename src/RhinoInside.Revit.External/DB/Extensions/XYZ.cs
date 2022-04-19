@@ -264,7 +264,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     internal static XYZ GetPrincipalComponent(this Transform covarianceMatrix, double tolerance = DefaultTolerance)
     {
-      tolerance = Math.Max(Precision, tolerance);
+      tolerance = Math.Max(MinDelta, tolerance);
 
       var previous = new XYZ(1.0, 1.0, 1.0);
       var principal = covarianceMatrix.OfVector(previous).Normalize(DenormalUpperBound);

@@ -50,34 +50,10 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetDataList("Classes", classNames))
         return;
 
-      var filters = new List<ARDB.ElementFilter>();
-      var classes = new HashSet<string>(classNames);
-      if (classes.Remove("Autodesk.Revit.DB.Area"))
-        filters.Add(new ARDB.AreaFilter());
-      if (classes.Remove("Autodesk.Revit.DB.AreaTag"))
-        filters.Add(new ARDB.AreaTagFilter());
-      if (classes.Remove("Autodesk.Revit.DB.Architecture.Room"))
-        filters.Add(new ARDB.Architecture.RoomFilter());
-      if (classes.Remove("Autodesk.Revit.DB.Architecture.RoomTag"))
-        filters.Add(new ARDB.Architecture.RoomTagFilter());
-      if (classes.Remove("Autodesk.Revit.DB.Mechanical.Space"))
-        filters.Add(new ARDB.Mechanical.SpaceFilter());
-      if (classes.Remove("Autodesk.Revit.DB.Mechanical.SpaceTag"))
-        filters.Add(new ARDB.Mechanical.SpaceTagFilter());
-
       try
       {
-        var types = classes.Select(x => Type.GetType($"{x},RevitAPI", true)).ToList();
-
-        if (types.Count > 0)
-        {
-          if (types.Count == 1)
-            filters.Add(new ARDB.ElementClassFilter(types[0]));
-          else
-            filters.Add(new ARDB.ElementMulticlassFilter(types));
-        }
-
-        DA.SetData("Filter", CompoundElementFilter.Union(filters));
+        var types = classNames.Select(x => typeof(ARDB.Element).Assembly.GetType(x, throwOnError: true)).ToArray();
+        DA.SetData("Filter", CompoundElementFilter.ElementClassFilter(types));
       }
       catch (System.TypeLoadException e)
       {

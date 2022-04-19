@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
 
       strict = false;
-      return distance <= successor * tolerance;
+      return distance <= Math.Max(Math.Abs(value), Math.Abs(successor)) * tolerance;
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       strict = false;
 
       // DB.BRepBuilderSurfaceGeometry.CreateNURBSSurface do not check using relative tolerance
-      //return distance <= successor * tolerance;
+      // return distance <= Math.Max(Math.Abs(value), Math.Abs(successor)) * tolerance;
       return false;
     }
 

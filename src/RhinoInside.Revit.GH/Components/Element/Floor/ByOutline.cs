@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           {
             var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
               polyCurve.DuplicateSegments() :
-              profile.Split(profile.Domain.Mid);
+              new Curve[] { profile };
 
             if (pi < loops.Count)
             {

@@ -63,6 +63,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 #endif
 
+    struct CurveReferenceEqualityComparer : IEqualityComparer<Curve>
+    {
+      public bool Equals(Curve x, Curve y) => x.Reference.EqualTo(y.Reference);
+      public int GetHashCode(Curve obj) => obj.Reference.ElementId.IntegerValue;
+    }
+
     public static IList<IList<ModelCurve>> GetAllModelCurves(this Sketch sketch)
     {
       var modelCurves = new IList<ModelCurve>[sketch.Profile.Size];
@@ -70,11 +76,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var loopIndex = 0;
       foreach (var profile in sketch.Profile.Cast<CurveArray>())
       {
-        var loop = modelCurves[loopIndex++] = new ModelCurve[profile.Size];
-
-        var edgeIndex = 0;
-        foreach (var edge in profile.Cast<Curve>())
-          loop[edgeIndex++] = sketch.Document.GetElement(edge.Reference.ElementId) as ModelCurve;
+        modelCurves[loopIndex++] = profile.Cast<Curve>().
+          Distinct(default(CurveReferenceEqualityComparer)).
+          Select(x => sketch.Document.GetElement(x.Reference.ElementId) as ModelCurve).
+          ToArray();
       }
 
       return modelCurves;
