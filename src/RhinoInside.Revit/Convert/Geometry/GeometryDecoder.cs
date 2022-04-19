@@ -39,6 +39,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </remarks>
     /// <since>1.4</since>
     internal static double ModelScaleFactor => UnitConverter.ToModelLength;
+
+    internal static GeometryObjectTolerance Tolerance => new GeometryObjectTolerance(UnitConverter.Model.UnitScale);
     #endregion
 
     #region Length
@@ -1430,7 +1432,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         polycurve.AppendSegment(curve.ToCurve());
 
       if (!value.IsOpen())
-        polycurve.MakeClosed(GeometryObjectTolerance.Model.VertexTolerance);
+        polycurve.MakeClosed(Tolerance.VertexTolerance);
 
       return polycurve;
     }
@@ -1476,7 +1478,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         segments[c] = value.get_Item(c).ToCurve();
 
       return segments.Length > 1 ?
-        Curve.JoinCurves(segments, GeometryObjectTolerance.Internal.VertexTolerance) :
+        Curve.JoinCurves(segments, Tolerance.VertexTolerance) :
         segments;
     }
 
@@ -1493,7 +1495,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       for (int c = 0; c < count; ++c)
         polycurve.AppendSegment(value.get_Item(c).ToCurve());
 
-      polycurve.MakeClosed(GeometryObjectTolerance.Model.VertexTolerance);
+      polycurve.MakeClosed(Tolerance.VertexTolerance);
       return polycurve;
     }
     #endregion

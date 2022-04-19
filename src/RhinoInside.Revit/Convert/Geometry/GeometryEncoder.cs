@@ -86,6 +86,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </remarks>
     /// <since>1.4</since>
     internal static double ModelScaleFactor => UnitConverter.ToInternalLength;
+
+    internal static GeometryObjectTolerance Tolerance => GeometryObjectTolerance.Internal;
     #endregion
 
     #region Length
@@ -1389,7 +1391,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Curve ToCurve(this PolylineCurve polylineCurve) => ToCurve(polylineCurve, ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this PolylineCurve polylineCurve, double factor)
     {
-      if (polylineCurve.TryGetLine(out var line, GeometryObjectTolerance.Internal.VertexTolerance * factor))
+      if (polylineCurve.TryGetLine(out var line, Tolerance.VertexTolerance * factor))
         return line.ToLine(factor);
 
       throw new ConversionException("Failed to convert non G1 continuous curve.");
@@ -1497,7 +1499,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Curve ToCurve(this NurbsCurve nurbsCurve) => nurbsCurve.ToCurve(ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this NurbsCurve nurbsCurve, double factor)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = Tolerance;
       if (nurbsCurve.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance * factor))
         return ellipse.ToCurve(interval, factor);
 
@@ -1578,7 +1580,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Curve ToCurve(this PolyCurve polyCurve) => ToCurve(polyCurve, ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this PolyCurve polyCurve, double factor)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = Tolerance;
       var curve = polyCurve.Simplify
       (
         CurveSimplifyOptions.AdjustG1 |
@@ -1718,7 +1720,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.CurveLoop ToCurveLoop(this Curve curve)
     {
       curve = curve.InOtherUnits(ModelScaleFactor);
-      curve.CombineShortSegments(GeometryObjectTolerance.Internal.ShortCurveTolerance);
+      curve.CombineShortSegments(Tolerance.ShortCurveTolerance);
 
       return ARDB.CurveLoop.Create(curve.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToList());
     }
@@ -1774,7 +1776,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.CurveArray ToCurveArray(this Curve curve)
     {
       curve = curve.InOtherUnits(ModelScaleFactor);
-      curve.CombineShortSegments(GeometryObjectTolerance.Internal.ShortCurveTolerance);
+      curve.CombineShortSegments(Tolerance.ShortCurveTolerance);
 
       return curve.ToCurveMany(UnitConverter.NoScale).SelectMany(x => x.ToBoundedCurves()).ToCurveArray();
     }
@@ -2318,7 +2320,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal static IEnumerable<ARDB.Line> ToLineMany(this Polyline value, double factor)
     {
       value = value.Duplicate();
-      value.DeleteShortSegments(GeometryObjectTolerance.Internal.ShortCurveTolerance / factor);
+      value.DeleteShortSegments(Tolerance.ShortCurveTolerance / factor);
 
       int count = value.Count;
       if (count > 1)
@@ -2342,7 +2344,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Convert to Raw form
       nurbsCurve = nurbsCurve.DuplicateCurve() as NurbsCurve;
       if (factor != 1.0) nurbsCurve.Scale(factor);
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = Tolerance;
       nurbsCurve.CombineShortSegments(tol.ShortCurveTolerance);
 
       // Transfer
@@ -2428,7 +2430,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Convert to Raw form
       polylineCurve = polylineCurve.DuplicateCurve() as PolylineCurve;
       if (factor != 1.0) polylineCurve.Scale(factor);
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = Tolerance;
       polylineCurve.CombineShortSegments(tol.ShortCurveTolerance);
 
       // Transfer
@@ -2456,7 +2458,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Convert to Raw form
       polyCurve = polyCurve.DuplicateCurve() as PolyCurve;
       if (factor != 1.0) polyCurve.Scale(factor);
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = Tolerance;
       polyCurve.RemoveNesting();
       polyCurve.CombineShortSegments(tol.ShortCurveTolerance);
 
