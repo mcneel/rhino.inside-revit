@@ -6,3 +6,17 @@ group: Modeling
 ---
 
 {% include youtube_player.html id="dpMFnJcvO5E" %}
+
+
+## Querying Structural Elements
+
+### 
+
+## Analyzing Structural Elements
+
+## Creating Structural Elements
+
+### Add Beam
+
+### Add Column
+
