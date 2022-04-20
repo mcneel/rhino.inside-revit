@@ -733,6 +733,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ConstructLevelConstraint {
+            get {
+                object obj = ResourceManager.GetObject("ConstructLevelConstraint", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CreateGenericShader {
             get {
                 object obj = ResourceManager.GetObject("CreateGenericShader", resourceCulture);
@@ -2346,6 +2356,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap LevelByElevation {
             get {
                 object obj = ResourceManager.GetObject("LevelByElevation", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LevelConstraint {
+            get {
+                object obj = ResourceManager.GetObject("LevelConstraint", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

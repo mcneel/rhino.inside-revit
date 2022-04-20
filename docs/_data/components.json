@@ -1080,11 +1080,11 @@
     "uuid": "e8ddc0e4-97e9-4659-9945-e8c77114273d"
   }, 
   {
-    "desc": "Given its Axis, it adds a Beam element to the active Revit document", 
+    "desc": "Given its Axis, it adds a beam element to the active Revit document", 
     "iconsrc": "/static/images/GH/BeamByCurve.png", 
     "icontag": null, 
     "panel": "Build", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Add Beam", 
     "typename": "BeamByCurve", 
@@ -1104,13 +1104,13 @@
     "uuid": "a39bbdf2-78f2-4501-bb6e-f9cc3e83516e"
   }, 
   {
-    "desc": "Given its Axis, it adds a structural Column to the active Revit document", 
+    "desc": "Given its Axis, it adds a structural column element to the active Revit document", 
     "iconsrc": "/static/images/GH/ColumnByCurve.png", 
     "icontag": null, 
     "panel": "Build", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
-    "title": "Add Column", 
+    "title": "Add Structural Column", 
     "typename": "ColumnByCurve", 
     "until": null, 
     "uuid": "47b560ac-1e1d-4576-9f17-bccf612974d8"
@@ -1150,6 +1150,18 @@
     "typename": "ElementRelease", 
     "until": null, 
     "uuid": "8621421d-b642-4c26-a88b-1760b9d97c91"
+  }, 
+  {
+    "desc": "Constructs a level constraint", 
+    "iconsrc": "/static/images/GH/ConstructLevelConstraint.png", 
+    "icontag": null, 
+    "panel": "Input", 
+    "since": null, 
+    "tab": "Revit", 
+    "title": "Level Constraint", 
+    "typename": "ConstructLevelConstraint", 
+    "until": null, 
+    "uuid": "01c853d8-87a3-4a76-8855-130beca30da1"
   }, 
   {
     "desc": "Given its Definition, it adds a new Parameter into the Revit document", 
@@ -2584,7 +2596,7 @@
     "iconsrc": "/static/images/GH/GridByCurve.png", 
     "icontag": null, 
     "panel": "Model", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Add Grid", 
     "typename": "GridByCurve", 
