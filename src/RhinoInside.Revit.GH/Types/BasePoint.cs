@@ -9,7 +9,10 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Base Point")]
-  public class BasePoint : GraphicalElement
+  public interface IGH_BasePoint : IGH_GraphicalElement { }
+
+  [Kernel.Attributes.Name("Base Point")]
+  public class BasePoint : GraphicalElement, IGH_BasePoint
   {
     protected override Type ValueType => typeof(ARDB.BasePoint);
     public new ARDB.BasePoint Value => base.Value as ARDB.BasePoint;
@@ -127,7 +130,7 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 
   [Kernel.Attributes.Name("Internal Origin")]
-  public class InternalOrigin : GraphicalElement
+  public class InternalOrigin : GraphicalElement, IGH_BasePoint
   {
     protected override Type ValueType => typeof(ARDB_InternalOrigin);
     public new ARDB_InternalOrigin Value => base.Value as ARDB_InternalOrigin;
@@ -143,7 +146,7 @@ namespace RhinoInside.Revit.GH.Types
     public InternalOrigin(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
 
 #if REVIT_2021
-    public InternalOrigin(ARDB_InternalOrigin point) : base(point) {}
+    public InternalOrigin(ARDB_InternalOrigin point) : base(point) { }
 #else
     public InternalOrigin(ARDB.Element point) : base(point)
     {
@@ -165,7 +168,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_PreviewData
     public override BoundingBox ClippingBox => Value is ARDB_InternalOrigin ?
-      new BoundingBox(Point3d.Origin, Point3d.Origin):
+      new BoundingBox(Point3d.Origin, Point3d.Origin) :
       NaN.BoundingBox;
 
     public override void DrawViewportWires(GH_PreviewWireArgs args)
