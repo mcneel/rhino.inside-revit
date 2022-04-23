@@ -109,7 +109,7 @@ namespace RhinoInside.Revit.External.DB
         switch (Base)
         {
           case ARDB.Level level: return level.ProjectElevation;
-          case ARDB.BasePoint basePoint: return basePoint.Position.Z;
+          case ARDB.BasePoint basePoint: return basePoint.GetPosition().Z;
         }
 
         return 0.0;
