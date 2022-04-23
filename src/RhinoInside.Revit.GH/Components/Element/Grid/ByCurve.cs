@@ -43,13 +43,23 @@ namespace RhinoInside.Revit.GH.Components.Grids
       ),
       new ParamDefinition
       (
-        new Parameters.ElevationInterval
+        new Parameters.ProjectElevation
         {
-          Name = "Extents",
-          NickName= "E",
-          Description = "Grid extents along z-axis",
-          Optional = true
+          Name = "Base",
+          NickName = "BA",
+          Description = $"Base of the grid.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'.",
+          Optional = true,
         }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ProjectElevation
+        {
+          Name = "Top",
+          NickName = "TO",
+          Description = $"Top of the grid.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'",
+          Optional = true,
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -119,11 +129,14 @@ namespace RhinoInside.Revit.GH.Components.Grids
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if (!Parameters.ElevationInterval.TryGetData(this, DA, "Extents", out var extents, doc)) return null;
+          if (!Params.TryGetData(DA, "Base", out ERDB.ElevationElementReference? baseElevation)) return null;
+          if (!Params.TryGetData(DA, "Top", out ERDB.ElevationElementReference? topElevation)) return null;
           if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.GridType type, doc, ARDB.ElementTypeGroup.GridType)) return null;
           Params.TryGetData(DA, "Template", out ARDB.Grid template);
 
+
+          var extents = new Interval();
           // Validation & Defaults
           {
             var tol = GeometryObjectTolerance.Model;
@@ -135,16 +148,24 @@ namespace RhinoInside.Revit.GH.Components.Grids
             )
               throw new RuntimeArgumentException("Curve", "Curve must be a horizontal line or arc curve.", curve);
 
-            extents = extents ?? new Interval
+            extents = new Interval
             (
-              GeometryDecoder.ToModelLength(axisPlane.OriginZ - 12.0),
-              GeometryDecoder.ToModelLength(axisPlane.OriginZ + 12.0)
+              GeometryEncoder.ToInternalLength(axisPlane.OriginZ),
+              GeometryEncoder.ToInternalLength(axisPlane.OriginZ)
             );
+
+            if (!baseElevation.HasValue) extents.T0 -= 12.0;
+            else if (baseElevation.Value.IsOffset(out var baseOffset)) extents.T0 += baseOffset;
+            else extents.T0 = baseElevation.Value.Elevation;
+
+            if (!topElevation.HasValue) extents.T1 += 12.0;
+            else if (topElevation.Value.IsOffset(out var topOffset)) extents.T1 += topOffset;
+            else extents.T1 = topElevation.Value.Elevation;
           }
 
           // Compute
           if (CanReconstruct(_Grid_, out var untracked, ref grid, doc.Value, name, categoryId: ARDB.BuiltInCategory.OST_Grids))
-            grid = Reconstruct(grid, doc.Value, curve, extents.Value, type, name, template);
+            grid = Reconstruct(grid, doc.Value, curve, extents, type, name, template);
 
           DA.SetData(_Grid_, grid);
           return untracked ? null : grid;
@@ -260,12 +281,9 @@ namespace RhinoInside.Revit.GH.Components.Grids
 
       using (var outline = grid.GetExtents())
       {
-        var bottom = GeometryEncoder.ToInternalLength(extents.T0);
-        var top    = GeometryEncoder.ToInternalLength(extents.T1);
-        var tol    = GeometryObjectTolerance.Internal;
-
-        if (!tol.AreAlmostEqualLengths(bottom, outline.MinimumPoint.Z) || !tol.AreAlmostEqualLengths(top, outline.MaximumPoint.Z))
-          grid.SetVerticalExtents(bottom, top);
+        var tol = GeometryObjectTolerance.Internal;
+        if (!tol.AreAlmostEqualLengths(extents.T0, outline.MinimumPoint.Z) || !tol.AreAlmostEqualLengths(extents.T1, outline.MaximumPoint.Z))
+          grid.SetVerticalExtents(extents.T0, extents.T1);
       }
 
       return grid;

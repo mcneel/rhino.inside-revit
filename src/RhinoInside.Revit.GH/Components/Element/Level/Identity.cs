@@ -2,6 +2,8 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.External.DB.Extensions;
+using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Levels
 {
@@ -19,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
     static readonly ParamDefinition[] inputs =
     {
       ParamDefinition.Create<Parameters.Level>("Level", "L"),
-      ParamDefinition.Create<Parameters.Elevation>("Elevation", "E", "Level elevation", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ProjectElevation>("Elevation", "E", "Level elevation", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Structural", "S", "Level is structural", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Building Story", "BS", "Level is building story", optional: true, relevance: ParamRelevance.Primary),
     };
@@ -29,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
     {
       ParamDefinition.Create<Parameters.Level>("Level", "L", relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Level name", GH_ParamAccess.item),
-      ParamDefinition.Create<Parameters.Elevation>("Elevation", "E", "Level elevation"),
+      ParamDefinition.Create<Parameters.ProjectElevation>("Elevation", "E", "Level elevation"),
       ParamDefinition.Create<Param_Boolean>("Structural", "S", "Level is structural", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Building Story", "BS", "Level is building story", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.View>("Plan View", "PV", "Associated plan view", relevance: ParamRelevance.Occasional),
@@ -55,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
           level.Value, () =>
           {
             if (elevation.HasValue)
-              level.SetElevationFrom(Params.Output<Parameters.Elevation>("Elevation").ElevationBase, elevation.Value);
+              level.Elevation = elevation.Value;
 
             level.IsStructural = structural;
             level.IsBuildingStory = buildingStory;
@@ -63,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
         );
       }
 
-      Params.TrySetData(DA, "Elevation", () => level.GetElevationFrom(Params.Output<Parameters.Elevation>("Elevation").ElevationBase));
+      Params.TrySetData(DA, "Elevation", () => new ERDB.ElevationElementReference(level.Value));
       Params.TrySetData(DA, "Structural", () => level.IsStructural);
       Params.TrySetData(DA, "Building Story", () => level.IsBuildingStory);
     }
