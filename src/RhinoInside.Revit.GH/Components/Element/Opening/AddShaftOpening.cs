@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
         {
           Name = "Base",
           NickName = "BA",
-          Description = $"Base of the opening.{Environment.NewLine}This input accepts a 'Level Constraint' or a 'Number' as an absolute elevation.",
+          Description = $"Base of the opening.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'.",
           Optional = true,
         }, ParamRelevance.Primary
       ),
@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
         {
           Name = "Top",
           NickName = "TO",
-          Description = $"Top of the opening.{Environment.NewLine}This input accepts a 'Level Constraint' or a 'Number' as an absolute height.",
+          Description = $"Top of the opening.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'",
           Optional = true,
         }, ParamRelevance.Primary
       ),
@@ -99,10 +99,10 @@ namespace RhinoInside.Revit.GH.Components.Openings
         {
           // Input
           if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary) || boundary.Count == 0) return null;
-          if (!Params.TryGetData(DA, "Base", out ERDB.LevelConstraint? baseConstraint)) return null;
-          if (!Params.TryGetData(DA, "Top", out ERDB.LevelConstraint? topConstraint)) return null;
+          if (!Params.TryGetData(DA, "Base", out ERDB.ElevationElementReference? baseElevation)) return null;
+          if (!Params.TryGetData(DA, "Top", out ERDB.ElevationElementReference? topElevation)) return null;
 
-          var elevation = Interval.Unset;
+          var boundaryElevation = Interval.Unset;
           {
             var tol = GeometryObjectTolerance.Model;
             foreach (var loop in boundary)
@@ -116,36 +116,64 @@ namespace RhinoInside.Revit.GH.Components.Openings
                 plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
               )
               {
-                elevation = Interval.Unset;
+                boundaryElevation = Interval.Unset;
                 break;
               }
 
-              elevation = Interval.FromUnion(elevation, new Interval(plane.OriginZ, plane.OriginZ));
+              boundaryElevation = Interval.FromUnion(boundaryElevation, new Interval(plane.OriginZ, plane.OriginZ));
             }
 
-            if (!elevation.IsValid || elevation.Length > tol.VertexTolerance)
+            if (!boundaryElevation.IsValid || boundaryElevation.Length > tol.VertexTolerance)
               throw new Exceptions.RuntimeArgumentException("Boundary", "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.", boundary);
           }
 
-          // Solve missing bottom & top
+          // Solve missing Base & Top
           {
-            if (baseConstraint?.IsAbsolute != false)
+            var z = GeometryEncoder.ToInternalLength(boundaryElevation.Mid);
+
+            // Make baseElevation relative to a Level
+            if (!baseElevation.HasValue || !baseElevation.Value.IsLevelConstraint(out var level, out var _))
             {
-              var z = baseConstraint ?? elevation.Mid / Revit.ModelUnits;
-              var level = doc.Value.GetNearestLevel(z);
-              baseConstraint = level is object ? new ERDB.LevelConstraint(level, z - level.ProjectElevation) : default;
+              level = doc.Value.GetNearestLevel(z);
+              double elevation = z, offset = 0.0;
+              if (baseElevation.HasValue)
+              {
+                if (baseElevation.Value.IsElevation(out elevation)) { offset = 0.0; }
+                else if (baseElevation.Value.IsOffset(out offset)) { elevation = z; }
+              }
+
+              baseElevation = new ERDB.ElevationElementReference(level, elevation - level.ProjectElevation + offset);
+            }
+
+            if (!topElevation.HasValue || !topElevation.Value.IsLevelConstraint(out var _, out var _))
+            {
+              double elevation = z, offset = 20.0;
+              if (topElevation.HasValue)
+              {
+                if (topElevation.Value.IsElevation(out elevation)) { offset = 0.0; }
+                else if (topElevation.Value.IsOffset(out offset)) { elevation = z; }
+              }
+
+              topElevation = new ERDB.ElevationElementReference(default, elevation - level.ProjectElevation + offset);
             }
           }
 
           // Solve default offsets
-          if (baseConstraint.HasValue && baseConstraint.Value.IsRelative(out var bottomLevel, out var bottomOffset) && !bottomOffset.HasValue)
-            baseConstraint = new ERDB.LevelConstraint(bottomLevel, -0.5);
+          if (baseElevation.HasValue && baseElevation.Value.IsLevelConstraint(out var bottomLevel, out var bottomOffset) && bottomOffset is null)
+            baseElevation = new ERDB.ElevationElementReference(bottomLevel, -0.5);
 
-          if (topConstraint.HasValue && topConstraint.Value.IsRelative(out var topLevel, out var topOffset) && !topOffset.HasValue)
-            topConstraint = new ERDB.LevelConstraint(topLevel, +0.5);
+          if (topElevation.HasValue && topElevation.Value.IsLevelConstraint(out var topLevel, out var topOffset) && topOffset is null)
+            topElevation = new ERDB.ElevationElementReference(topLevel, +0.5);
 
           // Compute
-          opening = Reconstruct(opening, doc.Value, boundary, baseConstraint.Value, topConstraint ?? 20.0);
+          opening = Reconstruct
+          (
+            opening, doc.Value,
+            boundary,
+            GeometryEncoder.ToInternalLength(boundaryElevation.Mid),
+            baseElevation.Value,
+            topElevation.Value
+          );
 
           DA.SetData(_Opening_, opening);
           return opening;
@@ -153,7 +181,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
       );
     }
 
-    bool Reuse(ARDB.Opening opening, IList<Curve> boundaries)
+    bool Reuse(ARDB.Opening opening, IList<Curve> boundaries, double elevation)
     {
       if (opening is null) return false;
 
@@ -166,22 +194,21 @@ namespace RhinoInside.Revit.GH.Components.Openings
         var tol = GeometryObjectTolerance.Model;
         var hack = new ARDB.XYZ(1.0, 1.0, 0.0);
         var loops = sketch.GetAllModelCurves();
-        var plane = sketch.SketchPlane.GetPlane().ToPlane();
+        var sketchPlane = sketch.SketchPlane.GetPlane();
+        sketch.SketchPlane.Location.Move(ARDB.XYZ.BasisZ * (elevation - sketchPlane.Origin.Z));
 
         var pi = 0;
         foreach (var boundary in boundaries)
         {
-          var profile = Curve.ProjectToPlane(boundary, plane);
-
           if
           (
-            !Curve.GetDistancesBetweenCurves(profiles[pi], profile, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
+            !Curve.GetDistancesBetweenCurves(profiles[pi], boundary, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
             max > tol.VertexTolerance
           )
           {
-            var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
+            var segments = boundary.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
               polyCurve.DuplicateSegments() :
-              new Curve[] { profile };
+              new Curve[] { boundary };
 
             if (pi < loops.Count)
             {
@@ -222,38 +249,41 @@ namespace RhinoInside.Revit.GH.Components.Openings
     (
       ARDB.Opening opening,
       ARDB.Document document,
-      IList<Curve> boundary,
-      ERDB.LevelConstraint baseConstraint,
-      ERDB.LevelConstraint topConstraint
+      IList<Curve> boundaries, double elevation,
+      ERDB.ElevationElementReference baseElevation,
+      ERDB.ElevationElementReference topElevation
     )
     {
       // If there are no Levels!!
-      if (!baseConstraint.IsRelative(out var baseLevel, out var baseOffseet))
+      if (!baseElevation.IsLevelConstraint(out var baseLevel, out var baseOffset))
         return default;
 
-      var topRelative = topConstraint.IsRelative(out var topLevel, out var topOffseet);
-
-      //if (topConstraint - baseConstraint < 0.001)
-      //  throw new Exceptions.RuntimeArgumentException("Height", $"The top of the Opening is lower than the bottom of the Opening or coincident with it. {{{opening?.Id}}} ");
-
-      if (!Reuse(opening, boundary))
-        opening = document.Create.NewOpening(baseLevel, topLevel, boundary.ToCurveArray());
+      if (!Reuse(opening, boundaries, elevation))
+      {
+        // We create a Level here to obtain an opening with a <not associated> `SketckPlane`
+        var level = ARDB.Level.Create(document, elevation);
+        opening = document.Create.NewOpening(level, default, boundaries.ToCurveArray());
+        opening.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(baseLevel.Id);
+        document.Delete(level.Id);
+      }
 
       // TODO: Compute if needs to be updated or not
       opening.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(ARDB.ElementId.InvalidElementId);
 
       opening.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(baseLevel.Id);
-      opening.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(baseOffseet.Value);
+      opening.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(baseOffset.Value);
 
-      if (topRelative)
+      if (topElevation.IsLevelConstraint(out var topLevel, out var topOffset))
       {
         opening.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(topLevel.Id);
-        opening.get_Parameter(ARDB.BuiltInParameter.WALL_TOP_OFFSET).Update(topOffseet.Value);
+        if (!opening.get_Parameter(ARDB.BuiltInParameter.WALL_TOP_OFFSET).Update(topOffset.Value))
+          throw new Exceptions.RuntimeArgumentException("Top", $"The top of the Opening is lower than the bottom of the Opening or coincident with it. {{{opening.Id}}} ");
       }
       else
       {
         opening.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(ARDB.ElementId.InvalidElementId);
-        opening.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update(topConstraint.Elevation);
+        if (!opening.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update(topElevation.Offset - baseOffset.Value))
+          throw new Exceptions.RuntimeArgumentException("Top", $"The top of the Opening is lower than the bottom of the Opening or coincident with it. {{{opening.Id}}} ");
       }
 
       return opening;

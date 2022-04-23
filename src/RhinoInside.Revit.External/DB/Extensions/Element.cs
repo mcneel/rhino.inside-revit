@@ -3,14 +3,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Architecture;
-using Autodesk.Revit.DB.Mechanical;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
   internal static class ElementEqualityComparer
   {
+    /// <summary>
+    /// IEqualityComparer for <see cref="Autodesk.Revit.DB.Element"/>
+    /// that compares elements from different <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
     public static readonly IEqualityComparer<Element> InterDocument = default(InterDocumentComparer);
+
+    /// <summary>
+    /// IEqualityComparer for <see cref="Autodesk.Revit.DB.Element"/>
+    /// that assumes all elements are from the same <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
     public static readonly IEqualityComparer<Element> SameDocument = default(SameDocumentComparer);
 
     struct SameDocumentComparer : IEqualityComparer<Element>
@@ -26,11 +33,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Determines whether the specified <see cref="Autodesk.Revit.DB.Element"/> equals to this <see cref="Autodesk.Revit.DB.Element"/>.
+    /// Determines whether the specified <see cref="Autodesk.Revit.DB.Element"/> equals
+    /// to this <see cref="Autodesk.Revit.DB.Element"/>.
     /// </summary>
     /// <remarks>
-    /// Two <see cref="Autodesk.Revit.DB.Element"/> instances are considered equivalent if they represent the same element
-    /// in this Revit session.
+    /// Two <see cref="Autodesk.Revit.DB.Element"/> instances are considered equivalent
+    /// if they represent the same element in this Revit session.
     /// </remarks>
     /// <param name="self"></param>
     /// <param name="other"></param>
@@ -605,12 +613,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region Parameter
-    struct ParameterEqualityComparer : IEqualityComparer<Parameter>
-    {
-      public bool Equals(Parameter x, Parameter y) => x.Id.IntegerValue == y.Id.IntegerValue;
-      public int GetHashCode(Parameter obj) => obj.Id.IntegerValue;
-    }
-
     public static IEnumerable<Parameter> GetParameters(this Element element, ParameterClass set)
     {
       switch (set)
@@ -626,7 +628,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               }
             ).
             Where(x => x?.Definition is object).
-            Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None), default(ParameterEqualityComparer)).
+            Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None), ParameterEqualityComparer.SameDocument).
             OrderBy(x => x.Id.IntegerValue);
 
         case ParameterClass.BuiltIn:
@@ -668,7 +670,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         case ParameterClass.Any:
           return element.GetParameters(name, ParameterClass.BuiltIn).
-            Union(element.GetParameters(name), default(ParameterEqualityComparer)).
+            Union(element.GetParameters(name), ParameterEqualityComparer.SameDocument).
             OrderBy(x => x.Id.IntegerValue);
 
         case ParameterClass.BuiltIn:

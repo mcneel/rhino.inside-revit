@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.GH.Parameters
           new Types.BasePoint(BasePointExtension.GetSurveyPoint(doc))
         };
 
-        foreach (var point in points)
+        foreach (var point in points.Where(x => x.IsValid))
           listBox.Items.Add(point);
 
         var selectedItems = points.Intersect(PersistentData.OfType<Types.GraphicalElement>());

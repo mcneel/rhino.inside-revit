@@ -1,255 +1,336 @@
 using System;
-using System.Windows.Forms;
-using GH_IO.Serialization;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
+using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
+using ARDB = Autodesk.Revit.DB;
+
+namespace RhinoInside.Revit.External.DB
+{
+  public struct ElevationElementReference : IEquatable<ElevationElementReference> //, IComparable<ElevationElementReference>
+  {
+    readonly ARDB.Document Document;
+    readonly ARDB.ElementId BaseId;
+    readonly double? Value;
+
+    ARDB.Element Base => Document?.GetElement(BaseId);
+
+    public ElevationElementReference(double offset)
+    {
+      Document = default;
+      BaseId = ARDB.ElementId.InvalidElementId;
+      Value = offset;
+    }
+
+    public ElevationElementReference(double height, ARDB.BasePoint basePoint)
+    {
+      Document = basePoint?.Document;
+      BaseId = basePoint?.Id;
+      Value = height;
+    }
+
+    public ElevationElementReference(ARDB.Level level)
+    {
+      var basePoint = default(ARDB.BasePoint);
+      switch ((ElevationBase) level.Document.GetElement(level.GetTypeId()).get_Parameter(ARDB.BuiltInParameter.LEVEL_RELATIVE_BASE_TYPE).AsInteger())
+      {
+        case ElevationBase.ProjectBasePoint: basePoint = BasePointExtension.GetProjectBasePoint(level.Document); break;
+        case ElevationBase.SurveyPoint: basePoint = BasePointExtension.GetSurveyPoint(level.Document); break;
+      }
+
+      Document = basePoint?.Document;
+      BaseId = basePoint?.Id;
+      Value = basePoint is object ? level.Elevation : level.ProjectElevation;
+    }
+
+    public ElevationElementReference(ARDB.Level level, double? offset)
+    {
+      Document = level?.Document;
+      BaseId = level?.Id;
+      Value = offset;
+    }
+
+    public bool IsAbsolute => BaseId is null && Value is object;
+
+    public bool IsOffset(out double offset)
+    {
+      if (BaseId == ARDB.ElementId.InvalidElementId)
+      {
+        offset = Offset;
+        return true;
+      }
+
+      offset = double.NaN;
+      return false;
+    }
+
+    public bool IsElevation(out double elevation)
+    {
+      if (BaseId != ARDB.ElementId.InvalidElementId)
+      {
+        elevation = Elevation;
+        return true;
+      }
+
+      elevation = double.NaN;
+      return false;
+    }
+
+    public bool IsRelative(out double offset, out ARDB.Element baseElement)
+    {
+      if ((baseElement = Base) is object)
+      {
+        offset = Value ?? 0.0;
+        return true;
+      }
+
+      offset = default;
+      return false;
+    }
+
+    public bool IsLevelConstraint(out ARDB.Level level, out double? offset)
+    {
+      if (Base is ARDB.Level baseLevel)
+      {
+        level = baseLevel;
+        offset = Value;
+        return true;
+      }
+
+      level = default;
+      offset = default;
+      return false;
+    }
+
+    public double BaseElevation
+    {
+      get
+      {
+        switch (Base)
+        {
+          case ARDB.Level level: return level.ProjectElevation;
+          case ARDB.BasePoint basePoint: return basePoint.GetPosition().Z;
+        }
+
+        return 0.0;
+      }
+    }
+
+    public double Offset => Value ?? 0.0;
+
+    public double Elevation => BaseElevation + Offset;
+
+    public override string ToString()
+    {
+      if (IsLevelConstraint(out var level, out var levelOffset))
+      {
+        var name = level.Name;
+        var token = $"'{name ?? "Invalid Level"}'";
+        if (levelOffset.HasValue && Math.Abs(levelOffset.Value) > 1e-9)
+          token += $" {(levelOffset.Value < 0.0 ? "-" : "+")} {Math.Abs(levelOffset.Value)} ft";
+
+        return token;
+      }
+      else if (IsRelative(out var relativeOffset, out var relativeElement))
+      {
+        var name = relativeElement.Name;
+        if (string.IsNullOrEmpty(name)) name = relativeElement.Category?.Name;
+        var token = $"'{name ?? "Invalid Element"}'";
+        token += $" {(relativeOffset < 0.0 ? "-" : "+")} {Math.Abs(relativeOffset)} ft";
+
+        return token;
+      }
+      else if (IsOffset(out var offset))
+      {
+        return $"Δ {(offset < 0.0 ? "-" : "+")}{Math.Abs(offset)} ft";
+      }
+      else if (IsElevation(out var elevation))
+      {
+        return $"{elevation} ft";
+      }
+
+      return string.Empty;
+    }
+
+    #region IEquatable
+    public override int GetHashCode() =>
+      (Base?.Document.GetHashCode() ?? 0) ^
+      (Base?.Id.IntegerValue.GetHashCode() ?? 0) ^
+      (Value?.GetHashCode() ?? 0);
+
+    public override bool Equals(object obj) => obj is ElevationElementReference other && Equals(other);
+
+    public bool Equals(ElevationElementReference other) => Base.IsEquivalent(other.Base) && Value == other.Value;
+
+    public static bool operator ==(ElevationElementReference left, ElevationElementReference right) => left.Equals(right);
+    public static bool operator !=(ElevationElementReference left, ElevationElementReference right) => !left.Equals(right);
+    #endregion
+
+    //#region IComparable
+    //public int CompareTo(ElevationElementReference other) => Elevation.CompareTo(other.Elevation);
+    //#endregion
+  }
+}
+
+namespace RhinoInside.Revit.GH.Types
+{
+  public class ProjectElevation : GH_Goo<External.DB.ElevationElementReference>
+  {
+    public ProjectElevation() { }
+    public ProjectElevation(External.DB.ElevationElementReference height) :
+      base(height)
+    { }
+    public ProjectElevation(double offset) :
+      base(new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset)))
+    { }
+    public ProjectElevation(double elevation, BasePoint basePoint) :
+      base(new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation), basePoint?.Value))
+    { }
+
+    public ProjectElevation(double elevation, IGH_BasePoint basePoint) :
+      base(new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation), basePoint?.Value as ARDB.BasePoint))
+    { }
+
+    public override bool IsValid => Value != default;
+
+    public override string TypeName => "Project Elevation";
+
+    public override string TypeDescription => "A signed distance along Z-axis";
+
+    public override IGH_Goo Duplicate() => MemberwiseClone() as IGH_Goo;
+
+    public override string ToString()
+    {
+      if (Value.IsLevelConstraint(out var level, out var levelOffset))
+      {
+        var name = level.Name;
+        var token = $"'{name ?? "Invalid Level"}'";
+        if (levelOffset.HasValue && Math.Abs(levelOffset.Value) > 1e-9)
+          token += $" {(levelOffset.Value < 0.0 ? "-" : "+")} {GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(levelOffset.Value)))} {GH_Format.RhinoUnitSymbol()}";
+
+        return token;
+      }
+      else if (Value.IsRelative(out var relativeOffset, out var relativeElement))
+      {
+        var name = relativeElement.Name;
+        if (string.IsNullOrEmpty(name)) name = relativeElement.Category?.Name;
+        var token = $"'{name ?? "Invalid Element"}'";
+        token += $" {(relativeOffset < 0.0 ? "-" : "+")} {GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(relativeOffset)))} {GH_Format.RhinoUnitSymbol()}";
+
+        return token;
+      }
+      else if (Value.IsOffset(out var offset))
+      {
+        return $"Δ {(offset < 0.0 ? "-" : "+")}{GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(offset)))} {GH_Format.RhinoUnitSymbol()}";
+      }
+      else if (Value.IsElevation(out var elevation))
+      {
+        return $"{GH_Format.FormatDouble(GeometryDecoder.ToModelLength(elevation))} {GH_Format.RhinoUnitSymbol()}";
+      }
+
+      return string.Empty;
+    }
+
+    public override bool CastTo<Q>(ref Q target)
+    {
+      if (typeof(Q).IsAssignableFrom(typeof(External.DB.ElevationElementReference)))
+      {
+        target = (Q) (object) Value;
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
+      {
+        target = (Q) (object) new GH_Number(GeometryDecoder.ToModelLength(Value.Elevation));
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(double)))
+      {
+        target = (Q) (object) GeometryDecoder.ToModelLength(Value.Elevation);
+        return true;
+      }
+
+      return base.CastTo(ref target);
+    }
+
+    public override bool CastFrom(object source)
+    {
+      if (source is IGH_Goo goo)
+        source = goo.ScriptVariable();
+
+      switch (source)
+      {
+        case double offset: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset)); return true;
+        case ARDB.Level level: Value = new External.DB.ElevationElementReference(level, default); return true;
+        case ARDB.BasePoint basePoint: Value = new External.DB.ElevationElementReference(default, basePoint); return true;
+        case External.DB.ElevationElementReference elevation: Value = elevation; return true;
+      }
+
+      return base.CastFrom(source);
+    }
+  }
+}
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  using External.DB.Extensions;
-  using Rhino.Geometry;
-
-  public class Elevation : Param_Number
+  public class ProjectElevation : Param<Types.ProjectElevation>
   {
     public override Guid ComponentGuid => new Guid("63F4A581-6065-4F90-BAD2-714DA8B97C08");
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
-    public External.DB.ElevationBase ElevationBase { get; set; } = External.DB.ElevationBase.InternalOrigin;
 
-    public Elevation()
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
+    protected override string IconTag => "⦻";
+
+    protected override Types.ProjectElevation PreferredCast(object data)
     {
-      Name = "Elevation";
-      NickName = "E";
-      Description = "Contains a collection of signed distances along Z axis";
-      Category = "Params";
-      SubCategory = "Revit";
+      return data is External.DB.ElevationElementReference height ? new Types.ProjectElevation(height) : default;
     }
 
-    public override bool Read(GH_IReader reader)
-    {
-      if (!base.Read(reader))
-        return false;
-
-      int elevationBase = (int) External.DB.ElevationBase.InternalOrigin;
-      reader.TryGetInt32("ElevationBase", ref elevationBase);
-      ElevationBase = (External.DB.ElevationBase) elevationBase;
-
-      return true;
-    }
-
-    public override bool Write(GH_IWriter writer)
-    {
-      if (!base.Write(writer))
-        return false;
-
-      if (ElevationBase != External.DB.ElevationBase.InternalOrigin)
-        writer.SetInt32("ElevationBase", (int) ElevationBase);
-
-      return true;
-    }
-
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
-    {
-      Menu_AppendWireDisplay(menu);
-      //this.Menu_AppendConnect(menu);
-      Menu_AppendDisconnectWires(menu);
-
-      Menu_AppendPrincipalParameter(menu);
-      Menu_AppendReverseParameter(menu);
-      Menu_AppendFlattenParameter(menu);
-      Menu_AppendGraftParameter(menu);
-      Menu_AppendSimplifyParameter(menu);
-      Menu_AppendElevationBase(menu);
-
-      if (Kind == GH_ParamKind.floating || Kind == GH_ParamKind.input)
-      {
-        Menu_AppendSeparator(menu);
-        if (Menu_CustomSingleValueItem() is ToolStripMenuItem single)
-        {
-          single.Enabled &= SourceCount == 0;
-          menu.Items.Add(single);
-        }
-        else Menu_AppendPromptOne(menu);
-
-        if (Menu_CustomMultiValueItem() is ToolStripMenuItem more)
-        {
-          more.Enabled &= SourceCount == 0;
-          menu.Items.Add(more);
-        }
-        else Menu_AppendPromptMore(menu);
-
-        Menu_AppendManageCollection(menu);
-        Menu_AppendSeparator(menu);
-        Menu_AppendDestroyPersistent(menu);
-        Menu_AppendInternaliseData(menu);
-
-        if (Exposure != GH_Exposure.hidden)
-          Menu_AppendExtractParameter(menu);
-      }
-    }
-
-    protected void Menu_AppendElevationBase(ToolStripDropDown menu)
-    {
-      if (Kind <= GH_ParamKind.floating)
-        return;
-
-      var Base = Menu_AppendItem(menu, "Elevation Base") as ToolStripMenuItem;
-
-      Base.Checked = ElevationBase != External.DB.ElevationBase.InternalOrigin;
-      Menu_AppendItem(Base.DropDown, "Internal Origin", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.InternalOrigin), true, ElevationBase == External.DB.ElevationBase.InternalOrigin);
-      Menu_AppendItem(Base.DropDown, "Project Base Point", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.ProjectBasePoint), true, ElevationBase == External.DB.ElevationBase.ProjectBasePoint);
-      Menu_AppendItem(Base.DropDown, "Survey Point", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.SurveyPoint), true, ElevationBase == External.DB.ElevationBase.SurveyPoint);
-    }
-
-    private void Menu_ElevationBase(External.DB.ElevationBase value)
-    {
-      RecordUndoEvent("Set: Elevation Base");
-
-      ElevationBase = value;
-
-      OnObjectChanged(GH_ObjectEventType.Options);
-
-      if (Kind == GH_ParamKind.output)
-        ExpireOwner();
-
-      ExpireSolution(true);
-    }
-
-    public static bool GetData(IGH_Component component, IGH_DataAccess DA, string name, out double height, Types.Document document)
-    {
-      height = default;
-      if (!DA.GetData(name, ref height)) return false;
-      height += document.Value.GetBasePointLocation(component.Params.Input<Elevation>(name).ElevationBase).Z * Revit.ModelUnits;
-
-      return true;
-    }
-  }
-
-  public class ElevationInterval : Param_Interval
-  {
-    public override Guid ComponentGuid => new Guid("4150D40A-7C02-4633-B3B5-CFE4B16855B5");
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
-    public External.DB.ElevationBase ElevationBase { get; set; } = External.DB.ElevationBase.InternalOrigin;
-
-    public ElevationInterval()
-    {
-      Name = "Elevation";
-      NickName = "E";
-      Description = "Signed distance interval along Z axis";
-      Category = "Params";
-      SubCategory = "Revit";
-    }
-
-    #region IO
-    public override bool Read(GH_IReader reader)
-    {
-      if (!base.Read(reader))
-        return false;
-
-      int elevationBase = (int) External.DB.ElevationBase.InternalOrigin;
-      reader.TryGetInt32("ElevationBase", ref elevationBase);
-      ElevationBase = (External.DB.ElevationBase) elevationBase;
-
-      return true;
-    }
-
-    public override bool Write(GH_IWriter writer)
-    {
-      if (!base.Write(writer))
-        return false;
-
-      if (ElevationBase != External.DB.ElevationBase.InternalOrigin)
-        writer.SetInt32("ElevationBase", (int) ElevationBase);
-
-      return true;
-    }
-    #endregion
-
-    #region UI
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
-    {
-      Menu_AppendWireDisplay(menu);
-      //this.Menu_AppendConnect(menu);
-      Menu_AppendDisconnectWires(menu);
-
-      Menu_AppendPrincipalParameter(menu);
-      Menu_AppendReverseParameter(menu);
-      Menu_AppendFlattenParameter(menu);
-      Menu_AppendGraftParameter(menu);
-      Menu_AppendSimplifyParameter(menu);
-      Menu_AppendElevationBase(menu);
-
-      if (Kind == GH_ParamKind.floating || Kind == GH_ParamKind.input)
-      {
-        Menu_AppendSeparator(menu);
-        if (Menu_CustomSingleValueItem() is ToolStripMenuItem single)
-        {
-          single.Enabled &= SourceCount == 0;
-          menu.Items.Add(single);
-        }
-        else Menu_AppendPromptOne(menu);
-
-        if (Menu_CustomMultiValueItem() is ToolStripMenuItem more)
-        {
-          more.Enabled &= SourceCount == 0;
-          menu.Items.Add(more);
-        }
-        else Menu_AppendPromptMore(menu);
-
-        Menu_AppendManageCollection(menu);
-        Menu_AppendSeparator(menu);
-        Menu_AppendDestroyPersistent(menu);
-        Menu_AppendInternaliseData(menu);
-
-        if (Exposure != GH_Exposure.hidden)
-          Menu_AppendExtractParameter(menu);
-      }
-    }
-
-    protected void Menu_AppendElevationBase(ToolStripDropDown menu)
-    {
-      if (Kind <= GH_ParamKind.floating)
-        return;
-
-      var Base = Menu_AppendItem(menu, "Elevation Base") as ToolStripMenuItem;
-
-      Base.Checked = ElevationBase != External.DB.ElevationBase.InternalOrigin;
-      Menu_AppendItem(Base.DropDown, "Internal Origin", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.InternalOrigin), true, ElevationBase == External.DB.ElevationBase.InternalOrigin);
-      Menu_AppendItem(Base.DropDown, "Project Base Point", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.ProjectBasePoint), true, ElevationBase == External.DB.ElevationBase.ProjectBasePoint);
-      Menu_AppendItem(Base.DropDown, "Survey Point", (s, a) => Menu_ElevationBase(External.DB.ElevationBase.SurveyPoint), true, ElevationBase == External.DB.ElevationBase.SurveyPoint);
-    }
-
-    private void Menu_ElevationBase(External.DB.ElevationBase value)
-    {
-      RecordUndoEvent("Set: Elevation Base");
-
-      ElevationBase = value;
-
-      OnObjectChanged(GH_ObjectEventType.Options);
-
-      if (Kind == GH_ParamKind.output)
-        ExpireOwner();
-
-      ExpireSolution(true);
-    }
-    #endregion
-
-    public static bool TryGetData
+    public ProjectElevation() : base
     (
-      IGH_Component component,
-      IGH_DataAccess DA,
-      string name,
-      out Interval? interval,
-      Types.Document document
+      name: "Project Elevation",
+      nickname: "Project Elevation",
+      description: "Contains a collection of project elevation values",
+      category: "Params",
+      subcategory: "Revit"
     )
-    {
-      if (!component.Params.TryGetData(DA, name, out interval)) return false;
-      if (interval.HasValue)
-      {
-        var elevationBase = document.Value.GetBasePointLocation(component.Params.Input<ElevationInterval>(name).ElevationBase).Z * Revit.ModelUnits;
-        interval = new Interval(interval.Value.T0 + elevationBase, interval.Value.T1 + elevationBase);
-      }
+    { }
+  }
+}
 
-      return true;
+namespace RhinoInside.Revit.GH.Components.Input
+{
+  public class ConstructProjectElevation : Component
+  {
+    public override Guid ComponentGuid => new Guid("54C795D0-38F8-4703-8968-0336C9D9B066");
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public ConstructProjectElevation() : base
+    (
+      name: "Project Elevation",
+      nickname: "Elevation",
+      description: "Constructs a project elevation",
+      category: "Revit",
+      subCategory: "Site"
+    )
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager[manager.AddParameter(new Parameters.BasePoint(), "Base Point", "BP", "Reference base point", GH_ParamAccess.item)].Optional = true;
+      manager.AddNumberParameter("Elevation", "E", "Relative elevation above or below the base point", GH_ParamAccess.item, 0.0);
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.ProjectElevation(), "Project Elevation", "PE", "Absolute elevation in the project", GH_ParamAccess.item);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.TryGetData(DA, "Base Point", out Types.IGH_BasePoint basePoint)) return;
+      if (!Params.GetData(DA, "Elevation", out double? elevation)) return;
+
+      DA.SetData("Project Elevation", new Types.ProjectElevation(elevation.Value, basePoint));
     }
   }
 }
