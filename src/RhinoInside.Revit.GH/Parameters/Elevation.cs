@@ -7,7 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB
 {
-  public struct ElevationElementReference : IEquatable<ElevationElementReference> //, IComparable<ElevationElementReference>
+  public struct ElevationElementReference : IEquatable<ElevationElementReference>
   {
     readonly ARDB.Document Document;
     readonly ARDB.ElementId BaseId;
@@ -166,9 +166,50 @@ namespace RhinoInside.Revit.External.DB
     public static bool operator !=(ElevationElementReference left, ElevationElementReference right) => !left.Equals(right);
     #endregion
 
-    //#region IComparable
-    //public int CompareTo(ElevationElementReference other) => Elevation.CompareTo(other.Elevation);
-    //#endregion
+    #region Solve Base & Top
+    public static void SolveBaseAndTop
+    (
+      ARDB.Document document,
+      double projectElevation, double defaultBaseElevation, double defaultTopElevation,
+      ref ElevationElementReference? baseElevation, ref ElevationElementReference? topElevation,
+      double defaultBaseOffset = 0.0, double defaultTopOffset = 0.0
+    )
+    {
+      if (!baseElevation.HasValue || !baseElevation.Value.IsLevelConstraint(out var baseLevel, out var bottomOffset))
+      {
+        baseLevel = document.GetNearestLevel(projectElevation);
+
+        double elevation = projectElevation, offset = defaultBaseElevation;
+        if (baseElevation.HasValue)
+        {
+          if (baseElevation.Value.IsElevation(out elevation)) { offset = 0.0; }
+          else if (baseElevation.Value.IsOffset(out offset)) { elevation = projectElevation; }
+        }
+
+        baseElevation = new ElevationElementReference(baseLevel, elevation - baseLevel.ProjectElevation + offset);
+      }
+      else if (bottomOffset is null)
+      {
+        baseElevation = new ElevationElementReference(baseLevel, defaultBaseOffset);
+      }
+
+      if (!topElevation.HasValue || !topElevation.Value.IsLevelConstraint(out var topLevel, out var topOffset))
+      {
+        double elevation = projectElevation, offset = defaultTopElevation;
+        if (topElevation.HasValue)
+        {
+          if (topElevation.Value.IsElevation(out elevation)) { offset = 0.0; }
+          else if (topElevation.Value.IsOffset(out offset)) { elevation = projectElevation; }
+        }
+
+        topElevation = new ElevationElementReference(default, elevation - baseLevel.ProjectElevation + offset);
+      }
+      else if (topOffset is null)
+      {
+        topElevation = new ElevationElementReference(topLevel, defaultTopOffset);
+      }
+    }
+    #endregion
   }
 }
 
@@ -317,20 +358,20 @@ namespace RhinoInside.Revit.GH.Components.Input
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager[manager.AddParameter(new Parameters.BasePoint(), "Base Point", "BP", "Reference base point", GH_ParamAccess.item)].Optional = true;
-      manager.AddNumberParameter("Elevation", "E", "Relative elevation above or below the base point", GH_ParamAccess.item, 0.0);
+      manager.AddNumberParameter("Offset", "O", "Offset above or below the base point", GH_ParamAccess.item, 0.0);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.ProjectElevation(), "Project Elevation", "PE", "Absolute elevation in the project", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.ProjectElevation(), "Elevation", "E", "Absolute elevation in the project", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.TryGetData(DA, "Base Point", out Types.IGH_BasePoint basePoint)) return;
-      if (!Params.GetData(DA, "Elevation", out double? elevation)) return;
+      if (!Params.GetData(DA, "Offset", out double? offset)) return;
 
-      DA.SetData("Project Elevation", new Types.ProjectElevation(elevation.Value, basePoint));
+      DA.SetData("Elevation", new Types.ProjectElevation(offset.Value, basePoint));
     }
   }
 }
