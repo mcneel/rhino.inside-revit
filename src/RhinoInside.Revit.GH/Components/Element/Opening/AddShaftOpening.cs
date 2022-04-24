@@ -128,42 +128,13 @@ namespace RhinoInside.Revit.GH.Components.Openings
           }
 
           // Solve missing Base & Top
-          {
-            var z = GeometryEncoder.ToInternalLength(boundaryElevation.Mid);
-
-            // Make baseElevation relative to a Level
-            if (!baseElevation.HasValue || !baseElevation.Value.IsLevelConstraint(out var level, out var _))
-            {
-              level = doc.Value.GetNearestLevel(z);
-              double elevation = z, offset = 0.0;
-              if (baseElevation.HasValue)
-              {
-                if (baseElevation.Value.IsElevation(out elevation)) { offset = 0.0; }
-                else if (baseElevation.Value.IsOffset(out offset)) { elevation = z; }
-              }
-
-              baseElevation = new ERDB.ElevationElementReference(level, elevation - level.ProjectElevation + offset);
-            }
-
-            if (!topElevation.HasValue || !topElevation.Value.IsLevelConstraint(out var _, out var _))
-            {
-              double elevation = z, offset = 20.0;
-              if (topElevation.HasValue)
-              {
-                if (topElevation.Value.IsElevation(out elevation)) { offset = 0.0; }
-                else if (topElevation.Value.IsOffset(out offset)) { elevation = z; }
-              }
-
-              topElevation = new ERDB.ElevationElementReference(default, elevation - level.ProjectElevation + offset);
-            }
-          }
-
-          // Solve default offsets
-          if (baseElevation.HasValue && baseElevation.Value.IsLevelConstraint(out var bottomLevel, out var bottomOffset) && bottomOffset is null)
-            baseElevation = new ERDB.ElevationElementReference(bottomLevel, -0.5);
-
-          if (topElevation.HasValue && topElevation.Value.IsLevelConstraint(out var topLevel, out var topOffset) && topOffset is null)
-            topElevation = new ERDB.ElevationElementReference(topLevel, +0.5);
+          ERDB.ElevationElementReference.SolveBaseAndTop
+          (
+            doc.Value, GeometryEncoder.ToInternalLength(boundaryElevation.Mid),
+            0.0, 20.0,
+            ref baseElevation, ref topElevation,
+            -0.5, +0.5
+          );
 
           // Compute
           opening = Reconstruct
