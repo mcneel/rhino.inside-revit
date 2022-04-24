@@ -4,9 +4,9 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.SpatialElements
 {
@@ -72,6 +72,26 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       ),
       new ParamDefinition
       (
+        new Parameters.LevelConstraint
+        {
+          Name = "Base",
+          NickName = "BA",
+          Description = $"Base of the {_Space_.ToLowerInvariant()}.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Location'.",
+          Optional = true,
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.LevelConstraint
+        {
+          Name = "Top",
+          NickName = "TO",
+          Description = $"Top of the {_Space_.ToLowerInvariant()}.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Location'.",
+          Optional = true,
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
         new Parameters.Phase()
         {
           Name = "Phase",
@@ -79,47 +99,7 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
           Description = $"Project phase to which the space belongs.{Environment.NewLine}Space will be placed in the last project phase if this parameter is not set.",
           Optional = true
         }, ParamRelevance.Secondary
-      ),
-      new ParamDefinition
-      (
-        new Parameters.Level()
-        {
-          Name = "Level",
-          NickName = "L",
-          Description = $"{_Space_} base level.",
-          Optional = true
-        }, ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
-        new Param_Number()
-        {
-          Name = "Base Offset",
-          NickName = "LO",
-          Description = "Specifies the distance at which the room occurs.",
-          Optional = true
-        }, ParamRelevance.Tertiary
-      ),
-      new ParamDefinition
-      (
-        new Parameters.Level()
-        {
-          Name = "Upper Limit",
-          NickName = "UL",
-          Description = $"{_Space_} upper level.",
-          Optional = true
-        }, ParamRelevance.Secondary
-      ),
-      new ParamDefinition
-      (
-        new Param_Number()
-        {
-          Name = "Limit Offset",
-          NickName = "LO",
-          Description = "Specifies the distance at which the room occurs.",
-          Optional = true
-        }, ParamRelevance.Tertiary
-      ),
+      )
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -140,6 +120,7 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
     static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
       ARDB.BuiltInParameter.ROOM_NUMBER,
+      ARDB.BuiltInParameter.ROOM_LEVEL_ID,
       ARDB.BuiltInParameter.ROOM_LOWER_OFFSET,
       ARDB.BuiltInParameter.ROOM_UPPER_LEVEL,
       ARDB.BuiltInParameter.ROOM_UPPER_OFFSET,
@@ -163,39 +144,31 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
           }
 
           if (!Params.TryGetData(DA, "Name", out string name)) return null;
-          if (!Params.TryGetData(DA, "Level", out ARDB.Level level)) return null;
-          if (!Params.TryGetData(DA, "Base Offset", out double? baseOffset)) return null;
-          if (!Params.TryGetData(DA, "Upper Limit", out ARDB.Level upperLimit)) return null;
-          if (!Params.TryGetData(DA, "Limit Offset", out double? limitOffset)) return null;
+          if (!Params.TryGetData(DA, "Base", out ERDB.ElevationElementReference? baseElevation)) return null;
+          if (!Params.TryGetData(DA, "Top", out ERDB.ElevationElementReference? topElevation)) return null;
           if (!Params.TryGetData(DA, "Phase", out ARDB.Phase phase)) return null;
 
           // Compute
           if (CanReconstruct(_Space_, out var untracked, ref space, doc.Value, number, categoryId: ARDB.BuiltInCategory.OST_MEPSpaces))
           {
-            if (untracked)
+            if (phase is null)
             {
-              // To avoid `Reconstruct` recereates the element in an other phase unless is necessary…
-              phase = phase ?? space?.Document.GetElement(space?.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE).AsElementId()) as ARDB.Phase;
+              // We avoid `Reconstruct` recreates the element in an other phase unless is necessary…
+              phase = untracked ?
+                space?.Document.GetElement(space?.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE).AsElementId()) as ARDB.Phase :
+                doc.Value.Phases.Cast<ARDB.Phase>().LastOrDefault();
             }
 
-            // Solve Level from Location
-            {
-              if (level is null && upperLimit is null && location.HasValue)
-              {
-                using (var provider = new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.LEVEL_IS_BUILDING_STORY)))
-                using (var evaluator = new ARDB.FilterNumericEquals())
-                using (var rule = new ARDB.FilterIntegerRule(provider, evaluator, 1))
-                using (var filter = new ARDB.ElementParameterFilter(rule))
-                  level = doc.Value.GetNearestBaseLevel(location.Value.Z / Revit.ModelUnits, out upperLimit, filter);
-              }
-              if (upperLimit is null) upperLimit = level;
-              if (level is null) level = upperLimit;
-
-              phase = phase ?? doc.Value.Phases.Cast<ARDB.Phase>().LastOrDefault();
-            }
+            // Solve missing Base & Top
+            ERDB.ElevationElementReference.SolveBaseAndTop
+            (
+              doc.Value, GeometryEncoder.ToInternalLength(location.Value.Z),
+              0.0, 10.0,
+              ref baseElevation, ref topElevation
+            );
 
             // Snap Location to the 'Level' 'Computation Height'
-            if (location.HasValue && level is object)
+            if (location.HasValue && baseElevation.Value.IsLevelConstraint(out var level, out var _))
             {
               location = new Point3d
               (
@@ -212,8 +185,8 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
               space,
               location?.ToXYZ(),
               number, name,
-              level, baseOffset,
-              upperLimit, limitOffset,
+              baseElevation.Value,
+              topElevation.Value,
               phase
             );
           }
@@ -247,18 +220,22 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       ARDB.Document document,
       ARDB.Mechanical.Space space, ARDB.XYZ location,
       string number, string name,
-      ARDB.Level level, double? baseOffset,
-      ARDB.Level upperLimit, double? limitOffset,
+      ERDB.ElevationElementReference baseElevation,
+      ERDB.ElevationElementReference topElevation,
       ARDB.Phase phase
     )
     {
+      // If there are no Levels!!
+      if (!baseElevation.IsLevelConstraint(out var baseLevel, out var baseOffset))
+        return default;
+
       var isNew = false;
-      if (!Reuse(space, level, phase, location))
+      if (!Reuse(space, baseLevel, phase, location))
       {
         isNew = true;
         space = space.ReplaceElement
         (
-          Create(document, level, phase, location),
+          Create(document, baseLevel, phase, location),
           ExcludeUniqueProperties
         );
       }
@@ -281,16 +258,26 @@ namespace RhinoInside.Revit.GH.Components.SpatialElements
       if (number is object) space.get_Parameter(ARDB.BuiltInParameter.ROOM_NUMBER).Update(number);
       if (name is object) space.get_Parameter(ARDB.BuiltInParameter.ROOM_NAME).Update(name);
 
-      var newBaseOffset = baseOffset.HasValue ? baseOffset.Value / Revit.ModelUnits : 0.0;
-      if (space.BaseOffset != newBaseOffset)
-        space.BaseOffset = newBaseOffset;
+      baseOffset = Math.Min(baseOffset.Value, space.Level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble());
+      if (space.BaseOffset != baseOffset.Value)
+        space.BaseOffset = baseOffset.Value;
 
-      if (space.Location is object && space.Level.IsEquivalent(level) && upperLimit is object)
-        space.UpperLimit = upperLimit;
+      if (topElevation.IsLevelConstraint(out var topLevel, out var topOffset))
+      {
+        if (space.Location is object && space.Level.IsEquivalent(baseLevel) && topLevel is object)
+          space.UpperLimit = topLevel;
 
-      var newLimitOffset = limitOffset.HasValue ? limitOffset.Value / Revit.ModelUnits : (level.IsEquivalent(upperLimit) ? 8.0 : 0.0);
-      if (space.LimitOffset != newLimitOffset)
-        space.LimitOffset = newLimitOffset;
+        if (space.LimitOffset != topOffset.Value)
+          space.LimitOffset = topOffset.Value;
+      }
+      else
+      {
+        if (space.Location is object && space.Level.IsEquivalent(baseLevel) && space.UpperLimit is object)
+          space.UpperLimit = baseLevel;
+
+        if (space.LimitOffset != topElevation.Offset)
+          space.LimitOffset = topElevation.Offset;
+      }
 
       if (!isNew && space.Location is object && space.Area == 0.0)
         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{space.Name}' is not in a properly enclosed region. {{{space.Id}}}");
