@@ -152,11 +152,13 @@
     <Compile Include="Components\Element\Sheet\SheetByNumber.cs" />
     <Compile Include="Components\Element\SpatialElement\AddArea.cs" />
     <Compile Include="Components\Element\SpatialElement\AddAreaBoundaryLine.cs" />
+    <Compile Include="Components\Element\SpatialElement\AddAreaTag.cs" />
     <Compile Include="Components\Element\SpatialElement\AddRoom.cs" />
     <Compile Include="Components\Element\SpatialElement\AddRoomSeparatorLine.cs" />
+    <Compile Include="Components\Element\SpatialElement\AddRoomTag.cs" />
     <Compile Include="Components\Element\SpatialElement\AddSpace.cs" />
     <Compile Include="Components\Element\SpatialElement\AddSpaceSeparatorLine.cs" />
-    <Compile Include="Components\Element\SpatialElement\QuerySpatialElements.cs" />
+    <Compile Include="Components\Element\SpatialElement\AddSpaceTag.cs" />    <Compile Include="Components\Element\SpatialElement\QuerySpatialElements.cs" />
     <Compile Include="Components\Element\SpatialElement\SpatialElementGeometry.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBeam.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />

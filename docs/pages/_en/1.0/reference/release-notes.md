@@ -22,7 +22,8 @@ group: Deployment & Configs
 - Added 'Spatial Element Boundary' and 'Spatial Element Geometry' components.
 - Added 'Add Area Boundary', 'Add Room Separation' and 'Add Space Separation' components.
 - Added 'Add Area', 'Add Room' and 'Add Space' components.
-- Added 'Query Areaa', 'Query Rooms' and 'Query Spaces' components.
+- Added 'Query Area', 'Query Rooms' and 'Query Spaces' components.
+- Added 'Add Area Tag', 'Add Room Tag' and 'Add Space Tag'.
 
 ### RC 
 
