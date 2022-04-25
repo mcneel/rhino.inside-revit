@@ -8,7 +8,7 @@ using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components.SpatialElements
+namespace RhinoInside.Revit.GH.Components.Topology
 {
   [ComponentVersion(introduced: "1.7")]
   public class AddRoom : ElementTrackerComponent

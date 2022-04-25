@@ -9,7 +9,7 @@ using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.SpatialElements
+namespace RhinoInside.Revit.GH.Components.Topology
 {
   [ComponentVersion(introduced: "1.7")]
   public class SpatialElementGeometry : ZuiComponent

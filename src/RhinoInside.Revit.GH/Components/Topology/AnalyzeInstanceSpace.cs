@@ -1,7 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 
-namespace RhinoInside.Revit.GH.Components.SpatialElements
+namespace RhinoInside.Revit.GH.Components.Topology
 {
   public class AnalyzeInstanceSpace : Component
   {
