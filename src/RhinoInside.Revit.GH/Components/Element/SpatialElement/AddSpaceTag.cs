@@ -102,13 +102,7 @@ namespace RhinoInside.Revit.GH.Components.Element.SpatialElement
           if (!Params.TryGetData(DA, "Head Location", out Point3d? headLocation)) return null;
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.Mechanical.SpaceTagType type, Types.Document.FromValue(space.Document), ARDB.BuiltInCategory.OST_MEPSpaceTags)) return null;
 
-          //if (viewPlan is null)
-          //{
-          //  using (var collector = new ARDB.FilteredElementCollector(room.Document).OfClass(typeof(ARDB.ViewPlan)))
-          //    viewPlan = collector.Cast<ARDB.ViewPlan>().Where(x => x.AreaScheme.IsEquivalent(room.AreaScheme)).FirstOrDefault();
-          //}
-
-          // Snap Point to the 'Area' 'Elevation'
+          // Snap Point to the 'Space' 'Elevation'
           var source = (space.Location as ARDB.LocationPoint).Point;
           var target = headLocation?.ToXYZ();
           target = new ARDB.XYZ(target?.X ?? source.X, target?.Y ?? source.Y, source.Z);
