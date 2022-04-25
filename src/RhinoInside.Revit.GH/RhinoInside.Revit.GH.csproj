@@ -239,6 +239,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Surface.cs" />
+    <Compile Include="Types\Annotations\Dimension.cs" />
+    <Compile Include="Types\Annotations\SpatialElementTag.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
@@ -337,7 +339,6 @@
     <Compile Include="Types\CurtainSystem.cs" />
     <Compile Include="Types\CurveElement.cs" />
     <Compile Include="Types\DesignOption.cs" />
-    <Compile Include="Types\Dimension.cs" />
     <Compile Include="Types\DirectShape.cs" />
     <Compile Include="Types\Document.cs" />
     <Compile Include="Types\DocumentObject.cs" />
