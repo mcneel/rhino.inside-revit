@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.SpatialElementTag tag && tag.Location is ARDB.LocationPoint point)
         {
           var plane = new Plane(point.Point.ToPoint3d(), Vector3d.XAxis, Vector3d.YAxis);
-          plane.Rotate(tag.RotationAngle, -tag.View.ViewDirection.ToVector3d());
+          plane.Rotate(point.Rotation, tag.View.ViewDirection.ToVector3d());
           return plane;
         }
 
