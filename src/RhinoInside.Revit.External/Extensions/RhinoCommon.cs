@@ -1155,5 +1155,21 @@ namespace Rhino.Display
 
       return false;
     }
+
+    public static Geometry.Vector2d PixelsPerUnit(this RhinoViewport viewport, Geometry.Point3d point)
+    {
+      if (viewport.GetCameraFrame(out var cameraFrame))
+      {
+        var worldToScrren = viewport.GetTransform(DocObjects.CoordinateSystem.World, DocObjects.CoordinateSystem.Screen);
+        var screen = worldToScrren * point;
+        return new Geometry.Vector2d
+        (
+          Math.Abs(screen.X - (worldToScrren * (point + cameraFrame.XAxis)).X),
+          Math.Abs(screen.Y - (worldToScrren * (point + cameraFrame.YAxis)).Y)
+        );
+      }
+
+      return new Geometry.Vector2d(1.0, 1.0);
+    }
   }
 }

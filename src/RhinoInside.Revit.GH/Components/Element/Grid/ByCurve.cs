@@ -1,13 +1,14 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Grids
 {
-  using System.Linq;
   using Convert.Geometry;
-  using Grasshopper.Kernel.Parameters;
   using External.DB.Extensions;
   using GH.Exceptions;
 
@@ -42,13 +43,23 @@ namespace RhinoInside.Revit.GH.Components.Grids
       ),
       new ParamDefinition
       (
-        new Parameters.ElevationInterval
+        new Parameters.ProjectElevation
         {
-          Name = "Elevation",
-          NickName= "E",
-          Description = "Grid extents interval along z-axis",
-          Optional = true
+          Name = "Base",
+          NickName = "BA",
+          Description = $"Base of the grid.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'.",
+          Optional = true,
         }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ProjectElevation
+        {
+          Name = "Top",
+          NickName = "TO",
+          Description = $"Top of the grid.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'",
+          Optional = true,
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -114,32 +125,47 @@ namespace RhinoInside.Revit.GH.Components.Grids
 
       ReconstructElement<ARDB.Grid>
       (
-        doc.Value, _Grid_, (grid) =>
+        doc.Value, _Grid_, grid =>
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if (!Parameters.ElevationInterval.TryGetData(this, DA, "Elevation", out var elevation, doc)) return null;
-
-          var tol = GeometryObjectTolerance.Model;
-          if
-          (
-            !(curve.IsLinear(tol.VertexTolerance) || curve.IsArc(tol.VertexTolerance)) ||
-            !curve.TryGetPlane(out var axisPlane, tol.VertexTolerance) ||
-            axisPlane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
-          )
-            throw new RuntimeArgumentException("Curve", "Curve must be a horizontal line or arc curve.", curve);
-
-          if (!elevation.HasValue)
-            elevation = new Interval(axisPlane.Origin.Z - 12.0 * Revit.ModelUnits, axisPlane.Origin.Z + 12.0 * Revit.ModelUnits);
-
+          if (!Params.TryGetData(DA, "Base", out ERDB.ElevationElementReference? baseElevation)) return null;
+          if (!Params.TryGetData(DA, "Top", out ERDB.ElevationElementReference? topElevation)) return null;
           if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.GridType type, doc, ARDB.ElementTypeGroup.GridType)) return null;
           Params.TryGetData(DA, "Template", out ARDB.Grid template);
 
+
+          var extents = new Interval();
+          // Validation & Defaults
+          {
+            var tol = GeometryObjectTolerance.Model;
+            if
+            (
+              !(curve.IsLinear(tol.VertexTolerance) || curve.IsArc(tol.VertexTolerance)) ||
+              !curve.TryGetPlane(out var axisPlane, tol.VertexTolerance) ||
+              axisPlane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
+            )
+              throw new RuntimeArgumentException("Curve", "Curve must be a horizontal line or arc curve.", curve);
+
+            extents = new Interval
+            (
+              GeometryEncoder.ToInternalLength(axisPlane.OriginZ),
+              GeometryEncoder.ToInternalLength(axisPlane.OriginZ)
+            );
+
+            if (!baseElevation.HasValue) extents.T0 -= 12.0;
+            else if (baseElevation.Value.IsOffset(out var baseOffset)) extents.T0 += baseOffset;
+            else extents.T0 = baseElevation.Value.Elevation;
+
+            if (!topElevation.HasValue) extents.T1 += 12.0;
+            else if (topElevation.Value.IsOffset(out var topOffset)) extents.T1 += topOffset;
+            else extents.T1 = topElevation.Value.Elevation;
+          }
+
           // Compute
-          StartTransaction(doc.Value);
           if (CanReconstruct(_Grid_, out var untracked, ref grid, doc.Value, name, categoryId: ARDB.BuiltInCategory.OST_Grids))
-            grid = Reconstruct(grid, doc.Value, curve, elevation.Value, type, name, template);
+            grid = Reconstruct(grid, doc.Value, curve, extents, type, name, template);
 
           DA.SetData(_Grid_, grid);
           return untracked ? null : grid;
@@ -161,7 +187,7 @@ namespace RhinoInside.Revit.GH.Components.Grids
         if (gridCurve is ARDB.Arc gridArc && newCurve is ARDB.Arc newArc)
         {
           // I do not found any way to update the radius ??
-          if (Math.Abs(gridArc.Radius - newArc.Radius) > tol.VertexTolerance)
+          if (!tol.AreAlmostEqualLengths(gridArc.Radius, newArc.Radius))
             return false;
         }
 
@@ -170,23 +196,11 @@ namespace RhinoInside.Revit.GH.Components.Grids
         grid.Maximize3DExtents();
 
         var view = default(ARDB.View);
-        using (var collector = new ARDB.FilteredElementCollector(grid.Document).OfClass(typeof(ARDB.View)))
+        var viewsFilter = ERDB.CompoundElementFilter.ElementClassFilter(typeof(ARDB.View3D), typeof(ARDB.ViewPlan));
+        using (var collector = new ARDB.FilteredElementCollector(grid.Document).WherePasses(viewsFilter))
         {
           var views = collector.Cast<ARDB.View>().
             Where(x => !x.IsTemplate && !x.IsAssemblyView).
-            Where
-            (
-              x =>
-              {
-                switch (x)
-                {
-                  case ARDB.View3D view3D: return true;
-                  case ARDB.ViewPlan viewPlan: return viewPlan.GetUnderlayOrientation() == ARDB.UnderlayOrientation.LookingDown;
-                }
-
-                return false;
-              }
-            ).
             OrderByDescending(x => x.ViewType);
 
           view = views.FirstOrDefault();
@@ -246,25 +260,31 @@ namespace RhinoInside.Revit.GH.Components.Grids
       return grid;
     }
 
-    ARDB.Grid Reconstruct(ARDB.Grid grid, ARDB.Document doc, Curve curve, Interval elevation, ARDB.GridType type, string name, ARDB.Grid template)
+    ARDB.Grid Reconstruct(ARDB.Grid grid, ARDB.Document doc, Curve curve, Interval extents, ARDB.GridType type, string name, ARDB.Grid template)
     {
       if (!Reuse(grid, curve, type, template))
       {
-        // Avoids conflict in case we are going to assign same name...
-        if (grid is object)
-          grid.Name = grid.UniqueId;
-
+        var previousGrid = grid;
         grid = grid.ReplaceElement
         (
           Create(doc, curve, type, template),
           ExcludeUniqueProperties
         );
+
+        // Avoids conflict in case we are going to assign same name...
+        if (previousGrid.IsValid())
+          previousGrid.Document.Delete(previousGrid.Id);
       }
 
       if (name is object && grid.Name != name)
         grid.Name = name;
 
-      grid.SetVerticalExtents(elevation.Min / Revit.ModelUnits, elevation.Max / Revit.ModelUnits);
+      using (var outline = grid.GetExtents())
+      {
+        var tol = GeometryObjectTolerance.Internal;
+        if (!tol.AreAlmostEqualLengths(extents.T0, outline.MinimumPoint.Z) || !tol.AreAlmostEqualLengths(extents.T1, outline.MaximumPoint.Z))
+          grid.SetVerticalExtents(extents.T0, extents.T1);
+      }
 
       return grid;
     }

@@ -4,3 +4,5 @@ ViewDetailLevel_ValueList
 StructuralAssetClass_ValueList
 StructuralAssetBehaviour_ValueList
 ThermalMaterialType_ValueList
+SpatialElement_ValueList
+SpatialElementBoundaryLocation_ValueList

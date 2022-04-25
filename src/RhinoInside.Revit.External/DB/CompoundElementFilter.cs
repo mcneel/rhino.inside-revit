@@ -142,6 +142,37 @@ namespace RhinoInside.Revit.External.DB
       return All;
     }
 
+    public static ElementFilter ElementClassFilter(params Type[] types)
+    {
+      bool allTypesIncluded = false;
+      bool specialTypesIncluded = false;
+      var set = new HashSet<Type>(types);
+      var filters = new List<ElementFilter>();
+
+      if (set.Remove(typeof(Element)))      return All;
+      if (set.Remove(typeof(ElementType)))  { filters.Add(new ElementIsElementTypeFilter());  specialTypesIncluded = allTypesIncluded = true; }
+      if (set.Remove(typeof(Area)))         { filters.Add(new AreaFilter());                  specialTypesIncluded = true; }
+      if (set.Remove(typeof(AreaTag)))      { filters.Add(new AreaTagFilter());               specialTypesIncluded = true; }
+      if (set.Remove(typeof(Room)))         { filters.Add(new RoomFilter());                  specialTypesIncluded = true; }
+      if (set.Remove(typeof(RoomTag)))      { filters.Add(new RoomTagFilter());               specialTypesIncluded = true; }
+      if (set.Remove(typeof(Space)))        { filters.Add(new SpaceFilter());                 specialTypesIncluded = true; }
+      if (set.Remove(typeof(SpaceTag)))     { filters.Add(new SpaceTagFilter());              specialTypesIncluded = true; }
+
+      types = !specialTypesIncluded ? types:
+        allTypesIncluded ?
+        set.Where(x => !x.IsSubclassOf(typeof(ElementType))).ToArray() :
+        set.ToArray();
+
+      switch (types.Length)
+      {
+        case 0: break;
+        case 1: filters.Add(new ElementClassFilter(types[0]));    break;
+        default: filters.Add(new ElementMulticlassFilter(types)); break;
+      }
+
+      return Union(filters);
+    }
+
     public static ElementFilter ElementKindFilter(ElementKind kind, bool? elementType, bool inverted = false)
     {
       var filters = new List<ElementFilter>();

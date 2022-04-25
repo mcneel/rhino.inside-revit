@@ -338,7 +338,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (type is null)
       {
         var data = Types.ElementType.FromElementId(document.Value, document.Value.GetDefaultElementTypeId(typeGroup));
-        if (data is null)
+        if (data?.IsValid != true)
           throw new Exceptions.RuntimeArgumentException(name, $"No suitable {typeGroup} has been found.");
 
         type = data as TOutput;
@@ -377,8 +377,8 @@ namespace RhinoInside.Revit.GH.Parameters
       if (type is null)
       {
         var data = Types.ElementType.FromElementId(document.Value, document.Value.GetDefaultFamilyTypeId(new ARDB.ElementId(categoryId)));
-        if (data is null)
-          throw new Exceptions.RuntimeArgumentException(name, $"No suitable {categoryId} type has been found.");
+        if (data?.IsValid != true)
+          throw new Exceptions.RuntimeArgumentException(name, $"No suitable {((External.DB.Schemas.CategoryId) categoryId).Label} type has been found.");
 
         if (data is Types.FamilySymbol symbol && !symbol.Value.IsActive)
           symbol.Value.Activate();

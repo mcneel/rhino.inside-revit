@@ -146,7 +146,7 @@ namespace RhinoInside.Revit.GH.Types
     public InternalOrigin(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
 
 #if REVIT_2021
-    public InternalOrigin(ARDB_InternalOrigin point) : base(point) {}
+    public InternalOrigin(ARDB_InternalOrigin point) : base(point) { }
 #else
     public InternalOrigin(ARDB.Element point) : base(point)
     {
@@ -168,7 +168,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_PreviewData
     public override BoundingBox ClippingBox => Value is ARDB_InternalOrigin ?
-      new BoundingBox(Point3d.Origin, Point3d.Origin):
+      new BoundingBox(Point3d.Origin, Point3d.Origin) :
       NaN.BoundingBox;
 
     public override void DrawViewportWires(GH_PreviewWireArgs args)

@@ -5,6 +5,58 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  internal static class ParameterEqualityComparer
+  {
+    /// <summary>
+    /// IEqualityComparer for <see cref="Autodesk.Revit.DB.Parameter"/>
+    /// that compares categories from different <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    public static readonly IEqualityComparer<Parameter> InterDocument = default(InterDocumentComparer);
+
+    /// <summary>
+    /// IEqualityComparer for <see cref="Autodesk.Revit.DB.Parameter"/>
+    /// that assumes all parameters are from the same <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    public static readonly IEqualityComparer<Parameter> SameDocument = default(SameDocumentComparer);
+
+    struct SameDocumentComparer : IEqualityComparer<Parameter>
+    {
+      public bool Equals(Parameter x, Parameter y) => x.Id.IntegerValue == y.Id.IntegerValue;
+      public int GetHashCode(Parameter obj) => obj.Id.IntegerValue;
+    }
+
+    struct InterDocumentComparer : IEqualityComparer<Parameter>
+    {
+      bool IEqualityComparer<Parameter>.Equals(Parameter x, Parameter y) => IsEquivalent(x, y);
+      int IEqualityComparer<Parameter>.GetHashCode(Parameter obj) => (obj?.Id.IntegerValue ?? int.MinValue) ^ (obj?.Element.Document.GetHashCode() ?? 0);
+    }
+
+    /// <summary>
+    /// Determines whether the specified <see cref="Autodesk.Revit.DB.Parameter"/> equals
+    /// to this <see cref="Autodesk.Revit.DB.Parameter"/>.
+    /// </summary>
+    /// <remarks>
+    /// Two <see cref="Parameter"/> instances are considered equivalent
+    /// if they represent the same element parameter in this Revit session.
+    /// </remarks>
+    /// <param name="self"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static bool IsEquivalent(this Parameter self, Parameter other)
+    {
+      if (ReferenceEquals(self, other))
+        return true;
+
+      if (self?.Id != other?.Id)
+        return false;
+
+      if (!self.Element.IsValidObject || !other.Element.IsValidObject)
+        return false;
+
+      return self.Element.Document.Equals(other.Element.Document);
+    }
+  }
+
   static class BuiltInParameterExtension
   {
     private static readonly SortedSet<BuiltInParameter> builtInParameters =

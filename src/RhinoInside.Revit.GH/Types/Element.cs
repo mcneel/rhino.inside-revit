@@ -193,6 +193,11 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Architecture.Room),       (element)=> new RoomElement           (element as ARDB.Architecture.Room) },
       { typeof(ARDB.Mechanical.Space),        (element)=> new SpaceElement          (element as ARDB.Mechanical.Space)  },
 
+      { typeof(ARDB.SpatialElementTag),       (element)=> new SpatialElementTag     (element as ARDB.SpatialElementTag)    },
+      { typeof(ARDB.AreaTag),                 (element)=> new AreaElementTag        (element as ARDB.AreaTag)              },
+      { typeof(ARDB.Architecture.RoomTag),    (element)=> new RoomElementTag        (element as ARDB.Architecture.RoomTag) },
+      { typeof(ARDB.Mechanical.SpaceTag),     (element)=> new SpaceElementTag       (element as ARDB.Mechanical.SpaceTag)  },
+
       { typeof(ARDB.Architecture.BuildingPad),(element)=> new BuildingPad           (element as ARDB.Architecture.BuildingPad) },
       { typeof(ARDB.Architecture.Railing),    (element)=> new Railing               (element as ARDB.Architecture.Railing) },
     };

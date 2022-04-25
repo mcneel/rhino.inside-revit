@@ -124,7 +124,6 @@
     <Compile Include="Components\Element\Opening\OpeningBoundaryProfile.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
     <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
-    <Compile Include="Components\Element\FamilyInstance\AnalyzeInstanceSpace.cs" />
     <Compile Include="Components\Element\Floor\ByOutline.cs" />
     <Compile Include="Components\Element\Grid\ByCurve.cs" />
     <Compile Include="Components\Element\Level\ByElevation.cs" />
@@ -150,13 +149,6 @@
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
     <Compile Include="Components\Element\Sketch\Deconstruct.cs" />
     <Compile Include="Components\Element\Sheet\SheetByNumber.cs" />
-    <Compile Include="Components\Element\SpatialElement\AddArea.cs" />
-    <Compile Include="Components\Element\SpatialElement\AddAreaBoundaryLine.cs" />
-    <Compile Include="Components\Element\SpatialElement\AddRoom.cs" />
-    <Compile Include="Components\Element\SpatialElement\AddRoomSeparatorLine.cs" />
-    <Compile Include="Components\Element\SpatialElement\AddSpace.cs" />
-    <Compile Include="Components\Element\SpatialElement\AddSpaceSeparatorLine.cs" />
-    <Compile Include="Components\Element\SpatialElement\SpatialElementGeometry.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBeam.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />
@@ -213,6 +205,18 @@
     <Compile Include="Components\ParameterElement\ProjectParameter.cs" />
     <Compile Include="Components\ParameterElement\QueryParameters.cs" />
     <Compile Include="Components\ParameterElement\SharedParameters.cs" />
+    <Compile Include="Components\Topology\AddArea.cs" />
+    <Compile Include="Components\Topology\AddAreaBoundaryLine.cs" />
+    <Compile Include="Components\Topology\AddAreaTag.cs" />
+    <Compile Include="Components\Topology\AddRoom.cs" />
+    <Compile Include="Components\Topology\AddRoomSeparatorLine.cs" />
+    <Compile Include="Components\Topology\AddRoomTag.cs" />
+    <Compile Include="Components\Topology\AddSpace.cs" />
+    <Compile Include="Components\Topology\AddSpaceSeparatorLine.cs" />
+    <Compile Include="Components\Topology\AddSpaceTag.cs" />
+    <Compile Include="Components\Topology\AnalyzeInstanceSpace.cs" />
+    <Compile Include="Components\Topology\QuerySpatialElements.cs" />
+    <Compile Include="Components\Topology\SpatialElementGeometry.cs" />
     <Compile Include="Components\TransactionalComponent.cs" />
     <Compile Include="Components\TransactionBaseComponent.cs" />
     <Compile Include="Components\Views\Active.cs" />
@@ -232,19 +236,14 @@
     <Compile Include="Components\ZuiComponent.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Optional.cs" />
-    <Compile Include="Parameters\Input\SpatialElementBoundaryLocation_ValueList.cs" />
-    <Compile Include="Parameters\Views\View.cs" />
-    <Compile Include="Parameters\Views\View3D.cs" />
-    <Compile Include="Parameters\Views\ViewPlan.cs" />
-    <Compile Include="Parameters\Views\ViewSection.cs" />
-    <Compile Include="Parameters\Views\ViewSheet.cs" />
-    <Compile Include="Parameters\Input\SpatialElement_ValueList.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Surface.cs" />
+    <Compile Include="Types\Annotations\Dimension.cs" />
+    <Compile Include="Types\Annotations\SpatialElementTag.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
@@ -273,6 +272,8 @@
     <Compile Include="Parameters\Input\LayerFunction_ValueList.cs" />
     <Compile Include="Parameters\Input\OpeningWrappingCondition_ValueList.cs" />
     <Compile Include="Parameters\Input\BuiltInParameterTypes.cs" />
+    <Compile Include="Parameters\Input\SpatialElement_ValueList.cs" />
+    <Compile Include="Parameters\Input\SpatialElementBoundaryLocation_ValueList.cs" />
     <Compile Include="Parameters\Input\StructuralAssetBehaviour_ValueList.cs" />
     <Compile Include="Parameters\Input\StructuralAssetClass_ValueList.cs" />
     <Compile Include="Parameters\Input\ThermalMaterialType_ValueList.cs" />
@@ -307,6 +308,7 @@
     <Compile Include="Parameters\Group.cs" />
     <Compile Include="Parameters\HostObject.cs" />
     <Compile Include="Parameters\ID.cs" />
+    <Compile Include="Parameters\LevelConstraint.cs" />
     <Compile Include="Parameters\LinePatternElement.cs" />
     <Compile Include="Parameters\Material.cs" />
     <Compile Include="Parameters\Opening.cs" />
@@ -322,6 +324,11 @@
     <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Parameters\ThermalAsset.cs" />
     <Compile Include="Parameters\ValueList.cs" />
+    <Compile Include="Parameters\Views\View.cs" />
+    <Compile Include="Parameters\Views\View3D.cs" />
+    <Compile Include="Parameters\Views\ViewPlan.cs" />
+    <Compile Include="Parameters\Views\ViewSection.cs" />
+    <Compile Include="Parameters\Views\ViewSheet.cs" />
     <Compile Include="Parameters\Workset.cs" />
     <Compile Include="Types\AppearanceAsset.cs" />
     <Compile Include="Types\AssetPropertyDouble1DMap.cs" />
@@ -335,7 +342,6 @@
     <Compile Include="Types\CurtainSystem.cs" />
     <Compile Include="Types\CurveElement.cs" />
     <Compile Include="Types\DesignOption.cs" />
-    <Compile Include="Types\Dimension.cs" />
     <Compile Include="Types\DirectShape.cs" />
     <Compile Include="Types\Document.cs" />
     <Compile Include="Types\DocumentObject.cs" />

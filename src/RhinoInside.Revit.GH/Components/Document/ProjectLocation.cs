@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     static readonly ParamDefinition[] inputs =
     {
       ParamDefinition.Create<Parameters.Document>("Project", "P", relevance: ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", optional: true, relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "Current Shared Site", optional: true, relevance: ParamRelevance.Secondary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;

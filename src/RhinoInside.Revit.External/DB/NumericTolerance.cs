@@ -15,15 +15,17 @@ namespace RhinoInside.Revit.External.DB
     public const double DefaultTolerance = 1e-9;
 
     /// <summary>
-    /// The smallest number such that 1.0 + Precision != 1.0
+    /// Represents the smallest number such that 1.0 + <see cref="MinDelta"/> != 1.0.
+    /// This field is constant.
     /// </summary>
     /// <remarks>
     /// Same as DBL_EPSILON 2.2204460492503131e-16
     /// </remarks>
-    public const double Precision = double.MaxValue * double.Epsilon / 4.0;
+    public const double MinDelta = double.MaxValue * double.Epsilon / 4.0;
 
     /// <summary>
-    /// The smallest positive normalized, finite representable value of type double.
+    /// Represents the smallest positive normalized finite representable value of a <see cref="double"/>.
+    /// This field is constant.
     /// </summary>
     /// <remarks>
     /// Same as +DBL_MIN +2.2250738585072014e-308 
@@ -31,22 +33,28 @@ namespace RhinoInside.Revit.External.DB
     public const double DenormalUpperBound = 4.0 / double.MaxValue;
 
     /// <summary>
-    /// The biggest negative normalized, finite representable value of type double.
+    /// Represents the largest negative normalized finite representable value of a <see cref="double"/>.
+    /// This field is constant.
     /// </summary>
     /// <remarks>
     /// Same as -DBL_MIN -2.2250738585072014e-308 
     /// </remarks>
     public const double DenormalLowerBound = 4.0 / double.MinValue;
 
-    #region IsAlmostEqualTo
-    public static bool IsAlmostEqualTo(double x, double y, double toleance = DefaultTolerance)
+    #region AreAlmostEqual
+    /// <summary>
+    /// Compares two doubles and determines if they are equal within the specified maximum absolute error.
+    /// </summary>
+    /// <param name="x">First value</param>
+    /// <param name="y">Second value</param>
+    /// <param name="tolerance">The absolute accuracy required for being almost equal.</param>
+    /// <returns>True if both doubles are almost equal up to the specified maximum absolute error, false otherwise.</returns>
+    public static bool AreAlmostEqual(double x, double y, double tolerance = DefaultTolerance)
     {
-      double min, max;
-      if (x < y) { min = x; max = y; }
-      else { min = y; max = x; }
-
-      var length = max - min;
-      return length <= toleance || length <= max * toleance;
+      if (double.IsInfinity(x) || double.IsInfinity(y))
+        return x == y;
+    
+      return Math.Abs(x - y) <= tolerance;
     }
     #endregion
   }

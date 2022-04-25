@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Grids
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Grid name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElevationInterval>("Elevation", "E", "Grid extents interval along z-axis", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Interval>("Elevation", "E", "Grid extents interval along z-axis", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary)
     };
 
@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Grids
         return;
 
       if (!Params.TryGetData(DA, "Name", out string name)) return;
-      if (!Parameters.ElevationInterval.TryGetData(this, DA, "Elevation", out var elevation, doc)) return;
+      if (!Params.TryGetData(DA, "Elevation", out Interval? elevation)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
       using (var collector = new ARDB.FilteredElementCollector(doc.Value))

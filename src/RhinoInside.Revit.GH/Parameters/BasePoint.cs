@@ -14,6 +14,8 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("16F8DAF7-B63C-4A8B-A2E1-ACA0A08CDCB8");
     protected override string IconTag => "⌖";
 
+    protected override Types.IGH_BasePoint InstantiateT() => new Types.BasePoint();
+
     public BasePoint() : base
     (
       name: "Base Point",
@@ -32,7 +34,7 @@ namespace RhinoInside.Revit.GH.Parameters
       (
         new ARDB.BuiltInCategory[]
         {
-          ARDB.BuiltInCategory.OST_IOS_GeoSite,       // Internal Oerigin
+          ARDB.BuiltInCategory.OST_IOS_GeoSite,       // Internal Origin
           ARDB.BuiltInCategory.OST_ProjectBasePoint,  // Project Base Point
           ARDB.BuiltInCategory.OST_SharedBasePoint    // Survey Point
         }
@@ -75,17 +77,17 @@ namespace RhinoInside.Revit.GH.Parameters
       listBox.Items.Clear();
 
       {
-        var points = new Types.GraphicalElement[]
+        var points = new Types.IGH_BasePoint[]
         {
           new Types.InternalOrigin(InternalOriginExtension.Get(doc)),
           new Types.BasePoint(BasePointExtension.GetProjectBasePoint(doc)),
           new Types.BasePoint(BasePointExtension.GetSurveyPoint(doc))
         };
 
-        foreach (var point in points)
+        foreach (var point in points.Where(x => x.IsValid))
           listBox.Items.Add(point);
 
-        var selectedItems = points.Intersect(PersistentData.OfType<Types.GraphicalElement>());
+        var selectedItems = points.Intersect(PersistentData.OfType<Types.IGH_BasePoint>());
 
         foreach (var item in selectedItems)
           listBox.SelectedItems.Add(item);

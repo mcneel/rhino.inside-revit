@@ -5,6 +5,55 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  internal static class CategoryEqualityComparer
+  {
+    /// <summary>
+    /// IEqualityComparer for <see cref="Autodesk.Revit.DB.Category"/>
+    /// that compares categories from different <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    public static readonly IEqualityComparer<Category> InterDocument = new InterDocumentComparer();
+
+    /// <summary>
+    /// IEqualityComparer for <see cref="Autodesk.Revit.DB.Category"/>
+    /// that assumes all categories are from the same <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    public static readonly IEqualityComparer<Category> SameDocument = new SameDocumentComparer();
+
+    struct SameDocumentComparer : IEqualityComparer<Category>
+    {
+      bool IEqualityComparer<Category>.Equals(Category x, Category y) => ReferenceEquals(x, y) || x?.Id == y?.Id;
+      int IEqualityComparer<Category>.GetHashCode(Category obj) => obj?.Id.IntegerValue ?? int.MinValue;
+    }
+
+    struct InterDocumentComparer : IEqualityComparer<Category>
+    {
+      bool IEqualityComparer<Category>.Equals(Category x, Category y) => IsEquivalent(x, y);
+      int IEqualityComparer<Category>.GetHashCode(Category obj) => (obj?.Id.IntegerValue ?? int.MinValue) ^ (obj?.Document().GetHashCode() ?? 0);
+    }
+
+    /// <summary>
+    /// Determines whether the specified <see cref="Autodesk.Revit.DB.Category"/> equals
+    /// to this <see cref="Autodesk.Revit.DB.Category"/>.
+    /// </summary>
+    /// <remarks>
+    /// Two <see cref="Category"/> instances are considered equivalent
+    /// if they represent the same category in this Revit session.
+    /// </remarks>
+    /// <param name="self"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static bool IsEquivalent(this Category self, Category other)
+    {
+      if (ReferenceEquals(self, other))
+        return true;
+
+      if (self?.Id != other?.Id)
+        return false;
+
+      return self.Document().Equals(other.Document());
+    }
+  }
+
   public static class BuiltInCategoryExtension
   {
 #if REVIT_2020
@@ -968,52 +1017,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return builtInCategories.Contains(value);
 
       return false;
-    }
-  }
-
-  internal static class CategoryEqualityComparer
-  {
-    /// <summary>
-    /// IEqualityComparer for <see cref="DB.Category"/> that compares categories from different <see cref="DB.Document"/>.
-    /// </summary>
-    public static readonly IEqualityComparer<Category> InterDocument = new InterDocumentComparer();
-
-    /// <summary>
-    /// IEqualityComparer for <see cref="DB.Category"/> that assumes all categories are from the same <see cref="DB.Document"/>.
-    /// </summary>
-    public static readonly IEqualityComparer<Category> SameDocument = new SameDocumentComparer();
-
-    struct SameDocumentComparer : IEqualityComparer<Category>
-    {
-      bool IEqualityComparer<Category>.Equals(Category x, Category y) => ReferenceEquals(x, y) || x?.Id == y?.Id;
-      int IEqualityComparer<Category>.GetHashCode(Category obj) => obj?.Id.IntegerValue ?? int.MinValue;
-    }
-
-    struct InterDocumentComparer : IEqualityComparer<Category>
-    {
-      bool IEqualityComparer<Category>.Equals(Category x, Category y) => IsEquivalent(x, y);
-      int IEqualityComparer<Category>.GetHashCode(Category obj) => (obj?.Id.IntegerValue ?? int.MinValue) ^ (obj?.Document().GetHashCode() ?? 0);
-    }
-
-    /// <summary>
-    /// Determines whether the specified <see cref="Autodesk.Revit.DB.Category"/> equals to this <see cref="Autodesk.Revit.DB.Category"/>.
-    /// </summary>
-    /// <remarks>
-    /// Two <see cref="Autodesk.Revit.DB.Category"/> instances are considered equivalent if they represent the same element
-    /// in this Revit session.
-    /// </remarks>
-    /// <param name="self"></param>
-    /// <param name="other"></param>
-    /// <returns></returns>
-    public static bool IsEquivalent(this Category self, Category other)
-    {
-      if (ReferenceEquals(self, other))
-        return true;
-
-      if (self?.Id != other?.Id)
-        return false;
-
-      return self.Document().Equals(other.Document());
     }
   }
 

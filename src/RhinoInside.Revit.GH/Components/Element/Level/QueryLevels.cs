@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Level name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElevationInterval>("Elevation", "E", "Level elevation interval along z-axis", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Interval>("Elevation", "E", "Level elevation interval along z-axis", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Structural", "S", "Level is structural", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Building Story", "BS", "Level is building story", defaultValue: true, GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary)
@@ -76,12 +76,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
           levels = levels.Where(x => x.Name.IsSymbolNameLike(name));
 
         if (elevation.HasValue)
-        {
-          var height = elevation.Value.InHostUnits() +
-            doc.GetBasePointLocation(Params.Input<Parameters.ElevationInterval>("Elevation").ElevationBase).Z;
-
-          levels = levels.Where(x => height.IncludesParameter(x.GetElevation(), false));
-        }
+          levels = levels.Where(x => elevation.Value.IncludesParameter(x.GetElevation(), false));
 
         DA.SetDataList
         (
