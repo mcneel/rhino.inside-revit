@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}</ProjectGuid>
@@ -156,6 +156,7 @@
     <Compile Include="Components\Element\SpatialElement\AddRoomSeparatorLine.cs" />
     <Compile Include="Components\Element\SpatialElement\AddSpace.cs" />
     <Compile Include="Components\Element\SpatialElement\AddSpaceSeparatorLine.cs" />
+    <Compile Include="Components\Element\SpatialElement\QuerySpatialElements.cs" />
     <Compile Include="Components\Element\SpatialElement\SpatialElementGeometry.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBeam.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />

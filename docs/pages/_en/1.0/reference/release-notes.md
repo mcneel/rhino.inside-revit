@@ -19,11 +19,15 @@ group: Deployment & Configs
 - Exposed 'View Type' parameter.
 - Added 'Add Dependent View' component.
 - Added 'Add Floor Plan', 'Add Ceiling Plan' and 'Add Structural Plan' components.
-- Added 'Add Area Boundary', 'Add Room Separation' and 'Add Space Separation' components.
 - Added 'Spatial Element Boundary' and 'Spatial Element Geometry' components.
-- Added 'Add Area' component.
+- Added 'Add Area Boundary', 'Add Room Separation' and 'Add Space Separation' components.
+- Added 'Add Area', 'Add Room' and 'Add Space' components.
+- Added 'Query Areaa', 'Query Rooms' and 'Query Spaces' components.
 
 ### RC 
+
+- Added 'Project Elevation' parameter and component.
+- Added 'Level Constraint' parameter and component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
