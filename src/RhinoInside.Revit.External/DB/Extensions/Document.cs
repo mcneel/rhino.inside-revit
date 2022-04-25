@@ -720,9 +720,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (!double.IsNaN(elevationAboveOrigin))
       {
         var min = double.PositiveInfinity;
-        using (var collector = new FilteredElementCollector(doc))
+        using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Level)))
         {
-          foreach (var levelN in collector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.GetElevation()))
+          foreach (var levelN in collector.Cast<Level>().OrderBy(LevelExtension.GetElevation))
           {
             var distance = Math.Abs(levelN.GetElevation() - elevationAboveOrigin);
             if (distance < min)
@@ -743,10 +743,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       topLevel = null;
       Level level = null;
-      using (var collector = new FilteredElementCollector(doc))
+      using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Level)))
       {
         var levelCollector = filter is object ? collector.WherePasses(filter) : collector;
-        foreach (var levelN in levelCollector.OfClass(typeof(Level)).Cast<Level>().OrderBy(c => c.GetElevation()))
+        foreach (var levelN in levelCollector.Cast<Level>().OrderBy(LevelExtension.GetElevation))
         {
           if (levelN.GetElevation() <= elevationAboveOrigin) level = levelN;
           else
@@ -766,10 +766,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       baseLevel = null;
       Level level = null;
-      using (var collector = new FilteredElementCollector(doc))
+      using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Level)))
       {
         var levelCollector = filter is object ? collector.WherePasses(filter) : collector;
-        foreach (var levelN in levelCollector.OfClass(typeof(Level)).Cast<Level>().OrderByDescending(c => c.GetElevation()))
+        foreach (var levelN in levelCollector.Cast<Level>().OrderByDescending(LevelExtension.GetElevation))
         {
           if (levelN.GetElevation() >= elevationAboveOrigin) level = levelN;
           else
