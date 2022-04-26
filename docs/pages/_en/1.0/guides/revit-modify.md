@@ -1,5 +1,5 @@
 ---
-title: Modify Geometry
+title: Element Geometry
 order: 58
 group: Modeling
 thumbnail: /static/images/guides/rir-ghpython.png

@@ -8,7 +8,7 @@ group: Modeling
 ## Querying Grids
 
 {% capture api_note %}
-In Revit API, Grids of all types are represented by the {% include api_type.html type='Autodesk.Revit.DB.Grid' title='DB.Grid' %}
+In Revit API, Grids of all types are represented by the {% include api_type.html type='Autodesk.Revit.DB.Grid' title='DB.Grid' %}. The {% include ltr/comp.html uuid='7d2fb886' %} primitive in {{ site.terms.rir }} represents a Grid.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
@@ -18,7 +18,7 @@ The {% include ltr/comp.html uuid="218fdacd-" %} component provides a list of al
 
 ![]({{ "/static/images/guides/revit-grid-query.png" | prepend: site.baseurl }})
 
-You can also use the Grid Parameter to choose an existing grid. Right-click the {% include ltr/comp.html uuid="7d2fb886-" %} Component gives access to various Grid functions.
+You can also use the Grid Parameter to choose an existing grid. Right-click the {% include ltr/comp.html uuid="7d2fb886-" %} primitive gives access to various Grid functions.
 
 ![]({{ "/static/images/guides/revit-grid_right_click.png" | prepend: site.baseurl }})
 

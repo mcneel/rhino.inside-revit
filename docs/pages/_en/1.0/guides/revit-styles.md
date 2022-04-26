@@ -10,7 +10,7 @@ ghdef: revit-styles.ghx
 ## Line Patterns
 
 {% capture api_note %}
-In Revit API, line patterns are represented by the {% include api_type.html type='Autodesk.Revit.DB.LinePatternElement' title='DB.LinePatternElement' %}. `Solid` is a special line pattern and Revit does not return a normal API type for this specific line pattern.
+In Revit API, line patterns are represented by the {% include api_type.html type='Autodesk.Revit.DB.LinePatternElement' title='DB.LinePatternElement' %}. `Solid` is a special line pattern and Revit does not return a normal API type for this specific line pattern. The {% include ltr/comp.html uuid='eb5ab657' %} primitive in {{ site.terms.rir }} represents Line Patterns.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 

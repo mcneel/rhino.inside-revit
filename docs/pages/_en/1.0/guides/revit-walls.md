@@ -11,7 +11,7 @@ ghdef: revit-walls.ghx
 ## Querying Wall Types
 
 {% capture api_note %}
-In Revit API, Wall Types are represented by {% include api_type.html type='Autodesk.Revit.DB.WallType' title='DB.WallType' %}. Walls have three main *System Families* that are represented by {% include api_type.html type='Autodesk.Revit.DB.WallKind' title='DB.WallKind' %} enumeration and could be determined by checking `DB.WallType.Kind`. In {{ site.terms.rir }}, the term *Wall System Family* is used instead for consistency.
+In Revit API, Wall Types are represented by {% include api_type.html type='Autodesk.Revit.DB.WallType' title='DB.WallType' %}. Walls have three main *System Families* that are represented by {% include api_type.html type='Autodesk.Revit.DB.WallKind' title='DB.WallKind' %} enumeration and could be determined by checking `DB.WallType.Kind`. In {{ site.terms.rir }}, the term *Wall System Family* is used instead for consistency and {% include ltr/comp.html uuid='fe427d04' %} primitive can represent a Wall Type.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
@@ -23,7 +23,7 @@ Use a combination of {% include ltr/comp.html uuid="d08f7ab1-" %} and {% include
 ## Querying Walls
 
 {% capture api_note %}
-In Revit API, Walls are represented by {% include api_type.html type='Autodesk.Revit.DB.Wall' title='DB.Wall' %}
+In Revit API, Walls are represented by {% include api_type.html type='Autodesk.Revit.DB.Wall' title='DB.Wall' %}. The {% include ltr/comp.html uuid='15ad6bf9' %} primitive in {{ site.terms.rir }} represents Walls of all kinds.
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 

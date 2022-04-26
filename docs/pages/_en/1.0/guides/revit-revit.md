@@ -23,7 +23,7 @@ The generated elements are then stored in a Revit **Document**. They are also or
 
 ![]({{ "/static/images/guides/revit-revit-containers.svg" | prepend: site.baseurl }})
 
-This is also a good place to mention **Subcategories**. They sound like an organization level right under the **Category**, but in practice, it is easier to think of them as a property of geometry rather than an organization level. When a Family function generates geometry, it can group them into subcategories of the main category. Their main purpose it to allow finer control over the graphical representation of each part of the geometry.
+This is also a good place to mention **Subcategories**. They sound like an organization level right under the **Category**, but in practice, it is easier to think of them as a property of geometry rather than an organization level. When a Family function generates geometry, it can group them into subcategories of the main category. Their main purpose is to allow finer control over the graphical representation of each part of the geometry.
 
 
 ## Elements & Instances
