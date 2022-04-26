@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
     };
 
     const string _Opening_ = "Opening";
-    protected virtual bool IsPerpendicular { get; }
+    protected virtual bool IsCutPerpendicularToFace { get; }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -83,18 +83,18 @@ namespace RhinoInside.Revit.GH.Components.Openings
 
           switch (host)
           {
-            case ARDB.CeilingAndFloor _:
-              if (IsPerpendicular == false && host.get_Parameter(ARDB.BuiltInParameter.ROOF_SLOPE).HasValue)
-                throw new Exceptions.RuntimeArgumentException("Host", "Host element should be an horizontal floor or a ceiling", host);
+            case ARDB.Floor _:
+              if (IsCutPerpendicularToFace == false && host.get_Parameter(ARDB.BuiltInParameter.ROOF_SLOPE).HasValue)
+                throw new Exceptions.RuntimeArgumentException("Host", "Sloped floors are not supported. Use shafts to add vertical openings to floors", host);
               break;
 
-            case ARDB.RoofBase _:
-              if (IsPerpendicular == true)
-                throw new Exceptions.RuntimeArgumentException("Host", "Host element should be a floor or a ceiling", host);
-              break;
+            //case ARDB.RoofBase _:
+            //  if (IsPerpendicular == true)
+            //    throw new Exceptions.RuntimeArgumentException("Host", "Host element should be a floor or a ceiling", host);
+            //  break;
 
-            default:
-              throw new Exceptions.RuntimeArgumentException("Host", "Host element should be a floor, ceiling or roof element", host);
+            //default:
+            //  throw new Exceptions.RuntimeArgumentException("Host", "Host element should be a floor, ceiling or roof element", host);
           }
 
           var tol = GeometryObjectTolerance.Model;
@@ -120,6 +120,8 @@ namespace RhinoInside.Revit.GH.Components.Openings
     }
     bool Reuse(ARDB.Opening opening, ARDB.HostObject host, IList<Curve> boundaries)
     {
+      return false;
+
       if (opening is null) return false;
 
       if (!opening.Host.IsEquivalent(host)) return false;
@@ -187,12 +189,12 @@ namespace RhinoInside.Revit.GH.Components.Openings
 
     ARDB.Opening Create(ARDB.Document doc, ARDB.HostObject hostElement, IList<Curve> boundary)
     {
-      return doc.Create.NewOpening(hostElement, boundary.ToCurveArray(), IsPerpendicular);
+      return doc.Create.NewOpening(hostElement, boundary.ToCurveArray(), IsCutPerpendicularToFace);
     }
 
     ARDB.Opening Reconstruct(ARDB.Opening opening, ARDB.Document doc, ARDB.HostObject host, IList<Curve> boundary)
     {
-      if (IsPerpendicular == false)
+      if (IsCutPerpendicularToFace == false)
       {
         if (host.GetSketch() is ARDB.Sketch sketch)
         {

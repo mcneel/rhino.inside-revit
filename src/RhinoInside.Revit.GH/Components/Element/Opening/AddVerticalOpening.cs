@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
     )
     { }
 
-    protected override bool IsPerpendicular => false;
+    protected override bool IsCutPerpendicularToFace => false;
   }
 }
 
