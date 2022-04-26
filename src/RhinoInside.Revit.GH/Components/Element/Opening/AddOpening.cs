@@ -87,14 +87,6 @@ namespace RhinoInside.Revit.GH.Components.Openings
               if (IsCutPerpendicularToFace == false && host.get_Parameter(ARDB.BuiltInParameter.ROOF_SLOPE).HasValue)
                 throw new Exceptions.RuntimeArgumentException("Host", "Sloped floors are not supported. Use shafts to add vertical openings to floors", host);
               break;
-
-            //case ARDB.RoofBase _:
-            //  if (IsPerpendicular == true)
-            //    throw new Exceptions.RuntimeArgumentException("Host", "Host element should be a floor or a ceiling", host);
-            //  break;
-
-            //default:
-            //  throw new Exceptions.RuntimeArgumentException("Host", "Host element should be a floor, ceiling or roof element", host);
           }
 
           var tol = GeometryObjectTolerance.Model;
@@ -120,8 +112,6 @@ namespace RhinoInside.Revit.GH.Components.Openings
     }
     bool Reuse(ARDB.Opening opening, ARDB.HostObject host, IList<Curve> boundaries)
     {
-      return false;
-
       if (opening is null) return false;
 
       if (!opening.Host.IsEquivalent(host)) return false;
