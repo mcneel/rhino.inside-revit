@@ -9,29 +9,32 @@ group: Deployment & Configs
 
 ### WIP
 
-- Added 'Crop Extents', 'Template' and 'Filter' input to 'Export View Image'.  
-- Added context menu to generate a transparent background image.
-- Added 'View Extents' component.
-- Added 'View Section Box' component.
-- Added '3D view' and 'Structural Plan' view parameters.
-- Added 'Floor Plan' 'Ceiling Plan' and 'Area Plan' parameters.
-- Added 'Section', 'Elevation' and 'Detail' view parameters.
-- Exposed 'View Type' parameter.
-- Added 'Add Dependent View' component.
-- Added 'Add Floor Plan', 'Add Ceiling Plan' and 'Add Structural Plan' components.
-- Added 'Spatial Element Boundary' and 'Spatial Element Geometry' components.
-- Added 'Add Area Boundary', 'Add Room Separation' and 'Add Space Separation' components.
-- Added 'Add Area', 'Add Room' and 'Add Space' components.
-- Added 'Query Area', 'Query Rooms' and 'Query Spaces' components.
-- Added 'Add Area Tag', 'Add Room Tag' and 'Add Space Tag'.
-
 ### RC 
 
-- Added 'Project Elevation' parameter and component.
-- Added 'Level Constraint' parameter and component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.7 RC1" version="v1.7.8151.26629" pre_release=true time="04/12/2022" %}
+
+- Added context menu to generate a transparent background image
+- Added *Crop Extents*, *Template* and *Filter* input to {% include ltr/comp.html uuid='4a962a0c' %}
+- Exposed {% include ltr/comp.html uuid='972b6fbe' %} parameter
+- Added {% include ltr/comp.html uuid='d4593785' %}, {% include ltr/comp.html uuid='45e7e88c' %} components
+- Added {% include ltr/comp.html uuid='f3c35fb2' %} view parameter
+- Added {% include ltr/comp.html uuid='bf2effd6' %} parameter and associated {% include ltr/comp.html uuid='51f9e551' %} component
+- Added {% include ltr/comp.html uuid='1bde7f9f' %} parameter and associated {% include ltr/comp.html uuid='3896729d' %} component
+- Added {% include ltr/comp.html uuid='33e34bd8' %} parameter and associated {% include ltr/comp.html uuid='782d0460' %} component
+- Added {% include ltr/comp.html uuid='d0d3d169' %}, {% include ltr/comp.html uuid='0744d339' %}, {% include ltr/comp.html uuid='6effb4b8' %}, {% include ltr/comp.html uuid='ca537732' %} view parameters
+- Added {% include ltr/comp.html uuid='a1878f3d' %} component
+- Added {% include ltr/comp.html uuid='53fdab6f' %} selector
+- Added {% include ltr/comp.html uuid='36842b86' %}
+- Added {% include ltr/comp.html uuid='34d68cdc' %} component
+- Added {% include ltr/comp.html uuid='34186815' %}, {% include ltr/comp.html uuid='dea31165' %} components
+- Added {% include ltr/comp.html uuid='2ee360f3' %}, {% include ltr/comp.html uuid='de5e832b' %}, {% include ltr/comp.html uuid='07711559' %} components
+- Added {% include ltr/comp.html uuid='d1940eb3' %}, {% include ltr/comp.html uuid='5ddcb816' %}, {% include ltr/comp.html uuid='a1ccf034' %} components
+- Added {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} components
+
 
 <!-- most recent release should be on top -->
 {% include ltr/release-header.html title="v1.6" version="v1.6.8151.18094" time="04/26/2022" %}
