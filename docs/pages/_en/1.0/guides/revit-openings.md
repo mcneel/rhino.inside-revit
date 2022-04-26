@@ -57,15 +57,15 @@ The dormer opening profile however can still be extracted by the {% include ltr/
 
 As mentioned before, **Shaft Openings** are not hosted on any specific Revit element. To determine elements (Floors in this example) that are cut by a shaft opening, we can use the {% include ltr/comp.html uuid='f5a32842' %} and filter for elements that are colliding with the shaft bounding box. The {% include ltr/comp.html uuid='18d46e90' %} contains the shaft opening we are interested in:
 
-![]({{ "/static/images/guides/revit-opening-filtershaftfloors.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-openings-filtershaftfloors.png" | prepend: site.baseurl }})
 
 ### Element Cut Profile
 
 To extract the boundary profile of a host element (Floors in this example), use the {% include ltr/comp.html uuid='032ad3f7' %} component and extract the Brep of the top or bottom face. Deconstructing this brep will also give you the curves:
 
-![]({{ "/static/images/guides/revit-opening-floorprofile.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-openings-floorprofile.png" | prepend: site.baseurl }})
 
-![]({{ "/static/images/guides/revit-opening-floorprofile-sc.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-openings-floorprofile-sc.png" | prepend: site.baseurl }})
 
 
 ## Creating Wall Openings
@@ -80,14 +80,17 @@ To create a shaft, use the {% include ltr/comp.html uuid='657811b7' %} component
 
 ![]({{ "/static/images/guides/revit-openings-createshaft.png" | prepend: site.baseurl }})
 
-The {% include ltr/comp.html uuid='657811b7' %} component also has two optional inputs (zoom in) that could be used to set the top and bottom offsets as well:
+You can also use {% include ltr/comp.html uuid='01c853d8' %} component to construct a more specific level constraint with offset values as well and pass to the **Base** and **Top** inputs:
 
 ![]({{ "/static/images/guides/revit-openings-createshaftoffset.png" | prepend: site.baseurl }})
 
-## Creating Face Openings
-
-{% include ltr/en/wip_note.html %}
-
 ## Creating Vertical Openings
 
-{% include ltr/en/wip_note.html %}
+To create a vertical opening on a Roof, Ceiling, or Floor (Currently only non-sloped floors are supported by Revit API) use the {% include ltr/comp.html uuid='c9c0f4d2' %} component and pass the host element and boundary to it:
+
+![]({{ "/static/images/guides/revit-openings-vertical.png" | prepend: site.baseurl }})
+
+Notice that only non-sloped floors are currently supported by Revit API so no openings are created if the host floor has any slopes:
+
+![]({{ "/static/images/guides/revit-openings-vertical-nofloor.png" | prepend: site.baseurl }})
+
