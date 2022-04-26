@@ -34,6 +34,14 @@ group: Deployment & Configs
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 <!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.6" version="v1.6.8151.18094" time="04/26/2022" %}
+
+- Added {% include ltr/comp.html uuid='54c795d0' %} and associated {% include ltr/comp.html uuid='63f4a581' %} parameter.
+- Added {% include ltr/comp.html uuid='01c853d8' %} and associated {% include ltr/comp.html uuid='4150d40a' %} parameter.
+- Updated {% include ltr/comp.html uuid='657811b7' %} to accept {% include ltr/comp.html uuid='4150d40a' %} parametes as **Base** and **Top** inputs as well and thus removed the optional offset parameters
+- Includes all changes under 1.6RC releases listed below
+- Minor Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.6 RC5" version="v1.6.8134.6334" pre_release=true time="04/12/2022" %}
 
 - Added support for Revit 2023
