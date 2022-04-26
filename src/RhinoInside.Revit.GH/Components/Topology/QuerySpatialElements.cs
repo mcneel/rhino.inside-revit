@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
   }
 
   [ComponentVersion(introduced: "1.7")]
-  public class QueryAreaElements : ElementCollectorComponent
+  public class QueryAreas : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D1940EB3-B81B-4E57-8F5A-94D045BFB509");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       QuerySpatialElements.elementFilter.Intersect(CompoundElementFilter.ElementClassFilter(typeof(ARDB.Area)));
     protected override ARDB.ElementFilter ElementFilter => elementFilter;
       
-    public QueryAreaElements() : base
+    public QueryAreas() : base
     (
       name: "Query Areas",
       nickname: "Areas",
@@ -263,7 +263,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
   }
 
   [ComponentVersion(introduced: "1.7")]
-  public class QueryRoomsElements : QuerySpatialElements
+  public class QueryRooms : QuerySpatialElements
   {
     public override Guid ComponentGuid => new Guid("5DDCB816-61A3-480F-AC45-67F66BEB2E78");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
@@ -272,7 +272,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       QuerySpatialElements.elementFilter.Intersect(CompoundElementFilter.ElementClassFilter(typeof(ARDB.Architecture.Room)));
     protected override ARDB.ElementFilter ElementFilter => elementFilter;
 
-    public QueryRoomsElements() : base
+    public QueryRooms() : base
     (
       name: "Query Rooms",
       nickname: "Rooms",
@@ -357,7 +357,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
   }
 
   [ComponentVersion(introduced: "1.7")]
-  public class QuerySpacesElements : QuerySpatialElements
+  public class QuerySpaces : QuerySpatialElements
   {
     public override Guid ComponentGuid => new Guid("A1CCF034-AA1F-4731-9863-3C22E0644E2B");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
@@ -366,7 +366,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       QuerySpatialElements.elementFilter.Intersect(CompoundElementFilter.ElementClassFilter(typeof(ARDB.Mechanical.Space)));
     protected override ARDB.ElementFilter ElementFilter => elementFilter;
 
-    public QuerySpacesElements() : base
+    public QuerySpaces() : base
     (
       name: "Query Spaces",
       nickname: "Spaces",
