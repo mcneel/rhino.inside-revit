@@ -973,6 +973,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ConstructProjectElevation {
+            get {
+                object obj = ResourceManager.GetObject("ConstructProjectElevation", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CreateGenericShader {
             get {
                 object obj = ResourceManager.GetObject("CreateGenericShader", resourceCulture);
@@ -2956,6 +2966,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap PinUnPinElement {
             get {
                 object obj = ResourceManager.GetObject("PinUnPinElement", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ProjectElevation {
+            get {
+                object obj = ResourceManager.GetObject("ProjectElevation", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
