@@ -482,6 +482,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (typeof(RevitLinkInstance).IsAssignableFrom(type))
         return BuiltInParameter.RVT_LINK_INSTANCE_NAME;
 
+      // BuiltInParameter.IMPORT_SYMBOL_NAME is tagged as "Name" in te UI,
+      // but in fact is the type-name not the instance name.
+      //if (typeof(ImportInstance).IsAssignableFrom(type))
+      //  return BuiltInParameter.IMPORT_SYMBOL_NAME;
+
       return BuiltInParameter.INVALID;
     }
 
