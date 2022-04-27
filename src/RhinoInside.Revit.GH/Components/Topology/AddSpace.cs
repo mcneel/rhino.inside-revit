@@ -6,6 +6,7 @@ using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
+using ARUI = Autodesk.Revit.UI;
 using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Topology
@@ -15,7 +16,6 @@ namespace RhinoInside.Revit.GH.Components.Topology
   {
     public override Guid ComponentGuid => new Guid("07711559-9681-4035-8D20-F00E4435D412");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
-    protected override string IconTag => string.Empty;
 
     public AddSpace() : base
     (
@@ -126,6 +126,23 @@ namespace RhinoInside.Revit.GH.Components.Topology
       ARDB.BuiltInParameter.ROOM_UPPER_OFFSET,
     };
 
+    protected override void BeforeSolveInstance()
+    {
+      var doc = Revit.ActiveUIDocument.Document;
+      using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.View)))
+      {
+        if (collector.Cast<ARDB.View>().Where(x => x.Name == "Level 1").FirstOrDefault() is ARDB.View view)
+          Revit.ActiveUIDocument.ActiveView = view;
+      }
+
+      base.BeforeSolveInstance();
+    }
+
+    protected override void AfterSolveInstance()
+    {
+      base.AfterSolveInstance();
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
@@ -155,28 +172,31 @@ namespace RhinoInside.Revit.GH.Components.Topology
             {
               // We avoid `Reconstruct` recreates the element in an other phase unless is necessary…
               phase = untracked ?
-                space?.Document.GetElement(space?.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE).AsElementId()) as ARDB.Phase :
+                space?.Document.GetElement(space.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE).AsElementId()) as ARDB.Phase :
                 doc.Value.Phases.Cast<ARDB.Phase>().LastOrDefault();
             }
 
-            // Solve missing Base & Top
-            ERDB.ElevationElementReference.SolveBaseAndTop
-            (
-              doc.Value, GeometryEncoder.ToInternalLength(location.Value.Z),
-              0.0, 10.0,
-              ref baseElevation, ref topElevation
-            );
-
-            // Snap Location to the 'Level' 'Computation Height'
-            if (location.HasValue && baseElevation.Value.IsLevelConstraint(out var level, out var _))
+            if (location.HasValue)
             {
-              location = new Point3d
+              // Solve missing Base & Top
+              ERDB.ElevationElementReference.SolveBaseAndTop
               (
-                location.Value.X,
-                location.Value.Y,
-                level.ProjectElevation * Revit.ModelUnits +
-                level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits
+                doc.Value, GeometryEncoder.ToInternalLength(location.Value.Z),
+                0.0, 10.0,
+                ref baseElevation, ref topElevation
               );
+
+              // Snap Location to the 'Level' 'Computation Height'
+              if (baseElevation.Value.IsLevelConstraint(out var level, out var _))
+              {
+                location = new Point3d
+                (
+                  location.Value.X,
+                  location.Value.Y,
+                  level.ProjectElevation * Revit.ModelUnits +
+                  level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits
+                );
+              }
             }
 
             space = Reconstruct
@@ -185,8 +205,8 @@ namespace RhinoInside.Revit.GH.Components.Topology
               space,
               location?.ToXYZ(),
               number, name,
-              baseElevation.Value,
-              topElevation.Value,
+              baseElevation ?? default,
+              topElevation ?? default,
               phase
             );
           }
@@ -226,13 +246,11 @@ namespace RhinoInside.Revit.GH.Components.Topology
     )
     {
       // If there are no Levels!!
-      if (!baseElevation.IsLevelConstraint(out var baseLevel, out var baseOffset))
+      if (!baseElevation.IsLevelConstraint(out var baseLevel, out var baseOffset) && location is object)
         return default;
 
-      var isNew = false;
       if (!Reuse(space, baseLevel, phase, location))
       {
-        isNew = true;
         space = space.ReplaceElement
         (
           Create(document, baseLevel, phase, location),
@@ -240,47 +258,54 @@ namespace RhinoInside.Revit.GH.Components.Topology
         );
       }
 
+      // We use ROOM_NAME here because `SpatialElment.Name` returns us a werid combination of "{Name} {Number}".
+      if (number is object) space.get_Parameter(ARDB.BuiltInParameter.ROOM_NUMBER).Update(number);
+      if (name is object)   space.get_Parameter(ARDB.BuiltInParameter.ROOM_NAME).Update(name);
+
       // Move Space to 'Location'
-      if (space.Location is ARDB.LocationPoint roomLocation && location is object)
+      if (location is object)
       {
-        var target = new ARDB.XYZ(location.X, location.Y, roomLocation.Point.Z);
-        var position = roomLocation.Point;
-        if (!target.IsAlmostEqualTo(position))
+        if (space.Location is ARDB.LocationPoint spaceLocation)
         {
-          var pinned = space.Pinned;
-          space.Pinned = false;
-          roomLocation.Move(target - position);
-          space.Pinned = pinned;
+          var position = spaceLocation.Point;
+          var target = new ARDB.XYZ(location.X, location.Y, position.Z);
+          if (!target.IsAlmostEqualTo(position))
+          {
+            var pinned = space.Pinned;
+            space.Pinned = false;
+            spaceLocation.Move(target - position);
+            space.Pinned = pinned;
+          }
+
+          baseOffset = Math.Min
+          (
+            baseOffset.Value,
+            space.Level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble()
+          );
+        }
+        else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{space.Name}' is not in a properly enclosed region on Phase '{phase.Name}'. {{{space.Id}}}");
+
+        if (space.BaseOffset != baseOffset.Value)
+          space.BaseOffset = baseOffset.Value;
+
+        if (topElevation.IsLevelConstraint(out var topLevel, out var topOffset))
+        {
+          if (space.Location is object && baseLevel.IsEquivalent(space.Level) && topLevel is object)
+            space.UpperLimit = topLevel;
+
+          if (space.LimitOffset != topOffset.Value)
+            space.LimitOffset = topOffset.Value;
+        }
+        else
+        {
+          if (space.Location is object && baseLevel.IsEquivalent(space.Level) && space.UpperLimit is object)
+            space.UpperLimit = baseLevel;
+
+          if (space.LimitOffset != topElevation.Offset)
+            space.LimitOffset = topElevation.Offset;
         }
       }
-
-      // We use ROOM_NAME here because Room.Name returns us a werid combination of "{Name} {Number}".
-      if (number is object) space.get_Parameter(ARDB.BuiltInParameter.ROOM_NUMBER).Update(number);
-      if (name is object) space.get_Parameter(ARDB.BuiltInParameter.ROOM_NAME).Update(name);
-
-      baseOffset = Math.Min(baseOffset.Value, space.Level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble());
-      if (space.BaseOffset != baseOffset.Value)
-        space.BaseOffset = baseOffset.Value;
-
-      if (topElevation.IsLevelConstraint(out var topLevel, out var topOffset))
-      {
-        if (space.Location is object && space.Level.IsEquivalent(baseLevel) && topLevel is object)
-          space.UpperLimit = topLevel;
-
-        if (space.LimitOffset != topOffset.Value)
-          space.LimitOffset = topOffset.Value;
-      }
-      else
-      {
-        if (space.Location is object && space.Level.IsEquivalent(baseLevel) && space.UpperLimit is object)
-          space.UpperLimit = baseLevel;
-
-        if (space.LimitOffset != topElevation.Offset)
-          space.LimitOffset = topElevation.Offset;
-      }
-
-      if (!isNew && space.Location is object && space.Area == 0.0)
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{space.Name}' is not in a properly enclosed region. {{{space.Id}}}");
+      else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"'{space.Name}' is unplaced. {{{space.Id}}}");
 
       return space;
     }
