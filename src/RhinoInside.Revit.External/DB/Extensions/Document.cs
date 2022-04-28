@@ -1000,6 +1000,35 @@ namespace RhinoInside.Revit.External.DB.Extensions
       purgableTypeIds = default;
       return false;
     }
+
+    /// <summary>
+    /// Indicates if a collection of elements can be deleted.
+    /// </summary>
+    /// <param name="doc">The document.</param>
+    /// <param name="ids">The collection od ids to check.</param>
+    /// <returns>True if all elements can be deleted, false otherwise.</returns>
+    public static bool CanDeleteElements(this Document doc, ICollection<ElementId> ids)
+    {
+      foreach(var id in ids)
+      {
+        if (!DocumentValidation.CanDeleteElement(doc, id))
+          return false;
+
+        if (doc.GetElement(id) is Element element)
+        {
+          switch(element)
+          {
+            // `DocumentValidation.CanDeleteElement` return true on 'Gross Building Area'.
+            // UI crashes if we delete it.
+            case AreaScheme scheme:
+              return !scheme.IsGrossBuildingArea;
+          }
+        }
+        else return false;
+      }
+
+      return true;
+    }
     #endregion
   }
 }

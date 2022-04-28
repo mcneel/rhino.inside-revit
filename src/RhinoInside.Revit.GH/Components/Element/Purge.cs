@@ -190,6 +190,12 @@ namespace RhinoInside.Revit.GH.Components.Elements
       {
         using (var updater = new Updater(document, elementIds))
         {
+          if (!document.CanDeleteElements(elementIds))
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One or more of the elements cannot be deleted");
+            return false;
+          }
+
           using (var transaction = NewTransaction(document))
           {
             transaction.Start();
