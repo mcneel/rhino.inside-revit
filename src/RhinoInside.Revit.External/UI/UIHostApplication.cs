@@ -141,23 +141,11 @@ namespace RhinoInside.Revit.External.UI
         if (value is null) throw new ArgumentNullException();
         if (value.Document.IsEquivalent(_app.ActiveUIDocument.Document)) return;
 
-        HostedApplication.Active.InvokeInHostContext
-        (
-          () =>
-          {
-            var activeWindow = Microsoft.Win32.SafeHandles.WindowHandle.ActiveWindow;
-
-            try
-            {
-              if (value.TryGetActiveGraphicalView(out var uiView))
-              {
-                using (var collector = new FilteredElementCollector(value.Document, uiView.ViewId))
-                  value.ShowElements(collector.FirstElementId());
-              }
-            }
-            finally { Microsoft.Win32.SafeHandles.WindowHandle.ActiveWindow = activeWindow; }
-          }
-        );
+        if (value.TryGetActiveGraphicalView(out var uiView))
+        {
+          HostedApplication.Active.InvokeInHostContext
+          (() => value.Document.SetActiveGraphicalView(value.Document.GetElement(uiView.ViewId) as View));
+        }
       }
     }
 

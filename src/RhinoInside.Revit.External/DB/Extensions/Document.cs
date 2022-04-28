@@ -789,9 +789,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// Gets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
     /// </summary>
     /// <param name="doc"></param>
-    /// <returns>The active graphical <see cref="Autodesk.Revit.DB.View"/></returns>
+    /// <returns>The active graphical <see cref="Autodesk.Revit.DB.View"/> or null if no view is considered active.</returns>
     /// <remarks>
-    /// The active view is the view that last had focus in the UI. null if no view is considered active.
+    /// The active view is the last view of the provided document that had the focus in the UI.
     /// </remarks>
     public static View GetActiveGraphicalView(this Document doc)
     {
@@ -817,6 +817,131 @@ namespace RhinoInside.Revit.External.DB.Extensions
           return activeView;
         }
       });
+    }
+
+    /// <summary>
+    /// Sets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="view">View to be activated</param>
+    public static bool SetActiveGraphicalView(this Document document, View view) =>
+      SetActiveGraphicalView(document, view, out var _);
+
+    /// <summary>
+    /// Sets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="view">View to be activated</param>
+    public static bool SetActiveGraphicalView(this Document document, View view, out bool wasOpened)
+    {
+      if (view is null)
+        throw new ArgumentNullException(nameof(view));
+
+      if (!view.IsGraphicalView())
+        throw new ArgumentException("Input view is not a graphical view.", nameof(view));
+
+      if (!document.Equals(view.Document))
+        throw new ArgumentException("View does not belong to the specified document", nameof(view));
+
+      if (document.IsModifiable || document.IsReadOnly)
+        throw new InvalidOperationException("Invalid document state.");
+
+      using (var uiDocument = new Autodesk.Revit.UI.UIDocument(document))
+      {
+        var openViews = uiDocument.GetOpenUIViews();
+        if (openViews.Count == 0)
+          throw new InvalidOperationException("Input view document is not open on the Revit UI");
+
+        wasOpened = openViews.Any(x => x.ViewId == view.Id);
+
+        var activeUIDocument = uiDocument.Application.ActiveUIDocument;
+        if (activeUIDocument is null)
+          throw new InvalidOperationException("There are no documents opened on the Revit UI");
+
+        if (!document.IsEquivalent(activeUIDocument.Document))
+        {
+          // This method may fail if the view is empty, or due to the BUG if its Id coincides
+          // with the active one from an other document, also modifies the Zoom on the view.
+          // 
+          //// 1. We use `UIDocument.ShowElements` on the target view to activate its document.
+          ////
+          //// Looks like Revit `UIDocument.ShowElements` has a bug comparing with the current view.
+          //// If the ElementId or UniqueId coincides it does not change the active document.
+          //if (activeUIDocument.ActiveView.Id != view.Id && activeUIDocument.ActiveView.UniqueId != view.UniqueId)
+          //{
+          //  // Some filters are added to the `ARDB.FilteredElementCollector` to avoid the
+          //  // 'No valid view is found' message from Revit.
+          //  using
+          //  (
+          //    var collector = new FilteredElementCollector(document, view.Id).
+          //    WherePasses(new ElementCategoryFilter(ElementId.InvalidElementId, inverted: true)).
+          //    WherePasses(External.DB.CompoundElementFilter.ElementHasBoundingBoxFilter)
+          //  )
+          //  {
+          //    var elements = collector.ToElementIds();
+          //    if (elements.Count > 0)
+          //    {
+          //      uiDocument.ShowElements(elements);
+          //      return true;
+          //    }
+
+          //    // Continue with the alternative method when the view is completly empty.
+          //  }
+          //}
+
+          // 2. Alternative method is less performant but aims to work on any case
+          // without altering the view zoom level.
+          using (var group = new TransactionGroup(document))
+          {
+            group.IsFailureHandlingForcedModal = true;
+
+            if (group.Start("Activate View") == TransactionStatus.Started)
+            {
+              var textNoteId = default(ElementId);
+              using (var tx = new Transaction(document, "Activate Document"))
+              {
+                if (tx.Start() == TransactionStatus.Started)
+                {
+                  // We create an EMPTY sheet because it does not show any model element.
+                  // Hopefully will be fast enough.
+                  var sheet = ViewSheet.Create(view.Document, ElementId.InvalidElementId);
+                  var typeId = document.GetDefaultElementTypeId(ElementTypeGroup.TextNoteType);
+                  textNoteId = TextNote.Create(document, sheet.Id, XYZ.Zero, "Show me!!", typeId).Id;
+
+                  var options = tx.GetFailureHandlingOptions().
+                                   SetClearAfterRollback(true).
+                                   SetDelayedMiniWarnings(false).
+                                   SetForcedModalHandling(true).
+                                   SetFailuresPreprocessor(FailuresPreprocessor.NoErrors);
+
+                  if (tx.Commit(options) != TransactionStatus.Committed)
+                    return false;
+                }
+              }
+
+              // Since the new View is not already open `UIDocument.ShowElements` asks the user
+              // to look for that view. We press OK here.
+              var activeWindow = Microsoft.Win32.SafeHandles.WindowHandle.ActiveWindow;
+              void PressOK(object sender, Autodesk.Revit.UI.Events.DialogBoxShowingEventArgs args) =>
+                args.OverrideResult((int) Microsoft.Win32.SafeHandles.DialogResult.IDOK);
+
+              uiDocument.Application.DialogBoxShowing += PressOK;
+              uiDocument.ShowElements(textNoteId);
+              uiDocument.Application.DialogBoxShowing -= PressOK;
+              Microsoft.Win32.SafeHandles.WindowHandle.ActiveWindow = activeWindow;
+
+              uiDocument.ActiveView = view;
+              group.RollBack();
+            }
+          }
+        }
+        else if (uiDocument.ActiveView.Id != view.Id)
+        {
+          uiDocument.ActiveView = view;
+        }
+
+        return true;
+      }
     }
 
     /// <summary>
