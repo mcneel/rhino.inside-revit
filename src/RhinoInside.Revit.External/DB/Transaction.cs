@@ -470,37 +470,44 @@ namespace RhinoInside.Revit.External.DB
     /// <summary>
     /// Implementation class for <see cref="CommitScope(Document)"/>
     /// </summary>
-    public readonly struct CommittableScope : IDisposable
+    public readonly struct CommittableScope : IDisposable, ITransactionFinalizer
     {
       internal static CommittableScope Default;
       readonly Transaction transaction;
+      const string name = "Commit Scope";
 
       internal CommittableScope(Document document)
       {
-        var name = "Commit Scope";
         transaction = new Transaction(document, name);
         transaction.SetFailureHandlingOptions
         (
           transaction.GetFailureHandlingOptions().
           SetClearAfterRollback(true).
           SetDelayedMiniWarnings(false).
-          SetForcedModalHandling(true)
+          SetForcedModalHandling(true).
+          SetFailuresPreprocessor(FailuresPreprocessor.NoErrors)
         );
 
         if (transaction.Start() != TransactionStatus.Started)
-          throw new InvalidOperationException($"Failed to start Transaction '{name}' on document '{document.Title.TripleDot(16)}'");
+          throw new InvalidOperationException($"Transaction failed to start on document '{document.Title}'");
       }
 
-      public void Commit() => transaction?.Commit();
+      public void Commit() => transaction?.Commit(transaction.GetFailureHandlingOptions().SetTransactionFinalizer(this));
+
+      void ITransactionFinalizer.OnCommitted(Document document, string strTransactionName) { }
+      public void OnRolledBack(Document document, string strTransactionName)
+      {
+        throw new InvalidOperationException($"Transaction failed to commit on document '{document.Title}'");
+      }
 
       void IDisposable.Dispose() => transaction?.Dispose();
     }
 
     /// <summary>
-    /// Starts a Commit scope that will be automatically comitted when disposed. In case of exception it will be rolledback.
+    /// Starts a Commit scope that will be automatically rolled back when disposed.
     /// </summary>
     /// <param name="document"></param>
-    /// <returns><see cref="IDisposable"/> that should be disposed to maked efective all changes done to <paramref name="document"/> in the scope.</returns>
+    /// <returns><see cref="IDisposable"/> that should be disposed before leaving the scope.</returns>
     /// <remarks>
     /// Use an auto dispose pattern to be sure the returned <see cref="IDisposable"/> is disposed before the calling method returns.
     /// And call <see cref="CommittableScope.Commit()"/> to commit all changes made to the model during the scope.
@@ -523,7 +530,7 @@ namespace RhinoInside.Revit.External.DB
     /// Starts a RollBack scope that will be automatically rolled back when disposed.
     /// </summary>
     /// <param name="document"></param>
-    /// <returns><see cref="IDisposable"/> that should be disposed to rollback all changes done to <paramref name="document"/> in the scope.</returns>
+    /// <returns><see cref="IDisposable"/> that should be disposed before leaving the scope.</returns>
     /// <remarks>
     /// Use an auto dispose pattern to be sure the returned <see cref="IDisposable"/> is disposed before the calling method returns.
     /// <para>
@@ -538,29 +545,68 @@ namespace RhinoInside.Revit.External.DB
     /// </remarks>
     public static IDisposable RollBackScope(this Document document)
     {
-      var name = "RollBack Scope";
       if (document.IsModifiable)
       {
         var subTransaction = new SubTransaction(document);
         if (subTransaction.Start() != TransactionStatus.Started)
-          throw new InvalidOperationException($"Failed to start subTransaction '{name}' on document '{document.Title.TripleDot(16)}'");
+          throw new InvalidOperationException($"SubTransaction failed to start on document '{document.Title.TripleDot(16)}'");
 
         return subTransaction;
       }
       else
       {
-        var transaction = new Transaction(document, name);
+        var transaction = new Transaction(document, "RollBack Scope");
         transaction.SetFailureHandlingOptions
         (
           transaction.GetFailureHandlingOptions().
           SetClearAfterRollback(true).
           SetDelayedMiniWarnings(false).
-          SetForcedModalHandling(true)
+          SetForcedModalHandling(true).
+          SetFailuresPreprocessor(FailuresPreprocessor.Rollback)
         );
+
         if (transaction.Start() != TransactionStatus.Started)
-          throw new InvalidOperationException($"Failed to start Transaction '{name}' on document '{document.Title.TripleDot(16)}'");
+          throw new InvalidOperationException($"Transaction failed to start on document '{document.Title.TripleDot(16)}'");
 
         return transaction;
+      }
+    }
+  }
+
+  public static class FailuresPreprocessor
+  {
+    public static readonly IFailuresPreprocessor NoWarnings = default(NoWarningsPreprocessor);
+    public static readonly IFailuresPreprocessor NoErrors   = default(NoErrorsPreprocessor);
+    public static readonly IFailuresPreprocessor Rollback   = default(RollbackPreprocessor);
+
+    struct NoWarningsPreprocessor : IFailuresPreprocessor
+    {
+      public FailureProcessingResult PreprocessFailures(FailuresAccessor failuresAccessor)
+      {
+        failuresAccessor.DeleteAllWarnings();
+        return FailureProcessingResult.Continue;
+      }
+    }
+
+    struct NoErrorsPreprocessor : IFailuresPreprocessor
+    {
+      public FailureProcessingResult PreprocessFailures(FailuresAccessor failuresAccessor)
+      {
+        if (failuresAccessor.GetSeverity() < FailureSeverity.Error)
+        {
+          failuresAccessor.DeleteAllWarnings();
+          return FailureProcessingResult.Continue;
+        }
+
+        return FailureProcessingResult.ProceedWithRollBack;
+      }
+    }
+
+    struct RollbackPreprocessor : IFailuresPreprocessor
+    {
+      public FailureProcessingResult PreprocessFailures(FailuresAccessor failuresAccessor)
+      {
+        return FailureProcessingResult.ProceedWithRollBack;
       }
     }
   }
