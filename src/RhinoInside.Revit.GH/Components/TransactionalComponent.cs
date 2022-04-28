@@ -383,7 +383,7 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
   }
 
-  enum TransactionExtent
+  internal enum TransactionExtent
   {
     Default,
     Component,
@@ -397,7 +397,7 @@ namespace RhinoInside.Revit.GH.Components
     : base(name, nickname, description, category, subCategory)
     { }
 
-    TransactionExtent TransactionExtent => TransactionExtent.Component;
+    internal virtual TransactionExtent TransactionExtent => TransactionExtent.Component;
 
     public override bool RequiresFailed
     (
@@ -680,7 +680,7 @@ namespace RhinoInside.Revit.GH.Components
         if(Params.Input<Parameters.Document>("Document") is IGH_Param document)
           return document.SourceCount == 0 && document.DataType == GH_ParamData.@void;
 
-        return true;
+        return Inputs.Any(x => x.Param is Parameters.Document && x.Param.Name == "Document");
       }
     }
 
@@ -729,6 +729,13 @@ namespace RhinoInside.Revit.GH.Components
 
             output = input;
           }
+        }
+        catch(Exception e)
+        {
+          if (FailureProcessingMode <= ARDB.FailureProcessingResult.ProceedWithCommit)
+            output = input;
+
+          throw e;
         }
         finally
         {
