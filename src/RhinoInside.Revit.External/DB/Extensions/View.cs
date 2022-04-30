@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
@@ -11,9 +12,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (view is null)
         throw new ArgumentNullException(nameof(view));
 
-      using (var uiDocument = new Autodesk.Revit.UI.UIDocument(view.Document))
+      using (var uiDocument = new UIDocument(view.Document))
       {
-        if (uiDocument.GetOpenUIViews().Where(x => x.ViewId == view.Id).FirstOrDefault() is Autodesk.Revit.UI.UIView uiView)
+        if (uiDocument.GetOpenUIViews().Where(x => x.ViewId == view.Id).FirstOrDefault() is UIView uiView)
         {
           uiView.Close();
           return true;

@@ -251,7 +251,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
             if (!element.CastFrom(value))
               throw new InvalidCastException();
 
-            id.Value = ElementExtension.GetNamesakeElement(parameter.Document, element.Document, element.Id);
+            id.Value = parameter.Document.LookupElement(element.Document, element.Id);
             parameter.SetValue(id);
             return true;
 
