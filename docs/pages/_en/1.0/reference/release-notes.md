@@ -15,6 +15,10 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.7 RC2" version="v1.7.8158.15230" pre_release=true time="05/03/2022" %}
+
+- Minor Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.7 RC1" version="v1.7.8151.26629" pre_release=true time="04/12/2022" %}
 
 - Added context menu to generate a transparent background image
