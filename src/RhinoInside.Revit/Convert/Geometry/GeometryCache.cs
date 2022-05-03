@@ -66,9 +66,9 @@ namespace RhinoInside.Revit.Convert.Geometry
           {
             switch (IntPtr.Size)
             {
-              case sizeof(uint):  writer.Write((uint)  typeof(Brep).TypeHandle.Value); break;
-              case sizeof(ulong): writer.Write((ulong) typeof(Brep).TypeHandle.Value); break;
-              default: throw new NotImplementedException();
+              case sizeof(uint):  writer.Write((uint)  geometry.GetType().TypeHandle.Value); break;
+              case sizeof(ulong): writer.Write((ulong) geometry.GetType().TypeHandle.Value); break;
+              default: throw new NotImplementedException($"Unexpected sizeof({nameof(IntPtr)})");
             }
 
             switch (geometry)
@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.Convert.Geometry
               case Curve curve:     Write(writer, curve, factor);   break;
               case Surface surface: Write(writer, surface, factor); break;
               case Brep brep:       Write(writer, brep, factor);    break;
-              default: throw new NotImplementedException();
+              default: throw new NotImplementedException($"Unexpected type '{geometry}'");
             }
 
             writer.Flush();
@@ -318,11 +318,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       where R : GeometryBase
       where T : ARDB.GeometryObject
     {
-      if (Policy == CachePolicy.Disabled)
-      {
-        signature = default;
-      }
-      else
+      if (Policy != CachePolicy.Disabled && key is object)
       {
         signature = new GeometrySignature(key, factor);
         if (GeometryDictionary.TryGetValue(signature, out var reference))
@@ -341,6 +337,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
 
       value = default;
+      signature = default;
       return false;
     }
   }
