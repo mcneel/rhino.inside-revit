@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Types
 
         return true;
       }
-      else if (value is ARDB.Element element)
+      else if (value is ARDB.Element element && !(value is ARDB.Phase))
       {
         SetValue(element.Document, element.CreatedPhaseId);
         return true;
