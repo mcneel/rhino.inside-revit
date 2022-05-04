@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Types
         SetValue(view.Document, view.GenLevel?.Id ?? ARDB.ElementId.InvalidElementId);
         return true;
       }
-      else if (value is ARDB.Element element)
+      else if (value is ARDB.Element element && !(value is ARDB.Level))
       {
         SetValue(element.Document, element.LevelId);
         return true;
