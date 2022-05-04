@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Types
         SetValue(spatialElement.Document, spatialElement.Location is object ? spatialElement.LevelId : ARDB.ElementId.InvalidElementId);
         return true;
       }
-      else if (value is ARDB.Element element)
+      else if (value is ARDB.Element element && !(value is ARDB.Level))
       {
         SetValue(element.Document, element.LevelId);
         return true;
