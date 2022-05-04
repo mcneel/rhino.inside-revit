@@ -15,6 +15,11 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+<!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.6 (Hotfix)" version="v1.6.8159.20547" time="05/04/2022" %}
+
+- Fixed a bug extracting Level elements from a parameter ([RE Discourse: Null Revit Levels Resulting In Missing Components](https://discourse.mcneel.com/t/rir-version-1-68-null-revit-levels-resulting-in-missing-components/142125))
+
 {% include ltr/release-header.html title="v1.7 RC2" version="v1.7.8158.15230" pre_release=true time="05/03/2022" %}
 
 - Minor Fixes and Improvements
@@ -39,8 +44,6 @@ group: Deployment & Configs
 - Added {% include ltr/comp.html uuid='d1940eb3' %}, {% include ltr/comp.html uuid='5ddcb816' %}, {% include ltr/comp.html uuid='a1ccf034' %} components
 - Added {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} components
 
-
-<!-- most recent release should be on top -->
 {% include ltr/release-header.html title="v1.6" version="v1.6.8151.18094" time="04/26/2022" %}
 
 - Added {% include ltr/comp.html uuid='54c795d0' %} and associated {% include ltr/comp.html uuid='63f4a581' %} parameter.
