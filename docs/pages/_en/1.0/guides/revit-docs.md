@@ -80,7 +80,7 @@ The documents output contains the name of the linked document and can be used in
 
 ## Querying Linked Elements
 
-Use the {% include ltr/comp.html uuid='0f7da57e' %} component shown here to access elements if a given document. The input document can be a linked document as well.
+Use the {% include ltr/comp.html uuid='0f7da57e' %} component shown here to access elements in a given document. The input document can be a linked document as well.
 
 ![]({{ "/static/images/guides/revit-links-querywalls1.4.png" | prepend: site.baseurl }})
 
