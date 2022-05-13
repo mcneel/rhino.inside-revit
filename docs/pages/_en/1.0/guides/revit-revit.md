@@ -25,7 +25,6 @@ The generated elements are then stored in a Revit **Document**. They are also or
 
 This is also a good place to mention **Subcategories**. They sound like an organization level right under the **Category**, but in practice, it is easier to think of them as a property of geometry rather than an organization level. When a Family function generates geometry, it can group them into subcategories of the main category. Their main purpose is to allow finer control over the graphical representation of each part of the geometry.
 
-
 ## Elements & Instances
 
 An often-asked question is **What is an Element?** Elements are the basic building blocks in Revit data model. Elements are organized into Categories. The list of categories is built into each Revit version and can not be changed. Elements have [Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) that hold data associated with the Element. Depending on their category, Elements will get a series of built-in parameters and can also accept custom parameters defined by user. Elements might have geometry e.g. Walls (3D) or Detail Components (2D), or might not include any geometry at all e.g. *Project Information* (Yes even that is an Element in Revit data model, although it is not selectable since Revit views are designed around geometric elements, therefore Revit provides a custom window to edit the project information). Elements have [Types]({{ site.baseurl }}{% link _en/1.0/guides/revit-types.md %}) that define how the element behaves in the Revit model.
@@ -64,7 +63,7 @@ Revit shows the list of built-in parameters in the *Element Properties* panel.
 
 ![]({{ "/static/images/guides/revit-params-parampanel.png" | prepend: site.baseurl }})
 
-Built-in Parameters are commonly defined in every Revit project by default. There is not way to change teh definition of them, only to read and write values to them.
+Built-in Parameters are commonly defined in every Revit project by default. There is not way to change the definition of them, only to read and write values to them.
 
 {% capture api_note %}
 In Revit API, all the built-in parameters are represented by the {% include api_type.html type='Autodesk.Revit.DB.BuiltInParameter' title='DB.BuiltInParameter' %} enumeration
@@ -79,7 +78,7 @@ Project Parameters may be attached to the Element Type or the Element Instance.
 
 To create a project parameter one must first define a parameter definition.  This is a template that outlines a parameter's Name, DataType, Group and optionally an ID (Guid). The definition is used  then a Parameter may be added to the projects.  Once added to the project, a Parameter instance will be attached to all the element instances, types or Globally to the project. Each Parameter instance can then store a unique value of a specific datatype.
 
-Shared Parameters are simply Project Parameters whos Parameter definitions can be transferred from one project to another thru a from a shared parameter file. Multiple projects can contain common parameter definitions. It is important to note that it is only the definitions that are shared, not the values within the parameters themselves. Shared parameters have a unique ID (Guid) that project parameters do not.
+Shared Parameters are simply Project Parameters whose Parameter definitions can be transferred from one project to another through a from a shared parameter file. Multiple projects can contain common parameter definitions. It is important to note that it is only the definitions that are shared, not the values within the parameters themselves. Shared parameters have a unique ID (Guid) that project parameters do not.
 
 ![]({{ "/static/images/guides/revit-params-projshared.png" | prepend: site.baseurl }})
 
@@ -123,7 +122,7 @@ In Revit API, all the built-in categories are represented by the {% include api_
 
 Before discussing *Families*, we need to discuss *Types* in Revit. There can be multiple types of elements under each of the Revit categories discussed above. For example a 3ft x 7ft single-panel door, is a door *Type* under the *Doors* category, or a 2x4 wood post is a column *Type* under the *Structural Columns* category.
 
-Each type, can have a series of **Type Parameters** that modify the behavior or other aspect of that specific Type. When working with Revit, we tend to define or modify various *Types* and place instances of these types into the model. For example we can define a 3ft x 7ft single-panel door Type and place many instances of this type in the model. All these instances will follow the logic that is enforced by that specific type. However, Type definitions can also allow certain **Instance Parameters** to be modified to change the behavior or graphics of a specific instance.
+Each type can have a series of **Type Parameters** that modify the behavior or other aspect of that specific Type. When working with Revit, we tend to define or modify various *Types* and place instances of these types into the model. For example we can define a 3ft x 7ft single-panel door Type and place many instances of this type in the model. All these instances will follow the logic that is enforced by that specific type. However, Type definitions can also allow certain **Instance Parameters** to be modified to change the behavior or graphics of a specific instance.
 
 ### Families
 

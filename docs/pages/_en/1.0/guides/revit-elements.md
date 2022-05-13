@@ -60,7 +60,7 @@ You can use the {% include ltr/comp.html uuid='e6a1f501' %} component in combina
 
 ![]({{ "/static/images/guides/revit-elements-querybyparam.png" | prepend: site.baseurl }})
 
-The {% include ltr/comp.html uuid='e6a1f501' %} is used to filter for values of specific parameter on elements. [Filter Rules](#filter-rules) specify the type of comparison that is to be performed on the parameter values. The list of built-in parameter names and types are quite long in Revit. Using the {% include ltr/comp.html uuid='c1d96f56' %} is a great way to select the proper parameter with it's additional listed detail in the selector.
+The {% include ltr/comp.html uuid='e6a1f501' %} is used to filter for values of specific parameter on elements. [Filter Rules](#filter-rules) specify the type of comparison that is to be performed on the parameter values. The list of built-in parameter names and types are quite long in Revit. Using the {% include ltr/comp.html uuid='c1d96f56' %} is a great way to select the proper parameter with its additional listed detail in the selector.
 
 ![]({{ "/static/images/guides/parameter-rule-filter.png" | prepend: site.baseurl }})
 
