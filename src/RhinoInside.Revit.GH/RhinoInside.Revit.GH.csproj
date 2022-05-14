@@ -61,6 +61,9 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
+    <Compile Include="Components\Element\Annotation\AddDetailLine.cs" />
+    <Compile Include="Components\Element\Annotation\AddRegion.cs" />
+    <Compile Include="Components\Element\Annotation\AddText.cs" />
     <Compile Include="Components\Element\Opening\AddFaceOpening.cs" />
     <Compile Include="Components\Element\Opening\AddOpening.cs" />
     <Compile Include="Components\Element\Opening\AddShaftOpening.cs" />
@@ -207,13 +210,13 @@
     <Compile Include="Components\ParameterElement\SharedParameters.cs" />
     <Compile Include="Components\Topology\AddArea.cs" />
     <Compile Include="Components\Topology\AddAreaBoundaryLine.cs" />
-    <Compile Include="Components\Topology\AddAreaTag.cs" />
+    <Compile Include="Components\Element\Annotation\AddAreaTag.cs" />
     <Compile Include="Components\Topology\AddRoom.cs" />
     <Compile Include="Components\Topology\AddRoomSeparatorLine.cs" />
-    <Compile Include="Components\Topology\AddRoomTag.cs" />
+    <Compile Include="Components\Element\Annotation\AddRoomTag.cs" />
     <Compile Include="Components\Topology\AddSpace.cs" />
     <Compile Include="Components\Topology\AddSpaceSeparatorLine.cs" />
-    <Compile Include="Components\Topology\AddSpaceTag.cs" />
+    <Compile Include="Components\Element\Annotation\AddSpaceTag.cs" />
     <Compile Include="Components\Topology\AnalyzeInstanceSpace.cs" />
     <Compile Include="Components\Topology\QuerySpatialElements.cs" />
     <Compile Include="Components\Topology\SpatialElementGeometry.cs" />
@@ -425,6 +428,7 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TextTemplating\Microsoft.TextTemplating.targets" />
   <PropertyGroup>
