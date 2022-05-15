@@ -78,15 +78,24 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve)) return null;
 
+          if
+          (
+            view.ViewType is ARDB.ViewType.ThreeD ||
+            view.ViewType is ARDB.ViewType.Schedule ||
+            view.ViewType is ARDB.ViewType.ColumnSchedule ||
+            view.ViewType is ARDB.ViewType.PanelSchedule
+          )
+            throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
+
           var tol = GeometryObjectTolerance.Model;
           if
           (
             curve.IsShort(tol.ShortCurveTolerance) ||
             curve.IsClosed ||
             !curve.TryGetPlane(out var plane, tol.VertexTolerance) ||
-            plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
+            plane.ZAxis.IsParallelTo(view.ViewDirection.ToVector3d(), tol.AngleTolerance) == 0
           )
-            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid horizontal, planar and open curve.", curve);
+            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid planar, open curve and perperdicular to the input view.", curve);
 
           // Compute
           detailCurve = Reconstruct(detailCurve, view, curve);
@@ -101,13 +110,10 @@ namespace RhinoInside.Revit.GH.Components.Annotation
     {
       if (detailCurve is null) return false;
 
-      var genLevel = view.GenLevel;
       if (detailCurve.OwnerViewId != view.Id) return false;
+      var plane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
 
-      var levelPlane = Plane.WorldXY;
-      levelPlane.Translate(Vector3d.ZAxis * genLevel.GetElevation() * Revit.ModelUnits);
-
-      using (var projectedCurve = Curve.ProjectToPlane(curve, levelPlane).ToCurve())
+      using (var projectedCurve = Curve.ProjectToPlane(curve, plane).ToCurve())
       {
         if (!projectedCurve.IsAlmostEqualTo(detailCurve.GeometryCurve))
           detailCurve.SetGeometryCurve(projectedCurve, overrideJoins: true);
@@ -118,14 +124,9 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
     ARDB.DetailCurve Create(ARDB.View view, Curve curve)
     {
-      if (view.GenLevel is ARDB.Level level)
-      {
-        var sketchPlane = level.GetSketchPlane(ensureSketchPlane: true);
-        using (var projectedCurve = Curve.ProjectToPlane(curve, sketchPlane.GetPlane().ToPlane()))
-          return view.Document.Create.NewDetailCurve(view, projectedCurve.ToCurve());
-      }
-
-      return default;
+      var plane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
+      var projectedCurve = Curve.ProjectToPlane(curve, plane).ToCurve();
+      return view.Document.Create.NewDetailCurve(view, projectedCurve);
     }
 
     ARDB.DetailCurve Reconstruct(ARDB.DetailCurve detailCurve, ARDB.View view, Curve curve)
