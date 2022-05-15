@@ -109,7 +109,9 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           if
           (
             view.ViewType is ARDB.ViewType.ThreeD ||
-            view.ViewType is ARDB.ViewType.Schedule
+            view.ViewType is ARDB.ViewType.Schedule ||
+            view.ViewType is ARDB.ViewType.ColumnSchedule ||
+            view.ViewType is ARDB.ViewType.PanelSchedule
           )
             throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
 
