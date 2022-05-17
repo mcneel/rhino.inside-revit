@@ -34,8 +34,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         {
           Name = "View",
           NickName = "V",
-          Description = "View to add a specific detail line",
-          Access = GH_ParamAccess.item
+          Description = "View to add a specific detail line"
         }
       ),
       new ParamDefinition
@@ -44,8 +43,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         {
           Name = "Curve",
           NickName = "C",
-          Description = "Curve to create a specific detail line",
-          Access = GH_ParamAccess.item
+          Description = "Curve to create a specific detail line"
         }
       )
     };
@@ -59,8 +57,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         {
           Name = _Output_,
           NickName = _Output_.Substring(0, 1),
-          Description = $"Output {_Output_}",
-          Access = GH_ParamAccess.item
+          Description = $"Output {_Output_}"
         }
       )
     };
