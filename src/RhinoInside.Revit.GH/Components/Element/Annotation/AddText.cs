@@ -71,7 +71,6 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           Name = "Type",
           NickName = "T",
           Description = "Element type of the given region"
-          // built-in category del type?
         }
       )
     };
