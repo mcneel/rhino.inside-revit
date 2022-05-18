@@ -23,7 +23,7 @@ In Revit API, Worksets are represented by the {% include api_type.html type='Aut
 
 ## Finding Specific Assembly
 
-To find a Assembly by name {% include ltr/comp.html uuid='fd5b45c3' %} component shared here.
+To find a Assembly by names {% include ltr/comp.html uuid='fd5b45c3' %} component shared here.
 
 ![]({{ "/static/images/guides/revit-worksets02.png" | prepend: site.baseurl }})
 
