@@ -30,7 +30,7 @@ And plan views using the categories to control graphics:
 
 ## Rhino objects as DirectShapes
 
-DirectShapes are the most obvious and many times the easiest way to get Geometry from Rhino into Revit. DirectShapes are generic Revit elements that can contain and categorize arbitrary non-parametric geometry inside the Revit model. However, since the geometry is not parametric, Revit does not know how they are created and can not resolved interactions between DirectShapes and other native elements. An example is that native Revit walls can not be extended to reach a DirectShape roof geometry.
+DirectShapes are the most obvious and many times the easiest way to get Geometry from Rhino into Revit. DirectShapes are generic Revit elements that can contain and categorize arbitrary non-parametric geometry inside the Revit model. However, since the geometry is not parametric, Revit does not know how they are created and can not resolve interactions between DirectShapes and other native elements. An example is that native Revit walls can not be extended to reach a DirectShape roof geometry.
 
 Good reasons for using DirectShapes include:
 1. Temporary models used in a competition or early design study submission for quick drawings.
@@ -99,7 +99,7 @@ Using built-in Revit *System Families* such as Walls, Floors, Ceilings, and Roof
 2. Elements can be edited even when {{ site.terms.rir }} is not available. The elements may have dimensions attached to them. The elements may be used to host other elements
 3. Many Revit users downstream may not realize these elements were created with {{ site.terms.rir }}
 
-Here is video on creating native Levels, Floors, Columns and Façade panels using {{ site.terms.rir }}:
+Here is a video on creating native Levels, Floors, Columns and Façade panels using {{ site.terms.rir }}:
 
 {% include youtube_player.html id="cc3WLvGkWcc" %}
 

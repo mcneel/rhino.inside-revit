@@ -102,7 +102,7 @@ Once the definition is created, then the Parameter can be added to the project u
 
 ### Adding a Project parameter
 
-Project parameters have addition properties beyond a basic Parameter Definition. Project parameters belong to certain Categories and the values can may vary across elements.
+Project parameters have addition properties beyond a basic Parameter Definition. Project parameters belong to certain Categories and the values can vary across elements.
 
 ![]({{ "/static/images/guides/revit-params-definekeycomp.png" | prepend: site.baseurl }})
 
@@ -132,7 +132,7 @@ Global parameters must be queried from the current project by using the Global s
 
 ![]({{ "/static/images/guides/param-global.png" | prepend: site.baseurl }})
 
-Add Global parameters to a project thru the stndard [Add Pararameter Process](#creating-parameters).
+Add Global parameters to a project thru the standard [Add Pararameter Process](#creating-parameters).
 
 ## Parameter Formula
 

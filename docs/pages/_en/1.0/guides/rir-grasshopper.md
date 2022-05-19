@@ -9,7 +9,6 @@ ghdef: rir-grasshopper.ghx
 
 {% include youtube_player.html id="VsE5uWQ-_oM" %}
 
-
 ## Revit-Aware Components
 
 The Revit-aware component icons help identifying the action that the component performs. As shown below, the base color shows the type of action (Query, Analyze, Modify, Create). There are a series of badges applied to icons as well, that show Type, Identity, or other aspects of the data that the component is designed to work with:
@@ -70,7 +69,7 @@ Grasshopper solver can also be toggled from the *Rhinoceros* tab in Revit. This 
 
 ## Element Tracking
 
-Tracking allows Grasshopper to replace the Revit elements that is previously created, even between saves. Each component output remembers which Revit elements it added and avoid creating duplicates. Only *Add* components in Grasshopper use tracking. Grasshopper will remember these elements after the file is closed and re-opened in the future.
+Tracking allows Grasshopper to replace the Revit elements that are previously created, even between saves. Each component output remembers which Revit elements it added and avoids creating duplicates. Only *Add* components in Grasshopper use tracking. Grasshopper will remember these elements after the file is closed and re-opened in the future.
 
 This video explains many of the details:
 
@@ -149,6 +148,6 @@ As mentioned in the sections above, paying close attention to the items below wi
 - Grasshopper runs on top of Revit. So when Revit gets slow (large models, too many open views, ...) Grasshopper might not get the amount of time it needs to update its resources and previews
 - Grasshopper previous in Revit require geometry conversions. Having too many previews also slows down the Revit view. Keep the preview on for Grasshopper components when necessary. You can also toggle the preview globally from the *Rhinoceros* tab in Revit
 - Running many transactions on individual elements is slower that running one transaction on many elements at once. Try to design the graph logic in a way that a single transactional component can operate on as many elements as you need to modify at once
-- Toggling the Grasshopper solver can be helpful in reducing wait times on on large Revit models
-- Poor quality geometry or models out of tolerance can slow dow the transfer process. See *Tolerances* section above
+- Toggling the Grasshopper solver can be helpful in reducing wait times on large Revit models
+- Poor quality geometry or models out of tolerance can slow down the transfer process. See *Tolerances* section above
   

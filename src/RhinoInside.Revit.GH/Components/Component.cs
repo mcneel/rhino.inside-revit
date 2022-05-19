@@ -223,6 +223,10 @@ namespace RhinoInside.Revit.GH.Components
                   var mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
                   AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
                 }
+                else
+                {
+                  AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message);
+                }
                 break;
               }
               case Types.GraphicalElement graphicalElement:

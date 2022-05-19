@@ -5,35 +5,59 @@ group: Deployment & Configs
 ---
 
 <!-- list the changes in WIP branch -->
+
 {% capture rc_release_notes %}
 
 ### WIP
 
-- Added 'Crop Extents', 'Template' and 'Filter' input to 'Export View Image'.  
-- Added context menu to generate a transparent background image.
-- Added 'View Extents' component.
-- Added 'View Section Box' component.
-- Added '3D view' and 'Structural Plan' view parameters.
-- Added 'Floor Plan' 'Ceiling Plan' and 'Area Plan' parameters.
-- Added 'Section', 'Elevation' and 'Detail' view parameters.
-- Exposed 'View Type' parameter.
-- Added 'Add Dependent View' component.
-- Added 'Add Floor Plan', 'Add Ceiling Plan' and 'Add Structural Plan' components.
-- Added 'Spatial Element Boundary' and 'Spatial Element Geometry' components.
-- Added 'Add Area Boundary', 'Add Room Separation' and 'Add Space Separation' components.
-- Added 'Add Area', 'Add Room' and 'Add Space' components.
-- Added 'Query Area', 'Query Rooms' and 'Query Spaces' components.
-- Added 'Add Area Tag', 'Add Room Tag' and 'Add Space Tag'.
+- Moved {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} from Topology to Annotation tab.
+- Added "Add Text" component
+- Added "Add Region" component
+- Added "Add Detail Line" component
 
-### RC 
-
-- Added 'Project Elevation' parameter and component.
-- Added 'Level Constraint' parameter and component.
+### RC
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 <!-- most recent release should be on top -->
+
+{% include ltr/release-header.html title="v1.6 (Hotfix)" version="v1.6.8159.20547" time="05/04/2022" %}
+
+- Fixed a bug extracting Level elements from a parameter ([RE Discourse: Null Revit Levels Resulting In Missing Components](https://discourse.mcneel.com/t/rir-version-1-68-null-revit-levels-resulting-in-missing-components/142125))
+
+{% include ltr/release-header.html title="v1.7 RC2" version="v1.7.8158.15230" pre_release=true time="05/03/2022" %}
+
+- Minor Fixes and Improvements
+
+{% include ltr/release-header.html title="v1.7 RC1" version="v1.7.8151.26629" pre_release=true time="04/12/2022" %}
+
+- Added context menu to generate a transparent background image
+- Added _Crop Extents_, _Template_ and _Filter_ input to {% include ltr/comp.html uuid='4a962a0c' %}
+- Exposed {% include ltr/comp.html uuid='972b6fbe' %} parameter
+- Added {% include ltr/comp.html uuid='d4593785' %}, {% include ltr/comp.html uuid='45e7e88c' %} components
+- Added {% include ltr/comp.html uuid='f3c35fb2' %} view parameter
+- Added {% include ltr/comp.html uuid='bf2effd6' %} parameter and associated {% include ltr/comp.html uuid='51f9e551' %} component
+- Added {% include ltr/comp.html uuid='1bde7f9f' %} parameter and associated {% include ltr/comp.html uuid='3896729d' %} component
+- Added {% include ltr/comp.html uuid='33e34bd8' %} parameter and associated {% include ltr/comp.html uuid='782d0460' %} component
+- Added {% include ltr/comp.html uuid='d0d3d169' %}, {% include ltr/comp.html uuid='0744d339' %}, {% include ltr/comp.html uuid='6effb4b8' %}, {% include ltr/comp.html uuid='ca537732' %} view parameters
+- Added {% include ltr/comp.html uuid='a1878f3d' %} component
+- Added {% include ltr/comp.html uuid='53fdab6f' %} selector
+- Added {% include ltr/comp.html uuid='36842b86' %}
+- Added {% include ltr/comp.html uuid='34d68cdc' %} component
+- Added {% include ltr/comp.html uuid='34186815' %}, {% include ltr/comp.html uuid='dea31165' %} components
+- Added {% include ltr/comp.html uuid='2ee360f3' %}, {% include ltr/comp.html uuid='de5e832b' %}, {% include ltr/comp.html uuid='07711559' %} components
+- Added {% include ltr/comp.html uuid='d1940eb3' %}, {% include ltr/comp.html uuid='5ddcb816' %}, {% include ltr/comp.html uuid='a1ccf034' %} components
+- Added {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} components
+
+{% include ltr/release-header.html title="v1.6" version="v1.6.8151.18094" time="04/26/2022" %}
+
+- Added {% include ltr/comp.html uuid='54c795d0' %} and associated {% include ltr/comp.html uuid='63f4a581' %} parameter.
+- Added {% include ltr/comp.html uuid='01c853d8' %} and associated {% include ltr/comp.html uuid='4150d40a' %} parameter.
+- Updated {% include ltr/comp.html uuid='657811b7' %} to accept {% include ltr/comp.html uuid='4150d40a' %} parametes as **Base** and **Top** inputs as well and thus removed the optional offset parameters
+- Includes all changes under 1.6RC releases listed below
+- Minor Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.6 RC5" version="v1.6.8134.6334" pre_release=true time="04/12/2022" %}
 
 - Added support for Revit 2023
@@ -43,9 +67,9 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.6 RC4" version="v1.6.8124.18574" pre_release=true time="04/05/2022" %}
 
-- Fixed {% include ltr/comp.html uuid='cec2b3df-' %} component when Tracking mode is set to *Update*.
-- Added *Elevation* input to {% include ltr/comp.html uuid='cec2b3df-' %}.
-- Fixed a bug on *Import 3DM* command when importing polylines on a family document.
+- Fixed {% include ltr/comp.html uuid='cec2b3df-' %} component when Tracking mode is set to _Update_.
+- Added _Elevation_ input to {% include ltr/comp.html uuid='cec2b3df-' %}.
+- Fixed a bug on _Import 3DM_ command when importing polylines on a family document.
 
 {% include ltr/release-header.html title="v1.6 RC3" version="v1.6.8123.20268" pre_release=true time="03/29/2022" %}
 
@@ -56,10 +80,10 @@ group: Deployment & Configs
 {% include ltr/release-header.html title="v1.6 RC2" version="v1.6.8119.11754" pre_release=true time="03/22/2022" %}
 
 - Fixed a problem on `ARDB.XYZ.PerpVector` when tolerance is too small.
-- Now *Convert* context menu is a sorted by parameter category.
+- Now _Convert_ context menu is a sorted by parameter category.
 - Added casting from {% include ltr/comp.html uuid='f3ea4a9c-' %} to {% include ltr/comp.html uuid='5c073f7d-' %}, {% include ltr/comp.html uuid='353ffb47-' %}, {% include ltr/comp.html uuid='3238f8bc-' %} and {% include ltr/comp.html uuid='97dd546d-' %}.
-- Now all *Add* components create elements on the last document Phase.
-- Now all *Add* components create elements with **Enable Analytical Model** off by default.
+- Now all _Add_ components create elements on the last document Phase.
+- Now all _Add_ components create elements with **Enable Analytical Model** off by default.
 - Fix for {% include ltr/comp.html uuid='26411aa6-' %} now it always returns a non joined element.
 - Fixed {% include ltr/comp.html uuid='2c374e6d-' %} component on shared-parameters.
 - Fix for {% include ltr/comp.html uuid='dcc82eca-' %} when managing structural elements.
@@ -68,7 +92,7 @@ group: Deployment & Configs
 - Now `Opening.Location` returns a plane centered on the profile curves.
 - Implemented casting `SpatialElement` to `Surface`
 - Added `Types.Railing`. This enables {% include ltr/comp.html uuid='dcc82eca-' %} component on railings.
-- Implemented *Type* output on {% include ltr/comp.html uuid='3bde5890-' %} for built-in parameters.
+- Implemented _Type_ output on {% include ltr/comp.html uuid='3bde5890-' %} for built-in parameters.
 - Now Grasshopper preview status is persistent between sessions.
 
 {% include ltr/release-header.html title="v1.6 RC1" version="v1.6.8102.16819" pre_release=true time="08/03/2022" %}
@@ -85,9 +109,8 @@ group: Deployment & Configs
 - Added **Is Subcategory** input to {% include ltr/comp.html uuid='d150e40e-' %} component
 - Now {% include ltr/comp.html uuid='70ccf7a6-' %} component returns openings on floor, ceiling and roofs
 - Fixed {% include ltr/comp.html uuid='37a8c46f-' %} component. It was failing to update 'Unconnected Height' when the wall is constrained at the top
-- Fixed {% include ltr/comp.html uuid='df634530-' %}  and {% include ltr/comp.html uuid='97e9c6bb-' %}. Now both component filter out non Model groups or types
+- Fixed {% include ltr/comp.html uuid='df634530-' %} and {% include ltr/comp.html uuid='97e9c6bb-' %}. Now both component filter out non Model groups or types
 - Now first access to `RhinoCommon.dll` loads Rhino
-
 
 {% include ltr/release-header.html title="v1.5" version="v1.5.8101.24584" time="03/08/2022" %}
 
@@ -98,21 +121,21 @@ group: Deployment & Configs
 
 - Fixed `AssemblyInstance.Location.set`
 - Implemented `AssemblyInstance.BoundingBox`
-- Now {% include ltr/comp.html uuid='ef607c2a-' %} displays the *BoundingBox* by default.
+- Now {% include ltr/comp.html uuid='ef607c2a-' %} displays the _BoundingBox_ by default.
 - Fixed `Types.BasePoint.ClippingBox` when the element is not available.
 
 {% include ltr/release-header.html title="v1.5 RC3" version="v1.5.8082.16096" pre_release=true time="02/16/2022" %}
 
 - {% include ltr/comp.html uuid='b6349dda-' %} now has "Open Design Options…" context menu option.
 - Added {% include ltr/comp.html uuid='8621421d-' %} component.
-- Added *Error Mode* context menu: Now all named elements creation components use preexisting elements when working in error-mode 'Continue'.
+- Added _Error Mode_ context menu: Now all named elements creation components use preexisting elements when working in error-mode 'Continue'.
 
-- Fix on {% include ltr/comp.html uuid='26411aa6-' %}, now it checks if family is *Structural Framing* before enabling-disabling joins.
+- Fix on {% include ltr/comp.html uuid='26411aa6-' %}, now it checks if family is _Structural Framing_ before enabling-disabling joins.
 - Fix on the {% include ltr/comp.html uuid='26411aa6-' %} component when working in tracking-mode 'Reuse'.
 - Fixed {% include ltr/comp.html uuid='f4c12aa0-' %} component when managing unnamed elements.
-- Fixed a bug on selection *Value Set* when there are no elements on the list.
+- Fixed a bug on selection _Value Set_ when there are no elements on the list.
 - Fixed a bug when user Undo a grasshopper object creation operation on components that track elements.
-- Fixed a problem when Revit is working in *US Survey Feet* units.
+- Fixed a problem when Revit is working in _US Survey Feet_ units.
 
 {% include ltr/release-header.html title="v1.5 RC2" version="v1.5.8067.24664" pre_release=true time="02/01/2022" %}
 
@@ -135,7 +158,7 @@ group: Deployment & Configs
 - Renamed 'Document Links' to {% include ltr/comp.html uuid='ebccfdd8-' %}.
 - Renamed 'Binding' to 'Scope' in parameter components.
 - Updated 'Element Dependents' to return original 'Elements' and also 'Referentials'.
-- Fixed {% include ltr/comp.html uuid='b3bcbf5b-' %} and {% include ltr/comp.html uuid='8b85b1fb-' %}: Now both have an option *Expand Dependents* in the context menu to extract dependent elements geometry. Outputs are grafted accordingly. Closes #509.
+- Fixed {% include ltr/comp.html uuid='b3bcbf5b-' %} and {% include ltr/comp.html uuid='8b85b1fb-' %}: Now both have an option _Expand Dependents_ in the context menu to extract dependent elements geometry. Outputs are grafted accordingly. Closes #509.
 - Updated some 'Query' component input parameters names to match Revit parameter name.
 
 {% include ltr/release-header.html title="v1.4 RC5" version="v1.4.8007.15883" pre_release=true time="12/07/2021" %}
@@ -154,10 +177,9 @@ group: Deployment & Configs
 
 ![]({{ "/static/images/release_notes/pythoneditor-docs.png" | prepend: site.baseurl }})
 
-- Fixed *Select All* and *Invert Selection* on **Value Set Picker**
-- Fixed {% include ltr/comp.html uuid='79daea3a-' %} when *Categories* input contains nulls
+- Fixed _Select All_ and _Invert Selection_ on **Value Set Picker**
+- Fixed {% include ltr/comp.html uuid='79daea3a-' %} when _Categories_ input contains nulls
 - Fixed {% include ltr/comp.html uuid='97d71aa8-' %} component when managing nulls
-
 
 {% include ltr/release-header.html title="v1.4 RC2" version="v1.4.7989.18759" pre_release=true time="11/16/2021" %}
 
@@ -179,9 +201,9 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.3 RC2" version="v1.3.7976.20198" pre_release=true time="10/27/2021" %}
 
-- Now *Open Viewport* command needs CTRL pressed to synchronize camera and workplane
-- {% include ltr/comp.html uuid='2dc4b866' %} now converts to *Plane*, *Box*, *Surface*, and *Material*
-- {% include ltr/comp.html uuid='4a962a0c' %} defaults to a temp folder when no *Folder* is provided
+- Now _Open Viewport_ command needs CTRL pressed to synchronize camera and workplane
+- {% include ltr/comp.html uuid='2dc4b866' %} now converts to _Plane_, _Box_, _Surface_, and _Material_
+- {% include ltr/comp.html uuid='4a962a0c' %} defaults to a temp folder when no _Folder_ is provided
 
 {% include ltr/release-header.html title="v1.3 RC1" version="v1.3.7970.19099" pre_release=true time="10/27/2021" %}
 
@@ -189,7 +211,7 @@ group: Deployment & Configs
   - New {% include ltr/comp.html uuid='7fcea93d-' extended=true %}
   - New {% include ltr/comp.html uuid='a39bbdf2-' extended=true %}
   - New {% include ltr/comp.html uuid='b344f1c1-' extended=true %}
-  - ZUI components e.g. {% include ltr/comp.html uuid='fad33c4b-' %} now have *Show all parameters* and *Hide unconnected parameters* on context menu
+  - ZUI components e.g. {% include ltr/comp.html uuid='fad33c4b-' %} now have _Show all parameters_ and _Hide unconnected parameters_ on context menu
 - Performance
   - Grasshopper now caches converted geometries from Rhino to Revit. This improves performance between Grasshopper runs, or when the same geometry is being converted many times.
 - Minor Fixes and Improvements
@@ -198,19 +220,20 @@ group: Deployment & Configs
 
 - Includes all changes under 1.2RC releases listed below
 - Component Changes
+
   - {% include ltr/comp.html uuid='704d9c1b-' %} component does not have a Title Block input anymore
   - Added {% include ltr/comp.html uuid='f2f3d866-' extended=true %}
   - Added {% include ltr/comp.html uuid='16f18871-' extended=true %}
   - {% include ltr/comp.html uuid='f6b99fe2-' %} now shows pretty names for view families sorted alphabetically
   - {% include ltr/comp.html uuid='f737745f-' %} replaces previous {% include ltr/comp_old.html title='Query Title Block Types' %} component
   - Removed {% include ltr/comp_old.html title='Analyze Sheet' %} component
-  - {% include ltr/comp.html uuid='6915b697-' %} component does not require *Category* anymore
+  - {% include ltr/comp.html uuid='6915b697-' %} component does not require _Category_ anymore
 
 - Issues
+
   - Fixed Non-C2-BREP edge conversion when knots are below tolerance. RE [#382](https://github.com/mcneel/rhino.inside-revit/issues/382).
 
 - Minor Fixes and Improvements
-
 
 {% include ltr/release-header.html title="v1.2 RC4" version="v1.2.7948.6892 " pre_release=true time="10/05/2021" %}
 
@@ -232,6 +255,7 @@ group: Deployment & Configs
 {% include ltr/release-header.html title="v1.2 RC1" version="v1.2.7927.28069" pre_release=true time="09/14/2021" %}
 
 - New View Components!
+
   - {% include ltr/comp.html uuid='97c8cb27-' extended=true %}
   - {% include ltr/comp_old.html title='Query Title Block Types' %}
   - {% include ltr/comp.html uuid='cadf5fbb-' extended=true %}
@@ -240,6 +264,7 @@ group: Deployment & Configs
   - {% include ltr/comp.html uuid='f6b99fe2-' extended=true %}
 
 - New Assembly Components!
+
   - {% include ltr/comp.html uuid='fd5b45c3-' extended=true %}
   - {% include ltr/comp_old.html title='Assembly Views' %}
   - {% include ltr/comp.html uuid='6915b697-' extended=true %}
@@ -248,6 +273,7 @@ group: Deployment & Configs
   - {% include ltr/comp.html uuid='ff0f49ca-' extended=true %}
 
 - New Workset Components!
+
   - {% include ltr/comp.html uuid='5c073f7d-' extended=true %}
   - {% include ltr/comp.html uuid='aa467c94-' extended=true %}
   - {% include ltr/comp.html uuid='b441ba8c-' extended=true %}
@@ -256,6 +282,7 @@ group: Deployment & Configs
   - {% include ltr/comp.html uuid='3380c493-' extended=true %}
 
 - New Phase Components!
+
   - {% include ltr/comp.html uuid='353ffb47-' extended=true %}
   - {% include ltr/comp.html uuid='3ba4524a-' extended=true %}
   - {% include ltr/comp.html uuid='91e4d3e1-' extended=true %}
@@ -278,31 +305,30 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.1 RC2" version="v1.1.7906.21197" pre_release=true time="08/24/2021" %}
 
-- 👉 Updated *Tracking Mode* context wording.
+- 👉 Updated _Tracking Mode_ context wording.
   - Supersede -> **Enabled : Replace**
   - Reconstruct -> **Enabled : Update**
 - 👉 Performance Improvements:
   - Disabled expiring objects when a Revit document change comes from Grasshopper itself
-  - Improved *Element Type* component speed when updating several elements
-  - Improved *Add Component (Location)* speed when used in *Supersede* mode
+  - Improved _Element Type_ component speed when updating several elements
+  - Improved _Add Component (Location)_ speed when used in _Supersede_ mode
 - 👉 Renamed:
-  - *Query Types* output from "E" to "T"
-  - *Add ModelLine* -> *Add Model Line*
-  - *Add SketchPlane* -> *Add Sketch Plane*
-  - *Thermal Asset Type* -> *Thermal Asset Class*
-  - *Physical Asset Type* -> *Physical Asset Class*
+  - _Query Types_ output from "E" to "T"
+  - _Add ModelLine_ -> _Add Model Line_
+  - _Add SketchPlane_ -> _Add Sketch Plane_
+  - _Thermal Asset Type_ -> _Thermal Asset Class_
+  - _Physical Asset Type_ -> _Physical Asset Class_
 - Now parameter rule components guess the parameter type from the value on non built-in parameters
 - Parameter setter does not change the value when the value to set is already the same
 - Fixed the way we solve BuiltIn parameters on family documents
-- Added *Behavior* input to Modify Physical and Thermal asset
-- Removed some default values on *Query Views* that add some confusion
+- Added _Behavior_ input to Modify Physical and Thermal asset
+- Removed some default values on _Query Views_ that add some confusion
 - Deleting an open view is not allowed. We show an message with less information in that case
-- Fix on *Add View3D* when managing a locked view
-- Fix on *Duplicate Type* when managing types without Category like `DB.ViewFamilyType`
-- Only *Graphical Element* should be pinned
+- Fix on _Add View3D_ when managing a locked view
+- Fix on _Duplicate Type_ when managing types without Category like `DB.ViewFamilyType`
+- Only _Graphical Element_ should be pinned
 - Closed [Issue #410](https://github.com/mcneel/rhino.inside-revit/issues/410)
 - Merged [PR #475](https://github.com/mcneel/rhino.inside-revit/issues/475)
-
 
 {% include ltr/release-header.html title="v1.0 Stable / v1.1 RC1" version="1.0.7894.17525 / v1.1.7894.19956" time="08/12/2021" %}
 

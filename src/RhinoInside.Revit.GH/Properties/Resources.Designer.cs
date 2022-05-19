@@ -123,6 +123,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddAreaTag {
+            get {
+                object obj = ResourceManager.GetObject("AddAreaTag", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddCeilingPlan {
             get {
                 object obj = ResourceManager.GetObject("AddCeilingPlan", resourceCulture);
@@ -213,6 +223,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddRoomTag {
+            get {
+                object obj = ResourceManager.GetObject("AddRoomTag", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddSectionView {
             get {
                 object obj = ResourceManager.GetObject("AddSectionView", resourceCulture);
@@ -246,6 +266,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AddSpaceSeparatorLine {
             get {
                 object obj = ResourceManager.GetObject("AddSpaceSeparatorLine", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddSpaceTag {
+            get {
+                object obj = ResourceManager.GetObject("AddSpaceTag", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -3023,6 +3053,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap QueryAreas {
+            get {
+                object obj = ResourceManager.GetObject("QueryAreas", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap QueryAssemblies {
             get {
                 object obj = ResourceManager.GetObject("QueryAssemblies", resourceCulture);
@@ -3203,6 +3243,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap QueryRooms {
+            get {
+                object obj = ResourceManager.GetObject("QueryRooms", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap QuerySheets {
             get {
                 object obj = ResourceManager.GetObject("QuerySheets", resourceCulture);
@@ -3216,6 +3266,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap QuerySiteLocations {
             get {
                 object obj = ResourceManager.GetObject("QuerySiteLocations", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QuerySpaces {
+            get {
+                object obj = ResourceManager.GetObject("QuerySpaces", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

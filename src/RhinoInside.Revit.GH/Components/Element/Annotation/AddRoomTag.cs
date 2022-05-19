@@ -7,22 +7,22 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Topology
+namespace RhinoInside.Revit.GH.Components.Element.Annotation
 {
   [ComponentVersion(introduced: "1.7")]
-  public class AddSpaceTag : ElementTrackerComponent
+  public class AddRoomTag : ElementTrackerComponent
   {
-    public override Guid ComponentGuid => new Guid("F3EB3A21-CF8C-440D-A912-CFC84F204957");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override Guid ComponentGuid => new Guid("3B95EFF0-6BB7-413D-8FBE-AB8895E804E2");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => string.Empty;
 
-    public AddSpaceTag() : base
+    public AddRoomTag() : base
     (
-      name: "Add Space Tag",
-      nickname: "SpaceTag",
-      description: "Given a point, it adds an space tag to the given view",
+      name: "Add Room Tag",
+      nickname: "RoomTag",
+      description: "Given a point, it adds an room tag to the given view",
       category: "Revit",
-      subCategory: "Topology"
+      subCategory: "Annotation"
     )
     { }
 
@@ -41,11 +41,11 @@ namespace RhinoInside.Revit.GH.Components.Topology
       ),
       new ParamDefinition
       (
-        new Parameters.SpaceElement()
+        new Parameters.RoomElement()
         {
-          Name = "Space",
-          NickName = "S",
-          Description = "Space to tag.",
+          Name = "Room",
+          NickName = "R",
+          Description = "Room to tag.",
           Access = GH_ParamAccess.item
         }
       ),
@@ -65,9 +65,9 @@ namespace RhinoInside.Revit.GH.Components.Topology
         {
           Name = "Type",
           NickName = "T",
-          Description = "Space Tag type.",
+          Description = "Room Tag type.",
           Optional = true,
-          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_MEPSpaceTags
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_RoomTags
         }, ParamRelevance.Primary
       ),
     };
@@ -91,72 +91,72 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Space", out ARDB.Mechanical.Space space)) return;
+      if (!Params.GetData(DA, "Room", out ARDB.Architecture.Room room)) return;
 
-      ReconstructElement<ARDB.Mechanical.SpaceTag>
+      ReconstructElement<ARDB.Architecture.RoomTag>
       (
-        space.Document, _Tag_, (spaceTag) =>
+        room.Document, _Tag_, (roomTag) =>
         {
           // Input
           if (!Params.TryGetData(DA, "View", out ARDB.View view)) return null;
           if (!Params.TryGetData(DA, "Head Location", out Point3d? headLocation)) return null;
-          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.Mechanical.SpaceTagType type, Types.Document.FromValue(space.Document), ARDB.BuiltInCategory.OST_MEPSpaceTags)) return null;
+          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.Architecture.RoomTagType type, Types.Document.FromValue(room.Document), ARDB.BuiltInCategory.OST_RoomTags)) return null;
 
-          // Snap Point to the 'Space' 'Elevation'
-          var source = (space.Location as ARDB.LocationPoint).Point;
+          // Snap Point to the 'Room' 'Elevation'
+          var source = (room.Location as ARDB.LocationPoint).Point;
           var target = headLocation?.ToXYZ();
           target = new ARDB.XYZ(target?.X ?? source.X, target?.Y ?? source.Y, source.Z);
 
           // Compute
-          spaceTag = Reconstruct(spaceTag, view, space, target, type);
+          roomTag = Reconstruct(roomTag, view, room, target, type);
 
-          DA.SetData(_Tag_, spaceTag);
-          return spaceTag;
+          DA.SetData(_Tag_, roomTag);
+          return roomTag;
         }
       );
     }
 
-    bool Reuse(ARDB.Mechanical.SpaceTag spaceTag, ARDB.View view, ARDB.XYZ point, ARDB.Mechanical.SpaceTagType type)
+    bool Reuse(ARDB.Architecture.RoomTag roomTag, ARDB.View view, ARDB.XYZ point, ARDB.Architecture.RoomTagType type)
     {
-      if (spaceTag is null) return false;
-      if (view is object && !spaceTag.View.IsEquivalent(view)) return false;
-      if (type.Id != spaceTag.GetTypeId()) spaceTag.ChangeTypeId(type.Id);
-      if (spaceTag.Location is ARDB.LocationPoint areaTagLocation)
+      if (roomTag is null) return false;
+      if (view is object && !roomTag.View.IsEquivalent(view)) return false;
+      if (type.Id != roomTag.GetTypeId()) roomTag.ChangeTypeId(type.Id);
+      if (roomTag.Location is ARDB.LocationPoint areaTagLocation)
       {
         var target = point;
         var position = areaTagLocation.Point;
         if (!target.IsAlmostEqualTo(position))
         {
-          var pinned = spaceTag.Pinned;
-          spaceTag.Pinned = false;
+          var pinned = roomTag.Pinned;
+          roomTag.Pinned = false;
           areaTagLocation.Move(target - position);
-          spaceTag.Pinned = pinned;
+          roomTag.Pinned = pinned;
         }
       }
 
       return true;
     }
 
-    ARDB.Mechanical.SpaceTag Reconstruct(ARDB.Mechanical.SpaceTag spaceTag, ARDB.View view, ARDB.Mechanical.Space space, ARDB.XYZ headPosition, ARDB.Mechanical.SpaceTagType type)
+    ARDB.Architecture.RoomTag Reconstruct(ARDB.Architecture.RoomTag roomTag, ARDB.View view, ARDB.Architecture.Room room, ARDB.XYZ headPosition, ARDB.Architecture.RoomTagType type)
     {
-      var areaLocation = (space.Location as ARDB.LocationPoint).Point;
-      if (!Reuse(spaceTag, view, areaLocation, type))
-        spaceTag = space.Document.Create.NewSpaceTag
+      var areaLocation = (room.Location as ARDB.LocationPoint).Point;
+      if (!Reuse(roomTag, view, areaLocation, type))
+        roomTag = room.Document.Create.NewRoomTag
         (
-          space,
+          new ARDB.LinkElementId(room.Id),
           new ARDB.UV(areaLocation.X, areaLocation.Y),
-          view
+          view?.Id
         );
 
-      if (!spaceTag.TagHeadPosition.IsAlmostEqualTo(headPosition))
+      if (!roomTag.TagHeadPosition.IsAlmostEqualTo(headPosition))
       {
-        var pinned = spaceTag.Pinned;
-        spaceTag.Pinned = false;
-        spaceTag.TagHeadPosition = headPosition;
-        spaceTag.Pinned = pinned;
+        var pinned = roomTag.Pinned;
+        roomTag.Pinned = false;
+        roomTag.TagHeadPosition = headPosition;
+        roomTag.Pinned = pinned;
       }
 
-      return spaceTag;
+      return roomTag;
     }
   }
 }

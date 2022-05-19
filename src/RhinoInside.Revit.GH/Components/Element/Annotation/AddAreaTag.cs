@@ -7,13 +7,13 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Topology
+namespace RhinoInside.Revit.GH.Components.Element.Annotation
 {
   [ComponentVersion(introduced: "1.7")]
   public class AddAreaTag : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("FF951E5D-9316-4E68-8E19-86C8CCF9A3DF");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => string.Empty;
 
     public AddAreaTag() : base
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       nickname: "AreaTag",
       description: "Given a point, it adds an area tag to the given Area Plan",
       category: "Revit",
-      subCategory: "Topology"
+      subCategory: "Annotation"
     )
     { }
 
