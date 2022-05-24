@@ -6,6 +6,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   using static NumericTolerance;
 
+  internal static class CurveEqualityComparer
+  {
+    /// <summary>
+    /// IEqualityComparer for <see cref="Autodesk.Revit.DB.Curve"/>
+    /// that compares <see cref="Autodesk.Revit.DB.Curve.Reference"/>.
+    /// </summary>
+    public static readonly IEqualityComparer<Curve> Reference = default(ReferenceComparer);
+
+    struct ReferenceComparer : IEqualityComparer<Curve>
+    {
+      public bool Equals(Curve x, Curve y) => x.Reference.EqualTo(y.Reference);
+      public int GetHashCode(Curve obj) => obj.Reference.ElementId.IntegerValue;
+    }
+  }
+
   public static class CurveExtension
   {
     public static bool IsSameKindAs(this Curve self, Curve other)
@@ -14,109 +29,70 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     #region IsAlmostEqualTo
-    private static bool AreAlmostEqual(IList<XYZ> x, IList<XYZ> y, double toleance)
+    [Obsolete("Please use GeometryObjectExtension.AlmostEquals")]
+    public static bool IsAlmostEqualTo(this Curve left, Curve right, double tolerance = DefaultTolerance)
     {
-      var count = x.Count;
-      if (count != y.Count) return false;
-      for (int p = 0; p < count; ++p)
-      {
-        if (!x[p].IsAlmostEqualTo(y[p], toleance))
-          return false;
-      }
-
-      return true;
-    }
-
-    private static bool AreAlmostEqual(DoubleArray x, DoubleArray y, double toleance)
-    {
-      var count = x.Size;
-      if (count != y.Size) return false;
-      for (int p = 0; p < count; ++p)
-      {
-        if (!NumericTolerance.AreAlmostEqual(x.get_Item(p), y.get_Item(p), toleance))
-          return false;
-      }
-
-      return true;
-    }
-
-    public static bool IsAlmostEqualTo(this Line self, Line other, double tolerance = DefaultTolerance) =>
-      self.IsBound == other.IsBound &&
-      self.Origin.IsAlmostEqualTo(other.Origin, tolerance) &&
-      self.Direction.IsAlmostEqualTo(other.Direction, tolerance) &&
-      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance)) &&
-      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance));
-
-    public static bool IsAlmostEqualTo(this Arc self, Arc other, double tolerance = DefaultTolerance) =>
-      self.IsBound == other.IsBound &&
-      self.IsCyclic == other.IsCyclic &&
-      NumericTolerance.AreAlmostEqual(self.Radius, other.Radius, tolerance) &&
-      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance)) &&
-      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance)) &&
-      self.Center.IsAlmostEqualTo(other.Center, tolerance) &&
-      self.Normal.IsAlmostEqualTo(other.Normal, tolerance) &&
-      self.XDirection.IsAlmostEqualTo(other.XDirection, tolerance) &&
-      self.YDirection.IsAlmostEqualTo(other.YDirection, tolerance);
-
-    public static bool IsAlmostEqualTo(this Ellipse self, Ellipse other, double tolerance = DefaultTolerance) =>
-      self.IsBound == other.IsBound &&
-      self.IsCyclic == other.IsCyclic &&
-      self.Center.IsAlmostEqualTo(other.Center, tolerance) &&
-      self.Normal.IsAlmostEqualTo(other.Normal, tolerance) &&
-      self.XDirection.IsAlmostEqualTo(other.XDirection, tolerance) &&
-      self.YDirection.IsAlmostEqualTo(other.YDirection, tolerance) &&
-      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance)) &&
-      (!self.IsBound || NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance)) &&
-      NumericTolerance.AreAlmostEqual(self.RadiusX, other.RadiusX, tolerance) &&
-      NumericTolerance.AreAlmostEqual(self.RadiusY, other.RadiusY, tolerance);
-
-    public static bool IsAlmostEqualTo(this HermiteSpline self, HermiteSpline other, double tolerance = DefaultTolerance) =>
-      self.IsBound == other.IsBound &&
-      self.IsCyclic == other.IsCyclic &&
-      AreAlmostEqual(self.ControlPoints, other.ControlPoints, tolerance) &&
-      AreAlmostEqual(self.Tangents, other.Tangents, tolerance) &&
-      AreAlmostEqual(self.Parameters, other.Parameters, tolerance);
-
-    public static bool IsAlmostEqualTo(this NurbSpline self, NurbSpline other, double tolerance = DefaultTolerance) =>
-      self.IsBound == other.IsBound &&
-      self.IsCyclic == other.IsCyclic &&
-      self.Degree == other.Degree &&
-      self.isRational == other.isRational &&
-      AreAlmostEqual(self.CtrlPoints, other.CtrlPoints, tolerance) &&
-      AreAlmostEqual(self.Knots, other.Knots, tolerance) &&
-      AreAlmostEqual(self.Weights, other.Weights, tolerance);
-
-    public static bool IsAlmostEqualTo(this CylindricalHelix self, CylindricalHelix other, double tolerance = DefaultTolerance) =>
-      self.IsBound == other.IsBound &&
-      self.IsCyclic == other.IsCyclic &&
-      self.IsRightHanded == other.IsRightHanded &&
-      NumericTolerance.AreAlmostEqual(self.Height, other.Height, tolerance) &&
-      NumericTolerance.AreAlmostEqual(self.Pitch, other.Pitch, tolerance) &&
-      NumericTolerance.AreAlmostEqual(self.Radius, other.Radius, tolerance) &&
-      NumericTolerance.AreAlmostEqual(self.GetEndParameter(0), other.GetEndParameter(0), tolerance) &&
-      NumericTolerance.AreAlmostEqual(self.GetEndParameter(1), other.GetEndParameter(1), tolerance) &&
-      self.BasePoint.IsAlmostEqualTo(other.BasePoint, tolerance) &&
-      self.XVector.IsAlmostEqualTo(other.XVector, tolerance) &&
-      self.YVector.IsAlmostEqualTo(other.YVector, tolerance) &&
-      self.ZVector.IsAlmostEqualTo(other.ZVector, tolerance);
-
-    public static bool IsAlmostEqualTo(this Curve self, Curve other, double tolerance = DefaultTolerance)
-    {
-      if (!IsSameKindAs(self, other)) return false;
-
-      switch (self)
-      {
-        case Line selfLine: return IsAlmostEqualTo(selfLine, (Line) other, tolerance);
-        case Arc selfArc: return IsAlmostEqualTo(selfArc, (Arc) other, tolerance);
-        case Ellipse selfEllipse: return IsAlmostEqualTo(selfEllipse, (Ellipse) other, tolerance);
-        case HermiteSpline selfHermite: return IsAlmostEqualTo(selfHermite, (HermiteSpline) other, tolerance);
-        case NurbSpline selfNurb: return IsAlmostEqualTo(selfNurb, (NurbSpline) other, tolerance);
-        case CylindricalHelix selfHelix: return IsAlmostEqualTo(selfHelix, (CylindricalHelix) other, tolerance);
-      }
-
-      throw new NotImplementedException();
+      return GeometryObjectEqualityComparer.Comparer(tolerance).Equals(left, right);
     }
     #endregion
+
+    public static bool GetRawParameters(this Curve curve, out double min, out double max)
+    {
+      if (curve.IsBound)
+      {
+        min = curve.GetEndParameter(0);
+        max = curve.GetEndParameter(1);
+      }
+      else if (curve.IsCyclic)
+      {
+        min = 0.0;
+        max = curve.Period;
+      }
+      else switch (curve)
+      {
+        case Line line:
+          min = 0.0;
+          max = line.Direction.GetLength();
+          break;
+
+        case HermiteSpline hermite:
+          using (var parameters = hermite.Parameters)
+          {
+            min = parameters.get_Item(0);
+            max = parameters.get_Item(parameters.Size-1);
+          }
+          break;
+
+        case NurbSpline spline:
+          using (var knots = spline.Knots)
+          {
+            min = knots.get_Item(0);
+            max = + knots.get_Item(knots.Size-1);
+          }
+          break;
+
+        default:
+          throw new NotImplementedException($"{nameof(GetRawParameters)} is not implemented for {curve.GetType()}.");
+      }
+
+      return curve.IsBound;
+    }
+
+    public static double GetNormalizedParameter(this Curve curve, double rawParameter)
+    {
+      curve.GetRawParameters(out var min, out var max);
+      var mid = 0.5 * (min + max);
+      var factor = 1.0 / (max - min);
+      return rawParameter < mid ?
+        (rawParameter - min) * factor + 0.0 :
+        (rawParameter - max) * factor + 1.0;
+    }
+
+    public static double GetRawParameter(this Curve curve, double normalizedParameter)
+    {
+      curve.GetRawParameters(out var min, out var max);
+      return min + normalizedParameter * (max - min);
+    }
 
     public static IEnumerable<Curve> ToBoundedCurves(this Curve curve)
     {
@@ -255,7 +231,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var end = curve.GetEndPoint(1);
         var curveDirection = end - start;
 
-        if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, DenormalUpperBound))
+        if (!curveDirection.AlmostEquals(XYZ.Zero, 0D))
         {
           origin = start + (curveDirection * 0.5);
           basisX = curveDirection.Normalize(0D);

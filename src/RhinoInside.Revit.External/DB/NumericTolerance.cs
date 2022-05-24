@@ -15,31 +15,31 @@ namespace RhinoInside.Revit.External.DB
     public const double DefaultTolerance = 1e-9;
 
     /// <summary>
-    /// Represents the smallest number such that 1.0 + <see cref="MinDelta"/> != 1.0.
+    /// ε Represents the smallest positive <see cref="double"/> value that is greater than zero.
+    /// This field is constant.
+    /// </summary>
+    /// <remarks>
+    /// Same as <see cref="double.Epsilon"/> 4.94065645841247E-324
+    /// </remarks>
+    public const double Epsilon = double.Epsilon;
+
+    /// <summary>
+    /// υ Represents the smallest positive NORMAL <see cref="double"/> value.
+    /// This field is constant.
+    /// </summary>
+    /// <remarks>
+    /// Same as DBL_MIN +2.2250738585072014e-308
+    /// </remarks>
+    public const double Upsilon = 4.0 / double.MaxValue;
+
+    /// <summary>
+    /// δ Represents the smallest number such that 1.0 + <see cref="Delta"/> != 1.0.
     /// This field is constant.
     /// </summary>
     /// <remarks>
     /// Same as DBL_EPSILON 2.2204460492503131e-16
     /// </remarks>
-    public const double MinDelta = double.MaxValue * double.Epsilon / 4.0;
-
-    /// <summary>
-    /// Represents the smallest positive normalized finite representable value of a <see cref="double"/>.
-    /// This field is constant.
-    /// </summary>
-    /// <remarks>
-    /// Same as +DBL_MIN +2.2250738585072014e-308 
-    /// </remarks>
-    public const double DenormalUpperBound = 4.0 / double.MaxValue;
-
-    /// <summary>
-    /// Represents the largest negative normalized finite representable value of a <see cref="double"/>.
-    /// This field is constant.
-    /// </summary>
-    /// <remarks>
-    /// Same as -DBL_MIN -2.2250738585072014e-308 
-    /// </remarks>
-    public const double DenormalLowerBound = 4.0 / double.MinValue;
+    public const double Delta = double.MaxValue * double.Epsilon / 4.0;
 
     #region AreAlmostEqual
     /// <summary>
@@ -49,11 +49,11 @@ namespace RhinoInside.Revit.External.DB
     /// <param name="y">Second value</param>
     /// <param name="tolerance">The absolute accuracy required for being almost equal.</param>
     /// <returns>True if both doubles are almost equal up to the specified maximum absolute error, false otherwise.</returns>
-    public static bool AreAlmostEqual(double x, double y, double tolerance = DefaultTolerance)
+    public static bool AlmostEquals(double x, double y, double tolerance = DefaultTolerance)
     {
       if (double.IsInfinity(x) || double.IsInfinity(y))
         return x == y;
-    
+
       return Math.Abs(x - y) <= tolerance;
     }
     #endregion
