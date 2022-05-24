@@ -1741,6 +1741,19 @@ namespace RhinoInside.Revit.Convert.Geometry
       return ARDB.CurveLoop.Create(curve.ToCurveMany(UnitConverter.NoScale).ToList());
     }
 
+    internal static ARDB.CurveLoop ToBoundedCurveLoop(this Curve curve)
+    {
+      curve = curve.InOtherUnits(ModelScaleFactor);
+      curve.CombineShortSegments(Tolerance.ShortCurveTolerance);
+
+      return ARDB.CurveLoop.Create
+      (
+        curve.ToCurveMany(UnitConverter.NoScale).
+        SelectMany(CurveExtension.ToBoundedCurves).
+        ToList()
+      );
+    }
+
     /// <summary>
     /// Converts the specified <see cref="Curve" /> to an equivalent of <see cref="ARDB.CurveArray" />.
     /// </summary>

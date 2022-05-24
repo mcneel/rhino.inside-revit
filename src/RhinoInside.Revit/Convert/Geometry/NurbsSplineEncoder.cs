@@ -6,6 +6,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.Convert.Geometry
 {
   using Convert.System.Collections.Generic;
+  using External.DB;
 
   /// <summary>
   /// Converts <see cref="NurbsCurve"/> to be transfered to a <see cref="ARDB.NurbSpline"/>.
@@ -22,12 +23,12 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static double KnotPrevNotEqual(double max, double tol = 1.0000000E-9 * 1000.0)
     {
-      var value = max - tol - External.DB.NumericTolerance.MinDelta;
+      var value = max - tol - NumericTolerance.Delta;
 
       if (!NormalizedKnotAlmostEqualTo(max, value, tol))
         return value;
 
-      return max - (max * (tol + External.DB.NumericTolerance.MinDelta));
+      return max - (max * (tol + NumericTolerance.Delta));
     }
 
     static double[] ToDoubleArray(NurbsCurveKnotList list, int degree)

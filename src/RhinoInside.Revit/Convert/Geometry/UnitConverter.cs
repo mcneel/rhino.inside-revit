@@ -559,8 +559,8 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static GeometryObjectTolerance Page      => new GeometryObjectTolerance(UnitConverter.Page.UnitScale);
 
     #region AreAlmostEqual
-    public bool AreAlmostEqualAngles(double x, double y) => ERDB.NumericTolerance.AreAlmostEqual(x, y, AngleTolerance);
-    public bool AreAlmostEqualLengths(double x, double y) => ERDB.NumericTolerance.AreAlmostEqual(x, y, VertexTolerance);
+    public bool AreAlmostEqualAngles(double x, double y) => ERDB.NumericTolerance.AlmostEquals(x, y, AngleTolerance);
+    public bool AreAlmostEqualLengths(double x, double y) => ERDB.NumericTolerance.AlmostEquals(x, y, VertexTolerance);
     #endregion
   }
 }
