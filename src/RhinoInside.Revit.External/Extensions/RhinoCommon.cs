@@ -636,17 +636,18 @@ namespace Rhino.Geometry
         kinks.Add(t);
       }
 
-      if (kinks is null)
+
+      if (kinks is object && kinks.Count > 1 && curve.Split(kinks) is Curve[] segments)
       {
-        polyCurve = default;
-        return false;
+        polyCurve = new PolyCurve();
+        foreach (var segment in segments)
+          polyCurve.AppendSegment(segment);
+
+        return true;
       }
 
-      polyCurve = new PolyCurve();
-      foreach (var segment in curve.Split(kinks))
-        polyCurve.AppendSegment(segment);
-
-      return true;
+      polyCurve = default;
+      return false;
     }
 
     static bool TryEvaluateCurvature
