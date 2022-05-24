@@ -7,7 +7,7 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.Annotation
+namespace RhinoInside.Revit.GH.Components.Annotation
 {
   [ComponentVersion(introduced: "1.7")]
   public class AddAreaTag : ElementTrackerComponent
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
 
       ReconstructElement<ARDB.AreaTag>
       (
-        area.Document, _Tag_, (areaTag) =>
+        area.Document, _Tag_, areaTag =>
         {
           // Input
           if (!Params.TryGetData(DA, "View", out ARDB.ViewPlan viewPlan)) return null;
@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
     {
       if (areaTag is null) return false;
       if (view is object && !areaTag.View.IsEquivalent(view)) return false;
-      if (type.Id != areaTag.GetTypeId()) areaTag.ChangeTypeId(type.Id);
+      if (areaTag.GetTypeId() != type.Id) areaTag.ChangeTypeId(type.Id);
       if (areaTag.Location is ARDB.LocationPoint areaTagLocation)
       {
         var target = point;

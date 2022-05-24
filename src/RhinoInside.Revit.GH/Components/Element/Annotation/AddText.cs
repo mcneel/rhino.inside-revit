@@ -3,6 +3,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotation
@@ -33,16 +34,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         {
           Name = "View",
           NickName = "V",
-          Description = "View to add a specific text",
-        }
-      ),
-      new ParamDefinition
-      (
-        new Param_String
-        {
-          Name = "Text",
-          NickName = "T",
-          Description = "Text to add to the input view",
+          Description = "View to add the text",
         }
       ),
       new ParamDefinition
@@ -51,8 +43,28 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         {
           Name = "Point",
           NickName = "P",
-          Description = "Point to place a specific text",
+          Description = "Point to place the text",
         }
+      ),
+      new ParamDefinition
+      (
+        new Param_Number
+        {
+          Name = "Rotation",
+          NickName = "R",
+          Description = "Base line text rotation",
+          Optional = true,
+          AngleParameter = true,
+        }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Param_String
+        {
+          Name = "Content",
+          NickName = "C",
+          Description = "Text content",
+        }.SetDefaultVale("ABC")
       ),
       new ParamDefinition
       (
@@ -62,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           NickName = "W",
           Description = "Width of the text in paper space",
           Optional = true
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -70,8 +82,10 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         {
           Name = "Type",
           NickName = "T",
-          Description = "Element type of the given region"
-        }
+          Description = "Element type of the given text",
+          Optional = true,
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_TextNotes
+        }, ParamRelevance.Primary
       )
     };
 
@@ -97,25 +111,57 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
       ReconstructElement<ARDB.TextNote>
       (
-        view.Document, _Output_, (textNote) =>
+        view.Document, _Output_, textNote =>
         {
           // Input
-          if (!Params.GetData(DA, "Text", out string text)) return null;
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
+          if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
+          if (!Params.GetData(DA, "Content", out string text)) return null;
           if (!Params.TryGetData(DA, "Width", out double? width)) return null;
-          if (!Params.GetData(DA, "Type", out ARDB.TextNoteType type)) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.TextNoteType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.TextNoteType)) return null;
+
+          if (rotation.HasValue && Params.Input<Param_Number>("Rotation")?.UseDegrees == true)
+            rotation = Rhino.RhinoMath.ToRadians(rotation.Value);
 
           if
           (
-            view.ViewType is ARDB.ViewType.ThreeD ||
             view.ViewType is ARDB.ViewType.Schedule ||
             view.ViewType is ARDB.ViewType.ColumnSchedule ||
             view.ViewType is ARDB.ViewType.PanelSchedule
           )
-            throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
+            throw new Exceptions.RuntimeArgumentException("View", "This view does not support text notes creation", view);
+
+          width = GeometryEncoder.ToInternalLength(width ?? double.NaN);
+          var min = ARDB.TextElement.GetMinimumAllowedWidth(view.Document, type.Id);
+          var max = ARDB.TextElement.GetMaximumAllowedWidth(view.Document, type.Id);
+
+          if (width == 0.0) width = double.NaN;
+          else if (width < min)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Minimum allowed width for type '{type.Name}' is {GeometryDecoder.ToModelLength(min)} {GH_Format.RhinoUnitSymbol()}");
+            width = min;
+          }
+          else if(width > max)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Maximum allowed width for type '{type.Name}' is {GeometryDecoder.ToModelLength(max)} {GH_Format.RhinoUnitSymbol()}");
+            width = max;
+          }
+
+          var viewPlane = new Plane(view.Origin.ToPoint3d(), view.RightDirection.ToVector3d(), view.UpDirection.ToVector3d());
+          if (view.ViewType != ARDB.ViewType.ThreeD)
+            point = viewPlane.ClosestPoint(point.Value);
 
           // Compute
-          textNote = Reconstruct(textNote, view, point.Value.ToXYZ(), text, type.Id, width.HasValue ? width.Value : double.MinValue);
+          textNote = Reconstruct
+          (
+            textNote,
+            view,
+            point.Value.ToXYZ(),
+            rotation ?? 0.0,
+            text,
+            width.Value,
+            type
+          );
 
           DA.SetData(_Output_, textNote);
           return textNote;
@@ -123,42 +169,87 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       );
     }
 
-    bool Reuse(ARDB.TextNote textNote, ARDB.View view, ARDB.XYZ point, string text, ARDB.ElementId typeId, double width)
+    bool Reuse
+    (
+      ARDB.TextNote textNote, ARDB.View view,
+      ARDB.XYZ point, double rotation,
+      string text, double width,
+      ARDB.TextNoteType type
+    )
     {
       if (textNote is null) return false;
-
       if (textNote.OwnerViewId != view.Id) return false;
-      if (textNote.GetTypeId() != typeId) return false;
+      if (textNote.GetTypeId() != type.Id) textNote.ChangeTypeId(type.Id);
+      if (textNote.IsTextWrappingActive && double.IsNaN(width)) return false;
 
-      var plane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
-      var projectedPoint = plane.ClosestPoint(point.ToPoint3d());
-      if (!textNote.Coord.IsAlmostEqualTo(projectedPoint.ToXYZ()))
-        textNote.Coord = projectedPoint.ToXYZ();
+      if (!textNote.Coord.IsAlmostEqualTo(point))
+        textNote.Coord = point;
+
+      var currentRotation = textNote.BaseDirection.AngleOnPlaneTo(view.RightDirection, view.ViewDirection);
+      if (!GeometryObjectTolerance.Internal.AreAlmostEqualAngles(currentRotation, rotation))
+      {
+        var pinned = textNote.Pinned;
+        textNote.Pinned = false;
+        using (var axis = ARDB.Line.CreateUnbound(textNote.Coord, -view.ViewDirection))
+          ARDB.ElementTransformUtils.RotateElement(textNote.Document, textNote.Id, axis, rotation - currentRotation);
+        textNote.Pinned = pinned;
+      }
+
+      if (text[text.Length - 1] != '\r')
+        text += '\r';
 
       if (textNote.Text != text)
         textNote.Text = text;
 
-      if (width != double.MinValue)
-        if (textNote.Width != width)
-          textNote.Width = width;
+      if (!double.IsNaN(width) && textNote.Width != width)
+        textNote.Width = width;
       
       return true;
     }
 
-    ARDB.TextNote Create(ARDB.View view, ARDB.XYZ point, string text, ARDB.ElementId typeId, double width)
+    ARDB.TextNote Create
+    (
+      ARDB.View view,
+      ARDB.XYZ point, double rotation,
+      string text, double width,
+      ARDB.TextNoteType type
+    )
     {
-      var opts = new ARDB.TextNoteOptions(typeId);
+      using (var opts = new ARDB.TextNoteOptions(type.Id))
+      {
+        opts.HorizontalAlignment = ARDB.HorizontalTextAlignment.Center;
+        opts.VerticalAlignment = ARDB.VerticalTextAlignment.Middle;
+        opts.Rotation = rotation;
 
-      if (width == double.MinValue)
-        return ARDB.TextNote.Create(view.Document, view.Id, point, text, opts);
-      else
-        return ARDB.TextNote.Create(view.Document, view.Id, point, width, text, opts);
+        if (double.IsNaN(width))
+          return ARDB.TextNote.Create(view.Document, view.Id, point, text, opts);
+        else
+          return ARDB.TextNote.Create(view.Document, view.Id, point, width, text, opts);
+      }
     }
 
-    ARDB.TextNote Reconstruct(ARDB.TextNote textNote, ARDB.View view, ARDB.XYZ point, string text, ARDB.ElementId typeId, double width)
+    ARDB.TextNote Reconstruct
+    (
+      ARDB.TextNote textNote,
+      ARDB.View view,
+      ARDB.XYZ point,
+      double rotation,
+      string text,
+      double width,
+      ARDB.TextNoteType type
+    )
     {
-      if (!Reuse(textNote, view, point, text, typeId, width))
-        textNote = Create(view, point, text, typeId, width);
+      if (!Reuse(textNote, view, point, rotation, text, width, type))
+        textNote = Create(view, point, rotation, text, width, type);
+
+      if (textNote.LeaderLeftAttachment != ARDB.LeaderAtachement.Midpoint)
+        textNote.LeaderLeftAttachment = ARDB.LeaderAtachement.Midpoint;
+      if (textNote.LeaderRightAttachment != ARDB.LeaderAtachement.Midpoint)
+        textNote.LeaderRightAttachment = ARDB.LeaderAtachement.Midpoint;
+      if (textNote.HorizontalAlignment != ARDB.HorizontalTextAlignment.Center)
+        textNote.HorizontalAlignment = ARDB.HorizontalTextAlignment.Center;
+      if (textNote.VerticalAlignment != ARDB.VerticalTextAlignment.Middle)
+        textNote.VerticalAlignment = ARDB.VerticalTextAlignment.Middle;
 
       return textNote;
     }

@@ -7,7 +7,7 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.Annotation
+namespace RhinoInside.Revit.GH.Components.Annotation
 {
   [ComponentVersion(introduced: "1.7")]
   public class AddSpaceTag : ElementTrackerComponent
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
 
       ReconstructElement<ARDB.Mechanical.SpaceTag>
       (
-        space.Document, _Tag_, (spaceTag) =>
+        space.Document, _Tag_, spaceTag =>
         {
           // Input
           if (!Params.TryGetData(DA, "View", out ARDB.View view)) return null;
@@ -120,7 +120,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
     {
       if (spaceTag is null) return false;
       if (view is object && !spaceTag.View.IsEquivalent(view)) return false;
-      if (type.Id != spaceTag.GetTypeId()) spaceTag.ChangeTypeId(type.Id);
+      if (spaceTag.GetTypeId() != type.Id) spaceTag.ChangeTypeId(type.Id);
       if (spaceTag.Location is ARDB.LocationPoint areaTagLocation)
       {
         var target = point;

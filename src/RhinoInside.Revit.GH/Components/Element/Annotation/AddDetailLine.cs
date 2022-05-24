@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
       ReconstructElement<ARDB.DetailCurve>
       (
-        view.Document, _Output_, (detailCurve) =>
+        view.Document, _Output_, detailCurve =>
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve)) return null;
@@ -84,18 +84,20 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           )
             throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
 
+          var viewPlane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
           var tol = GeometryObjectTolerance.Model;
           if
           (
             curve.IsShort(tol.ShortCurveTolerance) ||
             curve.IsClosed ||
             !curve.TryGetPlane(out var plane, tol.VertexTolerance) ||
-            plane.ZAxis.IsParallelTo(view.ViewDirection.ToVector3d(), tol.AngleTolerance) == 0
+            plane.ZAxis.IsParallelTo(view.ViewDirection.ToVector3d(), tol.AngleTolerance) == 0 ||
+            (curve = Curve.ProjectToPlane(curve, viewPlane)) is null
           )
-            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid planar, open curve and perperdicular to the input view.", curve);
+            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid planar, open curve and parallel to the input view.", curve);
 
           // Compute
-          detailCurve = Reconstruct(detailCurve, view, curve);
+          detailCurve = Reconstruct(detailCurve, view, curve.ToCurve());
 
           DA.SetData(_Output_, detailCurve);
           return detailCurve;
@@ -103,30 +105,27 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       );
     }
 
-    bool Reuse(ARDB.DetailCurve detailCurve, ARDB.View view, Curve curve)
+    bool Reuse(ARDB.DetailCurve detailCurve, ARDB.View view, ARDB.Curve curve)
     {
       if (detailCurve is null) return false;
 
       if (detailCurve.OwnerViewId != view.Id) return false;
-      var plane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
 
-      using (var projectedCurve = Curve.ProjectToPlane(curve, plane).ToCurve())
-      {
-        if (!projectedCurve.IsAlmostEqualTo(detailCurve.GeometryCurve))
-          detailCurve.SetGeometryCurve(projectedCurve, overrideJoins: true);
-      }
+      if (!curve.AlmostEquals(detailCurve.GeometryCurve, detailCurve.Document.Application.VertexTolerance))
+        detailCurve.SetGeometryCurve(curve, overrideJoins: true);
 
       return true;
     }
 
-    ARDB.DetailCurve Create(ARDB.View view, Curve curve)
+    ARDB.DetailCurve Create(ARDB.View view, ARDB.Curve curve)
     {
-      var plane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
-      var projectedCurve = Curve.ProjectToPlane(curve, plane).ToCurve();
-      return view.Document.Create.NewDetailCurve(view, projectedCurve);
+      if (view.Document.IsFamilyDocument)
+        return view.Document.FamilyCreate.NewDetailCurve(view, curve);
+      else
+        return view.Document.Create.NewDetailCurve(view, curve);
     }
 
-    ARDB.DetailCurve Reconstruct(ARDB.DetailCurve detailCurve, ARDB.View view, Curve curve)
+    ARDB.DetailCurve Reconstruct(ARDB.DetailCurve detailCurve, ARDB.View view, ARDB.Curve curve)
     {
       if (!Reuse(detailCurve, view, curve))
         detailCurve = Create(view, curve);

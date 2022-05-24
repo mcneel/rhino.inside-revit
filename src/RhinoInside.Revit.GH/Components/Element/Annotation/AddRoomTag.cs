@@ -7,7 +7,7 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.Annotation
+namespace RhinoInside.Revit.GH.Components.Annotation
 {
   [ComponentVersion(introduced: "1.7")]
   public class AddRoomTag : ElementTrackerComponent
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
 
       ReconstructElement<ARDB.Architecture.RoomTag>
       (
-        room.Document, _Tag_, (roomTag) =>
+        room.Document, _Tag_, roomTag =>
         {
           // Input
           if (!Params.TryGetData(DA, "View", out ARDB.View view)) return null;
@@ -120,7 +120,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
     {
       if (roomTag is null) return false;
       if (view is object && !roomTag.View.IsEquivalent(view)) return false;
-      if (type.Id != roomTag.GetTypeId()) roomTag.ChangeTypeId(type.Id);
+      if (roomTag.GetTypeId() != type.Id) roomTag.ChangeTypeId(type.Id);
       if (roomTag.Location is ARDB.LocationPoint areaTagLocation)
       {
         var target = point;

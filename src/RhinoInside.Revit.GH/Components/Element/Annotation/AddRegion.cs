@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotation
@@ -55,8 +56,9 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           Name = "Type",
           NickName = "T",
           Description = "Element type of the given region",
+          Optional = true,
           SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_FilledRegion
-        }
+        }, ParamRelevance.Primary
       )
     };
 
@@ -82,11 +84,11 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
       ReconstructElement<ARDB.FilledRegion>
       (
-        view.Document, _Output_, (region) =>
+        view.Document, _Output_, region =>
         {
           // Input
           if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary) || boundary.Count == 0) return null;
-          if (!Params.GetData(DA, "Type", out ARDB.FilledRegionType type)) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.FilledRegionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.FilledRegionType)) return null;
 
           if
           (
@@ -103,16 +105,19 @@ namespace RhinoInside.Revit.GH.Components.Annotation
             if (loop is null) return null;
             if
             (
-            loop.IsShort(tol.ShortCurveTolerance) ||
-            !loop.IsClosed ||
-            !loop.TryGetPlane(out var plane, tol.VertexTolerance) ||
-            plane.ZAxis.IsParallelTo(view.ViewDirection.ToVector3d(), tol.AngleTolerance) == 0
+              loop.IsShort(tol.ShortCurveTolerance) ||
+              !loop.IsClosed ||
+              !loop.TryGetPlane(out var plane, tol.VertexTolerance) ||
+              plane.ZAxis.IsParallelTo(view.ViewDirection.ToVector3d(), tol.AngleTolerance) == 0
             )
               throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid planar, closed curve and perperdicular to the input view.", loop);
           }
-          
+
+          var viewPlane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
+          boundary = boundary.Select(x => Curve.ProjectToPlane(x, viewPlane)).ToList();
+
           // Compute
-          region = Reconstruct(region, view, type.Id, boundary);
+          region = Reconstruct(region, view, boundary.Select(GeometryEncoder.ToBoundedCurveLoop).ToArray(), type);
 
           DA.SetData(_Output_, region);
           return region;
@@ -120,44 +125,60 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       );
     }
 
-    bool Reuse(ARDB.FilledRegion region, ARDB.View view, ARDB.ElementId typeId, IList<Curve> boundaries)
+    public static IList<IList<ARDB.ModelCurve>> GetAllModelCurves(ARDB.FilledRegion region)
     {
-      if (region is null) return false;
+      var boundaries = region.GetBoundaries();
+      var modelCurves = new IList<ARDB.ModelCurve>[boundaries.Count];
 
-      if (region.OwnerViewId != view.Id) return false;
-      if (region.GetTypeId() != typeId) return false;
-
-      var pi = 0;
-      var tol = GeometryObjectTolerance.Model;
-      var profiles = region.GetBoundaries() as List<ARDB.CurveLoop>;
-      if (profiles.Count != boundaries.Count)
-        return false;
-
+      var loopIndex = 0;
       foreach (var boundary in boundaries)
       {
-        var profile = GeometryDecoder.ToCurve(profiles[pi]);
-        if (!Curve.GetDistancesBetweenCurves(profile, boundary, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
-            max > tol.VertexTolerance)
-        {
+        modelCurves[loopIndex++] = boundary.Cast<ARDB.Curve>().
+          Distinct(CurveEqualityComparer.Reference).
+          Select(x => region.Document.GetElement(x.Reference.ElementId) as ARDB.ModelCurve).
+          ToArray();
+      }
+
+      return modelCurves;
+    }
+
+    bool Reuse(ARDB.FilledRegion region, ARDB.View view, IList<ARDB.CurveLoop> boundaries, ARDB.FilledRegionType type)
+    {
+      if (region is null) return false;
+      if (region.OwnerViewId != view.Id) return false;
+
+      var sourceBoundaries = region.GetBoundaries();
+      if (sourceBoundaries.Count != boundaries.Count)
+        return false;
+
+      var comparer = GeometryObjectEqualityComparer.Comparer(region.Document.Application.VertexTolerance);
+      for(int l = 0; l < sourceBoundaries.Count; ++l)
+      {
+        var sourceBondary = sourceBoundaries[l];
+        var targetBoundary = boundaries[l];
+        if (sourceBondary.NumberOfCurves() != targetBoundary.NumberOfCurves())
           return false;
+
+        foreach (var pair in sourceBondary.Zip(targetBoundary, (Source, Target) => (Source, Target)))
+        {
+          if (!comparer.Equals(pair.Source, pair.Target))
+            return false;
         }
-        pi++;
       }
       
+      if (region.GetTypeId() != type.Id) region.ChangeTypeId(type.Id);
       return true;
     }
 
-    ARDB.FilledRegion Create(ARDB.View view, ARDB.ElementId typeId, IList<Curve> boundary)
+    ARDB.FilledRegion Create(ARDB.View view, IList<ARDB.CurveLoop> boundaries, ARDB.FilledRegionType type)
     {
-      var plane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
-      var loops = boundary.Select(x => Curve.ProjectToPlane(x, plane).ToCurveLoop()).ToList();
-      return ARDB.FilledRegion.Create(view.Document, typeId, view.Id, loops);
+      return ARDB.FilledRegion.Create(view.Document, type.Id, view.Id, boundaries);
     }
 
-    ARDB.FilledRegion Reconstruct(ARDB.FilledRegion region, ARDB.View view, ARDB.ElementId typeId, IList<Curve> boundaries)
+    ARDB.FilledRegion Reconstruct(ARDB.FilledRegion region, ARDB.View view, IList<ARDB.CurveLoop> boundaries, ARDB.FilledRegionType type)
     {
-      if (!Reuse(region, view, typeId, boundaries))
-        region = Create(view, typeId, boundaries);
+      if (!Reuse(region, view, boundaries, type))
+        region = Create(view, boundaries, type);
 
       return region;
     }
