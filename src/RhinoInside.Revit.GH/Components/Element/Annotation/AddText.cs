@@ -218,7 +218,9 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       using (var opts = new ARDB.TextNoteOptions(type.Id))
       {
         opts.HorizontalAlignment = ARDB.HorizontalTextAlignment.Center;
+#if REVIT_2019
         opts.VerticalAlignment = ARDB.VerticalTextAlignment.Middle;
+#endif
         opts.Rotation = rotation;
 
         if (double.IsNaN(width))
@@ -248,8 +250,10 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         textNote.LeaderRightAttachment = ARDB.LeaderAtachement.Midpoint;
       if (textNote.HorizontalAlignment != ARDB.HorizontalTextAlignment.Center)
         textNote.HorizontalAlignment = ARDB.HorizontalTextAlignment.Center;
+#if REVIT_2019
       if (textNote.VerticalAlignment != ARDB.VerticalTextAlignment.Middle)
         textNote.VerticalAlignment = ARDB.VerticalTextAlignment.Middle;
+#endif
 
       return textNote;
     }
