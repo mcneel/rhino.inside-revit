@@ -49,12 +49,17 @@ namespace RhinoInside.Revit.GH.Types
           if (tag.HasLeader)
           {
             var end = tag.LeaderEnd.ToPoint3d();
+#if REVIT_2018
             if (tag.HasElbow)
             {
               var elbow = tag.LeaderElbow.ToPoint3d();
               args.Pipeline.DrawPolyline(new Point3d[] { head, elbow, end }, args.Color);
             }
-            else args.Pipeline.DrawLine(new Line(head, end), args.Color);
+            else
+#endif
+            {
+              args.Pipeline.DrawLine(new Line(head, end), args.Color);
+            }
           }
         }
 
@@ -82,7 +87,9 @@ namespace RhinoInside.Revit.GH.Types
             autoScaleForDpi: false
           );
         }
+#if REVIT_2018
         else args.Pipeline.DrawDot(head, tag.TagText, args.Color, System.Drawing.Color.White);
+#endif
       }
     }
   }

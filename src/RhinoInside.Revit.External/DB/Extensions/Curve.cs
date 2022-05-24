@@ -16,7 +16,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     struct ReferenceComparer : IEqualityComparer<Curve>
     {
+#if REVIT_2018
       public bool Equals(Curve x, Curve y) => x.Reference.EqualTo(y.Reference);
+#else
+      public bool Equals(Curve x, Curve y) => throw new NotImplementedException();
+#endif
       public int GetHashCode(Curve obj) => obj.Reference.ElementId.IntegerValue;
     }
   }
