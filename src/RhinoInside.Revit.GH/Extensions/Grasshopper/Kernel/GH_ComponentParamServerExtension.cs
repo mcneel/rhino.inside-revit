@@ -90,7 +90,7 @@ namespace Grasshopper.Kernel
       value = default;
 
       var index = parameters.Input.IndexOf(name, out var param);
-      if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
+      if (param?.DataType > GH_ParamData.@void)
       {
         if (!DA.GetData(index, ref value)) { value = default; return false; }
         return Requires(parameters.Owner, DA, index, value.Value, predicate);
@@ -105,7 +105,7 @@ namespace Grasshopper.Kernel
       value = default;
 
       var index = parameters.Input.IndexOf(name, out var param);
-      if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
+      if (param?.DataType > GH_ParamData.@void)
       {
         if (!DA.GetData(index, ref value)) { value = default; return false; }
         return Requires(parameters.Owner, DA, index, value, predicate);
