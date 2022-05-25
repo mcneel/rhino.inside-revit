@@ -176,12 +176,10 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
 
     public ARDB.ReferenceArray GetReferences(ARDB.Document doc, IList<ARDB.Element> elements)
     {
-      // Get assembly ElementIDs from members
       ICollection<ARDB.ElementId> AssElemIds = elements.Select(x => x.Id).ToList();
       ARDB.ReferenceArray ra = new ARDB.ReferenceArray();
       foreach (ARDB.ElementId aeId in AssElemIds)
       {
-        //cast ElementID to Element
         ARDB.Element ae = doc.GetElement(aeId);
         ARDB.FamilyInstance fmly = ae as ARDB.FamilyInstance;
         if (null != fmly)
@@ -189,7 +187,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
           switch (fmly.Category.Id.IntegerValue)
           {
             case ((int) ARDB.BuiltInCategory.OST_Columns):
-              ARDB.Reference refCol = fmly.GetReferenceByName(fmly.Category.Name);
+              ARDB.Reference refCol = fmly.GetReferenceByName("Center (Left/Right)");
               ra.Append(refCol);
               break;
             case ((int) ARDB.BuiltInCategory.OST_StructuralFraming):
