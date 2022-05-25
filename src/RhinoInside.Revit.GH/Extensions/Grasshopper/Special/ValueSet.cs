@@ -29,7 +29,7 @@ namespace Grasshopper.Special
   /// </remarks>
   struct GooEqualityComparer : IEqualityComparer<IGH_Goo>
   {
-    static bool IsEquatable(Type value) => value?.GetInterfaces().Any
+    static bool IsEquatable(Type type) => type?.GetInterfaces().Any
     (
       i =>
       i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEquatable<>)
@@ -47,8 +47,8 @@ namespace Grasshopper.Special
         goo?.ScriptVariable() is object obj &&
         (
           IsEquatable(obj.GetType()) ||
-          obj is ValueType ||
-          obj is IComparable
+          obj is IComparable ||
+          obj is ValueType
         )
       );
     }
@@ -68,23 +68,22 @@ namespace Grasshopper.Special
           return dynX.Equals(dynY);
         }
 
-        if (x is IGH_QuickCast qcX && y is IGH_QuickCast qcY)
-          return qcX.QC_CompareTo(qcY) == 0;
-
         if (x is IGH_GeometricGoo geoX && y is IGH_GeometricGoo geoY)
         {
           if (geoX.IsReferencedGeometry || geoY.IsReferencedGeometry)
             return geoX.ReferenceID == geoY.ReferenceID;
+        }
+        else
+        {
+          if (x is GH_StructurePath pathX && y is GH_StructurePath pathY)
+            return pathX.Value == pathY.Value;
 
-          if (geoX.ScriptVariable() is Rhino.Geometry.GeometryBase geometryX && geoY.ScriptVariable() is Rhino.Geometry.GeometryBase geometryY)
-            return Rhino.Geometry.GeometryBase.GeometryEquals(geometryX, geometryY);
+          if (x is GH_Culture cultureX && y is GH_Culture cultureY)
+            return cultureX.Value == cultureY.Value;
         }
 
-        if (x is GH_StructurePath pathX && y is GH_StructurePath pathY)
-          return pathX.Value == pathY.Value;
-
-        if (x is GH_Culture cultureX && y is GH_Culture cultureY)
-          return cultureX.Value == cultureY.Value;
+        if (x is IGH_QuickCast qcX && y is IGH_QuickCast qcY)
+          return qcX.QC_CompareTo(qcY) == 0;
 
         if (x is IComparable cX && y is IComparable cY)
           return cX.CompareTo(cY) == 0;
@@ -99,8 +98,18 @@ namespace Grasshopper.Special
 
     static bool ScriptVariableEquals(object x, object y)
     {
-      if (x.GetType() is Type typeX && y.GetType() is Type typeY && typeX == typeY)
+      if (ReferenceEquals(x, y)) return true;
+      if (x is null) return false;
+      if (y is null) return false;
+
+      var typeX = x.GetType();
+      var typeY = y.GetType();
+
+      if (typeX == typeY)
       {
+        if (x is Rhino.Geometry.GeometryBase geometryX && y is Rhino.Geometry.GeometryBase geometryY)
+          return Rhino.Geometry.GeometryBase.GeometryEquals(geometryX, geometryY);
+
         if (IsEquatable(typeX))
         {
           dynamic dynX = x, dynY = y;
@@ -117,38 +126,38 @@ namespace Grasshopper.Special
       return false;
     }
 
-    public int GetHashCode(IGH_Goo obj)
+    public int GetHashCode(IGH_Goo goo)
     {
-      if (obj is null)
+      if (goo is null)
         return 0;
 
-      if (IsEquatable(obj.GetType()))
-        return obj.GetHashCode();
+      if (IsEquatable(goo.GetType()))
+        return goo.GetHashCode();
 
-      if (obj is IGH_GeometricGoo geo && geo.IsReferencedGeometry)
+      if (goo is IGH_GeometricGoo geo && geo.IsReferencedGeometry)
         return geo.ReferenceID.GetHashCode();
 
-      if (obj is IGH_QuickCast qc)
+      if (goo is IGH_QuickCast qc)
         return qc.QC_Hash();
 
-      if (obj is GH_StructurePath path)
+      if (goo is GH_StructurePath path)
         return path.Value.GetHashCode();
 
-      if (obj is GH_Culture culture)
+      if (goo is GH_Culture culture)
         return culture.Value.LCID;
 
-      if (obj is IComparable comparableGoo)
+      if (goo is IComparable comparableGoo)
         return comparableGoo.GetHashCode();
 
-      if (obj.ScriptVariable() is object o)
+      if (goo.ScriptVariable() is object obj)
       {
-        if (o is IComparable comparable)
+        if (IsEquatable(obj.GetType()))
+          return obj.GetHashCode();
+
+        if (obj is IComparable comparable)
           return comparable.GetHashCode();
 
-        if (IsEquatable(o.GetType()))
-          return o.GetHashCode();
-
-        if (o is ValueType value)
+        if (obj is ValueType value)
           return value.GetHashCode();
       }
 
