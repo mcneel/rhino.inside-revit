@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -163,15 +164,60 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
       Line line;
       if (this.IsHorizontal) line = new Line(projectedPoint, plane.XAxis);
       else  line = new Line(projectedPoint, plane.YAxis);
-      
-      var references = new ARDB.ReferenceArray();
-      foreach (ARDB.Element element in elements)
-        references.Append(new ARDB.Reference(element));
+
+      var references = this.GetReferences(view.Document, elements);      
 
       if (type == default)
         return view.Document.Create.NewDimension(view, line.ToLine(), references);
       else
         return view.Document.Create.NewDimension(view, line.ToLine(), references, type);
+
+    }
+
+    public ARDB.ReferenceArray GetReferences(ARDB.Document doc, IList<ARDB.Element> elements)
+    {
+      // Get assembly ElementIDs from members
+      ICollection<ARDB.ElementId> AssElemIds = elements.Select(x => x.Id).ToList();
+      ARDB.ReferenceArray ra = new ARDB.ReferenceArray();
+      foreach (ARDB.ElementId aeId in AssElemIds)
+      {
+        //cast ElementID to Element
+        ARDB.Element ae = doc.GetElement(aeId);
+        ARDB.FamilyInstance fmly = ae as ARDB.FamilyInstance;
+        if (null != fmly)
+        {
+          switch (fmly.Category.Id.IntegerValue)
+          {
+            case ((int) ARDB.BuiltInCategory.OST_Columns):
+              ARDB.Reference refCol = fmly.GetReferenceByName(fmly.Category.Name);
+              ra.Append(refCol);
+              break;
+            case ((int) ARDB.BuiltInCategory.OST_StructuralFraming):
+              ARDB.Reference refBeamCen = fmly.GetReferenceByName("Center (Left/Right)");
+              ra.Append(refBeamCen);
+              break;
+            case ((int) ARDB.BuiltInCategory.OST_StructuralColumns):
+              ARDB.Reference refColCen = fmly.GetReferenceByName("Center (Left/Right)");
+              ra.Append(refColCen);
+              break;
+            case ((int) ARDB.BuiltInCategory.OST_GenericModel):
+              ARDB.Reference refGMCen = fmly.GetReferenceByName("Center (Left/Right)");
+              ra.Append(refGMCen);
+              break;
+            case ((int) ARDB.BuiltInCategory.OST_StructConnections):
+              ARDB.Reference refSCCen = fmly.GetReferenceByName("Center (Left/Right)");
+              ra.Append(refSCCen);
+              break;
+          }
+        }
+        else
+        {
+          var ele = doc.GetElement(aeId);
+          ra.Append(new ARDB.Reference(ele));
+        }
+
+      }
+      return ra;
 
     }
 
@@ -184,4 +230,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
     }
 
   }
+
+
 }
+
