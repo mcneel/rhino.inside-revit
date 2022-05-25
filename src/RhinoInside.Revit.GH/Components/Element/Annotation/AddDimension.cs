@@ -115,7 +115,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
       if (dimension.OwnerViewId != view.Id) return false;
       if (type != default && dimension.GetTypeId() != type.Id) return false;
 
-      //Point
       var plane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
       var projectedPoint = plane.ClosestPoint(point);
       var curve = dimension.Curve.ToCurve();
