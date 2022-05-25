@@ -613,6 +613,9 @@ namespace RhinoInside.Revit.GH.Components
     EventHandler<DialogBoxShowingEventArgs> dialogBoxShowing = null;
 
     // Step 2.1
+    public virtual bool OnStart(ARDB.Document document) => true;
+
+    // Step 2.2
     public virtual void OnStarted(ARDB.Document document) { }
 
     // Step 3.1

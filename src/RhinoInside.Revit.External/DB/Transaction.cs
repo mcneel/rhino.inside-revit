@@ -112,8 +112,29 @@ namespace RhinoInside.Revit.External.DB
 
   public interface ITransactionNotification
   {
+    /// <summary>
+    /// This method is called before start a transaction.
+    /// </summary>
+    /// <param name="document">The document associated with the transaction.</param>
+    /// <returns>True to allow a new transacion on <paramref name="document"/> or false to prevent it.</returns>
+    bool OnStart(Document document);
+
+    /// <summary>
+    /// This method is called after a transaction is started.
+    /// </summary>
+    /// <param name="document">The document associated with the transaction.</param>
     void OnStarted(Document document);
+
+    /// <summary>
+    /// This method is called before committing the transaction chain.
+    /// </summary>
+    /// <param name="documents">Documents associated with the transaction chain.</param>
     void OnPrepare(IReadOnlyCollection<Document> documents);
+
+    /// <summary>
+    /// This method is called at the end the transaction chain even no transaction is started.
+    /// </summary>
+    /// <param name="status">Status of the whole transaction chain.</param>
     void OnDone(TransactionStatus status);
   }
 
@@ -232,7 +253,9 @@ namespace RhinoInside.Revit.External.DB
             SetTransactionFinalizer(this)
           );
 
-          result = transaction.Start();
+          result = HandlingOptions.TransactionNotification?.OnStart(doc) ?? true ?
+            transaction.Start() : TransactionStatus.Uninitialized;
+
           if (result != TransactionStatus.Started)
           {
             transaction.Dispose();
@@ -247,6 +270,10 @@ namespace RhinoInside.Revit.External.DB
         {
           transaction.Dispose();
           throw e;
+        }
+        finally
+        {
+          HandlingOptions.TransactionNotification?.OnDone(result);
         }
       }
 
