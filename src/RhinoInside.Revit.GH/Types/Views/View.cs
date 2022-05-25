@@ -271,6 +271,23 @@ namespace RhinoInside.Revit.GH.Types
         new Interval(uv.Min.Y, uv.Max.Y)
       );
     }
+
+    #region Properties
+    public Phase Phase
+    {
+      get => Phase.FromElementId(Document, Value.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ARDB.ElementId.InvalidElementId) as Phase;
+      set
+      {
+        if (value is object && Value is ARDB.View view)
+        {
+          AssertValidDocument(value, nameof(Type));
+          InvalidateGraphics();
+
+          view.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.Update(value.Id);
+        }
+      }
+    }
+    #endregion
   }
 
   [Kernel.Attributes.Name("View Type")]
