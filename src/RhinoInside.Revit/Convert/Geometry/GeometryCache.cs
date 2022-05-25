@@ -56,6 +56,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     internal struct GeometrySignature : IEquatable<GeometrySignature>
     {
+      readonly int HashCode;
       readonly byte[] hash;
 
       internal GeometrySignature(GeometryBase geometry, double factor)
@@ -83,7 +84,14 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
 
           using (var sha1 = new SHA1Managed())
-            hash = sha1.ComputeHash(stream.GetBuffer());
+          {
+            var buffer = stream.GetBuffer();
+            hash = sha1.ComputeHash(buffer);
+
+            HashCode = buffer.Length;
+            for (int i = 0; i < hash.Length; ++i)
+              HashCode = HashCode * -1521134295 + (int) hash[i];
+          }
         }
       }
 
@@ -105,6 +113,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         if (ReferenceEquals(x, y)) return true;
         if (x is null || y is null) return false;
+        if (x.GetHashCode() != y.GetHashCode()) return false;
 
         var length = x.Length;
         if (length != y.Length) return false;
@@ -115,27 +124,12 @@ namespace RhinoInside.Revit.Convert.Geometry
         return true;
       }
 
-      public override int GetHashCode()
-      {
-        int code = 0;
-
-        if (hash is object)
-        {
-          for (int i = 0; i < hash.Length; ++i)
-          {
-            var value = (int) hash[i];
-            code ^= (value << 5) + value;
-          }
-        }
-
-        return code;
-      }
+      public override int GetHashCode() => HashCode;
 
       public static bool operator false(GeometrySignature signature) => signature.hash is null;
       public static bool operator true(GeometrySignature signature) => signature.hash is object;
 
       public static implicit operator bool(GeometrySignature signature) => signature.hash is object;
-
 
       static readonly GeometryObjectTolerance Tolerance = GeometryObjectTolerance.Internal;
       static int RoundNormalizedKnot(double value) => (int) Math.Round(value * 1e+9);
