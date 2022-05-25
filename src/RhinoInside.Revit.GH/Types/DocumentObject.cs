@@ -114,7 +114,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected internal bool AssertValidDocument(DocumentObject other, string paramName)
     {
-      if (other.Document is null) return false;
+      if (other?.Document is null) return false;
       if (other.Document.Equals(Document)) return true;
 
       throw new Exceptions.RuntimeArgumentException(paramName, "Invalid Document");
