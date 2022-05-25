@@ -203,11 +203,13 @@ namespace RhinoInside.Revit.External
           }
 
           isOpen = true;
-          enter?.Invoke(TopState, EventArgs.Empty);
+          try { enter?.Invoke(TopState, EventArgs.Empty); }
+          catch { }
         }
         else
         {
-          exit?.Invoke(TopState, EventArgs.Empty);
+          try { exit?.Invoke(TopState, EventArgs.Empty); }
+          catch { }
           isOpen = false;
         }
       }
