@@ -5,15 +5,26 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.Annotation
 {
   [ComponentVersion(introduced: "1.8")]
-  public abstract class AddDimension : ElementTrackerComponent
+  public abstract class AddLinearDimension : ElementTrackerComponent
   {
-    protected AddDimension(string name, string nickname, string description, string category, string subCategory) :
-      base(name, nickname, description, category, subCategory)
+    public override Guid ComponentGuid => new Guid("DF47C980-EF08-4BBE-A624-C956C07B04EC");
+    public override GH_Exposure Exposure => GH_Exposure.primary;
+    protected override string IconTag => string.Empty;
+
+    public AddLinearDimension() : base
+    (
+      name: "Add Linear Dimension",
+      nickname: "LineDim",
+      description: "Given a line, it adds a linear dimension to the given View",
+      category: "Revit",
+      subCategory: "Annotation"
+    )
     { }
 
     protected override ParamDefinition[] Inputs => inputs;
@@ -30,16 +41,16 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
       ),
       new ParamDefinition
       (
-        new Param_Point
+        new Param_Line
         {
-          Name = "Point",
-          NickName = "P",
-          Description = "Point to place a specific dimension",
+          Name = "Line",
+          NickName = "L",
+          Description = "Line to place a specific dimension",
         }
       ),
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.GraphicalElement()
         {
           Name = "References",
           NickName = "R",
@@ -75,7 +86,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
     };
 
     const string _Output_ = "Dimension";
-    protected virtual bool IsHorizontal { get; }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -83,12 +93,12 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
 
       ReconstructElement<ARDB.Dimension>
       (
-        view.Document, _Output_, (dimension) =>
+        view.Document, _Output_, dimension =>
         {
           // Input
-          if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
-          if (!Params.TryGetData(DA, "Type", out ARDB.DimensionType type)) return null;
+          if (!Params.GetData(DA, "Line", out Line? line)) return null;
           if (!Params.GetDataList(DA, "References", out IList<ARDB.Element> elements)) return null;
+          if (!Params.TryGetData(DA, "Type", out ARDB.DimensionType type)) return null;
 
           if
           (
@@ -99,8 +109,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
           )
             throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
 
+          var viewPlane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
+          line = new Line(viewPlane.ClosestPoint(line.Value.From), viewPlane.ClosestPoint(line.Value.To));
+
           // Compute
-          dimension = Reconstruct(dimension, view, point.Value, elements, type);
+          dimension = Reconstruct(dimension, view, line.Value.ToLine(), elements, type);
 
           DA.SetData(_Output_, dimension);
           return dimension;
@@ -108,129 +121,90 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
       );
     }
 
-    bool Reuse(ARDB.Dimension dimension, ARDB.View view, Point3d point, IList<ARDB.Element> elements, ARDB.DimensionType type)
+    static bool Contains(ARDB.ReferenceArray references, ARDB.ElementId value)
+    {
+      foreach (var reference in references.Cast<ARDB.Reference>())
+        if (reference.ElementId == value)
+          return true;
+
+      return false;
+    }
+
+    bool Reuse(ARDB.Dimension dimension, ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
     {
       if (dimension is null) return false;
-
       if (dimension.OwnerViewId != view.Id) return false;
-      if (type != default && dimension.GetTypeId() != type.Id) return false;
+      if (type != default && type.Id != dimension.GetTypeId()) return false;
 
-      //Point
-      var plane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
-      var projectedPoint = plane.ClosestPoint(point);
-      var curve = dimension.Curve.ToCurve();
+      // Line
+      if (!dimension.Curve.IsAlmostEqualTo(line)) return false;
 
-      if (this.IsHorizontal)
+      // Elements
+      var currentReference = dimension.References;
+      if (currentReference.Size != elements.Count) return false;
+
+      foreach (var element in elements)
       {
-        if (Math.Abs(curve.PointAt(0).Y - projectedPoint.Y) > GeometryObjectTolerance.Model.VertexTolerance ||
-            Math.Abs(curve.PointAt(0).Z - projectedPoint.Z) > GeometryObjectTolerance.Model.VertexTolerance)
+        if (!Contains(currentReference, element.Id))
           return false;
       }
-      else
-      {
-        if (Math.Abs(curve.PointAt(0).X - projectedPoint.X) > GeometryObjectTolerance.Model.VertexTolerance ||
-            Math.Abs(curve.PointAt(0).Z - projectedPoint.Z) > GeometryObjectTolerance.Model.VertexTolerance)
-          return false;
-      }
-
-      //Elements
-      if (dimension.References.Size != elements.Count) return false;
-      foreach (ARDB.Element element in elements)
-      {
-        var isInReferences = false;
-
-        for (int i = 0; i < dimension.References.Size; i++)
-        {
-          if (dimension.References.get_Item(i).ElementId == element.Id)
-          {
-            isInReferences = true;
-            break;
-          }
-        }
-          
-        
-        if (isInReferences == false) return false;
-      }
-
 
       return true;
     }
 
-    ARDB.Dimension Create(ARDB.View view, Point3d point, IList<ARDB.Element> elements, ARDB.DimensionType type)
+    ARDB.Dimension Create(ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
     {
-      var plane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
-      var projectedPoint = plane.ClosestPoint(point);
+      var references = this.GetReferences(view.Document, elements);
 
-      Line line;
-      if (this.IsHorizontal) line = new Line(projectedPoint, plane.XAxis);
-      else  line = new Line(projectedPoint, plane.YAxis);
-
-      var references = this.GetReferences(view.Document, elements);      
-
-      if (type == default)
-        return view.Document.Create.NewDimension(view, line.ToLine(), references);
+      if (view.Document.IsFamilyDocument)
+      {
+        if (type == default)
+          return view.Document.FamilyCreate.NewDimension(view, line, references);
+        else
+          return view.Document.FamilyCreate.NewDimension(view, line, references, type);
+      }
       else
-        return view.Document.Create.NewDimension(view, line.ToLine(), references, type);
-
+      {
+        if (type == default)
+          return view.Document.Create.NewDimension(view, line, references);
+        else
+          return view.Document.Create.NewDimension(view, line, references, type);
+      }
     }
 
     public ARDB.ReferenceArray GetReferences(ARDB.Document doc, IList<ARDB.Element> elements)
     {
-      // Get assembly ElementIDs from members
-      ICollection<ARDB.ElementId> AssElemIds = elements.Select(x => x.Id).ToList();
-      ARDB.ReferenceArray ra = new ARDB.ReferenceArray();
-      foreach (ARDB.ElementId aeId in AssElemIds)
-      {
-        //cast ElementID to Element
-        ARDB.Element ae = doc.GetElement(aeId);
-        ARDB.FamilyInstance fmly = ae as ARDB.FamilyInstance;
-        if (null != fmly)
-        {
-          switch (fmly.Category.Id.IntegerValue)
-          {
-            case ((int) ARDB.BuiltInCategory.OST_Columns):
-              ARDB.Reference refCol = fmly.GetReferenceByName(fmly.Category.Name);
-              ra.Append(refCol);
-              break;
-            case ((int) ARDB.BuiltInCategory.OST_StructuralFraming):
-              ARDB.Reference refBeamCen = fmly.GetReferenceByName("Center (Left/Right)");
-              ra.Append(refBeamCen);
-              break;
-            case ((int) ARDB.BuiltInCategory.OST_StructuralColumns):
-              ARDB.Reference refColCen = fmly.GetReferenceByName("Center (Left/Right)");
-              ra.Append(refColCen);
-              break;
-            case ((int) ARDB.BuiltInCategory.OST_GenericModel):
-              ARDB.Reference refGMCen = fmly.GetReferenceByName("Center (Left/Right)");
-              ra.Append(refGMCen);
-              break;
-            case ((int) ARDB.BuiltInCategory.OST_StructConnections):
-              ARDB.Reference refSCCen = fmly.GetReferenceByName("Center (Left/Right)");
-              ra.Append(refSCCen);
-              break;
-          }
-        }
-        else
-        {
-          var ele = doc.GetElement(aeId);
-          ra.Append(new ARDB.Reference(ele));
-        }
+      var referenceArray = new ARDB.ReferenceArray();
 
+      foreach (var element in elements)
+      {
+        switch (element)
+        {
+          case null: break;
+          case ARDB.FamilyInstance instance:
+            {
+              var references = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight);
+              if (references?.FirstOrDefault() is ARDB.Reference reference)
+                referenceArray.Append(reference);
+            }
+            break;
+
+          default:
+            referenceArray.Append(new ARDB.Reference(element));
+            break;
+        }
       }
-      return ra;
+      return referenceArray;
 
     }
 
-    ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, Point3d point, IList<ARDB.Element> elements, ARDB.DimensionType type = default)
+    ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
     {
-      if (!Reuse(dimension, view, point, elements, type))
-        dimension = Create(view, point, elements, type);
+      if (!Reuse(dimension, view, line, elements, type))
+        dimension = Create(view, line, elements, type);
 
       return dimension;
     }
-
   }
-
-
 }
 
