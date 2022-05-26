@@ -154,7 +154,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
 
     ARDB.Dimension Create(ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
     {
-      var references = this.GetReferences(view.Document, elements);
+      var references = GetReferences(view.Document, elements);
 
       if (view.Document.IsFamilyDocument)
       {
@@ -172,7 +172,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
       }
     }
 
-    public ARDB.ReferenceArray GetReferences(ARDB.Document doc, IList<ARDB.Element> elements)
+    static ARDB.ReferenceArray GetReferences(ARDB.Document doc, IList<ARDB.Element> elements)
     {
       var referenceArray = new ARDB.ReferenceArray();
 

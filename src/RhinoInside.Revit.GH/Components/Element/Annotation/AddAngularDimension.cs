@@ -151,11 +151,11 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
     ARDB.Dimension Create(ARDB.View view, ARDB.Arc arc, IList<ARDB.Element> elements, ARDB.DimensionType type)
     {
-      var references = this.GetReferences(view.Document, elements);
+      var references = GetReferences(view.Document, elements);
       return ARDB.AngularDimension.Create(view.Document, view, arc, references, type);
     }
 
-    public IList<ARDB.Reference> GetReferences(ARDB.Document doc, IList<ARDB.Element> elements)
+    static IList<ARDB.Reference> GetReferences(ARDB.Document doc, IList<ARDB.Element> elements)
     {
       var referenceArray = new List<ARDB.Reference>(elements.Count);
 
