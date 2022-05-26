@@ -11,7 +11,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Element.Annotation
 {
   [ComponentVersion(introduced: "1.8")]
-  public abstract class AddLinearDimension : ElementTrackerComponent
+  public class AddLinearDimension : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("DF47C980-EF08-4BBE-A624-C956C07B04EC");
     public override GH_Exposure Exposure => GH_Exposure.primary;

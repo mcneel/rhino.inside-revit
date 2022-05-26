@@ -61,12 +61,11 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
+    <Compile Include="Components\Element\Annotation\AddAngularDimension.cs" />
     <Compile Include="Components\Element\Annotation\AddDetailLine.cs" />
-    <Compile Include="Components\Element\Annotation\AddDimension.cs" />
-    <Compile Include="Components\Element\Annotation\AddHorizontalDimension.cs" />
+    <Compile Include="Components\Element\Annotation\AddLinearDimension.cs" />
     <Compile Include="Components\Element\Annotation\AddRegion.cs" />
     <Compile Include="Components\Element\Annotation\AddText.cs" />
-    <Compile Include="Components\Element\Annotation\AddVerticalDimension.cs" />
     <Compile Include="Components\Element\Opening\AddFaceOpening.cs" />
     <Compile Include="Components\Element\Opening\AddOpening.cs" />
     <Compile Include="Components\Element\Opening\AddShaftOpening.cs" />
