@@ -163,10 +163,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           var geometry = sketchGrid.get_Geometry(options);
 
-          using (geometry is object ? default : view.Document.RollBackScope())
+          using (geometry is object || view.Document.IsReadOnly ? default : view.Document.RollBackScope())
           {
             // SketchGrid need to be displayed at least once to have geometry.
-            if (geometry is null)
+            if (geometry is null && view.Document.IsModifiable)
             {
               view.ShowActiveWorkPlane();
               geometry = sketchGrid.get_Geometry(options);
