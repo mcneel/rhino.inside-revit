@@ -181,7 +181,7 @@ namespace RhinoInside.Revit.GH.Components.Grids
       var gridCurve = grid.Curve;
       var newCurve = grid.IsCurved ? curve.ToCurve().CreateReversed() : curve.ToCurve();
 
-      if (!gridCurve.IsAlmostEqualTo(newCurve, tol.VertexTolerance))
+      if (!gridCurve.AlmostEquals(newCurve, tol.VertexTolerance))
       {
         if (!gridCurve.IsSameKindAs(newCurve)) return false;
         if (gridCurve is ARDB.Arc gridArc && newCurve is ARDB.Arc newArc)

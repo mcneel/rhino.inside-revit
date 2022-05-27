@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Types
               break;
           }
 
-          if (!locationCurve.Curve.IsAlmostEqualTo(newCurve))
+          if (!locationCurve.Curve.AlmostEquals(newCurve, GeometryObjectTolerance.Internal.VertexTolerance))
           {
             using (!keepJoins ? ElementJoins.DisableJoinsScope(wall) : default)
               locationCurve.Curve = newCurve;

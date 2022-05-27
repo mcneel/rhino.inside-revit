@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
   public class AddAngularDimension : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("0DBE67E7-7D8E-41F9-85B0-139C0B7F1745");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => string.Empty;
 
     public AddAngularDimension() : base
@@ -102,7 +102,6 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
           if
           (
-            view.ViewType is ARDB.ViewType.ThreeD ||
             view.ViewType is ARDB.ViewType.Schedule ||
             view.ViewType is ARDB.ViewType.ColumnSchedule ||
             view.ViewType is ARDB.ViewType.PanelSchedule
@@ -134,7 +133,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       if (type != default && type.Id != dimension.GetTypeId()) return false;
 
       // Line
-      if (!dimension.Curve.IsAlmostEqualTo(arc)) return false;
+      if (!dimension.Curve.AlmostEquals(arc, GeometryObjectTolerance.Internal.VertexTolerance)) return false;
 
       // Elements
       var currentReference = dimension.References;
@@ -151,31 +150,38 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
     ARDB.Dimension Create(ARDB.View view, ARDB.Arc arc, IList<ARDB.Element> elements, ARDB.DimensionType type)
     {
-      var references = GetReferences(view.Document, elements);
+      var references = GetReferences(elements);
       return ARDB.AngularDimension.Create(view.Document, view, arc, references, type);
     }
 
-    static IList<ARDB.Reference> GetReferences(ARDB.Document doc, IList<ARDB.Element> elements)
+    static IList<ARDB.Reference> GetReferences(IList<ARDB.Element> elements)
     {
       var referenceArray = new List<ARDB.Reference>(elements.Count);
-
       foreach (var element in elements)
       {
+        var reference = default(ARDB.Reference);
         switch (element)
         {
           case null: break;
           case ARDB.FamilyInstance instance:
-            {
-              var references = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight);
-              if (references?.FirstOrDefault() is ARDB.Reference reference)
-                referenceArray.Append(reference);
-            }
+            reference = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
             break;
 
           default:
-            referenceArray.Append(new ARDB.Reference(element));
+            using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
+            {
+              var geometry = element.get_Geometry(options);
+              reference = geometry.OfType<ARDB.Solid>().
+                SelectMany(x => x.Faces.Cast<ARDB.Face>()).
+                Select(x => x.Reference).
+                OfType<ARDB.Reference>().
+                FirstOrDefault();
+            }
             break;
         }
+
+        if (reference is object)
+          referenceArray.Add(reference);
       }
       return referenceArray;
 

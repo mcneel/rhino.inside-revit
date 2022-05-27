@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       {
         if (modelCurve.SketchPlane.IsEquivalent(sketchPlane))
         {
-          if (!centerLine.IsAlmostEqualTo(modelCurve.GeometryCurve))
+          if (!centerLine.AlmostEquals(modelCurve.GeometryCurve, GeometryObjectTolerance.Internal.VertexTolerance))
             modelCurve.SetGeometryCurve(centerLine, true);
         }
         else modelCurve.SetSketchPlaneAndCurve(sketchPlane, centerLine);

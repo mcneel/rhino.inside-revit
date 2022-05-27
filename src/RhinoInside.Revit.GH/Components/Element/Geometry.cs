@@ -461,6 +461,9 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       using (scope)
       using (var options = new ARDB.Options() { DetailLevel = detailLevel.Value })
       {
+        options.IncludeNonVisibleObjects = true;
+        options.ComputeReferences = true;
+
         var _Elements_ = Params.IndexOfOutputParam("Elements");
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
         SolveGeometry

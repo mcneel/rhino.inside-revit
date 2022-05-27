@@ -12,16 +12,41 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// IEqualityComparer for <see cref="Autodesk.Revit.DB.Curve"/>
     /// that compares <see cref="Autodesk.Revit.DB.Curve.Reference"/>.
     /// </summary>
+    /// <remarks>
+    /// Reference <see cref="Reference.GlobalPoint"/> and <see cref="Reference.UVPoint"/> are ignored.
+    /// </remarks>
     public static readonly IEqualityComparer<Curve> Reference = default(ReferenceComparer);
 
     struct ReferenceComparer : IEqualityComparer<Curve>
     {
-#if REVIT_2018
-      public bool Equals(Curve x, Curve y) => x.Reference.EqualTo(y.Reference);
-#else
-      public bool Equals(Curve x, Curve y) => throw new NotImplementedException();
-#endif
-      public int GetHashCode(Curve obj) => obj.Reference.ElementId.IntegerValue;
+      public bool Equals(Curve x, Curve y)
+      {
+        if (ReferenceEquals(x, y)) return true;
+        if (x is null || y is null) return false;
+        var xReference = x.Reference;
+        var yReference = y.Reference;
+
+        if (ReferenceEquals(xReference, yReference)) return true;
+        if (xReference is null || xReference is null) return false;
+
+        if (xReference.ElementReferenceType != yReference.ElementReferenceType) return false;
+        if (xReference.ElementId != yReference.ElementId) return false;
+        if (xReference.LinkedElementId != yReference.LinkedElementId) return false;
+        return true;
+      }
+
+      public int GetHashCode(Curve value)
+      {
+        if (value is null) return 0;
+        var reference = value.Reference;
+        if (reference is null) return 0;
+
+        int hashCode = 1861411795;
+        hashCode = hashCode * -1521134295 + reference.ElementReferenceType.GetHashCode();
+        hashCode = hashCode * -1521134295 + reference.ElementId.GetHashCode();
+        hashCode = hashCode * -1521134295 + reference.LinkedElementId.GetHashCode();
+        return hashCode;
+      }
     }
   }
 
@@ -32,20 +57,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return self.IsBound == other.IsBound && self.GetType() == other.GetType();
     }
 
-    #region IsAlmostEqualTo
-    [Obsolete("Please use GeometryObjectExtension.AlmostEquals")]
-    public static bool IsAlmostEqualTo(this Curve left, Curve right, double tolerance = DefaultTolerance)
-    {
-      return GeometryObjectEqualityComparer.Comparer(tolerance).Equals(left, right);
-    }
-    #endregion
-
     public static bool GetRawParameters(this Curve curve, out double min, out double max)
     {
       if (curve.IsBound)
       {
-        min = curve.GetEndParameter(0);
-        max = curve.GetEndParameter(1);
+        min = curve.GetEndParameter(CurveEnd.Start);
+        max = curve.GetEndParameter(CurveEnd.End);
       }
       else if (curve.IsCyclic)
       {

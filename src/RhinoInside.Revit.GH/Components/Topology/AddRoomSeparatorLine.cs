@@ -114,7 +114,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
       using (var projectedCurve = Curve.ProjectToPlane(curve, levelPlane).ToCurve())
       {
-        if (!projectedCurve.IsAlmostEqualTo(roomSeparator.GeometryCurve))
+        if (!projectedCurve.AlmostEquals(roomSeparator.GeometryCurve, GeometryObjectTolerance.Internal.VertexTolerance))
           roomSeparator.SetGeometryCurve(projectedCurve, overrideJoins: true);
       }
 

@@ -190,7 +190,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (column.Location is ARDB.LocationCurve locationCurve)
       {
-        if (!locationCurve.Curve.IsAlmostEqualTo(curve, GeometryObjectTolerance.Internal.VertexTolerance))
+        if (!locationCurve.Curve.AlmostEquals(curve, GeometryObjectTolerance.Internal.VertexTolerance))
         {
           curve.TryGetLocation(out var origin, out var basisX, out var basisY);
 

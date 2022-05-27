@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
                 else
                   curve = segment.ToCurve();
 
-                if (!edge.GeometryCurve.IsAlmostEqualTo(curve))
+                if (!edge.GeometryCurve.AlmostEquals(curve, GeometryObjectTolerance.Internal.VertexTolerance))
                 {
                   // The following line allows SetGeometryCurve to work!!
                   edge.Location.Move(hack);

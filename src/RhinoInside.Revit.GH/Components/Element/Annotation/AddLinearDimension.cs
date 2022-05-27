@@ -102,7 +102,6 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
 
           if
           (
-            view.ViewType is ARDB.ViewType.ThreeD ||
             view.ViewType is ARDB.ViewType.Schedule ||
             view.ViewType is ARDB.ViewType.ColumnSchedule ||
             view.ViewType is ARDB.ViewType.PanelSchedule
@@ -137,7 +136,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
       if (type != default && type.Id != dimension.GetTypeId()) return false;
 
       // Line
-      if (!dimension.Curve.IsAlmostEqualTo(line)) return false;
+      if (!dimension.Curve.AlmostEquals(line, GeometryObjectTolerance.Internal.VertexTolerance)) return false;
 
       // Elements
       var currentReference = dimension.References;
@@ -154,7 +153,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
 
     ARDB.Dimension Create(ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
     {
-      var references = GetReferences(view.Document, elements);
+      var references = GetReferences(elements);
 
       if (view.Document.IsFamilyDocument)
       {
@@ -172,27 +171,35 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
       }
     }
 
-    static ARDB.ReferenceArray GetReferences(ARDB.Document doc, IList<ARDB.Element> elements)
+    static ARDB.ReferenceArray GetReferences(IList<ARDB.Element> elements)
     {
       var referenceArray = new ARDB.ReferenceArray();
 
       foreach (var element in elements)
       {
+        var reference = default(ARDB.Reference);
         switch (element)
         {
           case null: break;
           case ARDB.FamilyInstance instance:
-            {
-              var references = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight);
-              if (references?.FirstOrDefault() is ARDB.Reference reference)
-                referenceArray.Append(reference);
-            }
+            reference = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
             break;
 
           default:
-            referenceArray.Append(new ARDB.Reference(element));
+            using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
+            {
+              var geometry = element.get_Geometry(options);
+              reference = geometry.OfType<ARDB.Solid>().
+                SelectMany(x => x.Faces.Cast<ARDB.Face>()).
+                Select(x => x.Reference).
+                OfType<ARDB.Reference>().
+                FirstOrDefault();
+            }
             break;
         }
+
+        if (reference is object)
+          referenceArray.Append(reference);
       }
       return referenceArray;
 

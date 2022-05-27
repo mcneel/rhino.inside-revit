@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 
@@ -8,14 +9,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   struct GeometryObjectEqualityComparer :
     IEqualityComparer<double>,
-    IEqualityComparer<GeometryObject>,
-    IEqualityComparer<Curve>,
+    IEqualityComparer<Point>,
+    IEqualityComparer<PolyLine>,
     IEqualityComparer<Line>,
     IEqualityComparer<Arc>,
     IEqualityComparer<Ellipse>,
     IEqualityComparer<HermiteSpline>,
     IEqualityComparer<NurbSpline>,
-    IEqualityComparer<CylindricalHelix>
+    IEqualityComparer<CylindricalHelix>,
+    IEqualityComparer<Curve>,
+    IEqualityComparer<GeometryObject>
   {
     static int CombineHash(params int[] values)
     {
@@ -48,7 +51,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       public int GetHashCode(IList<double> values)
       {
-        int hash = 0;
+        int hash = values.Count;
         for (int h = 0; h < values.Count; h++)
           hash = hash * -1521134295 + GetHashCode(values[h]);
 
@@ -67,7 +70,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       public int GetHashCode(DoubleArray values)
       {
-        int hash = 0;
+        int hash = values.Size;
         for (int h = 0; h < values.Size; h++)
           hash = hash * -1521134295 + GetHashCode(values.get_Item(h));
 
@@ -98,8 +101,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public int GetHashCode(double value) => Math.Round(value / Tolerance).GetHashCode();
     #endregion
 
+    #region UV
+    public bool Equals(UV x, UV y) => XYZExtension.GetLength(x.U - y.U, x.V - y.V, 0.0) < Tolerance;
+    public int GetHashCode(UV obj) => CombineHash
+    (
+      GetHashCode(obj.U),
+      GetHashCode(obj.V)
+    );
+    #endregion
+
     #region XYZ
-    public bool Equals(XYZ x, XYZ y) => x.AlmostEquals(y, Tolerance);
+    public bool Equals(XYZ x, XYZ y) => XYZExtension.GetLength(x.X - y.X, x.Y - y.Y, x.Z - y.Z) < Tolerance;
     public int GetHashCode(XYZ obj) => CombineHash
     (
       GetHashCode(obj.X),
@@ -119,11 +131,81 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public int GetHashCode(IList<XYZ> values)
     {
-      int hash = 0;
+      int hash = values.Count;
       for (int h = 0; h < values.Count; h++)
         hash = hash * -1521134295 + GetHashCode(values[h]);
 
       return hash;
+    }
+    #endregion
+
+    #region Point
+    public bool Equals(Point left, Point right) =>
+      Equals(left.Coord, right.Coord);
+
+    public int GetHashCode(Point value) => CombineHash
+    (
+      value.GetType().GetHashCode(),
+      GetHashCode(value.Coord)
+    );
+    #endregion
+
+    #region PolyLine
+    public bool Equals(PolyLine left, PolyLine right) =>
+      left.NumberOfCoordinates == right.NumberOfCoordinates &&
+      Equals(left.GetCoordinates(), right.GetCoordinates());
+
+    public int GetHashCode(PolyLine value) => CombineHash
+    (
+      value.GetType().GetHashCode(),
+      GetHashCode(value.GetCoordinates())
+    );
+    #endregion
+
+    #region PolyLine
+    public bool Equals(Mesh left, Mesh right) =>
+      TrianglesEquals(left, right) &&
+      Equals(left.Vertices, right.Vertices);
+
+    public int GetHashCode(Mesh value) => CombineHash
+    (
+      value.GetType().GetHashCode(),
+      VerticesHashCode(value.Vertices, 16)
+    );
+
+    int VerticesHashCode(IList<XYZ> vertices, int sampleCount)
+    {
+      int hash = vertices.Count.GetHashCode();
+
+      if (vertices.Count < sampleCount)
+      {
+        for (int h = 0; h < vertices.Count; h++)
+          hash = hash * -1521134295 + GetHashCode(vertices[h]);
+      }
+      else
+      {
+        for (int h = 0; h < sampleCount; h++)
+          hash = hash * -1521134295 + GetHashCode(vertices[(int) Math.Round(((double) vertices.Count / sampleCount) * h)]);
+      }
+
+      return hash;
+    }
+
+    static bool TrianglesEquals(Mesh left, Mesh right)
+    {
+      var count = left.NumTriangles;
+      if (count != right.NumTriangles) return false;
+
+      for(int t = 0; t < count; ++t)
+      {
+        var lTriangle = left.get_Triangle(t);
+        var rTriangle = right.get_Triangle(t);
+        if (lTriangle.get_Index(0) != rTriangle.get_Index(0)) return false;
+        if (lTriangle.get_Index(1) != rTriangle.get_Index(1)) return false;
+        if (lTriangle.get_Index(2) != rTriangle.get_Index(2)) return false;
+      }
+
+      return true;
     }
     #endregion
 
@@ -310,6 +392,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       switch (left)
       {
+        case Point point:             return Equals(point,    (Point)             right);
+        case PolyLine polyLine:       return Equals(polyLine, (PolyLine)          right);
         case Line line:               return Equals(line,     (Line)              right);
         case Arc arc:                 return Equals(arc,      (Arc)               right);
         case Ellipse ellipse:         return Equals(ellipse,  (Ellipse)           right);
