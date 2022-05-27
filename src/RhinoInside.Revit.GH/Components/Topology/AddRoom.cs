@@ -31,13 +31,12 @@ namespace RhinoInside.Revit.GH.Components.Topology
     {
       new ParamDefinition
       (
-        new Parameters.Document()
+        new Parameters.View()
         {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        }, ParamRelevance.Occasional
+          Name = "View",
+          NickName = "View",
+          Description = "View to add a specific room",
+        }
       ),
       new ParamDefinition
       (
@@ -127,11 +126,11 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
 
       ReconstructElement<ARDB.Architecture.Room>
       (
-        doc.Value, _Room_, (room) =>
+        view.Document, _Room_, room =>
         {
           // Input
           if (!Params.TryGetData(DA, "Location", out Point3d? location)) return null;
@@ -148,14 +147,14 @@ namespace RhinoInside.Revit.GH.Components.Topology
           if (!Params.TryGetData(DA, "Phase", out ARDB.Phase phase)) return null;
 
           // Compute
-          if (CanReconstruct(_Room_, out var untracked, ref room, doc.Value, number, categoryId: ARDB.BuiltInCategory.OST_Rooms))
+          if (CanReconstruct(_Room_, out var untracked, ref room, view.Document, number, categoryId: ARDB.BuiltInCategory.OST_Rooms))
           {
             if (phase is null)
             {
               // We avoid `Reconstruct` recreates the element in an other phase unless is necessary…
               phase = untracked ?
                 room?.Document.GetElement(room.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE).AsElementId()) as ARDB.Phase:
-                doc.Value.Phases.Cast<ARDB.Phase>().LastOrDefault();
+                view.Document.Phases.Cast<ARDB.Phase>().LastOrDefault();
             }
 
             if (location.HasValue)
@@ -163,7 +162,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
               // Solve missing Base & Top
               ERDB.ElevationElementReference.SolveBaseAndTop
               (
-                doc.Value, GeometryEncoder.ToInternalLength(location.Value.Z),
+                view.Document, view.Value.GenLevel.ProjectElevation,
                 0.0, 10.0,
                 ref baseElevation, ref topElevation
               );
@@ -183,7 +182,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
             room = Reconstruct
             (
-              doc.Value,
+              view.Document,
               room,
               location?.ToXYZ(),
               number, name,

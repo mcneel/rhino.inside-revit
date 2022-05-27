@@ -704,7 +704,21 @@ namespace RhinoInside.Revit.GH.Components
       base.AfterSolveInstance();
     }
 
-    protected T ReconstructElement<T>(ARDB.Document document, string parameterName, Func<T, T> func) where T : ARDB.Element
+    protected T ReconstructElement<T>
+    (
+      ARDB.Document document, string parameterName,
+      Func<T, T> update
+    ) where T : ARDB.Element
+    {
+      return ReconstructElement(document, parameterName, x => true, update);
+    }
+
+    protected T ReconstructElement<T>
+    (
+      ARDB.Document document, string parameterName,
+      Predicate<T> validate, Func<T, T> update
+    )
+    where T : ARDB.Element
     {
       var output = default(T);
 
@@ -724,7 +738,12 @@ namespace RhinoInside.Revit.GH.Components
         try
         {
           if (!graphical || pinned)
-            UpdateDocument(document, () => output = func(input));
+          {
+            if (validate(input))
+              UpdateDocument(document, () => output = update(input));
+            else
+              output = null;
+          }
           else
           {
             if (graphical)

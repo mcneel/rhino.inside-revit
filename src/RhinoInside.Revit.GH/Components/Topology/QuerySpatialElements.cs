@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Param_String()
         {
           Name = "Number",
-          NickName = "Number",
+          NickName = "NUM",
           Description = "Element Number.",
           Optional = true
         }, ParamRelevance.Primary
@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Param_String()
         {
           Name = "Name",
-          NickName = "Name",
+          NickName = "N",
           Description = "Element Name.",
           Optional = true
         }, ParamRelevance.Primary
