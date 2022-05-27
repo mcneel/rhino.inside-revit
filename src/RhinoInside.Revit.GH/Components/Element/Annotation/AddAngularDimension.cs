@@ -167,6 +167,10 @@ namespace RhinoInside.Revit.GH.Components.Annotation
             reference = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
             break;
 
+          case ARDB.ModelLine modelLine:
+            reference = modelLine.GeometryCurve.Reference;
+            break;
+
           default:
             using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
             {
