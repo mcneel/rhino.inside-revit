@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Autodesk.Revit.DB;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -268,7 +267,8 @@ namespace RhinoInside.Revit.GH.Components.Topology
             return false;
 
           // If there are no Levels!!
-          if (!baseElevation.Value.IsLevelConstraint(out var baseLevel, out var baseOffset) && location is object)
+          var baseLevel = default(ARDB.Level);
+          if (location is object && !baseElevation.Value.IsLevelConstraint(out baseLevel, out var baseOffset))
             return false;
 
           if (Reuse(space, baseLevel, phase.Value, location?.ToXYZ()))
@@ -343,7 +343,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
       // We use ROOM_NAME here because `SpatialElment.Name` returns us a werid combination of "{Name} {Number}".
       if (number is object) space.get_Parameter(ARDB.BuiltInParameter.ROOM_NUMBER).Update(number);
-      if (name is object)   space.get_Parameter(ARDB.BuiltInParameter.ROOM_NAME).Update(name);
+      if (name is object) space.get_Parameter(ARDB.BuiltInParameter.ROOM_NAME).Update(name);
 
       // Move Space to 'Location'
       if (location is object)
