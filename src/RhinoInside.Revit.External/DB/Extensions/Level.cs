@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Autodesk.Revit.DB;
 
@@ -103,17 +104,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       using (var collector = new FilteredElementCollector(level.Document).OfClass(typeof(SketchPlane)))
       {
+        var minDistance = double.PositiveInfinity;
+        var closestSketchPlane = default(SketchPlane);
+        var comparer = GeometryObjectEqualityComparer.Default;
         var levelName = level.Name;
+        var BasisZ = XYZ.BasisZ;
         foreach (var sketchPlane in collector.Cast<SketchPlane>())
         {
           if (!sketchPlane.IsSuitableForModelElements) continue;
           if (sketchPlane.Name != levelName) continue;
           using (var plane = sketchPlane.GetPlane())
           {
-            if (plane.Origin.Z - level.ProjectElevation < 1e-9 && plane.Normal.IsAlmostEqualTo(XYZ.BasisZ))
-              return sketchPlane;
+            if (!comparer.Equals(plane.Normal, BasisZ))
+              continue;
+
+            var distance = Math.Abs(plane.Origin.Z - level.ProjectElevation);
+            if (distance < minDistance)
+            {
+              minDistance = distance;
+              closestSketchPlane = sketchPlane;
+            }
           }
         }
+
+        if (comparer.Equals(minDistance, 0.0))
+          return closestSketchPlane;
       }
 
       if (ensureSketchPlane)
