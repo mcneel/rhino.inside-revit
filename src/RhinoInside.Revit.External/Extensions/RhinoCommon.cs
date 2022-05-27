@@ -1172,5 +1172,23 @@ namespace Rhino.Display
 
       return new Geometry.Vector2d(1.0, 1.0);
     }
+
+    public static bool Scale(this RhinoViewport viewport, double scaleFactor)
+    {
+      var scaleTransform = Rhino.Geometry.Transform.Scale(Rhino.Geometry.Point3d.Origin, scaleFactor);
+      var projection = new Rhino.DocObjects.ViewportInfo(viewport);
+      projection.GetFrustum(out var left, out var right, out var bottom, out var top, out var near, out var far);
+      projection.SetFrustum(left * scaleFactor, right * scaleFactor, bottom * scaleFactor, top * scaleFactor, near * scaleFactor, far * scaleFactor);
+      projection.TransformCamera(scaleTransform);
+      if (!viewport.SetViewProjection(projection, updateTargetLocation: true))
+        return false;
+
+      var cplane = viewport.GetConstructionPlane();
+      cplane.Plane.Transform(scaleTransform);
+      cplane.GridSpacing *= scaleFactor;
+      cplane.SnapSpacing *= scaleFactor;
+      viewport.SetConstructionPlane(cplane);
+      return true;
+    }
   }
 }

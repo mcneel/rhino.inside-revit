@@ -36,7 +36,6 @@ namespace RhinoInside.Revit.GH.Components.Topology
           Name = "Area Plan",
           NickName = "AP",
           Description = "Area Plan to add a specific area",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition

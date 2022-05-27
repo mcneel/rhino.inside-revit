@@ -53,11 +53,12 @@ namespace RhinoInside.Revit.GH.Types
       switch (source)
       {
         case double offset: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset)); return true;
+        case ARDB.View view: Value = new External.DB.ElevationElementReference(view.GenLevel, default); return true;
         case ARDB.Level level: Value = new External.DB.ElevationElementReference(level, default); return true;
         case External.DB.ElevationElementReference elevation: Value = elevation; return true;
       }
 
-      return base.CastFrom(source);
+      return false;
     }
   }
 }

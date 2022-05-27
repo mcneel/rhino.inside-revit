@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (value is ARDB.View view)
       {
-        if (view.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE) is ARDB.Parameter viewPhase)
+        if (view.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE) is ARDB.Parameter viewPhase && viewPhase.HasValue)
           SetValue(view.Document, viewPhase.AsElementId());
         else
           SetValue(default, ARDB.ElementId.InvalidElementId);
@@ -32,7 +32,11 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (value is ARDB.SpatialElement spatialElement)
       {
-        SetValue(spatialElement.Document, spatialElement.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE).AsElementId());
+        if (spatialElement.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE) is ARDB.Parameter phase && phase.HasValue)
+          SetValue(spatialElement.Document, phase.AsElementId() ?? ARDB.ElementId.InvalidElementId);
+        else
+          SetValue(default, ARDB.ElementId.InvalidElementId);
+
         return true;
       }
       else if (value is ARDB.Element element && !(value is ARDB.Phase))

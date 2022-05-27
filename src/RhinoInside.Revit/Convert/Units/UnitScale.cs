@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Rhino;
+using Rhino.Display;
 using Rhino.DocObjects;
 
 namespace RhinoInside.Revit.Convert.Units
@@ -177,9 +178,6 @@ namespace RhinoInside.Revit.Convert.Units
 
     public static double operator *(double value, Ratio ratio)
     {
-      if (ratio.Antecedent == ratio.Consequent)
-        return value;
-
       // Multiply value by resulting ratio considering magnitude.
       if (Math.Abs(ratio.Antecedent) < Math.Abs(value))
         return ratio.Antecedent * (value / ratio.Consequent);
@@ -189,9 +187,6 @@ namespace RhinoInside.Revit.Convert.Units
 
     public static double operator /(double value, Ratio ratio)
     {
-      if (ratio.Antecedent == ratio.Consequent)
-        return value;
-
       // Multiply value by resulting ratio considering magnitude.
       if (Math.Abs(ratio.Consequent) < Math.Abs(value))
         return ratio.Consequent * (value / ratio.Antecedent);
@@ -201,9 +196,6 @@ namespace RhinoInside.Revit.Convert.Units
 
     public static double operator *(Ratio ratio, double value)
     {
-      if (ratio.Antecedent == ratio.Consequent)
-        return value;
-
       // Multiply value by resulting ratio considering magnitude.
       if (Math.Abs(ratio.Antecedent) < Math.Abs(value))
         return ratio.Antecedent * (value / ratio.Consequent);
@@ -213,9 +205,6 @@ namespace RhinoInside.Revit.Convert.Units
 
     public static double operator /(Ratio ratio, double value)
     {
-      if (ratio.Antecedent == ratio.Consequent)
-        return 1.0 / value;
-
       // Multiply value by resulting ratio considering magnitude.
       if (Math.Abs(ratio.Consequent) > Math.Abs(value))
         return ratio.Antecedent / (value * ratio.Consequent);
@@ -225,7 +214,7 @@ namespace RhinoInside.Revit.Convert.Units
     #endregion
   }
 
-  [DebuggerDisplay("{ToString(), nq} ({(double) this} m)")]
+  [DebuggerDisplay("{ToString(), nq} ({(double) Ratio} m)")]
   readonly struct UnitScale : IEquatable<UnitScale>
   {
     #region BuiltIn Ratios
@@ -263,7 +252,7 @@ namespace RhinoInside.Revit.Convert.Units
 
     #region BuiltIn Scales
     public static readonly UnitScale Unset             = default;
-    public static readonly UnitScale None              = new UnitScale(default, (Ratio) 0.0);
+    public static readonly UnitScale None              = new UnitScale(default, metersPerUnitRatio[0]);
 
     public static readonly UnitScale Angstroms         = new UnitScale(UnitSystem.Angstroms);
     public static readonly UnitScale Nanometers        = new UnitScale(UnitSystem.Nanometers);
@@ -321,7 +310,7 @@ namespace RhinoInside.Revit.Convert.Units
     public static explicit operator UnitScale(double metersPerUnit) => new UnitScale(metersPerUnit);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static explicit operator double(UnitScale self) => (double) self.Ratio;
+    public static explicit operator double(UnitScale self) => self == None ? 1.0 : (double) self.Ratio;
     #endregion
 
     #region UnitSystem
@@ -340,19 +329,17 @@ namespace RhinoInside.Revit.Convert.Units
 
     public static explicit operator UnitSystem(UnitScale self)
     {
-      if (self.Name is object)            return UnitSystem.CustomUnits;
+      if (self.Name is object) return UnitSystem.CustomUnits;
 
-      double metersPerUnit =              self.Ratio.Quotient;
-      if (!Ratio.IsFinite(metersPerUnit)) return UnitSystem.Unset;
-      if (metersPerUnit == 0.0)           return UnitSystem.None;
+      double metersPerUnit = self.Ratio.Quotient;
 
-      for (var u = UnitSystem.None + 1; u < UnitSystem.Parsecs + 1; ++u)
+      for (var u = UnitSystem.None; u <= UnitSystem.Parsecs; ++u)
       {
         var m = metersPerUnitRatio[(int) u].Quotient;
         if (m == metersPerUnit) return u;
       }
 
-      return UnitSystem.CustomUnits;
+      return self == Unset ? UnitSystem.Unset : UnitSystem.CustomUnits;
     }
     #endregion
 
@@ -373,13 +360,18 @@ namespace RhinoInside.Revit.Convert.Units
       BitConverter.DoubleToInt64Bits(right.Ratio.Quotient);
     #endregion
 
-    public static UnitScale operator *(UnitScale left, UnitScale right) => new UnitScale(left.Ratio * right.Ratio);
-    public static UnitScale operator /(UnitScale left, UnitScale right) => new UnitScale(left.Ratio / right.Ratio);
+    public static UnitScale operator *(UnitScale left, UnitScale right) =>
+      right == None || left == None ? None :
+      new UnitScale(left.Ratio * right.Ratio);
 
-    public static double operator *(double value, UnitScale scale) => Math.Abs(value) * scale.Ratio;
-    public static double operator /(double value, UnitScale scale) => Math.Abs(value) / scale.Ratio;
-    public static double operator *(UnitScale scale, double value) => scale.Ratio * Math.Abs(value);
-    public static double operator /(UnitScale scale, double value) => scale.Ratio / Math.Abs(value);
+    public static UnitScale operator /(UnitScale left, UnitScale right) =>
+      right == None || left == None ? None :
+      new UnitScale(left.Ratio / right.Ratio);
+
+    public static double operator *(double value, UnitScale scale) => scale == None ? value * 1.0 : value * scale.Ratio;
+    public static double operator /(double value, UnitScale scale) => scale == None ? value / 1.0 : value / scale.Ratio;
+    public static double operator *(UnitScale scale, double value) => scale == None ? value * 1.0 : scale.Ratio * value;
+    public static double operator /(UnitScale scale, double value) => scale == None ? 1.0 / value : scale.Ratio / value;
 
     public static double Convert(double value, UnitScale from, UnitScale to)
     {
@@ -422,6 +414,7 @@ namespace RhinoInside.Revit.Convert.Units
         new UnitScale(system, Ratio.Rationalize(meters), name) :
         new UnitScale(system);
     }
+
     internal static void SetUnitScale(RhinoDoc doc, ActiveSpace space, UnitScale value, bool scale = true)
     {
       if (doc is null)
@@ -430,6 +423,8 @@ namespace RhinoInside.Revit.Convert.Units
       if (space == ActiveSpace.None)
         space = doc.Views.ModelSpaceIsActive ? ActiveSpace.ModelSpace : ActiveSpace.PageSpace;
 
+      var scaleFactor = (double) (scale ? GetUnitScale(doc, space) : None / value);
+
       var (system, meters, name) = value;
       if (system == UnitSystem.CustomUnits)
         doc.SetCustomUnitSystem(space == ActiveSpace.ModelSpace, name, meters, scale);
@@ -437,6 +432,22 @@ namespace RhinoInside.Revit.Convert.Units
         doc.AdjustModelUnitSystem(system, scale);
       else if (space == ActiveSpace.PageSpace)
         doc.AdjustPageUnitSystem(system, scale);
+
+      if (scaleFactor != 1.0)
+      {
+        foreach (var view in doc.Views)
+        {
+          if (space == ActiveSpace.ModelSpace)
+          {
+            if (view is RhinoPageView page)
+            {
+              foreach (var detail in page.GetDetailViews())
+                detail.Viewport.Scale(scaleFactor);
+            }
+            else view.MainViewport.Scale(scaleFactor);
+          }
+        }
+      }
     }
 
     public static UnitScale GetActiveScale (RhinoDoc doc) => GetUnitScale(doc, ActiveSpace.None);

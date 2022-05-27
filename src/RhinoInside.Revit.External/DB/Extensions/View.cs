@@ -1,11 +1,29 @@
 using System;
 using System.Linq;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class ViewExtension
   {
+    public static bool Close(this View view)
+    {
+      if (view is null)
+        throw new ArgumentNullException(nameof(view));
+
+      using (var uiDocument = new UIDocument(view.Document))
+      {
+        if (uiDocument.GetOpenUIViews().Where(x => x.ViewId == view.Id).FirstOrDefault() is UIView uiView)
+        {
+          uiView.Close();
+          return true;
+        }
+      }
+
+      return false;
+    }
+
     static ViewFamily ToViewFamily(this ViewType viewType)
     {
       switch (viewType)

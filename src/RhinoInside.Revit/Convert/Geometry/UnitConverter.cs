@@ -52,12 +52,12 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Factor for converting a length from Revit internal units to active Rhino document units.
     /// </summary>
-    internal static double ToModelLength => (double) (InternalUnitScale.Ratio / Model.UnitScale.Ratio);
+    internal static double ToModelLength => (double) (InternalUnitScale / Model.UnitScale);
 
     /// <summary>
     /// Factor for converting a length from active Rhino document units to Revit internal units.
     /// </summary>
-    internal static double ToInternalLength => (double) (Model.UnitScale.Ratio / InternalUnitScale.Ratio);
+    internal static double ToInternalLength => (double) (Model.UnitScale / InternalUnitScale);
     #endregion
 
     #region Static Methods

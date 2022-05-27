@@ -317,16 +317,22 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Nomen
     internal static bool TryGetElement<T>(this Document doc, out T element, string nomen, string parentName = default, BuiltInCategory? categoryId = default) where T : Element
     {
+      var nomenParameter = ElementExtension.GetNomenParameter(typeof(T));
+
       if (typeof(ElementType).IsAssignableFrom(typeof(T)))
       {
-        using (var collector = new FilteredElementCollector(doc).WhereElementIsKindOf(typeof(T)))
+        using (var collector = new FilteredElementCollector(doc))
         {
           element = collector.
-          WhereElementIsKindOf(typeof(T)).
-          WhereCategoryIdEqualsTo(categoryId).
-          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
-          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, nomen).
-          OfType<T>().FirstOrDefault();
+            WhereElementIsElementType().
+            WhereCategoryIdEqualsTo(categoryId).
+            WhereElementIsKindOf(typeof(T)).
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
+            WhereParameterEqualsTo(nomenParameter, nomen).
+            Cast<ElementType>().
+            Where(x => x.FamilyName.Equals(parentName, ElementNaming.ComparisonType)).
+            OfType<T>().
+            FirstOrDefault(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType));
         }
       }
       else if (typeof(View).IsAssignableFrom(typeof(T)))
@@ -334,15 +340,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
         using (var collector = new FilteredElementCollector(doc))
         {
           var elementCollector = collector.
-          WhereElementIsKindOf(typeof(T)).
-          WhereCategoryIdEqualsTo(categoryId);
+            WhereElementIsNotElementType().
+            WhereCategoryIdEqualsTo(categoryId).
+            WhereElementIsKindOf(typeof(T));
 
-          var nameParameter = ElementExtension.GetNomenParameter(typeof(T));
-          var enumerable = nameParameter != BuiltInParameter.INVALID ?
-            elementCollector.WhereParameterEqualsTo(nameParameter, nomen) :
-            elementCollector.Where(x => x.Name == nomen);
+          var enumerable = nomenParameter != BuiltInParameter.INVALID ?
+            elementCollector.WhereParameterEqualsTo(nomenParameter, nomen) :
+            elementCollector;
 
-          element = enumerable.Cast<View>().Where(x => !x.IsTemplate && x.ViewType.ToString() == parentName).OfType<T>().FirstOrDefault();
+          element = enumerable.Cast<View>().
+            Where(x => !x.IsTemplate && x.ViewType.ToString() == parentName).
+            OfType<T>().
+            FirstOrDefault(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType));
         }
       }
       else if (typeof(AppearanceAssetElement).IsAssignableFrom(typeof(T)))
@@ -354,15 +363,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
         using (var collector = new FilteredElementCollector(doc))
         {
           var elementCollector = collector.
-          WhereElementIsKindOf(typeof(T)).
-          WhereCategoryIdEqualsTo(categoryId);
+            WhereElementIsNotElementType().
+            WhereCategoryIdEqualsTo(categoryId).
+            WhereElementIsKindOf(typeof(T));
 
-          var nameParameter = ElementExtension.GetNomenParameter(typeof(T));
-          var enumerable = nameParameter != BuiltInParameter.INVALID ?
-            elementCollector.WhereParameterEqualsTo(nameParameter, nomen) :
-            elementCollector.Where(x => x.Name == nomen);
+          var enumerable = nomenParameter != BuiltInParameter.INVALID ?
+            elementCollector.WhereParameterEqualsTo(nomenParameter, nomen) :
+            elementCollector;
 
-          element = enumerable.OfType<T>().FirstOrDefault();
+          element = enumerable.
+            OfType<T>().
+            FirstOrDefault(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType));
         }
       }
 
@@ -379,49 +390,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Select(x => x.Name).
       WhereNomenPrefixedWith(prefix).
       NextNomenOrDefault() ?? $"{prefix} 1";
-    }
-
-    internal static IEnumerable<Element> GetNamesakeElements(this Document doc, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
-    {
-      var enumerable = Enumerable.Empty<Element>();
-
-      if (!string.IsNullOrEmpty(name))
-      {
-        if (typeof(ElementType).IsAssignableFrom(type))
-        {
-          enumerable = new FilteredElementCollector(doc).
-          WhereElementIsElementType().
-          WhereElementIsKindOf(type).
-          WhereCategoryIdEqualsTo(categoryId).
-          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
-          WhereParameterBeginsWith(BuiltInParameter.ALL_MODEL_TYPE_NAME, name);
-        }
-        else
-        {
-          var elementCollector = new FilteredElementCollector(doc).
-          WhereElementIsNotElementType().
-          WhereElementIsKindOf(type).
-          WhereCategoryIdEqualsTo(categoryId);
-
-          var nameParameter = ElementExtension.GetNomenParameter(type);
-          enumerable = nameParameter != BuiltInParameter.INVALID ?
-            elementCollector.WhereParameterBeginsWith(nameParameter, name) :
-            elementCollector.Where(x => x.Name.StartsWith(name));
-        }
-      }
-
-      return enumerable.
-        // WhereElementIsKindOf sometimes is not enough.
-        Where(x => type.IsAssignableFrom(x.GetType())).
-        // Look for elements called "name" or "name 1" but not "name abc".
-        Where
-        (
-          x =>
-          {
-            TryParseNomenId(x.Name, out var prefix, out var _);
-            return prefix == name;
-          }
-        );
     }
 
     internal static bool TryParseNomenId(string name, out string prefix, out int id)
@@ -456,7 +424,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       TryParseNomenId(nomen.Trim(), out nomen, out var _);
 
       var last = doc.GetNamesakeElements(nomen, type, parentName, categoryId).
-        OrderBy(x => x.GetElementNomen(), default(ElementNameComparer)).LastOrDefault();
+        OrderBy(x => x.GetElementNomen(), ElementNaming.NameComparer).LastOrDefault();
 
       if (last is object)
       {
@@ -475,10 +443,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       foreach (var value in enumerable)
       {
-        if (!value.StartsWith(prefix)) continue;
+        if (!value.StartsWith(prefix, ElementNaming.ComparisonType)) continue;
 
         TryParseNomenId(value, out var name, out var _);
-        if (name != prefix) continue;
+        if (!name.Equals(prefix, ElementNaming.ComparisonType)) continue;
 
         yield return value;
       }
@@ -486,7 +454,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static string NextNomenOrDefault(this IEnumerable<string> enumerable)
     {
-      var last = enumerable.OrderBy(x => x, default(ElementNameComparer)).LastOrDefault();
+      var last = enumerable.OrderBy(x => x, ElementNaming.NameComparer).LastOrDefault();
 
       if (last is object)
       {
@@ -495,6 +463,141 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return default;
+    }
+
+    internal static IEnumerable<Element> GetNamesakeElements(this Document doc, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
+    {
+      var enumerable = Enumerable.Empty<Element>();
+
+      if (string.IsNullOrWhiteSpace(name))
+        return enumerable;
+
+      var nomenParameter = ElementExtension.GetNomenParameter(type);
+
+      if (typeof(ElementType).IsAssignableFrom(type))
+      {
+        enumerable = new FilteredElementCollector(doc).
+        WhereElementIsElementType().
+        WhereCategoryIdEqualsTo(categoryId).
+        WhereElementIsKindOf(type).
+        WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
+        WhereParameterBeginsWith(nomenParameter, name).
+        Cast<ElementType>().
+        Where(x => x.FamilyName.Equals(parentName, ElementNaming.ComparisonType));
+      }
+      else if (typeof(View).IsAssignableFrom(type))
+      {
+        enumerable = new FilteredElementCollector(doc).
+        WhereElementIsNotElementType().
+        WhereCategoryIdEqualsTo(categoryId).
+        WhereElementIsKindOf(type).
+        WhereParameterBeginsWith(nomenParameter, name).
+        Cast<View>().
+        Where(x => !x.IsTemplate && x.ViewType.ToString() == parentName);
+      }
+      else
+      {
+        var elementCollector = new FilteredElementCollector(doc).
+        WhereElementIsNotElementType().
+        WhereCategoryIdEqualsTo(categoryId).
+        WhereElementIsKindOf(type);
+
+        enumerable = nomenParameter != BuiltInParameter.INVALID ?
+          elementCollector.WhereParameterBeginsWith(nomenParameter, name) :
+          elementCollector;
+      }
+
+      return enumerable.
+        // WhereElementIsKindOf sometimes is not enough.
+        Where(x => type.IsAssignableFrom(x.GetType())).
+        // Look for elements called "name" or "name 1" but not "name abc" or "Name 1".
+        Where
+        (
+          x =>
+          {
+            TryParseNomenId(x.GetElementNomen(nomenParameter), out var prefix, out var _);
+            return prefix.Equals(name, ElementNaming.ComparisonType);
+          }
+        );
+    }
+
+    internal static ElementId LookupElement(this Document target, Document source, ElementId elementId)
+    {
+      if (elementId.IsBuiltInId() || target.IsEquivalent(source))
+        return elementId;
+
+      if (source.GetElement(elementId) is Element element)
+      {
+        var nomen = element.GetElementNomen(out var nomenParameter);
+
+        if (element is ElementType type)
+        {
+          using (var collector = new FilteredElementCollector(target))
+          {
+            return collector.WhereElementIsElementType().
+              WhereElementIsKindOf(element.GetType()).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
+              WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, type.FamilyName).
+              WhereParameterEqualsTo(nomenParameter, nomen).
+              Cast<ElementType>().
+              Where(x => x.FamilyName.Equals(type.FamilyName, ElementNaming.ComparisonType)).
+              Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
+              Select(x => x.Id).
+              FirstOrDefault() ?? ElementId.InvalidElementId;
+          }
+        }
+        else if (element is View view)
+        {
+          using (var collector = new FilteredElementCollector(target))
+          {
+            return collector.WhereElementIsElementType().
+              WhereElementIsKindOf(element.GetType()).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
+              WhereParameterEqualsTo(nomenParameter, nomen).
+              Cast<View>().
+              Where(x => x.IsTemplate == view.IsTemplate).
+              Where(x => x.ViewType == view.ViewType).
+              Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
+              Select(x => x.Id).
+              FirstOrDefault() ?? ElementId.InvalidElementId;
+          }
+        }
+        else if (element is SharedParameterElement sharedParameter)
+        {
+          return SharedParameterElement.Lookup(target, sharedParameter.GuidValue)?.Id ?? ElementId.InvalidElementId;
+        }
+        else if (element is AppearanceAssetElement asset)
+        {
+          return AppearanceAssetElement.GetAppearanceAssetElementByName(target, asset.Name)?.Id ?? ElementId.InvalidElementId;
+        }
+        else
+        {
+          using (var collector = new FilteredElementCollector(target))
+          {
+            if (nomenParameter != BuiltInParameter.INVALID)
+            {
+              return collector.WhereElementIsNotElementType().
+              WhereElementIsKindOf(element.GetType()).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
+              WhereParameterEqualsTo(nomenParameter, nomen).
+              Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
+              Select(x => x.Id).
+              FirstOrDefault() ?? ElementId.InvalidElementId;
+            }
+            else
+            {
+              return collector.WhereElementIsNotElementType().
+              WhereElementIsKindOf(element.GetType()).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
+              Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
+              Select(x => x.Id).
+              FirstOrDefault() ?? ElementId.InvalidElementId;
+            }
+          }
+        }
+      }
+
+      return ElementId.InvalidElementId;
     }
     #endregion
 
@@ -786,12 +889,32 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     #region View
     /// <summary>
+    /// Gets the default <see cref="Autodesk.Revit.DB.View3D"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="username">View user name. Use <see cref="default"/> to query using the current session user name.</param>
+    /// <returns>The default <see cref="Autodesk.Revit.DB.View3D"/> or null if no default 3D view is found.</returns>
+    public static View3D GetDefault3DView(this Document doc, string username = default)
+    {
+      username = username ?? (doc.IsWorkshared ? doc.Application.Username : string.Empty);
+      var viewName = string.IsNullOrEmpty(username) ? "{3D}" : $"{{3D - {username}}}";
+
+      using (var collector = new FilteredElementCollector(doc).OfClass(typeof(View3D)))
+      {
+        return collector.
+          WhereParameterEqualsTo(BuiltInParameter.VIEW_NAME, viewName).
+          OfType<View3D>().Where(x => !x.IsTemplate && x.Name.Equals(viewName, ElementNaming.ComparisonType)).
+          FirstOrDefault();
+      }
+    }
+
+    /// <summary>
     /// Gets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
     /// </summary>
     /// <param name="doc"></param>
-    /// <returns>The active graphical <see cref="Autodesk.Revit.DB.View"/></returns>
+    /// <returns>The active graphical <see cref="Autodesk.Revit.DB.View"/> or null if no view is considered active.</returns>
     /// <remarks>
-    /// The active view is the view that last had focus in the UI. null if no view is considered active.
+    /// The active view is the last view of the provided document that had the focus in the UI.
     /// </remarks>
     public static View GetActiveGraphicalView(this Document doc)
     {
@@ -817,6 +940,131 @@ namespace RhinoInside.Revit.External.DB.Extensions
           return activeView;
         }
       });
+    }
+
+    /// <summary>
+    /// Sets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="view">View to be activated</param>
+    public static bool SetActiveGraphicalView(this Document document, View view) =>
+      SetActiveGraphicalView(document, view, out var _);
+
+    /// <summary>
+    /// Sets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="view">View to be activated</param>
+    public static bool SetActiveGraphicalView(this Document document, View view, out bool wasOpened)
+    {
+      if (view is null)
+        throw new ArgumentNullException(nameof(view));
+
+      if (!view.IsGraphicalView())
+        throw new ArgumentException("Input view is not a graphical view.", nameof(view));
+
+      if (!document.Equals(view.Document))
+        throw new ArgumentException("View does not belong to the specified document", nameof(view));
+
+      if (document.IsModifiable || document.IsReadOnly)
+        throw new InvalidOperationException("Invalid document state.");
+
+      using (var uiDocument = new Autodesk.Revit.UI.UIDocument(document))
+      {
+        var openViews = uiDocument.GetOpenUIViews();
+        if (openViews.Count == 0)
+          throw new InvalidOperationException("Input view document is not open on the Revit UI");
+
+        wasOpened = openViews.Any(x => x.ViewId == view.Id);
+
+        var activeUIDocument = uiDocument.Application.ActiveUIDocument;
+        if (activeUIDocument is null)
+          throw new InvalidOperationException("There are no documents opened on the Revit UI");
+
+        if (!document.IsEquivalent(activeUIDocument.Document))
+        {
+          // This method may fail if the view is empty, or due to the BUG if its Id coincides
+          // with the active one from an other document, also modifies the Zoom on the view.
+          // 
+          //// 1. We use `UIDocument.ShowElements` on the target view to activate its document.
+          ////
+          //// Looks like Revit `UIDocument.ShowElements` has a bug comparing with the current view.
+          //// If the ElementId or UniqueId coincides it does not change the active document.
+          //if (activeUIDocument.ActiveView.Id != view.Id && activeUIDocument.ActiveView.UniqueId != view.UniqueId)
+          //{
+          //  // Some filters are added to the `ARDB.FilteredElementCollector` to avoid the
+          //  // 'No valid view is found' message from Revit.
+          //  using
+          //  (
+          //    var collector = new FilteredElementCollector(document, view.Id).
+          //    WherePasses(new ElementCategoryFilter(ElementId.InvalidElementId, inverted: true)).
+          //    WherePasses(External.DB.CompoundElementFilter.ElementHasBoundingBoxFilter)
+          //  )
+          //  {
+          //    var elements = collector.ToElementIds();
+          //    if (elements.Count > 0)
+          //    {
+          //      uiDocument.ShowElements(elements);
+          //      return true;
+          //    }
+
+          //    // Continue with the alternative method when the view is completly empty.
+          //  }
+          //}
+
+          // 2. Alternative method is less performant but aims to work on any case
+          // without altering the view zoom level.
+          using (var group = new TransactionGroup(document))
+          {
+            group.IsFailureHandlingForcedModal = true;
+
+            if (group.Start("Activate View") == TransactionStatus.Started)
+            {
+              var textNoteId = default(ElementId);
+              using (var tx = new Transaction(document, "Activate Document"))
+              {
+                if (tx.Start() == TransactionStatus.Started)
+                {
+                  // We create an EMPTY sheet because it does not show any model element.
+                  // Hopefully will be fast enough.
+                  var sheet = ViewSheet.Create(view.Document, ElementId.InvalidElementId);
+                  var typeId = document.GetDefaultElementTypeId(ElementTypeGroup.TextNoteType);
+                  textNoteId = TextNote.Create(document, sheet.Id, XYZ.Zero, "Show me!!", typeId).Id;
+
+                  var options = tx.GetFailureHandlingOptions().
+                                   SetClearAfterRollback(true).
+                                   SetDelayedMiniWarnings(false).
+                                   SetForcedModalHandling(true).
+                                   SetFailuresPreprocessor(FailuresPreprocessor.NoErrors);
+
+                  if (tx.Commit(options) != TransactionStatus.Committed)
+                    return false;
+                }
+              }
+
+              // Since the new View is not already open `UIDocument.ShowElements` asks the user
+              // to look for that view. We press OK here.
+              var activeWindow = Microsoft.Win32.SafeHandles.WindowHandle.ActiveWindow;
+              void PressOK(object sender, Autodesk.Revit.UI.Events.DialogBoxShowingEventArgs args) =>
+                args.OverrideResult((int) Microsoft.Win32.SafeHandles.DialogResult.IDOK);
+
+              uiDocument.Application.DialogBoxShowing += PressOK;
+              uiDocument.ShowElements(textNoteId);
+              uiDocument.Application.DialogBoxShowing -= PressOK;
+              Microsoft.Win32.SafeHandles.WindowHandle.ActiveWindow = activeWindow;
+
+              uiDocument.ActiveView = view;
+              group.RollBack();
+            }
+          }
+        }
+        else if (uiDocument.ActiveView.Id != view.Id)
+        {
+          uiDocument.ActiveView = view;
+        }
+
+        return true;
+      }
     }
 
     /// <summary>
@@ -874,6 +1122,37 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       purgableTypeIds = default;
       return false;
+    }
+    #endregion
+
+    #region Delete
+    /// <summary>
+    /// Indicates if a collection of elements can be deleted.
+    /// </summary>
+    /// <param name="doc">The document.</param>
+    /// <param name="ids">The collection od ids to check.</param>
+    /// <returns>True if all elements can be deleted, false otherwise.</returns>
+    public static bool CanDeleteElements(this Document doc, ICollection<ElementId> ids)
+    {
+      foreach(var id in ids)
+      {
+        if (!DocumentValidation.CanDeleteElement(doc, id))
+          return false;
+
+        if (doc.GetElement(id) is Element element)
+        {
+          switch(element)
+          {
+            // `DocumentValidation.CanDeleteElement` return true on 'Gross Building Area'.
+            // UI crashes if we delete it.
+            case AreaScheme scheme:
+              return !scheme.IsGrossBuildingArea;
+          }
+        }
+        else return false;
+      }
+
+      return true;
     }
     #endregion
   }

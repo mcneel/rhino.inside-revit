@@ -155,10 +155,10 @@ namespace RhinoInside.Revit.GH.Parameters
           );
       }
 
-      categoriesBox.SelectedIndex = -1;
+      categoriesBox.SelectedIndex = ListBox.NoMatches;
       categoriesBox.Items.Clear();
       categoriesBox.DisplayMember = "DisplayName";
-
+      categoriesBox.BeginUpdate();
       foreach (var category in categories)
       {
         if (category is null)
@@ -166,11 +166,12 @@ namespace RhinoInside.Revit.GH.Parameters
         else
           categoriesBox.Items.Add(Types.Category.FromCategory(category));
       }
+      categoriesBox.EndUpdate();
 
       if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
       {
         var currentCategory = new Types.Category(doc, new ARDB.ElementId(SelectedBuiltInCategory));
-        categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.Category>().IndexOf(currentCategory, 0).FirstOr(-1);
+        categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.Category>().IndexOf(currentCategory, 0).FirstOr(ListBox.NoMatches);
       }
     }
 
@@ -188,60 +189,73 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private void RefreshFamiliesBox(ComboBox familiesBox, ComboBox categoriesBox)
     {
-      familiesBox.SelectedIndex = -1;
-      familiesBox.Items.Clear();
-
-      using (var collector = new ARDB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
+      try
       {
-        var categories = GetCategoryIds(categoriesBox);
+        familiesBox.SelectedIndex = ListBox.NoMatches;
+        familiesBox.BeginUpdate();
+        familiesBox.Items.Clear();
 
-        foreach (var familyName in collector.WhereElementIsElementType().OfClass(typeof(R)).
-          WherePasses(new ARDB.ElementMulticategoryFilter(categories)).Cast<R>().
-          Select(x => x.GetFamilyName()).Distinct())
+        using (var collector = new ARDB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
         {
-          familiesBox.Items.Add(familyName);
+          var categories = GetCategoryIds(categoriesBox);
+
+          foreach (var familyName in collector.WhereElementIsElementType().OfClass(typeof(R)).
+            WherePasses(new ARDB.ElementMulticategoryFilter(categories)).Cast<R>().
+            Select(x => x.FamilyName).Distinct(ElementNaming.NameEqualityComparer))
+          {
+            familiesBox.Items.Add(familyName);
+          }
         }
       }
+      finally { familiesBox.EndUpdate(); }
     }
 
     private void RefreshElementTypesList(ListBox listBox, ComboBox categoriesBox, ComboBox familiesBox)
     {
-      var doc = Revit.ActiveUIDocument.Document;
-
-      listBox.SelectedIndexChanged -= ElementTypesBox_SelectedIndexChanged;
-      listBox.Items.Clear();
-
-      if (categoriesBox.SelectedIndex != -1 || familiesBox.SelectedIndex != -1)
+      try
       {
-        var categories = GetCategoryIds(categoriesBox);
-        if (categories.Length > 0)
+        listBox.SelectedIndexChanged -= ElementTypesBox_SelectedIndexChanged;
+        listBox.BeginUpdate();
+        listBox.Items.Clear();
+
+        if (categoriesBox.SelectedIndex != ListBox.NoMatches || familiesBox.SelectedIndex != ListBox.NoMatches)
         {
-          var elementTypes = default(IEnumerable<R>);
-          using (var collector = new ARDB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
+          var categories = GetCategoryIds(categoriesBox);
+          if (categories.Length > 0)
           {
-            elementTypes = collector.WhereElementIsElementType().OfClass(typeof(R)).
-                            WherePasses(new ARDB.ElementMulticategoryFilter(categories)).Cast<R>();
-
-            var familyName = familiesBox.SelectedItem as string;
-
-            listBox.DisplayMember = "Name";
-            foreach (var elementType in elementTypes)
+            var elementTypes = default(IEnumerable<R>);
+            using (var collector = new ARDB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
             {
-              if
-              (
-                !string.IsNullOrEmpty(familyName) &&
-                elementType.GetFamilyName() != familyName
-              )
-                continue;
+              var familyName = familiesBox.SelectedItem as string;
 
-              listBox.Items.Add(Types.ElementType.FromElement(elementType));
+              elementTypes = collector.WhereElementIsElementType().OfClass(typeof(R)).
+                              WherePasses(new ARDB.ElementMulticategoryFilter(categories)).
+                              WhereParameterEqualsTo(ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, familyName).
+                              Cast<R>();
+
+              listBox.DisplayMember = "Name";
+              foreach (var elementType in elementTypes)
+              {
+                if
+                (
+                  !string.IsNullOrEmpty(familyName) &&
+                  !elementType.FamilyName.Equals(familyName, ElementNaming.ComparisonType)
+                )
+                  continue;
+
+                listBox.Items.Add(Types.ElementType.FromElement(elementType));
+              }
             }
           }
         }
-      }
 
-      listBox.SelectedIndex = listBox.Items.Cast<T>().IndexOf(PersistentValue, 0).FirstOr(-1);
-      listBox.SelectedIndexChanged += ElementTypesBox_SelectedIndexChanged;
+        listBox.SelectedIndex = listBox.Items.Cast<T>().IndexOf(PersistentValue, 0).FirstOr(ListBox.NoMatches);
+      }
+      finally
+      {
+        listBox.EndUpdate();
+        listBox.SelectedIndexChanged += ElementTypesBox_SelectedIndexChanged;
+      }
     }
 
     private void CategoryType_SelectedIndexChanged(object sender, EventArgs e)
@@ -280,7 +294,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (sender is ListBox listBox)
       {
-        if (listBox.SelectedIndex != -1)
+        if (listBox.SelectedIndex != ListBox.NoMatches)
         {
           if (listBox.Items[listBox.SelectedIndex] is T value)
           {

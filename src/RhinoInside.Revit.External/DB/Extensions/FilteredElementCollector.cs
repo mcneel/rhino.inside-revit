@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 
@@ -18,6 +19,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return list.BinarySearch(item, ElementIdComparer.NoNullsAscending) >= 0;
       else
         return collection.Contains(item);
+    }
+
+    public int IndexOf(ElementId item)
+    {
+      if (collection is List<ElementId> list)
+        return list.BinarySearch(item, ElementIdComparer.NoNullsAscending);
+      else
+      {
+        var index = -1;
+        foreach(var id in collection)
+        {
+          index++;
+          if (id == item) break;
+        }
+
+        return index;
+      }
     }
 
     public void CopyTo(ElementId[] array, int arrayIndex) => collection.CopyTo(array, arrayIndex);

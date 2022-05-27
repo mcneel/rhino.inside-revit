@@ -51,10 +51,10 @@ namespace RhinoInside.Revit
       switch (CompareMethodFromPattern(ref pattern, ref not))
       {
         case CompareMethod.Nothing:     return not ^ false;
-        case CompareMethod.Equals:      return not ^ string.Equals(source, pattern, ElementNameComparer.StringComparison);
-        case CompareMethod.StartsWith:  return not ^ source.StartsWith(pattern, ElementNameComparer.StringComparison);
-        case CompareMethod.EndsWith:    return not ^ source.EndsWith(pattern, ElementNameComparer.StringComparison);
-        case CompareMethod.Contains:    return not ^ (source.IndexOf(pattern, ElementNameComparer.StringComparison) >= 0);
+        case CompareMethod.Equals:      return not ^ string.Equals(source, pattern, ElementNaming.ComparisonType);
+        case CompareMethod.StartsWith:  return not ^ source.StartsWith(pattern, ElementNaming.ComparisonType);
+        case CompareMethod.EndsWith:    return not ^ source.EndsWith(pattern, ElementNaming.ComparisonType);
+        case CompareMethod.Contains:    return not ^ (source.IndexOf(pattern, ElementNaming.ComparisonType) >= 0);
         case CompareMethod.Wildcard:    return not ^ Microsoft.VisualBasic.CompilerServices.LikeOperator.LikeString(source, pattern, Microsoft.VisualBasic.CompareMethod.Text);
         case CompareMethod.Regex: var regex = new System.Text.RegularExpressions.Regex(pattern); return not ^ regex.IsMatch(source);
       }
