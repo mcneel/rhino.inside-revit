@@ -14,8 +14,8 @@ group: Deployment & Configs
 - Added "Add Text" component
 - Added "Add Region" component
 - Added "Add Detail Line" component
-- Added "Add Linear Dimension" component
 - Added "Add Angular Dimension" component
+- Added "Add Linear Dimension" component
 
 ### RC
 
