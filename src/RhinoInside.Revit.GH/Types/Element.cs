@@ -189,6 +189,7 @@ namespace RhinoInside.Revit.GH.Types
 
       { typeof(ARDB.TextElement),             (element)=> new TextElement           (element as ARDB.TextElement)       },
       { typeof(ARDB.Dimension),               (element)=> new Dimension             (element as ARDB.Dimension)         },
+      { typeof(ARDB.SpotDimension),           (element)=> new Dimension             (element as ARDB.Dimension)         },
 
       { typeof(ARDB.AssemblyInstance),        (element)=> new AssemblyInstance      (element as ARDB.AssemblyInstance)  },
 
