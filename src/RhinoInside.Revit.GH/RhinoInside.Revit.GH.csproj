@@ -146,14 +146,8 @@
     <Compile Include="Components\Element\Railing\ByCurve.cs" />
     <Compile Include="Components\Element\Roof\ByOutline.cs" />
     <Compile Include="Components\Element\SelectDeselectElement.cs" />
-    <Compile Include="Components\Element\Sheet\TitleBlockByType.cs" />
-    <Compile Include="Components\Element\Sheet\QuerySheets.cs" />
-    <Compile Include="Components\Element\Sheet\SheetByNumber_Assembly.cs" />
-    <Compile Include="Components\Element\Sheet\SheetByNumber_Placeholder.cs" />
-    <Compile Include="Components\Element\Sheet\SheetIdentity.cs" />
     <Compile Include="Components\Element\SketchPlane\ByPlane.cs" />
     <Compile Include="Components\Element\Sketch\Deconstruct.cs" />
-    <Compile Include="Components\Element\Sheet\SheetByNumber.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBeam.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />
@@ -210,6 +204,13 @@
     <Compile Include="Components\ParameterElement\ProjectParameter.cs" />
     <Compile Include="Components\ParameterElement\QueryParameters.cs" />
     <Compile Include="Components\ParameterElement\SharedParameters.cs" />
+    <Compile Include="Components\Sheets\AddTitleBlock.cs" />
+    <Compile Include="Components\Sheets\AddViewport.cs" />
+    <Compile Include="Components\Sheets\QuerySheets.cs" />
+    <Compile Include="Components\Sheets\SheetByNumber.cs" />
+    <Compile Include="Components\Sheets\SheetByNumber_Assembly.cs" />
+    <Compile Include="Components\Sheets\SheetByNumber_Placeholder.cs" />
+    <Compile Include="Components\Sheets\SheetIdentity.cs" />
     <Compile Include="Components\Topology\AddArea.cs" />
     <Compile Include="Components\Topology\AddAreaBoundaryLine.cs" />
     <Compile Include="Components\Element\Annotation\AddAreaTag.cs" />
@@ -226,7 +227,6 @@
     <Compile Include="Components\TransactionBaseComponent.cs" />
     <Compile Include="Components\Views\Active.cs" />
     <Compile Include="Components\Views\AddViewPlan.cs" />
-    <Compile Include="Components\Sheets\AddViewport.cs" />
     <Compile Include="Components\Views\ClusterViewsByType.cs" />
     <Compile Include="Components\Views\ExportImage.cs" />
     <Compile Include="Components\Views\Extents.cs" />
