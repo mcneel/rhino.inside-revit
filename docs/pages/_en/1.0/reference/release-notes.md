@@ -16,6 +16,8 @@ group: Deployment & Configs
 - Added "Add Detail Line" component
 - Added "Add Angular Dimension" component
 - Added "Add Linear Dimension" component
+- Added "Add Spot Elevation" component
+- Added "Add Spot Coordinate" component
 
 ### RC
 
