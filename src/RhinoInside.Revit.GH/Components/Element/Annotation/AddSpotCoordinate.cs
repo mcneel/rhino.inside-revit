@@ -138,6 +138,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       {
         return false;
       }
+
 #if REVIT_2021
       if (!leader.GetEndPoint(0).AlmostEquals(spot.LeaderShoulderPosition, GeometryObjectTolerance.Internal.VertexTolerance) &&
           !leader.GetEndPoint(1).AlmostEquals(spot.LeaderShoulderPosition, GeometryObjectTolerance.Internal.VertexTolerance))

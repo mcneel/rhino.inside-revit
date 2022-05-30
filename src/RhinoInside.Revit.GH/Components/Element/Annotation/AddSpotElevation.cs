@@ -146,6 +146,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         return false;
       }
 #endif
+
       // Elements
       if (!Contains(spot.References, element.Id)) return false;
 
