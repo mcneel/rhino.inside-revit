@@ -95,6 +95,39 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public virtual Curve Leader
+    {
+      get
+      {
+        if (Value is ARDB.Dimension dimension)
+        {
+          if (dimension.HasLeader)
+          {
+#if REVIT_2021
+            if (dimension is ARDB.SpotDimension spot && spot.LeaderHasShoulder)
+              return new PolylineCurve
+              (
+                new Point3d[]
+                {
+                    spot.LeaderEndPosition.ToPoint3d(),
+                    spot.LeaderShoulderPosition.ToPoint3d(),
+                    spot.Origin.ToPoint3d()
+                }
+              );
+#endif
+
+            return new LineCurve
+            (
+              dimension.LeaderEndPosition.ToPoint3d(),
+              dimension.Origin.ToPoint3d()
+            );
+          }
+        }
+
+        return default;
+      }
+    }
+
     static string FormatValue(double value, ARDB.DimensionShape dimensionShape)
     {
       switch (dimensionShape)
@@ -110,6 +143,29 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return $"{GH_Format.FormatDouble(GeometryDecoder.ToModelLength(value))} {GH_Format.RhinoUnitSymbol()}";
+    }
+
+    static string FormatValue(ARDB.Dimension dimension, ARDB.DimensionStyleType style)
+    {
+      switch (style)
+      {
+        case ARDB.DimensionStyleType.Angular:
+          return $"{Rhino.RhinoMath.ToDegrees(dimension.Value.Value):N2}°";
+
+        case ARDB.DimensionStyleType.Radial:
+          return $"R {GH_Format.FormatDouble(GeometryDecoder.ToModelLength(dimension.Value.Value))} {GH_Format.RhinoUnitSymbol()}";
+
+        case ARDB.DimensionStyleType.Diameter:
+          return $"⌀ {GH_Format.FormatDouble(GeometryDecoder.ToModelLength(dimension.Value.Value))} {GH_Format.RhinoUnitSymbol()}";
+
+        case ARDB.DimensionStyleType.SpotElevation:
+          return $"{GH_Format.FormatDouble(GeometryDecoder.ToModelLength(dimension.Origin.Z))} {GH_Format.RhinoUnitSymbol()}";
+
+        case ARDB.DimensionStyleType.SpotCoordinate:
+          return $"X {GeometryDecoder.ToModelLength(dimension.Origin.X):N3}{Environment.NewLine}Y {GeometryDecoder.ToModelLength(dimension.Origin.Y):N3}";
+      }
+
+      return $"{GH_Format.FormatDouble(GeometryDecoder.ToModelLength(dimension.Value.Value))} {GH_Format.RhinoUnitSymbol()}";
     }
 
     public override void DrawViewportWires(GH_PreviewWireArgs args)
@@ -149,16 +205,14 @@ namespace RhinoInside.Revit.GH.Types
             args.Pipeline.DrawArrowHead(curve.PointAtEnd, curve.TangentAtEnd, args.Color, 16, 0.0);
           }
 
-          if (dimension.Value.HasValue)
+          if (Leader is Curve leader)
           {
-            var text = FormatValue(dimension.Value.Value, dimension.DimensionShape);
-            args.Pipeline.DrawDot(dimension.TextPosition.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
+            args.Pipeline.DrawCurve(leader, args.Color, args.Thickness);
+            args.Pipeline.DrawArrowHead(leader.PointAtEnd, leader.TangentAtEnd, args.Color, 16, 0.0);
           }
-          else if (dimension is ARDB.SpotDimension spot)
-          {
-            var text = FormatValue(dimension.Origin.Z, dimension.DimensionShape);
-            args.Pipeline.DrawDot(dimension.Origin.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
-          }
+
+          var text = FormatValue(dimension, dimension.DimensionType.StyleType);
+          args.Pipeline.DrawDot(dimension.TextPosition.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
         }
       }
     }

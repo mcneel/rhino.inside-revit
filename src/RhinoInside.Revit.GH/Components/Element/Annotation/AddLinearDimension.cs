@@ -41,21 +41,21 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
       ),
       new ParamDefinition
       (
-        new Param_Line
-        {
-          Name = "Line",
-          NickName = "L",
-          Description = "Line to place a specific dimension",
-        }
-      ),
-      new ParamDefinition
-      (
         new Parameters.GraphicalElement()
         {
           Name = "References",
           NickName = "R",
           Description = "References to create a specific dimension",
           Access = GH_ParamAccess.list
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_Line
+        {
+          Name = "Line",
+          NickName = "L",
+          Description = "Line to place a specific dimension",
         }
       ),
       new ParamDefinition
@@ -96,9 +96,9 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
         view.Document, _Output_, dimension =>
         {
           // Input
-          if (!Params.GetData(DA, "Line", out Line? line)) return null;
           if (!Params.GetDataList(DA, "References", out IList<ARDB.Element> elements)) return null;
-          if (!Params.TryGetData(DA, "Type", out ARDB.DimensionType type)) return null;
+          if (!Params.GetData(DA, "Line", out Line? line)) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.DimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.LinearDimensionType)) return null;
 
           if
           (

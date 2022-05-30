@@ -41,6 +41,15 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       ),
       new ParamDefinition
       (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Reference",
+          NickName = "R",
+          Description = "Reference to create a specific dimension",
+        }
+      ),
+      new ParamDefinition
+      (
         new Param_Point
         {
           Name = "Point",
@@ -50,21 +59,24 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       ),
       new ParamDefinition
       (
-        new Param_Line
+        new Param_Point
         {
-          Name = "Leader",
-          NickName = "L",
-          Description = "Line to place the leader's spot coordinate",
-        }
+          Name = "Head Location",
+          NickName = "HL",
+          Description = "Location to place the leader's spot text",
+          Optional = true
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.ElementType()
         {
-          Name = "Reference",
-          NickName = "R",
-          Description = "Reference to create a specific dimension",
-        }
+          Name = "Type",
+          NickName = "T",
+          Description = "Element type of the given dimension",
+          Optional = true,
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_SpotCoordinates
+        }, ParamRelevance.Occasional
       )
     };
 
@@ -94,8 +106,10 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         {
           // Input
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
-          if (!Params.GetData(DA, "Leader", out Line? line)) return null;
           if (!Params.GetData(DA, "Reference", out ARDB.Element element)) return null;
+          if (!Params.TryGetData(DA, "Head Location", out Point3d? headLocation)) return null;
+          if (headLocation is null) headLocation = point;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.SpotDimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.SpotCoordinateType)) return null;
 
           if
           (
@@ -106,7 +120,14 @@ namespace RhinoInside.Revit.GH.Components.Annotation
             throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
 
           // Compute
-          spot = Reconstruct(spot, view, point.Value.ToXYZ(), line.Value.ToLine(), element);
+          spot = Reconstruct
+          (
+            spot, view, element,
+            point.Value.ToXYZ(),
+            (headLocation.Value - Vector3d.XAxis * ((headLocation.Value.X - point.Value.X) / 3.0)).ToXYZ(),
+            headLocation.Value.ToXYZ(),
+            type
+          );
 
           DA.SetData(_Spot_, spot);
           return spot;
@@ -123,40 +144,48 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       return false;
     }
 
-    bool Reuse(ARDB.SpotDimension spot, ARDB.View view, ARDB.XYZ point, ARDB.Line leader, ARDB.Element element)
+    bool Reuse
+    (
+      ARDB.SpotDimension spot, ARDB.View view,
+      ARDB.Element element,
+      ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end
+    )
     {
       if (spot is null) return false;
       if (spot.OwnerViewId != view.Id) return false;
 
-      // Point
-      if (!spot.Origin.AlmostEquals(point, GeometryObjectTolerance.Internal.VertexTolerance)) return false;
-
-      // Leader
-      if (!leader.GetEndPoint(0).AlmostEquals(spot.LeaderEndPosition, GeometryObjectTolerance.Internal.VertexTolerance) &&
-          !leader.GetEndPoint(1).AlmostEquals(spot.LeaderEndPosition, GeometryObjectTolerance.Internal.VertexTolerance))
-      {
-        return false;
-      }
-#if REVIT_2021
-      if (!leader.GetEndPoint(0).AlmostEquals(spot.LeaderShoulderPosition, GeometryObjectTolerance.Internal.VertexTolerance) &&
-          !leader.GetEndPoint(1).AlmostEquals(spot.LeaderShoulderPosition, GeometryObjectTolerance.Internal.VertexTolerance))
-      {
-        return false;
-      }
-#endif
       // Elements
       if (!Contains(spot.References, element.Id)) return false;
+
+      // Point
+      var vertexTolerance = spot.Document.Application.VertexTolerance;
+
+      if (!spot.Origin.AlmostEquals(point, vertexTolerance)) return false;
+
+      // Leader
+#if REVIT_2021
+      if (spot.LeaderHasShoulder)
+      {
+        if (!bend.AlmostEquals(spot.LeaderShoulderPosition, vertexTolerance))
+          spot.LeaderShoulderPosition = bend;
+      }
+#endif
+
+      if (!end.AlmostEquals(spot.LeaderEndPosition, vertexTolerance))
+        spot.LeaderEndPosition = end;
 
       return true;
     }
 
-    ARDB.SpotDimension Create(ARDB.View view, ARDB.XYZ point, ARDB.Line leader, ARDB.Element element)
+    ARDB.SpotDimension Create
+    (
+      ARDB.View view,
+      ARDB.Element element,
+      ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end
+    )
     {
-      var reference = GetReferences(new List<ARDB.Element> { element }, point);
-      if (point.DistanceTo(leader.GetEndPoint(0)) < point.DistanceTo(leader.GetEndPoint(1)))
-        return view.Document.Create.NewSpotCoordinate(view, reference[0], point, leader.GetEndPoint(0), leader.GetEndPoint(1), point, true);
-      else
-        return view.Document.Create.NewSpotCoordinate(view, reference[0], point, leader.GetEndPoint(1), leader.GetEndPoint(0), point, true);
+      var reference = GetReferences(new List<ARDB.Element> { element }, point).FirstOrDefault();
+      return view.Document.Create.NewSpotCoordinate(view, reference, point, bend, end, point, true);
     }
 
     static IList<ARDB.Reference> GetReferences(IList<ARDB.Element> elements, ARDB.XYZ point)
@@ -186,7 +215,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
               var closestEdge = default(ARDB.Edge);
               var minDistance = double.PositiveInfinity;
-              foreach (var edge in edges)
+              foreach (var edge in edges.Where(x => x.Reference is object))
               {
                 var distance = edge.AsCurve().Distance(point);
                 if (distance < minDistance)
@@ -208,10 +237,20 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
     }
 
-    ARDB.SpotDimension Reconstruct(ARDB.SpotDimension spot, ARDB.View view, ARDB.XYZ point, ARDB.Line leader, ARDB.Element element)
+    ARDB.SpotDimension Reconstruct
+    (
+      ARDB.SpotDimension spot,
+      ARDB.View view,
+      ARDB.Element element,
+      ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end,
+      ARDB.SpotDimensionType type
+    )
     {
-      if (!Reuse(spot, view, point, leader, element))
-        spot = Create(view, point, leader, element);
+      if (!Reuse(spot, view, element, point, bend, end))
+        spot = Create(view, element, point, bend, end);
+
+      if (spot.GetTypeId() != type.Id) spot.ChangeTypeId(type.Id);
+      spot.HasLeader = !point.AlmostEquals(end, view.Document.Application.VertexTolerance);
 
       return spot;
     }

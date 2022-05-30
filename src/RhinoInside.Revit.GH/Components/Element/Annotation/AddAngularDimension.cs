@@ -41,21 +41,21 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       ),
       new ParamDefinition
       (
-        new Param_Arc
-        {
-          Name = "Arc",
-          NickName = "A",
-          Description = "Arc to place a specific dimension",
-        }
-      ),
-      new ParamDefinition
-      (
         new Parameters.GraphicalElement()
         {
           Name = "References",
           NickName = "R",
           Description = "References to create a specific dimension",
           Access = GH_ParamAccess.list
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_Arc
+        {
+          Name = "Arc",
+          NickName = "A",
+          Description = "Arc to place a specific dimension",
         }
       ),
       new ParamDefinition
@@ -96,9 +96,9 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         view.Document, _Output_, dimension =>
         {
           // Input
-          if (!Params.GetData(DA, "Arc", out Arc? arc)) return null;
           if (!Params.GetDataList(DA, "References", out IList<ARDB.Element> elements)) return null;
-          if (!Params.TryGetData(DA, "Type", out ARDB.DimensionType type)) return null;
+          if (!Params.GetData(DA, "Arc", out Arc? arc)) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.DimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.AngularDimensionType)) return null;
 
           if
           (
