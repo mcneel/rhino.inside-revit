@@ -382,7 +382,6 @@
     <Compile Include="Types\SketchPlane.cs" />
     <Compile Include="Types\Material.cs" />
     <Compile Include="Types\HostObject.cs" />
-    <Compile Include="Types\DataObject.cs" />
     <Compile Include="Types\StructuralMember.cs" />
     <Compile Include="Types\StructuralAsset.cs" />
     <Compile Include="Types\TextureData.cs" />
