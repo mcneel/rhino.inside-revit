@@ -326,7 +326,24 @@ namespace RhinoInside.Revit.GH.Types
     public IEnumerable<Curve> GridLineV => Value is ARDB.CurtainGrid grid ?
       grid.GetVGridLineIds().Select(x => (Document.GetElement(x) as ARDB.CurtainGridLine).FullCurve.ToCurve()) :
       default;
-
     #endregion
+  }
+
+  [Kernel.Attributes.Name("Curtain Cell")]
+  public class CurtainCell : DocumentObject
+  {
+    public CurtainCell() : base() { }
+    public CurtainCell(ARDB.Document doc, ARDB.CurtainCell value) : base(doc, value)
+    { }
+
+    #region DocumentObject
+    public override string DisplayName =>  "Curtain Cell";
+
+    protected override void ResetValue()
+    {
+      base.ResetValue();
+    }
+    #endregion
+
   }
 }

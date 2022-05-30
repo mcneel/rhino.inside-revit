@@ -13,11 +13,10 @@ namespace RhinoInside.Revit.GH.Types
   public class Dimension : GraphicalElement
   {
     protected override Type ValueType => typeof(ARDB.Dimension);
-    public static explicit operator ARDB.Dimension(Dimension value) => value?.Value;
     public new ARDB.Dimension Value => base.Value as ARDB.Dimension;
 
     public Dimension() { }
-    public Dimension(ARDB.Dimension dimension) : base(dimension) { }
+    public Dimension(ARDB.Dimension element) : base(element) { }
 
     public override Plane Location
     {
