@@ -1,13 +1,10 @@
 using System;
-using System.Linq;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
-  using Grasshopper.Kernel;
-  using RhinoInside.Revit.External.DB.Extensions;
 
   [Kernel.Attributes.Name("Text Element")]
   public class TextElement : GraphicalElement
