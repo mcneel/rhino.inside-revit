@@ -75,15 +75,14 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       (
         new Parameters.GraphicalElement()
         {
-          Name = _Output_,
-          NickName = _Output_.Substring(0, 1),
-          Description = $"Output {_Output_}",
-          Access = GH_ParamAccess.item
+          Name = _Spot_,
+          NickName = _Spot_.Substring(0, 1),
+          Description = $"Output {_Spot_}"
         }
       )
     };
 
-    const string _Output_ = "Spot Elevation";
+    const string _Spot_ = "Spot Elevation";
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -91,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
       ReconstructElement<ARDB.SpotDimension>
       (
-        view.Document, _Output_, spot =>
+        view.Document, _Spot_, spot =>
         {
           // Input
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
@@ -109,7 +108,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           // Compute
           spot = Reconstruct(spot, view, point.Value.ToXYZ(), line.Value.ToLine(), element);
 
-          DA.SetData(_Output_, spot);
+          DA.SetData(_Spot_, spot);
           return spot;
         }
       );
@@ -183,24 +182,21 @@ namespace RhinoInside.Revit.GH.Components.Annotation
               var geometry = element.get_Geometry(options);
 
               var edges = geometry.OfType<ARDB.Solid>().
-                SelectMany(y => y.Edges.Cast<ARDB.Edge>()).
-                ToList();
+                SelectMany(y => y.Edges.Cast<ARDB.Edge>());
 
-              var edge = default(ARDB.Edge);
-              var distance = Double.MaxValue;
-              foreach (var e in edges)
+              var closestEdge = default(ARDB.Edge);
+              var minDistance = double.PositiveInfinity;
+              foreach (var edge in edges)
               {
-                e.AsCurve().ToCurve().ClosestPoint(point.ToPoint3d(), out double t);
-                var d = point.ToPoint3d().DistanceTo(e.AsCurve().ToCurve().PointAt(t));
-                if (d < distance)
+                var distance = edge.AsCurve().Distance(point);
+                if (distance < minDistance)
                 {
-                  edge = e;
-                  distance = d;
+                  closestEdge = edge;
+                  minDistance = distance;
                 }
               }
 
-              reference = edge.Reference;
-
+              reference = closestEdge.Reference;
             }
             break;
         }
