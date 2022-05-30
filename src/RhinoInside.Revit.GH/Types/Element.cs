@@ -165,6 +165,8 @@ namespace RhinoInside.Revit.GH.Types
 
       { typeof(ARDB.Sketch),                  (element)=> new Sketch                (element as ARDB.Sketch)            },
       { typeof(ARDB.SketchPlane),             (element)=> new SketchPlane           (element as ARDB.SketchPlane)       },
+      { typeof(ARDB.CurveElement),            (element)=> new CurveElement          (element as ARDB.CurveElement)      },
+
       { typeof(ARDB.DatumPlane),              (element)=> new DatumPlane            (element as ARDB.DatumPlane)        },
       { typeof(ARDB.Level),                   (element)=> new Level                 (element as ARDB.Level)             },
       { typeof(ARDB.Grid),                    (element)=> new Grid                  (element as ARDB.Grid)              },
@@ -183,8 +185,9 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.FamilyInstance),          (element)=> new FamilyInstance        (element as ARDB.FamilyInstance)    },
       { typeof(ARDB.Panel),                   (element)=> new Panel                 (element as ARDB.Panel)             },
       { typeof(ARDB.Mullion),                 (element)=> new Mullion               (element as ARDB.Mullion)           },
+
+      { typeof(ARDB.TextElement),             (element)=> new TextElement           (element as ARDB.TextElement)       },
       { typeof(ARDB.Dimension),               (element)=> new Dimension             (element as ARDB.Dimension)         },
-      { typeof(ARDB.CurveElement),            (element)=> new CurveElement          (element as ARDB.CurveElement)      },
 
       { typeof(ARDB.AssemblyInstance),        (element)=> new AssemblyInstance      (element as ARDB.AssemblyInstance)  },
 
