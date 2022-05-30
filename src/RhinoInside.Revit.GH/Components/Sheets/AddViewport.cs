@@ -42,6 +42,15 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       ),
       new ParamDefinition
       (
+        new Parameters.View()
+        {
+          Name = "View",
+          NickName = "V",
+          Description = "View to place on the sheet"
+        }
+      ),
+      new ParamDefinition
+      (
         new Param_Point
         {
           Name = "Point",
@@ -49,15 +58,6 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           Description = "Viewport center point on sheet",
           Optional = true
         }, ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
-        new Parameters.View()
-        {
-          Name = "View",
-          NickName = "V",
-          Description = "View to place on the sheet"
-        }
       ),
     };
 
@@ -86,8 +86,8 @@ namespace RhinoInside.Revit.GH.Components.Sheets
         sheet.Document, _Viewport_, viewport =>
         {
           // Input
-          if (!Params.TryGetData(DA, "Point", out Point3d? point)) return null;
           if (!Params.GetData(DA, "View", out ARDB.View view)) return null;
+          if (!Params.TryGetData(DA, "Point", out Point3d? point)) return null;
 
           if (point is null)
           {
@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           (
             point.Value.X,
             point.Value.Y,
-            GeometryDecoder.ToModelLength(sheet.Origin.Z)
+            0.0
           );
 
           // Compute
@@ -123,6 +123,8 @@ namespace RhinoInside.Revit.GH.Components.Sheets
     bool Reuse(ARDB.Viewport viewport, ARDB.ViewSheet sheet, ARDB.View view, ARDB.XYZ point)
     {
       if (viewport is null) return false;
+      if (viewport.SheetId != sheet.Id) return false;
+      if (viewport.ViewId != view.Id) return false;
 
       if (!viewport.GetBoxCenter().AlmostEquals(point, viewport.Document.Application.VertexTolerance))
         viewport.SetBoxCenter(point);
