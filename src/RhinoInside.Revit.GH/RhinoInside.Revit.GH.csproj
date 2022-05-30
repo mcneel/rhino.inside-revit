@@ -65,6 +65,8 @@
     <Compile Include="Components\Element\Annotation\AddDetailLine.cs" />
     <Compile Include="Components\Element\Annotation\AddLinearDimension.cs" />
     <Compile Include="Components\Element\Annotation\AddRegion.cs" />
+    <Compile Include="Components\Element\Annotation\AddSpotCoordinate.cs" />
+    <Compile Include="Components\Element\Annotation\AddSpotElevation.cs" />
     <Compile Include="Components\Element\Annotation\AddText.cs" />
     <Compile Include="Components\Element\Opening\AddFaceOpening.cs" />
     <Compile Include="Components\Element\Opening\AddOpening.cs" />
@@ -249,6 +251,7 @@
     <Compile Include="Surface.cs" />
     <Compile Include="Types\Annotations\Dimension.cs" />
     <Compile Include="Types\Annotations\SpatialElementTag.cs" />
+    <Compile Include="Types\Annotations\SpotDimension.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
