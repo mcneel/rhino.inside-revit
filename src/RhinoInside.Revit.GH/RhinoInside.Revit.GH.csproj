@@ -252,6 +252,7 @@
     <Compile Include="Types\Annotations\Dimension.cs" />
     <Compile Include="Types\Annotations\SpatialElementTag.cs" />
     <Compile Include="Types\Annotations\SpotDimension.cs" />
+    <Compile Include="Types\Annotations\TextElement.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
