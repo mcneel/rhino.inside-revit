@@ -432,27 +432,21 @@ namespace Autodesk.Revit.DB
   using RhinoInside.Revit.External.DB;
   using RhinoInside.Revit.External.DB.Extensions;
 
-  abstract class ElementExternalFilter : IDisposable
+  class ElementIdSetFilter : IDisposable
   {
-    public virtual bool IsValidObject => true;
-    public bool Inverted { get; protected set; }
-    public virtual void Dispose() { }
-
-    public abstract bool PassesFilter(Document document, ElementId id);
-    public abstract bool PassesFilter(Element element);
-  }
-
-  class ElementIdSetFilter : ElementExternalFilter
-  {
-    protected static readonly FilterNumericRuleEvaluator NumericEqualsEvaluator = new FilterNumericEquals();
-    protected static readonly ParameterValueProvider IdParamProvider = new ParameterValueProvider(new ElementId(BuiltInParameter.ID_PARAM));
+    static readonly FilterNumericRuleEvaluator NumericEqualsEvaluator = new FilterNumericEquals();
+    static readonly ParameterValueProvider IdParamProvider = new ParameterValueProvider(new ElementId(BuiltInParameter.ID_PARAM));
 
     readonly HashSet<ElementId> IdsToInclude;
     public ElementIdSetFilter(ICollection<ElementId> idsToInclude) => IdsToInclude = new HashSet<ElementId>(idsToInclude);
     public ICollection<ElementId> GetIdsToInclude() => IdsToInclude;
 
-    public override bool PassesFilter(Document document, ElementId id) => IdsToInclude.Contains(id);
-    public override bool PassesFilter(Element element) => IdsToInclude.Contains(element.Id);
+    public bool IsValidObject => true;
+    public bool Inverted { get; protected set; }
+    public virtual void Dispose() { }
+
+    public bool PassesFilter(Document document, ElementId id) => IdsToInclude.Contains(id);
+    public bool PassesFilter(Element element) => IdsToInclude.Contains(element.Id);
 
     public static implicit operator ElementFilter(ElementIdSetFilter filter) => CompoundElementFilter.Union
     (
@@ -462,14 +456,12 @@ namespace Autodesk.Revit.DB
     );
   }
 
-  class VisibleInViewFilter : ElementExternalFilter
+  class VisibleInViewFilter : IDisposable
   {
     readonly Document Document;
     readonly ElementId ViewId;
     readonly ICollection<ElementId> VisibleElementIds;
     readonly ICollection<ElementId> VisibleCategoryIds;
-
-    public override bool IsValidObject => Document.IsValidObject;
 
     public VisibleInViewFilter(Document document, ElementId viewId) : this(document, viewId, inverted: false) { }
 
@@ -504,7 +496,11 @@ namespace Autodesk.Revit.DB
 #endif
     }
 
-    public override bool PassesFilter(Document document, ElementId id)
+    public bool IsValidObject => Document.IsValidObject;
+    public bool Inverted { get; protected set; }
+    public void Dispose() { }
+
+    public bool PassesFilter(Document document, ElementId id)
     {
       if (document is null) throw new ArgumentNullException(nameof(document));
       if (id is null) throw new ArgumentNullException(nameof(id));
@@ -513,7 +509,7 @@ namespace Autodesk.Revit.DB
       return VisibleElementIds.Contains(id) != Inverted;
     }
 
-    public override bool PassesFilter(Element element)
+    public bool PassesFilter(Element element)
     {
       if (element is null) throw new ArgumentNullException(nameof(element));
       if (!Document.IsEquivalent(element.Document)) throw new ArgumentException("Invalid element document", nameof(element));
