@@ -55,14 +55,14 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       (
         new Parameters.CurveElement()
         {
-          Name = _Output_,
-          NickName = _Output_.Substring(0, 1),
-          Description = $"Output {_Output_}"
+          Name = _DetailLine_,
+          NickName = _DetailLine_.Substring(0, 1),
+          Description = $"Output {_DetailLine_}"
         }
       )
     };
 
-    const string _Output_ = "Detail Line";
+    const string _DetailLine_ = "Detail Line";
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
       ReconstructElement<ARDB.DetailCurve>
       (
-        view.Document, _Output_, detailCurve =>
+        view.Document, _DetailLine_, detailCurve =>
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve)) return null;
@@ -99,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           // Compute
           detailCurve = Reconstruct(detailCurve, view, curve.ToCurve());
 
-          DA.SetData(_Output_, detailCurve);
+          DA.SetData(_DetailLine_, detailCurve);
           return detailCurve;
         }
       );

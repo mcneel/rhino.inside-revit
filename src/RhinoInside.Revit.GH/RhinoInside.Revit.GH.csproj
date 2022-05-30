@@ -226,6 +226,7 @@
     <Compile Include="Components\TransactionBaseComponent.cs" />
     <Compile Include="Components\Views\Active.cs" />
     <Compile Include="Components\Views\AddViewPlan.cs" />
+    <Compile Include="Components\Sheets\AddViewport.cs" />
     <Compile Include="Components\Views\ClusterViewsByType.cs" />
     <Compile Include="Components\Views\ExportImage.cs" />
     <Compile Include="Components\Views\Extents.cs" />
@@ -393,6 +394,7 @@
     <Compile Include="Types\Views\View.cs" />
     <Compile Include="Types\Views\View3D.cs" />
     <Compile Include="Types\Views\ViewPlan.cs" />
+    <Compile Include="Types\Views\Viewport.cs" />
     <Compile Include="Types\Views\ViewSection.cs" />
     <Compile Include="Types\Views\ViewSheet.cs" />
     <Compile Include="Types\Wall.cs" />
