@@ -18,6 +18,7 @@ group: Deployment & Configs
 - Added "Add Linear Dimension" component
 - Added "Add Spot Elevation" component
 - Added "Add Spot Coordinate" component
+- Added "Add Viewport" component
 
 ### RC
 
