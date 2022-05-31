@@ -22,32 +22,49 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.Dimension dimension && dimension.Curve is ARDB.Curve curve)
+        if (Value is ARDB.Dimension dimension)
         {
-          try
+          if (dimension.Curve is ARDB.Curve curve)
           {
-            if (!curve.IsBound)
+            try
             {
-              var segments = dimension.Segments.Cast<ARDB.DimensionSegment>().Where(x => x.Value.HasValue).ToArray();
-              if (segments.Length > 0)
+              if (!curve.IsBound)
               {
-                var first = segments.First();
-                var start = curve.Project(first.Origin);
+                var segments = dimension.Segments.Cast<ARDB.DimensionSegment>().Where(x => x.Value.HasValue).ToArray();
+                if (segments.Length > 0)
+                {
+                  var first = segments.First();
+                  var start = curve.Project(first.Origin);
 
-                var last = segments.Last();
-                var end = curve.Project(last.Origin);
+                  var last = segments.Last();
+                  var end = curve.Project(last.Origin);
 
-                curve.MakeBound(start.Parameter - first.Value.Value * 0.5, end.Parameter + last.Value.Value * 0.5);
+                  curve.MakeBound(start.Parameter - first.Value.Value * 0.5, end.Parameter + last.Value.Value * 0.5);
+                }
+                else if (dimension.Value.HasValue)
+                {
+                  if (dimension.Curve.Project(dimension.Origin) is ARDB.IntersectionResult result)
+                  {
+                    var startParameter = dimension.Value.Value * -0.5;
+                    var endParameter = dimension.Value.Value * +0.5;
+                    curve.MakeBound(result.Parameter + startParameter, result.Parameter + endParameter);
+                  }
+                }
+              }
+
+              if (curve.TryGetLocation(out var origin, out var basisX, out var basisY))
+              {
+                origin = curve.Evaluate(0.5, normalized: true);
+                return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
               }
             }
-
-            if(curve.TryGetLocation(out var origin, out var basisX, out var basisY))
-              return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
+            catch { }
           }
-          catch { }
+
+          return new Plane(dimension.Origin.ToPoint3d(), Vector3d.XAxis, Vector3d.YAxis);
         }
 
-        return base.Location;
+        return NaN.Plane;
       }
     }
 
@@ -162,6 +179,9 @@ namespace RhinoInside.Revit.GH.Types
 
         case ARDB.DimensionStyleType.SpotCoordinate:
           return $"X {GeometryDecoder.ToModelLength(dimension.Origin.X):N3}{Environment.NewLine}Y {GeometryDecoder.ToModelLength(dimension.Origin.Y):N3}";
+
+        case ARDB.DimensionStyleType.SpotSlope:
+          return $"⌳ {Rhino.RhinoMath.ToDegrees(dimension.get_Parameter(ARDB.BuiltInParameter.DIM_VALUE_ANGLE).AsDouble()):N2}°";
       }
 
       return $"{GH_Format.FormatDouble(GeometryDecoder.ToModelLength(dimension.Value.Value))} {GH_Format.RhinoUnitSymbol()}";

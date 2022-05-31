@@ -17,6 +17,17 @@ namespace RhinoInside.Revit.GH.Types
     public SpotDimension() { }
     public SpotDimension(ARDB.SpotDimension spotDimension) : base(spotDimension) { }
 
+    public override Plane Location
+    {
+      get
+      {
+        if (Value is ARDB.SpotDimension spot)
+          return new Plane(spot.Origin.ToPoint3d(), Vector3d.XAxis, Vector3d.YAxis);
+
+        return NaN.Plane;
+      }
+    }
+
 #if !REVIT_2021
     public override bool? HasLeader
     {
@@ -34,16 +45,21 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
 #if REVIT_2021
-        if (Value is ARDB.SpotDimension spot && HasLeader == true)
+        if
+        (
+          Value is ARDB.SpotDimension spot &&
+          spot.SpotDimensionType.StyleType != ARDB.DimensionStyleType.SpotSlope && 
+          HasLeader == true
+        )
         {
           if (spot.LeaderHasShoulder)
             return new PolylineCurve
             (
               new Point3d[]
               {
-                  spot.Origin.ToPoint3d(),
-                  spot.LeaderShoulderPosition.ToPoint3d(),
-                  spot.LeaderEndPosition.ToPoint3d()
+                spot.Origin.ToPoint3d(),
+                spot.LeaderShoulderPosition.ToPoint3d(),
+                spot.LeaderEndPosition.ToPoint3d()
               }
             );
 
@@ -72,7 +88,10 @@ namespace RhinoInside.Revit.GH.Types
 
         {
           var text = FormatValue(spot, spot.DimensionType.StyleType);
-          args.Pipeline.DrawDot(spot.TextPosition.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
+          var position = spot.DimensionType.StyleType == ARDB.DimensionStyleType.SpotSlope ?
+            spot.Origin : spot.TextPosition;
+
+          args.Pipeline.DrawDot(position.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
         }
       }
 #endif
