@@ -116,4 +116,91 @@ namespace RhinoInside.Revit.GH.Parameters
     }
     #endregion
   }
+
+  public class DimensionType : ElementType<Types.DimensionType, ARDB.DimensionType>
+  {
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
+    public override Guid ComponentGuid => new Guid("1554AF4F-19C2-49E7-B836-28383AF7F035");
+
+    public DimensionType() : base
+    (
+      name: "Dimension Type",
+      nickname: "DimType",
+      description: "Contains a collection of Revit dimension types",
+      category: "Params",
+      subcategory: "Revit Elements"
+    )
+    { }
+
+    #region UI
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var open = Menu_AppendItem(menu, $"Open");
+
+      var LinearDimensionTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.LinearDimensionTypes);
+      Menu_AppendItem
+      (
+        open.DropDown, "Linear types…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, LinearDimensionTypesId),
+        activeApp.CanPostCommand(LinearDimensionTypesId), false
+      );
+
+      var AngularDimensionTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.AngularDimensionTypes);
+      Menu_AppendItem
+      (
+        open.DropDown, "Angular types…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, AngularDimensionTypesId),
+        activeApp.CanPostCommand(AngularDimensionTypesId), false
+      );
+
+      var RadialDimensionTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.RadialDimensionTypes);
+      Menu_AppendItem
+      (
+        open.DropDown, "Radial types…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, RadialDimensionTypesId),
+        activeApp.CanPostCommand(RadialDimensionTypesId), false
+      );
+
+      var DiameterDimensionTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.DiameterDimensionTypes);
+      Menu_AppendItem
+      (
+        open.DropDown, "Diameter types…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, DiameterDimensionTypesId),
+        activeApp.CanPostCommand(DiameterDimensionTypesId), false
+      );
+
+      var SpotElevationTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SpotElevationTypes);
+      Menu_AppendItem
+      (
+        open.DropDown, "Spot elevation types…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, SpotElevationTypesId),
+        activeApp.CanPostCommand(SpotElevationTypesId), false
+      );
+
+      var SpotCoordinateTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SpotCoordinateTypes);
+      Menu_AppendItem
+      (
+        open.DropDown, "Spot coordinate types…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, SpotCoordinateTypesId),
+        activeApp.CanPostCommand(SpotCoordinateTypesId), false
+      );
+
+      var SpotSlopeTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SpotSlopeTypes);
+      Menu_AppendItem
+      (
+        open.DropDown, "Spot slope types…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, SpotSlopeTypesId),
+        activeApp.CanPostCommand(SpotSlopeTypesId), false
+      );
+    }
+
+    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
+    {
+
+    }
+    #endregion
+  }
 }

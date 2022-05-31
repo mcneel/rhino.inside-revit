@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       ),
       new ParamDefinition
       (
-        new Parameters.ElementType()
+        new Parameters.DimensionType()
         {
           Name = "Type",
           NickName = "T",

@@ -232,4 +232,14 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
   }
+
+  [Kernel.Attributes.Name("Dimension Type")]
+  public class DimensionType : ElementType
+  {
+    protected override Type ValueType => typeof(ARDB.DimensionType);
+    public new ARDB.DimensionType Value => base.Value as ARDB.DimensionType;
+
+    public DimensionType() { }
+    protected internal DimensionType(ARDB.DimensionType type) : base(type) { }
+  }
 }
