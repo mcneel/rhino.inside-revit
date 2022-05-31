@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
   using Grasshopper.Kernel;
-  using RhinoInside.Revit.External.DB.Extensions;
+  using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Dimension")]
   public class Dimension : GraphicalElement
@@ -95,33 +95,32 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public virtual bool? HasLeader
+    {
+#if REVIT_2021
+      get => Value?.HasLeader;
+      set { if (Value is ARDB.Dimension dimension && value is object && dimension.HasLeader != value) dimension.HasLeader = value.Value; }
+#else
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.DIM_LEADER)?.AsInteger() != 0;
+      set
+      {
+        if (Value?.get_Parameter(ARDB.BuiltInParameter.DIM_LEADER) is ARDB.Parameter hasLeader && value.HasValue)
+          hasLeader.Update(value.Value);
+      }
+#endif
+    }
+
     public virtual Curve Leader
     {
       get
       {
-        if (Value is ARDB.Dimension dimension)
+        if (Value is ARDB.Dimension dimension && HasLeader == true)
         {
-          if (dimension.HasLeader)
-          {
-#if REVIT_2021
-            if (dimension is ARDB.SpotDimension spot && spot.LeaderHasShoulder)
-              return new PolylineCurve
-              (
-                new Point3d[]
-                {
-                    spot.LeaderEndPosition.ToPoint3d(),
-                    spot.LeaderShoulderPosition.ToPoint3d(),
-                    spot.Origin.ToPoint3d()
-                }
-              );
-#endif
-
-            return new LineCurve
-            (
-              dimension.LeaderEndPosition.ToPoint3d(),
-              dimension.Origin.ToPoint3d()
-            );
-          }
+          return new LineCurve
+          (
+            dimension.Origin.ToPoint3d(),
+            dimension.LeaderEndPosition.ToPoint3d()
+          );
         }
 
         return default;
@@ -145,7 +144,7 @@ namespace RhinoInside.Revit.GH.Types
       return $"{GH_Format.FormatDouble(GeometryDecoder.ToModelLength(value))} {GH_Format.RhinoUnitSymbol()}";
     }
 
-    static string FormatValue(ARDB.Dimension dimension, ARDB.DimensionStyleType style)
+    protected static string FormatValue(ARDB.Dimension dimension, ARDB.DimensionStyleType style)
     {
       switch (style)
       {
@@ -205,14 +204,10 @@ namespace RhinoInside.Revit.GH.Types
             args.Pipeline.DrawArrowHead(curve.PointAtEnd, curve.TangentAtEnd, args.Color, 16, 0.0);
           }
 
-          if (Leader is Curve leader)
           {
-            args.Pipeline.DrawCurve(leader, args.Color, args.Thickness);
-            args.Pipeline.DrawArrowHead(leader.PointAtEnd, leader.TangentAtEnd, args.Color, 16, 0.0);
+            var text = FormatValue(dimension, dimension.DimensionType.StyleType);
+            args.Pipeline.DrawDot(dimension.TextPosition.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
           }
-
-          var text = FormatValue(dimension, dimension.DimensionType.StyleType);
-          args.Pipeline.DrawDot(dimension.TextPosition.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
         }
       }
     }
