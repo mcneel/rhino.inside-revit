@@ -181,10 +181,11 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
         switch (element)
         {
           case null: break;
+#if REVIT_2018
           case ARDB.FamilyInstance instance:
             reference = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
             break;
-
+#endif
           default:
             using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
             {
