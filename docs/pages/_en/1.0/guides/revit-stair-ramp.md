@@ -9,5 +9,5 @@ group: Modeling
 
 Use the {% include ltr/comp.html uuid='601ac666' %} component to Add Railing in the project.
 
-![]({{ "/static/images/guides/evit-railing-add.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/revit-railing-add.png" | prepend: site.baseurl }})
 
