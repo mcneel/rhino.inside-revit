@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           NickName = "HL",
           Description = "Location to place the leader's spot text",
           Optional = true
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           Description = "Element type of the given dimension",
           Optional = true,
           SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_SpotCoordinates
-        }, ParamRelevance.Occasional
+        }, ParamRelevance.Secondary
       )
     };
 
@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
     {
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.Dimension()
         {
           Name = _Spot_,
           NickName = _Spot_.Substring(0, 1),
@@ -135,15 +135,6 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       );
     }
 
-    static bool Contains(ARDB.ReferenceArray references, ARDB.ElementId value)
-    {
-      foreach (var reference in references.Cast<ARDB.Reference>())
-        if (reference.ElementId == value)
-          return true;
-
-      return false;
-    }
-
     bool Reuse
     (
       ARDB.SpotDimension spot, ARDB.View view,
@@ -154,25 +145,44 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       if (spot is null) return false;
       if (spot.OwnerViewId != view.Id) return false;
 
-      // Elements
-      if (!Contains(spot.References, element.Id)) return false;
+      // Reference
+      if (spot.References.Size != 1) return false;
 
-      // Point
+      var reference = GetReference(element, point, out var origin);
+      if (reference is null) return false;
+
+      var prevReference = spot.References.get_Item(0);
+
+      if (prevReference.ElementReferenceType != reference.ElementReferenceType) return false;
+      if (prevReference.ElementId != reference.ElementId) return false;
+      if (prevReference.LinkedElementId != reference.LinkedElementId) return false;
+
+      // Origin
       var vertexTolerance = spot.Document.Application.VertexTolerance;
-
-      if (!spot.Origin.AlmostEquals(point, vertexTolerance)) return false;
+      if (!spot.Origin.AlmostEquals(origin, vertexTolerance)) return false;
 
       // Leader
-#if REVIT_2021
-      if (spot.LeaderHasShoulder)
+      if (point.AlmostEquals(end, vertexTolerance))
       {
-        if (!bend.AlmostEquals(spot.LeaderShoulderPosition, vertexTolerance))
-          spot.LeaderShoulderPosition = bend;
+        spot.get_Parameter(ARDB.BuiltInParameter.SPOT_DIM_LEADER)?.Update(false);
       }
-#endif
+      else
+      {
+#if REVIT_2021
+        spot.get_Parameter(ARDB.BuiltInParameter.SPOT_DIM_LEADER)?.Update(true);
 
-      if (!end.AlmostEquals(spot.LeaderEndPosition, vertexTolerance))
-        spot.LeaderEndPosition = end;
+        if (spot.LeaderHasShoulder)
+        {
+          if (!bend.AlmostEquals(spot.LeaderShoulderPosition, vertexTolerance))
+            spot.LeaderShoulderPosition = bend;
+        }
+
+        if (!end.AlmostEquals(spot.LeaderEndPosition, vertexTolerance))
+          spot.LeaderEndPosition = end;
+#else
+        return false;
+#endif
+      }
 
       return true;
     }
@@ -184,57 +194,56 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end
     )
     {
-      var reference = GetReferences(new List<ARDB.Element> { element }, point).FirstOrDefault();
-      return view.Document.Create.NewSpotCoordinate(view, reference, point, bend, end, point, true);
+      var reference = GetReference(element, point, out var origin);
+      if (reference is null) return null;
+
+      var hasLeader = !point.AlmostEquals(end, view.Document.Application.VertexTolerance);
+      return view.Document.Create.NewSpotCoordinate(view, reference, origin, bend, end, point, hasLeader);
     }
 
-    static IList<ARDB.Reference> GetReferences(IList<ARDB.Element> elements, ARDB.XYZ point)
+    static ARDB.Reference GetReference(ARDB.Element element, ARDB.XYZ point, out ARDB.XYZ origin)
     {
-      var referenceArray = new List<ARDB.Reference>(elements.Count);
-      foreach (var element in elements)
+      origin = default;
+      var reference = default(ARDB.Reference);
+      switch (element)
       {
-        var reference = default(ARDB.Reference);
-        switch (element)
-        {
-          case null: break;
-          case ARDB.FamilyInstance instance:
-            reference = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
-            break;
+        case null: break;
+        case ARDB.FamilyInstance instance:
+          reference = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
+          break;
 
-          case ARDB.ModelLine modelLine:
-            reference = modelLine.GeometryCurve.Reference;
-            break;
+        case ARDB.ModelLine modelLine:
+          reference = modelLine.GeometryCurve.Reference;
+          break;
 
-          default:
-            using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
+        default:
+          using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
+          {
+            var geometry = element.get_Geometry(options);
+
+            var edges = geometry.OfType<ARDB.Solid>().
+              SelectMany(y => y.Edges.Cast<ARDB.Edge>());
+
+            var closestEdge = default(ARDB.Edge);
+            var minDistance = double.PositiveInfinity;
+            foreach (var edge in edges.Where(x => x.Reference is object))
             {
-              var geometry = element.get_Geometry(options);
-
-              var edges = geometry.OfType<ARDB.Solid>().
-                SelectMany(y => y.Edges.Cast<ARDB.Edge>());
-
-              var closestEdge = default(ARDB.Edge);
-              var minDistance = double.PositiveInfinity;
-              foreach (var edge in edges.Where(x => x.Reference is object))
+              var projected = edge.AsCurve().Project(point);
+              var distance = projected.XYZPoint.DistanceTo(point);
+              if (distance < minDistance)
               {
-                var distance = edge.AsCurve().Distance(point);
-                if (distance < minDistance)
-                {
-                  closestEdge = edge;
-                  minDistance = distance;
-                }
+                origin = projected.XYZPoint;
+                closestEdge = edge;
+                minDistance = distance;
               }
-
-              reference = closestEdge.Reference;
             }
-            break;
-        }
 
-        if (reference is object)
-          referenceArray.Add(reference);
+            reference = closestEdge.Reference;
+          }
+          break;
       }
-      return referenceArray;
 
+      return reference;
     }
 
     ARDB.SpotDimension Reconstruct
@@ -249,8 +258,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       if (!Reuse(spot, view, element, point, bend, end))
         spot = Create(view, element, point, bend, end);
 
-      if (spot.GetTypeId() != type.Id) spot.ChangeTypeId(type.Id);
-      spot.HasLeader = !point.AlmostEquals(end, view.Document.Application.VertexTolerance);
+      if (spot?.GetTypeId() != type.Id) spot.ChangeTypeId(type.Id);
 
       return spot;
     }

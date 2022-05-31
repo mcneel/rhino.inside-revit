@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
     {
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.Dimension()
         {
           Name = _Output_,
           NickName = _Output_.Substring(0, 1),

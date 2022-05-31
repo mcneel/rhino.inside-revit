@@ -304,6 +304,7 @@
     <Compile Include="Parameters\Category.cs" />
     <Compile Include="Parameters\CategoryTypes.cs" />
     <Compile Include="Parameters\DatumPlane.cs" />
+    <Compile Include="Parameters\Dimension.cs" />
     <Compile Include="Parameters\DirectShapeCategories.cs" />
     <Compile Include="Parameters\Document.cs" />
     <Compile Include="Parameters\Elevation.cs" />
