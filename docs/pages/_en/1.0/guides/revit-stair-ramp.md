@@ -5,4 +5,9 @@ thumbnail: /static/images/guides/revit-wip.png
 group: Modeling
 ---
 
-{% include ltr/en/wip_note.html %}
+## Add Railing
+
+Use the {% include ltr/comp.html uuid='601ac666' %} component to Add Railing in the project.
+
+![]({{ "/static/images/guides/revit-railing-add.png" | prepend: site.baseurl }})
+

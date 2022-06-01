@@ -6,4 +6,9 @@ thumbnail: /static/images/guides/revit-wip.png
 group: Containers
 ---
 
-{% include ltr/en/wip_note.html %}
+## Query Phases
+
+Use the {% include ltr/comp.html uuid='91e4d3e1' %} component to Query Phases in the project.
+
+![]({{ "/static/images/guides/revit-phase-query.png" | prepend: site.baseurl }})
+
