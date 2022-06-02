@@ -244,6 +244,7 @@
     <Compile Include="Components\Workset\QueryWorksets.cs" />
     <Compile Include="Components\ZuiComponent.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="ImageBuilder.cs" />
     <Compile Include="Optional.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -336,7 +337,7 @@
     <Compile Include="Parameters\StructuralAsset.cs" />
     <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Parameters\ThermalAsset.cs" />
-	<Compile Include="Parameters\TopographySurface.cs" />
+    <Compile Include="Parameters\TopographySurface.cs" />
     <Compile Include="Parameters\Views\View.cs" />
     <Compile Include="Parameters\Views\View3D.cs" />
     <Compile Include="Parameters\Views\ViewPlan.cs" />

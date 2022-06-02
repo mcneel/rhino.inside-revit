@@ -50,7 +50,6 @@
     <Compile Include="Rhinoceros.DebugLogging.cs" />
     <Compile Include="Rhinoceros.PreviewServer.cs" />
     <Compile Include="DirectContext3DServer.cs" />
-    <Compile Include="ImageBuilder.cs" />
     <Compile Include="Operator.cs" />
     <Compile Include="State.cs" />
     <Compile Include="Revit.cs" />

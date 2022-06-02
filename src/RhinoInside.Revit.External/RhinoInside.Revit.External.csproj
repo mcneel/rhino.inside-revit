@@ -107,6 +107,7 @@
     <Compile Include="Extensions\RhinoCommon.cs" />
     <Compile Include="Extensions\ShellItem.cs" />
     <Compile Include="Extensions\System.cs" />
+    <Compile Include="Extensions\System.Drawing.cs" />
     <Compile Include="Extensions\Win32.cs" />
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
