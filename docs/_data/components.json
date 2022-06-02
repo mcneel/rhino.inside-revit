@@ -1500,18 +1500,6 @@
     "uuid": "34d68cdc-892b-4525-959d-49c0ac66317e"
   }, 
   {
-    "desc": "Given a point, it adds an area tag to the given Area Plan", 
-    "iconsrc": "/static/images/GH/AddAreaTag.png", 
-    "icontag": null, 
-    "panel": "Topology", 
-    "since": "1.7", 
-    "tab": "Revit", 
-    "title": "Add Area Tag", 
-    "typename": "AddAreaTag", 
-    "until": null, 
-    "uuid": "ff951e5d-9316-4e68-8e19-86c8ccf9a3df"
-  }, 
-  {
     "desc": "Given a point, it adds a Room to the given Revit view", 
     "iconsrc": "/static/images/GH/AddRoom.png", 
     "icontag": null, 
@@ -1536,18 +1524,6 @@
     "uuid": "34186815-aaf1-44c5-b400-8ee426b14ac8"
   }, 
   {
-    "desc": "Given a point, it adds an room tag to the given view", 
-    "iconsrc": "/static/images/GH/AddRoomTag.png", 
-    "icontag": null, 
-    "panel": "Topology", 
-    "since": "1.7", 
-    "tab": "Revit", 
-    "title": "Add Room Tag", 
-    "typename": "AddRoomTag", 
-    "until": null, 
-    "uuid": "3b95eff0-6bb7-413d-8fbe-ab8895e804e2"
-  }, 
-  {
     "desc": "Given a point, it adds a Space to the given Revit view", 
     "iconsrc": "/static/images/GH/AddSpace.png", 
     "icontag": null, 
@@ -1570,18 +1546,6 @@
     "typename": "AddSpaceSeparatorLine", 
     "until": null, 
     "uuid": "dea31165-a184-466f-9119-d726472b226e"
-  }, 
-  {
-    "desc": "Given a point, it adds an space tag to the given view", 
-    "iconsrc": "/static/images/GH/AddSpaceTag.png", 
-    "icontag": null, 
-    "panel": "Topology", 
-    "since": "1.7", 
-    "tab": "Revit", 
-    "title": "Add Space Tag", 
-    "typename": "AddSpaceTag", 
-    "until": null, 
-    "uuid": "f3eb3a21-cf8c-440d-a912-cfc84f204957"
   }, 
   {
     "desc": "Analyze spatial elements surrounding the given instance", 
@@ -3538,6 +3502,126 @@
     "typename": "OpeningBoundaryProfile", 
     "until": null, 
     "uuid": "e76b0f6b-4ee1-413d-825d-4a8edd86d55f"
+  }, 
+  {
+    "desc": "Given a line, it adds a linear dimension to the given View", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Annotation", 
+    "since": "1.8", 
+    "tab": "Revit", 
+    "title": "Add Linear Dimension", 
+    "typename": "AddLinearDimension", 
+    "until": null, 
+    "uuid": "df47c980-ef08-4bbe-a624-c956c07b04ec"
+  }, 
+  {
+    "desc": "Given an arc, it adds an angular dimension to the given View", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Annotation", 
+    "since": "1.8", 
+    "tab": "Revit", 
+    "title": "Add Angular Dimension", 
+    "typename": "AddAngularDimension", 
+    "until": null, 
+    "uuid": "0dbe67e7-7d8e-41f9-85b0-139c0b7f1745"
+  }, 
+  {
+    "desc": "Given a Curve, it adds a detail line to the given View", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Annotation", 
+    "since": "1.8", 
+    "tab": "Revit", 
+    "title": "Add Detail Line", 
+    "typename": "AddDetailLine", 
+    "until": null, 
+    "uuid": "5a94ea62-3c27-4e48-b885-c98218264981"
+  }, 
+  {
+    "desc": "Given a profile, it adds a region to the given View", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Annotation", 
+    "since": "1.8", 
+    "tab": "Revit", 
+    "title": "Add Region", 
+    "typename": "AddRegion", 
+    "until": null, 
+    "uuid": "ad88cf11-1946-4429-8f4d-172e3f9b866f"
+  }, 
+  {
+    "desc": "Given a point, it adds a spot coordinate to the given View", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Annotation", 
+    "since": "1.8", 
+    "tab": "Revit", 
+    "title": "Add Spot Coordinate", 
+    "typename": "AddSpotCoordinate", 
+    "until": null, 
+    "uuid": "449b853b-423a-4007-ab6b-6f8e417a1175"
+  }, 
+  {
+    "desc": "Given a point, it adds a spot elevation to the given View", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Annotation", 
+    "since": "1.8", 
+    "tab": "Revit", 
+    "title": "Add Spot Elevation", 
+    "typename": "AddSpotElevation", 
+    "until": null, 
+    "uuid": "00c729f1-75be-4b13-8ab5-aefa4462f335"
+  }, 
+  {
+    "desc": "Given a content and a point, it adds a text to the given View", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Annotation", 
+    "since": "1.8", 
+    "tab": "Revit", 
+    "title": "Add Text", 
+    "typename": "AddText", 
+    "until": null, 
+    "uuid": "49acc84c-793f-40a4-a1bf-2d8bafbb3604"
+  }, 
+  {
+    "desc": "Given a point, it adds an area tag to the given Area Plan", 
+    "iconsrc": "/static/images/GH/AddAreaTag.png", 
+    "icontag": null, 
+    "panel": "Annotation", 
+    "since": "1.7", 
+    "tab": "Revit", 
+    "title": "Add Area Tag", 
+    "typename": "AddAreaTag", 
+    "until": null, 
+    "uuid": "ff951e5d-9316-4e68-8e19-86c8ccf9a3df"
+  }, 
+  {
+    "desc": "Given a point, it adds an room tag to the given view", 
+    "iconsrc": "/static/images/GH/AddRoomTag.png", 
+    "icontag": null, 
+    "panel": "Annotation", 
+    "since": "1.7", 
+    "tab": "Revit", 
+    "title": "Add Room Tag", 
+    "typename": "AddRoomTag", 
+    "until": null, 
+    "uuid": "3b95eff0-6bb7-413d-8fbe-ab8895e804e2"
+  }, 
+  {
+    "desc": "Given a point, it adds an space tag to the given view", 
+    "iconsrc": "/static/images/GH/AddSpaceTag.png", 
+    "icontag": null, 
+    "panel": "Annotation", 
+    "since": "1.7", 
+    "tab": "Revit", 
+    "title": "Add Space Tag", 
+    "typename": "AddSpaceTag", 
+    "until": null, 
+    "uuid": "f3eb3a21-cf8c-440d-a912-cfc84f204957"
   }, 
   {
     "desc": "Analyze given Basic Wall type", 
