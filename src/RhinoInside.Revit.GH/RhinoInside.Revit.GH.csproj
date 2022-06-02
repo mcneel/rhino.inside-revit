@@ -245,7 +245,6 @@
     <Compile Include="Components\ZuiComponent.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Optional.cs" />
-    <Compile Include="Parameters\TopographySurface.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -268,6 +267,7 @@
     <Compile Include="Extensions\Grasshopper\Special\ValueSet.cs" />
     <Compile Include="Extensions\System.Collections.Generic.cs" />
     <Compile Include="Extensions\WinForms.cs" />
+    <Compile Include="Parameters\Annotations\Dimension.cs" />
     <Compile Include="Parameters\Input\BuiltInCategories.cs" />
     <Compile Include="Parameters\Input\BuiltInParameters.cs" />
     <Compile Include="Parameters\Input\BuiltInParameterGroups.cs" />
@@ -277,6 +277,7 @@
     <Compile Include="Parameters\Input\CurtainMullionPosition_ValueList.cs" />
     <Compile Include="Parameters\Input\CurtainMullionSystemFamily_ValueList.cs" />
     <Compile Include="Parameters\Input\DeckEmbeddingType_ValueList.cs" />
+    <Compile Include="Parameters\Input\DirectShapeCategories.cs" />
     <Compile Include="Parameters\Input\DocumentPicker.cs" />
     <Compile Include="Parameters\Input\ElementClasses.cs" />
     <Compile Include="Parameters\Input\ElementTypeByName.cs" />
@@ -289,6 +290,7 @@
     <Compile Include="Parameters\Input\StructuralAssetBehaviour_ValueList.cs" />
     <Compile Include="Parameters\Input\StructuralAssetClass_ValueList.cs" />
     <Compile Include="Parameters\Input\ThermalMaterialType_ValueList.cs" />
+    <Compile Include="Parameters\Input\ValueList.cs" />
     <Compile Include="Parameters\Input\ViewDetailLevel_ValueList.cs" />
     <Compile Include="Parameters\Input\WallFunction_ValueList.cs" />
     <Compile Include="Parameters\Input\WallLocationLine_ValueList.cs" />
@@ -306,8 +308,6 @@
     <Compile Include="Parameters\Category.cs" />
     <Compile Include="Parameters\CategoryTypes.cs" />
     <Compile Include="Parameters\DatumPlane.cs" />
-    <Compile Include="Parameters\Dimension.cs" />
-    <Compile Include="Parameters\DirectShapeCategories.cs" />
     <Compile Include="Parameters\Document.cs" />
     <Compile Include="Parameters\Elevation.cs" />
     <Compile Include="Parameters\Element.cs" />
@@ -336,7 +336,7 @@
     <Compile Include="Parameters\StructuralAsset.cs" />
     <Compile Include="Parameters\TextureData.cs" />
     <Compile Include="Parameters\ThermalAsset.cs" />
-    <Compile Include="Parameters\ValueList.cs" />
+	<Compile Include="Parameters\TopographySurface.cs" />
     <Compile Include="Parameters\Views\View.cs" />
     <Compile Include="Parameters\Views\View3D.cs" />
     <Compile Include="Parameters\Views\ViewPlan.cs" />
