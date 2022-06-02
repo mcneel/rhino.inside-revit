@@ -19,14 +19,14 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Location
     public override Curve Curve => Value is ARDB.Architecture.Railing railing ?
-      Curve.JoinCurves(railing.GetPath().Select(x => x.ToCurve()), GeometryObjectTolerance.Model.VertexTolerance)[0] :
+      Curve.JoinCurves(railing.GetPath().Select(x => x.ToCurve()), GeometryTolerance.Model.VertexTolerance)[0] :
       default;
 
     public override void SetCurve(Curve curve, bool keepJoins = false)
     {
       if (Value is ARDB.Architecture.Railing railing && curve is object)
       {
-        if (Curve.EpsilonEquals(curve, GeometryObjectTolerance.Model.VertexTolerance) == false)
+        if (Curve.EpsilonEquals(curve, GeometryTolerance.Model.VertexTolerance) == false)
         {
           railing.SetPath(curve.ToCurveLoop());
           InvalidateGraphics();

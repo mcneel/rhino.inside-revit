@@ -332,7 +332,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         var segments = GetSegments(DA.ParameterTargetPath(index).AppendElement(DA.ParameterTargetIndex(index)), spatialElement, boundaryOptions);
         if (_Boundary_ >= 0)
         {
-          var tol = GeometryObjectTolerance.Model;
+          var tol = GeometryTolerance.Model;
           DA.SetDataList(_Boundary_, segments.Branches.SelectMany(c => Curve.JoinCurves(c.Select(x => x.Value)/*, tol.VertexTolerance, preserveDirection: true*/)));
         }
 

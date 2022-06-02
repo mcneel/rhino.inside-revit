@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.Convert.Geometry
   {
     static IEnumerable<Curve> ToCurveMany(IEnumerable<ARDB.CurveLoop> loops)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
 
       foreach (var loop in loops)
       {
@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static Brep TrimFaces(Brep brep, IEnumerable<Curve> loops)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       var brepFaces = new List<Brep>();
 
       foreach (var brepFace in brep?.Faces ?? Enumerable.Empty<BrepFace>())
@@ -134,7 +134,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         Cast<ARDB.Face>().
         Select(x => ToBrep(x)).
         ToArray(),
-        GeometryObjectTolerance.Internal.VertexTolerance
+        GeometryTolerance.Internal.VertexTolerance
       );
     }
   }

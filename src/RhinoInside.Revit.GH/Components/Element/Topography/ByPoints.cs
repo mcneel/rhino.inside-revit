@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     (
       name: "Add Topography (Points)",
       nickname: "Topography",
-      description: "Given a set of Points, it adds a Topography surface to the active Revit document",
+      description: "Given a set of Points, it adds a topography surface to the active Revit document",
       category: "Revit",
       subCategory: "Site"
     )
@@ -37,11 +37,10 @@ namespace RhinoInside.Revit.GH.Components.Site
       [Optional, NickName("DOC")]
       ARDB.Document document,
 
-      [ParamType(typeof(Parameters.GraphicalElement)), Description("New Topography")]
+      [Description("New Topography")]
       ref ARDB.Architecture.TopographySurface topography,
 
-      IList<Point3d> points,
-      [Optional] IList<Curve> regions
+      IList<Point3d> points
     )
     {
       var xyz = points.ConvertAll(GeometryEncoder.ToXYZ);
@@ -84,12 +83,6 @@ namespace RhinoInside.Revit.GH.Components.Site
       //else
       {
         ReplaceElement(ref topography, ARDB.Architecture.TopographySurface.Create(document, xyz));
-      }
-
-      if (topography is object && regions?.Count > 0)
-      {
-        var curveLoops = regions.Select(region => region.ToCurveLoop());
-        ARDB.Architecture.SiteSubRegion.Create(document, curveLoops.ToList(), topography.Id);
       }
     }
   }

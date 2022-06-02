@@ -204,7 +204,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       if (!Parameters.Level.TryGetDataOrDefault(this, DA, "Level", out Types.Level level, doc, point.HasValue ? point.Value.Z : double.NaN)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       using (var collector = new ARDB.FilteredElementCollector(doc.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
@@ -311,7 +311,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         phase = new Types.Phase(doc.Value.Phases.Cast<ARDB.Phase>().LastOrDefault());
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       using (var collector = new ARDB.FilteredElementCollector(doc.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
@@ -405,7 +405,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         phase = new Types.Phase(doc.Value.Phases.Cast<ARDB.Phase>().LastOrDefault());
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       using (var collector = new ARDB.FilteredElementCollector(doc.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);

@@ -19,6 +19,7 @@ group: Deployment & Configs
 - Added "Add Spot Elevation" component
 - Added "Add Spot Coordinate" component
 - Added "Add Viewport" component
+- Added "Add Topography Region" component
 
 ### RC
 

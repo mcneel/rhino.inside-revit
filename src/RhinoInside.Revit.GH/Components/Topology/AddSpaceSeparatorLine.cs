@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve)) return null;
 
-          var tol = GeometryObjectTolerance.Model;
+          var tol = GeometryTolerance.Model;
           if
           (
             curve.IsShort(tol.ShortCurveTolerance) ||
@@ -114,7 +114,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
       using (var projectedCurve = Curve.ProjectToPlane(curve, levelPlane).ToCurve())
       {
-        if (!projectedCurve.AlmostEquals(spaceSeparator.GeometryCurve, GeometryObjectTolerance.Internal.VertexTolerance))
+        if (!projectedCurve.AlmostEquals(spaceSeparator.GeometryCurve, GeometryTolerance.Internal.VertexTolerance))
           spaceSeparator.SetGeometryCurve(projectedCurve, overrideJoins: true);
       }
 

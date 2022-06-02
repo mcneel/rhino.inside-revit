@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components
         if (profiles.Length != 1)
           return false;
 
-        var tol = GeometryObjectTolerance.Model;
+        var tol = GeometryTolerance.Model;
         var plane = sketch.SketchPlane.GetPlane().ToPlane();
         var profile = Curve.ProjectToPlane(boundary, plane);
 
@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.GH.Components
               else
                 curve = segment.ToCurve();
 
-              if (!edge.GeometryCurve.AlmostEquals(curve, GeometryObjectTolerance.Internal.VertexTolerance))
+              if (!edge.GeometryCurve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
               {
                 // The following line allows SetGeometryCurve to work!!
                 edge.Location.Move(hack);
@@ -109,7 +109,7 @@ namespace RhinoInside.Revit.GH.Components
       Optional<ARDB.Level> level
     )
     {
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       if
       (
         boundary is null ||

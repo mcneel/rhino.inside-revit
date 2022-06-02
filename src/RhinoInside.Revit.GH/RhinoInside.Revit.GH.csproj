@@ -153,6 +153,7 @@
     <Compile Include="Components\Element\Structural\AddStructuralBeam.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />
+    <Compile Include="Components\Element\Topography\AddSiteSubRegion.cs" />
     <Compile Include="Components\Element\Topography\ByMesh.cs" />
     <Compile Include="Components\Element\Topography\ByPoints.cs" />
     <Compile Include="Components\Element\Properties.cs" />
@@ -244,6 +245,7 @@
     <Compile Include="Components\ZuiComponent.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Optional.cs" />
+    <Compile Include="Parameters\TopographySurface.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -395,6 +397,7 @@
     <Compile Include="Types\CurtainGridLine.cs" />
     <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\Mullion.cs" />
+    <Compile Include="Types\TopographySurface.cs" />
     <Compile Include="Types\Views\View.cs" />
     <Compile Include="Types\Views\View3D.cs" />
     <Compile Include="Types\Views\ViewPlan.cs" />

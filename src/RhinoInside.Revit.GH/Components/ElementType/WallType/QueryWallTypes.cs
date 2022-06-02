@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           (
             ARDB.BuiltInParameter.WALL_ATTR_WIDTH_PARAM,
             width.Mid / Revit.ModelUnits,
-            GeometryObjectTolerance.Internal.VertexTolerance + (width.Length * 0.5 / Revit.ModelUnits),
+            GeometryTolerance.Internal.VertexTolerance + (width.Length * 0.5 / Revit.ModelUnits),
             out var widthFilter
           )
         )

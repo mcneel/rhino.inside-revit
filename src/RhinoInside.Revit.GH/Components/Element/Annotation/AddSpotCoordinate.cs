@@ -231,12 +231,11 @@ namespace RhinoInside.Revit.GH.Components.Annotation
             foreach (var edge in edges.Where(x => x.Reference is object))
             {
               var projected = edge.AsCurve().Project(point);
-              var distance = projected.XYZPoint.DistanceTo(point);
-              if (distance < minDistance)
+              if (projected.Distance < minDistance)
               {
-                origin = projected.XYZPoint;
                 closestEdge = edge;
-                minDistance = distance;
+                minDistance = projected.Distance;
+                origin = projected.XYZPoint;
               }
             }
 

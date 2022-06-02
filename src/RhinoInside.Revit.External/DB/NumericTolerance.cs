@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.External.DB
     /// </remarks>
     public const double Delta = double.MaxValue * double.Epsilon / 4.0;
 
-    #region AreAlmostEqual
+    #region AlmostEqual
     /// <summary>
     /// Compares two doubles and determines if they are equal within the specified maximum absolute error.
     /// </summary>

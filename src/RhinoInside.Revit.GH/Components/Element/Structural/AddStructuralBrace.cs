@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if (!curve.TryGetLine(out var line, GeometryObjectTolerance.Model.VertexTolerance))
+          if (!curve.TryGetLine(out var line, GeometryTolerance.Model.VertexTolerance))
             throw new RuntimeArgumentException("Curve", "Curve must be line like curve.", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
@@ -203,7 +203,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (beam.Location is ARDB.LocationCurve locationCurve)
       {
-        if (!locationCurve.Curve.AlmostEquals(curve, GeometryObjectTolerance.Internal.VertexTolerance))
+        if (!locationCurve.Curve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
         {
           curve.TryGetLocation(out var origin, out var basisX, out var basisY);
 

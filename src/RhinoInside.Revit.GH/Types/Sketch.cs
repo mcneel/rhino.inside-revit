@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Types
               new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
             );
 
-            trimmedSurface.Value = planeSurface.CreateTrimmedSurface(loops, GeometryObjectTolerance.Model.VertexTolerance);
+            trimmedSurface.Value = planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
           }
 
           trimmedSurface.HasValue = true;

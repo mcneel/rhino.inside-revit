@@ -8,7 +8,7 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.Annotation
+namespace RhinoInside.Revit.GH.Components.Annotation
 {
   [ComponentVersion(introduced: "1.8")]
   public class AddLinearDimension : ElementTrackerComponent
@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.GH.Components.Element.Annotation
       if (type != default && type.Id != dimension.GetTypeId()) return false;
 
       // Line
-      if (!dimension.Curve.AlmostEquals(line, GeometryObjectTolerance.Internal.VertexTolerance)) return false;
+      if (!dimension.Curve.AlmostEquals(line, GeometryTolerance.Internal.VertexTolerance)) return false;
 
       // Elements
       var currentReference = dimension.References;

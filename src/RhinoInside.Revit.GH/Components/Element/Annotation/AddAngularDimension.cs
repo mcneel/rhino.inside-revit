@@ -133,7 +133,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       if (type != default && type.Id != dimension.GetTypeId()) return false;
 
       // Line
-      if (!dimension.Curve.AlmostEquals(arc, GeometryObjectTolerance.Internal.VertexTolerance)) return false;
+      if (!dimension.Curve.AlmostEquals(arc, GeometryTolerance.Internal.VertexTolerance)) return false;
 
       // Elements
       var currentReference = dimension.References;

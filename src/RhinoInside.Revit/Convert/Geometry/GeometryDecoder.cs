@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <since>1.4</since>
     internal static double ModelScaleFactor => UnitConverter.ToModelLength;
 
-    internal static GeometryObjectTolerance Tolerance => new GeometryObjectTolerance(UnitConverter.Model.UnitScale);
+    internal static GeometryTolerance Tolerance => new GeometryTolerance(UnitConverter.Model.UnitScale);
     #endregion
 
     #region Length

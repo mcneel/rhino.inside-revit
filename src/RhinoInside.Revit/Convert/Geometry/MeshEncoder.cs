@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.Convert.Geometry
   static class MeshEncoder
   {
     #region Tolerances
-    internal static readonly double ShortEdgeTolerance = 2.0 * GeometryObjectTolerance.Internal.VertexTolerance;
+    internal static readonly double ShortEdgeTolerance = 2.0 * GeometryTolerance.Internal.VertexTolerance;
     #endregion
 
     #region Encode
@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (EncodeRaw(ref mesh, scaleFactor))
       {
         // Revit needs Solid edges to be greater than GeometryObjectTolerance.Internal.ShortCurveTolerance
-        var tol = GeometryObjectTolerance.Internal;
+        var tol = GeometryTolerance.Internal;
         mesh.Vertices.Align(tol.ShortCurveTolerance, default);
         mesh.Vertices.Align(tol.ShortCurveTolerance, mesh.GetNakedEdgePointStatus().Select(x => !x));
         mesh.Weld(tol.AngleTolerance);
@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static bool TryRebuildMesh(Mesh mesh, MeshIssues issues, double factor)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       var nGonCount = mesh.Ngons.Count;
 
       if (issues.HasFlag(MeshIssues.ShortEdges) && mesh.Ngons.Count == 0)
@@ -236,7 +236,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           vertices[v] *= factor;
       }
 
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
 
       var isSolid = mesh.SolidOrientation() != 0;
       builder.OpenConnectedFaceSet(isSolid);

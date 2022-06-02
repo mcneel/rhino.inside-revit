@@ -99,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           )
             throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
 
-          var tol = GeometryObjectTolerance.Model;
+          var tol = GeometryTolerance.Model;
           foreach (var loop in boundary)
           {
             if (loop is null) return null;

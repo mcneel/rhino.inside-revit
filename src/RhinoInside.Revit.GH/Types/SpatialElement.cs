@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Types
               ARDB.SpatialElementBoundaryLocation.Center :
               ARDB.SpatialElementBoundaryLocation.Finish;
 
-            var tol = GeometryObjectTolerance.Model;
+            var tol = GeometryTolerance.Model;
             var plane = Location;
             {
               var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.GH.Types
               new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
             );
 
-            return planeSurface.CreateTrimmedSurface(loops, GeometryObjectTolerance.Model.VertexTolerance);
+            return planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
           }
         }
 
@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Architecture.Room room)
         {
           var solids = room.ClosedShell.OfType<ARDB.Solid>().Where(x => x.Faces.Size > 0);
-          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryObjectTolerance.Model.VertexTolerance);
+          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryTolerance.Model.VertexTolerance);
         }
 
         return null;
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Mechanical.Space space)
         {
           var solids = space.ClosedShell.OfType<ARDB.Solid>().Where(x => x.Faces.Size > 0);
-          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryObjectTolerance.Model.VertexTolerance);
+          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryTolerance.Model.VertexTolerance);
         }
 
         return null;

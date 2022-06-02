@@ -275,7 +275,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
                     1e-6 :
                     UnitConverter.Convert
                     (
-                      GeometryObjectTolerance.Internal.VertexTolerance,
+                      GeometryTolerance.Internal.VertexTolerance,
                       UnitConverter.Model.UnitScale,
                       UnitConverter.InternalUnitScale,
                       Math.Abs(dimensionality)

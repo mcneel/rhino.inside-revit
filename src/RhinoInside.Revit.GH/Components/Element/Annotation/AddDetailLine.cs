@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
             throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
 
           var viewPlane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
-          var tol = GeometryObjectTolerance.Model;
+          var tol = GeometryTolerance.Model;
           if
           (
             curve.IsShort(tol.ShortCurveTolerance) ||
