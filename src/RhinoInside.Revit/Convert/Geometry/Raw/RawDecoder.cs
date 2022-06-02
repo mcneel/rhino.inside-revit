@@ -755,7 +755,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       var basis = surface.GetBasisSurface();
       var distance = surface.GetOffsetDistance();
 
-      var offset = ToRhino(basis, bboxUV).Offset(distance, GeometryObjectTolerance.Internal.VertexTolerance);
+      var offset = ToRhino(basis, bboxUV).Offset(distance, GeometryTolerance.Internal.VertexTolerance);
       if (!surface.IsOrientationSameAsBasisSurface())
         offset = offset.Reverse(0);
 

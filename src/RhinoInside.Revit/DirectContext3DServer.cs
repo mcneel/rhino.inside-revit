@@ -794,7 +794,7 @@ namespace RhinoInside.Revit
             }
             else if (geometry is Curve curve)
             {
-              var tol = Convert.Geometry.GeometryObjectTolerance.Model;
+              var tol = Convert.Geometry.GeometryTolerance.Model;
               using (var polyline = curve.ToPolyline(tol.ShortCurveTolerance, tol.AngleTolerance * 100.0, tol.ShortCurveTolerance, 0.0))
               {
                 if (polyline?.ToPolyline() is Polyline pline)
