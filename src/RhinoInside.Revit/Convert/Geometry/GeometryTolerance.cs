@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.Convert.Geometry
   readonly struct GeometryTolerance
   {
     /// <summary>
-    /// Initializes a new instance of the <see cref="GeometryTolerance"/> using to the indicated unit system.
+    /// Initializes a new instance of the <see cref="GeometryTolerance"/> using the indicated unit system.
     /// </summary>
     /// <param name="scale">A <see cref="Rhino.UnitSystem"/> to be used in conversions.</param>
     public GeometryTolerance(UnitScale scale)
@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// Angle tolerance.
     /// </summary>
     /// <remarks>
-    /// Value is in radians. Two angle measurements closer than this value are considered identical.
+    /// Two angle measurements closer than this value are considered identical. Value is in radians.
     /// </remarks>
     public readonly double AngleTolerance;
 
@@ -72,7 +72,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     //);
 
     /// <summary>
-    /// Default <see cref="GeometryObjectTolerance"/> to be used on <see cref="ARDB.GeometryObject"/> instances.
+    /// Default <see cref="GeometryTolerance"/> to be used on <see cref="ARDB.GeometryObject"/> instances.
     /// </summary>
     public static GeometryTolerance Internal { get; internal set; } = new GeometryTolerance(double.NaN, double.NaN, double.NaN);
 
