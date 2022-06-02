@@ -104,8 +104,6 @@ namespace RhinoInside.Revit.GH.Types
         // 3. Update if necessary
         if (index < 0 || overwrite)
         {
-          var feet = UnitConverter.InternalUnitScale / UnitScale.Millimeters;
-
           using (var pattern = linePattern.GetLinePattern())
           {
             linetype.SetSegments
@@ -116,8 +114,8 @@ namespace RhinoInside.Revit.GH.Types
                 {
                   switch (x.Type)
                   {
-                    case ARDB.LinePatternSegmentType.Dash:  return +x.Length * feet;
-                    case ARDB.LinePatternSegmentType.Space: return -x.Length * feet;
+                    case ARDB.LinePatternSegmentType.Dash:  return UnitScale.Convert(+x.Length, UnitScale.Internal, UnitScale.Millimeters);
+                    case ARDB.LinePatternSegmentType.Space: return UnitScale.Convert(-x.Length, UnitScale.Internal, UnitScale.Millimeters);
                     case ARDB.LinePatternSegmentType.Dot:   return 0.0;
                     default: throw new ArgumentOutOfRangeException();
                   }
@@ -156,8 +154,6 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.LinePatternElement linePattern)
         {
-          var factor = GeometryDecoder.ModelScaleFactor;
-
           using (var pattern = linePattern.GetLinePattern())
           {
             return pattern.GetSegments().Select
@@ -166,8 +162,8 @@ namespace RhinoInside.Revit.GH.Types
               {
                 switch (x.Type)
                 {
-                  case ARDB.LinePatternSegmentType.Dash:  return x.Length * +factor;
-                  case ARDB.LinePatternSegmentType.Space: return x.Length * -factor;
+                  case ARDB.LinePatternSegmentType.Dash:  return GeometryDecoder.ToModelLength(+x.Length);
+                  case ARDB.LinePatternSegmentType.Space: return GeometryDecoder.ToModelLength(-x.Length);
                   case ARDB.LinePatternSegmentType.Dot:   return 0.0;
                   default: throw new ArgumentOutOfRangeException();
                 }
@@ -182,8 +178,6 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.LinePatternElement linePattern)
         {
-          var factor = GeometryEncoder.ModelScaleFactor;
-
           using (var pattern = linePattern.GetLinePattern())
           {
             if
@@ -194,8 +188,8 @@ namespace RhinoInside.Revit.GH.Types
                 (
                   x =>
                   {
-                    if (x  < 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Space, -x * factor);
-                    if (x  > 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Dash,  +x * factor);
+                    if (x  > 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Dash,  GeometryEncoder.ToInternalLength(+x));
+                    if (x  < 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Space, GeometryEncoder.ToInternalLength(-x));
                     if (x == 0.0) return new ARDB.LinePatternSegment(ARDB.LinePatternSegmentType.Dot,   0.0);
                     throw new ArgumentOutOfRangeException();
                   }
