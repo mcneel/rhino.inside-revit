@@ -1,5 +1,17 @@
 [
   {
+    "desc": "Contains a collection of Revit topography elements",
+    "iconsrc": null,
+    "icontag": "T",
+    "panel": "Revit",
+    "since": null,
+    "tab": "Params",
+    "title": "Topography",
+    "typename": "TopographySurface",
+    "until": null,
+    "uuid": "0700be5f-9b9c-4235-add5-787e42898114"
+  },
+  {
     "desc": "Contains a collection of Revit appearance asset elements",
     "iconsrc": "/static/images/GH/AppearanceAsset.png",
     "icontag": null,
@@ -178,6 +190,30 @@
     "typename": "Grid",
     "until": null,
     "uuid": "7d2fb886-a184-41b8-a7d6-a6fdb85cf4e4"
+  },
+  {
+    "desc": "Contains a collection of Revit dimension elements",
+    "iconsrc": null,
+    "icontag": "D",
+    "panel": "Revit Elements",
+    "since": null,
+    "tab": "Params",
+    "title": "Dimension",
+    "typename": "Dimension",
+    "until": null,
+    "uuid": "bc546b0c-1bf0-48c6-aaa9-f4fd429dad39"
+  },
+  {
+    "desc": "Contains a collection of Revit dimension types",
+    "iconsrc": null,
+    "icontag": "D",
+    "panel": "Revit Elements",
+    "since": null,
+    "tab": "Params",
+    "title": "Dimension Type",
+    "typename": "DimensionType",
+    "until": null,
+    "uuid": "1554af4f-19c2-49e7-b836-28383af7f035"
   },
   {
     "desc": "Provides a picker for direct shape categories",
@@ -1452,30 +1488,6 @@
     "uuid": "311316ba-81c7-495c-8a20-b7974091d6b1"
   },
   {
-    "desc": "View Get-Set crop extents",
-    "iconsrc": "/static/images/GH/ViewExtents.png",
-    "icontag": null,
-    "panel": "View",
-    "since": "1.7",
-    "tab": "Revit",
-    "title": "View Extents",
-    "typename": "ViewExtents",
-    "until": null,
-    "uuid": "d4593785-9cab-408e-b70c-1ba40a9b2b5e"
-  },
-  {
-    "desc": "View Get-Set section Box",
-    "iconsrc": "/static/images/GH/ViewSectionBox.png",
-    "icontag": null,
-    "panel": "View",
-    "since": "1.7",
-    "tab": "Revit",
-    "title": "View Section Box",
-    "typename": "ViewSectionBox",
-    "until": null,
-    "uuid": "45e7e88c-76cf-45f8-a31b-ac07accb6dbd"
-  },
-  {
     "desc": "Given an internal point, it adds an Area to the given Area Plan",
     "iconsrc": "/static/images/GH/AddArea.png",
     "icontag": null,
@@ -1618,6 +1630,78 @@
     "typename": "SpatialElementBoundary",
     "until": null,
     "uuid": "419062df-cd1c-4aeb-b4ca-e19402fe3317"
+  },
+  {
+    "desc": "Given a point and a view, it adds a viewport on a sheet",
+    "iconsrc": null,
+    "icontag": "A",
+    "panel": "View",
+    "since": "1.8",
+    "tab": "Revit",
+    "title": "Add Viewport",
+    "typename": "AddViewport",
+    "until": null,
+    "uuid": "493035d3-4779-4699-b577-8bc73afdb78a"
+  },
+  {
+    "desc": "Get all document sheets",
+    "iconsrc": "/static/images/GH/QuerySheets.png",
+    "icontag": null,
+    "panel": "View",
+    "since": "1.2",
+    "tab": "Revit",
+    "title": "Query Sheets",
+    "typename": "QuerySheets",
+    "until": null,
+    "uuid": "97c8cb27-955f-44cf-948d-dfbde285cd7a"
+  },
+  {
+    "desc": "Create a new sheet in Revit with given number and name",
+    "iconsrc": "/static/images/GH/SheetByNumber.png",
+    "icontag": null,
+    "panel": "View",
+    "since": "1.2",
+    "tab": "Revit",
+    "title": "Add Sheet",
+    "typename": "SheetByNumber",
+    "until": null,
+    "uuid": "704d9c1b-fc56-4407-87cf-720047ae5875"
+  },
+  {
+    "desc": "Create a new placeholder sheet in Revit with given number and name",
+    "iconsrc": "/static/images/GH/SheetByNumber_Placeholder.png",
+    "icontag": null,
+    "panel": "View",
+    "since": "1.2",
+    "tab": "Revit",
+    "title": "Add Sheet (Placeholder)",
+    "typename": "SheetByNumber_Placeholder",
+    "until": null,
+    "uuid": "16f18871-6fe8-4dfb-a4f5-47826d582442"
+  },
+  {
+    "desc": "Sheet Identity Data",
+    "iconsrc": "/static/images/GH/SheetIdentity.png",
+    "icontag": null,
+    "panel": "View",
+    "since": "1.2",
+    "tab": "Revit",
+    "title": "Sheet Identity",
+    "typename": "SheetIdentity",
+    "until": null,
+    "uuid": "cadf5fbb-9dea-4b9f-8214-9897cec0e54a"
+  },
+  {
+    "desc": "Create a Revit Title Block on a sheet view",
+    "iconsrc": "/static/images/GH/TitleBlockByType.png",
+    "icontag": null,
+    "panel": "View",
+    "since": "1.2",
+    "tab": "Revit",
+    "title": "Add Title Block",
+    "typename": "TitleBlockByType",
+    "until": null,
+    "uuid": "f2f3d866-5a62-40c0-a85b-c417183e0a52"
   },
   {
     "desc": "Given its Definition, it adds a new Parameter into the Revit document",
@@ -2182,66 +2266,6 @@
     "typename": "ElementBoundingBoxFilter",
     "until": null,
     "uuid": "f5a32842-b18e-470f-8bd3-bae1373ad982"
-  },
-  {
-    "desc": "Get all document sheets",
-    "iconsrc": "/static/images/GH/QuerySheets.png",
-    "icontag": null,
-    "panel": "View",
-    "since": "1.2",
-    "tab": "Revit",
-    "title": "Query Sheets",
-    "typename": "QuerySheets",
-    "until": null,
-    "uuid": "97c8cb27-955f-44cf-948d-dfbde285cd7a"
-  },
-  {
-    "desc": "Create a new placeholder sheet in Revit with given number and name",
-    "iconsrc": "/static/images/GH/SheetByNumber_Placeholder.png",
-    "icontag": null,
-    "panel": "View",
-    "since": "1.2",
-    "tab": "Revit",
-    "title": "Add Sheet (Placeholder)",
-    "typename": "SheetByNumber_Placeholder",
-    "until": null,
-    "uuid": "16f18871-6fe8-4dfb-a4f5-47826d582442"
-  },
-  {
-    "desc": "Sheet Identity Data",
-    "iconsrc": "/static/images/GH/SheetIdentity.png",
-    "icontag": null,
-    "panel": "View",
-    "since": "1.2",
-    "tab": "Revit",
-    "title": "Sheet Identity",
-    "typename": "SheetIdentity",
-    "until": null,
-    "uuid": "cadf5fbb-9dea-4b9f-8214-9897cec0e54a"
-  },
-  {
-    "desc": "Create a new sheet in Revit with given number and name",
-    "iconsrc": "/static/images/GH/SheetByNumber.png",
-    "icontag": null,
-    "panel": "View",
-    "since": "1.2",
-    "tab": "Revit",
-    "title": "Add Sheet",
-    "typename": "SheetByNumber",
-    "until": null,
-    "uuid": "704d9c1b-fc56-4407-87cf-720047ae5875"
-  },
-  {
-    "desc": "Create a Revit Title Block on a sheet view",
-    "iconsrc": "/static/images/GH/TitleBlockByType.png",
-    "icontag": null,
-    "panel": "View",
-    "since": "1.2",
-    "tab": "Revit",
-    "title": "Add Title Block",
-    "typename": "TitleBlockByType",
-    "until": null,
-    "uuid": "f2f3d866-5a62-40c0-a85b-c417183e0a52"
   },
   {
     "desc": "Element Phasing properties Get-Set accessor to element phasing information",
@@ -3504,18 +3528,6 @@
     "uuid": "e76b0f6b-4ee1-413d-825d-4a8edd86d55f"
   },
   {
-    "desc": "Given a line, it adds a linear dimension to the given View",
-    "iconsrc": null,
-    "icontag": "A",
-    "panel": "Annotation",
-    "since": "1.8",
-    "tab": "Revit",
-    "title": "Add Linear Dimension",
-    "typename": "AddLinearDimension",
-    "until": null,
-    "uuid": "df47c980-ef08-4bbe-a624-c956c07b04ec"
-  },
-  {
     "desc": "Given an arc, it adds an angular dimension to the given View",
     "iconsrc": null,
     "icontag": "A",
@@ -3538,6 +3550,18 @@
     "typename": "AddDetailLine",
     "until": null,
     "uuid": "5a94ea62-3c27-4e48-b885-c98218264981"
+  },
+  {
+    "desc": "Given a line, it adds a linear dimension to the given View",
+    "iconsrc": null,
+    "icontag": "A",
+    "panel": "Annotation",
+    "since": "1.8",
+    "tab": "Revit",
+    "title": "Add Linear Dimension",
+    "typename": "AddLinearDimension",
+    "until": null,
+    "uuid": "df47c980-ef08-4bbe-a624-c956c07b04ec"
   },
   {
     "desc": "Given a profile, it adds a region to the given View",
@@ -3948,6 +3972,18 @@
     "uuid": "4a962a0c-46a0-4a5f-b727-6747b715a975"
   },
   {
+    "desc": "View Get-Set crop extents",
+    "iconsrc": "/static/images/GH/ViewExtents.png",
+    "icontag": null,
+    "panel": "View",
+    "since": "1.7",
+    "tab": "Revit",
+    "title": "View Extents",
+    "typename": "ViewExtents",
+    "until": null,
+    "uuid": "d4593785-9cab-408e-b70c-1ba40a9b2b5e"
+  },
+  {
     "desc": "Query view identity information",
     "iconsrc": "/static/images/GH/ViewIdentity.png",
     "icontag": null,
@@ -3970,6 +4006,18 @@
     "typename": "QueryViews",
     "until": null,
     "uuid": "df691659-b75b-4455-af5f-8a5de485fa05"
+  },
+  {
+    "desc": "View Get-Set section Box",
+    "iconsrc": "/static/images/GH/ViewSectionBox.png",
+    "icontag": null,
+    "panel": "View",
+    "since": "1.7",
+    "tab": "Revit",
+    "title": "View Section Box",
+    "typename": "ViewSectionBox",
+    "until": null,
+    "uuid": "45e7e88c-76cf-45f8-a31b-ac07accb6dbd"
   },
   {
     "desc": "Given a plane, it adds a 3D View to the active Revit document",
@@ -4044,7 +4092,19 @@
     "uuid": "62641279-d4ce-4f93-8430-bd342be123ab"
   },
   {
-    "desc": "Given a Mesh, it adds a Topography surface to the active Revit document",
+    "desc": "Given a list of curves, it adds a topography region to the active Revit document",
+    "iconsrc": null,
+    "icontag": "A",
+    "panel": "Site",
+    "since": "1.8",
+    "tab": "Revit",
+    "title": "Add Topography Region",
+    "typename": "AddSiteSubRegion",
+    "until": null,
+    "uuid": "0644989d-91b4-45f8-92be-9fcde38c5c76"
+  },
+  {
+    "desc": "Given a Mesh, it adds a topography surface to the active Revit document",
     "iconsrc": "/static/images/GH/TopographyByMesh.png",
     "icontag": null,
     "panel": "Site",
@@ -4056,7 +4116,7 @@
     "uuid": "e6ea0a85-e118-4bfd-b01e-86ba22155938"
   },
   {
-    "desc": "Given a set of Points, it adds a Topography surface to the active Revit document",
+    "desc": "Given a set of Points, it adds a topography surface to the active Revit document",
     "iconsrc": "/static/images/GH/TopographyByPoints.png",
     "icontag": null,
     "panel": "Site",
