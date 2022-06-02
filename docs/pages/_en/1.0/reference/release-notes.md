@@ -12,7 +12,7 @@ group: Deployment & Configs
 
 - Moved {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} from Topology to Annotation tab.
 - Added {% include ltr/comp.html uuid='49acc84c' %} component
-- Added "Add Region" component
+- Added {% include ltr/comp.html uuid='ad88cf11' %} component
 - Added "Add Detail Line" component
 - Added "Add Angular Dimension" component
 - Added "Add Linear Dimension" component
