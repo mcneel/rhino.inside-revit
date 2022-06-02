@@ -11,15 +11,15 @@ group: Deployment & Configs
 ### WIP
 
 - Moved {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} from Topology to Annotation tab.
-- Added "Add Text" component
-- Added "Add Region" component
-- Added "Add Detail Line" component
-- Added "Add Angular Dimension" component
-- Added "Add Linear Dimension" component
-- Added "Add Spot Elevation" component
-- Added "Add Spot Coordinate" component
-- Added "Add Viewport" component
-- Added "Add Topography Region" component
+- Added {% include ltr/comp.html uuid='49acc84c' %} component
+- Added {% include ltr/comp.html uuid='ad88cf11' %} component
+- Added {% include ltr/comp.html uuid='5a94ea62' %} component
+- Added {% include ltr/comp.html uuid='0dbe67e7' %} component
+- Added {% include ltr/comp.html uuid='df47c980' %} component
+- Added {% include ltr/comp.html uuid='00c729f1' %} component
+- Added {% include ltr/comp.html uuid='449b853b' %} component
+- Added {% include ltr/comp.html uuid='493035d3' %} component
+- Added {% include ltr/comp.html uuid='0644989d' %} component
 
 ### RC
 
