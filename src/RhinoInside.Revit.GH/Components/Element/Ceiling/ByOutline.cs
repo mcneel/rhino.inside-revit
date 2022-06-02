@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components
         if (profiles.Length != boundaries.Count)
           return false;
 
-        var tol = GeometryObjectTolerance.Model;
+        var tol = GeometryTolerance.Model;
         var loops = sketch.GetAllModelCurves();
         var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
@@ -81,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components
                 else
                   curve = segment.ToCurve();
 
-                if (!edge.GeometryCurve.AlmostEquals(curve, GeometryObjectTolerance.Internal.VertexTolerance))
+                if (!edge.GeometryCurve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
                   edge.SetGeometryCurve(curve, false);
               }
             }
@@ -123,7 +123,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (boundary is null) return;
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       var normal = default(Vector3d); var maxArea = 0.0;
       var index = 0; var maxIndex = 0;
       foreach (var loop in boundary)

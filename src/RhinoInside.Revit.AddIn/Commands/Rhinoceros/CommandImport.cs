@@ -630,7 +630,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                     }
                     break;
                   case Curve curve:
-                    if (curve.TryGetPlane(out var plane, GeometryObjectTolerance.Internal.VertexTolerance / scaleFactor))
+                    if (curve.TryGetPlane(out var plane, GeometryTolerance.Internal.VertexTolerance / scaleFactor))
                     {
                       var sketchPlane = ARDB.SketchPlane.Create(doc, plane.ToPlane(scaleFactor));
                       foreach(var crv in curve.ToCurveMany(scaleFactor))

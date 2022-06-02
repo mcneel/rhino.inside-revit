@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
 
           var boundaryElevation = Interval.Unset;
           {
-            var tol = GeometryObjectTolerance.Model;
+            var tol = GeometryTolerance.Model;
             foreach (var loop in boundary)
             {
               if (loop is null) return null;
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
         if (profiles.Length != boundaries.Count)
           return false;
 
-        var tol = GeometryObjectTolerance.Model;
+        var tol = GeometryTolerance.Model;
         var hack = new ARDB.XYZ(1.0, 1.0, 0.0);
         var loops = sketch.GetAllModelCurves();
         var sketchPlane = sketch.SketchPlane.GetPlane();
@@ -198,7 +198,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
                 else
                   curve = segment.ToCurve();
 
-                if (!edge.GeometryCurve.AlmostEquals(curve, GeometryObjectTolerance.Internal.VertexTolerance))
+                if (!edge.GeometryCurve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
                 {
                   // The following line allows SetGeometryCurve to work!!
                   edge.Location.Move(hack);

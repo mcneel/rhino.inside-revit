@@ -111,7 +111,7 @@ namespace RhinoInside.Revit.GH.Components
           if
           (
             curve.IsClosed ||
-            !curve.IsPlanar(GeometryObjectTolerance.Model.VertexTolerance) ||
+            !curve.IsPlanar(GeometryTolerance.Model.VertexTolerance) ||
             curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, out var _)
           )
             throw new RuntimeArgumentException("Curve", "Curve must be a C1 continuous planar non closed curve.", curve);
@@ -207,7 +207,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (beam.Location is ARDB.LocationCurve locationCurve)
       {
-        if (!locationCurve.Curve.AlmostEquals(curve, GeometryObjectTolerance.Internal.VertexTolerance))
+        if (!locationCurve.Curve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
         {
           curve.TryGetLocation(out var origin, out var basisX, out var basisY);
 

@@ -149,7 +149,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       var result = cells.Count > 0;
 
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       foreach (var cell in cells)
       {
         foreach (var loop in cell.CurveLoops.Cast<ARDB.CurveArray>())
@@ -242,9 +242,9 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.CurtainGrid)
         {
-          var mp = new MeshingParameters(0.0, GeometryObjectTolerance.Model.ShortCurveTolerance)
+          var mp = new MeshingParameters(0.0, GeometryTolerance.Model.ShortCurveTolerance)
           {
-            Tolerance = GeometryObjectTolerance.Model.VertexTolerance,
+            Tolerance = GeometryTolerance.Model.VertexTolerance,
             SimplePlanes = true,
             JaggedSeams = true,
             RefineGrid = false,
@@ -259,7 +259,7 @@ namespace RhinoInside.Revit.GH.Types
             x =>
             {
               var m = Mesh.CreateFromPlanarBoundary(x, mp, mp.Tolerance);
-              m.MergeAllCoplanarFaces(GeometryObjectTolerance.Model.VertexTolerance, GeometryObjectTolerance.Model.AngleTolerance);
+              m.MergeAllCoplanarFaces(GeometryTolerance.Model.VertexTolerance, GeometryTolerance.Model.AngleTolerance);
               return m;
             })
           );
@@ -305,12 +305,12 @@ namespace RhinoInside.Revit.GH.Types
             PlanarCurves.SelectMany
             (
               x =>
-              Brep.CreatePlanarBreps(x, GeometryObjectTolerance.Model.VertexTolerance)
+              Brep.CreatePlanarBreps(x, GeometryTolerance.Model.VertexTolerance)
             ),
             RhinoMath.UnsetValue
           );
           if (brep?.IsValid == false)
-            brep.Repair(GeometryObjectTolerance.Model.VertexTolerance);
+            brep.Repair(GeometryTolerance.Model.VertexTolerance);
 
           return brep;
         }

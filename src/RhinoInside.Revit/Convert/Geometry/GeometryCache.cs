@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       public static implicit operator bool(GeometrySignature signature) => signature.hash is object;
 
-      static readonly GeometryObjectTolerance Tolerance = GeometryObjectTolerance.Internal;
+      static readonly GeometryTolerance Tolerance = GeometryTolerance.Internal;
       static int RoundNormalizedKnot(double value) => (int) Math.Round(value * 1e+9);
       static double RoundWeight     (double value) => (double) Math.Round(value * 1e+9);
       static double RoundLength     (double value) => (double) Math.Round(value / Tolerance.VertexTolerance);

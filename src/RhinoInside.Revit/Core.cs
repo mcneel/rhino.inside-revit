@@ -167,7 +167,7 @@ namespace RhinoInside.Revit
 
             var app = sender as Autodesk.Revit.ApplicationServices.Application;
             Host = new UIApplication(app);
-            Convert.Geometry.GeometryObjectTolerance.Internal = new Convert.Geometry.GeometryObjectTolerance
+            Convert.Geometry.GeometryTolerance.Internal = new Convert.Geometry.GeometryTolerance
             (
               app.AngleTolerance,
               app.VertexTolerance,

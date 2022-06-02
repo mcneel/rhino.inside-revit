@@ -263,7 +263,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (Curve.ProjectToPlane(curve, plane) is Curve p)
       {
-        var tol = GeometryObjectTolerance.Model;
+        var tol = GeometryTolerance.Model;
 
         if (p.TryGetLine(out var line, tol.VertexTolerance))
           projected = line.ToLine();

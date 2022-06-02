@@ -272,7 +272,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           if (!curve.IsBound && !curve.IsCyclic)
             throw new ArgumentException("Unbound non-cyclic curves are not supported.");
 
-          var tol = GeometryObjectTolerance.Internal;
+          var tol = GeometryTolerance.Internal;
           var crv = curve.IsCyclic && !curve.IsBound ?
             Curve.CreateInterpolatedCurve
             (
@@ -308,7 +308,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     #region Surfaces
     static PlaneSurface FromPlane(ARDB.XYZ origin, ARDB.XYZ xDir, ARDB.XYZ yDir, ARDB.XYZ zDir, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       var ctol = relativeTolerance * tol.ShortCurveTolerance;
       var uu = new Interval(bboxUV.Min.U - ctol, bboxUV.Max.U + ctol);
       var vv = new Interval(bboxUV.Min.V - ctol, bboxUV.Max.V + ctol);
@@ -345,7 +345,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static RevSurface FromConicalSurface(ARDB.XYZ origin, ARDB.XYZ xDir, ARDB.XYZ yDir, ARDB.XYZ zDir, double halfAngle, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       var atol = relativeTolerance * tol.AngleTolerance * 10.0;
       var ctol = relativeTolerance * tol.ShortCurveTolerance;
       var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
@@ -401,7 +401,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static RevSurface FromCylindricalSurface(ARDB.XYZ origin, ARDB.XYZ xDir, ARDB.XYZ yDir, ARDB.XYZ zDir, double radius, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       var atol = relativeTolerance * tol.AngleTolerance;
       var ctol = relativeTolerance * tol.ShortCurveTolerance;
       var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
@@ -454,7 +454,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static RevSurface FromRevolvedSurface(ARDB.XYZ origin, ARDB.XYZ xDir, ARDB.XYZ yDir, ARDB.XYZ zDir, ARDB.Curve curve, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       var atol = relativeTolerance * tol.AngleTolerance;
       var ctol = relativeTolerance * tol.ShortCurveTolerance;
       var uu = new Interval(bboxUV.Min.U - atol, bboxUV.Max.U + atol);
@@ -501,7 +501,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static Surface FromExtrudedSurface(IList<ARDB.Curve> curves, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       var ctol = relativeTolerance * tol.ShortCurveTolerance;
 
       var axis = new LineCurve
@@ -531,7 +531,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static Surface FromRuledSurface(IList<ARDB.Curve> curves, ARDB.XYZ start, ARDB.XYZ end, ARDB.BoundingBoxUV bboxUV, double relativeTolerance)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       var ctol = relativeTolerance * tol.ShortCurveTolerance;
 
       var cs = curves.Where(x => x is object).Select
@@ -670,7 +670,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
       if (nurbsSurface is object)
       {
-        var tol = GeometryObjectTolerance.Internal;
+        var tol = GeometryTolerance.Internal;
         double ctol = relativeTolerance * tol.ShortCurveTolerance * 5.0;
         if (ctol != 0.0)
         {
@@ -813,7 +813,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     static int AddSurface(Brep brep, ARDB.Face face, out List<BrepBoundary>[] shells, Dictionary<ARDB.Edge, BrepEdge> brepEdges = null)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
 
       // Extract base surface
       if (ToRhinoSurface(face, out var parametricOrientation) is Surface surface)
@@ -1033,7 +1033,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         brep.IsValidWithLog(out var log);
         Debug.WriteLine($"{MethodInfo.GetCurrentMethod().DeclaringType.FullName}.{MethodInfo.GetCurrentMethod().Name}()\n{log}");
 #endif
-        brep.Repair(GeometryObjectTolerance.Internal.VertexTolerance);
+        brep.Repair(GeometryTolerance.Internal.VertexTolerance);
       }
 
       return brep;
@@ -1083,7 +1083,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
           brep.IsValidWithLog(out var log);
           Debug.WriteLine($"{MethodInfo.GetCurrentMethod().DeclaringType.FullName}.{MethodInfo.GetCurrentMethod().Name}()\n{log}");
 #endif
-          brep.Repair(GeometryObjectTolerance.Internal.VertexTolerance);
+          brep.Repair(GeometryTolerance.Internal.VertexTolerance);
         }
       }
 

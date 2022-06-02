@@ -120,10 +120,10 @@ namespace RhinoInside.Revit.GH.Components
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if (!curve.TryGetLine(out var line, GeometryObjectTolerance.Model.VertexTolerance))
+          if (!curve.TryGetLine(out var line, GeometryTolerance.Model.VertexTolerance))
             throw new RuntimeArgumentException("Curve", "Curve must be line like curve.", curve);
 
-          if (line.ToZ - line.FromZ < GeometryObjectTolerance.Model.VertexTolerance)
+          if (line.ToZ - line.FromZ < GeometryTolerance.Model.VertexTolerance)
             throw new RuntimeArgumentException("Curve", "Curve start point must be below curve end point.", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralColumns)) return null;
@@ -190,7 +190,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (column.Location is ARDB.LocationCurve locationCurve)
       {
-        if (!locationCurve.Curve.AlmostEquals(curve, GeometryObjectTolerance.Internal.VertexTolerance))
+        if (!locationCurve.Curve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
         {
           curve.TryGetLocation(out var origin, out var basisX, out var basisY);
 

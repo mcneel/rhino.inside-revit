@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           }
         }
 
-        var meshingParameters = !double.IsNaN(quality) ? new MeshingParameters(quality, GeometryObjectTolerance.Internal.VertexTolerance) : null;
+        var meshingParameters = !double.IsNaN(quality) ? new MeshingParameters(quality, GeometryTolerance.Internal.VertexTolerance) : null;
         Types.GeometricElement.BuildPreview(element, meshingParameters, detailLevel, out var materials, out var meshes, out var wires);
 
         for (int m = 0; m < meshes?.Length; ++m)

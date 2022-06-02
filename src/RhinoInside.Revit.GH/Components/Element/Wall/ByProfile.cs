@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
       if (element.GetSketch() is ARDB.Sketch sketch)
       {
-        var tol = GeometryObjectTolerance.Model;
+        var tol = GeometryTolerance.Model;
         var hack = new ARDB.XYZ(1.0, 1.0, 0.0);
         var plane = sketch.SketchPlane.GetPlane().ToPlane();
         if (normal.IsParallelTo(plane.Normal, tol.AngleTolerance) == 0)
@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
                 else
                   curve = segment.ToCurve();
 
-                if (!edge.GeometryCurve.AlmostEquals(curve, GeometryObjectTolerance.Internal.VertexTolerance))
+                if (!edge.GeometryCurve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
                 {
                   // The following line allows SetGeometryCurve to work!!
                   edge.Location.Move(hack);
@@ -186,7 +186,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     {
       if (profile.Count < 1) return;
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       var normal = default(Vector3d);
       var maxArea = 0.0;
       foreach (var boundary in profile)

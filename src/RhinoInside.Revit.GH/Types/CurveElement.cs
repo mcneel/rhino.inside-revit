@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is ARDB.CurveElement curveElement && curve is object)
       {
         var newCurve = curve.ToCurve();
-        if (!curveElement.GeometryCurve.AlmostEquals(newCurve, GeometryObjectTolerance.Internal.VertexTolerance))
+        if (!curveElement.GeometryCurve.AlmostEquals(newCurve, GeometryTolerance.Internal.VertexTolerance))
         {
           curveElement.SetGeometryCurve(newCurve, overrideJoins: !keepJoins);
           InvalidateGraphics();

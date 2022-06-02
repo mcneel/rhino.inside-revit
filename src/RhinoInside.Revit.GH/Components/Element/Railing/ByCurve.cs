@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.StairsRailingType, nameof(type));
       SolveOptionalLevel(document, curve, ref level, out var bbox);
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
 
       // Axis
       var levelPlane = new Plane

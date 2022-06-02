@@ -363,7 +363,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         (
           clone is object &&
           location.HasValue && location.Value.IsValid &&
-          !clone.Location.EpsilonEquals(location.Value, GeometryObjectTolerance.Model.VertexTolerance)
+          !clone.Location.EpsilonEquals(location.Value, GeometryTolerance.Model.VertexTolerance)
         )
         {
           clone.SetLocation(location.Value);

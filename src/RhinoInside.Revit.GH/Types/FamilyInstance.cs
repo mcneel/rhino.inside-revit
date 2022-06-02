@@ -201,7 +201,7 @@ namespace RhinoInside.Revit.GH.Types
         if (instance.Location is ARDB.LocationCurve locationCurve)
         {
           var newCurve = curve.ToCurve();
-          if (!locationCurve.Curve.AlmostEquals(newCurve, GeometryObjectTolerance.Internal.VertexTolerance))
+          if (!locationCurve.Curve.AlmostEquals(newCurve, GeometryTolerance.Internal.VertexTolerance))
           {
             using (!keepJoins ? ElementJoins.DisableJoinsScope(instance) : default)
               locationCurve.Curve = newCurve;

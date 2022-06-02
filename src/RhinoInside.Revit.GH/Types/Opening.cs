@@ -137,7 +137,7 @@ namespace RhinoInside.Revit.GH.Types
                   curve.AppendSegment(east);
                   curve.AppendSegment(north);
                   curve.AppendSegment(west);
-                  curve.MakeClosed(GeometryObjectTolerance.Model.VertexTolerance);
+                  curve.MakeClosed(GeometryTolerance.Model.VertexTolerance);
 
                   return new Curve[] { curve };
                 }
@@ -161,7 +161,7 @@ namespace RhinoInside.Revit.GH.Types
             return sketch.TrimmedSurface;
         }
 
-        return Host?.Surface?.CreateTrimmedSurface(Boundaries, GeometryObjectTolerance.Model.VertexTolerance);
+        return Host?.Surface?.CreateTrimmedSurface(Boundaries, GeometryTolerance.Model.VertexTolerance);
       }
     }
     #endregion
