@@ -636,8 +636,7 @@ namespace Rhino.Geometry
         kinks.Add(t);
       }
 
-
-      if (kinks is object && kinks.Count > 1 && curve.Split(kinks) is Curve[] segments)
+      if (kinks is object && kinks.Count > (curve.IsClosed ? 1 : 0) && curve.Split(kinks) is Curve[] segments)
       {
         polyCurve = new PolyCurve();
         foreach (var segment in segments)
