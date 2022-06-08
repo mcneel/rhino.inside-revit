@@ -28,6 +28,14 @@ group: Deployment & Configs
 
 <!-- most recent release should be on top -->
 
+{% include ltr/release-header.html title="v1.7 RC3" version="v1.7.8188.17314" pre_release=true time="06/07/2022" %}
+
+- Now {% include ltr/comp.html uuid='de5e832b' %}, {% include ltr/comp.html uuid='07711559' %} take a {% include ltr/comp.html uuid='2dc4b866' %} as input
+- Added more error checking to {% include ltr/comp.html uuid='36842b86' %}
+- Fixed casting from {% include ltr/comp.html uuid='1e6825b6' %}, {% include ltr/comp.html uuid='30473b1d' %}, and {% include ltr/comp.html uuid='66aaae96' %}  to {% include ltr/comp.html uuid='353ffb47' %}
+- Implemented casting from {% include ltr/comp.html uuid='2dc4b866' %} to {% include ltr/comp.html uuid='01c853d8' %}
+- Minor Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.6 (Hotfix)" version="v1.6.8159.20547" time="05/04/2022" %}
 
 - Fixed a bug extracting Level elements from a parameter ([RE Discourse: Null Revit Levels Resulting In Missing Components](https://discourse.mcneel.com/t/rir-version-1-68-null-revit-levels-resulting-in-missing-components/142125))
