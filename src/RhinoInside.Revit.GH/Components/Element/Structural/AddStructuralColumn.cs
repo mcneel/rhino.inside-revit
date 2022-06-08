@@ -107,6 +107,8 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.BuiltInParameter.INSTANCE_MOVE_TOP_WITH_GRIDS,
       ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_PARAM,
       ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_PARAM,
+      ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM,
+      ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM,
       ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE,
     };
 
@@ -198,6 +200,11 @@ namespace RhinoInside.Revit.GH.Components
           column.SetLocation(origin, basisX, basisY);
 
           locationCurve.Curve = curve;
+
+          var startPoint = curve.GetEndPoint(ERDB.CurveEnd.Start);
+          var endPoint = curve.GetEndPoint(ERDB.CurveEnd.End);
+          column.get_Parameter(ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM).Update(Math.Min(startPoint.Z, endPoint.Z) - baselevel.ProjectElevation);
+          column.get_Parameter(ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM).Update(Math.Max(startPoint.Z, endPoint.Z) - topLevel.ProjectElevation);
         }
       }
 
