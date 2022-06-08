@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Location
-    public override Level Level
+    public override ARDB.ElementId LevelId
     {
       get
       {
@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Types
               levelId = levelParam.AsElementId();
           }
 
-          return new Level(instance.Document, levelId);
+          return levelId;
         }
 
         return default;

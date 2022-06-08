@@ -19,16 +19,7 @@ namespace RhinoInside.Revit.GH.Types
     public Group() { }
     public Group(ARDB.Group value) : base(value) { }
 
-    public override Level Level
-    {
-      get
-      {
-        if(Value is ARDB.Group group)
-          return Types.Level.FromElement(group.GetParameterValue<ARDB.Level>(ARDB.BuiltInParameter.GROUP_LEVEL)) as Level;
-
-        return default;
-      }
-    }
+    public override ARDB.ElementId LevelId => Value?.get_Parameter(ARDB.BuiltInParameter.GROUP_LEVEL).AsElementId();
 
     #region Location
     public override BoundingBox GetBoundingBox(Transform xform)

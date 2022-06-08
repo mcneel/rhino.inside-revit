@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Types
     public override BoundingBox GetBoundingBox(Transform xform) => IsPlaced ?
       base.GetBoundingBox(xform) : NaN.BoundingBox;
 
-    public override Level Level => Level.FromElement(Value?.Level) as Level;
+    public override ARDB.ElementId LevelId => Value?.Level?.Id ?? ARDB.ElementId.InvalidElementId;
 
     public Curve[] Boundaries
     {

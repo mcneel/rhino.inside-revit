@@ -18,17 +18,17 @@ namespace RhinoInside.Revit.GH.Types
     public Roof() { }
     public Roof(ARDB.RoofBase roof) : base(roof) { }
 
-    public override Level Level
+    public override ARDB.ElementId LevelId
     {
       get
       {
         switch (Value)
         {
           case ARDB.ExtrusionRoof extrusionRoof:
-            return new Level(extrusionRoof.Document, extrusionRoof.get_Parameter(ARDB.BuiltInParameter.ROOF_CONSTRAINT_LEVEL_PARAM).AsElementId());
+            return extrusionRoof.get_Parameter(ARDB.BuiltInParameter.ROOF_CONSTRAINT_LEVEL_PARAM).AsElementId();
         }
 
-        return base.Level;
+        return base.LevelId;
       }
     }
 
