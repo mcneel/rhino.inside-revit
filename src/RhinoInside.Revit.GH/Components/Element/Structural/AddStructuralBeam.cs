@@ -139,13 +139,6 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (beam is null) return false;
       if (type.Id != beam.GetTypeId()) beam.ChangeTypeId(type.Id);
-      if (level is object)
-      {
-        using (var referenceLevel = beam.get_Parameter(ARDB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM))
-        {
-          if (!referenceLevel.IsReadOnly) referenceLevel.Update(level.Id);
-        }
-      }
 
       return true;
     }
@@ -176,6 +169,14 @@ namespace RhinoInside.Revit.GH.Components
 
         // We turn off analytical model off by default
         beam.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+      }
+
+      if (level is object)
+      {
+        using (var referenceLevel = beam.get_Parameter(ARDB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM))
+        {
+          if (!referenceLevel.IsReadOnly) referenceLevel.Update(level.Id);
+        }
       }
 
       if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, ERDB.CurveEnd.Start))
