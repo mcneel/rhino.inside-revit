@@ -307,7 +307,8 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Location
-    public virtual Level Level => default;
+    public virtual ARDB.ElementId LevelId => Value?.LevelId;
+    public Level Level => LevelId is ARDB.ElementId levelId ? new Level(Document, levelId) : default;
 
     /// <summary>
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.

@@ -42,22 +42,14 @@ namespace RhinoInside.Revit.GH.Types
     {
       var value = source;
 
-      if (source is IGH_Goo goo)
-        value = goo.ScriptVariable();
-
-      if (value is ARDB.View view)
+      if (value is View view)
       {
-        SetValue(view.Document, view.GenLevel?.Id ?? ARDB.ElementId.InvalidElementId);
+        SetValue(view.Document, view.GenLevelId ?? ARDB.ElementId.InvalidElementId);
         return true;
       }
-      else if (value is ARDB.SpatialElement spatialElement)
+      else if (value is GraphicalElement element)
       {
-        SetValue(spatialElement.Document, spatialElement.Location is object ? spatialElement.LevelId : ARDB.ElementId.InvalidElementId);
-        return true;
-      }
-      else if (value is ARDB.Element element && !(value is ARDB.Level))
-      {
-        SetValue(element.Document, element.LevelId);
+        SetValue(element.Document, element.LevelId ?? ARDB.ElementId.InvalidElementId);
         return true;
       }
 

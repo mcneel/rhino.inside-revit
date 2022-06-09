@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Level Level => Level.FromElement(Value?.View.GenLevel) as Level;
+    public override ARDB.ElementId LevelId => Value?.View.GenLevel.Id;
     #endregion
 
     public override void DrawViewportWires(GH_PreviewWireArgs args)

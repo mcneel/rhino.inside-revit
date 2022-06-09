@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <remarks>
     /// Intersection of the line that is perpendicular to plane itself and passes through the world-origin.
     /// </remarks>
-    public XYZ Point => new XYZ(A * -D, B * -D, C - D);
+    public XYZ Point => new XYZ(A * -D, B * -D, C * -D);
 
     /// <summary>
     /// Plane normal.

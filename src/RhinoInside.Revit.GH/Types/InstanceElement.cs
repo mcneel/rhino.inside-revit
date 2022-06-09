@@ -25,9 +25,5 @@ namespace RhinoInside.Revit.GH.Types
 
       return GeometricElement.IsValidElement(element);
     }
-
-    public override Level Level => (Value is ARDB.Element element) ?
-      new Level(element.Document, element.LevelId) :
-      default;
   }
 }
