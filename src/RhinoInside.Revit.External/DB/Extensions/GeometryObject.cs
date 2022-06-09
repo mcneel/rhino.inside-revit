@@ -215,7 +215,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       left.IsBound ?
       (
         Equals(left.GetEndPoint(CurveEnd.Start), right.GetEndPoint(CurveEnd.Start)) &&
-        Equals(left.GetEndPoint(CurveEnd.End), right.GetEndPoint(CurveEnd.End))
+        Equals(left.GetEndPoint(CurveEnd.End),   right.GetEndPoint(CurveEnd.End))
       ):
       (
         Equals(left.Origin, right.Origin) &&
@@ -226,8 +226,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     (
       value.GetType().GetHashCode(),
       value.IsBound.GetHashCode(),
-      GetHashCode(value.Origin),
-      GetHashCode(value.Direction)
+      GetHashCode(value.IsBound ? value.GetEndPoint(CurveEnd.Start) : value.Origin),
+      GetHashCode(value.IsBound ? value.GetEndPoint(CurveEnd.End)   : value.Direction)
     );
     #endregion
 
