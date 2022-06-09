@@ -212,8 +212,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Line
     public bool Equals(Line left, Line right) =>
       left.IsBound == right.IsBound &&
-      Equals(left.Origin, right.Origin) &&
-      Equals(left.Direction, right.Direction);
+      left.IsBound ?
+      (
+        Equals(left.GetEndPoint(CurveEnd.Start), right.GetEndPoint(CurveEnd.Start)) &&
+        Equals(left.GetEndPoint(CurveEnd.End), right.GetEndPoint(CurveEnd.End))
+      ):
+      (
+        Equals(left.Origin, right.Origin) &&
+        Equals(left.Direction, right.Direction)
+      );
 
     public int GetHashCode(Line value) => CombineHash
     (
