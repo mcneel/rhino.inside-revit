@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Categories
+namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
   [ComponentVersion(introduced: "1.0", updated: "1.6")]
   public class CategoryIdentity : ZuiComponent

@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Categories
+namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
   using External.DB.Extensions;
 

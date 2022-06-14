@@ -2,7 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
-namespace RhinoInside.Revit.GH.Components.Categories
+namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
   public class CategoryObjectStyle : TransactionalChainComponent
   {
@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Categories
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Categories.Obsolete
+namespace RhinoInside.Revit.GH.Components.ObjectStyles.Obsolete
 {
   [Obsolete("Obsolete since 2020-10-08")]
   public class CategoryObjectStyle : Component
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Categories.Obsolete
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
 
     public CategoryObjectStyle()
-    : base("Category ObjectStyle", "ObjectStyle", string.Empty, "Revit", "Category")
+    : base("Category ObjectStyle", "ObjectStyle", string.Empty, "Revit", "Object Styles")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

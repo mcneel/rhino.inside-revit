@@ -5,12 +5,12 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Categories
+namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
   public class QueryLineStyles : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("54082395-7160-4563-B289-215AFDD33A7F");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
 
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.GraphicsStyle));
 

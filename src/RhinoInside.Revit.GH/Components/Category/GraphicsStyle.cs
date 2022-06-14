@@ -5,7 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Categories
+namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
   public class CategoryGraphicsStyle : Component
   {
