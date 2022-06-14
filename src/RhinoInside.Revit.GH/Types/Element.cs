@@ -167,6 +167,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Sketch),                          (element)=> new Sketch                (element as ARDB.Sketch)            },
       { typeof(ARDB.SketchPlane),                     (element)=> new SketchPlane           (element as ARDB.SketchPlane)       },
       { typeof(ARDB.CurveElement),                    (element)=> new CurveElement          (element as ARDB.CurveElement)      },
+      { typeof(ARDB.CombinableElement),               (element)=> new CombinableElement     (element as ARDB.CombinableElement) },
 
       { typeof(ARDB.DatumPlane),                      (element)=> new DatumPlane            (element as ARDB.DatumPlane)        },
       { typeof(ARDB.Level),                           (element)=> new Level                 (element as ARDB.Level)             },
@@ -417,7 +418,7 @@ namespace RhinoInside.Revit.GH.Types
           var document = element.Document;
           var id = element.Id;
 
-          if (id == ARDB.ElementId.InvalidElementId)
+          if (id.IsBuiltInId())
           {
             SetValue(document, id);
             return true;
@@ -653,14 +654,18 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Category Category
+    #region Category
+    public virtual Category Category
     {
       get => Value is object ?
         Value.Category is ARDB.Category category ?
         Category.FromCategory(category) :
         new Category() :
         default;
+
+      set => throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Category.");
     }
+    #endregion
 
     public virtual ElementType Type
     {
