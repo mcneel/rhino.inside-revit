@@ -15,6 +15,11 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.7" version="v1.7.8194.7007" time="06/14/2022" %}
+
+- Includes all changes under 1.7RC releases listed below
+- Minor Fixes and Improvements
+ 
 {% include ltr/release-header.html title="v1.7 RC3" version="v1.7.8188.17314" pre_release=true time="06/07/2022" %}
 
 - Now {% include ltr/comp.html uuid='de5e832b' %}, {% include ltr/comp.html uuid='07711559' %} take a {% include ltr/comp.html uuid='2dc4b866' %} as input
