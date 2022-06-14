@@ -40,8 +40,6 @@
     <Compile Include="Components\ElementType\Instances.cs" />
     <Compile Include="Components\ElementType\QueryTypes.cs" />
     <Compile Include="Components\ElementType\Similar.cs" />
-    <Compile Include="Components\ElementType\SiteLocation\Identity.cs" />
-    <Compile Include="Components\ElementType\SiteLocation\Query.cs" />
     <Compile Include="Components\ElementType\ViewType\QueryViewTypes.cs" />
     <Compile Include="Components\ElementType\WallType\AnalyseBasicWallType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainWallType.cs" />
@@ -65,7 +63,6 @@
     <Compile Include="Components\Element\Assembly\AssemblyMembers.cs" />
     <Compile Include="Components\Element\Assembly\DisassembleAssembly.cs" />
     <Compile Include="Components\Element\Assembly\QueryAssemblies.cs" />
-    <Compile Include="Components\Element\BuildingPad\ByOutline.cs" />
     <Compile Include="Components\Element\Ceiling\ByOutline.cs" />
     <Compile Include="Components\Element\CompoundStructureGeometry.cs" />
     <Compile Include="Components\Element\BoundingGeometry.cs" />
@@ -139,9 +136,6 @@
     <Compile Include="Components\Element\Structural\AddStructuralBeam.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />
-    <Compile Include="Components\Element\Topography\AddSiteSubRegion.cs" />
-    <Compile Include="Components\Element\Topography\ByMesh.cs" />
-    <Compile Include="Components\Element\Topography\ByPoints.cs" />
     <Compile Include="Components\Element\Properties.cs" />
     <Compile Include="Components\Element\Version.cs" />
     <Compile Include="Components\Element\Wall\AnalyseStackedWall.cs" />
@@ -216,7 +210,13 @@
     <Compile Include="Components\Sheets\SheetByNumber_Assembly.cs" />
     <Compile Include="Components\Sheets\SheetByNumber_Placeholder.cs" />
     <Compile Include="Components\Sheets\SheetIdentity.cs" />
+    <Compile Include="Components\Site\AddBuildingPad.cs" />
+    <Compile Include="Components\Site\AddSiteSubRegion.cs" />
+    <Compile Include="Components\Site\AddTopographyByMesh.cs" />
+    <Compile Include="Components\Site\AddTopographyByPoints.cs" />
     <Compile Include="Components\Site\ProjectLocation.cs" />
+    <Compile Include="Components\Site\QuerySiteLocations.cs" />
+    <Compile Include="Components\Site\SiteLocationIdentity.cs" />
     <Compile Include="Components\Topology\AddArea.cs" />
     <Compile Include="Components\Topology\AddAreaBoundaryLine.cs" />
     <Compile Include="Components\Element\Annotation\AddAreaTag.cs" />
