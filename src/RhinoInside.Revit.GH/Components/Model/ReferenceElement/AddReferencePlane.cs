@@ -9,6 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
   using External.DB.Extensions;
   using RhinoInside.Revit.Convert.Geometry;
 
+  [ComponentVersion(introduced: "1.8")]
   public class AddReferencePlane : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("4BE42EC7-5471-4448-8DD6-6F28F76BCB5F");
@@ -48,17 +49,17 @@ namespace RhinoInside.Revit.GH.Components.Levels
         },
         ParamRelevance.Primary
       ),
-      new ParamDefinition
-      (
-        new Parameters.GraphicalElement()
-        {
-          Name = "Template",
-          NickName = "T",
-          Description = "Template Reference Plane",
-          Optional = true
-        },
-        ParamRelevance.Occasional
-      ),
+      //new ParamDefinition
+      //(
+      //  new Parameters.GraphicalElement()
+      //  {
+      //    Name = "Template",
+      //    NickName = "T",
+      //    Description = "Template Reference Plane",
+      //    Optional = true
+      //  },
+      //  ParamRelevance.Occasional
+      //),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -189,8 +190,8 @@ namespace RhinoInside.Revit.GH.Components.Levels
       // Else create a brand new
       if (referencePlane is null)
       {
-        basisX *= 20.0;
-        basisY *= 20.0;
+        basisX *= 30.0;
+        basisY *= 30.0;
 
         if (doc.IsFamilyDocument)
           referencePlane = doc.FamilyCreate.NewReferencePlane2(origin + basisX, origin, origin - basisY, default);
