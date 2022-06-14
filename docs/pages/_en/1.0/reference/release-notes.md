@@ -8,7 +8,10 @@ group: Deployment & Configs
 
 {% capture rc_release_notes %}
 
-### WIP
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.8 RC1" version="v1.8.8200.21840" pre_release=true time="06/14/2022" %}
 
 - Moved {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} from Topology to Annotation tab.
 - Added {% include ltr/comp.html uuid='49acc84c' %} component
@@ -27,13 +30,11 @@ group: Deployment & Configs
 - Added 'Add Reference Plane' component.
 - Added 'Reference Plane' parameter.
 
-### RC
+{% include ltr/release-header.html title="v1.7" version="v1.7.8194.7007" time="06/14/2022" %}
 
-{% endcapture %}
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
-
-<!-- most recent release should be on top -->
-
+- Includes all changes under 1.7RC releases listed below
+- Minor Fixes and Improvements
+ 
 {% include ltr/release-header.html title="v1.7 RC3" version="v1.7.8188.17314" pre_release=true time="06/07/2022" %}
 
 - Now {% include ltr/comp.html uuid='de5e832b' %}, {% include ltr/comp.html uuid='07711559' %} take a {% include ltr/comp.html uuid='2dc4b866' %} as input
