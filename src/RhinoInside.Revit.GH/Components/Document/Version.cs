@@ -2,7 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
-namespace RhinoInside.Revit.GH.Components.Document
+namespace RhinoInside.Revit.GH.Components.Documents
 {
   [ComponentVersion(introduced: "1.6")]
   public class DocumentVersion : ZuiComponent
