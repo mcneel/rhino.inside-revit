@@ -601,8 +601,8 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.GraphicsStyle style)
         {
           var tip = string.Empty;
-          if (style.GraphicsStyleCategory.Parent is ARDB.Category parent)
-            tip = $"{parent.Name}\\";
+          //if (style.GraphicsStyleCategory.Parent is ARDB.Category parent)
+          //  tip = $"{parent.Name}\\";
 
           switch (style.GraphicsStyleType)
           {
