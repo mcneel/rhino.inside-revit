@@ -98,12 +98,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
-      if (Params.GetData(DA, "Name", out string name))
-      {
-        UpdateElement(element.Value, () => ElementSetNomen(element, name));
-      }
+      else DA.SetData("Element", element);
 
-      DA.SetData("Element", element);
+      if (Params.GetData(DA, "Name", out string name))
+        UpdateElement(element.Value, () => ElementSetNomen(element, name));
+
       Params.TrySetData(DA, "Name", () => element.Nomen);
     }
 
@@ -183,7 +182,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access Type",
+          Description = "Element to access Category",
         }
       )
     };
@@ -197,7 +196,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access Type",
+          Description = "Element to access Category",
         }
       ),
       new ParamDefinition
@@ -213,9 +212,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Element", out Types.Element element)) return;
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      else DA.SetData("Element", element);
 
-      DA.SetData("Element", element);
       DA.SetData("Category", element.Category);
     }
   }
