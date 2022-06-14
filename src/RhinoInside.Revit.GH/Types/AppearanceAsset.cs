@@ -96,15 +96,15 @@ namespace RhinoInside.Revit.GH.Types
           material.Name = materialName;
         }
 
-        if(material.Document is null || overwrite)
+        if(material.DocumentOwner is null || overwrite)
         {
-          if (material.Document is object)
+          if (material.DocumentOwner is object)
             material.BeginChange(RenderContent.ChangeContexts.Program);
 
           using (var asset = appearance.GetRenderingAsset())
             material.SimulateRenderingAsset(asset, doc);
 
-          if (material.Document is object)
+          if (material.DocumentOwner is object)
             material.EndChange();
           else
             doc.RenderMaterials.Add(material);
