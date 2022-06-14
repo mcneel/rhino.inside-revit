@@ -90,8 +90,6 @@
     <Compile Include="Components\Element\FlipUnflipElement.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
     <Compile Include="Components\Element\Grid\QueryGrids.cs" />
-    <Compile Include="Components\Element\Group\ByLocation.cs" />
-    <Compile Include="Components\Element\Group\Elements.cs" />
     <Compile Include="Components\Element\HostObject\BoundaryProfile.cs" />
     <Compile Include="Components\Element\HostObject\ElementHost.cs" />
     <Compile Include="Components\Element\HostObject\Faces.cs" />
@@ -200,6 +198,8 @@
     <Compile Include="Components\Filters\Selection\SelectionElements.cs" />
     <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
+    <Compile Include="Components\Model\Group\AddModelGroup.cs" />
+    <Compile Include="Components\Model\Group\GroupElements.cs" />
     <Compile Include="Components\Model\ReferencePlane\AddReferencePlane.cs" />
     <Compile Include="Components\ObjectStyles\CurveLineStyle.cs" />
     <Compile Include="Components\ParameterElement\AddParameter.cs" />
