@@ -99,26 +99,65 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 #endif
+  }
 
-    public static SketchPlane GetSketchPlane(this Level level, bool ensureSketchPlane = false)
+  public static class LevelTypeExtension
+  {
+    public static ElevationBase GetElevationBase(this LevelType levelType)
     {
-      using (var collector = new FilteredElementCollector(level.Document).OfClass(typeof(SketchPlane)))
+      return (ElevationBase) levelType.get_Parameter(BuiltInParameter.LEVEL_RELATIVE_BASE_TYPE).AsInteger();
+    }
+  }
+
+  public static class DatumPlaneExtension
+  {
+    internal static PlaneEquation GetPlaneEquation(this DatumPlane datum)
+    {
+      switch (datum)
+      {
+        case Level level:
+          return new PlaneEquation(XYZ.BasisZ, -level.ProjectElevation);
+
+        case Grid grid:
+          var curve = grid.Curve;
+          if (grid.IsCurved) curve = curve.CreateReversed();
+          var start = curve.GetEndPoint(CurveEnd.Start);
+          var end = curve.GetEndPoint(CurveEnd.End);
+          var axis = end - start;
+          var origin = start + (axis * 0.5);
+          var perp = axis.PerpVector();
+          return new PlaneEquation(origin, axis.CrossProduct(perp));
+
+        case ReferencePlane referencePlane:
+          var plane = referencePlane.GetPlane();
+          return new PlaneEquation(plane.Origin, plane.Normal);
+      }
+
+      throw new NotImplementedException($"{nameof(GetPlaneEquation)} is not implemented for {datum.GetType()}");
+    }
+
+    public static SketchPlane GetSketchPlane(this DatumPlane datum, bool ensureSketchPlane = false)
+    {
+      using (var collector = new FilteredElementCollector(datum.Document).OfClass(typeof(SketchPlane)))
       {
         var minDistance = double.PositiveInfinity;
         var closestSketchPlane = default(SketchPlane);
         var comparer = GeometryObjectEqualityComparer.Default;
-        var levelName = level.Name;
-        var BasisZ = XYZ.BasisZ;
+        var datumEquation = GetPlaneEquation(datum);
+        var datuName = datum.Name;
+
         foreach (var sketchPlane in collector.Cast<SketchPlane>())
         {
           if (!sketchPlane.IsSuitableForModelElements) continue;
-          if (sketchPlane.Name != levelName) continue;
+          if (sketchPlane.Name != datuName) continue;
           using (var plane = sketchPlane.GetPlane())
           {
-            if (!comparer.Equals(plane.Normal, BasisZ))
+            var equation = new PlaneEquation(plane.Origin, plane.Normal);
+
+            if (!comparer.Equals(equation.Normal, datumEquation.Normal))
               continue;
 
-            var distance = Math.Abs(plane.Origin.Z - level.ProjectElevation);
+            var distance = Math.Abs(equation.D - datumEquation.D);
             if (distance < minDistance)
             {
               minDistance = distance;
@@ -132,17 +171,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       if (ensureSketchPlane)
-        return SketchPlane.Create(level.Document, level.Id);
+        return SketchPlane.Create(datum.Document, datum.Id);
 
       return default;
-    }
-  }
-
-  public static class LevelTypeExtension
-  {
-    public static ElevationBase GetElevationBase(this LevelType levelType)
-    {
-      return (ElevationBase) levelType.get_Parameter(BuiltInParameter.LEVEL_RELATIVE_BASE_TYPE).AsInteger();
     }
   }
 }

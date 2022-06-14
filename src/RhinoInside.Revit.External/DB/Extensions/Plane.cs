@@ -4,6 +4,9 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  /// <summary>
+  /// Represents a General Form plane equation.
+  /// </summary>
   struct PlaneEquation
   {
     public readonly double A;
@@ -12,15 +15,39 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public readonly double D;
 
     /// <summary>
-    /// Point on plane.
+    /// Point on plane closest to world-origin.
     /// </summary>
-    /// <remarks>
-    /// Intersection of the line that is perpendicular to plane itself and passes through the world-origin.
-    /// </remarks>
     public XYZ Point => new XYZ(A * -D, B * -D, C * -D);
 
     /// <summary>
-    /// Plane normal.
+    /// Plane X axis according to the Arbitrary Axis Algorithm.
+    /// </summary>
+    /// <seealso cref="XYZExtension.PerpVector(XYZ, double)"/>
+    public XYZ Direction => XYZExtension.GetLength(A, B, 0.0) < NumericTolerance.DefaultTolerance ?
+      new XYZ( C, 0.0,  -A):
+      new XYZ(-B,   A, 0.0);
+
+    /// <summary>
+    /// Plane Y axis according to the Arbitrary Axis Algorithm.
+    /// </summary>
+    /// <seealso cref="XYZExtension.PerpVector(XYZ, double)"/>
+    //public XYZ Up => Normal.CrossProduct(Direction, NumericTolerance.DefaultTolerance);
+    public XYZ Up => XYZExtension.GetLength(A, B, 0.0) < NumericTolerance.DefaultTolerance ?
+      new XYZ
+      (
+           (B *  -A) /* - (C *  0.0) */,
+           (C *   C)    - (A * -A),
+        /* (A * 0.0) */ - (B *  C)
+      ):
+      new XYZ
+      (
+        /* (B * 0.0) */ - (C *   A),
+           (C *  -B) /* - (A * 0.0) */,
+           (A *   A)    - (B *  -B)
+      );
+
+    /// <summary>
+    /// Plane Z axis according to the Arbitrary Axis Algorithm.
     /// </summary>
     public XYZ Normal => new XYZ(A, B, C);
 
@@ -31,7 +58,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     PlaneEquation(double a, double b, double c, double d)
     {
-      Debug.Assert(XYZExtension.GetLength(a, b, c) - 1.0 < NumericTolerance.Upsilon);
+      Debug.Assert(XYZExtension.IsUnitLength(a, b, c, NumericTolerance.Upsilon));
 
       A = a;
       B = b;
@@ -39,13 +66,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       D = d;
     }
 
-    public PlaneEquation(XYZ normal, double signedDistanceToOrigin)
+    public PlaneEquation(XYZ vector, double originSignedDistance)
     {
-      var abc = normal.Normalize(0D);
+      var abc = vector.Normalize(0D);
       A = abc.X;
       B = abc.Y;
       C = abc.Z;
-      D = signedDistanceToOrigin;
+      D = originSignedDistance;
     }
 
     public PlaneEquation(XYZ point, XYZ normal)
@@ -54,7 +81,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       A = abc.X;
       B = abc.Y;
       C = abc.Z;
-      D = -abc.DotProduct(point);
+      D = -(abc.X * point.X + abc.Y * point.Y + abc.Z * point.Z);
     }
 
     public static PlaneEquation operator -(PlaneEquation value)
