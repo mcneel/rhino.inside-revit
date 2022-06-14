@@ -40,8 +40,6 @@
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
     <Compile Include="Components\ElementType\ExportImage.cs" />
-    <Compile Include="Components\ElementType\GroupType\Create.cs" />
-    <Compile Include="Components\ElementType\GroupType\QueryGroupTypes.cs" />
     <Compile Include="Components\ElementType\HostObjectType\CompoundStructure.cs" />
     <Compile Include="Components\ElementType\HostObjectType\ConstructCompoundStructure.cs" />
     <Compile Include="Components\ElementType\HostObjectType\ConstructCompoundStructureLayer.cs" />
@@ -199,7 +197,9 @@
     <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
     <Compile Include="Components\Model\Group\AddModelGroup.cs" />
+    <Compile Include="Components\Model\Group\CreateGroupType.cs" />
     <Compile Include="Components\Model\Group\GroupElements.cs" />
+    <Compile Include="Components\Model\Group\QueryGroupTypes.cs" />
     <Compile Include="Components\Model\ReferencePlane\AddReferencePlane.cs" />
     <Compile Include="Components\ObjectStyles\CurveLineStyle.cs" />
     <Compile Include="Components\ParameterElement\AddParameter.cs" />
