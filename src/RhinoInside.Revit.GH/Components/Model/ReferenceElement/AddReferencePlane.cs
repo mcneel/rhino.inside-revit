@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
     (
       name: "Add Reference Plane",
       nickname: "Reference Plane",
-      description: "Given its elevation, it adds a Reference Plane to the current Revit document",
+      description: "Given a plane definition, it adds a Reference Plane to the current Revit document",
       category: "Revit",
       subCategory: "Model"
     )
