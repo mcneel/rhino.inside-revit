@@ -601,7 +601,7 @@ namespace RhinoInside.Revit.GH.Components
           var count = branch.Count;
           for (int e = 0; e < count; ++e)
           {
-            if (branch[e] is Types.IGH_ElementId id && !id.IsValid)
+            if (branch[e] is Types.IGH_ElementId id && id.Value is ARDB.Element element && !element.IsValidObject)
               branch[e] = null;
           }
         }
