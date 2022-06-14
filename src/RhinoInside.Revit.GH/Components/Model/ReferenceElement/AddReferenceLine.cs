@@ -9,17 +9,17 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   using Convert.Geometry;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.8")]
-  public class AddModelLine : ElementTrackerComponent
+  [ComponentVersion(introduced: "1.8")]
+  public class AddReferenceLine : ElementTrackerComponent
   {
-    public override Guid ComponentGuid => new Guid("240127B1-94EE-47C9-98F8-05DE32447B01");
+    public override Guid ComponentGuid => new Guid("A2ADB132-6956-423B-AAA4-315A8E6F234F");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    public AddModelLine() : base
+    public AddReferenceLine() : base
     (
-      name: "Add Model Line",
-      nickname: "Model Line",
-      description: "Given a curve, it adds a Model Line to the current Revit document",
+      name: "Add Reference Line",
+      nickname: "Reference Line",
+      description: "Given a curve, it adds a Reference Line to the current Revit document",
       category: "Revit",
       subCategory: "Model"
     )
@@ -57,14 +57,14 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       (
         new Parameters.CurveElement()
         {
-          Name = _ModelLine_,
-          NickName = "ML",
-          Description = $"Output {_ModelLine_}",
+          Name = _ReferenceLine_,
+          NickName = "RL",
+          Description = $"Output {_ReferenceLine_}",
         }
       ),
     };
 
-    const string _ModelLine_ = "Model Line";
+    const string _ReferenceLine_ = "Reference Line";
     static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
       ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
@@ -72,24 +72,13 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
     };
 
-    public override void AddedToDocument(GH_Document document)
-    {
-      if (Params.Input<IGH_Param>("SketchPlane") is IGH_Param sketchPlane)
-        sketchPlane.Name = "Sketch Plane";
-
-      if (Params.Output<IGH_Param>("CurveElement") is IGH_Param curveElement)
-        curveElement.Name = _ModelLine_;
-
-      base.AddedToDocument(document);
-    }
-
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
       ReconstructElement<ARDB.ModelCurve>
       (
-        doc.Value, _ModelLine_, referenceLine =>
+        doc.Value, _ReferenceLine_, referenceLine =>
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
@@ -102,7 +91,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
           // Compute
           referenceLine = Reconstruct(referenceLine, doc.Value, curve.ToCurve(), sketchPlane.Value);
 
-          DA.SetData(_ModelLine_, referenceLine);
+          DA.SetData(_ReferenceLine_, referenceLine);
           return referenceLine;
         }
       );
@@ -139,6 +128,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       else
         referenceLine = doc.Create.NewModelCurve(curve, sketchPlane);
 
+      referenceLine.ChangeToReferenceLine();
       return referenceLine;
     }
 
@@ -161,4 +151,3 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     }
   }
 }
-

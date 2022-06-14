@@ -23,6 +23,7 @@ group: Deployment & Configs
 - Added {% include ltr/comp.html uuid='0644989d' %} component
 - Added 'Element Subcategory' component.
 - Added 'Curve Line Style' component.
+- Added 'Add Reference Line' componet.
 - Added 'Add Reference Plane' component.
 - Added 'Reference Plane' parameter.
 
