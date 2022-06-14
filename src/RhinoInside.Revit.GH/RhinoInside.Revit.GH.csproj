@@ -200,6 +200,7 @@
     <Compile Include="Components\Model\Group\CreateGroupType.cs" />
     <Compile Include="Components\Model\Group\GroupElements.cs" />
     <Compile Include="Components\Model\Group\QueryGroupTypes.cs" />
+    <Compile Include="Components\Model\ReferenceElement\AddReferencePlane.cs" />
     <Compile Include="Components\Model\ReferencePlane\AddReferencePlane.cs" />
     <Compile Include="Components\ObjectStyles\CurveLineStyle.cs" />
     <Compile Include="Components\ParameterElement\AddParameter.cs" />
