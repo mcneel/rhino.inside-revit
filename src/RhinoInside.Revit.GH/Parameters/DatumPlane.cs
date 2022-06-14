@@ -320,7 +320,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var doc = Revit.ActiveUIDocument.Document;
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
-      listBox.DisplayMember = nameof(Types.Grid.DisplayName);
+      listBox.DisplayMember = nameof(Types.Element.DisplayName);
       listBox.Items.Clear();
 
       using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.ReferencePlane)))

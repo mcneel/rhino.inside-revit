@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -131,5 +132,98 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("833E6207-BA60-4C6B-AB8B-96FDA0F91822");
 
     public GraphicsStyle() : base("Line Style", "Line Style", "Contains a collection of Revit line styles", "Params", "Revit Elements") { }
+
+    #region UI
+    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
+    {
+      if (SourceCount != 0) return;
+      if (Revit.ActiveUIDocument?.Document is null) return;
+
+      if (MutableNickName)
+      {
+        var listBox = new ListBox
+        {
+          BorderStyle = BorderStyle.FixedSingle,
+          Width = (int) (250 * GH_GraphicsUtil.UiScale),
+          Height = (int) (100 * GH_GraphicsUtil.UiScale),
+          SelectionMode = SelectionMode.MultiExtended
+        };
+        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+
+        Menu_AppendCustomItem(menu, listBox);
+        RefreshList(listBox);
+      }
+
+      base.Menu_AppendPromptOne(menu);
+    }
+
+    private void RefreshList(ListBox listBox)
+    {
+      var doc = Revit.ActiveUIDocument.Document;
+
+      listBox.BeginUpdate();
+      listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
+      listBox.DisplayMember = nameof(Types.Element.DisplayName);
+      listBox.Items.Clear();
+
+      {
+        var items = default(IList<Types.GraphicsStyle>);
+
+        if (doc.IsFamilyDocument && doc.OwnerFamily.FamilyCategory is ARDB.Category familyCategory)
+        {
+          var invisibleLines = doc.GetCategory(ARDB.BuiltInCategory.OST_InvisibleLines);
+          listBox.Items.Add(new Types.GraphicsStyle(invisibleLines.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection)));
+          listBox.Items.Add(new Types.GraphicsStyle(familyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection)));
+          listBox.Items.Add(new Types.GraphicsStyle(familyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut)));
+
+          var categories = familyCategory.SubCategories.Cast<ARDB.Category>();
+          var projection = categories.Select(x => x.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection));
+          var cut = categories.Select(x => x.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut));
+
+          items = projection.Concat(cut).
+            OfType<ARDB.GraphicsStyle>().
+            Select(x => new Types.GraphicsStyle(x)).
+            OrderBy(x => x.DisplayName, ElementNaming.NameComparer).
+            ToList();
+        }
+        else
+        {
+          var categories = doc.Settings.Categories.
+            get_Item(ARDB.BuiltInCategory.OST_Lines).SubCategories.Cast<ARDB.Category>();
+
+          items = categories.
+            Select(x => x.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection)).
+            Select(x => new Types.GraphicsStyle(x)).
+            OrderBy(x => x.DisplayName, ElementNaming.NameComparer).
+            ToList();
+        }
+
+        foreach (var item in items)
+          listBox.Items.Add(item);
+
+        var selectedItems = items.Intersect(PersistentData.OfType<Types.GraphicsStyle>());
+
+        foreach (var item in selectedItems)
+          listBox.SelectedItems.Add(item);
+      }
+
+      listBox.EndUpdate();
+      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+    }
+
+    private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      if (sender is ListBox listBox)
+      {
+        RecordPersistentDataEvent($"Set: {NickName}");
+        PersistentData.Clear();
+        PersistentData.AppendRange(listBox.SelectedItems.OfType<Types.GraphicsStyle>());
+        OnObjectChanged(GH_ObjectEventType.PersistentData);
+
+        ExpireSolution(true);
+      }
+    }
+    #endregion
+
   }
 }
