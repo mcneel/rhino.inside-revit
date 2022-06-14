@@ -199,6 +199,9 @@
     <Compile Include="Components\Filters\QueryFilters.cs" />
     <Compile Include="Components\Filters\Selection\SelectionElements.cs" />
     <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
+    <Compile Include="Components\Model\ElementSubcategory.cs" />
+    <Compile Include="Components\Model\ReferencePlane\AddReferencePlane.cs" />
+    <Compile Include="Components\ObjectStyles\CurveLineStyle.cs" />
     <Compile Include="Components\ParameterElement\AddParameter.cs" />
     <Compile Include="Components\ParameterElement\DefineParameter.cs" />
     <Compile Include="Components\ParameterElement\GlobalParameter.cs" />
