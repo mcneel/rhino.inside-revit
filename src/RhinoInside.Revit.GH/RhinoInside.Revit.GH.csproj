@@ -21,14 +21,13 @@
   <ItemGroup>
     <Compile Include="Attributes.cs" />
     <Compile Include="Components\Component.cs" />
-    <Compile Include="Components\Document\Active.cs" />
-    <Compile Include="Components\Document\AllDocuments.cs" />
-    <Compile Include="Components\Document\Links.cs" />
-    <Compile Include="Components\Document\Passport.cs" />
-    <Compile Include="Components\Document\ProjectInformation.cs" />
-    <Compile Include="Components\Document\ProjectLocation.cs" />
-    <Compile Include="Components\Document\Save.cs" />
-    <Compile Include="Components\Document\Version.cs" />
+    <Compile Include="Components\Documents\ActiveDocument.cs" />
+    <Compile Include="Components\Documents\DocumentIdentity.cs" />
+    <Compile Include="Components\Documents\DocumentVersion.cs" />
+    <Compile Include="Components\Documents\OpenDocuments.cs" />
+    <Compile Include="Components\Documents\ProjectInformation.cs" />
+    <Compile Include="Components\Documents\QueryRevitLinks.cs" />
+    <Compile Include="Components\Documents\SaveDocument.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
     <Compile Include="Components\ElementType\ExportImage.cs" />
@@ -217,6 +216,7 @@
     <Compile Include="Components\Sheets\SheetByNumber_Assembly.cs" />
     <Compile Include="Components\Sheets\SheetByNumber_Placeholder.cs" />
     <Compile Include="Components\Sheets\SheetIdentity.cs" />
+    <Compile Include="Components\Site\ProjectLocation.cs" />
     <Compile Include="Components\Topology\AddArea.cs" />
     <Compile Include="Components\Topology\AddAreaBoundaryLine.cs" />
     <Compile Include="Components\Element\Annotation\AddAreaTag.cs" />
