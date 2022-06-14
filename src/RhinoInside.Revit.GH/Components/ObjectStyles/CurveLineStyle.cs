@@ -73,10 +73,10 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       if (!Params.GetData(DA, "Element", out Types.CurveElement element, x => x.IsValid)) return;
       else DA.SetData("Element", element);
 
-      if (Params.GetData(DA, "Linestyle", out Types.GraphicsStyle style))
+      if (Params.GetData(DA, "Line Style", out Types.GraphicsStyle style))
         UpdateElement(element.Value, () => element.LineStyle = style);
 
-      Params.TrySetData(DA, "Linestyle", () => element.LineStyle);
+      Params.TrySetData(DA, "Line Style", () => element.LineStyle);
     }
   }
 }
