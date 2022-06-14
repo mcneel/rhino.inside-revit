@@ -269,7 +269,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class ReferencePlane : GraphicalElementT<Types.ReferencePlane, ARDB.ReferencePlane >
   {
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("D35EB2A7-E2B9-40D7-9592-CE049CC58CCA");
 
     public ReferencePlane() : base("Reference Plane", "Reference Plane", "Contains a collection of Revit reference plane elements", "Params", "Revit") { }
