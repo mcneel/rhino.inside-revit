@@ -215,6 +215,7 @@
     <Compile Include="Components\Site\AddTopographyByMesh.cs" />
     <Compile Include="Components\Site\AddTopographyByPoints.cs" />
     <Compile Include="Components\Site\ProjectLocation.cs" />
+    <Compile Include="Components\Site\QuerySharedSites.cs" />
     <Compile Include="Components\Site\QuerySiteLocations.cs" />
     <Compile Include="Components\Site\SiteLocationIdentity.cs" />
     <Compile Include="Components\Topology\AddArea.cs" />
