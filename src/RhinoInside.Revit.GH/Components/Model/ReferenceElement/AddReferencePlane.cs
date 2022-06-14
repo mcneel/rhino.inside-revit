@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Levels
     {
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.ReferencePlane()
         {
           Name = _ReferencePlane_,
           NickName = "RP",

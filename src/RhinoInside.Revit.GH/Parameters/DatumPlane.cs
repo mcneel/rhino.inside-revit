@@ -266,4 +266,96 @@ namespace RhinoInside.Revit.GH.Parameters
     }
     #endregion
   }
+
+  public class ReferencePlane : GraphicalElementT<Types.ReferencePlane, ARDB.ReferencePlane >
+  {
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override Guid ComponentGuid => new Guid("D35EB2A7-E2B9-40D7-9592-CE049CC58CCA");
+
+    public ReferencePlane() : base("Reference Plane", "Reference Plane", "Contains a collection of Revit reference plane elements", "Params", "Revit") { }
+
+    #region UI
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Curve" }
+    );
+
+    protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
+    {
+      var ReferencePlaneId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ReferencePlane);
+      Menu_AppendItem
+      (
+        menu, $"Set new {TypeName}",
+        Menu_PromptNew(ReferencePlaneId),
+        Revit.ActiveUIApplication.CanPostCommand(ReferencePlaneId),
+        false
+      );
+    }
+
+    protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
+    {
+      if (SourceCount != 0) return;
+      if (Revit.ActiveUIDocument?.Document is null) return;
+
+      if (MutableNickName)
+      {
+        var listBox = new ListBox
+        {
+          BorderStyle = BorderStyle.FixedSingle,
+          Width = (int) (250 * GH_GraphicsUtil.UiScale),
+          Height = (int) (100 * GH_GraphicsUtil.UiScale),
+          SelectionMode = SelectionMode.MultiExtended
+        };
+        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+
+        Menu_AppendCustomItem(menu, listBox);
+        RefreshPlaneList(listBox);
+      }
+
+      base.Menu_AppendPromptOne(menu);
+    }
+
+    private void RefreshPlaneList(ListBox listBox)
+    {
+      var doc = Revit.ActiveUIDocument.Document;
+
+      listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
+      listBox.DisplayMember = nameof(Types.Grid.DisplayName);
+      listBox.Items.Clear();
+
+      using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.ReferencePlane)))
+      {
+        var items = collector.Cast<ARDB.ReferencePlane>().
+          Where(x => !string.IsNullOrWhiteSpace(x.Name)).
+          Select(x => new Types.ReferencePlane(x)).
+          OrderBy(x => x.DisplayName, ElementNaming.NameComparer).
+          ToList();
+
+        foreach (var item in items)
+          listBox.Items.Add(item);
+
+        var selectedItems = items.Intersect(PersistentData.OfType<Types.ReferencePlane>());
+
+        foreach (var item in selectedItems)
+          listBox.SelectedItems.Add(item);
+      }
+
+      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+    }
+
+    private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      if (sender is ListBox listBox)
+      {
+        RecordPersistentDataEvent($"Set: {NickName}");
+        PersistentData.Clear();
+        PersistentData.AppendRange(listBox.SelectedItems.OfType<Types.ReferencePlane>());
+        OnObjectChanged(GH_ObjectEventType.PersistentData);
+
+        ExpireSolution(true);
+      }
+    }
+    #endregion
+  }
+
 }
