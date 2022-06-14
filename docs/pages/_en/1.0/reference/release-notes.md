@@ -20,6 +20,10 @@ group: Deployment & Configs
 - Added {% include ltr/comp.html uuid='449b853b' %} component
 - Added {% include ltr/comp.html uuid='493035d3' %} component
 - Added {% include ltr/comp.html uuid='0644989d' %} component
+- Added {% include ltr/comp.html uuid='0644989d' %} component
+- Added 'Add Reference Plane' component.
+- Added 'Element Subcategory' component.
+- Added 'Curve Line Style' component.
 
 ### RC
 
