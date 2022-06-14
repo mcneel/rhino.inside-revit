@@ -306,10 +306,18 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastTo(out target);
     }
 
-    #region Location
+    #region Properties
+    public virtual Category Subcategory
+    {
+      get => default;
+      set => throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Subcategory.");
+    }
+
     public virtual ARDB.ElementId LevelId => Value?.LevelId;
     public Level Level => LevelId is ARDB.ElementId levelId ? new Level(Document, levelId) : default;
+    #endregion
 
+    #region Location
     /// <summary>
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
     /// </summary>

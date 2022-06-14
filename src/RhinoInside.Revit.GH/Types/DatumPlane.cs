@@ -519,6 +519,50 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    #region Category
+    public override Category Subcategory
+    {
+      get
+      {
+        var paramId = ARDB.BuiltInParameter.CLINE_SUBCATEGORY;
+        if (paramId != ARDB.BuiltInParameter.INVALID && Value is ARDB.Element element)
+        {
+          using (var parameter = element.get_Parameter(paramId))
+          {
+            if (parameter?.AsElementId() is ARDB.ElementId categoryId)
+            {
+              var category = new Category(Document, categoryId);
+              return category.APIObject?.Parent is null ? new Category() : category;
+            }
+          }
+        }
+
+        return default;
+      }
+
+      set
+      {
+        var paramId = ARDB.BuiltInParameter.CLINE_SUBCATEGORY;
+        if (value is object && Value is ARDB.Element element)
+        {
+          using (var parameter = element.get_Parameter(paramId))
+          {
+            if (parameter is null)
+            {
+              if (value.Id != ARDB.ElementId.InvalidElementId)
+                throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Subcategory.");
+            }
+            else
+            {
+              AssertValidDocument(value, nameof(Subcategory));
+              parameter.Update(value);
+            }
+          }
+        }
+      }
+    }
+    #endregion
+
     #region Location
     public override BoundingBox GetBoundingBox(Transform xform)
     {
