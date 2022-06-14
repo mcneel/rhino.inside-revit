@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components
 
       ReconstructElement<ARDB.FamilyInstance>
       (
-        doc.Value, _Brace, beam =>
+        doc.Value, _Brace, brace =>
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
@@ -117,40 +117,39 @@ namespace RhinoInside.Revit.GH.Components
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Reference Level", out Types.Level level, doc, bbox.Center.Z)) return null;
 
           // Compute
-          beam = Reconstruct(beam, doc.Value, line.ToLine(), type.Value, level.Value);
+          brace = Reconstruct(brace, doc.Value, line.ToLine(), type.Value, level.Value);
 
-          DA.SetData(_Brace, beam);
-          return beam;
+          DA.SetData(_Brace, brace);
+          return brace;
         }
       );
     }
 
     bool Reuse
     (
-      ARDB.FamilyInstance beam,
-      ARDB.FamilySymbol type,
-      ARDB.Level level
+      ARDB.FamilyInstance brace,
+      ARDB.FamilySymbol type
     )
     {
-      if (beam is null) return false;
-      if (type.Id != beam.GetTypeId()) beam.ChangeTypeId(type.Id);
+      if (brace is null) return false;
+      if (type.Id != brace.GetTypeId()) brace.ChangeTypeId(type.Id);
 
       return true;
     }
 
     ARDB.FamilyInstance Reconstruct
     (
-      ARDB.FamilyInstance beam,
+      ARDB.FamilyInstance brace,
       ARDB.Document doc,
       ARDB.Curve curve,
       ARDB.FamilySymbol type,
       ARDB.Level level
     )
     {
-      if (!Reuse(beam, type, level))
+      if (!Reuse(brace, type))
       {
         // We create a vertical beam to force Revit create a non-work-plane based instance.
-        beam = beam.ReplaceElement
+        brace = brace.ReplaceElement
         (
           doc.Create.NewFamilyInstance
           (
@@ -163,24 +162,24 @@ namespace RhinoInside.Revit.GH.Components
         );
 
         // We turn off analytical model off by default
-        beam.Document.Regenerate();
-        beam.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        brace.Document.Regenerate();
+        brace.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
       }
 
       if (level is object)
       {
-        using (var referenceLevel = beam.get_Parameter(ARDB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM))
+        using (var referenceLevel = brace.get_Parameter(ARDB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM))
         {
           if (!referenceLevel.IsReadOnly) referenceLevel.Update(level.Id);
         }
       }
-      
-      if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, ERDB.CurveEnd.Start))
-        ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(beam, ERDB.CurveEnd.Start);
-      if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, ERDB.CurveEnd.End))
-        ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(beam, ERDB.CurveEnd.End);
 
-      if (beam.ExtensionUtility is ARDB.IExtension extension)
+      if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(brace, ERDB.CurveEnd.Start))
+        ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(brace, ERDB.CurveEnd.Start);
+      if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(brace, ERDB.CurveEnd.End))
+        ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(brace, ERDB.CurveEnd.End);
+
+      if (brace.ExtensionUtility is ARDB.IExtension extension)
       {
         if (extension.get_IsMiterLocked(ERDB.CurveEnd.Start))
           extension.set_IsMiterLocked(ERDB.CurveEnd.Start, false);
@@ -188,34 +187,34 @@ namespace RhinoInside.Revit.GH.Components
           extension.set_IsMiterLocked(ERDB.CurveEnd.End, false);
 
         if (extension.get_SymbolicExtended(ERDB.CurveEnd.Start))
-          beam.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.Start, false);
+          brace.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.Start, false);
         if (extension.get_SymbolicExtended(ERDB.CurveEnd.End))
-          beam.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.End, false);
+          brace.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.End, false);
 
         if (extension.get_Extended(ERDB.CurveEnd.Start))
-          beam.ExtensionUtility.set_Extended(ERDB.CurveEnd.Start, false);
+          brace.ExtensionUtility.set_Extended(ERDB.CurveEnd.Start, false);
         if (extension.get_Extended(ERDB.CurveEnd.End))
-          beam.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.End, false);
+          brace.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.End, false);
       }
 
-      beam.get_Parameter(ARDB.BuiltInParameter.Y_JUSTIFICATION)?.Update(ARDB.Structure.YJustification.Origin);
-      beam.get_Parameter(ARDB.BuiltInParameter.Z_JUSTIFICATION)?.Update(ARDB.Structure.ZJustification.Origin);
-      beam.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE)?.Update(0.0);
+      brace.get_Parameter(ARDB.BuiltInParameter.Y_JUSTIFICATION)?.Update(ARDB.Structure.YJustification.Origin);
+      brace.get_Parameter(ARDB.BuiltInParameter.Z_JUSTIFICATION)?.Update(ARDB.Structure.ZJustification.Origin);
+      brace.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE)?.Update(0.0);
 
-      if (beam.Location is ARDB.LocationCurve locationCurve)
+      if (brace.Location is ARDB.LocationCurve locationCurve)
       {
         if (!locationCurve.Curve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
         {
           curve.TryGetLocation(out var origin, out var basisX, out var basisY);
 
-          beam.Pinned = false;
-          beam.SetLocation(origin, basisX, basisY);
+          brace.Pinned = false;
+          brace.SetLocation(origin, basisX, basisY);
 
           locationCurve.Curve = curve;
         }
       }
 
-      return beam;
+      return brace;
     }
   }
 }

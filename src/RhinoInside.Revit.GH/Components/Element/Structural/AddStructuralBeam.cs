@@ -133,8 +133,7 @@ namespace RhinoInside.Revit.GH.Components
     bool Reuse
     (
       ARDB.FamilyInstance beam,
-      ARDB.FamilySymbol type,
-      ARDB.Level level
+      ARDB.FamilySymbol type
     )
     {
       if (beam is null) return false;
@@ -152,7 +151,7 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.Level level
     )
     {
-      if (!Reuse(beam, type, level))
+      if (!Reuse(beam, type))
       {
         // We create a vertical beam to force Revit create a non-work-plane based instance.
         beam = beam.ReplaceElement
