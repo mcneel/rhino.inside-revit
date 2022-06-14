@@ -87,6 +87,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
       listBox.Items.Clear();
+      listBox.Items.Add(new Types.Category());
 
       using (var collector = doc.Settings.Categories)
       {
@@ -126,9 +127,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class GraphicsStyle : Element<Types.GraphicsStyle, ARDB.GraphicsStyle>
   {
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("833E6207-BA60-4C6B-AB8B-96FDA0F91822");
 
-    public GraphicsStyle() : base("Graphics Style", "Graphics Style", "Contains a collection of Revit graphics styles", "Params", "Revit") { }
+    public GraphicsStyle() : base("Line Style", "Line Style", "Contains a collection of Revit line styles", "Params", "Revit Elements") { }
   }
 }

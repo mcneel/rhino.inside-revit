@@ -27,27 +27,28 @@ namespace RhinoInside.Revit.GH.Types
       if (base.CastFrom(source))
         return true;
 
-      var document = Revit.ActiveDBDocument;
-      var categoryId = ARDB.ElementId.InvalidElementId;
-
       if (source is IGH_Goo goo)
       {
         switch (source)
         {
-          case IGH_DocumentObject docObject: source = docObject.Value; break;
-          case CategoryId catId:             source = (ARDB.BuiltInCategory) catId.Value; break;
-          default:                           source = goo.ScriptVariable(); break;
+          case GraphicsStyle style:     source = style.Value; break;
+          case Element element:         SetValue(element.Document, element.Category.Id); return element.IsValid;
+          case CategoryId catId:        source = (ARDB.BuiltInCategory) catId.Value; break;
+          default:                      source = goo.ScriptVariable(); break;
         }
       }
 
+      var document = Revit.ActiveDBDocument;
+      var categoryId = ARDB.ElementId.InvalidElementId;
+
       switch (source)
       {
-        case int i:                    categoryId = new ARDB.ElementId(i); break;
-        case ARDB.BuiltInCategory bic: categoryId = new ARDB.ElementId(bic); break;
-        case ARDB.ElementId id:        categoryId = id; break;
-        case ARDB.Category c:          SetValue(c.Document(), c.Id); return true;
-        case ARDB.GraphicsStyle s:     SetValue(s.Document, s.GraphicsStyleCategory.Id); return true;
-        case ARDB.Family f:            SetValue(f.Document, f.FamilyCategoryId); return true;
+        case int i:                     categoryId = new ARDB.ElementId(i); break;
+        case ARDB.BuiltInCategory bic:  categoryId = new ARDB.ElementId(bic); break;
+        case ARDB.ElementId id:         categoryId = id; break;
+        case ARDB.Category c:           SetValue(c.Document(), c.Id); return true;
+        case ARDB.GraphicsStyle s:      SetValue(s.Document, s.GraphicsStyleCategory.Id); return true;
+        case ARDB.Family f:             SetValue(f.Document, f.FamilyCategoryId); return true;
         case ARDB.Element e:
           if(e.Category is ARDB.Category category)
             SetValue(e.Document, category.Id);
@@ -584,7 +585,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
   }
 
-  [Kernel.Attributes.Name("Graphics Style")]
+  [Kernel.Attributes.Name("Line Style")]
   public class GraphicsStyle : Element
   {
     protected override Type ValueType => typeof(ARDB.GraphicsStyle);
