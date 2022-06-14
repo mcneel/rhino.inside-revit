@@ -132,7 +132,6 @@
     <Compile Include="Components\Element\Level\ByElevation.cs" />
     <Compile Include="Components\Element\Material\ByColor.cs" />
     <Compile Include="Components\Element\Material\ByName.cs" />
-    <Compile Include="Components\Element\ModelLine\ByCurve.cs" />
     <Compile Include="Components\Element\Passport.cs" />
     <Compile Include="Components\Element\Phasing\ElementPhasing.cs" />
     <Compile Include="Components\Element\Phasing\QueryPhases.cs" />
@@ -195,13 +194,13 @@
     <Compile Include="Components\Filters\QueryFilters.cs" />
     <Compile Include="Components\Filters\Selection\SelectionElements.cs" />
     <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
+    <Compile Include="Components\Model\AddModelLine.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
     <Compile Include="Components\Model\Group\AddModelGroup.cs" />
     <Compile Include="Components\Model\Group\CreateGroupType.cs" />
     <Compile Include="Components\Model\Group\GroupElements.cs" />
     <Compile Include="Components\Model\Group\QueryGroupTypes.cs" />
     <Compile Include="Components\Model\ReferenceElement\AddReferencePlane.cs" />
-    <Compile Include="Components\Model\ReferencePlane\AddReferencePlane.cs" />
     <Compile Include="Components\ObjectStyles\CurveLineStyle.cs" />
     <Compile Include="Components\ParameterElement\AddParameter.cs" />
     <Compile Include="Components\ParameterElement\DefineParameter.cs" />
