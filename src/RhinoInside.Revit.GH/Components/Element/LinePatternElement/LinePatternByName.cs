@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
   public class LinePatternByName : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("5C99445A-E908-4598-B6F4-F3DB4FB84CC1");
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
 
     public LinePatternByName() : base
     (
