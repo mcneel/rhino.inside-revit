@@ -20,14 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes.cs" />
-    <Compile Include="Components\Category\AddSubCategory.cs" />
-    <Compile Include="Components\Category\GraphicsStyle.cs" />
-    <Compile Include="Components\Category\Identity.cs" />
-    <Compile Include="Components\Category\ObjectStyle.cs" />
-    <Compile Include="Components\Category\Parameters.cs" />
-    <Compile Include="Components\Category\QueryCategories.cs" />
-    <Compile Include="Components\Category\QueryLineStyles.cs" />
-    <Compile Include="Components\Category\SubCategories.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Document\Active.cs" />
     <Compile Include="Components\Document\AllDocuments.cs" />
@@ -201,7 +193,15 @@
     <Compile Include="Components\Model\Group\GroupElements.cs" />
     <Compile Include="Components\Model\Group\QueryGroupTypes.cs" />
     <Compile Include="Components\Model\ReferenceElement\AddReferencePlane.cs" />
+    <Compile Include="Components\ObjectStyles\AddSubCategory.cs" />
+    <Compile Include="Components\ObjectStyles\CategoryGraphicsStyle.cs" />
+    <Compile Include="Components\ObjectStyles\CategoryIdentity.cs" />
+    <Compile Include="Components\ObjectStyles\CategoryParameters.cs" />
+    <Compile Include="Components\ObjectStyles\CategoryStyle.cs" />
+    <Compile Include="Components\ObjectStyles\CategorySubCategories.cs" />
     <Compile Include="Components\ObjectStyles\CurveLineStyle.cs" />
+    <Compile Include="Components\ObjectStyles\QueryCategories.cs" />
+    <Compile Include="Components\ObjectStyles\QueryLineStyles.cs" />
     <Compile Include="Components\ParameterElement\AddParameter.cs" />
     <Compile Include="Components\ParameterElement\DefineParameter.cs" />
     <Compile Include="Components\ParameterElement\GlobalParameter.cs" />
