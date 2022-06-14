@@ -172,10 +172,11 @@ namespace RhinoInside.Revit.GH
           if (!element.CastFrom(value))
             throw new InvalidCastException();
 
-          if (!parameter.Element.Document.IsEquivalent(element.Document))
+          var elementId = element.Id;
+          if (!elementId.IsBuiltInId() && !parameter.Element.Document.IsEquivalent(element.Document))
             throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Definition.Name);
 
-          return parameter.Update(element.Id);
+          return parameter.Update(elementId);
 
         default:
           throw new NotImplementedException();
