@@ -93,19 +93,61 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
       (
         new Param_Point()
         {
-          Name = "Points",
-          NickName = "P",
+          Name = "Corners",
+          NickName = "C",
+          Description = "Corner points",
+          Access = GH_ParamAccess.list,
+        }, ParamRelevance.Tertiary
+      ),
+      new ParamDefinition
+      (
+        new Param_Point()
+        {
+          Name = "Exteriors",
+          NickName = "E",
+          Description = "Boundary points",
           Access = GH_ParamAccess.list,
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
-        new Param_Line()
+        new Param_Point()
+        {
+          Name = "Interiors",
+          NickName = "I",
+          Description = "Interior points",
+          Access = GH_ParamAccess.list,
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Curve()
+        {
+          Name = "Boundary",
+          NickName = "B",
+          Description = "Boundary curves",
+          Access = GH_ParamAccess.list,
+        }, ParamRelevance.Tertiary
+      ),
+      new ParamDefinition
+      (
+        new Param_Curve()
         {
           Name = "Creases",
           NickName = "C",
+          Description = "User drawn curves",
           Access = GH_ParamAccess.list,
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Param_Curve()
+        {
+          Name = "Auto",
+          NickName = "A",
+          Description = "Automatic curves",
+          Access = GH_ParamAccess.list,
+        }, ParamRelevance.Occasional
       )
     };
 
@@ -182,7 +224,7 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
       curvedEdgeConditionValue = curvedEdgeConditionParam?.AsInteger();
       if (curvedEdgeCondition != curvedEdgeConditionValue)
       {
-        if (curvedEdgeConditionParam is object)
+        if (curvedEdgeConditionParam is object && !curvedEdgeConditionParam.IsReadOnly)
         {
           StartTransaction(floor.Document);
           curvedEdgeConditionParam.Update(curvedEdgeCondition.Value);
@@ -195,18 +237,74 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
         DA, "Curved Edge Condition",
         () => curvedEdgeConditionParam?.AsInteger()
       );
-      Params.TrySetDataList
-      (
-        DA, "Points",
-        () => shape.SlabShapeVertices.Cast<ARDB.SlabShapeVertex>().
-        Select(x => x.Position.ToPoint3d())
-      );
-      Params.TrySetDataList
-      (
-        DA, "Creases",
-        () => shape.SlabShapeCreases.Cast<ARDB.SlabShapeCrease>().
-        Select(x => new Line(x.EndPoints.get_Item(0).Position.ToPoint3d(), x.EndPoints.get_Item(x.EndPoints.Size-1).Position.ToPoint3d()))
-      );
+
+      using (var shapeVertices = shape.SlabShapeVertices)
+      {
+        Params.TrySetDataList
+        (
+          DA, "Corners",
+          () => shapeVertices.Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Corner).
+          Select(x => x.Position.ToPoint3d())
+        );
+        Params.TrySetDataList
+        (
+          DA, "Exteriors",
+          () => shapeVertices.Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Edge).
+          Select(x => x.Position.ToPoint3d())
+        );
+        Params.TrySetDataList
+        (
+          DA, "Interiors",
+          () => shapeVertices.Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Interior).
+          Select(x => x.Position.ToPoint3d())
+        );
+      }
+
+      using (var shapeCreases = shape.SlabShapeCreases)
+      {
+        Params.TrySetDataList
+        (
+          DA, "Boundary",
+          () => shapeCreases.Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.Boundary).
+          Select
+          (
+            x =>
+            {
+              try { return x.Curve.ToCurve(); }
+              catch { }
+              return new LineCurve(x.EndPoints.get_Item(0).Position.ToPoint3d(), x.EndPoints.get_Item(x.EndPoints.Size - 1).Position.ToPoint3d());
+            }
+          )
+        );
+        Params.TrySetDataList
+        (
+          DA, "Creases",
+          () => shapeCreases.Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.UserDrawn).
+          Select
+          (
+            x =>
+            {
+              try { return x.Curve.ToCurve(); }
+              catch { }
+              return new LineCurve(x.EndPoints.get_Item(0).Position.ToPoint3d(), x.EndPoints.get_Item(x.EndPoints.Size - 1).Position.ToPoint3d());
+            }
+          )
+        );
+        Params.TrySetDataList
+        (
+          DA, "Auto",
+          () => shapeCreases.Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.Auto).
+          Select
+          (
+            x =>
+            {
+              try { return x.Curve.ToCurve(); }
+              catch { }
+              return new LineCurve(x.EndPoints.get_Item(0).Position.ToPoint3d(), x.EndPoints.get_Item(x.EndPoints.Size - 1).Position.ToPoint3d());
+            }
+          )
+        );
+      }
     }
   }
 }
