@@ -145,12 +145,6 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
       )
       {
         var tol = GeometryTolerance.Model;
-        var sketch = (floor as Types.ISketchAccess).Sketch;
-        var sketchLocation = sketch.Location;
-        var profiles = Curve.JoinCurves(sketch.Profiles);
-        for (int c = 0; c < profiles.Length; c++)
-          profiles[c] = Curve.ProjectToPlane(profiles[c], Plane.WorldXY);
-
         StartTransaction(floor.Document);
         (floor as IGH_PreviewMeshData).DestroyPreviewMeshes();
 
