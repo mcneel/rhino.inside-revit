@@ -141,7 +141,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           !loop.TryGetPlane(out plane, tol.VertexTolerance) ||
           plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
         )
-          ThrowArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.");
+          ThrowArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.", boundary);
 
         using (var properties = AreaMassProperties.Compute(loop))
         {
@@ -199,10 +199,9 @@ namespace RhinoInside.Revit.GH.Components.Families
 #endif
         // We turn off analytical model off by default
         newFloor.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        newFloor.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL)?.Update(structural);
 
         ReplaceElement(ref floor, newFloor, ExcludeUniqueProperties);
-
-        newFloor.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL)?.Update(structural);
       }
 
       if (floor is object)

@@ -55,6 +55,7 @@
     <Compile Include="Components\Element\Annotation\AddSpotCoordinate.cs" />
     <Compile Include="Components\Element\Annotation\AddSpotElevation.cs" />
     <Compile Include="Components\Element\Annotation\AddText.cs" />
+    <Compile Include="Components\Element\HostObject\SlabShape.cs" />
     <Compile Include="Components\Element\Opening\AddFaceOpening.cs" />
     <Compile Include="Components\Element\Opening\AddOpening.cs" />
     <Compile Include="Components\Element\Opening\AddShaftOpening.cs" />

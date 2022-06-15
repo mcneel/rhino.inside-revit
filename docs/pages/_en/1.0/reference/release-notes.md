@@ -8,6 +8,10 @@ group: Deployment & Configs
 
 {% capture rc_release_notes %}
 
+### WIP
+
+- Added 'Slab Shape' component.
+
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
