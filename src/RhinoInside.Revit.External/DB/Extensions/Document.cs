@@ -642,7 +642,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         (
           collector.Cast<GraphicsStyle>().
           Select(x => x.GraphicsStyleCategory).
-          Where(x => x.Name != string.Empty)
+          Where(x => x.Id != ElementId.InvalidElementId && x.Name != string.Empty)
         );
 
         if (parentId is object)
