@@ -158,11 +158,18 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (!Reuse(independentTag, view, element, headPosition))
         independentTag = Create(view, element, headPosition, leader, orientation);
 
+      independentTag.get_Parameter(ARDB.BuiltInParameter.LEADER_LINE).Update(true);
+
       if (view.ViewType == ARDB.ViewType.ThreeD)
       {
         independentTag.get_Parameter(ARDB.BuiltInParameter.TAG_LEADER_TYPE).Update(1);
         var end = (Types.Element.FromElement(element) as Types.GraphicalElement).Location.Origin.ToXYZ();
-        independentTag.LeaderEnd = end;
+
+        if (independentTag.GetTaggedReferences().FirstOrDefault() is ARDB.Reference reference)
+        {
+          if (!independentTag.GetLeaderEnd(reference).IsAlmostEqualTo(end))
+            independentTag.SetLeaderEnd(reference, end);
+        }
       }
 
       if (!independentTag.TagHeadPosition.IsAlmostEqualTo(headPosition))
