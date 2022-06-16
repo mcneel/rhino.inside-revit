@@ -21,6 +21,7 @@
   <ItemGroup>
     <Compile Include="Attributes.cs" />
     <Compile Include="Components\Annotations\AddAngularDimension.cs" />
+    <Compile Include="Components\Annotations\AddElementTag.cs" />
     <Compile Include="Components\Annotations\AddAreaTag.cs" />
     <Compile Include="Components\Annotations\AddDetailLine.cs" />
     <Compile Include="Components\Annotations\AddLinearDimension.cs" />
