@@ -90,6 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             view,
             element.Value,
             headLocation.Value.ToXYZ(),
+            element.Location.Origin.ToXYZ(),
             true,
             ARDB.TagOrientation.Horizontal
           );
@@ -151,6 +152,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ARDB.View view,
       ARDB.Element element,
       ARDB.XYZ headPosition,
+      ARDB.XYZ leaderEnd,
       bool leader,
       ARDB.TagOrientation orientation
     )
@@ -163,12 +165,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (view.ViewType == ARDB.ViewType.ThreeD)
       {
         independentTag.get_Parameter(ARDB.BuiltInParameter.TAG_LEADER_TYPE).Update(1);
-        var end = (Types.Element.FromElement(element) as Types.GraphicalElement).Location.Origin.ToXYZ();
-
         if (independentTag.GetTaggedReferences().FirstOrDefault() is ARDB.Reference reference)
         {
-          if (!independentTag.GetLeaderEnd(reference).IsAlmostEqualTo(end))
-            independentTag.SetLeaderEnd(reference, end);
+          if (!independentTag.GetLeaderEnd(reference).IsAlmostEqualTo(leaderEnd))
+            independentTag.SetLeaderEnd(reference, leaderEnd);
         }
       }
 
