@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}</ProjectGuid>
@@ -59,13 +59,6 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
-    <Compile Include="Components\Element\Annotation\AddAngularDimension.cs" />
-    <Compile Include="Components\Element\Annotation\AddDetailLine.cs" />
-    <Compile Include="Components\Element\Annotation\AddLinearDimension.cs" />
-    <Compile Include="Components\Element\Annotation\AddRegion.cs" />
-    <Compile Include="Components\Element\Annotation\AddSpotCoordinate.cs" />
-    <Compile Include="Components\Element\Annotation\AddSpotElevation.cs" />
-    <Compile Include="Components\Element\Annotation\AddText.cs" />
     <Compile Include="Components\Element\HostObject\SlabShape.cs" />
     <Compile Include="Components\Element\Opening\AddFaceOpening.cs" />
     <Compile Include="Components\Element\Opening\AddOpening.cs" />
