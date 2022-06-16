@@ -8,20 +8,20 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Annotation
+namespace RhinoInside.Revit.GH.Components.Annotations
 {
   [ComponentVersion(introduced: "1.8")]
-  public class AddSpotElevation : ElementTrackerComponent
+  public class AddSpotCoordinate : ElementTrackerComponent
   {
-    public override Guid ComponentGuid => new Guid("00c729f1-75be-4b13-8ab5-aefa4462f335");
+    public override Guid ComponentGuid => new Guid("449b853b-423a-4007-ab6b-6f8e417a1175");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => string.Empty;
 
-    public AddSpotElevation() : base
+    public AddSpotCoordinate() : base
     (
-      name: "Add Spot Elevation",
-      nickname: "SpotEle",
-      description: "Given a point, it adds a spot elevation to the given View",
+      name: "Add Spot Coordinate",
+      nickname: "SpotCoor",
+      description: "Given a point, it adds a spot coordinate to the given View",
       category: "Revit",
       subCategory: "Annotation"
     )
@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         {
           Name = "Point",
           NickName = "P",
-          Description = "Point to place a specific spot elevation",
+          Description = "Point to place a specific spot coordinate",
         }
       ),
       new ParamDefinition
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           NickName = "T",
           Description = "Element type of the given dimension",
           Optional = true,
-          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_SpotElevations
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_SpotCoordinates
         }, ParamRelevance.Secondary
       )
     };
@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       )
     };
 
-    const string _Spot_ = "Spot Elevation";
+    const string _Spot_ = "Spot Coordinate";
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -109,7 +109,7 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           if (!Params.GetData(DA, "Reference", out ARDB.Element element)) return null;
           if (!Params.TryGetData(DA, "Head Location", out Point3d? headLocation)) return null;
           if (headLocation is null) headLocation = point;
-          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.SpotDimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.SpotElevationType)) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.SpotDimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.SpotCoordinateType)) return null;
 
           if
           (
@@ -138,8 +138,8 @@ namespace RhinoInside.Revit.GH.Components.Annotation
     bool Reuse
     (
       ARDB.SpotDimension spot, ARDB.View view,
-      ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end,
-      ARDB.Element element
+      ARDB.Element element,
+      ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end
     )
     {
       if (spot is null) return false;
@@ -190,15 +190,15 @@ namespace RhinoInside.Revit.GH.Components.Annotation
     ARDB.SpotDimension Create
     (
       ARDB.View view,
-      ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end,
-      ARDB.Element element
+      ARDB.Element element,
+      ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end
     )
     {
       var reference = GetReference(element, point, out var origin);
       if (reference is null) return null;
 
       var hasLeader = !point.AlmostEquals(end, view.Document.Application.VertexTolerance);
-      return view.Document.Create.NewSpotElevation(view, reference, origin, bend, end, point, hasLeader);
+      return view.Document.Create.NewSpotCoordinate(view, reference, origin, bend, end, point, hasLeader);
     }
 
     static ARDB.Reference GetReference(ARDB.Element element, ARDB.XYZ point, out ARDB.XYZ origin)
@@ -256,8 +256,8 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       ARDB.SpotDimensionType type
     )
     {
-      if (!Reuse(spot, view, point, bend, end, element))
-        spot = Create(view, point, bend, end, element);
+      if (!Reuse(spot, view, element, point, bend, end))
+        spot = Create(view, element, point, bend, end);
 
       if (spot?.GetTypeId() != type.Id) spot.ChangeTypeId(type.Id);
 
@@ -265,5 +265,3 @@ namespace RhinoInside.Revit.GH.Components.Annotation
     }
   }
 }
-
-

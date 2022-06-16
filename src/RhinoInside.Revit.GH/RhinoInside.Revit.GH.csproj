@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}</ProjectGuid>
@@ -20,6 +20,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes.cs" />
+    <Compile Include="Components\Annotations\AddAngularDimension.cs" />
+    <Compile Include="Components\Annotations\AddElementTag.cs" />
+    <Compile Include="Components\Annotations\AddAreaTag.cs" />
+    <Compile Include="Components\Annotations\AddDetailLine.cs" />
+    <Compile Include="Components\Annotations\AddLinearDimension.cs" />
+    <Compile Include="Components\Annotations\AddRegion.cs" />
+    <Compile Include="Components\Annotations\AddRoomTag.cs" />
+    <Compile Include="Components\Annotations\AddSpaceTag.cs" />
+    <Compile Include="Components\Annotations\AddSpotCoordinate.cs" />
+    <Compile Include="Components\Annotations\AddSpotElevation.cs" />
+    <Compile Include="Components\Annotations\AddText.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Documents\ActiveDocument.cs" />
     <Compile Include="Components\Documents\DocumentIdentity.cs" />
@@ -221,13 +232,10 @@
     <Compile Include="Components\Site\SiteLocationIdentity.cs" />
     <Compile Include="Components\Topology\AddArea.cs" />
     <Compile Include="Components\Topology\AddAreaBoundaryLine.cs" />
-    <Compile Include="Components\Element\Annotation\AddAreaTag.cs" />
     <Compile Include="Components\Topology\AddRoom.cs" />
     <Compile Include="Components\Topology\AddRoomSeparatorLine.cs" />
-    <Compile Include="Components\Element\Annotation\AddRoomTag.cs" />
     <Compile Include="Components\Topology\AddSpace.cs" />
     <Compile Include="Components\Topology\AddSpaceSeparatorLine.cs" />
-    <Compile Include="Components\Element\Annotation\AddSpaceTag.cs" />
     <Compile Include="Components\Topology\AnalyzeInstanceSpace.cs" />
     <Compile Include="Components\Topology\QuerySpatialElements.cs" />
     <Compile Include="Components\Topology\SpatialElementGeometry.cs" />

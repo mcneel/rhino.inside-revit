@@ -7,7 +7,7 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Annotation
+namespace RhinoInside.Revit.GH.Components.Annotations
 {
   [ComponentVersion(introduced: "1.7")]
   public class AddSpaceTag : ElementTrackerComponent
@@ -18,8 +18,8 @@ namespace RhinoInside.Revit.GH.Components.Annotation
 
     public AddSpaceTag() : base
     (
-      name: "Add Space Tag",
-      nickname: "SpaceTag",
+      name: "Tag Space",
+      nickname: "TagSpace",
       description: "Given a point, it adds an space tag to the given view",
       category: "Revit",
       subCategory: "Annotation"
@@ -46,7 +46,6 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           Name = "Space",
           NickName = "S",
           Description = "Space to tag.",
-          Access = GH_ParamAccess.item
         }
       ),
       new ParamDefinition

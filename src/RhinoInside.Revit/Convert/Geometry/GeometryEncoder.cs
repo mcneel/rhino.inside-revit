@@ -1501,7 +1501,13 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal static ARDB.Curve ToCurve(this NurbsCurve nurbsCurve, double factor)
     {
       var tol = Tolerance;
-      if (nurbsCurve.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance * factor))
+      if
+      (
+        nurbsCurve.Degree == 2 &&
+        nurbsCurve.IsRational &&
+        nurbsCurve.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance * factor) &&
+        ellipse.Radius1 * factor <= 30_000.0 && ellipse.Radius2 * factor <= 30_000.0
+      )
         return ellipse.ToCurve(interval, factor);
 
       var gap = tol.ShortCurveTolerance * 1.01 / factor;
@@ -2404,7 +2410,12 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
       else if (nurbsCurve.Degree == 2)
       {
-        if (nurbsCurve.IsRational && nurbsCurve.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance))
+        if
+        (
+          nurbsCurve.IsRational &&
+          nurbsCurve.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance) &&
+          ellipse.Radius1 <= 30_000.0 && ellipse.Radius2 <= 30_000.0
+        )
         {
           // Only degree 2 rational NurbCurves should be transferred as an Arc-Ellipse
           // to avoid unexpected Arcs-Ellipses near linear with gigantic radius.

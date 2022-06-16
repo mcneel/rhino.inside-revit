@@ -8,20 +8,20 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Annotation
+namespace RhinoInside.Revit.GH.Components.Annotations
 {
   [ComponentVersion(introduced: "1.8")]
-  public class AddAngularDimension : ElementTrackerComponent
+  public class AddLinearDimension : ElementTrackerComponent
   {
-    public override Guid ComponentGuid => new Guid("0DBE67E7-7D8E-41F9-85B0-139C0B7F1745");
+    public override Guid ComponentGuid => new Guid("DF47C980-EF08-4BBE-A624-C956C07B04EC");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => string.Empty;
 
-    public AddAngularDimension() : base
+    public AddLinearDimension() : base
     (
-      name: "Add Angular Dimension",
-      nickname: "AngleDim",
-      description: "Given an arc, it adds an angular dimension to the given View",
+      name: "Add Linear Dimension",
+      nickname: "LineDim",
+      description: "Given a line, it adds a linear dimension to the given View",
       category: "Revit",
       subCategory: "Annotation"
     )
@@ -51,11 +51,11 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       ),
       new ParamDefinition
       (
-        new Param_Arc
+        new Param_Line
         {
-          Name = "Arc",
-          NickName = "A",
-          Description = "Arc to place a specific dimension",
+          Name = "Line",
+          NickName = "L",
+          Description = "Line to place a specific dimension",
         }
       ),
       new ParamDefinition
@@ -97,8 +97,8 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         {
           // Input
           if (!Params.GetDataList(DA, "References", out IList<ARDB.Element> elements)) return null;
-          if (!Params.GetData(DA, "Arc", out Arc? arc)) return null;
-          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.DimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.AngularDimensionType)) return null;
+          if (!Params.GetData(DA, "Line", out Line? line)) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.DimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.LinearDimensionType)) return null;
 
           if
           (
@@ -108,8 +108,11 @@ namespace RhinoInside.Revit.GH.Components.Annotation
           )
             throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
 
+          var viewPlane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
+          line = new Line(viewPlane.ClosestPoint(line.Value.From), viewPlane.ClosestPoint(line.Value.To));
+
           // Compute
-          dimension = Reconstruct(dimension, view, arc.Value.ToArc(), elements, type);
+          dimension = Reconstruct(dimension, view, line.Value.ToLine(), elements, type);
 
           DA.SetData(_Output_, dimension);
           return dimension;
@@ -126,14 +129,14 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       return false;
     }
 
-    bool Reuse(ARDB.Dimension dimension, ARDB.View view, ARDB.Arc arc, IList<ARDB.Element> elements, ARDB.DimensionType type)
+    bool Reuse(ARDB.Dimension dimension, ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
     {
       if (dimension is null) return false;
       if (dimension.OwnerViewId != view.Id) return false;
       if (type != default && type.Id != dimension.GetTypeId()) return false;
 
       // Line
-      if (!dimension.Curve.AlmostEquals(arc, GeometryTolerance.Internal.VertexTolerance)) return false;
+      if (!dimension.Curve.AlmostEquals(line, GeometryTolerance.Internal.VertexTolerance)) return false;
 
       // Elements
       var currentReference = dimension.References;
@@ -148,15 +151,30 @@ namespace RhinoInside.Revit.GH.Components.Annotation
       return true;
     }
 
-    ARDB.Dimension Create(ARDB.View view, ARDB.Arc arc, IList<ARDB.Element> elements, ARDB.DimensionType type)
+    ARDB.Dimension Create(ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
     {
       var references = GetReferences(elements);
-      return ARDB.AngularDimension.Create(view.Document, view, arc, references, type);
+
+      if (view.Document.IsFamilyDocument)
+      {
+        if (type == default)
+          return view.Document.FamilyCreate.NewDimension(view, line, references);
+        else
+          return view.Document.FamilyCreate.NewDimension(view, line, references, type);
+      }
+      else
+      {
+        if (type == default)
+          return view.Document.Create.NewDimension(view, line, references);
+        else
+          return view.Document.Create.NewDimension(view, line, references, type);
+      }
     }
 
-    static IList<ARDB.Reference> GetReferences(IList<ARDB.Element> elements)
+    static ARDB.ReferenceArray GetReferences(IList<ARDB.Element> elements)
     {
-      var referenceArray = new List<ARDB.Reference>(elements.Count);
+      var referenceArray = new ARDB.ReferenceArray();
+
       foreach (var element in elements)
       {
         var reference = default(ARDB.Reference);
@@ -168,11 +186,6 @@ namespace RhinoInside.Revit.GH.Components.Annotation
             reference = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
             break;
 #endif
-
-          case ARDB.ModelLine modelLine:
-            reference = modelLine.GeometryCurve.Reference;
-            break;
-
           default:
             using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
             {
@@ -187,16 +200,16 @@ namespace RhinoInside.Revit.GH.Components.Annotation
         }
 
         if (reference is object)
-          referenceArray.Add(reference);
+          referenceArray.Append(reference);
       }
       return referenceArray;
 
     }
 
-    ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Arc arc, IList<ARDB.Element> elements, ARDB.DimensionType type)
+    ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
     {
-      if (!Reuse(dimension, view, arc, elements, type))
-        dimension = Create(view, arc, elements, type);
+      if (!Reuse(dimension, view, line, elements, type))
+        dimension = Create(view, line, elements, type);
 
       return dimension;
     }
