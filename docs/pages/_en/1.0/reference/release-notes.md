@@ -12,6 +12,12 @@ group: Deployment & Configs
 
 - Added 'Slab Shape' component.
 
+### RC 
+
+- Added 'Tag By Category' component.
+- Added 'Multi-Category Tag' component.
+- Added 'Material Tag' component.
+
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
