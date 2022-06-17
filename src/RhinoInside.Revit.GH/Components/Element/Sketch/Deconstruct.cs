@@ -60,9 +60,9 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       (
         new Parameters.SketchPlane()
         {
-          Name = "Sketch Plane",
-          NickName = "SP",
-          Description = "Sketch plane element",
+          Name = "Work Plane",
+          NickName = "WP",
+          Description = "Work plane element",
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       else Params.TrySetData(DA, "Sketch", () => sketch);
 
       Params.TrySetData(DA, "Owner", () => sketch.Owner);
-      Params.TrySetData(DA, "Sketch Plane", () => sketch.SketchPlane);
+      Params.TrySetData(DA, "Work Plane", () => sketch.SketchPlane);
       Params.TrySetDataList(DA, "Profile", () => sketch.Profiles);
     }
   }

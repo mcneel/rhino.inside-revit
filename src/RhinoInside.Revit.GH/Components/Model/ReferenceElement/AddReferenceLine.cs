@@ -43,9 +43,9 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       (
         new Parameters.SketchPlane()
         {
-          Name = "Sketch Plane",
-          NickName = "SP",
-          Description = "Sketch Plane element",
+          Name = "Work Plane",
+          NickName = "WP",
+          Description = "Work Plane element",
         }
       ),
     };
@@ -82,11 +82,11 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if (!Params.GetData(DA, "Sketch Plane", out Types.SketchPlane sketchPlane)) return null;
+          if (!Params.GetData(DA, "Work Plane", out Types.SketchPlane sketchPlane)) return null;
 
           var plane = sketchPlane.Location;
           if ((curve = Rhino.Geometry.Curve.ProjectToPlane(curve, plane)) is null)
-            throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project curve in the 'Sketch Plane'.", curve);
+            throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project curve in the 'Work Plane'.", curve);
 
           // Compute
           referenceLine = Reconstruct(referenceLine, doc.Value, curve.ToCurve(), sketchPlane.Value);
