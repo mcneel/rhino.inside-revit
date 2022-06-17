@@ -81,6 +81,9 @@ namespace RhinoInside.Revit.GH.Components
                 else
                   curve = segment.ToCurve();
 
+                if (!edge.GeometryCurve.IsSameKindAs(curve))
+                  return false;
+
                 if (!edge.GeometryCurve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
                   edge.SetGeometryCurve(curve, false);
               }

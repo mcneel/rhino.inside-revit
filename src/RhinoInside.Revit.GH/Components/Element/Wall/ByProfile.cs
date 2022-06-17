@@ -13,7 +13,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
   using External.DB.Extensions;
   using ElementTracking;
   using Kernel.Attributes;
+  using Grasshopper.Kernel.Parameters;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.8")]
   public class WallByProfile : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("78b02ae8-2b78-45a7-962e-92e7d9097598");
@@ -125,6 +127,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
                 else
                   curve = segment.ToCurve();
 
+                if (!edge.GeometryCurve.IsSameKindAs(curve))
+                  return false;
+
                 if (!edge.GeometryCurve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
                 {
                   // The following line allows SetGeometryCurve to work!!
@@ -175,7 +180,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
       [Description("New Wall")]
       ref ARDB.Wall wall,
 
-      IList<Curve> profile,
+      [ParamType(typeof(Param_Surface))]
+      IList<Brep> profile,
       Optional<ARDB.WallType> type,
       Optional<ARDB.Level> level,
       [Optional] ARDB.WallLocationLine locationLine,
@@ -184,12 +190,14 @@ namespace RhinoInside.Revit.GH.Components.Walls
       [Optional] ARDB.Structure.StructuralWallUsage structuralUsage
     )
     {
-      if (profile.Count < 1) return;
+      var loops = profile.SelectMany(x => x.Loops).Select(x => x.To3dCurve()).ToArray();
+
+      if (loops.Length < 1) return;
 
       var tol = GeometryTolerance.Model;
       var normal = default(Vector3d);
       var maxArea = 0.0;
-      foreach (var boundary in profile)
+      foreach (var boundary in loops)
       {
         var boundaryPlane = default(Plane);
         if
@@ -200,12 +208,12 @@ namespace RhinoInside.Revit.GH.Components.Walls
           !boundary.TryGetPlane(out boundaryPlane, tol.VertexTolerance) ||
           !boundaryPlane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance)
         )
-          ThrowArgumentException(nameof(profile), "Boundary profile should be a valid vertical planar closed curve.", boundary);
+          ThrowArgumentException(nameof(loops), "Boundary profile should be a valid vertical planar closed curve.", boundary);
 
         using (var properties = AreaMassProperties.Compute(boundary))
         {
           if (properties is null)
-            ThrowArgumentException(nameof(profile), "Failed to compute Boundary Area", boundary);
+            ThrowArgumentException(nameof(loops), "Failed to compute Boundary Area", boundary);
 
           if (properties.Area > maxArea)
           {
@@ -220,7 +228,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       }
 
       SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.WallType, nameof(type));
-      SolveOptionalLevel(document, profile, ref level, out var bbox);
+      SolveOptionalLevel(document, loops, ref level, out var bbox);
 
       // LocationLine
       if (locationLine != ARDB.WallLocationLine.WallCenterline)
@@ -256,20 +264,20 @@ namespace RhinoInside.Revit.GH.Components.Walls
           offsetDist *= Revit.ModelUnits;
           var translation = Transform.Translation(normal * (flipped ? -offsetDist : offsetDist));
 
-          var newProfile = new Curve[profile.Count];
-          for (int p = 0; p < profile.Count; ++p)
+          var newLoops = new Curve[loops.Length];
+          for (int p = 0; p < loops.Length; ++p)
           {
-            newProfile[p] = profile[p].DuplicateCurve();
-            newProfile[p].Transform(translation);
+            newLoops[p] = loops[p].DuplicateCurve();
+            newLoops[p].Transform(translation);
           }
 
-          profile = newProfile;
+          loops = newLoops;
         }
       }
 
-      if (!Reuse(ref wall, profile, normal, type.Value))
+      if (!Reuse(ref wall, loops, normal, type.Value))
       {
-        var boundaries = profile.SelectMany(x => GeometryEncoder.ToCurveMany(x)).SelectMany(CurveExtension.ToBoundedCurves).ToList();
+        var boundaries = loops.SelectMany(x => GeometryEncoder.ToCurveMany(x)).SelectMany(CurveExtension.ToBoundedCurves).ToList();
         var newWall = ARDB.Wall.Create
         (
           document,

@@ -159,6 +159,9 @@ namespace RhinoInside.Revit.GH.Components.Openings
                 else
                   curve = segment.ToCurve();
 
+                if (!edge.GeometryCurve.IsSameKindAs(curve))
+                  return false;
+
                 if (!edge.GeometryCurve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
                 {
                   // The following line allows SetGeometryCurve to work!!
