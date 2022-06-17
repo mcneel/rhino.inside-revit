@@ -119,18 +119,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
           return new PlaneEquation(XYZ.BasisZ, -level.ProjectElevation);
 
         case Grid grid:
+          if (grid.IsCurved) return default;
           var curve = grid.Curve;
-          if (grid.IsCurved) curve = curve.CreateReversed();
           var start = curve.GetEndPoint(CurveEnd.Start);
           var end = curve.GetEndPoint(CurveEnd.End);
           var axis = end - start;
           var origin = start + (axis * 0.5);
           var perp = axis.PerpVector();
-          return new PlaneEquation(origin, axis.CrossProduct(perp));
+          return new PlaneEquation(origin, -perp);
 
         case ReferencePlane referencePlane:
           var plane = referencePlane.GetPlane();
           return new PlaneEquation(plane.Origin, plane.Normal);
+
+        case DatumPlane _:
+          return default;
       }
 
       throw new NotImplementedException($"{nameof(GetPlaneEquation)} is not implemented for {datum.GetType()}");

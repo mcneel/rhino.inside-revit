@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     (
       name: "Add Work Plane (Plane)",
       nickname: "WorkPlane",
-      description: "Given a Plane, it adds an <unconnected> Work Plane element to the active Revit document",
+      description: "Given a Plane, it adds a <not associated> Work Plane element to the active Revit document",
       category: "Revit",
       subCategory: "Model"
     )

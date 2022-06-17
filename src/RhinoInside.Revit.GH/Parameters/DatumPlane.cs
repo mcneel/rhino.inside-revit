@@ -9,7 +9,6 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
-  using RhinoInside.Revit.GH.Exceptions;
 
   public class Level : GraphicalElementT<Types.Level, ARDB.Level>
   {
@@ -152,7 +151,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         var data = Types.Level.FromElement(document.Value.GetNearestLevel(elevation / Revit.ModelUnits));
         if (data is null)
-          throw new RuntimeArgumentException(nameof(elevation), "No suitable level has been found.");
+          throw new Exceptions.RuntimeArgumentException(nameof(elevation), "No suitable level has been found.");
 
         level = data as TOutput;
         if (level is null)
