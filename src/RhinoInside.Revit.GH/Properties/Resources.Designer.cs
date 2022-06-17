@@ -373,6 +373,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddWorkPlaneByPlane {
+            get {
+                object obj = ResourceManager.GetObject("AddWorkPlaneByPlane", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AllDocuments {
             get {
                 object obj = ResourceManager.GetObject("AllDocuments", resourceCulture);
@@ -3516,16 +3526,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap SketchPlane {
             get {
                 object obj = ResourceManager.GetObject("SketchPlane", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap SketchPlaneByPlane {
-            get {
-                object obj = ResourceManager.GetObject("SketchPlaneByPlane", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
