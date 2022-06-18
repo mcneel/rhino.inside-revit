@@ -57,7 +57,17 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           NickName = "T",
           Description = "Element type of the given region",
           Optional = true,
-          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_FilledRegion
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_DetailComponents
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicsStyle
+        {
+          Name = "Line Style",
+          NickName = "LS",
+          Description = "Boundary line style",
+          Optional = true
         }, ParamRelevance.Primary
       )
     };
@@ -89,6 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           // Input
           if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary) || boundary.Count == 0) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.FilledRegionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.FilledRegionType)) return null;
+          if (!Params.TryGetData(DA, "Line Style", out Types.GraphicsStyle linestyle, x => x.IsValid)) return null;
 
           if
           (
@@ -117,7 +128,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           boundary = boundary.Select(x => Curve.ProjectToPlane(x, viewPlane)).ToList();
 
           // Compute
-          region = Reconstruct(region, view, boundary.Select(GeometryEncoder.ToBoundedCurveLoop).ToArray(), type);
+          region = Reconstruct
+          (
+            region,
+            view,
+            boundary.Select(GeometryEncoder.ToBoundedCurveLoop).ToArray(),
+            type,
+            linestyle?.Value
+          );
 
           DA.SetData(_Output_, region);
           return region;
@@ -175,10 +193,20 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       return ARDB.FilledRegion.Create(view.Document, type.Id, view.Id, boundaries);
     }
 
-    ARDB.FilledRegion Reconstruct(ARDB.FilledRegion region, ARDB.View view, IList<ARDB.CurveLoop> boundaries, ARDB.FilledRegionType type)
+    ARDB.FilledRegion Reconstruct
+    (
+      ARDB.FilledRegion region,
+      ARDB.View view,
+      IList<ARDB.CurveLoop> boundaries,
+      ARDB.FilledRegionType type,
+      ARDB.GraphicsStyle linestyle
+    )
     {
       if (!Reuse(region, view, boundaries, type))
         region = Create(view, boundaries, type);
+
+      if (linestyle is object)
+        region.SetLineStyleId(linestyle.Id);
 
       return region;
     }
