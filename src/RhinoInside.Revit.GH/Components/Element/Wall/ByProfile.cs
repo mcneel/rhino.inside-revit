@@ -79,71 +79,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     bool Reuse(ref ARDB.Wall element, IList<Curve> boundaries, Vector3d normal, ARDB.WallType type)
     {
-      return false;
+      //return false;
       if (element is null) return false;
 
-      if (element.GetSketch() is ARDB.Sketch sketch)
-      {
-        var tol = GeometryTolerance.Model;
-        var hack = new ARDB.XYZ(1.0, 1.0, 0.0);
-        var plane = sketch.SketchPlane.GetPlane().ToPlane();
-        if (normal.IsParallelTo(plane.Normal, tol.AngleTolerance) == 0)
-          return false;
-
-        var profiles = sketch.Profile.ToArray(GeometryDecoder.ToPolyCurve);
-        if (profiles.Length != boundaries.Count)
-          return false;
-
-        var loops = sketch.GetAllModelCurves();
-        var pi = 0;
-        foreach (var boundary in boundaries)
-        {
-          var profile = Curve.ProjectToPlane(boundary, plane);
-
-          if
-          (
-            !Curve.GetDistancesBetweenCurves(profiles[pi], profile, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
-            max > tol.VertexTolerance
-          )
-          {
-            var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
-              polyCurve.DuplicateSegments():
-              profile.Split(profile.Domain.Mid);
-
-            if (pi < loops.Count)
-            {
-              var loop = loops[pi];
-              if (segments.Length != loop.Count)
-                return false;
-
-              var index = 0;
-              foreach (var edge in loop)
-              {
-                var segment = segments[(++index) % segments.Length];
-
-                var curve = default(ARDB.Curve);
-                if (edge.GeometryCurve is ARDB.HermiteSpline)
-                  curve = segment.ToHermiteSpline();
-                else
-                  curve = segment.ToCurve();
-
-                if (!edge.GeometryCurve.IsSameKindAs(curve))
-                  return false;
-
-                if (!edge.GeometryCurve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
-                {
-                  // The following line allows SetGeometryCurve to work!!
-                  edge.Location.Move(hack);
-                  edge.SetGeometryCurve(curve, overrideJoins: true);
-                }
-              }
-            }
-          }
-
-          pi++;
-        }
-      }
-      else return false;
+      if (!(element.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, normal)))
+        return false;
 
       if (element.GetTypeId() != type.Id)
       {

@@ -63,20 +63,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 #endif
 
-    public static IList<IList<ModelCurve>> GetAllModelCurves(this Sketch sketch)
+    public static IList<IList<CurveElement>> GetProfileCurveElements(this Sketch sketch)
     {
-      var modelCurves = new IList<ModelCurve>[sketch.Profile.Size];
+      var curveElements = new IList<CurveElement>[sketch.Profile.Size];
 
       var loopIndex = 0;
       foreach (var profile in sketch.Profile.Cast<CurveArray>())
       {
-        modelCurves[loopIndex++] = profile.Cast<Curve>().
+        curveElements[loopIndex++] = profile.Cast<Curve>().
           Distinct(CurveEqualityComparer.Reference).
-          Select(x => sketch.Document.GetElement(x.Reference.ElementId) as ModelCurve).
+          Select(x => sketch.Document.GetElement(x.Reference.ElementId) as CurveElement).
           ToArray();
       }
 
-      return modelCurves;
+      return curveElements;
     }
 
 #if !REVIT_2022

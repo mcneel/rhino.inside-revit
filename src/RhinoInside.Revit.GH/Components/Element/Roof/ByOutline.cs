@@ -30,58 +30,8 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (element is null) return false;
 
-      if (element.GetSketch() is ARDB.Sketch sketch)
-      {
-        var profiles = sketch.Profile.ToArray(GeometryDecoder.ToPolyCurve);
-        if (profiles.Length != 1)
-          return false;
-
-        var tol = GeometryTolerance.Model;
-        var plane = sketch.SketchPlane.GetPlane().ToPlane();
-        var profile = Curve.ProjectToPlane(boundary, plane);
-
-        if
-        (
-          !Curve.GetDistancesBetweenCurves(profiles[0], profile, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
-          max > tol.VertexTolerance
-        )
-        {
-          var hack = new ARDB.XYZ(1.0, 1.0, 0.0);
-          var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
-            polyCurve.DuplicateSegments() :
-            new Curve[] { profile };
-
-          var index = 0;
-          var loops = sketch.GetAllModelCurves();
-          foreach (var loop in loops)
-          {
-            if (segments.Length != loop.Count)
-              return false;
-
-            foreach (var edge in loop)
-            {
-              var segment = segments[(++index) % segments.Length];
-
-              var curve = default(ARDB.Curve);
-              if (edge.GeometryCurve is ARDB.HermiteSpline)
-                curve = segment.ToHermiteSpline();
-              else
-                curve = segment.ToCurve();
-
-              if (!edge.GeometryCurve.IsSameKindAs(curve))
-                return false;
-
-              if (!edge.GeometryCurve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
-              {
-                // The following line allows SetGeometryCurve to work!!
-                edge.Location.Move(hack);
-                edge.SetGeometryCurve(curve, false);
-              }
-            }
-          }
-        }
-      }
-      else return false;
+      if (!(element.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, new Curve[] { boundary }, Vector3d.ZAxis)))
+        return false;
 
       if (element.GetTypeId() != type.Id)
       {
