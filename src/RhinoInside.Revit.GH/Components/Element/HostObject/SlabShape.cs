@@ -31,11 +31,11 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
     {
       new ParamDefinition
       (
-        new Parameters.Floor()
+        new Parameters.HostObject()
         {
-          Name = "Floor",
-          NickName = "F",
-          Description = "Floor to update",
+          Name = "Host",
+          NickName = "H",
+          Description = "Floor or Roof.",
         }
       ),
       new ParamDefinition
@@ -74,11 +74,11 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
     {
       new ParamDefinition
       (
-        new Parameters.Floor()
+        new Parameters.HostObject()
         {
-          Name = "Floor",
-          NickName = "F",
-          Description = "Floor to update",
+          Name = "Host",
+          NickName = "H",
+          Description = "Floor or Roof.",
         }
       ),
       new ParamDefinition
@@ -153,17 +153,23 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Floor", out Types.Floor floor)) return;
-      else Params.TrySetData(DA, "Floor", () => floor);
+      if (!Params.GetData(DA, "Host", out Types.HostObject host)) return;
+      else Params.TrySetData(DA, "Host", () => host);
 
-      var shape = floor.Value.SlabShapeEditor;
+      var shape = default(ARDB.SlabShapeEditor);
+      switch (host)
+      {
+        case Types.Floor floor: shape = floor.Value.SlabShapeEditor; break;
+        case Types.Roof roof:   shape = roof.Value.SlabShapeEditor; break;
+      }
+
       if (shape is null)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Only flat and horizontal floors are valid for slab shape edit.");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Only flat and horizontal floors and roofs are valid for slab shape edit.");
         return;
       }
 
-      var curvedEdgeConditionParam = floor.Value.get_Parameter(ARDB.BuiltInParameter.HOST_SSE_CURVED_EDGE_CONDITION_PARAM);
+      var curvedEdgeConditionParam = host.Value.get_Parameter(ARDB.BuiltInParameter.HOST_SSE_CURVED_EDGE_CONDITION_PARAM);
       var curvedEdgeConditionValue = curvedEdgeConditionParam?.AsInteger();
 
       var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>();
@@ -187,8 +193,8 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
       )
       {
         var tol = GeometryTolerance.Model;
-        StartTransaction(floor.Document);
-        (floor as IGH_PreviewMeshData).DestroyPreviewMeshes();
+        StartTransaction(host.Document);
+        (host as IGH_PreviewMeshData).DestroyPreviewMeshes();
 
         shape.Enable();
         shape.ResetSlabShape();
@@ -226,7 +232,7 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
       {
         if (curvedEdgeConditionParam is object && !curvedEdgeConditionParam.IsReadOnly)
         {
-          StartTransaction(floor.Document);
+          StartTransaction(host.Document);
           curvedEdgeConditionParam.Update(curvedEdgeCondition.Value);
         }
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Failed to update 'Curved Edge Condition'");
