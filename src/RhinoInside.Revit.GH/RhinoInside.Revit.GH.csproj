@@ -184,7 +184,6 @@
     <Compile Include="Components\Filters\Selection\SelectionElements.cs" />
     <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
-    <Compile Include="Components\Model\AddWorkPlaneByDatum.cs" />
     <Compile Include="Components\Model\AddWorkPlaneByPlane.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
     <Compile Include="Components\Model\Group\AddModelGroup.cs" />
