@@ -241,7 +241,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if
       (
         Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid) &&
-        !element.Curve.EpsilonEquals(curve, tol.VertexTolerance)
+        element.Curve?.EpsilonEquals(curve, tol.VertexTolerance) != true
       )
       {
         UpdateElement(element.Value, () => element.SetCurve(curve, KeepJoins));
