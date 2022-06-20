@@ -138,12 +138,20 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ARDB.TagOrientation orientation
     )
     {
+      try
+      {
 #if REVIT_2019
-      var reference = new ARDB.Reference(element);
-      return ARDB.IndependentTag.Create(view.Document, view.Id, reference, leader, TagMode, orientation, point);
+        var reference = new ARDB.Reference(element);
+        return ARDB.IndependentTag.Create(view.Document, view.Id, reference, leader, TagMode, orientation, point);
 #else
       return view.Document.Create.NewTag(view, element, leader, TagMode, orientation, point);
 #endif
+      }
+      catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"There is no tag loaded for '{element.Category.Name}'.");
+        return null;
+      }
     }
 
     ARDB.IndependentTag Reconstruct
@@ -160,24 +168,27 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (!Reuse(independentTag, view, element, headPosition))
         independentTag = Create(view, element, headPosition, leader, orientation);
 
-      independentTag.get_Parameter(ARDB.BuiltInParameter.LEADER_LINE).Update(true);
-
-      if (view.ViewType == ARDB.ViewType.ThreeD)
+      if (independentTag is object)
       {
-        independentTag.get_Parameter(ARDB.BuiltInParameter.TAG_LEADER_TYPE).Update(1);
-        if (independentTag.GetTaggedReferences().FirstOrDefault() is ARDB.Reference reference)
+        independentTag.get_Parameter(ARDB.BuiltInParameter.LEADER_LINE).Update(true);
+
+        if (view.ViewType == ARDB.ViewType.ThreeD)
         {
-          if (!independentTag.GetLeaderEnd(reference).IsAlmostEqualTo(leaderEnd))
-            independentTag.SetLeaderEnd(reference, leaderEnd);
+          independentTag.get_Parameter(ARDB.BuiltInParameter.TAG_LEADER_TYPE).Update(1);
+          if (independentTag.GetTaggedReferences().FirstOrDefault() is ARDB.Reference reference)
+          {
+            if (!independentTag.GetLeaderEnd(reference).IsAlmostEqualTo(leaderEnd))
+              independentTag.SetLeaderEnd(reference, leaderEnd);
+          }
         }
-      }
 
-      if (!independentTag.TagHeadPosition.IsAlmostEqualTo(headPosition))
-      {
-        var pinned = independentTag.Pinned;
-        independentTag.Pinned = false;
-        independentTag.TagHeadPosition = headPosition;
-        independentTag.Pinned = pinned;
+        if (!independentTag.TagHeadPosition.IsAlmostEqualTo(headPosition))
+        {
+          var pinned = independentTag.Pinned;
+          independentTag.Pinned = false;
+          independentTag.TagHeadPosition = headPosition;
+          independentTag.Pinned = pinned;
+        }
       }
 
       return independentTag;
