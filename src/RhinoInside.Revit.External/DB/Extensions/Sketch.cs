@@ -96,4 +96,60 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 #endif
   }
+
+#if REVIT_2022
+  public static class SketchEditScopeExtension
+  {
+    public static bool IsSketchEditingSupportedForSketchBasedElement(this SketchEditScope scope, Element element)
+    {
+#if REVIT_2023
+      return scope.IsSketchEditingSupportedForSketchBasedElement(element.Id);
+#else
+      switch (element)
+      {
+        case Ceiling ceiling: return true;
+        case Floor floor:     return true;
+        case Wall wall:       return wall.CanHaveProfileSketch();
+        case Opening opening: return true;
+      }
+
+      return false;
+#endif
+    }
+
+#if !REVIT_2023
+    public static bool IsElementWithoutSketch(this SketchEditScope scope, ElementId elementId)
+    {
+      // Revit returns false even on Walls whithout sketch.
+      return false;
+    }
+    public static void StartWithNewSketch(this SketchEditScope scope, ElementId elementId)
+    {
+      throw new System.NotImplementedException($"{nameof(StartWithNewSketch)} is not implement.");
+    }
+#endif
+
+    public static bool IsElementWithoutSketch(this SketchEditScope scope, Element element)
+    {
+      return element.GetSketch() is null;
+    }
+
+    public static Sketch StartWithNewSketch(this SketchEditScope scope, Element element)
+    {
+      switch (element)
+      {
+        case Wall wall:
+          using (var tx = element.Document.CommitScope())
+          {
+            var sketch = wall.CreateProfileSketch();
+            tx.Commit();
+            return sketch;
+          }
+      }
+
+      scope.StartWithNewSketch(element.Id);
+      return element.GetSketch();
+    }
+  }
+#endif
 }

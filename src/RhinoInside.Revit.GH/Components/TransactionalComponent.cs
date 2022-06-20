@@ -148,13 +148,13 @@ namespace RhinoInside.Revit.GH.Components
 #endif
       var severity = failuresAccessor.GetSeverity();
 
-      if (failuresAccessor.IsTransactionBeingCommitted())
+      if
+      (
+        severity >= ARDB.FailureSeverity.Error &&
+        FailureProcessingMode <= ARDB.FailureProcessingResult.ProceedWithCommit
+      )
       {
-        if
-        (
-          severity >= ARDB.FailureSeverity.Error &&
-          FailureProcessingMode <= ARDB.FailureProcessingResult.ProceedWithCommit
-        )
+        if (failuresAccessor.IsTransactionBeingCommitted())
         {
           // Handled failures in order
           if (FailureDefinitionIdsToFix is IEnumerable<ARDB.FailureDefinitionId> failureDefinitionIdsToFix)
@@ -163,14 +163,14 @@ namespace RhinoInside.Revit.GH.Components
             if (result != ARDB.FailureProcessingResult.Continue)
               return result;
           }
+        }
 
-          // Unhandled failures in incomming order
-          {
-            var unhandledFailureDefinitionIds = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
-            var result = FixFailures(failuresAccessor, unhandledFailureDefinitionIds);
-            if (result != ARDB.FailureProcessingResult.Continue)
-              return result;
-          }
+        // Unhandled failures in incomming order
+        {
+          var unhandledFailureDefinitionIds = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
+          var result = FixFailures(failuresAccessor, unhandledFailureDefinitionIds);
+          if (result != ARDB.FailureProcessingResult.Continue)
+            return result;
         }
       }
 
