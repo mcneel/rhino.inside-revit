@@ -18,9 +18,9 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
 
     public SlabShape() : base
     (
-      name: "Slab Shape",
-      nickname: "SlabShape",
-      description: "Given its outline curve, it adds a Floor element to the active Revit document",
+      name: "Host Sub Elements",
+      nickname: "SubElems",
+      description: "Manipulates points and edges on a slab, roof or floor.",
       category: "Revit",
       subCategory: "Host"
     )
@@ -154,7 +154,6 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Host", out Types.HostObject host)) return;
-      else Params.TrySetData(DA, "Host", () => host);
 
       var shape = default(ARDB.SlabShapeEditor);
       switch (host)
@@ -165,9 +164,11 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
 
       if (shape is null)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Only flat and horizontal floors and roofs are valid for slab shape edit.");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Only flat and horizontal slabs, floors or roofs are valid for '{Name}'.");
         return;
       }
+
+      Params.TrySetData(DA, "Host", () => host);
 
       var curvedEdgeConditionParam = host.Value.get_Parameter(ARDB.BuiltInParameter.HOST_SSE_CURVED_EDGE_CONDITION_PARAM);
       var curvedEdgeConditionValue = curvedEdgeConditionParam?.AsInteger();
