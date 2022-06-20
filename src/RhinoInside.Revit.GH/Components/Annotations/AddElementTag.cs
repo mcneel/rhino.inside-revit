@@ -84,14 +84,16 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             headLocation = element.Location.Origin;
 
           // Compute
+          var headPosition = headLocation.Value.ToXYZ();
+          var leaderEnd = element.Location.Origin.ToXYZ();
           independentTag = Reconstruct
           (
             independentTag,
             view,
             element.Value,
-            headLocation.Value.ToXYZ(),
-            element.Location.Origin.ToXYZ(),
-            true,
+            headPosition,
+            leaderEnd,
+            !headPosition.IsAlmostEqualTo(leaderEnd),
             ARDB.TagOrientation.Horizontal
           );
 
@@ -170,7 +172,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
       if (independentTag is object)
       {
-        independentTag.get_Parameter(ARDB.BuiltInParameter.LEADER_LINE).Update(true);
+        independentTag.get_Parameter(ARDB.BuiltInParameter.LEADER_LINE).Update(leader);
 
         if (view.ViewType == ARDB.ViewType.ThreeD)
         {
