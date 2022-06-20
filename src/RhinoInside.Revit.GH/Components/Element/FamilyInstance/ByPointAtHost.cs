@@ -13,6 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Families
   using External.DB.Extensions;
   using Kernel.Attributes;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.9")]
   public class FamilyInstanceByLocation : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("0C642D7D-897B-479E-8668-91E09222D7B9");
@@ -68,6 +69,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       Plane location,
       ARDB.FamilySymbol type,
       Optional<ARDB.Level> level,
+      [ParamType(typeof(Parameters.GraphicalElement))]
       [Optional] ARDB.Element host
     )
     {
