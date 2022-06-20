@@ -142,6 +142,25 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
+    ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.Curve curve, ARDB.FamilySymbol type)
+    {
+      return doc.IsFamilyDocument ?
+        doc.FamilyCreate.NewFamilyInstance
+        (
+          curve.GetEndPoint(0),
+          type,
+          default, // No work-plane based.
+          ARDB.Structure.StructuralType.Beam
+        ) :
+        doc.Create.NewFamilyInstance
+        (
+          curve,
+          type,
+          default, // No work-plane based.
+          ARDB.Structure.StructuralType.Beam
+        );
+    }
+
     ARDB.FamilyInstance Reconstruct
     (
       ARDB.FamilyInstance beam,
@@ -153,16 +172,9 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (!Reuse(beam, type))
       {
-        // We create a vertical beam to force Revit create a non-work-plane based instance.
         beam = beam.ReplaceElement
         (
-          doc.Create.NewFamilyInstance
-          (
-            ARDB.Line.CreateBound(ARDB.XYZ.Zero, ARDB.XYZ.BasisZ),
-            type,
-            level,
-            ARDB.Structure.StructuralType.Beam
-          ),
+          Create(doc, curve, type),
           ExcludeUniqueProperties
         );
 

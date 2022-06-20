@@ -333,6 +333,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddStructuralFoundation {
+            get {
+                object obj = ResourceManager.GetObject("AddStructuralFoundation", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddStructuralPlan {
             get {
                 object obj = ResourceManager.GetObject("AddStructuralPlan", resourceCulture);

@@ -155,6 +155,25 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
+    ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.Curve curve, ARDB.FamilySymbol type, ARDB.Level level)
+    {
+      return doc.IsFamilyDocument ?
+        doc.FamilyCreate.NewFamilyInstance
+        (
+          curve.GetEndPoint(0),
+          type,
+          default,
+          ARDB.Structure.StructuralType.Column
+        ) :
+        doc.Create.NewFamilyInstance
+        (
+          curve,
+          type,
+          level,
+          ARDB.Structure.StructuralType.Column
+        );
+    }
+
     ARDB.FamilyInstance Reconstruct
     (
       ARDB.FamilyInstance column,
@@ -169,13 +188,7 @@ namespace RhinoInside.Revit.GH.Components
       {
         column = column.ReplaceElement
         (
-          doc.Create.NewFamilyInstance
-          (
-            curve,
-            type,
-            baselevel,
-            ARDB.Structure.StructuralType.Column
-          ),
+          Create(doc, curve, type, baselevel),
           ExcludeUniqueProperties
         );
 

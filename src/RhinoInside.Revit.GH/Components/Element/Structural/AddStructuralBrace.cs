@@ -137,6 +137,25 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
+    ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.Curve curve, ARDB.FamilySymbol type)
+    {
+      return doc.IsFamilyDocument ?
+        doc.FamilyCreate.NewFamilyInstance
+        (
+          curve.GetEndPoint(0),
+          type,
+          default, // No work-plane based.
+          ARDB.Structure.StructuralType.Brace
+        ) :
+        doc.Create.NewFamilyInstance
+        (
+          curve,
+          type,
+          default, // No work-plane based.
+          ARDB.Structure.StructuralType.Brace
+        );
+    }
+
     ARDB.FamilyInstance Reconstruct
     (
       ARDB.FamilyInstance brace,
@@ -148,21 +167,13 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (!Reuse(brace, type))
       {
-        // We create a vertical beam to force Revit create a non-work-plane based instance.
         brace = brace.ReplaceElement
         (
-          doc.Create.NewFamilyInstance
-          (
-            ARDB.Line.CreateBound(ARDB.XYZ.Zero, ARDB.XYZ.BasisZ),
-            type,
-            level,
-            ARDB.Structure.StructuralType.Brace
-          ),
+          Create(doc, curve, type),
           ExcludeUniqueProperties
         );
 
         // We turn off analytical model off by default
-        brace.Document.Regenerate();
         brace.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
       }
 

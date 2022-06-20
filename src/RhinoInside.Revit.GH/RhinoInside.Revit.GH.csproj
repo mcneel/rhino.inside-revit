@@ -138,6 +138,7 @@
     <Compile Include="Components\Element\Sketch\Deconstruct.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBeam.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
+    <Compile Include="Components\Element\Structural\AddStructuralFoundation.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />
     <Compile Include="Components\Element\Properties.cs" />
     <Compile Include="Components\Element\Version.cs" />
@@ -183,6 +184,7 @@
     <Compile Include="Components\Filters\Selection\SelectionElements.cs" />
     <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
+    <Compile Include="Components\Model\AddWorkPlaneByDatum.cs" />
     <Compile Include="Components\Model\AddWorkPlaneByPlane.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
     <Compile Include="Components\Model\Group\AddModelGroup.cs" />
