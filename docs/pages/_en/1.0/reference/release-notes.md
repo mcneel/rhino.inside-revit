@@ -10,7 +10,8 @@ group: Deployment & Configs
 
 ### WIP
 
-- Added 'Slab Shape' component.
+- Added 'Host Sub Elements' component.
+- Added 'Profile' input to 'Host Boundary Profile' component.
 
 ### RC 
 
