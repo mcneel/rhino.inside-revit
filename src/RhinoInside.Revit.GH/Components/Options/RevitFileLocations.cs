@@ -4,6 +4,7 @@ using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Options
 {
+  [ComponentVersion(introduced: "1.9")]
   public class RevitFileLocations : Component
   {
     public override Guid ComponentGuid => new Guid("CB3D697E-B227-4F69-8514-9EEB83C5016C");

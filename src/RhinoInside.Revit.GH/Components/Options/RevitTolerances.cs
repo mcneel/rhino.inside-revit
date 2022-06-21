@@ -4,6 +4,7 @@ using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Options
 {
+  [ComponentVersion(introduced: "1.9")]
   public class RevitTolerances : Component
   {
     public override Guid ComponentGuid => new Guid("825D7AB3-0B45-43A7-9961-D0C6BB3C8E0A");
