@@ -186,7 +186,6 @@
     <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
     <Compile Include="Components\Model\AddWorkPlaneByPlane.cs" />
-    <Compile Include="Components\Model\Deconstruct.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
     <Compile Include="Components\Model\Group\AddModelGroup.cs" />
     <Compile Include="Components\Model\Group\CreateGroupType.cs" />
@@ -194,6 +193,7 @@
     <Compile Include="Components\Model\Group\QueryGroupTypes.cs" />
     <Compile Include="Components\Model\ReferenceElement\AddReferenceLine.cs" />
     <Compile Include="Components\Model\ReferenceElement\AddReferencePlane.cs" />
+    <Compile Include="Components\Model\SketchDeconstruct.cs" />
     <Compile Include="Components\ObjectStyles\AddSubCategory.cs" />
     <Compile Include="Components\ObjectStyles\CategoryGraphicsStyle.cs" />
     <Compile Include="Components\ObjectStyles\CategoryIdentity.cs" />
