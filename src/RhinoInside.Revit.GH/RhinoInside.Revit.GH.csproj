@@ -21,6 +21,7 @@
   <ItemGroup>
     <Compile Include="Attributes.cs" />
     <Compile Include="Components\Annotations\AddAngularDimension.cs" />
+    <Compile Include="Components\Annotations\AddSymbol.cs" />
     <Compile Include="Components\Annotations\AddElementTag.cs" />
     <Compile Include="Components\Annotations\AddAreaTag.cs" />
     <Compile Include="Components\Annotations\AddDetailLine.cs" />
@@ -30,6 +31,7 @@
     <Compile Include="Components\Annotations\AddSpaceTag.cs" />
     <Compile Include="Components\Annotations\AddSpotCoordinate.cs" />
     <Compile Include="Components\Annotations\AddSpotElevation.cs" />
+    <Compile Include="Components\Annotations\AddDetailItem.cs" />
     <Compile Include="Components\Annotations\AddText.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Documents\ActiveDocument.cs" />
