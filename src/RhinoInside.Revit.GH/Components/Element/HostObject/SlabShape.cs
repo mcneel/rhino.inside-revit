@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Element.HostObject
 {
@@ -40,12 +41,12 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
       ),
       new ParamDefinition
       (
-        new Param_Integer()
+        new Parameters.Param_Enum<Types.SlabShapeEditCurvedEdgeCondition>()
         {
           Name = "Curved Edge Condition",
           NickName = "CEC",
           Optional = true
-        }.SetDefaultVale(2), ParamRelevance.Secondary
+        }.SetDefaultVale(ERDB.SlabShapeEditCurvedEdgeCondition.ProjectToSide), ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -83,7 +84,7 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
       ),
       new ParamDefinition
       (
-        new Param_Integer()
+        new Parameters.Param_Enum<Types.SlabShapeEditCurvedEdgeCondition>()
         {
           Name = "Curved Edge Condition",
           NickName = "CEC",

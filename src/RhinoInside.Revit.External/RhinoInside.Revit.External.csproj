@@ -100,6 +100,7 @@
     <Compile Include="DB\Schemas\UnitType.cs" />
     <Compile Include="DB\Schemas\UnitType.Enum.cs" />
     <Compile Include="DB\Schemas\UnitType.Values.cs" />
+    <Compile Include="DB\SlabShapeEditCurvedEdgeCondition.cs" />
     <Compile Include="DB\Transaction.cs" />
     <Compile Include="DB\UniqueId.cs" />
     <Compile Include="DB\WallWrapping.cs" />
