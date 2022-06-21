@@ -203,6 +203,10 @@
     <Compile Include="Components\ObjectStyles\CurveLineStyle.cs" />
     <Compile Include="Components\ObjectStyles\QueryCategories.cs" />
     <Compile Include="Components\ObjectStyles\QueryLineStyles.cs" />
+    <Compile Include="Components\Options\RevitUser.cs" />
+    <Compile Include="Components\Options\RevitVersion.cs" />
+    <Compile Include="Components\Options\RevitTolerances.cs" />
+    <Compile Include="Components\Options\RevitFileLocations.cs" />
     <Compile Include="Components\ParameterElement\AddParameter.cs" />
     <Compile Include="Components\ParameterElement\DefineParameter.cs" />
     <Compile Include="Components\ParameterElement\GlobalParameter.cs" />

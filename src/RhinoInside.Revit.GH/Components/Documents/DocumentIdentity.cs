@@ -159,9 +159,9 @@ namespace RhinoInside.Revit.GH.Components.Documents
   {
     public override Guid ComponentGuid => new Guid("2577A55B-A198-4760-9183-ADF8193FB5BD");
 #if REVIT_2019
-    public override GH_Exposure Exposure => GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.obscure;
 #else
-    public override GH_Exposure Exposure => GH_Exposure.obscure | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.obscure | GH_Exposure.hidden;
     public override bool SDKCompliancy(int exeVersion, int exeServiceRelease) => false;
 #endif
     protected override string IconTag => "☁";

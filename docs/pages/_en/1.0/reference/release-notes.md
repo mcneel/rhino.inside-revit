@@ -12,6 +12,10 @@ group: Deployment & Configs
 
 - Added 'Host Sub Elements' component.
 - Added 'Profile' input to 'Host Boundary Profile' component.
+- Added 'Revit Version' component.
+- Added 'Revit User' component.
+- Added 'Document Tolerances' component.
+- Added 'Default File Locations' component.
 
 ### RC 
 
