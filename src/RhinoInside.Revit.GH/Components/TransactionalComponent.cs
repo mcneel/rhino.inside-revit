@@ -14,6 +14,7 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Convert.Display;
   using Convert.Geometry;
   using ElementTracking;
   using External.DB.Extensions;
@@ -732,12 +733,13 @@ namespace RhinoInside.Revit.GH.Components
             input = null;
         }
 
+        var grouped = input is object && input.GroupId != ARDB.ElementId.InvalidElementId;
         var graphical = input is object && Types.GraphicalElement.IsValidElement(input);
         var pinned = input?.Pinned != false;
 
         try
         {
-          if (!graphical || pinned)
+          if (!graphical || (pinned && !grouped))
           {
             if (validate(input))
               UpdateDocument(document, () => output = update(input));
@@ -746,8 +748,39 @@ namespace RhinoInside.Revit.GH.Components
           }
           else
           {
-            if (graphical)
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Some elements were ignored because are unpinned.");
+            if (graphical && input is object)
+            {
+              var mesh = default(Rhino.Geometry.Mesh);
+              var message = default(string);
+
+              if (grouped)
+                message = "Highlighted elements can't be updated because are grouped.";
+              else if (!pinned)
+                message = "Highlighted elements were not updated because are unpinned.";
+
+              using
+              (
+                var options = input.ViewSpecific ?
+                new ARDB.Options() { View = input.Document.GetElement(input.OwnerViewId) as ARDB.View } :
+                new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium }
+              )
+              using (var geometry = input.GetGeometry(options))
+              {
+                if (geometry is object)
+                {
+                  mesh = new Rhino.Geometry.Mesh();
+                  mesh.Append(geometry.GetPreviewMeshes(input.Document, null));
+                  if (mesh.Faces.Count == 0)
+                  {
+                    var inch = Revit.ModelUnits / 12.0;
+                    var box = input.GetBoundingBoxXYZ().ToBox(); box.Inflate(inch, inch, inch);
+                    mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
+                  }
+                }
+              }
+
+              AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, message, mesh);
+            }
 
             output = input;
           }
