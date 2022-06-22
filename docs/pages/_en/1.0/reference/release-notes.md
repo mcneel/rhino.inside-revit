@@ -28,6 +28,14 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.8 RC2" version="v1.8.8207.14855" pre_release=true time="06/21/2022" %}
+
+- Added 'Tag By Category' component.
+- Added 'Multi-Category Tag' component.
+- Added 'Material Tag' component.
+- Added 'Add Detail Item' component.
+- Added 'Add Symbol' component.
+
 {% include ltr/release-header.html title="v1.8 RC1" version="v1.8.8200.21840" pre_release=true time="06/14/2022" %}
 
 - Moved {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} from Topology to Annotation tab.
