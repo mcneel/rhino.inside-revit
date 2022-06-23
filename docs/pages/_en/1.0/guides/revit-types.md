@@ -116,8 +116,6 @@ Use the {% include ltr/comp.html uuid="c2b9b045-" %} component to save a family 
 
 ![]({{ "/static/images/guides/revit-families11.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Type Family.ghuser' name='Type Family' %}
-
 ## Creating New Families
 
 Under current {{ site.terms.rir }} implementation, you can use the {% include ltr/comp.html uuid='82523911' %} component to generate new Revit families and insert a new geometry into the family. Make sure to assign the correct template file to the component for best results.
