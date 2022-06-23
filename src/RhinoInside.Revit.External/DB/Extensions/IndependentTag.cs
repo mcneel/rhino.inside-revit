@@ -21,6 +21,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return new List<LinkElementId> { tag.TaggedElementId };
     }
 
+#if !REVIT_2018
+    static Reference GetTaggedReference(this IndependentTag tag)
+    {
+      return new Reference(tag.Document.GetElement(tag.TaggedLocalElementId));
+    }
+#endif
+
     public static IList<Reference> GetTaggedReferences(this IndependentTag tag)
     {
       return new List<Reference> { tag.GetTaggedReference() };
@@ -36,11 +43,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!reference.EqualTo(referenceTagged))
+        if (!Equals(tag.Document, reference, referenceTagged))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
+#if REVIT_2018
       return tag.HasElbow;
+#else
+      try { return tag.LeaderElbow is object; }
+      catch { }
+
+      return false;
+#endif
     }
 
     public static XYZ GetLeaderElbow(this IndependentTag tag, Reference referenceTagged)
@@ -53,7 +67,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!reference.EqualTo(referenceTagged))
+        if (!Equals(tag.Document, reference, referenceTagged))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
@@ -70,7 +84,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!reference.EqualTo(referenceTagged))
+        if (!Equals(tag.Document, reference, referenceTagged))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
@@ -87,7 +101,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!reference.EqualTo(referenceTagged))
+        if (!Equals(tag.Document, reference, referenceTagged))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
@@ -104,12 +118,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!reference.EqualTo(referenceTagged))
+        if (!Equals(tag.Document, reference, referenceTagged))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
       tag.LeaderEnd = pntEnd;
     }
 #endif
+
+    static bool Equals(Document doc, Reference a, Reference b)
+    {
+#if REVIT_2018
+      return a.EqualTo(b); 
+#else
+      return a.ConvertToStableRepresentation(doc) == b.ConvertToStableRepresentation(doc);
+#endif
+    }
   }
 }
