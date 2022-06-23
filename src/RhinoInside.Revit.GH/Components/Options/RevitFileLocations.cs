@@ -1,6 +1,5 @@
 using System;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Options
 {
@@ -23,9 +22,9 @@ namespace RhinoInside.Revit.GH.Components.Options
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddTextParameter("Project Template", "PT", string.Empty, GH_ParamAccess.item);
-      manager.AddTextParameter("Family Templates", "FT", string.Empty, GH_ParamAccess.item);
-      manager.AddTextParameter("Point Clouds", "FT", string.Empty, GH_ParamAccess.item);
+      manager.AddTextParameter("Project Template", "PT", "Default project template file", GH_ParamAccess.item);
+      manager.AddTextParameter("Family Templates", "FT", "Default family templates folder", GH_ParamAccess.item);
+      manager.AddTextParameter("Point Clouds", "PC", "Default point clouds folder", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
