@@ -1,9 +1,10 @@
 using System;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Options
 {
+  using External.ApplicationServices.Extensions;
+
   [ComponentVersion(introduced: "1.9")]
   public class RevitVersion : Component
   {
@@ -31,7 +32,7 @@ namespace RhinoInside.Revit.GH.Components.Options
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DA.SetData("Name", Revit.ActiveDBApplication.VersionName);
-      DA.SetData("Version", Revit.ActiveDBApplication.VersionNumber);
+      DA.SetData("Version", Revit.ActiveDBApplication.GetSubVersionNumber());
       DA.SetData("Build", Revit.ActiveDBApplication.VersionBuild);
     }
   }
