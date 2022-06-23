@@ -1,9 +1,11 @@
 using System;
+using System.Globalization;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Options
 {
+  using External.ApplicationServices.Extensions;
+
   [ComponentVersion(introduced: "1.9")]
   public class RevitUser : Component
   {
@@ -23,12 +25,18 @@ namespace RhinoInside.Revit.GH.Components.Options
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
+      manager.AddCultureParameter("Language", "L", "Language", GH_ParamAccess.item);
       manager.AddTextParameter("User Name", "UN", "User name for the current Revit session.", GH_ParamAccess.item);
+      manager.AddTextParameter("User ID", "ID", "The user id of the user currently logged in.", GH_ParamAccess.item);
+      manager.AddBooleanParameter("Logged In", "LI", "Gets if the user is logged in from this session to their Autodesk account.", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      DA.SetData("Language", new CultureInfo(Revit.ActiveDBApplication.Language.ToLCID()));
       DA.SetData("User Name", Revit.ActiveDBApplication.Username);
+      DA.SetData("User ID", Revit.ActiveDBApplication.LoginUserId);
+      DA.SetData("Logged In", Autodesk.Revit.ApplicationServices.Application.IsLoggedIn);
     }
   }
 }
