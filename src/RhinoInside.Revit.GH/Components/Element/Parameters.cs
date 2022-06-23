@@ -211,59 +211,59 @@ namespace RhinoInside.Revit.GH
         switch (key ?? goo.ScriptVariable())
         {
           case string parameterName:
-          {
-            parameter = element.GetParameter(parameterName, ERDB.ParameterClass.Any);
-            if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterName}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
-            break;
-          }
+            {
+              parameter = element.GetParameter(parameterName, ERDB.ParameterClass.Any);
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterName}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
+              break;
+            }
           case int parameterId:
-          {
-            var elementId = new ARDB.ElementId(parameterId);
-            if (elementId.TryGetBuiltInParameter(out var builtInParameter))
             {
-              parameter = element.get_Parameter(builtInParameter);
-              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not defined in 'Element' {{{element.Id.IntegerValue}}}");
+              var elementId = new ARDB.ElementId(parameterId);
+              if (elementId.TryGetBuiltInParameter(out var builtInParameter))
+              {
+                parameter = element.get_Parameter(builtInParameter);
+                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not defined in 'Element' {{{element.Id.IntegerValue}}}");
+              }
+              else if (element.Document.GetElement(new ARDB.ElementId(parameterId)) is ARDB.ParameterElement parameterElement)
+              {
+                parameter = element.get_Parameter(parameterElement.GetDefinition());
+                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
+              }
+              else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element");
+              break;
             }
-            else if (element.Document.GetElement(new ARDB.ElementId(parameterId)) is ARDB.ParameterElement parameterElement)
-            {
-              parameter = element.get_Parameter(parameterElement.GetDefinition());
-              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
-            }
-            else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element");
-            break;
-          }
           case ARDB.Parameter param:
-          {
-            parameter = element.get_Parameter(param.Definition);
-            if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{param.Definition.Name}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
-            break;
-          }
+            {
+              parameter = element.get_Parameter(param.Definition);
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{param.Definition.Name}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
+              break;
+            }
           case ARDB.ElementId elementId:
-          {
-            if (elementId.TryGetBuiltInParameter(out var builtInParameter))
             {
-              parameter = element.get_Parameter(builtInParameter);
-              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not  defined in 'Element' {{{element.Id.IntegerValue}}}");
+              if (elementId.TryGetBuiltInParameter(out var builtInParameter))
+              {
+                parameter = element.get_Parameter(builtInParameter);
+                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not  defined in 'Element' {{{element.Id.IntegerValue}}}");
+              }
+              else if (element.Document.GetElement(elementId) is ARDB.ParameterElement parameterElement)
+              {
+                parameter = element.get_Parameter(parameterElement.GetDefinition());
+                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
+              }
+              else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element.");
+              break;
             }
-            else if (element.Document.GetElement(elementId) is ARDB.ParameterElement parameterElement)
-            {
-              parameter = element.get_Parameter(parameterElement.GetDefinition());
-              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
-            }
-            else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element.");
-            break;
-          }
           case Guid guid:
-          {
-            parameter = element.get_Parameter(guid);
-            if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{guid}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
-            break;
-          }
+            {
+              parameter = element.get_Parameter(guid);
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{guid}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
+              break;
+            }
           default:
-          {
-            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element.");
-            break;
-          }
+            {
+              obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element.");
+              break;
+            }
         }
       }
 
