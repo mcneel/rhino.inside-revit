@@ -1,6 +1,5 @@
 using System;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Options
 {
@@ -26,13 +25,15 @@ namespace RhinoInside.Revit.GH.Components.Options
       manager.AddNumberParameter("Angle", "A", "Angle tolerance (radians)\nTwo angle measurements closer than this value are considered identical.", GH_ParamAccess.item);
       manager.AddNumberParameter("Vertex", "V", "Vertex tolerance\nTwo points within this distance are considered coincident.", GH_ParamAccess.item);
       manager.AddNumberParameter("Curve", "C", "Short Curve tolerance\nA curve shorter than this distance is considered degenerated.", GH_ParamAccess.item);
+      manager.AddNumberParameter("Thickness", "T", "The minimum thickness allowed in Revit for a variety of geometric constructs.\nThese include blends, extrusions, and wall layers..", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       DA.SetData("Angle", Revit.ActiveDBApplication.AngleTolerance);
-      DA.SetData("Vertex", Revit.ActiveDBApplication.VertexTolerance / Revit.ModelUnits);
-      DA.SetData("Curve", Revit.ActiveDBApplication.ShortCurveTolerance / Revit.ModelUnits);
+      DA.SetData("Vertex", Revit.ActiveDBApplication.VertexTolerance * Revit.ModelUnits);
+      DA.SetData("Curve", Revit.ActiveDBApplication.ShortCurveTolerance * Revit.ModelUnits);
+      DA.SetData("Thickness", Autodesk.Revit.ApplicationServices.Application.MinimumThickness * Revit.ModelUnits);
     }
   }
 }
