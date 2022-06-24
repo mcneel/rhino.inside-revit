@@ -17,17 +17,18 @@ There are multiple category types in a Revit model:
   - *Analytical* categories e.g. *Analytical Surfaces*, *Structural Loads*, etc.
   - *Annotation* categories e.g. *Tags*, *Dimensions*, etc.
 
-Within Model Categories there can be quite a difference between the category behaviors and the elements they contain. Developing and understanding of how commonly use categories will and will not allow is important to using Revit.See [Rhino To Revit]({{ site.baseurl }}{% link _en/1.0/guides/rhino-to-revit.md%}) guide to understand how to add these element types using Rhino geometry. Categories may or may not contain:
+Model Categories vary in the elements they can contain. Developing and understanding of how commonly used categories will allow is important to using Revit. Categories may or may not contain:
   - *Directshapes*
-  - *Component Families* e.g. *Furniture*, *Generic Model*, *Site* etc.
+  - *Loadable Families* e.g. *Furniture*, *Generic Model*, *Site* etc.
   - *System* Families/Types e.g. *Walls*, *Doors*, *Floors*, *Roofs*, etc.
 
+ See [Rhino To Revit]({{ site.baseurl }}{% link _en/1.0/guides/rhino-to-revit.md%}) guide to understand how to add any these element types using Rhino and Grasshopper.
 
 ## Query Categories
 
-There are two main ways to find categories elements in a document. 
+There are two main ways to find categories in a document. 
 
-Use the {% include ltr/comp.html uuid="d150e40e" %} component to query the document for the main categories and sub-categories that exist in a project. For query can be modified by using the {% include ltr/comp.html uuid="5ffb1339" %} component to filter for only certain categorie types or use a Booloen toggle to select main categories or sub-categories.
+Use the {% include ltr/comp.html uuid="d150e40e" %} component to query the document for the main categories and sub-categories that exist in a project. For query can be modified by using the {% include ltr/comp.html uuid="5ffb1339" %} component to filter for only certain categories types or use a Boolean toggle to select main categories or sub-categories.
 
 ![]({{ "/static/images/guides/gh-query-category.png" | prepend: site.baseurl }})
 
@@ -39,18 +40,26 @@ The second is to use the {% include ltr/comp.html uuid="af9d949f" %}. This selec
 
 ## Accessing Categories
 
-Category Identity
-Catergory Parameters
-Category Style
-Category Sub Categories
+ {% include ltr/comp.html uuid="d794361e" %} component can be establish the Parameters Type (Model, Annotation, Analysis) Name and whether it is a Main or Sub-category.
 
-### Category Graphic Style
-Get an set Category graphic styles.
+![]({{ "/static/images/guides/gh-built-in-category.png" | prepend: site.baseurl }})
+
+A list of Parameters which belong to a Category can be created to assist in making a list of values that can be used to create schedules or set them in a convenient list.  The example below uses the  {% include ltr/comp.html uuid="af9d949f" %} component select the Door Category then to find the Doors in the project in addition to all the Parameters in the Door category with the  {% include ltr/comp.html uuid="189f0a94" %} component.
+
+![]({{ "/static/images/guides/gh-category-parameter.png" | prepend: site.baseurl }})
+
+Get and set the Graphics styles for a Category thru the {% include ltr/comp.html uuid="ca3c1cf9" %} component.
+
+![]({{ "/static/images/guides/gh-category-graphic-style.png" | prepend: site.baseurl }})
 
 ## Extending Categories
+Main Categories are built-in and cannot be edited. Although subcategories can be added within most Categories for further organization and refined control of Elements 
 
 ## Sub-Categories
+Use the {% include ltr/comp.html uuid="8de336fb" %} component to add a subcategory.  If the sub-category already exist the component will simply return the existing sub-category.
 
-### Query Sub-categories
+![]({{ "/static/images/guides/gh-category-add-subcategory.png" | prepend: site.baseurl }})
 
-### Adding Sub-categories
+Use the {% include ltr/comp.html uuid="4915ab87" %} component to create a list of sub-categories within a specific category.
+
+![]({{ "/static/images/guides/gh-category-subcategory.png" | prepend: site.baseurl }})

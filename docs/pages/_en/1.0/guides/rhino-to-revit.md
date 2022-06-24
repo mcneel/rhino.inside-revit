@@ -13,8 +13,10 @@ Revit data model is based on a categorization system. Determining the best categ
 There are 3 main ways to classify and move Rhino geometry to Revit. Each successive strategy increases the integration within a BIM model, but each strategy also takes a bit more planning. The 3 ways are:
 
 1. Using [DirectShapes](#rhino-objects-as-directshapes) can be quite fast and takes the least amount of organizing. The limited organization and speed make DirectShapes best for temporary drawing sets such as competitions and early design presentations. DirectShapes may not the best for late project phases.
-2. Developing [Loadable Families with Subcategories](#rhino-objects-as-loadable-families) works well for standalone elements in a model or elements that might be ordered or built by an independant fabricator. Being part of a Family, these objects could have their own set of drawings in addition to being part of the larger project drawings.
+2. Developing [Loadable Families with Subcategories](#rhino-objects-as-loadable-families) works well for standalone elements in a model or elements that might be ordered or built by an independent fabricator. Being part of a Family, these objects could have their own set of drawings in addition to being part of the larger project drawings.
 3. Use [Rhino geometry to generate Native Revit elements](#using-revit-built-in-system-families) is the best way to generate final Revit elements. While it is not always possible to create everything with native elements, native elements normally integrate best with the rest of the Revit team. These objects can potentially be edited without any dependency on {{ site.terms.rir }}. While the creating elements in this way can be limited, the resulting elements are native Revit elements.
+
+When determining which method and category to use, [reference this list of Revit Categories and the type of Families they can accept from {{ site.terms.rir }}](https://docs.google.com/spreadsheets/d/1l8koAQtsz0o9iK80gmpC0HqSAFqpqAb0rKYdXcQkBWE/edit?usp=sharing).
 
 Here is a Rhino model and quick Revit drawings for a competition model using DirectShapes:
 
@@ -79,7 +81,7 @@ The process of creating subcategories is covered in this video:
 
 {% include youtube_player.html id="z57Ic0-4r2I" %}
 
-Use the subcategory component to assign a subcategory to objects before sending them to the family creator component:
+Below is the key part of the definition to create a new Loadable Family in Revit. The Family is created at the black {% include ltr/comp.html uuid="82523911" %} component. Inputs include the a family template, the name of the new family and the category the family will belong to.  In addition the {% include ltr/comp.html uuid='72fdc627' %} component is used to create Forms that will be placed within the Family.  The Form component will accept the BREP geometry, Visibility, Subcategory and material for each form. If the sub-category does not already exist, the {% include ltr/comp.html uuid='8de336fb' %} component can be used to create of assign a subcategory before sending them to the family creator component:
 
 ![Creating subcategory]({{ "/static/images/guides/subcategory-rhino-revit-gh.png" | prepend: site.baseurl }})
 

@@ -30,13 +30,11 @@ Use the {% include ltr/comp.html uuid='7dea1ba3' %} to access information about 
 
 ## Accessing Family of a Type
 
-When querying the custom types that exist in a Revit model, we can find out the custom family definition that contains the logic for each of these types. We are using a custom Grasshopper Python component (*Type Family*) to grab the family of each type being passed into this component. You can download this component, as a Grasshopper user object, from the link below.
+When querying the custom types that exist in a Revit model, we can find out the custom family definition that contains the logic for each of these types. We are using {% include ltr/comp.html uuid="742836d7" %} component to grab the family of each type being passed into this component. You can download this component, as a Grasshopper user object, from the link below.
 
 ![]({{ "/static/images/guides/revit-families03.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Type Family.ghuser' name='Type Family' %}
-
-Notice that **Duct Systems** for example, is a system type and therefore have no associated custom family definition. Therefore the *Type Family* component is returning `null`.
+Notice that **Duct Systems** for example, is a system type and therefore have no associated custom family definition. Therefore the {% include ltr/comp.html uuid="742836d7" %} component is returning `null`.
 
 ![]({{ "/static/images/guides/revit-families04.png" | prepend: site.baseurl }})
 
@@ -48,7 +46,6 @@ You can pass the any of the categories above to the {% include ltr/comp.html uui
 
 ![]({{ "/static/images/guides/revit-families05.png" | prepend: site.baseurl }})
 
-
 ## Determining Default Types
 
 When a build tool is launched (e.g. *Place Door*), Revit will automatically select the last-used type for that specific category (e.g. *Doors* for *Place Door* tool). This is called the **Default Type** for that category. This information is helpful when creating elements using the API. Use the {% include ltr/comp.html uuid='d67b341f' %} component to inspect the default types for the provided category:
@@ -58,7 +55,6 @@ When a build tool is launched (e.g. *Place Door*), Revit will automatically sele
 In case of families, the script value returned by this component will be the default `DB.FamilySymbol` representing the default type:
 
 ![]({{ "/static/images/guides/revit-types-defaultsymbol.png" | prepend: site.baseurl }})
-
 
 ## Modifying Types
 
@@ -135,7 +131,9 @@ There are a series of components under the *Revit > Family* panel that will help
 - {% include ltr/comp.html uuid='72fdc627' %}
 - {% include ltr/comp.html uuid='f0887ad5' %}
 
-![]({{ "/static/images/guides/revit-families14.png" | prepend: site.baseurl }})
+The Component Family components above can set the visibility, subcategory, and material of elements that will make up the new Family. For further details see the [Rhino Objects as Loadable Families guide]({{ site.baseurl }}{% link _en/1.0/guides/rhino-to-revit.md%}#rhino-objects-as-loadable-families).
+
+![Creating subcategory]({{ "/static/images/guides/subcategory-rhino-revit-gh.png" | prepend: site.baseurl }})
 
 As shown in the example above, you can use the {% include ltr/comp.html uuid='10ea29d4' %} component to create visibility options for the generated geometry. This components provides all the options available in the native Revit *Visibility/Graphics* editor for family geometries.
 
@@ -146,3 +144,20 @@ As shown in the example above, you can use the {% include ltr/comp.html uuid='10
 You can use the {% include ltr/comp.html uuid='82523911' %} component to edit existing families as well. Just pass the appropriate template and family name, the new geometry, and the {% include ltr/comp.html uuid='82523911' %} component automatically finds the existing family, replaces the content and reloads the family into the Revit model. Make sure the *OverrideFamily* is set to `True` and *OverrideParameters* is set appropriately to override the family parameters if needed.
 
 ![]({{ "/static/images/guides/revit-families16.png" | prepend: site.baseurl }})
+
+## Creating new Family Templates
+
+Revit comes with a series of Revit Family Template (.RFT) files.  These contain the necessary basic defaults to create loadable families for specific categories. Interestingly many of the most popular categories do not have templates built for them.  Examples of these categories would be Walls, Roofs, Floors, Windows, HardScape, etc. It is possible to create family templates and create loadable Families in these popular Categories by following the steps below. A list of Default Templates and Categories that will support customer RFT files is listed in [this spreadsheet](https://docs.google.com/spreadsheets/d/1l8koAQtsz0o9iK80gmpC0HqSAFqpqAb0rKYdXcQkBWE/edit?usp=sharing).
+
+The steps to create a new family template:
+
+ 1. Create in-place component using the needed category.  i.e. Stairs
+ 1. Draw an object 
+ 1. Group that object
+ 1. Right-click on the Group and Save Group.
+ 1. Save that file and an RFA file.
+ 1. Open the RFA and delete any objects in it.
+ 1. Save
+ 1. Rename the RFA as an RFT using File Explorer.
+ 1. Use the RFT to create a new family in New component family.
+
