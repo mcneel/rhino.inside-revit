@@ -240,9 +240,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Equals(left.Normal, right.Normal) &&
       left.IsBound ?
       (
-        Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 3.0, true)) &&
-        Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 3.0, true)) &&
-        Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 3.0, true))
+        Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 2.0, true)) &&
+        Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 2.0, true)) &&
+        Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 2.0, true))
       ) :
       (
         Equals(left.Evaluate(left.Period * 0.0 / 4.0, false), right.Evaluate(right.Period * 0.0 / 4.0, false)) &&
@@ -285,9 +285,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Equals(left.Normal, right.Normal) &&
       left.IsBound ?
       (
-        Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 3.0, true)) &&
-        Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 3.0, true)) &&
-        Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 3.0, true))
+        Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 2.0, true)) &&
+        Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 2.0, true)) &&
+        Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 2.0, true))
       ) :
       (
         Equals(left.Evaluate(left.Period * 0.0 / 4.0, false), right.Evaluate(right.Period * 0.0 / 4.0, false)) &&
