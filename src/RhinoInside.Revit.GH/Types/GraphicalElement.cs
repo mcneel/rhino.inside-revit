@@ -474,7 +474,7 @@ namespace RhinoInside.Revit.GH.Types
         if (element.Location is ARDB.LocationCurve curveLocation)
         {
           var orientation = ARDB.Transform.Identity;
-          orientation.SetOrientation
+          orientation.SetToAlignCoordSystem
           (
             origin, basisX, basisY, basisZ,
             newOrigin, newBasisX, newBasisY, newBasisZ
