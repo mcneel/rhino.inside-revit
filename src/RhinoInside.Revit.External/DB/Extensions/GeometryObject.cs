@@ -501,6 +501,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
             origin = derivatives.Origin;
             basisX = derivatives.BasisX;
             basisY = derivatives.BasisY;
+
+            // Make sure is orthonormal.
+            var basisZ = basisX.CrossProduct(basisY).Normalize(0D);
+            basisX = basisX.Normalize(0D);
+            basisY = basisZ.CrossProduct(basisX);
           }
           return true;
 
