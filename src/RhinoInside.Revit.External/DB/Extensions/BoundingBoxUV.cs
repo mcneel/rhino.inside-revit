@@ -20,8 +20,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return new UV
       (
-        value.Min.U * (1.0 - u) + value.Min.U * u,
-        value.Min.V * (1.0 - v) + value.Min.V * v
+        value.Min.U * (1.0 - u) + value.Max.U * u,
+        value.Min.V * (1.0 - v) + value.Max.V * v
       );
     }
 
@@ -58,9 +58,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return new XYZ
       (
-        value.Min.X * (1.0 - x) + value.Min.X * x,
-        value.Min.Y * (1.0 - y) + value.Min.Y * y,
-        value.Min.Z * (1.0 - z) + value.Min.Z * z
+        value.Min.X * (1.0 - x) + value.Max.X * x,
+        value.Min.Y * (1.0 - y) + value.Max.Y * y,
+        value.Min.Z * (1.0 - z) + value.Max.Z * z
       );
     }
 

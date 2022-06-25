@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -139,21 +141,22 @@ namespace RhinoInside.Revit.GH.Components
 
     ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.Curve curve, ARDB.FamilySymbol type)
     {
-      return doc.IsFamilyDocument ?
-        doc.FamilyCreate.NewFamilyInstance
+      var list = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>(1)
+      {
+        new Autodesk.Revit.Creation.FamilyInstanceCreationData
         (
-          curve.GetEndPoint(0),
-          type,
-          default, // No work-plane based.
-          ARDB.Structure.StructuralType.Brace
-        ) :
-        doc.Create.NewFamilyInstance
-        (
-          curve,
-          type,
-          default, // No work-plane based.
-          ARDB.Structure.StructuralType.Brace
-        );
+          curve: curve,
+          symbol: type,
+          level: default, // No work-plane based.
+          structuralType: ARDB.Structure.StructuralType.Brace
+        )
+      };
+
+      var ids = doc.IsFamilyDocument ?
+        doc.FamilyCreate.NewFamilyInstances2(list) :
+        doc.Create.NewFamilyInstances2(list);
+
+      return doc.GetElement(ids.First()) as ARDB.FamilyInstance;
     }
 
     ARDB.FamilyInstance Reconstruct
@@ -175,6 +178,7 @@ namespace RhinoInside.Revit.GH.Components
 
         // We turn off analytical model off by default
         brace.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        brace.Document.Regenerate();
       }
 
       if (level is object)
@@ -198,14 +202,14 @@ namespace RhinoInside.Revit.GH.Components
           extension.set_IsMiterLocked(ERDB.CurveEnd.End, false);
 
         if (extension.get_SymbolicExtended(ERDB.CurveEnd.Start))
-          brace.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.Start, false);
+          extension.set_SymbolicExtended(ERDB.CurveEnd.Start, false);
         if (extension.get_SymbolicExtended(ERDB.CurveEnd.End))
-          brace.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.End, false);
+          extension.set_SymbolicExtended(ERDB.CurveEnd.End, false);
 
         if (extension.get_Extended(ERDB.CurveEnd.Start))
-          brace.ExtensionUtility.set_Extended(ERDB.CurveEnd.Start, false);
+          extension.set_Extended(ERDB.CurveEnd.Start, false);
         if (extension.get_Extended(ERDB.CurveEnd.End))
-          brace.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.End, false);
+          extension.set_Extended(ERDB.CurveEnd.End, false);
       }
 
       brace.get_Parameter(ARDB.BuiltInParameter.Y_JUSTIFICATION)?.Update(ARDB.Structure.YJustification.Origin);
