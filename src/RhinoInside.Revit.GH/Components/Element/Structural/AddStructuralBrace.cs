@@ -156,7 +156,11 @@ namespace RhinoInside.Revit.GH.Components
         doc.FamilyCreate.NewFamilyInstances2(list) :
         doc.Create.NewFamilyInstances2(list);
 
-      return doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+      var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+
+      // We turn analytical model off by default
+      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+      return instance;
     }
 
     ARDB.FamilyInstance Reconstruct
@@ -176,8 +180,6 @@ namespace RhinoInside.Revit.GH.Components
           ExcludeUniqueProperties
         );
 
-        // We turn off analytical model off by default
-        brace.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
         brace.Document.Regenerate();
       }
 
