@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -155,6 +157,27 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
+    ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.Curve curve, ARDB.FamilySymbol type, ARDB.Level level)
+    {
+      var list = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>(1)
+      {
+        new Autodesk.Revit.Creation.FamilyInstanceCreationData
+        (
+          curve: curve,
+          symbol: type,
+          level: level,
+          structuralType: ARDB.Structure.StructuralType.Column
+        )
+      };
+
+      var ids = doc.IsFamilyDocument ?
+        doc.FamilyCreate.NewFamilyInstances2(list) :
+        doc.Create.NewFamilyInstances2(list);
+
+      return doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+    }
+
+
     ARDB.FamilyInstance Reconstruct
     (
       ARDB.FamilyInstance column,
@@ -169,18 +192,13 @@ namespace RhinoInside.Revit.GH.Components
       {
         column = column.ReplaceElement
         (
-          doc.Create.NewFamilyInstance
-          (
-            curve,
-            type,
-            baselevel,
-            ARDB.Structure.StructuralType.Column
-          ),
+          Create(doc, curve, type, baselevel),
           ExcludeUniqueProperties
         );
 
         // We turn off analytical model off by default
         column.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        column.Document.Regenerate();
       }
 
       column.get_Parameter(ARDB.BuiltInParameter.SLANTED_COLUMN_TYPE_PARAM).Update(2);
