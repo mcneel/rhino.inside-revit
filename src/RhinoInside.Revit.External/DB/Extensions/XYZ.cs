@@ -188,7 +188,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var A = a.Normalize(tolerance);
       var B = b.Normalize(tolerance);
 
-      return A.DotProduct(B) < tolerance;
+      return Math.Abs(A.DotProduct(B)) < tolerance;
     }
 
     /// <summary>
