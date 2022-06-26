@@ -237,6 +237,7 @@
     <Compile Include="Components\Topology\AddSpace.cs" />
     <Compile Include="Components\Topology\AddSpaceSeparatorLine.cs" />
     <Compile Include="Components\Topology\AnalyzeInstanceSpace.cs" />
+    <Compile Include="Components\Topology\SpatialElementIdentity.cs" />
     <Compile Include="Components\Topology\QuerySpatialElements.cs" />
     <Compile Include="Components\Topology\SpatialElementGeometry.cs" />
     <Compile Include="Components\TransactionalComponent.cs" />
