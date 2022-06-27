@@ -51,9 +51,9 @@ namespace RhinoInside.Revit.GH.Components.Topology
       (
         new Param_Point()
         {
-          Name = "Point",
-          NickName = "Pt",
-          Description = "Point to query.",
+          Name = "Location",
+          NickName = "L",
+          Description = "Element location point.",
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -61,16 +61,16 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Param_Boolean()
         {
           Name = "Placed",
-          NickName = "Pd",
+          NickName = "PD",
           Description = "Wheter element is placed or not.",
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
         new Param_String()
         {
           Name = "Number",
-          NickName = "Nu",
+          NickName = "NUM",
           Description = "Element Number.",
         }, ParamRelevance.Primary
       ),
@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Param_String()
         {
           Name = "Name",
-          NickName = "Nm",
+          NickName = "N",
           Description = "Element Name.",
         }, ParamRelevance.Primary
       ),
@@ -88,8 +88,8 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Parameters.Level()
         {
           Name = "Level",
-          NickName = "Lv",
-          Description = "Element level.",
+          NickName = "LV",
+          Description = "Level on which the element resides.",
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -97,8 +97,8 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Parameters.Phase()
         {
           Name = "Phase",
-          NickName = "Ph",
-          Description = "Element phase.",
+          NickName = "PH",
+          Description = "Project phase to which the element belongs.",
         }, ParamRelevance.Secondary
       ),
       new ParamDefinition
@@ -106,8 +106,8 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Param_Boolean()
         {
           Name = "Enclosed",
-          NickName = "Ed",
-          Description = "Wheter element is enclosed or not.",
+          NickName = "ED",
+          Description = "Wheter element is on a properly enclosed region or not.",
         }, ParamRelevance.Secondary
       ),
       new ParamDefinition
@@ -115,27 +115,27 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Param_Number()
         {
           Name = "Perimeter",
-          NickName = "Pe",
-          Description = "Element Perimeter.",
-        }, ParamRelevance.Primary
+          NickName = "PE",
+          Description = "Element perimeter.",
+        }, ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
         new Param_Number()
         {
           Name = "Area",
-          NickName = "Ar",
-          Description = "Element Area.",
-        }, ParamRelevance.Primary
+          NickName = "AR",
+          Description = "Element area.",
+        }, ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
         new Param_Number()
         {
           Name = "Volume",
-          NickName = "Vo",
-          Description = "Element Volume.",
-        }, ParamRelevance.Primary
+          NickName = "VO",
+          Description = "Element volume.",
+        }, ParamRelevance.Occasional
       ),
     };
 
