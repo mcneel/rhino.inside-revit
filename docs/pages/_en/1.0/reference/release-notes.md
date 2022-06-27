@@ -16,6 +16,7 @@ group: Deployment & Configs
 - Added 'Revit User' component.
 - Added 'Document Tolerances' component.
 - Added 'Default File Locations' component.
+- Added 'Spatial Element Identity' component.
 
 ### RC 
 
