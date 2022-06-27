@@ -196,7 +196,7 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
       {
         var tol = GeometryTolerance.Model;
         StartTransaction(host.Document);
-        (host as IGH_PreviewMeshData).DestroyPreviewMeshes();
+        host.InvalidateGraphics();
 
         shape.Enable();
         shape.ResetSlabShape();

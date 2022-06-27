@@ -156,7 +156,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
                     if (CommitTransaction(host.Document, tx) == ARDB.TransactionStatus.Committed)
                     {
                       scope.Commit(CreateFailuresPreprocessor());
-                      (host as IGH_PreviewMeshData).DestroyPreviewMeshes();
+                      host.InvalidateGraphics();
                     }
                     else scope.Cancel();
                   }

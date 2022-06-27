@@ -188,7 +188,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var A = a.Normalize(tolerance);
       var B = b.Normalize(tolerance);
 
-      return A.DotProduct(B) < tolerance;
+      return Math.Abs(A.DotProduct(B)) < tolerance;
     }
 
     /// <summary>
@@ -278,18 +278,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return cov;
     }
 
-    public static bool TryGetInverse(this Transform transform, out Transform inverse)
-    {
-      if (DefaultTolerance < transform.Determinant)
-      {
-        try { inverse = transform.Inverse; return true; }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
-      }
-
-      inverse = Transform.Identity;
-      return false;
-    }
-
     /// <summary>
     /// Computes the principal component of a covariance matrix.
     /// </summary>
@@ -316,28 +304,62 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class TransformExtension
   {
-    public static void SetOrientation
+    public static bool TryGetInverse(this Transform transform, out Transform inverse)
+    {
+      if (DefaultTolerance < transform.Determinant)
+      {
+        try { inverse = transform.Inverse; return true; }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+      }
+
+      inverse = Transform.Identity;
+      return false;
+    }
+
+    public static void GetCoordSystem
+    (
+      this Transform transform,
+      out XYZ origin, out XYZ basisX, out XYZ basisY, out XYZ basisZ
+    )
+    {
+      origin = transform.Origin;
+      basisX = transform.BasisX;
+      basisY = transform.BasisY;
+      basisZ = transform.BasisZ;
+    }
+
+    public static void SetCoordSystem
+    (
+      this Transform transform,
+      XYZ origin, XYZ basisX, XYZ basisY, XYZ basisZ
+    )
+    {
+      transform.Origin = origin;
+      transform.BasisX = basisX;
+      transform.BasisY = basisY;
+      transform.BasisZ = basisZ;
+    }
+
+    public static void SetToAlignCoordSystem
     (
       this Transform transform,
       XYZ origin0, XYZ basisX0, XYZ basisY0, XYZ basisZ0,
       XYZ origin1, XYZ basisX1, XYZ basisY1, XYZ basisZ1
     )
     {
-      var t0 = Transform.CreateTranslation(-origin0);
+      var from = Transform.Identity;
+      from.BasisX = new XYZ(basisX0.X, basisY0.X, basisZ0.X);
+      from.BasisY = new XYZ(basisX0.Y, basisY0.Y, basisZ0.Y);
+      from.BasisZ = new XYZ(basisX0.Z, basisY0.Z, basisZ0.Z);
+      from.Origin = from.OfPoint(-origin0);
 
-      var f0 = Transform.Identity;
-      f0.BasisX = new XYZ(basisX0.X, basisY0.X, basisZ0.X);
-      f0.BasisY = new XYZ(basisX0.Y, basisY0.Y, basisZ0.Y);
-      f0.BasisZ = new XYZ(basisX0.Z, basisY0.Z, basisZ0.Z);
+      var to = Transform.Identity;
+      to.BasisX = basisX1;
+      to.BasisY = basisY1;
+      to.BasisZ = basisZ1;
+      to.Origin = origin1;
 
-      var f1 = Transform.Identity;
-      f0.BasisX = basisX1;
-      f0.BasisY = basisY1;
-      f0.BasisZ = basisZ1;
-
-      var t1 = Transform.CreateTranslation( origin1);
-
-      var planeToPlane = t1 *f1 * f0 * t0;
+      var planeToPlane = to * from;
 
       transform.Origin = planeToPlane.Origin;
       transform.BasisX = planeToPlane.BasisX;

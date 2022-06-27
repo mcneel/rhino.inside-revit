@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -169,22 +171,27 @@ namespace RhinoInside.Revit.GH.Components
 
     ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.XYZ point, ARDB.FamilySymbol type, ARDB.Level level, ARDB.Element host)
     {
-      return doc.IsFamilyDocument ?
-        doc.FamilyCreate.NewFamilyInstance
+      var list = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>(1)
+      {
+        new Autodesk.Revit.Creation.FamilyInstanceCreationData
         (
-          point,
-          type,
-          host,
-          ARDB.Structure.StructuralType.Footing
-        ) :
-        doc.Create.NewFamilyInstance
-        (
-          point,
-          type,
-          host,
-          level,
-          ARDB.Structure.StructuralType.Footing
-        );
+          location: point,
+          symbol: type,
+          host: host,
+          level: level,
+          structuralType: ARDB.Structure.StructuralType.Footing
+        )
+      };
+
+      var ids = doc.IsFamilyDocument ?
+        doc.FamilyCreate.NewFamilyInstances2(list) :
+        doc.Create.NewFamilyInstances2(list);
+
+      var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+
+      // We turn analytical model off by default
+      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+      return instance;
     }
 
     ARDB.FamilyInstance Reconstruct
@@ -203,19 +210,9 @@ namespace RhinoInside.Revit.GH.Components
       {
         foundation = foundation.ReplaceElement
         (
-          doc.Create.NewFamilyInstance
-          (
-            origin,
-            type,
-            host,
-            level,
-            ARDB.Structure.StructuralType.Footing
-          ),
+          Create(doc, origin, type, level, host),
           ExcludeUniqueProperties
         );
-
-        // We turn off analytical model off by default
-        foundation.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
       }
 
       foundation.get_Parameter(ARDB.BuiltInParameter.INSTANCE_MOVES_WITH_GRID_PARAM)?.Update(false);
@@ -224,16 +221,8 @@ namespace RhinoInside.Revit.GH.Components
 
       {
         foundation.Document.Regenerate();
-        var pinned = foundation.Pinned;
-        try
-        {
-          foundation.Pinned = false;
-          foundation.SetLocation(origin, basisX, basisY);
-        }
-        finally
-        {
-          foundation.Pinned = true;
-        }
+        foundation.Pinned = false;
+        foundation.SetLocation(origin, basisX, basisY);
       }
 
       return foundation;

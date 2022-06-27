@@ -484,6 +484,8 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
 
           throw new Exceptions.RuntimeArgumentException("Parameter", message);
         }
+
+        element.InvalidateGraphics();
       }
 
       Params.TrySetData(DA, "Value", () => parameter.AsGoo());
