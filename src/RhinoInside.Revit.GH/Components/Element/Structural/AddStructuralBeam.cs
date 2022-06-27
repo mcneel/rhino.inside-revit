@@ -116,7 +116,7 @@ namespace RhinoInside.Revit.GH.Components
           (
             curve.IsClosed ||
             !curve.TryGetPlane(out var plane, tol.VertexTolerance) ||
-            curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, out var _)
+            curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _)
           )
             throw new RuntimeArgumentException("Curve", "Curve must be a C1 continuous planar non closed curve.", curve);
 
