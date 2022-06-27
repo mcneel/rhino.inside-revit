@@ -16,6 +16,7 @@ There are multiple category types in a Revit model:
   - *Model* categories e.g. *Walls*, *Doors*, *Floors*, *Roofs*, etc.
   - *Analytical* categories e.g. *Analytical Surfaces*, *Structural Loads*, etc.
   - *Annotation* categories e.g. *Tags*, *Dimensions*, etc.
+  - *Internal* categories various Tags etc.
 
 Model Categories vary in the elements they can contain. Developing and understanding of how commonly used categories will allow is important to using Revit. Categories may or may not contain:
   - *Directshapes*
@@ -58,7 +59,7 @@ Main Categories are built-in and cannot be edited. Although subcategories can be
 ## Sub-Categories
 Use the {% include ltr/comp.html uuid="8de336fb" %} component to add a subcategory.  If the sub-category already exist the component will simply return the existing sub-category.
 
-![]({{ "/static/images/guides/gh-category-add-subcategory.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/gh-sub-category.png" | prepend: site.baseurl }})
 
 Use the {% include ltr/comp.html uuid="4915ab87" %} component to create a list of sub-categories within a specific category.
 
