@@ -5,12 +5,12 @@ using Grasshopper.Kernel;
 namespace RhinoInside.Revit.GH.Components.ModelElements
 {
   [ComponentVersion(introduced: "1.0", updated: "1.9")]
-  public class GroupElements : ZuiComponent
+  public class GroupMembers : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("7C7D3739-7609-4F7F-BAB5-1E3648508891");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
-    public GroupElements() : base
+    public GroupMembers() : base
     (
       name: "Group Members",
       nickname: "Group",
