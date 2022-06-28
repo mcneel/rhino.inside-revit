@@ -191,44 +191,48 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value is ARDB.Dimension dimension)
       {
-        if (dimension.NumberOfSegments > 0)
+        try
         {
-          var segments = dimension.Segments.Cast<ARDB.DimensionSegment>().Where(x => x.Value.HasValue).ToArray();
-          foreach (var segment in segments)
+          if (dimension.NumberOfSegments > 0)
           {
-            if (!segment.Value.HasValue) continue;
-
-            var dimCurve = dimension.Curve;
-            if (dimCurve.Project(segment.Origin) is ARDB.IntersectionResult result)
+            var segments = dimension.Segments.Cast<ARDB.DimensionSegment>().Where(x => x.Value.HasValue).ToArray();
+            foreach (var segment in segments)
             {
-              var startParameter = segment.Value.Value * -0.5;
-              var endParameter   = segment.Value.Value * +0.5;
-              dimCurve.MakeBound(result.Parameter + startParameter, result.Parameter + endParameter);
+              if (!segment.Value.HasValue) continue;
 
-              var curve = dimCurve.ToCurve();
+              var dimCurve = dimension.Curve;
+              if (dimCurve.Project(segment.Origin) is ARDB.IntersectionResult result)
+              {
+                var startParameter = segment.Value.Value * -0.5;
+                var endParameter   = segment.Value.Value * +0.5;
+                dimCurve.MakeBound(result.Parameter + startParameter, result.Parameter + endParameter);
+
+                var curve = dimCurve.ToCurve();
+                args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
+                args.Pipeline.DrawArrowHead(curve.PointAtStart, -curve.TangentAtStart, args.Color, 16, 0.0);
+                args.Pipeline.DrawArrowHead(curve.PointAtEnd, curve.TangentAtEnd, args.Color, 16, 0.0);
+              }
+
+              var text = FormatValue(segment.Value.Value, dimension.DimensionShape);
+              if (segment.TextPosition is ARDB.XYZ textPosition)
+                args.Pipeline.DrawDot(textPosition.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
+            }
+          }
+          else 
+          {
+            if (Curve is Curve curve)
+            {
               args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
               args.Pipeline.DrawArrowHead(curve.PointAtStart, -curve.TangentAtStart, args.Color, 16, 0.0);
               args.Pipeline.DrawArrowHead(curve.PointAtEnd, curve.TangentAtEnd, args.Color, 16, 0.0);
             }
 
-            var text = FormatValue(segment.Value.Value, dimension.DimensionShape);
-            args.Pipeline.DrawDot(segment.TextPosition.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
-          }
-        }
-        else 
-        {
-          if (Curve is Curve curve)
-          {
-            args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
-            args.Pipeline.DrawArrowHead(curve.PointAtStart, -curve.TangentAtStart, args.Color, 16, 0.0);
-            args.Pipeline.DrawArrowHead(curve.PointAtEnd, curve.TangentAtEnd, args.Color, 16, 0.0);
-          }
-
-          {
             var text = FormatValue(dimension, dimension.DimensionType.StyleType);
-            args.Pipeline.DrawDot(dimension.TextPosition.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
+            if (dimension.TextPosition is ARDB.XYZ textPosition)
+              args.Pipeline.DrawDot(textPosition.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
           }
         }
+        catch { }
       }
     }
   }

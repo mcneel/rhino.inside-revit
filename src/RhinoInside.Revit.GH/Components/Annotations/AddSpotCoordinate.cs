@@ -214,8 +214,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           break;
 #endif
 
-        case ARDB.ModelLine modelLine:
-          reference = modelLine.GeometryCurve.Reference;
+        case ARDB.CurveElement curveElement:
+          reference = curveElement.GeometryCurve.Reference;
           break;
 
         default:
@@ -244,7 +244,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           break;
       }
 
-      return reference;
+      return reference ?? new ARDB.Reference(element);
     }
 
     ARDB.SpotDimension Reconstruct
