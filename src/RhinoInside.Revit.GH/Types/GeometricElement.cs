@@ -476,12 +476,12 @@ namespace RhinoInside.Revit.GH.Types
       (
         geometryElementContent.Length == 1 &&
         geometryElementContent[0] is ARDB.GeometryInstance geometryInstance &&
-        geometryInstance.Symbol is ARDB.ElementType
+        geometryInstance.GetSymbol() is ARDB.ElementType symbol
       )
       {
         // Special case to simplify DB.FamilyInstance elements.
         var instanceTransform = geometryInstance.Transform.ToTransform();
-        return BakeGeometryElement(idMap, false, doc, att, instanceTransform * transform, geometryInstance.Symbol, geometryInstance.SymbolGeometry, out index);
+        return BakeGeometryElement(idMap, false, doc, att, instanceTransform * transform, symbol, geometryInstance.SymbolGeometry, out index);
       }
 
       var idef_name = FullUniqueId.Format(element.Document.GetFingerprintGUID(), element.UniqueId);
@@ -531,7 +531,7 @@ namespace RhinoInside.Revit.GH.Types
               case ARDB.GeometryInstance instance:
                 using (GeometryDecoder.Context.Push())
                 {
-                  if (BakeGeometryElement(idMap, false, doc, att, Transform.Identity, instance.Symbol, instance.SymbolGeometry, out var idefIndex))
+                  if (BakeGeometryElement(idMap, false, doc, att, Transform.Identity, instance.GetSymbol(), instance.SymbolGeometry, out var idefIndex))
                     geo = new InstanceReferenceGeometry(doc.InstanceDefinitions[idefIndex].Id, instance.Transform.ToTransform());
                 }
                 break;
