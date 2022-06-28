@@ -981,5 +981,39 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return null;
     }
     #endregion
+
+    #region References
+    public static Reference GetDefaultReference(this Element element)
+    {
+      var reference = default(Reference);
+      switch (element)
+      {
+        case null: break;
+#if REVIT_2018
+        case FamilyInstance instance:
+          reference = instance.GetReferences(FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
+          break;
+#endif
+
+        case CurveElement modelLine:
+          reference = modelLine.GeometryCurve.Reference;
+          break;
+
+        default:
+          using (var options = new Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
+          {
+            var geometry = element.get_Geometry(options);
+            reference = geometry?.OfType<Solid>().
+              SelectMany(x => x.Faces.Cast<Face>()).
+              Select(x => x.Reference).
+              OfType<Reference>().
+              FirstOrDefault();
+          }
+          break;
+      }
+
+      return reference ?? new Reference(element);
+    }
+    #endregion
   }
 }

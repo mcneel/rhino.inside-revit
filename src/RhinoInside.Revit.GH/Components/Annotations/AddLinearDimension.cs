@@ -177,33 +177,11 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
       foreach (var element in elements)
       {
-        var reference = default(ARDB.Reference);
-        switch (element)
-        {
-          case null: break;
-#if REVIT_2018
-          case ARDB.FamilyInstance instance:
-            reference = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
-            break;
-#endif
-          default:
-            using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
-            {
-              var geometry = element.get_Geometry(options);
-              reference = geometry.OfType<ARDB.Solid>().
-                SelectMany(x => x.Faces.Cast<ARDB.Face>()).
-                Select(x => x.Reference).
-                OfType<ARDB.Reference>().
-                FirstOrDefault();
-            }
-            break;
-        }
-
-        if (reference is object)
+        if (element.GetDefaultReference() is ARDB.Reference reference)
           referenceArray.Append(reference);
       }
-      return referenceArray;
 
+      return referenceArray;
     }
 
     ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
