@@ -20,6 +20,12 @@ group: Deployment & Configs
 
 ### RC 
 
+- Fixed several geometry bugs.
+- Fixed creation on a family document.
+- Fixed curved Beams when in a vertical plane.
+- Fixed dimensioning components, when working with *Detail Lines* and *Reference Planes*.
+- Set Element Parameter casting issue with enums [#613](https://github.com/mcneel/rhino.inside-revit/issues/613)
+
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
