@@ -255,6 +255,12 @@ pre {
     column-gap: 40px;
 }
 
+.home-feature-content-dark a,
+.home-feature-content-dark a:visited {
+    color: #111;
+    font-weight: bold;
+}
+
 .home-feature-content a:hover {
     text-decoration: underline;
 }
