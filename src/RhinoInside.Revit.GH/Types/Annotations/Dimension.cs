@@ -146,45 +146,51 @@ namespace RhinoInside.Revit.GH.Types
 
     static string FormatValue(double value, ARDB.DimensionShape dimensionShape)
     {
+      var provider = System.Globalization.CultureInfo.InvariantCulture;
+      var precision = Rhino.RhinoDoc.ActiveDoc?.ModelDistanceDisplayPrecision ?? 3;
+
       switch (dimensionShape)
       {
         case ARDB.DimensionShape.Angular:
-          return $"{Rhino.RhinoMath.ToDegrees(value):G2}°";
+          return $"{Rhino.RhinoMath.ToDegrees(value):N1}°";
 
         case ARDB.DimensionShape.Radial:
-          return $"R {GH_Format.FormatDouble(GeometryDecoder.ToModelLength(value))} {GH_Format.RhinoUnitSymbol()}";
+          return $"R {GeometryDecoder.ToModelLength(value).ToString($"N{precision}", provider)} {GH_Format.RhinoUnitSymbol()}";
 
         case ARDB.DimensionShape.Diameter:
-          return $"⌀ {GH_Format.FormatDouble(GeometryDecoder.ToModelLength(value))} {GH_Format.RhinoUnitSymbol()}";
+          return $"⌀ {GeometryDecoder.ToModelLength(value).ToString($"N{precision}", provider)} {GH_Format.RhinoUnitSymbol()}";
       }
 
-      return $"{GH_Format.FormatDouble(GeometryDecoder.ToModelLength(value))} {GH_Format.RhinoUnitSymbol()}";
+      return $"{GeometryDecoder.ToModelLength(value).ToString($"N{precision}", provider)} {GH_Format.RhinoUnitSymbol()}";
     }
 
     protected static string FormatValue(ARDB.Dimension dimension, ARDB.DimensionStyleType style)
     {
+      var provider = System.Globalization.CultureInfo.InvariantCulture;
+      var precision = Rhino.RhinoDoc.ActiveDoc?.ModelDistanceDisplayPrecision ?? 3;
+
       switch (style)
       {
         case ARDB.DimensionStyleType.Angular:
-          return $"{Rhino.RhinoMath.ToDegrees(dimension.Value.Value):N2}°";
+          return $"{Rhino.RhinoMath.ToDegrees(dimension.Value.Value):N1}°";
 
         case ARDB.DimensionStyleType.Radial:
-          return $"R {GH_Format.FormatDouble(GeometryDecoder.ToModelLength(dimension.Value.Value))} {GH_Format.RhinoUnitSymbol()}";
+          return $"R {GeometryDecoder.ToModelLength(dimension.Value.Value).ToString($"N{precision}", provider)} {GH_Format.RhinoUnitSymbol()}";
 
         case ARDB.DimensionStyleType.Diameter:
-          return $"⌀ {GH_Format.FormatDouble(GeometryDecoder.ToModelLength(dimension.Value.Value))} {GH_Format.RhinoUnitSymbol()}";
+          return $"⌀ {GeometryDecoder.ToModelLength(dimension.Value.Value).ToString($"N{precision}", provider)} {GH_Format.RhinoUnitSymbol()}";
 
         case ARDB.DimensionStyleType.SpotElevation:
-          return $"{GH_Format.FormatDouble(GeometryDecoder.ToModelLength(dimension.Origin.Z))} {GH_Format.RhinoUnitSymbol()}";
+          return $"{GeometryDecoder.ToModelLength(dimension.Origin.Z).ToString($"N{precision}", provider)} {GH_Format.RhinoUnitSymbol()}";
 
         case ARDB.DimensionStyleType.SpotCoordinate:
-          return $"X {GeometryDecoder.ToModelLength(dimension.Origin.X):N3}{Environment.NewLine}Y {GeometryDecoder.ToModelLength(dimension.Origin.Y):N3}";
+          return $"X {GeometryDecoder.ToModelLength(dimension.Origin.X).ToString($"N{precision}", provider)}{Environment.NewLine}Y {GeometryDecoder.ToModelLength(dimension.Origin.Y).ToString($"N{precision}", provider)}";
 
         case ARDB.DimensionStyleType.SpotSlope:
-          return $"⌳ {Rhino.RhinoMath.ToDegrees(dimension.get_Parameter(ARDB.BuiltInParameter.DIM_VALUE_ANGLE).AsDouble()):N2}°";
+          return $"⌳ {Rhino.RhinoMath.ToDegrees(dimension.get_Parameter(ARDB.BuiltInParameter.DIM_VALUE_ANGLE).AsDouble()):N1}°";
       }
 
-      return $"{GH_Format.FormatDouble(GeometryDecoder.ToModelLength(dimension.Value.Value))} {GH_Format.RhinoUnitSymbol()}";
+      return $"{GeometryDecoder.ToModelLength(dimension.Value.Value).ToString($"N{precision}", provider)} {GH_Format.RhinoUnitSymbol()}";
     }
 
     public override void DrawViewportWires(GH_PreviewWireArgs args)
