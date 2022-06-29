@@ -24,7 +24,7 @@ Grasshopper is a visual programming environment tightly integrated with Rhino’
 {% endcapture %}
 
 {% capture bim360_note %}
-Our [BIM360 File Locker](https://github.com/eirannejad/BIM360FileLockerForRhino) plugin for Rhino 7, allows your team to work with Revit, Rhino, and Grasshopper files in the same BIM360 project. This enables project teams to link, share, lock access, get alerts, and sync with BIM360 using the [Autodesk Desktop Connector](https://www.autodesk.com/bim-360/desktop-connector/)
+Our [BIM360 File Locker](https://github.com/eirannejad/BIM360FileLockerForRhino) plugin for Rhino 7, allows your team to work with Revit, Rhino, and Grasshopper files in the same {{ site.terms.bim360 }} project. This enables project teams to link, share, lock access, get alerts, and sync with {{ site.terms.bim360 }} using the [Autodesk Desktop Connector](https://www.autodesk.com/bim-360/desktop-connector/)
 {% endcapture %}
 
 {% capture api_note %}
