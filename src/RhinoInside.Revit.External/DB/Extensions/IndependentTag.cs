@@ -39,11 +39,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
         throw new System.ArgumentNullException(nameof(referenceTagged));
 
       if (!tag.HasLeader)
-        throw new System.InvalidOperationException("The tag does not have a leader.");
+        throw new System.ArgumentException("The tag does not have a leader.");
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!Equals(tag.Document, reference, referenceTagged))
+        if (!reference.IsEquivalent(referenceTagged, tag.Document))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
@@ -51,25 +51,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return tag.HasElbow;
 #else
       try { return tag.LeaderElbow is object; }
-      catch { }
-
-      return false;
+      catch { return false; }
 #endif
     }
 
     public static XYZ GetLeaderElbow(this IndependentTag tag, Reference referenceTagged)
     {
-      if (referenceTagged is null)
-        throw new System.ArgumentNullException(nameof(referenceTagged));
-
-      if (!tag.HasLeader)
-        throw new System.InvalidOperationException("The tag does not have a leader.");
-
-      if (tag.GetTaggedReference() is Reference reference)
-      {
-        if (!Equals(tag.Document, reference, referenceTagged))
-          throw new System.ArgumentException(nameof(referenceTagged));
-      }
+      if (!tag.HasLeaderElbow(referenceTagged))
+        throw new System.ArgumentException("The tag does not have a leader elbow.");
 
       return tag.LeaderElbow;
     }
@@ -80,11 +69,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
         throw new System.ArgumentNullException(nameof(referenceTagged));
 
       if (!tag.HasLeader)
-        throw new System.InvalidOperationException("The tag does not have a leader.");
+        throw new System.ArgumentException("The tag does not have a leader.");
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!Equals(tag.Document, reference, referenceTagged))
+        if (!reference.IsEquivalent(referenceTagged, tag.Document))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
@@ -97,11 +86,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
         throw new System.ArgumentNullException(nameof(referenceTagged));
 
       if (!tag.HasLeader)
-        throw new System.InvalidOperationException("The tag does not have a leader.");
+        throw new System.ArgumentException("The tag does not have a leader.");
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!Equals(tag.Document, reference, referenceTagged))
+        if (!reference.IsEquivalent(referenceTagged, tag.Document))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
@@ -114,11 +103,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
         throw new System.ArgumentNullException(nameof(referenceTagged));
 
       if (!tag.HasLeader)
-        throw new System.InvalidOperationException("The tag does not have a leader.");
+        throw new System.ArgumentException("The tag does not have a leader.");
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!Equals(tag.Document, reference, referenceTagged))
+        if (!reference.IsEquivalent(referenceTagged, tag.Document))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
@@ -126,13 +115,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 #endif
 
-    static bool Equals(Document doc, Reference a, Reference b)
+#if !REVIT_2018
+    public static Reference GetTaggedReference(this IndependentTag tag)
     {
-#if REVIT_2018
-      return a.EqualTo(b); 
-#else
-      return a.ConvertToStableRepresentation(doc) == b.ConvertToStableRepresentation(doc);
-#endif
+      return new Reference(tag.Document.GetElement(tag.TaggedLocalElementId));
     }
+#endif
   }
 }

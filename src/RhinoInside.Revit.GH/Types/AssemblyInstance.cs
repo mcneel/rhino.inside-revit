@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -46,5 +47,17 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
+
+    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      var bbox = ClippingBox;
+      if (!bbox.IsValid)
+        return;
+
+      bbox.Inflate(0.5 * Revit.ModelUnits);
+
+      foreach (var edge in bbox.GetEdges() ?? Enumerable.Empty<Line>())
+        args.Pipeline.DrawPatternedLine(edge.From, edge.To, args.Color, 0x000000F0, args.Thickness);
+    }
   }
 }

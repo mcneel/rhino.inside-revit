@@ -189,7 +189,7 @@
     <Compile Include="Components\Model\ElementSubcategory.cs" />
     <Compile Include="Components\Model\Group\AddModelGroup.cs" />
     <Compile Include="Components\Model\Group\CreateGroupType.cs" />
-    <Compile Include="Components\Model\Group\GroupElements.cs" />
+    <Compile Include="Components\Model\Group\GroupMembers.cs" />
     <Compile Include="Components\Model\Group\QueryGroupTypes.cs" />
     <Compile Include="Components\Model\ReferenceElement\AddReferenceLine.cs" />
     <Compile Include="Components\Model\ReferenceElement\AddReferencePlane.cs" />

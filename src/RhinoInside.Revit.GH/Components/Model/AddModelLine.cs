@@ -89,39 +89,54 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
 
       ReconstructElement<ARDB.ModelCurve>
       (
-        doc.Value, _ModelLine_, referenceLine =>
+        doc.Value, _ModelLine_, modelLine =>
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
           if (!Params.GetData(DA, "Work Plane", out Types.SketchPlane sketchPlane)) return null;
 
           var plane = sketchPlane.Location;
-          if ((curve = Rhino.Geometry.Curve.ProjectToPlane(curve, plane)) is null)
-            throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project curve in the 'Work Plane'.", curve);
+          var tol = GeometryTolerance.Model;
+
+          if (curve.IsShort(tol.ShortCurveTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (curve.IsClosed(tol.VertexTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (!curve.IsParallelToPlane(plane, tol.VertexTolerance, tol.AngleTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to view plane.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
+
+          if ((curve = Curve.ProjectToPlane(curve, plane)) is null)
+            throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project Curve into 'Work Plane'", curve);
+
+          if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           // Compute
-          referenceLine = Reconstruct(referenceLine, doc.Value, curve.ToCurve(), sketchPlane.Value);
+          modelLine = Reconstruct(modelLine, doc.Value, curve.ToCurve(), sketchPlane.Value);
 
-          DA.SetData(_ModelLine_, referenceLine);
-          return referenceLine;
+          DA.SetData(_ModelLine_, modelLine);
+          return modelLine;
         }
       );
     }
 
     bool Reuse
     (
-      ARDB.ModelCurve referenceLine,
+      ARDB.ModelCurve modelLine,
       ARDB.Curve curve, ARDB.SketchPlane sketchPlane
     )
     {
-      if (referenceLine is null) return false;
+      if (modelLine is null) return false;
 
-      if (referenceLine.SketchPlane.IsEquivalent(sketchPlane))
+      if (!curve.IsSameKindAs(modelLine.GeometryCurve)) return false;
+      if (modelLine.SketchPlane.IsEquivalent(sketchPlane))
       {
-        if (!curve.AlmostEquals(referenceLine.GeometryCurve, GeometryTolerance.Internal.VertexTolerance))
-          referenceLine.SetGeometryCurve(curve, true);
+        if (!curve.AlmostEquals(modelLine.GeometryCurve, GeometryTolerance.Internal.VertexTolerance))
+          modelLine.SetGeometryCurve(curve, true);
       }
-      else referenceLine.SetSketchPlaneAndCurve(sketchPlane, curve);
+      else modelLine.SetSketchPlaneAndCurve(sketchPlane, curve);
 
       return true;
     }
@@ -132,32 +147,32 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       ARDB.Curve curve, ARDB.SketchPlane sketchPlane
     )
     {
-      var referenceLine = default(ARDB.ModelCurve);
+      var modelLine = default(ARDB.ModelCurve);
 
       if (doc.IsFamilyDocument)
-        referenceLine = doc.FamilyCreate.NewModelCurve(curve, sketchPlane);
+        modelLine = doc.FamilyCreate.NewModelCurve(curve, sketchPlane);
       else
-        referenceLine = doc.Create.NewModelCurve(curve, sketchPlane);
+        modelLine = doc.Create.NewModelCurve(curve, sketchPlane);
 
-      return referenceLine;
+      return modelLine;
     }
 
     ARDB.ModelCurve Reconstruct
     (
-      ARDB.ModelCurve referenceLine, ARDB.Document doc,
+      ARDB.ModelCurve modelLine, ARDB.Document doc,
       ARDB.Curve curve, ARDB.SketchPlane sketchPlane
     )
     {
-      if (!Reuse(referenceLine, curve, sketchPlane))
+      if (!Reuse(modelLine, curve, sketchPlane))
       {
-        referenceLine = referenceLine.ReplaceElement
+        modelLine = modelLine.ReplaceElement
         (
           Create(doc, curve, sketchPlane),
           ExcludeUniqueProperties
         );
       }
 
-      return referenceLine;
+      return modelLine;
     }
   }
 }

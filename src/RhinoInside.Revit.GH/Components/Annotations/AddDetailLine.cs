@@ -75,26 +75,23 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve)) return null;
 
-          if
-          (
-            view.ViewType is ARDB.ViewType.ThreeD ||
-            view.ViewType is ARDB.ViewType.Schedule ||
-            view.ViewType is ARDB.ViewType.ColumnSchedule ||
-            view.ViewType is ARDB.ViewType.PanelSchedule
-          )
-            throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
-
           var viewPlane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
           var tol = GeometryTolerance.Model;
-          if
-          (
-            curve.IsShort(tol.ShortCurveTolerance) ||
-            curve.IsClosed ||
-            !curve.TryGetPlane(out var plane, tol.VertexTolerance) ||
-            plane.ZAxis.IsParallelTo(view.ViewDirection.ToVector3d(), tol.AngleTolerance) == 0 ||
-            (curve = Curve.ProjectToPlane(curve, viewPlane)) is null
-          )
-            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid planar, open curve and parallel to the input view.", curve);
+
+          if (curve.IsShort(tol.ShortCurveTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (curve.IsClosed(tol.VertexTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (!curve.IsParallelToPlane(viewPlane, tol.VertexTolerance, tol.AngleTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to view plane.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
+
+          if ((curve = Curve.ProjectToPlane(curve, viewPlane)) is null)
+            throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project Curve into view plane", curve);
+
+          if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           // Compute
           detailCurve = Reconstruct(detailCurve, view, curve.ToCurve());
@@ -108,9 +105,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     bool Reuse(ARDB.DetailCurve detailCurve, ARDB.View view, ARDB.Curve curve)
     {
       if (detailCurve is null) return false;
-
       if (detailCurve.OwnerViewId != view.Id) return false;
 
+      if (!curve.IsSameKindAs(detailCurve.GeometryCurve)) return false;
       if (!curve.AlmostEquals(detailCurve.GeometryCurve, detailCurve.Document.Application.VertexTolerance))
         detailCurve.SetGeometryCurve(curve, overrideJoins: true);
 

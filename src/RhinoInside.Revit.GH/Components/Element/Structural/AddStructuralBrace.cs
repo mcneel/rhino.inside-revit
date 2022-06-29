@@ -108,10 +108,16 @@ namespace RhinoInside.Revit.GH.Components
       (
         doc.Value, _Brace, brace =>
         {
+          var tol = GeometryTolerance.Model;
+
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if (!curve.TryGetLine(out var line, GeometryTolerance.Model.VertexTolerance))
-            throw new RuntimeArgumentException("Curve", "Curve must be line like curve.", curve);
+
+          if (curve.IsShort(tol.ShortCurveTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (!curve.TryGetLine(out var line, tol.VertexTolerance))
+            throw new RuntimeArgumentException("Curve", $"Curve should be a line like curve.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
 
