@@ -402,7 +402,11 @@ namespace RhinoInside.Revit.GH.Types
         var meshes = TryGetPreviewMeshes();
         if (meshes is object)
         {
-          if (Grasshopper.CentralSettings.PreviewMeshEdges)
+          if (meshes.Length == 0)
+          {
+            base.DrawViewportWires(args);
+          }
+          else if (Grasshopper.CentralSettings.PreviewMeshEdges)
           {
             foreach (var mesh in meshes)
               args.Pipeline.DrawMeshWires(mesh, color, thickness);
