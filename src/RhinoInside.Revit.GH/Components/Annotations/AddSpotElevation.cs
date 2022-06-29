@@ -105,19 +105,12 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         view.Document, _Spot_, spot =>
         {
           // Input
+          if (!view.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
           if (!Params.GetData(DA, "Reference", out ARDB.Element element)) return null;
           if (!Params.TryGetData(DA, "Head Location", out Point3d? headLocation)) return null;
           if (headLocation is null) headLocation = point;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.SpotDimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.SpotElevationType)) return null;
-
-          if
-          (
-            view.ViewType is ARDB.ViewType.Schedule ||
-            view.ViewType is ARDB.ViewType.ColumnSchedule ||
-            view.ViewType is ARDB.ViewType.PanelSchedule
-          )
-            throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
 
           // Compute
           spot = Reconstruct
@@ -152,10 +145,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (reference is null) return false;
 
       var prevReference = spot.References.get_Item(0);
-
-      if (prevReference.ElementReferenceType != reference.ElementReferenceType) return false;
-      if (prevReference.ElementId != reference.ElementId) return false;
-      if (prevReference.LinkedElementId != reference.LinkedElementId) return false;
+      if (!prevReference.IsEquivalent(reference, spot.Document)) return false;
 
       // Origin
       var vertexTolerance = spot.Document.Application.VertexTolerance;
@@ -214,8 +204,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           break;
 #endif
 
-        case ARDB.ModelLine modelLine:
-          reference = modelLine.GeometryCurve.Reference;
+        case ARDB.CurveElement curveElement:
+          reference = curveElement.GeometryCurve.Reference;
           break;
 
         default:
@@ -244,7 +234,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           break;
       }
 
-      return reference;
+      return reference ?? new ARDB.Reference(element);
     }
 
     ARDB.SpotDimension Reconstruct

@@ -96,20 +96,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         view.Document, _Output_, dimension =>
         {
           // Input
+          if (!view.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
           if (!Params.GetDataList(DA, "References", out IList<ARDB.Element> elements)) return null;
           if (!Params.GetData(DA, "Arc", out Arc? arc)) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.DimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.AngularDimensionType)) return null;
 
-          if
-          (
-            view.ViewType is ARDB.ViewType.Schedule ||
-            view.ViewType is ARDB.ViewType.ColumnSchedule ||
-            view.ViewType is ARDB.ViewType.PanelSchedule
-          )
-            throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
-
           // Compute
-          dimension = Reconstruct(dimension, view, arc.Value.ToArc(), elements, type);
+          var references = elements.Select(ElementExtension.GetDefaultReference).OfType<ARDB.Reference>().ToArray();
+          dimension = Reconstruct(dimension, view, arc.Value.ToArc(), references, type);
 
           DA.SetData(_Output_, dimension);
           return dimension;
@@ -117,86 +111,33 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       );
     }
 
-    static bool Contains(ARDB.ReferenceArray references, ARDB.ElementId value)
-    {
-      foreach (var reference in references.Cast<ARDB.Reference>())
-        if (reference.ElementId == value)
-          return true;
-
-      return false;
-    }
-
-    bool Reuse(ARDB.Dimension dimension, ARDB.View view, ARDB.Arc arc, IList<ARDB.Element> elements, ARDB.DimensionType type)
+    bool Reuse(ARDB.Dimension dimension, ARDB.View view, ARDB.Arc arc, IList<ARDB.Reference> references, ARDB.DimensionType type)
     {
       if (dimension is null) return false;
       if (dimension.OwnerViewId != view.Id) return false;
       if (type != default && type.Id != dimension.GetTypeId()) return false;
 
-      // Line
+      // Arc
       if (!dimension.Curve.AlmostEquals(arc, GeometryTolerance.Internal.VertexTolerance)) return false;
 
-      // Elements
-      var currentReference = dimension.References;
-      if (currentReference.Size != elements.Count) return false;
+      // References
+      var currentReferences = dimension.References;
+      if (currentReferences.Size != references.Count) return false;
 
-      foreach (var element in elements)
+      var referenceEqualityComparer = ReferenceEqualityComparer.SameDocument(dimension.Document);
+      foreach (var reference in references)
       {
-        if (!Contains(currentReference, element.Id))
+        if (!currentReferences.Cast<ARDB.Reference>().Contains(reference, referenceEqualityComparer))
           return false;
       }
 
       return true;
     }
 
-    ARDB.Dimension Create(ARDB.View view, ARDB.Arc arc, IList<ARDB.Element> elements, ARDB.DimensionType type)
+    ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Arc arc, IList<ARDB.Reference> references, ARDB.DimensionType type)
     {
-      var references = GetReferences(elements);
-      return ARDB.AngularDimension.Create(view.Document, view, arc, references, type);
-    }
-
-    static IList<ARDB.Reference> GetReferences(IList<ARDB.Element> elements)
-    {
-      var referenceArray = new List<ARDB.Reference>(elements.Count);
-      foreach (var element in elements)
-      {
-        var reference = default(ARDB.Reference);
-        switch (element)
-        {
-          case null: break;
-#if REVIT_2018
-          case ARDB.FamilyInstance instance:
-            reference = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
-            break;
-#endif
-
-          case ARDB.ModelLine modelLine:
-            reference = modelLine.GeometryCurve.Reference;
-            break;
-
-          default:
-            using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
-            {
-              var geometry = element.get_Geometry(options);
-              reference = geometry.OfType<ARDB.Solid>().
-                SelectMany(x => x.Faces.Cast<ARDB.Face>()).
-                Select(x => x.Reference).
-                OfType<ARDB.Reference>().
-                FirstOrDefault();
-            }
-            break;
-        }
-
-        if (reference is object)
-          referenceArray.Add(reference);
-      }
-      return referenceArray;
-
-    }
-
-    ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Arc arc, IList<ARDB.Element> elements, ARDB.DimensionType type)
-    {
-      if (!Reuse(dimension, view, arc, elements, type))
-        dimension = Create(view, arc, elements, type);
+      if (!Reuse(dimension, view, arc, references, type))
+        dimension = ARDB.AngularDimension.Create(view.Document, view, arc, references, type);
 
       return dimension;
     }

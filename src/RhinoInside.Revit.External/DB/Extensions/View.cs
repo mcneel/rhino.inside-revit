@@ -71,15 +71,25 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       switch (viewType)
       {
-        case ViewType.Undefined:
-        case ViewType.Schedule:
-        case ViewType.ProjectBrowser:
-        case ViewType.SystemBrowser:
-        case ViewType.Internal:
-          return false;
+        case ViewType.FloorPlan:
+        case ViewType.CeilingPlan:
+        case ViewType.Elevation:
+        case ViewType.ThreeD:
+        case ViewType.DrawingSheet:
+
+        case ViewType.EngineeringPlan:
+        case ViewType.AreaPlan:
+
+        case ViewType.Section:
+        case ViewType.Detail:
+
+        case ViewType.Walkthrough:
+        case ViewType.Rendering:
+
+          return true;
       }
 
-      return true;
+      return false;
     }
 
     /// <summary>

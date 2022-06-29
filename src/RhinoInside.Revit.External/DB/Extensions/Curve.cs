@@ -259,17 +259,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
           var normal = XYZ.Zero;
           {
-            // Create the covariance matrix
-            var cov = XYZExtension.ComputeCovariance(curve.CtrlPoints);
+            var ctrlPoints = curve.CtrlPoints;
+            var cov = XYZExtension.ComputeCovariance(ctrlPoints);
+            
             bool planar = !cov.TryGetInverse(out var inverse);
             if (planar)
               inverse = cov;
 
             normal = inverse.GetPrincipalComponent(0D);
 
-            if(planar)
+            if (planar)
+            {
+              var plane = new PlaneEquation(normal, 0.0);
+              for (int p = 0; p < ctrlPoints.Count; ++p)
+                ctrlPoints[p] = plane.Project(ctrlPoints[p]);
+
+              cov = XYZExtension.ComputeCovariance(ctrlPoints);
+              normal = cov.GetPrincipalComponent(0D);
               normal = basisX.CrossProduct(normal).Normalize(0D);
+            }
           }
+
 
           basisY = normal.CrossProduct(basisX).Normalize(0D);
           return true;

@@ -96,23 +96,17 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         view.Document, _Output_, dimension =>
         {
           // Input
+          if (!view.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
           if (!Params.GetDataList(DA, "References", out IList<ARDB.Element> elements)) return null;
           if (!Params.GetData(DA, "Line", out Line? line)) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.DimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.LinearDimensionType)) return null;
-
-          if
-          (
-            view.ViewType is ARDB.ViewType.Schedule ||
-            view.ViewType is ARDB.ViewType.ColumnSchedule ||
-            view.ViewType is ARDB.ViewType.PanelSchedule
-          )
-            throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
 
           var viewPlane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
           line = new Line(viewPlane.ClosestPoint(line.Value.From), viewPlane.ClosestPoint(line.Value.To));
 
           // Compute
-          dimension = Reconstruct(dimension, view, line.Value.ToLine(), elements, type);
+          var references = elements.Select(ElementExtension.GetDefaultReference).OfType<ARDB.Reference>().ToArray();
+          dimension = Reconstruct(dimension, view, line.Value.ToLine(), references, type);
 
           DA.SetData(_Output_, dimension);
           return dimension;
@@ -120,16 +114,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       );
     }
 
-    static bool Contains(ARDB.ReferenceArray references, ARDB.ElementId value)
-    {
-      foreach (var reference in references.Cast<ARDB.Reference>())
-        if (reference.ElementId == value)
-          return true;
-
-      return false;
-    }
-
-    bool Reuse(ARDB.Dimension dimension, ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
+    bool Reuse(ARDB.Dimension dimension, ARDB.View view, ARDB.Line line, IList<ARDB.Reference> references, ARDB.DimensionType type)
     {
       if (dimension is null) return false;
       if (dimension.OwnerViewId != view.Id) return false;
@@ -138,78 +123,46 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       // Line
       if (!dimension.Curve.AlmostEquals(line, GeometryTolerance.Internal.VertexTolerance)) return false;
 
-      // Elements
-      var currentReference = dimension.References;
-      if (currentReference.Size != elements.Count) return false;
+      // References
+      var currentReferences = dimension.References;
+      if (currentReferences.Size != references.Count) return false;
 
-      foreach (var element in elements)
+      var referenceEqualityComparer = ReferenceEqualityComparer.SameDocument(dimension.Document);
+      foreach (var reference in references)
       {
-        if (!Contains(currentReference, element.Id))
+        if (!currentReferences.Cast<ARDB.Reference>().Contains(reference, referenceEqualityComparer))
           return false;
       }
 
       return true;
     }
 
-    ARDB.Dimension Create(ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
+    ARDB.Dimension Create(ARDB.View view, ARDB.Line line, IList<ARDB.Reference> references, ARDB.DimensionType type)
     {
-      var references = GetReferences(elements);
+      var referenceArray = new ARDB.ReferenceArray();
+      for (int r = 0; r < references.Count; ++r)
+        referenceArray.Append(references[r]);
 
       if (view.Document.IsFamilyDocument)
       {
         if (type == default)
-          return view.Document.FamilyCreate.NewDimension(view, line, references);
+          return view.Document.FamilyCreate.NewDimension(view, line, referenceArray);
         else
-          return view.Document.FamilyCreate.NewDimension(view, line, references, type);
+          return view.Document.FamilyCreate.NewDimension(view, line, referenceArray, type);
       }
       else
       {
         if (type == default)
-          return view.Document.Create.NewDimension(view, line, references);
+          return view.Document.Create.NewDimension(view, line, referenceArray);
         else
-          return view.Document.Create.NewDimension(view, line, references, type);
+          return view.Document.Create.NewDimension(view, line, referenceArray, type);
       }
     }
 
-    static ARDB.ReferenceArray GetReferences(IList<ARDB.Element> elements)
+    ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Line line, IList<ARDB.Reference> references, ARDB.DimensionType type)
     {
-      var referenceArray = new ARDB.ReferenceArray();
-
-      foreach (var element in elements)
-      {
-        var reference = default(ARDB.Reference);
-        switch (element)
-        {
-          case null: break;
-#if REVIT_2018
-          case ARDB.FamilyInstance instance:
-            reference = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
-            break;
-#endif
-          default:
-            using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
-            {
-              var geometry = element.get_Geometry(options);
-              reference = geometry.OfType<ARDB.Solid>().
-                SelectMany(x => x.Faces.Cast<ARDB.Face>()).
-                Select(x => x.Reference).
-                OfType<ARDB.Reference>().
-                FirstOrDefault();
-            }
-            break;
-        }
-
-        if (reference is object)
-          referenceArray.Append(reference);
-      }
-      return referenceArray;
-
-    }
-
-    ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Line line, IList<ARDB.Element> elements, ARDB.DimensionType type)
-    {
-      if (!Reuse(dimension, view, line, elements, type))
-        dimension = Create(view, line, elements, type);
+      if (!Reuse(dimension, view, line, references, type))
+        dimension = Create(view, line, references, type);
 
       return dimension;
     }
