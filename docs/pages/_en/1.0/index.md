@@ -23,6 +23,10 @@ Grasshopper is a visual programming environment tightly integrated with Rhino’
 {{ site.terms.rir }} adds over 300 Revit-aware components to Grasshopper that can query, modify, analyze, and create native Revit elements. More components are added in each release to support more Revit native types
 {% endcapture %}
 
+{% capture bim360_note %}
+{{ site.terms.rir }}Our BIM360 File Locker plugin allows your team to work with Revit, Rhino and Grasshopper files in the same BIM360 folder. This enables project teams to share the files, lock access and get alerts when working on the files and sync with BIM360 whether in Rhino or Revit.
+{% endcapture %}
+
 {% capture api_note %}
 {{ site.terms.rir }} provides translation API to allow creating custom conversion workflows between your Revit data and Rhino geometry and metadata. This includes an advanced geometry conversion API to safely translate advanced Rhino shapes into Revit. The API is easily accessible from Grasshopper's Python or C# scripting components
 {% endcapture %}
@@ -53,6 +57,13 @@ Grasshopper is a visual programming environment tightly integrated with Rhino’
    ghcomp_text=ghcomp_note
    ghcomp_learn_link="guides/"
    ghcomp_learn_title="See more guides ..."
+
+   bim360_header="BIM360 Integration"
+   bim360_text=bim360_note
+   bim360_learn_link="guides/"
+   bim360_learn_title="Details on BIM 360 Locker ..."
+   bim360_img="/static/images/home/rhino360.png"
+
 
    api_header="Python and C# Scripting"
    api_text=api_note
