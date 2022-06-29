@@ -63,6 +63,7 @@
     <Compile Include="DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="DB\Extensions\Plane.cs" />
     <Compile Include="DB\Extensions\ProjectLocation.cs" />
+    <Compile Include="DB\Extensions\Reference.cs" />
     <Compile Include="DB\Extensions\Sketch.cs" />
     <Compile Include="DB\Extensions\Solid.cs" />
     <Compile Include="DB\Extensions\Surface.cs" />

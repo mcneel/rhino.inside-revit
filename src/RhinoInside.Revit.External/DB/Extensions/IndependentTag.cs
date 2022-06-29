@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!reference.EqualTo(referenceTagged))
+        if (!reference.IsEquivalent(referenceTagged, tag.Document))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!reference.EqualTo(referenceTagged))
+        if (!reference.IsEquivalent(referenceTagged, tag.Document))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!reference.EqualTo(referenceTagged))
+        if (!reference.IsEquivalent(referenceTagged, tag.Document))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!reference.EqualTo(referenceTagged))
+        if (!reference.IsEquivalent(referenceTagged, tag.Document))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (tag.GetTaggedReference() is Reference reference)
       {
-        if (!reference.EqualTo(referenceTagged))
+        if (!reference.IsEquivalent(referenceTagged, tag.Document))
           throw new System.ArgumentException(nameof(referenceTagged));
       }
 
