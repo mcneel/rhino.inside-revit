@@ -988,7 +988,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var reference = default(Reference);
       switch (element)
       {
-        case null: break;
+        case null:
+          return null;
+
 #if REVIT_2018
         case FamilyInstance instance:
           reference = instance.GetReferences(FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
