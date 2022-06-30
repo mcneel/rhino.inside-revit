@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper;
+using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
@@ -251,6 +252,28 @@ namespace RhinoInside.Revit.GH.Components
         }
 
         base.ExpireLayout();
+      }
+
+      public override GH_ObjectResponse RespondToMouseDoubleClick(GH_Canvas sender, GH_CanvasMouseEvent e)
+      {
+        bool ctrl = Control.ModifierKeys == Keys.Control;
+        bool shift = Control.ModifierKeys == Keys.Shift;
+
+        if (e.Button == MouseButtons.Left && (ctrl || shift))
+        {
+          if (Owner is ZuiComponent zuiComponent)
+          {
+            sender.ActiveInteraction = null;
+            if (shift)
+              zuiComponent.Menu_ShowAllParameters(sender, e);
+            else if (ctrl)
+              zuiComponent.Menu_HideUnconnectedParameters(sender, e);
+
+            return GH_ObjectResponse.Handled;
+          }
+        }
+
+        return GH_ObjectResponse.Ignore;
       }
     }
 
