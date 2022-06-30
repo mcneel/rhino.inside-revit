@@ -164,6 +164,12 @@ pre {
     color: #111;
 }
 
+.home-feature-bim360 {
+    background-size: cover;
+    background-position: center;
+    color: #111;
+}
+
 .home-feature-api {
     background-size: cover;
     background-position: center;
@@ -247,6 +253,12 @@ pre {
     display: grid;
     grid-template-columns: repeat(2, minmax(250px, 1fr));
     column-gap: 40px;
+}
+
+.home-feature-content-dark a,
+.home-feature-content-dark a:visited {
+    color: #111;
+    font-weight: bold;
 }
 
 .home-feature-content a:hover {

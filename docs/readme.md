@@ -423,6 +423,7 @@ terms:
   rhino: Rhino WIP
   rir: Rhino.Inside.Revit
   revit: Autodesk Revit®
+  bim360: Autodesk BIM360®
 ```
 
 You can refer to these terms using liquid tags. Jekyll will automatically place the correct term when rendering the page. In the example below `{{ site.terms.rir }}` will be replaced by `Rhino.Inside.Revit`
