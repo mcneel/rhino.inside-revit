@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
           Name = "Curved Edge Condition",
           NickName = "CEC",
           Optional = true
-        }.SetDefaultVale(ERDB.SlabShapeEditCurvedEdgeCondition.ProjectToSide), ParamRelevance.Secondary
+        }.SetDefaultVale(ERDB.SlabShapeEditCurvedEdgeCondition.ProjectToSide), ParamRelevance.Tertiary
       ),
       new ParamDefinition
       (
@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
         {
           Name = "Curved Edge Condition",
           NickName = "CEC",
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Tertiary
       ),
       new ParamDefinition
       (
@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.GH.Components.Element.HostObject
           NickName = "C",
           Description = "Corner points",
           Access = GH_ParamAccess.list,
-        }, ParamRelevance.Tertiary
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
