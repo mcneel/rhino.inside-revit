@@ -108,12 +108,13 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       public bool Equals(GeometrySignature other)
       {
+        if (HashCode != other.HashCode) return false;
+
         var x = hash;
         var y = other.hash;
 
         if (ReferenceEquals(x, y)) return true;
         if (x is null || y is null) return false;
-        if (x.GetHashCode() != y.GetHashCode()) return false;
 
         var length = x.Length;
         if (length != y.Length) return false;
@@ -329,9 +330,9 @@ namespace RhinoInside.Revit.Convert.Geometry
           GeometryDictionary.Remove(signature);
         }
       }
+      else signature = default;
 
       value = default;
-      signature = default;
       return false;
     }
   }
