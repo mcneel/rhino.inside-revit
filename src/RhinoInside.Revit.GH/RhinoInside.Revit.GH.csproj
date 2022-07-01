@@ -21,6 +21,8 @@
   <ItemGroup>
     <Compile Include="Attributes.cs" />
     <Compile Include="Components\Annotations\AddAngularDimension.cs" />
+    <Compile Include="Components\Annotations\AddRevisionCloud.cs" />
+    <Compile Include="Components\Annotations\AddRevision.cs" />
     <Compile Include="Components\Annotations\AddSymbol.cs" />
     <Compile Include="Components\Annotations\AddElementTag.cs" />
     <Compile Include="Components\Annotations\AddAreaTag.cs" />
@@ -267,8 +269,10 @@
     </Compile>
     <Compile Include="Surface.cs" />
     <Compile Include="Types\Annotations\Dimension.cs" />
+    <Compile Include="Types\Annotations\RevisionCloud.cs" />
     <Compile Include="Types\Annotations\SpatialElementTag.cs" />
     <Compile Include="Types\Annotations\SpotDimension.cs" />
+    <Compile Include="Types\Annotations\Revision.cs" />
     <Compile Include="Types\Annotations\TextElement.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
     <None Include="Extensions\README.md" />
@@ -283,6 +287,7 @@
     <Compile Include="Extensions\System.Collections.Generic.cs" />
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="Parameters\Annotations\Dimension.cs" />
+    <Compile Include="Parameters\Annotations\Revision.cs" />
     <Compile Include="Parameters\Input\BuiltInCategories.cs" />
     <Compile Include="Parameters\Input\BuiltInParameters.cs" />
     <Compile Include="Parameters\Input\BuiltInParameterGroups.cs" />
