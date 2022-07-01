@@ -290,7 +290,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       {
         var tol = GeometryTolerance.Internal;
         var height = extrusion.PathStart.DistanceTo(extrusion.PathEnd);
-        if (height < tol.VertexTolerance / factor)
+        if (height < Autodesk.Revit.ApplicationServices.Application.MinimumThickness / factor)
         {
           var curves = new List<Curve>(extrusion.ProfileCount);
           for (int p = 0; p < extrusion.ProfileCount; ++p)
