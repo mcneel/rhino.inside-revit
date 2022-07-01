@@ -149,10 +149,12 @@ You can use the {% include ltr/comp.html uuid='82523911' %} component to edit ex
 
 Revit comes with a series of Revit Family Template (.RFT) files.  These contain the necessary basic defaults to create loadable families for specific categories. Interestingly many of the most popular categories do not have templates built for them.  Examples of these categories would be Walls, Roofs, Floors, Windows, HardScape, etc. It is possible to create family templates and create loadable Families in these popular Categories by following the steps below. A list of Default Templates and Categories that will support customer RFT files is listed in [this spreadsheet](https://docs.google.com/spreadsheets/d/1l8koAQtsz0o9iK80gmpC0HqSAFqpqAb0rKYdXcQkBWE/edit?usp=sharing).
 
+{% include vimeo_player.html id="726191224" %}
+
 The steps to create a new family template:
 
  1. Create in-place component using the needed category.  i.e. Stairs
- 1. Draw an object 
+ 1. Draw an object.
  1. Group that object
  1. Right-click on the Group and Save Group.
  1. Save that file and an RFA file.
