@@ -292,9 +292,9 @@ namespace RhinoInside.Revit.Convert.Geometry
         var height = extrusion.PathStart.DistanceTo(extrusion.PathEnd);
         if (height < Autodesk.Revit.ApplicationServices.Application.MinimumThickness / factor)
         {
-          var curves = new List<Curve>(extrusion.ProfileCount);
+          var curves = new Curve[extrusion.ProfileCount];
           for (int p = 0; p < extrusion.ProfileCount; ++p)
-            curves.Add(extrusion.Profile3d(p, 0.5));
+            curves[p] = extrusion.Profile3d(p, 0.5);
 
           var regions = Brep.CreatePlanarBreps(curves, tol.VertexTolerance / factor);
           if (regions.Length != 1)
