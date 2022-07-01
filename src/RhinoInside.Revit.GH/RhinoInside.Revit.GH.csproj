@@ -280,6 +280,7 @@
     <Compile Include="Extensions\System.Collections.Generic.cs" />
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="Parameters\Annotations\Dimension.cs" />
+    <Compile Include="Parameters\Annotations\Revision.cs" />
     <Compile Include="Parameters\Input\BuiltInCategories.cs" />
     <Compile Include="Parameters\Input\BuiltInParameters.cs" />
     <Compile Include="Parameters\Input\BuiltInParameterGroups.cs" />

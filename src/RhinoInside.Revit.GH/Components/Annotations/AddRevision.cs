@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.Revision()
         {
           Name = _Revision_,
           NickName = _Revision_.Substring(0, 1),

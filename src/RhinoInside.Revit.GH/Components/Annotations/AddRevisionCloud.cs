@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ),
       new ParamDefinition
       (
-        new Parameters.Element
+        new Parameters.Revision
         {
           Name = "Revision",
           NickName = "R",
