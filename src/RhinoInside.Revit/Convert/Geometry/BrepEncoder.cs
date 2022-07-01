@@ -290,11 +290,11 @@ namespace RhinoInside.Revit.Convert.Geometry
       {
         var tol = GeometryTolerance.Internal;
         var height = extrusion.PathStart.DistanceTo(extrusion.PathEnd);
-        if (height < tol.VertexTolerance / factor)
+        if (height < Autodesk.Revit.ApplicationServices.Application.MinimumThickness / factor)
         {
-          var curves = new List<Curve>(extrusion.ProfileCount);
+          var curves = new Curve[extrusion.ProfileCount];
           for (int p = 0; p < extrusion.ProfileCount; ++p)
-            curves.Add(extrusion.Profile3d(p, 0.5));
+            curves[p] = extrusion.Profile3d(p, 0.5);
 
           var regions = Brep.CreatePlanarBreps(curves, tol.VertexTolerance / factor);
           if (regions.Length != 1)
@@ -921,8 +921,9 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
           else GeometryEncoder.Context.Peek.RuntimeMessage(255, "Revit Data conversion service is not available", default);
 
-          // In case we don't have a destination document we create a new one here.
-          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(ARDB.UnitSystem.Imperial))
+          // Looks like importing on a different document than the destination one
+          // prevents Revit from reusing the Solids, so we obtain unique Solids.
+          doc = IODocument;
           {
             try
             {
@@ -961,7 +962,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             }
             finally
             {
-              if (!doc.IsEquivalent(ioDocument) && doc != GeometryEncoder.Context.Peek.Document)
+              if (!doc.IsEquivalent(ioDocument) && !doc.IsEquivalent(GeometryEncoder.Context.Peek.Document))
                 doc.Close(false);
             }
           }
@@ -1006,8 +1007,9 @@ namespace RhinoInside.Revit.Convert.Geometry
           else GeometryEncoder.Context.Peek.RuntimeMessage(255, "Revit Data conversion service is not available", default);
 
 #if REVIT_2022
-          // In case we don't have a destination document we create a new one here.
-          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(ARDB.UnitSystem.Imperial))
+          // Looks like importing on a different document than the destination one
+          // prevents Revit from reusing the Solids, so we obtain unique Solids.
+          doc = IODocument;
           {
             try
             {
@@ -1046,7 +1048,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             }
             finally
             {
-              if (!doc.IsEquivalent(ioDocument) && doc != GeometryEncoder.Context.Peek.Document)
+              if (!doc.IsEquivalent(ioDocument) && !doc.IsEquivalent(GeometryEncoder.Context.Peek.Document))
                 doc.Close(false);
             }
           }

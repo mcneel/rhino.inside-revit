@@ -500,7 +500,7 @@ namespace Rhino.Geometry
         return line.Direction.IsPerpendicularTo(plane.Normal, angleTolerance);
 
       return curve.TryGetPlane(out var curvePlane, tolerance) &&
-        curvePlane.ZAxis.IsParallelTo(plane.Normal, angleTolerance) == 0;
+        curvePlane.ZAxis.IsParallelTo(plane.Normal, angleTolerance) != 0;
     }
 
     /// <summary>

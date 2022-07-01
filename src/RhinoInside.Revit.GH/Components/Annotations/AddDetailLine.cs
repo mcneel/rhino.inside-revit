@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "View", out ARDB.View view)) return;
+      if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
 
       ReconstructElement<ARDB.DetailCurve>
       (
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve)) return null;
 
-          var viewPlane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
+          var viewPlane = view.Location;
           var tol = GeometryTolerance.Model;
 
           if (curve.IsShort(tol.ShortCurveTolerance))
@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           // Compute
-          detailCurve = Reconstruct(detailCurve, view, curve.ToCurve());
+          detailCurve = Reconstruct(detailCurve, view.Value, curve.ToCurve());
 
           DA.SetData(_DetailLine_, detailCurve);
           return detailCurve;
