@@ -143,7 +143,6 @@
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />
     <Compile Include="Components\Element\Properties.cs" />
-    <Compile Include="Components\Element\Structural\ElementSectionRotation.cs" />
     <Compile Include="Components\Element\Version.cs" />
     <Compile Include="Components\Element\Wall\AnalyseStackedWall.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
@@ -263,8 +262,10 @@
     </Compile>
     <Compile Include="Surface.cs" />
     <Compile Include="Types\Annotations\Dimension.cs" />
+    <Compile Include="Types\Annotations\RevisionCloud.cs" />
     <Compile Include="Types\Annotations\SpatialElementTag.cs" />
     <Compile Include="Types\Annotations\SpotDimension.cs" />
+    <Compile Include="Types\Annotations\Revision.cs" />
     <Compile Include="Types\Annotations\TextElement.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
     <None Include="Extensions\README.md" />
