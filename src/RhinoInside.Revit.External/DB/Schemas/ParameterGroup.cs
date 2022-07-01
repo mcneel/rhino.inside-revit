@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       // but it throws an exception when ParameterGroup is BuiltInParameterGroup.INVALID
       // By now to improve speed we use our implementation even on Revit 2022
       return self.ParameterGroup == Autodesk.Revit.DB.BuiltInParameterGroup.INVALID ?
-        default : (Schemas.ParameterGroup) self.GetGroupTypeId();
+        Schemas.ParameterGroup.Empty : (Schemas.ParameterGroup) self.GetGroupTypeId();
 #else
       return self.ParameterGroup;
 #endif
@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           return item.Key;
       }
 
-      return default;
+      return Schemas.ParameterGroup.Empty;
     }
 
     internal static Autodesk.Revit.DB.BuiltInParameterGroup ToBuiltInParameterGroup(this Schemas.ParameterGroup value)

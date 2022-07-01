@@ -921,8 +921,9 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
           else GeometryEncoder.Context.Peek.RuntimeMessage(255, "Revit Data conversion service is not available", default);
 
-          // In case we don't have a destination document we create a new one here.
-          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(ARDB.UnitSystem.Imperial))
+          // Looks like importing on a different document than the destination one
+          // prevents Revit from reusing the Solids, so we obtain unique Solids.
+          doc = IODocument;
           {
             try
             {
@@ -961,7 +962,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             }
             finally
             {
-              if (!doc.IsEquivalent(ioDocument) && doc != GeometryEncoder.Context.Peek.Document)
+              if (!doc.IsEquivalent(ioDocument) && !doc.IsEquivalent(GeometryEncoder.Context.Peek.Document))
                 doc.Close(false);
             }
           }
@@ -1006,8 +1007,9 @@ namespace RhinoInside.Revit.Convert.Geometry
           else GeometryEncoder.Context.Peek.RuntimeMessage(255, "Revit Data conversion service is not available", default);
 
 #if REVIT_2022
-          // In case we don't have a destination document we create a new one here.
-          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(ARDB.UnitSystem.Imperial))
+          // Looks like importing on a different document than the destination one
+          // prevents Revit from reusing the Solids, so we obtain unique Solids.
+          doc = IODocument;
           {
             try
             {
@@ -1046,7 +1048,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             }
             finally
             {
-              if (!doc.IsEquivalent(ioDocument) && doc != GeometryEncoder.Context.Peek.Document)
+              if (!doc.IsEquivalent(ioDocument) && !doc.IsEquivalent(GeometryEncoder.Context.Peek.Document))
                 doc.Close(false);
             }
           }

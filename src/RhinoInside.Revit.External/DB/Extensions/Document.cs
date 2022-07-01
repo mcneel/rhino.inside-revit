@@ -417,8 +417,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (nomen is null)
         throw new ArgumentNullException(nameof(nomen));
 
-      if (!NamingUtils.IsValidName(nomen))
-        throw new ArgumentException("Element name contains prohibited characters and is invalid.", nameof(nomen));
+      if (!ElementNaming.IsValidName(nomen))
+        throw new ArgumentException($"The name cannot contain these prohibited characters {string.Join(" ", ElementNaming.InvalidCharacters.ToCharArray())}", nameof(nomen));
 
       // Remove number sufix from name and trailing spaces.
       TryParseNomenId(nomen.Trim(), out nomen, out var _);
