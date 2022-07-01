@@ -453,6 +453,11 @@ namespace RhinoInside.Revit.GH.Types
 
           name = value;
         }
+        else if (Document.IsFamilyDocument && Class == ERDB.ParameterClass.Family)
+        {
+          var familyParameter = Document.FamilyManager.get_Parameter(Nomen);
+          Document.FamilyManager.RenameParameter(familyParameter, value);
+        }
         else base.Nomen = value;
       }
     }
@@ -583,7 +588,13 @@ namespace RhinoInside.Revit.GH.Types
     ERDB.Schemas.ParameterGroup group;
     public ERDB.Schemas.ParameterGroup Group
     {
-      get => Value?.GetDefinition()?.GetGroupType() ?? group;
+      get
+      {
+        if (IsReferencedData)
+          return Value?.GetDefinition()?.GetGroupType();
+        else
+          return group;
+      }
       set
       {
         if (IsReferencedData)
