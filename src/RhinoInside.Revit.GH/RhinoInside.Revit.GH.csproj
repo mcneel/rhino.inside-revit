@@ -21,6 +21,8 @@
   <ItemGroup>
     <Compile Include="Attributes.cs" />
     <Compile Include="Components\Annotations\AddAngularDimension.cs" />
+    <Compile Include="Components\Annotations\AddRevisionCloud.cs" />
+    <Compile Include="Components\Annotations\AddRevision.cs" />
     <Compile Include="Components\Annotations\AddSymbol.cs" />
     <Compile Include="Components\Annotations\AddElementTag.cs" />
     <Compile Include="Components\Annotations\AddAreaTag.cs" />
@@ -141,6 +143,7 @@
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />
     <Compile Include="Components\Element\Properties.cs" />
+    <Compile Include="Components\Element\Structural\ElementSectionRotation.cs" />
     <Compile Include="Components\Element\Version.cs" />
     <Compile Include="Components\Element\Wall\AnalyseStackedWall.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
