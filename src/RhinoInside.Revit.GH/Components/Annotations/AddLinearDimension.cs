@@ -89,24 +89,24 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "View", out ARDB.View view)) return;
+      if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
 
       ReconstructElement<ARDB.Dimension>
       (
         view.Document, _Output_, dimension =>
         {
           // Input
-          if (!view.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
+          if (!view.Value.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
           if (!Params.GetDataList(DA, "References", out IList<ARDB.Element> elements)) return null;
           if (!Params.GetData(DA, "Line", out Line? line)) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.DimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.LinearDimensionType)) return null;
 
-          var viewPlane = new Plane(view.Origin.ToPoint3d(), view.ViewDirection.ToVector3d());
+          var viewPlane = view.Location;
           line = new Line(viewPlane.ClosestPoint(line.Value.From), viewPlane.ClosestPoint(line.Value.To));
 
           // Compute
           var references = elements.Select(ElementExtension.GetDefaultReference).OfType<ARDB.Reference>().ToArray();
-          dimension = Reconstruct(dimension, view, line.Value.ToLine(), references, type);
+          dimension = Reconstruct(dimension, view.Value, line.Value.ToLine(), references, type);
 
           DA.SetData(_Output_, dimension);
           return dimension;
