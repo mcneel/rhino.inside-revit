@@ -148,8 +148,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             description, date,
             issued,
             issuedBy, issuedTo,
-            ARDB.RevisionVisibility.CloudAndTagVisible,
-            ARDB.RevisionNumberType.Numeric
+            ARDB.RevisionVisibility.CloudAndTagVisible
           );
 
           DA.SetData(_Revision_, revision);
@@ -169,8 +168,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       bool? issued,
       string issuedBy,
       string issuedTo,
-      ARDB.RevisionVisibility? visibility,
-      ARDB.RevisionNumberType? numberType
+      ARDB.RevisionVisibility? visibility
     )
     {
       if (revision is null)
@@ -193,9 +191,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
       if (visibility is object && visibility.Value != revision.Visibility)
         revision.Visibility = visibility.Value;
-
-      if (numberType is object && numberType.Value != revision.NumberType)
-        revision.NumberType = numberType.Value;
 
       return revision;
     }
