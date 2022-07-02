@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var SheetIssuesOrRevisionsId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SheetIssuesOrRevisions);
       Menu_AppendItem
       (
-        menu, "Open Revisions…",
+        menu, "Open Sheet Issues/Revisions…",
         (sender, arg) => External.UI.EditScope.PostCommand(activeApp, SheetIssuesOrRevisionsId),
         activeApp.CanPostCommand(SheetIssuesOrRevisionsId), false
       );

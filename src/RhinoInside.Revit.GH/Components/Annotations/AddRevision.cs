@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         {
           Name = "Issued",
           NickName = "I",
-          Description = "Indicates whether this Revision has been issued.",
+          Description = "Indicates whether this revision has been issued.",
           Optional = true
         }, ParamRelevance.Secondary
       ),
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         {
           Name = "Issued by",
           NickName = "IB",
-          Description = "Indicates who has issued or will issue this Revision.",
+          Description = "Indicates who has issued or will issue this revision.",
           Optional = true
         }, ParamRelevance.Secondary
       ),
@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         {
           Name = "Issued to",
           NickName = "IT",
-          Description = "Indicates to whom this Revision was or will be issued.",
+          Description = "Indicates to whom this revision was or will be issued.",
           Optional = true
         }, ParamRelevance.Secondary
       ),
@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           Name = "Revision Sequence",
           NickName = "RS",
           Description = "Revision sequence.",
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Occasional
       ),
     };
 

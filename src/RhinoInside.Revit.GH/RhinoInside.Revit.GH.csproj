@@ -35,6 +35,7 @@
     <Compile Include="Components\Annotations\AddSpotElevation.cs" />
     <Compile Include="Components\Annotations\AddDetailItem.cs" />
     <Compile Include="Components\Annotations\AddText.cs" />
+    <Compile Include="Components\Annotations\QueryRevisions.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Documents\ActiveDocument.cs" />
     <Compile Include="Components\Documents\DocumentIdentity.cs" />

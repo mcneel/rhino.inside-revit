@@ -41,11 +41,11 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ),
       new ParamDefinition
       (
-        new Param_Curve
+        new Param_Surface
         {
           Name = "Boundary",
           NickName = "B",
-          Description = "Profile to create a specific region",
+          Description = "Boundary to create a specific region",
           Access = GH_ParamAccess.list
         }
       ),
@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         view.Document, _Cloud_, cloud =>
         {
           // Input
-          if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary) || boundary.Count == 0) return null;
+          if (!Params.GetDataList(DA, "Boundary", out IList<Brep> boundary) || boundary.Count == 0) return null;
           if (!Params.TryGetData(DA, "Revision", out ARDB.Revision revision, x => x.IsValid())) return null;
 
           if (view is Types.View3D || !view.Value.IsGraphicalView())
@@ -94,7 +94,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
           var tol = GeometryTolerance.Model;
           var viewPlane = view.Location;
-          foreach (var loop in boundary)
+          var loops = boundary.SelectMany(x => x.Loops).Select(x => { var c = x.To3dCurve(); c.Reverse(); return c; }).ToArray();
+          foreach (var loop in loops)
           {
             if (loop is null) return null;
             if
@@ -106,7 +107,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
               throw new Exceptions.RuntimeArgumentException("Boundary", "Curve should be a valid planar, closed curve and perperdicular to the input view.", loop);
           }
 
-          boundary = boundary.Select(x => Curve.ProjectToPlane(x, viewPlane)).ToArray();
+          loops = loops.Select(x => Curve.ProjectToPlane(x, viewPlane)).ToArray();
 
           if (revision is null)
           {
@@ -115,7 +116,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           }
 
           // Compute
-          cloud = Reconstruct(cloud, view.Value, boundary, revision);
+          cloud = Reconstruct(cloud, view.Value, loops, revision);
 
           DA.SetData(_Cloud_, cloud);
           return cloud;

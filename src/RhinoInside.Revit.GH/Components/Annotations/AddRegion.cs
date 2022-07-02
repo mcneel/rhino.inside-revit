@@ -41,11 +41,11 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ),
       new ParamDefinition
       (
-        new Param_Curve
+        new Param_Surface
         {
           Name = "Boundary",
           NickName = "B",
-          Description = "Profile to create a specific region",
+          Description = "Boundary to create a specific region",
           Access = GH_ParamAccess.list
         }
       ),
@@ -97,7 +97,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         view.Document, _Output_, region =>
         {
           // Input
-          if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary) || boundary.Count == 0) return null;
+          if (!Params.GetDataList(DA, "Boundary", out IList<Brep> boundary) || boundary.Count == 0) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.FilledRegionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.FilledRegionType)) return null;
           if (!Params.TryGetData(DA, "Line Style", out Types.GraphicsStyle linestyle, x => x.IsValid)) return null;
 
@@ -106,7 +106,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
           var tol = GeometryTolerance.Model;
           var viewPlane = view.Location;
-          foreach (var loop in boundary)
+          var loops = boundary.SelectMany(x => x.Loops).Select(x => x.To3dCurve()).ToArray();
+          foreach (var loop in loops)
           {
             if (loop is null) return null;
             if
@@ -118,14 +119,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
               throw new Exceptions.RuntimeArgumentException("Boundary", "Curve should be a valid planar, closed curve and parallel to the input view.", loop);
           }
 
-          boundary = boundary.Select(x => Curve.ProjectToPlane(x, viewPlane)).ToArray();
+          loops = loops.Select(x => Curve.ProjectToPlane(x, viewPlane)).ToArray();
 
           // Compute
           region = Reconstruct
           (
             region,
             view.Value,
-            boundary,
+            loops,
             type,
             linestyle?.Value
           );
