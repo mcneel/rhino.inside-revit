@@ -563,6 +563,12 @@ namespace RhinoInside.Revit
           rhinoDoc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
           rhinoDoc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
           rhinoDoc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, UnitScale.GetModelScale(rhinoDoc));
+
+          // Like a Revit View at 1:100
+          rhinoDoc.ModelSpaceHatchScalingEnabled = true;
+          rhinoDoc.ModelSpaceHatchScale = 100.0;
+          rhinoDoc.Linetypes.LinetypeScale = 100.0;
+
           //switch (rhinoDoc.ModelUnitSystem)
           //{
           //  case UnitSystem.None: break;
