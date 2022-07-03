@@ -195,6 +195,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.FilledRegion),                    (element)=> new FilledRegion          (element as ARDB.FilledRegion)      },
       { typeof(ARDB.Revision),                        (element)=> new Revision              (element as ARDB.Revision)          },
       { typeof(ARDB.RevisionCloud),                   (element)=> new RevisionCloud         (element as ARDB.RevisionCloud)     },
+      { typeof(ARDB.AnnotationSymbol),                (element)=> new AnnotationSymbol      (element as ARDB.AnnotationSymbol)  },
 
       { typeof(ARDB.AssemblyInstance),                (element)=> new AssemblyInstance      (element as ARDB.AssemblyInstance)  },
 

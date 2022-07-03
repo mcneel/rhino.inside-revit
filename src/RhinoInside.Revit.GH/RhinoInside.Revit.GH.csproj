@@ -262,6 +262,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Surface.cs" />
+    <Compile Include="Types\Annotations\AnnotationSymbol.cs" />
     <Compile Include="Types\Annotations\Dimension.cs" />
     <Compile Include="Types\Annotations\FilledRegion.cs" />
     <Compile Include="Types\Annotations\RevisionCloud.cs" />
