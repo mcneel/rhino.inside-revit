@@ -8,8 +8,26 @@ namespace RhinoInside.Revit.GH.Types
   using Grasshopper.Kernel;
   using Rhino.Display;
 
+  [Kernel.Attributes.Name("Tag")]
+  public class TagElement : GraphicalElement
+  {
+    protected TagElement() { }
+    protected TagElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    protected TagElement(ARDB.Element element) : base(element) { }
+  }
+
+  [Kernel.Attributes.Name("Element Tag")]
+  public class IndependentTag : TagElement
+  {
+    protected override Type ValueType => typeof(ARDB.IndependentTag);
+    public new ARDB.IndependentTag Value => base.Value as ARDB.IndependentTag;
+
+    public IndependentTag() { }
+    public IndependentTag(ARDB.IndependentTag element) : base(element) { }
+  }
+
   [Kernel.Attributes.Name("Spatial Element Tag")]
-  public class SpatialElementTag : GraphicalElement
+  public class SpatialElementTag : TagElement
   {
     protected override Type ValueType => typeof(ARDB.SpatialElementTag);
     public new ARDB.SpatialElementTag Value => base.Value as ARDB.SpatialElementTag;
