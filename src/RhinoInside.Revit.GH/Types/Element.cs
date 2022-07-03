@@ -192,6 +192,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Dimension),                       (element)=> new Dimension             (element as ARDB.Dimension)         },
       { typeof(ARDB.DimensionType),                   (element)=> new DimensionType         (element as ARDB.DimensionType)     },
       { typeof(ARDB.SpotDimension),                   (element)=> new SpotDimension         (element as ARDB.SpotDimension)     },
+      { typeof(ARDB.FilledRegion),                    (element)=> new FilledRegion          (element as ARDB.FilledRegion)      },
       { typeof(ARDB.Revision),                        (element)=> new Revision              (element as ARDB.Revision)          },
       { typeof(ARDB.RevisionCloud),                   (element)=> new RevisionCloud         (element as ARDB.RevisionCloud)     },
 

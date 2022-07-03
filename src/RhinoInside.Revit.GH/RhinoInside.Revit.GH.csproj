@@ -263,6 +263,7 @@
     </Compile>
     <Compile Include="Surface.cs" />
     <Compile Include="Types\Annotations\Dimension.cs" />
+    <Compile Include="Types\Annotations\FilledRegion.cs" />
     <Compile Include="Types\Annotations\RevisionCloud.cs" />
     <Compile Include="Types\Annotations\SpatialElementTag.cs" />
     <Compile Include="Types\Annotations\SpotDimension.cs" />
