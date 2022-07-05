@@ -686,6 +686,8 @@ namespace RhinoInside.Revit.GH.Types
                 if (BakeGeometryElement(idMap, overwrite, doc, att, worldToElement, element, geometry, out var idefIndex))
                 {
                   att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
+                  att.Space = ActiveSpace.ModelSpace;
+                  att.ViewportId = Guid.Empty;
                   att.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
                   att.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
 
@@ -693,6 +695,9 @@ namespace RhinoInside.Revit.GH.Types
                     att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
 
                   guid = doc.Objects.AddInstanceObject(idefIndex, Transform.PlaneToPlane(Plane.WorldXY, location), att);
+
+                  // We don't want geometry on the active viewport but on its own.
+                  doc.Objects.ModifyAttributes(guid, att, quiet: true);
                 }
               }
 
