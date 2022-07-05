@@ -351,16 +351,19 @@ namespace RhinoInside.Revit.GH.Types
             -1.0 : // No Plot
             ToPlotWeight(ProjectionLineWeight);
 
-          if (category.CategoryType == ARDB.CategoryType.Annotation)
+          if (category.CategoryType != ARDB.CategoryType.Model)
           {
-            if
-            (
-              Id.TryGetBuiltInCategory(out var builtInCategory) &&
-              builtInCategory == ARDB.BuiltInCategory.OST_Grids
-            )
+
+            switch ((ARDB.BuiltInCategory) Id.IntegerValue)
             {
-              layer.Color = System.Drawing.Color.FromArgb(35, layer.Color);
-              layer.IsLocked = true;
+              case ARDB.BuiltInCategory.OST_Views:
+                layer.IsLocked = true;
+                break;
+              case ARDB.BuiltInCategory.OST_Levels:
+              case ARDB.BuiltInCategory.OST_Grids:
+                layer.Color = System.Drawing.Color.FromArgb(35, layer.Color);
+                layer.IsLocked = true;
+                break;
             }
           }
           else
