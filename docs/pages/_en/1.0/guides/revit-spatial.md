@@ -1,7 +1,8 @@
 ---
 title: Spatial Elements
 order: 43
-thumbnail: /static/images/guides/rir-ghpython.png
+thumbnail: /static/images/guides/revit-spatial.png
+subtitle: Workflows for Revit Spatial Elements (Rooms, Areas, and Spaces)
 group: Modeling
 ---
 

@@ -1,8 +1,8 @@
 ---
 title: Groups
 order: 72
-thumbnail: /static/images/guides/revit-wip.png
-
+thumbnail: /static/images/guides/revit-groups.png
+subtitle: Workflows for Revit Groups
 group: Containers
 ---
 

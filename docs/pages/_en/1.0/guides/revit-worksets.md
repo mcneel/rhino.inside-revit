@@ -1,8 +1,8 @@
 ---
 title: Worksets
 order: 71
-thumbnail: /static/images/guides/rir-ghpython.png
-
+thumbnail: /static/images/guides/revit-worksets.png
+subtitle: Workflows for Revit Worksets
 group: Containers
 ---
 

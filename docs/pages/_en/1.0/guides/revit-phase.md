@@ -1,8 +1,8 @@
 ---
 title: Phases
 order: 75
-thumbnail: /static/images/guides/revit-wip.png
-
+thumbnail: /static/images/guides/revit-phases.png
+subtitle: Workflows for Revit Phases
 group: Containers
 ---
 

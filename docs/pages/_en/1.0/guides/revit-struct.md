@@ -1,7 +1,8 @@
 ---
 title: Structural Elements
 order: 49
-thumbnail: /static/images/guides/rir-ghpython.png
+thumbnail: /static/images/guides/revit-struct.png
+subtitle: Workflows for Revit Structural Elements
 group: Modeling
 ---
 

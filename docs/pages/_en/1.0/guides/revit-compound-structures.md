@@ -1,8 +1,9 @@
 ---
 title: Compound Structures
 order: 60
+thumbnail: /static/images/guides/revit-compound-structures.png
+subtitle: Workflows for Revit Compound Structures
 group: Modeling
-thumbnail: /static/images/guides/revit-wip.png
 ---
 
 ## Deconstruct Compound Structure

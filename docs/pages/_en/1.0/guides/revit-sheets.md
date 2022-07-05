@@ -1,8 +1,8 @@
 ---
 title: Sheets
 order: 62
-thumbnail: /static/images/guides/revit-wip.png
-
+thumbnail: /static/images/guides/revit-sheets.png
+subtitle: Workflows for Revit Sheets
 group: Documentation
 ---
 

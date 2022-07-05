@@ -1,8 +1,8 @@
 ---
 title: Project Settings
 order: 90
-thumbnail: /static/images/guides/rir-ghpython.png
-
+thumbnail: /static/images/guides/revit-psettings.png
+subtitle: Workflows for Revit Project Settings
 group: Settings
 ---
 

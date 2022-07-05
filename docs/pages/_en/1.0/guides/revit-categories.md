@@ -1,10 +1,10 @@
 ---
 title: "Revit: Categories"
 subtitle: All working with Categories
-order: 23
+order: 24
 group: Essentials
 home: true
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/revit-categories.png
 ghdef: 
 ---
 
