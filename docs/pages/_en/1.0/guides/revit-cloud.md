@@ -4,7 +4,7 @@ subtitle: Working with Rhino Grasshopper and BIM360
 order: 26
 group: Essentials
 home: true
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/revit-cloud.png
 ghdef: 
 ---
 

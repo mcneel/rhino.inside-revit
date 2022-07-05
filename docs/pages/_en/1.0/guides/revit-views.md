@@ -1,8 +1,8 @@
 ---
 title: Views
 order: 63
-thumbnail: /static/images/guides/rir-ghpython.png
-
+thumbnail: /static/images/guides/revit-views.png
+subtitle: Workflows for Revit Views
 group: Documentation
 ---
 

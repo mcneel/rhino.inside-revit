@@ -1,8 +1,8 @@
 ---
 title: Drafting
 order: 62
-thumbnail: /static/images/guides/revit-wip.png
-
+thumbnail: /static/images/guides/revit-drafting.png
+subtitle: Workflows for Drafting in Revit
 group: Documentation
 ---
 
