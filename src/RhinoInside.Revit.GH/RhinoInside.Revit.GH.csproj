@@ -257,6 +257,7 @@
     <Compile Include="Components\Views\AddDependentView.cs" />
     <Compile Include="Components\Workset\Active.cs" />
     <Compile Include="Components\Workset\ElementWorkset.cs" />
+    <Compile Include="Components\Workset\DeleteWorkset.cs" />
     <Compile Include="Components\Workset\Identity.cs" />
     <Compile Include="Components\Workset\QueryWorksets.cs" />
     <Compile Include="Components\ZuiComponent.cs" />
