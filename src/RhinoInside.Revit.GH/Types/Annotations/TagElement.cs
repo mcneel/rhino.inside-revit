@@ -24,6 +24,23 @@ namespace RhinoInside.Revit.GH.Types
 
     public IndependentTag() { }
     public IndependentTag(ARDB.IndependentTag element) : base(element) { }
+
+    #region Location
+    public override Plane Location
+    {
+      get
+      {
+        if (Value is ARDB.IndependentTag tag)
+        {
+          var view = tag.Document.GetElement(tag.OwnerViewId) as ARDB.View;
+          var plane = new Plane(tag.TagHeadPosition.ToPoint3d(), view.RightDirection.ToVector3d(), view.UpDirection.ToVector3d());
+          return plane;
+        }
+
+        return NaN.Plane;
+      }
+    }
+    #endregion
   }
 
   [Kernel.Attributes.Name("Spatial Element Tag")]
