@@ -82,8 +82,11 @@ namespace RhinoInside.Revit.GH.Types
         var attributes = new List<ObjectAttributes>();
 
         var type = element.Document.GetElement(element.GetTypeId()) as ARDB.FilledRegionType;
+#if REVIT_2019
         var pattern = Types.Element.FromElementId(type.Document, type.ForegroundPatternId) as Types.FillPatternElement;
-
+#else
+        var pattern = Types.Element.FromElementId(type.Document, type.FillPatternId ) as Types.FillPatternElement;
+#endif
         var patternIndex = -1;
         if (pattern.BakeElement(idMap, false, doc, att, out var patternId))
           patternIndex = doc.HatchPatterns.FindId(patternId).Index;
@@ -165,7 +168,11 @@ namespace RhinoInside.Revit.GH.Types
             LayerIndex = att.LayerIndex,
             LinetypeSource = ObjectLinetypeSource.LinetypeFromObject,
             ColorSource = ObjectColorSource.ColorFromObject,
+#if REVIT_2019
             ObjectColor = type.ForegroundPatternColor.ToColor(),
+#else
+            ObjectColor = type.Color.ToColor(),
+#endif
             PlotColorSource = ObjectPlotColorSource.PlotColorFromDisplay,
             PlotWeightSource = ObjectPlotWeightSource.PlotWeightFromParent,
             MaterialSource = ObjectMaterialSource.MaterialFromParent,
@@ -237,6 +244,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
-    #endregion
+#endregion
   }
 }
