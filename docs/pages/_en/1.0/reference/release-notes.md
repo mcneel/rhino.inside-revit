@@ -23,21 +23,32 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.8 RC4" version="v1.8.8221.17917" pre_release=true time="07/05/2022" %}
+
+- Added {% include ltr/comp.html uuid='8ff70eef' %}
+- Added {% include ltr/comp.html uuid='8ead987d' %} component
+- Added {% include ltr/comp.html uuid='82a7462c' %} parameter
+- Improved {% include ltr/comp.html uuid='ad88cf11' %} reuse logic
+- Geometry conversion improvements
+- Added warning to {% include ltr/comp.html uuid='134b7171' %} to avoid Shared Parameters Service invalid characters
+- Now default document annotation scales are set to 1:100 by default
+
+
 {% include ltr/release-header.html title="v1.8 RC3" version="v1.8.8215.8714" pre_release=true time="06/28/2022" %}
 
 - Fixed several geometry bugs.
 - Fixed structural framing creation on a family document.
 - Fixed curved Beams when in a vertical plane.
-- Fixed dimensioning components, when working with *Detail Lines* and *Reference Planes*.
-- Set Element Parameter casting issue with enums [#613](https://github.com/mcneel/rhino.inside-revit/issues/613)
+- Fixed dimensioning components, when working with Detail Lines and Reference Planes.
+- {% include ltr/comp.html uuid='8f1ee110' %} casting issue with enums [#613](https://github.com/mcneel/rhino.inside-revit/issues/613)
 
 {% include ltr/release-header.html title="v1.8 RC2" version="v1.8.8207.14855" pre_release=true time="06/21/2022" %}
 
-- Added 'Tag By Category' component.
-- Added 'Multi-Category Tag' component.
-- Added 'Material Tag' component.
-- Added 'Add Detail Item' component.
-- Added 'Add Symbol' component.
+- Added {% include ltr/comp.html uuid='689d4059' %} component.
+- Added {% include ltr/comp.html uuid='e6e4a2ee' %} component.
+- Added {% include ltr/comp.html uuid='11424062' %} component.
+- Added {% include ltr/comp.html uuid='fe258116' %} component.
+- Added {% include ltr/comp.html uuid='2beb60ba' %} component.
 
 {% include ltr/release-header.html title="v1.8 RC1" version="v1.8.8200.21840" pre_release=true time="06/14/2022" %}
 
@@ -52,11 +63,11 @@ group: Deployment & Configs
 - Added {% include ltr/comp.html uuid='493035d3' %} component
 - Added {% include ltr/comp.html uuid='0644989d' %} component
 - Added {% include ltr/comp.html uuid='0644989d' %} component
-- Added 'Element Subcategory' component.
-- Added 'Curve Line Style' component.
-- Added 'Add Reference Line' componet.
-- Added 'Add Reference Plane' component.
-- Added 'Reference Plane' parameter.
+- Added {% include ltr/comp.html uuid='495330db' %} component.
+- Added {% include ltr/comp.html uuid='60be53c5' %} component.
+- Added {% include ltr/comp.html uuid='a2adb132' %} componet.
+- Added {% include ltr/comp.html uuid='4be42ec7' %} component.
+- Added {% include ltr/comp.html uuid='d35eb2a7' %} parameter.
 
 {% include ltr/release-header.html title="v1.7" version="v1.7.8194.7007" time="06/14/2022" %}
 
