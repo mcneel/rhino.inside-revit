@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Filled Region")]
-  public class FilledRegion : GeometricElement, ISketchAccess, Bake.IGH_BakeAwareElement
+  public class FilledRegion : GeometricElement, ISketchAccess/*, Bake.IGH_BakeAwareElement*/
   {
     protected override Type ValueType => typeof(ARDB.FilledRegion);
     public new ARDB.FilledRegion Value => base.Value as ARDB.FilledRegion;
@@ -45,6 +45,7 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    /*
     #region IGH_BakeAwareElement
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
       BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
@@ -245,5 +246,6 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 #endregion
+    */
   }
 }
