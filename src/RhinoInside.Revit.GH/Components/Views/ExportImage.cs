@@ -247,7 +247,7 @@ namespace RhinoInside.Revit.GH.Components.Views
               FitDirection =            fitDirection ??
                                         (cropExtents.Value.U.Length > cropExtents.Value.V.Length ?
                                         ARDB.FitDirectionType.Horizontal : ARDB.FitDirectionType.Vertical),
-              PixelSize =               pixelSize.GetValueOrDefault(1048),
+              PixelSize =               pixelSize.GetValueOrDefault(1024),
               ImageResolution =         resolution ?? ARDB.ImageResolution.DPI_72,
               ShadowViewsFileType =     fileType ?? ARDB.ImageFileType.PNG,
               HLRandWFViewsFileType =   fileType ?? ARDB.ImageFileType.PNG,
