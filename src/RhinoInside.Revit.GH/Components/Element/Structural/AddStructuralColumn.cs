@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -107,6 +109,8 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.BuiltInParameter.INSTANCE_MOVE_TOP_WITH_GRIDS,
       ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_PARAM,
       ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_PARAM,
+      ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM,
+      ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM,
       ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE,
     };
 
@@ -118,13 +122,19 @@ namespace RhinoInside.Revit.GH.Components
       (
         doc.Value, _Column_, column =>
         {
+          var tol = GeometryTolerance.Model;
+
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if (!curve.TryGetLine(out var line, GeometryObjectTolerance.Model.VertexTolerance))
-            throw new RuntimeArgumentException("Curve", "Curve must be line like curve.", curve);
 
-          if (line.ToZ - line.FromZ < GeometryObjectTolerance.Model.VertexTolerance)
-            throw new RuntimeArgumentException("Curve", "Curve start point must be below curve end point.", curve);
+          if (curve.IsShort(tol.ShortCurveTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (!curve.TryGetLine(out var line, tol.VertexTolerance))
+            throw new RuntimeArgumentException("Curve", $"Curve should be a line like curve.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (line.ToZ - line.FromZ < tol.VertexTolerance)
+            throw new RuntimeArgumentException("Curve", $"Curve start point must be below curve end point.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralColumns)) return null;
 
@@ -153,6 +163,30 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
+    ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.Curve curve, ARDB.FamilySymbol type, ARDB.Level level)
+    {
+      var list = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>(1)
+      {
+        new Autodesk.Revit.Creation.FamilyInstanceCreationData
+        (
+          curve: curve,
+          symbol: type,
+          level: level,
+          structuralType: ARDB.Structure.StructuralType.Column
+        )
+      };
+
+      var ids = doc.IsFamilyDocument ?
+        doc.FamilyCreate.NewFamilyInstances2(list) :
+        doc.Create.NewFamilyInstances2(list);
+
+      var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+
+      // We turn analytical model off by default
+      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+      return instance;
+    }
+
     ARDB.FamilyInstance Reconstruct
     (
       ARDB.FamilyInstance column,
@@ -167,18 +201,11 @@ namespace RhinoInside.Revit.GH.Components
       {
         column = column.ReplaceElement
         (
-          doc.Create.NewFamilyInstance
-          (
-            curve,
-            type,
-            baselevel,
-            ARDB.Structure.StructuralType.Column
-          ),
+          Create(doc, curve, type, baselevel),
           ExcludeUniqueProperties
         );
 
-        // We turn off analytical model off by default
-        column.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        column.Document.Regenerate();
       }
 
       column.get_Parameter(ARDB.BuiltInParameter.SLANTED_COLUMN_TYPE_PARAM).Update(2);
@@ -190,7 +217,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (column.Location is ARDB.LocationCurve locationCurve)
       {
-        if (!locationCurve.Curve.IsAlmostEqualTo(curve, GeometryObjectTolerance.Internal.VertexTolerance))
+        if (!locationCurve.Curve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
         {
           curve.TryGetLocation(out var origin, out var basisX, out var basisY);
 
@@ -198,6 +225,11 @@ namespace RhinoInside.Revit.GH.Components
           column.SetLocation(origin, basisX, basisY);
 
           locationCurve.Curve = curve;
+
+          var startPoint = curve.GetEndPoint(ERDB.CurveEnd.Start);
+          var endPoint = curve.GetEndPoint(ERDB.CurveEnd.End);
+          column.get_Parameter(ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM).Update(Math.Min(startPoint.Z, endPoint.Z) - baselevel.ProjectElevation);
+          column.get_Parameter(ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM).Update(Math.Max(startPoint.Z, endPoint.Z) - topLevel.ProjectElevation);
         }
       }
 

@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
   public class LinePatternDashes : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("851E51FE-8B35-4F32-BABD-0FB3A1AFEAF4");
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
 
     public LinePatternDashes() : base
     (

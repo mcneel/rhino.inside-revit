@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Types
           if (instance.Location is ARDB.LocationCurve locationCurve)
           {
             var newCurve = curve.ToCurve();
-            if (!locationCurve.Curve.IsAlmostEqualTo(newCurve))
+            if (!locationCurve.Curve.AlmostEquals(newCurve, GeometryTolerance.Internal.VertexTolerance))
             {
               if (instance.Host is ARDB.Level)
               {
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Types
           if (instance.Location is ARDB.LocationCurve locationCurve)
           {
             var newCurve = curve.ToCurve();
-            if (!locationCurve.Curve.IsAlmostEqualTo(newCurve))
+            if (!locationCurve.Curve.AlmostEquals(newCurve, GeometryTolerance.Internal.VertexTolerance))
             {
               using (!keepJoins ? ElementJoins.DisableJoinsScope(instance) : default)
                 locationCurve.Curve = newCurve;
@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Types
 
             if (columnStyle != 2)
             {
-              if (Vector3d.VectorAngle(curve.PointAtEnd - curve.PointAtStart, Vector3d.ZAxis) < GeometryObjectTolerance.Model.AngleTolerance)
+              if (Vector3d.VectorAngle(curve.PointAtEnd - curve.PointAtStart, Vector3d.ZAxis) < GeometryTolerance.Model.AngleTolerance)
               {
                 instance.Document.Regenerate();
                 columnStyleParam.Set(0);

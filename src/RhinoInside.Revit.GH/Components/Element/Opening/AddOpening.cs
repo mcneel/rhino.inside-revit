@@ -69,6 +69,12 @@ namespace RhinoInside.Revit.GH.Components.Openings
     const string _Opening_ = "Opening";
     protected virtual bool IsCutPerpendicularToFace { get; }
 
+    bool IsSlopped(ARDB.HostObject host)
+    {
+      var elements = host.GetSketch().GetDependents<ARDB.CurveElement>();
+      return elements.Any(x => x.get_Parameter(ARDB.BuiltInParameter.SPECIFY_SLOPE_OR_OFFSET)?.HasValue == true);
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
@@ -78,18 +84,29 @@ namespace RhinoInside.Revit.GH.Components.Openings
         doc.Value, _Opening_, (opening) =>
         {
           // Input
-          if (!Params.GetData(DA, "Host", out ARDB.HostObject host)) return null;
+          if (!Params.GetData(DA, "Host", out Types.HostObject host, x => x.IsValid)) return null;
           if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary)) return null;
 
-          switch (host)
+          switch (host.Value)
           {
             case ARDB.Floor _:
-              if (IsCutPerpendicularToFace == false && host.get_Parameter(ARDB.BuiltInParameter.ROOF_SLOPE).HasValue)
+              if (IsCutPerpendicularToFace == false && IsSlopped(host.Value))
                 throw new Exceptions.RuntimeArgumentException("Host", "Sloped floors are not supported. Use shafts to add vertical openings to floors", host);
+              break;
+
+            case ARDB.ExtrusionRoof _:
+              if (IsCutPerpendicularToFace == false)
+                throw new Exceptions.RuntimeArgumentException("Host", "Extrusion Roofs are not supported. Use shafts to add vertical openings to floors", host);
+              else
+                throw new Exceptions.RuntimeArgumentException("Host", "Extrusion Roofs are not supported", host);
+
+            case ARDB.RoofBase _:
+              if (IsCutPerpendicularToFace == true && IsSlopped(host.Value))
+                throw new Exceptions.RuntimeArgumentException("Host", "Sloped Roofs are not supported", host);
               break;
           }
 
-          var tol = GeometryObjectTolerance.Model;
+          var tol = GeometryTolerance.Model;
           foreach (var loop in boundary)
           {
             if (loop is null) return null;
@@ -103,76 +120,22 @@ namespace RhinoInside.Revit.GH.Components.Openings
           }
 
           // Compute
-          opening = Reconstruct(opening, doc.Value, host, boundary);
+          opening = Reconstruct(opening, doc.Value, host.Value, boundary);
+          host.InvalidateGraphics();
 
           DA.SetData(_Opening_, opening);
           return opening;
         }
       );
     }
-    bool Reuse(ARDB.Opening opening, ARDB.HostObject host, IList<Curve> boundaries)
+    bool Reuse(ARDB.Opening opening, ARDB.HostObject host, IList<Curve> boundaries, Vector3d normal)
     {
       if (opening is null) return false;
 
       if (!opening.Host.IsEquivalent(host)) return false;
 
-      if (opening.GetSketch() is ARDB.Sketch sketch)
-      {
-        var profiles = sketch.Profile.ToArray(GeometryDecoder.ToPolyCurve);
-        if (profiles.Length != boundaries.Count)
-          return false;
-
-        var tol = GeometryObjectTolerance.Model;
-        var hack = new ARDB.XYZ(1.0, 1.0, 0.0);
-        var loops = sketch.GetAllModelCurves();
-        var plane = sketch.SketchPlane.GetPlane().ToPlane();
-
-        var pi = 0;
-        foreach (var boundary in boundaries)
-        {
-          var profile = Curve.ProjectToPlane(boundary, plane);
-
-          if
-          (
-            !Curve.GetDistancesBetweenCurves(profiles[pi], profile, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
-            max > tol.VertexTolerance
-          )
-          {
-            var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
-              polyCurve.DuplicateSegments() :
-              profile.Split(profile.Domain.Mid);
-
-            if (pi < loops.Count)
-            {
-              var loop = loops[pi];
-              if (segments.Length != loop.Count)
-                return false;
-
-              var index = 0;
-              foreach (var edge in loop)
-              {
-                var segment = segments[(++index) % segments.Length];
-
-                var curve = default(ARDB.Curve);
-                if (edge.GeometryCurve is ARDB.HermiteSpline)
-                  curve = segment.ToHermiteSpline();
-                else
-                  curve = segment.ToCurve();
-
-                if (!edge.GeometryCurve.IsAlmostEqualTo(curve))
-                {
-                  // The following line allows SetGeometryCurve to work!!
-                  edge.Location.Move(hack);
-                  edge.SetGeometryCurve(curve, false);
-                }
-              }
-            }
-          }
-
-          pi++;
-        }
-      }
-      else return false;
+      if (!(opening.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, Vector3d.ZAxis)))
+        return false;
 
       return true;
     }
@@ -184,17 +147,19 @@ namespace RhinoInside.Revit.GH.Components.Openings
 
     ARDB.Opening Reconstruct(ARDB.Opening opening, ARDB.Document doc, ARDB.HostObject host, IList<Curve> boundary)
     {
-      if (IsCutPerpendicularToFace == false)
+      var normal = Vector3d.ZAxis;
+
+      if (IsCutPerpendicularToFace == true)
       {
         if (host.GetSketch() is ARDB.Sketch sketch)
         {
           var hostPlane = sketch.SketchPlane.GetPlane().ToPlane();
-
+          normal = hostPlane.Normal;
           boundary = boundary.Select(x => Curve.ProjectToPlane(x, hostPlane)).ToArray();
         }
       }
 
-      if (!Reuse(opening, host, boundary))
+      if (!Reuse(opening, host, boundary, normal))
         opening = Create(doc, host, boundary);
 
       return opening;

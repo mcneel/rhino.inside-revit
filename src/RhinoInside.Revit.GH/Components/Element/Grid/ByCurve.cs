@@ -139,7 +139,7 @@ namespace RhinoInside.Revit.GH.Components.Grids
           var extents = new Interval();
           // Validation & Defaults
           {
-            var tol = GeometryObjectTolerance.Model;
+            var tol = GeometryTolerance.Model;
             if
             (
               !(curve.IsLinear(tol.VertexTolerance) || curve.IsArc(tol.VertexTolerance)) ||
@@ -177,17 +177,17 @@ namespace RhinoInside.Revit.GH.Components.Grids
     {
       if (grid is null) return false;
 
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       var gridCurve = grid.Curve;
       var newCurve = grid.IsCurved ? curve.ToCurve().CreateReversed() : curve.ToCurve();
 
-      if (!gridCurve.IsAlmostEqualTo(newCurve, tol.VertexTolerance))
+      if (!gridCurve.AlmostEquals(newCurve, tol.VertexTolerance))
       {
         if (!gridCurve.IsSameKindAs(newCurve)) return false;
         if (gridCurve is ARDB.Arc gridArc && newCurve is ARDB.Arc newArc)
         {
           // I do not found any way to update the radius ??
-          if (!tol.AreAlmostEqualLengths(gridArc.Radius, newArc.Radius))
+          if (!tol.AlmostEqualLengths(gridArc.Radius, newArc.Radius))
             return false;
         }
 
@@ -238,7 +238,7 @@ namespace RhinoInside.Revit.GH.Components.Grids
     {
       var grid = default(ARDB.Grid);
       {
-        var tol = GeometryObjectTolerance.Model;
+        var tol = GeometryTolerance.Model;
         if (curve.TryGetLine(out var line, tol.VertexTolerance))
         {
           grid = ARDB.Grid.Create(doc, line.ToLine());
@@ -281,8 +281,8 @@ namespace RhinoInside.Revit.GH.Components.Grids
 
       using (var outline = grid.GetExtents())
       {
-        var tol = GeometryObjectTolerance.Internal;
-        if (!tol.AreAlmostEqualLengths(extents.T0, outline.MinimumPoint.Z) || !tol.AreAlmostEqualLengths(extents.T1, outline.MaximumPoint.Z))
+        var tol = GeometryTolerance.Internal;
+        if (!tol.AlmostEqualLengths(extents.T0, outline.MinimumPoint.Z) || !tol.AlmostEqualLengths(extents.T1, outline.MaximumPoint.Z))
           grid.SetVerticalExtents(extents.T0, extents.T1);
       }
 

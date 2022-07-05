@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{D6C256D4-B518-464F-9E68-CB282202E846}</ProjectGuid>
@@ -18,6 +18,7 @@
     <Compile Include="Convert\Geometry\GeometryCache.cs" />
     <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
     <Compile Include="Convert\Geometry\GeometryEncoder.cs" />
+    <Compile Include="Convert\Geometry\GeometryTolerance.cs" />
     <Compile Include="Convert\Geometry\KnotListEncoder.cs" />
     <Compile Include="Convert\Geometry\MeshDecoder.cs" />
     <Compile Include="Convert\Geometry\Raw\RawDecoder.cs" />
@@ -49,7 +50,6 @@
     <Compile Include="Rhinoceros.DebugLogging.cs" />
     <Compile Include="Rhinoceros.PreviewServer.cs" />
     <Compile Include="DirectContext3DServer.cs" />
-    <Compile Include="ImageBuilder.cs" />
     <Compile Include="Operator.cs" />
     <Compile Include="State.cs" />
     <Compile Include="Revit.cs" />

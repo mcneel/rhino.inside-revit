@@ -73,6 +73,10 @@ namespace RhinoInside.Revit.GH.Types
                     att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
 
                   guid = doc.Objects.AddInstanceObject(idefIndex, Transform.PlaneToPlane(Plane.WorldXY, location), att);
+
+                  // AddInstanceObject places the object on the active view if is a Page
+                  if (doc.Views.ActiveView is Rhino.Display.RhinoPageView)
+                    doc.Objects.ModifyAttributes(guid, att, quiet: true);
                 }
               }
 
@@ -91,7 +95,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Location
-    public override Level Level
+    public override ARDB.ElementId LevelId
     {
       get
       {
@@ -107,7 +111,7 @@ namespace RhinoInside.Revit.GH.Types
               levelId = levelParam.AsElementId();
           }
 
-          return new Level(instance.Document, levelId);
+          return levelId;
         }
 
         return default;
@@ -201,7 +205,7 @@ namespace RhinoInside.Revit.GH.Types
         if (instance.Location is ARDB.LocationCurve locationCurve)
         {
           var newCurve = curve.ToCurve();
-          if (!locationCurve.Curve.IsAlmostEqualTo(newCurve))
+          if (!locationCurve.Curve.AlmostEquals(newCurve, GeometryTolerance.Internal.VertexTolerance))
           {
             using (!keepJoins ? ElementJoins.DisableJoinsScope(instance) : default)
               locationCurve.Curve = newCurve;

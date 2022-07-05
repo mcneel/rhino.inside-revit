@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH
       get
       {
         previewCurrentMeshParameters.RelativeTolerance = 0.15;
-        previewCurrentMeshParameters.MinimumEdgeLength = GeometryObjectTolerance.Model.ShortCurveTolerance;
+        previewCurrentMeshParameters.MinimumEdgeLength = GeometryTolerance.Model.ShortCurveTolerance;
 
         if (ActiveDefinition?.PreviewCurrentMeshParameters() is Rhino.Geometry.MeshingParameters parameters)
         {

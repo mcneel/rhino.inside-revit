@@ -75,7 +75,37 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region Properties
+    #region Category
+    public override Category Subcategory
+    {
+      get => Category.FromCategory(LineStyle?.Value.GraphicsStyleCategory);
+      set
+      {
+        if (value is object && Value is ARDB.CurveElement element)
+        {
+          AssertValidDocument(value, nameof(Subcategory));
+          var styleType = LineStyle?.Value.GraphicsStyleType ?? ARDB.GraphicsStyleType.Projection;
+          var style = value.APIObject?.GetGraphicsStyle(styleType);
+          element.LineStyle = style;
+        }
+      }
+    }
+
+    public GraphicsStyle LineStyle
+    {
+      get => GraphicsStyle.FromElement(Value?.LineStyle) as GraphicsStyle;
+      set
+      {
+        if (value is object && Value is ARDB.CurveElement element)
+        {
+          AssertValidDocument(value, nameof(GraphicsStyle));
+          element.LineStyle = value.Value;
+        }
+      }
+    }
+    #endregion
+
+    #region Location
     public override Curve Curve => Value?.GeometryCurve.ToCurve();
 
     public override void SetCurve(Curve curve, bool keepJoins = false)
@@ -83,7 +113,7 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is ARDB.CurveElement curveElement && curve is object)
       {
         var newCurve = curve.ToCurve();
-        if (!curveElement.GeometryCurve.IsAlmostEqualTo(newCurve))
+        if (!curveElement.GeometryCurve.AlmostEquals(newCurve, GeometryTolerance.Internal.VertexTolerance))
         {
           curveElement.SetGeometryCurve(newCurve, overrideJoins: !keepJoins);
           InvalidateGraphics();

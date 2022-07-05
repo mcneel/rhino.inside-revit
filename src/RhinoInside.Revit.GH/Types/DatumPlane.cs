@@ -42,22 +42,14 @@ namespace RhinoInside.Revit.GH.Types
     {
       var value = source;
 
-      if (source is IGH_Goo goo)
-        value = goo.ScriptVariable();
-
-      if (value is ARDB.View view)
+      if (value is View view)
       {
-        SetValue(view.Document, view.GenLevel?.Id ?? ARDB.ElementId.InvalidElementId);
+        SetValue(view.Document, view.GenLevelId ?? ARDB.ElementId.InvalidElementId);
         return true;
       }
-      else if (value is ARDB.SpatialElement spatialElement)
+      else if (value is GraphicalElement element)
       {
-        SetValue(spatialElement.Document, spatialElement.Location is object ? spatialElement.LevelId : ARDB.ElementId.InvalidElementId);
-        return true;
-      }
-      else if (value is ARDB.Element element && !(value is ARDB.Level))
-      {
-        SetValue(element.Document, element.LevelId);
+        SetValue(element.Document, element.LevelId ?? ARDB.ElementId.InvalidElementId);
         return true;
       }
 
@@ -524,6 +516,50 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return false;
+    }
+    #endregion
+
+    #region Category
+    public override Category Subcategory
+    {
+      get
+      {
+        var paramId = ARDB.BuiltInParameter.CLINE_SUBCATEGORY;
+        if (paramId != ARDB.BuiltInParameter.INVALID && Value is ARDB.Element element)
+        {
+          using (var parameter = element.get_Parameter(paramId))
+          {
+            if (parameter?.AsElementId() is ARDB.ElementId categoryId)
+            {
+              var category = new Category(Document, categoryId);
+              return category.APIObject?.Parent is null ? new Category() : category;
+            }
+          }
+        }
+
+        return default;
+      }
+
+      set
+      {
+        var paramId = ARDB.BuiltInParameter.CLINE_SUBCATEGORY;
+        if (value is object && Value is ARDB.Element element)
+        {
+          using (var parameter = element.get_Parameter(paramId))
+          {
+            if (parameter is null)
+            {
+              if (value.Id != ARDB.ElementId.InvalidElementId)
+                throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Subcategory.");
+            }
+            else
+            {
+              AssertValidDocument(value, nameof(Subcategory));
+              parameter.Update(value);
+            }
+          }
+        }
+      }
     }
     #endregion
 

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -106,15 +108,22 @@ namespace RhinoInside.Revit.GH.Components
       (
         doc.Value, _Beam_, beam =>
         {
+          var tol = GeometryTolerance.Model;
+
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if
-          (
-            curve.IsClosed ||
-            !curve.IsPlanar(GeometryObjectTolerance.Model.VertexTolerance) ||
-            curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, out var _)
-          )
-            throw new RuntimeArgumentException("Curve", "Curve must be a C1 continuous planar non closed curve.", curve);
+
+          if (curve.IsShort(tol.ShortCurveTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (curve.IsClosed(tol.VertexTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (!curve.TryGetPlane(out var plane, tol.VertexTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to view plane.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
 
@@ -122,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Reference Level", out Types.Level level, doc, bbox.Center.Z)) return null;
 
           // Compute
-          beam = Reconstruct(beam, doc.Value, curve.ToCurve(), type.Value, level.Value);
+          beam = Reconstruct(beam, doc.Value, curve.ToCurve(), plane.Normal.ToXYZ(), type.Value, level.Value);
 
           DA.SetData(_Beam_, beam);
           return beam;
@@ -133,21 +142,43 @@ namespace RhinoInside.Revit.GH.Components
     bool Reuse
     (
       ARDB.FamilyInstance beam,
-      ARDB.FamilySymbol type,
-      ARDB.Level level
+      ARDB.XYZ normal,
+      ARDB.FamilySymbol type
     )
     {
       if (beam is null) return false;
       if (type.Id != beam.GetTypeId()) beam.ChangeTypeId(type.Id);
-      if (level is object)
-      {
-        using (var referenceLevel = beam.get_Parameter(ARDB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM))
-        {
-          if (!referenceLevel.IsReadOnly) referenceLevel.Update(level.Id);
-        }
-      }
 
-      return true;
+      beam.GetLocation(out var _, out var basisX, out var basisY);
+      var currentNormal = basisX.CrossProduct(basisY);
+
+      var wasVertical = currentNormal.IsPerpendicularTo(ARDB.XYZ.BasisZ);
+      var isVertical = normal.IsPerpendicularTo(ARDB.XYZ.BasisZ);
+      return isVertical == wasVertical;
+    }
+
+    ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.Curve curve, ARDB.FamilySymbol type)
+    {
+      var list = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>(1)
+      {
+        new Autodesk.Revit.Creation.FamilyInstanceCreationData
+        (
+          curve: curve,
+          symbol: type,
+          level: default, // No work-plane based.
+          structuralType: ARDB.Structure.StructuralType.Beam
+        )
+      };
+
+      var ids = doc.IsFamilyDocument ?
+        doc.FamilyCreate.NewFamilyInstances2(list) :
+        doc.Create.NewFamilyInstances2(list);
+
+      var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+
+      // We turn analytical model off by default
+      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+      return instance;
     }
 
     ARDB.FamilyInstance Reconstruct
@@ -155,27 +186,28 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.FamilyInstance beam,
       ARDB.Document doc,
       ARDB.Curve curve,
+      ARDB.XYZ normal,
       ARDB.FamilySymbol type,
       ARDB.Level level
     )
     {
-      if (!Reuse(beam, type, level))
+      if (!Reuse(beam, normal, type))
       {
-        // We create a vertical beam to force Revit create a non-work-plane based instance.
         beam = beam.ReplaceElement
         (
-          doc.Create.NewFamilyInstance
-          (
-            ARDB.Line.CreateBound(ARDB.XYZ.Zero, ARDB.XYZ.BasisZ),
-            type,
-            level,
-            ARDB.Structure.StructuralType.Beam
-          ),
+          Create(doc, curve, type),
           ExcludeUniqueProperties
         );
 
-        // We turn off analytical model off by default
-        beam.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        beam.Document.Regenerate();
+      }
+
+      if (level is object)
+      {
+        using (var referenceLevel = beam.get_Parameter(ARDB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM))
+        {
+          if (!referenceLevel.IsReadOnly) referenceLevel.Update(level.Id);
+        }
       }
 
       if (ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(beam, ERDB.CurveEnd.Start))
@@ -191,14 +223,14 @@ namespace RhinoInside.Revit.GH.Components
           extension.set_IsMiterLocked(ERDB.CurveEnd.End, false);
 
         if (extension.get_SymbolicExtended(ERDB.CurveEnd.Start))
-          beam.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.Start, false);
+          extension.set_SymbolicExtended(ERDB.CurveEnd.Start, false);
         if (extension.get_SymbolicExtended(ERDB.CurveEnd.End))
-          beam.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.End, false);
+          extension.set_SymbolicExtended(ERDB.CurveEnd.End, false);
 
         if (extension.get_Extended(ERDB.CurveEnd.Start))
-          beam.ExtensionUtility.set_Extended(ERDB.CurveEnd.Start, false);
+          extension.set_Extended(ERDB.CurveEnd.Start, false);
         if (extension.get_Extended(ERDB.CurveEnd.End))
-          beam.ExtensionUtility.set_SymbolicExtended(ERDB.CurveEnd.End, false);
+          extension.set_Extended(ERDB.CurveEnd.End, false);
       }
 
       beam.get_Parameter(ARDB.BuiltInParameter.Y_JUSTIFICATION)?.Update(ARDB.Structure.YJustification.Origin);
@@ -207,7 +239,7 @@ namespace RhinoInside.Revit.GH.Components
 
       if (beam.Location is ARDB.LocationCurve locationCurve)
       {
-        if (!locationCurve.Curve.IsAlmostEqualTo(curve, GeometryObjectTolerance.Internal.VertexTolerance))
+        if (!locationCurve.Curve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
         {
           curve.TryGetLocation(out var origin, out var basisX, out var basisY);
 

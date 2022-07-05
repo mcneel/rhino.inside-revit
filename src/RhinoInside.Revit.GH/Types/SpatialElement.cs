@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Types
     public override BoundingBox GetBoundingBox(Transform xform) => IsPlaced ?
       base.GetBoundingBox(xform) : NaN.BoundingBox;
 
-    public override Level Level => Level.FromElement(Value?.Level) as Level;
+    public override ARDB.ElementId LevelId => Value?.Level?.Id ?? ARDB.ElementId.InvalidElementId;
 
     public Curve[] Boundaries
     {
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Types
               ARDB.SpatialElementBoundaryLocation.Center :
               ARDB.SpatialElementBoundaryLocation.Finish;
 
-            var tol = GeometryObjectTolerance.Model;
+            var tol = GeometryTolerance.Model;
             var plane = Location;
             {
               var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.GH.Types
               new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
             );
 
-            return planeSurface.CreateTrimmedSurface(loops, GeometryObjectTolerance.Model.VertexTolerance);
+            return planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
           }
         }
 
@@ -101,11 +101,55 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public bool IsPlaced => Value?.Location is object;
     public string Number => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_NUMBER)?.AsString();
     public string Name => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_NAME)?.AsString();
     public Phase Phase => Value is ARDB.SpatialElement element ?
       Phase.FromElementId(element.Document, element.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE)?.AsElementId()) as Phase : default;
+
+    public bool IsPlaced => Value?.Location is object;
+    public bool IsEnclosed => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_PERIMETER)?.HasValue == true;
+
+    public double? Perimeter
+    {
+      get
+      {
+        if (Value is ARDB.SpatialElement element && Value.get_Parameter(ARDB.BuiltInParameter.ROOM_PERIMETER) is ARDB.Parameter roomPerimeter)
+        {
+          if (roomPerimeter.HasValue)
+            return roomPerimeter.AsDouble() * Revit.ModelUnits;
+        }
+
+        return default;
+      }
+    }
+
+    public double? Area
+    {
+      get
+      {
+        if (Value is ARDB.SpatialElement element && Value.get_Parameter(ARDB.BuiltInParameter.ROOM_AREA) is ARDB.Parameter roomArea)
+        {
+          if (roomArea.HasValue)
+            return roomArea.AsDouble() * Revit.ModelUnits * Revit.ModelUnits;
+        }
+
+        return default;
+      }
+    }
+
+    public double? Volume
+    {
+      get
+      {
+        if (Value is ARDB.SpatialElement element && Value.get_Parameter(ARDB.BuiltInParameter.ROOM_VOLUME) is ARDB.Parameter roomVolume)
+        {
+          if (roomVolume.HasValue)
+            return roomVolume.AsDouble() * Revit.ModelUnits * Revit.ModelUnits * Revit.ModelUnits;
+        }
+
+        return default;
+      }
+    }
     #endregion
   }
 
@@ -136,7 +180,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Architecture.Room room)
         {
           var solids = room.ClosedShell.OfType<ARDB.Solid>().Where(x => x.Faces.Size > 0);
-          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryObjectTolerance.Model.VertexTolerance);
+          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryTolerance.Model.VertexTolerance);
         }
 
         return null;
@@ -162,7 +206,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Mechanical.Space space)
         {
           var solids = space.ClosedShell.OfType<ARDB.Solid>().Where(x => x.Faces.Size > 0);
-          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryObjectTolerance.Model.VertexTolerance);
+          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryTolerance.Model.VertexTolerance);
         }
 
         return null;

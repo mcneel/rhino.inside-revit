@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <since>1.4</since>
     internal static double ModelScaleFactor => UnitConverter.ToInternalLength;
 
-    internal static GeometryObjectTolerance Tolerance => GeometryObjectTolerance.Internal;
+    internal static GeometryTolerance Tolerance => GeometryTolerance.Internal;
     #endregion
 
     #region Length
@@ -1501,7 +1501,13 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal static ARDB.Curve ToCurve(this NurbsCurve nurbsCurve, double factor)
     {
       var tol = Tolerance;
-      if (nurbsCurve.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance * factor))
+      if
+      (
+        nurbsCurve.Degree == 2 &&
+        nurbsCurve.IsRational &&
+        nurbsCurve.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance * factor) &&
+        ellipse.Radius1 * factor <= 30_000.0 && ellipse.Radius2 * factor <= 30_000.0
+      )
         return ellipse.ToCurve(interval, factor);
 
       var gap = tol.ShortCurveTolerance * 1.01 / factor;
@@ -1673,7 +1679,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal static ARDB.HermiteSpline ToHermiteSpline(this Curve curve) => ToHermiteSpline(curve, ModelScaleFactor);
     internal static ARDB.HermiteSpline ToHermiteSpline(this Curve curve, double factor)
     {
-      if (curve.TryGetHermiteSpline(out var points, out var start, out var end, GeometryObjectTolerance.Internal.VertexTolerance / factor))
+      if (curve.TryGetHermiteSpline(out var points, out var start, out var end, GeometryTolerance.Internal.VertexTolerance / factor))
       {
         using (var tangents = new ARDB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
         {
@@ -1739,6 +1745,19 @@ namespace RhinoInside.Revit.Convert.Geometry
       curve.CombineShortSegments(Tolerance.ShortCurveTolerance);
 
       return ARDB.CurveLoop.Create(curve.ToCurveMany(UnitConverter.NoScale).ToList());
+    }
+
+    internal static ARDB.CurveLoop ToBoundedCurveLoop(this Curve curve)
+    {
+      curve = curve.InOtherUnits(ModelScaleFactor);
+      curve.CombineShortSegments(Tolerance.ShortCurveTolerance);
+
+      return ARDB.CurveLoop.Create
+      (
+        curve.ToCurveMany(UnitConverter.NoScale).
+        SelectMany(CurveExtension.ToBoundedCurves).
+        ToList()
+      );
     }
 
     /// <summary>
@@ -2391,7 +2410,12 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
       else if (nurbsCurve.Degree == 2)
       {
-        if (nurbsCurve.IsRational && nurbsCurve.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance))
+        if
+        (
+          nurbsCurve.IsRational &&
+          nurbsCurve.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance) &&
+          ellipse.Radius1 <= 30_000.0 && ellipse.Radius2 <= 30_000.0
+        )
         {
           // Only degree 2 rational NurbCurves should be transferred as an Arc-Ellipse
           // to avoid unexpected Arcs-Ellipses near linear with gigantic radius.

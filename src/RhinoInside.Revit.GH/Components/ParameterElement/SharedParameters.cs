@@ -158,7 +158,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
                   var dPath = definitionsPath.AppendElement(index);
                   definitions.EnsurePath(dPath);
-                  foreach (var definition in parameterGroup.Definitions.OrderBy(x => x.Name, default(ElementNameComparer)))
+                  foreach (var definition in parameterGroup.Definitions.OrderBy(x => x.Name, ElementNaming.NameComparer))
                   {
                     if (name is object && !Operator.IsSymbolNameLike(definition.Name, name))
                       continue;

@@ -1,11 +1,29 @@
 using System;
 using System.Linq;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class ViewExtension
   {
+    public static bool Close(this View view)
+    {
+      if (view is null)
+        throw new ArgumentNullException(nameof(view));
+
+      using (var uiDocument = new UIDocument(view.Document))
+      {
+        if (uiDocument.GetOpenUIViews().Where(x => x.ViewId == view.Id).FirstOrDefault() is UIView uiView)
+        {
+          uiView.Close();
+          return true;
+        }
+      }
+
+      return false;
+    }
+
     static ViewFamily ToViewFamily(this ViewType viewType)
     {
       switch (viewType)
@@ -53,15 +71,25 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       switch (viewType)
       {
-        case ViewType.Undefined:
-        case ViewType.Schedule:
-        case ViewType.ProjectBrowser:
-        case ViewType.SystemBrowser:
-        case ViewType.Internal:
-          return false;
+        case ViewType.FloorPlan:
+        case ViewType.CeilingPlan:
+        case ViewType.Elevation:
+        case ViewType.ThreeD:
+        case ViewType.DrawingSheet:
+
+        case ViewType.EngineeringPlan:
+        case ViewType.AreaPlan:
+
+        case ViewType.Section:
+        case ViewType.Detail:
+
+        case ViewType.Walkthrough:
+        case ViewType.Rendering:
+
+          return true;
       }
 
-      return true;
+      return false;
     }
 
     /// <summary>
@@ -145,10 +173,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           var geometry = sketchGrid.get_Geometry(options);
 
-          using (geometry is object ? default : view.Document.RollBackScope())
+          using (geometry is object || view.Document.IsReadOnly ? default : view.Document.RollBackScope())
           {
             // SketchGrid need to be displayed at least once to have geometry.
-            if (geometry is null)
+            if (geometry is null && view.Document.IsModifiable)
             {
               view.ShowActiveWorkPlane();
               geometry = sketchGrid.get_Geometry(options);

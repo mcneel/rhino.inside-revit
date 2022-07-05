@@ -399,7 +399,7 @@ namespace RhinoInside.Revit
     {
       if (doc is object)
       {
-        var revitTol = GeometryObjectTolerance.Internal;
+        var revitTol = GeometryTolerance.Internal;
         var maxDistanceTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, UnitScale.GetModelScale(doc));
         if (doc.ModelAbsoluteTolerance > maxDistanceTolerance)
           doc.ModelAbsoluteTolerance = maxDistanceTolerance;
@@ -417,7 +417,7 @@ namespace RhinoInside.Revit
 
       if (Revit.ActiveUIDocument?.Document is ARDB.Document revitDoc)
       {
-        var revitTol = GeometryObjectTolerance.Internal;
+        var revitTol = GeometryTolerance.Internal;
         var units = revitDoc.GetUnits();
         var RevitModelUnitScale = units.ToUnitScale(out var distanceDisplayPrecision);
         var RhinoModelUnitScale = UnitScale.GetModelScale(doc);
@@ -547,7 +547,7 @@ namespace RhinoInside.Revit
       bool docModified = rhinoDoc.Modified;
       try
       {
-        var revitTol = GeometryObjectTolerance.Internal;
+        var revitTol = GeometryTolerance.Internal;
 
         if (revitDoc is null)
         {
@@ -563,6 +563,12 @@ namespace RhinoInside.Revit
           rhinoDoc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
           rhinoDoc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
           rhinoDoc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, UnitScale.GetModelScale(rhinoDoc));
+
+          // Like a Revit View at 1:100
+          rhinoDoc.ModelSpaceHatchScalingEnabled = true;
+          rhinoDoc.ModelSpaceHatchScale = 100.0;
+          rhinoDoc.Linetypes.LinetypeScale = 100.0;
+
           //switch (rhinoDoc.ModelUnitSystem)
           //{
           //  case UnitSystem.None: break;

@@ -306,9 +306,18 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastTo(out target);
     }
 
-    #region Location
-    public virtual Level Level => default;
+    #region Properties
+    public virtual Category Subcategory
+    {
+      get => default;
+      set => throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Subcategory.");
+    }
 
+    public virtual ARDB.ElementId LevelId => Value?.LevelId;
+    public Level Level => LevelId is ARDB.ElementId levelId ? new Level(Document, levelId) : default;
+    #endregion
+
+    #region Location
     /// <summary>
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
     /// </summary>
@@ -465,7 +474,7 @@ namespace RhinoInside.Revit.GH.Types
         if (element.Location is ARDB.LocationCurve curveLocation)
         {
           var orientation = ARDB.Transform.Identity;
-          orientation.SetOrientation
+          orientation.SetToAlignCoordSystem
           (
             origin, basisX, basisY, basisZ,
             newOrigin, newBasisX, newBasisY, newBasisZ
@@ -580,7 +589,7 @@ namespace RhinoInside.Revit.GH.Types
         if (element.Location is ARDB.LocationCurve locationCurve)
         {
           var newCurve = curve.ToCurve();
-          if (!locationCurve.Curve.IsAlmostEqualTo(newCurve))
+          if (!locationCurve.Curve.AlmostEquals(newCurve, GeometryTolerance.Internal.VertexTolerance))
           {
             locationCurve.Curve = newCurve;
             InvalidateGraphics();

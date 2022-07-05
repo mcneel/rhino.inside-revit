@@ -21,28 +21,62 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static double GetLength(this XYZ xyz, double tolerance = DefaultTolerance)
     {
       // We follow a denormals-are-zero by default
-      tolerance = Math.Max(DenormalUpperBound, tolerance);
+      tolerance = Math.Max(Upsilon, tolerance);
 
-      return GetLength(xyz.X, xyz.Y, xyz.Z, tolerance);
+      var length = GetLength(xyz.X, xyz.Y, xyz.Z);
+      return length < tolerance ? 0.0 : length;
     }
 
-    static double GetLength(double x, double y, double z, double tolerance)
+    internal static double GetLength(double x, double y, double z)
     {
       x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
 
       double u = x, v = y, w = z;
       if (x > w) { u = y; v = z; w = x; }
       if (y > w) { u = z; v = x; w = y; }
-      if (w < tolerance) return 0.0;
+      if (w < Upsilon) return 0.0;
 
       u /= w; v /= w;
 
       return Math.Sqrt(1.0 + (u * u + v * v)) * w;
     }
 
-    public static bool AreAlmostEqual(XYZ a, XYZ b, double tolerance)
+    internal static bool IsZeroLength(double x, double y, double z, double tolerance)
     {
-      return GetLength(a.X - b.X, a.Y - b.Y, a.Z - b.Z, tolerance) < tolerance;
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+
+      double u = x, v = y, w = z;
+      if (x > w) { u = y; v = z; w = x; }
+      if (y > w) { u = z; v = x; w = y; }
+      if (w < (0.0 + tolerance) / 3.0) return true;
+      if (w > (0.0 + tolerance)      ) return false;
+
+      u /= w; v /= w;
+
+      return Math.Sqrt(1.0 + (u * u + v * v)) * w < tolerance;
+    }
+
+    internal static bool IsUnitLength(double x, double y, double z, double tolerance)
+    {
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+
+      double u = x, v = y, w = z;
+      if (x > w) { u = y; v = z; w = x; }
+      if (y > w) { u = z; v = x; w = y; }
+      if (w < (1.0 - tolerance) / 3.0) return false;
+      if (w > (1.0 + tolerance)      ) return false;
+
+      u /= w; v /= w;
+
+      return Math.Sqrt(1.0 + (u * u + v * v)) * w - 1.0 < tolerance;
+    }
+
+    public static bool AlmostEquals(this XYZ a, XYZ b, double tolerance)
+    {
+      // We follow a denormals-are-zero by default
+      tolerance = Math.Max(Upsilon, tolerance);
+
+      return GetLength(a.X - b.X, a.Y - b.Y, a.Z - b.Z) < tolerance;
     }
 
     /// <summary>
@@ -57,9 +91,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ Normalize(this XYZ xyz, double tolerance = DefaultTolerance)
     {
       // We follow a denormals-are-zero by default
-      tolerance = Math.Max(DenormalUpperBound, tolerance);
+      tolerance = Math.Max(Upsilon, tolerance);
 
-      var length = GetLength(xyz, tolerance);
+      var length = GetLength(xyz.X, xyz.Y, xyz.Z);
       if (length < tolerance)
         return XYZ.Zero;
 
@@ -81,7 +115,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ CrossProduct(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
       // We follow a denormals-are-zero by default
-      tolerance = Math.Max(DenormalUpperBound, tolerance);
+      tolerance = Math.Max(Upsilon, tolerance);
 
       var lengthA = a.GetLength(tolerance);
       var lengthB = b.GetLength(tolerance);
@@ -113,12 +147,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsParallelTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
       // We follow a denormals-are-zero by default
-      tolerance = Math.Max(DenormalUpperBound, tolerance);
+      tolerance = Math.Max(Upsilon, tolerance);
 
       var A = a.Normalize(tolerance);
       var B = b.Normalize(tolerance);
 
-      return AreAlmostEqual(A, A.DotProduct(B) < 0.0 ? -B : B, tolerance);
+      return AlmostEquals(A, A.DotProduct(B) < 0.0 ? -B : B, tolerance);
     }
 
     /// <summary>
@@ -131,12 +165,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsCodirectionalTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
       // We follow a denormals-are-zero by default
-      tolerance = Math.Max(DenormalUpperBound, tolerance);
+      tolerance = Math.Max(Upsilon, tolerance);
 
       var A = a.Normalize(tolerance);
       var B = b.Normalize(tolerance);
 
-      return AreAlmostEqual(A, B, tolerance);
+      return AlmostEquals(A, B, tolerance);
     }
 
     /// <summary>
@@ -149,12 +183,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsPerpendicularTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
       // We follow a denormals-are-zero by default
-      tolerance = Math.Max(DenormalUpperBound, tolerance);
+      tolerance = Math.Max(Upsilon, tolerance);
 
       var A = a.Normalize(tolerance);
       var B = b.Normalize(tolerance);
 
-      return A.DotProduct(B) < tolerance;
+      return Math.Abs(A.DotProduct(B)) < tolerance;
     }
 
     /// <summary>
@@ -168,7 +202,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ PerpVector(this XYZ value, double tolerance = DefaultTolerance)
     {
       // We follow a denormals-are-zero by default
-      tolerance = Math.Max(DenormalUpperBound, tolerance);
+      tolerance = Math.Max(Upsilon, tolerance);
 
       var length = value.GetLength(tolerance);
       if (length < tolerance)
@@ -244,6 +278,32 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return cov;
     }
 
+    /// <summary>
+    /// Computes the principal component of a covariance matrix.
+    /// </summary>
+    /// <param name="covarianceMatrix"></param>
+    /// <param name="tolerance"></param>
+    /// <returns></returns>
+    internal static XYZ GetPrincipalComponent(this Transform covarianceMatrix, double tolerance = DefaultTolerance)
+    {
+      tolerance = Math.Max(Delta, tolerance);
+
+      var previous = new XYZ(1.0, 1.0, 1.0);
+      var principal = covarianceMatrix.OfVector(previous).Normalize(Upsilon);
+
+      var iterations = 50;
+      while (--iterations > 0 && !AlmostEquals(previous, principal, tolerance))
+      {
+        previous = principal;
+        principal = covarianceMatrix.OfVector(previous).Normalize(Upsilon);
+      }
+
+      return principal;
+    }
+  }
+
+  public static class TransformExtension
+  {
     public static bool TryGetInverse(this Transform transform, out Transform inverse)
     {
       if (DefaultTolerance < transform.Determinant)
@@ -256,54 +316,50 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    /// <summary>
-    /// Computes the principal component of a covariance matrix.
-    /// </summary>
-    /// <param name="covarianceMatrix"></param>
-    /// <param name="tolerance"></param>
-    /// <returns></returns>
-    internal static XYZ GetPrincipalComponent(this Transform covarianceMatrix, double tolerance = DefaultTolerance)
+    public static void GetCoordSystem
+    (
+      this Transform transform,
+      out XYZ origin, out XYZ basisX, out XYZ basisY, out XYZ basisZ
+    )
     {
-      tolerance = Math.Max(MinDelta, tolerance);
-
-      var previous = new XYZ(1.0, 1.0, 1.0);
-      var principal = covarianceMatrix.OfVector(previous).Normalize(DenormalUpperBound);
-
-      var iterations = 50;
-      while (--iterations > 0 && !AreAlmostEqual(previous, principal, tolerance))
-      {
-        previous = principal;
-        principal = covarianceMatrix.OfVector(previous).Normalize(DenormalUpperBound);
-      }
-
-      return principal;
+      origin = transform.Origin;
+      basisX = transform.BasisX;
+      basisY = transform.BasisY;
+      basisZ = transform.BasisZ;
     }
-  }
 
-  public static class TransformExtension
-  {
-    public static void SetOrientation
+    public static void SetCoordSystem
+    (
+      this Transform transform,
+      XYZ origin, XYZ basisX, XYZ basisY, XYZ basisZ
+    )
+    {
+      transform.Origin = origin;
+      transform.BasisX = basisX;
+      transform.BasisY = basisY;
+      transform.BasisZ = basisZ;
+    }
+
+    public static void SetToAlignCoordSystem
     (
       this Transform transform,
       XYZ origin0, XYZ basisX0, XYZ basisY0, XYZ basisZ0,
       XYZ origin1, XYZ basisX1, XYZ basisY1, XYZ basisZ1
     )
     {
-      var t0 = Transform.CreateTranslation(-origin0);
+      var from = Transform.Identity;
+      from.BasisX = new XYZ(basisX0.X, basisY0.X, basisZ0.X);
+      from.BasisY = new XYZ(basisX0.Y, basisY0.Y, basisZ0.Y);
+      from.BasisZ = new XYZ(basisX0.Z, basisY0.Z, basisZ0.Z);
+      from.Origin = from.OfPoint(-origin0);
 
-      var f0 = Transform.Identity;
-      f0.BasisX = new XYZ(basisX0.X, basisY0.X, basisZ0.X);
-      f0.BasisY = new XYZ(basisX0.Y, basisY0.Y, basisZ0.Y);
-      f0.BasisZ = new XYZ(basisX0.Z, basisY0.Z, basisZ0.Z);
+      var to = Transform.Identity;
+      to.BasisX = basisX1;
+      to.BasisY = basisY1;
+      to.BasisZ = basisZ1;
+      to.Origin = origin1;
 
-      var f1 = Transform.Identity;
-      f0.BasisX = basisX1;
-      f0.BasisY = basisY1;
-      f0.BasisZ = basisZ1;
-
-      var t1 = Transform.CreateTranslation( origin1);
-
-      var planeToPlane = t1 *f1 * f0 * t0;
+      var planeToPlane = to * from;
 
       transform.Origin = planeToPlane.Origin;
       transform.BasisX = planeToPlane.BasisX;

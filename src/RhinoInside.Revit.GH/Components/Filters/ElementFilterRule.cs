@@ -262,7 +262,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
                   (
                     value,
                     UnitConverter.Model.UnitScale,
-                    UnitConverter.InternalUnitScale,
+                    Convert.Units.UnitScale.Internal,
                     dimensionality
                   );
                 else
@@ -275,9 +275,9 @@ namespace RhinoInside.Revit.GH.Components.Filters
                     1e-6 :
                     UnitConverter.Convert
                     (
-                      GeometryObjectTolerance.Internal.VertexTolerance,
+                      GeometryTolerance.Internal.VertexTolerance,
                       UnitConverter.Model.UnitScale,
-                      UnitConverter.InternalUnitScale,
+                      Convert.Units.UnitScale.Internal,
                       Math.Abs(dimensionality)
                     );
                 }

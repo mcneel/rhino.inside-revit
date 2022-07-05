@@ -50,24 +50,23 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // get input
-      Types.DataObject<ARDB.CurtainCell> dataObj = default;
-      if (!DA.GetData("Curtain Grid Cell", ref dataObj))
+      if (!Params.GetData(DA, "Curtain Grid Cell", out Types.CurtainCell cell))
         return;
 
-      ARDB.CurtainCell cell = dataObj.Value;
-
-      // Revit API throws errors with no message when .CurveLoops is accessed
-      // Autodesk.Revit.Exceptions.InvalidOperationException at Autodesk.Revit.DB.CurtainCell.get_CurveLoops()
-      // but .CurveLoops actually returns data
-      // same might happen with .PlanarizedCurveLoops but not fully tested
-      try
+      if (cell.Value is ARDB.CurtainCell curtainCell)
       {
-        DA.SetDataList("Curves", cell.CurveLoops?.ToCurveMany());
-        DA.SetDataList("Planarized Curves", cell.PlanarizedCurveLoops?.ToCurveMany());
+        // Revit API throws errors with no message when .CurveLoops is accessed
+        // Autodesk.Revit.Exceptions.InvalidOperationException at Autodesk.Revit.DB.CurtainCell.get_CurveLoops()
+        // but .CurveLoops actually returns data
+        // same might happen with .PlanarizedCurveLoops but not fully tested
+        try
+        {
+          DA.SetDataList("Curves", curtainCell.CurveLoops?.ToCurveMany());
+          DA.SetDataList("Planarized Curves", curtainCell.PlanarizedCurveLoops?.ToCurveMany());
+        }
+        // silence the empty exception
+        catch { }
       }
-      // silence the empty exception
-      catch { }
     }
   }
 }

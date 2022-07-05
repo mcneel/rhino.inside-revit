@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (!curve.IsValidWithLog(out log)) return false;
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
 #if REVIT_2020
       if
       (
@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.GH.Types
           if (!IsValidCurve(curve, out var log))
             throw new Exceptions.RuntimeArgumentException(nameof(curve), log, curve);
 
-          var tol = GeometryObjectTolerance.Model;
+          var tol = GeometryTolerance.Model;
           var newCurve = default(ARDB.Curve);
           switch (Curve)
           {
@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Types
               break;
           }
 
-          if (!locationCurve.Curve.IsAlmostEqualTo(newCurve))
+          if (!locationCurve.Curve.AlmostEquals(newCurve, GeometryTolerance.Internal.VertexTolerance))
           {
             using (!keepJoins ? ElementJoins.DisableJoinsScope(wall) : default)
               locationCurve.Curve = newCurve;

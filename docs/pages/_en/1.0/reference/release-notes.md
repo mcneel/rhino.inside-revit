@@ -10,17 +10,77 @@ group: Deployment & Configs
 
 ### WIP
 
-- Moved {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} from Topology to Annotation tab.
-- Added "Add Text" component
-- Added "Add Region" component
-- Added "Add Detail Line" component
+- Added 'Host Sub Elements' component.
+- Added 'Profile' input to 'Host Boundary Profile' component.
+- Added 'Revit Version' component.
+- Added 'Revit User' component.
+- Added 'Document Tolerances' component.
+- Added 'Default File Locations' component.
+- Added 'Spatial Element Identity' component.
 
-### RC
+### RC 
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-<!-- most recent release should be on top -->
+{% include ltr/release-header.html title="v1.8 RC4" version="v1.8.8221.17917" pre_release=true time="07/05/2022" %}
+
+- Added {% include ltr/comp.html uuid='8ff70eef' %}
+- Added {% include ltr/comp.html uuid='8ead987d' %} component
+- Added {% include ltr/comp.html uuid='82a7462c' %} parameter
+- Improved {% include ltr/comp.html uuid='ad88cf11' %} reuse logic
+- Geometry conversion improvements
+- Added warning to {% include ltr/comp.html uuid='134b7171' %} to avoid Shared Parameters Service invalid characters
+- Now default document annotation scales are set to 1:100 by default
+
+
+{% include ltr/release-header.html title="v1.8 RC3" version="v1.8.8215.8714" pre_release=true time="06/28/2022" %}
+
+- Fixed several geometry bugs.
+- Fixed structural framing creation on a family document.
+- Fixed curved Beams when in a vertical plane.
+- Fixed dimensioning components, when working with Detail Lines and Reference Planes.
+- {% include ltr/comp.html uuid='8f1ee110' %} casting issue with enums [#613](https://github.com/mcneel/rhino.inside-revit/issues/613)
+
+{% include ltr/release-header.html title="v1.8 RC2" version="v1.8.8207.14855" pre_release=true time="06/21/2022" %}
+
+- Added {% include ltr/comp.html uuid='689d4059' %} component.
+- Added {% include ltr/comp.html uuid='e6e4a2ee' %} component.
+- Added {% include ltr/comp.html uuid='11424062' %} component.
+- Added {% include ltr/comp.html uuid='fe258116' %} component.
+- Added {% include ltr/comp.html uuid='2beb60ba' %} component.
+
+{% include ltr/release-header.html title="v1.8 RC1" version="v1.8.8200.21840" pre_release=true time="06/14/2022" %}
+
+- Moved {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} from Topology to Annotation tab.
+- Added {% include ltr/comp.html uuid='49acc84c' %} component
+- Added {% include ltr/comp.html uuid='ad88cf11' %} component
+- Added {% include ltr/comp.html uuid='5a94ea62' %} component
+- Added {% include ltr/comp.html uuid='0dbe67e7' %} component
+- Added {% include ltr/comp.html uuid='df47c980' %} component
+- Added {% include ltr/comp.html uuid='00c729f1' %} component
+- Added {% include ltr/comp.html uuid='449b853b' %} component
+- Added {% include ltr/comp.html uuid='493035d3' %} component
+- Added {% include ltr/comp.html uuid='0644989d' %} component
+- Added {% include ltr/comp.html uuid='0644989d' %} component
+- Added {% include ltr/comp.html uuid='495330db' %} component.
+- Added {% include ltr/comp.html uuid='60be53c5' %} component.
+- Added {% include ltr/comp.html uuid='a2adb132' %} componet.
+- Added {% include ltr/comp.html uuid='4be42ec7' %} component.
+- Added {% include ltr/comp.html uuid='d35eb2a7' %} parameter.
+
+{% include ltr/release-header.html title="v1.7" version="v1.7.8194.7007" time="06/14/2022" %}
+
+- Includes all changes under 1.7RC releases listed below
+- Minor Fixes and Improvements
+ 
+{% include ltr/release-header.html title="v1.7 RC3" version="v1.7.8188.17314" pre_release=true time="06/07/2022" %}
+
+- Now {% include ltr/comp.html uuid='de5e832b' %}, {% include ltr/comp.html uuid='07711559' %} take a {% include ltr/comp.html uuid='2dc4b866' %} as input
+- Added more error checking to {% include ltr/comp.html uuid='36842b86' %}
+- Fixed casting from {% include ltr/comp.html uuid='1e6825b6' %}, {% include ltr/comp.html uuid='30473b1d' %}, and {% include ltr/comp.html uuid='66aaae96' %}  to {% include ltr/comp.html uuid='353ffb47' %}
+- Implemented casting from {% include ltr/comp.html uuid='2dc4b866' %} to {% include ltr/comp.html uuid='01c853d8' %}
+- Minor Fixes and Improvements
 
 {% include ltr/release-header.html title="v1.6 (Hotfix)" version="v1.6.8159.20547" time="05/04/2022" %}
 

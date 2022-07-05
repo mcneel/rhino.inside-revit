@@ -6,6 +6,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.Convert.Geometry
 {
   using Convert.System.Collections.Generic;
+  using External.DB;
 
   /// <summary>
   /// Converts <see cref="NurbsCurve"/> to be transfered to a <see cref="ARDB.NurbSpline"/>.
@@ -13,21 +14,18 @@ namespace RhinoInside.Revit.Convert.Geometry
   /// </summary>
   static class NurbsSplineEncoder
   {
-    static bool NormalizedKnotAlmostEqualTo(double max, double min, double tol = 1.0e-09)
+    static bool NormalizedKnotAlmostEqualTo(double max, double min, double tol = NumericTolerance.DefaultTolerance)
     {
       Debug.Assert(0.0 <= min && min <= max && max <= 1.0);
 
       return max - min <= tol;
     }
 
-    static double KnotPrevNotEqual(double max, double tol = 1.0000000E-9 * 1000.0)
+    static double KnotPrevNotEqual(double max, double tol = NumericTolerance.DefaultTolerance)
     {
-      var value = max - tol - External.DB.NumericTolerance.MinDelta;
+      Debug.Assert(tol >= NumericTolerance.DefaultTolerance);
 
-      if (!NormalizedKnotAlmostEqualTo(max, value, tol))
-        return value;
-
-      return max - (max * (tol + External.DB.NumericTolerance.MinDelta));
+      return max - (2.0 * tol);
     }
 
     static double[] ToDoubleArray(NurbsCurveKnotList list, int degree)
@@ -53,14 +51,17 @@ namespace RhinoInside.Revit.Convert.Geometry
           (list[k] - min) * factor + 0.0:
           (list[k] - max) * factor + 1.0;
 
-        double next = knots[k + 2];
+        double next = list[k+1] <= mid ?
+          (list[k+1] - min) * factor + 0.0:
+          (list[k+1] - max) * factor + 1.0;
+
         if (NormalizedKnotAlmostEqualTo(next, current))
         {
           multiplicity++;
           if (multiplicity > degree - 2)
-            current = KnotPrevNotEqual(next);
+            current = KnotPrevNotEqual(knots[k+2]);
           else
-            current = next;
+            current = knots[k+2];
         }
         else multiplicity = 1;
 

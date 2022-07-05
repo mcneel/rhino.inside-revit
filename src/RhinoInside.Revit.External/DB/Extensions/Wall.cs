@@ -43,5 +43,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
       // TODO: stacked walls center line is not correct
       return wall.GetLocationCurve().Curve;
     }
+
+#if !REVIT_2022
+    public static bool CanHaveProfileSketch(this Wall wall)
+    {
+      return wall.WallType.Kind == WallKind.Basic &&
+            !wall.IsStackedWallMember &&
+            (wall.Location as LocationCurve).Curve is Line;
+    }
+
+    public static Sketch CreateProfileSketch(this Wall wall)
+    {
+      throw new System.NotImplementedException($"{nameof(CreateProfileSketch)} is not implement.");
+    }
+#endif
   }
 }

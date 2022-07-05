@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         for (int s = 0; s < count && !update; ++s)
         {
-          if (segments[s].Type != lineSegs[s].Type || !NumericTolerance.AreAlmostEqual(segments[s].Length, lineSegs[s].Length))
+          if (segments[s].Type != lineSegs[s].Type || !NumericTolerance.AlmostEquals(segments[s].Length, lineSegs[s].Length))
             update = true;
         }
       }

@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       [Optional] ARDB.Structure.StructuralWallUsage structuralUsage
     )
     {
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
 
 #if REVIT_2020
       if
@@ -186,7 +186,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       {
         newWall = previousWall;
 
-        if(!locationCurve.Curve.IsAlmostEqualTo(centerLine))
+        if(!locationCurve.Curve.AlmostEquals(centerLine, GeometryTolerance.Internal.VertexTolerance))
           locationCurve.Curve = centerLine;
       }
       else

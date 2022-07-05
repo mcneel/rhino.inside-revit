@@ -163,7 +163,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
       else DA.SetData("Element", element);
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       if
       (
         Params.GetData(DA, "Location", out Plane? location, x => x.IsValid) &&
@@ -237,11 +237,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
       else DA.SetData("Element", element);
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       if
       (
         Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid) &&
-        !element.Curve.EpsilonEquals(curve, tol.VertexTolerance)
+        element.Curve?.EpsilonEquals(curve, tol.VertexTolerance) != true
       )
       {
         UpdateElement(element.Value, () => element.SetCurve(curve, KeepJoins));

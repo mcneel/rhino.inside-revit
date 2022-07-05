@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -15,7 +16,6 @@ namespace RhinoInside.Revit.GH.Components.Topology
   {
     public override Guid ComponentGuid => new Guid("07711559-9681-4035-8D20-F00E4435D412");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
-    protected override string IconTag => string.Empty;
 
     public AddSpace() : base
     (
@@ -32,13 +32,12 @@ namespace RhinoInside.Revit.GH.Components.Topology
     {
       new ParamDefinition
       (
-        new Parameters.Document()
+        new Parameters.View()
         {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        }, ParamRelevance.Occasional
+          Name = "View",
+          NickName = "V",
+          Description = "View to add a specific room",
+        }
       ),
       new ParamDefinition
       (
@@ -126,68 +125,172 @@ namespace RhinoInside.Revit.GH.Components.Topology
       ARDB.BuiltInParameter.ROOM_UPPER_OFFSET,
     };
 
+    internal override TransactionExtent TransactionExtent => TransactionExtent.Scope;
+
+    ARDB.View ActiveView = default;
+    readonly List<ARDB.View> ViewsToClose = new List<ARDB.View>();
+    readonly Dictionary<(Types.View View, Types.Phase Phase), Types.View> TemporaryViews = new Dictionary<(Types.View View, Types.Phase Phase), Types.View>();
+
+    protected override void BeforeSolveInstance()
+    {
+      ActiveView = Revit.ActiveDBDocument?.GetActiveGraphicalView();
+
+      base.BeforeSolveInstance();
+    }
+
+    protected override void AfterSolveInstance()
+    {
+      base.AfterSolveInstance();
+
+      ActiveView?.Document.SetActiveGraphicalView(ActiveView);
+      ActiveView = default;
+
+      foreach (var view in (ViewsToClose as IEnumerable<ARDB.View>).Reverse())
+        view.Close();
+      ViewsToClose.Clear();
+
+      if (TemporaryViews.Count > 0)
+      {
+        foreach (var views in TemporaryViews.Values.GroupBy(x => x.Document).Reverse())
+        {
+          using (var scope = External.DB.DisposableScope.CommitScope(views.Key))
+          {
+            views.Key.Delete(views.Select(x => x.Id).ToArray());
+            scope.Commit();
+          }
+        }
+
+        TemporaryViews.Clear();
+      }
+
+      var spaces = Params.Output<IGH_Param>(_Space_).
+        VolatileData.AllData(skipNulls: true).Cast<Types.SpatialElement>();
+
+      foreach (var space in spaces)
+      {
+        if (space.Value.Location is object && space.Value.Area == 0.0)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{space.DisplayName}' is not in a properly enclosed region on Phase '{space.Phase.DisplayName}'. {{{space.Id}}}");
+      }
+    }
+
+    bool SetActiveViewInPhase(ref Types.View view, ref Types.Phase phase)
+    {
+      if (!view.Phase.Equals(phase))
+      {
+        if (!TemporaryViews.TryGetValue((view, phase), out var temporaryView))
+        {
+          StartTransaction(view.Document);
+          try
+          {
+            temporaryView = Types.View.FromElementId(view.Document, view.Value.Duplicate(ARDB.ViewDuplicateOption.Duplicate)) as Types.View;
+            temporaryView.Phase = phase;
+            CommitTransaction();
+
+            TemporaryViews.Add((view, phase), temporaryView);
+          }
+          catch
+          {
+            RollBackTransaction();
+          }
+        }
+
+        view = temporaryView;
+      }
+
+      if (!view.Document.ActiveView.IsEquivalent(view.Value))
+      {
+        if (!view.Document.SetActiveGraphicalView(view.Value, out var viewWasOpen))
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to activate view '{view.DisplayName}'");
+          return false;
+        }
+        else if (!viewWasOpen)
+        {
+          ViewsToClose.Add(view.Value);
+        }
+      }
+
+      return true;
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
+
+      bool invalidInput = false;
+      invalidInput |= !Params.TryGetData(DA, "Location", out Point3d? location);
+      invalidInput |= !Params.TryGetData(DA, "Number", out string number);
+      if (location is null && number is null)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "A Location or a Room Number is necessary.");
+        invalidInput |= true;
+      }
+
+      invalidInput |= !Params.TryGetData(DA, "Name", out string name);
+      invalidInput |= !Params.TryGetData(DA, "Base", out ERDB.ElevationElementReference? baseElevation);
+      invalidInput |= !Params.TryGetData(DA, "Top", out ERDB.ElevationElementReference? topElevation);
+      invalidInput |= !Params.TryGetData(DA, "Phase", out Types.Phase phase);
+      if (phase is null) phase = view.Phase;
+
+      if (!invalidInput)
+      {
+        if (location.HasValue)
+        {
+          // Solve missing Base & Top
+          ERDB.ElevationElementReference.SolveBaseAndTop
+          (
+            view.Document, view.Value.GenLevel.ProjectElevation,
+            0.0, 10.0,
+            ref baseElevation, ref topElevation
+          );
+
+          // Snap Location to the 'Level' 'Computation Height'
+          if (baseElevation.Value.IsLevelConstraint(out var level, out var _))
+          {
+            location = new Point3d
+            (
+              location.Value.X,
+              location.Value.Y,
+              level.ProjectElevation * Revit.ModelUnits +
+              level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits
+            );
+          }
+        }
+      }
 
       ReconstructElement<ARDB.Mechanical.Space>
       (
-        doc.Value, _Space_, (space) =>
+        view.Document, _Space_,
+        space => // Validate Input
         {
-          // Input
-          if (!Params.TryGetData(DA, "Location", out Point3d? location)) return null;
-          if (!Params.TryGetData(DA, "Number", out string number)) return null;
-          if (location is null && number is null)
+          if (invalidInput)
+            return false;
+
+          // If there are no Levels!!
+          var baseLevel = default(ARDB.Level);
+          if (location is object && !baseElevation.Value.IsLevelConstraint(out baseLevel, out var baseOffset))
+            return false;
+
+          if (Reuse(space, baseLevel, phase.Value, location?.ToXYZ()))
+            return true;
+
+          // Ensure we have an acceptable View on the requested Phase active on the UI.
+          // Else NewSpace does not take the correct Phase.
+          return SetActiveViewInPhase(ref view, ref phase);
+        },
+        space => // Compute
+        {
+          if (CanReconstruct(_Space_, out var untracked, ref space, view.Document, number, categoryId: ARDB.BuiltInCategory.OST_MEPSpaces))
           {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "A Location or a Room Number is necessary.");
-            return null;
-          }
-
-          if (!Params.TryGetData(DA, "Name", out string name)) return null;
-          if (!Params.TryGetData(DA, "Base", out ERDB.ElevationElementReference? baseElevation)) return null;
-          if (!Params.TryGetData(DA, "Top", out ERDB.ElevationElementReference? topElevation)) return null;
-          if (!Params.TryGetData(DA, "Phase", out ARDB.Phase phase)) return null;
-
-          // Compute
-          if (CanReconstruct(_Space_, out var untracked, ref space, doc.Value, number, categoryId: ARDB.BuiltInCategory.OST_MEPSpaces))
-          {
-            if (phase is null)
-            {
-              // We avoid `Reconstruct` recreates the element in an other phase unless is necessary…
-              phase = untracked ?
-                space?.Document.GetElement(space?.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE).AsElementId()) as ARDB.Phase :
-                doc.Value.Phases.Cast<ARDB.Phase>().LastOrDefault();
-            }
-
-            // Solve missing Base & Top
-            ERDB.ElevationElementReference.SolveBaseAndTop
-            (
-              doc.Value, GeometryEncoder.ToInternalLength(location.Value.Z),
-              0.0, 10.0,
-              ref baseElevation, ref topElevation
-            );
-
-            // Snap Location to the 'Level' 'Computation Height'
-            if (location.HasValue && baseElevation.Value.IsLevelConstraint(out var level, out var _))
-            {
-              location = new Point3d
-              (
-                location.Value.X,
-                location.Value.Y,
-                level.ProjectElevation * Revit.ModelUnits +
-                level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits
-              );
-            }
-
             space = Reconstruct
             (
-              doc.Value,
+              view.Document,
               space,
               location?.ToXYZ(),
               number, name,
-              baseElevation.Value,
-              topElevation.Value,
-              phase
+              baseElevation ?? default,
+              topElevation ?? default,
+              phase.Value
             );
           }
 
@@ -226,13 +329,11 @@ namespace RhinoInside.Revit.GH.Components.Topology
     )
     {
       // If there are no Levels!!
-      if (!baseElevation.IsLevelConstraint(out var baseLevel, out var baseOffset))
+      if (!baseElevation.IsLevelConstraint(out var baseLevel, out var baseOffset) && location is object)
         return default;
 
-      var isNew = false;
       if (!Reuse(space, baseLevel, phase, location))
       {
-        isNew = true;
         space = space.ReplaceElement
         (
           Create(document, baseLevel, phase, location),
@@ -240,47 +341,53 @@ namespace RhinoInside.Revit.GH.Components.Topology
         );
       }
 
-      // Move Space to 'Location'
-      if (space.Location is ARDB.LocationPoint roomLocation && location is object)
-      {
-        var target = new ARDB.XYZ(location.X, location.Y, roomLocation.Point.Z);
-        var position = roomLocation.Point;
-        if (!target.IsAlmostEqualTo(position))
-        {
-          var pinned = space.Pinned;
-          space.Pinned = false;
-          roomLocation.Move(target - position);
-          space.Pinned = pinned;
-        }
-      }
-
-      // We use ROOM_NAME here because Room.Name returns us a werid combination of "{Name} {Number}".
+      // We use ROOM_NAME here because `SpatialElment.Name` returns us a werid combination of "{Name} {Number}".
       if (number is object) space.get_Parameter(ARDB.BuiltInParameter.ROOM_NUMBER).Update(number);
       if (name is object) space.get_Parameter(ARDB.BuiltInParameter.ROOM_NAME).Update(name);
 
-      baseOffset = Math.Min(baseOffset.Value, space.Level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble());
-      if (space.BaseOffset != baseOffset.Value)
-        space.BaseOffset = baseOffset.Value;
-
-      if (topElevation.IsLevelConstraint(out var topLevel, out var topOffset))
+      // Move Space to 'Location'
+      if (location is object)
       {
-        if (space.Location is object && space.Level.IsEquivalent(baseLevel) && topLevel is object)
-          space.UpperLimit = topLevel;
+        if (space.Location is ARDB.LocationPoint spaceLocation)
+        {
+          var position = spaceLocation.Point;
+          var target = new ARDB.XYZ(location.X, location.Y, position.Z);
+          if (!target.IsAlmostEqualTo(position))
+          {
+            var pinned = space.Pinned;
+            space.Pinned = false;
+            spaceLocation.Move(target - position);
+            space.Pinned = pinned;
+          }
 
-        if (space.LimitOffset != topOffset.Value)
-          space.LimitOffset = topOffset.Value;
+          baseOffset = Math.Min
+          (
+            baseOffset.Value,
+            space.Level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble()
+          );
+        }
+
+        if (space.BaseOffset != baseOffset.Value)
+          space.BaseOffset = baseOffset.Value;
+
+        if (topElevation.IsLevelConstraint(out var topLevel, out var topOffset))
+        {
+          if (space.Location is object && baseLevel.IsEquivalent(space.Level) && topLevel is object)
+            space.UpperLimit = topLevel;
+
+          if (space.LimitOffset != topOffset.Value)
+            space.LimitOffset = topOffset.Value;
+        }
+        else
+        {
+          if (space.Location is object && baseLevel.IsEquivalent(space.Level) && space.UpperLimit is object)
+            space.UpperLimit = baseLevel;
+
+          if (space.LimitOffset != topElevation.Offset)
+            space.LimitOffset = topElevation.Offset;
+        }
       }
-      else
-      {
-        if (space.Location is object && space.Level.IsEquivalent(baseLevel) && space.UpperLimit is object)
-          space.UpperLimit = baseLevel;
-
-        if (space.LimitOffset != topElevation.Offset)
-          space.LimitOffset = topElevation.Offset;
-      }
-
-      if (!isNew && space.Location is object && space.Area == 0.0)
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{space.Name}' is not in a properly enclosed region. {{{space.Id}}}");
+      else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"'{space.Name}' is unplaced. {{{space.Id}}}");
 
       return space;
     }

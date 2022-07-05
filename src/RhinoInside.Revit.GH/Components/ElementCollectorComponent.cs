@@ -147,7 +147,6 @@ namespace RhinoInside.Revit.GH.Components
           );
 
           filter = new ARDB.ElementParameterFilter(rule, inverted);
-          pattern = default;
           return true;
         }
       }

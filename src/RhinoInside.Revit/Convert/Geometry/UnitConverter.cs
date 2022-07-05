@@ -33,16 +33,6 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static readonly UnitConverter Page = new UnitConverter(ActiveSpace.PageSpace, default);
     #endregion
 
-    #region Implementation Details
-    /// <summary>
-    /// Revit Internal Unit Scale.
-    /// </summary>
-    /// <remarks>
-    /// It returns <see cref="UnitScale.Feet"/>.
-    /// </remarks>
-    internal static readonly UnitScale InternalUnitScale = UnitScale.Internal;
-    #endregion
-
     #region Internal Factors
     /// <summary>
     /// Factor to do a direct conversion without any unit scaling.
@@ -52,12 +42,12 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Factor for converting a length from Revit internal units to active Rhino document units.
     /// </summary>
-    internal static double ToModelLength => (double) (InternalUnitScale.Ratio / Model.UnitScale.Ratio);
+    internal static double ToModelLength => (double) (UnitScale.Internal / Model.UnitScale);
 
     /// <summary>
     /// Factor for converting a length from active Rhino document units to Revit internal units.
     /// </summary>
-    internal static double ToInternalLength => (double) (Model.UnitScale.Ratio / InternalUnitScale.Ratio);
+    internal static double ToInternalLength => (double) (Model.UnitScale / UnitScale.Internal);
     #endregion
 
     #region Static Methods
@@ -72,7 +62,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </remarks>
     public static double ConvertFromInternalUnits(double length, UnitScale target)
     {
-      return length * (InternalUnitScale.Ratio / target.Ratio);
+      return length * (UnitScale.Internal.Ratio / target.Ratio);
     }
 
     /// <summary>
@@ -86,7 +76,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </remarks>
     public static double ConvertToInternalUnits(double length, UnitScale source)
     {
-      return length * (source.Ratio / InternalUnitScale.Ratio);
+      return length * (source.Ratio / UnitScale.Internal.Ratio);
     }
 
     /// <summary>
@@ -178,12 +168,12 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     internal double ConvertFromInternalUnits(double value, EDBS.SpecType spec)
     {
-      return Convert(value, spec, InternalUnitScale, UnitScale);
+      return Convert(value, spec, UnitScale.Internal, UnitScale);
     }
 
     internal double ConvertToInternalUnits(double value, EDBS.SpecType spec)
     {
-      return Convert(value, spec, UnitScale, InternalUnitScale);
+      return Convert(value, spec, UnitScale, UnitScale.Internal);
     }
     #endregion
   }
@@ -407,14 +397,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     { Scale(value = (G) value.Duplicate(), UnitConverter.ToModelLength); return value; }
 
     internal static double InRhinoUnits(double value, EDBS.SpecType spec) =>
-      InOtherUnits(value, spec, UnitConverter.InternalUnitScale, UnitConverter.Model.UnitScale);
+      InOtherUnits(value, spec, UnitScale.Internal, UnitConverter.Model.UnitScale);
 
     internal static double InRhinoUnits(double value, EDBS.SpecType type, RhinoDoc rhinoDoc)
     {
       if (rhinoDoc is null)
         throw new ArgumentNullException(nameof(rhinoDoc));
 
-      return InOtherUnits(value, type, UnitConverter.InternalUnitScale, UnitScale.GetModelScale(rhinoDoc));
+      return InOtherUnits(value, type, UnitScale.Internal, UnitScale.GetModelScale(rhinoDoc));
     }
     #endregion
 
@@ -465,102 +455,15 @@ namespace RhinoInside.Revit.Convert.Geometry
     { Scale(value = (G) value.Duplicate(), UnitConverter.ToInternalLength); return value; }
 
     internal static double InHostUnits(double value, EDBS.SpecType spec) =>
-      InOtherUnits(value, spec, UnitConverter.Model.UnitScale, UnitConverter.InternalUnitScale);
+      InOtherUnits(value, spec, UnitConverter.Model.UnitScale, UnitScale.Internal);
 
     internal static double InHostUnits(double value, EDBS.SpecType spec, RhinoDoc rhinoDoc)
     {
       if (rhinoDoc is null)
         return double.NaN;
 
-      return InOtherUnits(value, spec, UnitScale.GetModelScale(rhinoDoc), UnitConverter.InternalUnitScale);
+      return InOtherUnits(value, spec, UnitScale.GetModelScale(rhinoDoc), UnitScale.Internal);
     }
-    #endregion
-  }
-
-  /// <summary>
-  /// Tolerance values to be used on <see cref="Autodesk.Revit.DB.GeometryObject"/> instances.
-  /// </summary>
-  readonly struct GeometryObjectTolerance
-  {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GeometryObjectTolerance"/> using to the indicated unit system.
-    /// </summary>
-    /// <param name="scale">A <see cref="Rhino.UnitSystem"/> to be used in conversions.</param>
-    public GeometryObjectTolerance(UnitScale scale)
-    {
-      if (scale == UnitScale.None)
-      {
-        AngleTolerance      = Internal.AngleTolerance;
-        VertexTolerance     = Internal.VertexTolerance;
-        ShortCurveTolerance = Internal.ShortCurveTolerance;
-      }
-      else
-      {
-        AngleTolerance      = Internal.AngleTolerance;
-        VertexTolerance     = UnitScale.Convert(Internal.VertexTolerance, UnitScale.Internal, scale);
-        ShortCurveTolerance = UnitScale.Convert(Internal.ShortCurveTolerance, UnitScale.Internal, scale);
-      }
-    }
-
-    internal GeometryObjectTolerance(double angle, double vertex, double curve)
-    {
-      AngleTolerance = angle;
-      VertexTolerance = vertex;
-      ShortCurveTolerance = curve;
-    }
-
-    /// <summary>
-    /// Angle tolerance.
-    /// </summary>
-    /// <remarks>
-    /// Value is in radians. Two angle measurements closer than this value are considered identical.
-    /// </remarks>
-    public readonly double AngleTolerance;
-
-    /// <summary>
-    /// Vertex tolerance.
-    /// </summary>
-    /// <remarks>
-    /// Two points within this distance are considered coincident.
-    /// </remarks>
-    public readonly double VertexTolerance;
-
-    /// <summary>
-    /// Curve length tolerance
-    /// </summary>
-    /// <remarks>
-    /// A curve shorter than this distance is considered degenerated.
-    /// </remarks>
-    public readonly double ShortCurveTolerance;
-
-    // Initialized to NaN to notice if Internal is used before is assigned.
-    //
-    //private const double AbsoluteTolerance = (1.0 / 12.0) / 16.0; // 1/16″ in feet
-    //public static GeometryObjectTolerance Internal { get; internal set; } = new GeometryObjectTolerance
-    //(
-    //  angle:  Math.PI / 1800.0, // 0.1° in rad,
-    //  vertex: AbsoluteTolerance / 10.0,
-    //  curve:  AbsoluteTolerance / 2.0
-    //);
-
-    /// <summary>
-    /// Default <see cref="GeometryObjectTolerance"/> to be used on <see cref="ARDB.GeometryObject"/> instances.
-    /// </summary>
-    public static GeometryObjectTolerance Internal  { get; internal set; } = new GeometryObjectTolerance(double.NaN, double.NaN, double.NaN);
-
-    /// <summary>
-    /// Default <see cref="GeometryObjectTolerance"/> expresed in Rhino model unit system.
-    /// </summary>
-    public static GeometryObjectTolerance Model     => new GeometryObjectTolerance(UnitConverter.Model.UnitScale);
-
-    /// <summary>
-    /// Default <see cref="GeometryObjectTolerance"/> expresed in Rhino page unit system.
-    /// </summary>
-    public static GeometryObjectTolerance Page      => new GeometryObjectTolerance(UnitConverter.Page.UnitScale);
-
-    #region AreAlmostEqual
-    public bool AreAlmostEqualAngles(double x, double y) => ERDB.NumericTolerance.AreAlmostEqual(x, y, AngleTolerance);
-    public bool AreAlmostEqualLengths(double x, double y) => ERDB.NumericTolerance.AreAlmostEqual(x, y, VertexTolerance);
     #endregion
   }
 }

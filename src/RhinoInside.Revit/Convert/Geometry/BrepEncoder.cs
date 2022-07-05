@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.Convert.Geometry
   static class BrepEncoder
   {
     #region Tolerances
-    static double JoinTolerance => Math.Sqrt(Math.Pow(GeometryObjectTolerance.Internal.VertexTolerance, 2.0) * 2.0);
+    static double JoinTolerance => Math.Sqrt(Math.Pow(GeometryTolerance.Internal.VertexTolerance, 2.0) * 2.0);
     static double EdgeTolerance => JoinTolerance * 0.5;
     #endregion
 
@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (scaleFactor != 1.0 && !brep.Scale(scaleFactor))
         return default;
 
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       var bbox = brep.GetBoundingBox(false);
       if (!bbox.IsValid || bbox.Diagonal.Length < tol.ShortCurveTolerance)
         return default;
@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     static BrepIssues AuditBrep(Brep brep)
     {
       var options = default(BrepIssues);
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
 
       // Edges
       {
@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       if(options != BrepIssues.Nothing)
       {
-        var tol = GeometryObjectTolerance.Internal;
+        var tol = GeometryTolerance.Internal;
         var edgesToUnjoin = brep.Edges.Select(x => x.EdgeIndex);
         var shells = brep.UnjoinEdges(edgesToUnjoin);
         if (shells.Length == 0)
@@ -288,13 +288,13 @@ namespace RhinoInside.Revit.Convert.Geometry
       // Try convert flat extrusions under tolerance as surfaces
       if (brep.TryGetExtrusion(out var extrusion))
       {
-        var tol = GeometryObjectTolerance.Internal;
+        var tol = GeometryTolerance.Internal;
         var height = extrusion.PathStart.DistanceTo(extrusion.PathEnd);
-        if (height < tol.VertexTolerance / factor)
+        if (height < Autodesk.Revit.ApplicationServices.Application.MinimumThickness / factor)
         {
-          var curves = new List<Curve>(extrusion.ProfileCount);
+          var curves = new Curve[extrusion.ProfileCount];
           for (int p = 0; p < extrusion.ProfileCount; ++p)
-            curves.Add(extrusion.Profile3d(p, 0.5));
+            curves[p] = extrusion.Profile3d(p, 0.5);
 
           var regions = Brep.CreatePlanarBreps(curves, tol.VertexTolerance / factor);
           if (regions.Length != 1)
@@ -342,7 +342,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       try
       {
-        var tol = GeometryObjectTolerance.Internal;
+        var tol = GeometryTolerance.Internal;
         var brepType = ARDB.BRepType.OpenShell;
         switch (brep.SolidOrientation)
         {
@@ -430,7 +430,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                 catch (Autodesk.Revit.Exceptions.ArgumentsInconsistentException e)
                 {
                   error = true;
-                  var message = e.Message.Replace("(as identified by Application.ShortCurveTolerance)", $"({GeometryObjectTolerance.Model.ShortCurveTolerance})");
+                  var message = e.Message.Replace("(as identified by Application.ShortCurveTolerance)", $"({GeometryTolerance.Model.ShortCurveTolerance})");
                   message = message.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0];
                   GeometryEncoder.Context.Peek.RuntimeMessage(20, message, edge);
                   break;
@@ -495,7 +495,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     static ARDB.Line ToEdgeCurve(Line line)
     {
       var length = line.Length;
-      var isShort = length < GeometryObjectTolerance.Internal.ShortCurveTolerance;
+      var isShort = length < GeometryTolerance.Internal.ShortCurveTolerance;
       var factor = isShort ? 1.0 / length : UnitConverter.NoScale;
 
       var curve = ARDB.Line.CreateBound
@@ -510,7 +510,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     static ARDB.Arc ToEdgeCurve(Arc arc)
     {
       var length = arc.Length;
-      var isShort = length < GeometryObjectTolerance.Internal.ShortCurveTolerance;
+      var isShort = length < GeometryTolerance.Internal.ShortCurveTolerance;
       var factor = isShort ? 1.0 / length : UnitConverter.NoScale;
 
       var curve = ARDB.Arc.Create
@@ -526,7 +526,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     static ARDB.Curve ToEdgeCurve(NurbsCurve nurbs)
     {
       var length = nurbs.GetLength();
-      var isShort = length < GeometryObjectTolerance.Internal.ShortCurveTolerance;
+      var isShort = length < GeometryTolerance.Internal.ShortCurveTolerance;
       var factor = isShort ? 1.0 / length : UnitConverter.NoScale;
 
       var degree = nurbs.Degree;
@@ -555,7 +555,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<ARDB.Curve> ToEdgeCurve(PolyCurve curve)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       if (curve.RemoveShortSegments(tol.VertexTolerance))
       {
 #if DEBUG
@@ -579,7 +579,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<ARDB.Line> ToEdgeCurveMany(PolylineCurve curve)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       if (curve.RemoveShortSegments(tol.VertexTolerance))
       {
 #if DEBUG
@@ -603,7 +603,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<ARDB.Arc> ToEdgeCurveMany(ArcCurve curve)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       if (curve.IsClosed(tol.ShortCurveTolerance * 1.01))
       {
         var interval = curve.Domain;
@@ -625,7 +625,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<ARDB.Curve> ToEdgeCurveMany(PolyCurve curve)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       if (curve.RemoveShortSegments(tol.VertexTolerance))
       {
 #if DEBUG
@@ -686,7 +686,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         yield break;
       }
-      else if (curve.IsClosed(GeometryObjectTolerance.Internal.VertexTolerance))
+      else if (curve.IsClosed(GeometryTolerance.Internal.VertexTolerance))
       {
         var segments = curve.DuplicateSegments();
         if (segments.Length == 1)
@@ -761,7 +761,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static IEnumerable<ARDB.BRepBuilderEdgeGeometry> ToBRepBuilderEdgeGeometry(BrepEdge edge)
     {
-      var tol = GeometryObjectTolerance.Internal;
+      var tol = GeometryTolerance.Internal;
       var edgeCurve = edge.EdgeCurve.Trim(edge.Domain) ?? edge.EdgeCurve.DuplicateCurve();
       if (edgeCurve is null || edge.IsShort(tol.VertexTolerance, edge.Domain))
       {
@@ -921,8 +921,9 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
           else GeometryEncoder.Context.Peek.RuntimeMessage(255, "Revit Data conversion service is not available", default);
 
-          // In case we don't have a destination document we create a new one here.
-          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(ARDB.UnitSystem.Imperial))
+          // Looks like importing on a different document than the destination one
+          // prevents Revit from reusing the Solids, so we obtain unique Solids.
+          doc = IODocument;
           {
             try
             {
@@ -961,7 +962,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             }
             finally
             {
-              if (!doc.IsEquivalent(ioDocument) && doc != GeometryEncoder.Context.Peek.Document)
+              if (!doc.IsEquivalent(ioDocument) && !doc.IsEquivalent(GeometryEncoder.Context.Peek.Document))
                 doc.Close(false);
             }
           }
@@ -1006,8 +1007,9 @@ namespace RhinoInside.Revit.Convert.Geometry
           else GeometryEncoder.Context.Peek.RuntimeMessage(255, "Revit Data conversion service is not available", default);
 
 #if REVIT_2022
-          // In case we don't have a destination document we create a new one here.
-          using (doc.IsValid() ? default : doc = Revit.ActiveDBApplication.NewProjectDocument(ARDB.UnitSystem.Imperial))
+          // Looks like importing on a different document than the destination one
+          // prevents Revit from reusing the Solids, so we obtain unique Solids.
+          doc = IODocument;
           {
             try
             {
@@ -1046,7 +1048,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             }
             finally
             {
-              if (!doc.IsEquivalent(ioDocument) && doc != GeometryEncoder.Context.Peek.Document)
+              if (!doc.IsEquivalent(ioDocument) && !doc.IsEquivalent(GeometryEncoder.Context.Peek.Document))
                 doc.Close(false);
             }
           }
@@ -1068,7 +1070,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     #region Debug
     static bool IsEquivalent(this ARDB.Solid solid, Brep brep)
     {
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       var hit = new bool[brep.Faces.Count];
 
       foreach (var face in solid.Faces.Cast<ARDB.Face>())

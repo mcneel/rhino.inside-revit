@@ -223,6 +223,8 @@ namespace RhinoInside.Revit.GH.Parameters
         }
         else if (RhinoDoc.ActiveDoc is RhinoDoc doc)
         {
+          var redrawEnabled = doc.Views.RedrawEnabled;
+          doc.Views.RedrawEnabled = false;
           var ur = doc.BeginUndoRecord("GrasshopperBake");
           try
           {
@@ -230,15 +232,16 @@ namespace RhinoInside.Revit.GH.Parameters
 
             var guids = new List<Guid>();
             bakeObject.BakeGeometry(doc, default, guids);
-
-            //foreach (var view in doc.Views)
-            //  view.Redraw();
           }
           finally
           {
             Grasshopper.Plugin.Commands.BakeObject = default;
             doc.EndUndoRecord(ur);
+            doc.Views.RedrawEnabled = redrawEnabled;
           }
+
+          // Update views to show baked objects
+          doc.Views.Redraw();
         }
       }
     }

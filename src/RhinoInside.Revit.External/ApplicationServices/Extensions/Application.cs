@@ -65,6 +65,18 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
       return 1033;
     }
 
+    #region SubVersionNumber
+    internal static string GetSubVersionNumber(this Application app)
+    {
+#if REVIT_2018
+      return app.SubVersionNumber;
+#else
+      return $"{app.VersionNumber}.0";
+#endif
+    }
+    #endregion
+
+    #region UI
     /// <summary>
     /// Queries for all open <see cref="Autodesk.Revit.DB.Document"/> in Revit UI.
     /// </summary>
@@ -93,15 +105,7 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
         }
       }
     }
-
-    internal static string GetSubVersionNumber(this Application app)
-    {
-#if REVIT_2018
-      return app.SubVersionNumber;
-#else
-      return $"{app.VersionNumber}.0";
-#endif
-    }
+    #endregion
   }
 
   static class ControlledApplicationExtension
@@ -121,6 +125,7 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
 #endif
     }
 
+    #region SubVersionNumber
     internal static string GetSubVersionNumber(this ControlledApplication app)
     {
       try { return InternalGetSubVersionNumber(app); }
@@ -132,5 +137,6 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
 #else
     static string InternalGetSubVersionNumber(ControlledApplication app) => $"{app.VersionNumber}.0";
 #endif
+    #endregion
   }
 }

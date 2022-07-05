@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
@@ -7,7 +6,6 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Levels
 {
   using External.DB.Extensions;
-  using ElementTracking;
   using RhinoInside.Revit.Convert.Geometry;
 
   public class LevelByElevation : ElementTrackerComponent

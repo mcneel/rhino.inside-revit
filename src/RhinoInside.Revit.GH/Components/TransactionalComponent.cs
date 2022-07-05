@@ -14,6 +14,7 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using Convert.Display;
   using Convert.Geometry;
   using ElementTracking;
   using External.DB.Extensions;
@@ -148,13 +149,13 @@ namespace RhinoInside.Revit.GH.Components
 #endif
       var severity = failuresAccessor.GetSeverity();
 
-      if (failuresAccessor.IsTransactionBeingCommitted())
+      if
+      (
+        severity >= ARDB.FailureSeverity.Error &&
+        FailureProcessingMode <= ARDB.FailureProcessingResult.ProceedWithCommit
+      )
       {
-        if
-        (
-          severity >= ARDB.FailureSeverity.Error &&
-          FailureProcessingMode <= ARDB.FailureProcessingResult.ProceedWithCommit
-        )
+        if (failuresAccessor.IsTransactionBeingCommitted())
         {
           // Handled failures in order
           if (FailureDefinitionIdsToFix is IEnumerable<ARDB.FailureDefinitionId> failureDefinitionIdsToFix)
@@ -163,14 +164,14 @@ namespace RhinoInside.Revit.GH.Components
             if (result != ARDB.FailureProcessingResult.Continue)
               return result;
           }
+        }
 
-          // Unhandled failures in incomming order
-          {
-            var unhandledFailureDefinitionIds = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
-            var result = FixFailures(failuresAccessor, unhandledFailureDefinitionIds);
-            if (result != ARDB.FailureProcessingResult.Continue)
-              return result;
-          }
+        // Unhandled failures in incomming order
+        {
+          var unhandledFailureDefinitionIds = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
+          var result = FixFailures(failuresAccessor, unhandledFailureDefinitionIds);
+          if (result != ARDB.FailureProcessingResult.Continue)
+            return result;
         }
       }
 
@@ -383,7 +384,7 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
   }
 
-  enum TransactionExtent
+  internal enum TransactionExtent
   {
     Default,
     Component,
@@ -397,7 +398,7 @@ namespace RhinoInside.Revit.GH.Components
     : base(name, nickname, description, category, subCategory)
     { }
 
-    TransactionExtent TransactionExtent => TransactionExtent.Component;
+    internal virtual TransactionExtent TransactionExtent => TransactionExtent.Component;
 
     public override bool RequiresFailed
     (
@@ -601,7 +602,7 @@ namespace RhinoInside.Revit.GH.Components
           var count = branch.Count;
           for (int e = 0; e < count; ++e)
           {
-            if (branch[e] is Types.IGH_ElementId id && !id.IsValid)
+            if (branch[e] is Types.IGH_ElementId id && id.Value is ARDB.Element element && !element.IsValidObject)
               branch[e] = null;
           }
         }
@@ -613,6 +614,9 @@ namespace RhinoInside.Revit.GH.Components
     EventHandler<DialogBoxShowingEventArgs> dialogBoxShowing = null;
 
     // Step 2.1
+    public virtual bool OnStart(ARDB.Document document) => true;
+
+    // Step 2.2
     public virtual void OnStarted(ARDB.Document document) { }
 
     // Step 3.1
@@ -680,7 +684,7 @@ namespace RhinoInside.Revit.GH.Components
         if(Params.Input<Parameters.Document>("Document") is IGH_Param document)
           return document.SourceCount == 0 && document.DataType == GH_ParamData.@void;
 
-        return true;
+        return Inputs.Any(x => x.Param is Parameters.Document && x.Param.Name == "Document");
       }
     }
 
@@ -701,7 +705,21 @@ namespace RhinoInside.Revit.GH.Components
       base.AfterSolveInstance();
     }
 
-    protected T ReconstructElement<T>(ARDB.Document document, string parameterName, Func<T, T> func) where T : ARDB.Element
+    protected T ReconstructElement<T>
+    (
+      ARDB.Document document, string parameterName,
+      Func<T, T> update
+    ) where T : ARDB.Element
+    {
+      return ReconstructElement(document, parameterName, x => true, update);
+    }
+
+    protected T ReconstructElement<T>
+    (
+      ARDB.Document document, string parameterName,
+      Predicate<T> validate, Func<T, T> update
+    )
+    where T : ARDB.Element
     {
       var output = default(T);
 
@@ -715,20 +733,64 @@ namespace RhinoInside.Revit.GH.Components
             input = null;
         }
 
+        var grouped = input is object && input.GroupId != ARDB.ElementId.InvalidElementId;
         var graphical = input is object && Types.GraphicalElement.IsValidElement(input);
         var pinned = input?.Pinned != false;
 
         try
         {
-          if (!graphical || pinned)
-            UpdateDocument(document, () => output = func(input));
+          if (!graphical || (pinned && !grouped))
+          {
+            if (validate(input))
+              UpdateDocument(document, () => output = update(input));
+            else
+              output = null;
+          }
           else
           {
-            if (graphical)
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Some elements were ignored because are unpinned.");
+            if (graphical && input is object)
+            {
+              var mesh = default(Rhino.Geometry.Mesh);
+              var message = default(string);
+
+              if (grouped)
+                message = "Highlighted elements can't be updated because are grouped.";
+              else if (!pinned)
+                message = "Highlighted elements were not updated because are unpinned.";
+
+              using
+              (
+                var options = input.ViewSpecific ?
+                new ARDB.Options() { View = input.Document.GetElement(input.OwnerViewId) as ARDB.View } :
+                new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium }
+              )
+              using (var geometry = input.GetGeometry(options))
+              {
+                if (geometry is object)
+                {
+                  mesh = new Rhino.Geometry.Mesh();
+                  mesh.Append(geometry.GetPreviewMeshes(input.Document, null));
+                  if (mesh.Faces.Count == 0)
+                  {
+                    var inch = Revit.ModelUnits / 12.0;
+                    var box = input.GetBoundingBoxXYZ().ToBox(); box.Inflate(inch, inch, inch);
+                    mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
+                  }
+                }
+              }
+
+              AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, message, mesh);
+            }
 
             output = input;
           }
+        }
+        catch(Exception e)
+        {
+          if (FailureProcessingMode <= ARDB.FailureProcessingResult.ProceedWithCommit)
+            output = input;
+
+          throw e;
         }
         finally
         {

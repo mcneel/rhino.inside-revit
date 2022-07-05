@@ -58,15 +58,71 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
   }
 
-  internal struct ElementNameComparer : IComparer<string>
+  public static class ElementNaming 
   {
-    public int Compare(string x, string y) => NamingUtils.CompareNames(x, y);
+    /// <summary>
+    /// Identifies if the input <paramref name="name"/> is valid for use as an Element name in Revit.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public static bool IsValidName(string name) => NamingUtils.IsValidName(name);
 
-#if REVIT_2023
-    public static StringComparison StringComparison = StringComparison.OrdinalIgnoreCase;
-#else
-    public static StringComparison StringComparison = StringComparison.Ordinal;
-#endif
+    public static bool IsValidNameCharacter(char character) => NamingUtils.IsValidName(character.ToString());
+    public static string InvalidCharacters => "\\:{}[]|;<>?`~";
+
+    public static string MakeValidName(string name)
+    {
+      var builder = new System.Text.StringBuilder();
+
+      foreach(var c in name)
+      {
+        switch(c)
+        {
+          case '\\': builder.Append('⧵'); break;
+          case ':': builder.Append('∶'); break;
+          case '{': builder.Append('❴'); break;
+          case '}': builder.Append('❵'); break;
+          case '[': builder.Append('［'); break;
+          case ']': builder.Append('］'); break;
+          case '|': builder.Append('∣'); break;
+          case ';': builder.Append(';'); break;
+          case '<': builder.Append('‹'); break;
+          case '>': builder.Append('›'); break;
+          case '?': builder.Append('¿'); break;
+          case '`': builder.Append('｀'); break;
+          case '~': builder.Append('∼'); break;
+          default:
+            if (IsValidNameCharacter(c)) builder.Append(c);
+            else builder.Append('�');
+            break;
+        }
+      }
+
+      return builder.ToString();
+    }
+
+    struct ElementNameComparer : IComparer<string>
+    {
+      public int Compare(string x, string y) => NamingUtils.CompareNames(x, y);
+    }
+
+    /// <summary>
+    /// Compares two Element name string for equality using Revit's comparison rules.
+    /// </summary>
+    public static readonly IEqualityComparer<string> NameEqualityComparer = StringComparer.Ordinal;
+
+    /// <summary>
+    /// Compares two Element name strings using Revit's comparison rules.
+    /// </summary>
+    public static readonly IComparer<string> NameComparer = default(ElementNameComparer);
+
+    /// <summary>
+    /// <see cref="System.StringComparison"/> used on <see cref="Autodesk.Revit.DB.NamingUtils"/> for equality comparsion.
+    /// </summary>
+    /// <remarks>
+    /// Revit UI is not consitent some places uses a case sensitive comparsion.
+    /// </remarks>
+    public static readonly StringComparison ComparisonType = StringComparison.Ordinal;
   }
 
   public static class ElementExtension
@@ -262,6 +318,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 #endif
 
+    #region Dependents
     /// <summary>
     /// Updater to collect changes on the Delete operation
     /// </summary>
@@ -370,6 +427,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var doc = element.Document;
       return ids.Select(doc.GetElement).OfType<T>().FirstOrDefault();
     }
+    #endregion
 
     #region Nomen
 
@@ -381,7 +439,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     //
     // In other cases like 'Design Options' the Name parameter may come decorated
     // this makes `Element.Name` not useful for searching or comparing namesake elements.
-    // Nomen is undecorated in thos case.
+    // Nomen is undecorated in this case.
 
     public static bool CanBeRenominated(this Element element)
     {
@@ -425,7 +483,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
         (
           prefix,
           element.GetType(),
-          element is ElementType type ? type.GetFamilyName() : default,
+          element is ElementType type ?
+          type.FamilyName :
+          element is View view ? view.ViewType.ToString() :
+          default,
           categoryId
         );
 
@@ -510,6 +571,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return BuiltInParameter.INVALID;
     }
 
+    public static string GetElementNomen(this Element element) =>
+      GetElementNomen(element, out var _);
+
     internal static string GetElementNomen(this Element element, out BuiltInParameter nomenParameter)
     {
       if ((nomenParameter = GetNomenParameter(element)) != BuiltInParameter.INVALID)
@@ -518,8 +582,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return element.Name;
     }
 
-    public static string GetElementNomen(this Element element) =>
-      GetElementNomen(element, out var _);
+    internal static string GetElementNomen(this Element element, BuiltInParameter nomenParameter)
+    {
+      if (nomenParameter != BuiltInParameter.INVALID)
+        return GetParameterValue<string>(element, nomenParameter);
+      else
+        return element.Name;
+    }
 
     internal static void SetElementNomen(this Element element, BuiltInParameter nomenParameter, string name)
     {
@@ -563,57 +632,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       nomenParameter = BuiltInParameter.INVALID;
       return false;
-    }
-
-    internal static ElementId GetNamesakeElement(Document target, Document source, ElementId elementId)
-    {
-      if (elementId.IsBuiltInId() || target.IsEquivalent(source))
-        return elementId;
-
-      if (source.GetElement(elementId) is Element element)
-      {
-        if (element is ElementType type)
-        {
-          using (var collector = new FilteredElementCollector(target))
-          {
-            return collector.WhereElementIsElementType().
-              WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
-              WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, type.GetFamilyName()).
-              WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, type.Name).
-              FirstElementId();
-          }
-        }
-        if (element is AppearanceAssetElement asset)
-        {
-          return AppearanceAssetElement.GetAppearanceAssetElementByName(target, asset.Name)?.Id ?? ElementId.InvalidElementId;
-        }
-        else
-        {
-          var nomen = element.GetElementNomen(out var nomenParameter);
-          using (var collector = new FilteredElementCollector(target))
-          {
-            if (nomenParameter != BuiltInParameter.INVALID)
-            {
-              return collector.WhereElementIsNotElementType().
-              WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
-              WhereParameterEqualsTo(nomenParameter, nomen).
-              FirstElementId();
-            }
-            else
-            {
-              return collector.WhereElementIsNotElementType().
-              WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementId.InvalidElementId).
-              Where(x => x.Name == nomen).Select(x => x.Id).FirstOrDefault() ??
-              ElementId.InvalidElementId;
-            }
-          }
-        }
-      }
-
-      return ElementId.InvalidElementId;
     }
     #endregion
 
@@ -789,7 +807,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               break;
 
             case StorageType.ElementId:
-              param.Update(GetNamesakeElement(to.Document, from.Document, previousParameter.AsElementId()));
+              param.Update(to.Document.LookupElement(from.Document, previousParameter.AsElementId()));
               break;
           }
         }
@@ -932,10 +950,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
             var bic = BuiltInCategory.INVALID;
             sourceView.Category?.Id.TryGetBuiltInCategory(out bic);
             destinationView = destinationDocument.
-              GetNamesakeElements(sourceView.GetElementNomen(), sourceView.GetType(), categoryId: bic).
-              OfType<View>().
-              Where(x => !x.IsTemplate && x.ViewType == sourceView.ViewType).
-              FirstOrDefault();
+              GetNamesakeElements(sourceView.GetElementNomen(), sourceView.GetType(), parentName: sourceView.ViewType.ToString(), categoryId: bic).
+              Cast<View>().FirstOrDefault();
           }
 
           if (destinationView is object)
@@ -963,6 +979,42 @@ namespace RhinoInside.Revit.External.DB.Extensions
       catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
       return null;
+    }
+    #endregion
+
+    #region References
+    public static Reference GetDefaultReference(this Element element)
+    {
+      var reference = default(Reference);
+      switch (element)
+      {
+        case null:
+          return null;
+
+#if REVIT_2018
+        case FamilyInstance instance:
+          reference = instance.GetReferences(FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
+          break;
+#endif
+
+        case CurveElement modelLine:
+          reference = modelLine.GeometryCurve.Reference;
+          break;
+
+        default:
+          using (var options = new Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
+          {
+            var geometry = element.get_Geometry(options);
+            reference = geometry?.OfType<Solid>().
+              SelectMany(x => x.Faces.Cast<Face>()).
+              Select(x => x.Reference).
+              OfType<Reference>().
+              FirstOrDefault();
+          }
+          break;
+      }
+
+      return reference ?? new Reference(element);
     }
     #endregion
   }

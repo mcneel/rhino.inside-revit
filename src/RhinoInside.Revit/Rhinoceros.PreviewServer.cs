@@ -235,7 +235,7 @@ namespace RhinoInside.Revit
             return !add || pco.PointCloudGeometry.Count > 0;
 
           if (rhinoObject is CurveObject co)
-            return !add || !co.CurveGeometry.IsShort(GeometryObjectTolerance.Model.ShortCurveTolerance);
+            return !add || !co.CurveGeometry.IsShort(GeometryTolerance.Model.ShortCurveTolerance);
 
           if (rhinoObject is MeshObject mo)
             return !add || mo.MeshGeometry.Faces.Count > 0;

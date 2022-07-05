@@ -62,5 +62,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
       }
     }
+
+    public static void SetLocation(this Instance element, XYZ newOrigin, double newAngle)
+    {
+      var modified = false;
+      var pinned = element.Pinned;
+
+      try
+      {
+        element.GetLocation(out var origin, out var basisX, out var basisY);
+
+        // Set Origin
+        {
+          var translation = newOrigin - origin;
+          if (translation.GetLength() > element.Document.Application.VertexTolerance)
+          {
+            element.Pinned = false;
+            modified = true;
+            ElementTransformUtils.MoveElement(element.Document, element.Id, translation);
+          }
+        }
+
+        // Set Rotation
+        {
+          var normal = basisX.CrossProduct(basisY);
+          var right = normal.PerpVector();
+          var rotation = newAngle - basisX.AngleOnPlaneTo(right, normal);
+          if (rotation > element.Document.Application.AngleTolerance)
+          {
+            element.Pinned = false;
+            modified = true;
+
+            using (var axis = Line.CreateUnbound(newOrigin, normal))
+              ElementTransformUtils.RotateElement(element.Document, element.Id, axis, rotation);
+          }
+        }
+      }
+      finally
+      {
+        if (modified)
+          element.Pinned = pinned;
+      }
+    }
   }
 }

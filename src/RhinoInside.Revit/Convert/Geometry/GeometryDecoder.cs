@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <since>1.4</since>
     internal static double ModelScaleFactor => UnitConverter.ToModelLength;
 
-    internal static GeometryObjectTolerance Tolerance => new GeometryObjectTolerance(UnitConverter.Model.UnitScale);
+    internal static GeometryTolerance Tolerance => new GeometryTolerance(UnitConverter.Model.UnitScale);
     #endregion
 
     #region Length
@@ -1543,8 +1543,8 @@ namespace RhinoInside.Revit.Convert.Geometry
 
           if (geometryObject is ARDB.GeometryInstance instance)
           {
-            context.Element = instance.Symbol;
-            context.Category = instance.Symbol.Category ?? context.Category;
+            context.Element = instance.GetSymbol();
+            context.Category = context.Element.Category ?? context.Category;
             context.Material = context.Category?.Material;
           }
           else if (geometryObject is ARDB.GeometryElement geometry)

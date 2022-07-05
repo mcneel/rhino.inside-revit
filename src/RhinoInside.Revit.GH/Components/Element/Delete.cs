@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 
@@ -137,6 +138,12 @@ namespace RhinoInside.Revit.GH.Components.Elements
       {
         using (var updater = deleted is object && modified is object ? new Updater(document) : default)
         {
+          if (!document.CanDeleteElements(elementIds))
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One or more of the elements cannot be deleted");
+            return -1;
+          }
+
           using (var transaction = NewTransaction(document))
           {
             transaction.Start();

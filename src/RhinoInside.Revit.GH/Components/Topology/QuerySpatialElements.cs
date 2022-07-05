@@ -44,10 +44,20 @@ namespace RhinoInside.Revit.GH.Components.Topology
       ),
       new ParamDefinition
       (
+        new Param_Boolean()
+        {
+          Name = "Placed",
+          NickName = "PD",
+          Description = "Wheter element is placed or not.",
+          Optional = true
+        }.SetDefaultVale(true), ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
         new Param_String()
         {
           Name = "Number",
-          NickName = "Number",
+          NickName = "NUM",
           Description = "Element Number.",
           Optional = true
         }, ParamRelevance.Primary
@@ -57,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Param_String()
         {
           Name = "Name",
-          NickName = "Name",
+          NickName = "N",
           Description = "Element Name.",
           Optional = true
         }, ParamRelevance.Primary
@@ -67,7 +77,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Parameters.Level()
         {
           Name = "Level",
-          NickName = "L",
+          NickName = "LV",
           Description = "Level to query on.",
           Optional = true
         }, ParamRelevance.Primary
@@ -77,10 +87,20 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Parameters.Phase()
         {
           Name = "Phase",
-          NickName = "P",
+          NickName = "PH",
           Description = "Project phase to query on.",
           Optional = true
         }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean()
+        {
+          Name = "Enclosed",
+          NickName = "ED",
+          Description = "Wheter element is on a properly enclosed region or not.",
+          Optional = true
+        }.SetDefaultVale(true), ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -95,7 +115,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     };
   }
 
-  [ComponentVersion(introduced: "1.7")]
+  [ComponentVersion(introduced: "1.7", updated: "1.9")]
   public class QueryAreas : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D1940EB3-B81B-4E57-8F5A-94D045BFB509");
@@ -140,10 +160,20 @@ namespace RhinoInside.Revit.GH.Components.Topology
       ),
       new ParamDefinition
       (
+        new Param_Boolean()
+        {
+          Name = "Placed",
+          NickName = "PD",
+          Description = "Wheter element is placed or not.",
+          Optional = true
+        }.SetDefaultVale(true), ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
         new Param_String()
         {
           Name = "Number",
-          NickName = "Number",
+          NickName = "NUM",
           Description = "Element Number.",
           Optional = true
         }, ParamRelevance.Primary
@@ -153,7 +183,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Param_String()
         {
           Name = "Name",
-          NickName = "Name",
+          NickName = "N",
           Description = "Element Name.",
           Optional = true
         }, ParamRelevance.Primary
@@ -163,10 +193,20 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Parameters.Level()
         {
           Name = "Level",
-          NickName = "L",
+          NickName = "LV",
           Description = "Level to query on.",
           Optional = true
         }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean()
+        {
+          Name = "Enclosed",
+          NickName = "ED",
+          Description = "Wheter element is on a properly enclosed region or not.",
+          Optional = true
+        }.SetDefaultVale(true), ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -199,12 +239,14 @@ namespace RhinoInside.Revit.GH.Components.Topology
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Params.TryGetData(DA, "Point", out Point3d? point)) return;
+      if (!Params.TryGetData(DA, "Placed", out bool? placed)) return;
       if (!Params.TryGetData(DA, "Number", out string number)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
-      if (!Parameters.Level.TryGetDataOrDefault(this, DA, "Level", out Types.Level level, doc, point.HasValue ? point.Value.Z : double.NaN)) return;
+      if (!Parameters.Level.TryGetDataOrDefault(this, DA, "Level", out Types.Level level, doc, point.HasValue ? point.Value.Z : double.NaN) && point.HasValue) return;
+      if (!Params.TryGetData(DA, "Enclosed", out bool? enclosed)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       using (var collector = new ARDB.FilteredElementCollector(doc.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
@@ -218,10 +260,25 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.ROOM_NAME, ref name, out var nameFilter))
           elementsCollector = elementsCollector.WherePasses(nameFilter);
 
+        if (enclosed.HasValue)
+        {
+          var rule = new ARDB.FilterDoubleRule
+          (
+            new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.ROOM_PERIMETER)),
+            new ARDB.FilterNumericGreater(),
+            0.0, 0.0
+          );
+
+          elementsCollector = elementsCollector.WherePasses(new ARDB.ElementParameterFilter(rule, !enclosed.Value));
+        }
+
         if (level is object)
           elementsCollector = elementsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.ROOM_LEVEL_ID, level.Id);
 
-        var areas = collector.Cast<ARDB.Area>().Where(x => x.Area > 0.0).Select(x => new Types.AreaElement(x));
+        var areas = collector.Select(x => new Types.AreaElement(x as ARDB.Area));
+
+        if (placed.HasValue)
+          areas = areas.Where(x => x.IsPlaced == placed.Value);
 
         if (!string.IsNullOrEmpty(number))
           areas = areas.Where(x => x.Number.IsSymbolNameLike(number));
@@ -252,17 +309,12 @@ namespace RhinoInside.Revit.GH.Components.Topology
           );
         }
 
-        DA.SetDataList
-        (
-          "Areas",
-          areas.
-          TakeWhileIsNotEscapeKeyDown(this)
-        );
+        DA.SetDataList("Areas", areas.TakeWhileIsNotEscapeKeyDown(this));
       }
     }
   }
 
-  [ComponentVersion(introduced: "1.7")]
+  [ComponentVersion(introduced: "1.7", updated: "1.9")]
   public class QueryRooms : QuerySpatialElements
   {
     public override Guid ComponentGuid => new Guid("5DDCB816-61A3-480F-AC45-67F66BEB2E78");
@@ -303,15 +355,17 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
       if (!Params.TryGetData(DA, "Point", out Point3d? point)) return;
       var xyz = point.HasValue ? point.Value.ToXYZ() : default;
+      if (!Params.TryGetData(DA, "Placed", out bool? placed)) return;
       if (!Params.TryGetData(DA, "Number", out string number)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Level", out Types.Level level)) return;
       if (!Params.TryGetData(DA, "Phase", out Types.Phase phase)) return;
       if (phase is null && Params.IndexOfInputParam("Phase") < 0)
         phase = new Types.Phase(doc.Value.Phases.Cast<ARDB.Phase>().LastOrDefault());
+      if (!Params.TryGetData(DA, "Enclosed", out bool? enclosed)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       using (var collector = new ARDB.FilteredElementCollector(doc.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
@@ -334,7 +388,22 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (phase is object)
           elementsCollector = elementsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.ROOM_PHASE, phase.Id);
 
-        var rooms = collector.Cast<ARDB.Architecture.Room>().Where(x => x.Area > 0.0);
+        if (enclosed.HasValue)
+        {
+          var rule = new ARDB.FilterDoubleRule
+          (
+            new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.ROOM_PERIMETER)),
+            new ARDB.FilterNumericGreater(),
+            0.0, 0.0
+          );
+
+          elementsCollector = elementsCollector.WherePasses(new ARDB.ElementParameterFilter(rule, !enclosed.Value));
+        }
+
+        var rooms = collector.Select(x => new Types.RoomElement(x as ARDB.Architecture.Room));
+
+        if (placed.HasValue)
+          rooms = rooms.Where(x => x.IsPlaced == placed.Value);
 
         if (!string.IsNullOrEmpty(number))
           rooms = rooms.Where(x => x.Number.IsSymbolNameLike(number));
@@ -343,20 +412,14 @@ namespace RhinoInside.Revit.GH.Components.Topology
           rooms = rooms.Where(x => x.Name.IsSymbolNameLike(name));
 
         if (xyz is object)
-          rooms = rooms.Where(room => room.IsPointInRoom(xyz));
+          rooms = rooms.Where(room => room.Value.IsPointInRoom(xyz));
 
-        DA.SetDataList
-        (
-          "Rooms",
-          rooms.
-          Select(x => new Types.RoomElement(x)).
-          TakeWhileIsNotEscapeKeyDown(this)
-        );
+        DA.SetDataList("Rooms",rooms.TakeWhileIsNotEscapeKeyDown(this));
       }
     }
   }
 
-  [ComponentVersion(introduced: "1.7")]
+  [ComponentVersion(introduced: "1.7", updated: "1.9")]
   public class QuerySpaces : QuerySpatialElements
   {
     public override Guid ComponentGuid => new Guid("A1CCF034-AA1F-4731-9863-3C22E0644E2B");
@@ -397,15 +460,17 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
       if (!Params.TryGetData(DA, "Point", out Point3d? point)) return;
       var xyz = point.HasValue ? point.Value.ToXYZ() : default;
+      if (!Params.TryGetData(DA, "Placed", out bool? placed)) return;
       if (!Params.TryGetData(DA, "Number", out string number)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Level", out Types.Level level)) return;
       if (!Params.TryGetData(DA, "Phase", out Types.Phase phase)) return;
       if (phase is null && Params.IndexOfInputParam("Phase") < 0)
         phase = new Types.Phase(doc.Value.Phases.Cast<ARDB.Phase>().LastOrDefault());
+      if (!Params.TryGetData(DA, "Enclosed", out bool? enclosed)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       using (var collector = new ARDB.FilteredElementCollector(doc.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
@@ -428,7 +493,22 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (phase is object)
           elementsCollector = elementsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.ROOM_PHASE, phase.Id);
 
-        var spaces = collector.Cast<ARDB.Mechanical.Space>().Where(x => x.Area > 0.0);
+        if (enclosed.HasValue)
+        {
+          var rule = new ARDB.FilterDoubleRule
+          (
+            new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.ROOM_PERIMETER)),
+            new ARDB.FilterNumericGreater(),
+            0.0, 0.0
+          );
+
+          elementsCollector = elementsCollector.WherePasses(new ARDB.ElementParameterFilter(rule, !enclosed.Value));
+        }
+
+        var spaces = collector.Select(x => new Types.SpaceElement(x as ARDB.Mechanical.Space));
+
+        if (placed.HasValue)
+          spaces = spaces.Where(x => x.IsPlaced == placed.Value);
 
         if (!string.IsNullOrEmpty(number))
           spaces = spaces.Where(x => x.Number.IsSymbolNameLike(number));
@@ -437,15 +517,9 @@ namespace RhinoInside.Revit.GH.Components.Topology
           spaces = spaces.Where(x => x.Name.IsSymbolNameLike(name));
 
         if (xyz is object)
-          spaces = spaces.Where(room => room.IsPointInSpace(xyz));
+          spaces = spaces.Where(room => room.Value.IsPointInSpace(xyz));
 
-        DA.SetDataList
-        (
-          "Spaces",
-          spaces.
-          Select(x => new Types.SpaceElement(x)).
-          TakeWhileIsNotEscapeKeyDown(this)
-        );
+        DA.SetDataList("Spaces", spaces.TakeWhileIsNotEscapeKeyDown(this));
       }
     }
   }

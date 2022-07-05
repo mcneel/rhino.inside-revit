@@ -153,9 +153,9 @@
     </ItemGroup>
 
     <ItemGroup Condition="$(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)'=='.csproj'">
-        <PackageReference Include="RhinoCommon" Version="7.9.21222.15001" IncludeAssets="compile; build" />
-        <PackageReference Include="RhinoWindows" Version="7.9.21222.15001" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.9.21222.15001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.15.22039.13001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoWindows" Version="7.15.22039.13001" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.15.22039.13001" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="compile; build" />
     </ItemGroup>
 </Project>

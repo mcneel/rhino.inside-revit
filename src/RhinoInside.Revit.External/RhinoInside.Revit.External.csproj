@@ -52,6 +52,7 @@
     <Compile Include="DB\Extensions\FilteredElementCollector.cs" />
     <Compile Include="DB\Extensions\GeometryObject.cs" />
     <Compile Include="DB\Extensions\HostObject.cs" />
+    <Compile Include="DB\Extensions\IndependentTag.cs" />
     <Compile Include="DB\Extensions\Instance.cs" />
     <Compile Include="DB\Extensions\InternalOrigin.cs" />
     <Compile Include="DB\Extensions\Level.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="DB\Extensions\Plane.cs" />
     <Compile Include="DB\Extensions\ProjectLocation.cs" />
+    <Compile Include="DB\Extensions\Reference.cs" />
     <Compile Include="DB\Extensions\Sketch.cs" />
     <Compile Include="DB\Extensions\Solid.cs" />
     <Compile Include="DB\Extensions\Surface.cs" />
@@ -99,6 +101,7 @@
     <Compile Include="DB\Schemas\UnitType.cs" />
     <Compile Include="DB\Schemas\UnitType.Enum.cs" />
     <Compile Include="DB\Schemas\UnitType.Values.cs" />
+    <Compile Include="DB\SlabShapeEditCurvedEdgeCondition.cs" />
     <Compile Include="DB\Transaction.cs" />
     <Compile Include="DB\UniqueId.cs" />
     <Compile Include="DB\WallWrapping.cs" />
@@ -107,6 +110,7 @@
     <Compile Include="Extensions\RhinoCommon.cs" />
     <Compile Include="Extensions\ShellItem.cs" />
     <Compile Include="Extensions\System.cs" />
+    <Compile Include="Extensions\System.Drawing.cs" />
     <Compile Include="Extensions\Win32.cs" />
     <Compile Include="Extensions\WinForms.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

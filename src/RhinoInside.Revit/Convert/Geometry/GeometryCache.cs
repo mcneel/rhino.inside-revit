@@ -56,6 +56,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     internal struct GeometrySignature : IEquatable<GeometrySignature>
     {
+      readonly int HashCode;
       readonly byte[] hash;
 
       internal GeometrySignature(GeometryBase geometry, double factor)
@@ -83,7 +84,14 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
 
           using (var sha1 = new SHA1Managed())
-            hash = sha1.ComputeHash(stream.GetBuffer());
+          {
+            var buffer = stream.GetBuffer();
+            hash = sha1.ComputeHash(buffer);
+
+            HashCode = buffer.Length;
+            for (int i = 0; i < hash.Length; ++i)
+              HashCode = HashCode * -1521134295 + (int) hash[i];
+          }
         }
       }
 
@@ -100,6 +108,8 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       public bool Equals(GeometrySignature other)
       {
+        if (HashCode != other.HashCode) return false;
+
         var x = hash;
         var y = other.hash;
 
@@ -115,29 +125,14 @@ namespace RhinoInside.Revit.Convert.Geometry
         return true;
       }
 
-      public override int GetHashCode()
-      {
-        int code = 0;
-
-        if (hash is object)
-        {
-          for (int i = 0; i < hash.Length; ++i)
-          {
-            var value = (int) hash[i];
-            code ^= (value << 5) + value;
-          }
-        }
-
-        return code;
-      }
+      public override int GetHashCode() => HashCode;
 
       public static bool operator false(GeometrySignature signature) => signature.hash is null;
       public static bool operator true(GeometrySignature signature) => signature.hash is object;
 
       public static implicit operator bool(GeometrySignature signature) => signature.hash is object;
 
-
-      static readonly GeometryObjectTolerance Tolerance = GeometryObjectTolerance.Internal;
+      static readonly GeometryTolerance Tolerance = GeometryTolerance.Internal;
       static int RoundNormalizedKnot(double value) => (int) Math.Round(value * 1e+9);
       static double RoundWeight     (double value) => (double) Math.Round(value * 1e+9);
       static double RoundLength     (double value) => (double) Math.Round(value / Tolerance.VertexTolerance);
@@ -335,9 +330,9 @@ namespace RhinoInside.Revit.Convert.Geometry
           GeometryDictionary.Remove(signature);
         }
       }
+      else signature = default;
 
       value = default;
-      signature = default;
       return false;
     }
   }

@@ -117,7 +117,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
         var minPt = pointA.Z < pointB.Z ? pointA : pointB;
         var maxPt = pointA.Z > pointB.Z ? pointA : pointB;
 
-        var tol = GeometryObjectTolerance.Model;
+        var tol = GeometryTolerance.Model;
         if (Math.Abs((minPt.Z / Revit.ModelUnits) - opening.BoundaryRect[0].Z) > tol.VertexTolerance  ||
             Math.Abs((maxPt.Z / Revit.ModelUnits) - opening.BoundaryRect[1].Z) > tol.VertexTolerance)
           return false;

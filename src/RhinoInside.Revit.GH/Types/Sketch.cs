@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Types
               new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
             );
 
-            trimmedSurface.Value = planeSurface.CreateTrimmedSurface(loops, GeometryObjectTolerance.Model.VertexTolerance);
+            trimmedSurface.Value = planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
           }
 
           trimmedSurface.HasValue = true;
@@ -151,5 +151,87 @@ namespace RhinoInside.Revit.GH.Types
     public SketchPlane SketchPlane =>
       Value is ARDB.Sketch sketch ? SketchPlane.FromElement(sketch.SketchPlane) as SketchPlane : default;
     #endregion
+
+    internal static bool SetProfile(ARDB.Sketch sketch, IList<Curve> boundaries, Vector3d normal)
+    {
+      var tol = GeometryTolerance.Model;
+      var sketchPlane = sketch.SketchPlane.GetPlane();
+      var plane = sketchPlane.ToPlane();
+      if (normal.IsParallelTo(plane.Normal, tol.AngleTolerance) == 0)
+        return false;
+
+      var profiles = sketch.Profile.ToArray(GeometryDecoder.ToPolyCurve);
+      if (profiles.Length != boundaries.Count)
+        return false;
+
+      bool constraintsRemoved = false;
+      void RemoveConstraints()
+      {
+        if (constraintsRemoved) return;
+        var constraintsIds = sketch.GetDependentElements
+        (
+          ERDB.CompoundElementFilter.Intersect
+          (
+          new ARDB.ElementClassFilter(typeof(ARDB.Dimension)),
+          new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_WeakDims)
+          )
+        );
+
+        sketch.Document.Delete(constraintsIds);
+        constraintsRemoved = true;
+      }
+
+      var loops = sketch.GetProfileCurveElements();
+      var pi = 0;
+      foreach (var boundary in boundaries)
+      {
+        var profile = Curve.ProjectToPlane(boundary, plane);
+
+        if
+        (
+          !Curve.GetDistancesBetweenCurves(profiles[pi], profile, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
+          max > tol.VertexTolerance
+        )
+        {
+          // Remove all constraints to move curves freely.
+          RemoveConstraints();
+
+          var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
+            polyCurve.DuplicateSegments() :
+            profile.Split(profile.Domain.Mid);
+
+          if (pi < loops.Count)
+          {
+            var loop = loops[pi];
+            if (segments.Length != loop.Count)
+              return false;
+
+            var index = 0;
+            foreach (var edge in loop)
+            {
+              var segment = profile.IsClosed ?
+                segments[(++index) % segments.Length ] :
+                segments[index++];
+
+              var curve = default(ARDB.Curve);
+              if (edge.GeometryCurve is ARDB.HermiteSpline)
+                curve = segment.ToHermiteSpline();
+              else
+                curve = segment.ToCurve();
+
+              if (!edge.GeometryCurve.IsSameKindAs(curve))
+                return false;
+
+              if (!edge.GeometryCurve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
+                edge.SetGeometryCurve(curve, overrideJoins: true);
+            }
+          }
+        }
+
+        pi++;
+      }
+
+      return true;
+    }
   }
 }

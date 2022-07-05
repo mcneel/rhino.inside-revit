@@ -500,7 +500,7 @@ namespace Rhino.Geometry
         return line.Direction.IsPerpendicularTo(plane.Normal, angleTolerance);
 
       return curve.TryGetPlane(out var curvePlane, tolerance) &&
-        curvePlane.ZAxis.IsParallelTo(plane.Normal, angleTolerance) == 0;
+        curvePlane.ZAxis.IsParallelTo(plane.Normal, angleTolerance) != 0;
     }
 
     /// <summary>
@@ -636,17 +636,17 @@ namespace Rhino.Geometry
         kinks.Add(t);
       }
 
-      if (kinks is null)
+      if (kinks is object && kinks.Count > (curve.IsClosed ? 1 : 0) && curve.Split(kinks) is Curve[] segments)
       {
-        polyCurve = default;
-        return false;
+        polyCurve = new PolyCurve();
+        foreach (var segment in segments)
+          polyCurve.AppendSegment(segment);
+
+        return true;
       }
 
-      polyCurve = new PolyCurve();
-      foreach (var segment in curve.Split(kinks))
-        polyCurve.AppendSegment(segment);
-
-      return true;
+      polyCurve = default;
+      return false;
     }
 
     static bool TryEvaluateCurvature
@@ -1170,6 +1170,24 @@ namespace Rhino.Display
       }
 
       return new Geometry.Vector2d(1.0, 1.0);
+    }
+
+    public static bool Scale(this RhinoViewport viewport, double scaleFactor)
+    {
+      var scaleTransform = Rhino.Geometry.Transform.Scale(Rhino.Geometry.Point3d.Origin, scaleFactor);
+      var projection = new Rhino.DocObjects.ViewportInfo(viewport);
+      projection.GetFrustum(out var left, out var right, out var bottom, out var top, out var near, out var far);
+      projection.SetFrustum(left * scaleFactor, right * scaleFactor, bottom * scaleFactor, top * scaleFactor, near * scaleFactor, far * scaleFactor);
+      projection.TransformCamera(scaleTransform);
+      if (!viewport.SetViewProjection(projection, updateTargetLocation: true))
+        return false;
+
+      var cplane = viewport.GetConstructionPlane();
+      cplane.Plane.Transform(scaleTransform);
+      cplane.GridSpacing *= scaleFactor;
+      cplane.SnapSpacing *= scaleFactor;
+      viewport.SetConstructionPlane(cplane);
+      return true;
     }
   }
 }

@@ -402,7 +402,11 @@ namespace RhinoInside.Revit.GH.Types
         var meshes = TryGetPreviewMeshes();
         if (meshes is object)
         {
-          if (Grasshopper.CentralSettings.PreviewMeshEdges)
+          if (meshes.Length == 0)
+          {
+            base.DrawViewportWires(args);
+          }
+          else if (Grasshopper.CentralSettings.PreviewMeshEdges)
           {
             foreach (var mesh in meshes)
               args.Pipeline.DrawMeshWires(mesh, color, thickness);
@@ -447,6 +451,41 @@ namespace RhinoInside.Revit.GH.Types
       return attributes;
     }
 
+    /// <summary>
+    /// Decorates instance definition name using "Category:FamilyName:TypeName" when posible.
+    /// </summary>
+    /// <param name="element"></param>
+    /// <param name="description"></param>
+    /// <returns></returns>
+    protected static string GetBakeInstanceDefinitionName(ARDB.Element element, out string description)
+    {
+      var name = FullUniqueId.Format(element.Document.GetFingerprintGUID(), element.UniqueId);
+      description = string.Empty;
+
+      if (element is ARDB.ElementType type)
+      {
+        name = $"Revit:{type.Category?.FullName()}:{type.FamilyName}:{type.Name} {{{name}}}";
+        description = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
+
+        if (type.Category?.CategoryType != ARDB.CategoryType.Model)
+          name = "*" + name;
+      }
+      else if (element.Document.GetElement(element.GetTypeId()) is ARDB.ElementType elementType)
+      {
+        name = $"Revit:{elementType.Category?.FullName()}:{elementType.FamilyName}:{elementType.Name} {{{name}}}";
+        description = elementType.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
+
+        if (elementType.Category?.CategoryType != ARDB.CategoryType.Model)
+          name = "*" + name;
+      }
+      else
+      {
+        name = $"*Revit:{element.Category?.FullName()}:: {{{name}}}";
+      }
+
+      return name;
+    }
+
     protected internal static bool BakeGeometryElement
     (
       IDictionary<ARDB.ElementId, Guid> idMap,
@@ -476,31 +515,16 @@ namespace RhinoInside.Revit.GH.Types
       (
         geometryElementContent.Length == 1 &&
         geometryElementContent[0] is ARDB.GeometryInstance geometryInstance &&
-        geometryInstance.Symbol is ARDB.ElementType
+        geometryInstance.GetSymbol() is ARDB.ElementType symbol
       )
       {
         // Special case to simplify DB.FamilyInstance elements.
         var instanceTransform = geometryInstance.Transform.ToTransform();
-        return BakeGeometryElement(idMap, false, doc, att, instanceTransform * transform, geometryInstance.Symbol, geometryInstance.SymbolGeometry, out index);
+        return BakeGeometryElement(idMap, false, doc, att, instanceTransform * transform, symbol, geometryInstance.SymbolGeometry, out index);
       }
 
-      var idef_name = FullUniqueId.Format(element.Document.GetFingerprintGUID(), element.UniqueId);
-      var idef_description = string.Empty;
-
-      // Decorate idef_name using "Category:FamilyName:TypeName" when posible
-      if (element is ARDB.ElementType type)
-      {
-        idef_name = $"Revit:{type.Category?.FullName()}:{type.FamilyName}:{type.Name} {{{idef_name}}}";
-        idef_description = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
-      }
-      else if (element.Document.GetElement(element.GetTypeId()) is ARDB.ElementType elementType)
-      {
-        idef_name = $"Revit:{elementType.Category?.FullName()}:{elementType.FamilyName}:{elementType.Name} {{{idef_name}}}";
-      }
-      else
-      {
-        idef_name = $"*Revit:{element.Category?.FullName()}:: {{{idef_name}}}";
-      }
+      // Get a Unique Instance Definition name.
+      var idef_name = GetBakeInstanceDefinitionName(element, out var idef_description);
 
       // 2. Check if already exist
       index = doc.InstanceDefinitions.Find(idef_name)?.Index ?? -1;
@@ -531,7 +555,7 @@ namespace RhinoInside.Revit.GH.Types
               case ARDB.GeometryInstance instance:
                 using (GeometryDecoder.Context.Push())
                 {
-                  if (BakeGeometryElement(idMap, false, doc, att, Transform.Identity, instance.Symbol, instance.SymbolGeometry, out var idefIndex))
+                  if (BakeGeometryElement(idMap, false, doc, att, Transform.Identity, instance.GetSymbol(), instance.SymbolGeometry, out var idefIndex))
                     geo = new InstanceReferenceGeometry(doc.InstanceDefinitions[idefIndex].Id, instance.Transform.ToTransform());
                 }
                 break;
@@ -626,7 +650,7 @@ namespace RhinoInside.Revit.GH.Types
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
       BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
-    public bool BakeElement
+    public virtual bool BakeElement
     (
       IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
@@ -662,6 +686,8 @@ namespace RhinoInside.Revit.GH.Types
                 if (BakeGeometryElement(idMap, overwrite, doc, att, worldToElement, element, geometry, out var idefIndex))
                 {
                   att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
+                  att.Space = ActiveSpace.ModelSpace;
+                  att.ViewportId = Guid.Empty;
                   att.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
                   att.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
 
@@ -669,6 +695,9 @@ namespace RhinoInside.Revit.GH.Types
                     att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
 
                   guid = doc.Objects.AddInstanceObject(idefIndex, Transform.PlaneToPlane(Plane.WorldXY, location), att);
+
+                  // We don't want geometry on the active viewport but on its own.
+                  doc.Objects.ModifyAttributes(guid, att, quiet: true);
                 }
               }
 

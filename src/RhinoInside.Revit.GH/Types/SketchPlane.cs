@@ -8,7 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  [Kernel.Attributes.Name("Sketch Plane")]
+  [Kernel.Attributes.Name("Work Plane")]
   public class SketchPlane : GraphicalElement
   {
     protected override Type ValueType => typeof(ARDB.SketchPlane);

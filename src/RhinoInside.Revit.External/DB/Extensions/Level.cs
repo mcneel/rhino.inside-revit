@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Autodesk.Revit.DB;
 
@@ -98,29 +99,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 #endif
-
-    public static SketchPlane GetSketchPlane(this Level level, bool ensureSketchPlane = false)
-    {
-      using (var collector = new FilteredElementCollector(level.Document).OfClass(typeof(SketchPlane)))
-      {
-        var levelName = level.Name;
-        foreach (var sketchPlane in collector.Cast<SketchPlane>())
-        {
-          if (!sketchPlane.IsSuitableForModelElements) continue;
-          if (sketchPlane.Name != levelName) continue;
-          using (var plane = sketchPlane.GetPlane())
-          {
-            if (plane.Origin.Z - level.ProjectElevation < 1e-9 && plane.Normal.IsAlmostEqualTo(XYZ.BasisZ))
-              return sketchPlane;
-          }
-        }
-      }
-
-      if (ensureSketchPlane)
-        return SketchPlane.Create(level.Document, level.Id);
-
-      return default;
-    }
   }
 
   public static class LevelTypeExtension
@@ -128,6 +106,77 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static ElevationBase GetElevationBase(this LevelType levelType)
     {
       return (ElevationBase) levelType.get_Parameter(BuiltInParameter.LEVEL_RELATIVE_BASE_TYPE).AsInteger();
+    }
+  }
+
+  public static class DatumPlaneExtension
+  {
+    internal static PlaneEquation GetPlaneEquation(this DatumPlane datum)
+    {
+      switch (datum)
+      {
+        case Level level:
+          return new PlaneEquation(XYZ.BasisZ, -level.ProjectElevation);
+
+        case Grid grid:
+          if (grid.IsCurved) return default;
+          var curve = grid.Curve;
+          var start = curve.GetEndPoint(CurveEnd.Start);
+          var end = curve.GetEndPoint(CurveEnd.End);
+          var axis = end - start;
+          var origin = start + (axis * 0.5);
+          var perp = axis.PerpVector();
+          return new PlaneEquation(origin, -perp);
+
+        case ReferencePlane referencePlane:
+          var plane = referencePlane.GetPlane();
+          return new PlaneEquation(plane.Origin, plane.Normal);
+
+        case DatumPlane _:
+          return default;
+      }
+
+      throw new NotImplementedException($"{nameof(GetPlaneEquation)} is not implemented for {datum.GetType()}");
+    }
+
+    public static SketchPlane GetSketchPlane(this DatumPlane datum, bool ensureSketchPlane = false)
+    {
+      using (var collector = new FilteredElementCollector(datum.Document).OfClass(typeof(SketchPlane)))
+      {
+        var minDistance = double.PositiveInfinity;
+        var closestSketchPlane = default(SketchPlane);
+        var comparer = GeometryObjectEqualityComparer.Default;
+        var datumEquation = GetPlaneEquation(datum);
+        var datuName = datum.Name;
+
+        foreach (var sketchPlane in collector.Cast<SketchPlane>())
+        {
+          if (!sketchPlane.IsSuitableForModelElements) continue;
+          if (sketchPlane.Name != datuName) continue;
+          using (var plane = sketchPlane.GetPlane())
+          {
+            var equation = new PlaneEquation(plane.Origin, plane.Normal);
+
+            if (!comparer.Equals(equation.Normal, datumEquation.Normal))
+              continue;
+
+            var distance = Math.Abs(equation.D - datumEquation.D);
+            if (distance < minDistance)
+            {
+              minDistance = distance;
+              closestSketchPlane = sketchPlane;
+            }
+          }
+        }
+
+        if (comparer.Equals(minDistance, 0.0))
+          return closestSketchPlane;
+      }
+
+      if (ensureSketchPlane)
+        return SketchPlane.Create(datum.Document, datum.Id);
+
+      return default;
     }
   }
 }

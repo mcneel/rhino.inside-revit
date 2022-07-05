@@ -282,25 +282,23 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
-    ComponentGuid("2A3E4872-EF41-442A-B886-8B7DBA73DFE2"),
-    Name("Wall Location Line"),
-    Description("Contains a collection of Revit wall location line values"),
-  ]
-  public class WallLocationLine : GH_Enum<ARDB.WallLocationLine>
+  ComponentGuid("A78B2CFC-A9A5-4E7A-816E-5BEE0F6BDC7E"),
+  Name("Slab Curved Edge Condition"),
+  Description("Contains a collection of slab curves edge condition values"),
+]
+  public class SlabShapeEditCurvedEdgeCondition : GH_Enum<External.DB.SlabShapeEditCurvedEdgeCondition>
   {
-    public WallLocationLine() : base() { }
-    public WallLocationLine(ARDB.WallLocationLine value) : base(value) { }
+    public SlabShapeEditCurvedEdgeCondition() : base() { }
+    public SlabShapeEditCurvedEdgeCondition(External.DB.SlabShapeEditCurvedEdgeCondition value) : base(value) { }
+    public override bool IsEmpty => Value == External.DB.SlabShapeEditCurvedEdgeCondition.None;
 
     public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
     (
       new Dictionary<int, string>
       {
-        { (int) ARDB.WallLocationLine.WallCenterline,      "Wall Centerline"       },
-        { (int) ARDB.WallLocationLine.CoreCenterline,      "Core Centerline"       },
-        { (int) ARDB.WallLocationLine.FinishFaceExterior,  "Finish Face: Exterior" },
-        { (int) ARDB.WallLocationLine.FinishFaceInterior,  "Finish Face: Interior" },
-        { (int) ARDB.WallLocationLine.CoreExterior,        "Core Face: Exterior"   },
-        { (int) ARDB.WallLocationLine.CoreInterior,        "Core Face: Interior"   },
+        { (int) External.DB.SlabShapeEditCurvedEdgeCondition.None,           "None" },
+        { (int) External.DB.SlabShapeEditCurvedEdgeCondition.ConformToCurve, "Conform To Curve" },
+        { (int) External.DB.SlabShapeEditCurvedEdgeCondition.ProjectToSide,  "Project To Side" },
       }
     );
   }
@@ -323,6 +321,30 @@ namespace RhinoInside.Revit.GH.Types
         { (int) ARDB.SpatialElementBoundaryLocation.Center,        "Center" },
         { (int) ARDB.SpatialElementBoundaryLocation.CoreBoundary,  "Core: Boundary" },
         { (int) ARDB.SpatialElementBoundaryLocation.CoreCenter,    "Core: Center" }
+      }
+    );
+  }
+
+  [
+    ComponentGuid("2A3E4872-EF41-442A-B886-8B7DBA73DFE2"),
+    Name("Wall Location Line"),
+    Description("Contains a collection of Revit wall location line values"),
+  ]
+  public class WallLocationLine : GH_Enum<ARDB.WallLocationLine>
+  {
+    public WallLocationLine() : base() { }
+    public WallLocationLine(ARDB.WallLocationLine value) : base(value) { }
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) ARDB.WallLocationLine.WallCenterline,      "Wall Centerline"       },
+        { (int) ARDB.WallLocationLine.CoreCenterline,      "Core Centerline"       },
+        { (int) ARDB.WallLocationLine.FinishFaceExterior,  "Finish Face: Exterior" },
+        { (int) ARDB.WallLocationLine.FinishFaceInterior,  "Finish Face: Interior" },
+        { (int) ARDB.WallLocationLine.CoreExterior,        "Core Face: Exterior"   },
+        { (int) ARDB.WallLocationLine.CoreInterior,        "Core Face: Interior"   },
       }
     );
   }

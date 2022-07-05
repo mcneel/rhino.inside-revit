@@ -63,26 +63,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 #endif
 
-    struct CurveReferenceEqualityComparer : IEqualityComparer<Curve>
+    public static IList<IList<CurveElement>> GetProfileCurveElements(this Sketch sketch)
     {
-      public bool Equals(Curve x, Curve y) => x.Reference.EqualTo(y.Reference);
-      public int GetHashCode(Curve obj) => obj.Reference.ElementId.IntegerValue;
-    }
-
-    public static IList<IList<ModelCurve>> GetAllModelCurves(this Sketch sketch)
-    {
-      var modelCurves = new IList<ModelCurve>[sketch.Profile.Size];
+      var curveElements = new IList<CurveElement>[sketch.Profile.Size];
 
       var loopIndex = 0;
       foreach (var profile in sketch.Profile.Cast<CurveArray>())
       {
-        modelCurves[loopIndex++] = profile.Cast<Curve>().
-          Distinct(default(CurveReferenceEqualityComparer)).
-          Select(x => sketch.Document.GetElement(x.Reference.ElementId) as ModelCurve).
+        curveElements[loopIndex++] = profile.Cast<Curve>().
+          Distinct(CurveEqualityComparer.Reference).
+          Select(x => sketch.Document.GetElement(x.Reference.ElementId) as CurveElement).
           ToArray();
       }
 
-      return modelCurves;
+      return curveElements;
     }
 
 #if !REVIT_2022
@@ -102,4 +96,60 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 #endif
   }
+
+#if REVIT_2022
+  public static class SketchEditScopeExtension
+  {
+    public static bool IsSketchEditingSupportedForSketchBasedElement(this SketchEditScope scope, Element element)
+    {
+#if REVIT_2023
+      return scope.IsSketchEditingSupportedForSketchBasedElement(element.Id);
+#else
+      switch (element)
+      {
+        case Ceiling ceiling: return true;
+        case Floor floor:     return true;
+        case Wall wall:       return wall.CanHaveProfileSketch();
+        case Opening opening: return true;
+      }
+
+      return false;
+#endif
+    }
+
+#if !REVIT_2023
+    public static bool IsElementWithoutSketch(this SketchEditScope scope, ElementId elementId)
+    {
+      // Revit returns false even on Walls whithout sketch.
+      return false;
+    }
+    public static void StartWithNewSketch(this SketchEditScope scope, ElementId elementId)
+    {
+      throw new System.NotImplementedException($"{nameof(StartWithNewSketch)} is not implement.");
+    }
+#endif
+
+    public static bool IsElementWithoutSketch(this SketchEditScope scope, Element element)
+    {
+      return element.GetSketch() is null;
+    }
+
+    public static Sketch StartWithNewSketch(this SketchEditScope scope, Element element)
+    {
+      switch (element)
+      {
+        case Wall wall:
+          using (var tx = element.Document.CommitScope())
+          {
+            var sketch = wall.CreateProfileSketch();
+            tx.Commit();
+            return sketch;
+          }
+      }
+
+      scope.StartWithNewSketch(element.Id);
+      return element.GetSketch();
+    }
+  }
+#endif
 }

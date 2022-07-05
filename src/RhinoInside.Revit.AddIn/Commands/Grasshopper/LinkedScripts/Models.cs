@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Windows.Media.Imaging;
+using System.Drawing;
+using System.Drawing.Interop;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -103,8 +105,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
         return script;
       }
-      else
-        return null;
+      else return null;
     }
 
     string IconImageData = null;
@@ -115,22 +116,17 @@ namespace RhinoInside.Revit.AddIn.Commands
         // if SVG
         if (IconImageData.IndexOf("<svg", StringComparison.OrdinalIgnoreCase) > 0)
         {
-          return Rhino.UI.DrawingUtilities.BitmapFromSvg(
-            IconImageData, width, height
-            ).ToBitmapImage();
+          return Rhino.UI.DrawingUtilities.BitmapFromSvg(IconImageData, width, height).
+            ToBitmapImage();
         }
         // else assume bitmap
         else
         {
-          return new System.Drawing.Bitmap(
-            new System.IO.MemoryStream(
-              System.Convert.FromBase64String(IconImageData)
-              )
-            ).ToBitmapImage(width, height);
+          return new Bitmap(new MemoryStream(System.Convert.FromBase64String(IconImageData))).
+            ToBitmapImage(width, height);
         }
       }
-      else
-        return null;
+      else return null;
     }
   }
 

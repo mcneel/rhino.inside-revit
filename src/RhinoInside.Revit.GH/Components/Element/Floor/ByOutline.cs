@@ -31,58 +31,8 @@ namespace RhinoInside.Revit.GH.Components.Families
     {
       if (element is null) return false;
 
-      if (element.GetSketch() is ARDB.Sketch sketch)
-      {
-        var profiles = sketch.Profile.ToArray(GeometryDecoder.ToPolyCurve);
-        if (profiles.Length != boundaries.Count)
-          return false;
-
-        var tol = GeometryObjectTolerance.Model;
-        var loops = sketch.GetAllModelCurves();
-        var plane = sketch.SketchPlane.GetPlane().ToPlane();
-
-        var pi = 0;
-        foreach (var boundary in boundaries)
-        {
-          var profile = Curve.ProjectToPlane(boundary, plane);
-
-          if
-          (
-            !Curve.GetDistancesBetweenCurves(profiles[pi], profile, tol.VertexTolerance, out var max, out var _, out var _, out var _, out var _, out var _) ||
-            max > tol.VertexTolerance
-          )
-          {
-            var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
-              polyCurve.DuplicateSegments() :
-              new Curve[] { profile };
-
-            if (pi < loops.Count)
-            {
-              var loop = loops[pi];
-              if (segments.Length != loop.Count)
-                return false;
-
-              var index = 0;
-              foreach (var edge in loop)
-              {
-                var segment = segments[(++index) % segments.Length];
-
-                var curve = default(ARDB.Curve);
-                if (edge.GeometryCurve is ARDB.HermiteSpline)
-                  curve = segment.ToHermiteSpline();
-                else
-                  curve = segment.ToCurve();
-
-                if(!edge.GeometryCurve.IsAlmostEqualTo(curve))
-                  edge.SetGeometryCurve(curve, false);
-              }
-            }
-          }
-
-          pi++;
-        }
-      }
-      else return false;
+      if (!(element.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, Vector3d.ZAxis)))
+        return false;
 
       if (element.GetTypeId() != type.Id)
       {
@@ -127,7 +77,7 @@ namespace RhinoInside.Revit.GH.Components.Families
     {
       if (boundary is null) return;
 
-      var tol = GeometryObjectTolerance.Model;
+      var tol = GeometryTolerance.Model;
       var normal = default(Vector3d); var maxArea = 0.0;
       var index = 0; var maxIndex = 0;
       foreach (var loop in boundary)
@@ -141,7 +91,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           !loop.TryGetPlane(out plane, tol.VertexTolerance) ||
           plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
         )
-          ThrowArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.");
+          ThrowArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.", boundary);
 
         using (var properties = AreaMassProperties.Compute(loop))
         {
@@ -199,10 +149,9 @@ namespace RhinoInside.Revit.GH.Components.Families
 #endif
         // We turn off analytical model off by default
         newFloor.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        newFloor.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL)?.Update(structural);
 
         ReplaceElement(ref floor, newFloor, ExcludeUniqueProperties);
-
-        newFloor.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL)?.Update(structural);
       }
 
       if (floor is object)

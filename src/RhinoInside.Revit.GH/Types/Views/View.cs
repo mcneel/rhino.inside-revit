@@ -1,18 +1,22 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using Grasshopper.Kernel.Types;
+using Rhino;
+using Rhino.DocObjects;
 using Rhino.Display;
 using Rhino.Geometry;
+using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using System.Diagnostics;
+  using Convert.DocObjects;
   using Convert.Geometry;
   using Convert.System.Drawing;
+  using Convert.Units;
   using External.DB.Extensions;
-  using Convert.DocObjects;
 
   [Kernel.Attributes.Name("View")]
   public interface IGH_View : IGH_Element { }
@@ -53,7 +57,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Interval2D)))
       {
-        var outline = Outline;
+        var outline = GetOutline(ActiveSpace.ModelSpace);
         target = outline.IsValid ? (Q) (object) new GH_Interval2D(outline) : default;
 
         return true;
@@ -97,24 +101,51 @@ namespace RhinoInside.Revit.GH.Types
     public ViewType ViewType => Value is ARDB.View view ?
       new ViewType(view.ViewType) : default;
 
-    public UVInterval Outline
-    {
-      get
-      {
-        if (Value is ARDB.View view)
-        {
-          var outline = view.Outline;
-          var modelUnits = Revit.ModelUnits;
-          if (!outline.IsUnset()) return new UVInterval
-          (
-            new Interval(outline.Min.U * modelUnits, outline.Max.U * modelUnits),
-            new Interval(outline.Min.V * modelUnits, outline.Max.V * modelUnits)
-          );
-        }
+    public virtual ARDB.ElementId GenLevelId => Value?.GenLevel.Id;
+    public Level GenLevel => GenLevelId is ARDB.ElementId levelId ? new Level(Document, levelId) : default;
 
-        return new UVInterval(NaN.Interval, NaN.Interval);
+    public double Scale => Value is ARDB.View view ?
+      view.Scale == 0 ? 1.0 : (double)view.Scale :
+      double.NaN;
+
+    public UVInterval GetOutline(ActiveSpace space) => Rhinoceros.InvokeInHostContext(() =>
+    {
+      if (Value is ARDB.View view)
+      {
+        using (var uiDoc = new Autodesk.Revit.UI.UIDocument(view.Document))
+        {
+          var selectedIds = uiDoc.Selection.GetElementIds();
+
+          try
+          {
+            // Clear selection
+            if (selectedIds.Count > 0)
+              uiDoc.Selection.SetElementIds(new ARDB.ElementId[] { });
+
+            using (var outline = view.Outline)
+            {
+              var unitsScale = UnitScale.Internal / UnitScale.GetUnitScale(RhinoDoc.ActiveDoc, space == ActiveSpace.None ? ActiveSpace.PageSpace : space);
+              var viewScale = space == ActiveSpace.None ? 1.0 : (view.Scale == 0 ? 1.0 : (double) view.Scale);
+
+              if (!outline.IsUnset()) return new UVInterval
+              (
+                new Interval(viewScale * outline.Min.U * unitsScale, viewScale * outline.Max.U * unitsScale),
+                new Interval(viewScale * outline.Min.V * unitsScale, viewScale * outline.Max.V * unitsScale)
+              );
+            }
+          }
+          catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+          finally
+          {
+            // Restore selection
+            if (selectedIds.Count > 0)
+              uiDoc.Selection.SetElementIds(selectedIds);
+          }
+        }
       }
-    }
+
+      return new UVInterval(NaN.Interval, NaN.Interval);
+    });
 
     public Plane Location => Value is ARDB.View view ? new Plane
     (
@@ -129,43 +160,40 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.View view)
-        {
-          var box = view.get_BoundingBox(default).ToBox();
-          var outline = Outline;
-          var scale = view.Scale == 0 ? 1 : view.Scale;
-          return new PlaneSurface
-          (
-            plane: box.Plane,
-            xExtents: new Interval(outline.U0 * scale, outline.U1 * scale),
-            yExtents: new Interval(outline.V0 * scale, outline.V1 * scale)
-          );
-        }
+        var outline = GetOutline(ActiveSpace.ModelSpace);
+        if (outline.IsValid) return new PlaneSurface
+        (
+          plane: Location,
+          xExtents: new Interval(outline.U0, outline.U1),
+          yExtents: new Interval(outline.V0, outline.V1)
+        );
 
         return default;
       }
     }
 
-    public DisplayMaterial ToDisplayMaterial()
+    public DisplayMaterial ToDisplayMaterial() => Rhinoceros.InvokeInHostContext(() =>
     {
       if (Value is ARDB.View view)
       {
         var swapFolder = Path.Combine(Core.SwapFolder, view.Document.GetFingerprintGUID().ToString());
         Directory.CreateDirectory(swapFolder);
 
-        var rect = view.GetOutlineRectangle().ToRectangle();
-        var fitDirection = rect.Width > rect.Height ?
-          ARDB.FitDirectionType.Horizontal :
-          ARDB.FitDirectionType.Vertical;
-        var pixelSize = Math.Max(rect.Width, rect.Height);
-        if (pixelSize == 0) return default;
-        pixelSize = Math.Min(4096, pixelSize);
-
         using (var uiDoc = new Autodesk.Revit.UI.UIDocument(view.Document))
         {
           var selectedIds = uiDoc.Selection.GetElementIds();
+
+          // Clear selection
           if (selectedIds.Count > 0)
             uiDoc.Selection.SetElementIds(new ARDB.ElementId[] { });
+
+          var rect = view.GetOutlineRectangle().ToRectangle();
+          var fitDirection = rect.Width > rect.Height ?
+            ARDB.FitDirectionType.Horizontal :
+            ARDB.FitDirectionType.Vertical;
+          var pixelSize = Math.Max(rect.Width, rect.Height);
+          if (pixelSize == 0) return default;
+          pixelSize = Math.Min(4096, pixelSize);
 
           try
           {
@@ -198,6 +226,7 @@ namespace RhinoInside.Revit.GH.Types
           catch (Autodesk.Revit.Exceptions.ApplicationException) { }
           finally
           {
+            // Restore selection
             if (selectedIds.Count > 0)
               uiDoc.Selection.SetElementIds(selectedIds);
           }
@@ -205,7 +234,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return default;
-    }
+    });
 
     public Transform GetModelToProjectionTransform()
     {
@@ -271,6 +300,23 @@ namespace RhinoInside.Revit.GH.Types
         new Interval(uv.Min.Y, uv.Max.Y)
       );
     }
+
+    #region Properties
+    public Phase Phase
+    {
+      get => Phase.FromElementId(Document, Value.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ARDB.ElementId.InvalidElementId) as Phase;
+      set
+      {
+        if (value is object && Value is ARDB.View view)
+        {
+          AssertValidDocument(value, nameof(Type));
+          InvalidateGraphics();
+
+          view.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.Update(value.Id);
+        }
+      }
+    }
+    #endregion
   }
 
   [Kernel.Attributes.Name("View Type")]

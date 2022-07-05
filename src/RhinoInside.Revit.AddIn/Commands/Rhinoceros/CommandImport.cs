@@ -66,6 +66,8 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       if (layer.HasName && layer.Name is string layerName)
       {
+        layerName = ElementNaming.MakeValidName(layerName);
+
         if (categories.TryGetValue(layerName, out var category)) id = category.Id;
         else
         {
@@ -158,7 +160,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       Rhino.Render.RenderMaterial mat
     )
     {
-      string name = mat.Name ?? mat.Id.ToString();
+      string name = ElementNaming.MakeValidName(mat.Name ?? mat.Id.ToString());
       var appearanceAssetId = ARDB.ElementId.InvalidElementId;
 
 #if REVIT_2018
@@ -301,6 +303,8 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       if(mat.HasName && mat.Name is string materialName)
       {
+        materialName = ElementNaming.MakeValidName(materialName);
+
         if (materials.TryGetValue(materialName, out var material)) id = material.Id;
         else
         {
@@ -612,7 +616,7 @@ namespace RhinoInside.Revit.AddIn.Commands
               else if (geometry is SubD subD) geometry = subD.ToBrep(SubDToBrepOptions.Default);
 
               if (translationVector != Vector3d.Zero)
-                geometry.Translate(translationVector);
+                geometry?.Translate(translationVector);
 
               try
               {
@@ -626,7 +630,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                     }
                     break;
                   case Curve curve:
-                    if (curve.TryGetPlane(out var plane, GeometryObjectTolerance.Internal.VertexTolerance / scaleFactor))
+                    if (curve.TryGetPlane(out var plane, GeometryTolerance.Internal.VertexTolerance / scaleFactor))
                     {
                       var sketchPlane = ARDB.SketchPlane.Create(doc, plane.ToPlane(scaleFactor));
                       foreach(var crv in curve.ToCurveMany(scaleFactor))

@@ -10,7 +10,6 @@ namespace RhinoInside.Revit.GH.Types
   public class ViewSheet : View
   {
     protected override Type ValueType => typeof(ARDB.ViewSheet);
-    public static explicit operator ARDB.ViewSheet(ViewSheet value) => value?.Value;
     public new ARDB.ViewSheet Value => base.Value as ARDB.ViewSheet;
 
     public ViewSheet() { }

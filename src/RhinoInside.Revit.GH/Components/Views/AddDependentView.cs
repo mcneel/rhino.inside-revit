@@ -64,21 +64,26 @@ namespace RhinoInside.Revit.GH.Components.Views
     {
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
       else Params.TrySetData(DA, "View", () => view);
-      var doc = Types.Document.FromValue(view.Document);
 
       ReconstructElement<ARDB.View>
       (
-        doc.Value, _Dependent_, (dependent) =>
+        view.Document, _Dependent_, dependent =>
         {
-          // Compute
-          try
+          if (!view.Value.CanViewBeDuplicated(ARDB.ViewDuplicateOption.AsDependent))
           {
-            if (dependent?.GetPrimaryViewId() != view.Id || !dependent.Document.Equals(doc.Value))
-              dependent = doc.Value.GetElement(view.Value.Duplicate(ARDB.ViewDuplicateOption.AsDependent)) as ARDB.View;
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{view.DisplayName}' view can not be duplicated as Dependent. {{{view.Id}}}");
+            return null;
           }
-          catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
+
+          // Compute
+          if
+          (
+            dependent is null ||
+            dependent.GetPrimaryViewId() != view.Id ||
+            !dependent.Document.Equals(view.Document)
+          )
           {
-            throw new Exceptions.RuntimeArgumentException("View", e.Message, view);
+            dependent = view.Document.GetElement(view.Value.Duplicate(ARDB.ViewDuplicateOption.AsDependent)) as ARDB.View;
           }
 
           DA.SetData(_Dependent_, dependent);
