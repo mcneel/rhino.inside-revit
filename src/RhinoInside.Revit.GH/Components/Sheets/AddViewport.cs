@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Sheet", out ARDB.ViewSheet sheet)) return;
+      if (!Params.GetData(DA, "Sheet", out Types.ViewSheet sheet)) return;
 
       ReconstructElement<ARDB.Viewport>
       (
@@ -91,28 +91,13 @@ namespace RhinoInside.Revit.GH.Components.Sheets
 
           if (point is null)
           {
-            using (var outline = sheet.Outline)
-            {
-              var min = outline.Min;
-              var max = outline.Max;
-
-              point = new Point3d
-              (
-                GeometryDecoder.ToModelLength((min.U + max.U) * 0.5),
-                GeometryDecoder.ToModelLength((min.V + max.V) * 0.5),
-                0.0
-              );
-            }
+            var outline = sheet.GetOutline(Rhino.DocObjects.ActiveSpace.ModelSpace);
+            point = new Point3d(outline.U.Mid, outline.V.Mid, 0.0);
           }
-          else point = new Point3d
-          (
-            point.Value.X,
-            point.Value.Y,
-            0.0
-          );
+          else point = new Point3d(point.Value.X, point.Value.Y, 0.0);
 
           // Compute
-          viewport = Reconstruct(viewport, sheet, view, point.Value.ToXYZ());
+          viewport = Reconstruct(viewport, sheet.Value, view, point.Value.ToXYZ());
 
           DA.SetData(_Viewport_, viewport);
           return viewport;
