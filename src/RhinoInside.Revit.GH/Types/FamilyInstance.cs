@@ -73,6 +73,10 @@ namespace RhinoInside.Revit.GH.Types
                     att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
 
                   guid = doc.Objects.AddInstanceObject(idefIndex, Transform.PlaneToPlane(Plane.WorldXY, location), att);
+
+                  // AddInstanceObject places the object on the active view if is a Page
+                  if (doc.Views.ActiveView is Rhino.Display.RhinoPageView)
+                    doc.Objects.ModifyAttributes(guid, att, quiet: true);
                 }
               }
 
