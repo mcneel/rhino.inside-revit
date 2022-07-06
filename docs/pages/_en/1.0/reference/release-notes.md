@@ -17,6 +17,7 @@ group: Deployment & Configs
 - Added 'Document Tolerances' component.
 - Added 'Default File Locations' component.
 - Added 'Spatial Element Identity' component.
+- Added 'Delete Workset' component (Revit 2023).
 
 ### RC 
 
