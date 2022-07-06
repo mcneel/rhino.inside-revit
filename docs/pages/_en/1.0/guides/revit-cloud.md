@@ -8,7 +8,10 @@ thumbnail: /static/images/guides/revit-cloud.png
 ghdef: 
 ---
 
+{% capture link_note %}
 Both Rhino files and Grasshopper definitions can be integrated into {{ site.terms.bim360 }}.  The most recent files will be available to all team members as part of the project. All files will benefit from the backup, versioning and file locking that {{ site.terms.bim360 }} offers. 
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-cloud.png' %}
 
 By using the [BIM360 File Locker](https://github.com/eirannejad/BIM360FileLockerForRhino) plugin:
  - Files will lock if currently open, or manually marked as locked by another person

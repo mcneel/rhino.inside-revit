@@ -6,7 +6,11 @@ thumbnail: /static/images/guides/revit-to-rhino.png
 group: Essentials
 ---
 
+
+{% capture link_note %}
 This guide covers at sending Revit Elements to Rhino.
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-to-rhino.png' %}
 
 There are 3 stages to each of the examples below:
 

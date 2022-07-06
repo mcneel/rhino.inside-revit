@@ -6,7 +6,13 @@ thumbnail: /static/images/guides/rhino-to-revit.png
 group: Essentials
 ---
 
-In this guide we will take a look at how to send Rhino geometry to {{ site.terms.revit }} using Grasshopper. {{ site.terms.rir }} allows Rhino shapes and forms to be encoded into, and categorized as Revit elements. It is important to note that the easiest and quickest way of moving geometry into Revit may not be the best method. Determining which the final goal of the forms in Revit can improve the quality of the final Revit data structure and increase project efficiency.
+
+{% capture link_note %}
+In this guide we will take a look at how to send Rhino geometry to {{ site.terms.revit }} using Grasshopper.
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/rhino-to-revit.png' %}
+
+ {{ site.terms.rir }} allows Rhino shapes and forms to be encoded into, and categorized as Revit elements. It is important to note that the easiest and quickest way of moving geometry into Revit may not be the best method. Determining which the final goal of the forms in Revit can improve the quality of the final Revit data structure and increase project efficiency.
 
 Revit data model is based on a categorization system. Determining the best categories and subcategories to use will allow the elements to be drawn and scheduled properly. The challenge is that not every Revit category is available for each method discussed here.
 

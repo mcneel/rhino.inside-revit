@@ -8,9 +8,10 @@ thumbnail: /static/images/guides/revit-categories.png
 ghdef: 
 ---
 
-![]({{ "/static/images/guides/revit-types-categories.svg" | prepend: site.baseurl }})
-
+{% capture link_note %}
 Categories are the highest-level groups. These categories are built into Revit and loosely organize the components by their function. Categories cannot be removed or added-to in Revit. There are many Categories within Revit organized in various ways.
+{% endcapture %}
+{% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-categories.png' %}
 
 There are multiple category types in a Revit model:
   - *Model* categories e.g. *Walls*, *Doors*, *Floors*, *Roofs*, etc.
