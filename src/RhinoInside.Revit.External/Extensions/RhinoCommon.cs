@@ -16,6 +16,27 @@ namespace Rhino.Geometry
     public static readonly Box Box = new Box(Plane, BoundingBox);
   }
 
+  static class UnitSystemExtension
+  {
+    public static bool IsImperial(this UnitSystem us)
+    {
+      switch (us)
+      {
+        case UnitSystem.Microinches:
+        case UnitSystem.Mils:
+        case UnitSystem.Inches:
+        case UnitSystem.Feet:
+        case UnitSystem.Yards:
+        case UnitSystem.Miles:
+
+        case UnitSystem.PrinterPoints:
+        case UnitSystem.PrinterPicas:
+          return true;
+      }
+      return false;
+    }
+  }
+
   static class Vector3dExtension
   {
     /// <summary>
@@ -1174,11 +1195,16 @@ namespace Rhino.Display
 
     public static bool Scale(this RhinoViewport viewport, double scaleFactor)
     {
-      var scaleTransform = Rhino.Geometry.Transform.Scale(Rhino.Geometry.Point3d.Origin, scaleFactor);
+      var scaleTransform = Rhino.Geometry.Transform.Scale(Geometry.Point3d.Origin, scaleFactor);
       var projection = new Rhino.DocObjects.ViewportInfo(viewport);
-      projection.GetFrustum(out var left, out var right, out var bottom, out var top, out var near, out var far);
-      projection.SetFrustum(left * scaleFactor, right * scaleFactor, bottom * scaleFactor, top * scaleFactor, near * scaleFactor, far * scaleFactor);
       projection.TransformCamera(scaleTransform);
+
+      if (projection.IsParallelProjection)
+      {
+        projection.GetFrustum(out var left, out var right, out var bottom, out var top, out var near, out var far);
+        projection.SetFrustum(left * scaleFactor, right * scaleFactor, bottom * scaleFactor, top * scaleFactor, near * scaleFactor, far * scaleFactor);
+      }
+
       if (!viewport.SetViewProjection(projection, updateTargetLocation: true))
         return false;
 

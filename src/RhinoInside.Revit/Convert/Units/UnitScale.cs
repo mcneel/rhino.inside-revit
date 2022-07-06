@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Rhino;
 using Rhino.Display;
@@ -423,7 +424,7 @@ namespace RhinoInside.Revit.Convert.Units
       if (space == ActiveSpace.None)
         space = doc.Views.ModelSpaceIsActive ? ActiveSpace.ModelSpace : ActiveSpace.PageSpace;
 
-      var scaleFactor = (double) (scale ? GetUnitScale(doc, space) : None / value);
+      var scaleFactor = (double) ((scale ? GetUnitScale(doc, space) : None) / value);
 
       var (system, meters, name) = value;
       if (system == UnitSystem.CustomUnits)
@@ -433,20 +434,44 @@ namespace RhinoInside.Revit.Convert.Units
       else if (space == ActiveSpace.PageSpace)
         doc.AdjustPageUnitSystem(system, scale);
 
-      if (scaleFactor != 1.0)
+      if (scaleFactor == 1.0)
+        return;
+
+      switch (space)
       {
-        foreach (var view in doc.Views)
-        {
-          if (space == ActiveSpace.ModelSpace)
+        case ActiveSpace.ModelSpace:
+
+          foreach (var view in doc.Views)
           {
             if (view is RhinoPageView page)
             {
               foreach (var detail in page.GetDetailViews())
+              {
                 detail.Viewport.Scale(scaleFactor);
+                detail.CommitViewportChanges();
+              }
             }
             else view.MainViewport.Scale(scaleFactor);
           }
-        }
+
+          doc.ModelSpaceHatchScale *= scaleFactor;
+
+          foreach (var style in doc.DimStyles)
+          {
+            style.DimensionScale *= scaleFactor;
+            doc.DimStyles.Modify(style, style.Index, quiet: true);
+          }
+
+          foreach(var annotation in doc.Objects.OfType<AnnotationObjectBase>())
+          {
+            var geometry = annotation.AnnotationGeometry;
+            if(geometry.IsPropertyOverridden(DimensionStyle.Field.DimensionScale))
+              geometry.DimensionScale *= scaleFactor;
+
+            annotation.CommitChanges();
+          }
+
+          break;
       }
     }
 

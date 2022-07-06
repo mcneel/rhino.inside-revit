@@ -566,7 +566,7 @@ namespace RhinoInside.Revit
 
           // Like a Revit View at 1:100
           rhinoDoc.ModelSpaceHatchScalingEnabled = true;
-          rhinoDoc.ModelSpaceHatchScale = 100.0;
+          rhinoDoc.ModelSpaceHatchScale = 100.0 * (UnitScale.GetModelScale(rhinoDoc) / UnitScale.GetPageScale(rhinoDoc));
           rhinoDoc.Linetypes.LinetypeScale = 100.0;
 
           //switch (rhinoDoc.ModelUnitSystem)
@@ -597,7 +597,31 @@ namespace RhinoInside.Revit
 
       if (rhinoDoc.IsCreating)
       {
-        Revit.EnqueueIdlingAction(() => AdjustViewConstructionPlanes(rhinoDoc));
+        Revit.EnqueueIdlingAction
+        (
+          () =>
+          {
+            AdjustViewConstructionPlanes(rhinoDoc);
+
+            foreach (var view in rhinoDoc.Views)
+            {
+              var viewport = view.MainViewport;
+
+              // Zoom to grid
+              {
+                var cplane = viewport.GetConstructionPlane();
+                var min = cplane.Plane.PointAt(-cplane.GridSpacing * cplane.GridLineCount, -cplane.GridSpacing * cplane.GridLineCount, 0.0);
+                var max = cplane.Plane.PointAt(+cplane.GridSpacing * cplane.GridLineCount, +cplane.GridSpacing * cplane.GridLineCount, 0.0);
+                var bbox = new BoundingBox(min, max);
+
+                viewport.ZoomBoundingBox(bbox);
+              }
+
+              // Adjust to extens in case there is anything in the viewports like Grasshopper previews.
+              viewport.ZoomExtents();
+            }
+          }
+        );
         return;
       }
 
@@ -609,16 +633,19 @@ namespace RhinoInside.Revit
     {
       if (viewport.ParentView?.Document is RhinoDoc rhinoDoc)
       {
-        var modelUnitScale = UnitScale.GetModelScale(rhinoDoc);
-        bool imperial = modelUnitScale == UnitScale.Feet || modelUnitScale == UnitScale.Inches;
+        var viewportUnitScale = viewport.ParentView is RhinoPageView ?
+          UnitScale.GetPageScale(rhinoDoc) :
+          UnitScale.GetModelScale(rhinoDoc);
+
+        bool imperial = ((UnitSystem) viewportUnitScale).IsImperial();
 
         var modelGridSpacing = imperial ?
-        UnitScale.Convert(1.0, UnitScale.Yards, modelUnitScale) :
-        UnitScale.Convert(1.0, UnitScale.Meters, modelUnitScale);
+        UnitScale.Convert(1.0, UnitScale.Yards, viewportUnitScale) :
+        UnitScale.Convert(1.0, UnitScale.Meters, viewportUnitScale);
 
         var modelSnapSpacing = imperial ?
-        UnitScale.Convert(1.0, UnitScale.Yards, modelUnitScale) :
-        UnitScale.Convert(1.0, UnitScale.Meters, modelUnitScale);
+        UnitScale.Convert(1.0, UnitScale.Yards, viewportUnitScale) :
+        UnitScale.Convert(1.0, UnitScale.Meters, viewportUnitScale);
 
         var modelThickLineFrequency = imperial ? 6 : 5;
 
@@ -629,16 +656,6 @@ namespace RhinoInside.Revit
         cplane.ThickLineFrequency = modelThickLineFrequency;
 
         viewport.SetConstructionPlane(cplane);
-
-        var min = cplane.Plane.PointAt(-cplane.GridSpacing * cplane.GridLineCount, -cplane.GridSpacing * cplane.GridLineCount, 0.0);
-        var max = cplane.Plane.PointAt(+cplane.GridSpacing * cplane.GridLineCount, +cplane.GridSpacing * cplane.GridLineCount, 0.0);
-        var bbox = new BoundingBox(min, max);
-
-        // Zoom to grid
-        viewport.ZoomBoundingBox(bbox);
-
-        // Adjust to extens in case there is anything in the viewports like Grasshopper previews.
-        viewport.ZoomExtents();
       }
     }
     #endregion
