@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class Dimension : GraphicalElementT<Types.Dimension, ARDB.Dimension>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("BC546B0C-1BF0-48C6-AAA9-F4FD429DAD39");
 
     public Dimension() : base
