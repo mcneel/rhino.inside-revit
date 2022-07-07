@@ -101,16 +101,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return seed;
     }
 
-    #region File
+    #region Identity
     /// <summary>
-    /// The document's title.
+    /// The document's name.
     /// </summary>
     /// <param name="doc"></param>
     /// <returns>The file name of the document's disk file without extension.</returns>
     /// <remarks>
     /// This method returns an non empty string even if the project has not been saved yet.
     /// </remarks>
-    public static string GetTitle(this Document doc)
+    public static string GetName(this Document doc)
     {
       // Document.Title may contain the extension
       // on some Revit versions or depending on user settings.
@@ -122,22 +122,24 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// The document's file name.
+    /// The document's title.
     /// </summary>
     /// <param name="doc"></param>
     /// <returns>The file name of the document's disk file with extension.</returns>
     /// <remarks>
     /// This method returns an non empty string even if the project has not been saved yet.
     /// </remarks>
-    public static string GetFileName(this Document doc)
+    public static string GetTitle(this Document doc)
     {
       return string.IsNullOrEmpty(doc.PathName) ?
         Path.GetFileNameWithoutExtension(doc.Title) + (doc.IsFamilyDocument ? ".rfa" : ".rvt") :
         Path.GetFileName(doc.PathName);        
     }
+    #endregion
 
+    #region File
     /// <summary>
-    /// Gets the model path of the model.
+    /// Gets the model path of the document.
     /// </summary>
     /// <remarks>
     /// If <paramref name="doc"/> is still not saved this method returns null.

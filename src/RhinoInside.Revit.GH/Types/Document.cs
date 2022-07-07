@@ -86,7 +86,6 @@ namespace RhinoInside.Revit.GH.Types
     object IGH_Goo.ScriptVariable() => Value;
     public IGH_GooProxy EmitProxy() => new Proxy(this);
 
-
     bool GH_IO.GH_ISerializable.Read(GH_IReader reader)
     {
       Guid documentGUID = default;
@@ -239,21 +238,9 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public Guid DocumentGUID { get; protected set; } = default;
+
     public Uri ModelURI { get; protected set; } = default;
     public string PathName { get; protected set; } = default;
-    public string FileName
-    {
-      get
-      {
-        if (Value is ARDB.Document document)
-          return document.GetFileName();
-
-        if (!string.IsNullOrEmpty(PathName))
-          return Path.GetFileName(PathName);
-
-        return string.Empty;
-      }
-    }
 
     public Uri CentralModelURI { get; protected set; } = default;
     public string CentralPathName { get; protected set; } = default;
@@ -377,17 +364,19 @@ namespace RhinoInside.Revit.GH.Types
               if (match_path.Length == 1)
                 return FromValue(match_path[0]);
             }
-            else
+            else if (!string.IsNullOrEmpty(System.IO.Path.GetExtension(str)))
             {
-              // Find a matching FileName
-              var match_file = docs.Where(x => x.GetFileName().Equals(str, StringComparison.OrdinalIgnoreCase)).ToArray();
-              if (match_file.Length == 1)
-                return FromValue(match_file[0]);
-
               // Find a matching Title
               var match_title = docs.Where(x => x.GetTitle().Equals(str, StringComparison.OrdinalIgnoreCase)).ToArray();
               if (match_title.Length == 1)
                 return FromValue(match_title[0]);
+            }
+            else
+            {
+              // Find a matching Name
+              var match_name = docs.Where(x => x.GetName().Equals(str, StringComparison.OrdinalIgnoreCase)).ToArray();
+              if (match_name.Length == 1)
+                return FromValue(match_name[0]);
             }
           }
           break;
@@ -447,7 +436,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public virtual string DisplayName =>
-      IsValid ? FileName :
+      IsValid ? Title :
       !string.IsNullOrEmpty(PathName) ? $"{PathName}" :
       !(ModelURI is null) ? $"{ModelURI}" :
       DocumentGUID != Guid.Empty ? $"{DocumentGUID.ToString("B").ToUpperInvariant()}" :
@@ -484,9 +473,9 @@ namespace RhinoInside.Revit.GH.Types
         get
         {
           if (owner is null) return "<Active Document>";
-          if (string.IsNullOrEmpty(owner.FileName)) return owner.DisplayName;
-          if (owner.IsValid) return owner.FileName.TripleDotPath(27);
-          return $"⚠ {owner.FileName.TripleDotPath(25)}";
+          if (string.IsNullOrEmpty(owner.Title)) return owner.DisplayName;
+          if (owner.IsValid) return owner.Title.TripleDotPath(27);
+          return $"⚠ {owner.Title.TripleDotPath(25)}";
         }
       }
 
@@ -496,11 +485,10 @@ namespace RhinoInside.Revit.GH.Types
         get
         {
           if (owner is null) return "<Active Document>";
-          if (string.IsNullOrEmpty(owner.FileName)) return owner.DisplayName;
-          return owner.FileName;
+          if (string.IsNullOrEmpty(owner.Title)) return owner.DisplayName;
+          return owner.Title;
         }
       }
-
 
       public Guid? DocumentGUID => owner?.DocumentGUID;
       public string ModelURI => owner?.ModelURI?.ToString();
@@ -511,10 +499,58 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Identity
-    public string Title => Value?.GetTitle() ?? Path.GetFileNameWithoutExtension(FileName);
+    internal string Title
+    {
+      get
+      {
+        if (Value is ARDB.Document document)
+          return document.GetTitle();
+
+        if (!string.IsNullOrEmpty(PathName))
+          return Path.GetFileName(PathName);
+
+        return string.Empty;
+      }
+    }
+
+    public string Name => Value?.GetName() ?? Path.GetFileNameWithoutExtension(Title);
     public UnitSystem DisplayUnitSystem => Value is ARDB.Document document ?
       new UnitSystem { Value = (ARDB.UnitSystem) document.DisplayUnitSystem } :
       default;
+    #endregion
+
+    #region File
+    public string FilePath
+    {
+      get
+      {
+        using (var modelPath = Value?.GetModelPath())
+        {
+          if (modelPath is null) return default;
+          else if (modelPath.IsCloudPath())
+          {
+            using (var app = Value.Application)
+            {
+              return System.IO.Path.Combine
+              (
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Autodesk", "Revit", app.VersionName,
+                "CollaborationCache", app.LoginUserId,
+                modelPath.GetProjectGUID().ToString(),
+                $"{modelPath.GetModelGUID()}{System.IO.Path.GetExtension(Value.PathName)}"
+              );
+            }
+          }
+
+        }
+
+        return System.IO.File.Exists(Value.PathName) ? Value.PathName : default;
+      }
+    }
+
+    public string FileName => Path.GetFileName(FilePath);
+
+    public string FileExtension => Path.GetExtension(FilePath);
     #endregion
 
     #region Version
@@ -612,7 +648,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (source is Document document)
       {
-        Name = document.FileName;
+        Name = document.Title;
         StateGUID = document.DocumentGUID;
         DocumentGUID = document.DocumentGUID;
         ModelURI = document.ModelURI;

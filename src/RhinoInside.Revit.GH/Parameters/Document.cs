@@ -291,7 +291,7 @@ namespace RhinoInside.Revit.GH.Parameters
           MessageBox.Show
           (
             Form.ActiveForm,
-            $"The model '{document.FileName}' is not currently open on Revit{Environment.NewLine}" +
+            $"The model '{document.Title}' is not currently open on Revit{Environment.NewLine}" +
             $"Do you want to open it from:{Environment.NewLine}" +
             Environment.NewLine +
             $"{document.PathName}",

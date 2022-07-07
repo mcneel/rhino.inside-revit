@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 {
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.6")]
+  [ComponentVersion(introduced: "1.0", updated: "1.9")]
   public class DocumentIdentity : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("94BD655C-77DD-4A88-BDDB-B9456C45F06C");
@@ -33,25 +33,28 @@ namespace RhinoInside.Revit.GH.Components.Documents
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_Guid>("Document ID", "ID", "A unique identifier for the document"),
-      ParamDefinition.Create<Param_String>("Title", "T", "Document title"),
-      ParamDefinition.Create<Param_Boolean>("Is Family", "F", "Identifies if the document is a family document"),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.UnitSystem>>("Unit System", "U", "Identifies if the document units"),
+      ParamDefinition.Create<Param_String>("Title", "T", "Document title", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Name", "N", "Document name whithout extension"),
+      ParamDefinition.Create<Param_Boolean>("Is Family", "F", "Identifies if the document is a family document", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.UnitSystem>>("Unit System", "US", "Document unit system", relevance: ParamRelevance.Primary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      else Params.TrySetData(DA, "Document", () => doc);
 
-      DA.SetData("Document ID", doc.GetFingerprintGUID());
-      DA.SetData("Title", doc.Title);
-      DA.SetData("Is Family", doc.IsFamilyDocument);
-      DA.SetData("Unit System", (ARDB.UnitSystem) doc.DisplayUnitSystem);
+      DA.SetData("Document ID", doc.DocumentGUID);
+      Params.TrySetData(DA, "Title", () => doc.Title);
+      Params.TrySetData(DA, "Name", () => doc.Name);
+      Params.TrySetData(DA, "Is Family", () => doc.Value.IsFamilyDocument);
+      Params.TrySetData(DA, "Unit System", () => (ARDB.UnitSystem) doc.Value.DisplayUnitSystem);
     }
   }
 
-  [ComponentVersion(introduced: "1.0", updated: "1.6")]
+  [ComponentVersion(introduced: "1.0", updated: "1.9")]
   public class DocumentFile : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("C1C15806-311A-4A07-9DAE-6DBD1D98EC05");
@@ -78,8 +81,12 @@ namespace RhinoInside.Revit.GH.Components.Documents
     static readonly ParamDefinition[] outputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_FilePath>("Path", "P", "The fully qualified path of the document's disk file"),
+      ParamDefinition.Create<Param_String>("Model Path", "MP", "The document path"),
+      ParamDefinition.Create<Param_FilePath>("Path", "P", "The fully qualified path of the document's disk file", relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Param_String>("Name", "N", "The document's file name", relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Param_String>("Extension", "P", "The document's file extension", relevance: ParamRelevance.Secondary),
       ParamDefinition.Create<Param_Boolean>("Read Only", "RO", "Identifies if the document was opened from a read-only file", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Size", "S", "Document's file size (bytes)", relevance: ParamRelevance.Primary),
     };
 
     public override void AddedToDocument(GH_Document document)
@@ -98,8 +105,28 @@ namespace RhinoInside.Revit.GH.Components.Documents
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       else Params.TrySetData(DA, "Document", () => doc);
 
-      Params.TrySetData(DA, "Path", () => doc.PathName);
+      Params.TrySetData(DA, "Model Path", () => doc.PathName);
+      Params.TrySetData(DA, "Path", () => doc.FilePath);
+      Params.TrySetData(DA, "Name", () => doc.FileName);
+      Params.TrySetData(DA, "Extension", () => doc.FileExtension);
       Params.TrySetData(DA, "Read Only", () => doc.Value?.IsReadOnlyFile);
+      Params.TrySetData(DA, "Size", () =>
+      {
+        try
+        {
+          if (doc.FilePath is string path)
+          {
+            var info = new System.IO.FileInfo(path);
+            if (info.Exists) return (double?) info.Length;
+          }
+        }
+        catch (Exception e)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
+        }
+
+        return default;
+      });
     }
   }
 
