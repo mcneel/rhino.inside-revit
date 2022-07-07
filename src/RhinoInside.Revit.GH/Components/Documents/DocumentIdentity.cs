@@ -35,6 +35,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_Guid>("Document ID", "ID", "A unique identifier for the document"),
+      ParamDefinition.Create<Param_String>("Model Path", "MP", "The document path"),
       ParamDefinition.Create<Param_String>("Title", "T", "Document title", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_String>("Name", "N", "Document name whithout extension"),
       ParamDefinition.Create<Param_Boolean>("Is Family", "F", "Identifies if the document is a family document", relevance: ParamRelevance.Primary),
@@ -47,6 +48,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
       else Params.TrySetData(DA, "Document", () => doc);
 
       DA.SetData("Document ID", doc.DocumentGUID);
+      Params.TrySetData(DA, "Model Path", () => doc.ModelPath);
       Params.TrySetData(DA, "Title", () => doc.Title);
       Params.TrySetData(DA, "Name", () => doc.Name);
       Params.TrySetData(DA, "Is Family", () => doc.Value.IsFamilyDocument);
@@ -81,12 +83,11 @@ namespace RhinoInside.Revit.GH.Components.Documents
     static readonly ParamDefinition[] outputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_String>("Model Path", "MP", "The document path"),
-      ParamDefinition.Create<Param_FilePath>("Path", "P", "The fully qualified path of the document's disk file", relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Param_FilePath>("Path", "P", "The fully qualified path of the document's disk file"),
       ParamDefinition.Create<Param_String>("Name", "N", "The document's file name", relevance: ParamRelevance.Secondary),
       ParamDefinition.Create<Param_String>("Extension", "P", "The document's file extension", relevance: ParamRelevance.Secondary),
-      ParamDefinition.Create<Param_Boolean>("Read Only", "RO", "Identifies if the document was opened from a read-only file", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Number>("Size", "S", "Document's file size (bytes)", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Read Only", "RO", "Identifies if the document was opened from a read-only file", relevance: ParamRelevance.Primary),
     };
 
     public override void AddedToDocument(GH_Document document)
@@ -105,11 +106,9 @@ namespace RhinoInside.Revit.GH.Components.Documents
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       else Params.TrySetData(DA, "Document", () => doc);
 
-      Params.TrySetData(DA, "Model Path", () => doc.PathName);
       Params.TrySetData(DA, "Path", () => doc.FilePath);
       Params.TrySetData(DA, "Name", () => doc.FileName);
       Params.TrySetData(DA, "Extension", () => doc.FileExtension);
-      Params.TrySetData(DA, "Read Only", () => doc.Value?.IsReadOnlyFile);
       Params.TrySetData(DA, "Size", () =>
       {
         try
@@ -127,6 +126,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
         return default;
       });
+      Params.TrySetData(DA, "Read Only", () => doc.Value?.IsReadOnlyFile);
     }
   }
 
@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     {
       ParamDefinition.Create<Param_Boolean>("IsWorkshared", "WS", "Identifies if worksharing have been enabled in the document", GH_ParamAccess.item),
       ParamDefinition.Create<Param_String>("ServerPath", "SP", "Central Server Path", GH_ParamAccess.item),
-      ParamDefinition.Create<Param_Guid>("CentralGUID", "WCGUID", "The central GUID of the server-based model", GH_ParamAccess.item),
+      ParamDefinition.Create<Param_Guid>("CentralGUID", "CID", "The central GUID of the server-based model", GH_ParamAccess.item),
       ParamDefinition.Create<Param_Boolean>("Detached", "D", "Identifies if a workshared document is detached", GH_ParamAccess.item),
     };
 

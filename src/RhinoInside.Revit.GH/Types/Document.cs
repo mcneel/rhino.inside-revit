@@ -499,6 +499,17 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Identity
+    public string ModelPath
+    {
+      get
+      {
+        if (Value?.GetModelPath() is ARDB.ModelPath modelPath)
+          return ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath);
+
+        return string.Empty;
+      }
+    }
+
     internal string Title
     {
       get
