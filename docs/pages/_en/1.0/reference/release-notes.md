@@ -18,6 +18,7 @@ group: Deployment & Configs
 - Added 'Default File Locations' component.
 - Added 'Spatial Element Identity' component.
 - Added 'Delete Workset' component (Revit 2023).
+- Added 'Default 3D View' component.
 
 ### RC 
 

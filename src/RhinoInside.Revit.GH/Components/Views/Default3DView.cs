@@ -5,17 +5,18 @@ using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  public class ViewActive : ZuiComponent
+  [ComponentVersion(introduced: "1.0")]
+  public class Default3DView : ZuiComponent
   {
-    public override Guid ComponentGuid => new Guid("7CCF350C-80CC-42D0-85BA-78544FD59F4A");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override string IconTag => "A";
+    public override Guid ComponentGuid => new Guid("F2277265-8845-403B-83A9-EF670FA036C8");
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    protected override string IconTag => "3D";
 
-    public ViewActive() : base
+    public Default3DView() : base
     (
-      name: "Active Graphical View",
-      nickname: "Active",
-      description: "Gets the active graphical view",
+      name: "Default 3D View",
+      nickname: "3D View",
+      description: "Gets the default 3D view",
       category: "Revit",
       subCategory: "View"
     )
@@ -30,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.View>("Active View", "V", "Active graphical view", GH_ParamAccess.item)
+      ParamDefinition.Create<Parameters.View3D>("3D View", "V", "Default 3D view")
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -38,7 +39,8 @@ namespace RhinoInside.Revit.GH.Components.Views
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc))
         return;
 
-      DA.SetData("Active View", doc.Value?.GetActiveGraphicalView());
+      var view = doc.Value.GetDefault3DView();
+      DA.SetData("3D View", view);
     }
 
     #region UI
@@ -47,6 +49,14 @@ namespace RhinoInside.Revit.GH.Components.Views
       base.AppendAdditionalComponentMenuItems(menu);
 
       var activeApp = Revit.ActiveUIApplication;
+      var Default3DViewId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Default3DView);
+      Menu_AppendItem
+      (
+        menu, "Open Default 3D View…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, Default3DViewId, () => ExpireSolution(true)),
+        activeApp.CanPostCommand(Default3DViewId), false
+      );
+
 #if REVIT_2019
       var CloseInactiveViewsId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.CloseInactiveViews);
       Menu_AppendItem

@@ -6,6 +6,8 @@ using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.7")]
   public class View3D : View<Types.View3D, ARDB.View3D>
   {
@@ -17,18 +19,19 @@ namespace RhinoInside.Revit.GH.Parameters
 
     #region UI
     protected override ARDB.ViewFamily ViewFamily => ARDB.ViewFamily.ThreeDimensional;
-    public override void Menu_AppendActions(ToolStripDropDown menu)
+
+    protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      base.Menu_AppendActions(menu);
+      base.Menu_AppendPromptNew(menu);
 
       var activeApp = Revit.ActiveUIApplication;
       {
+        var exist = activeApp.ActiveUIDocument.Document.GetDefault3DView() is object;
         var commandId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.Default3DView);
         Menu_AppendItem
         (
-          menu, "Default 3D View…",
-          (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-          activeApp.CanPostCommand(commandId), false
+          menu, "Create Default 3D View…", Menu_PromptNew(commandId),
+          !exist && activeApp.CanPostCommand(commandId), false
         );
       }
     }

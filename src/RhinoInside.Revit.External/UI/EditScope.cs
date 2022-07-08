@@ -33,6 +33,14 @@ namespace RhinoInside.Revit.External.UI
         await scope.ExecuteCommandAsync(commandId);
     }
 
+    internal static async void PostCommand(UIHostApplication app, RevitCommandId commandId, Action continuation)
+    {
+      using (var scope = new EditScope(app))
+        await scope.ExecuteCommandAsync(commandId);
+
+      continuation();
+    }
+
     internal CommandAwaitable ExecuteCommandAsync(RevitCommandId commandId) =>
       new CommandAwaitable(uiApplication.Value as UIApplication, commandId);
 
