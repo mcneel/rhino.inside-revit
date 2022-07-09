@@ -55,8 +55,8 @@ namespace RhinoInside.Revit.GH.Components.Views
         (sender, arg) => External.UI.EditScope.PostCommand(activeApp, CloseInactiveViewsId),
         activeApp.CanPostCommand(CloseInactiveViewsId), false
       );
-    }
 #endif
+    }
     #endregion
   }
 }
