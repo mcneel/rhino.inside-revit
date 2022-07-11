@@ -79,6 +79,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return default;
     }
+
+    /// <summary>
+    /// Gets a string version of the path of a given ModelPath.
+    /// </summary>
+    /// <param name="self"></param>
+    /// <returns>The path in string form.</returns>
+    public static string ToUserVisiblePath(this ModelPath self)
+    {
+      return self is object ? ModelPathUtils.ConvertModelPathToUserVisiblePath(self) : default;
+    }
   }
 
   public static class ModelUri
@@ -101,7 +111,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
       else
       {
-        var path = ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath);
+        var path = modelPath.ToUserVisiblePath();
         if (Uri.TryCreate(path, UriKind.Absolute, out var uri))
           return uri;
       }
