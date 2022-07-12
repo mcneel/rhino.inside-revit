@@ -113,19 +113,22 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
 
     bool Reuse
     (
-      ARDB.ModelCurve referenceLine,
+      ARDB.ModelCurve modelCurve,
       ARDB.Curve curve, ARDB.SketchPlane sketchPlane
     )
     {
-      if (referenceLine is null) return false;
+      if (modelCurve is null) return false;
 
-      if (!curve.IsSameKindAs(referenceLine.GeometryCurve)) return false;
-      if (referenceLine.SketchPlane.IsEquivalent(sketchPlane))
+      using (var geometryCurve = modelCurve.GeometryCurve)
       {
-        if (!curve.AlmostEquals(referenceLine.GeometryCurve, GeometryTolerance.Internal.VertexTolerance))
-          referenceLine.SetGeometryCurve(curve, true);
+        if (!curve.IsSameKindAs(geometryCurve)) return false;
+        if (modelCurve.SketchPlane.IsEquivalent(sketchPlane))
+        {
+          if (!curve.AlmostEquals(geometryCurve, modelCurve.Document.Application.VertexTolerance))
+            modelCurve.SetGeometryCurve(curve, true);
+        }
+        else modelCurve.SetSketchPlaneAndCurve(sketchPlane, curve);
       }
-      else referenceLine.SetSketchPlaneAndCurve(sketchPlane, curve);
 
       return true;
     }
@@ -136,12 +139,9 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       ARDB.Curve curve, ARDB.SketchPlane sketchPlane
     )
     {
-      var referenceLine = default(ARDB.ModelCurve);
-
-      if (doc.IsFamilyDocument)
-        referenceLine = doc.FamilyCreate.NewModelCurve(curve, sketchPlane);
-      else
-        referenceLine = doc.Create.NewModelCurve(curve, sketchPlane);
+      var referenceLine = doc.IsFamilyDocument ?
+        doc.FamilyCreate.NewModelCurve(curve, sketchPlane) :
+        doc.Create.NewModelCurve(curve, sketchPlane);
 
       referenceLine.ChangeToReferenceLine();
       return referenceLine;
