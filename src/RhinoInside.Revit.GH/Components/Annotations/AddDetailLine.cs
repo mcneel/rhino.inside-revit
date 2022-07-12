@@ -107,19 +107,21 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (detailCurve is null) return false;
       if (detailCurve.OwnerViewId != view.Id) return false;
 
-      if (!curve.IsSameKindAs(detailCurve.GeometryCurve)) return false;
-      if (!curve.AlmostEquals(detailCurve.GeometryCurve, detailCurve.Document.Application.VertexTolerance))
-        detailCurve.SetGeometryCurve(curve, overrideJoins: true);
+      using (var geometryCurve = detailCurve.GeometryCurve)
+      {
+        if (!curve.IsSameKindAs(geometryCurve)) return false;
+        if (!curve.AlmostEquals(geometryCurve, detailCurve.Document.Application.VertexTolerance))
+          detailCurve.SetGeometryCurve(curve, overrideJoins: true);
+      }
 
       return true;
     }
 
     ARDB.DetailCurve Create(ARDB.View view, ARDB.Curve curve)
     {
-      if (view.Document.IsFamilyDocument)
-        return view.Document.FamilyCreate.NewDetailCurve(view, curve);
-      else
-        return view.Document.Create.NewDetailCurve(view, curve);
+      return view.Document.IsFamilyDocument ?
+        view.Document.FamilyCreate.NewDetailCurve(view, curve) :
+        view.Document.Create.NewDetailCurve(view, curve);
     }
 
     ARDB.DetailCurve Reconstruct(ARDB.DetailCurve detailCurve, ARDB.View view, ARDB.Curve curve)
