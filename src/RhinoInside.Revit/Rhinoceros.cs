@@ -102,7 +102,7 @@ namespace RhinoInside.Revit
       MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
       MainWindow.ExtendedWindowStyles |= ExtendedWindowStyles.AppWindow;
 
-      return External.ActivationGate.AddGateWindow(MainWindow.Handle);
+      return External.ActivationGate.AddGateWindow(MainWindow.Handle, Core.ActivationEvent);
     }
 
     internal static bool InitGrasshopper()
