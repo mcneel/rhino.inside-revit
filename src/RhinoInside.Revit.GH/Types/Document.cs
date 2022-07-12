@@ -551,7 +551,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (IsEmpty) return default;
         if (Value is ARDB.Document document) return document.GetPathName();
-        else if (ModelURI?.IsFileUri(out var localPath) == true) return localPath;
+        if (ModelURI is object && ModelURI.IsFileUri(out var localPath)) return localPath;
 
         return default;
       }
