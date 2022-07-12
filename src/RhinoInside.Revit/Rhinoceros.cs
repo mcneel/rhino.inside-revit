@@ -566,7 +566,7 @@ namespace RhinoInside.Revit
 
           // Like a Revit View at 1:100
           rhinoDoc.ModelSpaceHatchScalingEnabled = true;
-          rhinoDoc.ModelSpaceHatchScale = 100.0 * (UnitScale.GetModelScale(rhinoDoc) / UnitScale.GetPageScale(rhinoDoc));
+          rhinoDoc.ModelSpaceHatchScale = 100.0 * (UnitScale.GetPageScale(rhinoDoc) / UnitScale.GetModelScale(rhinoDoc));
           rhinoDoc.Linetypes.LinetypeScale = 100.0;
 
           //switch (rhinoDoc.ModelUnitSystem)
