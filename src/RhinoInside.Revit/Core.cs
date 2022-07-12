@@ -3,8 +3,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Autodesk.Revit.DB.Events;
-using Autodesk.Revit.UI;
+using ARUI = Autodesk.Revit.UI;
+using ARDB = Autodesk.Revit.DB;
 using Microsoft.Win32;
 using static RhinoInside.Revit.Diagnostics;
 using RhinoInside.Revit.External.ApplicationServices.Extensions;
@@ -76,6 +76,7 @@ namespace RhinoInside.Revit
     internal static bool IsolateSettings = true;
     internal static bool UseHostLanguage = true;
     internal static bool KeepUIOnTop = true;
+    internal static ARUI.ExternalEvent ActivationEvent = default;
     #endregion
 
     #region Constructor
@@ -131,9 +132,9 @@ namespace RhinoInside.Revit
       private set { if (!ReferenceEquals(host, value)) { host?.Dispose(); host = value; } }
     }
 
-    internal static Result OnStartup(UIControlledApplication uiCtrlApp)
+    internal static ARUI.Result OnStartup(ARUI.UIControlledApplication uiCtrlApp)
     {
-      if (uiCtrlApp.IsLateAddinLoading) return Result.Failed;
+      if (uiCtrlApp.IsLateAddinLoading) return ARUI.Result.Failed;
 
       using (var scope = Logger.LogScope())
       {
@@ -141,7 +142,7 @@ namespace RhinoInside.Revit
         {
           scope.LogTrace("Starting…", DisplayVersion);
           var result = Startup(uiCtrlApp);
-          if (result != Result.Succeeded) return result;
+          if (result != ARUI.Result.Succeeded) return result;
         }
 
         // Ensure we have a SwapFolder
@@ -159,14 +160,14 @@ namespace RhinoInside.Revit
           // Register Revit Failures
           External.DB.ExternalFailures.CreateFailureDefinitions();
 
-          EventHandler<ApplicationInitializedEventArgs> applicationInitialized = null;
+          EventHandler<ARDB.Events.ApplicationInitializedEventArgs> applicationInitialized = null;
           Host.Services.ApplicationInitialized += applicationInitialized = (sender, args) =>
           {
             Host.Services.ApplicationInitialized -= applicationInitialized;
             if (CurrentStatus < Status.Available) return;
 
             var app = sender as Autodesk.Revit.ApplicationServices.Application;
-            Host = new UIApplication(app);
+            Host = new ARUI.UIApplication(app);
             Convert.Geometry.GeometryTolerance.Internal = new Convert.Geometry.GeometryTolerance
             (
               app.AngleTolerance,
@@ -176,11 +177,11 @@ namespace RhinoInside.Revit
           };
         }
 
-        return Result.Succeeded;
+        return ARUI.Result.Succeeded;
       }
     }
 
-    internal static Result OnShutdown(UIControlledApplication uiCtrlApp)
+    internal static ARUI.Result OnShutdown(ARUI.UIControlledApplication uiCtrlApp)
     {
       using (Logger.LogScope())
       {
@@ -190,7 +191,7 @@ namespace RhinoInside.Revit
         }
         catch
         {
-          return Result.Failed;
+          return ARUI.Result.Failed;
         }
         finally
         {
@@ -219,10 +220,10 @@ namespace RhinoInside.Revit
     static readonly Version MinimumRevitVersion = new Version(2017, 0);
 #endif
 
-    static Result Startup(UIX.UIHostApplication app)
+    static ARUI.Result Startup(UIX.UIHostApplication app)
     {
       if (StartupMode == CoreStartupMode.Cancelled)
-        return Result.Cancelled;
+        return ARUI.Result.Cancelled;
 
       // Check if Revit.exe is a supported version
       var RevitVersion = new Version(app.Services.SubVersionNumber);
@@ -230,7 +231,7 @@ namespace RhinoInside.Revit
       {
         using
         (
-          var taskDialog = new TaskDialog("Update Revit")
+          var taskDialog = new ARUI.TaskDialog("Update Revit")
           {
             Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}.UpdateRevit",
             MainIcon = UIX.TaskDialogIcons.IconInformation,
@@ -250,41 +251,41 @@ namespace RhinoInside.Revit
           }
         )
         {
-          taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, $"Revit {RevitVersion.Major} Product Updates…");
-          if (taskDialog.Show() == TaskDialogResult.CommandLink1)
+          taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink1, $"Revit {RevitVersion.Major} Product Updates…");
+          if (taskDialog.Show() == ARUI.TaskDialogResult.CommandLink1)
           {
             using (Process.Start($@"https://knowledge.autodesk.com/support/revit/downloads?release={RevitVersion.Major}")) { }
           }
         }
 
-        return Result.Cancelled;
+        return ARUI.Result.Cancelled;
       }
 
       // Check if we have 'opennurbs_private.manifest' file on Revit folder.
       if (status == Status.Available)
       {
         if (Status.Available != (status = NativeLoader.IsolateOpenNurbs(app.MainWindowHandle) ? Status.Available : Status.Unavailable))
-          return Result.Failed;
+          return ARUI.Result.Failed;
       }
 
       Host = app;
-      return Result.Succeeded;
+      return ARUI.Result.Succeeded;
     }
 
-    internal static Result CheckSetup()
+    internal static ARUI.Result CheckSetup()
     {
       var services = Host.Services;
 
       // Check if Rhino.Inside is expired
       if (CheckIsExpired(minDaysUntilExpiration: 10))
-        return Result.Cancelled;
+        return ARUI.Result.Cancelled;
 
       // Check if Rhino.exe is a supported version
       if (RhinoVersion < MinimumRhinoVersion)
       {
         using
         (
-          var taskDialog = new TaskDialog("Update Rhino")
+          var taskDialog = new ARUI.TaskDialog("Update Rhino")
           {
             Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}.UpdateRhino",
             MainIcon = UIX.TaskDialogIcons.IconInformation,
@@ -304,17 +305,17 @@ namespace RhinoInside.Revit
           }
         )
         {
-          taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Download latest Rhino…");
-          if (taskDialog.Show() == TaskDialogResult.CommandLink1)
+          taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink1, "Download latest Rhino…");
+          if (taskDialog.Show() == ARUI.TaskDialogResult.CommandLink1)
           {
             using (Process.Start(@"https://www.rhino3d.com/download/rhino/7.0/latest")) { }
           }
         }
 
-        return Result.Cancelled;
+        return ARUI.Result.Cancelled;
       }
 
-      return Result.Succeeded;
+      return ARUI.Result.Succeeded;
     }
 
     static string CallerFilePath([System.Runtime.CompilerServices.CallerFilePath] string CallerFilePath = "") => CallerFilePath;
@@ -345,7 +346,7 @@ namespace RhinoInside.Revit
 
       using
       (
-        var taskDialog = new TaskDialog("Days left")
+        var taskDialog = new ARUI.TaskDialog("Days left")
         {
           Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
           MainIcon = UIX.TaskDialogIcons.IconInformation,
@@ -359,8 +360,8 @@ namespace RhinoInside.Revit
         }
       )
       {
-        taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Check for updates…", $"Open {Product} download page");
-        if (taskDialog.Show() == TaskDialogResult.CommandLink1)
+        taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink1, "Check for updates…", $"Open {Product} download page");
+        if (taskDialog.Show() == ARUI.TaskDialogResult.CommandLink1)
         {
           using (Process.Start(@"https://www.rhino3d.com/download/rhino.inside-revit/1/latest")) { }
         }

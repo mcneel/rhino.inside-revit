@@ -22,6 +22,7 @@ namespace RhinoInside.Revit.AddIn
         Core.IsolateSettings = options.IsolateSettings;
         Core.UseHostLanguage = options.UseHostLanguage;
         Core.KeepUIOnTop     = options.KeepUIOnTop;
+        Core.ActivationEvent = External.ActivationGate.CreateActivationEvent();
 
         var result = Core.OnStartup(app);
         if (result != Result.Succeeded) return result;

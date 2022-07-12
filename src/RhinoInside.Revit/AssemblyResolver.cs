@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
@@ -246,7 +247,7 @@ namespace RhinoInside.Revit
       var internalAssembliesOnly = InternalAssembliesOnly;
       try
       {
-        if (InternalAssembliesOnly && !InternalAssemblies.ContainsKey(assemblyName.Name))
+        if (InternalAssembliesOnly && !IsInternalReference(args))
           return default;
 
         internalAssembliesOnly = false;
@@ -457,6 +458,18 @@ namespace RhinoInside.Revit
     }
 
     #region Utils
+    static bool IsInternalReference(ResolveEventArgs args)
+    {
+      if
+      (
+        InternalAssemblies.ContainsKey(args.Name) &&
+        GetRequestingAssembly(args) is Assembly requestingAssembly
+      )
+        return requestingAssembly.GetReferencedAssemblies().Any(x => InternalAssemblies.ContainsKey(x.Name));
+
+      return false;
+    }
+
     static Assembly GetRequestingAssembly(ResolveEventArgs args)
     {
       var requestingAssembly = args.RequestingAssembly;

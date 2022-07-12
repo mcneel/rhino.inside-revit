@@ -63,11 +63,17 @@ namespace RhinoInside.Revit.External
     class Gate
     {
       public readonly WindowHandle Window;
-      public readonly ExternalEvent ExternalEvent = ExternalEvent.Create(new TryActivateEventHandler());
+      public readonly ExternalEvent ExternalEvent;
       public readonly HashSet<IntPtr> ExternalWindows = new HashSet<IntPtr>();
 
-      public Gate(IntPtr gate) { Window = new WindowHandle(gate); }
+      public Gate(IntPtr gate, ExternalEvent externalEvent = default)
+      {
+        Window = new WindowHandle(gate);
+        ExternalEvent = externalEvent ?? CreateActivationEvent();
+      }
     }
+
+    public static ExternalEvent CreateActivationEvent() => ExternalEvent.Create(new TryActivateEventHandler());
 
     [ThreadStatic]
     static readonly Dictionary<IntPtr, Gate> gates = new Dictionary<IntPtr, Gate>();
@@ -104,7 +110,7 @@ namespace RhinoInside.Revit.External
     /// </summary>
     /// <param name="hWnd">HWND of the gate window to register.</param>
     /// <returns>true on success, false on failure.</returns>
-    public static bool AddGateWindow(IntPtr hWnd)
+    public static bool AddGateWindow(IntPtr hWnd, ExternalEvent externalEvent = default)
     {
       using (var window = new WindowHandle(hWnd))
         if (window.IsInvalid && window.ThreadId == ThreadHandle.CurrentThreadId)
@@ -116,7 +122,7 @@ namespace RhinoInside.Revit.External
       if (hook is null)
         hook = new Hook();
 
-      gates.Add(hWnd, new Gate(hWnd));
+      gates.Add(hWnd, new Gate(hWnd, externalEvent));
       return true;
     }
 
@@ -424,11 +430,10 @@ namespace RhinoInside.Revit.External
         {
           case 5: // HCBT_ACTIVATE
           {
-            windowToActivate = new WindowHandle(wParam);
-
             if (IsOpen)
             {
-              if (windowToActivate == HostMainWindow && !windowToActivate.Enabled)
+              var window = new WindowHandle(wParam);
+              if (window == HostMainWindow && !window.Enabled)
               {
                 foreach (var gate in gates)
                 {
@@ -441,6 +446,8 @@ namespace RhinoInside.Revit.External
             {
               if (IsExternalWindow(wParam, out var externalEvent))
               {
+                windowToActivate = new WindowHandle(wParam);
+
                 if (externalEvent.IsPending)
                   WindowHandle.ActiveWindow.Flash();
                 else
