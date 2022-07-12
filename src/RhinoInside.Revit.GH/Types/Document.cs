@@ -81,6 +81,7 @@ namespace RhinoInside.Revit.GH.Types
     }
     string IGH_Goo.TypeDescription => $"Represents a Revit {((IGH_Goo) this).TypeName.ToLowerInvariant()}";
     public virtual bool IsValid => document.IsValid();
+    public virtual bool IsEmpty => DocumentGUID == Guid.Empty;
     public virtual string IsValidWhyNot => document.IsValidWithLog(out var log) ? default : log;
     IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) MemberwiseClone();
     object IGH_Goo.ScriptVariable() => Value;
@@ -152,54 +153,18 @@ namespace RhinoInside.Revit.GH.Types
 
     void RefreshReferenceData()
     {
-      if (document is null)
+      if (document?.IsValidObject == true)
       {
-        if (ModelURI is null) return;
-        if (ModelURI.IsFileUri(out var localPath) == true)
+        using (var modelPath = document.GetLocalModelPath())
         {
-          PathName = localPath;
-
-          if (File.Exists(localPath))
+          if (modelPath?.IsFilePath() == true)
           {
-            try
+            var modelUri = modelPath.ToUri();
+            if (modelUri != ModelURI)
             {
-              using (var info = ARDB.BasicFileInfo.Extract(ModelURI.LocalPath))
-              {
-                if (!info.IsWorkshared)
-                {
-                  CentralPathName = string.Empty;
-                  CentralModelURI = ModelUri.Empty;
-                }
-                else if (info.IsLocal)
-                {
-                  CentralPathName = info.CentralPath;
-                  if (Uri.TryCreate(info.CentralPath, UriKind.Absolute, out var centralModelURI))
-                    CentralModelURI = centralModelURI;
-                }
-              }
+              ModelURI = modelUri;
+              PathName = modelPath.ToUserVisiblePath();
             }
-            catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-          }
-        }
-        else if (ModelURI.ToModelPath() is ARDB.ModelPath modelPath)
-        {
-          try { PathName = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath); }
-          catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-        }
-      }
-      else if (document.IsValidObject)
-      {
-        using (var modelPath = document.GetModelPath())
-        {
-          var modelUri = modelPath.ToUri();
-          if (ModelURI != modelUri)
-          {
-            ModelURI = modelUri;
-            PathName = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath);
-          }
-          else
-          {
-            PathName = document.PathName;
           }
         }
 
@@ -211,19 +176,81 @@ namespace RhinoInside.Revit.GH.Types
             if (centralUri != CentralModelURI)
             {
               CentralModelURI = centralUri;
-              CentralPathName = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(centralPath);
+              CentralPathName = centralPath.ToUserVisiblePath();
             }
           }
         }
         else
         {
-          CentralModelURI = ModelUri.Empty;
-          CentralPathName = string.Empty;
+          CentralModelURI = default;
+          CentralPathName = default;
         }
+      }
+      else
+      {
+        if (ModelURI is object)
+        {
+          try
+          {
+            using (var modelPath = ModelURI.ToModelPath())
+              PathName = modelPath.ToUserVisiblePath();
+          }
+          catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+
+          if (ModelURI.IsFileUri(out var localPath))
+          {
+            if (File.Exists(localPath))
+            {
+              try
+              {
+                using (var info = ARDB.BasicFileInfo.Extract(localPath))
+                {
+                  if (info.IsWorkshared)
+                  {
+                    CentralPathName = info.CentralPath;
+                    if (Uri.TryCreate(info.CentralPath, UriKind.Absolute, out var centralModelURI))
+                      CentralModelURI = centralModelURI;
+                  }
+                  else
+                  {
+                    CentralPathName = default;
+                    CentralModelURI = default;
+                  }
+                }
+              }
+              catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+            }
+
+            return;
+          }
+          else
+          {
+            PathName = default;
+            ModelURI = default; 
+          }
+        }
+
+        if (CentralModelURI is object)
+        {
+          using (var modelPath = CentralModelURI.ToModelPath())
+            CentralPathName = modelPath.ToUserVisiblePath();
+        }
+      }
+    }
+
+    public ARDB.BasicFileInfo FileInfo
+    {
+      get 
+      {
+        if (FilePath is string filePath && File.Exists(filePath))
+          return ARDB.BasicFileInfo.Extract(filePath);
+
+        return default;
       }
     }
     #endregion
 
+    #region Properties
     ARDB.Document document;
     public ARDB.Document Value
     {
@@ -244,6 +271,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public Uri CentralModelURI { get; protected set; } = default;
     public string CentralPathName { get; protected set; } = default;
+    #endregion
 
     public Document() { }
     protected Document(ARDB.Document value)
@@ -436,10 +464,8 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public virtual string DisplayName =>
-      IsValid ? Title :
-      !string.IsNullOrEmpty(PathName) ? $"{PathName}" :
-      !(ModelURI is null) ? $"{ModelURI}" :
-      DocumentGUID != Guid.Empty ? $"{DocumentGUID.ToString("B").ToUpperInvariant()}" :
+      IsValid ? Name :
+      DocumentGUID != default ? DocumentGUID.ToString("B").ToUpper() :
       "<None>";
 
     #region Proxy
@@ -499,32 +525,20 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Identity
-    public string ModelPath
-    {
-      get
-      {
-        if (Value?.GetModelPath() is ARDB.ModelPath modelPath)
-          return ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(modelPath);
+    internal ARDB.ModelPath GetModelPath() => Value is ARDB.Document document?
+      document.GetModelPath() : (CentralModelURI ?? ModelURI).ToModelPath();
 
-        return string.Empty;
-      }
-    }
+    public string GetModelPathName() => GetModelPath().ToUserVisiblePath() ?? CentralPathName ?? PathName;
 
-    internal string Title
-    {
-      get
-      {
-        if (Value is ARDB.Document document)
-          return document.GetTitle();
+    public string Title => Value?.GetTitle() ??
+      Path.GetFileNameWithoutExtension(CentralPathName ?? PathName);
 
-        if (!string.IsNullOrEmpty(PathName))
-          return Path.GetFileName(PathName);
+    public string Name => Value?.GetName() ??
+      Path.GetFileName(PathName ?? CentralPathName);
 
-        return string.Empty;
-      }
-    }
+    public bool? IsFamilyDocument => Value?.IsFamilyDocument ??
+      Path.GetExtension(CentralPathName ?? PathName)?.ToLowerInvariant() == ".rfa";
 
-    public string Name => Value?.GetName() ?? Path.GetFileNameWithoutExtension(Title);
     public UnitSystem DisplayUnitSystem => Value is ARDB.Document document ?
       new UnitSystem { Value = (ARDB.UnitSystem) document.DisplayUnitSystem } :
       default;
@@ -535,27 +549,11 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        using (var modelPath = Value?.GetModelPath())
-        {
-          if (modelPath is null) return default;
-          else if (modelPath.IsCloudPath())
-          {
-            using (var app = Value.Application)
-            {
-              return System.IO.Path.Combine
-              (
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Autodesk", "Revit", app.VersionName,
-                "CollaborationCache", app.LoginUserId,
-                modelPath.GetProjectGUID().ToString(),
-                $"{modelPath.GetModelGUID()}{System.IO.Path.GetExtension(Value.PathName)}"
-              );
-            }
-          }
+        if (IsEmpty) return default;
+        if (Value is ARDB.Document document) return document.GetPathName();
+        else if (ModelURI?.IsFileUri(out var localPath) == true) return localPath;
 
-        }
-
-        return System.IO.File.Exists(Value.PathName) ? Value.PathName : default;
+        return default;
       }
     }
 
@@ -568,6 +566,7 @@ namespace RhinoInside.Revit.GH.Types
     public Guid? ExportID => Value?.GetExportID();
 
     public bool? IsModified => Value?.IsModified;
+
     public bool? IsEditable => Value is ARDB.Document document ?
       !document.IsLinked : default(bool?);
 
@@ -580,9 +579,10 @@ namespace RhinoInside.Revit.GH.Types
           using (var version = ARDB.Document.GetDocumentVersion(document))
             return (version.VersionGUID, version.NumberOfSaves);
         }
-        else if (File.Exists(PathName))
+        else
         {
-          using (var info = ARDB.BasicFileInfo.Extract(PathName))
+          using (var info = FileInfo)
+          if (info is object)
           {
             using (var version = info.GetDocumentVersion())
               return (version.VersionGUID, version.NumberOfSaves);
@@ -599,10 +599,57 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
+        if (IsEmpty) return default;
         if (Value is ARDB.Document document) return document.IsWorkshared;
         return !(CentralModelURI is null);
       }
     }
+
+    public bool? IsDetached
+    {
+      get
+      {
+        if (IsEmpty) return default;
+        if (Value is ARDB.Document document) return document.IsDetached;
+        return default;
+      }
+    }
+
+    public bool? IsCentral
+    {
+      get
+      {
+        if (IsEmpty) return default;
+        return IsWorkshared == true && PathName == CentralPathName;
+      }
+    }
+
+    public bool? HasPendingChanges
+    {
+      get
+      {
+        if (IsEmpty|| IsWorkshared != true) return default;
+        if (Value is ARDB.Document document && document.IsModified) return true;
+        if (FileInfo is ARDB.BasicFileInfo info) return !info.AllLocalChangesSavedToCentral;
+        return default;
+      }
+    }
+
+    public (Guid VersionGUID, int NumberOfSaves)? CentralVersion
+    {
+      get
+      {
+        if (IsWorkshared == true)
+        {
+          using (var info = FileInfo)
+            if (info is object)
+              return (info.LatestCentralEpisodeGUID, info.LatestCentralVersion);
+        }
+
+        return default;
+      }
+    }
+
     #endregion
   }
 
