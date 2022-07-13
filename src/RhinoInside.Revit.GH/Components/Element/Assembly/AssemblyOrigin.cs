@@ -2,12 +2,13 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Assemblies
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.9")]
   public class AssemblyOrigin : TransactionalChainComponent
   {
@@ -76,35 +77,31 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Assembly", out ARDB.AssemblyInstance assembly, x => x is object)) return;
+      if (!Params.GetData(DA, "Assembly", out Types.AssemblyInstance assembly, x => x is object)) return;
       else DA.SetData("Assembly", assembly);
 
       if (Params.TryGetData(DA, "Origin", out Plane? origin) && origin.HasValue)
       {
-        assembly.GetTransform().GetCoordSystem(out var o, out var x, out var y, out var z);
+        assembly.Value.GetTransform().GetCoordSystem(out var o, out var x, out var y, out var z);
         var O = origin.Value.Origin.ToXYZ();
         var X = origin.Value.XAxis.ToXYZ();
         var Y = origin.Value.YAxis.ToXYZ();
         var Z = origin.Value.ZAxis.ToXYZ();
-        var comparer = GeometryObjectEqualityComparer.Comparer(assembly.Document.Application.VertexTolerance);
-        if (!comparer.Equals(o, O) || !comparer.Equals(x, X) || !comparer.Equals(y, Y) || !comparer.Equals(z, Z))
+        if
+        (
+          !o.IsAlmostEqualTo(O) ||
+          !x.IsAlmostEqualTo(X) ||
+          !y.IsAlmostEqualTo(Y) ||
+          !z.IsAlmostEqualTo(Z))
         {
           StartTransaction(assembly.Document);
           var transform = ARDB.Transform.Identity;
           transform.SetCoordSystem(O, X, Y, Z);
-          assembly.SetTransform(transform);
+          assembly.Value.SetTransform(transform);
         }
       }
 
-      Params.TrySetData
-      (
-        DA, "Origin",
-        () =>
-        {
-          assembly.GetTransform().GetCoordSystem(out var o, out var x, out var y, out var z);
-          return new Plane(o.ToPoint3d(), x.ToVector3d(), y.ToVector3d());
-        }
-      );
+      Params.TrySetData(DA, "Origin", () => assembly.Location);
     }
   }
 }

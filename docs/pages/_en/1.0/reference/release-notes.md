@@ -19,6 +19,7 @@ group: Deployment & Configs
 - Added 'Spatial Element Identity' component.
 - Added 'Delete Workset' component (Revit 2023).
 - Added 'Default 3D View' component.
+- Added 'Assembly Origin' component.
 
 ### RC 
 
