@@ -88,7 +88,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </remarks>
     /// <param name="level"></param>
     /// <returns>InvalidElementId if no associated view is found.</returns>
-    /// <seealso cref="ViewExtension.FindAssociatedLevelId(ViewPlan)"/>
     public static ElementId FindAssociatedPlanViewId(this Level level)
     {
       using (var collector = new FilteredElementCollector(level.Document))

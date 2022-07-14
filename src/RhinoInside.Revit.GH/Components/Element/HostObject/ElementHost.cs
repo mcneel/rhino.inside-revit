@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
@@ -70,16 +69,18 @@ namespace RhinoInside.Revit.GH.Components.Hosts
 
           using (var includesFilter = CompoundElementFilter.InclusionFilter(element.Value))
           {
-            foreach (var host in elementCollector.Cast<ARDB.HostObject>())
+            foreach (ARDB.HostObject host in elementCollector)
             {
               if (host.Id == element.Id)
                 continue;
 
-              if (host.FindInserts(false, true, true, false).Contains(element.Id))
+              // Necessary to found Curtain walls embeded in an other Wall
+              if (host.FindInserts(false, false, true, false).Contains(element.Id))
               {
                 DA.SetData("Host", Types.HostObject.FromElement(host));
                 break;
               }
+
               // Necessary to found Panel walls in a Curtain Wall
               else if (host.GetDependentElements(includesFilter).Count > 0)
               {
