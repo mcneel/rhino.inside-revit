@@ -110,11 +110,26 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
     #endregion
 
     #region Settings
+    public static string GetCurrentUsersDataFolderPath(this Application app)
+    {
+#if REVIT_2019
+      return app.CurrentUsersDataFolderPath;
+#else
+      return System.IO.Path.Combine
+      (
+        System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
+        "Autodesk",
+        "Revit",
+        app.VersionName
+      );
+#endif
+    }
+
     public static bool TryGetProfileValue(this Application app, string section, string key, out string value)
     {
       if (!string.IsNullOrEmpty(section) && !string.IsNullOrEmpty(key))
       {
-        var revit_ini = Path.Combine(app.CurrentUsersDataFolderPath, "Revit.ini");
+        var revit_ini = Path.Combine(app.GetCurrentUsersDataFolderPath(), "Revit.ini");
         var result = new System.Text.StringBuilder(1024);
         while (Kernel32.GetPrivateProfileString(section, key, string.Empty, result, (uint) result.Capacity, revit_ini) == result.Capacity - 1)
           result.EnsureCapacity(result.Capacity * 2);
