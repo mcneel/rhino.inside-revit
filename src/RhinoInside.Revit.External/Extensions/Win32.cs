@@ -319,6 +319,13 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
 
     [DllImport(KERNEL32, SetLastError = true)]
     public static extern HMODULE GetModuleHandle(string lpModuleName);
+
+    [DllImport(KERNEL32, CharSet = CharSet.Unicode)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool WritePrivateProfileString(string Section, string Key, string Value, string FileName);
+
+    [DllImport(KERNEL32, CharSet = CharSet.Unicode)]
+    public static extern DWORD GetPrivateProfileString(string Section, string Key, string Default, StringBuilder RetVal, DWORD Size, string FileName);
   }
 
   [SuppressUnmanagedCodeSecurity]

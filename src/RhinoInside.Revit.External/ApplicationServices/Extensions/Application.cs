@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 using System.IO;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.ApplicationServices;
 using System.Linq;
-using RhinoInside.Revit.External.DB.Extensions;
+using Autodesk.Revit.ApplicationServices;
+using Autodesk.Revit.DB;
+using Microsoft.Win32.SafeHandles.InteropServices;
 
 namespace RhinoInside.Revit.External.ApplicationServices.Extensions
 {
+  using DB.Extensions;
+
   public static class ApplicationExtension
   {
     public static DefinitionFile CreateSharedParameterFile(this Application app)
@@ -104,6 +106,28 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
             projects.Add(doc);
         }
       }
+    }
+    #endregion
+
+    #region Settings
+    public static bool TryGetProfileValue(this Application app, string section, string key, out string value)
+    {
+      if (!string.IsNullOrEmpty(section) && !string.IsNullOrEmpty(key))
+      {
+        var revit_ini = Path.Combine(app.CurrentUsersDataFolderPath, "Revit.ini");
+        var result = new System.Text.StringBuilder(1024);
+        while (Kernel32.GetPrivateProfileString(section, key, string.Empty, result, (uint) result.Capacity, revit_ini) == result.Capacity - 1)
+          result.EnsureCapacity(result.Capacity * 2);
+
+        if (result.Length > 0)
+        {
+          value = result.ToString();
+          return true;
+        }
+      }
+
+      value = default;
+      return false;
     }
     #endregion
   }
