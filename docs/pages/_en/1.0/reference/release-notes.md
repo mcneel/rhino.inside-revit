@@ -26,7 +26,7 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.8" version="v1.8.8228.26612" time="07/18/2022" %}
+{% include ltr/release-header.html title="v1.8" version="v1.8.8221.17917" time="07/18/2022" %}
 
 - Includes all changes under 1.8RC releases listed below
 - Minor Fixes and Improvements
