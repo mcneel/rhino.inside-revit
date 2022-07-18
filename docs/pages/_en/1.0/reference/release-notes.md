@@ -11,6 +11,11 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.8" version="v1.8.8228.26612" time="07/18/2022" %}
+
+- Includes all changes under 1.8RC releases listed below
+- Minor Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.8 RC4" version="v1.8.8221.17917" pre_release=true time="07/05/2022" %}
 
 - Added {% include ltr/comp.html uuid='8ff70eef' %}
@@ -49,7 +54,6 @@ group: Deployment & Configs
 - Added {% include ltr/comp.html uuid='00c729f1' %} component
 - Added {% include ltr/comp.html uuid='449b853b' %} component
 - Added {% include ltr/comp.html uuid='493035d3' %} component
-- Added {% include ltr/comp.html uuid='0644989d' %} component
 - Added {% include ltr/comp.html uuid='0644989d' %} component
 - Added {% include ltr/comp.html uuid='495330db' %} component.
 - Added {% include ltr/comp.html uuid='60be53c5' %} component.
