@@ -93,6 +93,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddAngularDimension {
+            get {
+                object obj = ResourceManager.GetObject("AddAngularDimension", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddArea {
             get {
                 object obj = ResourceManager.GetObject("AddArea", resourceCulture);
@@ -186,6 +196,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AddFloorPlan {
             get {
                 object obj = ResourceManager.GetObject("AddFloorPlan", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddLinearDimension {
+            get {
+                object obj = ResourceManager.GetObject("AddLinearDimension", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -306,6 +326,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AddSpaceTag {
             get {
                 object obj = ResourceManager.GetObject("AddSpaceTag", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddSpotCoordinate {
+            get {
+                object obj = ResourceManager.GetObject("AddSpotCoordinate", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddSpotElevation {
+            get {
+                object obj = ResourceManager.GetObject("AddSpotElevation", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1303,9 +1343,39 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap DetailLine {
+            get {
+                object obj = ResourceManager.GetObject("DetailLine", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap DetailView {
             get {
                 object obj = ResourceManager.GetObject("DetailView", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Dimension {
+            get {
+                object obj = ResourceManager.GetObject("Dimension", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DimensionType {
+            get {
+                object obj = ResourceManager.GetObject("DimensionType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
