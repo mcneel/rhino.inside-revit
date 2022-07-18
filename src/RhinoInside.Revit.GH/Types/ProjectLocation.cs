@@ -6,11 +6,11 @@ using Rhino.DocObjects;
 using Rhino.DocObjects.Tables;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
-using static Rhino.RhinoMath;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using External.DB.Extensions;
+  using RhinoInside.Revit.Convert.Units;
 
   [Kernel.Attributes.Name("Shared Site")]
   public class ProjectLocation : Instance, Bake.IGH_BakeAwareElement
@@ -89,9 +89,10 @@ namespace RhinoInside.Revit.GH.Types
               ModelBasePoint = location.Origin,
               ModelEast = location.XAxis,
               ModelNorth = location.YAxis,
-              EarthBasepointElevation = siteLocation.Elevation,
-              EarthBasepointLatitude = ToDegrees(siteLocation.Latitude),
-              EarthBasepointLongitude = ToDegrees(siteLocation.Longitude),
+              EarthBasepointElevationZero = BasepointZero.MeanSeaLevel,
+              EarthBasepointElevation = UnitScale.Convert(siteLocation.Elevation, UnitScale.Internal, UnitScale.GetModelScale(doc)),
+              EarthBasepointLatitude = RhinoMath.ToDegrees(siteLocation.Latitude),
+              EarthBasepointLongitude = RhinoMath.ToDegrees(siteLocation.Longitude),
             };
 
             doc.EarthAnchorPoint = anchorPoint;
