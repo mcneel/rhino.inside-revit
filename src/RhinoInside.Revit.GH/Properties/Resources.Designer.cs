@@ -263,6 +263,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddRegion {
+            get {
+                object obj = ResourceManager.GetObject("AddRegion", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddRevision {
             get {
                 object obj = ResourceManager.GetObject("AddRevision", resourceCulture);
@@ -2516,6 +2526,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap FamilyTypes {
             get {
                 object obj = ResourceManager.GetObject("FamilyTypes", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap FilledRegion {
+            get {
+                object obj = ResourceManager.GetObject("FilledRegion", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
