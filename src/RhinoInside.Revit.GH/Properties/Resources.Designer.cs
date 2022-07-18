@@ -443,6 +443,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddViewport {
+            get {
+                object obj = ResourceManager.GetObject("AddViewport", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddWallOpening {
             get {
                 object obj = ResourceManager.GetObject("AddWallOpening", resourceCulture);
@@ -3976,6 +3986,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ViewIdentity {
             get {
                 object obj = ResourceManager.GetObject("ViewIdentity", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Viewport {
+            get {
+                object obj = ResourceManager.GetObject("Viewport", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
