@@ -253,6 +253,26 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddRevision {
+            get {
+                object obj = ResourceManager.GetObject("AddRevision", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddRevisionCloud {
+            get {
+                object obj = ResourceManager.GetObject("AddRevisionCloud", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddRoom {
             get {
                 object obj = ResourceManager.GetObject("AddRoom", resourceCulture);
@@ -3343,6 +3363,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap QueryRevisions {
+            get {
+                object obj = ResourceManager.GetObject("QueryRevisions", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap QueryRooms {
             get {
                 object obj = ResourceManager.GetObject("QueryRooms", resourceCulture);
@@ -3466,6 +3496,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ReferencePlane {
             get {
                 object obj = ResourceManager.GetObject("ReferencePlane", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Revision {
+            get {
+                object obj = ResourceManager.GetObject("Revision", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap RevisionCloud {
+            get {
+                object obj = ResourceManager.GetObject("RevisionCloud", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
