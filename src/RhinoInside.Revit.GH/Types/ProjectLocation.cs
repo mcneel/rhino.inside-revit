@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Types
               ModelEast = location.XAxis,
               ModelNorth = location.YAxis,
               EarthBasepointElevationZero = BasepointZero.MeanSeaLevel,
-              EarthBasepointElevation = UnitScale.Convert(siteLocation.Elevation, UnitScale.Internal, UnitScale.GetModelScale(doc)),
+              EarthBasepointElevation = UnitScale.Convert(siteLocation.Elevation, UnitScale.Internal, UnitScale.Meters),
               EarthBasepointLatitude = RhinoMath.ToDegrees(siteLocation.Latitude),
               EarthBasepointLongitude = RhinoMath.ToDegrees(siteLocation.Longitude),
             };
