@@ -223,6 +223,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddReferencePlane {
+            get {
+                object obj = ResourceManager.GetObject("AddReferencePlane", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddRoom {
             get {
                 object obj = ResourceManager.GetObject("AddRoom", resourceCulture);
@@ -3366,6 +3376,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap RailingByCurve {
             get {
                 object obj = ResourceManager.GetObject("RailingByCurve", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ReferenceLine {
+            get {
+                object obj = ResourceManager.GetObject("ReferenceLine", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ReferencePlane {
+            get {
+                object obj = ResourceManager.GetObject("ReferencePlane", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
