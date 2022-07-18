@@ -1,4 +1,6 @@
 using System;
+using Rhino.Geometry;
+using RhinoInside.Revit.Convert.Display;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -11,5 +13,32 @@ namespace RhinoInside.Revit.GH.Types
 
     public TopographySurface() { }
     public TopographySurface(ARDB.Architecture.TopographySurface element) : base(element) { }
+
+    #region Location
+    public override Mesh Mesh
+    {
+      get
+      {
+        if (Value is object)
+        {
+          using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Fine })
+          using (var geometry = Value.get_Geometry(options))
+          {
+            if (geometry is object)
+            {
+              var mesh = new Mesh();
+              mesh.Append(geometry.GetPreviewMeshes(Document, null));
+              mesh.Normals.ComputeNormals();
+
+              if (mesh.Faces.Count > 0)
+                return mesh;
+            }
+          }
+        }
+
+        return null;
+      }
+    }
+    #endregion
   }
 }

@@ -21,6 +21,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return new List<LinkElementId> { tag.TaggedElementId };
     }
 
+#if !REVIT_2018
+    static Reference GetTaggedReference(this IndependentTag tag)
+    {
+      return new Reference(tag.Document.GetElement(tag.TaggedLocalElementId));
+    }
+#endif
+
     public static IList<Reference> GetTaggedReferences(this IndependentTag tag)
     {
       return new List<Reference> { tag.GetTaggedReference() };

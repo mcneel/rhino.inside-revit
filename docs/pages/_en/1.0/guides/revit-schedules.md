@@ -1,8 +1,8 @@
 ---
 title: Schedules & Reports
 order: 65
-thumbnail: /static/images/guides/revit-wip.png
-
+thumbnail: /static/images/guides/revit-schedules.png
+subtitle: Workflows for Revit Schedules
 group: Documentation
 ---
 

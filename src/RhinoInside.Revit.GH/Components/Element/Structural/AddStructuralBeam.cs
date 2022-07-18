@@ -112,13 +112,18 @@ namespace RhinoInside.Revit.GH.Components
 
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if
-          (
-            curve.IsClosed ||
-            !curve.TryGetPlane(out var plane, tol.VertexTolerance) ||
-            curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, out var _)
-          )
-            throw new RuntimeArgumentException("Curve", "Curve must be a C1 continuous planar non closed curve.", curve);
+
+          if (curve.IsShort(tol.ShortCurveTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (curve.IsClosed(tol.VertexTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (!curve.TryGetPlane(out var plane, tol.VertexTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to view plane.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
 
@@ -169,7 +174,11 @@ namespace RhinoInside.Revit.GH.Components
         doc.FamilyCreate.NewFamilyInstances2(list) :
         doc.Create.NewFamilyInstances2(list);
 
-      return doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+      var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+
+      // We turn analytical model off by default
+      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+      return instance;
     }
 
     ARDB.FamilyInstance Reconstruct
@@ -190,8 +199,6 @@ namespace RhinoInside.Revit.GH.Components
           ExcludeUniqueProperties
         );
 
-        // We turn off analytical model off by default
-        beam.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
         beam.Document.Regenerate();
       }
 

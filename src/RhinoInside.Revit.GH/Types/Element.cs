@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override object FetchValue() => Document.GetElement(Id);
     #endregion
 
-    protected void InvalidateGraphics()
+    protected internal void InvalidateGraphics()
     {
       Debug.Assert(Document.IsModifiable);
 

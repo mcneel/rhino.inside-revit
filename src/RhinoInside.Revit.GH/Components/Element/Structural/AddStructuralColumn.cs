@@ -122,13 +122,19 @@ namespace RhinoInside.Revit.GH.Components
       (
         doc.Value, _Column_, column =>
         {
+          var tol = GeometryTolerance.Model;
+
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if (!curve.TryGetLine(out var line, GeometryTolerance.Model.VertexTolerance))
-            throw new RuntimeArgumentException("Curve", "Curve must be line like curve.", curve);
 
-          if (line.ToZ - line.FromZ < GeometryTolerance.Model.VertexTolerance)
-            throw new RuntimeArgumentException("Curve", "Curve start point must be below curve end point.", curve);
+          if (curve.IsShort(tol.ShortCurveTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (!curve.TryGetLine(out var line, tol.VertexTolerance))
+            throw new RuntimeArgumentException("Curve", $"Curve should be a line like curve.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (line.ToZ - line.FromZ < tol.VertexTolerance)
+            throw new RuntimeArgumentException("Curve", $"Curve start point must be below curve end point.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralColumns)) return null;
 
@@ -174,9 +180,12 @@ namespace RhinoInside.Revit.GH.Components
         doc.FamilyCreate.NewFamilyInstances2(list) :
         doc.Create.NewFamilyInstances2(list);
 
-      return doc.GetElement(ids.First()) as ARDB.FamilyInstance;
-    }
+      var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
 
+      // We turn analytical model off by default
+      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+      return instance;
+    }
 
     ARDB.FamilyInstance Reconstruct
     (
@@ -196,8 +205,6 @@ namespace RhinoInside.Revit.GH.Components
           ExcludeUniqueProperties
         );
 
-        // We turn off analytical model off by default
-        column.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
         column.Document.Regenerate();
       }
 

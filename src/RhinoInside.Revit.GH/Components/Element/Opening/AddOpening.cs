@@ -121,7 +121,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
 
           // Compute
           opening = Reconstruct(opening, doc.Value, host.Value, boundary);
-          (host as IGH_PreviewMeshData).DestroyPreviewMeshes();
+          host.InvalidateGraphics();
 
           DA.SetData(_Opening_, opening);
           return opening;

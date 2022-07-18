@@ -1,8 +1,9 @@
 ---
 title: Directshapes
 order: 59
+thumbnail: /static/images/guides/revit-directshapes.png
+subtitle: Workflows for Revit DirectShapes
 group: Modeling
-thumbnail: /static/images/guides/revit-wip.png
 ---
 
 ## DirectShape Categories

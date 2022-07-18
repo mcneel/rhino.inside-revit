@@ -208,7 +208,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return element.get_BoundingBox(view.IsGraphicalView() ? view : default);
     }
 
-
     static bool SkipGeometryObject(GeometryObject geometry, View view)
     {
       return geometry is null ||

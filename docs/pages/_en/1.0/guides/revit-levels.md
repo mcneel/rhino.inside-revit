@@ -1,7 +1,8 @@
 ---
 title: Levels
 order: 46
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/revit-levels.png
+subtitle: Workflows for Revit Levels
 group: Modeling
 ---
 

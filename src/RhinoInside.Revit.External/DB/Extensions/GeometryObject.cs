@@ -521,5 +521,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       origin = basisX = basisY = default;
       return false;
     }
+
+    public static Element GetSymbol(this GeometryInstance instance)
+    {
+#if REVIT_2023
+      return instance.GetDocument().GetElement(instance.GetSymbolGeometryId().SymbolId);
+#else
+      return instance.Symbol;
+#endif
+    }
   }
 }

@@ -2,6 +2,7 @@
 title: Openings
 order: 48
 thumbnail: /static/images/guides/revit-opening.png
+subtitle: Workflows for Revit Openings
 group: Modeling
 ---
 

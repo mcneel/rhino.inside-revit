@@ -1,4 +1,5 @@
 using System;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.External.DB.Extensions;
 
@@ -13,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     public ViewActive() : base
     (
       name: "Active Graphical View",
-      nickname: "AGraphView",
+      nickname: "Active",
       description: "Gets the active graphical view",
       category: "Revit",
       subCategory: "View"
@@ -39,5 +40,23 @@ namespace RhinoInside.Revit.GH.Components.Views
 
       DA.SetData("Active View", doc.Value?.GetActiveGraphicalView());
     }
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+#if REVIT_2019
+      var CloseInactiveViewsId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.CloseInactiveViews);
+      Menu_AppendItem
+      (
+        menu, "Close Inactive Views…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, CloseInactiveViewsId),
+        activeApp.CanPostCommand(CloseInactiveViewsId), false
+      );
+#endif
+    }
+    #endregion
   }
 }

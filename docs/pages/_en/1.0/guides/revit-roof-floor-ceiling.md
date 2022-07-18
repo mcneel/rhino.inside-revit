@@ -1,7 +1,8 @@
 ---
 title: Floors, Ceilings, Roofs
 order: 47
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/revit-roof-floor-ceiling.png
+subtitle: Workflows for Revit Floors, Ceilings, Roofs
 group: Modeling
 ---
 

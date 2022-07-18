@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
+using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
+using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
-  using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
-  using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 
   [EditorBrowsable(EditorBrowsableState.Never)]
   public abstract class GH_Component : Grasshopper.Kernel.GH_Component
@@ -18,13 +19,35 @@ namespace RhinoInside.Revit.GH.Components
     protected GH_Component(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    // Grasshopper default implementation has a bug, it checks inputs instead of outputs
-    public override bool IsBakeCapable => Params?.Output.OfType<IGH_BakeAwareObject>().Where(x => x.IsBakeCapable).Any() ?? false;
-
     protected override Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
                                       ImageBuilder.BuildIcon(IconTag, Properties.Resources.UnknownIcon);
 
     protected virtual string IconTag => GetType().Name.Substring(0, 1);
+
+    #region Bake
+    // Grasshopper default implementation has a bug, it checks inputs instead of outputs
+    public override bool IsBakeCapable => Params?.Output.OfType<IGH_BakeAwareObject>().Any(x => x.IsBakeCapable) ?? false;
+
+    public override bool AppendMenuItems(ToolStripDropDown menu)
+    {
+      if (!base.AppendMenuItems(menu)) return false;
+
+      // Grasshopper default implementation has a bug, and does not check IsBakeCapable.
+      if (this is IGH_BakeAwareObject bake && !bake.IsBakeCapable)
+      {
+        for (int i = 0; i < menu.Items.Count; ++i)
+        {
+          if (menu.Items[i].Text == "Bake…")
+          {
+            menu.Items[i].Enabled = false;
+            break;
+          }
+        }
+      }
+
+      return true;
+    }
+    #endregion
 
 #if DEBUG
     // Placeholder for breakpoints in DEBUG

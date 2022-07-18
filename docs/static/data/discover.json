@@ -200,6 +200,27 @@
         ]
     },
     {
+        "title": "Getting the most out of Rhino in BIM projects",
+        "url": "https://youtu.be/H5uS9owTZ48",
+        "thumbnail": "https://i3.ytimg.com/vi/H5uS9owTZ48/maxresdefault.jpg",
+        "author": "Modelical",
+        "authorUrl": "https://www.modelical.com/en/",
+        "description": "Webinar about the successful use of Rhino.Inside.Revit in several architectural projects at Modelical. Rhino.Inside.Revit is mainly well-known for its capacity of translating complex geometry from Rhino to Revit. Our speakers will show us how they manage both geometry and information and design optimal workflows.",
+        "kinds": [
+            "webinar",
+            "video"
+        ],
+        "tags": [
+            "presentation",
+            "workflow",
+            "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
         "title": "Rhino.Inside.Revit Review",
         "url": "https://www.youtube.com/watch?v=J11LIrDIchw",
         "thumbnail": "https://i3.ytimg.com/vi/J11LIrDIchw/maxresdefault.jpg",

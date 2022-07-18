@@ -13,10 +13,10 @@ local machine for development and testing purposes.
   ([download](https://www.microsoft.com/net/download/visual-studio-sdks))
 * Rhino 7
   ([download](https://www.rhino3d.com/download/rhino/7.0))
-* Autodesk Revit 2018-2022
+* Autodesk Revit 2018-2023
   ([download](https://www.autodesk.com/products/revit/free-trial))
 * Add this link to your bookmarks 😉
-  ([API docs](https://www.apidocs.co/apps/))
+  ([API docs](https://apidocs.co/))
 
 ## Getting Source & Build
 

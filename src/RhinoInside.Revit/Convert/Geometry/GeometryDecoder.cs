@@ -1543,8 +1543,8 @@ namespace RhinoInside.Revit.Convert.Geometry
 
           if (geometryObject is ARDB.GeometryInstance instance)
           {
-            context.Element = instance.Symbol;
-            context.Category = instance.Symbol.Category ?? context.Category;
+            context.Element = instance.GetSymbol();
+            context.Category = context.Element.Category ?? context.Category;
             context.Material = context.Category?.Material;
           }
           else if (geometryObject is ARDB.GeometryElement geometry)

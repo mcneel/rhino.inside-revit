@@ -1,8 +1,8 @@
 ---
 title: Assemblies
 order: 72
-thumbnail: /static/images/guides/rir-ghpython.png
-
+thumbnail: /static/images/guides/revit-assemblies.png
+subtitle: Workflows for Revit Assemblies
 group: Containers
 ---
 

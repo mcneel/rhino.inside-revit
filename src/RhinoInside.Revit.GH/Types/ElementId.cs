@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Types
       using (var Documents = Revit.ActiveDBApplication.Documents)
       {
         if (Documents.Size > 1)
-          InstanceId = $"{InstanceId} @ {Document?.GetFileName() ?? DocumentGUID.ToString("B")}";
+          InstanceId = $"{InstanceId} @ {Document?.GetTitle() ?? DocumentGUID.ToString("B")}";
       }
 
       return $"{Invalid}{TypeName}{InstanceName}{InstanceId}";
@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.GH.Types
       public bool Valid => owner.IsValid;
 
       [System.ComponentModel.Description("The document this element belongs to.")]
-      public string Document => owner.Document?.GetFileName();
+      public string Document => owner.Document?.GetTitle();
 
       [System.ComponentModel.Description("The Guid of document this element belongs to.")]
       public Guid DocumentGUID => owner.DocumentGUID;
@@ -243,7 +243,7 @@ namespace RhinoInside.Revit.GH.Types
     Bitmap IGH_ItemDescription.GetImage(Size size) => default;
     string IGH_ItemDescription.Name => DisplayName;
     string IGH_ItemDescription.NickName => $"{{{Id?.ToString()}}}";
-    string IGH_ItemDescription.Description => Document?.GetFileName();
+    string IGH_ItemDescription.Description => Document?.GetTitle();
     #endregion
 
     #region IGH_ReferencedData

@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components.Families
         if (DA.GetData("Preview View", ref view))
         {
           if (!view.Document.Equals(familyDoc))
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Title}' is not a valid view in document {familyDoc.GetFileName()}"); return;
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Title}' is not a valid view in document {familyDoc.GetTitle()}"); return;
         }
 
         try

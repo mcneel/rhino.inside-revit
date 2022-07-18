@@ -60,12 +60,12 @@ guidelines in contributing to the codebase.
 
 Currently the project does not have any documentation for the API.
 This is an area that needs improvement.
-The Wiki has a [reference page](https://www.rhino3d.com/inside/revit/beta/reference/rir-api)
+The Wiki has a [reference page](https://www.rhino3d.com/inside/revit/1.0/reference/rir-api)
 for the API.
 
 ## Known Issues
 
 Known issues with the product are listed at
-[References > Known Issues](https://www.rhino3d.com/inside/revit/beta/reference/known-issues)
+[References > Known Issues](https://www.rhino3d.com/inside/revit/1.0/reference/known-issues)
 on the Wiki.
 Please keep this page updated when new and persistent issues are identified.

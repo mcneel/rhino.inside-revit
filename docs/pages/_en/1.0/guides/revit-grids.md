@@ -1,7 +1,8 @@
 ---
 title: Grids
 order: 45
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/revit-grids.png
+subtitle: Workflows for Revit Grids
 group: Modeling
 ---
 

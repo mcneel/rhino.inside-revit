@@ -67,6 +67,7 @@ namespace RhinoInside.Revit.GH
                 case ARDB.BuiltInParameter.FUNCTION_PARAM: return new Types.WallFunction((ARDB.WallFunction) integer);
                 case ARDB.BuiltInParameter.VIEW_DETAIL_LEVEL: return new Types.ViewDetailLevel((ARDB.ViewDetailLevel) integer);
                 case ARDB.BuiltInParameter.VIEW_DISCIPLINE: return new Types.ViewDiscipline((ARDB.ViewDiscipline) integer);
+                case ARDB.BuiltInParameter.HOST_SSE_CURVED_EDGE_CONDITION_PARAM: return new Types.SlabShapeEditCurvedEdgeCondition((ERDB.SlabShapeEditCurvedEdgeCondition) integer);
               }
 
               var builtInIntegerName = builtInInteger.ToString();
@@ -433,14 +434,7 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
       if (parameter is null)
       {
         var message = $"Parameter '{key.DisplayName}' is not defined on 'Element'. {{{element.Id.IntegerValue}}}";
-        if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, message);
-        else if (FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit)
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, message);
-        else
         throw new Exceptions.RuntimeArgumentException("Parameter", message);
-
-        return;
       }
       else Params.TrySetData(DA, "Parameter", () => new Types.ParameterKey(element.Document, parameter.Definition as ARDB.InternalDefinition));
 
@@ -448,12 +442,16 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
       {
         StartTransaction(element.Document);
 
-        if (!parameter.Update(value))
+        if (parameter.IsReadOnly || !parameter.Update(value))
         {
-          var message = $"Cannot to set value '{value}' to parameter '{parameter.Definition.Name}'.";
+          var message = parameter.IsReadOnly ?
+            $"Can't set parameter. '{parameter.Definition.Name}' is read-only.":
+            $"Invalid value. Failed to set value '{value}' to parameter '{parameter.Definition.Name}'.";
+
           var dataTypeId = parameter.Definition?.GetDataType();
           if
           (
+            !parameter.IsReadOnly &&
             ERDB.Schemas.SpecType.IsMeasurableSpec(dataTypeId, out var specTypeId) &&
             GH_Convert.ToDouble(value, out var number, GH_Conversion.Both)
           )
@@ -478,18 +476,16 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
 
           message += $" {{{element.Id.IntegerValue}}}";
 
-          if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, message);
-          else if (FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, message);
-          else
+          if (FailureProcessingMode >= ARDB.FailureProcessingResult.ProceedWithRollBack)
           {
-            using (var failure = new ARDB.FailureMessage(ARDB.BuiltInFailures.GeneralFailures.InvalidValue))
+            using (var failure = new ARDB.FailureMessage(parameter.IsReadOnly ? ARDB.BuiltInFailures.GeneralFailures.CannotSetParameter : ARDB.BuiltInFailures.GeneralFailures.InvalidValue))
               element.Document.PostFailure(failure.SetFailingElement(element.Id));
           }
 
-          return;
+          throw new Exceptions.RuntimeArgumentException("Parameter", message);
         }
+
+        element.InvalidateGraphics();
       }
 
       Params.TrySetData(DA, "Value", () => parameter.AsGoo());

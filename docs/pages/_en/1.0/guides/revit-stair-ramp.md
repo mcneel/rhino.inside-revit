@@ -1,7 +1,8 @@
 ---
-title: Stair Ramps and Railings
+title: Stairs, Ramps, Railings
 order: 49
-thumbnail: /static/images/guides/revit-wip.png
+thumbnail: /static/images/guides/revit-stair-ramp.png
+subtitle: Workflows for Revit Stairs, Ramps, Railings
 group: Modeling
 ---
 

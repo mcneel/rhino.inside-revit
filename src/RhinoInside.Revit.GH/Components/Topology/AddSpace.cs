@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         new Parameters.View()
         {
           Name = "View",
-          NickName = "View",
+          NickName = "V",
           Description = "View to add a specific room",
         }
       ),

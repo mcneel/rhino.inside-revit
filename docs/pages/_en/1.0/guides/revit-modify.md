@@ -1,8 +1,9 @@
 ---
 title: Element Geometry
 order: 58
+thumbnail: /static/images/guides/revit-modify.png
+subtitle: Workflows for Modifying Revit Elements
 group: Modeling
-thumbnail: /static/images/guides/rir-ghpython.png
 ---
 
 ## Flip

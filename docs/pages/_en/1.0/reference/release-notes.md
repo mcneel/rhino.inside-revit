@@ -8,10 +8,27 @@ group: Deployment & Configs
 
 {% capture rc_release_notes %}
 
+### WIP
+
+### RC 
+
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.8" version="v1.8.8228.26612" time="07/18/2022" %}
+{% include ltr/release-header.html title="v1.9 RC1" version="v1.9.8234.21248" pre_release=true time="07/18/2022" %}
+
+- Added 'Host Sub Elements' component.
+- Added 'Profile' input to 'Host Boundary Profile' component.
+- Added 'Revit Version' component.
+- Added 'Revit User' component.
+- Added 'Document Tolerances' component.
+- Added 'Default File Locations' component.
+- Added 'Spatial Element Identity' component.
+- Added 'Delete Workset' component (Revit 2023).
+- Added 'Default 3D View' component.
+- Added 'Assembly Origin' component.
+
+{% include ltr/release-header.html title="v1.8" version="v1.8.8221.17917" time="07/18/2022" %}
 
 - Includes all changes under 1.8RC releases listed below
 - Minor Fixes and Improvements

@@ -1,8 +1,9 @@
 ---
-title: Site
+title: Site, Topography
 order: 60
+thumbnail: /static/images/guides/revit-site.png
+subtitle: Workflows for Revit Site and Topography
 group: Modeling
-thumbnail: /static/images/guides/revit-wip.png
 ---
 
 ## Add Topography (Mesh)
