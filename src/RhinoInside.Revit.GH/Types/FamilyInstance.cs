@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.GH.Types
 
                 if (BakeGeometryElement(idMap, overwrite, doc, att, worldToElement, element, geometry, out var idefIndex))
                 {
-                  att = att.Duplicate();
+                  att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
                   att.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
                   att.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
 
