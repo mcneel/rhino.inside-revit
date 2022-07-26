@@ -87,15 +87,15 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.Document>("Project", "P", relevance: ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "Current Shared Site", optional: true, relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Parameters.Document>("Project", "P", optional: true, relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "New current Shared Site", optional: true, relevance: ParamRelevance.Tertiary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
       ParamDefinition.Create<Parameters.SiteLocation>("Site Location", "SL", "Project site location", relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "Current Shared Site", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "Project current Shared Site", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.BasePoint>("Survey Point", "SP", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.BasePoint>("Project Base Point", "PBP", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.BasePoint>("Internal Origin", "IO", relevance: ParamRelevance.Occasional),
