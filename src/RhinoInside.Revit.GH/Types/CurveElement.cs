@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Types
       // 3. Update if necessary
       if (Value is ARDB.CurveElement curve)
       {
-        att = att.Duplicate();
+        att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
         att.Name = DisplayName;
         if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
           att.LayerIndex = doc.Layers.FindId(layerGuid).Index;

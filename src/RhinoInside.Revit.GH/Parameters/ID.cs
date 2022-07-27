@@ -329,9 +329,8 @@ namespace RhinoInside.Revit.GH.Parameters
     public void BakeElements(RhinoDoc doc, ObjectAttributes att, List<Guid> guids)
     {
       if (doc is null) throw new ArgumentNullException(nameof(doc));
-      if (att is null) att = doc.CreateDefaultAttributes();
-      else att = att.Duplicate();
       if (guids is null) throw new ArgumentNullException(nameof(guids));
+      att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
 
       var idMap = new Dictionary<ARDB.ElementId, Guid>();
 

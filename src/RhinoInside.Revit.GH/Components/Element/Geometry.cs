@@ -118,6 +118,16 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     )
     {
       var index = level;
+      {
+        var elePath = elements is object ? elementsPath.AppendElement(index) : default;
+        if (level == 0 && ExpandDependents) elePath = elePath?.AppendElement(0);
+        elements?.EnsurePath(elePath);
+
+        var geoPath = geometriesPath.AppendElement(index);
+        if (level == 0 && ExpandDependents) geoPath = geoPath.AppendElement(0);
+        geometries.EnsurePath(geoPath);
+      }
+
       foreach (var element in include)
       {
         if (level == 0 && GH_Document.IsEscapeKeyDown())
@@ -130,10 +140,11 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         if (level == 0 && ExpandDependents) elePath = elePath?.AppendElement(0);
         elements?.EnsurePath(elePath);
 
-        var geoPath = geometriesPath.AppendElement(index++);
+        var geoPath = geometriesPath.AppendElement(index);
         if (level == 0 && ExpandDependents) geoPath = geoPath.AppendElement(0);
         geometries.EnsurePath(geoPath);
 
+        index++;
         if
         (
           element is object &&

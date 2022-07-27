@@ -316,7 +316,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Value is ARDB.Grid grid)
       {
-        att = att.Duplicate();
+        att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
         att.Name = grid.Name;
         att.WireDensity = -1;
         att.CastsShadows = false;
@@ -646,7 +646,7 @@ namespace RhinoInside.Revit.GH.Types
       // 3. Update if necessary
       if (Value is ARDB.ReferencePoint point)
       {
-        att = att.Duplicate();
+        att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
         att.Name = DisplayName;
         if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
           att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
