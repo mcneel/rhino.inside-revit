@@ -6,6 +6,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.Convert.Display
 {
   using Geometry;
+  using External.DB.Extensions;
 
   static class PreviewConverter
   {
@@ -18,7 +19,7 @@ namespace RhinoInside.Revit.Convert.Display
         return true;
 
       if (doc?.GetElement(geometryObject.GraphicsStyleId) is ARDB.GraphicsStyle style)
-        return style.GraphicsStyleCategory.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_LightingFixtureSource;
+        return style.GraphicsStyleCategory.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_LightingFixtureSource;
 
       return false;
     }

@@ -302,7 +302,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Joins
     static bool IsStructuralFraming(ARDB.FamilyInstance frame) =>
-      frame.Category.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming;
+      frame.Category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralFraming;
     
     public bool? IsJoinAllowedAtStart
     {

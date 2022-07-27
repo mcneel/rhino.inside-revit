@@ -22,13 +22,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
     struct SameDocumentComparer : IEqualityComparer<Category>
     {
       bool IEqualityComparer<Category>.Equals(Category x, Category y) => ReferenceEquals(x, y) || x?.Id == y?.Id;
-      int IEqualityComparer<Category>.GetHashCode(Category obj) => obj?.Id.IntegerValue ?? int.MinValue;
+      int IEqualityComparer<Category>.GetHashCode(Category obj) => obj?.Id.GetHashCode() ?? 0;
     }
 
     struct InterDocumentComparer : IEqualityComparer<Category>
     {
       bool IEqualityComparer<Category>.Equals(Category x, Category y) => IsEquivalent(x, y);
-      int IEqualityComparer<Category>.GetHashCode(Category obj) => (obj?.Id.IntegerValue ?? int.MinValue) ^ (obj?.Document().GetHashCode() ?? 0);
+      int IEqualityComparer<Category>.GetHashCode(Category obj) => (obj?.Id.GetHashCode() ?? 0) ^ (obj?.Document().GetHashCode() ?? 0);
     }
 
     /// <summary>
@@ -1036,7 +1036,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (map is null)
         return true;
 
-      return !map.Cast<Category>().Any(x => x.Id.IntegerValue == category.Id.IntegerValue);
+      return !map.Cast<Category>().Any(x => x.Id == category.Id);
     }
 
     /// <summary>

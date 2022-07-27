@@ -398,7 +398,7 @@ namespace RhinoInside.Revit.GH.Parameters
           if (!document.Value.IsEquivalent(element.Document))
             throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
 
-          if (element.Category.Id.IntegerValue != (int)categoryId)
+          if (element.Category.Id.ToBuiltInCategory() != categoryId)
             throw new Exceptions.RuntimeArgumentException(name, $"Collected type is not on category '{((ERDB.Schemas.CategoryId) categoryId).Label}'.");
 
           if (element is ARDB.FamilySymbol symbol && !symbol.IsActive)
@@ -412,7 +412,7 @@ namespace RhinoInside.Revit.GH.Parameters
           if (!document.Value.IsEquivalent(goo.Document))
             throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
 
-          if (goo.Category.Id.IntegerValue != (int) categoryId)
+          if (goo.Category.Id.ToBuiltInCategory() != categoryId)
             throw new Exceptions.RuntimeArgumentException(name, $"Collected type is not on category '{((ERDB.Schemas.CategoryId) categoryId).Label}'.");
 
           if (goo is Types.FamilySymbol symbol && !symbol.Value.IsActive)

@@ -155,7 +155,7 @@ namespace RhinoInside.Revit.External.DB
     #region IEquatable
     public override int GetHashCode() =>
       (Base?.Document.GetHashCode() ?? 0) ^
-      (Base?.Id.IntegerValue.GetHashCode() ?? 0) ^
+      (Base?.Id.GetHashCode() ?? 0) ^
       (Value?.GetHashCode() ?? 0);
 
     public override bool Equals(object obj) => obj is ElevationElementReference other && Equals(other);

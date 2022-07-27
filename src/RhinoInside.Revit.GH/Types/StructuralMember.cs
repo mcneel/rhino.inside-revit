@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return ((element as ARDB.FamilyInstance)?.StructuralType) == ARDB.Structure.StructuralType.Beam &&
-             element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming;
+             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralFraming;
     }
 
     public StructuralBeam() { }
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return ((element as ARDB.FamilyInstance)?.StructuralType) == ARDB.Structure.StructuralType.Brace &&
-             element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming;
+             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralFraming;
     }
 
     public StructuralBrace() { }
@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return ((element as ARDB.FamilyInstance)?.StructuralType) == ARDB.Structure.StructuralType.Column &&
-               element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralColumns;
+               element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralColumns;
     }
 
     public StructuralColumn() { }

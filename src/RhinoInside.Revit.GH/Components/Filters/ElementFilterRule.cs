@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
             foreach (var categoryId in categoriesWhereDefined)
             {
               var schedule = default(ARDB.ViewSchedule);
-              if (categoryId.IntegerValue == (int) ARDB.BuiltInCategory.OST_Areas)
+              if (categoryId.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Areas)
               {
                 using (var collector = new ARDB.FilteredElementCollector(doc))
                 {
@@ -431,7 +431,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not a text parameter.");
         else
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterKey.Id.IntegerValue}' is not a text parameter.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterKey.Id.ToValue()}' is not a text parameter.");
 
         return;
       }

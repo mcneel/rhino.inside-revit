@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
 
           // Compute
           StartTransaction(doc.Value);
-          if (CanReconstruct(_Type_, out var untracked, ref type, doc.Value, name, template.FamilyName, (ARDB.BuiltInCategory) template.Category.Id.IntegerValue))
+          if (CanReconstruct(_Type_, out var untracked, ref type, doc.Value, name, template.FamilyName, template.Category.Id.ToBuiltInCategory()))
             type = Reconstruct(type, doc.Value, name, template.Value);
 
           DA.SetData(_Type_, type);
@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
           template.GetType(),
           template.FamilyName,
           template.Category is ARDB.Category category ?
-          (ARDB.BuiltInCategory) category.Id.IntegerValue :
+          category.Id.ToBuiltInCategory() :
           ARDB.BuiltInCategory.INVALID
         );
       }

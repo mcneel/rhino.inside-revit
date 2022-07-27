@@ -227,7 +227,7 @@ namespace RhinoInside.Revit.GH.Parameters
           parameters = categoriesBox.Items.
                         Cast<Types.Category>().
                         SelectMany(x => ARDB.TableView.GetAvailableParameters(doc, x.Id)).
-                        GroupBy(x => x.IntegerValue).
+                        GroupBy(x => x.ToValue()).
                         Select(x => x.First());
         }
         else

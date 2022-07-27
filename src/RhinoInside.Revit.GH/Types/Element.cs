@@ -33,9 +33,9 @@ namespace RhinoInside.Revit.GH.Types
 
         if (Id.IsBuiltInId())
         {
-          if (!IsValid) return $"Referenced built-in {((IGH_Goo) this).TypeName} is not valid. {{{Id.IntegerValue}}}";
+          if (!IsValid) return $"Referenced built-in {((IGH_Goo) this).TypeName} is not valid. {{{Id.ToValue()}}}";
         }
-        else if (Value is null) return $"Referenced {((IGH_Goo) this).TypeName} was deleted or undone. {{{Id.IntegerValue}}}";
+        else if (Value is null) return $"Referenced {((IGH_Goo) this).TypeName} was deleted or undone. {{{Id.ToValue()}}}";
 
         return default;
       }
@@ -372,7 +372,7 @@ namespace RhinoInside.Revit.GH.Types
       this.id = id;
       if (doc is object && id is object)
       {
-        UniqueID = id.IntegerValue < 0 ?
+        UniqueID = id.IsBuiltInId() ?
           UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(doc), id.IntegerValue) :
           doc.GetElement(id)?.UniqueId ?? string.Empty;
       }
@@ -520,7 +520,7 @@ namespace RhinoInside.Revit.GH.Types
       [System.ComponentModel.RefreshProperties(System.ComponentModel.RefreshProperties.All)]
       public virtual int? Id
       {
-        get => owner.Id?.IntegerValue;
+        get => owner.Id?.ToValue();
       }
 
       [System.ComponentModel.Description("A human readable name for the Element.")]
