@@ -28,9 +28,9 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       ParamDefinition.Create<Param_Boolean>("Use Render Appearance", "R", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Colour>("Color", "C", optional: true, relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Param_Number>("Transparency", "T", optional: true, relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Param_Number>("Shininess", "SH", optional: true, relevance: ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_Number>("Smoothness", "SM", optional: true, relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_Number>("Transparency", "T", "Valid value range is [0.0, 1.0]", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Shininess", "SH", "Valid value range is [0.0, 1.0]", optional: true, relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_Number>("Smoothness", "SM", "Valid value range is [0.0, 1.0]", optional: true, relevance: ParamRelevance.Occasional),
 
       ParamDefinition.Create<Parameters.FillPatternElement>("Surface Foreground Pattern", "SFP", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Colour>("Surface Foreground Color", "SFC", optional: true, relevance: ParamRelevance.Primary),
