@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components
 
       int idsCount = 0;
       foreach (var id in error.GetFailingElementIds())
-        message += idsCount++ == 0 ? $" {{{id.IntegerValue}" : $", {id.IntegerValue}";
+        message += idsCount++ == 0 ? $" {{{id.ToValue()}" : $", {id.ToValue()}";
       if (idsCount > 0) message += "} ";
 
       ActiveObject?.AddRuntimeMessage(level, message);

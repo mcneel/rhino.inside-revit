@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB.BasePoint &&
-             element.Category.Id.IntegerValue != (int) ARDB.BuiltInCategory.OST_IOS_GeoSite;
+             element.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_IOS_GeoSite;
     }
 
     public BasePoint() { }
@@ -121,6 +121,8 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using External.DB.Extensions;
+
 #if REVIT_2021
   using ARDB_InternalOrigin = ARDB.InternalOrigin;
 #elif REVIT_2020
@@ -139,7 +141,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB_InternalOrigin &&
-             element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_IOS_GeoSite;
+             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_IOS_GeoSite;
     }
 
     public InternalOrigin() { }

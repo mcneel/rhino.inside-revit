@@ -759,7 +759,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         foreach (var style in collector.Cast<GraphicsStyle>())
         {
           var category = style.GraphicsStyleCategory;
-          if (category.Id.IntegerValue == (int) categoryId)
+          if (category.Id.ToBuiltInCategory() == categoryId)
             return style.GraphicsStyleCategory;
         }
       }

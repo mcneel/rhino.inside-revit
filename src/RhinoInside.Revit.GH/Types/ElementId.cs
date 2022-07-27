@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsReferencedData)
         return $"{Invalid}{TypeName}{InstanceName}";
 
-      string InstanceId = valid ? $" : id {Id.IntegerValue}" : $" : {UniqueID}";
+      string InstanceId = valid ? $" : id {Id.ToValue()}" : $" : {UniqueID}";
 
       using (var Documents = Revit.ActiveDBApplication.Documents)
       {
@@ -170,7 +170,7 @@ namespace RhinoInside.Revit.GH.Types
       private class ParameterPropertyDescriptor : PropertyDescriptor
       {
         readonly ARDB.Parameter parameter;
-        public ParameterPropertyDescriptor(ARDB.Parameter p) : base(p.Definition?.Name ?? p.Id.IntegerValue.ToString(), null) { parameter = p; }
+        public ParameterPropertyDescriptor(ARDB.Parameter p) : base(p.Definition?.Name ?? p.Id.ToValue().ToString(), null) { parameter = p; }
         public override Type ComponentType => typeof(Proxy);
         public override bool IsReadOnly => true;
         public override string Name => parameter.Definition?.Name ?? string.Empty;
@@ -213,7 +213,7 @@ namespace RhinoInside.Revit.GH.Types
 
           return false;
         }
-        public override int GetHashCode() => parameter.Id.IntegerValue;
+        public override int GetHashCode() => parameter.Id.GetHashCode();
         public override bool ShouldSerializeValue(object component) { return false; }
         public override void ResetValue(object component) { }
         public override bool CanResetValue(object component) { return false; }
@@ -294,8 +294,8 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     bool IGH_QuickCast.QC_Bool() => IsValid;
-    int IGH_QuickCast.QC_Int() => Id?.IntegerValue ?? throw new InvalidCastException();
-    double IGH_QuickCast.QC_Num() => Id?.IntegerValue ?? throw new InvalidCastException();
+    int IGH_QuickCast.QC_Int() => Id?.ToValue() ?? throw new InvalidCastException();
+    double IGH_QuickCast.QC_Num() => Id?.ToValue() ?? throw new InvalidCastException();
     string IGH_QuickCast.QC_Text() => External.DB.FullUniqueId.Format(DocumentGUID, UniqueID);
     Color IGH_QuickCast.QC_Col() => throw new InvalidCastException();
     Point3d IGH_QuickCast.QC_Pt() => throw new InvalidCastException();
@@ -311,7 +311,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Properties
     public override string DisplayName => IsReferencedData ?
-      Id is null ? "INVALID" : Id.IntegerValue.ToString() :
+      Id is null ? "INVALID" : Id.ToValue().ToString() :
       "<None>";
     #endregion
   }

@@ -185,7 +185,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     ARDB.Category MapCategory(ARDB.Document project, ARDB.Document family, ARDB.ElementId categoryId, bool createIfNotExist = false)
     {
-      if (-3000000 < categoryId.IntegerValue && categoryId.IntegerValue < -2000000)
+      if (categoryId.TryGetBuiltInCategory(out var _))
         return family.GetCategory(categoryId);
 
       try
@@ -355,7 +355,7 @@ namespace RhinoInside.Revit.GH.Components.Families
             doc.GetCategory(subCategoryId) is ARDB.Category subCategory
           )
           {
-            if (subCategoryId.IntegerValue == (int) ARDB.BuiltInCategory.OST_InvisibleLines)
+            if (subCategoryId.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_InvisibleLines)
             {
               familySubCategory = MapCategory(doc, familyDoc, subCategoryId, true);
             }
@@ -385,7 +385,7 @@ namespace RhinoInside.Revit.GH.Components.Families
         curve.TryGetUserString(ARDB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
         curve.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
 
-        if (familyDoc.OwnerFamily.FamilyCategory.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_DetailComponents)
+        if (familyDoc.OwnerFamily.FamilyCategory.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_DetailComponents)
         {
           using (var collector = new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.View)))
           {
@@ -742,7 +742,7 @@ namespace RhinoInside.Revit.GH.Components.Families
                 if (updateGeometry)
                 {
                   using (var forms = new DeleteElementEnumerator<ARDB.GenericForm>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.GenericForm)).Cast<ARDB.GenericForm>().ToArray()))
-                  using (var curves = new DeleteElementEnumerator<ARDB.CurveElement>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.CurveElement)).Cast<ARDB.CurveElement>().Where(x => x.Category.Id.IntegerValue != (int) ARDB.BuiltInCategory.OST_SketchLines).ToArray()))
+                  using (var curves = new DeleteElementEnumerator<ARDB.CurveElement>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.CurveElement)).Cast<ARDB.CurveElement>().Where(x => x.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_SketchLines).ToArray()))
                   using (var openings = new DeleteElementEnumerator<ARDB.Opening>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.Opening)).Cast<ARDB.Opening>().ToArray()))
                   using (var ctx = GeometryEncoder.Context.Push(familyDoc))
                   {

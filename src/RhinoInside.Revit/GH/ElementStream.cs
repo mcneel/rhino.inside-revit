@@ -482,7 +482,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
 
       if (CategoryId != default)
       {
-        if ((element.Category?.Id ?? ARDB.ElementId.InvalidElementId).IntegerValue != (int) CategoryId)
+        if ((element.Category?.Id ?? ARDB.ElementId.InvalidElementId).ToBuiltInCategory() != CategoryId)
           return false;
       }
 

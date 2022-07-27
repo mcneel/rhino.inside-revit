@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
       public int GetHashCode(ARDB.ElementType obj) => new
       {
-        Category = (obj?.Category?.Id ?? ARDB.ElementId.InvalidElementId).IntegerValue,
+        Category = (obj?.Category?.Id ?? ARDB.ElementId.InvalidElementId).GetHashCode(),
         Kind = obj.GetElementKind(),
         FamilyName = obj?.FamilyName
       }.

@@ -632,7 +632,7 @@ namespace RhinoInside.Revit.GH.Types
           var Flipped = element.GetType().GetProperty("Flipped");
 
           if (Flip is null || Flipped is null)
-            throw new Exceptions.RuntimeException($"Facing can not be flipped for element. {{{element.Id.IntegerValue}}}");
+            throw new Exceptions.RuntimeException($"Facing can not be flipped for element. {{{element.Id.ToValue()}}}");
 
           if ((bool) Flipped.GetValue(element) != value)
           {
@@ -652,7 +652,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value.HasValue && Value is ARDB.Element element)
         {
           if (!CanFlipHand)
-            throw new Exceptions.RuntimeException($"Hand can not be flipped for this element. {{{element.Id.IntegerValue}}}");
+            throw new Exceptions.RuntimeException($"Hand can not be flipped for this element. {{{element.Id.ToValue()}}}");
 
           if (HandFlipped != value)
             throw new MissingMemberException(element.GetType().FullName, nameof(HandFlipped));
@@ -669,7 +669,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value.HasValue && Value is ARDB.Element element)
         {
           if (!CanFlipWorkPlane)
-            throw new Exceptions.RuntimeException($"Work Plane can not be flipped for this element. {{{element.Id.IntegerValue}}}");
+            throw new Exceptions.RuntimeException($"Work Plane can not be flipped for this element. {{{element.Id.ToValue()}}}");
 
           if (WorkPlaneFlipped != value)
             throw new MissingMemberException(element.GetType().FullName, nameof(WorkPlaneFlipped));
@@ -689,7 +689,7 @@ namespace RhinoInside.Revit.GH.Types
           return ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, end);
 
         case ARDB.FamilyInstance instance:
-          if (instance.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming)
+          if (instance.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralFraming)
             return ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(instance, end);
 
           break;
@@ -711,7 +711,7 @@ namespace RhinoInside.Revit.GH.Types
             return;
 
           case ARDB.FamilyInstance instance:
-            if (instance.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_StructuralFraming)
+            if (instance.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralFraming)
             {
               if (allow.Value) ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(instance, end);
               else ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(instance, end);
@@ -815,7 +815,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (AllowedJoinEnds is object)
         {
-          foreach (var join in AllowedJoinEnds.OrderBy(x => x.Element.Id.IntegerValue).ThenBy(x => x.End))
+          foreach (var join in AllowedJoinEnds.OrderBy(x => x.Element.Id.ToValue()).ThenBy(x => x.End))
             AllowJoinAtEnd(join.Element, join.End, allow: true);
         }
       }

@@ -4,6 +4,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
+  using External.DB.Extensions;
+
   public class AnalyzeCurtainGridPanelType : Component
   {
     public override Guid ComponentGuid => new Guid("6F11977F-7CF3-41F1-8A69-2F4CD7287DEF");
@@ -81,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           case ARDB.FamilySymbol finst:
             // make sure family symbol belongs to a Panel Family
             // finst.Family.IsCurtainPanelFamily returns FALSE !!!
-            var isCurtainPanelFamily = finst.Family.FamilyCategory.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_CurtainWallPanels;
+            var isCurtainPanelFamily = finst.Family.FamilyCategory.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_CurtainWallPanels;
             // can not extract Offset and Thickness since they are not builtin for curtain panel custom families
             // TODO: maybe extract other info for Panel Families?!
             break;

@@ -347,14 +347,14 @@ namespace RhinoInside.Revit.GH.Types
 
           layer.Color = category.LineColor.ToColor();
           layer.LinetypeIndex = linetypeIndex;
-          layer.PlotWeight = category.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_InvisibleLines ?
+          layer.PlotWeight = category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_InvisibleLines ?
             -1.0 : // No Plot
             ToPlotWeight(ProjectionLineWeight);
 
           if (category.CategoryType != ARDB.CategoryType.Model)
           {
 
-            switch ((ARDB.BuiltInCategory) Id.IntegerValue)
+            switch (Id.ToBuiltInCategory())
             {
               case ARDB.BuiltInCategory.OST_Views:
                 layer.IsLocked = true;
@@ -371,7 +371,7 @@ namespace RhinoInside.Revit.GH.Types
             layer.RenderMaterialIndex = materialIndex;
 
             // Special case for "Light Sources"
-            if (category.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_LightingFixtureSource)
+            if (category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_LightingFixtureSource)
               layer.IsVisible = false;
           }
 

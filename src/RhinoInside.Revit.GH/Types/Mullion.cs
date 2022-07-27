@@ -4,6 +4,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Mullion")]
   public class Mullion : FamilyInstance
@@ -30,7 +31,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        switch ((External.DB.BuiltInMullionPositionId) Id.IntegerValue)
+        switch ((External.DB.BuiltInMullionPositionId) Id.ToValue())
         {
           case External.DB.BuiltInMullionPositionId.PerpendicularToFace: return "Perpendicular To Face";
           case External.DB.BuiltInMullionPositionId.ParallelToGround:    return "Parallel To Ground";
@@ -53,7 +54,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        switch ((External.DB.BuiltInMullionProfileId) Id.IntegerValue)
+        switch ((External.DB.BuiltInMullionProfileId) Id.ToValue())
         {
           case External.DB.BuiltInMullionProfileId.Rectangular: return "Rectangular";
           case External.DB.BuiltInMullionProfileId.Circular:    return "Circular";

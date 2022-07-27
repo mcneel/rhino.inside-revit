@@ -21,14 +21,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     struct SameDocumentComparer : IEqualityComparer<Parameter>
     {
-      public bool Equals(Parameter x, Parameter y) => x.Id.IntegerValue == y.Id.IntegerValue;
-      public int GetHashCode(Parameter obj) => obj.Id.IntegerValue;
+      public bool Equals(Parameter x, Parameter y) => x.Id == y.Id;
+      public int GetHashCode(Parameter obj) => obj?.Id.GetHashCode() ?? 0;
     }
 
     struct InterDocumentComparer : IEqualityComparer<Parameter>
     {
       bool IEqualityComparer<Parameter>.Equals(Parameter x, Parameter y) => IsEquivalent(x, y);
-      int IEqualityComparer<Parameter>.GetHashCode(Parameter obj) => (obj?.Id.IntegerValue ?? int.MinValue) ^ (obj?.Element.Document.GetHashCode() ?? 0);
+      int IEqualityComparer<Parameter>.GetHashCode(Parameter obj) => (obj?.Id.GetHashCode() ?? 0) ^ (obj?.Element.Document.GetHashCode() ?? 0);
     }
 
     /// <summary>
@@ -231,7 +231,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if(parameter.IsShared)
         return new Schemas.ParameterId($"autodesk.parameter.aec.revit.external.-1:{parameter.GUID:N}");
       else
-        return new Schemas.ParameterId($"autodesk.parameter.aec.revit.project:{parameter.Id.IntegerValue}");
+        return new Schemas.ParameterId($"autodesk.parameter.aec.revit.project:{parameter.Id.ToValue()}");
     }
 #endif
   }

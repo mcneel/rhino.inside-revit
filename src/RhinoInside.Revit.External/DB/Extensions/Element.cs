@@ -23,13 +23,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
     struct SameDocumentComparer : IEqualityComparer<Element>
     {
       bool IEqualityComparer<Element>.Equals(Element x, Element y) => ReferenceEquals(x, y) || x?.Id == y?.Id;
-      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj?.Id.IntegerValue ?? int.MinValue;
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => obj?.Id.GetHashCode() ?? 0;
     }
 
     struct InterDocumentComparer : IEqualityComparer<Element>
     {
       bool IEqualityComparer<Element>.Equals(Element x, Element y) =>  IsEquivalent(x, y);
-      int IEqualityComparer<Element>.GetHashCode(Element obj) => (obj?.Id.IntegerValue ?? int.MinValue) ^ (obj?.Document.GetHashCode() ?? 0);
+      int IEqualityComparer<Element>.GetHashCode(Element obj) => (obj?.Id.GetHashCode() ?? 0) ^ (obj?.Document.GetHashCode() ?? 0);
     }
 
     /// <summary>
@@ -651,7 +651,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             ).
             Where(x => x?.Definition is object).
             Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None), ParameterEqualityComparer.SameDocument).
-            OrderBy(x => x.Id.IntegerValue);
+            OrderBy(x => x.Id.ToValue());
 
         case ParameterClass.BuiltIn:
           return BuiltInParameterExtension.BuiltInParameters.
@@ -667,20 +667,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case ParameterClass.Project:
           return element.Parameters.Cast<Parameter>().
-            Where(p => !p.IsShared && p.Id.IntegerValue > 0).
+            Where(p => !p.IsShared && !p.Id.IsBuiltInId()).
             Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() == 1).
-            OrderBy(x => x.Id.IntegerValue);
+            OrderBy(x => x.Id.ToValue());
 
         case ParameterClass.Family:
           return element.Parameters.Cast<Parameter>().
-            Where(p => !p.IsShared && p.Id.IntegerValue > 0).
+            Where(p => !p.IsShared && !p.Id.IsBuiltInId()).
             Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() == 0).
-            OrderBy(x => x.Id.IntegerValue);
+            OrderBy(x => x.Id.ToValue());
 
         case ParameterClass.Shared:
           return element.Parameters.Cast<Parameter>().
             Where(p => p.IsShared).
-            OrderBy(x => x.Id.IntegerValue);
+            OrderBy(x => x.Id.ToValue());
       }
 
       return Enumerable.Empty<Parameter>();
@@ -693,7 +693,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case ParameterClass.Any:
           return element.GetParameters(name, ParameterClass.BuiltIn).
             Union(element.GetParameters(name), ParameterEqualityComparer.SameDocument).
-            OrderBy(x => x.Id.IntegerValue);
+            OrderBy(x => x.Id.ToValue());
 
         case ParameterClass.BuiltIn:
           return BuiltInParameterExtension.BuiltInParameterMap.TryGetValue(name, out var parameters) ?
@@ -702,20 +702,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case ParameterClass.Project:
           return element.GetParameters(name).
-            Where(p => !p.IsShared && p.Id.IntegerValue > 0).
+            Where(p => !p.IsShared && !p.Id.IsBuiltInId()).
             Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() == 1).
-            OrderBy(x => x.Id.IntegerValue);
+            OrderBy(x => x.Id.ToValue());
 
         case ParameterClass.Family:
           return element.GetParameters(name).
-            Where(p => !p.IsShared && p.Id.IntegerValue > 0).
+            Where(p => !p.IsShared && !p.Id.IsBuiltInId()).
             Where(p => (p.Element.Document.GetElement(p.Id) as ParameterElement)?.get_Parameter(BuiltInParameter.ELEM_DELETABLE_IN_FAMILY)?.AsInteger() == 0).
-            OrderBy(x => x.Id.IntegerValue);
+            OrderBy(x => x.Id.ToValue());
 
         case ParameterClass.Shared:
           return element.GetParameters(name).
             Where(p => p.IsShared).
-            OrderBy(x => x.Id.IntegerValue);
+            OrderBy(x => x.Id.ToValue());
       }
 
       return Enumerable.Empty<Parameter>();

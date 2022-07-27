@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Win32.SafeHandles;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace Rhino.Geometry
 {
@@ -1040,7 +1041,7 @@ namespace Rhino.Geometry
 
     public static bool TryGetUserString(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def)
     {
-      if (geometry.TryGetUserString(key, out int id, def.IntegerValue))
+      if (geometry.TryGetUserString(key, out int id, def.ToValue()))
       {
         value = new Autodesk.Revit.DB.ElementId(id);
         return true;
@@ -1051,10 +1052,10 @@ namespace Rhino.Geometry
     }
 
     public static bool TrySetUserString(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value) =>
-      geometry.TrySetUserString(key, value.IntegerValue, Autodesk.Revit.DB.ElementId.InvalidElementId.IntegerValue);
+      geometry.TrySetUserString(key, value.ToValue(), Autodesk.Revit.DB.ElementId.InvalidElementId.ToValue());
 
     public static bool TrySetUserString(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def) =>
-      geometry.TrySetUserString(key, value.IntegerValue, def.IntegerValue);
+      geometry.TrySetUserString(key, value.ToValue(), def.ToValue());
   }
 }
 

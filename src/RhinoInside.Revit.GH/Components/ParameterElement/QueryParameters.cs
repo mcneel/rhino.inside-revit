@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         parameters = parameters.Where(x => x.GetGroupType() == group.Value);
 
       // As any other Query component this should return elements sorted by Id.
-      parameters = parameters.OrderBy(x => x.Id.IntegerValue);
+      parameters = parameters.OrderBy(x => x.Id.ToValue());
 
       DA.SetDataList
       (

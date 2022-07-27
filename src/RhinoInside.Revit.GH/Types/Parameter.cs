@@ -257,11 +257,11 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (owner.IsReferencedData)
         {
-          int value = owner.Id?.IntegerValue ?? -1;
-          if (Enum.IsDefined(typeof(ARDB.BuiltInParameter), value))
-            return ((ARDB.BuiltInParameter) value).ToStringGeneric();
+          var id = owner.Id ?? ARDB.ElementId.InvalidElementId;
+          if (id.TryGetBuiltInParameter(out var bip) == true)
+            return bip.ToStringGeneric();
 
-          return value.ToString();
+          return id.ToValue().ToString();
         }
         else return owner.DisplayName;
       }
@@ -401,13 +401,13 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Id is object && Id.TryGetBuiltInParameter(out var bip))
-          return ((External.DB.Schemas.ParameterId) bip).Name;
+          return ((ERDB.Schemas.ParameterId) bip).Name;
 
         if (IsReferencedData)
         {
           return GUID.HasValue ?
-            $"{{{Id?.IntegerValue}}} : {GUID.Value:B}" :
-            $"{{{Id?.IntegerValue}}}";
+            $"{{{Id?.ToValue()}}} : {GUID.Value:B}" :
+            $"{{{Id?.ToValue()}}}";
         }
         else
         {
@@ -507,7 +507,7 @@ namespace RhinoInside.Revit.GH.Types
                       var schedule = default(ARDB.ViewSchedule);
                       if (ARDB.ViewSchedule.IsValidCategoryForSchedule(categoryId))
                       {
-                        if (categoryId.IntegerValue == (int) ARDB.BuiltInCategory.OST_Areas)
+                        if (categoryId.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Areas)
                         {
                           using (var collector = new ARDB.FilteredElementCollector(doc))
                           {
@@ -1004,7 +1004,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if
         (
-          A.Id.IntegerValue == B.Id.IntegerValue &&
+          A.Id.ToValue() == B.Id.ToValue() &&
           A.StorageType == B.StorageType &&
           A.HasValue == B.HasValue
         )
