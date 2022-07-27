@@ -190,6 +190,9 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object && Value is ARDB.Material material)
         {
           var intValue = (int) Math.Round(value.Value * 100.0);
+          if(0.0 > intValue || intValue > 100)
+            throw new ArgumentOutOfRangeException(nameof(Transparency), "Valid value range for transparency is [0.0, 1.0]");
+
           if (material.Transparency != intValue)
             material.Transparency = intValue;
         }
@@ -204,6 +207,9 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object && Value is ARDB.Material material)
         {
           var intValue = (int) Math.Round(value.Value * 128.0);
+          if (0.0 > intValue || intValue > 128)
+            throw new ArgumentOutOfRangeException(nameof(Shininess), "Valid value range for shininess is [0.0, 1.0]");
+
           if (material.Shininess != intValue)
             material.Shininess = intValue;
         }
@@ -218,6 +224,9 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object && Value is ARDB.Material material)
         {
           var intValue = (int) Math.Round(value.Value * 100.0);
+          if (0.0 > intValue || intValue > 100)
+            throw new ArgumentOutOfRangeException(nameof(Smoothness), "Valid value range for smoothness is [0.0, 1.0]");
+
           if (material.Smoothness != intValue)
             material.Smoothness = intValue;
         }
