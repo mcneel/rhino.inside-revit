@@ -13,8 +13,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           case LocationPoint pointLocation:
             origin = pointLocation.Point;
-            basisX = transform.BasisX;
-            basisY = transform.BasisY;
+            basisX = transform.BasisX.Normalize(0D);
+            basisY = transform.BasisY.Normalize(0D);
             return;
 
           case LocationCurve curveLocation:
@@ -24,8 +24,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         // Default values
         origin = transform.Origin;
-        basisX = transform.BasisX;
-        basisY = transform.BasisY;
+        basisX = transform.BasisX.Normalize(0D);
+        basisY = transform.BasisY.Normalize(0D);
       }
     }
 

@@ -178,8 +178,8 @@ namespace RhinoInside.Revit.GH.Components.Grids
       if (grid is null) return false;
 
       var tol = GeometryTolerance.Internal;
-      var gridCurve = grid.Curve;
-      var newCurve = grid.IsCurved ? curve.ToCurve().CreateReversed() : curve.ToCurve();
+      var gridCurve = grid.IsCurved ? grid.Curve : grid.Curve.CreateReversed();
+      var newCurve = curve.ToCurve();
 
       if (!gridCurve.AlmostEquals(newCurve, tol.VertexTolerance))
       {
@@ -209,7 +209,9 @@ namespace RhinoInside.Revit.GH.Components.Grids
         if (view is null) return false;
 
         var curves = grid.GetCurvesInView(ARDB.DatumExtentType.Model, view);
+        if (curves.Count != 1) return false;
 
+        curves[0] = grid.IsCurved ? curves[0] : curves[0].CreateReversed();
         curves[0].TryGetLocation(out var origin0, out var basisX0, out var basisY0);
         newCurve.TryGetLocation(out var origin, out var _, out var _);
 
@@ -241,11 +243,11 @@ namespace RhinoInside.Revit.GH.Components.Grids
         var tol = GeometryTolerance.Model;
         if (curve.TryGetLine(out var line, tol.VertexTolerance))
         {
-          grid = ARDB.Grid.Create(doc, line.ToLine());
+          grid = ARDB.Grid.Create(doc, line.ToLine().CreateReversed() as ARDB.Line);
         }
         else if (curve.TryGetArc(out var arc, tol.VertexTolerance))
         {
-          grid = ARDB.Grid.Create(doc, arc.ToArc());
+          grid = ARDB.Grid.Create(doc, arc.ToArc().CreateReversed() as ARDB.Arc);
         }
         else
         {

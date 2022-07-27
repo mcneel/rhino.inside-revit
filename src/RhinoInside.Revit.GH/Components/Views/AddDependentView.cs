@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         new Parameters.View()
         {
           Name = "View",
-          NickName = "View",
+          NickName = "V",
           Description = "Parent View",
         }
       )

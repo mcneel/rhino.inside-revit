@@ -190,6 +190,8 @@ namespace RhinoInside.Revit.GH.Components
           Create(view, origin, type),
           ExcludeUniqueProperties
         );
+
+        symbol.Document.Regenerate();
       }
 
       symbol.SetLocation(origin, rotation);
