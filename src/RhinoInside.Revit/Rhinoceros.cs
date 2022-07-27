@@ -487,7 +487,7 @@ namespace RhinoInside.Revit
               }
             }
 
-            if (GH.Guest.ModelUnitScale != UnitScale.Unset)
+            if (GH.Guest.ModelUnitScale != UnitScale.Unset && GH.Guest.ModelUnitScale != UnitScale.None)
             {
               taskDialog.ExpandedContent += $"{Environment.NewLine}Documents opened in Grasshopper were working in {GrasshopperModelUnitScale}";
               if (GrasshopperModelUnitScale != RhinoModelUnitScale && GrasshopperModelUnitScale != RevitModelUnitScale)

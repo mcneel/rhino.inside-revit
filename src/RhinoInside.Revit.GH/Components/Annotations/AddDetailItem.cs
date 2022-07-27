@@ -187,6 +187,8 @@ namespace RhinoInside.Revit.GH.Components
           Create(view, origin, type),
           ExcludeUniqueProperties
         );
+
+        detail.Document.Regenerate();
       }
 
       detail.SetLocation(origin, rotation);
