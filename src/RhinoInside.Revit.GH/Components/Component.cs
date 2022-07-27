@@ -314,7 +314,7 @@ namespace RhinoInside.Revit.GH.Components
           break;
 
         case System.Exception _:
-          var assemblyName = new System.Reflection.AssemblyName(GetType().Assembly.FullName).Name;
+          var assemblyName = GetType().Assembly.GetName().Name;
           if (e.Source == assemblyName)
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
           else
