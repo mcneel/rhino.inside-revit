@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   internal struct ElementIdEqualityComparer : IEqualityComparer<ElementId>
   {
-    bool IEqualityComparer<ElementId>.Equals(ElementId x, ElementId y) => ReferenceEquals(x, y) || x?.ToValue() == y?.ToValue();
+    bool IEqualityComparer<ElementId>.Equals(ElementId x, ElementId y) => ReferenceEquals(x, y) || (x is object && y is object && x == y);
     int IEqualityComparer<ElementId>.GetHashCode(ElementId obj) => obj?.GetHashCode() ?? 0;
   }
 

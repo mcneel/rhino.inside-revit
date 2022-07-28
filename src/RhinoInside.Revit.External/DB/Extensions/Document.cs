@@ -285,99 +285,33 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static bool TryGetCategoryId(this Document doc, string uniqueId, out ElementId categoryId)
-    {
-      categoryId = default;
-
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
-      {
-        if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
-        {
-          if (((BuiltInCategory) id).IsValid())
-            categoryId = new ElementId((BuiltInCategory) id);
-        }
-        else
-        {
-          if (AsCategory(doc?.GetElement(uniqueId)) is Category category)
-            categoryId = category.Id;
-        }
-      }
-
-      return categoryId is object;
-    }
-
-    public static bool TryGetParameterId(this Document doc, string uniqueId, out ElementId parameterId)
-    {
-      parameterId = default;
-
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
-      {
-        if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
-        {
-          if (((BuiltInParameter) id).IsValid())
-            parameterId = new ElementId((BuiltInParameter) id);
-        }
-        else
-        {
-          if (doc?.GetElement(uniqueId) is ParameterElement parameter)
-            parameterId = parameter.Id;
-        }
-      }
-
-      return parameterId is object;
-    }
-
-    public static bool TryGetLinePatternId(this Document doc, string uniqueId, out ElementId patternId)
-    {
-      patternId = default;
-
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
-      {
-        if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
-        {
-          if (((BuiltInLinePattern) id).IsValid())
-            patternId = new ElementId(id);
-        }
-        else
-        {
-          if (doc?.GetElement(uniqueId) is LinePatternElement pattern)
-            patternId = pattern.Id;
-        }
-      }
-
-      return patternId is object;
-    }
-
     public static bool TryGetElementId(this Document doc, string uniqueId, out ElementId elementId)
     {
       elementId = default;
 
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id) && EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
+      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
       {
-        if (((BuiltInCategory) id).IsValid())
-          elementId = new ElementId((BuiltInCategory) id);
-
-        else if (((BuiltInParameter) id).IsValid())
-          elementId = new ElementId((BuiltInParameter) id);
-
-        else if (((BuiltInLinePattern) id).IsValid())
-          elementId = new ElementId(id);
-      }
-      else
-      {
-        try
+        if (id < 0)
         {
-          if (Reference.ParseFromStableRepresentation(doc, uniqueId) is Reference reference)
-            elementId = reference.ElementId;
+          if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
+            elementId = new ElementId(id);
         }
-        catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+        else
+        {
+          try
+          {
+            if (Reference.ParseFromStableRepresentation(doc, uniqueId) is Reference reference)
+              elementId = reference.ElementId;
+          }
+          catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+        }
       }
 
       return elementId is object;
     }
 
     /// <summary>
-    /// Compare two <see cref="Autodesk.Revit.DB.Reference"/> objects to know it are referencing same <see cref="Autodesk.Revit.Element"/>
+    /// Compare two <see cref="Autodesk.Revit.DB.Reference"/> objects to know if are referencing same <see cref="Autodesk.Revit.Element"/>
     /// </summary>
     /// <param name="doc"></param>
     /// <param name="x"></param>

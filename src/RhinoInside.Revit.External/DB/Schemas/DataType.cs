@@ -180,7 +180,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       { Schemas.SpecType.Measurable.Moment, 14}, // ParameterType.Moment
       { Schemas.SpecType.Int.NumberOfPoles, 15}, // ParameterType.NumberOfPoles
       //{ Schemas.SpecType.Measurable.FixtureUnit, 16}, // ParameterType.FixtureUnit
-      //{ Reference.FamilyType, 17}, // ParameterType.FamilyType
+      //{ Schemas.SpecType.Reference.FamilyType, 17}, // ParameterType.FamilyType
       { Schemas.SpecType.Reference.LoadClassification, 18}, // ParameterType.LoadClassification
       { Schemas.SpecType.Reference.Image, 19}, // ParameterType.Image
       { Schemas.SpecType.String.MultilineText, 20}, // ParameterType.MultilineText
