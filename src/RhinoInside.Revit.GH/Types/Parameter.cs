@@ -1004,7 +1004,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if
         (
-          A.Id.ToValue() == B.Id.ToValue() &&
+          A.Id == B.Id &&
           A.StorageType == B.StorageType &&
           A.HasValue == B.HasValue
         )
