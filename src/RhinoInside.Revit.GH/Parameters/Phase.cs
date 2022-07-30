@@ -41,7 +41,8 @@ namespace RhinoInside.Revit.GH.Parameters
         Sorted = true,
         BorderStyle = BorderStyle.FixedSingle,
         Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+        Height = (int) (100 * GH_GraphicsUtil.UiScale),
+        DisplayMember = nameof(Types.Element.DisplayName)
       };
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
 
@@ -55,18 +56,19 @@ namespace RhinoInside.Revit.GH.Parameters
       var doc = Revit.ActiveUIDocument.Document;
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
+      listBox.BeginUpdate();
       listBox.Items.Clear();
       listBox.Items.Add(new Types.Phase());
 
       {
         var phases = doc.Phases.Cast<ARDB.Phase>();
 
-        listBox.DisplayMember = "DisplayName";
         foreach (var phase in phases)
           listBox.Items.Add(new Types.Phase(phase));
       }
 
       listBox.SelectedIndex = listBox.Items.Cast<Types.Phase>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.EndUpdate();
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 

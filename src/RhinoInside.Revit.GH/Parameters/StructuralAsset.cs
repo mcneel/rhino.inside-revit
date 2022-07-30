@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class StructuralAsset : Element<Types.StructuralAssetElement, ARDB.PropertySetElement>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("dde6da63-87bc-4250-9455-5233bfad8683");
 
     public StructuralAsset() : base

@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class AppearanceAsset : Element<Types.AppearanceAssetElement, ARDB.AppearanceAssetElement>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("941b2ee3-5423-4fee-9df6-27c77fdb53c9");
 
     public AppearanceAsset() : base

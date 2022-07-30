@@ -142,7 +142,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Id is object && Id.TryGetBuiltInLinePattern(out var builtInLinePattern))
-          return $"{builtInLinePattern}";
+          return $"<{builtInLinePattern}>";
 
         return base.Nomen;
       }

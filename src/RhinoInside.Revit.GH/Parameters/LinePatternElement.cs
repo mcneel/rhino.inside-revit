@@ -48,7 +48,8 @@ namespace RhinoInside.Revit.GH.Parameters
         Sorted = true,
         BorderStyle = BorderStyle.FixedSingle,
         Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+        Height = (int) (100 * GH_GraphicsUtil.UiScale),
+        DisplayMember = nameof(Types.Element.DisplayName)
       };
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
 
@@ -61,21 +62,22 @@ namespace RhinoInside.Revit.GH.Parameters
       var doc = Revit.ActiveUIDocument.Document;
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
+      listBox.BeginUpdate();
       listBox.Items.Clear();
+      listBox.Items.Add(new Types.LinePatternElement());
+      listBox.Items.Add(new Types.LinePatternElement(doc, new ARDB.ElementId((int) External.DB.BuiltInLinePattern.Solid)));
 
       using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.LinePatternElement)))
       {
         var patterns = collector.
-                        Cast<ARDB.LinePatternElement>();
+                       Cast<ARDB.LinePatternElement>();
 
-        listBox.DisplayMember = "DisplayName";
-
-        listBox.Items.Add(new Types.LinePatternElement(doc, new ARDB.ElementId((int) External.DB.BuiltInLinePattern.Solid)));
         foreach (var pattern in patterns)
           listBox.Items.Add(new Types.LinePatternElement(pattern));
       }
 
       listBox.SelectedIndex = listBox.Items.Cast<Types.LinePatternElement>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.EndUpdate();
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 

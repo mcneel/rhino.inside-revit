@@ -41,7 +41,8 @@ namespace RhinoInside.Revit.GH.Parameters
         Sorted = true,
         BorderStyle = BorderStyle.FixedSingle,
         Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+        Height = (int) (100 * GH_GraphicsUtil.UiScale),
+        DisplayMember = nameof(Types.Element.DisplayName)
       };
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
 
@@ -87,6 +88,7 @@ namespace RhinoInside.Revit.GH.Parameters
         return;
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
+      listBox.BeginUpdate();
       listBox.Items.Clear();
       listBox.Items.Add(new Types.Category());
 
@@ -96,12 +98,13 @@ namespace RhinoInside.Revit.GH.Parameters
           Cast<ARDB.Category>().
           Where(x => 3 == (int) categoryType ? x.IsTagCategory : x.CategoryType == categoryType && !x.IsTagCategory);
 
-        listBox.DisplayMember = "DisplayName";
         foreach (var category in categories)
           listBox.Items.Add(Types.Category.FromCategory(category));
+
+        listBox.SelectedIndex = listBox.Items.Cast<Types.Category>().IndexOf(PersistentValue, 0).FirstOr(-1);
       }
 
-      listBox.SelectedIndex = listBox.Items.Cast<Types.Category>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.EndUpdate();
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 
@@ -146,7 +149,8 @@ namespace RhinoInside.Revit.GH.Parameters
           BorderStyle = BorderStyle.FixedSingle,
           Width = (int) (250 * GH_GraphicsUtil.UiScale),
           Height = (int) (100 * GH_GraphicsUtil.UiScale),
-          SelectionMode = SelectionMode.MultiExtended
+          SelectionMode = SelectionMode.MultiExtended,
+          DisplayMember = nameof(Types.Element.Nomen)
         };
         listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
 
@@ -161,9 +165,8 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       var doc = Revit.ActiveUIDocument.Document;
 
-      listBox.BeginUpdate();
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
-      listBox.DisplayMember = nameof(Types.Element.DisplayName);
+      listBox.BeginUpdate();
       listBox.Items.Clear();
 
       {

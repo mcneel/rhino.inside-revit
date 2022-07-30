@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class BuildingPad : GraphicalElementT<Types.BuildingPad, ARDB.Architecture.BuildingPad>
   {
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("0D0AFE5F-4578-493E-8374-C6BD1C5395BE");
 
     public BuildingPad() : base("Building Pad", "Building Pad", "Contains a collection of Revit building pad elements", "Params", "Revit Elements") { }

@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           NickName = "E",
           Description = "Source elements",
           Access = GH_ParamAccess.list
-        }
+        }, ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -269,8 +269,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           Name = "Element",
           NickName = "E",
           Description = "Source element",
-        },
-        ParamRelevance.Occasional
+        }, ParamRelevance.Occasional
       ),
       new ParamDefinition
       (

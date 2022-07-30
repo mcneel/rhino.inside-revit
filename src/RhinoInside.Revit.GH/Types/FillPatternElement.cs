@@ -12,7 +12,6 @@ namespace RhinoInside.Revit.GH.Types
   {
     protected override Type ValueType => typeof(ARDB.FillPatternElement);
     public new ARDB.FillPatternElement Value => base.Value as ARDB.FillPatternElement;
-    public static explicit operator ARDB.FillPatternElement(FillPatternElement value) => value?.Value;
 
     public FillPatternElement() { }
     public FillPatternElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
