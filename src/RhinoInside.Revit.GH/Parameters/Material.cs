@@ -56,7 +56,8 @@ namespace RhinoInside.Revit.GH.Parameters
         Sorted = true,
         BorderStyle = BorderStyle.FixedSingle,
         Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+        Height = (int) (100 * GH_GraphicsUtil.UiScale),
+        DisplayMember = nameof(Types.Element.DisplayName)
       };
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
 
@@ -72,8 +73,6 @@ namespace RhinoInside.Revit.GH.Parameters
 
       using (var collector = new ARDB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
       {
-        listBox.Items.Clear();
-
         var materials = collector.
                         OfClass(typeof(ARDB.Material)).
                         Cast<ARDB.Material>().
@@ -96,7 +95,7 @@ namespace RhinoInside.Revit.GH.Parameters
           }
         }
         else RefreshMaterialsList(listBox, default);
-      }      
+      }
 
       Menu_AppendCustomItem(menu, materialCategoryBox);
       Menu_AppendCustomItem(menu, listBox);
@@ -116,6 +115,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var doc = Revit.ActiveUIDocument.Document;
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
+      listBox.BeginUpdate();
       listBox.Items.Clear();
       listBox.Items.Add(new Types.Material());
 
@@ -125,12 +125,12 @@ namespace RhinoInside.Revit.GH.Parameters
                         Cast<ARDB.Material>().
                         Where(x => string.IsNullOrEmpty(materialClass) || x.MaterialClass == materialClass);
 
-        listBox.DisplayMember = "DisplayName";
         foreach (var material in materials)
           listBox.Items.Add(new Types.Material(material));
       }
 
       listBox.SelectedIndex = listBox.Items.Cast<Types.Material>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.EndUpdate();
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 

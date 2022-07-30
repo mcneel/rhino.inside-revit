@@ -137,7 +137,8 @@ namespace RhinoInside.Revit.GH.Parameters
         Sorted = true,
         BorderStyle = BorderStyle.FixedSingle,
         Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        Height = (int) (100 * GH_GraphicsUtil.UiScale)
+        Height = (int) (100 * GH_GraphicsUtil.UiScale),
+        DisplayMember = nameof(Types.Element.DisplayName)
       };
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
 
@@ -146,6 +147,7 @@ namespace RhinoInside.Revit.GH.Parameters
         Sorted = true,
         DropDownStyle = ComboBoxStyle.DropDownList,
         Width = (int) (200 * GH_GraphicsUtil.UiScale),
+        DisplayMember = nameof(Types.Element.DisplayName),
         Tag = listBox
       };
       categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
@@ -176,8 +178,6 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private void RefreshCategoryList(ComboBox categoriesBox, ARDB.CategoryType categoryType)
     {
-      if (Revit.ActiveUIDocument is null) return;
-
       var doc = Revit.ActiveUIDocument.Document;
       var categories = doc.GetBuiltInCategoriesWithParameters().Select(x => doc.GetCategory(x));
 
@@ -189,9 +189,9 @@ namespace RhinoInside.Revit.GH.Parameters
           categories = categories.Where(x => x.CategoryType == categoryType && !x.IsTagCategory);
       }
 
+      categoriesBox.BeginUpdate();
       categoriesBox.SelectedIndex = -1;
       categoriesBox.Items.Clear();
-      categoriesBox.DisplayMember = "DisplayName";
 
       foreach (var category in categories)
         categoriesBox.Items.Add(Types.Category.FromCategory(category));
@@ -201,17 +201,13 @@ namespace RhinoInside.Revit.GH.Parameters
         var currentCategory = new Types.Category(doc, new ARDB.ElementId(SelectedBuiltInCategory));
         categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.Category>().IndexOf(currentCategory, 0).FirstOr(-1);
       }
+
+      categoriesBox.EndUpdate();
     }
 
     private void RefreshParametersList(ListBox listBox, ComboBox categoriesBox)
     {
-      if (Revit.ActiveUIDocument is null) return;
-
       var doc = Revit.ActiveUIDocument.Document;
-
-      listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
-      listBox.Items.Clear();
-      listBox.DisplayMember = "DisplayName";
 
       var current = default(Types.ParameterKey);
       if (SourceCount == 0 && PersistentDataCount == 1)
@@ -220,27 +216,30 @@ namespace RhinoInside.Revit.GH.Parameters
           current = firstValue as Types.ParameterKey;
       }
 
+      var parameters = default(IEnumerable<ARDB.ElementId>);
+      if (categoriesBox.SelectedIndex == -1)
       {
-        var parameters = default(IEnumerable<ARDB.ElementId>);
-        if (categoriesBox.SelectedIndex == -1)
-        {
-          parameters = categoriesBox.Items.
-                        Cast<Types.Category>().
-                        SelectMany(x => ARDB.TableView.GetAvailableParameters(doc, x.Id)).
-                        GroupBy(x => x.ToValue()).
-                        Select(x => x.First());
-        }
-        else
-        {
-          parameters = ARDB.TableView.GetAvailableParameters(doc, (categoriesBox.Items[categoriesBox.SelectedIndex] as Types.Category).Id);
-        }
-
-        foreach (var parameter in parameters)
-          listBox.Items.Add(Types.ParameterKey.FromElementId(doc, parameter));
-
-        listBox.SelectedIndex = listBox.Items.Cast<Types.ParameterKey>().IndexOf(PersistentValue, 0).FirstOr(-1);
-        listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
+        parameters = categoriesBox.Items.
+                      Cast<Types.Category>().
+                      SelectMany(x => ARDB.TableView.GetAvailableParameters(doc, x.Id)).
+                      GroupBy(x => x.ToValue()).
+                      Select(x => x.First());
       }
+      else
+      {
+        parameters = ARDB.TableView.GetAvailableParameters(doc, (categoriesBox.Items[categoriesBox.SelectedIndex] as Types.Category).Id);
+      }
+
+      listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
+      listBox.BeginUpdate();
+      listBox.Items.Clear();
+
+      foreach (var parameter in parameters)
+        listBox.Items.Add(Types.ParameterKey.FromElementId(doc, parameter));
+
+      listBox.SelectedIndex = listBox.Items.Cast<Types.ParameterKey>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.EndUpdate();
+      listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 
     private void CategoryType_SelectedIndexChanged(object sender, EventArgs e)

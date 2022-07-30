@@ -57,7 +57,8 @@ namespace RhinoInside.Revit.GH.Parameters
           BorderStyle = BorderStyle.FixedSingle,
           Width = (int) (250 * GH_GraphicsUtil.UiScale),
           Height = (int) (100 * GH_GraphicsUtil.UiScale),
-          SelectionMode = SelectionMode.MultiExtended
+          SelectionMode = SelectionMode.MultiExtended,
+          DisplayMember = nameof(Types.Element.DisplayName)
         };
         listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
 
@@ -73,7 +74,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var doc = Revit.ActiveUIDocument.Document;
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
-      listBox.DisplayMember = "DisplayName";
+      listBox.BeginUpdate();
       listBox.Items.Clear();
 
       {
@@ -93,6 +94,7 @@ namespace RhinoInside.Revit.GH.Parameters
           listBox.SelectedItems.Add(item);
       }
 
+      listBox.EndUpdate();
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 

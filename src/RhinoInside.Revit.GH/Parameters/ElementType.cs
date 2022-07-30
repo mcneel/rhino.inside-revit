@@ -52,6 +52,7 @@ namespace RhinoInside.Revit.GH.Parameters
         Sorted = true,
         DropDownStyle = ComboBoxStyle.DropDownList,
         Width = (int) (300 * GH_GraphicsUtil.UiScale),
+        DisplayMember = nameof(Types.Element.DisplayName)
       };
       categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
       categoriesBox.SetCueBanner("Category filter…");
@@ -157,9 +158,9 @@ namespace RhinoInside.Revit.GH.Parameters
       }
 
       categoriesBox.SelectedIndex = ListBox.NoMatches;
-      categoriesBox.Items.Clear();
-      categoriesBox.DisplayMember = "DisplayName";
       categoriesBox.BeginUpdate();
+      categoriesBox.Items.Clear();
+
       foreach (var category in categories)
       {
         if (category is null)
@@ -177,7 +178,7 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     private ARDB.ElementId[] GetCategoryIds(ComboBox categoriesBox)
-    {        
+    {
       return
       (
         categoriesBox.SelectedItem is Types.Category category ?
@@ -192,8 +193,8 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       try
       {
-        familiesBox.SelectedIndex = ListBox.NoMatches;
         familiesBox.BeginUpdate();
+        familiesBox.SelectedIndex = ListBox.NoMatches;
         familiesBox.Items.Clear();
 
         using (var collector = new ARDB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
