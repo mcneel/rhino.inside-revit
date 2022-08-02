@@ -83,6 +83,11 @@ namespace RhinoInside.Revit
           finally { activated = default; }
         }
       }
+
+      public override string ToString()
+      {
+        return $"Activated={Assembly is object}, CodeBase={assemblyName.CodeBase}";
+      }
     }
 
     static readonly Dictionary<string, AssemblyReference> references = new Dictionary<string, AssemblyReference>();
