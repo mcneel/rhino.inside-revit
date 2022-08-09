@@ -10,11 +10,11 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added context menu to 'Project Location' component.
+- Now `Types.BasePoint` bake as a named construction-plane.
 
 ### RC 
 
-- Added context menu to 'Project Location' component.
-- Now `Types.BasePoint` bake as a named construction-plane.
 - Fix for 'Element Geometry' component when receiving empty branches.
 - Fix for `BakeElements` when no attributes are provided.
 - Fix for `Types.View.DrawViewportWires` when showing an `ARDB.ImageView`.
