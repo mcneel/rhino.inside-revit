@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     {
       new ParamDefinition
       (
-        new Parameters.View()
+        new Parameters.ViewDrafting()
         {
           Name = _View_,
           NickName = _View_.Substring(0, 1),
