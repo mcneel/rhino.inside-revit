@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     (
       "Element Name",
       "ElemName",
-      "Element Name Property. Get-Set accessor to Element Name property.",
+      "Element Name Property. Get-Set access component to Element Name property.",
       "Revit",
       "Element"
     )
@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     (
       "Element Category",
       "ElemCat",
-      "Element Category Property. Get-Set accessor to Element Category property.",
+      "Element Category Property. Get-Set access component to Element Category property.",
       "Revit",
       "Element"
     )
@@ -230,7 +230,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     (
       "Element Type",
       "ElemType",
-      "Element Type Property. Get-Set accessor to Element Type property.",
+      "Element Type Property. Get-Set access component to Element Type property.",
       "Revit",
       "Element"
     )

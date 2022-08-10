@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
     (
       name: "Assembly Origin",
       nickname: "Origin",
-      description: "Get-Set accessor for assembly origin",
+      description: "Get-Set access component for assembly origin",
       category: "Revit",
       subCategory: "Model"
     )
