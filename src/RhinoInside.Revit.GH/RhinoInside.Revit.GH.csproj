@@ -428,6 +428,7 @@
     <Compile Include="Types\TopographySurface.cs" />
     <Compile Include="Types\Views\View.cs" />
     <Compile Include="Types\Views\View3D.cs" />
+    <Compile Include="Types\Views\ViewDrafting.cs" />
     <Compile Include="Types\Views\ViewPlan.cs" />
     <Compile Include="Types\Views\Viewport.cs" />
     <Compile Include="Types\Views\ViewSection.cs" />
