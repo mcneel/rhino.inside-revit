@@ -12,6 +12,7 @@ group: Deployment & Configs
 
 - Added context menu to 'Project Location' component.
 - Now `Types.BasePoint` bake as a named construction-plane.
+- Added 'Add Drafting View' component.
 
 ### RC 
 
