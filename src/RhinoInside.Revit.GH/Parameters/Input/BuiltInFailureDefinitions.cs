@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using GH_IO.Serialization;
 using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
 {
+  [ComponentVersion(introduced: "1.10")]
   public class BuiltInFailureDefinitions : Grasshopper.Special.ValueSet<Types.FailureDefinition>
   {
     public override Guid ComponentGuid => new Guid("73E14FBB-24EA-44FE-85ED-5D028154029B");
