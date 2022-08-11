@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Drawing.Interop;
 using System.Reflection;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -15,55 +15,16 @@ namespace RhinoInside.Revit.AddIn.Commands
     internal static readonly string TabName = "Rhino.Inside";
 
     #region Image
-    // FIXME: find a way to detect the scaling on Revit.RevitScreen
-    static double RevitScreenScaleFactor => 1.0;
-
     internal static System.Windows.Media.Imaging.BitmapSource LoadRibbonButtonImage(string name, bool small = false)
     {
-      const uint defaultDPI = 96;
       int desiredSize = small ? 16 : 32;
-      var adjustedIconSize = desiredSize * 2;
-      var adjustedDPI = defaultDPI * 2;
-      var screenScale = RevitScreenScaleFactor;
-
-      string specificSizeName = name.Replace(".png", $"_{desiredSize}.png");
       var assembly = Assembly.GetExecutingAssembly();
       var root = typeof(Loader).Namespace;
 
-      // if screen has no scaling and a specific size is provided, use that
-      // otherwise rebuild icon for size and screen scale
-      using (var resource = (screenScale == 1 ? assembly.GetManifestResourceStream($"{root}.Resources.{specificSizeName}") : null)
-                            ?? assembly.GetManifestResourceStream($"{root}.Resources.{name}"))
+      using (var resource = assembly.GetManifestResourceStream($"{root}.Resources.{name}"))
       {
-        var baseImage = new System.Windows.Media.Imaging.BitmapImage();
-        baseImage.BeginInit();
-        baseImage.StreamSource = resource;
-        baseImage.DecodePixelHeight = System.Convert.ToInt32(adjustedIconSize * screenScale);
-        baseImage.EndInit();
-        resource.Seek(0, SeekOrigin.Begin);
-
-        var imageWidth = baseImage.PixelWidth;
-        var imageFormat = baseImage.Format;
-        var imageBytePerPixel = baseImage.Format.BitsPerPixel / 8;
-        var palette = baseImage.Palette;
-
-        var stride = imageWidth * imageBytePerPixel;
-        var arraySize = stride * imageWidth;
-        var imageData = Array.CreateInstance(typeof(byte), arraySize);
-        baseImage.CopyPixels(imageData, stride, 0);
-
-        var imageDim = System.Convert.ToInt32(adjustedIconSize * screenScale);
-        return System.Windows.Media.Imaging.BitmapSource.Create
-        (
-          imageDim,
-          imageDim,
-          adjustedDPI * screenScale,
-          adjustedDPI * screenScale,
-          imageFormat,
-          palette,
-          imageData,
-          stride
-        );
+        using (var bitmap = new System.Drawing.Bitmap(resource))
+          return bitmap.ToBitmapImage(desiredSize, desiredSize);
       }
     }
     #endregion

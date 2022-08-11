@@ -465,19 +465,22 @@ namespace RhinoInside.Revit.AddIn.Forms
 
     private void AddButton_Click(object sender, EventArgs e)
     {
-      var sfdlg = new SelectFolderDialog();
-      sfdlg.ShowDialog(this);
-
-      if (sfdlg.Directory is string location)
+      using (var sfdlg = new SelectFolderDialog())
       {
-        foreach (var item in _scriptLocations.Items)
-          if (item.Text == location)
+        if (sfdlg.ShowDialog(this) == DialogResult.Ok)
+        {
+          if (sfdlg.Directory is string location)
           {
-            _scriptLocations.SelectedIndex = _scriptLocations.Items.IndexOf(item);
-            return;
-          }
+            foreach (var item in _scriptLocations.Items)
+              if (item.Text == location)
+              {
+                _scriptLocations.SelectedIndex = _scriptLocations.Items.IndexOf(item);
+                return;
+              }
 
-        _scriptLocations.Items.Add(location);
+            _scriptLocations.Items.Add(location);
+          }
+        }
       }
     }
 
