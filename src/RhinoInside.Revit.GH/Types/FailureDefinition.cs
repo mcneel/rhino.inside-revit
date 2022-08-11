@@ -26,11 +26,31 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_Goo Duplicate() => (FailureDefinition) MemberwiseClone();
 
+    static string ToString(ARDB.FailureSeverity severity)
+    {
+      switch (severity)
+      {
+        case ARDB.FailureSeverity.None: return "None";
+        case ARDB.FailureSeverity.Warning: return "Warning";
+        case ARDB.FailureSeverity.Error: return "Error";
+        case ARDB.FailureSeverity.DocumentCorruption: return "Document Corruption";
+      }
+
+      return severity.ToString();
+    }
+
     public override string ToString()
     {
       var id = new ARDB.FailureDefinitionId(Value);
       var accessor = Autodesk.Revit.ApplicationServices.Application.GetFailureDefinitionRegistry()?.FindFailureDefinition(id);
-      return (accessor?.GetDescriptionText() ?? Value.ToString("B")).Split(new char[] {'.'}, StringSplitOptions.RemoveEmptyEntries)[0];
+      var descriptionText = accessor?.GetDescriptionText() ?? Value.ToString("B");
+      descriptionText = descriptionText.Replace("\r\n", " ");
+      var descriptionLines = descriptionText.Split(new char[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
+      var description = (descriptionLines.Length > 0 ? descriptionLines[0] : descriptionText);
+      description = description.Trim();
+      description = description.Length > 0 ? char.ToUpper(description[0]) + description.Substring(1) : string.Empty;
+
+      return $"Revit {ToString(accessor.GetSeverity())} : {description}.";
     }
 
     public override bool CastTo<Q>(ref Q target)

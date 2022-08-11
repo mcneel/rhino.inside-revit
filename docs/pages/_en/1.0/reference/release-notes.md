@@ -15,6 +15,7 @@ group: Deployment & Configs
 - Added 'Add Drafting View' component.
 - Added 'Element Face Paint' component.
 - Added 'Document Warnings' component.
+- Added 'Built-In Failure Definitions' picker.
 
 ### RC 
 
