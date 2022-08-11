@@ -90,7 +90,14 @@ namespace System.Drawing.Interop
       }
     }
 
-    public static SWM.Imaging.BitmapImage ToBitmapImage(this SD.Bitmap bitmap, int PixelWidth = 0, int PixelHeight = 0)
+    /// <summary>
+    /// Converts a <see cref="System.Drawing.Bitmap"/> into a <see cref="System.Windows.Media.Imaging.BitmapImage"/>.
+    /// </summary>
+    /// <param name="bitmap"></param>
+    /// <param name="width">The width of the bitmap in device-independent units (1/96th inch per unit).</param>
+    /// <param name="height">The height of the bitmap in device-independent units (1/96th inch per unit).</param>
+    /// <returns></returns>
+    public static SWM.Imaging.BitmapImage ToBitmapImage(this SD.Bitmap bitmap, double width = 0, double height = 0)
     {
       using (var memory = new MemoryStream())
       {
@@ -101,8 +108,8 @@ namespace System.Drawing.Interop
         bitmapImage.BeginInit();
         bitmapImage.StreamSource = memory;
         bitmapImage.CacheOption = SWM.Imaging.BitmapCacheOption.OnLoad;
-        bitmapImage.DecodePixelWidth = PixelWidth;
-        bitmapImage.DecodePixelHeight = PixelHeight;
+        bitmapImage.DecodePixelWidth =  (int) Math.Round(bitmap.Width  * (width  / (bitmap.Width *  (96.0 / bitmap.HorizontalResolution))));
+        bitmapImage.DecodePixelHeight = (int) Math.Round(bitmap.Height * (height / (bitmap.Height * (96.0 / bitmap.VerticalResolution  ))));
         bitmapImage.EndInit();
         bitmapImage.Freeze();
 

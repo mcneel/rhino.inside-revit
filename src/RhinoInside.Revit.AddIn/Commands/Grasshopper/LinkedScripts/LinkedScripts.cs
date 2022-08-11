@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 using Autodesk.Revit.UI;
@@ -195,18 +196,15 @@ namespace RhinoInside.Revit.AddIn.Commands
       {
         Image = GetScriptIcon(script, small: true),
         LargeImage = GetScriptIcon(script, small: false),
-        ToolTip = script.Description != null && !string.IsNullOrEmpty(script.Description) ? script.Description : "Launch script in Grasshopper player",
+        ToolTip = script.Description ?? "Launch script in Grasshopper player",
         LongDescription = $"Script Path: {script.ScriptPath}",
       };
     }
 
-    internal static BitmapSource GetScriptIcon(LinkedScript script, bool small = false)
+    internal static ImageSource GetScriptIcon(LinkedScript script, bool small = false)
     {
-      int desiredSize = small ? 16 : 32;
-      if (script.GetScriptIcon(desiredSize, desiredSize) is BitmapSource icon)
-        return icon;
-      else
-        return Command.LoadRibbonButtonImage($"Ribbon.Grasshopper.{script.ScriptType}.png", small);
+      return script.GetScriptIcon(small) ??
+        Command.LoadRibbonButtonImage($"Ribbon.Grasshopper.{script.ScriptType}.png", small);
     }
   }
 }
