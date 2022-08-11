@@ -54,21 +54,22 @@ namespace RhinoInside.Revit.GH.Components.Documents
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       new ParamDefinition
       (
-        new Param_Guid()
+        new Param_GenericObject()
         {
-          Name = "Failure ID",
-          NickName = "ID",
-          Description = "Failure definition ID.",
+          Name = "Failure Definition",
+          NickName = "FD",
+          Description = "Failure definition.",
           Access = GH_ParamAccess.list,
-          DataMapping = GH_DataMapping.Graft
-        }, ParamRelevance.Secondary
+          DataMapping = GH_DataMapping.Graft,
+          Hidden = true,
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
         new Param_String()
         {
-          Name = "Failure",
-          NickName = "F",
+          Name = "Description",
+          NickName = "D",
           Description = "Failure definition description.",
           Access = GH_ParamAccess.list,
           DataMapping = GH_DataMapping.Graft
@@ -85,8 +86,8 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
       var warnings = doc.Value.GetWarnings();
 
-      Params.TrySetDataList(DA, "Failure ID", () => warnings.Select(x => x.GetFailureDefinitionId().Guid));
-      Params.TrySetDataList(DA, "Failure", () => warnings.Select(x => x.GetDescriptionText()));
+      Params.TrySetDataList(DA, "Failure Definition", () => warnings.Select(x => new Types.FailureDefinition(x.GetFailureDefinitionId().Guid)));
+      Params.TrySetDataList(DA, "Description", () => warnings.Select(x => x.GetDescriptionText()));
 
       var _FailingElements_ = Params.IndexOfOutputParam("Failing Elements");
       if (_FailingElements_ != -1)

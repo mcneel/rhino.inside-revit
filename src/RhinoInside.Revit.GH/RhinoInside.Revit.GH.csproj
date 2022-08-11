@@ -393,6 +393,7 @@
     <Compile Include="Types\ElementId.cs" />
     <Compile Include="Types\ElementType.cs" />
     <Compile Include="Types\Enums.cs" />
+    <Compile Include="Types\FailureDefinition.cs" />
     <Compile Include="Types\Family.cs" />
     <Compile Include="Types\FamilyInstance.cs" />
     <Compile Include="Types\FillPatternElement.cs" />
