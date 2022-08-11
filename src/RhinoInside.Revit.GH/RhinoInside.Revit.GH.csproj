@@ -38,6 +38,7 @@
     <Compile Include="Components\Annotations\QueryRevisions.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Documents\ActiveDocument.cs" />
+    <Compile Include="Components\Documents\DocumentWarnings.cs" />
     <Compile Include="Components\Documents\DocumentIdentity.cs" />
     <Compile Include="Components\Documents\DocumentVersion.cs" />
     <Compile Include="Components\Documents\OpenDocuments.cs" />

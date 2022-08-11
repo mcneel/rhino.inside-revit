@@ -14,6 +14,7 @@ group: Deployment & Configs
 - Now `Types.BasePoint` bake as a named construction-plane.
 - Added 'Add Drafting View' component.
 - Added 'Element Face Paint' component.
+- Added 'Document Warnings' component.
 
 ### RC 
 
