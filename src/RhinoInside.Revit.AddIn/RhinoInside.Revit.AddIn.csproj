@@ -102,6 +102,7 @@
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOn.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\OpenViewport.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Off.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Shaded.png" />
     <EmbeddedResource Include="Resources\RIR-logo.ico" />
     <EmbeddedResource Include="Resources\RIR-logo.png" />

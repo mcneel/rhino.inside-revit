@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       var buttonData = NewPushButtonData<CommandToggleRhinoPreview, NeedsActiveDocument<Availability>>
       (
         name: CommandName,
-        iconName: "Ribbon.Grasshopper.Preview_Off.png",
+        iconName: "Ribbon.Rhinoceros.Preview_Off.png",
         tooltip: "Toggle Rhino model preview visibility",
         url : "reference/rir-interface#rhinoceros-panel"
       );
@@ -48,8 +48,8 @@ namespace RhinoInside.Revit.AddIn.Commands
         }
         else
         {
-          button.Image = LoadRibbonButtonImage("Ribbon.Grasshopper.Preview_Off.png", true);
-          button.LargeImage = LoadRibbonButtonImage("Ribbon.Grasshopper.Preview_Off.png");
+          button.Image = LoadRibbonButtonImage("Ribbon.Rhinoceros.Preview_Off.png", true);
+          button.LargeImage = LoadRibbonButtonImage("Ribbon.Rhinoceros.Preview_Off.png");
         }
       }
     }
