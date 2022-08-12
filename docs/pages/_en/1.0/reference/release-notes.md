@@ -27,7 +27,9 @@ group: Deployment & Configs
 - Fixed 'Add Symbol' component. It was moving two times the specified distance.
 - Fixed 'Add Detail' component. It was moving two times the specified distance.
 - Fixed value range validation on 'Material Graphics' component.
-- Added item <None> to some parameters context menu.
+- Added item *None* to some parameters context menu.
+- Fixed some blurry icons on HDPI screens.
+- Fixed a `System.FormatException` when building linked scripts toolbar.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
