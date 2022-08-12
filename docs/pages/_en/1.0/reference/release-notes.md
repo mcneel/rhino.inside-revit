@@ -19,14 +19,7 @@ group: Deployment & Configs
 
 ### RC 
 
-- Fix for 'Element Geometry' component when receiving empty branches.
 - Fix for `BakeElements` when no attributes are provided.
-- Fix for `Types.View.DrawViewportWires` when showing an `ARDB.ImageView`.
-- Fix for the case Grasshopper had run with No-units.
-- Fixed `ARDB.Instance.GetLocation` when instance is scaled.
-- Fixed 'Add Symbol' component. It was moving two times the specified distance.
-- Fixed 'Add Detail' component. It was moving two times the specified distance.
-- Fixed value range validation on 'Material Graphics' component.
 - Fixed some blurry icons on HDPI screens.
 - Fixed a `System.FormatException` when building linked scripts toolbar.
 
