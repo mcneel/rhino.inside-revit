@@ -108,8 +108,8 @@ namespace System.Drawing.Interop
         bitmapImage.BeginInit();
         bitmapImage.StreamSource = memory;
         bitmapImage.CacheOption = SWM.Imaging.BitmapCacheOption.OnLoad;
-        bitmapImage.DecodePixelWidth =  (int) Math.Round(bitmap.Width  * (width  / (bitmap.Width *  (96.0 / bitmap.HorizontalResolution))));
-        bitmapImage.DecodePixelHeight = (int) Math.Round(bitmap.Height * (height / (bitmap.Height * (96.0 / bitmap.VerticalResolution  ))));
+        bitmapImage.DecodePixelWidth  = (int) Math.Round(width  * bitmap.HorizontalResolution / 96.0);
+        bitmapImage.DecodePixelHeight = (int) Math.Round(height * bitmap.HorizontalResolution / 96.0);
         bitmapImage.EndInit();
         bitmapImage.Freeze();
 
