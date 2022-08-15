@@ -85,6 +85,7 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.8 RC1" version="v1.8.8200.21840" pre_release=true time="06/14/2022" %}
 
+- Now RiR requires Rhino v7.15.
 - Moved {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} from Topology to Annotation tab.
 - Added {% include ltr/comp.html uuid='49acc84c' %} component
 - Added {% include ltr/comp.html uuid='ad88cf11' %} component
