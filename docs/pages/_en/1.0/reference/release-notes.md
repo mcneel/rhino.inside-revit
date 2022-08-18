@@ -26,6 +26,12 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.9 RC3" version="v1.9.8259.4446" pre_release=true time="08/16/2022" %}
+
+- Fix for `BakeElements` when no attributes are provided.
+- Fixed some blurry icons on HDPI screens.
+- Fixed a `System.FormatException` when building linked scripts toolbar.
+
 {% include ltr/release-header.html title="v1.9 RC2" version="v1.9.8256.24423" pre_release=true time="08/09/2022" %}
 
 - Fix for {% include ltr/comp.html uuid='b3bcbf5b' %} component when receiving empty branches.
