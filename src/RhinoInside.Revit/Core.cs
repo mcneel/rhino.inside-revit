@@ -309,7 +309,7 @@ namespace RhinoInside.Revit
           taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink1, "Download latest Rhino…");
           if (taskDialog.Show() == ARUI.TaskDialogResult.CommandLink1)
           {
-            using (Process.Start(@"https://www.rhino3d.com/download/rhino/7.0/latest")) { }
+            using (Process.Start($@"https://www.rhino3d.com/download/rhino/{MinimumRhinoVersion.Major}.0/latest")) { }
           }
         }
 
