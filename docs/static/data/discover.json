@@ -949,6 +949,86 @@
         ]
     },
     {
+        "title": "Scheduled and Tagged Shapes",
+        "url": "https://discourse.mcneel.com/t/add-scheduled-and-tagged-direct-shapes-to-revit-example/134572",
+        "thumbnail": "https://i3.ytimg.com/vi/nyO7ZlOHS6o/maxresdefault.jpg",
+        "author": "McNeel",
+        "authorUrl": "",
+        "description": "Take Rhino Geometry into Revit with Tags and Materials. Files available on the discourse forum.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "tutorial",
+            "intermediate"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "title": "Smart Assembly Tutorial",
+        "url": "https://discourse.mcneel.com/t/rhino-inside-revit-hanger-example/132590",
+        "thumbnail": "https://i3.ytimg.com/vi/aIucXNCosN4/maxresdefault.jpg",
+        "author": "McNeel",
+        "authorUrl": "",
+        "description": "Have Grasshopper dynamcally control ceiling hanger fittings based on the material they are attached to.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "tutorial",
+            "intermediate"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "title": "Flexible Curtain Wall",
+        "url": "https://discourse.mcneel.com/t/rhinoinside-revit-facade-flex-curtain-panel/142064",
+        "thumbnail": "https://i3.ytimg.com/vi/ZPNNFJ1qplY/maxresdefault.jpg",
+        "author": "McNeel",
+        "authorUrl": "",
+        "description": "Create a flexible curtail wall facade pattern",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "tutorial",
+            "intermediate"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "title": "Topology and Lanscaping workflow",
+        "url": "https://discourse.mcneel.com/t/dla-topography-workshop/145299",
+        "thumbnail": "https://i3.ytimg.com/vi/RznkwUpIEv4/maxresdefault.jpg",
+        "author": "McNeel",
+        "authorUrl": "",
+        "description": "This is a recording of a DLA Rhino.Inside.Revit Workshop",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "tutorial",
+            "intermediate"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
         "title": "Intro to Rhino.Inside.Revit",
         "url": "https://www.youtube.com/watch?v=qFy1XcNcBsc",
         "thumbnail": "https://i3.ytimg.com/vi/qFy1XcNcBsc/maxresdefault.jpg",
