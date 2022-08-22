@@ -55,6 +55,7 @@ Use the **Analyse Spatial Element** component shared here to get the common prop
 
 ![]({{ "/static/images/guides/revit-spatial05.png" | prepend: site.baseurl }})
 
+{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Spatial Element.ghuser' name='Analyse Spatial Element' %}
 
 ### Filtering Spatial Elements by Level
 
@@ -100,8 +101,6 @@ Make sure to grab the *Center* location lines when working with spatial containe
 
 {% include ltr/download_comp.html archive='/static/ghnodes/NonManifold Merge.ghuser' name='NonManifold Merge' %}
 
-## Analyzing Instance Space
-
 ## Analyzing Area Schemes
 
 Use the **Analyse Area Scheme** component shared here to analyze the *Area Scheme* elements:
@@ -126,30 +125,12 @@ Use the **Analyse Area** component shared above to filter the *Area* elements by
 
 ![]({{ "/static/images/guides/revit-spatial16.png" | prepend: site.baseurl }})
 
-## Adding Spacial Elements
+## Creating Separation Lines
 
-### Add Area
-
-Add Area
-Add Area Boundary
-Tag Area
-
-### Add Space
-
-Add Space
-Addspace Seperator
-Tag SPace
-
-### Add Room
-
-Add Room
-Tag Room
-
-###Creating Separation Lines
-
-#### Area Boundary Lines
+### Area Boundary Lines
 
 To create area boundary lines, use the *Create Area Boundaries* component shared here. The component needs an Area Plan and curves as input.
 
 ![]({{ "/static/images/guides/revit-spatial14.png" | prepend: site.baseurl }})
 
+{% include ltr/download_comp.html archive='/static/ghnodes/Create Area Boundaries.ghuser' name='Create Area Boundaries' %}
