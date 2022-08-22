@@ -76,13 +76,11 @@
     <EmbeddedResource Include="Resources\ChannelRC-icon.png" />
     <EmbeddedResource Include="Resources\ChannelStable-icon.png" />
     <EmbeddedResource Include="Resources\Folder-icon.png" />
-    <EmbeddedResource Include="Resources\Folder-icon_16.png" />
     <EmbeddedResource Include="Resources\Forum-icon.png" />
     <EmbeddedResource Include="Resources\Grasshopper.png" />
     <EmbeddedResource Include="Resources\GrasshopperPlayer.png" />
     <EmbeddedResource Include="Resources\Guides-icon.png" />
     <EmbeddedResource Include="Resources\Link-icon.png" />
-    <EmbeddedResource Include="Resources\Link-icon_16.png" />
     <EmbeddedResource Include="Resources\NewRelease.png" />
     <EmbeddedResource Include="Resources\Options.png" />
     <EmbeddedResource Include="Resources\PackageManager-icon.png" />
@@ -92,13 +90,9 @@
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Bake.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\CaptureElements.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile_32.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFolder.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFolder_32.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GHSpecialFolder.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GHSpecialFolder_16.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhxFile.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhxFile_32.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Preview_Off.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Preview_Shaded.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Preview_Wireframe.png" />
@@ -107,8 +101,8 @@
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOff.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOn.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM_32.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\OpenViewport.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Off.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Shaded.png" />
     <EmbeddedResource Include="Resources\RIR-logo.ico" />
     <EmbeddedResource Include="Resources\RIR-logo.png" />

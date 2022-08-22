@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     (
       "Element Subcategory",
       "Subcategory",
-      "Element Subcategory Property. Get-Set accessor to Element Subcategory property.",
+      "Element Subcategory Property. Get-Set access component to Element Subcategory property.",
       "Revit",
       "Model"
     )

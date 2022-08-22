@@ -41,6 +41,7 @@
     <Compile Include="DB\ElevationBase.cs" />
     <Compile Include="DB\Extensions\BasePoint.cs" />
     <Compile Include="DB\Extensions\BoundingBoxUV.cs" />
+    <Compile Include="DB\Extensions\BoundingBoxXYZ.cs" />
     <Compile Include="DB\Extensions\Category.cs" />
     <Compile Include="DB\Extensions\Curve.cs" />
     <Compile Include="DB\Extensions\CurveLoop.cs" />

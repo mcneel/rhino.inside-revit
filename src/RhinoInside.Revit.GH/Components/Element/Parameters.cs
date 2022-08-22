@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH
       // but DB.ElementParameterFilter works on those parameters!?!?
       if (!parameter.HasValue)
       {
-        switch ((ARDB.BuiltInParameter) parameter.Id.IntegerValue)
+        switch (parameter.Id.ToBuiltInParameter())
         {
           case ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME:
             return ((parameter.Element.Document.GetElement(parameter.Element.GetTypeId()) as ARDB.ElementType)?.FamilyName)
@@ -201,7 +201,7 @@ namespace RhinoInside.Revit.GH
           parameter = parameterKey.GetParameter(element);
 
           if (parameter is null)
-            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterKey.DisplayName}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
+            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterKey.DisplayName}' is not defined in 'Element'. {{{element.Id.ToValue()}}}");
 
           return parameter;
         }
@@ -214,7 +214,7 @@ namespace RhinoInside.Revit.GH
           case string parameterName:
             {
               parameter = element.GetParameter(parameterName, ERDB.ParameterClass.Any);
-              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterName}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterName}' is not defined in 'Element'. {{{element.Id.ToValue()}}}");
               break;
             }
           case int parameterId:
@@ -223,12 +223,12 @@ namespace RhinoInside.Revit.GH
               if (elementId.TryGetBuiltInParameter(out var builtInParameter))
               {
                 parameter = element.get_Parameter(builtInParameter);
-                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not defined in 'Element' {{{element.Id.IntegerValue}}}");
+                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not defined in 'Element' {{{element.Id.ToValue()}}}");
               }
               else if (element.Document.GetElement(new ARDB.ElementId(parameterId)) is ARDB.ParameterElement parameterElement)
               {
                 parameter = element.get_Parameter(parameterElement.GetDefinition());
-                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
+                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'. {{{element.Id.ToValue()}}}");
               }
               else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element");
               break;
@@ -236,7 +236,7 @@ namespace RhinoInside.Revit.GH
           case ARDB.Parameter param:
             {
               parameter = element.get_Parameter(param.Definition);
-              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{param.Definition.Name}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{param.Definition.Name}' is not defined in 'Element'. {{{element.Id.ToValue()}}}");
               break;
             }
           case ARDB.ElementId elementId:
@@ -244,12 +244,12 @@ namespace RhinoInside.Revit.GH
               if (elementId.TryGetBuiltInParameter(out var builtInParameter))
               {
                 parameter = element.get_Parameter(builtInParameter);
-                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not  defined in 'Element' {{{element.Id.IntegerValue}}}");
+                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not  defined in 'Element' {{{element.Id.ToValue()}}}");
               }
               else if (element.Document.GetElement(elementId) is ARDB.ParameterElement parameterElement)
               {
                 parameter = element.get_Parameter(parameterElement.GetDefinition());
-                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
+                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'. {{{element.Id.ToValue()}}}");
               }
               else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element.");
               break;
@@ -257,7 +257,7 @@ namespace RhinoInside.Revit.GH
           case Guid guid:
             {
               parameter = element.get_Parameter(guid);
-              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{guid}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}");
+              if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{guid}' is not defined in 'Element'. {{{element.Id.ToValue()}}}");
               break;
             }
           default:
@@ -319,10 +319,10 @@ namespace RhinoInside.Revit.GH
           var elementId = parameter.AsElementId();
 
           return elementId.IsBuiltInId() ?
-            ERDB.FullUniqueId.Format(documentGUID, ERDB.UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(document), elementId.IntegerValue)) :
+            ERDB.FullUniqueId.Format(documentGUID, ERDB.UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(document), elementId.ToValue())) :
             document?.GetElement(elementId) is ARDB.Element element ?
             ERDB.FullUniqueId.Format(documentGUID, element.UniqueId) :
-            ERDB.FullUniqueId.Format(Guid.Empty, ERDB.UniqueId.Format(Guid.Empty, ARDB.ElementId.InvalidElementId.IntegerValue));
+            ERDB.FullUniqueId.Format(Guid.Empty, ERDB.UniqueId.Format(Guid.Empty, ARDB.ElementId.InvalidElementId.ToValue()));
 
         default:
           throw new NotImplementedException();
@@ -349,7 +349,7 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
     (
       name: "Element Parameter",
       nickname: "Param",
-      description: "Get-Set accessor to element parameter values",
+      description: "Get-Set access component to element parameter values",
       category: "Revit",
       subCategory: "Element"
     )
@@ -433,7 +433,7 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
       var parameter = key.GetParameter(element.Value);
       if (parameter is null)
       {
-        var message = $"Parameter '{key.DisplayName}' is not defined on 'Element'. {{{element.Id.IntegerValue}}}";
+        var message = $"Parameter '{key.DisplayName}' is not defined on 'Element'. {{{element.Id.ToValue()}}}";
         throw new Exceptions.RuntimeArgumentException("Parameter", message);
       }
       else Params.TrySetData(DA, "Parameter", () => new Types.ParameterKey(element.Document, parameter.Definition as ARDB.InternalDefinition));
@@ -474,7 +474,7 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
             }
           }
 
-          message += $" {{{element.Id.IntegerValue}}}";
+          message += $" {{{element.Id.ToValue()}}}";
 
           if (FailureProcessingMode >= ARDB.FailureProcessingResult.ProceedWithRollBack)
           {
@@ -552,7 +552,7 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
       var parameter = key.GetParameter(element.Value);
       if (parameter is null)
       {
-        var message = $"Parameter '{key.DisplayName}' is not defined in 'Element'. {{{element.Id.IntegerValue}}}";
+        var message = $"Parameter '{key.DisplayName}' is not defined in 'Element'. {{{element.Id.ToValue()}}}";
         if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
         {
           AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, message);
@@ -609,7 +609,7 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
       var parameters = new List<ARDB.Parameter>(element.Value.Parameters.Size);
       foreach (var group in element.Value.GetParameters(ERDB.ParameterClass.Any).GroupBy(x => x.Definition?.GetGroupType() ?? ERDB.Schemas.ParameterGroup.Empty).OrderBy(x => x.Key))
       {
-        foreach (var param in group.OrderBy(x => x.Id.IntegerValue))
+        foreach (var param in group.OrderBy(x => x.Id.ToValue()))
         {
           if (string.IsNullOrEmpty(param.Definition.Name))
             continue;

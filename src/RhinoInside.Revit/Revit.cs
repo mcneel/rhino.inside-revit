@@ -44,10 +44,10 @@ namespace RhinoInside.Revit
 
     internal static ARUI.Result Shutdown()
     {
-      Rhinoceros.Shutdown();
-
       if (!MainWindow.IsZero)
       {
+        Rhinoceros.Shutdown();
+
         // Unregister some events
         Core.Host.Services.DocumentChanged -= OnDocumentChanged;
         Core.Host.Idling -= OnIdle;

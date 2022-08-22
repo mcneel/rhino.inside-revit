@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Options
 {
@@ -22,6 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Options
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
+      manager.AddTextParameter("Projects", "P", "Default user documents folder", GH_ParamAccess.item);
       manager.AddTextParameter("Project Template", "PT", "Default project template file", GH_ParamAccess.item);
       manager.AddTextParameter("Family Templates", "FT", "Default family templates folder", GH_ParamAccess.item);
       manager.AddTextParameter("Point Clouds", "PC", "Default point clouds folder", GH_ParamAccess.item);
@@ -29,6 +31,9 @@ namespace RhinoInside.Revit.GH.Components.Options
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      Revit.ActiveDBApplication.TryGetProfileValue("Directories", "ProjectPath", out var ProjectPath);
+
+      DA.SetData("Projects", ProjectPath ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
       DA.SetData("Project Template", Revit.ActiveDBApplication.DefaultProjectTemplate);
       DA.SetData("Family Templates", Revit.ActiveDBApplication.FamilyTemplatePath);
       DA.SetData("Point Clouds", Revit.ActiveDBApplication.PointCloudsRootPath);

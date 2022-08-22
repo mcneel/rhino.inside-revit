@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// The document's name.
     /// </summary>
     /// <param name="doc"></param>
-    /// <returns>The file name of the document's disk file without extension.</returns>
+    /// <returns>The file name of the document's disk file.</returns>
     /// <remarks>
     /// This method returns an non empty string even if the project has not been saved yet.
     /// </remarks>
@@ -117,32 +117,120 @@ namespace RhinoInside.Revit.External.DB.Extensions
       // To avoid the corner case where the file was called "Project.rvt.rvt",
       // we try first with the Document.PathName.
       return string.IsNullOrEmpty(doc.PathName) ?
-        Path.GetFileNameWithoutExtension(doc.Title) :
-        Path.GetFileNameWithoutExtension(doc.PathName);
+        Path.GetFileNameWithoutExtension(doc.Title) + (doc.IsFamilyDocument ? ".rfa" : ".rvt") :
+        Path.GetFileName(doc.PathName);
     }
 
     /// <summary>
     /// The document's title.
     /// </summary>
     /// <param name="doc"></param>
-    /// <returns>The file name of the document's disk file with extension.</returns>
+    /// <returns>The file name of the document's disk file without extension.</returns>
     /// <remarks>
     /// This method returns an non empty string even if the project has not been saved yet.
     /// </remarks>
     public static string GetTitle(this Document doc)
     {
-      return string.IsNullOrEmpty(doc.PathName) ?
-        Path.GetFileNameWithoutExtension(doc.Title) + (doc.IsFamilyDocument ? ".rfa" : ".rvt") :
-        Path.GetFileName(doc.PathName);        
+      var title = string.Empty;
+      if (doc.IsWorkshared && doc.GetWorksharingCentralModelPath() is ModelPath centralPath)
+        title = Path.GetFileNameWithoutExtension(centralPath.ToUserVisiblePath());
+
+      if (string.IsNullOrEmpty(title))
+        title = Path.GetFileNameWithoutExtension(doc.Title);
+
+      if (doc.IsDetached && title.EndsWith("_detached"))
+        title = title.Substring(0, title.Length - "_detached".Length);        
+
+      return title;
     }
     #endregion
 
     #region File
     /// <summary>
-    /// Gets the model path of the document.
+    /// The fully qualified path of the document's local disk file.
+    /// If <paramref name="doc"/> is still not saved this method returns null.
     /// </summary>
     /// <remarks>
+    /// On workshared documents returns the local copy path.
+    /// </remarks>
+    /// <param name="doc"></param>
+    /// <returns>The path or null if still not saved.</returns>
+    public static string GetPathName(this Document doc)
+    {
+      var pathName = doc.PathName;
+
+      /// <summary>
+      /// Revit documentation reads like:
+      ///
+      /// <see cref="Document.PathName"/> summary:
+      /// This string is empty if the project has not been saved or does not have a disk
+      /// file associated with it yet. Note that the pathname will be **empty** if a document
+      /// is detached. See Autodesk.Revit.DB.Document.IsDetached.
+      ///  
+      /// <see cref="Document.IsDetached"/> summary:
+      /// Note that <see cref="Document.Title"/> and <see cref="Document.PathName"/> 
+      /// will be **empty** strings if a document is detached.
+      /// 
+      /// Both descriptions are not accurate.
+      /// Detached models return only the file name on its Document.PathName property,
+      /// instead of an empty string. So we need to check IsDetached here.
+      /// </summary>
+      if (string.IsNullOrEmpty(pathName) || doc.IsDetached)
+        return default;
+
+#if REVIT_2019
+      if (doc.IsModelInCloud)
+      {
+        if (doc.GetCloudModelPath() is ModelPath cloudPath)
+        {
+          using (cloudPath)
+          {
+            var projectGUID = cloudPath.GetProjectGUID();
+            var modelGUID = cloudPath.GetModelGUID();
+            if (projectGUID == Guid.Empty || modelGUID == Guid.Empty)
+              return default;
+
+            using (var app = doc.Application)
+            {
+              pathName = System.IO.Path.Combine
+              (
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Autodesk", "Revit", app.VersionName,
+                "CollaborationCache", app.LoginUserId,
+                projectGUID.ToString(), $"{modelGUID}{System.IO.Path.GetExtension(pathName)}"
+              );
+            }
+          }
+        }
+        else return default;
+      }
+#endif
+
+      return File.Exists(pathName) ? pathName : default;
+    }
+
+    /// <summary>
+    /// Gets the document local model path.
     /// If <paramref name="doc"/> is still not saved this method returns null.
+    /// </summary>
+    /// <remarks>
+    /// On workshared documents returns the local copy path.
+    /// </remarks>
+    /// <param name="doc"></param>
+    /// <returns>The model path or null if still not saved.</returns>
+    public static ModelPath GetLocalModelPath(this Document doc)
+    {
+      return doc.GetPathName() is string pathName ?
+        ModelPathUtils.ConvertUserVisiblePathToModelPath(pathName) :
+        default;
+    }
+
+    /// <summary>
+    /// Gets the document model path.
+    /// If <paramref name="doc"/> is still not saved this method returns null.
+    /// </summary>
+    /// <remarks>
+    /// On workshared documents returns the central model path else a local path.
     /// </remarks>
     /// <param name="doc"></param>
     /// <returns>The model path or null if still not saved.</returns>
@@ -167,10 +255,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (string.IsNullOrEmpty(doc.PathName) || doc.IsDetached)
         return default;
 
-#if REVIT_2019
-      if (doc.IsModelInCloud)
-        return doc.GetCloudModelPath();
-#endif
+      if (doc.IsWorkshared)
+        return doc.GetWorksharingCentralModelPath();
 
       return ModelPathUtils.ConvertUserVisiblePathToModelPath(doc.PathName);
     }
@@ -199,99 +285,33 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static bool TryGetCategoryId(this Document doc, string uniqueId, out ElementId categoryId)
-    {
-      categoryId = default;
-
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
-      {
-        if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
-        {
-          if (((BuiltInCategory) id).IsValid())
-            categoryId = new ElementId((BuiltInCategory) id);
-        }
-        else
-        {
-          if (AsCategory(doc?.GetElement(uniqueId)) is Category category)
-            categoryId = category.Id;
-        }
-      }
-
-      return categoryId is object;
-    }
-
-    public static bool TryGetParameterId(this Document doc, string uniqueId, out ElementId parameterId)
-    {
-      parameterId = default;
-
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
-      {
-        if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
-        {
-          if (((BuiltInParameter) id).IsValid())
-            parameterId = new ElementId((BuiltInParameter) id);
-        }
-        else
-        {
-          if (doc?.GetElement(uniqueId) is ParameterElement parameter)
-            parameterId = parameter.Id;
-        }
-      }
-
-      return parameterId is object;
-    }
-
-    public static bool TryGetLinePatternId(this Document doc, string uniqueId, out ElementId patternId)
-    {
-      patternId = default;
-
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
-      {
-        if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
-        {
-          if (((BuiltInLinePattern) id).IsValid())
-            patternId = new ElementId(id);
-        }
-        else
-        {
-          if (doc?.GetElement(uniqueId) is LinePatternElement pattern)
-            patternId = pattern.Id;
-        }
-      }
-
-      return patternId is object;
-    }
-
     public static bool TryGetElementId(this Document doc, string uniqueId, out ElementId elementId)
     {
       elementId = default;
 
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id) && EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
+      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
       {
-        if (((BuiltInCategory) id).IsValid())
-          elementId = new ElementId((BuiltInCategory) id);
-
-        else if (((BuiltInParameter) id).IsValid())
-          elementId = new ElementId((BuiltInParameter) id);
-
-        else if (((BuiltInLinePattern) id).IsValid())
-          elementId = new ElementId(id);
-      }
-      else
-      {
-        try
+        if (id < 0)
         {
-          if (Reference.ParseFromStableRepresentation(doc, uniqueId) is Reference reference)
-            elementId = reference.ElementId;
+          if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
+            elementId = new ElementId(id);
         }
-        catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+        else
+        {
+          try
+          {
+            if (Reference.ParseFromStableRepresentation(doc, uniqueId) is Reference reference)
+              elementId = reference.ElementId;
+          }
+          catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+        }
       }
 
       return elementId is object;
     }
 
     /// <summary>
-    /// Compare two <see cref="Autodesk.Revit.DB.Reference"/> objects to know it are referencing same <see cref="Autodesk.Revit.Element"/>
+    /// Compare two <see cref="Autodesk.Revit.DB.Reference"/> objects to know if are referencing same <see cref="Autodesk.Revit.Element"/>
     /// </summary>
     /// <param name="doc"></param>
     /// <param name="x"></param>
@@ -673,7 +693,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         foreach (var style in collector.Cast<GraphicsStyle>())
         {
           var category = style.GraphicsStyleCategory;
-          if (category.Id.IntegerValue == (int) categoryId)
+          if (category.Id.ToBuiltInCategory() == categoryId)
             return style.GraphicsStyleCategory;
         }
       }

@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.Group group && group.Category.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_IOSModelGroups)
+        if (Value is ARDB.Group group && group.Category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_IOSModelGroups)
         {
           try
           {

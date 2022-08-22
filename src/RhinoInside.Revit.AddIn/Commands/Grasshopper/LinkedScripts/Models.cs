@@ -1,10 +1,10 @@
 using System;
-using System.IO;
-using System.Linq;
 using System.Collections.Generic;
-using System.Windows.Media.Imaging;
 using System.Drawing;
 using System.Drawing.Interop;
+using System.IO;
+using System.Linq;
+using System.Windows.Media;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -72,61 +72,65 @@ namespace RhinoInside.Revit.AddIn.Commands
     public static LinkedScript FromPath(string scriptPath)
     {
       var ext = Path.GetExtension(scriptPath).ToLower();
-      if (File.Exists(scriptPath) && SupportedExtensions.Contains(ext))
+      if (SupportedExtensions.Contains(ext) && File.Exists(scriptPath))
       {
-        var script = new LinkedScript
-        {
-          ScriptType = ext == ".gh" ? ScriptType.GhFile : ScriptType.GhxFile,
-          ScriptPath = scriptPath,
-          Name = Path.GetFileNameWithoutExtension(scriptPath),
-        };
-
-        // now that base props are setup, read the rest from the file
         var archive = new GH_IO.Serialization.GH_Archive();
-        if (archive.ReadFromFile(script.ScriptPath))
+        if (archive.ReadFromFile(scriptPath))
         {
-          // find gh document properties
-          var defProps = archive.GetRootNode.FindChunk("Definition")?.FindChunk("DefinitionProperties");
-          if (defProps != null)
+          var description = default(string);
+          var iconImageData = default(string);
+
+          var definitionProperties = archive.GetRootNode.
+            FindChunk("Definition")?.
+            FindChunk("DefinitionProperties");
+
+          if (definitionProperties is object)
           {
-            // find description
-            if (defProps.ItemExists("Description"))
-              script.Description = defProps.GetString("Description");
-
-            // find icon
-            if (defProps.ItemExists("IconImageData"))
-            {
-              var iconImgData = defProps.GetString("IconImageData");
-              if (iconImgData is string && !string.IsNullOrEmpty(iconImgData))
-                script.IconImageData = iconImgData;
-            }
+            definitionProperties.TryGetString("Description", ref description);
+            definitionProperties.TryGetString("IconImageData", ref iconImageData);
           }
-        }
 
-        return script;
+          return new LinkedScript
+          {
+            ScriptType = ext == ".gh" ? ScriptType.GhFile : ScriptType.GhxFile,
+            ScriptPath = scriptPath,
+            Name = Path.GetFileNameWithoutExtension(scriptPath),
+            Description = description,
+            IconImageData = iconImageData,
+          };
+        }
       }
-      else return null;
+
+      return default;
     }
 
     string IconImageData = null;
-    public BitmapSource GetScriptIcon(int width, int height)
+    public ImageSource GetScriptIcon(bool small)
     {
-      if (IconImageData is string)
+      if (!string.IsNullOrEmpty(IconImageData))
       {
-        // if SVG
-        if (IconImageData.IndexOf("<svg", StringComparison.OrdinalIgnoreCase) > 0)
+        int width = small ? 16 : 32;
+        int height = small ? 16 : 32;
+
+        try
         {
-          return Rhino.UI.DrawingUtilities.BitmapFromSvg(IconImageData, width, height).
-            ToBitmapImage();
+          // if SVG
+          if (IconImageData.IndexOf("<svg", StringComparison.OrdinalIgnoreCase) > 0)
+          {
+            using (var bitmap = Rhino.UI.DrawingUtilities.BitmapFromSvg(IconImageData, width * 4, height * 4))
+              return bitmap.ToBitmapImage(width, height);
+          }
+          // else assume bitmap
+          else
+          {
+            using (var bitmap = new Bitmap(new MemoryStream(System.Convert.FromBase64String(IconImageData))))
+              return bitmap.ToBitmapImage(width, height);
+          }
         }
-        // else assume bitmap
-        else
-        {
-          return new Bitmap(new MemoryStream(System.Convert.FromBase64String(IconImageData))).
-            ToBitmapImage(width, height);
-        }
+        catch { }
       }
-      else return null;
+
+      return default;
     }
   }
 

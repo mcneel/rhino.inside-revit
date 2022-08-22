@@ -10,6 +10,42 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added context menu to 'Project Location' component.
+- Now `Types.BasePoint` bake as a named construction-plane.
+- Added 'Add Drafting View' component.
+- Added 'Element Face Paint' component.
+- Added 'Document Warnings' component.
+- Added 'Built-In Failure Definitions' picker.
+
+### RC 
+
+- Fix for `BakeElements` when no attributes are provided.
+- Fixed some blurry icons on HDPI screens.
+- Fixed a `System.FormatException` when building linked scripts toolbar.
+
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.9 RC3" version="v1.9.8259.4446" pre_release=true time="08/16/2022" %}
+
+- Fix for `BakeElements` when no attributes are provided.
+- Fixed some blurry icons on HDPI screens.
+- Fixed a `System.FormatException` when building linked scripts toolbar.
+
+{% include ltr/release-header.html title="v1.9 RC2" version="v1.9.8256.24423" pre_release=true time="08/09/2022" %}
+
+- Fix for {% include ltr/comp.html uuid='b3bcbf5b' %} component when receiving empty branches.
+- Fixed {% include ltr/comp.html uuid='2beb60ba' %} component. It was moving two times the specified distance.
+- Fixed 'Add Detail' component. It was moving two times the specified distance.
+- Fixed value range validation on {% include ltr/comp.html uuid='8c5cd6fb' %} component.
+- Added item `<None>` to some parameters context menu.
+- Fix for the case Grasshopper had run with No-units.
+- Fix for `BakeElements` when no attributes are provided.
+- Fix for `Types.View.DrawViewportWires` when showing an `ARDB.ImageView`.
+- Fix for `ARDB.Instance.GetLocation` when instance is scaled.
+
+{% include ltr/release-header.html title="v1.9 RC1" version="v1.9.8234.21248" pre_release=true time="07/18/2022" %}
+
 - Added 'Host Sub Elements' component.
 - Added 'Profile' input to 'Host Boundary Profile' component.
 - Added 'Revit Version' component.
@@ -19,11 +55,12 @@ group: Deployment & Configs
 - Added 'Spatial Element Identity' component.
 - Added 'Delete Workset' component (Revit 2023).
 - Added 'Default 3D View' component.
+- Added 'Assembly Origin' component.
 
-### RC 
+{% include ltr/release-header.html title="v1.8" version="v1.8.8221.17917" time="07/18/2022" %}
 
-{% endcapture %}
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+- Includes all changes under 1.8RC releases listed below
+- Minor Fixes and Improvements
 
 {% include ltr/release-header.html title="v1.8 RC4" version="v1.8.8221.17917" pre_release=true time="07/05/2022" %}
 
@@ -54,6 +91,7 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.8 RC1" version="v1.8.8200.21840" pre_release=true time="06/14/2022" %}
 
+- Now RiR requires Rhino v7.15.
 - Moved {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} from Topology to Annotation tab.
 - Added {% include ltr/comp.html uuid='49acc84c' %} component
 - Added {% include ltr/comp.html uuid='ad88cf11' %} component
@@ -63,7 +101,6 @@ group: Deployment & Configs
 - Added {% include ltr/comp.html uuid='00c729f1' %} component
 - Added {% include ltr/comp.html uuid='449b853b' %} component
 - Added {% include ltr/comp.html uuid='493035d3' %} component
-- Added {% include ltr/comp.html uuid='0644989d' %} component
 - Added {% include ltr/comp.html uuid='0644989d' %} component
 - Added {% include ltr/comp.html uuid='495330db' %} component.
 - Added {% include ltr/comp.html uuid='60be53c5' %} component.

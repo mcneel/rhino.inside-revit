@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
     (
       name: "Element Workset",
       nickname: "Workset",
-      description: "Element Workset properties. Get-Set accessor to element workset information.",
+      description: "Element Workset properties. Get-Set access component to element workset information.",
       category: "Revit",
       subCategory: "Element"
     )

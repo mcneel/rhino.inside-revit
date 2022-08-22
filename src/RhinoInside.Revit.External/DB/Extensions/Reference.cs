@@ -20,8 +20,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         int hashCode = 2022825623;
         hashCode = hashCode * -1521134295 + (int) obj.ElementReferenceType;
-        hashCode = hashCode * -1521134295 + obj.LinkedElementId.IntegerValue;
-        hashCode = hashCode * -1521134295 + obj.ElementId.IntegerValue;
+        hashCode = hashCode * -1521134295 + obj.LinkedElementId.GetHashCode();
+        hashCode = hashCode * -1521134295 + obj.ElementId.GetHashCode();
         return hashCode;
       }
     }

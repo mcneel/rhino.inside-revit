@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     public AddDependentView() : base
     (
       name: "Add Dependent View",
-      nickname: "DependatView",
+      nickname: "D-View",
       description: "Add a dependent Revit View.",
       category: "Revit",
       subCategory: "View"
@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         new Parameters.View()
         {
           Name = "View",
-          NickName = "View",
+          NickName = "V",
           Description = "Parent View",
         }
       )
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         new Parameters.View()
         {
           Name = "View",
-          NickName = "View",
+          NickName = "V",
           Description = "Parent View",
         }, ParamRelevance.Primary
       ),

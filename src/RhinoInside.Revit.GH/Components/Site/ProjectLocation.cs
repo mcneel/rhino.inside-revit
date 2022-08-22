@@ -1,4 +1,5 @@
 using System;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.External.DB.Extensions;
 
@@ -9,6 +10,68 @@ namespace RhinoInside.Revit.GH.Components.Site
     public override Guid ComponentGuid => new Guid("B8677884-61E8-4D3F-8ACB-0873B2A40053");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "⌖";
+
+    #region UI
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalMenuItems(menu);
+      Menu_AppendSeparator(menu);
+
+      var activeApp = Revit.ActiveUIApplication;
+      var LocationId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Location);
+      Menu_AppendItem
+      (
+        menu, "Location…",
+        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, LocationId),
+        activeApp.CanPostCommand(LocationId), false
+      );
+
+      var online = Menu_AppendItem(menu, "Online");
+      Menu_AppendItem
+      (
+        online.DropDown, "Bing Maps…",
+        (sender, arg) =>
+        {
+          if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
+            using (System.Diagnostics.Process.Start($@"https://bing.com/maps/default.aspx?cp={Rhino.RhinoMath.ToDegrees(location.Latitude)}~{Rhino.RhinoMath.ToDegrees(location.Longitude)}&lvl=18")) { }
+        },
+        activeApp.ActiveUIDocument is object, false
+      );
+
+      Menu_AppendItem
+      (
+        online.DropDown, "DuckDuckGo…",
+        (sender, arg) =>
+        {
+          if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
+            using (System.Diagnostics.Process.Start($@"https://duckduckgo.com/?q={Rhino.RhinoMath.ToDegrees(location.Latitude)}%2C{Rhino.RhinoMath.ToDegrees(location.Longitude)}&iaxm=maps")) { }
+        },
+        activeApp.ActiveUIDocument is object, false
+      );
+
+      Menu_AppendItem
+      (
+        online.DropDown, "Google Maps…",
+        (sender, arg) =>
+        {
+          if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
+            using (System.Diagnostics.Process.Start($@"https://www.google.com/maps/@{Rhino.RhinoMath.ToDegrees(location.Latitude)},{Rhino.RhinoMath.ToDegrees(location.Longitude)},18z")) { }
+        },
+        activeApp.ActiveUIDocument is object, false
+      );
+
+      Menu_AppendItem
+      (
+        online.DropDown, "OpenStreetMap…",
+        (sender, arg) =>
+        {
+          if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
+            using (System.Diagnostics.Process.Start($@"https://www.openstreetmap.org/?mlat={Rhino.RhinoMath.ToDegrees(location.Latitude)}&mlon={Rhino.RhinoMath.ToDegrees(location.Longitude)}")) { }
+        },
+        activeApp.ActiveUIDocument is object, false
+      );
+    }
+    #endregion
 
     public ActiveProjectLocation()
     : base
@@ -24,15 +87,15 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.Document>("Project", "P", relevance: ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "Current Shared Site", optional: true, relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Parameters.Document>("Project", "P", optional: true, relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "New current Shared Site", optional: true, relevance: ParamRelevance.Tertiary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
       ParamDefinition.Create<Parameters.SiteLocation>("Site Location", "SL", "Project site location", relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "Current Shared Site", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "Project current Shared Site", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.BasePoint>("Survey Point", "SP", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.BasePoint>("Project Base Point", "PBP", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.BasePoint>("Internal Origin", "IO", relevance: ParamRelevance.Occasional),

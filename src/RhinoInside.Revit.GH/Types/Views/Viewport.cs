@@ -4,6 +4,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using System.Diagnostics;
   using Convert.Geometry;
   using Grasshopper.Kernel;
 
@@ -56,22 +57,32 @@ namespace RhinoInside.Revit.GH.Types
           args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x00003333, args.Thickness, close: true);
         }
 
-        using (var boxOutline = viewport.GetLabelOutline())
+        var view = Document.GetElement(viewport.ViewId) as ARDB.View;
+        if (view is ARDB.ImageView) return;
+
+        try
         {
-          var points = new Point3d[]
+          using (var boxOutline = viewport.GetLabelOutline())
           {
-            boxOutline.MinimumPoint.ToPoint3d(),
-            Point3d.Origin,
-            boxOutline.MaximumPoint.ToPoint3d(),
-            Point3d.Origin
-          };
+            var points = new Point3d[]
+            {
+              boxOutline.MinimumPoint.ToPoint3d(),
+              Point3d.Origin,
+              boxOutline.MaximumPoint.ToPoint3d(),
+              Point3d.Origin
+            };
 
-          points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
-          points[1] = new Point3d(points[2].X, points[0].Y, 0.0);
-          points[2] = new Point3d(points[2].X, points[2].Y, 0.0);
-          points[3] = new Point3d(points[0].X, points[2].Y, 0.0);
+            points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
+            points[1] = new Point3d(points[2].X, points[0].Y, 0.0);
+            points[2] = new Point3d(points[2].X, points[2].Y, 0.0);
+            points[3] = new Point3d(points[0].X, points[2].Y, 0.0);
 
-          args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x00003333, args.Thickness, close: true);
+            args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x00003333, args.Thickness, close: true);
+          }
+        }
+        catch (Exception e)
+        {
+          Debug.Fail(e.Source, e.Message);
         }
       }
     }

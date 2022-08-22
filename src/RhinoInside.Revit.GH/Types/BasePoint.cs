@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
 using Grasshopper.Kernel;
+using Rhino;
+using Rhino.DocObjects;
+using Rhino.DocObjects.Tables;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
@@ -12,7 +16,7 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_BasePoint : IGH_GraphicalElement { }
 
   [Kernel.Attributes.Name("Base Point")]
-  public class BasePoint : GraphicalElement, IGH_BasePoint
+  public class BasePoint : GraphicalElement, IGH_BasePoint, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.BasePoint);
     public new ARDB.BasePoint Value => base.Value as ARDB.BasePoint;
@@ -21,7 +25,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB.BasePoint &&
-             element.Category.Id.IntegerValue != (int) ARDB.BuiltInCategory.OST_IOS_GeoSite;
+             element.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_IOS_GeoSite;
     }
 
     public BasePoint() { }
@@ -92,6 +96,53 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is ARDB.BasePoint point)
+      {
+        var name = $"Revit::{point.Category.Name}";
+
+        // 2. Check if already exist
+        var index = doc.NamedConstructionPlanes.Find(name);
+
+        // 3. Update if necessary
+        if (index < 0 || overwrite)
+        {
+          if (point.IsEquivalent(BasePointExtension.GetProjectBasePoint(Document)))
+            doc.ModelBasepoint = Location.Origin;
+
+          var cplane = CreateConstructionPlane(name, Location, doc);
+
+          if (index < 0) index = doc.NamedConstructionPlanes.Add(cplane);
+          else if (overwrite) doc.NamedConstructionPlanes.Modify(cplane, index, true);
+        }
+
+        // TODO: Create a V5 Uuid out of the name
+        //guid = new Guid(0, 0, 0, BitConverter.GetBytes((long) index));
+        //idMap.Add(Id, guid);
+
+        return true;
+      }
+
+      return false;
+    }
+    #endregion
+
     #region Properties
     public override Plane Location
     {
@@ -109,6 +160,7 @@ namespace RhinoInside.Revit.GH.Types
             axisX = basisX.ToVector3d();
             axisY = basisY.ToVector3d();
           }
+
           return new Plane(origin, axisX, axisY);
         }
 
@@ -121,6 +173,8 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using External.DB.Extensions;
+
 #if REVIT_2021
   using ARDB_InternalOrigin = ARDB.InternalOrigin;
 #elif REVIT_2020
@@ -139,7 +193,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB_InternalOrigin &&
-             element.Category?.Id.IntegerValue == (int) ARDB.BuiltInCategory.OST_IOS_GeoSite;
+             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_IOS_GeoSite;
     }
 
     public InternalOrigin() { }

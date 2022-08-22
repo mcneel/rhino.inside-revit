@@ -134,9 +134,9 @@ namespace RhinoInside.Revit.AddIn.Forms
     {
       // Placement
       {
-        //placementSelector.Items.Add("Center to Center", DB.ImportPlacement.Centered.ToString());
+        //placementSelector.Items.Add("Center to Center", ARDB.ImportPlacement.Centered.ToString());
         placementSelector.Items.Add("Origin to Origin", ARDB.ImportPlacement.Origin.ToString());
-        //placementSelector.Items.Add("By Shared Coordinates", DB.ImportPlacement.Shared.ToString());
+        //placementSelector.Items.Add("By Shared Coordinates", ARDB.ImportPlacement.Shared.ToString());
         placementSelector.Items.Add("Base Point to Base Point", ARDB.ImportPlacement.Site.ToString());
         placementSelector.SelectedIndex = 0;
       }

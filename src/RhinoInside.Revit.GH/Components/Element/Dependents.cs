@@ -120,7 +120,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
             return;
           }
           catch (Autodesk.Revit.Exceptions.ArgumentException e)
-          { AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{e.Message} {element.Id.IntegerValue}"); }
+          { AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{e.Message} {element.Id.ToValue()}"); }
         }
 
         {

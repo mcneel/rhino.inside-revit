@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Autodesk.Revit.UI;
 using Microsoft.Win32;
@@ -14,9 +15,9 @@ namespace RhinoInside.Revit
   {
     static readonly string InstallPath =
 #if DEBUG
-      Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install", "InstallPath", null) as string ??
+      Registry.GetValue($@"HKEY_CURRENT_USER\{Core.RegistryPath}-WIP-Developer-Debug-trunk\Install", "InstallPath", null) as string ??
 #endif
-      Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install", "InstallPath", null) as string ??
+      Registry.GetValue($@"HKEY_LOCAL_MACHINE\{Core.RegistryPath}\Install", "InstallPath", null) as string ??
       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP");
 
     #region AssemblyReference
@@ -81,6 +82,11 @@ namespace RhinoInside.Revit
           try { activated(AppDomain.CurrentDomain, new AssemblyLoadEventArgs(Assembly)); }
           finally { activated = default; }
         }
+      }
+
+      public override string ToString()
+      {
+        return $"Activated={Assembly is object}, CodeBase={assemblyName.CodeBase}";
       }
     }
 
@@ -246,7 +252,7 @@ namespace RhinoInside.Revit
       var internalAssembliesOnly = InternalAssembliesOnly;
       try
       {
-        if (InternalAssembliesOnly && !InternalAssemblies.ContainsKey(assemblyName.Name))
+        if (InternalAssembliesOnly && !IsInternalReference(args))
           return default;
 
         internalAssembliesOnly = false;
@@ -457,6 +463,18 @@ namespace RhinoInside.Revit
     }
 
     #region Utils
+    static bool IsInternalReference(ResolveEventArgs args)
+    {
+      if
+      (
+        InternalAssemblies.ContainsKey(args.Name) &&
+        GetRequestingAssembly(args) is Assembly requestingAssembly
+      )
+        return requestingAssembly.GetReferencedAssemblies().Any(x => InternalAssemblies.ContainsKey(x.Name));
+
+      return false;
+    }
+
     static Assembly GetRequestingAssembly(ResolveEventArgs args)
     {
       var requestingAssembly = args.RequestingAssembly;

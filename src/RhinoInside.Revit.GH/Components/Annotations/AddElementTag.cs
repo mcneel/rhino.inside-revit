@@ -142,11 +142,11 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       try
       {
-#if REVIT_2019
+#if REVIT_2018
         var reference = new ARDB.Reference(element);
         return ARDB.IndependentTag.Create(view.Document, view.Id, reference, leader, TagMode, orientation, point);
 #else
-      return view.Document.Create.NewTag(view, element, leader, TagMode, orientation, point);
+        return view.Document.Create.NewTag(view, element, leader, TagMode, orientation, point);
 #endif
       }
       catch (Autodesk.Revit.Exceptions.InvalidOperationException)

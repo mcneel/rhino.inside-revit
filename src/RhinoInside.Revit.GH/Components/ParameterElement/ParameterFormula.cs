@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     (
       name: "Parameter Formula",
       nickname: "Formula",
-      description: "Parameter formula property. Get-Set accessor to Parameter formula properties",
+      description: "Parameter formula property. Get-Set access component to Parameter formula properties",
       category: "Revit",
       subCategory: "Parameter"
     )

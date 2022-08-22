@@ -316,7 +316,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Value is ARDB.Grid grid)
       {
-        att = att.Duplicate();
+        att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
         att.Name = grid.Name;
         att.WireDensity = -1;
         att.CastsShadows = false;
@@ -406,8 +406,8 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Grid grid)
         {
           return grid.IsCurved ?
-            grid.Curve.CreateReversed().ToCurve() :
-            grid.Curve.ToCurve();
+            grid.Curve.ToCurve() :
+            grid.Curve.CreateReversed().ToCurve();
         }
 
         return default;
@@ -418,11 +418,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.Grid grid)
+        if (Curve is Curve curve)
         {
           var bbox = BoundingBox;
-          var curve = grid.Curve.ToCurve();
-
           var curveA = curve.DuplicateCurve(); curveA.Translate(0.0, 0.0, bbox.Min.Z - curve.PointAtStart.Z);
           var curveB = curve.DuplicateCurve(); curveB.Translate(0.0, 0.0, bbox.Max.Z - curve.PointAtStart.Z);
 
@@ -646,7 +644,7 @@ namespace RhinoInside.Revit.GH.Types
       // 3. Update if necessary
       if (Value is ARDB.ReferencePoint point)
       {
-        att = att.Duplicate();
+        att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
         att.Name = DisplayName;
         if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
           att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
