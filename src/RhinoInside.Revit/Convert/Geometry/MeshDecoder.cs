@@ -24,6 +24,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         }
       }
 
+      mesh.Vertices.Align(MeshEncoder.ShortEdgeTolerance);
       mesh.Ngons.AddPlanarNgons(GeometryTolerance.Model.VertexTolerance, 4, 2, true);
       return mesh;
     }

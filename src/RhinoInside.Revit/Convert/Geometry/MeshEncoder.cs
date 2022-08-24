@@ -238,7 +238,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       var tol = GeometryTolerance.Internal;
 
-      var isSolid = mesh.SolidOrientation() != 0;
+      var isSolid = mesh.SolidOrientation() != -1;
       builder.OpenConnectedFaceSet(isSolid);
       var faces = 0;
 
