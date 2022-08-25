@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -8,39 +9,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class XYZExtension
   {
-    /// <summary>
-    /// Gets the length of this vector.
-    /// </summary>
-    /// <remarks>
-    /// In 3-D Euclidean space, the length of the vector is the square root of the sum
-    /// of the three coordinates squared.
-    /// </remarks>
-    /// <param name="xyz"></param>
-    /// <param name="tolerance"></param>
-    /// <returns></returns>
-    public static double GetLength(this XYZ xyz, double tolerance = DefaultTolerance)
-    {
-      // We follow a denormals-are-zero by default
-      tolerance = Math.Max(Upsilon, tolerance);
-
-      var length = GetLength(xyz.X, xyz.Y, xyz.Z);
-      return length < tolerance ? 0.0 : length;
-    }
-
-    internal static double GetLength(double x, double y, double z)
-    {
-      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
-
-      double u = x, v = y, w = z;
-      if (x > w) { u = y; v = z; w = x; }
-      if (y > w) { u = z; v = x; w = y; }
-      if (w < Upsilon) return 0.0;
-
-      u /= w; v /= w;
-
-      return Math.Sqrt(1.0 + (u * u + v * v)) * w;
-    }
-
     internal static bool IsZeroLength(double x, double y, double z, double tolerance)
     {
       x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
@@ -69,6 +37,39 @@ namespace RhinoInside.Revit.External.DB.Extensions
       u /= w; v /= w;
 
       return Math.Sqrt(1.0 + (u * u + v * v)) * w - 1.0 < tolerance;
+    }
+
+    internal static double GetLength(double x, double y, double z)
+    {
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+
+      double u = x, v = y, w = z;
+      if (x > w) { u = y; v = z; w = x; }
+      if (y > w) { u = z; v = x; w = y; }
+      if (w < Upsilon) return 0.0;
+
+      u /= w; v /= w;
+
+      return Math.Sqrt(1.0 + (u * u + v * v)) * w;
+    }
+
+    /// <summary>
+    /// Gets the length of this vector.
+    /// </summary>
+    /// <remarks>
+    /// In 3-D Euclidean space, the length of the vector is the square root of the sum
+    /// of the three coordinates squared.
+    /// </remarks>
+    /// <param name="xyz"></param>
+    /// <param name="tolerance"></param>
+    /// <returns></returns>
+    public static double GetLength(this XYZ xyz, double tolerance = DefaultTolerance)
+    {
+      // We follow a denormals-are-zero by default
+      tolerance = Math.Max(Upsilon, tolerance);
+
+      var length = GetLength(xyz.X, xyz.Y, xyz.Z);
+      return length < tolerance ? 0.0 : length;
     }
 
     public static bool AlmostEquals(this XYZ a, XYZ b, double tolerance)
@@ -214,6 +215,68 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return new XYZ(value.Z, 0.0, -value.X);
       else
         return new XYZ(-value.Y, value.X, 0.0);
+    }
+
+    /// <summary>
+    /// Retrieves a box that circumscribes the point set.
+    /// </summary>
+    /// <param name="points"></param>
+    /// <returns></returns>
+    public static bool TryGetBoundingBox(IEnumerable<XYZ> points, out BoundingBoxXYZ bbox)
+    {
+      double minX = double.PositiveInfinity, minY = double.PositiveInfinity, minZ = double.PositiveInfinity;
+      double maxX = double.NegativeInfinity, maxY = double.NegativeInfinity, maxZ = double.NegativeInfinity;
+
+      foreach (var point in points)
+      {
+        var value = point.X;
+        minX = Math.Min(minX, value);
+        maxX = Math.Max(maxX, value);
+
+        value = point.Y;
+        minY = Math.Min(minY, value);
+        maxY = Math.Max(maxY, value);
+
+        value = point.Z;
+        minZ = Math.Min(minZ, value);
+        maxZ = Math.Max(maxZ, value);
+      }
+
+      if (minX <= maxX && minY <= maxY && minZ <= maxZ)
+      {
+        bbox = new BoundingBoxXYZ()
+        {
+          Min = new XYZ(minX, minY, minZ),
+          Max = new XYZ(maxX, maxY, maxZ)
+        };
+        return true;
+      }
+
+      bbox = default;
+      return false;
+    }
+
+    /// <summary>
+    /// Retrieves a box that circumscribes the point set.
+    /// </summary>
+    /// <param name="points"></param>
+    /// <param name="coordSystem"></param>
+    /// <returns></returns>
+    public static bool TryGetBoundingBox(IEnumerable<XYZ> points, out BoundingBoxXYZ bbox, Transform coordSystem)
+    {
+      if (coordSystem is null || coordSystem.IsIdentity)
+        return TryGetBoundingBox(points, out bbox);
+
+      if (!coordSystem.IsConformal)
+        throw new ArgumentException("Transform is not conformal", nameof(coordSystem));
+
+      if (!coordSystem.TryGetInverse(out coordSystem))
+      {
+        bbox = default;
+        return false;
+      }
+
+      return TryGetBoundingBox(points.Select(coordSystem.OfPoint), out bbox);
     }
 
     /// <summary>
