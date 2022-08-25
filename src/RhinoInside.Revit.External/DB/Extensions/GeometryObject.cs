@@ -496,7 +496,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           return edge.AsCurve().TryGetLocation(out origin, out basisX, out basisY);
 
         case Face face:
-          using (var derivatives = face.ComputeDerivatives(new UV(0.5, 0.5), true))
+          using (var derivatives = face.ComputeDerivatives(new UV(0.5, 0.5), normalized: true))
           {
             origin = derivatives.Origin;
             basisX = derivatives.BasisX;
@@ -512,6 +512,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case Solid solid:
           if (!solid.Faces.IsEmpty)
             return TryGetLocation(solid.Faces.get_Item(0), out origin, out basisX, out basisY);
+
           break;
 
         case Mesh mesh:
@@ -520,6 +521,75 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       origin = basisX = basisY = default;
       return false;
+    }
+
+    /// <summary>
+    /// Retrieves a box that encloses the geometry object.
+    /// </summary>
+    /// <param name="geometry"></param>
+    /// <returns>The bounding box</returns>
+    public static BoundingBoxXYZ GetBoundingBox(this GeometryObject geometry)
+    {
+      switch (geometry)
+      {
+        case GeometryElement element:
+          return element.GetBoundingBox();
+
+        case GeometryInstance instance:
+          {
+            var bbox = instance.SymbolGeometry.GetBoundingBox();
+            bbox.Transform = instance.Transform;
+            return bbox;
+          }
+
+        case Point point:
+          return new BoundingBoxXYZ() { Min = point.Coord, Max = point.Coord };
+
+        case PolyLine polyline:
+          {
+            if (XYZExtension.TryGetBoundingBox(polyline.GetCoordinates(), out var bbox))
+              return bbox;
+          }
+          break;
+
+        case Curve curve:
+          {
+            if (XYZExtension.TryGetBoundingBox(curve.Tessellate(), out var bbox))
+              return bbox;
+          }
+          break;
+
+        case Edge edge:
+          {
+            if (XYZExtension.TryGetBoundingBox(edge.Tessellate(), out var bbox))
+              return bbox;
+          }
+          break;
+
+        case Face face:
+          {
+            using (var mesh = face.Triangulate())
+              if (XYZExtension.TryGetBoundingBox(mesh.Vertices, out var bbox))
+                return bbox;
+          }
+          break;
+
+        case Solid solid:
+          {
+            if (!solid.Faces.IsEmpty)
+              return solid.GetBoundingBox();
+          }
+          break;
+
+        case Mesh mesh:
+          {
+            if (XYZExtension.TryGetBoundingBox(mesh.Vertices, out var bbox))
+              return bbox;
+          }
+          break;
+      }
+
+      return new BoundingBoxXYZ() { Enabled = false };
     }
 
     public static Element GetSymbol(this GeometryInstance instance)
