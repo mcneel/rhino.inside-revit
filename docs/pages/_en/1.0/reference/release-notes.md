@@ -12,12 +12,14 @@ group: Deployment & Configs
 
 ### RC 
 
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.9 RC4" version="v1.9.8272.12095" pre_release=true time="08/30/2022" %}
+
 - Fix for `ARDB.Mesh` encoding and decoding when the mesh is not closed.
 - Fixed `ARDB.Mesh.ComputeCentroid` extension method.
 - Added `ARDB.GeometryObject.GetBoundingBox` extension method.
-
-{% endcapture %}
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 {% include ltr/release-header.html title="v1.9 RC3" version="v1.9.8259.4446" pre_release=true time="08/16/2022" %}
 
