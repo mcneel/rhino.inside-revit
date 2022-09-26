@@ -12,6 +12,8 @@ group: Deployment & Configs
 
 ### RC 
 
+- Fixed `GH.Gest.LoadEditor` to make Grasshopper window owned by Rhino. Even before it is ever been shown.
+
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
