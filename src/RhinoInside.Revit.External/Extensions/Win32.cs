@@ -140,7 +140,11 @@ namespace Microsoft.Win32.SafeHandles
 
     public int ThreadId => (int) User32.GetWindowThreadProcessId(this, IntPtr.Zero);
 
-    public WindowHandle Owner => User32.GetWindow(this, 4 /*GW_OWNER*/);
+    public WindowHandle Owner
+    {
+      get => User32.GetWindow(this, 4 /*GW_OWNER*/);
+      set => User32.SetWindowLongPtr(this, -8 /*GWL_HWNDPARENT*/, value?.handle ?? IntPtr.Zero);
+    }
     public WindowHandle ActivePopup => User32.GetWindow(this, 6 /*GW_ENABLEDPOPUP*/);
 
     public WindowHandle Parent

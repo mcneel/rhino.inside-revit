@@ -9,12 +9,14 @@ using Grasshopper;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Plugin;
+using Microsoft.Win32.SafeHandles;
 using Rhino;
 using ARDB = Autodesk.Revit.DB;
 using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH
 {
+  using System.Threading;
   using Convert.Geometry;
   using Convert.Units;
   using External.DB;
@@ -127,14 +129,22 @@ namespace RhinoInside.Revit.GH
     public static bool IsEditorLoaded() => Script.IsEditorLoaded();
 
     /// <summary>
-    /// Load the main Grasshopper Editor. If the editor has already been loaded nothing
-    /// will happen.
+    /// Load the main Grasshopper Editor.
+    /// If the editor has already been loaded nothing will happen.
     /// </summary>
     public static void LoadEditor()
     {
-      Script.LoadEditor();
       if (!Script.IsEditorLoaded())
-        throw new InvalidOperationException("Failed to startup Grasshopper");
+      {
+        var currentCulture = Thread.CurrentThread.CurrentCulture;
+        try     { Script.LoadEditor(); }
+        finally { Thread.CurrentThread.CurrentCulture = currentCulture; }
+
+        if (!Script.IsEditorLoaded())
+          throw new InvalidOperationException("Failed to startup Grasshopper");
+
+        new WindowHandle(Instances.DocumentEditor.Handle).Owner = Rhinoceros.MainWindow;
+      }
     }
 
     /// <summary>

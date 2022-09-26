@@ -366,6 +366,10 @@ namespace RhinoInside.Revit.AddIn.Commands
     {
       var (res, msg) = External.ActivationGate.Open(() =>
       {
+        // Load Grasshopper window in case the user has not did it before.
+        // This enables definitions that relay on Grasshopper window like those that show UI.
+        GH.Guest.LoadEditor();
+
         var result = ReadFromFile(filePath, out var definition);
         if (result == Result.Succeeded)
         {
@@ -392,7 +396,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                 foreach (var value in values)
                   value.Key.AddVolatileDataList(new Grasshopper.Kernel.Data.GH_Path(0), value.Value);
 
-                Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+                Grasshopper.Instances.EnforceInvariantCulture();
                 using (var modal = new ModalScope())
                 {
                   definition.NewSolution(false, GH_SolutionMode.Silent);
