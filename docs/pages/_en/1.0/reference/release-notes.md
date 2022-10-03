@@ -13,6 +13,7 @@ group: Deployment & Configs
 ### RC 
 
 - Fixed `GH.Gest.LoadEditor` to make Grasshopper window owned by Rhino. Even before it is ever been shown.
+- Fix for 'Import 3DM' command when input model has No-Units.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
@@ -36,7 +37,7 @@ group: Deployment & Configs
 - Fixed 'Add Detail' component. It was moving two times the specified distance.
 - Fixed value range validation on {% include ltr/comp.html uuid='8c5cd6fb' %} component.
 - Added item `<None>` to some parameters context menu.
-- Fix for the case Grasshopper had run with No-units.
+- Fix for the case Grasshopper had run with No-Units.
 - Fix for `BakeElements` when no attributes are provided.
 - Fix for `Types.View.DrawViewportWires` when showing an `ARDB.ImageView`.
 - Fix for `ARDB.Instance.GetLocation` when instance is scaled.
