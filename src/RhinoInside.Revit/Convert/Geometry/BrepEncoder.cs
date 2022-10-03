@@ -297,7 +297,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             curves[p] = extrusion.Profile3d(p, 0.5);
 
           var regions = Brep.CreatePlanarBreps(curves, tol.VertexTolerance / factor);
-          if (regions.Length != 1)
+          if (regions?.Length != 1)
             return false;
 
           brep = regions[0];

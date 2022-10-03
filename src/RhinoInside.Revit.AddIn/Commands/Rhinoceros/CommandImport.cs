@@ -445,10 +445,8 @@ namespace RhinoInside.Revit.AddIn.Commands
       {
         ARDB.DirectShapeLibrary.GetDirectShapeLibrary(doc).Reset();
 
-        using (var model = File3dm.Read(filePath))
+        using (var model = OpenModel(filePath, out var scaleFactor))
         {
-          var scaleFactor = UnitScale.Convert(1.0, (UnitScale) model.Settings.ModelUnitSystem, UnitScale.Internal);
-
           using (var trans = new ARDB.Transaction(doc, "Import 3D Model"))
           {
             if (trans.Start() == ARDB.TransactionStatus.Started)
@@ -567,9 +565,8 @@ namespace RhinoInside.Revit.AddIn.Commands
       bool visibleLayersOnly
     )
     {
-      using (var model = File3dm.Read(filePath))
+      using (var model = OpenModel(filePath, out var scaleFactor))
       {
-        var scaleFactor = UnitScale.Convert(1.0, (UnitScale) model.Settings.ModelUnitSystem, UnitScale.Internal);
         var translationVector = Point3d.Origin - ImportPlacement(model, placement);
 
         using (var trans = new ARDB.Transaction(doc, "Import 3D Model"))
@@ -706,6 +703,21 @@ namespace RhinoInside.Revit.AddIn.Commands
       return Result.Failed;
     }
     #endregion
+
+    static File3dm OpenModel(string filePath, out double scaleFactor)
+    {
+      try
+      {
+        var model = File3dm.Read(filePath);
+        scaleFactor = UnitScale.Convert(1.0, (UnitScale) model.Settings.ModelUnitSystem, UnitScale.Internal);
+
+        if (!(External.DB.NumericTolerance.Delta < scaleFactor && scaleFactor < double.PositiveInfinity))
+          throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.Settings.ModelUnitSystem}.");
+
+        return model;
+      }
+      catch (Exception e) { throw new External.FailException(e.Message); }
+    }
 
     public override Result Execute(ExternalCommandData data, ref string message, ARDB.ElementSet elements)
     {
