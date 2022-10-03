@@ -799,15 +799,13 @@ namespace RhinoInside.Revit
               {
                 if (polyline?.ToPolyline() is Polyline pline)
                 {
-
                   // Reduce too complex polylines.
                   {
                     var ctol = tol.VertexTolerance;
                     while (pline.Count > 0x4000)
                     {
                       ctol *= 2.0;
-                      if (pline.ReduceSegments(ctol) == 0)
-                        break;
+                      pline.ReduceSegments(ctol);
                     }
                   }
 
