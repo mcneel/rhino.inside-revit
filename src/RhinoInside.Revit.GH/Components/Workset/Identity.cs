@@ -135,6 +135,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Workset", out Types.Workset workset)) return;
+      else Params.TrySetData(DA, "Workset", () => workset);
 
       if (Params.GetData(DA, "Name", out string name))
       {
@@ -145,7 +146,6 @@ namespace RhinoInside.Revit.GH.Components.Worksets
         }
       }
 
-      DA.SetData("Workset", workset);
       Params.TrySetData(DA, "Kind", () => workset.Value.Kind);
       Params.TrySetData(DA, "Name", () => workset.Value.Name);
       Params.TrySetData(DA, "Owner", () => workset.Value.Owner);
