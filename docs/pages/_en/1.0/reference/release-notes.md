@@ -19,17 +19,19 @@ group: Deployment & Configs
 
 ### RC 
 
-- Fixed `GH.Gest.LoadEditor` to make Grasshopper window owned by Rhino. Even before it is ever been shown.
-- Fix for 'Import 3DM' command when input model has No-Units.
-- Improved how 'Duplicate Element' handles 'None' element.
-- Fix for 'Workset Identity' component.
-- Fix for 'Add Selection Filter' when a null is used as input.
-- Fix for 'Inspect Element' when input 'Element' is null.
-- Fix for `Types.View.GenLevelId` when view is not based on a Level.
-- Added `ARDB.ViewSection.GetElevationMarker` extension method.
-
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.9 RC5" version="v1.9.8319.16206" pre_release=true time="10/11/2022" %}
+
+- Fix for {% include ltr/comp.html uuid='c33cd128' %} component.
+- Fix for {% include ltr/comp.html uuid='29618f71' %} when a null is used as input.
+- Fix for {% include ltr/comp.html uuid='fad33c4b' %} when input 'Element' is null.
+- Improved how {% include ltr/comp.html uuid='f4c12aa0' %} handles 'None' element.
+- Fixed `GH.Gest.LoadEditor` to make Grasshopper window owned by Rhino. Even before it is ever been shown.
+- Fix for 'Import 3DM' command when input model has No-Units.
+- Fix for `Types.View.GenLevelId` when view is not based on a Level.
+- Added `ARDB.ViewSection.GetElevationMarker` extension method.
 
 {% include ltr/release-header.html title="v1.9 RC4" version="v1.9.8272.12095" pre_release=true time="08/30/2022" %}
 
