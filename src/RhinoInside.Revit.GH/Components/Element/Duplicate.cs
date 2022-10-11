@@ -94,11 +94,18 @@ namespace RhinoInside.Revit.GH.Components.Elements
       {
         var duplicates = new Types.Element[elements.Count];
 
-        var input = new (int index, Types.Element element)[elements.Count];
-        for (int e = 0; e < elements.Count; ++e)
-          input[e] = (e, elements[e]);
+        // Xlate Invalid elements -> None
+        var None = new Types.Element();
+        for (int e = 0; e < duplicates.Length; e++)
+        {
+          if (elements[e]?.IsValid == false)
+            duplicates[e] = None;
+        }
 
-        var documents = input.Where(x => x.element?.IsValid == true).GroupBy(x => x.element.Document);
+        var documents = elements.
+          Select((element, index) => (index, element)).
+          Where(x => x.element?.IsValid == true).
+          GroupBy(x => x.element.Document);
 
         foreach (var document in documents)
         {

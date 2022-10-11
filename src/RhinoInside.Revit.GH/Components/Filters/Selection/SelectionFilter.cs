@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
           NickName = "N",
           Description = "Selection filter name",
         },
-        ParamRelevance.Primary        
+        ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -101,7 +101,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
           StartTransaction(doc.Value);
           if (CanReconstruct(_SelectionFilter_, out var untracked, ref selection, doc.Value, name))
           {
-            var elementIds = elements?.Where(x => doc.Value.IsEquivalent(x.Document)).Select(x => x.Id).ToList();
+            var elementIds = elements?.Where(x => doc.Value.IsEquivalent(x?.Document)).Select(x => x.Id).ToList();
             selection = Reconstruct(selection, doc.Value, name, elementIds, default);
           }
 

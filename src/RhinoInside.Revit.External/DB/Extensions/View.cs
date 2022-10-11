@@ -183,5 +183,32 @@ namespace RhinoInside.Revit.External.DB.Extensions
       gridSpacing = double.NaN;
       return false;
     }
+
+    static int IndexOfViewSection(ElevationMarker marker, ElementId viewId)
+    {
+      if (marker.HasElevations())
+      {
+        for (int i = 0; i < marker.MaximumViewCount; ++i)
+        {
+          if (marker.GetViewId(i) == viewId)
+            return i;
+        }
+      }
+
+      return -1;
+    }
+
+    public static ElevationMarker GetElevationMarker(this ViewSection viewSection)
+    {
+      using (var collector = new FilteredElementCollector(viewSection.Document))
+      {
+        return collector.
+          OfCategory(BuiltInCategory.OST_Elev).
+          OfClass(typeof(ElevationMarker)).
+          OfType<ElevationMarker>().
+          Where(x => IndexOfViewSection(x, viewSection.Id) >= 0).
+          FirstOrDefault();
+      }
+    }
   }
 }

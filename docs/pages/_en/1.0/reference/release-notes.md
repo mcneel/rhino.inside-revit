@@ -21,6 +21,12 @@ group: Deployment & Configs
 
 - Fixed `GH.Gest.LoadEditor` to make Grasshopper window owned by Rhino. Even before it is ever been shown.
 - Fix for 'Import 3DM' command when input model has No-Units.
+- Improved how 'Duplicate Element' handles 'None' element.
+- Fix for 'Workset Identity' component.
+- Fix for 'Add Selection Filter' when a null is used as input.
+- Fix for 'Inspect Element' when input 'Element' is null.
+- Fix for `Types.View.GenLevelId` when view is not based on a Level.
+- Added `ARDB.ViewSection.GetElevationMarker` extension method.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
