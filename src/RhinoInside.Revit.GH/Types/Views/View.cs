@@ -101,8 +101,8 @@ namespace RhinoInside.Revit.GH.Types
     public ViewType ViewType => Value is ARDB.View view ?
       new ViewType(view.ViewType) : default;
 
-    public virtual ARDB.ElementId GenLevelId => Value?.GenLevel.Id;
-    public Level GenLevel => GenLevelId is ARDB.ElementId levelId ? new Level(Document, levelId) : default;
+    public virtual ARDB.ElementId GenLevelId => Value?.GenLevel?.Id;
+    public Level GenLevel => Value?.GenLevel is ARDB.Level genLevel ? new Level(genLevel) : default;
 
     public double Scale => Value is ARDB.View view ?
       view.Scale == 0 ? 1.0 : (double)view.Scale :
