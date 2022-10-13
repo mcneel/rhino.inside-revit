@@ -114,12 +114,5 @@ namespace RhinoInside.Revit.External.DB.Extensions
       tag.LeaderEnd = pntEnd;
     }
 #endif
-
-#if !REVIT_2018
-    public static Reference GetTaggedReference(this IndependentTag tag)
-    {
-      return new Reference(tag.Document.GetElement(tag.TaggedLocalElementId));
-    }
-#endif
   }
 }

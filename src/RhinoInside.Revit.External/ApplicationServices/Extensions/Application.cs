@@ -125,6 +125,14 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
 #endif
     }
 
+    internal static string GetProjectPath(this Application app)
+    {
+      if (TryGetProfileValue(app, "Directories", "ProjectPath", out var projectsPath))
+        return System.Environment.ExpandEnvironmentVariables(projectsPath);
+
+      return System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+    }
+
     public static bool TryGetProfileValue(this Application app, string section, string key, out string value)
     {
       if (!string.IsNullOrEmpty(section) && !string.IsNullOrEmpty(key))
