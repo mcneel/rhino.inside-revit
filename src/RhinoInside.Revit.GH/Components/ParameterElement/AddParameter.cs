@@ -331,12 +331,13 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
             foreach (var category in categories)
               binding.Categories.Insert(category);
 
-            if (!doc.ParameterBindings.Insert(definition, binding, key.Group))
+            var keyGroup = key.Group == ERDB.Schemas.ParameterGroup.Empty ? null : key.Group;
+            if (!doc.ParameterBindings.Insert(definition, binding, keyGroup))
             {
               if
               (
                 FailureProcessingMode != ARDB.FailureProcessingResult.ProceedWithCommit ||
-                !doc.ParameterBindings.ReInsert(definition, binding, key.Group)
+                !doc.ParameterBindings.ReInsert(definition, binding, keyGroup)
               )
                 throw new Exceptions.RuntimeException
                 (
