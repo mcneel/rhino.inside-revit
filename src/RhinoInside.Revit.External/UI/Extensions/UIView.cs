@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
 
       using (var uiDocument = new Autodesk.Revit.UI.UIDocument(view.Document))
       {
-        uiView = uiDocument.GetOpenUIViews().Where(x => x.ViewId == view.Id).FirstOrDefault();
+        uiView = uiDocument.GetOpenUIViews().FirstOrDefault(x => x.ViewId == view.Id);
         return uiView is object;
       }
     }

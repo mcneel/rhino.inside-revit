@@ -742,7 +742,7 @@ namespace RhinoInside.Revit
           var groupName = e.CommandLocalName;
           var pluginId = PlugIn.IdFromName(e.CommandPluginName);
           var plugin = PlugIn.Find(pluginId);
-          var command = plugin?.GetCommands().Where(x => x.Id == e.CommandId).FirstOrDefault();
+          var command = plugin?.GetCommands().FirstOrDefault(x => x.Id == e.CommandId);
           if
           (
             command?.GetType().GetRuntimeProperty("DisplayName") is PropertyInfo info &&

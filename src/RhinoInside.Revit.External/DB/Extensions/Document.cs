@@ -803,7 +803,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           using (var smallSet = new ElementCategoryFilter(clueCategoryId, false))
           {
             using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)).WherePasses(smallSet))
-              family = collector.Where(x => x.Name == name).FirstOrDefault() as Family;
+              family = collector.FirstOrDefault(x => x.Name == name) as Family;
           }
         }
 
@@ -814,14 +814,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             // We use categoryId as a clue too speed up search.
             using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)).WherePasses(bigSet))
-              family = collector.Where(x => x.Name == name).FirstOrDefault() as Family;
+              family = collector.FirstOrDefault(x => x.Name == name) as Family;
           }
         }
       }
       else
       {
         using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)))
-          family = collector.Where(x => x.Name == name).FirstOrDefault() as Family;
+          family = collector.FirstOrDefault(x => x.Name == name) as Family;
       }
 
       return family is object;

@@ -714,7 +714,7 @@ namespace RhinoInside.Revit.GH.Parameters
               int filteredElementsCount = 0;
 
               var filters = collector.Cast<ARDB.FilterElement>();
-              if (filters.Where(x => x.Name == NickName).FirstOrDefault() is ARDB.FilterElement filter)
+              if (filters.FirstOrDefault(x => x.Name == NickName) is ARDB.FilterElement filter)
               {
                 if (filter is ARDB.SelectionFilterElement selection)
                 {

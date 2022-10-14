@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
 
         // Look for one that is associated to the `ActiveGraphicalView`
         if (uiDocument.ActiveGraphicalView is Autodesk.Revit.DB.View activeView && activeView.IsValidObject)
-          _uiView_ = openViews.Where(x => x.ViewId == activeView.Id).FirstOrDefault();
+          _uiView_ = openViews.FirstOrDefault(x => x.ViewId == activeView.Id);
 
         // Look for the first Graphical View that is open
         if (_uiView_?.IsValidObject != true)

@@ -229,7 +229,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       {
         using (var collector = new ARDB.FilteredElementCollector(family).OfClass(typeof(ARDB.Material)))
         {
-          if (collector.Cast<ARDB.Material>().Where(x => x.Name == material.Name).FirstOrDefault() is ARDB.Material familyMaterial)
+          if (collector.Cast<ARDB.Material>().FirstOrDefault(x => x.Name == material.Name) is ARDB.Material familyMaterial)
             return familyMaterial.Id;
         }
 
@@ -785,7 +785,7 @@ namespace RhinoInside.Revit.GH.Components.Families
                     {
                       using (var hosts = new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.HostObject)))
                       {
-                        if (hosts.Where(x => x is ARDB.Wall || x is ARDB.Ceiling).FirstOrDefault() is ARDB.HostObject host)
+                        if (hosts.FirstOrDefault(x => x is ARDB.Wall || x is ARDB.Ceiling) is ARDB.HostObject host)
                           Add(doc, familyDoc, loops, host, openings);
                         else
                           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No suitable host object is been found");
