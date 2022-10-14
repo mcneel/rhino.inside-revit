@@ -308,7 +308,7 @@ namespace Rhino.Geometry
         var centroidF = planarFaces[f].Centroid;
 
         // Check if they have same area.
-        for (int g = f - 1; g >= 0 && RhinoMath.EpsilonEquals(planarFaces[f].LoopArea, planarFaces[g].LoopArea, RhinoMath.SqrtEpsilon); --g)
+        for (int g = f - 1; g >= 0 && RhinoMath.EpsilonEquals(planarFaces[f].LoopArea, planarFaces[g].LoopArea, 1e-6); --g)
         {
           // Planes should be parallel or anti-parallel
           if (planeF.Normal.IsParallelTo(planarFaces[g].Plane.Normal, RhinoMath.DefaultAngleTolerance / 100.0) == 0)

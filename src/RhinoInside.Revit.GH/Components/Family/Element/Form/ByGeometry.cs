@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           {
             try
             {
-              foreach (var curve in extrusion.Profile3d(new Rhino.Geometry.ComponentIndex(Rhino.Geometry.ComponentIndexType.ExtrusionBottomProfile, 0)).ToCurveMany())
+              foreach (var curve in extrusion.Profile3d(new ComponentIndex(ComponentIndexType.ExtrusionBottomProfile, 0)).ToCurveMany())
                 referenceArray.Append(new ARDB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
               ReplaceElement
