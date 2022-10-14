@@ -200,7 +200,7 @@ namespace RhinoInside.Revit.AddIn.Forms
       if (AddInOptions.Current.UpdateChannel is string activeChannelId)
       {
         var channelGuid = new Guid(activeChannelId);
-        var updateChannel = Updater.Channels.Where(x => x.Id == channelGuid).First();
+        var updateChannel = Updater.Channels.First(x => x.Id == channelGuid);
         _updateChannelSelector.SelectedIndex = Array.IndexOf(Updater.Channels, updateChannel);
       }
       else

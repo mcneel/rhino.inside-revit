@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             {
               var midPoint = edge.PointAt(edge.Domain.Mid);
 
-              var midPointOnAnyLoop = loops.Where(x => x.ClosestPoint(midPoint, out var _, tol.VertexTolerance)).Any();
+              var midPointOnAnyLoop = loops.Any(x => x.ClosestPoint(midPoint, out var _, tol.VertexTolerance));
               if (!midPointOnAnyLoop)
               {
                 trimmedBrep.Faces.RemoveAt(trimmedFace.FaceIndex);

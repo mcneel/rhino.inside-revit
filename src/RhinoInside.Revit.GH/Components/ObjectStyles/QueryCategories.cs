@@ -23,10 +23,10 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       ICollection<ARDB.ElementId> modified
     )
     {
-      if (added.Where(x => x.IsCategoryId(document)).Any())
+      if (added.Any(x => x.IsCategoryId(document)))
         return true;
 
-      if (modified.Where(x => x.IsCategoryId(document)).Any())
+      if (modified.Any(x => x.IsCategoryId(document)))
         return true;
 
       if (deleted.Any())

@@ -787,7 +787,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool TryGetParameter(this Document doc, out ParameterElement parameterElement, string parameterName, ParameterScope scope)
     {
-      var (definition, _) = doc.GetParameterDefinitions(scope).Where(x => x.Definition.Name == parameterName).FirstOrDefault();
+      var (definition, _) = doc.GetParameterDefinitions(scope).FirstOrDefault(x => x.Definition.Name == parameterName);
       parameterElement = doc.GetElement(definition?.Id ?? ElementId.InvalidElementId) as ParameterElement;
       return parameterElement is object;
     }
@@ -925,8 +925,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         return collector.
           WhereParameterEqualsTo(BuiltInParameter.VIEW_NAME, viewName).
-          OfType<View3D>().Where(x => !x.IsTemplate && x.Name.Equals(viewName, ElementNaming.ComparisonType)).
-          FirstOrDefault();
+          OfType<View3D>().
+          FirstOrDefault(x => !x.IsTemplate && x.Name.Equals(viewName, ElementNaming.ComparisonType));
       }
     }
 
@@ -948,16 +948,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
         {
-          var activeView = uiDocument.ActiveGraphicalView;
-
-          if (activeView is null)
-          {
-            var openViews = uiDocument.GetOpenUIViews().
-                Select(x => doc.GetElement(x.ViewId) as View).
-                Where(x => x.IsGraphicalView());
-
-            activeView = openViews.FirstOrDefault();
-          }
+          var activeView = uiDocument.ActiveGraphicalView ??
+              uiDocument.
+              GetOpenUIViews().
+              Select(x => doc.GetElement(x.ViewId) as View).
+              FirstOrDefault(ViewExtension.IsGraphicalView);
 
           return activeView;
         }

@@ -263,7 +263,7 @@ namespace RhinoInside.Revit.GH
     {
       if (args.CommandEnglishName == "GrasshopperBake")
       {
-        if (!Rhinoceros.Exposed && !RhinoDoc.ActiveDoc.Views.Where(x => x.Floating).Any())
+        if (!Rhinoceros.Exposed && !RhinoDoc.ActiveDoc.Views.Any(x => x.Floating))
         {
           var cursorPosition = System.Windows.Forms.Cursor.Position;
           if (Rhinoceros.OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300) is null)

@@ -70,8 +70,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       if
       (
         new string[] { pkgAddinSpecificContents, pkgAddinContents }.
-        Where(d => Directory.Exists(d)).
-        FirstOrDefault() is string pkgContentsDir
+        FirstOrDefault(d => Directory.Exists(d)) is string pkgContentsDir
       )
       {
         return new ScriptPkg { Name = pkgName, Location = pkgContentsDir };

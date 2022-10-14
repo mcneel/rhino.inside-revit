@@ -827,7 +827,7 @@ namespace RhinoInside.Revit
             if (RhinoGet.InGetObject(rhinoDoc) || RhinoGet.InGetPoint(rhinoDoc))
             {
               // If there is no floating viewport visible...
-              if (!rhinoDoc.Views.Where(x => x.Floating).Any())
+              if (!rhinoDoc.Views.Any(x => x.Floating))
               {
                 var cursorPosition = System.Windows.Forms.Cursor.Position;
                 if (OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300) is null)
@@ -897,7 +897,7 @@ namespace RhinoInside.Revit
     {
       if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
       {
-        var openView = rhinoDoc.Views.Where(v => v.MainViewport.Name == RevitViewName).FirstOrDefault();
+        var openView = rhinoDoc.Views.FirstOrDefault(v => v.MainViewport.Name == RevitViewName);
         if (openView is null)
         {
           if

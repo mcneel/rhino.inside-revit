@@ -276,7 +276,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         using (var Documents = Revit.ActiveDBApplication.Documents)
         {
-          if (Documents.Cast<ARDB.Document>().Where(x => x.IsLinked).Any())
+          if (Documents.Cast<ARDB.Document>().Any(x => x.IsLinked))
           {
             Menu_AppendSeparator(menu);
             Menu_AppendItem(menu, $"Set one linked {TypeName}", Menu_PromptOneLinked, SourceCount == 0, false);
@@ -296,9 +296,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (Revit.ActiveUIDocument?.Document is ARDB.Document activeDoc)
       {
         var any = ToElementIds(VolatileData).
-          Where(x => activeDoc.Equals(x.Document)).
-          Select(x => x.Id).
-          Any();
+          Any(x => activeDoc.Equals(x.Document));
 
         Menu_AppendItem(menu, $"Externalise selection", Menu_ExternaliseData, any, false);
       }
@@ -486,17 +484,17 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private void Menu_HighlightElements(object sender, EventArgs e)
     {
-      var uiDocument = Revit.ActiveUIDocument;
-      var doc = uiDocument.Document;
-      var elementIds = ToElementIds(VolatileData).
-                       Where(x => doc.Equals(x.Document)).
-                       Select(x => x.Id);
-
-      if (elementIds.Any())
+      if (VolatileData.PathCount > 0)
       {
-        var ids = elementIds.ToArray();
-        uiDocument.Selection.SetElementIds(ids);
-        uiDocument.ShowElements(ids);
+        var uiDocument = Revit.ActiveUIDocument;
+        var doc = uiDocument.Document;
+        var elementIds = ToElementIds(VolatileData).
+                         Where(x => doc.Equals(x.Document)).
+                         Select(x => x.Id).
+                         ToList();
+
+        uiDocument.Selection.SetElementIds(elementIds);
+        uiDocument.ShowElements(elementIds);
       }
     }
 

@@ -287,7 +287,7 @@ namespace Rhino.Geometry
         return false;
 
       // If brep has more that 3 faces we should check if there are faces with interior loops
-      if (brep.Faces.Count > 3 && brep.Faces.Where(face => face.Loops.Count != 1 && !face.IsPlanar(RhinoMath.ZeroTolerance)).Any())
+      if (brep.Faces.Count > 3 && brep.Faces.Any(face => face.Loops.Count != 1 && !face.IsPlanar(RhinoMath.ZeroTolerance)))
         return false;
 
       var candidateFaces = new List<int[]>();
