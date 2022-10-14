@@ -20,6 +20,7 @@ group: Deployment & Configs
 ### RC 
 
 - Fix on 'Add Parameter' when definition parameter group is not a built-in one.
+- Renamed 'Add LoftForm' component to 'Add Mass Loft'.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

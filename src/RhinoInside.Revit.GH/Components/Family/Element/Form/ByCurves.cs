@@ -8,6 +8,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 {
   using Convert.Geometry;
   using Kernel.Attributes;
+  using External.DB.Extensions;
 
   public class FormByCurves : ReconstructElementComponent
   {
@@ -16,8 +17,8 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     public FormByCurves() : base
     (
-      name: "Add LoftForm",
-      nickname: "LoftForm",
+      name: "Add Mass Loft",
+      nickname: "MassLoft",
       description: "Given a list of curves, it adds a Form element to the active Revit document",
       category: "Revit",
       subCategory: "Family"
@@ -35,8 +36,8 @@ namespace RhinoInside.Revit.GH.Components.Families
       IList<Rhino.Geometry.Curve> profiles
     )
     {
-      if (!document.IsFamilyDocument)
-        throw new Exceptions.RuntimeArgumentException("Document", "This component can only run on a Family document");
+      if (!document.IsFamilyDocument || document.OwnerFamily.FamilyCategoryId.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_Mass)
+        throw new Exceptions.RuntimeArgumentException("Document", "This component can run only on a Mass Family document");
 
       var planes = new List<Rhino.Geometry.Plane>();
       foreach (var profile in profiles)
