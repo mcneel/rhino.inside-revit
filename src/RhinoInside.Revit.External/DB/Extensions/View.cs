@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       using (var uiDocument = new UIDocument(view.Document))
       {
-        if (uiDocument.GetOpenUIViews().Where(x => x.ViewId == view.Id).FirstOrDefault() is UIView uiView)
+        if (uiDocument.GetOpenUIViews().FirstOrDefault(x => x.ViewId == view.Id) is UIView uiView)
         {
           uiView.Close();
           return true;
@@ -125,12 +125,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
-    internal static ElementId GetSketchGridId(this View view)
-    {
-      return view.
-        GetDependentElements(new ElementCategoryFilter(BuiltInCategory.OST_IOSSketchGrid)).
-        FirstOrDefault();
-    }
+    static readonly ElementFilter OST_IOSSketchGridFilter = new ElementCategoryFilter(BuiltInCategory.OST_IOSSketchGrid);
+    internal static ElementId GetSketchGridId(this View view) => view.GetDependentElements(OST_IOSSketchGridFilter).FirstOrDefault();
 
     internal static bool TryGetSketchGridSurface
     (
@@ -206,8 +202,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           OfCategory(BuiltInCategory.OST_Elev).
           OfClass(typeof(ElevationMarker)).
           OfType<ElevationMarker>().
-          Where(x => IndexOfViewSection(x, viewSection.Id) >= 0).
-          FirstOrDefault();
+          FirstOrDefault(x => IndexOfViewSection(x, viewSection.Id) >= 0);
       }
     }
   }

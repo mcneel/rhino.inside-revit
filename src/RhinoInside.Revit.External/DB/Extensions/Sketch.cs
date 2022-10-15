@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var id = sketch.Id;
 
       var dependents = sketch.GetDependentElements(SketchOwnerFilter).Select(document.GetElement);
-      if (dependents.Where(x => x.GetSketch()?.Id == id).FirstOrDefault() is Element owner)
+      if (dependents.FirstOrDefault(x => x.GetSketch()?.Id == id) is Element owner)
         return owner;
 
       using (var collector = new FilteredElementCollector(document))
@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           WherePasses(SketchOwnerFilter).
           WherePasses(new BoundingBoxIntersectsFilter(sketch.GetOutline()));
 
-        return elementCollector.Cast<Element>().Where(x => x.GetSketch()?.Id == id).FirstOrDefault();
+        return elementCollector.Cast<Element>().FirstOrDefault(x => x.GetSketch()?.Id == id);
       }
     }
 #endif

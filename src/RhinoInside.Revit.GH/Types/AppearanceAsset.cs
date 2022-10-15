@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is ARDB.AppearanceAssetElement appearance)
       {
         // 2. Check if already exist
-        var material = doc.RenderMaterials.Where(x => x.Name == materialName).FirstOrDefault();
+        var material = doc.RenderMaterials.FirstOrDefault(x => x.Name == materialName);
 
         if (material is null)
         {

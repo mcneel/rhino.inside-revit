@@ -77,7 +77,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     )
     {
       // If anything of that type is added we need to update ListItems
-      if (added.Where(id => PassesFilter(doc, id)).Any())
+      if (added.Any(id => PassesFilter(doc, id)))
         return true;
 
       // If selected items are modified we need to expire dependant components
@@ -192,7 +192,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       if (SourceCount == 0)
       {
         // If an element that pass the filter is added we need to update ListItems
-        var updateListItems = added.Where(id => PassesFilter(doc, id)).Any();
+        var updateListItems = added.Any(id => PassesFilter(doc, id));
 
         if (!updateListItems)
         {

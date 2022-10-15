@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.AddIn.Distribution
         if (Properties.AddInOptions.Current.UpdateChannel is string activeChannelId)
         {
           var channelGuid = new Guid(activeChannelId);
-          return Channels.Where(x => x.Id == channelGuid).FirstOrDefault();
+          return Channels.FirstOrDefault(x => x.Id == channelGuid);
         }
 
         return null;

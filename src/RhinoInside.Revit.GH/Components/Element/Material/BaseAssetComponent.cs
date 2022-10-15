@@ -392,7 +392,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
       string schema
     )
     {
-      return app.GetAssets(assetType).Where(x => x.Name == schema).FirstOrDefault();
+      return app.GetAssets(assetType).FirstOrDefault(x => x.Name == schema);
     }
 
     public static List<ARDB.AppearanceAssetElement> QueryAppearanceAssetElements(ARDB.Document doc)

@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
           case ARDB.ImageFileType.JPEGLossless:
           {
             filePath += ".jpg";
-            var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
+            var codec = ImageCodecInfo.GetImageDecoders().FirstOrDefault(x => x.FormatID == ImageFormat.Jpeg.Guid);
             using (var parameters = new EncoderParameters(1))
             {
               parameters.Param[0] = new EncoderParameter(Encoder.Quality, 100);
@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
           case ARDB.ImageFileType.JPEGMedium:
           {
             filePath += ".jpg";
-            var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
+            var codec = ImageCodecInfo.GetImageDecoders().FirstOrDefault(x => x.FormatID == ImageFormat.Jpeg.Guid);
             using (var parameters = new EncoderParameters(1))
             {
               parameters.Param[0] = new EncoderParameter(Encoder.Quality, 50);
@@ -146,7 +146,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
           case ARDB.ImageFileType.JPEGSmallest:
           {
             filePath += ".jpg";
-            var codec = ImageCodecInfo.GetImageDecoders().Where(x => x.FormatID == ImageFormat.Jpeg.Guid).FirstOrDefault();
+            var codec = ImageCodecInfo.GetImageDecoders().FirstOrDefault(x => x.FormatID == ImageFormat.Jpeg.Guid);
             using (var parameters = new EncoderParameters(1))
             {
               parameters.Param[0] = new EncoderParameter(Encoder.Quality, 1);

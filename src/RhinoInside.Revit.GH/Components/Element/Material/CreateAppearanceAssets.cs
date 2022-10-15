@@ -158,7 +158,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
       if (assetElement is null)
       {
         var assets = doc.Application.GetAssets(ARDB.Visual.AssetType.Appearance);
-        var asset = assets.Where(x => x.Name == schema).FirstOrDefault();
+        var asset = assets.FirstOrDefault(x => x.Name == schema);
         assetElement = ARDB.AppearanceAssetElement.Create(doc, name, asset);
       }
 

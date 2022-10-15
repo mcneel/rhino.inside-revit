@@ -742,7 +742,7 @@ namespace RhinoInside.Revit
           var groupName = e.CommandLocalName;
           var pluginId = PlugIn.IdFromName(e.CommandPluginName);
           var plugin = PlugIn.Find(pluginId);
-          var command = plugin?.GetCommands().Where(x => x.Id == e.CommandId).FirstOrDefault();
+          var command = plugin?.GetCommands().FirstOrDefault(x => x.Id == e.CommandId);
           if
           (
             command?.GetType().GetRuntimeProperty("DisplayName") is PropertyInfo info &&
@@ -827,7 +827,7 @@ namespace RhinoInside.Revit
             if (RhinoGet.InGetObject(rhinoDoc) || RhinoGet.InGetPoint(rhinoDoc))
             {
               // If there is no floating viewport visible...
-              if (!rhinoDoc.Views.Where(x => x.Floating).Any())
+              if (!rhinoDoc.Views.Any(x => x.Floating))
               {
                 var cursorPosition = System.Windows.Forms.Cursor.Position;
                 if (OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300) is null)
@@ -897,7 +897,7 @@ namespace RhinoInside.Revit
     {
       if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
       {
-        var openView = rhinoDoc.Views.Where(v => v.MainViewport.Name == RevitViewName).FirstOrDefault();
+        var openView = rhinoDoc.Views.FirstOrDefault(v => v.MainViewport.Name == RevitViewName);
         if (openView is null)
         {
           if

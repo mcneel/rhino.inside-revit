@@ -581,7 +581,7 @@ namespace RhinoInside.Revit.AddIn.Commands
             using (var collector = new ARDB.FilteredElementCollector(doc))
             {
               var elementCollector = collector.OfClass(typeof(ARDB.View3D));
-              view3D = elementCollector.Cast<ARDB.View3D>().Where(x => x.Name == "{3D}").FirstOrDefault();
+              view3D = elementCollector.Cast<ARDB.View3D>().FirstOrDefault(x => x.Name == "{3D}");
             }
 
             if (view3D is object)
