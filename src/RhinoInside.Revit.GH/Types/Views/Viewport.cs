@@ -44,31 +44,19 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.Viewport viewport && viewport.SheetId != ARDB.ElementId.InvalidElementId)
         {
+          var boxCenter = viewport.GetBoxCenter().ToPoint3d();
+          boxCenter.Z = 0.0;
+
           switch (viewport.Rotation)
           {
             case ARDB.ViewportRotation.None:
-              return new Plane
-              (
-                viewport.GetBoxCenter().ToPoint3d(),
-                Vector3d.XAxis,
-                Vector3d.YAxis
-              );
+              return new Plane(boxCenter, Vector3d.XAxis, Vector3d.YAxis);
 
             case ARDB.ViewportRotation.Clockwise:
-              return new Plane
-              (
-                viewport.GetBoxCenter().ToPoint3d(),
-                -Vector3d.YAxis,
-                Vector3d.XAxis
-              );
+              return new Plane(boxCenter, -Vector3d.YAxis, Vector3d.XAxis);
 
             case ARDB.ViewportRotation.Counterclockwise:
-              return new Plane
-              (
-                viewport.GetBoxCenter().ToPoint3d(),
-                Vector3d.YAxis,
-                -Vector3d.XAxis
-              );
+              return new Plane(boxCenter, Vector3d.YAxis, -Vector3d.XAxis);
           }
         }
 
