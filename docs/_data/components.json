@@ -828,6 +828,18 @@
     "uuid": "f3c35fb2-b43b-4d80-9f9c-aee26acc7649"
   }, 
   {
+    "desc": "Contains a collection of Revit drafting views", 
+    "iconsrc": null, 
+    "icontag": "V", 
+    "panel": "Revit", 
+    "since": "1.10", 
+    "tab": "Params", 
+    "title": "Drafting View", 
+    "typename": "ViewDrafting", 
+    "until": null, 
+    "uuid": "50979e85-0735-4fb2-9f4b-4acb72f49344"
+  }, 
+  {
     "desc": "Contains a collection of Revit floor plan views", 
     "iconsrc": "/static/images/GH/FloorPlan.png", 
     "icontag": null, 
@@ -946,6 +958,18 @@
     "typename": "BuiltInCategories", 
     "until": null, 
     "uuid": "af9d949f-1692-45aa-9fe4-653cff5eca26"
+  }, 
+  {
+    "desc": "Provides a picker for built-in failure definitions", 
+    "iconsrc": "/static/images/GH/BuiltInFailureDefinitions.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "since": "1.10", 
+    "tab": "Revit", 
+    "title": "Built-In Failure Definitions", 
+    "typename": "BuiltInFailureDefinitions", 
+    "until": null, 
+    "uuid": "73e14fbb-24ea-44fe-85ed-5d028154029b"
   }, 
   {
     "desc": "Provides a picker for built-in parameters", 
@@ -1428,6 +1452,18 @@
     "uuid": "87e0ca19-088e-4a94-9770-180abc7049ad"
   }, 
   {
+    "desc": "Given its Location, it adds a structural foundation element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddStructuralFoundation.png", 
+    "icontag": null, 
+    "panel": "Build", 
+    "since": "1.9", 
+    "tab": "Revit", 
+    "title": "Add Structural Foundation", 
+    "typename": "AddStructuralFoundation", 
+    "until": null, 
+    "uuid": "c1c7cdbb-ee50-40fc-a398-e01465ec65eb"
+  }, 
+  {
     "desc": "Given its Axis, it adds a structural column element to the active Revit document", 
     "iconsrc": "/static/images/GH/AddStructuralColumn.png", 
     "icontag": null, 
@@ -1488,7 +1524,7 @@
     "uuid": "aa467c94-d400-4f4a-80bf-defb309a4c52"
   }, 
   {
-    "desc": "Element Workset properties Get-Set accessor to element workset information", 
+    "desc": "Element Workset properties Get-Set access component to element workset information", 
     "iconsrc": "/static/images/GH/ElementWorkset.png", 
     "icontag": null, 
     "panel": "Element", 
@@ -1512,7 +1548,19 @@
     "uuid": "f68f96ec-977a-4103-94ee-932b8108193c"
   }, 
   {
-    "desc": "Workset properties Get-Set accessor to workset information", 
+    "desc": "Deletes worksets from Revit document", 
+    "iconsrc": "/static/images/GH/DeleteWorkset.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "since": "1.9", 
+    "tab": "Revit", 
+    "title": "Delete Workset", 
+    "typename": "DeleteWorkset", 
+    "until": null, 
+    "uuid": "bf1b9be9-2d5f-45dc-947b-a8acfa6d6e2d"
+  }, 
+  {
+    "desc": "Workset properties Get-Set access component to workset information", 
     "iconsrc": "/static/images/GH/WorksetIdentity.png", 
     "icontag": null, 
     "panel": "Document", 
@@ -1618,6 +1666,18 @@
     "typename": "AnalyzeInstanceSpace", 
     "until": null, 
     "uuid": "6ac37380-d14f-46bf-835c-611db8c38e3b"
+  }, 
+  {
+    "desc": "Query spatial element identity information", 
+    "iconsrc": "/static/images/GH/SpatialElementIdentity.png", 
+    "icontag": null, 
+    "panel": "Topology", 
+    "since": "1.9", 
+    "tab": "Revit", 
+    "title": "Spatial Element Identity", 
+    "typename": "SpatialElementIdentity", 
+    "until": null, 
+    "uuid": "e3d32938-0e10-4b93-a40d-0781d8842ece"
   }, 
   {
     "desc": "Get document area elements list", 
@@ -1872,7 +1932,7 @@
     "uuid": "134b7171-84e2-4900-b0c9-1d3e40f9b679"
   }, 
   {
-    "desc": "Get-Set accessor to global parameter values", 
+    "desc": "Get-Set access component to global parameter values", 
     "iconsrc": "/static/images/GH/GlobalParameter.png", 
     "icontag": null, 
     "panel": "Parameter", 
@@ -1884,7 +1944,7 @@
     "uuid": "32e77d86-0bf5-4766-b5e7-e181044c3820"
   }, 
   {
-    "desc": "Parameter formula property Get-Set accessor to Parameter formula properties", 
+    "desc": "Parameter formula property Get-Set access component to Parameter formula properties", 
     "iconsrc": "/static/images/GH/ParameterFormula.png", 
     "icontag": null, 
     "panel": "Parameter", 
@@ -1954,6 +2014,54 @@
     "typename": "ParameterIdentity", 
     "until": null, 
     "uuid": "a80f4919-2387-4c78-be2b-2f35b2e60298"
+  }, 
+  {
+    "desc": "Gets Revit user information", 
+    "iconsrc": "/static/images/GH/RevitUser.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "since": "1.9", 
+    "tab": "Revit", 
+    "title": "Revit User", 
+    "typename": "RevitUser", 
+    "until": null, 
+    "uuid": "4bfeb1ee-fe14-430a-96ea-eac5cd7a7382"
+  }, 
+  {
+    "desc": "Gets Revit version information", 
+    "iconsrc": "/static/images/GH/RevitVersion.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "since": "1.9", 
+    "tab": "Revit", 
+    "title": "Revit Version", 
+    "typename": "RevitVersion", 
+    "until": null, 
+    "uuid": "ace507e5-2f94-4037-814b-fd9e94b6f87c"
+  }, 
+  {
+    "desc": "Gets Revit tolereance values", 
+    "iconsrc": "/static/images/GH/RevitTolerances.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "since": "1.9", 
+    "tab": "Revit", 
+    "title": "Document Tolerances", 
+    "typename": "RevitTolerances", 
+    "until": null, 
+    "uuid": "825d7ab3-0b45-43a7-9961-d0c6bb3c8e0a"
+  }, 
+  {
+    "desc": "Gets Revit default file locations", 
+    "iconsrc": "/static/images/GH/RevitFileLocations.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "since": "1.9", 
+    "tab": "Revit", 
+    "title": "Default File Locations", 
+    "typename": "RevitFileLocations", 
+    "until": null, 
+    "uuid": "cb3d697e-b227-4f69-8514-9eeb83c5016c"
   }, 
   {
     "desc": "Add a new subcategory to the given category", 
@@ -2028,7 +2136,7 @@
     "uuid": "4915ab87-0bd5-4541-ac43-3fbc450dd883"
   }, 
   {
-    "desc": "Curve Line Style Property Get-Set accessor to Curve Line Style property", 
+    "desc": "Curve Line Style Property Get-Set access component to Curve Line Style property", 
     "iconsrc": "/static/images/GH/CurveLineStyle.png", 
     "icontag": null, 
     "panel": "Object Styles", 
@@ -2074,6 +2182,126 @@
     "typename": "CategoryObjectStyle", 
     "until": null, 
     "uuid": "1dd8ae78-f7da-4f26-8353-4cce6b925dc6"
+  }, 
+  {
+    "desc": "Given a curve, it adds a Model Line to the current Revit document", 
+    "iconsrc": "/static/images/GH/AddModelLine.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Add Model Line", 
+    "typename": "AddModelLine", 
+    "until": null, 
+    "uuid": "240127b1-94ee-47c9-98f8-05de32447b01"
+  }, 
+  {
+    "desc": "Given a Plane, it adds a <not associated> Work Plane element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddWorkPlaneByPlane.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Add Work Plane (Plane)", 
+    "typename": "AddWorkPlaneByPlane", 
+    "until": null, 
+    "uuid": "1fa679e4-1821-483a-99f8-dc166b0595f4"
+  }, 
+  {
+    "desc": "Element Subcategory Property Get-Set access component to Element Subcategory property", 
+    "iconsrc": "/static/images/GH/ElementSubcategory.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.8", 
+    "tab": "Revit", 
+    "title": "Element Subcategory", 
+    "typename": "ElementSubcategory", 
+    "until": null, 
+    "uuid": "495330db-5733-4718-adbb-73c2fb5787a7"
+  }, 
+  {
+    "desc": "Given its location, it reconstructs a Model Group into the active Revit document", 
+    "iconsrc": "/static/images/GH/GroupByLocation.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": null, 
+    "tab": "Revit", 
+    "title": "Add Model Group", 
+    "typename": "GroupByLocation", 
+    "until": null, 
+    "uuid": "df634530-634d-43f8-9c42-73f4a8d62c1e"
+  }, 
+  {
+    "desc": "Given a collection of elements, it adds a Group type to the active Revit document", 
+    "iconsrc": "/static/images/GH/GroupTypeCreate.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Create Group Type", 
+    "typename": "GroupTypeCreate", 
+    "until": null, 
+    "uuid": "39e42448-1c1c-4140-bc37-7399abf82117"
+  }, 
+  {
+    "desc": "Get group members list", 
+    "iconsrc": "/static/images/GH/GroupMembers.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Group Members", 
+    "typename": "GroupMembers", 
+    "until": null, 
+    "uuid": "7c7d3739-7609-4f7f-bab5-1e3648508891"
+  }, 
+  {
+    "desc": "Get document group types list", 
+    "iconsrc": "/static/images/GH/QueryGroupTypes.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": null, 
+    "tab": "Revit", 
+    "title": "Query Group Types", 
+    "typename": "QueryGroupTypes", 
+    "until": null, 
+    "uuid": "97e9c6bb-8442-4f77-bca1-6be8aafbdc96"
+  }, 
+  {
+    "desc": "Given a curve, it adds a Reference Line to the current Revit document", 
+    "iconsrc": "/static/images/GH/AddReferenceLine.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.8", 
+    "tab": "Revit", 
+    "title": "Add Reference Line", 
+    "typename": "AddReferenceLine", 
+    "until": null, 
+    "uuid": "a2adb132-6956-423b-aaa4-315a8e6f234f"
+  }, 
+  {
+    "desc": "Given a plane definition, it adds a Reference Plane to the current Revit document", 
+    "iconsrc": "/static/images/GH/AddReferencePlane.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.8", 
+    "tab": "Revit", 
+    "title": "Add Reference Plane", 
+    "typename": "AddReferencePlane", 
+    "until": null, 
+    "uuid": "4be42ec7-5471-4448-8dd6-6f28f76bcb5f"
+  }, 
+  {
+    "desc": "", 
+    "iconsrc": null, 
+    "icontag": "S", 
+    "panel": "Model", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Deconstruct Sketch", 
+    "typename": "SketchDeconstruct", 
+    "until": null, 
+    "uuid": "f9bc3f5e-7415-485e-b74c-5cb855b818b8"
   }, 
   {
     "desc": "Filter used to match elements if value of a parameter are not equals to Value", 
@@ -2532,127 +2760,7 @@
     "uuid": "f5a32842-b18e-470f-8bd3-bae1373ad982"
   }, 
   {
-    "desc": "", 
-    "iconsrc": null, 
-    "icontag": "S", 
-    "panel": "Model", 
-    "since": "1.0", 
-    "tab": "Revit", 
-    "title": "Deconstruct Sketch", 
-    "typename": "SketchDeconstruct", 
-    "until": null, 
-    "uuid": "f9bc3f5e-7415-485e-b74c-5cb855b818b8"
-  }, 
-  {
-    "desc": "Given a curve, it adds a Model Line to the current Revit document", 
-    "iconsrc": "/static/images/GH/AddModelLine.png", 
-    "icontag": null, 
-    "panel": "Model", 
-    "since": "1.0", 
-    "tab": "Revit", 
-    "title": "Add Model Line", 
-    "typename": "AddModelLine", 
-    "until": null, 
-    "uuid": "240127b1-94ee-47c9-98f8-05de32447b01"
-  }, 
-  {
-    "desc": "Given a Plane, it adds a <not associated> Work Plane element to the active Revit document", 
-    "iconsrc": "/static/images/GH/AddWorkPlaneByPlane.png", 
-    "icontag": null, 
-    "panel": "Model", 
-    "since": "1.0", 
-    "tab": "Revit", 
-    "title": "Add Work Plane (Plane)", 
-    "typename": "AddWorkPlaneByPlane", 
-    "until": null, 
-    "uuid": "1fa679e4-1821-483a-99f8-dc166b0595f4"
-  }, 
-  {
-    "desc": "Element Subcategory Property Get-Set accessor to Element Subcategory property", 
-    "iconsrc": "/static/images/GH/ElementSubcategory.png", 
-    "icontag": null, 
-    "panel": "Model", 
-    "since": "1.8", 
-    "tab": "Revit", 
-    "title": "Element Subcategory", 
-    "typename": "ElementSubcategory", 
-    "until": null, 
-    "uuid": "495330db-5733-4718-adbb-73c2fb5787a7"
-  }, 
-  {
-    "desc": "Given its location, it reconstructs a Model Group into the active Revit document", 
-    "iconsrc": "/static/images/GH/GroupByLocation.png", 
-    "icontag": null, 
-    "panel": "Model", 
-    "since": null, 
-    "tab": "Revit", 
-    "title": "Add Model Group", 
-    "typename": "GroupByLocation", 
-    "until": null, 
-    "uuid": "df634530-634d-43f8-9c42-73f4a8d62c1e"
-  }, 
-  {
-    "desc": "Given a collection of elements, it adds a Group type to the active Revit document", 
-    "iconsrc": "/static/images/GH/GroupTypeCreate.png", 
-    "icontag": null, 
-    "panel": "Model", 
-    "since": "1.0", 
-    "tab": "Revit", 
-    "title": "Create Group Type", 
-    "typename": "GroupTypeCreate", 
-    "until": null, 
-    "uuid": "39e42448-1c1c-4140-bc37-7399abf82117"
-  }, 
-  {
-    "desc": "Get group elements list", 
-    "iconsrc": "/static/images/GH/GroupElements.png", 
-    "icontag": null, 
-    "panel": "Model", 
-    "since": null, 
-    "tab": "Revit", 
-    "title": "Group Elements", 
-    "typename": "GroupElements", 
-    "until": null, 
-    "uuid": "7c7d3739-7609-4f7f-bab5-1e3648508891"
-  }, 
-  {
-    "desc": "Get document group types list", 
-    "iconsrc": "/static/images/GH/QueryGroupTypes.png", 
-    "icontag": null, 
-    "panel": "Model", 
-    "since": null, 
-    "tab": "Revit", 
-    "title": "Query Group Types", 
-    "typename": "QueryGroupTypes", 
-    "until": null, 
-    "uuid": "97e9c6bb-8442-4f77-bca1-6be8aafbdc96"
-  }, 
-  {
-    "desc": "Given a curve, it adds a Reference Line to the current Revit document", 
-    "iconsrc": "/static/images/GH/AddReferenceLine.png", 
-    "icontag": null, 
-    "panel": "Model", 
-    "since": "1.8", 
-    "tab": "Revit", 
-    "title": "Add Reference Line", 
-    "typename": "AddReferenceLine", 
-    "until": null, 
-    "uuid": "a2adb132-6956-423b-aaa4-315a8e6f234f"
-  }, 
-  {
-    "desc": "Given a plane definition, it adds a Reference Plane to the current Revit document", 
-    "iconsrc": "/static/images/GH/AddReferencePlane.png", 
-    "icontag": null, 
-    "panel": "Model", 
-    "since": "1.8", 
-    "tab": "Revit", 
-    "title": "Add Reference Plane", 
-    "typename": "AddReferencePlane", 
-    "until": null, 
-    "uuid": "4be42ec7-5471-4448-8dd6-6f28f76bcb5f"
-  }, 
-  {
-    "desc": "Element Phasing properties Get-Set accessor to element phasing information", 
+    "desc": "Element Phasing properties Get-Set access component to element phasing information", 
     "iconsrc": "/static/images/GH/GraphicalElementPhasing.png", 
     "icontag": null, 
     "panel": "Element", 
@@ -2680,7 +2788,7 @@
     "iconsrc": "/static/images/GH/FamilyInstanceByLocation.png", 
     "icontag": null, 
     "panel": "Build", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Add Component (Location)", 
     "typename": "FamilyInstanceByLocation", 
@@ -2706,7 +2814,7 @@
     "panel": "Family", 
     "since": null, 
     "tab": "Revit", 
-    "title": "Add LoftForm", 
+    "title": "Add Mass Loft", 
     "typename": "FormByCurves", 
     "until": null, 
     "uuid": "42631b6e-505e-4091-981a-e7605ae5a1ff"
@@ -2868,7 +2976,7 @@
     "uuid": "f0887ad5-8acb-4806-bb12-7596bcedffed"
   }, 
   {
-    "desc": "Get-Set accessor to element parameter values", 
+    "desc": "Get-Set access component to element parameter values", 
     "iconsrc": "/static/images/GH/ElementParameter.png", 
     "icontag": null, 
     "panel": "Element", 
@@ -3300,7 +3408,7 @@
     "uuid": "5c99445a-e908-4598-b6f4-f3db4fb84cc1"
   }, 
   {
-    "desc": "Get-Set accessor to line patern dashes, spaces and dots", 
+    "desc": "Get-Set access component to line patern dashes, spaces and dots", 
     "iconsrc": "/static/images/GH/LinePatternDashes.png", 
     "icontag": null, 
     "panel": "Object Styles", 
@@ -3328,7 +3436,7 @@
     "iconsrc": "/static/images/GH/LevelIdentity.png", 
     "icontag": null, 
     "panel": "Model", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Level Identity", 
     "typename": "LevelIdentity", 
@@ -3564,6 +3672,18 @@
     "uuid": "93c18dfd-faab-4cf1-a681-c11754c2495d"
   }, 
   {
+    "desc": "Get-Set access component to material used to paint an Element Face", 
+    "iconsrc": "/static/images/GH/ElementFacePaintMaterial.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "since": "1.10", 
+    "tab": "Revit", 
+    "title": "Element Face Paint", 
+    "typename": "ElementFacePaintMaterial", 
+    "until": null, 
+    "uuid": "2a4a95d5-3dbd-4056-9c76-c51e6411cdb5"
+  }, 
+  {
     "desc": "", 
     "iconsrc": "/static/images/GH/ElementPassport.png", 
     "icontag": null, 
@@ -3648,7 +3768,7 @@
     "uuid": "3e44d6bb-5f49-40e8-a2c4-53e5e3a63ddc"
   }, 
   {
-    "desc": "Element Name Property Get-Set accessor to Element Name property", 
+    "desc": "Element Name Property Get-Set access component to Element Name property", 
     "iconsrc": "/static/images/GH/ElementPropertyName.png", 
     "icontag": null, 
     "panel": "Element", 
@@ -3660,7 +3780,7 @@
     "uuid": "01934ad1-f31b-43e5-add9-c196f4a2467e"
   }, 
   {
-    "desc": "Element Category Property Get-Set accessor to Element Category property", 
+    "desc": "Element Category Property Get-Set access component to Element Category property", 
     "iconsrc": "/static/images/GH/ElementPropertyCategory.png", 
     "icontag": null, 
     "panel": "Element", 
@@ -3672,7 +3792,7 @@
     "uuid": "5ac48de6-f706-4e88-a4ad-7a4439f1dab5"
   }, 
   {
-    "desc": "Element Type Property Get-Set accessor to Element Type property", 
+    "desc": "Element Type Property Get-Set access component to Element Type property", 
     "iconsrc": "/static/images/GH/ElementPropertyType.png", 
     "icontag": null, 
     "panel": "Element", 
@@ -3828,6 +3948,18 @@
     "uuid": "33ead71b-647b-4783-b0ce-c840cd50c15d"
   }, 
   {
+    "desc": "Get-Set access component for assembly origin", 
+    "iconsrc": "/static/images/GH/AssemblyOrigin.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.9", 
+    "tab": "Revit", 
+    "title": "Assembly Origin", 
+    "typename": "AssemblyOrigin", 
+    "until": null, 
+    "uuid": "1c1cc766-d782-4c4a-8b2e-fe8508e4a623"
+  }, 
+  {
     "desc": "Disassemble given assembly and release the members", 
     "iconsrc": "/static/images/GH/DisassembleAssembly.png", 
     "icontag": null, 
@@ -3910,6 +4042,18 @@
     "typename": "OpeningBoundaryProfile", 
     "until": null, 
     "uuid": "e76b0f6b-4ee1-413d-825d-4a8edd86d55f"
+  }, 
+  {
+    "desc": "Manipulates points and edges on a slab, roof or floor", 
+    "iconsrc": "/static/images/GH/SlabShape.png", 
+    "icontag": null, 
+    "panel": "Host", 
+    "since": "1.9", 
+    "tab": "Revit", 
+    "title": "Host Sub Elements", 
+    "typename": "SlabShape", 
+    "until": null, 
+    "uuid": "516b2771-0a9a-4f87-9db1-e27fe0fa968b"
   }, 
   {
     "desc": "Analyze given Basic Wall type", 
@@ -4216,7 +4360,7 @@
     "iconsrc": "/static/images/GH/HostObjectBoundaryProfile.png", 
     "icontag": null, 
     "panel": "Host", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Host Boundary Profile", 
     "typename": "HostObjectBoundaryProfile", 
@@ -4404,6 +4548,18 @@
     "uuid": "ee033516-c1dc-4c72-8fcd-f85f38a0f267"
   }, 
   {
+    "desc": "Gets a list of failure messages generated from persistent (reviewable) warnings accumulated in the document", 
+    "iconsrc": "/static/images/GH/DocumentWarnings.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "since": "1.10", 
+    "tab": "Revit", 
+    "title": "Document Warnings", 
+    "typename": "DocumentWarnings", 
+    "until": null, 
+    "uuid": "3917adb2-706e-49a2-a3af-6b5f610c4b78"
+  }, 
+  {
     "desc": "Basic information about a document identity", 
     "iconsrc": "/static/images/GH/DocumentIdentity.png", 
     "icontag": null, 
@@ -4416,7 +4572,7 @@
     "uuid": "94bd655c-77dd-4a88-bddb-b9456c45f06c"
   }, 
   {
-    "desc": "Basic information about a document file", 
+    "desc": "Basic information about a document local file", 
     "iconsrc": "/static/images/GH/DocumentFile.png", 
     "icontag": null, 
     "panel": "Document", 
@@ -4432,7 +4588,7 @@
     "iconsrc": "/static/images/GH/DocumentWorksharing.png", 
     "icontag": null, 
     "panel": "Document", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Document Worksharing", 
     "typename": "DocumentWorksharing", 
@@ -4440,13 +4596,13 @@
     "uuid": "f7d56db0-f1c1-45bb-aa07-196039fff862"
   }, 
   {
-    "desc": "Cloud information about a document", 
+    "desc": "Document server information", 
     "iconsrc": "/static/images/GH/DocumentCloud.png", 
     "icontag": null, 
     "panel": "Document", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
-    "title": "Document Cloud", 
+    "title": "Document Server", 
     "typename": "DocumentCloud", 
     "until": null, 
     "uuid": "2577a55b-a198-4760-9183-adf8193fb5bd"
@@ -4548,6 +4704,30 @@
     "uuid": "7ccf350c-80cc-42d0-85ba-78544fd59f4a"
   }, 
   {
+    "desc": "Add a dependent Revit View", 
+    "iconsrc": "/static/images/GH/AddDependentView.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.7", 
+    "tab": "Revit", 
+    "title": "Add Dependent View", 
+    "typename": "AddDependentView", 
+    "until": null, 
+    "uuid": "36842b86-7c55-42cb-ad8f-28ca779495d0"
+  }, 
+  {
+    "desc": "Given a name, it adds a drafting view to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddDraftingView.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.10", 
+    "tab": "Revit", 
+    "title": "Add Drafting View", 
+    "typename": "AddDraftingView", 
+    "until": null, 
+    "uuid": "c62d18a8-93c5-406f-8c13-778d50a16b8d"
+  }, 
+  {
     "desc": "Given a level, it adds a floor plan to the active Revit document", 
     "iconsrc": "/static/images/GH/AddFloorPlan.png", 
     "icontag": null, 
@@ -4594,6 +4774,18 @@
     "typename": "ClusterViewsByType", 
     "until": null, 
     "uuid": "f6b99fe2-19e1-4840-96c1-13873a0aece8"
+  }, 
+  {
+    "desc": "Gets the default 3D view", 
+    "iconsrc": "/static/images/GH/Default3DView.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Default 3D View", 
+    "typename": "Default3DView", 
+    "until": null, 
+    "uuid": "f2277265-8845-403b-83a9-ef670fa036c8"
   }, 
   {
     "desc": "Exports a view into a raster image file", 
@@ -4666,18 +4858,6 @@
     "typename": "View3DByPlane", 
     "until": null, 
     "uuid": "f7b775c9-05e0-40f7-85e9-5cc2ef79731e"
-  }, 
-  {
-    "desc": "Add a dependent Revit View", 
-    "iconsrc": "/static/images/GH/AddDependentView.png", 
-    "icontag": null, 
-    "panel": "View", 
-    "since": "1.7", 
-    "tab": "Revit", 
-    "title": "Add Dependent View", 
-    "typename": "AddDependentView", 
-    "until": null, 
-    "uuid": "36842b86-7c55-42cb-ad8f-28ca779495d0"
   }, 
   {
     "desc": "Given an arc, it adds an angular dimension to the given View", 
