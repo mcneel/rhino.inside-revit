@@ -10,17 +10,19 @@ group: Deployment & Configs
 
 ### WIP
 
+### RC 
+
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.10 RC1" version="v1.10.8326.27328" pre_release=true time="10/18/2022" %}
+
 - Added context menu to 'Project Location' component.
 - Now `Types.BasePoint` bake as a named construction-plane.
 - Added 'Add Drafting View' component.
 - Added 'Element Face Paint' component.
 - Added 'Document Warnings' component.
 - Added 'Built-In Failure Definitions' picker.
-
-### RC 
-
-{% endcapture %}
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 {% include ltr/release-header.html title="v1.9" version="v1.9.8326.25768" time="10/18/2022" %}
 
