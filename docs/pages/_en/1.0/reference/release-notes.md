@@ -12,16 +12,31 @@ group: Deployment & Configs
 
 ### RC 
 
-- Fix on 'Add Parameter' when definition parameter group is not a built-in one.
-- Renamed 'Add LoftForm' component to 'Add Mass Loft'.
-- Improved 'View Extents' component, not it returns a more accurate 'Depth'.
-- Added 'Computation Height' to 'Level Identity' component.
-- Fix for `Viewport.Location`.
-- Implemented casting from Viewport to ViewSheet and View.
-- Fix on Brep.TryGetExtrusion extension method.
-
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.9" version="v1.9.8326.25768" time="10/18/2022" %}
+
+- Includes all changes under 1.9RC releases listed below
+- New {% include ltr/comp.html uuid='1c1cc766' %}
+- New {% include ltr/comp.html uuid='516b2771' %}
+- New {% include ltr/comp.html uuid='e3d32938' %}
+- New {% include ltr/comp.html uuid='cb3d697e' %}
+- New {% include ltr/comp.html uuid='825d7ab3' %}
+- New {% include ltr/comp.html uuid='4bfeb1ee' %}
+- New {% include ltr/comp.html uuid='ace507e5' %}
+- New {% include ltr/comp.html uuid='bf1b9be9' %}
+- New {% include ltr/comp.html uuid='c62d18a8' %}
+- New {% include ltr/comp.html uuid='f2277265' %}
+- New {% include ltr/comp.html uuid='3917adb2' %}
+- New {% include ltr/comp.html uuid='2a4a95d5' %}
+- Fix on {% include ltr/comp.html uuid='84ab6f3c' %} when definition parameter group is not a built-in one.
+- Renamed 'Add LoftForm' component to {% include ltr/comp.html uuid='42631b6e' %}.
+- Improved {% include ltr/comp.html uuid='d4593785' %} component, not it returns a more accurate 'Depth'.
+- Added 'Computation Height' to {% include ltr/comp.html uuid='e996b34d' %} component.
+- Fix for `Viewport.Location`.
+- Implemented casting from `Viewport` to `ViewSheet` and `View`.
+- Fix on Brep.TryGetExtrusion extension method.
 
 {% include ltr/release-header.html title="v1.9 RC5" version="v1.9.8319.16206" pre_release=true time="10/11/2022" %}
 
