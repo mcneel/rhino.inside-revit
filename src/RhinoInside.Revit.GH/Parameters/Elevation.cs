@@ -1,6 +1,8 @@
 using System;
+using System.Drawing;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
@@ -215,7 +217,7 @@ namespace RhinoInside.Revit.External.DB
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class ProjectElevation : GH_Goo<External.DB.ElevationElementReference>
+  public class ProjectElevation : GH_Goo<External.DB.ElevationElementReference>, IGH_QuickCast
   {
     public ProjectElevation() { }
     public ProjectElevation(External.DB.ElevationElementReference height) :
@@ -272,6 +274,8 @@ namespace RhinoInside.Revit.GH.Types
       return string.Empty;
     }
 
+    private double Elevation => GeometryDecoder.ToModelLength(Value.Elevation);
+
     public override bool CastTo<Q>(ref Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(External.DB.ElevationElementReference)))
@@ -282,13 +286,13 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
       {
-        target = (Q) (object) new GH_Number(GeometryDecoder.ToModelLength(Value.Elevation));
+        target = (Q) (object) new GH_Number(Elevation);
         return true;
       }
 
       if (typeof(Q).IsAssignableFrom(typeof(double)))
       {
-        target = (Q) (object) GeometryDecoder.ToModelLength(Value.Elevation);
+        target = (Q) (object) Elevation;
         return true;
       }
 
@@ -310,6 +314,54 @@ namespace RhinoInside.Revit.GH.Types
 
       return base.CastFrom(source);
     }
+
+    #region IGH_QuickCast
+    GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
+
+    double IGH_QuickCast.QC_Distance(IGH_QuickCast other)
+    {
+      switch (other.QC_Type)
+      {
+        case GH_QuickCastType.@bool:  return Math.Abs((other.QC_Bool() ? 1.0 : 0.0) - Elevation);
+        case GH_QuickCastType.@int:   return Math.Abs(other.QC_Int() - Elevation);
+        case GH_QuickCastType.num:    return Math.Abs(other.QC_Num() - Elevation);
+        case GH_QuickCastType.text:   return other.QC_Distance(new GH_String(((IGH_QuickCast) this).QC_Text()));
+        default: throw new InvalidOperationException($"{nameof(ProjectElevation)}.QC_Distance cannot be called with a parameter of type {other.GetType().FullName}");
+      }
+    }
+
+    int IGH_QuickCast.QC_Hash() => Math.Round(Elevation, 9).GetHashCode();
+
+    bool IGH_QuickCast.QC_Bool() => Elevation != 0.0; 
+
+    int IGH_QuickCast.QC_Int() => System.Convert.ToInt32(Math.Round(Elevation, MidpointRounding.AwayFromZero));
+
+    double IGH_QuickCast.QC_Num() => Elevation;
+
+    string IGH_QuickCast.QC_Text() => Elevation.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
+
+    Color IGH_QuickCast.QC_Col()
+    {
+      var c = System.Convert.ToInt32(Math.Min(Math.Max(Elevation, 0.0), 1.0) * 255);
+      return Color.FromArgb(c, c, c);
+    }
+
+    Point3d IGH_QuickCast.QC_Pt() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Point3d");
+    Vector3d IGH_QuickCast.QC_Vec() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Vector3d");
+    Complex IGH_QuickCast.QC_Complex() => new Complex(Elevation);
+    Matrix IGH_QuickCast.QC_Matrix() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Matrix");
+    Interval IGH_QuickCast.QC_Interval() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Interval");
+
+    int IGH_QuickCast.QC_CompareTo(IGH_QuickCast other)
+    {
+      if (GH_QuickCastType.num != other.QC_Type) return other.QC_Type.CompareTo(GH_QuickCastType.num);
+
+      var num = other.QC_Num();
+      if(Math.Abs(num - Elevation) < 0.000000001) return 0;
+
+      return Elevation.CompareTo(num);
+    }
+    #endregion
   }
 }
 
