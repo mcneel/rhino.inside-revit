@@ -7,7 +7,6 @@ using Rhino.DocObjects;
 using Rhino.Display;
 using Rhino.Geometry;
 using Grasshopper.Kernel.Types;
-using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -161,9 +160,23 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var outline = GetOutline(ActiveSpace.ModelSpace);
+        var location = Location;
+        if (Value is ARDB.ViewPlan plan)
+        {
+          using (var viewRange = plan.GetViewRange())
+          {
+            var z = GeometryDecoder.ToModelLength
+            (
+              (plan.Document.GetElement(viewRange.GetLevelId(ARDB.PlanViewPlane.CutPlane)) as ARDB.Level).ProjectElevation +
+              viewRange.GetOffset(ARDB.PlanViewPlane.CutPlane)
+            );
+            location.Origin = new Point3d(location.Origin.X, location.Origin.Y, z);
+          }
+        }
+
         if (outline.IsValid) return new PlaneSurface
         (
-          plane: Location,
+          plane: location,
           xExtents: new Interval(outline.U0, outline.U1),
           yExtents: new Interval(outline.V0, outline.V1)
         );
