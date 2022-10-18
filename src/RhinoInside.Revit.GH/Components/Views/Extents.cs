@@ -7,6 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
+  using External.DB;
+  using Convert.DocObjects;
+
   [ComponentVersion(introduced: "1.7")]
   public class ViewExtents : TransactionalChainComponent
   {
@@ -95,14 +98,14 @@ namespace RhinoInside.Revit.GH.Components.Views
       (
         name: "Crop Extents",
         nickname: "CE",
-        description:  "Crop extents in View near-plane coordinate system.",
+        description:  "Crop extents in View-Location coordinate system.",
         relevance: ParamRelevance.Primary
       ),
       ParamDefinition.Create<Param_Interval>
       (
         name: "Depth",
         nickname: "D",
-        description:  "View depth in View near-plane coordinate system",
+        description:  "View depth in View-Location coordinate system",
         relevance: ParamRelevance.Secondary
       )
     };
@@ -124,7 +127,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         StartTransaction(view.Document);
         view.Value.CropBoxVisible = cropRegionVisible.Value;
       }
-      Params.TrySetData(DA, "Crop Region Visible", () => view.Value.CropBoxVisible);      
+      Params.TrySetData(DA, "Crop Region Visible", () => view.Value.CropBoxVisible);
 
       if (Params.GetData(DA, "Crop Extents", out GH_Interval2D cropExtents))
       {
@@ -148,6 +151,15 @@ namespace RhinoInside.Revit.GH.Components.Views
       Params.TrySetData(DA, "Crop Extents", () =>
       {
         var cropBox = view.Value.CropBox;
+        if (!view.Value.CropBoxActive)
+        {
+          using (view.Document.RollBackScope())
+          {
+            view.Value.CropBoxActive = true;
+            cropBox = view.Value.CropBox;
+          }
+        }
+
         var u = new Interval(cropBox.Min.X * Revit.ModelUnits, cropBox.Max.X * Revit.ModelUnits);
         var v = new Interval(cropBox.Min.Y * Revit.ModelUnits, cropBox.Max.Y * Revit.ModelUnits);
         return new GH_Interval2D(new UVInterval(u, v));
@@ -199,6 +211,51 @@ namespace RhinoInside.Revit.GH.Components.Views
       Params.TrySetData(DA, "Depth", () =>
       {
         var cropBox = view.Value.CropBox;
+
+        if (!view.Value.CropBoxActive)
+        {
+          using (view.Document.RollBackScope())
+          {
+            view.Value.CropBoxActive = true;
+            cropBox = view.Value.CropBox;
+          }
+        }
+
+        switch (view.Value)
+        {
+          case ARDB.View3D view3D:
+            if (view3D.TryGetViewportInfo(false, out var info))
+              cropBox.Min = new ARDB.XYZ(cropBox.Min.X, cropBox.Min.Y, -info.FrustumFar / Revit.ModelUnits);
+            else if (view3D.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR)?.AsInteger() == 0)
+              cropBox.Min = new ARDB.XYZ(cropBox.Min.X, cropBox.Min.Y, -15_000.0);
+
+            break;
+
+          case ARDB.ViewPlan viewPlan:
+            using (var viewRange = viewPlan.GetViewRange())
+            {
+              var bottomLevelId = viewRange.GetLevelId(ARDB.PlanViewPlane.ViewDepthPlane);
+              var bottomXYZ     = view.Document.GetElement(bottomLevelId) is ARDB.Level bottomLevel ? (bottomLevel.Elevation + viewRange.GetOffset(ARDB.PlanViewPlane.ViewDepthPlane)) : cropBox.Min.Z;
+              var topLevelId    = viewRange.GetLevelId(ARDB.PlanViewPlane.TopClipPlane);
+              var topXYZ        = view.Document.GetElement(topLevelId) is ARDB.Level topLevel ? (topLevel.Elevation + viewRange.GetOffset(ARDB.PlanViewPlane.TopClipPlane)) : cropBox.Max.Z;
+
+              cropBox.Min = new ARDB.XYZ(cropBox.Min.X, cropBox.Min.Y, bottomXYZ);
+              cropBox.Max = new ARDB.XYZ(cropBox.Max.X, cropBox.Max.Y, topXYZ);
+            }
+            break;
+
+          case ARDB.ViewSection viewSection:
+            if (viewSection.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING)?.AsInteger() == 0)
+              cropBox.Min = new ARDB.XYZ(cropBox.Min.X, cropBox.Min.Y, -15_000.0);
+
+            break;
+
+          case ARDB.ViewSheet viewSheet:
+            cropBox.Min = new ARDB.XYZ(cropBox.Min.X, cropBox.Min.Y, 0.0);
+            cropBox.Max = new ARDB.XYZ(cropBox.Max.X, cropBox.Max.Y, 0.0);
+            break;
+        }
+
         var interval = new Interval(cropBox.Min.Z * Revit.ModelUnits, cropBox.Max.Z * Revit.ModelUnits);
         return new GH_Interval(interval);
       });
