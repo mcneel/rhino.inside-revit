@@ -333,7 +333,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Element element)
         {
           var plane = Location;
-          if (!Location.IsValid)
+          if (!plane.IsValid)
             return element.GetBoundingBoxXYZ().ToBox();
 
           var bbox = GetBoundingBox(Transform.ChangeBasis(Plane.WorldXY, plane));
