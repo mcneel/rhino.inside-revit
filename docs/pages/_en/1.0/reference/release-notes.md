@@ -14,6 +14,11 @@ group: Deployment & Configs
 
 - Fix on 'Add Parameter' when definition parameter group is not a built-in one.
 - Renamed 'Add LoftForm' component to 'Add Mass Loft'.
+- Improved 'View Extents' component, not it returns a more accurate 'Depth'.
+- Added 'Computation Height' to 'Level Identity' component.
+- Fix for `Viewport.Location`.
+- Implemented casting from Viewport to ViewSheet and View.
+- Fix on Brep.TryGetExtrusion extension method.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
