@@ -1068,86 +1068,39 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_QuickCast
-    GH_QuickCastType IGH_QuickCast.QC_Type
+    GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
+    int IGH_QuickCast.QC_Hash() => (Value.AsGoo() as IGH_QuickCast)?.QC_Hash() ?? 0;
+    double IGH_QuickCast.QC_Distance(IGH_QuickCast other) => (Value.AsGoo() as IGH_QuickCast)?.QC_Distance(other) ?? double.NaN;
+
+    bool IGH_QuickCast.QC_Bool() => (Value.AsGoo() as IGH_QuickCast)?.QC_Bool() ??
+      throw new InvalidCastException($"'{DisplayName}' cannot be cast to {nameof(System.Double)}");
+    int IGH_QuickCast.QC_Int() => (Value.AsGoo() as IGH_QuickCast)?.QC_Int() ??
+      throw new InvalidCastException($"'{DisplayName}' cannot be cast to {nameof(System.Int32)}");
+    double IGH_QuickCast.QC_Num() => (Value.AsGoo() as IGH_QuickCast)?.QC_Num() ??
+      throw new InvalidCastException($"'{DisplayName}' cannot be cast to {nameof(System.Double)}");
+
+    string IGH_QuickCast.QC_Text()
     {
-      get
-      {
-        //return GH_QuickCastType.text;
-        switch (Value.ToConvertible())
-        {
-          default:
-          case bool     _: return GH_QuickCastType.@bool;
-          case char     _: return GH_QuickCastType.@int;
-          case sbyte    _: return GH_QuickCastType.@int;
-          case byte     _: return GH_QuickCastType.@int;
-          case short    _: return GH_QuickCastType.@int;
-          case ushort   _: return GH_QuickCastType.@int;
-          case int      _: return GH_QuickCastType.@int;
-          case uint     _: return GH_QuickCastType.@int;
-          case long     _: return GH_QuickCastType.@int;
-          case ulong    _: return GH_QuickCastType.@int;
-          case float    _: return GH_QuickCastType.num;
-          case double   _: return GH_QuickCastType.num;
-          case decimal  _: return GH_QuickCastType.num;
-          case DateTime _: return GH_QuickCastType.num;
-          case string   _: return GH_QuickCastType.text;
-        }
-      }
+      var value = Value.AsGoo();
+      return value is GH_Number number ?
+        number.Value.ToString("G17", System.Globalization.CultureInfo.InvariantCulture) :
+        (value as IGH_QuickCast)?.QC_Text() ??
+        throw new InvalidCastException($"'{DisplayName}' cannot be cast to {nameof(System.String)}");
     }
-
-    double IGH_QuickCast.QC_Distance(IGH_QuickCast other)
-    {
-      var quickCast = Value.AsGoo() as IGH_QuickCast;
-      var quickType = quickCast?.QC_Type ?? (GH_QuickCastType) (-1);
-
-      switch (quickType)
-      {
-        case GH_QuickCastType.@bool:    return Math.Abs((quickCast.QC_Bool() ? 0.0 : 1.0) - (other.QC_Bool() ? 0.0 : 1.0));
-        case GH_QuickCastType.@int:     return Math.Abs(((double) quickCast.QC_Int()) - ((double) other.QC_Int()));
-        case GH_QuickCastType.num:      return Math.Abs(((double) quickCast.QC_Num()) - ((double) other.QC_Num()));
-        case GH_QuickCastType.text:
-          var thisText = quickCast.QC_Text(); var otherText = other.QC_Text();
-          var dist0 = Grasshopper.Kernel.GH_StringMatcher.LevenshteinDistance(thisText, otherText);
-          var dist1 = Grasshopper.Kernel.GH_StringMatcher.LevenshteinDistance(thisText.ToUpperInvariant(), otherText.ToUpperInvariant());
-          return 0.5 * (dist0 + dist1);
-        case GH_QuickCastType.col:
-          var thisCol = quickCast.QC_Col(); var otherCol = other.QC_Col();
-          var colorRGBA = new Rhino.Geometry.Point4d(thisCol.R - otherCol.R, thisCol.G - otherCol.G, thisCol.B - otherCol.B, thisCol.A - otherCol.A);
-          colorRGBA *= 1.0 / 255.0;
-          return Math.Sqrt(colorRGBA.X * colorRGBA.X + colorRGBA.Y * colorRGBA.Y + colorRGBA.Z * colorRGBA.Z + colorRGBA.W * colorRGBA.W);
-        case GH_QuickCastType.pt:       return quickCast.QC_Pt().DistanceTo(other.QC_Pt());
-        case GH_QuickCastType.vec:      return ((Rhino.Geometry.Point3d) quickCast.QC_Vec()).DistanceTo((Rhino.Geometry.Point3d) other.QC_Vec());
-        case GH_QuickCastType.complex:  throw new InvalidOperationException();
-        case GH_QuickCastType.interval: throw new InvalidOperationException();
-        case GH_QuickCastType.matrix:   throw new InvalidOperationException();
-        default:                        throw new InvalidOperationException();
-      }
-    }
-
-    int IGH_QuickCast.QC_Hash() => Value.ToConvertible()?.GetHashCode() ?? 0;
-    bool IGH_QuickCast.QC_Bool() => System.Convert.ToBoolean(Value.ToConvertible());
-    int IGH_QuickCast.QC_Int() => System.Convert.ToInt32(Value.ToConvertible());
-    double IGH_QuickCast.QC_Num() => System.Convert.ToDouble(Value.ToConvertible());
-    string IGH_QuickCast.QC_Text() => System.Convert.ToString(Value.ToConvertible());
-    System.Drawing.Color IGH_QuickCast.QC_Col() => System.Drawing.Color.FromArgb(System.Convert.ToInt32(Value.ToConvertible()));
+    System.Drawing.Color IGH_QuickCast.QC_Col() => (Value.AsGoo() as IGH_QuickCast)?.QC_Col() ??
+      throw new InvalidCastException($"'{DisplayName}' cannot be cast to {nameof(System.Drawing.Color)}");
     Rhino.Geometry.Point3d IGH_QuickCast.QC_Pt() => (Value.AsGoo() as IGH_QuickCast)?.QC_Pt() ??
-      throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Rhino.Geometry.Point3d)}");
+      throw new InvalidCastException($"'{DisplayName}' cannot be cast to {nameof(Rhino.Geometry.Point3d)}");
     Rhino.Geometry.Vector3d IGH_QuickCast.QC_Vec() => (Value.AsGoo() as IGH_QuickCast)?.QC_Vec() ??
-      throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Rhino.Geometry.Vector3d)}");
+      throw new InvalidCastException($"'{DisplayName}' cannot be cast to {nameof(Rhino.Geometry.Vector3d)}");
     Complex IGH_QuickCast.QC_Complex() => (Value.AsGoo() as IGH_QuickCast)?.QC_Complex() ??
-      throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Complex)}");
+      throw new InvalidCastException($"'{DisplayName}' cannot be cast to {nameof(Complex)}");
     Rhino.Geometry.Matrix IGH_QuickCast.QC_Matrix() => (Value.AsGoo() as IGH_QuickCast)?.QC_Matrix() ??
-      throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Rhino.Geometry.Matrix)}");
+      throw new InvalidCastException($"'{DisplayName}' cannot be cast to {nameof(Rhino.Geometry.Matrix)}");
     Rhino.Geometry.Interval IGH_QuickCast.QC_Interval() => (Value.AsGoo() as IGH_QuickCast)?.QC_Interval() ??
-      throw new InvalidCastException($"{GetType().Name} cannot be cast to {nameof(Rhino.Geometry.Interval)}");
-    int IGH_QuickCast.QC_CompareTo(IGH_QuickCast other)
-    {
-      var quickCast = Value.AsGoo() as IGH_QuickCast;
-      var quickType = quickCast?.QC_Type ?? (GH_QuickCastType) (-1);
-
-      if (quickType != other.QC_Type) quickType.CompareTo(other.QC_Type);
-      return quickCast.QC_CompareTo(other);
-    }
+      throw new InvalidCastException($"'{DisplayName}' cannot be cast to {nameof(Rhino.Geometry.Interval)}");
+    int IGH_QuickCast.QC_CompareTo(IGH_QuickCast other) => (Value.AsGoo() as IGH_QuickCast)?.QC_CompareTo(other) ??
+      throw new InvalidCastException($"'{DisplayName}' cannot be compared");
     #endregion
 
     #region IConvertible
