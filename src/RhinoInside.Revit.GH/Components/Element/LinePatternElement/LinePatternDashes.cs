@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
     (
       name: "Line Pattern Dashes",
       nickname: "Dashes",
-      description: "Get-Set accessor to line patern dashes, spaces and dots.",
+      description: "Get-Set access component to line patern dashes, spaces and dots.",
       category: "Revit",
       subCategory: "Object Styles"
     )

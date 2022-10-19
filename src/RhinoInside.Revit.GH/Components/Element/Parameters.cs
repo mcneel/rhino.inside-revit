@@ -349,7 +349,7 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
     (
       name: "Element Parameter",
       nickname: "Param",
-      description: "Get-Set accessor to element parameter values",
+      description: "Get-Set access component to element parameter values",
       category: "Revit",
       subCategory: "Element"
     )

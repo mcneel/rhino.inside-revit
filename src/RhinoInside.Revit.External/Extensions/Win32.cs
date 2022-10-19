@@ -292,6 +292,7 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
 
   using HMODULE   = LibraryHandle;
   using HINSTANCE = LibraryHandle;
+  using HDC       = IntPtr;
   using HWND      = WindowHandle;
   using HHOOK     = SafeHookHandle;
   using HMENU     = IntPtr;
@@ -451,6 +452,14 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     internal static extern bool FlashWindowEx(ref FLASHWINFO pwfi);
     #endregion
 
+    #region GDI
+    [DllImport(USER32)]
+    public static extern HDC GetDC(HWND hWnd);
+
+    [DllImport(USER32)]
+    public static extern int ReleaseDC(HWND hWnd, HDC hDC);
+    #endregion
+
     #region Hooks API
     public enum HookType : int
     {
@@ -498,10 +507,12 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
   {
     internal const string GDI32 = "GDI32";
 
-    [DllImport(GDI32, EntryPoint = "DeleteObject")]
+    [DllImport(GDI32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool DeleteObject([In] IntPtr hObject);
 
+    [DllImport(GDI32)]
+    public static extern int GetDeviceCaps(HDC hdc, int index);
   }
 
   [SuppressUnmanagedCodeSecurity]

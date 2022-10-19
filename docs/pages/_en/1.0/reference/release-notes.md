@@ -15,6 +15,15 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.10 RC1" version="v1.10.8326.27328" pre_release=true time="10/18/2022" %}
+
+- Added context menu to 'Project Location' component.
+- Now `Types.BasePoint` bake as a named construction-plane.
+- New {% include ltr/comp.html uuid='2a4a95d5' %}
+- New {% include ltr/comp.html uuid='3917adb2' %}
+- New {% include ltr/comp.html uuid='c62d18a8' %}
+- Added 'Built-In Failure Definitions' picker.
+
 {% include ltr/release-header.html title="v1.9" version="v1.9.8326.25768" time="10/18/2022" %}
 
 - Includes all changes under 1.9RC releases listed below
@@ -26,10 +35,7 @@ group: Deployment & Configs
 - New {% include ltr/comp.html uuid='4bfeb1ee' %}
 - New {% include ltr/comp.html uuid='ace507e5' %}
 - New {% include ltr/comp.html uuid='bf1b9be9' %}
-- New {% include ltr/comp.html uuid='c62d18a8' %}
 - New {% include ltr/comp.html uuid='f2277265' %}
-- New {% include ltr/comp.html uuid='3917adb2' %}
-- New {% include ltr/comp.html uuid='2a4a95d5' %}
 - Fix on {% include ltr/comp.html uuid='84ab6f3c' %} when definition parameter group is not a built-in one.
 - Renamed 'Add LoftForm' component to {% include ltr/comp.html uuid='42631b6e' %}.
 - Improved {% include ltr/comp.html uuid='d4593785' %} component, not it returns a more accurate 'Depth'.
@@ -86,7 +92,7 @@ group: Deployment & Configs
 - Added 'Default 3D View' component.
 - Added 'Assembly Origin' component.
 
-{% include ltr/release-header.html title="v1.8" version="v1.8.8228.26612" time="07/18/2022" %}
+{% include ltr/release-header.html title="v1.8" version="v1.8.8221.17917" time="07/18/2022" %}
 
 - Includes all changes under 1.8RC releases listed below
 - Minor Fixes and Improvements
@@ -120,6 +126,7 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.8 RC1" version="v1.8.8200.21840" pre_release=true time="06/14/2022" %}
 
+- Now RiR requires Rhino v7.15.
 - Moved {% include ltr/comp.html uuid='ff951e5d' %}, {% include ltr/comp.html uuid='3b95eff0' %}, {% include ltr/comp.html uuid='f3eb3a21' %} from Topology to Annotation tab.
 - Added {% include ltr/comp.html uuid='49acc84c' %} component
 - Added {% include ltr/comp.html uuid='ad88cf11' %} component

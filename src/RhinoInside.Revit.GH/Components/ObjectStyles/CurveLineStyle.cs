@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
     (
       "Curve Line Style",
       "Linestyle",
-      "Curve Line Style Property. Get-Set accessor to Curve Line Style property.",
+      "Curve Line Style Property. Get-Set access component to Curve Line Style property.",
       "Revit",
       "Object Styles"
     )

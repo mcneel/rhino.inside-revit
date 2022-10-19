@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Value is ARDB.ProjectLocation projectLocation)
       {
-        var name = ToString();
+        var name = $"Revit::{projectLocation.Name}";
 
         // 2. Check if already exist
         var index = doc.NamedConstructionPlanes.Find(name);

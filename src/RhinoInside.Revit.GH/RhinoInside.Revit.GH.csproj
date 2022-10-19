@@ -38,6 +38,7 @@
     <Compile Include="Components\Annotations\QueryRevisions.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Documents\ActiveDocument.cs" />
+    <Compile Include="Components\Documents\DocumentWarnings.cs" />
     <Compile Include="Components\Documents\DocumentIdentity.cs" />
     <Compile Include="Components\Documents\DocumentVersion.cs" />
     <Compile Include="Components\Documents\OpenDocuments.cs" />
@@ -247,6 +248,8 @@
     <Compile Include="Components\TransactionalComponent.cs" />
     <Compile Include="Components\TransactionBaseComponent.cs" />
     <Compile Include="Components\Views\Active.cs" />
+    <Compile Include="Components\Views\AddDependentView.cs" />
+    <Compile Include="Components\Views\AddDraftingView.cs" />
     <Compile Include="Components\Views\AddViewPlan.cs" />
     <Compile Include="Components\Views\ClusterViewsByType.cs" />
     <Compile Include="Components\Views\Default3DView.cs" />
@@ -256,7 +259,6 @@
     <Compile Include="Components\Views\QueryViews.cs" />
     <Compile Include="Components\Views\SectionBox.cs" />
     <Compile Include="Components\Views\View3DByPlane.cs" />
-    <Compile Include="Components\Views\AddDependentView.cs" />
     <Compile Include="Components\Workset\Active.cs" />
     <Compile Include="Components\Workset\ElementWorkset.cs" />
     <Compile Include="Components\Workset\DeleteWorkset.cs" />
@@ -295,6 +297,7 @@
     <Compile Include="Parameters\Annotations\Dimension.cs" />
     <Compile Include="Parameters\Annotations\Revision.cs" />
     <Compile Include="Parameters\Input\BuiltInCategories.cs" />
+    <Compile Include="Parameters\Input\BuiltInFailureDefinitions.cs" />
     <Compile Include="Parameters\Input\BuiltInParameters.cs" />
     <Compile Include="Parameters\Input\BuiltInParameterGroups.cs" />
     <Compile Include="Parameters\Input\CurtainGridAlignType_ValueList.cs" />
@@ -365,6 +368,7 @@
     <Compile Include="Parameters\TopographySurface.cs" />
     <Compile Include="Parameters\Views\View.cs" />
     <Compile Include="Parameters\Views\View3D.cs" />
+    <Compile Include="Parameters\Views\ViewDrafting.cs" />
     <Compile Include="Parameters\Views\ViewPlan.cs" />
     <Compile Include="Parameters\Views\ViewSection.cs" />
     <Compile Include="Parameters\Views\ViewSheet.cs" />
@@ -390,6 +394,7 @@
     <Compile Include="Types\ElementId.cs" />
     <Compile Include="Types\ElementType.cs" />
     <Compile Include="Types\Enums.cs" />
+    <Compile Include="Types\FailureDefinition.cs" />
     <Compile Include="Types\Family.cs" />
     <Compile Include="Types\FamilyInstance.cs" />
     <Compile Include="Types\FillPatternElement.cs" />
@@ -427,6 +432,7 @@
     <Compile Include="Types\TopographySurface.cs" />
     <Compile Include="Types\Views\View.cs" />
     <Compile Include="Types\Views\View3D.cs" />
+    <Compile Include="Types\Views\ViewDrafting.cs" />
     <Compile Include="Types\Views\ViewPlan.cs" />
     <Compile Include="Types\Views\Viewport.cs" />
     <Compile Include="Types\Views\ViewSection.cs" />

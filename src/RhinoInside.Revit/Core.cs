@@ -80,11 +80,12 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Constructor
+    internal static readonly string RegistryPath = @"SOFTWARE\McNeel\Rhinoceros\7.0";
     static readonly string SystemDir =
 #if DEBUG
-      Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install", "Path", null) as string ??
+      Registry.GetValue($@"HKEY_CURRENT_USER\{RegistryPath}-WIP-Developer-Debug-trunk\Install", "Path", null) as string ??
 #endif
-      Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install", "Path", null) as string ??
+      Registry.GetValue($@"HKEY_LOCAL_MACHINE\{RegistryPath}\Install", "Path", null) as string ??
       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP", "System");
 
     internal static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
@@ -308,7 +309,7 @@ namespace RhinoInside.Revit
           taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink1, "Download latest Rhino…");
           if (taskDialog.Show() == ARUI.TaskDialogResult.CommandLink1)
           {
-            using (Process.Start(@"https://www.rhino3d.com/download/rhino/7.0/latest")) { }
+            using (Process.Start($@"https://www.rhino3d.com/download/rhino/{MinimumRhinoVersion.Major}.0/latest")) { }
           }
         }
 

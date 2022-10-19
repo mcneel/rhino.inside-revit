@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Phasing
     (
       name: "Element Phasing",
       nickname: "Phasing",
-      description: "Element Phasing properties. Get-Set accessor to element phasing information.",
+      description: "Element Phasing properties. Get-Set access component to element phasing information.",
       category: "Revit",
       subCategory: "Element"
     )

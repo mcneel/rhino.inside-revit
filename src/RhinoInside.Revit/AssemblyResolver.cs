@@ -15,9 +15,9 @@ namespace RhinoInside.Revit
   {
     static readonly string InstallPath =
 #if DEBUG
-      Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\McNeel\Rhinoceros\7.0-WIP-Developer-Debug-trunk\Install", "InstallPath", null) as string ??
+      Registry.GetValue($@"HKEY_CURRENT_USER\{Core.RegistryPath}-WIP-Developer-Debug-trunk\Install", "InstallPath", null) as string ??
 #endif
-      Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\7.0\Install", "InstallPath", null) as string ??
+      Registry.GetValue($@"HKEY_LOCAL_MACHINE\{Core.RegistryPath}\Install", "InstallPath", null) as string ??
       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP");
 
     #region AssemblyReference
@@ -82,6 +82,11 @@ namespace RhinoInside.Revit
           try { activated(AppDomain.CurrentDomain, new AssemblyLoadEventArgs(Assembly)); }
           finally { activated = default; }
         }
+      }
+
+      public override string ToString()
+      {
+        return $"Activated={Assembly is object}, CodeBase={assemblyName.CodeBase}";
       }
     }
 

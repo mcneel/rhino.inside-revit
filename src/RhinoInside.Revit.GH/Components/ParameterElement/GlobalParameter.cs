@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
   (
     name: "Global Parameter",
     nickname: "GlobalParam",
-    description: "Get-Set accessor to global parameter values",
+    description: "Get-Set access component to global parameter values",
     category: "Revit",
     subCategory: "Parameter"
   )

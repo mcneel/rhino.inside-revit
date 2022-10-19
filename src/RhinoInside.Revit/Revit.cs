@@ -47,7 +47,7 @@ namespace RhinoInside.Revit
       if (!MainWindow.IsZero)
       {
         Rhinoceros.Shutdown();
-        
+
         // Unregister some events
         Core.Host.Services.DocumentChanged -= OnDocumentChanged;
         Core.Host.Idling -= OnIdle;

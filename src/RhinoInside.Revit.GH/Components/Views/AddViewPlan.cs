@@ -10,7 +10,6 @@ namespace RhinoInside.Revit.GH.Components.Views
   public abstract class AddViewPlan : ElementTrackerComponent
   {
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
-    protected override string IconTag => string.Empty;
 
     protected AddViewPlan(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory)
