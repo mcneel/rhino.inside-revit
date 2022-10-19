@@ -5,7 +5,7 @@ using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  [ComponentVersion(introduced: "1.0")]
+  [ComponentVersion(introduced: "1.9")]
   public class Default3DView : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("F2277265-8845-403B-83A9-EF670FA036C8");
