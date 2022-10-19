@@ -19,9 +19,9 @@ group: Deployment & Configs
 
 - Added context menu to 'Project Location' component.
 - Now `Types.BasePoint` bake as a named construction-plane.
-- Added 'Add Drafting View' component.
-- Added 'Element Face Paint' component.
-- Added 'Document Warnings' component.
+- New {% include ltr/comp.html uuid='2a4a95d5' %}
+- New {% include ltr/comp.html uuid='3917adb2' %}
+- New {% include ltr/comp.html uuid='c62d18a8' %}
 - Added 'Built-In Failure Definitions' picker.
 
 {% include ltr/release-header.html title="v1.9" version="v1.9.8326.25768" time="10/18/2022" %}
@@ -35,10 +35,7 @@ group: Deployment & Configs
 - New {% include ltr/comp.html uuid='4bfeb1ee' %}
 - New {% include ltr/comp.html uuid='ace507e5' %}
 - New {% include ltr/comp.html uuid='bf1b9be9' %}
-- New {% include ltr/comp.html uuid='c62d18a8' %}
 - New {% include ltr/comp.html uuid='f2277265' %}
-- New {% include ltr/comp.html uuid='3917adb2' %}
-- New {% include ltr/comp.html uuid='2a4a95d5' %}
 - Fix on {% include ltr/comp.html uuid='84ab6f3c' %} when definition parameter group is not a built-in one.
 - Renamed 'Add LoftForm' component to {% include ltr/comp.html uuid='42631b6e' %}.
 - Improved {% include ltr/comp.html uuid='d4593785' %} component, not it returns a more accurate 'Depth'.
