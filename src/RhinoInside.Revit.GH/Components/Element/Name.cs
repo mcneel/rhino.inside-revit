@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
@@ -8,6 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
+  using External.DB;
+  using External.DB.Extensions;
+
   public class ElementPropertyName : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("01934AD1-F31B-43E5-ADD9-C196F4A2467E");
@@ -19,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     (
       "Element Name",
       "ElemName",
-      "Element Name Property. Get-Set access component to Element Name property.",
+      "Element Name Property. Get-Set accessor to Element Name property.",
       "Revit",
       "Element"
     )
@@ -156,20 +158,19 @@ namespace RhinoInside.Revit.GH.Components.Elements
     }
   }
 
-  public class ElementPropertyCategory : ZuiComponent
+  public class NamesakeElement : ElementCollectorComponent
   {
-    public override Guid ComponentGuid => new Guid("5AC48DE6-F706-4E88-A4AD-7A4439F1DAB5");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override string IconTag => "C";
+    public override Guid ComponentGuid => new Guid("1FEE04EF-A3DA-44F4-B114-486724C92AB6");
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter(inverted: true);
 
-    public ElementPropertyCategory()
-    : base
+    public NamesakeElement() : base
     (
-      "Element Category",
-      "ElemCat",
-      "Element Category Property. Get-Set access component to Element Category property.",
-      "Revit",
-      "Element"
+      name: "Namesake Element",
+      nickname: "Namesake",
+      description: "Get namesake element on a diferent document",
+      category: "Revit",
+      subCategory: "Element"
     )
     { }
 
@@ -178,11 +179,20 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       new ParamDefinition
       (
+        new Parameters.Document()
+        {
+          Name = "Document",
+          NickName = "DOC",
+          Description = "Document to query on",
+        }
+      ),
+      new ParamDefinition
+      (
         new Parameters.Element()
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access Category",
+          Description = "Source Element",
         }
       )
     };
@@ -196,159 +206,34 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access Category",
+          Description = "Namesake Element",
         }
       ),
       new ParamDefinition
       (
-        new Parameters.Category()
+        new Param_String()
         {
-          Name = "Category",
-          NickName = "C",
-          Description = "Element Category",
-        }
+          Name = "Name",
+          NickName = "N",
+          Description = "Element Name",
+        },
+        ParamRelevance.Secondary
       ),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
-      else DA.SetData("Element", element);
 
-      DA.SetData("Category", element.Category);
-    }
-  }
-
-  public class ElementPropertyType : TransactionalChainComponent
-  {
-    public override Guid ComponentGuid => new Guid("FE427D04-1D8F-48BE-BFBA-EB28AD23FC03");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override string IconTag => "T";
-
-    public ElementPropertyType()
-    : base
-    (
-      "Element Type",
-      "ElemType",
-      "Element Type Property. Get-Set access component to Element Type property.",
-      "Revit",
-      "Element"
-    )
-    { }
-
-    protected override ParamDefinition[] Inputs => inputs;
-    static readonly ParamDefinition[] inputs =
-    {
-      new ParamDefinition
+      var namesake = Types.Element.FromElementId
       (
-        new Parameters.Element()
-        {
-          Name = "Element",
-          NickName = "E",
-          Description = "Element to access Type",
-          Access = GH_ParamAccess.list
-        }
-      ),
-      new ParamDefinition
-      (
-        new Parameters.ElementType()
-        {
-          Name = "Type",
-          NickName = "T",
-          Description = "Element Type",
-          Optional = true,
-          Access = GH_ParamAccess.list
-        },
-        ParamRelevance.Primary
-      ),
-    };
-
-    protected override ParamDefinition[] Outputs => outputs;
-    static readonly ParamDefinition[] outputs =
-    {
-      new ParamDefinition
-      (
-        new Parameters.Element()
-        {
-          Name = "Element",
-          NickName = "E",
-          Description = "Element to access Type",
-          Access = GH_ParamAccess.list
-        }
-      ),
-      new ParamDefinition
-      (
-        new Parameters.ElementType()
-        {
-          Name = "Type",
-          NickName = "T",
-          Description = "Element Type",
-          Access = GH_ParamAccess.list
-        },
-        ParamRelevance.Primary
-      ),
-    };
-
-    protected override void TrySolveInstance(IGH_DataAccess DA)
-    {
-      if (!Params.GetDataList(DA, "Element", out IList<Types.Element> elements)) return;
-      if (Params.GetDataList(DA, "Type", out IList<Types.ElementType> types))
-      {
-        var outputTypes = Params.IndexOfOutputParam("Type") < 0 ? default : new List<Types.ElementType>();
-        var typesSets = new Dictionary<Types.ElementType, List<ARDB.ElementId>>();
-
-        int index = 0;
-        foreach (var element in elements)
-        {
-          if (element is object && types.ElementAtOrLast(index) is Types.ElementType type)
-          {
-            outputTypes?.Add(element is object ? type : default);
-
-            if (!typesSets.TryGetValue(type, out var entry))
-              typesSets.Add(type, new List<ARDB.ElementId> { element.Id });
-            else
-              entry.Add(element.Id);
-          }
-          else outputTypes?.Add(default);
-
-          index++;
-        }
-
-        var map = new Dictionary<ARDB.ElementId, ARDB.ElementId>();
-        foreach (var type in typesSets)
-        {
-          UpdateDocument
-          (
-            type.Key.Document, () =>
-            {
-              foreach (var entry in ARDB.Element.ChangeTypeId(type.Key.Document, type.Value, type.Key.Id))
-              {
-                if (map.ContainsKey(entry.Key)) map.Remove(entry.Key);
-                map.Add(entry.Key, entry.Value);
-              }
-            }
-          );
-        }
-
-        DA.SetDataList
-        (
-          "Element",
-          elements.Select
-          (
-            x =>
-            x is null ? null :
-            map.TryGetValue(x.Id, out var newId) ?
-            Types.Element.FromElementId(x.Document, newId) : x
-          )
-        );
-
-        Params.TrySetDataList(DA, "Type", () => outputTypes);
-      }
-      else
-      {
-        DA.SetDataList("Element", elements);
-        Params.TrySetDataList(DA, "Type", () => elements.Select(x => x?.Type));
-      }
+        doc,
+        doc.LookupElement(element.Document, element.Id)
+      );
+      DA.SetData("Element", namesake);
+      Params.TrySetData(DA, "Name", () => namesake.Nomen);
     }
   }
 }

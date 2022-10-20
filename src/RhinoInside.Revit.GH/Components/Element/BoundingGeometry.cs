@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
@@ -170,6 +171,188 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       }
       // join all the breps into one
       return Brep.JoinBreps(finalBreps, 0.1).First();
+    }
+  }
+
+  [ComponentVersion(introduced: "1.10")]
+  public class DeconstructElementGeometry : ZuiComponent
+  {
+    public override Guid ComponentGuid => new Guid("BBD8187B-829A-4604-B6BC-DE896A9FF62B");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override string IconTag => "DG";
+
+    public DeconstructElementGeometry() : base
+    (
+      name: "Deconstruct Element Geometry",
+      nickname: "Deconstruct",
+      description: "Deconstruct geometry of given element into simpler geometry",
+      category: "Revit",
+      subCategory: "Element"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Element to deconstruct",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean()
+        {
+          Name = "Invisble",
+          NickName = "I",
+          Description = "Include non visible geometry",
+          Optional = true
+        }.SetDefaultVale(false), ParamRelevance.Secondary
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Deconstructed element",
+        }, ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Face()
+        {
+          Name = "Faces",
+          NickName = "F",
+          Description = "List of element face references",
+          Access = GH_ParamAccess.list
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Edge()
+        {
+          Name = "Edges",
+          NickName = "E",
+          Description = "List of element edge references",
+          Access = GH_ParamAccess.list
+        }, ParamRelevance.Primary
+      ),
+      //new ParamDefinition
+      //(
+      //  new Parameters.Vertex()
+      //  {
+      //    Name = "Vertices",
+      //    NickName = "V",
+      //    Access = GH_ParamAccess.list
+      //  }
+      //),
+    };
+
+    IEnumerable<string> GetFaceReferences(ARDB.Document document, string uniqueId, ARDB.GeometryObject geometry)
+    {
+      int instanceIndex = 0;
+      switch (geometry)
+      {
+        case ARDB.GeometryElement element:
+          foreach (var g in element.SelectMany(x => GetFaceReferences(document, uniqueId, x)))
+            yield return g;
+          yield break;
+
+        case ARDB.GeometryInstance instance:
+          foreach (var g in GetFaceReferences(document, uniqueId, instance.GetInstanceGeometry()))
+            yield return $"{uniqueId}:{instanceIndex}:INSTANCE:{g}";
+
+          instanceIndex++;
+          yield break;
+
+        case ARDB.Mesh mesh:
+          yield break;
+
+        case ARDB.Solid solid:
+          foreach (var face in solid.Faces.Cast<ARDB.Face>())
+          {
+            if (face.Reference is ARDB.Reference reference)
+            {
+              yield return reference.ConvertToStableRepresentation(document);
+            }
+          }
+
+          yield break;
+
+        case ARDB.Curve curve:
+          yield break;
+
+        case ARDB.PolyLine polyline:
+          yield break;
+      }
+    }
+
+    IEnumerable<string> GetEdgeReferences(ARDB.Document document, string uniqueId, ARDB.GeometryObject geometry)
+    {
+      int instanceIndex = 0;
+      switch (geometry)
+      {
+        case ARDB.GeometryElement element:
+          foreach (var g in element.SelectMany(x => GetEdgeReferences(document, uniqueId, x)))
+            yield return g;
+          yield break;
+
+        case ARDB.GeometryInstance instance:
+          foreach (var g in GetEdgeReferences(document, uniqueId, instance.GetInstanceGeometry()))
+            yield return $"{uniqueId}:{instanceIndex}:INSTANCE:{g}";
+
+          instanceIndex++;
+          yield break;
+
+        case ARDB.Mesh mesh:
+          yield break;
+
+        case ARDB.Solid solid:
+          foreach (var edge in solid.Edges.Cast<ARDB.Edge>())
+          {
+            if (edge.Reference is ARDB.Reference reference)
+            {
+              yield return reference.ConvertToStableRepresentation(document);
+            }
+          }
+
+          yield break;
+
+        case ARDB.Curve curve:
+          yield break;
+
+        case ARDB.PolyLine polyline:
+          yield break;
+      }
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
+      else Params.TrySetData(DA, "Element", () => element);
+
+      if (!Params.TryGetData(DA, "Invisble", out bool? invisibles)) return;
+
+      using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = invisibles ?? false })
+
+      using (var geometry = element.Value.GetGeometry(options))
+      {
+        if (geometry is null) return;
+
+        Params.TrySetDataList(DA, "Faces", () => GetFaceReferences(element.Document, element.UniqueID, geometry).Select(x => new Types.Face(element.Document, ARDB.Reference.ParseFromStableRepresentation(element.Document, x))));
+        Params.TrySetDataList(DA, "Edges", () => GetEdgeReferences(element.Document, element.UniqueID, geometry).Select(x => new Types.Edge(element.Document, ARDB.Reference.ParseFromStableRepresentation(element.Document, x))));
+        //Params.TrySetDataList(DA, "Vertices", () => GetEdges(geometry).Where(x => x.Reference is object).Select(x => new Types.Vertex(element.Document, x.Reference, 0)));
+      }
     }
   }
 }

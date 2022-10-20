@@ -294,7 +294,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           if (element.get_BoundingBox(Value) is ARDB.BoundingBoxXYZ bboxXYZ)
           {
-            var bbox = bboxXYZ.ToBoundingBox().GetBoundingBox(projection);
+            var bbox = bboxXYZ.ToBox().GetBoundingBox(projection);
             if (uv.Contains(bbox.Min) && uv.Contains(bbox.Max))
               continue;
 
@@ -322,7 +322,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is ARDB.View view)
         {
-          AssertValidDocument(value, nameof(Type));
+          AssertValidDocument(value, nameof(Phase));
           InvalidateGraphics();
 
           view.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.Update(value.Id);

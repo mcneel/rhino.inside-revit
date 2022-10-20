@@ -65,7 +65,9 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
     <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
+    <Compile Include="Components\Element\Category.cs" />
     <Compile Include="Components\Element\HostObject\SlabShape.cs" />
+    <Compile Include="Components\Element\Name.cs" />
     <Compile Include="Components\Element\Opening\AddFaceOpening.cs" />
     <Compile Include="Components\Element\Opening\AddOpening.cs" />
     <Compile Include="Components\Element\Opening\AddShaftOpening.cs" />
@@ -146,7 +148,7 @@
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralFoundation.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />
-    <Compile Include="Components\Element\Properties.cs" />
+    <Compile Include="Components\Element\Type.cs" />
     <Compile Include="Components\Element\Version.cs" />
     <Compile Include="Components\Element\Wall\AnalyseStackedWall.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
