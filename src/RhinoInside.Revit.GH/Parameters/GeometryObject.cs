@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using Autodesk.Revit.UI.Selection;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
@@ -10,7 +11,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using External.UI.Selection;
 
-  public abstract class GeometryObject<X, R> : ElementIdParam<X, R>, IGH_PreviewObject
+  public abstract class GeometryObject<X> : ElementIdParam<X>, IGH_PreviewObject
   where X : class, Types.IGH_ElementId
   {
     protected GeometryObject(string name, string nickname, string description, string category, string subcategory) :
@@ -26,7 +27,23 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class Vertex : GeometryObject<Types.Vertex, ARDB.Point>
+  public class GeometryObject : GeometryObject<Types.GeometryObject>
+  {
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override Guid ComponentGuid => new Guid("7A41402E-7B6C-4523-9B57-E8485713F461");
+    public GeometryObject() : base("Geometry Object", "Geometry Object", "Contains a collection of Revit geometry references", "Params", "Revit") { }
+
+    #region UI
+    protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
+    protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
+    protected override void Menu_AppendInternaliseData(ToolStripDropDown menu) { }
+
+    protected override GH_GetterResult Prompt_Singular(ref Types.GeometryObject value) => GH_GetterResult.cancel;
+    protected override GH_GetterResult Prompt_Plural(ref List<Types.GeometryObject> values) => GH_GetterResult.cancel;
+    #endregion
+  }
+
+  public class Vertex : GeometryObject<Types.Vertex>
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary;
     public override Guid ComponentGuid => new Guid("BC1B160A-DC04-4139-AB7D-1AECBDE7FF88");
@@ -84,7 +101,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class Edge : GeometryObject<Types.Edge, ARDB.Edge>
+  public class Edge : GeometryObject<Types.Edge>
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary;
     public override Guid ComponentGuid => new Guid("B79FD0FD-63AE-4776-A0A7-6392A3A58B0D");
@@ -135,7 +152,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class Face : GeometryObject<Types.Face, ARDB.Face>
+  public class Face : GeometryObject<Types.Face>
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary;
     public override Guid ComponentGuid => new Guid("759700ED-BC79-4986-A6AB-84921A7C9293");
@@ -147,6 +164,19 @@ namespace RhinoInside.Revit.GH.Parameters
       new string[] { "Box", "Surface", "Mesh" }
     );
 
+    static ARDB.Reference FixReference(ARDB.Document document, ARDB.Reference reference)
+    {
+      if (reference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE)
+      {
+        // For some reason non visible faces do not have the ":SURFACE" sufix.
+        var representation = reference.ConvertToStableRepresentation(document);
+        if (!representation.EndsWith(":SURFACE")) representation += ":SURFACE";
+        reference = ARDB.Reference.ParseFromStableRepresentation(document, representation);
+      }
+
+      return reference;
+    }
+
     protected override GH_GetterResult Prompt_Plural(ref List<Types.Face> value)
     {
       var uiDocument = Revit.ActiveUIDocument;
@@ -155,7 +185,7 @@ namespace RhinoInside.Revit.GH.Parameters
       switch (uiDocument.PickObjects(out var references, ObjectType.Face))
       {
         case Autodesk.Revit.UI.Result.Succeeded:
-          value = references.Select((x) => new Types.Face(uiDocument.Document, x)).ToList();
+          value = references.Select((x) => new Types.Face(uiDocument.Document, FixReference(uiDocument.Document, x))).ToList();
           return GH_GetterResult.success;
         case Autodesk.Revit.UI.Result.Cancelled:
           return GH_GetterResult.cancel;
@@ -173,7 +203,7 @@ namespace RhinoInside.Revit.GH.Parameters
       switch (uiDocument.PickObject(out var reference, ObjectType.Face))
       {
         case Autodesk.Revit.UI.Result.Succeeded:
-          value = new Types.Face(uiDocument.Document, reference);
+          value = new Types.Face(uiDocument.Document, FixReference(uiDocument.Document, reference));
           return GH_GetterResult.success;
         case Autodesk.Revit.UI.Result.Cancelled:
           return GH_GetterResult.cancel;

@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
 
-  public abstract class ElementIdParam<T, R> :
+  public abstract class ElementIdParam<T> :
   PersistentParam<T>,
   IGH_BakeAwareObject,
   Kernel.IGH_ElementIdParam

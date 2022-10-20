@@ -13,18 +13,18 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
   using GH.Kernel.Attributes;
 
-  public abstract class GeometryObject<X> :
+  [Name("Geometry Object")]
+  public abstract class GeometryObject :
     ElementId,
-    IEquatable<GeometryObject<X>>,
+    IEquatable<GeometryObject>,
     IGH_GeometricGoo,
     IGH_PreviewData,
     IGH_PreviewMeshData
-    where X : ARDB.GeometryObject
   {
     #region System.Object
-    public bool Equals(GeometryObject<X> other) => other is object &&
+    public bool Equals(GeometryObject other) => other is object &&
       other.DocumentGUID == DocumentGUID && other.UniqueID == UniqueID;
-    public override bool Equals(object obj) => (obj is GeometryObject<X> id) ? Equals(id) : base.Equals(obj);
+    public override bool Equals(object obj) => (obj is GeometryObject id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
 
     public sealed override string ToString()
@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Types
 
       try
       {
-        if (Document?.GetElement(Reference) is ARDB.Element element)
+        if (Element.FromReference(Document, Reference) is Element element)
         {
           typeName = "Referenced ";
           switch (Reference.ElementReferenceType)
@@ -47,17 +47,23 @@ namespace RhinoInside.Revit.GH.Types
             case ARDB.ElementReferenceType.REFERENCE_TYPE_INSTANCE: typeName += "instance"; break;
             case ARDB.ElementReferenceType.REFERENCE_TYPE_CUT_EDGE: typeName += "trim"; break;
             case ARDB.ElementReferenceType.REFERENCE_TYPE_MESH: typeName += "mesh"; break;
-#if REVIT_2018
+  #if REVIT_2018
             case ARDB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT: typeName += "subelement"; break;
-#endif
+  #endif
           }
 
-          typeName += " at Revit " + element.GetType().Name + " \"" + element.Name + "\"";
+          typeName += $" : id {element.Id}";
+#if DEBUG
+          var stable = Reference.ConvertToStableRepresentation(Document);
+          // TODO : Generate a better string swapping uniqueId -> Id
+          typeName += stable.Substring(stable.IndexOf(':'));
+#endif
+        }
+        else
+        {
+          typeName += $" : {Reference.ConvertToStableRepresentation(Document)}";
         }
 
-#if DEBUG
-        typeName += " (" + Reference.ConvertToStableRepresentation(Document) + ")";
-#endif
         return typeName;
       }
       catch (Autodesk.Revit.Exceptions.ApplicationException)
@@ -68,7 +74,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Goo
-    public override bool IsValid => Value is X;
+    public override bool IsValid => base.IsValid && Value is object;
     #endregion
 
     #region ReferenceObject
@@ -182,14 +188,14 @@ namespace RhinoInside.Revit.GH.Types
       }
       catch (Autodesk.Revit.Exceptions.InvalidObjectException) { }
     }
-    public new X Value
+    public new ARDB.GeometryObject Value
     {
       get
       {
         // Cached value is not reliable if a document regeneration happens.
         // Since there is no IsValidObject property we Reset the value always :(
         ResetValue();
-        return base.Value as X;
+        return base.Value as ARDB.GeometryObject;
       }
     }
 
@@ -214,8 +220,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
   }
 
-  [Name("Revit Vertex")]
-  public class Vertex : GeometryObject<ARDB.Point>, IGH_PreviewData
+  [Name("Vertex")]
+  public class Vertex : GeometryObject, IGH_PreviewData
   {
     readonly int VertexIndex = -1;
     protected override object FetchValue()
@@ -234,6 +240,8 @@ namespace RhinoInside.Revit.GH.Types
 
       return default;
     }
+
+    public new ARDB.Point Value => base.Value as ARDB.Point;
 
     public Vertex() { }
     public Vertex(ARDB.Document doc, ARDB.Reference reference, int index) : base(doc, reference) { VertexIndex = index; }
@@ -313,8 +321,10 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Name("Edge")]
-  public class Edge : GeometryObject<ARDB.Edge>, IGH_PreviewData
+  public class Edge : GeometryObject, IGH_PreviewData
   {
+    public new ARDB.Edge Value => base.Value as ARDB.Edge;
+
     public Edge() { }
     public Edge(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
 
@@ -334,7 +344,7 @@ namespace RhinoInside.Revit.GH.Types
           }
         }
 
-        return wires.FirstOrDefault();
+        return wires?.FirstOrDefault();
       }
     }
 
@@ -415,8 +425,10 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Name("Face")]
-  public class Face : GeometryObject<ARDB.Face>, IGH_PreviewData
+  public class Face : GeometryObject, IGH_PreviewData
   {
+    public new ARDB.Face Value => base.Value as ARDB.Face;
+
     public Face() { }
     public Face(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
 
@@ -550,8 +562,11 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsValid)
         return;
 
-      foreach (var curve in Curves)
-        args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
+      if (Curves is Curve[] curves)
+      {
+        foreach (var curve in curves)
+          args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
+      }
     }
 
     void IGH_PreviewData.DrawViewportMeshes(GH_PreviewMeshArgs args)
@@ -559,8 +574,11 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsValid)
         return;
 
-      foreach (var mesh in Meshes(args.MeshingParameters))
-        args.Pipeline.DrawMeshShaded(mesh, args.Material);
+      if (Meshes(args.MeshingParameters) is Mesh[] meshes)
+      {
+        foreach (var mesh in meshes)
+          args.Pipeline.DrawMeshShaded(mesh, args.Material);
+      }
     }
     #endregion
 
