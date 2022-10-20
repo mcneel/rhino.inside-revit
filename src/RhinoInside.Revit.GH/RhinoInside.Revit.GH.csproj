@@ -148,7 +148,7 @@
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralFoundation.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />
-    <Compile Include="Components\Element\Properties.cs" />
+    <Compile Include="Components\Element\Type.cs" />
     <Compile Include="Components\Element\Version.cs" />
     <Compile Include="Components\Element\Wall\AnalyseStackedWall.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
