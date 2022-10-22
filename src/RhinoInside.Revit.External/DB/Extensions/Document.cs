@@ -1042,11 +1042,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
               {
                 if (tx.Start() == TransactionStatus.Started)
                 {
-                  // We create an EMPTY sheet because it does not show any model element.
+                  // We create an EMPTY drafting view because it does not show any model element.
                   // Hopefully will be fast enough.
-                  var sheet = ViewSheet.Create(view.Document, ElementId.InvalidElementId);
+                  var drafting = ViewDrafting.Create(document, document.GetDefaultElementTypeId(ElementTypeGroup.ViewTypeDrafting));
                   var typeId = document.GetDefaultElementTypeId(ElementTypeGroup.TextNoteType);
-                  textNoteId = TextNote.Create(document, sheet.Id, XYZ.Zero, "Show me!!", typeId).Id;
+                  textNoteId = TextNote.Create(document, drafting.Id, XYZ.Zero, "Show me!!", typeId).Id;
 
                   var options = tx.GetFailureHandlingOptions().
                                    SetClearAfterRollback(true).
