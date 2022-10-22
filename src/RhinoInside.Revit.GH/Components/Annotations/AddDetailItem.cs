@@ -122,7 +122,7 @@ namespace RhinoInside.Revit.GH.Components
           detail = Reconstruct
           (
             detail,
-            view,
+            view.Value,
             point.Value.ToXYZ(),
             rotation ?? 0.0,
             type.Value
