@@ -75,6 +75,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve)) return null;
 
+          if (!view.Value.IsAnnotationView())
+            throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
+
           var viewPlane = view.Location;
           var tol = GeometryTolerance.Model;
 

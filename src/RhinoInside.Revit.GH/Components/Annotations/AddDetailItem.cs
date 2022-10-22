@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "View", out ARDB.View view)) return;
+      if (!Params.GetData(DA, "View", out Types.View view)) return;
 
       ReconstructElement<ARDB.FamilyInstance>
       (
@@ -108,8 +108,11 @@ namespace RhinoInside.Revit.GH.Components
           if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, Types.Document.FromValue(view.Document), ARDB.BuiltInCategory.OST_DetailComponents)) return null;
 
-          var viewPlane = new Plane(view.Origin.ToPoint3d(), view.RightDirection.ToVector3d(), view.UpDirection.ToVector3d());
-          if (view.ViewType != ARDB.ViewType.ThreeD)
+          if (!view.Value.IsAnnotationView())
+            throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
+
+          var viewPlane = view.Location;
+          if (view.Value.ViewType != ARDB.ViewType.ThreeD)
             point = viewPlane.ClosestPoint(point.Value);
 
           if (rotation.HasValue && Params.Input<Param_Number>("Rotation")?.UseDegrees == true)

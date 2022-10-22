@@ -71,20 +71,32 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       switch (viewType)
       {
-        case ViewType.FloorPlan:
-        case ViewType.CeilingPlan:
-        case ViewType.Elevation:
-        case ViewType.ThreeD:
+        // ViewSheet
         case ViewType.DrawingSheet:
 
+        // View3D
+        case ViewType.ThreeD:
+        case ViewType.Walkthrough:
+
+        // ImageView
+        case ViewType.Rendering:
+
+        // ViewPlan
+        case ViewType.FloorPlan:
+        case ViewType.CeilingPlan:
         case ViewType.EngineeringPlan:
         case ViewType.AreaPlan:
 
+        // ViewSection
+        case ViewType.Elevation:
         case ViewType.Section:
         case ViewType.Detail:
 
-        case ViewType.Walkthrough:
-        case ViewType.Rendering:
+        // ViewDrafting
+        case ViewType.DraftingView:
+
+        // View
+        case ViewType.Legend:
 
           return true;
       }
@@ -103,6 +115,37 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (view.IsTemplate) return false;
 
       return IsGraphicalViewType(view.ViewType);
+    }
+
+    /// <summary>
+    /// Checks if the provided <see cref="Autodesk.Revit.DB.View"/> supports annotative elements.
+    /// </summary>
+    /// <param name="view"></param>
+    /// <returns>true if <paramref name="view"/> is a graphical view.</returns>
+    public static bool IsAnnotationView(this View view)
+    {
+      if (view is null) return false;
+      if (view.IsTemplate) return false;
+
+      switch (view.ViewType)
+      {
+        case ViewType.DrawingSheet:
+
+        case ViewType.FloorPlan:
+        case ViewType.CeilingPlan:
+        case ViewType.AreaPlan:
+        case ViewType.EngineeringPlan:
+
+        case ViewType.Elevation:
+        case ViewType.Section:
+        case ViewType.Detail:
+
+        case ViewType.DraftingView:
+        case ViewType.Legend:
+          return true;
+      }
+
+      return false;
     }
 
     /// <summary>
