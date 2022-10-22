@@ -164,7 +164,8 @@ namespace RhinoInside.Revit.GH.Types
       if (profiles.Length != boundaries.Count)
         return false;
 
-      bool constraintsRemoved = false;
+      // FilledRegion needs the constraints to be edited from the Revi UI latter!!
+      bool constraintsRemoved = sketch.GetOwner() is ARDB.FilledRegion;
       void RemoveConstraints()
       {
         if (constraintsRemoved) return;

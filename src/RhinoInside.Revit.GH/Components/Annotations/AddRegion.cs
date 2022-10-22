@@ -101,7 +101,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.FilledRegionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.FilledRegionType)) return null;
           if (!Params.TryGetData(DA, "Line Style", out Types.GraphicsStyle linestyle, x => x.IsValid)) return null;
 
-          if (view is Types.View3D || !view.Value.IsGraphicalView())
+          if (!view.Value.IsAnnotationView())
             throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
 
           var tol = GeometryTolerance.Model;
