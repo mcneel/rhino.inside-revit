@@ -12,6 +12,7 @@ group: Deployment & Configs
 
 ### RC 
 
+- Now Grasshoppers is not loaded at start up.
 - Now 'Active Selection' expires solution when Revit selection changes.
 
 {% endcapture %}
