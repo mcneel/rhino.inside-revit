@@ -175,10 +175,13 @@ namespace RhinoInside.Revit.GH.Components.Geometry
   }
 
   [ComponentVersion(introduced: "1.10")]
-  public class DeconstructElementGeometry : ZuiComponent
+#if DEBUG
+  public
+#endif
+  class DeconstructElementGeometry : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("BBD8187B-829A-4604-B6BC-DE896A9FF62B");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
     protected override string IconTag => "DG";
 
     public DeconstructElementGeometry() : base
