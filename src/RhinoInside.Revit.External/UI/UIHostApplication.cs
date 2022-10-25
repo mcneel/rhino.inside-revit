@@ -62,33 +62,6 @@ namespace RhinoInside.Revit.External.UI
     #endregion
 
     #region Events
-    protected static readonly Dictionary<Delegate, (Delegate Target, int Count)> EventMap = new Dictionary<Delegate, (Delegate, int)>();
-
-    protected static EventHandler<T> AddEventHandler<T>(EventHandler<T> handler)
-    {
-      if (EventMap.TryGetValue(handler, out var trampoline)) trampoline.Count++;
-      else trampoline.Target = new EventHandler<T>((s, a) => ActivationGate.Open(() => handler.Invoke(s, a), s));
-
-      EventMap[handler] = trampoline;
-
-      return (EventHandler<T>) trampoline.Target;
-    }
-
-    protected static EventHandler<T> RemoveEventHandler<T>(EventHandler<T> handler)
-    {
-      if (EventMap.TryGetValue(handler, out var trampoline))
-      {
-        if (trampoline.Count == 0) EventMap.Remove(handler);
-        else
-        {
-          trampoline.Count--;
-          EventMap[handler] = trampoline;
-        }
-      }
-
-      return (EventHandler<T>) trampoline.Target;
-    }
-
     public abstract event EventHandler<IdlingEventArgs> Idling;
     public abstract event EventHandler<ViewActivatingEventArgs> ViewActivating;
     public abstract event EventHandler<ViewActivatedEventArgs> ViewActivated;
@@ -110,7 +83,7 @@ namespace RhinoInside.Revit.External.UI
         {
           if (selectionChangedCount == 0)
           {
-            Idling += AddEventHandler((EventHandler<IdlingEventArgs>) CompareSelection);
+            Idling += CompareSelection;
             Services.DocumentClosing += Services_DocumentClosing;
           }
 
@@ -129,7 +102,7 @@ namespace RhinoInside.Revit.External.UI
           if (selectionChangedCount == 0)
           {
             Services.DocumentClosing -= Services_DocumentClosing;
-            Idling -= RemoveEventHandler((EventHandler<IdlingEventArgs>) CompareSelection);
+            Idling -= CompareSelection;
           }
         }
       }
@@ -223,13 +196,21 @@ namespace RhinoInside.Revit.External.UI
 #endregion
 
 #region Events
-    public override event EventHandler<IdlingEventArgs> Idling { add => _app.Idling += value; remove => _app.Idling -= value; }
+    public override event EventHandler<IdlingEventArgs> Idling
+    {
+      add    => _app.Idling += ActivationGate.AddEventHandler(value);
+      remove => _app.Idling -= ActivationGate.RemoveEventHandler(value);
+    }
     public override event EventHandler<ViewActivatingEventArgs> ViewActivating { add => _app.ViewActivating += value; remove => _app.ViewActivating -= value; }
     public override event EventHandler<ViewActivatedEventArgs> ViewActivated { add => _app.ViewActivated += value; remove => _app.ViewActivated -= value; }
 #if REVIT_2023
-    public override event EventHandler<SelectionChangedEventArgs> SelectionChanged { add => _app.SelectionChanged += value; remove => _app.SelectionChanged -= value; }
+    public override event EventHandler<SelectionChangedEventArgs> SelectionChanged
+    {
+      add    => _app.SelectionChanged += ActivationGate.AddEventHandler(value);
+      remove => _app.SelectionChanged -= ActivationGate.RemoveEventHandler(value);
+    }
 #endif
-#endregion
+    #endregion
   }
 
   class UIHostApplicationU : UIHostApplication
@@ -297,15 +278,23 @@ namespace RhinoInside.Revit.External.UI
 #endregion
 
 #region Events
-    public override event EventHandler<IdlingEventArgs> Idling { add => _app.Idling += value; remove => _app.Idling -= value; }
+    public override event EventHandler<IdlingEventArgs> Idling
+    {
+      add    => _app.Idling += ActivationGate.AddEventHandler(value);
+      remove => _app.Idling -= ActivationGate.RemoveEventHandler(value);
+    }
     public override event EventHandler<ViewActivatingEventArgs> ViewActivating { add => _app.ViewActivating += value; remove => _app.ViewActivating -= value; }
     public override event EventHandler<ViewActivatedEventArgs> ViewActivated { add => _app.ViewActivated += value; remove => _app.ViewActivated -= value; }
 #if REVIT_2023
-    public override event EventHandler<SelectionChangedEventArgs> SelectionChanged { add => _app.SelectionChanged += value; remove => _app.SelectionChanged -= value; }
+    public override event EventHandler<SelectionChangedEventArgs> SelectionChanged
+    {
+      add    => _app.SelectionChanged += ActivationGate.AddEventHandler(value);
+      remove => _app.SelectionChanged -= ActivationGate.RemoveEventHandler(value);
+    }
 #endif
-#endregion
+    #endregion
   }
-#endregion
+  #endregion
 }
 
 namespace System.Windows.Interop
