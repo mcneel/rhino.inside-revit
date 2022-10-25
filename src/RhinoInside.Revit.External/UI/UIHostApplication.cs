@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.External.UI
     public abstract event EventHandler<ViewActivatingEventArgs> ViewActivating;
     public abstract event EventHandler<ViewActivatedEventArgs> ViewActivated;
 #if REVIT_2023
-    public abstract event EventHandler<SelectionChangeEventArgs> SelectionChanged;
+    public abstract event EventHandler<SelectionChangedEventArgs> SelectionChanged;
 #endif
     #endregion
 
@@ -101,8 +101,8 @@ namespace RhinoInside.Revit.External.UI
     #region SelectionChanged
     static readonly object selectionChangedLock = new object();
     static int selectionChangedCount = 0;
-    static event EventHandler<SelectionChangeEventArgs> selectionChanged;
-    public event EventHandler<SelectionChangeEventArgs> SelectionChanged
+    static event EventHandler<SelectionChangedEventArgs> selectionChanged;
+    public event EventHandler<SelectionChangedEventArgs> SelectionChanged
     {
       add
       {
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.External.UI
             else
               previousSelections.Remove(uiDocument.Document);
 
-            using (var args = new SelectionChangeEventArgs(uiDocument.Document, currentSelection))
+            using (var args = new SelectionChangedEventArgs(uiDocument.Document, currentSelection))
               selectionChanged(sender, args);
           }
         }
@@ -227,7 +227,7 @@ namespace RhinoInside.Revit.External.UI
     public override event EventHandler<ViewActivatingEventArgs> ViewActivating { add => _app.ViewActivating += value; remove => _app.ViewActivating -= value; }
     public override event EventHandler<ViewActivatedEventArgs> ViewActivated { add => _app.ViewActivated += value; remove => _app.ViewActivated -= value; }
 #if REVIT_2023
-    public override event EventHandler<SelectionChangeEventArgs> SelectionChanged { add => _app.SelectionChanged += value; remove => _app.SelectionChanged -= value; }
+    public override event EventHandler<SelectionChangedEventArgs> SelectionChanged { add => _app.SelectionChanged += value; remove => _app.SelectionChanged -= value; }
 #endif
 #endregion
   }
@@ -301,7 +301,7 @@ namespace RhinoInside.Revit.External.UI
     public override event EventHandler<ViewActivatingEventArgs> ViewActivating { add => _app.ViewActivating += value; remove => _app.ViewActivating -= value; }
     public override event EventHandler<ViewActivatedEventArgs> ViewActivated { add => _app.ViewActivated += value; remove => _app.ViewActivated -= value; }
 #if REVIT_2023
-    public override event EventHandler<SelectionChangeEventArgs> SelectionChanged { add => _app.SelectionChanged += value; remove => _app.SelectionChanged -= value; }
+    public override event EventHandler<SelectionChangedEventArgs> SelectionChanged { add => _app.SelectionChanged += value; remove => _app.SelectionChanged -= value; }
 #endif
 #endregion
   }

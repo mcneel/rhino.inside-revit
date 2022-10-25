@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using Autodesk.Revit.UI.Selection;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Rhino.Display;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public abstract class GraphicalElementT<T, R> :
     Element<T, R>,
     IGH_PreviewObject,
-    ISelectionFilter
+    ARUI.Selection.ISelectionFilter
     where T : class, Types.IGH_GraphicalElement
     where R : ARDB.Element
   {
@@ -62,15 +62,15 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override GH_GetterResult Prompt_Singular(ref T value)
     {
-      const ObjectType objectType = ObjectType.Element;
+      const ARUI.Selection.ObjectType objectType = ARUI.Selection.ObjectType.Element;
 
       var uiDocument = Revit.ActiveUIDocument;
       switch (uiDocument.PickObject(out var reference, objectType, this))
       {
-        case Autodesk.Revit.UI.Result.Succeeded:
+        case ARUI.Result.Succeeded:
           value = Types.Element.FromReference(uiDocument.Document, reference) as T;
           return GH_GetterResult.success;
-        case Autodesk.Revit.UI.Result.Cancelled:
+        case ARUI.Result.Cancelled:
           return GH_GetterResult.cancel;
       }
 
@@ -84,9 +84,9 @@ namespace RhinoInside.Revit.GH.Parameters
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
 
-      switch (uiDocument.PickObject(out var reference, ObjectType.LinkedElement, this))
+      switch (uiDocument.PickObject(out var reference, ARUI.Selection.ObjectType.LinkedElement, this))
       {
-        case Autodesk.Revit.UI.Result.Succeeded:
+        case ARUI.Result.Succeeded:
           if (Types.Element.FromReference(doc, reference) is T element)
           {
             value = new GH_Structure<T>();
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Parameters
           }
           break;
 
-        case Autodesk.Revit.UI.Result.Cancelled:
+        case ARUI.Result.Cancelled:
           return GH_GetterResult.cancel;
       }
 
@@ -118,12 +118,12 @@ namespace RhinoInside.Revit.GH.Parameters
       }
       else
       {
-        switch (uiDocument.PickObjects(out var references, ObjectType.Element, this))
+        switch (uiDocument.PickObjects(out var references, ARUI.Selection.ObjectType.Element, this))
         {
-          case Autodesk.Revit.UI.Result.Succeeded:
+          case ARUI.Result.Succeeded:
             value = references.Select(r => Types.Element.FromReference(doc, r) as T).ToList();
             return GH_GetterResult.success;
-          case Autodesk.Revit.UI.Result.Cancelled:
+          case ARUI.Result.Cancelled:
             return GH_GetterResult.cancel;
         }
       }
@@ -138,9 +138,9 @@ namespace RhinoInside.Revit.GH.Parameters
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
 
-      switch (uiDocument.PickObjects(out var references, ObjectType.LinkedElement, this))
+      switch (uiDocument.PickObjects(out var references, ARUI.Selection.ObjectType.LinkedElement, this))
       {
-        case Autodesk.Revit.UI.Result.Succeeded:
+        case ARUI.Result.Succeeded:
           value = new GH_Structure<T>();
 
           var groups = references.
@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.GH.Parameters
             value.AppendRange(group, new GH_Path(index++));
 
           return GH_GetterResult.success;
-        case Autodesk.Revit.UI.Result.Cancelled:
+        case ARUI.Result.Cancelled:
           return GH_GetterResult.cancel;
       }
 
@@ -161,10 +161,10 @@ namespace RhinoInside.Revit.GH.Parameters
       return GH_GetterResult.success;
     }
 
-    class LinkedElementSelectionFilter : ISelectionFilter
+    class LinkedElementSelectionFilter : ARUI.Selection.ISelectionFilter
     {
-      readonly ISelectionFilter SelectionFilter;
-      public LinkedElementSelectionFilter(ISelectionFilter filter) => SelectionFilter = filter;
+      readonly ARUI.Selection.ISelectionFilter SelectionFilter;
+      public LinkedElementSelectionFilter(ARUI.Selection.ISelectionFilter filter) => SelectionFilter = filter;
 
       public bool AllowElement(ARDB.Element elem) => elem is ARDB.RevitLinkInstance;
       public bool AllowReference(ARDB.Reference reference, ARDB.XYZ position)
@@ -179,7 +179,7 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    protected GH_GetterResult Prompt_Elements(ref GH_Structure<T> value, ObjectType objectType, bool multiple, bool preSelect)
+    protected GH_GetterResult Prompt_Elements(ref GH_Structure<T> value, ARUI.Selection.ObjectType objectType, bool multiple, bool preSelect)
     {
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
@@ -197,12 +197,12 @@ namespace RhinoInside.Revit.GH.Parameters
                            ).
                            ToArray();
 
-      var result = Autodesk.Revit.UI.Result.Failed;
+      var result = ARUI.Result.Failed;
       var references = default(IList<ARDB.Reference>);
       {
-        var selectionFilter = objectType == ObjectType.LinkedElement ?
+        var selectionFilter = objectType == ARUI.Selection.ObjectType.LinkedElement ?
           new LinkedElementSelectionFilter(this) :
-          (ISelectionFilter) this;
+          (ARUI.Selection.ISelectionFilter) this;
 
         if (multiple)
         {
@@ -214,14 +214,14 @@ namespace RhinoInside.Revit.GH.Parameters
         else
         {
           result = uiDocument.PickObject(out var reference, objectType, selectionFilter);
-          if (result == Autodesk.Revit.UI.Result.Succeeded)
+          if (result == ARUI.Result.Succeeded)
             references = new ARDB.Reference[] { reference };
         }
       }
 
       switch(result)
       {
-        case Autodesk.Revit.UI.Result.Succeeded:
+        case ARUI.Result.Succeeded:
           value = new GH_Structure<T>();
 
           foreach (var document in documents.Where(x => x.Key != docGUID))
@@ -230,7 +230,7 @@ namespace RhinoInside.Revit.GH.Parameters
           value.AppendRange(references.Select(r => Types.Element.FromReference(doc, r) as T), new GH_Path(DocumentExtension.DocumentSessionId(docGUID)));
 
           return GH_GetterResult.success;
-        case Autodesk.Revit.UI.Result.Cancelled:
+        case ARUI.Result.Cancelled:
           return GH_GetterResult.cancel;
       }
 
@@ -457,7 +457,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         PrepareForPrompt();
         var data = m_data.Duplicate();
-        if (Prompt_Elements(ref data, ObjectType.Element, true, true) == GH_GetterResult.success)
+        if (Prompt_Elements(ref data, ARUI.Selection.ObjectType.Element, true, true) == GH_GetterResult.success)
         {
           RecordPersistentDataEvent("Change data");
 
@@ -548,7 +548,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private async void Menu_ExternaliseData(object sender, EventArgs e)
     {
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SaveSelection);
+      var commandId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.SaveSelection);
       var activeApp = Revit.ActiveUIApplication;
       using (var scope = new External.UI.EditScope(activeApp))
       {
@@ -784,7 +784,7 @@ namespace RhinoInside.Revit.GH.Parameters
         Core.Host.SelectionChanged -= Host_SelectionChanged;
     }
 
-    private void Host_SelectionChanged(object sender, Autodesk.Revit.UI.Events.SelectionChangeEventArgs e)
+    private void Host_SelectionChanged(object sender, ARUI.Events.SelectionChangedEventArgs e)
     {
       ExpireSolution(true);
     }

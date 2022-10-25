@@ -81,9 +81,9 @@ namespace RhinoInside.Revit.External.UI.Selection
 #if !REVIT_2023
 namespace Autodesk.Revit.UI.Events
 {
-  public class SelectionChangeEventArgs : EventArgs, IDisposable
+  public class SelectionChangedEventArgs : EventArgs, IDisposable
   {
-    internal SelectionChangeEventArgs(Document doc, ICollection<ElementId> selectedElements)
+    internal SelectionChangedEventArgs(Document doc, ICollection<ElementId> selectedElements)
     {
       document = doc;
       selectionSet = new SortedSet<ElementId>(selectedElements, RhinoInside.Revit.External.DB.Extensions.ElementIdComparer.NoNullsAscending);
