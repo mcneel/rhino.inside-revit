@@ -612,10 +612,10 @@ namespace RhinoInside.Revit.GH.Parameters
           filters = collector.Cast<ARDB.FilterElement>().OrderBy(x => x.Name).ToArray();
         }
 
-        comboBox.Items.Add("<Active Selection>");
+        comboBox.Items.Add(_ActiveSelection_);
 
-        if (!MutableNickName && NickName == "<Active Selection>")
-          comboBox.SelectedIndex = 1;
+        if (ActiveSelection)
+          comboBox.SelectedIndex = _ActiveSelectionIndex_;
 
         foreach (var filter in filters)
         {
@@ -635,6 +635,12 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (sender is ComboBox comboBox)
       {
+        if (ActiveSelection && comboBox.SelectedIndex != _ActiveSelectionIndex_)
+          Core.Host.SelectionChanged -= Host_SelectionChanged;
+
+        if (!ActiveSelection && comboBox.SelectedIndex == _ActiveSelectionIndex_)
+          Core.Host.SelectionChanged += Host_SelectionChanged;
+
         if (comboBox.SelectedIndex != -1)
         {
           if (comboBox.Items[comboBox.SelectedIndex] is string value)
@@ -698,7 +704,7 @@ namespace RhinoInside.Revit.GH.Parameters
         var doc = Revit.ActiveUIDocument?.Document;
         if (doc is object)
         {
-          if (NickName == "<Active Selection>")
+          if (NickName == _ActiveSelection_)
           {
             var selection = Revit.ActiveUIDocument.Selection.GetElementIds();
             var path = new GH_Path(0);
@@ -757,6 +763,30 @@ namespace RhinoInside.Revit.GH.Parameters
         }
       }
       else base.LoadVolatileData();
+    }
+
+    const string _ActiveSelection_ = "<Active Selection>";
+    const int _ActiveSelectionIndex_ = 1;
+    bool ActiveSelection => !MutableNickName && NickName == _ActiveSelection_;
+
+    public override void AddedToDocument(GH_Document document)
+    {
+      if (ActiveSelection)
+        Core.Host.SelectionChanged += Host_SelectionChanged;
+
+      base.AddedToDocument(document);
+    }
+    public override void RemovedFromDocument(GH_Document document)
+    {
+      base.RemovedFromDocument(document);
+
+      if (ActiveSelection)
+        Core.Host.SelectionChanged -= Host_SelectionChanged;
+    }
+
+    private void Host_SelectionChanged(object sender, Autodesk.Revit.UI.Events.SelectionChangeEventArgs e)
+    {
+      ExpireSolution(true);
     }
     #endregion
   }
