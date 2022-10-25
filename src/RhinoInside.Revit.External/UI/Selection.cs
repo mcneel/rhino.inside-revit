@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -76,3 +77,33 @@ namespace RhinoInside.Revit.External.UI.Selection
     }
   }
 }
+
+#if !REVIT_2023
+namespace Autodesk.Revit.UI.Events
+{
+  public class SelectionChangedEventArgs : EventArgs, IDisposable
+  {
+    internal SelectionChangedEventArgs(Document doc, ICollection<ElementId> selectedElements)
+    {
+      document = doc;
+      selectionSet = new SortedSet<ElementId>(selectedElements, RhinoInside.Revit.External.DB.Extensions.ElementIdComparer.NoNullsAscending);
+    }
+
+    #region RevitAPIEventArgs
+    public void Dispose() => IsValidObject = false;
+    public bool IsValidObject { get; private set; } = true;
+
+    public bool Cancellable => false;
+    public bool IsCancelled() => false;
+    #endregion
+
+    readonly Document document;
+    public Document GetDocument() => document;
+
+    readonly ISet<ElementId> selectionSet;
+    public ISet<ElementId> GetSelectedElements() => selectionSet;
+
+    public IList<Reference> GetReferences() => selectionSet.Select(x => new Reference(document.GetElement(x))).ToList();
+  }
+}
+#endif

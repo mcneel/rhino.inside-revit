@@ -38,35 +38,9 @@ namespace RhinoInside.Revit.External.ApplicationServices
     #endregion
 
     #region Events
-    protected static readonly Dictionary<Delegate, (Delegate Target, int Count)> EventMap = new Dictionary<Delegate, (Delegate, int)>();
-
-    protected static EventHandler<T> AddEventHandler<T>(EventHandler<T> handler)
-    {
-      if (EventMap.TryGetValue(handler, out var trampoline)) trampoline.Count++;
-      else trampoline.Target = new EventHandler<T>((s, a) => ActivationGate.Open(() => handler.Invoke(s, a), s));
-
-      EventMap[handler] = trampoline;
-
-      return (EventHandler<T>) trampoline.Target;
-    }
-
-    protected static EventHandler<T> RemoveEventHandler<T>(EventHandler<T> handler)
-    {
-      if (EventMap.TryGetValue(handler, out var trampoline))
-      {
-        if (trampoline.Count == 0) EventMap.Remove(handler);
-        else
-        {
-          trampoline.Count--;
-          EventMap[handler] = trampoline;
-        }
-      }
-
-      return (EventHandler<T>) trampoline.Target;
-    }
-
-    public abstract event EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs> DocumentChanged;
     public abstract event EventHandler<Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs> ApplicationInitialized;
+    public abstract event EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs> DocumentChanged;
+    public abstract event EventHandler<Autodesk.Revit.DB.Events.DocumentClosingEventArgs> DocumentClosing;
     #endregion
   }
 
@@ -110,20 +84,25 @@ namespace RhinoInside.Revit.External.ApplicationServices
     #endregion
 
     #region Events
-    public override event EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs> DocumentChanged
-    {
-      add => _app.DocumentChanged += AddEventHandler(value);
-      remove => _app.DocumentChanged -= RemoveEventHandler(value);
-    }
     public override event EventHandler<Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs> ApplicationInitialized
     {
-      add    => _app.ApplicationInitialized += AddEventHandler(value);
-      remove => _app.ApplicationInitialized -= RemoveEventHandler(value);
+      add    => _app.ApplicationInitialized += ActivationGate.AddEventHandler(value);
+      remove => _app.ApplicationInitialized -= ActivationGate.RemoveEventHandler(value);
+    }
+    public override event EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs> DocumentChanged
+    {
+      add    => _app.DocumentChanged += ActivationGate.AddEventHandler(value);
+      remove => _app.DocumentChanged -= ActivationGate.RemoveEventHandler(value);
+    }
+    public override event EventHandler<Autodesk.Revit.DB.Events.DocumentClosingEventArgs> DocumentClosing
+    {
+      add    => _app.DocumentClosing += ActivationGate.AddEventHandler(value);
+      remove => _app.DocumentClosing -= ActivationGate.RemoveEventHandler(value);
     }
     #endregion
-  }
+}
 
-  class HostServicesU : HostServices
+class HostServicesU : HostServices
   {
     readonly Application _app;
     public HostServicesU(Application app) => _app = app;
@@ -162,15 +141,20 @@ namespace RhinoInside.Revit.External.ApplicationServices
     #endregion
 
     #region Events
-    public override event EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs> DocumentChanged
-    {
-      add => _app.DocumentChanged += AddEventHandler(value);
-      remove => _app.DocumentChanged -= RemoveEventHandler(value);
-    }
     public override event EventHandler<Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs> ApplicationInitialized
     {
-      add => _app.ApplicationInitialized += AddEventHandler(value);
-      remove => _app.ApplicationInitialized -= RemoveEventHandler(value);
+      add    => _app.ApplicationInitialized += ActivationGate.AddEventHandler(value);
+      remove => _app.ApplicationInitialized -= ActivationGate.RemoveEventHandler(value);
+    }
+    public override event EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs> DocumentChanged
+    {
+      add    => _app.DocumentChanged += ActivationGate.AddEventHandler(value);
+      remove => _app.DocumentChanged -= ActivationGate.RemoveEventHandler(value);
+    }
+    public override event EventHandler<Autodesk.Revit.DB.Events.DocumentClosingEventArgs> DocumentClosing
+    {
+      add    => _app.DocumentClosing += ActivationGate.AddEventHandler(value);
+      remove => _app.DocumentClosing -= ActivationGate.RemoveEventHandler(value);
     }
     #endregion
   }

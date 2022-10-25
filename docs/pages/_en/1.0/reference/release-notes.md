@@ -12,6 +12,8 @@ group: Deployment & Configs
 
 ### RC 
 
+- Now 'Active Selection' expires solution when Revit selection changes.
+
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 

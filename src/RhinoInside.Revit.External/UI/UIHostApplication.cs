@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -49,7 +50,7 @@ namespace RhinoInside.Revit.External.UI
     public abstract IReadOnlyList<RibbonPanel> GetRibbonPanels(string tabName);
     #endregion
 
-    #region Addins
+    #region AddIns
     public abstract AddInId ActiveAddInId { get; }
     public abstract void LoadAddIn(string fileName);
     public abstract ExternalApplicationArray LoadedApplications { get; }
@@ -64,7 +65,84 @@ namespace RhinoInside.Revit.External.UI
     public abstract event EventHandler<IdlingEventArgs> Idling;
     public abstract event EventHandler<ViewActivatingEventArgs> ViewActivating;
     public abstract event EventHandler<ViewActivatedEventArgs> ViewActivated;
+#if REVIT_2023
+    public abstract event EventHandler<SelectionChangedEventArgs> SelectionChanged;
+#endif
     #endregion
+
+#if !REVIT_2023
+    #region SelectionChanged
+    static readonly object selectionChangedLock = new object();
+    static int selectionChangedCount = 0;
+    static event EventHandler<SelectionChangedEventArgs> selectionChanged;
+    public event EventHandler<SelectionChangedEventArgs> SelectionChanged
+    {
+      add
+      {
+        lock (selectionChangedLock)
+        {
+          if (selectionChangedCount == 0)
+          {
+            Idling += CompareSelection;
+            Services.DocumentClosing += Services_DocumentClosing;
+          }
+
+          selectionChangedCount++;
+          selectionChanged += value;
+        }
+      }
+
+      remove
+      {
+        lock (selectionChangedLock)
+        {
+          selectionChangedCount--;
+          selectionChanged -= value;
+
+          if (selectionChangedCount == 0)
+          {
+            Services.DocumentClosing -= Services_DocumentClosing;
+            Idling -= CompareSelection;
+          }
+        }
+      }
+    }
+
+    static readonly Dictionary<Document, ICollection<ElementId>> previousSelections = new Dictionary<Document, ICollection<ElementId>>();
+    private void Services_DocumentClosing(object sender, Autodesk.Revit.DB.Events.DocumentClosingEventArgs e)
+    {
+      previousSelections.Remove(e.Document);
+    }
+
+    private void CompareSelection(object sender, IdlingEventArgs e)
+    {
+      if (selectionChanged is null)
+        return;
+
+      if (sender is UIApplication uiApplication)
+      {
+        if (uiApplication.ActiveUIDocument is UIDocument uiDocument)
+        {
+          if (!previousSelections.TryGetValue(uiDocument.Document, out var previousSelection))
+            previousSelection = new ElementId[0];
+
+          var currentSelection = uiDocument.Selection.GetElementIds();
+
+          if (previousSelection.Count != currentSelection.Count || previousSelection.Zip(currentSelection, (prev, cur) => prev == cur).Any(x => x == false))
+          {
+            if (currentSelection.Count > 0)
+              previousSelections[uiDocument.Document] = currentSelection;
+            else
+              previousSelections.Remove(uiDocument.Document);
+
+            using (var args = new SelectionChangedEventArgs(uiDocument.Document, currentSelection))
+              selectionChanged(sender, args);
+          }
+        }
+      }
+    }
+    #endregion
+#endif
   }
 
   class UIHostApplicationC : UIHostApplication
@@ -78,7 +156,7 @@ namespace RhinoInside.Revit.External.UI
     public override ApplicationServices.HostServices Services => new ApplicationServices.HostServicesC(_app.ControlledApplication);
     public override UIDocument ActiveUIDocument { get => default; set => throw new InvalidOperationException(); }
 
-    #region UI
+#region UI
     public override IntPtr MainWindowHandle
     {
 #if REVIT_2019
@@ -87,9 +165,9 @@ namespace RhinoInside.Revit.External.UI
       get => System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
 #endif
     }
-    #endregion
+#endregion
 
-    #region Ribbon
+#region Ribbon
     public override void CreateRibbonTab(string tabName) =>
       _app.CreateRibbonTab(tabName);
 
@@ -104,23 +182,34 @@ namespace RhinoInside.Revit.External.UI
 
     public override IReadOnlyList<RibbonPanel> GetRibbonPanels(string tabName) =>
       _app.GetRibbonPanels(tabName);
-    #endregion
+#endregion
 
-    #region Addins
+#region Addins
     public override AddInId ActiveAddInId => _app.ActiveAddInId;
     public override void LoadAddIn(string fileName) => _app.LoadAddIn(fileName);
     public override ExternalApplicationArray LoadedApplications => _app.LoadedApplications;
-    #endregion
+#endregion
 
-    #region Commands
+#region Commands
     public override bool CanPostCommand(RevitCommandId commandId) => false;
     public override void PostCommand(RevitCommandId commandId) => throw new InvalidOperationException();
-    #endregion
+#endregion
 
-    #region Events
-    public override event EventHandler<IdlingEventArgs> Idling { add => _app.Idling += value; remove => _app.Idling -= value; }
+#region Events
+    public override event EventHandler<IdlingEventArgs> Idling
+    {
+      add    => _app.Idling += ActivationGate.AddEventHandler(value);
+      remove => _app.Idling -= ActivationGate.RemoveEventHandler(value);
+    }
     public override event EventHandler<ViewActivatingEventArgs> ViewActivating { add => _app.ViewActivating += value; remove => _app.ViewActivating -= value; }
     public override event EventHandler<ViewActivatedEventArgs> ViewActivated { add => _app.ViewActivated += value; remove => _app.ViewActivated -= value; }
+#if REVIT_2023
+    public override event EventHandler<SelectionChangedEventArgs> SelectionChanged
+    {
+      add    => _app.SelectionChanged += ActivationGate.AddEventHandler(value);
+      remove => _app.SelectionChanged -= ActivationGate.RemoveEventHandler(value);
+    }
+#endif
     #endregion
   }
 
@@ -149,7 +238,7 @@ namespace RhinoInside.Revit.External.UI
       }
     }
 
-    #region UI
+#region UI
     public override IntPtr MainWindowHandle
     {
 #if REVIT_2019
@@ -158,9 +247,9 @@ namespace RhinoInside.Revit.External.UI
       get => System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
 #endif
     }
-    #endregion
+#endregion
 
-    #region Ribbon
+#region Ribbon
     public override void CreateRibbonTab(string tabName) =>
       _app.CreateRibbonTab(tabName);
 
@@ -175,23 +264,34 @@ namespace RhinoInside.Revit.External.UI
 
     public override IReadOnlyList<RibbonPanel> GetRibbonPanels(string tabName) =>
       _app.GetRibbonPanels(tabName);
-    #endregion
+#endregion
 
-    #region Addins
+#region AddIns
     public override AddInId ActiveAddInId => _app.ActiveAddInId;
     public override void LoadAddIn(string fileName) => _app.LoadAddIn(fileName);
     public override ExternalApplicationArray LoadedApplications => _app.LoadedApplications;
-    #endregion
+#endregion
 
-    #region Commands
+#region Commands
     public override bool CanPostCommand(RevitCommandId commandId) => _app.CanPostCommand(commandId);
     public override void PostCommand(RevitCommandId commandId) => _app.PostCommand(commandId);
-    #endregion
+#endregion
 
-    #region Events
-    public override event EventHandler<IdlingEventArgs> Idling { add => _app.Idling += value; remove => _app.Idling -= value; }
+#region Events
+    public override event EventHandler<IdlingEventArgs> Idling
+    {
+      add    => _app.Idling += ActivationGate.AddEventHandler(value);
+      remove => _app.Idling -= ActivationGate.RemoveEventHandler(value);
+    }
     public override event EventHandler<ViewActivatingEventArgs> ViewActivating { add => _app.ViewActivating += value; remove => _app.ViewActivating -= value; }
     public override event EventHandler<ViewActivatedEventArgs> ViewActivated { add => _app.ViewActivated += value; remove => _app.ViewActivated -= value; }
+#if REVIT_2023
+    public override event EventHandler<SelectionChangedEventArgs> SelectionChanged
+    {
+      add    => _app.SelectionChanged += ActivationGate.AddEventHandler(value);
+      remove => _app.SelectionChanged -= ActivationGate.RemoveEventHandler(value);
+    }
+#endif
     #endregion
   }
   #endregion

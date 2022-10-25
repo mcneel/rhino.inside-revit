@@ -488,6 +488,41 @@ namespace RhinoInside.Revit.External
     [ThreadStatic]
     static Hook hook = default;
     #endregion
+
+    #region Events
+    static readonly Dictionary<Delegate, (Delegate Target, int Count)> EventMap = new Dictionary<Delegate, (Delegate, int)>();
+
+    internal static EventHandler<T> AddEventHandler<T>(EventHandler<T> handler)
+    {
+      lock (EventMap)
+      {
+        if (EventMap.TryGetValue(handler, out var trampoline)) trampoline.Count++;
+        else trampoline.Target = new EventHandler<T>((s, a) => ActivationGate.Open(() => handler.Invoke(s, a), s));
+
+        EventMap[handler] = trampoline;
+
+        return (EventHandler<T>) trampoline.Target;
+      }
+    }
+
+    internal static EventHandler<T> RemoveEventHandler<T>(EventHandler<T> handler)
+    {
+      lock (EventMap)
+      {
+        if (EventMap.TryGetValue(handler, out var trampoline))
+        {
+          if (trampoline.Count == 0) EventMap.Remove(handler);
+          else
+          {
+            trampoline.Count--;
+            EventMap[handler] = trampoline;
+          }
+        }
+
+        return (EventHandler<T>) trampoline.Target;
+      }
+    }
+    #endregion
   }
 }
 
