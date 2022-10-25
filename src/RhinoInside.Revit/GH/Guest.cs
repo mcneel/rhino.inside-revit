@@ -53,13 +53,7 @@ namespace RhinoInside.Revit.GH
 
     GuestResult OnCheckIn(CheckInArgs options)
     {
-      try
-      {
-        if (!LoadStartupAssemblies())
-          options.Message = "Failed to load Revit Grasshopper components.";
-      }
-      catch (FileNotFoundException e) { options.Message = $"{e.Message}{Environment.NewLine}{e.FileName}"; }
-      catch (Exception e)             { options.Message = e.Message; }
+      Instances.CanvasCreated += EditorLoaded;
 
       // Register PreviewServer
       previewServer = new PreviewServer();
@@ -96,6 +90,31 @@ namespace RhinoInside.Revit.GH
       Instances.DocumentServer.DocumentRemoved += DocumentServer_DocumentRemoved;
 
       return GuestResult.Succeeded;
+    }
+
+    private void EditorLoaded(GH_Canvas canvas)
+    {
+      Instances.CanvasCreated += EditorLoaded;
+
+      var message = string.Empty;
+      try
+      {
+        if (!LoadStartupAssemblies())
+          message = "Failed to load Revit Grasshopper components.";
+      }
+      catch (FileNotFoundException e) { message = $"{e.Message}{Environment.NewLine}{e.FileName}"; }
+      catch (Exception e) { message = e.Message; }
+
+      if (!string.IsNullOrEmpty(message))
+      {
+        System.Windows.Forms.MessageBox.Show
+        (
+          System.Windows.Forms.Form.ActiveForm,
+          message, "Error",
+          System.Windows.Forms.MessageBoxButtons.OK,
+          System.Windows.Forms.MessageBoxIcon.Error
+        );
+      }
     }
 
     GuestResult OnCheckOut(CheckOutArgs options)
