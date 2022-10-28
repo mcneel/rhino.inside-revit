@@ -107,13 +107,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "View", out ARDB.View view)) return;
+      if (!Params.GetData(DA, "View", out Types.View view)) return;
 
       ReconstructElement<ARDB.TextNote>
       (
         view.Document, _Output_, textNote =>
         {
           // Input
+          if (!view.Value.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support text notes creation", view);
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
           if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
           if (!Params.GetData(DA, "Content", out string text)) return null;
@@ -122,14 +123,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
           if (rotation.HasValue && Params.Input<Param_Number>("Rotation")?.UseDegrees == true)
             rotation = Rhino.RhinoMath.ToRadians(rotation.Value);
-
-          if
-          (
-            view.ViewType is ARDB.ViewType.Schedule ||
-            view.ViewType is ARDB.ViewType.ColumnSchedule ||
-            view.ViewType is ARDB.ViewType.PanelSchedule
-          )
-            throw new Exceptions.RuntimeArgumentException("View", "This view does not support text notes creation", view);
 
           width = GeometryEncoder.ToInternalLength(width ?? double.NaN);
           var min = ARDB.TextElement.GetMinimumAllowedWidth(view.Document, type.Id);
@@ -147,15 +140,15 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             width = max;
           }
 
-          var viewPlane = new Plane(view.Origin.ToPoint3d(), view.RightDirection.ToVector3d(), view.UpDirection.ToVector3d());
-          if (view.ViewType != ARDB.ViewType.ThreeD)
+          var viewPlane = view.Location;
+          if (view.Value.ViewType != ARDB.ViewType.ThreeD)
             point = viewPlane.ClosestPoint(point.Value);
 
           // Compute
           textNote = Reconstruct
           (
             textNote,
-            view,
+            view.Value,
             point.Value.ToXYZ(),
             rotation ?? 0.0,
             text,

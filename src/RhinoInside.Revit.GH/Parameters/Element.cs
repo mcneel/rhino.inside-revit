@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Parameters
           var pinned = ToElementIds(VolatileData).
                        Where(x => doc.Equals(x.Document)).
                        Select(x => doc.GetElement(x.Id)).
-                       Where(x => x?.Pinned == true).Any();
+                       Any(x => x?.Pinned == true);
 
           if (pinned)
             Menu_AppendItem(menu, $"Unpin {GH_Convert.ToPlural(TypeName)}", Menu_UnpinElements, DataType != GH_ParamData.remote, false);
@@ -165,7 +165,7 @@ namespace RhinoInside.Revit.GH.Parameters
           var unpinned = ToElementIds(VolatileData).
                        Where(x => doc.Equals(x.Document)).
                        Select(x => doc.GetElement(x.Id)).
-                       Where(x => x?.Pinned == false).Any();
+                       Any(x => x?.Pinned == false);
 
           if (unpinned)
             Menu_AppendItem(menu, $"Pin {GH_Convert.ToPlural(TypeName)}", Menu_PinElements, DataType != GH_ParamData.remote, false);
@@ -177,7 +177,7 @@ namespace RhinoInside.Revit.GH.Parameters
           Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
         }
 
-        if (TrackingMode != TrackingMode.NotApplicable)
+        if (ActiveTrackingMode(default) != TrackingMode.NotApplicable)
           Menu_AppendItem(menu, $"Release {GH_Convert.ToPlural(TypeName)}…", Menu_ReleaseElements, HasTrackedElements, false);
       }
     }
@@ -459,7 +459,8 @@ namespace RhinoInside.Revit.GH.Parameters
     }
     #endregion
 
-    TrackingMode TrackingMode => (Attributes.GetTopLevel.DocObject as IGH_TrackingComponent)?.TrackingMode ?? TrackingMode.NotApplicable;
+    TrackingMode ActiveTrackingMode(ARDB.Document document) =>
+      (document?.IsLinked == true ? null : Attributes.GetTopLevel.DocObject as IGH_TrackingComponent)?.TrackingMode ?? TrackingMode.NotApplicable;
 
     #region IGH_TrackingParam
     ElementStreamMode IGH_TrackingParam.StreamMode { get; set; }
@@ -468,7 +469,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     void IGH_TrackingParam.OpenTrackingParam(ARDB.Document document)
     {
-      if (TrackingMode == TrackingMode.NotApplicable) return;
+      if (ActiveTrackingMode(document) == TrackingMode.NotApplicable) return;
 
       // Open an ElementStreamDictionary to store ouput param on multiple documents
       var streamId = new ElementStreamId(this, string.Empty);
@@ -477,7 +478,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       // This deletes all elements tracked from previous iterations.
       // It helps to avoid name collisions on named elements.
-      if (TrackingMode < TrackingMode.Reconstruct)
+      if (ActiveTrackingMode(document) < TrackingMode.Reconstruct)
       {
         var chain = Attributes.GetTopLevel.DocObject as Components.TransactionalChainComponent;
         foreach (var stream in ElementStreams)
@@ -493,25 +494,25 @@ namespace RhinoInside.Revit.GH.Parameters
 
     void IGH_TrackingParam.CloseTrackingParam()
     {
-      if (TrackingMode == TrackingMode.NotApplicable) return;
+      if (ActiveTrackingMode(default) == TrackingMode.NotApplicable) return;
 
       // Close all element streams and delete excess elements.
       using (ElementStreams) ElementStreams = default;
     }
 
-    IEnumerable<TOutput> IGH_TrackingParam.GetTrackedElements<TOutput>(ARDB.Document doc)
+    IEnumerable<TOutput> IGH_TrackingParam.GetTrackedElements<TOutput>(ARDB.Document document)
     {
-      if (TrackingMode == TrackingMode.Reconstruct)
-        return ElementStreams[doc].Cast<TOutput>();
+      if (ActiveTrackingMode(document) == TrackingMode.Reconstruct)
+        return ElementStreams[document].Cast<TOutput>();
 
       return Enumerable.Empty<TOutput>();
     }
 
-    bool IGH_TrackingParam.ReadTrackedElement<TOutput>(ARDB.Document doc, out TOutput element)
+    bool IGH_TrackingParam.ReadTrackedElement<TOutput>(ARDB.Document document, out TOutput element)
     {
-      if (TrackingMode == TrackingMode.Reconstruct)
+      if (ActiveTrackingMode(document) == TrackingMode.Reconstruct)
       {
-        var elementStream = ElementStreams[doc];
+        var elementStream = ElementStreams[document];
         if (elementStream.Read(out var previous) && previous is TOutput output)
         {
           element = output;
@@ -523,15 +524,15 @@ namespace RhinoInside.Revit.GH.Parameters
       return false;
     }
 
-    void IGH_TrackingParam.WriteTrackedElement<TInput>(ARDB.Document doc, TInput element)
+    void IGH_TrackingParam.WriteTrackedElement<TInput>(ARDB.Document document, TInput element)
     {
-      if (TrackingMode > TrackingMode.Disabled)
-        ElementStreams[doc].Write(element as R);
+      if (ActiveTrackingMode(document) > TrackingMode.Disabled)
+        ElementStreams[document].Write(element as R);
     }
 
     bool IGH_TrackingParam.IsTrackedElement<TInput>(TInput element)
     {
-      if (TrackingMode > TrackingMode.Disabled)
+      if (ActiveTrackingMode(element.Document) > TrackingMode.Disabled)
         return ElementStreams[element.Document].Contains(element as R);
 
       return false;

@@ -69,6 +69,7 @@ namespace RhinoInside.Revit.GH.Components.Views
           case ARDB.ViewType.Section:         param = new Parameters.SectionView(); break;
           case ARDB.ViewType.Elevation:       param = new Parameters.ElevationView(); break;
           case ARDB.ViewType.Detail:          param = new Parameters.DetailView(); break;
+          case ARDB.ViewType.DraftingView:    param = new Parameters.ViewDrafting(); break;
           default:                            param = new Parameters.View(); break;
         }
 
@@ -91,7 +92,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       var clusters = new Dictionary<ARDB.ViewType, List<Types.View>>(viewTypes.Length);
       foreach (var view in views)
       {
-        if (view.Value is ARDB.View value)
+        if (view?.Value is ARDB.View value)
         {
           if (!clusters.TryGetValue(value.ViewType, out var cluster))
             clusters.Add(value.ViewType, cluster = new List<Types.View>());
