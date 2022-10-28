@@ -12,11 +12,14 @@ group: Deployment & Configs
 
 ### RC 
 
-- Now Grasshoppers is not loaded at start up.
-- Now 'Active Selection' expires solution when Revit selection changes.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.10 RC2" version="v1.10.8336.14469" pre_release=true time="10/28/2022" %}
+
+- Now Grasshopper is not loaded at start up.
+- Now changing element selection in Revit, expires 'Active Selection' in Grasshopper.
 
 {% include ltr/release-header.html title="v1.10 RC1" version="v1.10.8326.27328" pre_release=true time="10/18/2022" %}
 
