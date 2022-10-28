@@ -86,11 +86,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         view.Document, _Cloud_, cloud =>
         {
           // Input
+          if (!view.Value.IsAnnotationView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
           if (!Params.GetDataList(DA, "Boundary", out IList<Brep> boundary) || boundary.Count == 0) return null;
           if (!Params.TryGetData(DA, "Revision", out ARDB.Revision revision, x => x.IsValid())) return null;
-
-          if (!view.Value.IsAnnotationView())
-            throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
 
           var tol = GeometryTolerance.Model;
           var viewPlane = view.Location;
