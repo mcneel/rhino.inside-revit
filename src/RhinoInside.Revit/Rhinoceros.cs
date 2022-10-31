@@ -90,8 +90,13 @@ namespace RhinoInside.Revit
       catch (Exception e)
       {
         ErrorReport.TraceException(e, Core.Host);
-        ErrorReport.ReportException(e, Core.Host);
-        Core.CurrentStatus = Core.Status.Failed;
+
+        if (Core.CurrentStatus > Core.Status.Unavailable)
+        {
+          ErrorReport.ReportException(e, Core.Host);
+          Core.CurrentStatus = Core.Status.Failed;
+        }
+
         return false;
       }
       finally
@@ -120,6 +125,9 @@ namespace RhinoInside.Revit
 
     internal static ARUI.Result Startup()
     {
+      if (!RhinoApp.CanSave)
+        return ARUI.Result.Cancelled;
+
       RhinoApp.MainLoop                         += MainLoop;
 
       RhinoDoc.NewDocument                      += OnNewDocument;

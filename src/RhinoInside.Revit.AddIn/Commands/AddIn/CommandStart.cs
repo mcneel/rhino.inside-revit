@@ -134,6 +134,8 @@ namespace RhinoInside.Revit.AddIn.Commands
 
           if (Core.CurrentStatus == Core.Status.Unavailable)
             button.ToolTip = "Rhino.Inside failed to found a valid copy of Rhino installed.";
+          else if (Core.CurrentStatus == Core.Status.Expired)
+            button.ToolTip = "Rhino.Inside failed to found a valid Rhino license.";
           else if (Core.CurrentStatus == Core.Status.Obsolete)
             button.ToolTip = "Rhino.Inside has expired.";
           else
