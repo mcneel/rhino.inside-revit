@@ -56,6 +56,13 @@ namespace RhinoInside.Revit
       // Load RhinoCore
       try
       {
+        EventHandler<Rhino.Runtime.LicenseStateChangedEventArgs> LicenseStateChanged = default;
+        RhinoApp.LicenseStateChanged += LicenseStateChanged = (sender, arg) =>
+        {
+          if(!arg.CallingRhinoCommonAllowed)
+            Core.CurrentStatus = Core.Status.Expired;
+        };
+
         var args = new List<string>();
 
         if (Core.IsolateSettings)

@@ -94,6 +94,10 @@ namespace RhinoInside.Revit.AddIn.Commands
 
         case Core.Status.Unavailable:
           return Core.CheckSetup();
+
+        case Core.Status.Expired:
+          message = "Rhino license is not available.";
+          return Result.Failed;
       }
 
       return Result.Failed;
