@@ -94,6 +94,10 @@ namespace RhinoInside.Revit.AddIn.Commands
 
         case Core.Status.Unavailable:
           return Core.CheckSetup();
+
+        case Core.Status.Expired:
+          message = "Rhino license is not available.";
+          return Result.Failed;
       }
 
       return Result.Failed;
@@ -130,6 +134,8 @@ namespace RhinoInside.Revit.AddIn.Commands
 
           if (Core.CurrentStatus == Core.Status.Unavailable)
             button.ToolTip = "Rhino.Inside failed to found a valid copy of Rhino installed.";
+          else if (Core.CurrentStatus == Core.Status.Expired)
+            button.ToolTip = "Rhino.Inside failed to found a valid Rhino license.";
           else if (Core.CurrentStatus == Core.Status.Obsolete)
             button.ToolTip = "Rhino.Inside has expired.";
           else

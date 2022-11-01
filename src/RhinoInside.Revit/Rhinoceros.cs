@@ -56,6 +56,13 @@ namespace RhinoInside.Revit
       // Load RhinoCore
       try
       {
+        EventHandler<Rhino.Runtime.LicenseStateChangedEventArgs> LicenseStateChanged = default;
+        RhinoApp.LicenseStateChanged += LicenseStateChanged = (sender, arg) =>
+        {
+          if(!arg.CallingRhinoCommonAllowed)
+            Core.CurrentStatus = Core.Status.Expired;
+        };
+
         var args = new List<string>();
 
         if (Core.IsolateSettings)
@@ -83,8 +90,13 @@ namespace RhinoInside.Revit
       catch (Exception e)
       {
         ErrorReport.TraceException(e, Core.Host);
-        ErrorReport.ReportException(e, Core.Host);
-        Core.CurrentStatus = Core.Status.Failed;
+
+        if (Core.CurrentStatus > Core.Status.Unavailable)
+        {
+          ErrorReport.ReportException(e, Core.Host);
+          Core.CurrentStatus = Core.Status.Failed;
+        }
+
         return false;
       }
       finally
@@ -113,6 +125,9 @@ namespace RhinoInside.Revit
 
     internal static ARUI.Result Startup()
     {
+      if (!RhinoApp.CanSave)
+        return ARUI.Result.Cancelled;
+
       RhinoApp.MainLoop                         += MainLoop;
 
       RhinoDoc.NewDocument                      += OnNewDocument;

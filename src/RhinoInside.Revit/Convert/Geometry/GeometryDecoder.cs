@@ -1600,21 +1600,21 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal static IEnumerable<GeometryBase> ToGeometryBaseMany(this ARDB.GeometryObject geometry) =>
       ToGeometryBaseMany(geometry, _ => true);
 
-    internal static IEnumerable<GeometryBase> ToGeometryBaseMany(this ARDB.GeometryObject geometry, Func<ARDB.GeometryObject, bool> visitor)
+    internal static IEnumerable<GeometryBase> ToGeometryBaseMany(this ARDB.GeometryObject geometry, Predicate<ARDB.GeometryObject> predicate)
     {
       UpdateGraphicAttributes(geometry);
 
-      if (visitor(geometry))
+      if (predicate(geometry))
       {
         switch (geometry)
         {
           case ARDB.GeometryElement element:
-            foreach (var g in element.SelectMany(x => x.ToGeometryBaseMany(visitor)))
+            foreach (var g in element.SelectMany(x => x.ToGeometryBaseMany(predicate)))
               yield return g;
             yield break;
 
           case ARDB.GeometryInstance instance:
-            foreach (var g in instance.GetInstanceGeometry().ToGeometryBaseMany(visitor))
+            foreach (var g in instance.GetInstanceGeometry().ToGeometryBaseMany(predicate))
               yield return g;
             yield break;
 
@@ -1632,6 +1632,10 @@ namespace RhinoInside.Revit.Convert.Geometry
 
           case ARDB.PolyLine polyline:
             yield return SetGraphicAttributes(polyline.ToPolylineCurve());
+            yield break;
+
+          case ARDB.Point point:
+            yield return SetGraphicAttributes(point.ToPoint());
             yield break;
         }
       }
