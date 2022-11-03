@@ -258,6 +258,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
               {
                 // Adjust value acording to data-type dimensionality
                 if (spec.TryGetLengthDimensionality(out var dimensionality))
+                {
                   value = UnitConverter.Convert
                   (
                     value,
@@ -265,23 +266,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
                     Convert.Units.UnitScale.Internal,
                     dimensionality
                   );
-                else
-                  dimensionality = 0;
-
-                // Adjust tolerance acording to data-type dimensionality
-                if (Condition == ConditionType.Equals || Condition == ConditionType.NotEquals)
-                {
-                  tol = dimensionality == 0 ?
-                    1e-6 :
-                    UnitConverter.Convert
-                    (
-                      GeometryTolerance.Internal.VertexTolerance,
-                      UnitConverter.Model.UnitScale,
-                      Convert.Units.UnitScale.Internal,
-                      Math.Abs(dimensionality)
-                    );
                 }
               }
+
+              if (Condition == ConditionType.Equals || Condition == ConditionType.NotEquals)
+                tol = NumericTolerance.DefaultTolerance;
 
               rule = new ARDB.FilterDoubleRule(provider, ruleEvaluator, value, tol);
             }
