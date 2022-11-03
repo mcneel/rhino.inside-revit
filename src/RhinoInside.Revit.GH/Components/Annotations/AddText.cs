@@ -183,8 +183,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       {
         var pinned = textNote.Pinned;
         textNote.Pinned = false;
-        using (var axis = ARDB.Line.CreateUnbound(textNote.Coord, -view.ViewDirection))
-          ARDB.ElementTransformUtils.RotateElement(textNote.Document, textNote.Id, axis, rotation - currentRotation);
+        using (var axis = ARDB.Line.CreateUnbound(textNote.Coord, view.ViewDirection))
+          ARDB.ElementTransformUtils.RotateElement(textNote.Document, textNote.Id, axis, rotation + currentRotation);
         textNote.Pinned = pinned;
       }
 
