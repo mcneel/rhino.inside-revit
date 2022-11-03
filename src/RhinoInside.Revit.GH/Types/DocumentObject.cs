@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using Rhino.Geometry;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
@@ -9,9 +10,11 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   /// <summary>
-  /// Interface to wrap classes that are defined into <see cref="Autodesk.Revit.DB"/> namespace.
-  /// For example: <see cref="ARDB.Document"/>
+  /// Interface to wrap document related types.
   /// </summary>
+  /// <remarks>
+  /// For example: <see cref="ARDB.Document"/>
+  /// </remarks>
   public interface IGH_DocumentObject : IGH_Goo
   {
     ARDB.Document Document { get; }
@@ -98,18 +101,11 @@ namespace RhinoInside.Revit.GH.Types
     protected DocumentObject() { }
     protected DocumentObject(ARDB.Document doc, object val) { document = doc; value = val; }
 
-    ARDB.Document document = default;
+    ARDB.Document document;
     public ARDB.Document Document
     {
-      get => document?.IsValidObject != true ? null : document;
-      protected set
-      {
-        // Please don't Dispose 'document' here, same reference may be in use in other places.
-        //if (value is null) document?.Dispose();
-
-        document = value;
-        ResetValue();
-      }
+      get => document?.IsValidObject == true ? document : null;
+      protected set => document = value;
     }
 
     protected internal bool AssertValidDocument(DocumentObject other, string paramName)
@@ -129,10 +125,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected virtual void ResetValue()
     {
-      // Please don't Dispose 'value' here, same reference may be in use in other places.
-      //if (value is IDisposable disposable)
-      //  disposable.Dispose();
-
+      document = default;
       value = default;
     }
 
@@ -140,9 +133,11 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   /// <summary>
-  /// Interface to wrap classes that can be created-duplicated-updated-deleted without starting a Revit Transaction.
-  /// For example: <see cref="ARDB.CompoundStructureLayer"/>
+  /// Interface to wrap document related types that can be created-duplicated-updated-deleted without starting a Revit Transaction.
   /// </summary>
+  /// <remarks>
+  /// For example: <see cref="ARDB.CompoundStructureLayer"/>
+  /// </remarks>
   public interface IGH_ValueObject : IGH_DocumentObject
   {
 
@@ -178,9 +173,11 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   /// <summary>
-  /// Interface to wrap classes that can not be created-duplicated-updated-deleted without starting a Revit Transaction.
-  /// For example: <see cref="ARDB.CurtainGrid"/>, <see cref="ARDB.Parameter"/>
+  /// Interface to wrap document related types that can NOT be created-duplicated-updated-deleted without starting a Revit Transaction.
   /// </summary>
+  /// <remarks>
+  /// For example: <see cref="ARDB.Element"/>, <see cref="ARDB.Category"/> or, <see cref="ARDB.Workset"/>
+  /// </remarks>
   public interface IGH_ReferenceObject : IGH_DocumentObject
   {
     Guid DocumentGUID { get; }
@@ -190,7 +187,8 @@ namespace RhinoInside.Revit.GH.Types
   public abstract class ReferenceObject : DocumentObject,
     IEquatable<ReferenceObject>,
     IGH_ReferenceObject,
-    IGH_ReferenceData
+    IGH_ReferenceData,
+    IGH_QuickCast
   {
     protected ReferenceObject() { }
 
@@ -260,11 +258,37 @@ namespace RhinoInside.Revit.GH.Types
     protected abstract object FetchValue();
     public virtual void UnloadReferencedData()
     {
-      ResetValue();
+      if (!IsReferencedData) return;
 
-      if (IsReferencedData)
-        Document = default;
+      ResetValue();
     }
+    #endregion
+
+    #region IGH_QuickCast
+    GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
+    private string QC_Value => External.DB.FullUniqueId.Format(DocumentGUID, UniqueID);
+
+    int IGH_QuickCast.QC_Hash() => QC_Value.GetHashCode();
+
+    double IGH_QuickCast.QC_Distance(IGH_QuickCast other) => (this as IGH_QuickCast).QC_CompareTo(other) == 0 ? 0.0 : double.NaN;
+
+    int IGH_QuickCast.QC_CompareTo(IGH_QuickCast other)
+    {
+      return other is IGH_ElementId otherId ?
+        QC_Value.CompareTo(External.DB.FullUniqueId.Format(otherId.DocumentGUID, otherId.UniqueID)) :
+        -1;
+    }
+
+    bool IGH_QuickCast.QC_Bool() => throw new InvalidCastException();
+    int IGH_QuickCast.QC_Int() => throw new InvalidCastException();
+    double IGH_QuickCast.QC_Num() => throw new InvalidCastException();
+    string IGH_QuickCast.QC_Text() => QC_Value;
+    System.Drawing.Color IGH_QuickCast.QC_Col() => throw new InvalidCastException();
+    Point3d IGH_QuickCast.QC_Pt() => throw new InvalidCastException();
+    Vector3d IGH_QuickCast.QC_Vec() => throw new InvalidCastException();
+    Complex IGH_QuickCast.QC_Complex() => throw new InvalidCastException();
+    Matrix IGH_QuickCast.QC_Matrix() => throw new InvalidCastException();
+    Interval IGH_QuickCast.QC_Interval() => throw new InvalidCastException();
     #endregion
   }
 }
