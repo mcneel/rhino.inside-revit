@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Types
   /// Interface that represents any <see cref="ARDB.Element"/> that has a Graphical representation in Revit
   /// </summary>
   [Kernel.Attributes.Name("Graphical Element")]
-  public interface IGH_GraphicalElement : IGH_Element, IGH_QuickCast
+  public interface IGH_GraphicalElement : IGH_Element
   {
     bool? ViewSpecific { get; }
     View OwnerView { get; }
@@ -95,33 +95,6 @@ namespace RhinoInside.Revit.GH.Types
     bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsReferencedDataLoaded || LoadReferencedData();
     IGH_GeometricGoo IGH_GeometricGoo.Transform(Transform xform) => null;
     IGH_GeometricGoo IGH_GeometricGoo.Morph(SpaceMorph xmorph) => null;
-    #endregion
-
-    #region IGH_QuickCast
-    Point3d IGH_QuickCast.QC_Pt()
-    {
-      var position = Position;
-      if (position.IsValid)
-        return position;
-
-      throw new InvalidCastException();
-    }
-    Vector3d IGH_QuickCast.QC_Vec()
-    {
-      var direction = Direction;
-      if (direction.IsValid)
-        return direction;
-
-      throw new InvalidCastException();
-    }
-    Interval IGH_QuickCast.QC_Interval()
-    {
-      var bbox = BoundingBox;
-      if (bbox.IsValid)
-        return new Interval(bbox.Min.Z, bbox.Max.Z);
-
-      throw new InvalidCastException();
-    }
     #endregion
 
     #region IGH_PreviewData

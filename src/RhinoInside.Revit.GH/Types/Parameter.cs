@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         var parameterClass = Class;
         return parameterClass != ERDB.ParameterClass.Invalid ?
-        $"Revit {Class} Parameter" : "Revit Parameter";
+        $"Revit {parameterClass} Parameter" : "Revit Parameter";
       }
     }
 
@@ -71,8 +71,7 @@ namespace RhinoInside.Revit.GH.Types
     public ParameterKey Duplicate() => (ParameterKey) MemberwiseClone();
 
     #region System.Object
-    public override bool Equals(object obj) =>
-      obj is ParameterKey other && Equals(other);
+    public override bool Equals(object obj) => obj is ParameterKey other && Equals(other);
 
     public override int GetHashCode() => IsReferencedData ?
       base.GetHashCode() :
@@ -126,7 +125,7 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_Goo
     public override bool IsValid => IsReferencedData ?
       ((Id?.TryGetBuiltInParameter(out var _) == true) || base.IsValid) :
-      (name is object && ARDB.NamingUtils.IsValidName(name) || GUID.HasValue);
+      (name is object && ElementNaming.IsValidName(name) || GUID.HasValue);
 
     protected override Type ValueType => typeof(ARDB.ParameterElement);
     public override object ScriptVariable()
@@ -448,7 +447,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (!IsReferencedData)
         {
-          if (!ARDB.NamingUtils.IsValidName(value))
+          if (!ElementNaming.IsValidName(value))
             throw new ArgumentException("Invalid parameter name");
 
           name = value;
@@ -969,8 +968,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region System.Object
     public override string ToString() => Value.AsGoo()?.ToString();
-    public override bool Equals(object obj) =>
-      (obj is ElementId id) ? Equals(id) : base.Equals(obj);
+    public override bool Equals(object obj) => obj is ParameterValue id && Equals(id);
 
     public override int GetHashCode()
     {
@@ -984,10 +982,10 @@ namespace RhinoInside.Revit.GH.Types
         {
           switch (value.StorageType)
           {
-            case ARDB.StorageType.Integer: hashCode ^= value.AsInteger().GetHashCode(); break;
-            case ARDB.StorageType.Double: hashCode ^= value.AsDouble().GetHashCode(); break;
-            case ARDB.StorageType.String: hashCode ^= value.AsString().GetHashCode(); break;
-            case ARDB.StorageType.ElementId: hashCode ^= value.AsElementId().GetHashCode(); break;
+            case ARDB.StorageType.Integer:    hashCode ^= value.AsInteger().GetHashCode(); break;
+            case ARDB.StorageType.Double:     hashCode ^= value.AsDouble().GetHashCode(); break;
+            case ARDB.StorageType.String:     hashCode ^= value.AsString().GetHashCode(); break;
+            case ARDB.StorageType.ElementId:  hashCode ^= value.AsElementId().GetHashCode(); break;
           }
         }
       }
@@ -999,8 +997,7 @@ namespace RhinoInside.Revit.GH.Types
     #region IEquatable
     public bool Equals(ParameterValue other)
     {
-      if (other is null) return false;
-      if (Value is ARDB.Parameter A && other.Value is ARDB.Parameter B)
+      if (Value is ARDB.Parameter A && other?.Value is ARDB.Parameter B)
       {
         if
         (
@@ -1009,16 +1006,16 @@ namespace RhinoInside.Revit.GH.Types
           A.HasValue == B.HasValue
         )
         {
-          if (!Value.HasValue)
+          if (!A.HasValue)
             return true;
 
-          switch (Value.StorageType)
+          switch (A.StorageType)
           {
-            case ARDB.StorageType.None: return true;
-            case ARDB.StorageType.Integer: return A.AsInteger() == B.AsInteger();
-            case ARDB.StorageType.Double: return A.AsDouble() == B.AsDouble();
-            case ARDB.StorageType.String: return A.AsString() == B.AsString();
-            case ARDB.StorageType.ElementId: return A.AsElementId() == B.AsElementId();
+            case ARDB.StorageType.None:       return true;
+            case ARDB.StorageType.Integer:    return A.AsInteger() == B.AsInteger();
+            case ARDB.StorageType.Double:     return A.AsDouble() == B.AsDouble();
+            case ARDB.StorageType.String:     return A.AsString() == B.AsString();
+            case ARDB.StorageType.ElementId:  return A.AsElementId() == B.AsElementId() && Document.Equals(other.Document);
           }
         }
       }

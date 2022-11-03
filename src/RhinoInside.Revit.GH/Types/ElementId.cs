@@ -2,10 +2,8 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
-using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Special;
-using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -25,8 +23,7 @@ namespace RhinoInside.Revit.GH.Types
 
   public abstract class ElementId : ReferenceObject,
     IGH_ElementId,
-    IGH_ItemDescription,
-    IGH_QuickCast
+    IGH_ItemDescription
   {
     #region System.Object
     public bool Equals(IGH_ElementId other) => other is object &&
@@ -125,20 +122,20 @@ namespace RhinoInside.Revit.GH.Types
 
       public bool Valid => owner.IsValid;
 
-      [System.ComponentModel.Description("The document this element belongs to.")]
+      [Description("The document this element belongs to.")]
       public string Document => owner.Document?.GetTitle();
 
-      [System.ComponentModel.Description("The Guid of document this element belongs to.")]
+      [Description("The Guid of document this element belongs to.")]
       public Guid DocumentGUID => owner.DocumentGUID;
 
       protected virtual bool IsValidId(ARDB.Document doc, ARDB.ElementId id) =>
         owner.GetType() == Element.FromElementId(doc, id).GetType();
 
-      [System.ComponentModel.Description("A stable unique identifier for an element within the document.")]
+      [Description("A stable unique identifier for an element within the document.")]
       public string UniqueID => owner.UniqueID;
-      [System.ComponentModel.Description("API Object Type.")]
+      [Description("API Object Type.")]
       public virtual Type ObjectType => owner.Value?.GetType();
-      [System.ComponentModel.Description("Element is built in Revit.")]
+      [Description("Element is built in Revit.")]
       public bool IsBuiltIn => owner.IsReferencedData && owner.Id.IsBuiltInId();
 
       class ObjectConverter : ExpandableObjectConverter
@@ -255,41 +252,8 @@ namespace RhinoInside.Revit.GH.Types
     public abstract ARDB.ElementId Id { get; }
     #endregion
 
-    #region IGH_QuickCast
-    GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
-    private string QC_Value => External.DB.FullUniqueId.Format(DocumentGUID, UniqueID);
-
-    int IGH_QuickCast.QC_Hash() => QC_Value.GetHashCode();
-
-    double IGH_QuickCast.QC_Distance(IGH_QuickCast other) => (this as IGH_QuickCast).QC_CompareTo(other) == 0 ? 0.0 : double.NaN;
-
-    int IGH_QuickCast.QC_CompareTo(IGH_QuickCast other)
-    {
-      return other is IGH_ElementId otherId ?
-        QC_Value.CompareTo(External.DB.FullUniqueId.Format(otherId.DocumentGUID, otherId.UniqueID)) :
-        -1;
-    }
-
-    bool IGH_QuickCast.QC_Bool() => throw new InvalidCastException();
-    int IGH_QuickCast.QC_Int() => throw new InvalidCastException();
-    double IGH_QuickCast.QC_Num() => throw new InvalidCastException();
-    string IGH_QuickCast.QC_Text() => QC_Value;
-    Color IGH_QuickCast.QC_Col() => throw new InvalidCastException();
-    Point3d IGH_QuickCast.QC_Pt() => throw new InvalidCastException();
-    Vector3d IGH_QuickCast.QC_Vec() => throw new InvalidCastException();
-    Complex IGH_QuickCast.QC_Complex() => throw new InvalidCastException();
-    Matrix IGH_QuickCast.QC_Matrix() => throw new InvalidCastException();
-    Interval IGH_QuickCast.QC_Interval() => throw new InvalidCastException();
-    #endregion
-
     public ElementId() { }
 
     protected ElementId(ARDB.Document doc, object value) : base(doc, value) { }
-
-    #region Properties
-    public override string DisplayName => IsReferencedData ?
-      Id is null ? "INVALID" : Id.ToValue().ToString() :
-      "<None>";
-    #endregion
   }
 }
