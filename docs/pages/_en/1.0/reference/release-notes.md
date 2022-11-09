@@ -16,6 +16,10 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.10 RC3" version="v1.10.8342.22296" pre_release=true time="11/08/2022" %}
+
+- Minor Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.10 RC2" version="v1.10.8336.14469" pre_release=true time="10/28/2022" %}
 
 - Now Grasshopper is not loaded at start up.
