@@ -115,33 +115,39 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return min + normalizedParameter * (max - min);
     }
 
+    public static Curve CreateBounded(this Curve crv, double startParameter, double endParameter)
+    {
+      crv = crv.CreateTransformed(Transform.Identity);
+      crv.MakeBound(startParameter, endParameter);
+      return crv;
+    }
+
     public static IEnumerable<Curve> ToBoundedCurves(this Curve curve)
     {
-      switch (curve)
+      if (!curve.IsBound)
       {
-        case Arc arc:
-          if (!arc.IsBound)
-          {
-            yield return Arc.Create(arc.Center, arc.Radius, 0.0, Math.PI, arc.XDirection, arc.YDirection);
-            yield return Arc.Create(arc.Center, arc.Radius, Math.PI, Math.PI * 2.0, arc.XDirection, arc.YDirection);
-          }
-          else yield return arc;
-          yield break;
-        case Ellipse ellipse:
-          if (!ellipse.IsBound)
-          {
-#if REVIT_2018
-            yield return Ellipse.CreateCurve(ellipse.Center, ellipse.RadiusX, ellipse.RadiusY, ellipse.XDirection, ellipse.YDirection, 0.0, Math.PI);
-            yield return Ellipse.CreateCurve(ellipse.Center, ellipse.RadiusX, ellipse.RadiusY, ellipse.XDirection, ellipse.YDirection, Math.PI, Math.PI * 2.0);
-#else
-            yield return Ellipse.Create(ellipse.Center, ellipse.RadiusX, ellipse.RadiusY, ellipse.XDirection, ellipse.YDirection, 0.0, Math.PI);
-            yield return Ellipse.Create(ellipse.Center, ellipse.RadiusX, ellipse.RadiusY, ellipse.XDirection, ellipse.YDirection, Math.PI, Math.PI * 2.0);
-#endif
-          }
-          else yield return ellipse;
-          yield break;
-        case Curve c: yield return c; yield break;
+        switch (curve)
+        {
+          case Line line:
+            yield return line.CreateBounded(-15_000.0, +15_000.0);
+            yield break;
+
+          case Arc arc:
+            yield return arc.CreateBounded(0.0, Math.PI);
+            yield return arc.CreateBounded(Math.PI, 2.0 * Math.PI);
+            yield break;
+
+          case Ellipse ellipse:
+            yield return ellipse.CreateBounded(0.0, Math.PI);
+            yield return ellipse.CreateBounded(Math.PI, 2.0 * Math.PI);
+            yield break;
+
+          default:
+            throw new NotImplementedException($"{nameof(ToBoundedCurves)} is not implemented for {curve.GetType()}.");
+        }
       }
+
+      yield return curve;
     }
 
     public static CurveArray ToCurveArray(this IEnumerable<Curve> curves)
