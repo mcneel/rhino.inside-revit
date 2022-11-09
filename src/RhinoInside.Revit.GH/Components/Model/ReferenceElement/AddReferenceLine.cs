@@ -90,8 +90,8 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
           if (curve.IsShort(tol.ShortCurveTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
-          if (curve.IsClosed(tol.VertexTolerance))
-            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+          if (curve is NurbsCurve && curve.IsClosed(tol.ShortCurveTolerance * 1.01))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!curve.IsParallelToPlane(plane, tol.VertexTolerance, tol.AngleTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to view plane.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
