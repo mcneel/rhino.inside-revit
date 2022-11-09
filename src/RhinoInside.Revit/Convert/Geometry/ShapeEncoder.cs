@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Rhino.Geometry;
@@ -24,7 +25,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           return pointCloud.Select(x => x.ToPoint(factor)).ToArray();
 
         case Curve curve:
-          return curve.ToCurveMany(factor).SelectMany(x => x.ToBoundedCurves()).ToArray();
+          return curve.ToCurveMany(factor).SelectMany(x => x.ToShape()).ToArray();
 
         case Brep brep:
           if (ToShape(brep, factor) is ARDB.GeometryObject brepShape)
@@ -57,6 +58,25 @@ namespace RhinoInside.Revit.Convert.Geometry
       }
 
       return new ARDB.GeometryObject[0];
+    }
+
+    static IEnumerable<ARDB.Curve> ToShape(this ARDB.Curve curve)
+    {
+      foreach (var segment in curve.ToBoundedCurves())
+      {
+        var distance = segment.GetEndPoint(0).DistanceTo(segment.GetEndPoint(1));
+        if (distance < GeometryTolerance.Internal.VertexTolerance || 30_000 < distance)
+        {
+          // TODO : Split curve in appropiate segments instead of throwing.
+          throw new ConversionException
+          (
+            "Input curve does not satisfy DirectShape validation criteria. " +
+            "Distance betwen end points should be greater than vertex-tolerance and less than 30,000 ft."
+          );
+        }
+
+        yield return segment;
+      }
     }
 
     static ARDB.GeometryObject ToShape(Brep brep, double factor)
