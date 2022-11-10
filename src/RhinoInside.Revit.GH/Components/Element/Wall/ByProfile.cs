@@ -9,7 +9,6 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Walls
 {
   using Convert.Geometry;
-  using Convert.System.Collections.Generic;
   using External.DB.Extensions;
   using ElementTracking;
   using Kernel.Attributes;
@@ -77,12 +76,21 @@ namespace RhinoInside.Revit.GH.Components.Walls
     };
     protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix;
 
-    bool Reuse(ref ARDB.Wall element, IList<Curve> boundaries, Vector3d normal, ARDB.WallType type)
+    bool Reuse(ref ARDB.Wall element, IList<Curve> boundaries, Plane plane, ARDB.WallType type)
     {
-      //return false;
       if (element is null) return false;
 
-      if (!(element.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, normal)))
+      // TODO : Move & Orient the Wall instead of recreate it.
+      if (element.Location is ARDB.LocationCurve location && location.Curve is ARDB.Line line)
+      {
+        var curEquation = new Plane(line.Origin.ToPoint3d(), line.Direction.ToVector3d(), Vector3d.ZAxis).GetPlaneEquation();
+        var newEquation = plane.GetPlaneEquation();
+
+        if (!GeometryTolerance.Model.AlmostEqualLengths(curEquation[3], newEquation[3])) return false;
+      }
+      else return false;
+
+      if (!(element.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, plane.Normal)))
         return false;
 
       if (element.GetTypeId() != type.Id)
@@ -130,39 +138,46 @@ namespace RhinoInside.Revit.GH.Components.Walls
       [Optional] ARDB.Structure.StructuralWallUsage structuralUsage
     )
     {
-      var loops = profile.SelectMany(x => x.Loops).Select(x => x.To3dCurve()).ToArray();
+      var loops = profile.OfType<Brep>().SelectMany(x => x.Loops).Select(x => x.To3dCurve()).ToArray();
 
       if (loops.Length < 1) return;
 
       var tol = GeometryTolerance.Model;
-      var normal = default(Vector3d);
+      var boundaryPlane = default(Plane);
       var maxArea = 0.0;
-      foreach (var boundary in loops)
+      foreach (var loop in loops)
       {
-        var boundaryPlane = default(Plane);
+        var plane = default(Plane);
         if
         (
-           boundary is null ||
-           boundary.IsShort(tol.ShortCurveTolerance) ||
-          !boundary.IsClosed ||
-          !boundary.TryGetPlane(out boundaryPlane, tol.VertexTolerance) ||
-          !boundaryPlane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance)
+           loop is null ||
+           loop.IsShort(tol.ShortCurveTolerance) ||
+          !loop.IsClosed ||
+          !loop.TryGetPlane(out plane, tol.VertexTolerance) ||
+          !plane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance)
         )
-          ThrowArgumentException(nameof(loops), "Boundary profile should be a valid vertical planar closed curve.", boundary);
+          ThrowArgumentException(nameof(loops), "Boundary profile should be a valid vertical planar closed curve.", loop);
 
-        using (var properties = AreaMassProperties.Compute(boundary))
+        using (var properties = AreaMassProperties.Compute(loop))
         {
           if (properties is null)
-            ThrowArgumentException(nameof(loops), "Failed to compute Boundary Area", boundary);
+            ThrowArgumentException(nameof(loops), "Failed to compute Boundary Area", loop);
 
           if (properties.Area > maxArea)
           {
             maxArea = properties.Area;
-            normal = boundaryPlane.Normal;
+            var orientation = loop.ClosedCurveOrientation(plane);
 
-            var orientation = boundary.ClosedCurveOrientation(boundaryPlane);
-            if (orientation == CurveOrientation.CounterClockwise)
-              normal.Reverse();
+            boundaryPlane = new Plane
+            (
+              plane.Origin,
+              Vector3d.CrossProduct
+              (
+                Vector3d.ZAxis,
+                orientation == CurveOrientation.CounterClockwise ? -plane.Normal : plane.Normal
+              ),
+              Vector3d.ZAxis
+            );
           }
         }
       }
@@ -202,7 +217,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
         if (offsetDist != 0.0)
         {
           offsetDist *= Revit.ModelUnits;
-          var translation = Transform.Translation(normal * (flipped ? -offsetDist : offsetDist));
+          var translation = Transform.Translation(boundaryPlane.Normal * (flipped ? -offsetDist : offsetDist));
+          boundaryPlane.Transform(translation);
 
           var newLoops = new Curve[loops.Length];
           for (int p = 0; p < loops.Length; ++p)
@@ -215,17 +231,21 @@ namespace RhinoInside.Revit.GH.Components.Walls
         }
       }
 
-      if (!Reuse(ref wall, loops, normal, type.Value))
+      if (!Reuse(ref wall, loops, boundaryPlane, type.Value))
       {
-        var boundaries = loops.SelectMany(x => GeometryEncoder.ToCurveMany(x)).SelectMany(CurveExtension.ToBoundedCurves).ToList();
+        var boundaries = loops.
+          SelectMany(x => GeometryEncoder.ToCurveMany(Curve.ProjectToPlane(x, boundaryPlane))).
+          SelectMany(CurveExtension.ToBoundedCurves).
+          ToList();
+
         var newWall = ARDB.Wall.Create
         (
           document,
           boundaries,
           type.Value.Id,
           level.Value.Id,
-          structural: true,
-          normal.ToXYZ()
+          structural: structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing,
+          boundaryPlane.Normal.ToXYZ()
         );
 
         // Wait to join at the end of the Transaction
@@ -241,8 +261,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
         newWall.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
 
         ReplaceElement(ref wall, newWall, ExcludeUniqueProperties);
-
-        newWall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT)?.Update(structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing);
       }
 
       if (wall is object)

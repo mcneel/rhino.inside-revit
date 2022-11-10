@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     {
       SolveOptionalLevel(document, boundary, ref level, out var boundaryBBox);
 
-      var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
+      var curveLoops = boundary.ConvertAll(GeometryEncoder.ToBoundedCurveLoop);
 
       if (buildingPad is object)
       {

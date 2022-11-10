@@ -164,8 +164,19 @@ namespace RhinoInside.Revit.GH.Types
       if (profiles.Length != boundaries.Count)
         return false;
 
-      // FilledRegion needs the constraints to be edited from the Revi UI latter!!
-      bool constraintsRemoved = sketch.GetOwner() is ARDB.FilledRegion;
+      bool constraintsRemoved = false;
+      bool splitClosed = true;
+
+      switch (sketch.GetOwner())
+      {
+        // FilledRegion needs the constraints to be edited from the Revi UI latter!!
+        case ARDB.FilledRegion _:     constraintsRemoved = true;  break;
+        case ARDB.ExtrusionRoof _:    splitClosed = false;        break;
+#if REVIT_2022
+        case ARDB.CeilingAndFloor _:  splitClosed = false;        break;
+#endif
+      }
+
       void RemoveConstraints()
       {
         if (constraintsRemoved) return;
@@ -199,7 +210,9 @@ namespace RhinoInside.Revit.GH.Types
 
           var segments = profile.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
             polyCurve.DuplicateSegments() :
-            profile.Split(profile.Domain.Mid);
+            splitClosed ?
+            profile.Split(profile.Domain.Mid) :
+            new Curve[] { profile };
 
           if (pi < loops.Count)
           {

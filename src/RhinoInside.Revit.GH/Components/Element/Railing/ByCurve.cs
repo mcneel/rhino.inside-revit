@@ -61,14 +61,14 @@ namespace RhinoInside.Revit.GH.Components
       {
         newRail = previousRail;
 
-        newRail.SetPath(curve.ToCurveLoop());
+        newRail.SetPath(curve.ToBoundedCurveLoop());
       }
       else
       {
         newRail = ARDB.Architecture.Railing.Create
         (
           document,
-          curve.ToCurveLoop(),
+          curve.ToBoundedCurveLoop(),
           type.Value.Id,
           level.Value.Id
         );

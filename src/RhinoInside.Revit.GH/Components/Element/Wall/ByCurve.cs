@@ -200,7 +200,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           height.Value / Revit.ModelUnits,
           levelIsEmpty ? bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation() : 0.0,
           flipped,
-          structural: true
+          structural: structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing
         );
 
         // Wait to join at the end of the Transaction
@@ -216,8 +216,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
         newWall.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
 
         ReplaceElement(ref wall, newWall, ExcludeUniqueProperties);
-
-        newWall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT)?.Update(structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing);
       }
 
       if (newWall is object)
