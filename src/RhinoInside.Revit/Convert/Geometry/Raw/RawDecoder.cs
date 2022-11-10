@@ -129,48 +129,43 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
             AsPoint3d(line.GetEndPoint(ERDB.CurveEnd.Start)),
             AsPoint3d(line.GetEndPoint(ERDB.CurveEnd.End))
           ),
-          line.GetEndParameter(ERDB.CurveEnd.Start),
-          line.GetEndParameter(ERDB.CurveEnd.End)
+          line.GetEndParameter(ERDB.CurveEnd.Start), line.GetEndParameter(ERDB.CurveEnd.End)
         ) :
         new LineCurve
         (
-          new Line(AsPoint3d(line.Origin) - (15000.0 * AsVector3d(line.Direction)), AsPoint3d(line.Origin) + (15000.0 * AsVector3d(line.Direction))),
-          -15_000.0,
-          +15_000.0
+          new Line
+          (
+            AsPoint3d(line.Origin) - (15_000.0 * AsVector3d(line.Direction)),
+            AsPoint3d(line.Origin) + (15_000.0 * AsVector3d(line.Direction))
+          ),
+          -15_000.0, +15_000.0
         );
     }
 
     public static ArcCurve ToRhino(ARDB.Arc arc)
     {
-      return arc.IsBound ?
-        new ArcCurve
-        (
-          new Arc
-          (
-            AsPoint3d(arc.GetEndPoint(ERDB.CurveEnd.Start)),
-            AsPoint3d(arc.Evaluate(0.5, normalized: true)),
-            AsPoint3d(arc.GetEndPoint(ERDB.CurveEnd.End))
-          ),
-          arc.GetEndParameter(ERDB.CurveEnd.Start),
-          arc.GetEndParameter(ERDB.CurveEnd.End)
-        ) :
-        new ArcCurve
-        (
-          new Circle
-          (
-            new Plane(AsPoint3d(arc.Center), AsVector3d(arc.XDirection), AsVector3d(arc.YDirection)),
-            arc.Radius
-          ),
-          0.0,
-          2.0 * Math.PI
-        );
+      var domain = arc.IsBound ?
+        new Interval(arc.GetEndParameter(ERDB.CurveEnd.Start), arc.GetEndParameter(ERDB.CurveEnd.End)):
+        new Interval(0.0, 2.0 * Math.PI);
+
+      var _circle = new Circle
+      (
+        new Plane(AsPoint3d(arc.Center), AsVector3d(arc.XDirection), AsVector3d(arc.YDirection)),
+        arc.Radius
+      );
+
+      return new ArcCurve(new Arc(_circle, domain), domain.T0, domain.T1);
     }
 
     public static NurbsCurve ToRhino(ARDB.Ellipse ellipse)
     {
-      var plane = new Plane(AsPoint3d(ellipse.Center), AsVector3d(ellipse.XDirection), AsVector3d(ellipse.YDirection));
-      var e = new Ellipse(plane, ellipse.RadiusX, ellipse.RadiusY);
-      var nurbsCurve = e.ToNurbsCurve();
+      var _ellipse = new Ellipse
+      (
+        new Plane(AsPoint3d(ellipse.Center), AsVector3d(ellipse.XDirection), AsVector3d(ellipse.YDirection)),
+        ellipse.RadiusX, ellipse.RadiusY
+      );
+
+      var nurbsCurve = _ellipse.ToNurbsCurve();
 
       if (ellipse.IsBound)
       {
@@ -193,12 +188,12 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     public static NurbsCurve ToRhino(ARDB.HermiteSpline hermite)
     {
       var nurbsCurve = ToRhino(ARDB.NurbSpline.Create(hermite));
-      var trim = new Interval
+      var domain = new Interval
       (
         hermite.GetEndParameter(ERDB.CurveEnd.Start),
         hermite.GetEndParameter(ERDB.CurveEnd.End)
       );
-      return nurbsCurve.Trim(trim) as NurbsCurve ?? nurbsCurve;
+      return nurbsCurve.Trim(domain) as NurbsCurve ?? nurbsCurve;
     }
 
     public static NurbsCurve ToRhino(ARDB.NurbSpline nurb)
