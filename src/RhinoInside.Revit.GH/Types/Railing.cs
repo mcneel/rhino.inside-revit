@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Curve.EpsilonEquals(curve, GeometryTolerance.Model.VertexTolerance) == false)
         {
-          railing.SetPath(curve.ToCurveLoop());
+          railing.SetPath(curve.ToBoundedCurveLoop());
           InvalidateGraphics();
         }
       }

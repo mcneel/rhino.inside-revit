@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.GH.Components.Site
 
           // Input
           if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary)) return null;
-          var curveLoops = boundary.Select(x => x.ToCurveLoop());
+            var curveLoops = boundary.Select(GeometryEncoder.ToBoundedCurveLoop);
 
           // Compute
           var subRegion = Reconstruct(region?.AsSiteSubRegion(), topography, curveLoops.ToArray());

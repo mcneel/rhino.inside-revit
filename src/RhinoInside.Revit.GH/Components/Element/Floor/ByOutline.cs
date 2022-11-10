@@ -140,12 +140,13 @@ namespace RhinoInside.Revit.GH.Components.Families
 
         newFloor = ARDB.Floor.Create(document, curveLoops, type.Value.Id, level.Value.Id, isStructural: true, default, 0.0);
 #else
-        var curveArray = boundary[0].ToCurveArray();
-
-        if (type.Value.IsFoundationSlab)
-          newFloor = document.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural: true, ARDB.XYZ.BasisZ);
-        else
-          newFloor = document.Create.NewFloor(curveArray, type.Value, level.Value, structural: true, ARDB.XYZ.BasisZ);
+        using (var curveArray = boundary[0].ToBoundedCurveArray())
+        {
+          if (type.Value.IsFoundationSlab)
+            newFloor = document.Create.NewFoundationSlab(curveArray, type.Value, level.Value, structural: true, ARDB.XYZ.BasisZ);
+          else
+            newFloor = document.Create.NewFloor(curveArray, type.Value, level.Value, structural: true, ARDB.XYZ.BasisZ);
+        }
 #endif
         // We turn off analytical model off by default
         newFloor.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
