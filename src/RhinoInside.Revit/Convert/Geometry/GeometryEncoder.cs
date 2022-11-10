@@ -8,7 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.Convert.Geometry
 {
   using External.DB.Extensions;
-  using RhinoInside.Revit.Convert.System.Collections.Generic;
+  using Convert.System.Collections.Generic;
 
   /// <summary>
   /// Converts a Rhino geometry type to an equivalent Revit geometry type.
@@ -1814,6 +1814,14 @@ namespace RhinoInside.Revit.Convert.Geometry
       curve.CombineShortSegments(Tolerance.ShortCurveTolerance);
 
       return curve.ToCurveMany(UnitConverter.NoScale).ToCurveArray();
+    }
+
+    internal static ARDB.CurveArray ToBoundedCurveArray(this Curve curve)
+    {
+      curve = curve.InOtherUnits(ModelScaleFactor);
+      curve.CombineShortSegments(Tolerance.ShortCurveTolerance);
+
+      return curve.ToCurveMany(UnitConverter.NoScale).SelectMany(CurveExtension.ToBoundedCurves).ToCurveArray();
     }
 
     internal static ARDB.CurveArray ToCurveArray(this IEnumerable<Curve> value)
