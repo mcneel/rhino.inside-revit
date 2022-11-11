@@ -1,8 +1,8 @@
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
@@ -25,7 +25,12 @@ namespace RhinoInside.Revit.Convert.Geometry
           return pointCloud.Select(x => x.ToPoint(factor)).ToArray();
 
         case Curve curve:
-          return curve.ToCurveMany(factor).SelectMany(x => x.ToShape()).ToArray();
+          if (curve.SpanCount > 1 && curve.TryGetPolyline(out var polyline))
+            return new ARDB.PolyLine[] { polyline.ToPolyLine(factor) };
+
+          return curve.TryGetPolyCurve(out var polyCurve, GeometryTolerance.Internal.AngleTolerance) ?
+            polyCurve.ToCurveMany(factor).Select(ToShape).ToArray() :
+            new ARDB.Curve[] { curve.ToCurve(factor).ToShape() };
 
         case Brep brep:
           if (ToShape(brep, factor) is ARDB.GeometryObject brepShape)
@@ -60,28 +65,45 @@ namespace RhinoInside.Revit.Convert.Geometry
       return new ARDB.GeometryObject[0];
     }
 
-    static IEnumerable<ARDB.Curve> ToShape(this ARDB.Curve curve)
+    static ARDB.Curve ToShape(this ARDB.Curve curve)
     {
-      foreach (var segment in curve.ToBoundedCurves())
+      if (!curve.IsBound)
       {
-        var distance = segment.GetEndPoint(0).DistanceTo(segment.GetEndPoint(1));
-        if (distance < GeometryTolerance.Internal.VertexTolerance || 30_000 < distance)
+        curve.GetRawParameters(out var min, out var max);
+        curve = curve.CreateBounded(min, max);
+      }
+
+      {
+        var length = curve.Length;
+        if (length < GeometryTolerance.Internal.ShortCurveTolerance)
         {
-          // TODO : Split curve in appropiate segments instead of throwing.
-          throw new ConversionException
+          GeometryEncoder.Context.Peek.RuntimeMessage
           (
-            "Input curve does not satisfy DirectShape validation criteria. " +
-            "Distance betwen end points should be greater than vertex-tolerance and less than 30,000 ft."
+            10,
+            "Curve is too short for Revit's tolerance. " +
+            "Curve length should be greater than short-curve tolerance.",
+            default
           );
         }
 
-        yield return segment;
+        var distance = curve.GetEndPoint(ERDB.CurveEnd.Start).DistanceTo(curve.GetEndPoint(ERDB.CurveEnd.End));
+        if (distance > 30_000)
+        {
+          GeometryEncoder.Context.Peek.RuntimeMessage
+          (
+            10,
+            "Curve is too long for Revit's tolerance. " +
+            "Length between curve end points should be less than 30,000 ft.",
+            default
+          );
+        }
       }
+
+      return curve;
     }
 
     static ARDB.GeometryObject ToShape(Brep brep, double factor)
     {
-      // Try using DB.BRepBuilder
       if (BrepEncoder.ToSolid(brep, factor) is ARDB.Solid solid)
         return solid;
 
@@ -91,7 +113,6 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static ARDB.GeometryObject ToShape(Extrusion extrusion, double factor)
     {
-      // Try using DB.BRepBuilder
       if (ExtrusionEncoder.ToSolid(extrusion, factor) is ARDB.Solid solid)
         return solid;
 
@@ -101,7 +122,6 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static ARDB.GeometryObject ToShape(SubD subD, double factor)
     {
-      // Try using DB.BRepBuilder
       if (SubDEncoder.ToSolid(subD, factor) is ARDB.Solid solid)
         return solid;
 
