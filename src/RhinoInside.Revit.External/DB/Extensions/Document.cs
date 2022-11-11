@@ -433,8 +433,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static int? GetIncrementalNomen(this Document doc, Type type, ref string nomen, string parentName = default, BuiltInCategory? categoryId = default)
     {
-      if (nomen is null)
-        throw new ArgumentNullException(nameof(nomen));
+      if (type is null)
+        throw new ArgumentNullException(nameof(type));
 
       if (nomen is null)
         throw new ArgumentNullException(nameof(nomen));
