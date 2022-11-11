@@ -1500,37 +1500,28 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Curve ToCurve(this NurbsCurve nurbsCurve) => nurbsCurve.ToCurve(ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this NurbsCurve nurbsCurve, double factor)
     {
-      var tol = Tolerance;
       if
       (
         nurbsCurve.Degree == 2 &&
         nurbsCurve.IsRational &&
-        nurbsCurve.TryGetEllipse(out var ellipse, out var interval, tol.VertexTolerance * factor) &&
-        ellipse.Radius1 * factor <= 30_000.0 && ellipse.Radius2 * factor <= 30_000.0
+        nurbsCurve.TryGetEllipse(out var ellipse, out var interval, Tolerance.VertexTolerance / factor) &&
+        ellipse.Radius1 <= 30_000.0 / factor && ellipse.Radius2 <= 30_000.0 / factor
       )
         return ellipse.ToCurve(interval, factor);
 
-      var gap = tol.ShortCurveTolerance * 1.01 / factor;
-      if (nurbsCurve.IsClosed(gap))
-      {
-        var length = nurbsCurve.GetLength();
-        if
-        (
-          length > gap &&
-          nurbsCurve.LengthParameter((gap / 2.0), out var t0) &&
-          nurbsCurve.LengthParameter(length - (gap / 2.0), out var t1)
-        )
-        {
-          var segments = nurbsCurve.Split(new double[] { t0, t1 });
-          nurbsCurve = segments[0] as NurbsCurve ?? nurbsCurve;
-        }
-        else throw new ConversionException($"Failed to Split closed NurbsCurve, Length = {length}");
-      }
-
+      bool isDuplicate = false;
       if (nurbsCurve.Degree < 3 && nurbsCurve.SpanCount > 1)
       {
-        nurbsCurve = nurbsCurve.DuplicateCurve() as NurbsCurve;
+        nurbsCurve = isDuplicate ? nurbsCurve : nurbsCurve.DuplicateCurve() as NurbsCurve;
         nurbsCurve.IncreaseDegree(3);
+        isDuplicate = true;
+      }
+
+      if (nurbsCurve.IsPeriodic)
+      {
+        // ARDB.NurbSpline can't be periodic.
+        nurbsCurve = isDuplicate ? nurbsCurve : nurbsCurve.DuplicateCurve() as NurbsCurve;
+        nurbsCurve.Knots.ClampEnd(CurveEnd.Both);
       }
 
       return NurbsSplineEncoder.ToNurbsSpline(nurbsCurve, factor);
