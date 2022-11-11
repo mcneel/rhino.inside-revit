@@ -603,6 +603,7 @@ namespace Rhino.Geometry
           ellipse.ClosestPoint(curve.PointAtStart, out var t0);
           ellipse.ClosestPoint(curve.PointAtEnd, out var t1);
           domain = new Interval(t0, t1);
+          if (domain.IsDecreasing) domain.Reverse();
           return true;
         }
       }
