@@ -1158,7 +1158,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal static ARDB.Curve ToCurve(this Ellipse ellipse, double factor) => ellipse.ToCurve(new Interval(0.0, 2.0 * Math.PI), factor);
 
     /// <summary>
-    /// Converts the specified <see cref="Ellipse" /> within the given <see cref="Interval" />to an equivalent of <see cref="ARDB.Curve" />.
+    /// Converts the specified <see cref="Ellipse" /> within the given <see cref="Interval" /> to an equivalent of <see cref="ARDB.Curve" />.
     /// </summary>
     /// <example>
     /// 
@@ -1392,7 +1392,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Curve ToCurve(this PolylineCurve polylineCurve) => ToCurve(polylineCurve, ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this PolylineCurve polylineCurve, double factor)
     {
-      if (polylineCurve.TryGetLine(out var line, Tolerance.VertexTolerance * factor))
+      if (polylineCurve.TryGetLine(out var line, Tolerance.VertexTolerance / factor))
         return line.ToLine(factor);
 
       throw new ConversionException("Failed to convert non G1 continuous curve.");
@@ -1592,7 +1592,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       (
         CurveSimplifyOptions.AdjustG1 |
         CurveSimplifyOptions.Merge,
-        tol.VertexTolerance * factor,
+        tol.VertexTolerance / factor,
         tol.AngleTolerance
       )
       ?? polyCurve;
@@ -1679,7 +1679,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     internal static ARDB.HermiteSpline ToHermiteSpline(this Curve curve) => ToHermiteSpline(curve, ModelScaleFactor);
     internal static ARDB.HermiteSpline ToHermiteSpline(this Curve curve, double factor)
     {
-      if (curve.TryGetHermiteSpline(out var points, out var start, out var end, GeometryTolerance.Internal.VertexTolerance / factor))
+      if (curve.TryGetHermiteSpline(out var points, out var start, out var end, Tolerance.VertexTolerance / factor))
       {
         using (var tangents = new ARDB.HermiteSplineTangents() { StartTangent = start.ToXYZ(), EndTangent = end.ToXYZ() })
         {
