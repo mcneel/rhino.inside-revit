@@ -1,10 +1,12 @@
 using System;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
+  using Convert;
   using Convert.Geometry;
   using Kernel.Attributes;
 
@@ -31,7 +33,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [ParamType(typeof(Parameters.GraphicalElement)), Name("Point"), NickName("P"), Description("New Point Shape")]
       ref ARDB.DirectShape element,
 
-      Rhino.Geometry.Point3d point
+      Point3d point
     )
     {
       if (!ThrowIfNotValid(nameof(point), point))
@@ -46,8 +48,25 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
 
-        var shape = new ARDB.Point[] { ARDB.Point.Create(point.ToXYZ()) };
-        element.SetShape(shape);
+        try
+        {
+          var shape = new ARDB.Point[] { ARDB.Point.Create(ARDB.XYZ.Zero) };
+          element.SetShape(shape);
+          element.Pinned = false;
+          element.Location.Move(point.ToXYZ());
+        }
+        catch (ConversionException e)
+        {
+          ThrowArgumentException(nameof(point), e.Message, point);
+        }
+        catch (Autodesk.Revit.Exceptions.ArgumentException e)
+        {
+          if (e.GetType() == typeof(Autodesk.Revit.Exceptions.ArgumentException))
+            ThrowArgumentException(nameof(point), "Input geometry does not satisfy DirectShape validation criteria.", point);
+
+          throw e;
+        }
+
       }
     }
   }

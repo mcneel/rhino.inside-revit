@@ -2,10 +2,12 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
+  using Convert;
   using Convert.Geometry;
   using Kernel.Attributes;
 
@@ -32,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [ParamType(typeof(Parameters.GraphicalElement)), Name("Curve"), NickName("C"), Description("New Curve Shape")]
       ref ARDB.DirectShape element,
 
-      Rhino.Geometry.Curve curve
+      Curve curve
     )
     {
       if (!ThrowIfNotValid(nameof(curve), curve))
@@ -47,7 +49,25 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
 
-        element.SetShape(curve.ToShape().OfType<ARDB.GeometryObject>().ToList());
+        try
+        {
+          var bbox = curve.GetBoundingBox(accurate: false);
+          curve.Transform(Transform.Translation(Point3d.Origin - bbox.Center));
+          element.SetShape(curve.ToShape());
+          element.Pinned = false;
+          element.Location.Move(bbox.Center.ToXYZ());
+        }
+        catch (ConversionException e)
+        {
+          ThrowArgumentException(nameof(curve), e.Message, curve);
+        }
+        catch (Autodesk.Revit.Exceptions.ArgumentException e)
+        {
+          if (e.GetType() == typeof(Autodesk.Revit.Exceptions.ArgumentException))
+            ThrowArgumentException(nameof(curve), "Input geometry does not satisfy DirectShape validation criteria.", curve);
+
+          throw e;
+        }
       }
     }
   }
