@@ -919,7 +919,18 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Line ToLine(this Line line) => line.ToLine(ModelScaleFactor);
     internal static ARDB.Line ToLine(this Line line, double factor)
     {
-      return ARDB.Line.CreateBound(line.From.ToXYZ(factor), line.To.ToXYZ(factor));
+      var transform = default(ARDB.Transform);
+      {
+        var scale = line.Length;
+        if (scale > 30_000 / factor)
+        {
+          factor /= scale;
+          transform = ARDB.Transform.Identity.ScaleBasis(scale);
+        }
+      }
+
+      var curve = ARDB.Line.CreateBound(line.From.ToXYZ(factor), line.To.ToXYZ(factor));
+      return transform is object ? (ARDB.Line) curve.CreateTransformed(transform) : curve;
     }
 
     /// <summary>
@@ -1047,10 +1058,24 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Arc ToArc(this Arc arc) => arc.ToArc(ModelScaleFactor);
     internal static ARDB.Arc ToArc(this Arc arc, double factor)
     {
-      if (arc.IsCircle)
-        return ARDB.Arc.Create(arc.Plane.ToPlane(factor), arc.Radius * factor, 0.0, 2.0 * Math.PI);
-      else
-        return ARDB.Arc.Create(arc.StartPoint.ToXYZ(factor), arc.EndPoint.ToXYZ(factor), arc.MidPoint.ToXYZ(factor));
+      var transform = default(ARDB.Transform);
+      {
+        var scale = arc.Radius;
+        if (scale > 30_000 / factor)
+        {
+          factor /= scale;
+          transform = ARDB.Transform.Identity.ScaleBasis(scale);
+        }
+
+        if (Point3d.Origin.DistanceTo(arc.Plane.Origin) > 30_000 / factor)
+        {
+          transform = (transform ?? ARDB.Transform.Identity) * ARDB.Transform.CreateTranslation(arc.Plane.Origin.ToXYZ());
+          arc.Plane = new Plane(Point3d.Origin, arc.Plane.XAxis, arc.Plane.YAxis);
+        }
+      }
+
+      var curve = ARDB.Arc.Create(arc.Plane.ToPlane(factor), arc.Radius * factor, arc.StartAngle, arc.EndAngle);
+      return transform is object ? (ARDB.Arc) curve.CreateTransformed(transform) : curve;
     }
 
     /// <summary>
@@ -1103,7 +1128,24 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Arc ToArc(this Circle circle) => circle.ToArc(ModelScaleFactor);
     internal static ARDB.Arc ToArc(this Circle circle, double factor)
     {
-      return ARDB.Arc.Create(circle.Plane.ToPlane(factor), circle.Radius * factor, 0.0, 2.0 * Math.PI);
+      var transform = default(ARDB.Transform);
+      {
+        var scale = circle.Radius;
+        if (scale > 30_000 / factor)
+        {
+          factor /= scale;
+          transform = ARDB.Transform.Identity.ScaleBasis(scale);
+        }
+
+        if (Point3d.Origin.DistanceTo(circle.Plane.Origin) > 30_000 / factor)
+        {
+          transform = (transform ?? ARDB.Transform.Identity) * ARDB.Transform.CreateTranslation(circle.Plane.Origin.ToXYZ());
+          circle.Plane = new Plane(Point3d.Origin, circle.Plane.XAxis, circle.Plane.YAxis);
+        }
+      }
+
+      var curve = ARDB.Arc.Create(circle.Plane.ToPlane(factor), circle.Radius * factor, 0.0, 2.0 * Math.PI);
+      return transform is object ? (ARDB.Arc) curve.CreateTransformed(transform) : curve;
     }
 
     /// <summary>
@@ -1213,11 +1255,28 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.Curve ToCurve(this Ellipse ellipse, Interval interval) => ellipse.ToCurve(interval, ModelScaleFactor);
     internal static ARDB.Curve ToCurve(this Ellipse ellipse, Interval interval, double factor)
     {
+      var transform = default(ARDB.Transform);
+      {
+        var scale = Math.Min(ellipse.Radius1, ellipse.Radius2);
+        if (scale > 30_000 / factor)
+        {
+          factor /= scale;
+          transform = ARDB.Transform.Identity.ScaleBasis(scale);
+        }
+
+        if (Point3d.Origin.DistanceTo(ellipse.Plane.Origin) > 30_000 / factor)
+        {
+          transform = (transform ?? ARDB.Transform.Identity) * ARDB.Transform.CreateTranslation(ellipse.Plane.Origin.ToXYZ());
+          ellipse.Plane = new Plane(Point3d.Origin, ellipse.Plane.XAxis, ellipse.Plane.YAxis);
+        }
+      }
+
 #if REVIT_2018
-      return ARDB.Ellipse.CreateCurve(ellipse.Plane.Origin.ToXYZ(factor), ellipse.Radius1 * factor, ellipse.Radius2 * factor, ellipse.Plane.XAxis.ToXYZ(), ellipse.Plane.YAxis.ToXYZ(), interval.Min, interval.Max);
+      var curve = ARDB.Ellipse.CreateCurve(ellipse.Plane.Origin.ToXYZ(factor), ellipse.Radius1 * factor, ellipse.Radius2 * factor, ellipse.Plane.XAxis.ToXYZ(), ellipse.Plane.YAxis.ToXYZ(), interval.Min, interval.Max);
 #else
-      return ARDB.Ellipse.Create(ellipse.Plane.Origin.ToXYZ(factor), ellipse.Radius1 * factor, ellipse.Radius2 * factor, ellipse.Plane.XAxis.ToXYZ(), ellipse.Plane.YAxis.ToXYZ(), interval.Min, interval.Max);
+      var curve = ARDB.Ellipse.Create(ellipse.Plane.Origin.ToXYZ(factor), ellipse.Radius1 * factor, ellipse.Radius2 * factor, ellipse.Plane.XAxis.ToXYZ(), ellipse.Plane.YAxis.ToXYZ(), interval.Min, interval.Max);
 #endif
+      return transform is object ? curve.CreateTransformed(transform) : curve;
     }
     #endregion
 
