@@ -52,24 +52,42 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    ARDB.Workset value => base.Value as ARDB.Workset;
     public new ARDB.Workset Value
     {
       get
       {
+        var value = base.Value as ARDB.Workset;
         if (value?.IsValidObject == false)
+        {
           ResetValue();
+          value = base.Value as ARDB.Workset;
+        }
 
         return value;
       }
     }
 
-    ARDB.WorksetId id;
-    public ARDB.WorksetId Id => id;
+    public ARDB.WorksetId Id { get; private set; }
 
-    public override string DisplayName => Value.Name;
+    public override string DisplayName => Value?.Name;
 
     public override bool? IsEditable => Value?.IsEditable;
+    #endregion
+
+    #region ReferenceObject
+    protected override object FetchValue() => Document.GetWorksetTable()?.GetWorkset(Id);
+
+    protected void SetValue(ARDB.Document doc, ARDB.WorksetId id)
+    {
+      if (id == ARDB.WorksetId.InvalidWorksetId)
+        doc = null;
+
+      Document = doc;
+      DocumentGUID = doc.GetFingerprintGUID();
+
+      Id = id;
+      UniqueID = doc?.GetWorksetTable()?.GetWorkset(id)?.UniqueId.ToString() ?? string.Empty;
+    }
     #endregion
 
     #region IGH_Goo
@@ -194,7 +212,7 @@ namespace RhinoInside.Revit.GH.Types
             if (document.GetWorksetTable().GetWorkset(guid) is ARDB.Workset ws)
             {
               Document = document;
-              id = ws.Id;
+              Id = ws.Id;
             }
           }
         }
@@ -203,26 +221,12 @@ namespace RhinoInside.Revit.GH.Types
       return IsReferencedDataLoaded;
     }
 
-    protected override object FetchValue() => Document.GetWorksetTable()?.GetWorkset(Id);
-
-    protected void SetValue(ARDB.Document doc, ARDB.WorksetId id)
-    {
-      if (id == ARDB.WorksetId.InvalidWorksetId)
-        doc = null;
-
-      Document = doc;
-      DocumentGUID = doc.GetFingerprintGUID();
-
-      this.id = id;
-      UniqueID = doc?.GetWorksetTable()?.GetWorkset(id)?.UniqueId.ToString() ??
-        string.Empty;
-    }
     public override void UnloadReferencedData()
     {
       base.UnloadReferencedData();
 
       if (IsReferencedData)
-        id = default;
+        Id = default;
     }
     #endregion
   }
