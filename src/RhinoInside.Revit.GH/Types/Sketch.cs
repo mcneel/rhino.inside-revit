@@ -171,7 +171,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         // FilledRegion needs the constraints to be edited from the Revi UI latter!!
         case ARDB.FilledRegion _:     constraintsRemoved = true;  break;
-        case ARDB.ExtrusionRoof _:    splitClosed = false;        break;
+        case ARDB.FootPrintRoof _:    splitClosed = false;        break;
 #if REVIT_2022
         case ARDB.CeilingAndFloor _:  splitClosed = false;        break;
 #endif

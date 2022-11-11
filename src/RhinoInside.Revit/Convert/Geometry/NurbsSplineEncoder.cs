@@ -108,19 +108,36 @@ namespace RhinoInside.Revit.Convert.Geometry
       var knots = ToDoubleArray(value.Knots, degree);
       var controlPoints = ToXYZArray(value.Points, factor);
 
+      Debug.Assert(!value.IsPeriodic);
       Debug.Assert(degree > 2 || value.SpanCount == 1);
       Debug.Assert(degree >= 1);
       Debug.Assert(controlPoints.Length > degree);
       Debug.Assert(knots.Length == (degree + 1) + controlPoints.Length);
 
-      if (value.IsRational)
+      try
       {
-        var weights = value.Points.ConvertAll(x => x.Weight);
-        return ARDB.NurbSpline.CreateCurve(degree, knots, controlPoints, weights);
+        if (value.IsRational)
+        {
+          var weights = value.Points.ConvertAll(x => x.Weight);
+          return ARDB.NurbSpline.CreateCurve(degree, knots, controlPoints, weights);
+        }
+        else
+        {
+          return ARDB.NurbSpline.CreateCurve(degree, knots, controlPoints);
+        }
       }
-      else
+      catch (Autodesk.Revit.Exceptions.ApplicationException)
       {
-        return ARDB.NurbSpline.CreateCurve(degree, knots, controlPoints);
+        if (value.IsShort(GeometryTolerance.Internal.ShortCurveTolerance / factor))
+        {
+          throw new ConversionException
+          (
+            "Curve is too short for Revit's tolerance. " +
+            "Length should be greater than short-curve tolerance."
+          );
+        }
+
+        throw;
       }
     }
   }
