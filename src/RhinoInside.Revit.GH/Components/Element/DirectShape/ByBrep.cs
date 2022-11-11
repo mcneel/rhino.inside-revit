@@ -2,10 +2,12 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
+  using Convert;
   using Convert.Geometry;
   using Kernel.Attributes;
 
@@ -32,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [ParamType(typeof(Parameters.GraphicalElement)), Name("Brep"), NickName("B"), Description("New Brep Shape")]
       ref ARDB.DirectShape element,
 
-      Rhino.Geometry.Brep brep
+      Brep brep
     )
     {
       if (!ThrowIfNotValid(nameof(brep), brep))
@@ -45,9 +47,27 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       using (var ctx = GeometryEncoder.Context.Push(element))
       {
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
-          AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry); 
+          AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
 
-        element.SetShape(brep.ToShape().OfType<ARDB.GeometryObject>().ToList());
+        try
+        {
+          var bbox = brep.GetBoundingBox(accurate: false);
+          brep.Transform(Transform.Translation(Point3d.Origin - bbox.Center));
+          element.SetShape(brep.ToShape());
+          element.Pinned = false;
+          element.Location.Move(bbox.Center.ToXYZ());
+        }
+        catch (ConversionException e)
+        {
+          ThrowArgumentException(nameof(brep), e.Message, brep);
+        }
+        catch (Autodesk.Revit.Exceptions.ArgumentException e)
+        {
+          if (e.GetType() == typeof(Autodesk.Revit.Exceptions.ArgumentException))
+            ThrowArgumentException(nameof(brep), "Input geometry does not satisfy DirectShape validation criteria.", brep);
+
+          throw e;
+        }
       }
     }
   }

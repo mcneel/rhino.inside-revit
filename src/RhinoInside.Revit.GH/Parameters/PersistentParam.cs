@@ -129,6 +129,8 @@ namespace RhinoInside.Revit.GH.Parameters
       foreach (var error in errors) builder.AppendLine(error);
       Debug.Assert(errors.Count == 0, builder.ToString());
     }
+
+    protected override T InstantiateT() => typeof(T).IsAbstract || typeof(T).IsInterface ? default : base.InstantiateT();
     #endregion
 
     #region VolatileData

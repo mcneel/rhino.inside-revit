@@ -11,6 +11,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   using Convert.Geometry;
   using External.DB.Extensions;
   using Kernel.Attributes;
+  using Rhino.Geometry;
 
   public abstract class ReconstructDirectShapeComponent : ReconstructElementComponent
   {
@@ -22,13 +23,13 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       var scriptVariable = obj.ScriptVariable();
       switch (scriptVariable)
       {
-        case Rhino.Geometry.Point3d point: return new Rhino.Geometry.Point(point);
-        case Rhino.Geometry.Line line: return new Rhino.Geometry.LineCurve(line);
-        case Rhino.Geometry.Rectangle3d rect: return rect.ToNurbsCurve();
-        case Rhino.Geometry.Arc arc: return new Rhino.Geometry.ArcCurve(arc);
-        case Rhino.Geometry.Circle circle: return new Rhino.Geometry.ArcCurve(circle);
-        case Rhino.Geometry.Ellipse ellipse: return ellipse.ToNurbsCurve();
-        case Rhino.Geometry.Box box: return box.ToBrep();
+        case Point3d point: return new Rhino.Geometry.Point(point);
+        case Line line: return new Rhino.Geometry.LineCurve(line);
+        case Rectangle3d rect: return rect.ToNurbsCurve();
+        case Arc arc: return new Rhino.Geometry.ArcCurve(arc);
+        case Circle circle: return new Rhino.Geometry.ArcCurve(circle);
+        case Ellipse ellipse: return ellipse.ToNurbsCurve();
+        case Box box: return box.ToBrep();
       }
 
       return scriptVariable as Rhino.Geometry.GeometryBase;
@@ -37,6 +38,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     protected IList<ARDB.GeometryObject> BuildShape
     (
       ARDB.Element element,
+      Point3d center,
       IList<IGH_GeometricGoo> geometry,
       IList<ARDB.Material> materials,
       out IList<ARDB.ElementId> paintIds
@@ -68,6 +70,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
                         ARDB.ElementId.InvalidElementId;
                       }
 
+                      x.Transform(Transform.Translation(Point3d.Origin - center));
                       var subShape = x.ToShape();
                       materialIds?.AddRange(Enumerable.Repeat(ctx.MaterialId, subShape.Length));
                       if (!hasSolids) hasSolids = subShape.Any(s => s is ARDB.Solid);
@@ -149,8 +152,13 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       if (directShape is object && directShape.Category.Id == category.Value.Id) { }
       else ReplaceElement(ref directShape, ARDB.DirectShape.CreateElement(document, category.Value.Id));
 
+      var bbox = BoundingBox.Empty;
+      foreach (var g in geometry) bbox.Union(g.Boundingbox);
+
       directShape.Name = name ?? string.Empty;
-      directShape.SetShape(BuildShape(directShape, geometry, material, out var paintIds));
+      directShape.SetShape(BuildShape(directShape, bbox.Center, geometry, material, out var paintIds));
+      directShape.Pinned = false;
+      directShape.Location.Move(bbox.Center.ToXYZ());
 
       PaintElementSolids(directShape, paintIds);
     }
@@ -202,7 +210,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Family Name on DirectShape Types is only supported on Revit 2022 or above.");
 #endif
       directShapeType.Name = name;
-      directShapeType.SetShape(BuildShape(directShapeType, geometry, material, out var paintIds));
+      directShapeType.SetShape(BuildShape(directShapeType, Point3d.Origin, geometry, material, out var paintIds));
 
       ReplaceElement(ref type, directShapeType);
 
@@ -234,7 +242,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       ref ARDB.DirectShape directShape,
 
       [Description("Location where to place the element. Point or plane is accepted.")]
-      Rhino.Geometry.Plane location,
+      Plane location,
       ARDB.DirectShapeType type
     )
     {
@@ -257,7 +265,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
           library.AddDefinitionType(type.UniqueId, type.Id);
       }
 
-      using (var transform = Rhino.Geometry.Transform.PlaneToPlane(Rhino.Geometry.Plane.WorldXY, location).ToTransform())
+      using (var transform = Transform.PlaneToPlane(Plane.WorldXY, location).ToTransform())
       {
         directShape.SetShape(ARDB.DirectShape.CreateGeometryInstance(document, type.UniqueId, transform));
       }

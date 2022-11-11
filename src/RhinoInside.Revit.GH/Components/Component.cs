@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using Rhino.Geometry;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
@@ -294,7 +296,10 @@ namespace RhinoInside.Revit.GH.Components
           break;
 
         case Autodesk.Revit.Exceptions.ArgumentOutOfRangeException _:
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Value is out of range");
+          if (e.Source == System.Reflection.Assembly.GetExecutingAssembly().GetName().Name)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0]);
+          else
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message.Split(new string[] { Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)[0]}");
           break;
 
         case Autodesk.Revit.Exceptions.ArgumentException _:
@@ -323,6 +328,45 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       return false;
+    }
+
+    public override void CollectData()
+    {
+      bool IsWithinLengthLimits(Point3d point)
+      {
+        var LengthLimit = GeometryDecoder.ToModelLength(52_800); // feet.
+        var distance = point.DistanceTo(Point3d.Origin);
+        return distance <= LengthLimit;
+      }
+
+      base.CollectData();
+
+      foreach (var input in Params.Input.Where(x => x is IGH_BakeAwareObject))
+      {
+        var reported = false;
+        var data = input.VolatileData;
+        foreach (var path in data.Paths)
+        {
+          var branch = data.get_Branch(path);
+          for (int i = 0; i < branch.Count; i++)
+          {
+            if (branch[i] is IGH_GeometricGoo goo)
+            {
+              var bbox = goo.Boundingbox;
+              if (!IsWithinLengthLimits(bbox.Min) || !IsWithinLengthLimits(bbox.Max))
+              {
+                if (!reported) AddGeometryRuntimeError
+                (
+                  GH_RuntimeMessageLevel.Warning,
+                  $"The input {input.NickName} lies outside of Revit design limits." +
+                  $" Design limits are ±{GeometryDecoder.ToModelLength(52_800):N0} {GH_Format.RhinoUnitSymbol()} around the origin.",
+                  GH_Convert.ToGeometryBase(goo)
+                );
+              }
+            }
+          }
+        }
+      }
     }
     #endregion
 
