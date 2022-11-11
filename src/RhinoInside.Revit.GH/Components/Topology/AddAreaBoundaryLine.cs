@@ -84,20 +84,17 @@ namespace RhinoInside.Revit.GH.Components.Topology
           if (curve.IsShort(tol.ShortCurveTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
-          if (curve is NurbsCurve && curve.IsClosed(tol.ShortCurveTolerance * 1.01))
+          if (curve.IsClosed(tol.ShortCurveTolerance * 1.01))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!curve.IsParallelToPlane(plane, tol.VertexTolerance, tol.AngleTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to view plane.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
-          if ((curve = Curve.ProjectToPlane(curve, plane)) is null)
-            throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project Curve into 'Work Plane'", curve);
-
           if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           // Compute
-          areaBoundary = Reconstruct(areaBoundary, viewPlan.Value, curve.ToCurve());
+          areaBoundary = Reconstruct(areaBoundary, viewPlan.Value, curve);
 
           DA.SetData(_AreaBoundary_, areaBoundary);
           return areaBoundary;
@@ -105,33 +102,42 @@ namespace RhinoInside.Revit.GH.Components.Topology
       );
     }
 
-    bool Reuse(ARDB.ModelCurve modelCurve, ARDB.ViewPlan view, ARDB.Curve curve)
+    bool Reuse(ARDB.ModelCurve modelCurve, ARDB.ViewPlan view, Curve curve)
     {
       if (modelCurve is null) return false;
-      if (modelCurve.LevelId != view.GenLevel.Id) return false;
+
+      var genLevel = view.GenLevel;
+      if (modelCurve.LevelId != genLevel?.Id) return false;
+
+      var levelPlane = Plane.WorldXY;
+      levelPlane.Translate(Vector3d.ZAxis * genLevel.GetElevation() * Revit.ModelUnits);
 
       using (var geometryCurve = modelCurve.GeometryCurve)
       {
-        if (!curve.IsSameKindAs(geometryCurve)) return false;
-        if (!curve.AlmostEquals(geometryCurve, modelCurve.Document.Application.VertexTolerance))
-          modelCurve.SetGeometryCurve(curve, true);
+        using (var projectedCurve = Curve.ProjectToPlane(curve, levelPlane).ToCurve())
+        {
+          if (!projectedCurve.IsSameKindAs(geometryCurve)) return false;
+          if (!projectedCurve.AlmostEquals(geometryCurve, modelCurve.Document.Application.VertexTolerance))
+            modelCurve.SetGeometryCurve(projectedCurve, true);
+        }
       }
 
       return true;
     }
 
-    ARDB.ModelCurve Create(ARDB.ViewPlan view, ARDB.Curve curve)
+    ARDB.ModelCurve Create(ARDB.ViewPlan view, Curve curve)
     {
       if (view.GenLevel is ARDB.Level level)
       {
         using (var sketchPlane = level.GetSketchPlane(ensureSketchPlane: true))
-          return view.Document.Create.NewAreaBoundaryLine(sketchPlane, curve, view);
+        using (var projectedCurve = Curve.ProjectToPlane(curve, sketchPlane.GetPlane().ToPlane()))
+          return view.Document.Create.NewAreaBoundaryLine(sketchPlane, projectedCurve.ToCurve(), view);
       }
 
       return default;
     }
 
-    ARDB.ModelCurve Reconstruct(ARDB.ModelCurve areaBoundaryLine, ARDB.ViewPlan view, ARDB.Curve curve)
+    ARDB.ModelCurve Reconstruct(ARDB.ModelCurve areaBoundaryLine, ARDB.ViewPlan view, Curve curve)
     {
       if (!Reuse(areaBoundaryLine, view, curve))
         areaBoundaryLine = Create(view, curve);

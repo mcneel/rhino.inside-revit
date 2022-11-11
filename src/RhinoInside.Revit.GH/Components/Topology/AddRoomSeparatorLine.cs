@@ -1,4 +1,5 @@
 using System;
+using Autodesk.Revit.DB.Structure;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -69,8 +70,8 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "View", out ARDB.View view)) return;
-      if (!(view is ARDB.ViewPlan))
+      if (!Params.GetData(DA, "View", out Types.View view)) return;
+      if (!(view.Value is ARDB.ViewPlan))
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "View should be a plan view");
         return;
@@ -83,18 +84,23 @@ namespace RhinoInside.Revit.GH.Components.Topology
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve)) return null;
 
+          var plane = view.GenLevel.Location;
           var tol = GeometryTolerance.Model;
-          if
-          (
-            curve.IsShort(tol.ShortCurveTolerance) ||
-            curve.IsClosed ||
-            !curve.TryGetPlane(out var plane, tol.VertexTolerance) ||
-            plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
-          )
-            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a valid horizontal, planar and open curve.", curve);
+
+          if (curve.IsShort(tol.ShortCurveTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (curve.IsClosed(tol.ShortCurveTolerance * 1.01))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+
+          if (!curve.IsParallelToPlane(plane, tol.VertexTolerance, tol.AngleTolerance))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to view plane.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
+
+          if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           // Compute
-          roomSeparatorLine = Reconstruct(roomSeparatorLine, view as ARDB.ViewPlan, curve);
+          roomSeparatorLine = Reconstruct(roomSeparatorLine, view.Value as ARDB.ViewPlan, curve);
 
           DA.SetData(_RoomSeparation_, roomSeparatorLine);
           return roomSeparatorLine;
@@ -112,10 +118,14 @@ namespace RhinoInside.Revit.GH.Components.Topology
       var levelPlane = Plane.WorldXY;
       levelPlane.Translate(Vector3d.ZAxis * genLevel.GetElevation() * Revit.ModelUnits);
 
-      using (var projectedCurve = Curve.ProjectToPlane(curve, levelPlane).ToCurve())
+      using (var geometryCurve = roomSeparator.GeometryCurve)
       {
-        if (!projectedCurve.AlmostEquals(roomSeparator.GeometryCurve, GeometryTolerance.Internal.VertexTolerance))
-          roomSeparator.SetGeometryCurve(projectedCurve, overrideJoins: true);
+        using (var projectedCurve = Curve.ProjectToPlane(curve, levelPlane).ToCurve())
+        {
+          if (!projectedCurve.IsSameKindAs(geometryCurve)) return false;
+          if (!projectedCurve.AlmostEquals(geometryCurve, GeometryTolerance.Internal.VertexTolerance))
+            roomSeparator.SetGeometryCurve(projectedCurve, overrideJoins: true);
+        }
       }
 
       return true;
@@ -125,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     {
       if (view.GenLevel is ARDB.Level level)
       {
-        var sketchPlane = level.GetSketchPlane(ensureSketchPlane: true);
+        using (var sketchPlane = level.GetSketchPlane(ensureSketchPlane: true))
         using (var projectedCurve = Curve.ProjectToPlane(curve, sketchPlane.GetPlane().ToPlane()))
         using (var curveArray = new ARDB.CurveArray())
         {
