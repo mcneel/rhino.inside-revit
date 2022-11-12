@@ -108,33 +108,40 @@ namespace RhinoInside.Revit.GH.Parameters
     )
       where TOutput : class
     {
-      if (!component.Params.TryGetData(DA, name, out level)) return false;
-      if (level is null)
-      {
-        var data = Types.Level.FromElement(document.Value.GetNearestLevel(elevation / Revit.ModelUnits));
-        if (data is null)
-          return false;
+      level = default;
 
-        level = data as TOutput;
+      try
+      {
+        if (!component.Params.TryGetData(DA, name, out level)) return false;
         if (level is null)
-          return data.CastTo(out level);
-      }
+        {
+          var data = Types.Level.FromElement(document.Value.GetNearestLevel(elevation / Revit.ModelUnits));
+          if (data is null)
+            return false;
 
-      // Validate document
-      switch (level)
+          level = data as TOutput;
+          if (level is null)
+            return data.CastTo(out level);
+        }
+
+        return true;
+      }
+      finally
       {
-        case ARDB.Element element:
-          if (!document.Value.IsEquivalent(element.Document))
-            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
-          break;
+        // Validate document
+        switch (level)
+        {
+          case ARDB.Element element:
+            if (!document.Value.IsEquivalent(element.Document))
+              throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(level)} from a diferent document.");
+            break;
 
-        case Types.IGH_ElementId id:
-          if (!document.Value.IsEquivalent(id.Document))
-            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
-          break;
+          case Types.Element goo:
+            if (!document.Value.IsEquivalent(goo.Document))
+              throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(level)} from a diferent document.");
+            break;
+        }
       }
-
-      return true;
     }
 
     public static bool GetDataOrDefault<TOutput>
@@ -148,33 +155,40 @@ namespace RhinoInside.Revit.GH.Parameters
     )
       where TOutput : class
     {
-      if (!component.Params.TryGetData(DA, name, out level)) return false;
-      if (level is null)
-      {
-        var data = Types.Level.FromElement(document.Value.GetNearestLevel(elevation / Revit.ModelUnits));
-        if (data is null)
-          throw new Exceptions.RuntimeArgumentException(nameof(elevation), "No suitable level has been found.");
+      level = default;
 
-        level = data as TOutput;
+      try
+      {
+        if (!component.Params.TryGetData(DA, name, out level)) return false;
         if (level is null)
-          return data.CastTo(out level);
-      }
+        {
+          var data = Types.Level.FromElement(document.Value.GetNearestLevel(elevation / Revit.ModelUnits));
+          if (data is null)
+            throw new Exceptions.RuntimeArgumentException(nameof(elevation), "No suitable level has been found.");
 
-      // Validate document
-      switch (level)
+          level = data as TOutput;
+          if (level is null)
+            return data.CastTo(out level);
+        }
+
+        return true;
+      }
+      finally
       {
-        case ARDB.Element element:
-          if (!document.Value.IsEquivalent(element.Document))
-            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
-          break;
+        // Validate document
+        switch (level)
+        {
+          case ARDB.Element element:
+            if (!document.Value.IsEquivalent(element.Document))
+              throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(level)} from a diferent document.");
+            break;
 
-        case Types.IGH_ElementId id:
-          if (!document.Value.IsEquivalent(id.Document))
-            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
-          break;
+          case Types.Element goo:
+            if (!document.Value.IsEquivalent(goo.Document))
+              throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(level)} from a diferent document.");
+            break;
+        }
       }
-
-      return true;
     }
   }
 
@@ -362,5 +376,4 @@ namespace RhinoInside.Revit.GH.Parameters
     }
     #endregion
   }
-
 }
