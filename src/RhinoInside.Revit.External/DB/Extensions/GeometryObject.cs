@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 
@@ -9,6 +8,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   struct GeometryObjectEqualityComparer :
     IEqualityComparer<double>,
+    IEqualityComparer<UV>,
+    IEqualityComparer<XYZ>,
     IEqualityComparer<Point>,
     IEqualityComparer<PolyLine>,
     IEqualityComparer<Line>,
@@ -97,12 +98,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static GeometryObjectEqualityComparer Comparer(double tolerance) => new GeometryObjectEqualityComparer(tolerance);
 
     #region Length
-    public bool Equals(double x, double y) => NumericTolerance.AlmostEquals(x, y, Tolerance);
+    public bool Equals(double x, double y) => NumericTolerance.Abs(x - y) < Tolerance;
     public int GetHashCode(double value) => Math.Round(value / Tolerance).GetHashCode();
     #endregion
 
     #region UV
-    public bool Equals(UV x, UV y) => XYZExtension.GetLength(x.U - y.U, x.V - y.V, 0.0) < Tolerance;
+    public bool Equals(UV x, UV y) => NumericTolerance.Abs(x.U - y.U, x.V - y.V) < Tolerance;
     public int GetHashCode(UV obj) => CombineHash
     (
       GetHashCode(obj.U),
@@ -111,7 +112,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region XYZ
-    public bool Equals(XYZ x, XYZ y) => XYZExtension.GetLength(x.X - y.X, x.Y - y.Y, x.Z - y.Z) < Tolerance;
+    public bool Equals(XYZ x, XYZ y) => NumericTolerance.Abs(x.X - y.X, x.Y - y.Y, x.Z - y.Z) < Tolerance;
     public int GetHashCode(XYZ obj) => CombineHash
     (
       GetHashCode(obj.X),
@@ -431,6 +432,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class GeometryObjectExtension
   {
+    internal static bool IsValid(this GeometryObject self)
+    {
+      if (self is null) return false;
+#if REVIT_2021
+      try { var _ = self.Id; return true; }
+#else
+      // TODO : Test this, type by type, and use a faster fail check.
+      try { return self.TryGetLocation(out var _, out var _, out var _);}
+#endif
+      catch { return false; }
+    }
+
     public static bool AlmostEquals<G>(this G left, G right)
       where G : GeometryObject
     {
