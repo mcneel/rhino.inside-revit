@@ -107,10 +107,6 @@ namespace RhinoInside.Revit.GH.Types
     string IGH_ItemDescription.Description => Document?.GetTitle();
     #endregion
 
-    #region IGH_ReferencedData
-    public override bool IsReferencedData => DocumentGUID != Guid.Empty;
-    #endregion
-
     #region IGH_ElementId
     public abstract ARDB.Reference Reference { get; }
     public abstract ARDB.ElementId Id { get; }

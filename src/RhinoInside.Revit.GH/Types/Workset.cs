@@ -114,8 +114,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public virtual object ScriptVariable() => Value;
-
     public override bool CastFrom(object source)
     {
       var value = source;
@@ -150,42 +148,16 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    protected class Proxy : IGH_GooProxy
+    protected new class Proxy : ReferenceObject.Proxy
     {
-      protected readonly Workset owner;
-      public Proxy(Workset o) { owner = o; ((IGH_GooProxy) this).UserString = FormatInstance(); }
-      public override string ToString() => owner.DisplayName;
+      protected new readonly Workset owner;
+      public Proxy(Workset o) : base(o) { }
 
-      IGH_Goo IGH_GooProxy.ProxyOwner => owner;
-      string IGH_GooProxy.UserString { get; set; }
-      bool IGH_GooProxy.IsParsable => IsParsable();
-      string IGH_GooProxy.MutateString(string str) => str.Trim();
-
-      public virtual void Construct() { }
-      public virtual bool IsParsable() => false;
-      public virtual string FormatInstance() => owner.DisplayName;
-      public virtual bool FromString(string str) => throw new NotImplementedException();
-
-      public bool Valid => owner.IsValid;
-
-      [System.ComponentModel.Description("The document this element belongs to.")]
-      public string Document => owner.Document?.GetTitle();
-
-      [System.ComponentModel.Description("The Guid of document this element belongs to.")]
-      public Guid DocumentGUID => owner.DocumentGUID;
-
-      protected virtual bool IsValidId(ARDB.Document doc, ARDB.ElementId id) =>
-        owner.GetType() == Element.FromElementId(doc, id).GetType();
-
-      [System.ComponentModel.Description("A stable unique identifier for an element within the document.")]
-      public string UniqueID => owner.UniqueID;
-      [System.ComponentModel.Description("API Object Type.")]
-      public virtual Type ObjectType => owner.Value?.GetType();
       [System.ComponentModel.Description("Element is built in Revit.")]
       public bool IsBuiltIn => owner.IsReferencedData && owner.Id.IntegerValue < 0;
     }
 
-    public virtual IGH_GooProxy EmitProxy() => new Proxy(this);
+    public override IGH_GooProxy EmitProxy() => new Proxy(this);
     #endregion
 
     #region IGH_ItemDescription
@@ -196,7 +168,6 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ReferencedData
-    public override bool IsReferencedData => DocumentGUID != Guid.Empty;
     public override bool IsReferencedDataLoaded => Document is object && Id is object;
 
     public override bool LoadReferencedData()

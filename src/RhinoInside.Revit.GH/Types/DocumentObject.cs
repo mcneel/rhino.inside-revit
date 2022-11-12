@@ -196,6 +196,8 @@ namespace RhinoInside.Revit.GH.Types
 
     protected ReferenceObject(ARDB.Document doc, object val) : base(doc, val) { }
 
+    public abstract bool? IsEditable { get; }
+
     #region System.Object
     public bool Equals(ReferenceObject other) => other is object &&
       Equals(Document, other.Document) && Equals(UniqueID, other.UniqueID);
@@ -215,8 +217,6 @@ namespace RhinoInside.Revit.GH.Types
       }
       protected set => base.Value = value;
     }
-
-    public abstract bool? IsEditable { get; }
     #endregion
 
     #region GH_ISerializable
@@ -253,7 +253,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ReferencedData
-    public abstract bool IsReferencedData { get; }
+    public virtual bool IsReferencedData => DocumentGUID != Guid.Empty;
     public abstract bool IsReferencedDataLoaded { get; }
 
     public abstract bool LoadReferencedData();
