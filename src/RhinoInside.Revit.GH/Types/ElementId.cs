@@ -83,8 +83,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public virtual object ScriptVariable() => Value;
-
     public override bool CastTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.ElementId)))

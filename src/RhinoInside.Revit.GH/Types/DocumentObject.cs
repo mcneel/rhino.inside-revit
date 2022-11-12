@@ -54,7 +54,8 @@ namespace RhinoInside.Revit.GH.Types
     public virtual bool IsValid => Document.IsValid();
     public virtual string IsValidWhyNot => document.IsValidWithLog(out var log) ? default : log;
     IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) (this as ICloneable)?.Clone();
-    object IGH_Goo.ScriptVariable() => Value;
+    object IGH_Goo.ScriptVariable() => ScriptVariable();
+    public virtual object ScriptVariable() => Value;
 
     IGH_GooProxy IGH_Goo.EmitProxy() => default;
     public virtual bool CastFrom(object source) => false;
