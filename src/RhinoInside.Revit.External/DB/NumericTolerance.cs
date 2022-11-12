@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace RhinoInside.Revit.External.DB
 {
@@ -41,6 +42,65 @@ namespace RhinoInside.Revit.External.DB
     /// </remarks>
     public const double Delta = double.MaxValue * double.Epsilon / 4.0;
 
+    #region Abs
+    /// <summary>
+    /// Absolute value of {<paramref name="x"/>}.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <returns>Distance from {0}.</returns>
+    /// <remarks>This method returns denormals as zero.</remarks>
+    public static double Abs(double x)
+    {
+      x = Math.Abs(x);
+
+      if (x < Upsilon) return 0.0;
+
+      return x;
+    }
+
+    /// <summary>
+    /// Absolute value of {<paramref name="x"/>, <paramref name="y"/>} .
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns>Distance from {0, 0}.</returns>
+    /// <remarks>This method returns denormals as zero.</remarks>
+    public static double Abs(double x, double y)
+    {
+      x = Math.Abs(x); y = Math.Abs(y);
+
+      double       u = x, v = y;
+      if (x > v) { u = y; v = x; }
+      if (v < Upsilon) return 0.0;
+
+      u /= v;
+
+      return Math.Sqrt(1.0 + (u * u)) * v;
+    }
+
+    /// <summary>
+    /// Absolute value of {<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>}.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="z"></param>
+    /// <returns>Distance from {0, 0, 0}.</returns>
+    /// <remarks>This method returns denormals as zero.</remarks>
+    public static double Abs(double x, double y, double z)
+    {
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+
+      double       u = x, v = y, w = z;
+      if (x > w) { u = y; v = z; w = x; }
+      if (y > w) { u = z; v = x; w = y; }
+      if (w < Upsilon) return 0.0;
+
+      u /= w; v /= w;
+
+      return Math.Sqrt(1.0 + (u * u + v * v)) * w;
+    }
+    #endregion
+
     #region AlmostEqual
     /// <summary>
     /// Compares two doubles and determines if they are equal within the specified maximum absolute error.
@@ -51,6 +111,8 @@ namespace RhinoInside.Revit.External.DB
     /// <returns>True if both doubles are almost equal up to the specified maximum absolute error, false otherwise.</returns>
     public static bool AlmostEquals(double x, double y, double tolerance = DefaultTolerance)
     {
+      Debug.Assert(tolerance >= Delta);
+
       if (double.IsInfinity(x) || double.IsInfinity(y))
         return x == y;
 
