@@ -9,6 +9,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class XYZExtension
   {
+    public static void Deconstruct
+    (
+      this XYZ value,
+      out double x, out double y, out double z
+    )
+    {
+      x = value.X;
+      y = value.Y;
+      z = value.Z;
+    }
+
     internal static bool IsZeroLength(double x, double y, double z, double tolerance)
     {
       x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
@@ -39,20 +50,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return Math.Sqrt(1.0 + (u * u + v * v)) * w - 1.0 < tolerance;
     }
 
-    internal static double GetLength(double x, double y, double z)
-    {
-      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
-
-      double u = x, v = y, w = z;
-      if (x > w) { u = y; v = z; w = x; }
-      if (y > w) { u = z; v = x; w = y; }
-      if (w < Upsilon) return 0.0;
-
-      u /= w; v /= w;
-
-      return Math.Sqrt(1.0 + (u * u + v * v)) * w;
-    }
-
     /// <summary>
     /// Gets the length of this vector.
     /// </summary>
@@ -65,19 +62,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static double GetLength(this XYZ xyz, double tolerance = DefaultTolerance)
     {
-      // We follow a denormals-are-zero by default
-      tolerance = Math.Max(Upsilon, tolerance);
-
-      var length = GetLength(xyz.X, xyz.Y, xyz.Z);
+      var length = NumericTolerance.Abs(xyz.X, xyz.Y, xyz.Z);
       return length < tolerance ? 0.0 : length;
     }
 
     public static bool AlmostEquals(this XYZ a, XYZ b, double tolerance)
     {
-      // We follow a denormals-are-zero by default
-      tolerance = Math.Max(Upsilon, tolerance);
-
-      return GetLength(a.X - b.X, a.Y - b.Y, a.Z - b.Z) < tolerance;
+      return NumericTolerance.Abs(a.X - b.X, a.Y - b.Y, a.Z - b.Z) < tolerance;
     }
 
     /// <summary>
@@ -91,14 +82,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The normalized XYZ or zero if the vector is almost Zero.</returns>
     public static XYZ Normalize(this XYZ xyz, double tolerance = DefaultTolerance)
     {
-      // We follow a denormals-are-zero by default
-      tolerance = Math.Max(Upsilon, tolerance);
-
-      var length = GetLength(xyz.X, xyz.Y, xyz.Z);
+      var (x, y, z) = xyz;
+      var length = NumericTolerance.Abs(x, y, x);
       if (length < tolerance)
         return XYZ.Zero;
 
-      return new XYZ(xyz.X / length, xyz.Y / length, xyz.Z / length);
+      return new XYZ(x / length, y / length, z / length);
     }
 
     /// <summary>
@@ -115,18 +104,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The vector equal to the cross product.</returns>
     public static XYZ CrossProduct(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
-      // We follow a denormals-are-zero by default
-      tolerance = Math.Max(Upsilon, tolerance);
+      var (aX, aY, aZ) = a;
+      var lengthA = NumericTolerance.Abs(aX, aY, aZ);
+      if (lengthA < tolerance)
+        return XYZ.Zero;
 
-      var lengthA = a.GetLength(tolerance);
-      var lengthB = b.GetLength(tolerance);
-
-      if (lengthA < tolerance || lengthB < tolerance)
+      var (bX, bY, bZ) = b;
+      var lengthB = NumericTolerance.Abs(bX, bY, bZ);
+      if (lengthB < tolerance)
         return XYZ.Zero;
 
       // Normalize a and b
-      double aX = a.X / lengthA, aY = a.Y / lengthA, aZ = a.Z / lengthA;
-      double bX = b.X / lengthB, bY = b.Y / lengthB, bZ = b.Z / lengthB;
+      aX /= lengthA; aY /= lengthA; aZ /= lengthA;
+      bX /= lengthB; bY /= lengthB; bZ /= lengthB;
 
       // Compute CrossProduct of normalized vectors
       var x = aY * bZ - aZ * bY;
@@ -147,9 +137,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>true if <paramref name="a"/> and <paramref name="b"/> are parallel</returns>
     public static bool IsParallelTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
-      // We follow a denormals-are-zero by default
-      tolerance = Math.Max(Upsilon, tolerance);
-
       var A = a.Normalize(tolerance);
       var B = b.Normalize(tolerance);
 
@@ -165,9 +152,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>true if <paramref name="a"/> and <paramref name="b"/> are codirectional</returns>
     public static bool IsCodirectionalTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
-      // We follow a denormals-are-zero by default
-      tolerance = Math.Max(Upsilon, tolerance);
-
       var A = a.Normalize(tolerance);
       var B = b.Normalize(tolerance);
 
@@ -183,9 +167,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>true if <paramref name="a"/> and <paramref name="b"/> are perpendicular</returns>
     public static bool IsPerpendicularTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
-      // We follow a denormals-are-zero by default
-      tolerance = Math.Max(Upsilon, tolerance);
-
       var A = a.Normalize(tolerance);
       var B = b.Normalize(tolerance);
 
@@ -202,19 +183,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>X axis of the corresponding coordinate system</returns>
     public static XYZ PerpVector(this XYZ value, double tolerance = DefaultTolerance)
     {
-      // We follow a denormals-are-zero by default
-      tolerance = Math.Max(Upsilon, tolerance);
-
-      var length = value.GetLength(tolerance);
+      var (x, y, z) = value;
+      var length = NumericTolerance.Abs(x, y, z);
       if (length < tolerance)
         return XYZ.Zero;
 
-      var normal = new XYZ(value.X / length, value.Y / length, value.Z / length);
-
-      if (new XYZ(normal.X, normal.Y, 0.0).GetLength(tolerance) < tolerance)
-        return new XYZ(value.Z, 0.0, -value.X);
-      else
-        return new XYZ(-value.Y, value.X, 0.0);
+      return NumericTolerance.Abs(x / length, y / length) < tolerance ?
+        new XYZ(z, 0.0, -x) :
+        new XYZ(-y, x, 0.0);
     }
 
     /// <summary>
@@ -308,9 +284,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     internal static Transform ComputeCovariance(IEnumerable<XYZ> points, XYZ meanPoint = default)
     {
-      if (meanPoint is null) meanPoint = ComputeMeanPoint(points);
-
-      double x = meanPoint.X, y = meanPoint.Y, z = meanPoint.Z;
+      var (x, y, z) = meanPoint ?? ComputeMeanPoint(points);
       Sum covXx = default, covXy = default, covXz = default;
       Sum covYx = default, covYy = default, covYz = default;
       Sum covZx = default, covZy = default, covZz = default;
@@ -367,6 +341,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class TransformExtension
   {
+    public static void Deconstruct
+    (
+      this Transform transform,
+      out XYZ origin, out XYZ basisX, out XYZ basisY, out XYZ basisZ
+    )
+    {
+      origin = transform.Origin;
+      basisX = transform.BasisX;
+      basisY = transform.BasisY;
+      basisZ = transform.BasisZ;
+    }
+
     public static bool TryGetInverse(this Transform transform, out Transform inverse)
     {
       if (DefaultTolerance < transform.Determinant)
