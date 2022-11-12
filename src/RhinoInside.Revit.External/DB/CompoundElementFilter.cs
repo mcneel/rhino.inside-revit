@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.External.DB
       );
     }
 
-    const double BoundingBoxLimits = 1e+9;
+    internal const double BoundingBoxLimits = 1e+9;
     public static ElementFilter ElementHasBoundingBoxFilter { get; } = new BoundingBoxIsInsideFilter(new Outline(new XYZ(-BoundingBoxLimits, -BoundingBoxLimits, -BoundingBoxLimits), new XYZ(+BoundingBoxLimits, +BoundingBoxLimits, +BoundingBoxLimits)));
     public static ElementFilter ElementHasCategoryFilter { get; } = new ElementCategoryFilter(BuiltInCategory.INVALID, inverted: true);
     private static ElementFilter ElementIsElementTypeFilterInstance { get; } = new ElementIsElementTypeFilter(inverted: false);
