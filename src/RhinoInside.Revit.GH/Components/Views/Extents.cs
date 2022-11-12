@@ -7,8 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  using External.DB;
-  using Convert.DocObjects;
+  using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.7")]
   public class ViewExtents : TransactionalChainComponent
@@ -110,22 +109,41 @@ namespace RhinoInside.Revit.GH.Components.Views
       )
     };
 
+    GH_PreviewMode PreviewMode = GH_PreviewMode.Disabled;
+    protected override void BeforeSolveInstance()
+    {
+      // CropBox should not take into account the Previews.
+      // In recent versions of Revit this helps.
+      PreviewMode = PreviewServer.PreviewMode;
+      PreviewServer.PreviewMode = GH_PreviewMode.Disabled;
+
+      base.BeforeSolveInstance();
+    }
+
+    protected override void AfterSolveInstance()
+    {
+      base.AfterSolveInstance();
+
+      PreviewServer.PreviewMode = PreviewMode;
+      PreviewMode = GH_PreviewMode.Disabled;
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
       else Params.TrySetData(DA, "View", () => view);
 
-      if (Params.GetData(DA, "Crop View", out bool? cropView) && cropView.HasValue)
+      if (Params.GetData(DA, "Crop View", out bool? cropView))
       {
         StartTransaction(view.Document);
-        view.Value.CropBoxActive = cropView.Value;
+        view.CropBoxActive = cropView;
       }
       Params.TrySetData(DA, "Crop View", () => view.Value.CropBoxActive);
 
-      if (Params.GetData(DA, "Crop Region Visible", out bool? cropRegionVisible) && cropRegionVisible.HasValue)
+      if (Params.GetData(DA, "Crop Region Visible", out bool? cropRegionVisible))
       {
         StartTransaction(view.Document);
-        view.Value.CropBoxVisible = cropRegionVisible.Value;
+        view.CropBoxVisible = cropRegionVisible;
       }
       Params.TrySetData(DA, "Crop Region Visible", () => view.Value.CropBoxVisible);
 
@@ -150,18 +168,9 @@ namespace RhinoInside.Revit.GH.Components.Views
       }
       Params.TrySetData(DA, "Crop Extents", () =>
       {
-        var cropBox = view.Value.CropBox;
-        if (!view.Value.CropBoxActive)
-        {
-          using (view.Document.RollBackScope())
-          {
-            view.Value.CropBoxActive = true;
-            cropBox = view.Value.CropBox;
-          }
-        }
-
-        var u = new Interval(cropBox.Min.X * Revit.ModelUnits, cropBox.Max.X * Revit.ModelUnits);
-        var v = new Interval(cropBox.Min.Y * Revit.ModelUnits, cropBox.Max.Y * Revit.ModelUnits);
+        var (min, max) = view.Value.CropBox;
+        var u = new Interval(min.X * Revit.ModelUnits, max.X * Revit.ModelUnits);
+        var v = new Interval(min.Y * Revit.ModelUnits, max.Y * Revit.ModelUnits);
         return new GH_Interval2D(new UVInterval(u, v));
       });
 
@@ -210,55 +219,51 @@ namespace RhinoInside.Revit.GH.Components.Views
       }
       Params.TrySetData(DA, "Depth", () =>
       {
-        var cropBox = view.Value.CropBox;
-
-        if (!view.Value.CropBoxActive)
-        {
-          using (view.Document.RollBackScope())
-          {
-            view.Value.CropBoxActive = true;
-            cropBox = view.Value.CropBox;
-          }
-        }
-
-        switch (view.Value)
-        {
-          case ARDB.View3D view3D:
-            if (view3D.TryGetViewportInfo(false, out var info))
-              cropBox.Min = new ARDB.XYZ(cropBox.Min.X, cropBox.Min.Y, -info.FrustumFar / Revit.ModelUnits);
-            else if (view3D.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR)?.AsInteger() == 0)
-              cropBox.Min = new ARDB.XYZ(cropBox.Min.X, cropBox.Min.Y, -15_000.0);
-
-            break;
-
-          case ARDB.ViewPlan viewPlan:
-            using (var viewRange = viewPlan.GetViewRange())
-            {
-              var bottomLevelId = viewRange.GetLevelId(ARDB.PlanViewPlane.ViewDepthPlane);
-              var bottomXYZ     = view.Document.GetElement(bottomLevelId) is ARDB.Level bottomLevel ? (bottomLevel.Elevation + viewRange.GetOffset(ARDB.PlanViewPlane.ViewDepthPlane)) : cropBox.Min.Z;
-              var topLevelId    = viewRange.GetLevelId(ARDB.PlanViewPlane.TopClipPlane);
-              var topXYZ        = view.Document.GetElement(topLevelId) is ARDB.Level topLevel ? (topLevel.Elevation + viewRange.GetOffset(ARDB.PlanViewPlane.TopClipPlane)) : cropBox.Max.Z;
-
-              cropBox.Min = new ARDB.XYZ(cropBox.Min.X, cropBox.Min.Y, bottomXYZ);
-              cropBox.Max = new ARDB.XYZ(cropBox.Max.X, cropBox.Max.Y, topXYZ);
-            }
-            break;
-
-          case ARDB.ViewSection viewSection:
-            if (viewSection.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING)?.AsInteger() == 0)
-              cropBox.Min = new ARDB.XYZ(cropBox.Min.X, cropBox.Min.Y, -15_000.0);
-
-            break;
-
-          case ARDB.ViewSheet viewSheet:
-            cropBox.Min = new ARDB.XYZ(cropBox.Min.X, cropBox.Min.Y, 0.0);
-            cropBox.Max = new ARDB.XYZ(cropBox.Max.X, cropBox.Max.Y, 0.0);
-            break;
-        }
-
-        var interval = new Interval(cropBox.Min.Z * Revit.ModelUnits, cropBox.Max.Z * Revit.ModelUnits);
-        return new GH_Interval(interval);
+        GetViewRangeOffsets(view.Value, out var backOffset, out var frontOffset);
+        return new GH_Interval(new Interval(backOffset * Revit.ModelUnits, frontOffset * Revit.ModelUnits));
       });
+    }
+
+    internal static void GetFrontAndBackClipOffsets(ARDB.View view, out double backOffset, out double frontOffset)
+    {
+      backOffset = view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR)?.AsInteger() == 1 ?
+                   (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR)?.AsDouble() ?? double.NegativeInfinity) : double.NegativeInfinity;
+
+      frontOffset = view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_NEAR)?.AsInteger() == 1 ?
+                   (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_NEAR)?.AsDouble() ?? double.PositiveInfinity) : double.PositiveInfinity;
+    }
+
+    internal static void GetViewRangeOffsets(ARDB.View view, out double backOffset, out double frontOffset)
+    {
+      GetFrontAndBackClipOffsets(view, out backOffset, out frontOffset);
+
+      switch (view)
+      {
+        case ARDB.View3D view3D:
+        {
+          // `FilteredElementCollector` does not check near-plane on 3D-views. (Tested on Revit 2023.0)
+          //if (view3D.IsPerspective)
+          //  frontOffset = Math.Min(frontOffset, 0.0);
+        }
+        break;
+
+        case ARDB.ViewPlan viewPlan:
+          using (var viewRange = viewPlan.GetViewRange())
+          {
+            if (view.Document.GetElement(viewRange.GetLevelId(ARDB.PlanViewPlane.ViewDepthPlane)) is ARDB.Level bottomLevel)
+              backOffset = Math.Max(backOffset, bottomLevel.ProjectElevation + viewRange.GetOffset(ARDB.PlanViewPlane.ViewDepthPlane));
+
+            if (view.Document.GetElement(viewRange.GetLevelId(ARDB.PlanViewPlane.TopClipPlane)) is ARDB.Level topLevel)
+              frontOffset = Math.Min(frontOffset, topLevel.ProjectElevation + viewRange.GetOffset(ARDB.PlanViewPlane.TopClipPlane));
+          }
+          break;
+
+        case ARDB.ViewSection viewSection:
+          if (!double.IsInfinity(frontOffset) && !double.IsNaN(frontOffset))
+            frontOffset = 0.0;
+
+          break;
+      }
     }
   }
 }
