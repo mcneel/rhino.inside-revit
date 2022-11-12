@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Drawing;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Special;
@@ -99,38 +98,6 @@ namespace RhinoInside.Revit.GH.Types
       target = default;
       return false;
     }
-
-    protected class Proxy : IGH_GooProxy
-    {
-      protected readonly ElementId owner;
-      public Proxy(ElementId o) { owner = o; ((IGH_GooProxy) this).UserString = FormatInstance(); }
-      public override string ToString() => owner.DisplayName;
-
-      IGH_Goo IGH_GooProxy.ProxyOwner => owner;
-      string IGH_GooProxy.UserString { get; set; }
-      bool IGH_GooProxy.IsParsable => IsParsable();
-      string IGH_GooProxy.MutateString(string str) => str.Trim();
-
-      public virtual void Construct() { }
-      public virtual bool IsParsable() => false;
-      public virtual string FormatInstance() => owner.DisplayName;
-      public virtual bool FromString(string str) => throw new NotImplementedException();
-
-      public bool Valid => owner.IsValid;
-
-      [Description("The document this element belongs to.")]
-      public string Document => owner.Document?.GetTitle();
-
-      [Description("The Guid of document this element belongs to.")]
-      public Guid DocumentGUID => owner.DocumentGUID;
-
-      [Description("A stable unique identifier for an element within the document.")]
-      public string UniqueID => owner.UniqueID;
-      [Description("API Object Type.")]
-      public virtual Type ObjectType => owner.Value?.GetType();
-    }
-
-    public virtual IGH_GooProxy EmitProxy() => new Proxy(this);
     #endregion
 
     #region IGH_ItemDescription
