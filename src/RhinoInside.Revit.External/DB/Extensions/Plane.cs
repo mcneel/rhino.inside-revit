@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// Plane X axis according to the Arbitrary Axis Algorithm.
     /// </summary>
     /// <seealso cref="XYZExtension.PerpVector(XYZ, double)"/>
-    public XYZ Direction => XYZExtension.GetLength(A, B, 0.0) < NumericTolerance.DefaultTolerance ?
+    public XYZ Direction => NumericTolerance.Abs(A, B) < NumericTolerance.DefaultTolerance ?
       new XYZ( C, 0.0,  -A):
       new XYZ(-B,   A, 0.0);
 
@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </summary>
     /// <seealso cref="XYZExtension.PerpVector(XYZ, double)"/>
     //public XYZ Up => Normal.CrossProduct(Direction, NumericTolerance.DefaultTolerance);
-    public XYZ Up => XYZExtension.GetLength(A, B, 0.0) < NumericTolerance.DefaultTolerance ?
+    public XYZ Up => NumericTolerance.Abs(A, B) < NumericTolerance.DefaultTolerance ?
       new XYZ
       (
            (B *  -A) /* - (C *  0.0) */,
@@ -68,23 +68,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public PlaneEquation(XYZ vector, double originSignedDistance)
     {
-      var abc = vector.Normalize(0D);
-      A = abc.X;
-      B = abc.Y;
-      C = abc.Z;
+      (A, B, C) = vector.Normalize(0D);
       D = originSignedDistance;
     }
 
     public PlaneEquation(XYZ point, XYZ normal)
     {
-      var abc = normal.Normalize(0D);
-      A = abc.X;
-      B = abc.Y;
-      C = abc.Z;
-      D = -(abc.X * point.X + abc.Y * point.Y + abc.Z * point.Z);
+      (A, B, C) = normal.Normalize(0D);
+      D = -(A * point.X + B * point.Y + C * point.Z);
     }
 
-    public static PlaneEquation operator -(PlaneEquation value)
+    public static PlaneEquation operator -(in PlaneEquation value)
     {
       return new PlaneEquation(-value.A, -value.B, -value.C, -value.D);
     }
