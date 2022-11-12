@@ -81,7 +81,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
         return true;
 
       // If selected items are modified we need to expire dependant components
-      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
+      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_Element>())
       {
         if (!data.IsValid)
           continue;
@@ -180,7 +180,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     )
     {
       // If selected items are modified we need to expire dependant components
-      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
+      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_Element>())
       {
         if (!doc.IsEquivalent(data.Document))
           continue;
@@ -197,7 +197,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
         if (!updateListItems)
         {
           // If an item in ListItems is deleted we need to update ListItems
-          foreach (var item in ListItems.Select(x => x.Value).OfType<Types.IGH_ElementId>())
+          foreach (var item in ListItems.Select(x => x.Value).OfType<Types.IGH_Element>())
           {
             if (!doc.IsEquivalent(item.Document))
               continue;
