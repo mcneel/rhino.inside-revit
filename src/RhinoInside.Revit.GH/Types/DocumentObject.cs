@@ -276,7 +276,7 @@ namespace RhinoInside.Revit.GH.Types
 
     int IGH_QuickCast.QC_CompareTo(IGH_QuickCast other)
     {
-      return other is IGH_ElementId otherId ?
+      return GetType() == other.GetType() && other is IGH_ReferenceObject otherId ?
         QC_Value.CompareTo(External.DB.FullUniqueId.Format(otherId.DocumentGUID, otherId.UniqueID)) :
         -1;
     }
