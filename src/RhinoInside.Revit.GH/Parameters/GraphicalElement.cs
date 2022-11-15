@@ -44,14 +44,11 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
 
     #region ISelectionFilter
-    public virtual bool AllowElement(ARDB.Element elem) => elem is R && Types.GraphicalElement.IsValidElement(elem);
-    public bool AllowReference(ARDB.Reference reference, ARDB.XYZ position)
-    {
-      if (reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
-        return AllowElement(Revit.ActiveUIDocument.Document.GetElement(reference));
+    public virtual bool AllowElement(ARDB.Element elem) =>
+      elem is R && Types.GraphicalElement.IsValidElement(elem);
 
-      return false;
-    }
+    public bool AllowReference(ARDB.Reference reference, ARDB.XYZ position) =>
+      reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE;
     #endregion
 
     #region UI methods
@@ -84,7 +81,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
 
-      switch (uiDocument.PickObject(out var reference, ARUI.Selection.ObjectType.LinkedElement, this))
+      switch (uiDocument.PickObject(out var reference, ARUI.Selection.ObjectType.LinkedElement, new LinkedElementSelectionFilter(this)))
       {
         case ARUI.Result.Succeeded:
           if (Types.Element.FromReference(doc, reference) is T element)
@@ -138,7 +135,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
 
-      switch (uiDocument.PickObjects(out var references, ARUI.Selection.ObjectType.LinkedElement, this))
+      switch (uiDocument.PickObjects(out var references, ARUI.Selection.ObjectType.LinkedElement, new LinkedElementSelectionFilter(this)))
       {
         case ARUI.Result.Succeeded:
           value = new GH_Structure<T>();
@@ -171,8 +168,8 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
         {
-          if (Revit.ActiveUIDocument.Document.GetElement(reference) is ARDB.RevitLinkInstance link)
-            return SelectionFilter.AllowElement(link.GetLinkDocument().GetElement(reference.LinkedElementId));
+          if (Revit.ActiveUIDocument.Document.GetElement(reference.ElementId) is ARDB.RevitLinkInstance link)
+            return SelectionFilter.AllowElement(link.GetLinkDocument()?.GetElement(reference.LinkedElementId));
         }
 
         return false;
