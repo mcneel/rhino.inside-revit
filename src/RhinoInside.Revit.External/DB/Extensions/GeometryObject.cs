@@ -213,14 +213,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Line
     public bool Equals(Line left, Line right) =>
       left.IsBound == right.IsBound &&
-      left.IsBound ?
       (
-        Equals(left.GetEndPoint(CurveEnd.Start), right.GetEndPoint(CurveEnd.Start)) &&
-        Equals(left.GetEndPoint(CurveEnd.End),   right.GetEndPoint(CurveEnd.End))
-      ):
-      (
-        Equals(left.Origin, right.Origin) &&
-        Equals(left.Direction, right.Direction)
+        left.IsBound ?
+        (
+          Equals(left.GetEndPoint(CurveEnd.Start), right.GetEndPoint(CurveEnd.Start)) &&
+          Equals(left.GetEndPoint(CurveEnd.End),   right.GetEndPoint(CurveEnd.End))
+        ):
+        (
+          Equals(left.Origin, right.Origin) &&
+          Equals(left.Direction, right.Direction)
+        )
       );
 
     public int GetHashCode(Line value) => CombineHash
@@ -239,17 +241,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Equals(left.XDirection, right.XDirection) &&
       Equals(left.YDirection, right.YDirection) &&
       Equals(left.Normal, right.Normal) &&
-      left.IsBound ?
       (
-        Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 2.0, true)) &&
-        Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 2.0, true)) &&
-        Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 2.0, true))
-      ) :
-      (
-        Equals(left.Evaluate(left.Period * 0.0 / 4.0, false), right.Evaluate(right.Period * 0.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 1.0 / 4.0, false), right.Evaluate(right.Period * 1.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 2.0 / 4.0, false), right.Evaluate(right.Period * 2.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 3.0 / 4.0, false), right.Evaluate(right.Period * 3.0 / 4.0, false))
+        left.IsBound ?
+        (
+          Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 2.0, true)) &&
+          Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 2.0, true)) &&
+          Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 2.0, true))
+        ) :
+        (
+          Equals(left.Evaluate(left.Period * 0.0 / 4.0, false), right.Evaluate(right.Period * 0.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 1.0 / 4.0, false), right.Evaluate(right.Period * 1.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 2.0 / 4.0, false), right.Evaluate(right.Period * 2.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 3.0 / 4.0, false), right.Evaluate(right.Period * 3.0 / 4.0, false))
+        )
       );
 
     public int GetHashCode(Arc value) => CombineHash
@@ -284,17 +288,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Equals(left.XDirection, right.XDirection) &&
       Equals(left.YDirection, right.YDirection) &&
       Equals(left.Normal, right.Normal) &&
-      left.IsBound ?
       (
-        Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 2.0, true)) &&
-        Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 2.0, true)) &&
-        Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 2.0, true))
-      ) :
-      (
-        Equals(left.Evaluate(left.Period * 0.0 / 4.0, false), right.Evaluate(right.Period * 0.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 1.0 / 4.0, false), right.Evaluate(right.Period * 1.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 2.0 / 4.0, false), right.Evaluate(right.Period * 2.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 3.0 / 4.0, false), right.Evaluate(right.Period * 3.0 / 4.0, false))
+        left.IsBound ?
+        (
+          Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 2.0, true)) &&
+          Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 2.0, true)) &&
+          Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 2.0, true))
+        ) :
+        (
+          Equals(left.Evaluate(left.Period * 0.0 / 4.0, false), right.Evaluate(right.Period * 0.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 1.0 / 4.0, false), right.Evaluate(right.Period * 1.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 2.0 / 4.0, false), right.Evaluate(right.Period * 2.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 3.0 / 4.0, false), right.Evaluate(right.Period * 3.0 / 4.0, false))
+        )
       );
 
     public int GetHashCode(Ellipse value) => CombineHash
