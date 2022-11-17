@@ -973,7 +973,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           );
         }
 
-        return ids.Select(destinationDocument.GetElement).OfType<T>().FirstOrDefault();
+        return ids?.Select(destinationDocument.GetElement).OfType<T>().FirstOrDefault();
       }
       catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
@@ -1000,6 +1000,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
           reference = modelLine.GeometryCurve.Reference;
           break;
 
+        case Level level:
+          reference = level.GetPlaneReference();
+          break;
+
+        case SketchPlane sketchPlane:
+          reference = sketchPlane.GetPlaneReference();
+          break;
+
         default:
           using (var options = new Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
           {
@@ -1014,6 +1022,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return reference ?? new Reference(element);
+    }
+
+    public static GeometryObject GetGeometryObjectFromReference(this Element element, Reference reference, out Transform transform)
+    {
+      if (element.GetGeometryObjectFromReference(reference) is GeometryObject geometryObject)
+      {
+        transform = (element as Instance)?.GetTransform() ?? Transform.Identity;
+        return geometryObject;
+      }
+
+      transform = null;
+      return null;
     }
     #endregion
   }
