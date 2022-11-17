@@ -217,6 +217,8 @@ namespace RhinoInside.Revit.GH.Types
       }
       protected set => base.Value = value;
     }
+
+    protected abstract object FetchValue();
     #endregion
 
     #region GH_ISerializable
@@ -255,9 +257,7 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_ReferencedData
     public virtual bool IsReferencedData => DocumentGUID != Guid.Empty;
     public abstract bool IsReferencedDataLoaded { get; }
-
     public abstract bool LoadReferencedData();
-    protected abstract object FetchValue();
     public virtual void UnloadReferencedData()
     {
       if (!IsReferencedData) return;
