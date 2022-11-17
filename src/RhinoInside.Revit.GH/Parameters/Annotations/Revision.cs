@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Parameters
       (
         menu, "Open Sheet Issues/Revisions…",
         (sender, arg) => External.UI.EditScope.PostCommand(activeApp, SheetIssuesOrRevisionsId),
-        activeApp.CanPostCommand(SheetIssuesOrRevisionsId), false
+        activeApp.ActiveUIDocument is object && activeApp.CanPostCommand(SheetIssuesOrRevisionsId), false
       );
     }
     #endregion

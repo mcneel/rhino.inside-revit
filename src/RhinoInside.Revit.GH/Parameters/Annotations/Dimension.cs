@@ -136,7 +136,11 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
+      base.Menu_AppendActions(menu);
+
       var activeApp = Revit.ActiveUIApplication;
+      if (activeApp.ActiveUIDocument is null) return;
+
       var open = Menu_AppendItem(menu, $"Open");
 
       var LinearDimensionTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.LinearDimensionTypes);
@@ -194,8 +198,6 @@ namespace RhinoInside.Revit.GH.Parameters
         (sender, arg) => External.UI.EditScope.PostCommand(activeApp, SpotSlopeTypesId),
         activeApp.CanPostCommand(SpotSlopeTypesId), false
       );
-
-      base.Menu_AppendActions(menu);
     }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu) => Rhinoceros.InvokeInHostContext(() =>
