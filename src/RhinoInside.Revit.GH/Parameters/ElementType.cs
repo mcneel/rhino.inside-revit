@@ -10,7 +10,6 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  using System.Diagnostics;
   using External.DB.Extensions;
 
   public abstract class ElementType<T, R> : Element<T, R>
@@ -296,6 +295,50 @@ namespace RhinoInside.Revit.GH.Parameters
 
         ExpireSolution(true);
       }
+    }
+
+    public override void Menu_AppendActions(ToolStripDropDown menu)
+    {
+      if (Revit.ActiveUIDocument?.Document is ARDB.Document doc)
+      {
+        bool singular = ToElementIds(VolatileData).Where(x => doc.IsEquivalent(x.Document)).Take(2).Count() == 1;
+        {
+          var activeApp = Revit.ActiveUIApplication;
+          var TypePropertiesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.TypeProperties);
+          Menu_AppendItem
+          (
+            menu, $"Edit {TypeName}…",
+            async (sender, arg) =>
+            {
+              var ids = ToElementIds(VolatileData).Where(x => doc.IsEquivalent(x.Document)).Select(x => x.Id).Take(1).ToList();
+              if (ids.Any())
+              {
+                using (var scope = new External.UI.EditScope(activeApp))
+                {
+                  var activeDocument = activeApp.ActiveUIDocument;
+                  var selection = activeDocument.Selection;
+                  var current = selection.GetElementIds();
+                  selection.SetElementIds(ids);
+                  var changes = await scope.ExecuteCommandAsync(TypePropertiesId);
+                  selection.SetElementIds(current);
+
+                  if (changes.GetSummary(activeDocument.Document, out var _, out var _, out var modified) > 0)
+                  {
+                    if (modified.Contains(ids[0]))
+                    {
+                      ExpireDownStreamObjects();
+                      OnPingDocument().NewSolution(expireAllObjects: false);
+                    }
+                  }
+                }
+              }
+            },
+            singular && activeApp.CanPostCommand(TypePropertiesId), false
+          );
+        }
+      }
+
+      base.Menu_AppendActions(menu);
     }
     #endregion
 
