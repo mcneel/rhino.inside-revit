@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 
@@ -47,7 +48,36 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (self.ElementId != other.ElementId) return false;
       if (self.LinkedElementId != other.LinkedElementId) return false;
 
+// TODO : Test if it validates the document and is faster.
+//#if REVIT_2018
+//      return self.EqualTo(other);
+//#else
       return self.ConvertToStableRepresentation(document) == other.ConvertToStableRepresentation(document);
+//#endif
+    }
+  }
+
+  public static class ReferenceExtension
+  {
+    public static Reference CreateGeometryLinkReference(this Reference reference, Document document, ElementId linkInstanceId, Document linkedDocument)
+    {
+      if (reference is null) throw new ArgumentNullException(nameof(reference));
+
+      if (!linkedDocument.IsValid() || !linkInstanceId.IsValid()) return null;
+      if (document.IsEquivalent(linkedDocument)) return reference;
+
+      var stable = reference.ConvertToStableRepresentation(linkedDocument);
+
+      var referenceId = ReferenceId.Parse(stable, linkedDocument);
+      referenceId = new ReferenceId
+      (
+        new GeometryObjectId(linkInstanceId.ToValue(), 0, GeometryObjectType.RVTLINK),
+        referenceId.Element,
+        referenceId.Symbol
+      );
+      stable = referenceId.Format(document);
+
+      return Reference.ParseFromStableRepresentation(document, stable);
     }
   }
 }
