@@ -22,6 +22,7 @@ namespace RhinoInside.Revit.External.UI.Selection
       }
     }
 
+    #region PickObject
     public static Result PickObject(this UIDocument doc, out Reference reference, ObjectType objectType)
     {
       return Pick(doc.Application, out reference, () => doc.Selection.PickObject(objectType));
@@ -41,7 +42,9 @@ namespace RhinoInside.Revit.External.UI.Selection
     {
       return Pick(doc.Application, out reference, () => doc.Selection.PickObject(objectType, selectionFilter, statusPrompt));
     }
+    #endregion
 
+    #region PickObjects
     public static Result PickObjects(this UIDocument doc, out IList<Reference> reference, ObjectType objectType)
     {
       return Pick(doc.Application, out reference, () => doc.Selection.PickObjects(objectType));
@@ -66,21 +69,47 @@ namespace RhinoInside.Revit.External.UI.Selection
     {
       return Pick(doc.Application, out reference, () => doc.Selection.PickObjects(objectType, selectionFilter, statusPrompt, pPreSelected));
     }
+    #endregion
 
     public static Result PickElementsByRectangle(this UIDocument doc, out IList<Element> elements, ISelectionFilter selectionFilter, string statusPrompt)
     {
       return Pick(doc.Application, out elements, () => doc.Selection.PickElementsByRectangle(selectionFilter, statusPrompt));
     }
 
-    public static Result PickPoint(this UIDocument doc, out XYZ point, ObjectSnapTypes snapSettings, string statusPrompt)
+    #region PickPoint
+    public static Result PickPoint(this UIDocument doc, out XYZ point, string statusPrompt = null)
     {
-      return Pick(doc.Application, out point, () => doc.Selection.PickPoint(snapSettings, statusPrompt));
+      return Pick(doc.Application, out point, () => statusPrompt is object ? doc.Selection.PickPoint(GetObjectSnapTypes(doc), statusPrompt) : doc.Selection.PickPoint(GetObjectSnapTypes(doc)));
     }
 
-    public static Result PickPoint(this UIDocument doc, out XYZ point, string statusPrompt)
+    public static Result PickPoint(this UIDocument doc, out XYZ point, ObjectSnapTypes objectSnapTypes, string statusPrompt = null)
     {
-      return Pick(doc.Application, out point, () => doc.Selection.PickPoint(GetObjectSnapTypes(doc), statusPrompt));
+      return Pick(doc.Application, out point, () => statusPrompt is object ? doc.Selection.PickPoint(objectSnapTypes, statusPrompt) : doc.Selection.PickPoint(objectSnapTypes));
     }
+    #endregion
+
+    #region PickPoints
+    public static Result PickPoints(this UIDocument doc, out IList<XYZ> points, string statusPrompt = null)
+    {
+      return PickPoints(doc, out points, GetObjectSnapTypes(doc), statusPrompt);
+    }
+
+    public static Result PickPoints(this UIDocument doc, out IList<XYZ> points, ObjectSnapTypes objectSnapTypes, string statusPrompt = null)
+    {
+      return Pick
+      (
+        doc.Application, out points, () =>
+        {
+          var values = new List<XYZ>();
+          while (true)
+          {
+            try { values.Add(statusPrompt is object ? doc.Selection.PickPoint(objectSnapTypes, statusPrompt) : doc.Selection.PickPoint(objectSnapTypes)); }
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException) { if (values.Count == 0) throw; else return values; }
+          }
+        }
+     );
+    }
+    #endregion
 
     internal static ObjectSnapTypes GetObjectSnapTypes(UIDocument doc)
     {
