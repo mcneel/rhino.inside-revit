@@ -43,10 +43,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Filter", ref filter))
         return;
 
+      var elementFilter = filter.Value;
       DA.SetDataList
       (
         "Pass",
-        elements.Select(x => x.IsValid ? new GH_Boolean(filter.Value.PassesFilter(x.Document, x.Id)) : default)
+        elements.Select(x => elementFilter is object && x?.IsValid is true ? new GH_Boolean(elementFilter.PassesFilter(x.Document, x.Id)) : default)
       );
     }
   }
