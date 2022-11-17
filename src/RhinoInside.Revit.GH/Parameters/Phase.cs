@@ -17,9 +17,9 @@ namespace RhinoInside.Revit.GH.Parameters
     public Phase() : base("Phase", "Phase", "Contains a collection of Revit construction phase elements", "Params", "Revit") { }
 
     #region UI
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      base.AppendAdditionalMenuItems(menu);
+      base.Menu_AppendActions(menu);
 
       var activeApp = Revit.ActiveUIApplication;
       var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Phases);
@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Parameters
       (
         menu, $"Open Phases…",
         (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.CanPostCommand(commandId), false
+        activeApp.ActiveUIDocument is object && activeApp.CanPostCommand(commandId), false
       );
     }
 

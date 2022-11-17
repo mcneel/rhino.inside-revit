@@ -89,42 +89,43 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected ARDB.BuiltInCategory SelectedBuiltInCategory = ARDB.BuiltInCategory.INVALID;
 
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      base.AppendAdditionalMenuItems(menu);
-
       var activeApp = Revit.ActiveUIApplication;
       var doc = activeApp.ActiveUIDocument?.Document;
-      if (doc is null) return;
-
+      if (doc is object)
       {
-        var commandId = doc.IsFamilyDocument ?
-          Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.FamilyTypes) :
-          Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ProjectParameters);
+        {
+          var commandId = doc.IsFamilyDocument ?
+            Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.FamilyTypes) :
+            Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ProjectParameters);
 
-        var commandName = doc.IsFamilyDocument ?
-          "Open Family Parameters…" :
-          "Open Project Parameters…";
+          var commandName = doc.IsFamilyDocument ?
+            "Open Family Parameters…" :
+            "Open Project Parameters…";
 
-        Menu_AppendItem
-        (
-          menu, commandName,
-          (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-          activeApp.CanPostCommand(commandId), false
-        );
-      }
+          Menu_AppendItem
+          (
+            menu, commandName,
+            (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+            activeApp.CanPostCommand(commandId), false
+          );
+        }
 
 #if REVIT_2022
-      {
-        var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.GlobalParameters);
-        Menu_AppendItem
-        (
-          menu, "Open Global Parameters…",
-          (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-          !doc.IsFamilyDocument && activeApp.CanPostCommand(commandId), false
-        );
-      }
+        {
+          var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.GlobalParameters);
+          Menu_AppendItem
+          (
+            menu, "Open Global Parameters…",
+            (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
+            !doc.IsFamilyDocument && activeApp.CanPostCommand(commandId), false
+          );
+        }
 #endif
+      }
+
+      base.Menu_AppendActions(menu);
     }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)

@@ -25,12 +25,11 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
 
     #region UI
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      base.AppendAdditionalMenuItems(menu);
+      base.Menu_AppendActions(menu);
 
       var activeApp = Revit.ActiveUIApplication;
-
       var SheetIssuesOrRevisionsId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SheetIssuesOrRevisions);
       Menu_AppendItem
       (

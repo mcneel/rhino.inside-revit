@@ -129,9 +129,10 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override T PreferredCast(object data) => data is R ? Types.Element.FromValue(data) as T : null;
 
-    internal static IEnumerable<Types.IGH_Element> ToElementIds(IGH_Structure data) =>
-      data.AllData(true).
-      OfType<Types.IGH_Element>().
+    internal static IEnumerable<T> ToElementIds(IGH_Structure data) =>
+      data.
+      AllData(skipNulls: true).
+      OfType<T>().
       Where(x => x.IsValid);
 
     #region UI
@@ -172,7 +173,7 @@ namespace RhinoInside.Revit.GH.Parameters
         }
 
         {
-          bool delete = ToElementIds(VolatileData).Any(x => doc.Equals(x.Document));
+          bool delete = ToElementIds(VolatileData).Any(x => doc.IsEquivalent(x.Document));
 
           Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
         }
