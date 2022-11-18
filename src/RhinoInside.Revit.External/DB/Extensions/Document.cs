@@ -312,28 +312,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool TryGetLinkElementId(this Document doc, string uniqueId, out LinkElementId linkElementId)
     {
+      if (ReferenceId.TryParse(uniqueId, out var reference, doc))
+      {
+        linkElementId = reference.IsLinked ?
+          new LinkElementId(new ElementId(reference.Record.Id), new ElementId(reference.Element.Id)) :
+          new LinkElementId(new ElementId(reference.Element.Id));
+
+        return true;
+      }
+
       linkElementId = default;
-
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id) && id < 0)
-      {
-        if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
-          linkElementId = new LinkElementId(new ElementId(id));
-      }
-      else
-      {
-        try
-        {
-          if (Reference.ParseFromStableRepresentation(doc, uniqueId) is Reference reference)
-          {
-            linkElementId = reference.LinkedElementId == ElementId.InvalidElementId ?
-              new LinkElementId(reference.ElementId):
-              new LinkElementId(reference.ElementId, reference.LinkedElementId);
-          }
-        }
-        catch (Autodesk.Revit.Exceptions.ArgumentException) { }
-      }
-
-      return linkElementId is object;
+      return false;
     }
 
     /// <summary>

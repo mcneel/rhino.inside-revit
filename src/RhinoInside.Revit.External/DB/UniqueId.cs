@@ -42,18 +42,18 @@ namespace RhinoInside.Revit.External.DB
 
   public static class FullUniqueId
   {
-    public static string Format(Guid documentId, string uniqueId) => $"{documentId:D}-{uniqueId}";
-    public static bool TryParse(string s, out Guid documentId, out string uniqueId)
+    public static string Format(Guid documentId, string stableId) => $"{documentId:D}:{stableId}";
+    public static bool TryParse(string s, out Guid documentId, out string stableId)
     {
       documentId = Guid.Empty;
-      uniqueId = string.Empty;
+      stableId = string.Empty;
       if (s.Length < NumHexDigits.DocumentId + 1 + NumHexDigits.EpisodeId + 1 + NumHexDigits.ElementId)
         return false;
 
-      if (Guid.TryParseExact(s.Substring(0, NumHexDigits.DocumentId), "D", out documentId) && s[NumHexDigits.DocumentId] == '-')
+      if (Guid.TryParseExact(s.Substring(0, NumHexDigits.DocumentId), "D", out documentId) && s[NumHexDigits.DocumentId] == ':')
       {
-        uniqueId = s.Substring(NumHexDigits.DocumentId + 1);
-        return UniqueId.TryParse(uniqueId, out var _, out var _);
+        stableId = s.Substring(NumHexDigits.DocumentId + 1);
+        return true;
       }
 
       return false;
@@ -116,8 +116,8 @@ namespace RhinoInside.Revit.External.DB
       Parameters = parameters;
     }
 
-    public override string ToString() => Format(null);
-    internal string Format(ARDB.Document document)
+    public override string ToString() => ToString(null);
+    internal string ToString(ARDB.Document document)
     {
       string FormatId(IntId id)
       {
@@ -156,28 +156,30 @@ namespace RhinoInside.Revit.External.DB
 
   readonly struct ReferenceId
   {
-    public readonly GeometryObjectId Root;    // Link instance when linked, equal to Element when not.
-    public readonly GeometryObjectId Element; // Linked element when linked.
-    public readonly GeometryObjectId Symbol;  // default when Element is not an INSTANCE
+    public readonly GeometryObjectId Record;  // Record in the root document.        (RevitLinkInstance when linked).
+    public readonly GeometryObjectId Element; // Element.                            (Linked element when Reference is a RevitLinkInstance).
+    public readonly GeometryObjectId Symbol;  // Element that contains the geometry. (Symbol when Element is an Instance)
 
-    public bool IsLinked => Root != Element;
-    public bool IsInstance => Symbol != default;
+    public bool IsLinked => Record.Type == GeometryObjectType.RVTLINK;
+    public bool IsInstance => Element.Type == GeometryObjectType.INSTANCE;
 
-    public bool IsElement => Element.Id != 0 && Element.Type == GeometryObjectType.ELEMENT;
-    public bool IsGeometry => Element.Id != 0 && Element.Type != GeometryObjectType.ELEMENT;
+    public bool IsElement => Element.Type == GeometryObjectType.ELEMENT && Element.Id != 0;
+    public bool IsGeometry => Element.Type != GeometryObjectType.ELEMENT && Element.Id != 0;
 
     public ReferenceId(params GeometryObjectId[] ids)
     {
       switch (ids.Length)
       {
         case 0:
-          Root = Element = Symbol = default;
-          break;
-        case 1:
-          if (ids[0].Type == GeometryObjectType.ELEMENT)
           {
-            Root = Element = ids[0];
-            Symbol = default;
+            Record = Element = Symbol = default;
+          }
+          break;
+
+        case 1:
+          if (ids[0].Type != GeometryObjectType.RVTLINK)
+          {
+            Record = Element = Symbol = ids[0];
           }
           else throw new ArgumentException(nameof(ids));
           break;
@@ -185,31 +187,29 @@ namespace RhinoInside.Revit.External.DB
         case 2:
           if (ids[0].Type == GeometryObjectType.RVTLINK)
           {
-            Root = ids[0];
-            Element = ids[1];
-            Symbol = default;
+            Record = ids[0];
+            Element = Symbol = ids[1];
           }
           else if(ids[0].Type == GeometryObjectType.INSTANCE)
           {
-            Root = ids[0];
-            Element = ids[0];
+            Record = Element = ids[0];
             Symbol = ids[1];
           }
           else throw new ArgumentException(nameof(ids));
           break;
 
         case 3:
-          if (ids[0].Type == GeometryObjectType.RVTLINK)
+          if
+          (
+            (ids[0].Type != GeometryObjectType.RVTLINK  && ids[0] == ids[1] && ids[1] == ids[2]) ||
+            (ids[0].Type == GeometryObjectType.INSTANCE && ids[0] == ids[1] && ids[1] != ids[2]) ||
+            (ids[0].Type == GeometryObjectType.RVTLINK  && ids[1] == ids[2]) ||
+            (ids[0].Type == GeometryObjectType.RVTLINK  && ids[1].Type == GeometryObjectType.INSTANCE && ids[1] != ids[2])
+          )
           {
-            Root = ids[0];
+            Record  = ids[0];
             Element = ids[1];
-            Symbol = ids[2];
-          }
-          else if (ids[0].Type == GeometryObjectType.INSTANCE)
-          {
-            Root = ids[0];
-            Element = ids[1];
-            Symbol = ids[2];
+            Symbol  = ids[2];
           }
           else throw new ArgumentException(nameof(ids));
           break;
@@ -219,21 +219,30 @@ namespace RhinoInside.Revit.External.DB
       }
     }
 
-    public override string ToString() => Format(null);
-    public string Format(ARDB.Document document)
+    public override string ToString() => ToString(null);
+    public string ToString(ARDB.Document document)
     {
       if (IsLinked)
-        return IsInstance ? $"{Root.Format(document)}:{Element}:{Symbol}" : $"{Root.Format(document)}:{Element}";
+        return IsInstance ? $"{Record.ToString(document)}:{Element}:{Symbol}" : $"{Record.ToString(document)}:{Element}";
       else
-        return IsInstance ? $"{Element.Format(document)}:{Symbol.Format(document)}" : Element.Format(document);
+        return IsInstance ? $"{Element.ToString(document)}:{Symbol.ToString(document)}" : Element.ToString(document);
     }
 
+    #region IParsable
     public static ReferenceId Parse(string s, ARDB.Document document)
     {
       IntId ParseId(string uniqueId)
       {
-        if (UniqueId.TryParse(uniqueId, out var _, out var id))
-          return document is object && id > 0 ? ARDB.Reference.ParseFromStableRepresentation(document, uniqueId).ElementId.ToValue() : id;
+        if (document is object && UniqueId.TryParse(uniqueId, out var episode, out var id))
+        {
+          if (id > 0)
+            return ARDB.Reference.ParseFromStableRepresentation(document, uniqueId).ElementId.ToValue();
+
+          if (episode != ARDB.ExportUtils.GetGBXMLDocumentId(document))
+            throw new FormatException($"{nameof(s)} is not in the correct format.");
+
+          return id;
+        }
 
         return RuntimeId.Parse(uniqueId);
       }
@@ -241,32 +250,38 @@ namespace RhinoInside.Revit.External.DB
       try
       {
         var tokens = s.Split(':');
-        int level = 0;
+        if (0 > tokens.Length || tokens.Length > 9)
+          throw new FormatException($"{nameof(s)} is not in the correct format.");
+
+        int nesting = 0;
         var geometryId = new GeometryObjectId[3];
-        for (int i = 0; i < tokens.Length && level < geometryId.Length; ++i)
+        for (int i = 0; i < tokens.Length && nesting < geometryId.Length; ++i)
         {
-          geometryId[level].Id = ParseId(tokens[i]);
+          geometryId[nesting] = default;
+          geometryId[nesting].Id = ParseId(tokens[i]);
 
-          if (++i >= tokens.Length) break;
-          geometryId[level].Index = Int32.Parse(tokens[i]);
-
-          if (++i >= tokens.Length) break;
-
-          var types = tokens[i].Split('/');
-          geometryId[level].Type = (GeometryObjectType) Enum.Parse(typeof(GeometryObjectType), types[0]);
-
-          if (types.Length > 1)
-            geometryId[level].Parameters = types.Skip(1).Select(ParseId).ToArray();
-
-          if (level == 0)
+          if (++i < tokens.Length)
           {
-            if (geometryId[level].Type == GeometryObjectType.RVTLINK)
-              document = default;
-            else
-              geometryId[++level] = geometryId[0];
+            if (Int32.TryParse(tokens[i], out geometryId[nesting].Index))
+              i++;
+
+            if (i < tokens.Length)
+            {
+              var types = tokens[i].Split('/');
+              geometryId[nesting].Type = (GeometryObjectType) Enum.Parse(typeof(GeometryObjectType), types[0]);
+
+              if (types.Length > 1)
+                geometryId[nesting].Parameters = types.Skip(1).Select(ParseId).ToArray();
+            }
           }
 
-          level++;
+          if (geometryId[nesting].Type == GeometryObjectType.RVTLINK)
+            document = default;
+
+          for (var n = nesting; n < geometryId.Length; ++n)
+            geometryId[n] = geometryId[nesting];
+        
+          nesting++;
         }
 
         return new ReferenceId(geometryId);
@@ -285,6 +300,7 @@ namespace RhinoInside.Revit.External.DB
       referenceId = default;
       return false;
     }
+    #endregion
   }
 
   readonly struct GlobalReferenceId : IEquatable<GlobalReferenceId>

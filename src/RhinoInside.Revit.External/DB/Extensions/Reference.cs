@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         referenceId.Element,
         referenceId.Symbol
       );
-      stable = referenceId.Format(document);
+      stable = referenceId.ToString(document);
 
       return Reference.ParseFromStableRepresentation(document, stable);
     }
