@@ -351,7 +351,6 @@
     <Compile Include="Parameters\GraphicalElement.cs" />
     <Compile Include="Parameters\Group.cs" />
     <Compile Include="Parameters\HostObject.cs" />
-    <Compile Include="Parameters\ID.cs" />
     <Compile Include="Parameters\LevelConstraint.cs" />
     <Compile Include="Parameters\LinePatternElement.cs" />
     <Compile Include="Parameters\Material.cs" />
@@ -361,6 +360,7 @@
     <Compile Include="Parameters\PersistentParam.cs" />
     <Compile Include="Parameters\Phase.cs" />
     <Compile Include="Parameters\ProjectLocation.cs" />
+    <Compile Include="Parameters\Reference.cs" />
     <Compile Include="Parameters\Sketch.cs" />
     <Compile Include="Parameters\SketchPlane.cs" />
     <Compile Include="Parameters\SpatialElement.cs" />
@@ -393,7 +393,6 @@
     <Compile Include="Types\DocumentObject.cs" />
     <Compile Include="Types\Element.cs" />
     <Compile Include="Types\ElementFilter.cs" />
-    <Compile Include="Types\ElementId.cs" />
     <Compile Include="Types\ElementType.cs" />
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\FailureDefinition.cs" />
@@ -416,6 +415,7 @@
     <Compile Include="Types\Phase.cs" />
     <Compile Include="Types\ProjectLocation.cs" />
     <Compile Include="Types\Railing.cs" />
+    <Compile Include="Types\Reference.cs" />
     <Compile Include="Types\Roof.cs" />
     <Compile Include="Types\DataType.cs" />
     <Compile Include="Types\ScopeBox.cs" />
