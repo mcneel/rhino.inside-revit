@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.Convert.Display
     #endregion
 
     #region GetPreviewMeshes
-    static double LevelOfDetail(this MeshingParameters value) => value?.RelativeTolerance ?? 0.15;
+    internal static double LevelOfDetail(this MeshingParameters value) => value?.RelativeTolerance ?? 0.15;
 
     /// <summary>
     /// Extracts a sequence of <see cref="Mesh"/> from a sequence of <see cref="ARDB.GeometryObject"/>.
