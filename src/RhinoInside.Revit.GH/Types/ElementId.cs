@@ -8,15 +8,18 @@ namespace RhinoInside.Revit.GH.Types
 {
   using External.DB.Extensions;
 
-  // public interface IGH_PersistentReference
+  // public interface IGH_Reference
   /// <summary>
   /// Interface to implement into classes that has a stable <see cref="ARDB.Reference"/>.
   /// For example: <see cref="ARDB.Element"/>, <see cref="ARDB.GeometryObject"/>
   /// </summary>
   public interface IGH_ElementId : IGH_ReferenceObject, IEquatable<IGH_ElementId>
   {
-    ARDB.Reference Reference { get; }
     ARDB.ElementId Id { get; }
+
+    ARDB.Document ReferenceDocument {get;}
+    ARDB.Reference Reference { get; }
+    ARDB.ElementId ReferenceId { get; }
   }
 
   public abstract class ElementId : ReferenceObject,
@@ -37,7 +40,7 @@ namespace RhinoInside.Revit.GH.Types
         valid ? string.Empty :
         (IsReferencedData ? "❌ Deleted " : "⚠ Invalid ");
       string TypeName = ((IGH_Goo) this).TypeName;
-      string InstanceName = DisplayName ?? string.Empty;
+      string InstanceName = DisplayName;
 
       if (!string.IsNullOrWhiteSpace(InstanceName))
         InstanceName = $" : {InstanceName}";
@@ -45,20 +48,26 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsReferencedData)
         return $"{Invalid}{TypeName}{InstanceName}";
 
-      string InstanceId = valid ? $" : id {Id.ToValue()}" : $" : {UniqueID}";
+      string InstanceId = Id is null ?
+        $" : {UniqueID}" :
+        IsLinked ?
+        $" : id {ReferenceId.ToValue()}:{Id.ToValue()}" :
+        $" : id {Id.ToValue()}";
 
-      using (var Documents = Revit.ActiveDBApplication.Documents)
+      if (ReferenceDocument is ARDB.Document && Document is ARDB.Document document)
       {
-        if (Documents.Size > 1)
-          InstanceId = $"{InstanceId} @ {Document?.GetTitle() ?? DocumentGUID.ToString("B")}";
+        if (document.IsLinked || document.IsFamilyDocument)
+          InstanceId = $"{InstanceId} @ {document.GetTitle()}";
       }
+      else InstanceId = $"{InstanceId} @ {DocumentGUID:B}";
 
+      if (IsLinked) TypeName = "Linked " + TypeName;
       return $"{Invalid}{TypeName}{InstanceName}{InstanceId}";
     }
     #endregion
 
     #region IGH_Goo
-    public override bool IsValid => base.IsValid && Id.IsValid();
+    public override bool IsValid => base.IsValid && ReferenceDocument is object && Id.IsValid();
     public override string IsValidWhyNot
     {
       get
@@ -66,9 +75,13 @@ namespace RhinoInside.Revit.GH.Types
         if (DocumentGUID == Guid.Empty) return $"DocumentGUID '{Guid.Empty}' is invalid";
         if (!External.DB.UniqueId.TryParse(UniqueID, out var _, out var _)) return $"UniqueID '{UniqueID}' is invalid";
 
-        if (Document is null)
+        if (ReferenceDocument is null)
         {
           return $"Referenced Revit document '{DocumentGUID}' was closed.";
+        }
+        else if (Document is null)
+        {
+          return "Referenced Revit linked document is not loaded.";
         }
         else
         {
@@ -108,8 +121,13 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ElementId
-    public abstract ARDB.Reference Reference { get; }
     public abstract ARDB.ElementId Id { get; }
+
+    public abstract ARDB.Reference Reference { get; }
+    public abstract ARDB.Document ReferenceDocument { get; }
+    public abstract ARDB.ElementId ReferenceId { get; }
+
+    public bool IsLinked => ReferenceDocument is object && !ReferenceDocument.IsEquivalent(Document);
     #endregion
 
     public ElementId() { }

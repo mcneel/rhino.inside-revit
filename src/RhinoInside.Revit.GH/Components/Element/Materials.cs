@@ -65,20 +65,20 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.Face>("Face", "F", "Face to query about its paint material."),
+      ParamDefinition.Create<Parameters.GeometryFace>("Face", "F", "Face to query about its paint material."),
       ParamDefinition.Create<Parameters.Material>("Paint", "P", "Material used to paint Face", optional: true, relevance: ParamRelevance.Primary)
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Face>("Face", "F", "Face queried about its paint material."),
+      ParamDefinition.Create<Parameters.GeometryFace>("Face", "F", "Face queried about its paint material."),
       ParamDefinition.Create<Parameters.Material>("Paint", "P", "Material used to paint Face", relevance: ParamRelevance.Primary)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (Params.TryGetData(DA, "Face", out Types.Face face, x => x.IsValid))
+      if (Params.TryGetData(DA, "Face", out Types.GeometryFace face, x => x.IsValid))
         Params.TrySetData(DA, "Face", () => face);
 
       if (Params.GetData(DA, "Paint", out Types.Material paint))
@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           face.Document.Paint(face.Id, face.Value, paint.Id);
       }
 
-      Params.TrySetData(DA, "Paint", () => Types.Material.FromElementId(face.Document, face.Document.GetPaintedMaterial(face.Id, face.Value)));
+      Params.TrySetData(DA, "Paint", () => face.Document.GetPaintedMaterial(face.Id, face.Value));
     }
   }
 }

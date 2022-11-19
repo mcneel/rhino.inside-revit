@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
-using GH_IO.Serialization;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
 using Rhino;
 using Rhino.DocObjects;
 using ARDB = Autodesk.Revit.DB;
@@ -47,112 +45,6 @@ namespace RhinoInside.Revit.GH.Parameters
     protected ElementIdParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
-
-    [Flags]
-    public enum DataGrouping
-    {
-      None = 0,
-      Document = 1,
-      Workset = 2,
-      DesignOption = 4,
-      Category = 8,
-    };
-
-    public DataGrouping Grouping { get; set; } = DataGrouping.None;
-
-    public override bool Read(GH_IReader reader)
-    {
-      if (!base.Read(reader))
-        return false;
-
-      int grouping = (int) DataGrouping.None;
-      reader.TryGetInt32("Grouping", ref grouping);
-      Grouping = (DataGrouping) grouping;
-
-      return true;
-    }
-    public override bool Write(GH_IWriter writer)
-    {
-      if (!base.Write(writer))
-        return false;
-
-      if (Grouping != DataGrouping.None)
-        writer.SetInt32("Grouping", (int) Grouping);
-
-      return true;
-    }
-
-    protected override void ProcessVolatileData()
-    {
-      if (Grouping != DataGrouping.None)
-      {
-        if (Kind == GH_ParamKind.floating)
-        {
-          if ((Grouping & DataGrouping.Document) != 0)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Grouped by Document");
-
-          if ((Grouping & DataGrouping.Workset) != 0)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Grouped by Workset");
-
-          if ((Grouping & DataGrouping.DesignOption) != 0)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Grouped by Design Option");
-
-          if ((Grouping & DataGrouping.Category) != 0)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Grouped by Category");
-        }
-
-        var data = new GH_Structure<T>();
-        var pathCount = m_data.PathCount;
-        for (int p = 0; p < pathCount; ++p)
-        {
-          var path = m_data.Paths[p];
-          var branch = m_data.get_Branch(path);
-          foreach (var item in branch)
-          {
-            if (item is Types.IGH_ElementId value)
-            {
-              var group = path;
-
-              if ((Grouping & DataGrouping.Document) != 0)
-              {
-                var docId = DocumentExtension.DocumentSessionId(value.DocumentGUID);
-                group = group.AppendElement(docId);
-              }
-
-              if (Grouping > DataGrouping.Document)
-              {
-                var element = value.Document?.GetElement(value.Id);
-
-                if ((Grouping & DataGrouping.Workset) != 0)
-                {
-                  var catId = element?.WorksetId?.IntegerValue ?? 0;
-                  group = group.AppendElement(catId);
-                }
-
-                if ((Grouping & DataGrouping.DesignOption) != 0)
-                {
-                  var catId = element?.DesignOption?.Id.IntegerValue ?? 0;
-                  group = group.AppendElement(catId);
-                }
-
-                if ((Grouping & DataGrouping.Category) != 0)
-                {
-                  var catId = element?.Category?.Id.IntegerValue ?? 0;
-                  group = group.AppendElement(catId);
-                }
-              }
-
-              data.Append((T) value, group);
-            }
-            else data.Append(null, path.AppendElement(int.MinValue));
-          }
-        }
-
-        m_data = data;
-      }
-
-      base.ProcessVolatileData();
-    }
 
     #region UI
     public override bool AppendMenuItems(ToolStripDropDown menu)
@@ -246,38 +138,6 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    protected override void Menu_AppendPreProcessParameter(ToolStripDropDown menu)
-    {
-      base.Menu_AppendPreProcessParameter(menu);
-
-#if DEBUG
-      var Group = Menu_AppendItem(menu, "Group by");
-
-      Group.Checked = Grouping != DataGrouping.None;
-      Menu_AppendItem(Group.DropDown, "Document",      (s, a) => Menu_GroupBy(DataGrouping.Document),      true, (Grouping & DataGrouping.Document) != 0);
-      Menu_AppendItem(Group.DropDown, "Workset",       (s, a) => Menu_GroupBy(DataGrouping.Workset),       true, (Grouping & DataGrouping.Workset) != 0);
-      Menu_AppendItem(Group.DropDown, "Design Option", (s, a) => Menu_GroupBy(DataGrouping.DesignOption),  true, (Grouping & DataGrouping.DesignOption) != 0);
-      Menu_AppendItem(Group.DropDown, "Category",      (s, a) => Menu_GroupBy(DataGrouping.Category),      true, (Grouping & DataGrouping.Category) != 0);
-#endif
-    }
-
-    private void Menu_GroupBy(DataGrouping value)
-    {
-      RecordUndoEvent("Set: Grouping");
-
-      if ((Grouping & value) != 0)
-        Grouping &= ~value;
-      else
-        Grouping |= value;
-
-      OnObjectChanged(GH_ObjectEventType.Options);
-
-      if (Kind == GH_ParamKind.output)
-        ExpireOwner();
-
-      ExpireSolutionTopLevel(true);
-    }
-
     protected override void PrepareForPrompt() { }
     protected override void RecoverFromPrompt() { }
     #endregion
@@ -302,16 +162,18 @@ namespace RhinoInside.Revit.GH.Parameters
 
       foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
       {
-        if (!data.Id.IsValid() || !data.Document.IsValid())
+        var document = data.ReferenceDocument;
+        var elementId = data.ReferenceId;
+        if (!elementId.IsValid() || !document.IsValid())
           continue;
 
-        if (!doc.Equals(data.Document))
+        if (!doc.Equals(document))
           continue;
 
-        if (modified.Contains(data.Id))
+        if (modified.Contains(elementId))
           return true;
 
-        if (deleted.Contains(data.Id))
+        if (deleted.Contains(elementId))
           return true;
       }
 
@@ -341,28 +203,32 @@ namespace RhinoInside.Revit.GH.Parameters
       bool progress = Grasshopper.Plugin.Commands.BakeObject == this &&
         1 == Rhino.UI.StatusBar.ShowProgressMeter(doc.RuntimeSerialNumber, 0, VolatileData.DataCount, "Baking…", true, true);
 
-      foreach (var goo in VolatileData.AllData(true))
+      try
       {
-        if (progress)
-          Rhino.UI.StatusBar.UpdateProgressMeter(doc.RuntimeSerialNumber, 1, false);
-
-        if (goo is null) continue;
-        if (!goo.IsValid) continue;
-
-        if (goo is Bake.IGH_BakeAwareElement bakeAwareElement)
+        foreach (var goo in VolatileData.AllData(true))
         {
-          if (bakeAwareElement.BakeElement(idMap, true, doc, att, out var guid))
-            guids.Add(guid);
-        }
-        else if (goo is IGH_BakeAwareData bakeAwareData)
-        {
-          if (bakeAwareData.BakeGeometry(doc, att, out var guid))
-            guids.Add(guid);
+          if (progress)
+            Rhino.UI.StatusBar.UpdateProgressMeter(doc.RuntimeSerialNumber, 1, false);
+
+          if (goo is null) continue;
+          if (!goo.IsValid) continue;
+
+          if (goo is Bake.IGH_BakeAwareElement bakeAwareElement)
+          {
+            if (bakeAwareElement.BakeElement(idMap, true, doc, att, out var guid))
+              guids.Add(guid);
+          }
+          else if (goo is IGH_BakeAwareData bakeAwareData)
+          {
+            if (bakeAwareData.BakeGeometry(doc, att, out var guid))
+              guids.Add(guid);
+          }
         }
       }
-
-      if (progress)
-        Rhino.UI.StatusBar.HideProgressMeter(doc.RuntimeSerialNumber);
+      finally
+      {
+        if (progress) Rhino.UI.StatusBar.HideProgressMeter(doc.RuntimeSerialNumber);
+      }
     }
     #endregion
   }

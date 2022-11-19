@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Types
     public virtual BoundingBox GetBoundingBox(Transform xform)
     {
       if (Value is ARDB.Element element)
-        return element.GetBoundingBoxXYZ().ToBoundingBox().GetBoundingBox(xform);
+        return element.GetBoundingBoxXYZ().ToBox().GetBoundingBox(xform);
 
       return NaN.BoundingBox;
     }
@@ -131,6 +131,12 @@ namespace RhinoInside.Revit.GH.Types
     public override bool CastTo<Q>(out Q target)
     {
       target = default;
+
+      if (typeof(Q).IsAssignableFrom(typeof(GeometryObject)))
+      {
+        target = (Q) (object) GeometryObject.FromReference(ReferenceDocument, Reference);
+        return true;
+      }
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Interval)))
       {
@@ -751,9 +757,9 @@ namespace RhinoInside.Revit.GH.Types
                 WhereElementIsNotElementType().
                 WhereElementIsKindOf(element.GetType()).
                 WhereCategoryIdEqualsTo(element.Category?.Id).
-                WherePasses(new ARDB.ElementIsCurveDrivenFilter()).
+                WhereElementIsCurveDriven().
                 WherePasses(new ARDB.BoundingBoxIntersectsFilter(outline)).
-                WherePasses(new ARDB.ExclusionFilter(new ARDB.ElementId[] { element.Id }));
+                Excluding(new ARDB.ElementId[] { element.Id });
 
               foreach (var elementAtMid in elementCollector)
               {

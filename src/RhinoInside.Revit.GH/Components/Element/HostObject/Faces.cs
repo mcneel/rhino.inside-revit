@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Hosts
@@ -27,56 +28,52 @@ namespace RhinoInside.Revit.GH.Components.Hosts
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Face(), "Top", "T", string.Empty, GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.Face(), "Interior", "I", string.Empty, GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.Face(), "Exterior", "E", string.Empty, GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.Face(), "Bottom", "B", string.Empty, GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.GeometryFace(), "Top", "T", string.Empty, GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.GeometryFace(), "Interior", "I", string.Empty, GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.GeometryFace(), "Exterior", "E", string.Empty, GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.GeometryFace(), "Bottom", "B", string.Empty, GH_ParamAccess.list);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      ARDB.HostObject host = null;
+      Types.HostObject host = null;
       if (!DA.GetData("Host", ref host) || host is null)
         return;
 
       var doc = host.Document;
-      if (host is ARDB.RoofBase || host is ARDB.CeilingAndFloor)
+      if (host.Value is ARDB.RoofBase || host.Value is ARDB.CeilingAndFloor)
       {
         try
         {
-          var bottom = ARDB.HostObjectUtils.GetBottomFaces(host).
-            Where(x => host.GetGeometryObjectFromReference(x) is ARDB.Face).
-            Select(reference => new Types.Face(doc, reference));
+          var bottom = ARDB.HostObjectUtils.GetBottomFaces(host.Value).
+                       Select(reference => new Types.GeometryFace(doc, reference.CreateGeometryLinkReference(host.ReferenceDocument, host.ReferenceId, host.Document)));
           DA.SetDataList("Bottom", bottom);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
         try
         {
-          var top = ARDB.HostObjectUtils.GetTopFaces(host).
-            Where(x => host.GetGeometryObjectFromReference(x) is ARDB.Face).
-            Select(reference => new Types.Face(doc, reference));
+          var top = ARDB.HostObjectUtils.GetTopFaces(host.Value).
+                    Select(reference => new Types.GeometryFace(doc, reference.CreateGeometryLinkReference(host.ReferenceDocument, host.ReferenceId, host.Document)));
           DA.SetDataList("Top", top);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }
       }
 
-      if (host is ARDB.Wall || host is ARDB.FaceWall)
+      if (host.Value is ARDB.Wall || host.Value is ARDB.FaceWall)
       {
         try
         {
-          var interior = ARDB.HostObjectUtils.GetSideFaces(host, ARDB.ShellLayerType.Interior).
-            Where(x => host.GetGeometryObjectFromReference(x) is ARDB.Face).
-            Select(reference => new Types.Face(doc, reference));
+          var interior = ARDB.HostObjectUtils.GetSideFaces(host.Value, ARDB.ShellLayerType.Interior).
+                         Select(reference => new Types.GeometryFace(doc, reference.CreateGeometryLinkReference(host.ReferenceDocument, host.ReferenceId, host.Document)));
           DA.SetDataList("Interior", interior);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
         try
         {
-          var exterior = ARDB.HostObjectUtils.GetSideFaces(host, ARDB.ShellLayerType.Exterior).
-            Where(x => host.GetGeometryObjectFromReference(x) is ARDB.Face).
-            Select(reference => new Types.Face(doc, reference));
+          var exterior = ARDB.HostObjectUtils.GetSideFaces(host.Value, ARDB.ShellLayerType.Exterior).
+                         Select(reference => new Types.GeometryFace(doc, reference.CreateGeometryLinkReference(host.ReferenceDocument, host.ReferenceId, host.Document)));
           DA.SetDataList("Exterior", exterior);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }

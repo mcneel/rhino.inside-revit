@@ -4,10 +4,10 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
-  using External.DB;
   using External.DB.Extensions;
 
   public class QueryElement : ZuiComponent
@@ -45,6 +45,15 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       switch (goo)
       {
+        case Types.ElementId id:
+          if (doc.IsEquivalent(id.ReferenceDocument))
+            DA.SetData("Element", Types.Element.FromReference(id.ReferenceDocument, id.Reference));
+
+          else if (doc.IsEquivalent(id.Document))
+            DA.SetData("Element", Types.Element.FromElementId(id.Document, id.Id));
+
+          return;
+
         case Types.CategoryId c:
           DA.SetData("Element", Types.Category.FromElementId(doc, new ARDB.ElementId(c.Value)));
           return;
@@ -54,50 +63,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           return;
       }
 
-      var value = goo.ScriptVariable();
-
-      switch (value)
-      {
-        case double n:
-          if (!double.IsNaN(n))
-          {
-            try { DA.SetData("Element", Types.Element.FromElementId(doc, new ARDB.ElementId(System.Convert.ToInt32(n)))); }
-            catch { }
-          }
-          return;
-
-        case int i:
-          DA.SetData("Element", Types.Element.FromElementId(doc, new ARDB.ElementId(i)));
-          return;
-
-        case string s:
-
-          if (FullUniqueId.TryParse(s, out var documentId, out var uniqueId))
-          {
-            if (doc.GetFingerprintGUID() == documentId && doc.TryGetElementId(uniqueId, out var elementId))
-              DA.SetData("Element", Types.Element.FromElementId(doc, elementId));
-
-            return;
-          }
-
-          if (UniqueId.TryParse(s, out var _, out var _))
-          {
-            if (doc.TryGetElementId(s, out var elementId))
-              DA.SetData("Element", Types.Element.FromElementId(doc, elementId));
-
-            return;
-          }
-
-          if (int.TryParse(s, out var index))
-          {
-            if (doc.GetElement(new ARDB.ElementId(index)) is ARDB.Element element)
-              DA.SetData("Element", Types.Element.FromElement(element));
-
-            return;
-          }
-
-          return;
-      }
+      DA.SetData("Element", Types.Element.FromValue(doc, goo.ScriptVariable()));
     }
   }
 
@@ -105,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   {
     public override Guid ComponentGuid => new Guid("0F7DA57E-6C05-4DD0-AABF-69E42DF38859");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter(inverted: true);
+    protected override ARDB.ElementFilter ElementFilter => ERDB.CompoundElementFilter.ElementIsElementTypeFilter(inverted: true);
 
     static readonly string[] keywords = new string[] { "Count" };
     public override IEnumerable<string> Keywords => Enumerable.Concat(base.Keywords, keywords);
@@ -226,7 +192,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
           elementCollector = elementCollector.WherePasses
           (
-            CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
+            ERDB.CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
           );
         }
 
