@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
 
-  public class Level : GraphicalElementT<Types.Level, ARDB.Level>
+  public class Level : GraphicalElement<Types.Level, ARDB.Level>
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("3238F8BC-8483-4584-B47C-48B4933E478E");
@@ -192,7 +192,7 @@ namespace RhinoInside.Revit.GH.Parameters
     }
   }
 
-  public class Grid : GraphicalElementT<Types.Grid, ARDB.Grid>
+  public class Grid : GraphicalElement<Types.Grid, ARDB.Grid>
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("7D2FB886-A184-41B8-A7D6-A6FDB85CF4E4");
@@ -284,7 +284,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class ReferencePlane : GraphicalElementT<Types.ReferencePlane, ARDB.ReferencePlane >
+  public class ReferencePlane : GraphicalElement<Types.ReferencePlane, ARDB.ReferencePlane >
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("D35EB2A7-E2B9-40D7-9592-CE049CC58CCA");

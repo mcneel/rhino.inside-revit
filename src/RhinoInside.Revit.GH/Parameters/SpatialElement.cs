@@ -8,7 +8,7 @@ using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class SpatialElement : GraphicalElementT<Types.SpatialElement, ARDB.SpatialElement>
+  public class SpatialElement : GraphicalElement<Types.SpatialElement, ARDB.SpatialElement>
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("8774ACF3-7B77-474F-B12B-03D4CBBC3C15");
@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Parameters
   }
 
   [ComponentVersion(introduced: "1.7")]
-  public class AreaElement : GraphicalElementT<Types.AreaElement, ARDB.Area>
+  public class AreaElement : GraphicalElement<Types.AreaElement, ARDB.Area>
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("66AAAE96-BA85-4DC7-A188-AC213FAD3176");
@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Parameters
   }
 
   [ComponentVersion(introduced: "1.7")]
-  public class RoomElement : GraphicalElementT<Types.RoomElement, ARDB.Architecture.Room>
+  public class RoomElement : GraphicalElement<Types.RoomElement, ARDB.Architecture.Room>
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("1E6825B6-4A7A-44EA-BC70-A9A110963E17");
@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Parameters
   }
 
   [ComponentVersion(introduced: "1.7")]
-  public class SpaceElement : GraphicalElementT<Types.SpaceElement, ARDB.Mechanical.Space>
+  public class SpaceElement : GraphicalElement<Types.SpaceElement, ARDB.Mechanical.Space>
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("30473B1D-6226-45CE-90A7-5F8E1E1DCBE3");

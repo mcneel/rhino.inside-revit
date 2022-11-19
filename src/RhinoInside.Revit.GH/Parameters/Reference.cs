@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
 
-  public abstract class ReferenceParam<T> :
+  public abstract class Reference<T> :
   PersistentParam<T>,
   IGH_BakeAwareObject,
   Kernel.IGH_ReferenceParam
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    protected ReferenceParam(string name, string nickname, string description, string category, string subcategory) :
+    protected Reference(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
 

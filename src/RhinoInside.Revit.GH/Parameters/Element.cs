@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.GH.Parameters
   using External.DB;
   using External.DB.Extensions;
 
-  public abstract class Element<T, R> : ReferenceParam<T>,
+  public abstract class Element<T, R> : Reference<T>,
     IGH_TrackingParam
     where T : class, Types.IGH_Element
     where R : ARDB.Element

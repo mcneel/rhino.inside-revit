@@ -6,7 +6,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class FamilyInstance : GraphicalElementT<Types.IGH_FamilyInstance, ARDB.FamilyInstance>
+  public class FamilyInstance : GraphicalElement<Types.IGH_FamilyInstance, ARDB.FamilyInstance>
   {
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("804BD6AC-8A4A-4D79-A734-330534B3C435");
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override Types.IGH_FamilySymbol InstantiateT() => new Types.FamilySymbol();
   }
 
-  public class Mullion : GraphicalElementT<Types.Mullion, ARDB.Mullion>
+  public class Mullion : GraphicalElement<Types.Mullion, ARDB.Mullion>
   {
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("6D845CBD-1962-4912-80C1-F47FE99AD54A");
@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class Panel : GraphicalElementT<Types.Panel, ARDB.FamilyInstance>
+  public class Panel : GraphicalElement<Types.Panel, ARDB.FamilyInstance>
   {
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("CEF5DD61-BC7D-4E66-AE94-E990B193ACDC");
