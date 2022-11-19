@@ -188,7 +188,7 @@ namespace RhinoInside.Revit.GH.Parameters
                             documents.Where(x => x.Key == docGUID).
                             SelectMany(x => x).
                             Where(x => x.IsValid).
-                            Select(x => x.Reference).
+                            Select(x => x.GetReference()).
                             OfType<ARDB.Reference>() :
                             Enumerable.Empty<ARDB.Reference>()
                            ).

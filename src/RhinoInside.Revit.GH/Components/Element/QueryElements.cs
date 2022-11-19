@@ -45,9 +45,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       switch (goo)
       {
-        case Types.ElementId id:
+        case Types.Reference id:
           if (doc.IsEquivalent(id.ReferenceDocument))
-            DA.SetData("Element", Types.Element.FromReference(id.ReferenceDocument, id.Reference));
+            DA.SetData("Element", Types.Element.FromReference(id.ReferenceDocument, id.GetReference()));
 
           else if (doc.IsEquivalent(id.Document))
             DA.SetData("Element", Types.Element.FromElementId(id.Document, id.Id));

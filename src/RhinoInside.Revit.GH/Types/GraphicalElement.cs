@@ -134,7 +134,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GeometryObject)))
       {
-        target = (Q) (object) GeometryObject.FromReference(ReferenceDocument, Reference);
+        target = (Q) (object) GeometryObject.FromReference(ReferenceDocument, GetReference());
         return true;
       }
 

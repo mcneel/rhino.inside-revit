@@ -14,14 +14,14 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Element")]
-  public interface IGH_Element : IGH_ElementId
+  public interface IGH_Element : IGH_Reference
   {
     Category Category { get; }
     ElementType Type { get; set; }
   }
 
   [Kernel.Attributes.Name("Element")]
-  public class Element : ElementId, IGH_Element
+  public class Element : Reference, IGH_Element
   {
     #region IGH_Goo
     public override bool IsValid => base.IsValid && Value is object;
@@ -74,21 +74,18 @@ namespace RhinoInside.Revit.GH.Types
       !Id.IsBuiltInId() && !Document.IsLinked : default(bool?);
     #endregion
 
-    #region IGH_ElementId
+    #region IGH_Reference
     ARDB.ElementId id = ARDB.ElementId.InvalidElementId;
     public override ARDB.ElementId Id => id;
 
     ARDB.Document referenceDocument;
     public override ARDB.Document ReferenceDocument => referenceDocument;
 
-    public override ARDB.Reference Reference
+    public override ARDB.Reference GetReference()
     {
-      get
-      {
-        try { return ARDB.Reference.ParseFromStableRepresentation(ReferenceDocument, UniqueID); }
-        catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
-        catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
-      }
+      try { return ARDB.Reference.ParseFromStableRepresentation(ReferenceDocument, UniqueID); }
+      catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
+      catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
     }
 
     ARDB.ElementId referenceId = ARDB.ElementId.InvalidElementId;
@@ -573,7 +570,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     [TypeConverter(typeof(Proxy.ObjectConverter))]
-    protected new class Proxy : ElementId.Proxy
+    protected new class Proxy : Reference.Proxy
     {
       protected new Element owner => base.owner as Element;
 

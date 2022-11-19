@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using External.UI.Selection;
 
-  public abstract class GeometryObject<X> : ElementIdParam<X>, IGH_PreviewObject
+  public abstract class GeometryObject<X> : ReferenceParam<X>, IGH_PreviewObject
   where X : class, Types.IGH_GeometryObject
   {
     protected GeometryObject(string name, string nickname, string description, string category, string subcategory) :

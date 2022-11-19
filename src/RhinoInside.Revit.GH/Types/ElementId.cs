@@ -8,28 +8,27 @@ namespace RhinoInside.Revit.GH.Types
 {
   using External.DB.Extensions;
 
-  // public interface IGH_Reference
   /// <summary>
   /// Interface to implement into classes that has a stable <see cref="ARDB.Reference"/>.
   /// For example: <see cref="ARDB.Element"/>, <see cref="ARDB.GeometryObject"/>
   /// </summary>
-  public interface IGH_ElementId : IGH_ReferenceObject, IEquatable<IGH_ElementId>
+  public interface IGH_Reference : IGH_ReferenceObject, IEquatable<IGH_Reference>
   {
     ARDB.ElementId Id { get; }
 
+    ARDB.Reference GetReference();
     ARDB.Document ReferenceDocument {get;}
-    ARDB.Reference Reference { get; }
     ARDB.ElementId ReferenceId { get; }
   }
 
-  public abstract class ElementId : ReferenceObject,
-    IGH_ElementId,
+  public abstract class Reference : ReferenceObject,
+    IGH_Reference,
     IGH_ItemDescription
   {
     #region System.Object
-    public bool Equals(IGH_ElementId other) => other is object &&
+    public bool Equals(IGH_Reference other) => other is object &&
       other.DocumentGUID == DocumentGUID && other.UniqueID == UniqueID;
-    public override bool Equals(object obj) => (obj is IGH_ElementId id) ? Equals(id) : base.Equals(obj);
+    public override bool Equals(object obj) => (obj is IGH_Reference id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
 
     public override string ToString()
@@ -120,18 +119,18 @@ namespace RhinoInside.Revit.GH.Types
     string IGH_ItemDescription.Description => Document?.GetTitle();
     #endregion
 
-    #region IGH_ElementId
+    #region IGH_Reference
     public abstract ARDB.ElementId Id { get; }
 
-    public abstract ARDB.Reference Reference { get; }
+    public abstract ARDB.Reference GetReference();
     public abstract ARDB.Document ReferenceDocument { get; }
     public abstract ARDB.ElementId ReferenceId { get; }
 
     public bool IsLinked => ReferenceDocument is object && !ReferenceDocument.IsEquivalent(Document);
     #endregion
 
-    public ElementId() { }
+    public Reference() { }
 
-    protected ElementId(ARDB.Document doc, object value) : base(doc, value) { }
+    protected Reference(ARDB.Document doc, object value) : base(doc, value) { }
   }
 }

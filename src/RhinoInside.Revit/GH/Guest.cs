@@ -582,12 +582,12 @@ namespace RhinoInside.Revit.GH
             if (obj.Phase == GH_SolutionPhase.Computing)
               continue;
 
-            if (obj is Kernel.IGH_ElementIdParam persistentParam)
+            if (obj is Kernel.IGH_ReferenceParam persistentParam)
             {
               if (persistentParam.NeedsToBeExpired(document, added, deleted, modified))
                 change.ExpiredObjects.Add(persistentParam);
             }
-            else if (obj is Kernel.IGH_ElementIdComponent persistentComponent)
+            else if (obj is Kernel.IGH_ReferenceComponent persistentComponent)
             {
               if (persistentComponent.NeedsToBeExpired(document, added, deleted, modified))
               {
@@ -595,7 +595,7 @@ namespace RhinoInside.Revit.GH
               }
               else
               {
-                foreach (var output in persistentComponent.Params.Output.OfType<Kernel.IGH_ElementIdParam>())
+                foreach (var output in persistentComponent.Params.Output.OfType<Kernel.IGH_ReferenceParam>())
                 {
                   if (output.Recipients.Count > 0 && output.NeedsToBeExpired(document, added, deleted, modified))
                   {

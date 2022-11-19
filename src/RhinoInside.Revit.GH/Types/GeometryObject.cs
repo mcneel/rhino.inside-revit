@@ -14,13 +14,12 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using External.DB.Extensions;
   using GH.Kernel.Attributes;
-  using Grasshopper.Special;
 
   [Name("Geometry")]
-  public interface IGH_GeometryObject : IGH_ElementId { }
+  public interface IGH_GeometryObject : IGH_Reference { }
 
   [Name("Geometry")]
-  public abstract class GeometryObject : ElementId,
+  public abstract class GeometryObject : Reference,
     IGH_GeometryObject,
     IGH_GeometricGoo,
     IGH_PreviewData,
@@ -30,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
 #if DEBUG
     public override string ToString()
     {
-      try   { return Reference.ConvertToStableRepresentation(ReferenceDocument); }
+      try   { return GetReference().ConvertToStableRepresentation(ReferenceDocument); }
       catch { return base.ToString(); }
     }
 #endif
@@ -46,12 +45,12 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (typeof(Q).IsAssignableFrom(typeof(ARDB.Reference)))
       {
-        target = (Q) (object) Reference;
+        target = (Q) (object) GetReference();
         return true;
       }
-      else if (Reference is object && typeof(IGH_Element).IsAssignableFrom(typeof(Q)))
+      else if (GetReference() is object && typeof(IGH_Element).IsAssignableFrom(typeof(Q)))
       {
-        target = (Q) (object) Element.FromReference(ReferenceDocument, Reference) is Q goo ? goo : default;
+        target = (Q) (object) Element.FromReference(ReferenceDocument, GetReference()) is Q goo ? goo : default;
         return true;
       }
 
@@ -59,7 +58,7 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region IGH_ElementId
+    #region IGH_Reference
     public override ARDB.ElementId Id => reference is null ? null :
       reference.LinkedElementId != ARDB.ElementId.InvalidElementId ?
       reference.LinkedElementId :
@@ -69,12 +68,12 @@ namespace RhinoInside.Revit.GH.Types
     public override ARDB.Document ReferenceDocument => referenceDocument?.IsValidObject is true ? referenceDocument : null;
 
     private ARDB.Reference reference;
-    public override ARDB.Reference Reference => reference;
+    public override ARDB.Reference GetReference() => reference;
 
     public override ARDB.ElementId ReferenceId => reference?.ElementId;
 
     public override bool IsReferencedData => DocumentGUID != Guid.Empty;
-    public override bool IsReferencedDataLoaded => ReferenceDocument is object && Reference is object;
+    public override bool IsReferencedDataLoaded => referenceDocument is object && reference is object;
     public override bool LoadReferencedData()
     {
       if (IsReferencedData && !IsReferencedDataLoaded)
@@ -391,7 +390,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Reference is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR)
+        if (GetReference() is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR)
         {
           var uniqueId = reference.ConvertToStableRepresentation(Document);
           int end = -1;
@@ -798,7 +797,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Reference)))
       {
-        target = (Q) (object) (IsValid ? Reference : null);
+        target = (Q) (object) (IsValid ? GetReference() : null);
         return true;
       }
       else if (typeof(Q).IsAssignableFrom(typeof(ARDB.Face)))
@@ -808,7 +807,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (Value is ARDB.Face face)
       {
-        var element = Reference is object ? Document?.GetElement(Reference) : null;
+        var element = GetReference() is ARDB.Reference reference ? Document?.GetElement(reference) : null;
 
         if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
         {

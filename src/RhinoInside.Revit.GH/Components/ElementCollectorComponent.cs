@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components
         if (deleted.Count > 0)
         {
           var empty = new ARDB.ElementId[0];
-          foreach (var param in Params.Output.OfType<Kernel.IGH_ElementIdParam>())
+          foreach (var param in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
           {
             if (param.NeedsToBeExpired(document, empty, deleted, empty))
               return true;

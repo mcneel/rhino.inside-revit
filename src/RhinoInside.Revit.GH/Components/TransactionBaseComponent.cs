@@ -763,7 +763,7 @@ namespace RhinoInside.Revit.GH.Components
 
     #region IGH_ElementIdBakeAwareObject
     IEnumerable<Types.IGH_GraphicalElement> GetElementsToBake(ARDB.Document document) =>
-      Params.Output.Where(x => x is Kernel.IGH_ElementIdParam).
+      Params.Output.Where(x => x is Kernel.IGH_ReferenceParam).
       SelectMany(x => x.VolatileData.AllData(true).OfType<Types.IGH_GraphicalElement>()).
       Where(x => x.Document.IsEquivalent(document));
 

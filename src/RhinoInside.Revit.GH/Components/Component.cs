@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Components
   }
 
   [ComponentVersion(introduced: "0.0", updated: "1.3")]
-  public abstract class Component : GH_Component, Kernel.IGH_ElementIdComponent, IGH_RuntimeContract
+  public abstract class Component : GH_Component, Kernel.IGH_ReferenceComponent, IGH_RuntimeContract
   {
     protected Component(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory)
@@ -487,7 +487,7 @@ namespace RhinoInside.Revit.GH.Components
     }
     #endregion
 
-    #region IGH_ElementIdComponent
+    #region IGH_ReferenceComponent
     static readonly ARDB.ElementId[] EmptyElementIds = new ARDB.ElementId[0];
     public virtual bool NeedsToBeExpired
     (
@@ -503,7 +503,7 @@ namespace RhinoInside.Revit.GH.Components
         // Only inputs with persitent data are considered source of data.
         var persistentInputs = Params.Input.
           Where(x => x.DataType == GH_ParamData.local).
-          OfType<Kernel.IGH_ElementIdParam>();
+          OfType<Kernel.IGH_ReferenceParam>();
 
         // Check inputs
         foreach (var param in persistentInputs)

@@ -27,11 +27,11 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
 
-  public abstract class ElementIdParam<T> :
+  public abstract class ReferenceParam<T> :
   PersistentParam<T>,
   IGH_BakeAwareObject,
-  Kernel.IGH_ElementIdParam
-  where T : class, Types.IGH_ElementId
+  Kernel.IGH_ReferenceParam
+  where T : class, Types.IGH_Reference
   {
     public override string TypeName
     {
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    protected ElementIdParam(string name, string nickname, string description, string category, string subcategory) :
+    protected ReferenceParam(string name, string nickname, string description, string category, string subcategory) :
       base(name, nickname, description, category, subcategory)
     { }
 
@@ -142,8 +142,8 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override void RecoverFromPrompt() { }
     #endregion
 
-    #region IGH_ElementIdParam
-    bool Kernel.IGH_ElementIdParam.NeedsToBeExpired
+    #region IGH_ReferenceParam
+    bool Kernel.IGH_ReferenceParam.NeedsToBeExpired
     (
       ARDB.Document doc,
       ICollection<ARDB.ElementId> added,
@@ -160,7 +160,7 @@ namespace RhinoInside.Revit.GH.Parameters
           CollectData();
       }
 
-      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
+      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_Reference>())
       {
         var document = data.ReferenceDocument;
         var elementId = data.ReferenceId;
