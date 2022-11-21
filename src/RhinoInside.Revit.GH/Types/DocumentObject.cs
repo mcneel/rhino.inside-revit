@@ -200,9 +200,9 @@ namespace RhinoInside.Revit.GH.Types
 
     #region System.Object
     public bool Equals(ReferenceObject other) => other is object &&
-      Equals(Document, other.Document) && Equals(UniqueID, other.UniqueID);
+      Equals(DocumentGUID, other.DocumentGUID) && Equals(UniqueID, other.UniqueID);
     public override bool Equals(object obj) => (obj is ReferenceObject id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => Document.GetHashCode() ^ UniqueID.GetHashCode();
+    public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
     #endregion
 
     #region DocumentObject

@@ -444,7 +444,7 @@ namespace RhinoInside.Revit.GH.Types
       Document = _ReferenceDocument = doc;
       DocumentGUID = doc.GetFingerprintGUID();
 
-      this._Id = _ReferenceId = id;
+      _Id = _ReferenceId = id;
       if (doc is object && id is object)
       {
         UniqueID = id.IsBuiltInId() ?
@@ -458,10 +458,10 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (ValueType.IsInstanceOfType(element))
       {
-        Document = _ReferenceDocument = element.Document;
         DocumentGUID = Document.GetFingerprintGUID();
-        _Id = _ReferenceId = element.Id;
         UniqueID = element.UniqueId;
+        Document = _ReferenceDocument = element.Document;
+        _Id = _ReferenceId = element.Id;
         base.Value = element;
         return true;
       }
