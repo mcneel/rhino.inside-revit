@@ -12,6 +12,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Display;
   using External.DB.Extensions;
+  using RhinoInside.Revit.External.DB;
 
   [Kernel.Attributes.Name("Element")]
   public interface IGH_Element : IGH_Reference
@@ -88,13 +89,24 @@ namespace RhinoInside.Revit.GH.Types
 
     public override ARDB.Reference GetReference()
     {
-      try { return ARDB.Reference.ParseFromStableRepresentation(ReferenceDocument, UniqueID); }
+      try { return ARDB.Reference.ParseFromStableRepresentation(ReferenceDocument, ReferenceUniqueId); }
       catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
       catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
     }
 
     ARDB.ElementId _ReferenceId = ARDB.ElementId.InvalidElementId;
     public override ARDB.ElementId ReferenceId => _ReferenceId;
+
+    public string UniqueId
+    {
+      get
+      {
+        if (Document is object && ERDB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument))
+          return referenceId.Element.ToString(Document);
+
+        return default;
+      }
+    }
     #endregion
 
     #region IGH_ReferencedData
@@ -105,9 +117,9 @@ namespace RhinoInside.Revit.GH.Types
       {
         UnloadReferencedData();
 
-        if (Types.Document.TryGetDocument(DocumentGUID, out _ReferenceDocument))
+        if (Types.Document.TryGetDocument(ReferenceDocumentId, out _ReferenceDocument))
         {
-          if (_ReferenceDocument.TryGetLinkElementId(UniqueID, out var linkElementId))
+          if (_ReferenceDocument.TryGetLinkElementId(ReferenceUniqueId, out var linkElementId))
           {
             _ReferenceId = _Id = linkElementId.HostElementId;
             if (_ReferenceId == ARDB.ElementId.InvalidElementId)
@@ -407,12 +419,12 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (FromElement(link.GetLinkDocument()?.GetElement(id.LinkedElementId)) is Element element)
         {
-          using (var linkedElementReference = ARDB.Reference.ParseFromStableRepresentation(element.Document, element.UniqueID))
+          using (var linkedElementReference = ARDB.Reference.ParseFromStableRepresentation(element.Document, element.ReferenceUniqueId))
           {
             using (var elementReference = linkedElementReference.CreateLinkReference(link))
             {
-              element.DocumentGUID = doc.GetFingerprintGUID();
-              element.UniqueID = elementReference.ConvertToStableRepresentation(doc);
+              element.ReferenceDocumentId = doc.GetFingerprintGUID();
+              element.ReferenceUniqueId = elementReference.ConvertToStableRepresentation(doc);
               element._ReferenceDocument = doc;
               element._ReferenceId = link.Id;
               return element;
@@ -442,24 +454,24 @@ namespace RhinoInside.Revit.GH.Types
         doc = null;
 
       Document = _ReferenceDocument = doc;
-      DocumentGUID = doc.GetFingerprintGUID();
+      ReferenceDocumentId = doc.GetFingerprintGUID();
 
       _Id = _ReferenceId = id;
       if (doc is object && id is object)
       {
-        UniqueID = id.IsBuiltInId() ?
+        ReferenceUniqueId = id.IsBuiltInId() ?
           ERDB.UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(doc), id.IntegerValue) :
           doc.GetElement(id)?.UniqueId ?? string.Empty;
       }
-      else UniqueID = string.Empty;
+      else ReferenceUniqueId = string.Empty;
     }
 
     protected virtual bool SetValue(ARDB.Element element)
     {
       if (ValueType.IsInstanceOfType(element))
       {
-        DocumentGUID = Document.GetFingerprintGUID();
-        UniqueID = element.UniqueId;
+        ReferenceDocumentId = Document.GetFingerprintGUID();
+        ReferenceUniqueId = element.UniqueId;
         Document = _ReferenceDocument = element.Document;
         _Id = _ReferenceId = element.Id;
         base.Value = element;
@@ -473,11 +485,11 @@ namespace RhinoInside.Revit.GH.Types
     internal Element(ARDB.Document doc, ARDB.ElementId id) => SetValue(doc, id);
     protected Element(ARDB.Element element) : base(element?.Document, element)
     {
-      DocumentGUID = Document.GetFingerprintGUID();
+      ReferenceDocumentId = Document.GetFingerprintGUID();
 
       if (element is object)
       {
-        UniqueID = element.UniqueId;
+        ReferenceUniqueId = element.UniqueId;
         _ReferenceDocument = element.Document;
         _ReferenceId = _Id = element.Id;
       }
@@ -589,17 +601,20 @@ namespace RhinoInside.Revit.GH.Types
       protected virtual bool IsValidId(ARDB.Document doc, ARDB.ElementId id) =>
         owner.GetType() == Element.FromElementId(doc, id).GetType();
 
-      [Description("Element is built in Revit.")]
+      [DisplayName("Document"), Description("The document that references this element."), Category("Reference")]
+      public string ReferenceDocument => owner.ReferenceDocument?.GetTitle();
+
+      [DisplayName("Built In"), Description("Element is built in Revit."), Category("Object")]
       public bool IsBuiltIn => owner.IsReferencedData && owner.Id.IsBuiltInId();
 
-      [Description("The element identifier in this session.")]
-      [RefreshProperties(RefreshProperties.All)]
-      public virtual int? Id
-      {
-        get => owner.Id?.ToValue();
-      }
+      [DisplayName("Element ID"), Description("The element identifier in this session."), Category("Object")]
+      //[RefreshProperties(RefreshProperties.All)]
+      public virtual int? Id => owner.Id?.ToValue();
 
-      [Description("A human readable name for the Element.")]
+      [DisplayName("Unique ID"),Description("A stable unique identifier for an element within the model."), Category("Object")]
+      public virtual string UniqueId => owner.UniqueId;
+
+      [Description("A human readable name for the Element."), Category("Object")]
       public string Name => owner.Nomen;
 
       class ObjectConverter : ExpandableObjectConverter

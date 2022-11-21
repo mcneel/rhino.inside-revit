@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Types
   /// Interface to implement into classes that has a stable <see cref="ARDB.Reference"/>.
   /// For example: <see cref="ARDB.Element"/>, <see cref="ARDB.GeometryObject"/>
   /// </summary>
-  public interface IGH_Reference : IGH_ReferenceObject, IEquatable<IGH_Reference>
+  public interface IGH_Reference : IGH_ReferenceObject
   {
     ARDB.ElementId Id { get; }
 
@@ -26,16 +26,11 @@ namespace RhinoInside.Revit.GH.Types
     IGH_ItemDescription
   {
     #region System.Object
-    public bool Equals(IGH_Reference other) => other is object &&
-      Equals(DocumentGUID, other.DocumentGUID) && Equals(UniqueID, other.UniqueID);
-    public override bool Equals(object obj) => (obj is IGH_Reference id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
-
     public override string ToString()
     {
       var valid = IsValid;
       string Invalid = Id == ARDB.ElementId.InvalidElementId ?
-        (string.IsNullOrWhiteSpace(UniqueID) ? string.Empty : "Unresolved ") :
+        (string.IsNullOrWhiteSpace(ReferenceUniqueId) ? string.Empty : "Unresolved ") :
         valid ? string.Empty :
         (IsReferencedData ? "❌ Deleted " : "⚠ Invalid ");
       string TypeName = ((IGH_Goo) this).TypeName;
@@ -48,7 +43,7 @@ namespace RhinoInside.Revit.GH.Types
         return $"{Invalid}{TypeName}{InstanceName}";
 
       string InstanceId = Id is null ?
-        $" : {UniqueID}" :
+        $" : {ReferenceUniqueId}" :
         IsLinked ?
         $" : id {ReferenceId.ToValue()}:{Id.ToValue()}" :
         $" : id {Id.ToValue()}";
@@ -58,7 +53,7 @@ namespace RhinoInside.Revit.GH.Types
         if (document.IsLinked || document.IsFamilyDocument)
           InstanceId = $"{InstanceId} @ {document.GetTitle()}";
       }
-      else InstanceId = $"{InstanceId} @ {DocumentGUID:B}";
+      else InstanceId = $"{InstanceId} @ {ReferenceDocumentId:B}";
 
       if (IsLinked) TypeName = "Linked " + TypeName;
       return $"{Invalid}{TypeName}{InstanceName}{InstanceId}";
@@ -71,12 +66,12 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (DocumentGUID == Guid.Empty) return $"DocumentGUID '{Guid.Empty}' is invalid";
-        if (!External.DB.UniqueId.TryParse(UniqueID, out var _, out var _)) return $"UniqueID '{UniqueID}' is invalid";
+        if (ReferenceDocumentId == Guid.Empty) return $"Reference Document Id '{Guid.Empty}' is invalid";
+        if (!External.DB.UniqueId.TryParse(ReferenceUniqueId, out var _, out var _)) return $"Reference Unique Id '{ReferenceUniqueId}' is invalid";
 
         if (ReferenceDocument is null)
         {
-          return $"Referenced Revit document '{DocumentGUID}' was closed.";
+          return $"Referenced Revit document '{ReferenceDocumentId}' was closed.";
         }
         else if (Document is null)
         {
@@ -85,7 +80,7 @@ namespace RhinoInside.Revit.GH.Types
         else
         {
           var id = Id;
-          if (id is null) return $"Referenced Revit element '{UniqueID}' is not available.";
+          if (id is null) return $"Referenced Revit element '{ReferenceUniqueId}' is not available.";
           if (id == ARDB.ElementId.InvalidElementId) return "Id is equal to InvalidElementId.";
         }
 

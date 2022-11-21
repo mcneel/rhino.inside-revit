@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       else Params.TrySetData(DA, "Document", () => doc);
 
-      DA.SetData("Document ID", doc.DocumentGUID);
+      DA.SetData("Document ID", doc.DocumentId);
       Params.TrySetData(DA, "Model Path", () => doc.GetModelPathName());
       Params.TrySetData(DA, "Name", () => doc.Name);
       Params.TrySetData(DA, "Title", () => doc.Title);

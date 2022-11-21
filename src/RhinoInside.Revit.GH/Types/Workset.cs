@@ -10,7 +10,6 @@ namespace RhinoInside.Revit.GH.Types
 
   [Kernel.Attributes.Name("Workset")]
   public class Workset : ReferenceObject,
-    IEquatable<Workset>,
     IGH_ItemDescription
   {
     public Workset() { }
@@ -18,16 +17,11 @@ namespace RhinoInside.Revit.GH.Types
     public Workset(ARDB.Document doc, ARDB.Workset value) : base(doc, value) => SetValue(doc, value.Id);
 
     #region System.Object
-    public bool Equals(Workset other) => other is object &&
-      other.DocumentGUID == other.DocumentGUID && other.UniqueID == UniqueID;
-    public override bool Equals(object obj) => (obj is Workset id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
-
     public override string ToString()
     {
       var valid = IsValid;
       string Invalid = Id == ARDB.WorksetId.InvalidWorksetId ?
-        (string.IsNullOrWhiteSpace(UniqueID) ? string.Empty : "Unresolved ") :
+        (string.IsNullOrWhiteSpace(ReferenceUniqueId) ? string.Empty : "Unresolved ") :
         valid ? string.Empty :
         (IsReferencedData ? "❌ Deleted " : "⚠ Invalid ");
       string TypeName = ((IGH_Goo) this).TypeName;
@@ -39,12 +33,12 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsReferencedData)
         return $"{Invalid}{TypeName}{InstanceName}";
 
-      string InstanceId = valid ? $" : id {Id.IntegerValue}" : $" : {UniqueID}";
+      string InstanceId = valid ? $" : id {Id.IntegerValue}" : $" : {ReferenceUniqueId}";
 
       using (var Documents = Revit.ActiveDBApplication.Documents)
       {
         if (Documents.Size > 1)
-          InstanceId = $"{InstanceId} @ {Document?.GetTitle() ?? DocumentGUID.ToString("B")}";
+          InstanceId = $"{InstanceId} @ {Document?.GetTitle() ?? ReferenceDocumentId.ToString("B")}";
       }
 
       return $"{Invalid}{TypeName}{InstanceName}{InstanceId}";
@@ -83,10 +77,10 @@ namespace RhinoInside.Revit.GH.Types
         doc = null;
 
       Document = doc;
-      DocumentGUID = doc.GetFingerprintGUID();
+      ReferenceDocumentId = doc.GetFingerprintGUID();
 
       Id = id;
-      UniqueID = doc?.GetWorksetTable()?.GetWorkset(id)?.UniqueId.ToString() ?? string.Empty;
+      ReferenceUniqueId = doc?.GetWorksetTable()?.GetWorkset(id)?.UniqueId.ToString() ?? string.Empty;
     }
     #endregion
 
@@ -96,17 +90,17 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (DocumentGUID == Guid.Empty) return $"DocumentGUID '{Guid.Empty}' is invalid";
-        if (!Guid.TryParse(UniqueID, out var _)) return $"UniqueID '{UniqueID}' is invalid";
+        if (ReferenceDocumentId == Guid.Empty) return $"Reference Document Id '{Guid.Empty}' is invalid";
+        if (!Guid.TryParse(ReferenceUniqueId, out var _)) return $"Reference Unique Id '{ReferenceUniqueId}' is invalid";
 
         var id = Id;
         if (Document is null)
         {
-          return $"Referenced Revit document '{DocumentGUID}' was closed.";
+          return $"Referenced Revit document '{ReferenceDocumentId}' was closed.";
         }
         else
         {
-          if (id is null) return $"Referenced Revit element '{UniqueID}' is not available.";
+          if (id is null) return $"Referenced Revit element '{ReferenceUniqueId}' is not available.";
           if (id == ARDB.WorksetId.InvalidWorksetId) return "Id is equal to InvalidElementId.";
         }
 
@@ -176,9 +170,9 @@ namespace RhinoInside.Revit.GH.Types
       {
         UnloadReferencedData();
 
-        if (Types.Document.TryGetDocument(DocumentGUID, out var document))
+        if (Types.Document.TryGetDocument(ReferenceDocumentId, out var document))
         {
-          if (document.IsWorkshared && Guid.TryParse(UniqueID, out var guid))
+          if (document.IsWorkshared && Guid.TryParse(ReferenceUniqueId, out var guid))
           {
             if (document.GetWorksetTable().GetWorkset(guid) is ARDB.Workset ws)
             {

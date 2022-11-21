@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Grasshopper;
@@ -9,7 +10,6 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using System.Diagnostics;
   using Convert.Display;
   using Convert.Geometry;
   using External.DB.Extensions;
@@ -72,7 +72,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override ARDB.ElementId ReferenceId => _Reference?.ElementId;
 
-    public override bool IsReferencedData => DocumentGUID != Guid.Empty;
+    public override bool IsReferencedData => ReferenceDocumentId != Guid.Empty;
     public override bool IsReferencedDataLoaded => _ReferenceDocument is object && _Reference is object;
     public override bool LoadReferencedData()
     {
@@ -80,11 +80,11 @@ namespace RhinoInside.Revit.GH.Types
       {
         UnloadReferencedData();
 
-        if (Types.Document.TryGetDocument(DocumentGUID, out _ReferenceDocument))
+        if (Types.Document.TryGetDocument(ReferenceDocumentId, out _ReferenceDocument))
         {
           try
           {
-            _Reference = ARDB.Reference.ParseFromStableRepresentation(_ReferenceDocument, UniqueID);
+            _Reference = ARDB.Reference.ParseFromStableRepresentation(_ReferenceDocument, ReferenceUniqueId);
 
             if (_Reference.LinkedElementId == ARDB.ElementId.InvalidElementId)
             {
@@ -208,8 +208,8 @@ namespace RhinoInside.Revit.GH.Types
     protected GeometryObject(ARDB.Document document, ARDB.GeometryObject geometryObject) : base(document, geometryObject) { }
     protected GeometryObject(ARDB.Document document, ARDB.Reference reference)
     {
-      DocumentGUID = document.GetFingerprintGUID();
-      UniqueID = reference.ConvertToStableRepresentation(document);
+      ReferenceDocumentId = document.GetFingerprintGUID();
+      ReferenceUniqueId = reference.ConvertToStableRepresentation(document);
 
       _ReferenceDocument = document;
       _Reference = reference;
@@ -271,8 +271,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         try
         {
-          DocumentGUID = doc.GetFingerprintGUID();
-          UniqueID = reference.ConvertToStableRepresentation(doc);
+          ReferenceDocumentId = doc.GetFingerprintGUID();
+          ReferenceUniqueId = reference.ConvertToStableRepresentation(doc);
 
           _ReferenceDocument = doc;
           _Reference = reference;
@@ -288,8 +288,8 @@ namespace RhinoInside.Revit.GH.Types
       Document = default;
       _Reference = default;
       _ReferenceDocument = null;
-      UniqueID = string.Empty;
-      DocumentGUID = Guid.Empty;
+      ReferenceUniqueId = string.Empty;
+      ReferenceDocumentId = Guid.Empty;
     }
 
     /// <summary>

@@ -122,7 +122,7 @@ namespace RhinoInside.Revit.GH.Types
     public virtual object Value
     {
       get => _Value;
-      protected set => this._Value = value;
+      protected set => _Value = value;
     }
 
     protected virtual void ResetValue()
@@ -182,8 +182,8 @@ namespace RhinoInside.Revit.GH.Types
   /// </remarks>
   public interface IGH_ReferenceObject : IGH_DocumentObject
   {
-    Guid DocumentGUID { get; }
-    string UniqueID { get; }
+    Guid ReferenceDocumentId { get; }
+    string ReferenceUniqueId { get; }
   }
 
   public abstract class ReferenceObject : DocumentObject,
@@ -200,9 +200,11 @@ namespace RhinoInside.Revit.GH.Types
 
     #region System.Object
     public bool Equals(ReferenceObject other) => other is object &&
-      Equals(DocumentGUID, other.DocumentGUID) && Equals(UniqueID, other.UniqueID);
+      Equals(ReferenceDocumentId, other.ReferenceDocumentId) &&
+      Equals(ReferenceUniqueId, other.ReferenceUniqueId) &&
+      Equals(GetType(), other.GetType());
     public override bool Equals(object obj) => (obj is ReferenceObject id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
+    public override int GetHashCode() => ReferenceDocumentId.GetHashCode() ^ ReferenceUniqueId.GetHashCode();
     #endregion
 
     #region DocumentObject
@@ -228,34 +230,34 @@ namespace RhinoInside.Revit.GH.Types
 
       var documentGUID = Guid.Empty;
       reader.TryGetGuid("DocumentGUID", ref documentGUID);
-      DocumentGUID = documentGUID;
+      ReferenceDocumentId = documentGUID;
 
       string uniqueID = string.Empty;
       reader.TryGetString("UniqueID", ref uniqueID);
-      UniqueID = uniqueID;
+      ReferenceUniqueId = uniqueID;
 
       return true;
     }
 
     protected override bool Write(GH_IWriter writer)
     {
-      if (DocumentGUID != Guid.Empty)
-        writer.SetGuid("DocumentGUID", DocumentGUID);
+      if (ReferenceDocumentId != Guid.Empty)
+        writer.SetGuid("DocumentGUID", ReferenceDocumentId);
 
-      if (!string.IsNullOrEmpty(UniqueID))
-        writer.SetString("UniqueID", UniqueID);
+      if (!string.IsNullOrEmpty(ReferenceUniqueId))
+        writer.SetString("UniqueID", ReferenceUniqueId);
 
       return true;
     }
     #endregion
 
     #region IGH_ReferenceObject
-    public Guid DocumentGUID { get; protected set; } = Guid.Empty;
-    public string UniqueID { get; protected set; } = string.Empty;
+    public Guid ReferenceDocumentId { get; protected set; } = Guid.Empty;
+    public string ReferenceUniqueId { get; protected set; } = string.Empty;
     #endregion
 
     #region IGH_ReferencedData
-    public virtual bool IsReferencedData => DocumentGUID != Guid.Empty;
+    public virtual bool IsReferencedData => ReferenceDocumentId != Guid.Empty;
     public abstract bool IsReferencedDataLoaded { get; }
     public abstract bool LoadReferencedData();
     public virtual void UnloadReferencedData()
@@ -268,7 +270,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_QuickCast
     GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
-    private string QC_Value => External.DB.FullUniqueId.Format(DocumentGUID, UniqueID);
+    private string QC_Value => External.DB.FullUniqueId.Format(ReferenceDocumentId, ReferenceUniqueId);
 
     int IGH_QuickCast.QC_Hash() => QC_Value.GetHashCode();
 
@@ -277,7 +279,7 @@ namespace RhinoInside.Revit.GH.Types
     int IGH_QuickCast.QC_CompareTo(IGH_QuickCast other)
     {
       return GetType() == other.GetType() && other is IGH_ReferenceObject otherId ?
-        QC_Value.CompareTo(External.DB.FullUniqueId.Format(otherId.DocumentGUID, otherId.UniqueID)) :
+        QC_Value.CompareTo(External.DB.FullUniqueId.Format(otherId.ReferenceDocumentId, otherId.ReferenceUniqueId)) :
         -1;
     }
 
@@ -304,24 +306,25 @@ namespace RhinoInside.Revit.GH.Types
       string IGH_GooProxy.UserString { get; set; }
       bool IGH_GooProxy.IsParsable => IsParsable();
       string IGH_GooProxy.MutateString(string str) => str.Trim();
+      bool IGH_GooProxy.Valid => Valid;
+      protected bool Valid => owner.IsValid;
 
       public virtual void Construct() { }
       public virtual bool IsParsable() => false;
       public virtual string FormatInstance() => owner.DisplayName;
       public virtual bool FromString(string str) => throw new NotImplementedException();
 
-      public bool Valid => owner.IsValid;
+      [DisplayName("Class"), Description("API Object Type."), Category("Object")]
+      public virtual Type ObjectType => owner.Value?.GetType();
 
-      [Description("The document this element belongs to.")]
+      [DisplayName("Model"), Description("The document this element belongs to."), Category("Object")]
       public string Document => owner.Document?.GetTitle();
 
-      [Description("The Guid of document this element belongs to.")]
-      public Guid DocumentGUID => owner.DocumentGUID;
+      [DisplayName("Document ID"), Description("The Guid of document that references this element."), Category("Reference")]
+      public Guid ReferenceDocumentId => owner.ReferenceDocumentId;
 
-      [Description("A stable unique identifier for an element within the document.")]
-      public string UniqueID => owner.UniqueID;
-      [Description("API Object Type.")]
-      public virtual Type ObjectType => owner.Value?.GetType();
+      [DisplayName("Unique ID"), Description("A stable unique identifier for an element within the document."), Category("Reference")]
+      public string ReferenceUniqueId => owner.ReferenceUniqueId;
     }
 
     public virtual IGH_GooProxy EmitProxy() => new Proxy(this);

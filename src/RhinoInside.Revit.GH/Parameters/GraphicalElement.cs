@@ -182,7 +182,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var doc = uiDocument.Document;
       var docGUID = doc.GetFingerprintGUID();
 
-      var documents = value.AllData(true).OfType<T>().GroupBy(x => x.DocumentGUID);
+      var documents = value.AllData(true).OfType<T>().GroupBy(x => x.ReferenceDocumentId);
       var activeElements = (
                             preSelect ?
                             documents.Where(x => x.Key == docGUID).
