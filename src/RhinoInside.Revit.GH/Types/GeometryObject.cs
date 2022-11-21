@@ -428,7 +428,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static new GeometryPoint FromReference(ARDB.Document document, ARDB.Reference reference)
     {
-      if (document.GetElement(reference) is ARDB.Element element && element.GetGeometryObjectFromReference(reference, out var transform) is ARDB.GeometryObject geometry)
+      if (document.GetGeometryObjectFromReference(reference, out var transform) is ARDB.GeometryObject geometry)
       {
         using (geometry)
         {

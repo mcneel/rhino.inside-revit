@@ -309,6 +309,32 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       return doc.GetElement(reference) as T;
     }
+
+    public static GeometryObject GetGeometryObjectFromReference(this Document doc, Reference reference, out Transform transform)
+    {
+      transform = null;
+
+      var element = doc.GetElement(reference.ElementId);
+      if (element is RevitLinkInstance link)
+      {
+        transform = link.GetTransform();
+        element = link.GetLinkDocument()?.GetElement(reference.LinkedElementId);
+        reference = reference.CreateReferenceInLink();
+      }
+
+      if (element?.GetGeometryObjectFromReference(reference) is GeometryObject geometryObject)
+      {
+        if (element is Instance instance)
+          transform = transform is object ? transform * instance.GetTransform() : transform;
+        else
+          transform = Transform.Identity;
+
+        return geometryObject;
+      }
+      else transform = null;
+
+      return null;
+    }
     #endregion
 
     #region Nomen
