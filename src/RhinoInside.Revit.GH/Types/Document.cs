@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.GH.Types
       var tip = IsValid ?
       (
         IsReferencedDataLoaded ?
-        $"{typeName} : {DisplayName}" :
+        $"{(Value.IsLinked ? "Linked " : string.Empty)}{typeName} : {DisplayName}" :
         $"Unresolved {typeName} : {DisplayName}"
       ) :
       (

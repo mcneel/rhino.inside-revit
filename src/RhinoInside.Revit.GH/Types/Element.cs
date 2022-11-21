@@ -45,15 +45,21 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    ARDB.Element value => base.Value as ARDB.Element;
     public new ARDB.Element Value
     {
       get
       {
-        if (value?.IsValidObject == false)
-          ResetValue();
+        var element = base.Value as ARDB.Element;
+        switch (element?.IsValidObject)
+        {
+          case false:
+            Debug.WriteLine("Element is not valid.");
+            ResetValue();
+            return base.Value as ARDB.Element;
 
-        return value;
+          case true:  return element;
+          default:    return null;
+        }
       }
     }
 
@@ -70,16 +76,15 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region ReferenceObject
-    public override bool? IsEditable => IsValid ?
-      !Id.IsBuiltInId() && !Document.IsLinked : default(bool?);
+    public override bool? IsEditable => IsValid ? !Document.IsLinked && CanDelete : default(bool?);
     #endregion
 
     #region IGH_Reference
-    ARDB.ElementId id = ARDB.ElementId.InvalidElementId;
-    public override ARDB.ElementId Id => id;
+    ARDB.ElementId _Id = ARDB.ElementId.InvalidElementId;
+    public override ARDB.ElementId Id => _Id;
 
-    ARDB.Document referenceDocument;
-    public override ARDB.Document ReferenceDocument => referenceDocument;
+    ARDB.Document _ReferenceDocument;
+    public override ARDB.Document ReferenceDocument => _ReferenceDocument;
 
     public override ARDB.Reference GetReference()
     {
@@ -88,8 +93,8 @@ namespace RhinoInside.Revit.GH.Types
       catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
     }
 
-    ARDB.ElementId referenceId = ARDB.ElementId.InvalidElementId;
-    public override ARDB.ElementId ReferenceId => referenceId;
+    ARDB.ElementId _ReferenceId = ARDB.ElementId.InvalidElementId;
+    public override ARDB.ElementId ReferenceId => _ReferenceId;
     #endregion
 
     #region IGH_ReferencedData
@@ -100,20 +105,20 @@ namespace RhinoInside.Revit.GH.Types
       {
         UnloadReferencedData();
 
-        if (Types.Document.TryGetDocument(DocumentGUID, out referenceDocument))
+        if (Types.Document.TryGetDocument(DocumentGUID, out _ReferenceDocument))
         {
-          if (referenceDocument.TryGetLinkElementId(UniqueID, out var linkElementId))
+          if (_ReferenceDocument.TryGetLinkElementId(UniqueID, out var linkElementId))
           {
-            referenceId = id = linkElementId.HostElementId;
-            if (referenceId == ARDB.ElementId.InvalidElementId)
+            _ReferenceId = _Id = linkElementId.HostElementId;
+            if (_ReferenceId == ARDB.ElementId.InvalidElementId)
             {
-              referenceId = linkElementId.LinkInstanceId;
-              id = linkElementId.LinkedElementId;
-              Document = (referenceDocument.GetElement(referenceId) as ARDB.RevitLinkInstance).GetLinkDocument();
+              _ReferenceId = linkElementId.LinkInstanceId;
+              _Id = linkElementId.LinkedElementId;
+              Document = (_ReferenceDocument.GetElement(_ReferenceId) as ARDB.RevitLinkInstance).GetLinkDocument();
             }
-            else Document = referenceDocument;
+            else Document = _ReferenceDocument;
           }
-          else referenceDocument = null;
+          else _ReferenceDocument = null;
         }
       }
 
@@ -124,9 +129,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (IsReferencedData)
       {
-        referenceDocument = default;
-        referenceId = default;
-        id = default;
+        _ReferenceDocument = default;
+        _ReferenceId = default;
+        _Id = default;
       }
 
       base.UnloadReferencedData();
@@ -408,8 +413,8 @@ namespace RhinoInside.Revit.GH.Types
             {
               element.DocumentGUID = doc.GetFingerprintGUID();
               element.UniqueID = elementReference.ConvertToStableRepresentation(doc);
-              element.referenceDocument = doc;
-              element.referenceId = link.Id;
+              element._ReferenceDocument = doc;
+              element._ReferenceId = link.Id;
               return element;
             }
           }
@@ -436,10 +441,10 @@ namespace RhinoInside.Revit.GH.Types
       if (id == ARDB.ElementId.InvalidElementId)
         doc = null;
 
-      Document = referenceDocument = doc;
+      Document = _ReferenceDocument = doc;
       DocumentGUID = doc.GetFingerprintGUID();
 
-      this.id = referenceId = id;
+      this._Id = _ReferenceId = id;
       if (doc is object && id is object)
       {
         UniqueID = id.IsBuiltInId() ?
@@ -453,9 +458,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (ValueType.IsInstanceOfType(element))
       {
-        Document = referenceDocument = element.Document;
+        Document = _ReferenceDocument = element.Document;
         DocumentGUID = Document.GetFingerprintGUID();
-        id = referenceId = element.Id;
+        _Id = _ReferenceId = element.Id;
         UniqueID = element.UniqueId;
         base.Value = element;
         return true;
@@ -473,8 +478,8 @@ namespace RhinoInside.Revit.GH.Types
       if (element is object)
       {
         UniqueID = element.UniqueId;
-        referenceDocument = element.Document;
-        referenceId = id = element.Id;
+        _ReferenceDocument = element.Document;
+        _ReferenceId = _Id = element.Id;
       }
     }
 

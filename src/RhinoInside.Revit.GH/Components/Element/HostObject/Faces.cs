@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Hosts
@@ -40,13 +39,12 @@ namespace RhinoInside.Revit.GH.Components.Hosts
       if (!DA.GetData("Host", ref host) || host is null)
         return;
 
-      var doc = host.Document;
       if (host.Value is ARDB.RoofBase || host.Value is ARDB.CeilingAndFloor)
       {
         try
         {
           var bottom = ARDB.HostObjectUtils.GetBottomFaces(host.Value).
-                       Select(reference => new Types.GeometryFace(doc, reference.CreateGeometryLinkReference(host.ReferenceDocument, host.ReferenceId, host.Document)));
+                       Select(host.GetGeometryObjectFromReference<Types.GeometryFace>);
           DA.SetDataList("Bottom", bottom);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }
@@ -54,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
         try
         {
           var top = ARDB.HostObjectUtils.GetTopFaces(host.Value).
-                    Select(reference => new Types.GeometryFace(doc, reference.CreateGeometryLinkReference(host.ReferenceDocument, host.ReferenceId, host.Document)));
+                    Select(host.GetGeometryObjectFromReference<Types.GeometryFace>);
           DA.SetDataList("Top", top);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }
@@ -65,7 +63,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
         try
         {
           var interior = ARDB.HostObjectUtils.GetSideFaces(host.Value, ARDB.ShellLayerType.Interior).
-                         Select(reference => new Types.GeometryFace(doc, reference.CreateGeometryLinkReference(host.ReferenceDocument, host.ReferenceId, host.Document)));
+                         Select(host.GetGeometryObjectFromReference<Types.GeometryFace>);
           DA.SetDataList("Interior", interior);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }
@@ -73,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
         try
         {
           var exterior = ARDB.HostObjectUtils.GetSideFaces(host.Value, ARDB.ShellLayerType.Exterior).
-                         Select(reference => new Types.GeometryFace(doc, reference.CreateGeometryLinkReference(host.ReferenceDocument, host.ReferenceId, host.Document)));
+                         Select(host.GetGeometryObjectFromReference<Types.GeometryFace>);
           DA.SetDataList("Exterior", exterior);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }

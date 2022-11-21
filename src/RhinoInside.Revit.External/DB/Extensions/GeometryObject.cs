@@ -438,14 +438,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class GeometryObjectExtension
   {
-    internal static bool IsValid(this GeometryObject self)
+    internal static bool IsValid(this GeometryObject geometry) => geometry?.IsValidObject() ?? false;
+
+    internal static bool IsValidObject(this GeometryObject geometry)
     {
-      if (self is null) return false;
 #if REVIT_2021
-      try { return self.Id >= 0; }
+      try { return geometry.Id >= 0; }
 #else
       // TODO : Test this, type by type, and use a faster fail check.
-      try { return self.TryGetLocation(out var _, out var _, out var _);}
+      try { return geometry.TryGetLocation(out var _, out var _, out var _);}
 #endif
       catch { return false; }
     }

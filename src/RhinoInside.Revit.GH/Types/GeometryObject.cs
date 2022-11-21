@@ -59,40 +59,40 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Reference
-    public override ARDB.ElementId Id => reference is null ? null :
-      reference.LinkedElementId != ARDB.ElementId.InvalidElementId ?
-      reference.LinkedElementId :
-      reference.ElementId;
+    public override ARDB.ElementId Id => _Reference is null ? null :
+      _Reference.LinkedElementId != ARDB.ElementId.InvalidElementId ?
+      _Reference.LinkedElementId :
+      _Reference.ElementId;
 
-    private ARDB.Document referenceDocument;
-    public override ARDB.Document ReferenceDocument => referenceDocument?.IsValidObject is true ? referenceDocument : null;
+    private ARDB.Document _ReferenceDocument;
+    public override ARDB.Document ReferenceDocument => _ReferenceDocument?.IsValidObject is true ? _ReferenceDocument : null;
 
-    private ARDB.Reference reference;
-    public override ARDB.Reference GetReference() => reference;
+    private ARDB.Reference _Reference;
+    public override ARDB.Reference GetReference() => _Reference;
 
-    public override ARDB.ElementId ReferenceId => reference?.ElementId;
+    public override ARDB.ElementId ReferenceId => _Reference?.ElementId;
 
     public override bool IsReferencedData => DocumentGUID != Guid.Empty;
-    public override bool IsReferencedDataLoaded => referenceDocument is object && reference is object;
+    public override bool IsReferencedDataLoaded => _ReferenceDocument is object && _Reference is object;
     public override bool LoadReferencedData()
     {
       if (IsReferencedData && !IsReferencedDataLoaded)
       {
         UnloadReferencedData();
 
-        if (Types.Document.TryGetDocument(DocumentGUID, out referenceDocument))
+        if (Types.Document.TryGetDocument(DocumentGUID, out _ReferenceDocument))
         {
           try
           {
-            reference = ARDB.Reference.ParseFromStableRepresentation(referenceDocument, UniqueID);
+            _Reference = ARDB.Reference.ParseFromStableRepresentation(_ReferenceDocument, UniqueID);
 
-            if (reference.LinkedElementId == ARDB.ElementId.InvalidElementId)
+            if (_Reference.LinkedElementId == ARDB.ElementId.InvalidElementId)
             {
-              Document = referenceDocument;
+              Document = _ReferenceDocument;
               return true;
             }
 
-            if (referenceDocument.GetElement(reference.ElementId) is ARDB.RevitLinkInstance link && link.GetLinkDocument() is ARDB.Document linkDocument)
+            if (_ReferenceDocument.GetElement(_Reference.ElementId) is ARDB.RevitLinkInstance link && link.GetLinkDocument() is ARDB.Document linkDocument)
             {
               Document = linkDocument;
               return true;
@@ -100,8 +100,8 @@ namespace RhinoInside.Revit.GH.Types
           }
           catch { }
 
-          referenceDocument = null;
-          reference = null;
+          _ReferenceDocument = null;
+          _Reference = null;
           Document = null;
         }
       }
@@ -113,8 +113,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (IsReferencedData)
       {
-        reference = default;
-        referenceDocument = default;
+        _Reference = default;
+        _ReferenceDocument = default;
       }
 
       base.UnloadReferencedData();
@@ -122,26 +122,27 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override object FetchValue()
     {
-      transform = default;
+      _Transform = default;
 
-      if (ReferenceDocument is object && reference is object)
+      if (_ReferenceDocument is object && _Reference is object)
       {
         try
         {
-          if (ReferenceDocument.GetElement(reference) is ARDB.Element element)
+          if (_ReferenceDocument.GetElement(_Reference) is ARDB.Element element)
           {
+            var geometryReference = _Reference;
             if (element is ARDB.RevitLinkInstance link)
             {
-              transform = link.GetTransform().ToTransform();
-              element = link.GetLinkDocument()?.GetElement(reference.LinkedElementId);
-              reference = reference.CreateReferenceInLink();
+              _Transform = link.GetTransform().ToTransform();
+              element = link.GetLinkDocument()?.GetElement(_Reference.LinkedElementId);
+              geometryReference = _Reference.CreateReferenceInLink();
             }
 
             if (element is ARDB.Instance instance)
-              transform = transform.HasValue ? transform.Value * instance.GetTransform().ToTransform() : instance.GetTransform().ToTransform();
+              _Transform = _Transform.HasValue ? _Transform.Value * instance.GetTransform().ToTransform() : instance.GetTransform().ToTransform();
 
             Document = element?.Document;
-            var geometry = element?.GetGeometryObjectFromReference(reference);
+            var geometry = element?.GetGeometryObjectFromReference(geometryReference);
             return geometry;
           }
         }
@@ -172,35 +173,35 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_PreviewData
-    private BoundingBox? clippingBox;
-    BoundingBox IGH_PreviewData.ClippingBox => clippingBox ?? (clippingBox = ClippingBox).Value;
+    private BoundingBox? _ClippingBox;
+    BoundingBox IGH_PreviewData.ClippingBox => _ClippingBox ?? (_ClippingBox = ClippingBox).Value;
 
     public virtual void DrawViewportWires(GH_PreviewWireArgs args) { }
     public virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
     #region IGH_PreviewMeshData
-    protected Point point = null;
-    protected Curve[] wires = null;
-    protected Mesh[] meshes = null;
-    protected double levelOfDetail = double.NaN;
+    protected Point _Point = null;
+    protected Curve[] _Wires = null;
+    protected Mesh[] _Meshes = null;
+    protected double _LevelOfDetail = double.NaN;
 
-    Transform? transform = default;
-    protected Transform Transform => transform ?? Transform.Identity;
-    protected bool HasTransform => transform.HasValue;
+    Transform? _Transform = default;
+    protected Transform Transform => _Transform ?? Transform.Identity;
+    protected bool HasTransform => _Transform.HasValue;
 
     void IGH_PreviewMeshData.DestroyPreviewMeshes()
     {
-      clippingBox = null;
-      transform = null;
-      levelOfDetail = double.NaN;
+      _ClippingBox = null;
+      _Transform = null;
+      _LevelOfDetail = double.NaN;
 
-      point = null;
-      wires = null;
-      meshes = null;
+      _Point = null;
+      _Wires = null;
+      _Meshes = null;
     }
 
-    Mesh[] IGH_PreviewMeshData.GetPreviewMeshes() => meshes;
+    Mesh[] IGH_PreviewMeshData.GetPreviewMeshes() => _Meshes;
     #endregion
 
     protected GeometryObject() { }
@@ -210,16 +211,11 @@ namespace RhinoInside.Revit.GH.Types
       DocumentGUID = document.GetFingerprintGUID();
       UniqueID = reference.ConvertToStableRepresentation(document);
 
-      referenceDocument = document;
-      this.reference = reference;
+      _ReferenceDocument = document;
+      _Reference = reference;
 
-      Document = reference.LinkedElementId == ARDB.ElementId.InvalidElementId ? referenceDocument :
-        referenceDocument.GetElement<ARDB.RevitLinkInstance>(reference.ElementId)?.GetLinkDocument();
-    }
-
-    public static GeometryObject FromReference(ARDB.Document document, ARDB.Reference reference, ARDB.ElementId linkInstanceId, ARDB.Document linkedDocument)
-    {
-      return FromReference(document, reference.CreateGeometryLinkReference(document, linkInstanceId, linkedDocument));
+      Document = reference.LinkedElementId == ARDB.ElementId.InvalidElementId ? _ReferenceDocument :
+        _ReferenceDocument.GetElement<ARDB.RevitLinkInstance>(reference.ElementId)?.GetLinkDocument();
     }
 
     public static GeometryObject FromReference(ARDB.Document document, ARDB.Reference reference)
@@ -247,20 +243,17 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var value = base.Value as ARDB.GeometryObject;
-
-        if (!value.IsValid())
+        var geometryObject = base.Value as ARDB.GeometryObject;
+        switch (geometryObject?.IsValidObject())
         {
-          if (value is object)
-          {
-            Debug.WriteLine("GeometryObject.IsValid() == false");
+          case false:
+            Debug.WriteLine("GeometryObject is not valid.");
             ResetValue();
-          }
+            return base.Value as ARDB.GeometryObject;
 
-          value = base.Value as ARDB.GeometryObject;
+          case true:  return geometryObject;
+          default:    return null;
         }
-
-        return value;
       }
     }
 
@@ -281,11 +274,11 @@ namespace RhinoInside.Revit.GH.Types
           DocumentGUID = doc.GetFingerprintGUID();
           UniqueID = reference.ConvertToStableRepresentation(doc);
 
-          referenceDocument = doc;
-          this.reference = reference;
+          _ReferenceDocument = doc;
+          _Reference = reference;
 
-          Document = reference.LinkedElementId == ARDB.ElementId.InvalidElementId ? referenceDocument :
-            referenceDocument.GetElement<ARDB.RevitLinkInstance>(reference.ElementId)?.GetLinkDocument();
+          Document = reference.LinkedElementId == ARDB.ElementId.InvalidElementId ? _ReferenceDocument :
+            _ReferenceDocument.GetElement<ARDB.RevitLinkInstance>(reference.ElementId)?.GetLinkDocument();
 
           return;
         }
@@ -293,8 +286,8 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       Document = default;
-      this.reference = default;
-      referenceDocument = null;
+      _Reference = default;
+      _ReferenceDocument = null;
       UniqueID = string.Empty;
       DocumentGUID = Guid.Empty;
     }
@@ -309,7 +302,7 @@ namespace RhinoInside.Revit.GH.Types
     /// </summary>
     public virtual BoundingBox ClippingBox => BoundingBox;
 
-    public virtual ARDB.Reference GetDefaultReference() => reference;
+    public virtual ARDB.Reference GetDefaultReference() => _Reference;
 
     #region DocumentObject
     public override string DisplayName => GetType().GetCustomAttribute<NameAttribute>().Name;
@@ -326,9 +319,7 @@ namespace RhinoInside.Revit.GH.Types
     public new ARDB.GeometryElement Value => base.Value as ARDB.GeometryElement;
     public override ARDB.Reference GetDefaultReference()
     {
-      return Document?.GetElement(Id)?.
-        GetDefaultReference()?.
-        CreateGeometryLinkReference(ReferenceDocument, ReferenceId, Document);
+      return GetReference(Document?.GetElement(Id)?.GetDefaultReference());
     }
 
     public GeometryElement() { }
@@ -482,15 +473,15 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (base.point is null && Value is ARDB.Point point)
+        if (base._Point is null && Value is ARDB.Point point)
         {
-          base.point = new Point(point.Coord.ToPoint3d());
+          base._Point = new Point(point.Coord.ToPoint3d());
 
           if (HasTransform)
-            base.point.Transform(Transform);
+            base._Point.Transform(Transform);
         }
 
-        return base.point;
+        return base._Point;
       }
     }
 
@@ -566,15 +557,15 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.Curve curve && wires is null)
+        if (Value is ARDB.Curve curve && _Wires is null)
         {
-          wires = new Curve[] { curve.ToCurve() };
+          _Wires = new Curve[] { curve.ToCurve() };
 
           if (HasTransform)
-            wires[0].Transform(Transform);
+            _Wires[0].Transform(Transform);
         }
 
-        return wires?.FirstOrDefault();
+        return _Wires?.FirstOrDefault();
       }
     }
 
@@ -738,32 +729,32 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (ClippingBox.IsValid && Value is ARDB.Face face && wires is null)
+        if (ClippingBox.IsValid && Value is ARDB.Face face && _Wires is null)
         {
-          wires = face.GetEdgesAsCurveLoops().SelectMany(x => x.GetPreviewWires()).ToArray();
+          _Wires = face.GetEdgesAsCurveLoops().SelectMany(x => x.GetPreviewWires()).ToArray();
 
           if (HasTransform)
           {
-            foreach (var wire in wires)
+            foreach (var wire in _Wires)
               wire.Transform(Transform);
           }
         }
 
-        return wires;
+        return _Wires;
       }
     }
 
     protected Mesh[] GetPreviewMeshes(MeshingParameters meshingParameters)
     {
-      if (meshingParameters.LevelOfDetail() != levelOfDetail)
+      if (meshingParameters.LevelOfDetail() != _LevelOfDetail)
       {
-        levelOfDetail = meshingParameters.LevelOfDetail();
+        _LevelOfDetail = meshingParameters.LevelOfDetail();
         if (ClippingBox.IsValid && Value is ARDB.Face face)
         {
-          meshes = Enumerable.Repeat(face, 1).GetPreviewMeshes(Document, meshingParameters).ToArray();
+          _Meshes = Enumerable.Repeat(face, 1).GetPreviewMeshes(Document, meshingParameters).ToArray();
 
           var transform = Transform;
-          foreach (var mesh in meshes)
+          foreach (var mesh in _Meshes)
           {
             if (HasTransform) mesh.Transform(transform);
             mesh.Normals.ComputeNormals();
@@ -771,7 +762,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return meshes;
+      return _Meshes;
     }
 
     void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
@@ -831,9 +822,9 @@ namespace RhinoInside.Revit.GH.Types
         }
         if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
         {
-          if (meshes is object)
+          if (_Meshes is object)
           {
-            var m = new Mesh(); m.Append(meshes);
+            var m = new Mesh(); m.Append(_Meshes);
             target = (Q) (object) new GH_Mesh(m);
           }
           else target = default;

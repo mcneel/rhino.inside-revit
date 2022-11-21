@@ -52,8 +52,8 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     string IGH_Goo.TypeDescription => $"Represents a {((IGH_Goo) this).TypeName.ToLowerInvariant()}";
-    public virtual bool IsValid => Document.IsValid();
-    public virtual string IsValidWhyNot => document.IsValidWithLog(out var log) ? default : log;
+    public virtual bool IsValid => _Document.IsValid();
+    public virtual string IsValidWhyNot => _Document.IsValidWithLog(out var log) ? default : log;
     IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) (this as ICloneable)?.Clone();
     object IGH_Goo.ScriptVariable() => ScriptVariable();
     public virtual object ScriptVariable() => Value;
@@ -101,13 +101,13 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     protected DocumentObject() { }
-    protected DocumentObject(ARDB.Document doc, object val) { document = doc; value = val; }
+    protected DocumentObject(ARDB.Document doc, object val) { _Document = doc; _Value = val; }
 
-    ARDB.Document document;
+    ARDB.Document _Document;
     public ARDB.Document Document
     {
-      get => document?.IsValidObject == true ? document : null;
-      protected set => document = value;
+      get => _Document?.IsValidObject == true ? _Document : null;
+      protected set => _Document = value;
     }
 
     protected internal bool AssertValidDocument(DocumentObject other, string paramName)
@@ -118,17 +118,17 @@ namespace RhinoInside.Revit.GH.Types
       throw new Exceptions.RuntimeArgumentException(paramName, "Invalid Document");
     }
 
-    object value;
+    object _Value;
     public virtual object Value
     {
-      get => value;
-      protected set => this.value = value;
+      get => _Value;
+      protected set => this._Value = value;
     }
 
     protected virtual void ResetValue()
     {
-      document = default;
-      value = default;
+      _Document = default;
+      _Value = default;
     }
 
     public abstract string DisplayName { get; }

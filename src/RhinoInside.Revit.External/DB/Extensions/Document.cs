@@ -285,59 +285,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static bool TryGetElementId(this Document doc, string uniqueId, out ElementId elementId)
-    {
-      elementId = default;
-
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
-      {
-        if (id < 0)
-        {
-          if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
-            elementId = new ElementId(id);
-        }
-        else
-        {
-          try
-          {
-            if (Reference.ParseFromStableRepresentation(doc, uniqueId) is Reference reference)
-              elementId = reference.ElementId;
-          }
-          catch (Autodesk.Revit.Exceptions.ArgumentException) { }
-        }
-      }
-
-      return elementId is object;
-    }
-
     public static bool TryGetLinkElementId(this Document doc, string uniqueId, out LinkElementId linkElementId)
     {
       if (ReferenceId.TryParse(uniqueId, out var reference, doc))
       {
         linkElementId = reference.IsLinked ?
           new LinkElementId(new ElementId(reference.Record.Id), new ElementId(reference.Element.Id)) :
-          new LinkElementId(new ElementId(reference.Element.Id));
+          new LinkElementId(new ElementId(reference.Record.Id));
 
         return true;
       }
 
       linkElementId = default;
       return false;
-    }
-
-    /// <summary>
-    /// Compare two <see cref="Autodesk.Revit.DB.Reference"/> objects to know if are referencing same <see cref="Autodesk.Revit.Element"/>
-    /// </summary>
-    /// <param name="doc"></param>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns>true if both references are equivalent</returns>
-    public static bool AreEquivalentReferences(this Document doc, Reference x, Reference y)
-    {
-      var UniqueIdX = x?.ConvertToStableRepresentation(doc);
-      var UniqueIdY = y?.ConvertToStableRepresentation(doc);
-
-      return UniqueIdX == UniqueIdY;
     }
 
     public static T GetElement<T>(this Document doc, ElementId elementId) where T : Element

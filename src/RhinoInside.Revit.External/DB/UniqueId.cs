@@ -224,6 +224,20 @@ namespace RhinoInside.Revit.External.DB
     public string ToString(ARDB.Document document)
     {
       if (IsLinked)
+      {
+        var linkedDocument = (document.GetElement(new ARDB.ElementId(Record.Id)) as ARDB.RevitLinkInstance).GetLinkDocument();
+        return IsInstance ?
+          $"{Record.ToString(document)}:{Element.ToString(linkedDocument)}:{Symbol.ToString(linkedDocument)}" :
+          $"{Record.ToString(document)}:{Element.ToString(linkedDocument)}";
+      }
+      else return IsInstance ?
+          $"{Element.ToString(document)}:{Symbol.ToString(document)}" :
+             Element.ToString(document);
+    }
+
+    public string ToStableRepresentation(ARDB.Document document)
+    {
+      if (IsLinked)
         return IsInstance ? $"{Record.ToString(document)}:{Element}:{Symbol}" : $"{Record.ToString(document)}:{Element}";
       else
         return IsInstance ? $"{Element.ToString(document)}:{Symbol.ToString(document)}" : Element.ToString(document);
@@ -278,7 +292,7 @@ namespace RhinoInside.Revit.External.DB
                 {
                   case GeometryObjectType.RVTLINK:
                     geometryId[nesting].TypeId = ParseId(types[1]);
-                    document = default;
+                    document = (document.GetElement(new ARDB.ElementId(geometryId[0].Id)) as ARDB.RevitLinkInstance)?.GetLinkDocument();
                     break;
 
                   default:

@@ -132,5 +132,37 @@ namespace RhinoInside.Revit.GH.Types
     public Reference() { }
 
     protected Reference(ARDB.Document doc, object value) : base(doc, value) { }
+
+    protected ARDB.Reference GetReference(ARDB.Reference reference)
+    {
+      if (reference.LinkedElementId == ARDB.ElementId.InvalidElementId)
+      {
+        if (reference.ElementId != Id)
+          throw new ArgumentException("Invalid Reference", nameof(reference));
+
+        if (IsLinked)
+          return reference.CreateLinkReference(ReferenceDocument, ReferenceId, Document);
+      }
+      else
+      {
+        if (reference.ElementId != ReferenceId || reference.LinkedElementId != Id)
+          throw new ArgumentException("Invalid Reference", nameof(reference));
+      }
+
+      return reference;
+    }
+
+    internal T GetElementFromReference<T>(ARDB.Reference reference) where T : Element
+    {
+      if (reference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
+        throw new ArgumentException("Invalid ElementReferenceType", nameof(reference));
+
+      return Element.FromReference(ReferenceDocument, GetReference(reference)) as T;
+    }
+
+    internal T GetGeometryObjectFromReference<T>(ARDB.Reference reference) where T : GeometryObject
+    {
+      return GeometryObject.FromReference(ReferenceDocument, GetReference(reference)) as T;
+    }
   }
 }

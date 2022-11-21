@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (reference is null) return false;
 
       var prevReference = spot.References.get_Item(0);
-      if (!prevReference.IsEquivalent(reference, spot.Document)) return false;
+      if (!spot.Document.AreEquivalentReferences(prevReference, reference)) return false;
 
       // Origin
       var vertexTolerance = spot.Document.Application.VertexTolerance;
