@@ -300,6 +300,7 @@ namespace RhinoInside.Revit.External.DB
                     break;
                 }
               }
+              else geometryId[nesting].TypeId = -1;
             }
           }
           else geometryId[nesting].Index = -1;

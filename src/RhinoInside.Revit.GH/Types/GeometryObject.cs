@@ -357,7 +357,15 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      return Value?.GetBoundingBox()?.ToBox().GetBoundingBox(xform) ?? NaN.BoundingBox;
+      if (Value?.GetBoundingBox()?.ToBox() is Box box)
+      {
+        if (HasTransform) box.Transform(Transform);
+        return xform == Transform.Identity ?
+          box.BoundingBox :
+          box.GetBoundingBox(xform);
+      }
+
+      return NaN.BoundingBox;
     }
 
     #region IGH_PreviewData
@@ -473,15 +481,15 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (base._Point is null && Value is ARDB.Point point)
+        if (_Point is null && Value is ARDB.Point point)
         {
-          base._Point = new Point(point.Coord.ToPoint3d());
+          _Point = new Point(point.Coord.ToPoint3d());
 
           if (HasTransform)
-            base._Point.Transform(Transform);
+            _Point.Transform(Transform);
         }
 
-        return base._Point;
+        return _Point;
       }
     }
 
@@ -714,9 +722,23 @@ namespace RhinoInside.Revit.GH.Types
     public GeometryFace() { }
     public GeometryFace(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
 
+    Brep Brep
+    {
+      get
+      {
+        if (Value?.ToBrep() is Brep brep)
+        {
+          if (HasTransform) brep.Transform(Transform);
+          return brep;
+        }
+
+        return null;
+      }
+    }
+
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      return Value?.ToBrep() is Brep brep ?
+      return Brep is Brep brep ?
       (
         xform == Transform.Identity ?
         brep.GetBoundingBox(true) :
