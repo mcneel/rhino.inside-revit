@@ -97,16 +97,9 @@ namespace RhinoInside.Revit.GH.Types
     ARDB.ElementId _ReferenceId = ARDB.ElementId.InvalidElementId;
     public override ARDB.ElementId ReferenceId => _ReferenceId;
 
-    public string UniqueId
-    {
-      get
-      {
-        if (Document is object && ERDB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument))
-          return referenceId.Element.ToString(Document);
-
-        return default;
-      }
-    }
+    public string UniqueId =>
+      Document is ARDB.Document document && ERDB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument) ?
+      referenceId.Element.ToString(document) :default;
     #endregion
 
     #region IGH_ReferencedData
