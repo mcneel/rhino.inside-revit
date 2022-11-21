@@ -3,6 +3,8 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
+  using External.DB.Extensions;
+
   public class ElementPassport : Component
   {
     public override Guid ComponentGuid => new Guid("BD534A54-B7ED-4D56-AA53-1F446D445DF6");
@@ -23,19 +25,19 @@ namespace RhinoInside.Revit.GH.Components.Elements
       manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "DocumentGUID", "GUID", "A unique identifier for the document the Element resides", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.Document(), "Document", "Document", "The document that contains this element", GH_ParamAccess.item);
       manager.AddTextParameter("UniqueID", "UUID", "A stable across upgrades and workset operations unique identifier for the Element", GH_ParamAccess.item);
-      manager.AddIntegerParameter("Id", "ID", "A unique identifier for an Element within the document that contains it", GH_ParamAccess.item);
+      manager.AddTextParameter("Id", "ID", "A unique identifier for an Element within the document that contains it", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var reference = default(Types.Reference);
-      if (!DA.GetData("Element", ref reference))
+      var element = default(Types.Element);
+      if (!DA.GetData("Element", ref element))
         return;
 
-      DA.SetData("DocumentGUID", reference?.DocumentGUID);
-      DA.SetData("Document", reference?.Document);
-      DA.SetData("UniqueID", reference?.UniqueID);
-      DA.SetData("Id", reference?.Id.IntegerValue);
+      DA.SetData("DocumentGUID", element?.Document.GetFingerprintGUID());
+      DA.SetData("Document", element?.Document);
+      DA.SetData("UniqueID", element?.Value?.UniqueId);
+      DA.SetData("Id", element?.Id);
     }
   }
 }
