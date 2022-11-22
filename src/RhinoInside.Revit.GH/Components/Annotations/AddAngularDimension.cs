@@ -10,7 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations
 {
-  [ComponentVersion(introduced: "1.8")]
+  [ComponentVersion(introduced: "1.8", updated: "1.10")]
   public class AddAngularDimension : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("0DBE67E7-7D8E-41F9-85B0-139C0B7F1745");
@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ),
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.GeometryObject()
         {
           Name = "References",
           NickName = "R",
@@ -97,12 +97,12 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         {
           // Input
           if (!view.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
-          if (!Params.GetDataList(DA, "References", out IList<ARDB.Element> elements)) return null;
+          if (!Params.GetDataList(DA, "References", out IList<Types.GeometryObject> geometries)) return null;
           if (!Params.GetData(DA, "Arc", out Arc? arc)) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.DimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.AngularDimensionType)) return null;
 
           // Compute
-          var references = elements.Select(ElementExtension.GetDefaultReference).OfType<ARDB.Reference>().ToArray();
+          var references = geometries.Where(x => x.ReferenceDocument.IsEquivalent(view.Document)).Select(x => x?.GetDefaultReference()).OfType<ARDB.Reference>().ToArray();
           dimension = Reconstruct(dimension, view, arc.Value.ToArc(), references, type);
 
           DA.SetData(_Output_, dimension);

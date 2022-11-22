@@ -391,7 +391,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (GetReference() is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR)
         {
-          var uniqueId = reference.ConvertToStableRepresentation(Document);
+          var uniqueId = reference.ConvertToStableRepresentation(ReferenceDocument);
           int end = -1;
           if (uniqueId.EndsWith("/0")) end = 0;
           else if (uniqueId.EndsWith("/1")) end = 1;

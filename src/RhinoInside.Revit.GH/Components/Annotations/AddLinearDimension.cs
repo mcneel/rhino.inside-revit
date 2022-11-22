@@ -10,7 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations
 {
-  [ComponentVersion(introduced: "1.8")]
+  [ComponentVersion(introduced: "1.8", updated: "1.10")]
   public class AddLinearDimension : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("DF47C980-EF08-4BBE-A624-C956C07B04EC");
@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ),
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.GeometryObject()
         {
           Name = "References",
           NickName = "R",
@@ -97,15 +97,12 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         {
           // Input
           if (!view.Value.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
-          if (!Params.GetDataList(DA, "References", out IList<ARDB.Element> elements)) return null;
+          if (!Params.GetDataList(DA, "References", out IList<Types.GeometryObject> geometries)) return null;
           if (!Params.GetData(DA, "Line", out Line? line)) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.DimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.LinearDimensionType)) return null;
 
-          var viewPlane = view.Location;
-          line = new Line(viewPlane.ClosestPoint(line.Value.From), viewPlane.ClosestPoint(line.Value.To));
-
           // Compute
-          var references = elements.Select(ElementExtension.GetDefaultReference).OfType<ARDB.Reference>().ToArray();
+          var references = geometries.Where(x => x.ReferenceDocument.IsEquivalent(view.Document)).Select(x => x?.GetDefaultReference()).OfType<ARDB.Reference>().ToArray();
           dimension = Reconstruct(dimension, view.Value, line.Value.ToLine(), references, type);
 
           DA.SetData(_Output_, dimension);
@@ -168,4 +165,3 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     }
   }
 }
-

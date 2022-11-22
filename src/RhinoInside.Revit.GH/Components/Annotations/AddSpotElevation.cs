@@ -10,7 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations
 {
-  [ComponentVersion(introduced: "1.8")]
+  [ComponentVersion(introduced: "1.8", updated: "1.10")]
   public class AddSpotElevation : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("00c729f1-75be-4b13-8ab5-aefa4462f335");
@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ),
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.GeometryObject()
         {
           Name = "Reference",
           NickName = "R",
@@ -107,15 +107,19 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           // Input
           if (!view.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
-          if (!Params.GetData(DA, "Reference", out ARDB.Element element)) return null;
+          if (!Params.GetData(DA, "Reference", out Types.GeometryObject geometry)) return null;
           if (!Params.TryGetData(DA, "Head Location", out Point3d? headLocation)) return null;
           if (headLocation is null) headLocation = point;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.SpotDimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.SpotElevationType)) return null;
 
+          var bbox = geometry.GetBoundingBox(Transform.Identity);
+          if (!bbox.Contains(point.Value))
+            point = bbox.ClosestPoint(point.Value);
+
           // Compute
           spot = Reconstruct
           (
-            spot, view, element,
+            spot, view, geometry.GetDefaultReference(),
             point.Value.ToXYZ(),
             (headLocation.Value - Vector3d.XAxis * ((headLocation.Value.X - point.Value.X) / 3.0)).ToXYZ(),
             headLocation.Value.ToXYZ(),
@@ -131,8 +135,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     bool Reuse
     (
       ARDB.SpotDimension spot, ARDB.View view,
-      ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end,
-      ARDB.Element element
+      ARDB.Reference reference,
+      ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end
     )
     {
       if (spot is null) return false;
@@ -141,7 +145,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       // Reference
       if (spot.References.Size != 1) return false;
 
-      var reference = GetReference(element, point, out var origin);
       if (reference is null) return false;
 
       var prevReference = spot.References.get_Item(0);
@@ -149,7 +152,11 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
       // Origin
       var vertexTolerance = spot.Document.Application.VertexTolerance;
-      if (!spot.Origin.AlmostEquals(origin, vertexTolerance)) return false;
+      if (!spot.Origin.AlmostEquals(point, vertexTolerance))
+      {
+        spot.Pinned = false;
+        spot.Location.Move(point - spot.Origin);
+      }
 
       // Leader
       if (point.AlmostEquals(end, vertexTolerance))
@@ -180,74 +187,27 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     ARDB.SpotDimension Create
     (
       ARDB.View view,
-      ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end,
-      ARDB.Element element
+      ARDB.Reference reference,
+      ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end
     )
     {
-      var reference = GetReference(element, point, out var origin);
       if (reference is null) return null;
 
       var hasLeader = !point.AlmostEquals(end, view.Document.Application.VertexTolerance);
-      return view.Document.Create.NewSpotElevation(view, reference, origin, bend, end, point, hasLeader);
-    }
-
-    static ARDB.Reference GetReference(ARDB.Element element, ARDB.XYZ point, out ARDB.XYZ origin)
-    {
-      origin = default;
-      var reference = default(ARDB.Reference);
-      switch (element)
-      {
-        case null: break;
-#if REVIT_2018
-        case ARDB.FamilyInstance instance:
-          reference = instance.GetReferences(ARDB.FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
-          break;
-#endif
-
-        case ARDB.CurveElement curveElement:
-          reference = curveElement.GeometryCurve.Reference;
-          break;
-
-        default:
-          using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = true })
-          {
-            var geometry = element.get_Geometry(options);
-
-            var edges = geometry.OfType<ARDB.Solid>().
-              SelectMany(y => y.Edges.Cast<ARDB.Edge>());
-
-            var closestEdge = default(ARDB.Edge);
-            var minDistance = double.PositiveInfinity;
-            foreach (var edge in edges.Where(x => x.Reference is object))
-            {
-              var projected = edge.AsCurve().Project(point);
-              if (projected.Distance < minDistance)
-              {
-                closestEdge = edge;
-                minDistance = projected.Distance;
-                origin = projected.XYZPoint;
-              }
-            }
-
-            reference = closestEdge.Reference;
-          }
-          break;
-      }
-
-      return reference ?? new ARDB.Reference(element);
+      return view.Document.Create.NewSpotElevation(view, reference, point, bend, end, point, hasLeader);
     }
 
     ARDB.SpotDimension Reconstruct
     (
       ARDB.SpotDimension spot,
       ARDB.View view,
-      ARDB.Element element,
+      ARDB.Reference reference,
       ARDB.XYZ point, ARDB.XYZ bend, ARDB.XYZ end,
       ARDB.SpotDimensionType type
     )
     {
-      if (!Reuse(spot, view, point, bend, end, element))
-        spot = Create(view, point, bend, end, element);
+      if (!Reuse(spot, view, reference, point, bend, end))
+        spot = Create(view, reference, point, bend, end);
 
       if (spot?.GetTypeId() != type.Id) spot.ChangeTypeId(type.Id);
 
