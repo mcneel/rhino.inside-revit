@@ -607,7 +607,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               Select(x => x.Id).
               FirstOrDefault() ?? ElementId.InvalidElementId;
             }
-            else
+            else if (element is Family || element is ParameterElement || element.CanBeRenominated())
             {
               return collector.WhereElementIsNotElementType().
               WhereElementIsKindOf(element.GetType()).

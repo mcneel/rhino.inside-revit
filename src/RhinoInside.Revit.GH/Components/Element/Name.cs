@@ -158,10 +158,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
     }
   }
 
+  [ComponentVersion(introduced: "1.10")]
   public class NamesakeElement : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("1FEE04EF-A3DA-44F4-B114-486724C92AB6");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
     protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter(inverted: true);
 
     public NamesakeElement() : base
