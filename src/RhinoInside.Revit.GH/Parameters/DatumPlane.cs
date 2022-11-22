@@ -18,6 +18,11 @@ namespace RhinoInside.Revit.GH.Parameters
     public Level() : base("Level", "Level", "Contains a collection of Revit level elements", "Params", "Revit") { }
 
     #region UI
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Work Plane" }
+    );
+
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
       var Level = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Level);
