@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -9,7 +8,6 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   using Convert.Geometry;
   using External.DB.Extensions;
   using Grasshopper.Kernel.Parameters;
-  using Kernel.Attributes;
 
   [ComponentVersion(introduced: "1.0", updated: "1.8")]
   public class AddWorkPlaneByPlane : ElementTrackerComponent
@@ -38,8 +36,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
           Name = "Plane",
           NickName = "P",
           Description = "Plane definition",
-        },
-        ParamRelevance.Primary
+        }
       )
     };
 
