@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -12,6 +13,13 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
 
     public Workset() : base("Workset", "Workset", "Contains a collection of Revit workset elements", "Params", "Revit") { }
+
+    protected override Types.Workset PreferredCast(object data)
+    {
+      return data is ValueTuple<ARDB.Document, ARDB.Workset> workset ?
+             new Types.Workset(workset.Item1, workset.Item2) :
+             null;
+    }
 
     #region UI
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)

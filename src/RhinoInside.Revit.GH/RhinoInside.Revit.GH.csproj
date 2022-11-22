@@ -262,6 +262,7 @@
     <Compile Include="Components\Views\SectionBox.cs" />
     <Compile Include="Components\Views\View3DByPlane.cs" />
     <Compile Include="Components\Workset\Active.cs" />
+    <Compile Include="Components\Workset\CreateWorkset.cs" />
     <Compile Include="Components\Workset\ElementWorkset.cs" />
     <Compile Include="Components\Workset\DeleteWorkset.cs" />
     <Compile Include="Components\Workset\Identity.cs" />

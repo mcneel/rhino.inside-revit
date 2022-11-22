@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     public Workset() { }
     public Workset(ARDB.Document doc, ARDB.WorksetId id) : base() => SetValue(doc, id);
-    public Workset(ARDB.Document doc, ARDB.Workset value) : base(doc, value) => SetValue(doc, value.Id);
+    public Workset(ARDB.Document doc, ARDB.Workset value) : base(doc, value) => SetValue(doc, value?.Id ?? ARDB.WorksetId.InvalidWorksetId);
 
     #region System.Object
     public override string ToString()
@@ -27,7 +27,9 @@ namespace RhinoInside.Revit.GH.Types
       string TypeName = ((IGH_Goo) this).TypeName;
       string InstanceName = DisplayName ?? string.Empty;
 
-      if (!string.IsNullOrWhiteSpace(InstanceName))
+      if (string.IsNullOrWhiteSpace(InstanceName))
+        InstanceName = $" : <None>";
+      else
         InstanceName = $" : {InstanceName}";
 
       if (!IsReferencedData)
