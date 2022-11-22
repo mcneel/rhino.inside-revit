@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ Normalize(this XYZ xyz, double tolerance = DefaultTolerance)
     {
       var (x, y, z) = xyz;
-      var length = NumericTolerance.Abs(x, y, x);
+      var length = NumericTolerance.Abs(x, y, z);
       if (length < tolerance)
         return XYZ.Zero;
 
