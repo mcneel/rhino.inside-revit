@@ -89,7 +89,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="$(Configuration.Contains('2022'))">
         <RevitVersion>2022</RevitVersion>
-        <RevitApiVersion>2022.0.0</RevitApiVersion>
+        <RevitApiVersion>2022.1.0</RevitApiVersion>
         <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
     </PropertyGroup>
     <PropertyGroup Condition="$(Configuration.Contains('2023'))">

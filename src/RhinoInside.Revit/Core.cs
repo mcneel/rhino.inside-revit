@@ -208,7 +208,7 @@ namespace RhinoInside.Revit
 #if REVIT_2023
     static readonly Version MinimumRevitVersion = new Version(2023, 0);
 #elif REVIT_2022
-    static readonly Version MinimumRevitVersion = new Version(2022, 0);
+    static readonly Version MinimumRevitVersion = new Version(2022, 1);
 #elif REVIT_2021
     static readonly Version MinimumRevitVersion = new Version(2021, 1);
 #elif REVIT_2020
@@ -255,7 +255,7 @@ namespace RhinoInside.Revit
           taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink1, $"Revit {RevitVersion.Major} Product Updates…");
           if (taskDialog.Show() == ARUI.TaskDialogResult.CommandLink1)
           {
-            using (Process.Start($@"https://knowledge.autodesk.com/support/revit/downloads?release={RevitVersion.Major}")) { }
+            using (Process.Start($@"https://knowledge.autodesk.com/support/revit?s=Download%20Updates&v={RevitVersion.Major}&sort=score")) { }
           }
         }
 
