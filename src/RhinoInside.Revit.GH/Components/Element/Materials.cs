@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           face.Document.Paint(face.Id, face.Value, paint.Id);
       }
 
-      Params.TrySetData(DA, "Paint", () => face.Document.GetPaintedMaterial(face.Id, face.Value));
+      Params.TrySetData(DA, "Paint", () => new Types.Material(face.Document, face.Document.GetPaintedMaterial(face.Id, face.Value)));
     }
   }
 }
