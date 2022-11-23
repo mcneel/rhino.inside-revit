@@ -47,8 +47,14 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       bool hasSolids = false;
       using (var ctx = GeometryEncoder.Context.Push(element))
       {
+        var transform = Transform.Identity;
+        var inverse = Transform.Identity;
+
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
+        {
+          invalidGeometry?.Transform(inverse);
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
+        };
 
         var materialIndex = 0;
         var materialCount = materials?.Count ?? 0;
@@ -70,7 +76,10 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
                         ARDB.ElementId.InvalidElementId;
                       }
 
-                      x.Transform(Transform.Translation(Point3d.Origin - center));
+                      transform = Transform.Translation(Point3d.Origin - center);
+                      inverse = Transform.Translation(center / Revit.ModelUnits - Point3d.Origin);
+
+                      x.Transform(transform);
                       var subShape = x.ToShape();
                       materialIds?.AddRange(Enumerable.Repeat(ctx.MaterialId, subShape.Length));
                       if (!hasSolids) hasSolids = subShape.Any(s => s is ARDB.Solid);

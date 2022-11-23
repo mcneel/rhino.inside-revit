@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
@@ -46,13 +45,19 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
       using (var ctx = GeometryEncoder.Context.Push(element))
       {
+        var bbox = curve.GetBoundingBox(accurate: false);
+        var transform = Transform.Translation(Point3d.Origin - bbox.Center);
+        var inverse = Transform.Translation(bbox.Center / Revit.ModelUnits - Point3d.Origin);
+
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
+        {
+          invalidGeometry?.Transform(inverse);
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
+        };
 
         try
         {
-          var bbox = curve.GetBoundingBox(accurate: false);
-          curve.Transform(Transform.Translation(Point3d.Origin - bbox.Center));
+          curve.Transform(transform);
           element.SetShape(curve.ToShape());
           element.Pinned = false;
           element.Location.Move(bbox.Center.ToXYZ());
