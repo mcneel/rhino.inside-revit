@@ -266,6 +266,15 @@ namespace RhinoInside.Revit.GH.Components
                 AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, geometry);
                 break;
 
+              case BoundingBox bbox:
+              {
+                var inch = Revit.ModelUnits / 12.0;
+                var box = new Box(bbox); box.Inflate(inch, inch, inch);
+                var mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
+                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
+                break;
+              }
+
               default:
                 AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, default);
                 break;

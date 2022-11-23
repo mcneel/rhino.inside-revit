@@ -64,12 +64,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         }
         catch (ConversionException e)
         {
-          ThrowArgumentException(nameof(curve), e.Message, curve);
+          ThrowArgumentException(nameof(curve), e.Message, bbox);
         }
         catch (Autodesk.Revit.Exceptions.ArgumentException e)
         {
           if (e.GetType() == typeof(Autodesk.Revit.Exceptions.ArgumentException))
-            ThrowArgumentException(nameof(curve), "Input geometry does not satisfy DirectShape validation criteria.", curve);
+            ThrowArgumentException(nameof(curve), "Input geometry does not satisfy DirectShape validation criteria.", bbox);
 
           throw e;
         }
