@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
@@ -7,6 +6,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
+  using System.Windows;
   using Convert;
   using Convert.Geometry;
   using Kernel.Attributes;
@@ -46,25 +46,31 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
       using (var ctx = GeometryEncoder.Context.Push(element))
       {
+        var bbox = mesh.GetBoundingBox(accurate: false);
+        var transform = Transform.Translation(Point3d.Origin - bbox.Center);
+        var inverse = Transform.Translation(bbox.Center / Revit.ModelUnits - Point3d.Origin);
+
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
+        {
+          invalidGeometry?.Transform(inverse);
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
+        };
 
         try
         {
-          var bbox = mesh.GetBoundingBox(accurate: false);
-          mesh.Transform(Transform.Translation(Point3d.Origin - bbox.Center));
+          mesh.Transform(transform);
           element.SetShape(mesh.ToShape());
           element.Pinned = false;
           element.Location.Move(bbox.Center.ToXYZ());
         }
         catch (ConversionException e)
         {
-          ThrowArgumentException(nameof(mesh), e.Message, mesh);
+          ThrowArgumentException(nameof(mesh), e.Message, bbox);
         }
         catch (Autodesk.Revit.Exceptions.ArgumentException e)
         {
           if (e.GetType() == typeof(Autodesk.Revit.Exceptions.ArgumentException))
-            ThrowArgumentException(nameof(mesh), "Input geometry does not satisfy DirectShape validation criteria.", mesh);
+            ThrowArgumentException(nameof(mesh), "Input geometry does not satisfy DirectShape validation criteria.", bbox);
 
           throw e;
         }
