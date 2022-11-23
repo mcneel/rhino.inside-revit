@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void SubInvalidateGraphics()
     {
-      clippingBox = default;
+      _ClippingBox = default;
 
       base.SubInvalidateGraphics();
     }
@@ -98,17 +98,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_PreviewData
-    private BoundingBox? clippingBox;
-    BoundingBox IGH_PreviewData.ClippingBox
-    {
-      get
-      {
-        if (!clippingBox.HasValue)
-          clippingBox = ClippingBox;
-
-        return clippingBox.Value;
-      }
-    }
+    private BoundingBox? _ClippingBox;
+    BoundingBox IGH_PreviewData.ClippingBox => _ClippingBox ?? (_ClippingBox = ClippingBox).Value;
 
     /// <summary>
     /// Not necessarily accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for display.
