@@ -65,6 +65,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static Reference CreateLinkReference(this Reference reference, Document document, ElementId linkInstanceId, Document linkedDocument)
     {
       if (reference is null) throw new ArgumentNullException(nameof(reference));
+      if (document is null) throw new ArgumentNullException(nameof(document));
       if (!linkInstanceId.IsValid()) throw new ArgumentException(nameof(linkInstanceId));
       if (!linkedDocument.IsValid() || !linkedDocument.IsLinked) throw new ArgumentException(nameof(linkedDocument));
 
@@ -80,6 +81,36 @@ namespace RhinoInside.Revit.External.DB.Extensions
       stable = referenceId.ToStableRepresentation(document);
 
       return Reference.ParseFromStableRepresentation(document, stable);
+    }
+
+    internal static string ConvertToPersistentRepresentation(this Reference reference, Document document)
+    {
+      if (reference is null) throw new ArgumentNullException(nameof(reference));
+      if (document is null)  throw new ArgumentNullException(nameof(document));
+
+      if (reference.ElementReferenceType == ElementReferenceType.REFERENCE_TYPE_NONE)
+      {
+        var referenceId = reference.LinkedElementId == ElementId.InvalidElementId ?
+          new ReferenceId(new GeometryObjectId(reference.ElementId.ToValue())) :
+          new ReferenceId
+          (
+            new GeometryObjectId(reference.ElementId.ToValue(), -1, GeometryObjectType.RVTLINK, document.GetElement(reference.ElementId).GetTypeId().ToValue()),
+            new GeometryObjectId(reference.LinkedElementId.ToValue())
+          );
+
+        return referenceId.ToString(document);
+      }
+      else
+      {
+        var stable = reference.ConvertToStableRepresentation(document);
+        return ReferenceId.Parse(stable, document).ToString(document);
+      }
+    }
+
+    internal static Reference ParseFromPersistentRepresentation(Document document, string persistent)
+    {
+      return Reference.ParseFromStableRepresentation(document, ReferenceId.Parse(persistent, document).ToStableRepresentation(document));
+
     }
   }
 }

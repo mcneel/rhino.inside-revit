@@ -46,6 +46,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
+    public override string DisplayName => Nomen ?? (IsReferencedData ? string.Empty : "<None>");
+
     public new ARDB.Element Value
     {
       get
@@ -64,32 +66,83 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    protected override object FetchValue() => Document?.GetElement(Id);
-
     protected override void ResetValue()
     {
       SubInvalidateGraphics();
 
+      _ReferenceDocument = default;
+      _ReferenceId = default;
+      _Id = default;
+
       base.ResetValue();
     }
 
-    public override string DisplayName => Nomen ?? (IsReferencedData ? string.Empty : "<None>");
+    protected override object FetchValue()
+    {
+      LoadReferencedData();
+      return Document?.GetElement(Id);
+    }
+
+    protected void SetValue(ARDB.Document doc, ARDB.ElementId id)
+    {
+      ResetValue();
+
+      if (!id.IsValid())
+        doc = null;
+
+      _ReferenceDocument = Document = doc;
+      _ReferenceId = _Id = id ?? ARDB.ElementId.InvalidElementId;
+
+      if (Document is object)
+      {
+        ReferenceDocumentId = _ReferenceDocument.GetFingerprintGUID();
+
+        if (_Id.IsBuiltInId())
+        {
+          ReferenceUniqueId = ERDB.UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(Document), _Id.ToValue());
+          base.Value = null;
+        }
+        else
+        {
+          var element = Document.GetElement(_Id);
+          ReferenceUniqueId = element?.UniqueId ?? string.Empty;
+          base.Value = element;
+        }
+      }
+    }
+
+    protected virtual bool SetValue(ARDB.Element element)
+    {
+      if (ValueType.IsInstanceOfType(element))
+      {
+        _ReferenceDocument = Document = element.Document;
+        _ReferenceId = _Id = element.Id;
+
+        ReferenceDocumentId = _ReferenceDocument.GetFingerprintGUID();
+        ReferenceUniqueId = element.UniqueId;
+
+        base.Value = element;
+        return true;
+      }
+
+      return false;
+    }
     #endregion
 
     #region ReferenceObject
     public override bool? IsEditable => IsValid ? !Document.IsLinked && CanDelete : default(bool?);
     #endregion
 
-    #region IGH_Reference
+    #region Reference
     ARDB.ElementId _Id = ARDB.ElementId.InvalidElementId;
     public override ARDB.ElementId Id => _Id;
 
     ARDB.Document _ReferenceDocument;
-    public override ARDB.Document ReferenceDocument => _ReferenceDocument;
+    public override ARDB.Document ReferenceDocument => _ReferenceDocument?.IsValidObject == true ? _ReferenceDocument : null;
 
     public override ARDB.Reference GetReference()
     {
-      try { return ARDB.Reference.ParseFromStableRepresentation(ReferenceDocument, ReferenceUniqueId); }
+      try { return ReferenceExtension.ParseFromPersistentRepresentation(ReferenceDocument, ReferenceUniqueId); }
       catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
       catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
     }
@@ -99,14 +152,14 @@ namespace RhinoInside.Revit.GH.Types
 
     public string UniqueId =>
       Document is ARDB.Document document && ERDB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument) ?
-      referenceId.Element.ToString(document) :default;
+      referenceId.Element.ToString(document) : default;
     #endregion
 
     #region IGH_ReferencedData
-    public override bool IsReferencedDataLoaded => ReferenceDocument is object && Id is object;
+    public override bool IsReferencedDataLoaded => ReferenceDocument is object && _Id is object;
     public sealed override bool LoadReferencedData()
     {
-      if (IsReferencedData)
+      if (IsReferencedData && !IsReferencedDataLoaded)
       {
         UnloadReferencedData();
 
@@ -128,18 +181,6 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return IsReferencedDataLoaded;
-    }
-
-    public override void UnloadReferencedData()
-    {
-      if (IsReferencedData)
-      {
-        _ReferenceDocument = default;
-        _ReferenceId = default;
-        _Id = default;
-      }
-
-      base.UnloadReferencedData();
     }
     #endregion
 
@@ -417,7 +458,7 @@ namespace RhinoInside.Revit.GH.Types
             using (var elementReference = linkedElementReference.CreateLinkReference(link))
             {
               element.ReferenceDocumentId = doc.GetFingerprintGUID();
-              element.ReferenceUniqueId = elementReference.ConvertToStableRepresentation(doc);
+              element.ReferenceUniqueId = elementReference.ConvertToPersistentRepresentation(doc);
               element._ReferenceDocument = doc;
               element._ReferenceId = link.Id;
               return element;
@@ -431,7 +472,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static Element FromReference(ARDB.Document doc, ARDB.Reference reference)
     {
-      // We call FromLinkElementId to truncate the geometry part of the reference and create a stable UniqueId if is linked.
+      // We call FromLinkElementId to truncate the geometry part of the reference and create a persistent UniqueId if is linked.
       return FromLinkElementId
       (
           doc,
@@ -441,50 +482,19 @@ namespace RhinoInside.Revit.GH.Types
       );
     }
 
-    protected internal void SetValue(ARDB.Document doc, ARDB.ElementId id)
-    {
-      if (id == ARDB.ElementId.InvalidElementId)
-        doc = null;
-
-      Document = _ReferenceDocument = doc;
-      ReferenceDocumentId = doc.GetFingerprintGUID();
-
-      _Id = _ReferenceId = id;
-      if (doc is object && id is object)
-      {
-        ReferenceUniqueId = id.IsBuiltInId() ?
-          ERDB.UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(doc), id.IntegerValue) :
-          doc.GetElement(id)?.UniqueId ?? string.Empty;
-      }
-      else ReferenceUniqueId = string.Empty;
-    }
-
-    protected virtual bool SetValue(ARDB.Element element)
-    {
-      if (ValueType.IsInstanceOfType(element))
-      {
-        ReferenceDocumentId = Document.GetFingerprintGUID();
-        ReferenceUniqueId = element.UniqueId;
-        Document = _ReferenceDocument = element.Document;
-        _Id = _ReferenceId = element.Id;
-        base.Value = element;
-        return true;
-      }
-
-      return false;
-    }
-
     public Element() { }
     internal Element(ARDB.Document doc, ARDB.ElementId id) => SetValue(doc, id);
     protected Element(ARDB.Element element) : base(element?.Document, element)
     {
-      ReferenceDocumentId = Document.GetFingerprintGUID();
-
       if (element is object)
       {
-        ReferenceUniqueId = element.UniqueId;
-        _ReferenceDocument = element.Document;
-        _ReferenceId = _Id = element.Id;
+        _ReferenceDocument  = Document;
+        _ReferenceId        = _Id       = element.Id;
+
+        ReferenceDocumentId = Document.GetFingerprintGUID();
+        ReferenceUniqueId   = element.UniqueId;
+
+        Debug.Assert(ReferenceEquals(base.Value, element));
       }
     }
 

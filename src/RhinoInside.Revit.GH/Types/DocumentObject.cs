@@ -103,13 +103,18 @@ namespace RhinoInside.Revit.GH.Types
     protected DocumentObject() { }
     protected DocumentObject(ARDB.Document doc, object val) { _Document = doc; _Value = val; }
 
+    public abstract string DisplayName { get; }
+
+    #region Document
     ARDB.Document _Document;
     public ARDB.Document Document
     {
       get => _Document?.IsValidObject == true ? _Document : null;
       protected set => _Document = value;
     }
+    #endregion
 
+    #region Value
     protected internal bool AssertValidDocument(DocumentObject other, string paramName)
     {
       if (other?.Document is null) return false;
@@ -130,8 +135,7 @@ namespace RhinoInside.Revit.GH.Types
       _Document = default;
       _Value = default;
     }
-
-    public abstract string DisplayName { get; }
+    #endregion
   }
 
   /// <summary>
@@ -192,12 +196,6 @@ namespace RhinoInside.Revit.GH.Types
     IGH_ReferenceData,
     IGH_QuickCast
   {
-    protected ReferenceObject() { }
-
-    protected ReferenceObject(ARDB.Document doc, object val) : base(doc, val) { }
-
-    public abstract bool? IsEditable { get; }
-
     #region System.Object
     public bool Equals(ReferenceObject other) => other is object &&
       Equals(ReferenceDocumentId, other.ReferenceDocumentId) &&
@@ -260,11 +258,10 @@ namespace RhinoInside.Revit.GH.Types
     public virtual bool IsReferencedData => ReferenceDocumentId != Guid.Empty;
     public abstract bool IsReferencedDataLoaded { get; }
     public abstract bool LoadReferencedData();
-    public virtual void UnloadReferencedData()
+    public void UnloadReferencedData()
     {
-      if (!IsReferencedData) return;
-
-      ResetValue();
+      if (IsReferencedData)
+        ResetValue();
     }
     #endregion
 
@@ -323,11 +320,16 @@ namespace RhinoInside.Revit.GH.Types
       [DisplayName("Document ID"), Description("The Guid of document that references this element."), Category("Reference")]
       public Guid ReferenceDocumentId => owner.ReferenceDocumentId;
 
-      [DisplayName("Unique ID"), Description("A stable unique identifier for an element within the document."), Category("Reference")]
+      [DisplayName("Persistent ID"), Description("A stable unique identifier for an element within the document."), Category("Reference")]
       public string ReferenceUniqueId => owner.ReferenceUniqueId;
     }
 
     public virtual IGH_GooProxy EmitProxy() => new Proxy(this);
     #endregion
+
+    protected ReferenceObject() { }
+    protected ReferenceObject(ARDB.Document doc, object val) : base(doc, val) { }
+
+    public abstract bool? IsEditable { get; }
   }
 }

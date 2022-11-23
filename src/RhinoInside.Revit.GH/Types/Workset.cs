@@ -6,16 +6,13 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using System.Runtime.CompilerServices;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Workset")]
   public class Workset : ReferenceObject,
     IGH_ItemDescription
   {
-    public Workset() { }
-    public Workset(ARDB.Document doc, ARDB.WorksetId id) : base() => SetValue(doc, id);
-    public Workset(ARDB.Document doc, ARDB.Workset value) : base(doc, value) => SetValue(doc, value?.Id ?? ARDB.WorksetId.InvalidWorksetId);
-
     #region System.Object
     public override string ToString()
     {
@@ -37,17 +34,21 @@ namespace RhinoInside.Revit.GH.Types
 
       string InstanceId = valid ? $" : id {Id.IntegerValue}" : $" : {ReferenceUniqueId}";
 
-      using (var Documents = Revit.ActiveDBApplication.Documents)
+      if (/*ReferenceDocument is ARDB.Document && */Document is ARDB.Document document)
       {
-        if (Documents.Size > 1)
-          InstanceId = $"{InstanceId} @ {Document?.GetTitle() ?? ReferenceDocumentId.ToString("B")}";
+        if (document.IsLinked || document.IsFamilyDocument)
+          InstanceId = $"{InstanceId} @ {document.GetTitle()}";
       }
+      else InstanceId = $"{InstanceId} @ {ReferenceDocumentId:B}";
 
+      //if (IsLinked) TypeName = "Linked " + TypeName;
       return $"{Invalid}{TypeName}{InstanceName}{InstanceId}";
     }
     #endregion
 
     #region DocumentObject
+    public override string DisplayName => Value?.Name;
+
     public new ARDB.Workset Value
     {
       get
@@ -63,18 +64,22 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public ARDB.WorksetId Id { get; private set; }
+    protected override void ResetValue()
+    {
+      Id = default;
+      base.ResetValue();
+    }
 
-    public override string DisplayName => Value?.Name;
-
-    public override bool? IsEditable => Value?.IsEditable;
-    #endregion
-
-    #region ReferenceObject
-    protected override object FetchValue() => Document.GetWorksetTable()?.GetWorkset(Id);
+    protected override object FetchValue()
+    {
+      LoadReferencedData();
+      return Document?.GetWorksetTable()?.GetWorkset(Id);
+    }
 
     protected void SetValue(ARDB.Document doc, ARDB.WorksetId id)
     {
+      ResetValue();
+
       if (id == ARDB.WorksetId.InvalidWorksetId)
         doc = null;
 
@@ -84,6 +89,10 @@ namespace RhinoInside.Revit.GH.Types
       Id = id;
       ReferenceUniqueId = doc?.GetWorksetTable()?.GetWorkset(id)?.UniqueId.ToString() ?? string.Empty;
     }
+    #endregion
+
+    #region ReferenceObject
+    public override bool? IsEditable => Value?.IsEditable;
     #endregion
 
     #region IGH_Goo
@@ -168,7 +177,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool LoadReferencedData()
     {
-      if (IsReferencedData)
+      if (IsReferencedData && !IsReferencedDataLoaded)
       {
         UnloadReferencedData();
 
@@ -187,14 +196,12 @@ namespace RhinoInside.Revit.GH.Types
 
       return IsReferencedDataLoaded;
     }
-
-    public override void UnloadReferencedData()
-    {
-      base.UnloadReferencedData();
-
-      if (IsReferencedData)
-        Id = default;
-    }
     #endregion
+
+    public Workset() { }
+    public Workset(ARDB.Document doc, ARDB.WorksetId id) : base() => SetValue(doc, id);
+    public Workset(ARDB.Document doc, ARDB.Workset value) : base(doc, value) => SetValue(doc, value?.Id ?? ARDB.WorksetId.InvalidWorksetId);
+
+    public ARDB.WorksetId Id { get; private set; }
   }
 }

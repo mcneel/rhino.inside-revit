@@ -225,7 +225,7 @@ namespace RhinoInside.Revit.External.DB
     {
       if (IsLinked)
       {
-        var linkedDocument = (document.GetElement(new ARDB.ElementId(Record.Id)) as ARDB.RevitLinkInstance).GetLinkDocument();
+        var linkedDocument = (document?.GetElement(new ARDB.ElementId(Record.Id)) as ARDB.RevitLinkInstance)?.GetLinkDocument();
         return IsInstance ?
           $"{Record.ToString(document)}:{Element.ToString(linkedDocument)}:{Symbol.ToString(linkedDocument)}" :
           $"{Record.ToString(document)}:{Element.ToString(linkedDocument)}";

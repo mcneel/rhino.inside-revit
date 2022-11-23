@@ -58,70 +58,31 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region IGH_Reference
-    public override ARDB.ElementId Id => _Reference is null ? null :
-      _Reference.LinkedElementId != ARDB.ElementId.InvalidElementId ?
-      _Reference.LinkedElementId :
-      _Reference.ElementId;
+    #region DocumentObject
+    public override string DisplayName => GetType().GetCustomAttribute<NameAttribute>().Name;
 
-    private ARDB.Document _ReferenceDocument;
-    public override ARDB.Document ReferenceDocument => _ReferenceDocument?.IsValidObject is true ? _ReferenceDocument : null;
-
-    private ARDB.Reference _Reference;
-    public override ARDB.Reference GetReference() => _Reference;
-
-    public override ARDB.ElementId ReferenceId => _Reference?.ElementId;
-
-    public override bool IsReferencedData => ReferenceDocumentId != Guid.Empty;
-    public override bool IsReferencedDataLoaded => _ReferenceDocument is object && _Reference is object;
-    public override bool LoadReferencedData()
+    public new ARDB.GeometryObject Value
     {
-      if (IsReferencedData && !IsReferencedDataLoaded)
+      get
       {
-        UnloadReferencedData();
-
-        if (Types.Document.TryGetDocument(ReferenceDocumentId, out _ReferenceDocument))
+        var geometryObject = base.Value as ARDB.GeometryObject;
+        switch (geometryObject?.IsValidObject())
         {
-          try
-          {
-            _Reference = ARDB.Reference.ParseFromStableRepresentation(_ReferenceDocument, ReferenceUniqueId);
+          case false:
+            Debug.WriteLine("GeometryObject is not valid.");
+            ResetValue();
+            return base.Value as ARDB.GeometryObject;
 
-            if (_Reference.LinkedElementId == ARDB.ElementId.InvalidElementId)
-            {
-              Document = _ReferenceDocument;
-              return true;
-            }
-
-            if (_ReferenceDocument.GetElement(_Reference.ElementId) is ARDB.RevitLinkInstance link && link.GetLinkDocument() is ARDB.Document linkDocument)
-            {
-              Document = linkDocument;
-              return true;
-            }
-          }
-          catch { }
-
-          _ReferenceDocument = null;
-          _Reference = null;
-          Document = null;
+          case true: return geometryObject;
+          default: return null;
         }
       }
-
-      return IsReferencedDataLoaded;
-    }
-
-    public override void UnloadReferencedData()
-    {
-      if (IsReferencedData)
-      {
-        _Reference = default;
-        _ReferenceDocument = default;
-      }
-
-      base.UnloadReferencedData();
     }
 
     protected override object FetchValue()
     {
+      LoadReferencedData();
+
       _Transform = default;
 
       if (_ReferenceDocument is object && _Reference is object)
@@ -150,6 +111,92 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return default;
+    }
+
+    protected override void ResetValue()
+    {
+      (this as IGH_PreviewMeshData).DestroyPreviewMeshes();
+
+      _Reference = default;
+      _ReferenceDocument = default;
+
+      base.ResetValue();
+    }
+
+    protected void SetValue(ARDB.Document document, ARDB.Reference reference)
+    {
+      ResetValue();
+
+      if (reference is null)
+        document = null;
+
+      if (document is object)
+      {
+        ReferenceUniqueId = reference.ConvertToPersistentRepresentation(document);
+        ReferenceDocumentId = document.GetFingerprintGUID();
+
+        _ReferenceDocument = document;
+        Document = reference.LinkedElementId == ARDB.ElementId.InvalidElementId ? _ReferenceDocument :
+          _ReferenceDocument.GetElement<ARDB.RevitLinkInstance>(reference.ElementId)?.GetLinkDocument();
+
+        _Reference = reference;
+      }
+    }
+    #endregion
+
+    #region ReferenceObject
+    public override bool? IsEditable => Value?.IsReadOnly;
+    #endregion
+
+    #region Reference
+    public override ARDB.ElementId Id => _Reference is null ? null :
+      _Reference.LinkedElementId != ARDB.ElementId.InvalidElementId ?
+      _Reference.LinkedElementId :
+      _Reference.ElementId;
+
+    private ARDB.Document _ReferenceDocument;
+    public override ARDB.Document ReferenceDocument => _ReferenceDocument?.IsValidObject is true ? _ReferenceDocument : null;
+
+    private ARDB.Reference _Reference;
+    public override ARDB.Reference GetReference() => _Reference;
+
+    public override ARDB.ElementId ReferenceId => _Reference?.ElementId;
+
+    public override bool IsReferencedData => ReferenceDocumentId != Guid.Empty;
+    public override bool IsReferencedDataLoaded => _ReferenceDocument is object && _Reference is object;
+    public override bool LoadReferencedData()
+    {
+      if (IsReferencedData && !IsReferencedDataLoaded)
+      {
+        UnloadReferencedData();
+
+        if (Types.Document.TryGetDocument(ReferenceDocumentId, out _ReferenceDocument))
+        {
+          try
+          {
+            _Reference = ReferenceExtension.ParseFromPersistentRepresentation(_ReferenceDocument, ReferenceUniqueId);
+
+            if (_Reference.LinkedElementId == ARDB.ElementId.InvalidElementId)
+            {
+              Document = _ReferenceDocument;
+              return true;
+            }
+
+            if (_ReferenceDocument.GetElement(_Reference.ElementId) is ARDB.RevitLinkInstance link && link.GetLinkDocument() is ARDB.Document linkDocument)
+            {
+              Document = linkDocument;
+              return true;
+            }
+          }
+          catch { }
+
+          _ReferenceDocument = null;
+          _Reference = null;
+          Document = null;
+        }
+      }
+
+      return IsReferencedDataLoaded;
     }
     #endregion
 
@@ -209,7 +256,7 @@ namespace RhinoInside.Revit.GH.Types
     protected GeometryObject(ARDB.Document document, ARDB.Reference reference)
     {
       ReferenceDocumentId = document.GetFingerprintGUID();
-      ReferenceUniqueId = reference.ConvertToStableRepresentation(document);
+      ReferenceUniqueId = reference.ConvertToPersistentRepresentation(document);
 
       _ReferenceDocument = document;
       _Reference = reference;
@@ -239,59 +286,6 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    public new ARDB.GeometryObject Value
-    {
-      get
-      {
-        var geometryObject = base.Value as ARDB.GeometryObject;
-        switch (geometryObject?.IsValidObject())
-        {
-          case false:
-            Debug.WriteLine("GeometryObject is not valid.");
-            ResetValue();
-            return base.Value as ARDB.GeometryObject;
-
-          case true:  return geometryObject;
-          default:    return null;
-        }
-      }
-    }
-
-    protected override void ResetValue()
-    {
-      (this as IGH_PreviewMeshData).DestroyPreviewMeshes();
-      base.ResetValue();
-    }
-
-    protected void SetValue(ARDB.Document doc, ARDB.Reference reference)
-    {
-      ResetValue();
-
-      if (doc is object && reference is object)
-      {
-        try
-        {
-          ReferenceDocumentId = doc.GetFingerprintGUID();
-          ReferenceUniqueId = reference.ConvertToStableRepresentation(doc);
-
-          _ReferenceDocument = doc;
-          _Reference = reference;
-
-          Document = reference.LinkedElementId == ARDB.ElementId.InvalidElementId ? _ReferenceDocument :
-            _ReferenceDocument.GetElement<ARDB.RevitLinkInstance>(reference.ElementId)?.GetLinkDocument();
-
-          return;
-        }
-        catch (Autodesk.Revit.Exceptions.InvalidObjectException) { }
-      }
-
-      Document = default;
-      _Reference = default;
-      _ReferenceDocument = null;
-      ReferenceUniqueId = string.Empty;
-      ReferenceDocumentId = Guid.Empty;
-    }
-
     /// <summary>
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
     /// </summary>
@@ -303,14 +297,6 @@ namespace RhinoInside.Revit.GH.Types
     public virtual BoundingBox ClippingBox => BoundingBox;
 
     public virtual ARDB.Reference GetDefaultReference() => _Reference;
-
-    #region DocumentObject
-    public override string DisplayName => GetType().GetCustomAttribute<NameAttribute>().Name;
-    #endregion
-
-    #region ReferenceObject
-    public override bool? IsEditable => Value?.IsReadOnly;
-    #endregion
   }
 
   [Name("Element")]

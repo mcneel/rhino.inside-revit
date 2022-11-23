@@ -285,9 +285,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static bool TryGetLinkElementId(this Document doc, string uniqueId, out LinkElementId linkElementId)
+    public static bool TryGetLinkElementId(this Document doc, string persistent, out LinkElementId linkElementId)
     {
-      if (ReferenceId.TryParse(uniqueId, out var reference, doc))
+      if (ReferenceId.TryParse(persistent, out var reference, doc))
       {
         linkElementId = reference.IsLinked ?
           new LinkElementId(new ElementId(reference.Record.Id), new ElementId(reference.Element.Id)) :
