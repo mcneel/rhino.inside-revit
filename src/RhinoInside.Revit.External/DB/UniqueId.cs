@@ -191,7 +191,7 @@ namespace RhinoInside.Revit.External.DB
             Record = ids[0];
             Element = Symbol = ids[1];
           }
-          else if(ids[0].Type == GeometryObjectType.INSTANCE)
+          else if(ids[1].Type != GeometryObjectType.RVTLINK)
           {
             Record = Element = ids[0];
             Symbol = ids[1];

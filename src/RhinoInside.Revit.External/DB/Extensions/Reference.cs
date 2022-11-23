@@ -83,6 +83,29 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return Reference.ParseFromStableRepresentation(document, stable);
     }
 
+    internal static Reference CreateReferenceInLink(this Reference reference, RevitLinkInstance instance)
+    {
+      if (reference is null) throw new ArgumentNullException(nameof(reference));
+      if (instance is null) throw new ArgumentNullException(nameof(instance));
+      if (instance.Id != reference.ElementId) throw new ArgumentException(nameof(instance));
+      if (instance.GetLinkDocument() is Document linkedDocument)
+      {
+        var stable = reference.ConvertToStableRepresentation(instance.Document);
+
+        var referenceId = ReferenceId.Parse(stable, instance.Document);
+        referenceId = new ReferenceId
+        (
+          referenceId.Element,
+          referenceId.Symbol
+        );
+        stable = referenceId.ToStableRepresentation(linkedDocument);
+
+        return Reference.ParseFromStableRepresentation(linkedDocument, stable);
+      }
+
+      return null;
+    }
+
     internal static string ConvertToPersistentRepresentation(this Reference reference, Document document)
     {
       if (reference is null) throw new ArgumentNullException(nameof(reference));
