@@ -96,15 +96,14 @@ namespace RhinoInside.Revit.GH.Types
             {
               _Transform = link.GetTransform().ToTransform();
               element = link.GetLinkDocument()?.GetElement(_Reference.LinkedElementId);
-              geometryReference = _Reference.CreateReferenceInLink();
+              geometryReference = _Reference.CreateReferenceInLink(link);
             }
 
             if (element is ARDB.Instance instance)
               _Transform = _Transform.HasValue ? _Transform.Value * instance.GetTransform().ToTransform() : instance.GetTransform().ToTransform();
 
             Document = element?.Document;
-            var geometry = element?.GetGeometryObjectFromReference(geometryReference);
-            return geometry;
+            return element?.GetGeometryObjectFromReference(geometryReference);
           }
         }
         catch (Autodesk.Revit.Exceptions.ArgumentException) { }

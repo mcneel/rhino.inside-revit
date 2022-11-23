@@ -319,7 +319,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         transform = link.GetTransform();
         element = link.GetLinkDocument()?.GetElement(reference.LinkedElementId);
-        reference = reference.CreateReferenceInLink();
+        reference = reference.CreateReferenceInLink(link);
       }
 
       if (element?.GetGeometryObjectFromReference(reference) is GeometryObject geometryObject)
