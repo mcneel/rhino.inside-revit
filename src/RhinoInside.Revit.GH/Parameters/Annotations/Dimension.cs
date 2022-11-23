@@ -9,7 +9,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class Dimension : GraphicalElementT<Types.Dimension, ARDB.Dimension>
+  public class Dimension : GraphicalElement<Types.Dimension, ARDB.Dimension>
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("BC546B0C-1BF0-48C6-AAA9-F4FD429DAD39");
@@ -134,11 +134,13 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
 
     #region UI
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      base.AppendAdditionalMenuItems(menu);
+      base.Menu_AppendActions(menu);
 
       var activeApp = Revit.ActiveUIApplication;
+      if (activeApp.ActiveUIDocument is null) return;
+
       var open = Menu_AppendItem(menu, $"Open");
 
       var LinearDimensionTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.LinearDimensionTypes);

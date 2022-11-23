@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
   internal static class TrackingParamGooExtensions
   {
     public static bool ReadTrackedElement<T>(this GH_ComponentParamServer parameters, string name, ARDB.Document doc, out T value)
-      where T : Types.IGH_ElementId
+      where T : Types.IGH_Reference
     {
       if
       (
@@ -93,13 +93,13 @@ namespace RhinoInside.Revit.GH.ElementTracking
     }
 
     public static void WriteTrackedElement<T>(this GH_ComponentParamServer parameters, string name, ARDB.Document document, T value)
-      where T : Types.IGH_ElementId
+      where T : Types.IGH_Reference
     {
       TrackingParamElementExtensions.WriteTrackedElement(parameters, name, document, value?.Value as ARDB.Element);
     }
 
     public static IEnumerable<T> TrackedElements<T>(this GH_ComponentParamServer parameters, string name, ARDB.Document document)
-      where T : Types.IGH_ElementId
+      where T : Types.IGH_Reference
     {
       return TrackingParamElementExtensions.TrackedElements<ARDB.Element>(parameters, name, document).
         Select(x => Types.Element.FromElement(x) is T t ? t : default);
@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.GH.Parameters
   using External.DB;
   using External.DB.Extensions;
 
-  public abstract class Element<T, R> : ElementIdParam<T>,
+  public abstract class Element<T, R> : Reference<T>,
     IGH_TrackingParam
     where T : class, Types.IGH_Element
     where R : ARDB.Element
@@ -129,9 +129,10 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override T PreferredCast(object data) => data is R ? Types.Element.FromValue(data) as T : null;
 
-    internal static IEnumerable<Types.IGH_Element> ToElementIds(IGH_Structure data) =>
-      data.AllData(true).
-      OfType<Types.IGH_Element>().
+    internal static IEnumerable<T> ToElementIds(IGH_Structure data) =>
+      data.
+      AllData(skipNulls: true).
+      OfType<T>().
       Where(x => x.IsValid);
 
     #region UI
@@ -172,7 +173,7 @@ namespace RhinoInside.Revit.GH.Parameters
         }
 
         {
-          bool delete = ToElementIds(VolatileData).Any(x => doc.Equals(x.Document));
+          bool delete = ToElementIds(VolatileData).Any(x => doc.IsEquivalent(x.Document));
 
           Menu_AppendItem(menu, $"Delete {GH_Convert.ToPlural(TypeName)}", Menu_DeleteElements, delete, false);
         }

@@ -116,6 +116,13 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         }
       }
     }
+
+    public static bool IsValidCategoryId(ARDB.ElementId categoryId, ARDB.Document doc)
+    {
+      // For some unknown reason Revit dislikes 'Coordination Model' category (Tested in Revit 2023).
+      return categoryId.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_Coordination_Model &&
+        ARDB.DirectShape.IsValidCategoryId(categoryId, doc);
+    }
   }
 
   public class DirectShapeByGeometry : ReconstructDirectShapeComponent
@@ -149,18 +156,26 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     {
       SolveOptionalCategory(ref category, document, ARDB.BuiltInCategory.OST_GenericModel, nameof(geometry));
 
-      if (directShape is object && directShape.Category.Id == category.Value.Id) { }
-      else ReplaceElement(ref directShape, ARDB.DirectShape.CreateElement(document, category.Value.Id));
+      if (IsValidCategoryId(category.Value.Id, document))
+      {
+        if (directShape is object && directShape.Category.Id == category.Value.Id) { }
+        else ReplaceElement(ref directShape, ARDB.DirectShape.CreateElement(document, category.Value.Id));
 
-      var bbox = BoundingBox.Empty;
-      foreach (var g in geometry) bbox.Union(g.Boundingbox);
+        var bbox = BoundingBox.Empty;
+        foreach (var g in geometry) bbox.Union(g.Boundingbox);
 
-      directShape.Name = name ?? string.Empty;
-      directShape.SetShape(BuildShape(directShape, bbox.Center, geometry, material, out var paintIds));
-      directShape.Pinned = false;
-      directShape.Location.Move(bbox.Center.ToXYZ());
+        directShape.Name = name ?? string.Empty;
+        directShape.SetShape(BuildShape(directShape, bbox.Center, geometry, material, out var paintIds));
+        directShape.Pinned = false;
+        directShape.Location.Move(bbox.Center.ToXYZ());
 
-      PaintElementSolids(directShape, paintIds);
+        PaintElementSolids(directShape, paintIds);
+      }
+      else
+      {
+        directShape = null;
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{category.Value.Name}' category may not be used as a DirectShape category.");
+      }
     }
   }
 
@@ -197,24 +212,29 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     {
       SolveOptionalCategory(ref category, document, ARDB.BuiltInCategory.OST_GenericModel, nameof(geometry));
 
-      if (type is ARDB.DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
-      else directShapeType = ARDB.DirectShapeType.Create(document, name, category.Value.Id);
+      if (IsValidCategoryId(category.Value.Id, document))
+      {
+        if (type is ARDB.DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
+        else directShapeType = ARDB.DirectShapeType.Create(document, name, category.Value.Id);
 
 #if REVIT_2022
-      if (familyName is object)
-        directShapeType.SetFamilyName(familyName);
-      else
-        directShapeType.SetFamilyName(name);
+        directShapeType.SetFamilyName(familyName ?? name);
 #else
-      if (familyName is object)
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Family Name on DirectShape Types is only supported on Revit 2022 or above.");
+        if (familyName is object)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "'Family Name' on DirectShape Types is only supported on Revit 2022 or above.");
 #endif
-      directShapeType.Name = name;
-      directShapeType.SetShape(BuildShape(directShapeType, Point3d.Origin, geometry, material, out var paintIds));
+        directShapeType.Name = name;
+        directShapeType.SetShape(BuildShape(directShapeType, Point3d.Origin, geometry, material, out var paintIds));
 
-      ReplaceElement(ref type, directShapeType);
+        ReplaceElement(ref type, directShapeType);
 
-      PaintElementSolids(directShapeType, paintIds);
+        PaintElementSolids(directShapeType, paintIds);
+      }
+      else
+      {
+        type = null;
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{category.Value.Name}' category may not be used as a DirectShape category.");
+      }
     }
   }
 

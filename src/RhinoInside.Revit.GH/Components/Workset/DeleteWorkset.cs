@@ -11,13 +11,12 @@ namespace RhinoInside.Revit.GH.Components.Worksets
   public class DeleteWorkset : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("BF1B9BE9-2D5F-45DC-947B-A8ACFA6D6E2D");
-#if REVIT_2023
+#if REVIT_2022
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 #else
     public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.hidden;
     public override bool SDKCompliancy(int exeVersion, int exeServiceRelease) => false;
 #endif
-    protected override string IconTag => String.Empty;
 
     public DeleteWorkset() : base
     (
@@ -72,8 +71,8 @@ namespace RhinoInside.Revit.GH.Components.Worksets
 
     protected override void BeforeSolveInstance()
     {
-#if !REVIT_2023
-      AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is only supported on Revit 2023 or above.");
+#if !REVIT_2022
+      AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is only supported on Revit 2022.1 or above.");
 #endif
 
       Message = string.Empty;
@@ -87,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
       if (!Params.GetData(DA, "Workset", out Types.Workset workset, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Target Workset", out Types.Workset target, x => x.IsValid)) return;
 
-#if REVIT_2023
+#if REVIT_2022
       using (var settings = new ARDB.DeleteWorksetSettings())
       {
         if (target is object)

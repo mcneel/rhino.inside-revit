@@ -5,9 +5,38 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class BoundingBoxXYZExtension
   {
+    public const int AxisX = 0;
+    public const int AxisY = 1;
+    public const int AxisZ = 2;
+
+    public const int BoundsMin = 0;
+    public const int BoundsMax = 1;
+
     public static bool IsUnset(this BoundingBoxXYZ value)
     {
-      return !(value is object && value.Min.X <= value.Max.X && value.Min.Y <= value.Max.Y && value.Min.Z <= value.Max.Z);
+      var ((minX, minY, minZ), (maxX, maxY, maxZ)) = value;
+      return !(value is object && minX <= maxX && minY <= maxY && minZ <= maxZ);
+    }
+
+    public static void Deconstruct
+    (
+      this BoundingBoxXYZ value,
+      out XYZ min, out XYZ max
+    )
+    {
+      min = value.get_Bounds(BoundsMin);
+      max = value.get_Bounds(BoundsMax);
+    }
+
+    public static void Deconstruct
+    (
+      this BoundingBoxXYZ value,
+      out XYZ min, out XYZ max, out Transform transform
+    )
+    {
+      min = value.get_Bounds(BoundsMin);
+      max = value.get_Bounds(BoundsMax);
+      transform = value.Transform;
     }
 
     public static XYZ Evaluate(this BoundingBoxXYZ value, XYZ xyz)
@@ -15,15 +44,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (value.IsUnset()) return default;
       if (xyz is null) return default;
 
-      var x = xyz.X;
-      var y = xyz.Y;
-      var z = xyz.Z;
+      var (x, y, z) = xyz;
+      var (min, max) = value;
 
       return new XYZ
       (
-        value.Min.X * (1.0 - x) + value.Max.X * x,
-        value.Min.Y * (1.0 - y) + value.Max.Y * y,
-        value.Min.Z * (1.0 - z) + value.Max.Z * z
+        min.X * (1.0 - x) + max.X * x,
+        min.Y * (1.0 - y) + max.Y * y,
+        min.Z * (1.0 - z) + max.Z * z
       );
     }
 
@@ -37,8 +65,55 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static void Union(this BoundingBoxXYZ value, XYZ xyz)
     {
-      value.Min = new XYZ(Math.Min(value.Min.X, xyz.X), Math.Min(value.Min.Y, xyz.Y), Math.Min(value.Min.Z, xyz.Z));
-      value.Max = new XYZ(Math.Max(value.Max.X, xyz.X), Math.Max(value.Max.Y, xyz.Y), Math.Max(value.Max.Z, xyz.Z));
+      var (x, y, z) = xyz;
+      var (min, max) = value;
+
+      value.Min = new XYZ(Math.Min(min.X, x), Math.Min(min.Y, y), Math.Min(min.Z, z));
+      value.Max = new XYZ(Math.Max(max.X, x), Math.Max(max.Y, y), Math.Max(max.Z, z));
+    }
+
+    public static Outline ToOutLine(this BoundingBoxXYZ value) =>
+      new Outline(value.Transform.OfPoint(value.Min), value.Transform.OfPoint(value.Max));
+
+    internal static bool GetPlaneEquations
+    (
+      this BoundingBoxXYZ value,
+      out
+      (
+        (PlaneEquation? Min, PlaneEquation? Max) X,
+        (PlaneEquation? Min, PlaneEquation? Max) Y,
+        (PlaneEquation? Min, PlaneEquation? Max) Z
+      ) planes
+    )
+    {
+      bool clipped = false;
+      planes = default;
+
+      var (min, max, transform) = value;
+      var (origin, basisX, basisY, basisZ) = transform;
+
+      using (transform)
+      {
+        if (clipped |= value.get_BoundEnabled(BoundsMin, AxisX))
+          planes.X.Min = new PlaneEquation(origin + min.X * basisX, basisX);
+
+        if (clipped |= value.get_BoundEnabled(BoundsMax, AxisX))
+          planes.X.Max = new PlaneEquation(origin + max.X * basisX, -basisX);
+
+        if (clipped |= value.get_BoundEnabled(BoundsMin, AxisY))
+          planes.Y.Min = new PlaneEquation(origin + min.Y * basisY, basisY);
+
+        if (clipped |= value.get_BoundEnabled(BoundsMax, AxisY))
+          planes.Y.Max = new PlaneEquation(origin + max.Y * basisY, -basisY);
+
+        if (clipped |= value.get_BoundEnabled(BoundsMin, AxisZ))
+          planes.Z.Min = new PlaneEquation(origin + min.Z * basisZ, basisZ);
+
+        if (clipped |= value.get_BoundEnabled(BoundsMax, AxisZ))
+          planes.Z.Max = new PlaneEquation(origin + max.Z * basisZ, -basisZ);
+      }
+
+      return clipped;
     }
   }
 }

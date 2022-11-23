@@ -188,15 +188,15 @@ namespace RhinoInside.Revit.GH.Components.Filters
           case GH_Integer _:          storageType = ARDB.StorageType.Integer; break;
           case GH_Number _:           storageType = ARDB.StorageType.Double; break;
           case GH_String _:           storageType = ARDB.StorageType.String; break;
-          case Types.IGH_ElementId _: storageType = ARDB.StorageType.ElementId; break;
+          case Types.Element _:       storageType = ARDB.StorageType.ElementId; break;
           default:
             switch (goo.ScriptVariable())
             {
-              case bool _: storageType = ARDB.StorageType.Integer; break;
-              case int _: storageType = ARDB.StorageType.Integer; break;
-              case double _: storageType = ARDB.StorageType.Double; break;
-              case string _: storageType = ARDB.StorageType.String; break;
-              case ARDB.Element _: storageType = ARDB.StorageType.ElementId; break;
+              case bool _:            storageType = ARDB.StorageType.Integer; break;
+              case int _:             storageType = ARDB.StorageType.Integer; break;
+              case double _:          storageType = ARDB.StorageType.Double; break;
+              case string _:          storageType = ARDB.StorageType.String; break;
+              case ARDB.Element _:    storageType = ARDB.StorageType.ElementId; break;
             }
             break;
         }

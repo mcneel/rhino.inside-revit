@@ -285,44 +285,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static bool TryGetElementId(this Document doc, string uniqueId, out ElementId elementId)
+    public static bool TryGetLinkElementId(this Document doc, string persistent, out LinkElementId linkElementId)
     {
-      elementId = default;
-
-      if (UniqueId.TryParse(uniqueId, out var EpisodeId, out var id))
+      if (ReferenceId.TryParse(persistent, out var reference, doc))
       {
-        if (id < 0)
-        {
-          if (EpisodeId == ExportUtils.GetGBXMLDocumentId(doc))
-            elementId = new ElementId(id);
-        }
-        else
-        {
-          try
-          {
-            if (Reference.ParseFromStableRepresentation(doc, uniqueId) is Reference reference)
-              elementId = reference.ElementId;
-          }
-          catch (Autodesk.Revit.Exceptions.ArgumentException) { }
-        }
+        linkElementId = reference.IsLinked ?
+          new LinkElementId(new ElementId(reference.Record.Id), new ElementId(reference.Element.Id)) :
+          new LinkElementId(new ElementId(reference.Record.Id));
+
+        return true;
       }
 
-      return elementId is object;
-    }
-
-    /// <summary>
-    /// Compare two <see cref="Autodesk.Revit.DB.Reference"/> objects to know if are referencing same <see cref="Autodesk.Revit.Element"/>
-    /// </summary>
-    /// <param name="doc"></param>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns>true if both references are equivalent</returns>
-    public static bool AreEquivalentReferences(this Document doc, Reference x, Reference y)
-    {
-      var UniqueIdX = x?.ConvertToStableRepresentation(doc);
-      var UniqueIdY = y?.ConvertToStableRepresentation(doc);
-
-      return UniqueIdX == UniqueIdY;
+      linkElementId = default;
+      return false;
     }
 
     public static T GetElement<T>(this Document doc, ElementId elementId) where T : Element
@@ -333,6 +308,32 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static T GetElement<T>(this Document doc, Reference reference) where T : Element
     {
       return doc.GetElement(reference) as T;
+    }
+
+    public static GeometryObject GetGeometryObjectFromReference(this Document doc, Reference reference, out Transform transform)
+    {
+      transform = null;
+
+      var element = doc.GetElement(reference.ElementId);
+      if (element is RevitLinkInstance link)
+      {
+        transform = link.GetTransform();
+        element = link.GetLinkDocument()?.GetElement(reference.LinkedElementId);
+        reference = reference.CreateReferenceInLink();
+      }
+
+      if (element?.GetGeometryObjectFromReference(reference) is GeometryObject geometryObject)
+      {
+        if (element is Instance instance)
+          transform = transform is object ? transform * instance.GetTransform() : transform;
+        else
+          transform = Transform.Identity;
+
+        return geometryObject;
+      }
+      else transform = null;
+
+      return null;
     }
     #endregion
 
@@ -433,8 +434,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static int? GetIncrementalNomen(this Document doc, Type type, ref string nomen, string parentName = default, BuiltInCategory? categoryId = default)
     {
-      if (nomen is null)
-        throw new ArgumentNullException(nameof(nomen));
+      if (type is null)
+        throw new ArgumentNullException(nameof(type));
 
       if (nomen is null)
         throw new ArgumentNullException(nameof(nomen));
@@ -606,7 +607,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               Select(x => x.Id).
               FirstOrDefault() ?? ElementId.InvalidElementId;
             }
-            else
+            else if (element is Family || element is ParameterElement || element.CanBeRenominated())
             {
               return collector.WhereElementIsNotElementType().
               WhereElementIsKindOf(element.GetType()).

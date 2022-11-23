@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   using Convert.Geometry;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.8")]
+  [ComponentVersion(introduced: "1.0", updated: "1.10")]
   public class AddModelLine : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("240127B1-94EE-47C9-98F8-05DE32447B01");
@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     (
       name: "Add Model Line",
       nickname: "Model Line",
-      description: "Given a curve, it adds a Model Line to the current Revit document",
+      description: "Given a curve, it adds a Model Line to the the provided Work Plane",
       category: "Revit",
       subCategory: "Model"
     )
@@ -28,17 +28,6 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document() { Optional = true }, ParamRelevance.Occasional),
-      new ParamDefinition
-      (
-        new Param_Curve()
-        {
-          Name = "Curve",
-          NickName = "Curve",
-          Description = "Curve to sketch",
-        },
-        ParamRelevance.Primary
-      ),
       new ParamDefinition
       (
         new Parameters.SketchPlane()
@@ -46,6 +35,15 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
           Name = "Work Plane",
           NickName = "WP",
           Description = "Work Plane element",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_Curve()
+        {
+          Name = "Curve",
+          NickName = "Curve",
+          Description = "Curve to sketch",
         }
       ),
     };
@@ -85,15 +83,14 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Params.GetData(DA, "Work Plane", out Types.SketchPlane sketchPlane)) return;
 
       ReconstructElement<ARDB.ModelCurve>
       (
-        doc.Value, _ModelLine_, modelLine =>
+        sketchPlane.Document, _ModelLine_, modelLine =>
         {
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if (!Params.GetData(DA, "Work Plane", out Types.SketchPlane sketchPlane)) return null;
 
           var plane = sketchPlane.Location;
           var tol = GeometryTolerance.Model;
@@ -114,7 +111,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           // Compute
-          modelLine = Reconstruct(modelLine, doc.Value, curve.ToCurve(), sketchPlane.Value);
+          modelLine = Reconstruct(modelLine, sketchPlane.Document, curve.ToCurve(), sketchPlane.Value);
 
           DA.SetData(_ModelLine_, modelLine);
           return modelLine;

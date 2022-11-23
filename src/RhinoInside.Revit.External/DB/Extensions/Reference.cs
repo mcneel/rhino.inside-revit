@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 
@@ -15,39 +16,101 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       readonly Document Document;
       public EqualityComparer(Document doc) => Document = doc;
-      bool IEqualityComparer<Reference>.Equals(Reference x, Reference y) => IsEquivalent(x, y, Document);
+      bool IEqualityComparer<Reference>.Equals(Reference x, Reference y) => AreEquivalentReferences(Document, x, y);
       int IEqualityComparer<Reference>.GetHashCode(Reference obj)
       {
         int hashCode = 2022825623;
         hashCode = hashCode * -1521134295 + (int) obj.ElementReferenceType;
-        hashCode = hashCode * -1521134295 + obj.LinkedElementId.GetHashCode();
         hashCode = hashCode * -1521134295 + obj.ElementId.GetHashCode();
+        hashCode = hashCode * -1521134295 + obj.LinkedElementId.GetHashCode();
         return hashCode;
       }
     }
 
     /// <summary>
-    /// Determines whether the specified <see cref="Autodesk.Revit.DB.Reference"/> equals
-    /// to this <see cref="Autodesk.Revit.DB.Reference"/>.
+    /// Compare two <see cref="Autodesk.Revit.DB.Reference"/> objects to establish
+    /// if they are referencing same <see cref="Autodesk.Revit.DB.Element"/>.
     /// </summary>
     /// <remarks>
     /// Two <see cref="Autodesk.Revit.DB.Reference"/> instances are considered equivalent
-    /// if their stable representation are equal.
+    /// if their stable representations are equal.
     /// </remarks>
-    /// <param name="self"></param>
-    /// <param name="other"></param>
     /// <param name="document"></param>
-    /// <returns></returns>
-    public static bool IsEquivalent(this Reference self, Reference other, Document document)
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns>true if both references are equivalent.</returns>
+    public static bool AreEquivalentReferences(this Document document, Reference left, Reference right)
     {
-      if (ReferenceEquals(self, other)) return true;
-      if (self is null || other is null) return false;
+      if (ReferenceEquals(left, right)) return true;
+      if (left is null || right is null) return false;
 
-      if (self.ElementReferenceType != other.ElementReferenceType) return false;
-      if (self.ElementId != other.ElementId) return false;
-      if (self.LinkedElementId != other.LinkedElementId) return false;
+      if (left.ElementReferenceType != right.ElementReferenceType) return false;
+      if (left.ElementId != right.ElementId) return false;
+      if (left.LinkedElementId != right.LinkedElementId) return false;
 
-      return self.ConvertToStableRepresentation(document) == other.ConvertToStableRepresentation(document);
+      // TODO: Test if EqualTo validates the document and is faster than ConvertToStableRepresentation.
+//#if REVIT_2018
+//      return left.EqualTo(right);
+//#else
+      var stableLeft = left?.ConvertToStableRepresentation(document);
+      var stableRight = right?.ConvertToStableRepresentation(document);
+
+      return stableLeft == stableRight;
+//#endif
+    }
+  }
+
+  internal static class ReferenceExtension
+  {
+    public static Reference CreateLinkReference(this Reference reference, Document document, ElementId linkInstanceId, Document linkedDocument)
+    {
+      if (reference is null) throw new ArgumentNullException(nameof(reference));
+      if (document is null) throw new ArgumentNullException(nameof(document));
+      if (!linkInstanceId.IsValid()) throw new ArgumentException(nameof(linkInstanceId));
+      if (!linkedDocument.IsValid() || !linkedDocument.IsLinked) throw new ArgumentException(nameof(linkedDocument));
+
+      var stable = reference.ConvertToStableRepresentation(linkedDocument);
+
+      var referenceId = ReferenceId.Parse(stable, linkedDocument);
+      referenceId = new ReferenceId
+      (
+        new GeometryObjectId(linkInstanceId.ToValue(), 0, GeometryObjectType.RVTLINK),
+        referenceId.Element,
+        referenceId.Symbol
+      );
+      stable = referenceId.ToStableRepresentation(document);
+
+      return Reference.ParseFromStableRepresentation(document, stable);
+    }
+
+    internal static string ConvertToPersistentRepresentation(this Reference reference, Document document)
+    {
+      if (reference is null) throw new ArgumentNullException(nameof(reference));
+      if (document is null)  throw new ArgumentNullException(nameof(document));
+
+      if (reference.ElementReferenceType == ElementReferenceType.REFERENCE_TYPE_NONE)
+      {
+        var referenceId = reference.LinkedElementId == ElementId.InvalidElementId ?
+          new ReferenceId(new GeometryObjectId(reference.ElementId.ToValue())) :
+          new ReferenceId
+          (
+            new GeometryObjectId(reference.ElementId.ToValue(), -1, GeometryObjectType.RVTLINK, document.GetElement(reference.ElementId).GetTypeId().ToValue()),
+            new GeometryObjectId(reference.LinkedElementId.ToValue())
+          );
+
+        return referenceId.ToString(document);
+      }
+      else
+      {
+        var stable = reference.ConvertToStableRepresentation(document);
+        return ReferenceId.Parse(stable, document).ToString(document);
+      }
+    }
+
+    internal static Reference ParseFromPersistentRepresentation(Document document, string persistent)
+    {
+      return Reference.ParseFromStableRepresentation(document, ReferenceId.Parse(persistent, document).ToStableRepresentation(document));
+
     }
   }
 }

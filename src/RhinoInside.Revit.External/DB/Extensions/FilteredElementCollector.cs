@@ -17,6 +17,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (collection is List<ElementId> list)
         return list.BinarySearch(item, ElementIdComparer.NoNullsAscending) >= 0;
+      if (collection is ElementId[] array)
+        return Array.BinarySearch(array, item, ElementIdComparer.NoNullsAscending) >= 0;
       else
         return collection.Contains(item);
     }

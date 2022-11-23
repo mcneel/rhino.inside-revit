@@ -204,17 +204,17 @@ namespace RhinoInside.Revit.GH.Components.Topology
                     {
                       case ARDB.SubfaceType.Bottom:
                         bottomF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
-                        bottomE?.Add(Types.GraphicalElement.FromElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
+                        bottomE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
                         break;
 
                       case ARDB.SubfaceType.Top:
                         topF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
-                        topE?.Add(Types.GraphicalElement.FromElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
+                        topE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
                         break;
 
                       case ARDB.SubfaceType.Side:
                         sideF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
-                        sideE?.Add(Types.GraphicalElement.FromElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
+                        sideE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
                         break;
                     }
                   }

@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
 
-  public class Level : GraphicalElementT<Types.Level, ARDB.Level>
+  public class Level : GraphicalElement<Types.Level, ARDB.Level>
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("3238F8BC-8483-4584-B47C-48B4933E478E");
@@ -18,6 +18,11 @@ namespace RhinoInside.Revit.GH.Parameters
     public Level() : base("Level", "Level", "Contains a collection of Revit level elements", "Params", "Revit") { }
 
     #region UI
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Work Plane" }
+    );
+
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
       var Level = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Level);
@@ -108,33 +113,40 @@ namespace RhinoInside.Revit.GH.Parameters
     )
       where TOutput : class
     {
-      if (!component.Params.TryGetData(DA, name, out level)) return false;
-      if (level is null)
-      {
-        var data = Types.Level.FromElement(document.Value.GetNearestLevel(elevation / Revit.ModelUnits));
-        if (data is null)
-          return false;
+      level = default;
 
-        level = data as TOutput;
+      try
+      {
+        if (!component.Params.TryGetData(DA, name, out level)) return false;
         if (level is null)
-          return data.CastTo(out level);
-      }
+        {
+          var data = Types.Level.FromElement(document.Value.GetNearestLevel(elevation / Revit.ModelUnits));
+          if (data is null)
+            return false;
 
-      // Validate document
-      switch (level)
+          level = data as TOutput;
+          if (level is null)
+            return data.CastTo(out level);
+        }
+
+        return true;
+      }
+      finally
       {
-        case ARDB.Element element:
-          if (!document.Value.IsEquivalent(element.Document))
-            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
-          break;
+        // Validate document
+        switch (level)
+        {
+          case ARDB.Element element:
+            if (!document.Value.IsEquivalent(element.Document))
+              throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(level)} from a diferent document.");
+            break;
 
-        case Types.IGH_ElementId id:
-          if (!document.Value.IsEquivalent(id.Document))
-            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
-          break;
+          case Types.Element goo:
+            if (!document.Value.IsEquivalent(goo.Document))
+              throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(level)} from a diferent document.");
+            break;
+        }
       }
-
-      return true;
     }
 
     public static bool GetDataOrDefault<TOutput>
@@ -148,37 +160,44 @@ namespace RhinoInside.Revit.GH.Parameters
     )
       where TOutput : class
     {
-      if (!component.Params.TryGetData(DA, name, out level)) return false;
-      if (level is null)
-      {
-        var data = Types.Level.FromElement(document.Value.GetNearestLevel(elevation / Revit.ModelUnits));
-        if (data is null)
-          throw new Exceptions.RuntimeArgumentException(nameof(elevation), "No suitable level has been found.");
+      level = default;
 
-        level = data as TOutput;
+      try
+      {
+        if (!component.Params.TryGetData(DA, name, out level)) return false;
         if (level is null)
-          return data.CastTo(out level);
-      }
+        {
+          var data = Types.Level.FromElement(document.Value.GetNearestLevel(elevation / Revit.ModelUnits));
+          if (data is null)
+            throw new Exceptions.RuntimeArgumentException(nameof(elevation), "No suitable level has been found.");
 
-      // Validate document
-      switch (level)
+          level = data as TOutput;
+          if (level is null)
+            return data.CastTo(out level);
+        }
+
+        return true;
+      }
+      finally
       {
-        case ARDB.Element element:
-          if (!document.Value.IsEquivalent(element.Document))
-            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
-          break;
+        // Validate document
+        switch (level)
+        {
+          case ARDB.Element element:
+            if (!document.Value.IsEquivalent(element.Document))
+              throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(level)} from a diferent document.");
+            break;
 
-        case Types.IGH_ElementId id:
-          if (!document.Value.IsEquivalent(id.Document))
-            throw new Exceptions.RuntimeArgumentException(name, "Failed to assign a type from a diferent document.");
-          break;
+          case Types.Element goo:
+            if (!document.Value.IsEquivalent(goo.Document))
+              throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(level)} from a diferent document.");
+            break;
+        }
       }
-
-      return true;
     }
   }
 
-  public class Grid : GraphicalElementT<Types.Grid, ARDB.Grid>
+  public class Grid : GraphicalElement<Types.Grid, ARDB.Grid>
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("7D2FB886-A184-41B8-A7D6-A6FDB85CF4E4");
@@ -270,7 +289,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class ReferencePlane : GraphicalElementT<Types.ReferencePlane, ARDB.ReferencePlane >
+  public class ReferencePlane : GraphicalElement<Types.ReferencePlane, ARDB.ReferencePlane >
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("D35EB2A7-E2B9-40D7-9592-CE049CC58CCA");
@@ -362,5 +381,4 @@ namespace RhinoInside.Revit.GH.Parameters
     }
     #endregion
   }
-
 }

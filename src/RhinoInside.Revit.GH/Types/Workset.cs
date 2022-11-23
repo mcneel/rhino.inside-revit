@@ -6,69 +6,92 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using System.Runtime.CompilerServices;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Workset")]
   public class Workset : ReferenceObject,
-    IEquatable<Workset>,
     IGH_ItemDescription
   {
-    public Workset() { }
-    public Workset(ARDB.Document doc, ARDB.WorksetId id) : base() => SetValue(doc, id);
-    public Workset(ARDB.Document doc, ARDB.Workset value) : base(doc, value) => SetValue(doc, value.Id);
-
     #region System.Object
-    public bool Equals(Workset other) => other is object &&
-      other.DocumentGUID == other.DocumentGUID && other.UniqueID == UniqueID;
-    public override bool Equals(object obj) => (obj is Workset id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => DocumentGUID.GetHashCode() ^ UniqueID.GetHashCode();
-
     public override string ToString()
     {
       var valid = IsValid;
       string Invalid = Id == ARDB.WorksetId.InvalidWorksetId ?
-        (string.IsNullOrWhiteSpace(UniqueID) ? string.Empty : "Unresolved ") :
+        (string.IsNullOrWhiteSpace(ReferenceUniqueId) ? string.Empty : "Unresolved ") :
         valid ? string.Empty :
         (IsReferencedData ? "❌ Deleted " : "⚠ Invalid ");
       string TypeName = ((IGH_Goo) this).TypeName;
       string InstanceName = DisplayName ?? string.Empty;
 
-      if (!string.IsNullOrWhiteSpace(InstanceName))
+      if (string.IsNullOrWhiteSpace(InstanceName))
+        InstanceName = $" : <None>";
+      else
         InstanceName = $" : {InstanceName}";
 
       if (!IsReferencedData)
         return $"{Invalid}{TypeName}{InstanceName}";
 
-      string InstanceId = valid ? $" : id {Id.IntegerValue}" : $" : {UniqueID}";
+      string InstanceId = valid ? $" : id {Id.IntegerValue}" : $" : {ReferenceUniqueId}";
 
-      using (var Documents = Revit.ActiveDBApplication.Documents)
+      if (/*ReferenceDocument is ARDB.Document && */Document is ARDB.Document document)
       {
-        if (Documents.Size > 1)
-          InstanceId = $"{InstanceId} @ {Document?.GetTitle() ?? DocumentGUID.ToString("B")}";
+        if (document.IsLinked || document.IsFamilyDocument)
+          InstanceId = $"{InstanceId} @ {document.GetTitle()}";
       }
+      else InstanceId = $"{InstanceId} @ {ReferenceDocumentId:B}";
 
+      //if (IsLinked) TypeName = "Linked " + TypeName;
       return $"{Invalid}{TypeName}{InstanceName}{InstanceId}";
     }
     #endregion
 
     #region DocumentObject
-    ARDB.Workset value => base.Value as ARDB.Workset;
+    public override string DisplayName => Value?.Name;
+
     public new ARDB.Workset Value
     {
       get
       {
+        var value = base.Value as ARDB.Workset;
         if (value?.IsValidObject == false)
+        {
           ResetValue();
+          value = base.Value as ARDB.Workset;
+        }
 
         return value;
       }
     }
 
-    ARDB.WorksetId id;
-    public ARDB.WorksetId Id => id;
+    protected override void ResetValue()
+    {
+      Id = default;
+      base.ResetValue();
+    }
 
-    public override string DisplayName => Value.Name;
+    protected override object FetchValue()
+    {
+      LoadReferencedData();
+      return Document?.GetWorksetTable()?.GetWorkset(Id);
+    }
 
+    protected void SetValue(ARDB.Document doc, ARDB.WorksetId id)
+    {
+      ResetValue();
+
+      if (id == ARDB.WorksetId.InvalidWorksetId)
+        doc = null;
+
+      Document = doc;
+      ReferenceDocumentId = doc.GetFingerprintGUID();
+
+      Id = id;
+      ReferenceUniqueId = doc?.GetWorksetTable()?.GetWorkset(id)?.UniqueId.ToString() ?? string.Empty;
+    }
+    #endregion
+
+    #region ReferenceObject
     public override bool? IsEditable => Value?.IsEditable;
     #endregion
 
@@ -78,25 +101,23 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (DocumentGUID == Guid.Empty) return $"DocumentGUID '{Guid.Empty}' is invalid";
-        if (!Guid.TryParse(UniqueID, out var _)) return $"UniqueID '{UniqueID}' is invalid";
+        if (ReferenceDocumentId == Guid.Empty) return $"Reference Document Id '{Guid.Empty}' is invalid";
+        if (!Guid.TryParse(ReferenceUniqueId, out var _)) return $"Reference Unique Id '{ReferenceUniqueId}' is invalid";
 
         var id = Id;
         if (Document is null)
         {
-          return $"Referenced Revit document '{DocumentGUID}' was closed.";
+          return $"Referenced Revit document '{ReferenceDocumentId}' was closed.";
         }
         else
         {
-          if (id is null) return $"Referenced Revit element '{UniqueID}' is not available.";
+          if (id is null) return $"Referenced Revit element '{ReferenceUniqueId}' is not available.";
           if (id == ARDB.WorksetId.InvalidWorksetId) return "Id is equal to InvalidElementId.";
         }
 
         return default;
       }
     }
-
-    public virtual object ScriptVariable() => Value;
 
     public override bool CastFrom(object source)
     {
@@ -132,42 +153,16 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    protected class Proxy : IGH_GooProxy
+    protected new class Proxy : ReferenceObject.Proxy
     {
-      protected readonly Workset owner;
-      public Proxy(Workset o) { owner = o; ((IGH_GooProxy) this).UserString = FormatInstance(); }
-      public override string ToString() => owner.DisplayName;
+      protected new readonly Workset owner;
+      public Proxy(Workset o) : base(o) { }
 
-      IGH_Goo IGH_GooProxy.ProxyOwner => owner;
-      string IGH_GooProxy.UserString { get; set; }
-      bool IGH_GooProxy.IsParsable => IsParsable();
-      string IGH_GooProxy.MutateString(string str) => str.Trim();
-
-      public virtual void Construct() { }
-      public virtual bool IsParsable() => false;
-      public virtual string FormatInstance() => owner.DisplayName;
-      public virtual bool FromString(string str) => throw new NotImplementedException();
-
-      public bool Valid => owner.IsValid;
-
-      [System.ComponentModel.Description("The document this element belongs to.")]
-      public string Document => owner.Document?.GetTitle();
-
-      [System.ComponentModel.Description("The Guid of document this element belongs to.")]
-      public Guid DocumentGUID => owner.DocumentGUID;
-
-      protected virtual bool IsValidId(ARDB.Document doc, ARDB.ElementId id) =>
-        owner.GetType() == Element.FromElementId(doc, id).GetType();
-
-      [System.ComponentModel.Description("A stable unique identifier for an element within the document.")]
-      public string UniqueID => owner.UniqueID;
-      [System.ComponentModel.Description("API Object Type.")]
-      public virtual Type ObjectType => owner.Value?.GetType();
       [System.ComponentModel.Description("Element is built in Revit.")]
       public bool IsBuiltIn => owner.IsReferencedData && owner.Id.IntegerValue < 0;
     }
 
-    public virtual IGH_GooProxy EmitProxy() => new Proxy(this);
+    public override IGH_GooProxy EmitProxy() => new Proxy(this);
     #endregion
 
     #region IGH_ItemDescription
@@ -178,23 +173,22 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ReferencedData
-    public override bool IsReferencedData => DocumentGUID != Guid.Empty;
     public override bool IsReferencedDataLoaded => Document is object && Id is object;
 
     public override bool LoadReferencedData()
     {
-      if (IsReferencedData)
+      if (IsReferencedData && !IsReferencedDataLoaded)
       {
         UnloadReferencedData();
 
-        if (Types.Document.TryGetDocument(DocumentGUID, out var document))
+        if (Types.Document.TryGetDocument(ReferenceDocumentId, out var document))
         {
-          if (document.IsWorkshared && Guid.TryParse(UniqueID, out var guid))
+          if (document.IsWorkshared && Guid.TryParse(ReferenceUniqueId, out var guid))
           {
             if (document.GetWorksetTable().GetWorkset(guid) is ARDB.Workset ws)
             {
               Document = document;
-              id = ws.Id;
+              Id = ws.Id;
             }
           }
         }
@@ -202,28 +196,12 @@ namespace RhinoInside.Revit.GH.Types
 
       return IsReferencedDataLoaded;
     }
-
-    protected override object FetchValue() => Document.GetWorksetTable()?.GetWorkset(Id);
-
-    protected void SetValue(ARDB.Document doc, ARDB.WorksetId id)
-    {
-      if (id == ARDB.WorksetId.InvalidWorksetId)
-        doc = null;
-
-      Document = doc;
-      DocumentGUID = doc.GetFingerprintGUID();
-
-      this.id = id;
-      UniqueID = doc?.GetWorksetTable()?.GetWorkset(id)?.UniqueId.ToString() ??
-        string.Empty;
-    }
-    public override void UnloadReferencedData()
-    {
-      base.UnloadReferencedData();
-
-      if (IsReferencedData)
-        id = default;
-    }
     #endregion
+
+    public Workset() { }
+    public Workset(ARDB.Document doc, ARDB.WorksetId id) : base() => SetValue(doc, id);
+    public Workset(ARDB.Document doc, ARDB.Workset value) : base(doc, value) => SetValue(doc, value?.Id ?? ARDB.WorksetId.InvalidWorksetId);
+
+    public ARDB.WorksetId Id { get; private set; }
   }
 }

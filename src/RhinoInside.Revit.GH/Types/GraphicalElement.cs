@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void SubInvalidateGraphics()
     {
-      clippingBox = default;
+      _ClippingBox = default;
 
       base.SubInvalidateGraphics();
     }
@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Types
     public virtual BoundingBox GetBoundingBox(Transform xform)
     {
       if (Value is ARDB.Element element)
-        return element.GetBoundingBoxXYZ().ToBoundingBox().GetBoundingBox(xform);
+        return element.GetBoundingBoxXYZ().ToBox().GetBoundingBox(xform);
 
       return NaN.BoundingBox;
     }
@@ -98,17 +98,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_PreviewData
-    private BoundingBox? clippingBox;
-    BoundingBox IGH_PreviewData.ClippingBox
-    {
-      get
-      {
-        if (!clippingBox.HasValue)
-          clippingBox = ClippingBox;
-
-        return clippingBox.Value;
-      }
-    }
+    private BoundingBox? _ClippingBox;
+    BoundingBox IGH_PreviewData.ClippingBox => _ClippingBox ?? (_ClippingBox = ClippingBox).Value;
 
     /// <summary>
     /// Not necessarily accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for display.
@@ -131,6 +122,12 @@ namespace RhinoInside.Revit.GH.Types
     public override bool CastTo<Q>(out Q target)
     {
       target = default;
+
+      if (typeof(Q).IsAssignableFrom(typeof(GeometryObject)))
+      {
+        target = (Q) (object) GeometryObject.FromReference(ReferenceDocument, GetReference());
+        return true;
+      }
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Interval)))
       {
@@ -751,9 +748,9 @@ namespace RhinoInside.Revit.GH.Types
                 WhereElementIsNotElementType().
                 WhereElementIsKindOf(element.GetType()).
                 WhereCategoryIdEqualsTo(element.Category?.Id).
-                WherePasses(new ARDB.ElementIsCurveDrivenFilter()).
+                WhereElementIsCurveDriven().
                 WherePasses(new ARDB.BoundingBoxIntersectsFilter(outline)).
-                WherePasses(new ARDB.ExclusionFilter(new ARDB.ElementId[] { element.Id }));
+                Excluding(new ARDB.ElementId[] { element.Id });
 
               foreach (var elementAtMid in elementCollector)
               {

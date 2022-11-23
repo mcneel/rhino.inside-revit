@@ -590,7 +590,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       foreach (var output in Params.Output)
       {
-        if (!typeof(Types.IGH_ElementId).IsAssignableFrom(output.Type))
+        if (!typeof(Types.IGH_Element).IsAssignableFrom(output.Type))
           continue;
 
         var data = output.VolatileData;
@@ -602,7 +602,7 @@ namespace RhinoInside.Revit.GH.Components
           var count = branch.Count;
           for (int e = 0; e < count; ++e)
           {
-            if (branch[e] is Types.IGH_ElementId id && id.Value is ARDB.Element element && !element.IsValidObject)
+            if (branch[e] is Types.IGH_Element id && id.Value is ARDB.Element element && !element.IsValidObject)
               branch[e] = null;
           }
         }

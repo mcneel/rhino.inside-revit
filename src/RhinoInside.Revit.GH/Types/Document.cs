@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Document")]
   public interface IGH_Document : IGH_Goo, IEquatable<IGH_Document>
   {
-    Guid DocumentGUID { get; }
+    Guid DocumentId { get; }
 
     Uri ModelURI { get; }
     string PathName { get; }
@@ -37,14 +37,14 @@ namespace RhinoInside.Revit.GH.Types
       if (ReferenceEquals(this, other)) return true;
       if (other is null) return false;
 
-      if (DocumentGUID != other.DocumentGUID) return false;
+      if (DocumentId != other.DocumentId) return false;
       if (ModelURI != other.ModelURI) return false;
 
       return true;
     }
 
     public override bool Equals(object obj) => (obj is Document doc) && Equals(doc);
-    public override int GetHashCode() => DocumentGUID.GetHashCode();
+    public override int GetHashCode() => DocumentId.GetHashCode();
 
     public sealed override string ToString()
     {
@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.GH.Types
       var tip = IsValid ?
       (
         IsReferencedDataLoaded ?
-        $"{typeName} : {DisplayName}" :
+        $"{(Value.IsLinked ? "Revit Linked Model" : typeName)} : {DisplayName}" :
         $"Unresolved {typeName} : {DisplayName}"
       ) :
       (
@@ -80,9 +80,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     string IGH_Goo.TypeDescription => $"Represents a Revit {((IGH_Goo) this).TypeName.ToLowerInvariant()}";
-    public virtual bool IsValid => document.IsValid();
-    public virtual bool IsEmpty => DocumentGUID == Guid.Empty;
-    public virtual string IsValidWhyNot => document.IsValidWithLog(out var log) ? default : log;
+    public virtual bool IsValid => _Document.IsValid();
+    public virtual bool IsEmpty => DocumentId == Guid.Empty;
+    public virtual string IsValidWhyNot => _Document.IsValidWithLog(out var log) ? default : log;
     IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) MemberwiseClone();
     object IGH_Goo.ScriptVariable() => Value;
     public IGH_GooProxy EmitProxy() => new Proxy(this);
@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Types
     bool GH_IO.GH_ISerializable.Read(GH_IReader reader)
     {
       Guid documentGUID = default;
-      DocumentGUID = reader.TryGetGuid("DocumentGUID", ref documentGUID) ? documentGUID : default;
+      DocumentId = reader.TryGetGuid("DocumentGUID", ref documentGUID) ? documentGUID : default;
 
       string modelUri = default;
       ModelURI = reader.TryGetString("ModelURI", ref modelUri) ? new Uri(modelUri) : default;
@@ -109,8 +109,8 @@ namespace RhinoInside.Revit.GH.Types
 
     bool GH_IO.GH_ISerializable.Write(GH_IWriter writer)
     {
-      if (DocumentGUID != default)
-        writer.SetGuid("DocumentGUID", DocumentGUID);
+      if (DocumentId != default)
+        writer.SetGuid("DocumentGUID", DocumentId);
 
       if (ModelURI != default)
         writer.SetString("ModelURI", ModelURI.ToString());
@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ReferenceData
-    public bool IsReferencedData => DocumentGUID != default || ModelURI != default;
+    public bool IsReferencedData => DocumentId != default || ModelURI != default;
 
     public bool IsReferencedDataLoaded => Value.IsValid();
 
@@ -137,7 +137,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       RefreshReferenceData();
 
-      if (TryGetDocument(DocumentGUID, out document))
+      if (TryGetDocument(DocumentId, out _Document))
         return true;
 
       return false;
@@ -153,9 +153,9 @@ namespace RhinoInside.Revit.GH.Types
 
     void RefreshReferenceData()
     {
-      if (document?.IsValidObject == true)
+      if (_Document?.IsValidObject == true)
       {
-        using (var modelPath = document.GetLocalModelPath())
+        using (var modelPath = _Document.GetLocalModelPath())
         {
           if (modelPath?.IsFilePath() == true)
           {
@@ -168,9 +168,9 @@ namespace RhinoInside.Revit.GH.Types
           }
         }
 
-        if (document.IsWorkshared)
+        if (_Document.IsWorkshared)
         {
-          using (var centralPath = document.GetWorksharingCentralModelPath())
+          using (var centralPath = _Document.GetWorksharingCentralModelPath())
           {
             var centralUri = centralPath.ToUri();
             if (centralUri != CentralModelURI)
@@ -251,20 +251,20 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    ARDB.Document document;
+    ARDB.Document _Document;
     public ARDB.Document Value
     {
       get
       {
-        if (document?.IsValidObject == false)
-          document = default;
+        if (_Document?.IsValidObject == false)
+          _Document = default;
 
-        return document;
+        return _Document;
       }
-      private set => document = value;
+      private set => _Document = value;
     }
 
-    public Guid DocumentGUID { get; protected set; } = default;
+    public Guid DocumentId { get; protected set; } = default;
 
     public Uri ModelURI { get; protected set; } = default;
     public string PathName { get; protected set; } = default;
@@ -277,8 +277,8 @@ namespace RhinoInside.Revit.GH.Types
     protected Document(ARDB.Document value)
     {
       if (value is null) return;
-      document = value;
-      DocumentGUID = value.GetFingerprintGUID();
+      _Document = value;
+      DocumentId = value.GetFingerprintGUID();
       RefreshReferenceData();
     }
 
@@ -440,7 +440,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (doc is object)
       {
-        doc.DocumentGUID = state.DocumentGUID;
+        doc.DocumentId = state.DocumentId;
         doc.ModelURI = state.ModelURI;
         doc.PathName = state.PathName;
         doc.CentralModelURI = state.CentralModelURI;
@@ -465,7 +465,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual string DisplayName =>
       IsValid ? Name :
-      DocumentGUID != default ? DocumentGUID.ToString("B").ToUpper() :
+      DocumentId != default ? DocumentId.ToString("B").ToUpper() :
       "<None>";
 
     #region Proxy
@@ -516,7 +516,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      public Guid? DocumentGUID => owner?.DocumentGUID;
+      public Guid? DocumentId => owner?.DocumentId;
       public string ModelURI => owner?.ModelURI?.ToString();
       public string PathName => owner?.PathName;
       public string CentralModelURI => owner?.CentralModelURI?.ToString();
@@ -686,7 +686,7 @@ namespace RhinoInside.Revit.GH.Types
     public string Name { get; set; }
     public Guid StateGUID { get; set; } = Guid.NewGuid();
 
-    public Guid DocumentGUID { get; set; } = default;
+    public Guid DocumentId { get; set; } = default;
 
     public Uri ModelURI { get; set; } = default;
     public string PathName { get; set; } = default;
@@ -707,8 +707,8 @@ namespace RhinoInside.Revit.GH.Types
       if (source is Document document)
       {
         Name = document.Title;
-        StateGUID = document.DocumentGUID;
-        DocumentGUID = document.DocumentGUID;
+        StateGUID = document.DocumentId;
+        DocumentId = document.DocumentId;
         ModelURI = document.ModelURI;
         PathName = document.PathName;
         CentralModelURI = document.CentralModelURI;
@@ -740,7 +740,7 @@ namespace RhinoInside.Revit.GH.Types
       StateGUID = reader.GetGuid("StateGUID");
 
       Guid documentGUID = default;
-      DocumentGUID = reader.TryGetGuid("DocumentGUID", ref documentGUID) ? documentGUID : default;
+      DocumentId = reader.TryGetGuid("DocumentGUID", ref documentGUID) ? documentGUID : default;
 
       string modelUri = default;
       ModelURI = reader.TryGetString("ModelURI", ref modelUri) ? new Uri(modelUri) : default;
@@ -762,8 +762,8 @@ namespace RhinoInside.Revit.GH.Types
       writer.SetString("Name", Name);
       writer.SetGuid("StateGUID", StateGUID);
 
-      if (DocumentGUID != default)
-        writer.SetGuid("DocumentGUID", DocumentGUID);
+      if (DocumentId != default)
+        writer.SetGuid("DocumentGUID", DocumentId);
 
       if (ModelURI != default)
         writer.SetString("ModelURI", ModelURI.ToString());

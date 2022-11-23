@@ -232,7 +232,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       ),
       new ParamDefinition
       (
-        new Parameters.Face()
+        new Parameters.GeometryFace()
         {
           Name = "Faces",
           NickName = "F",
@@ -242,7 +242,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       ),
       new ParamDefinition
       (
-        new Parameters.Edge()
+        new Parameters.GeometryCurve()
         {
           Name = "Edges",
           NickName = "E",
@@ -250,15 +250,16 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           Access = GH_ParamAccess.list
         }, ParamRelevance.Primary
       ),
-      //new ParamDefinition
-      //(
-      //  new Parameters.Vertex()
-      //  {
-      //    Name = "Vertices",
-      //    NickName = "V",
-      //    Access = GH_ParamAccess.list
-      //  }
-      //),
+      new ParamDefinition
+      (
+        new Parameters.GeometryPoint()
+        {
+          Name = "Vertices",
+          NickName = "V",
+          Description = "List of element point references",
+          Access = GH_ParamAccess.list
+        },ParamRelevance.Secondary
+      ),
     };
 
     IEnumerable<string> GetFaceReferences(ARDB.Document document, string uniqueId, ARDB.GeometryObject geometry)
@@ -352,9 +353,32 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       {
         if (geometry is null) return;
 
-        Params.TrySetDataList(DA, "Faces", () => GetFaceReferences(element.Document, element.UniqueID, geometry).Select(x => new Types.Face(element.Document, ARDB.Reference.ParseFromStableRepresentation(element.Document, x))));
-        Params.TrySetDataList(DA, "Edges", () => GetEdgeReferences(element.Document, element.UniqueID, geometry).Select(x => new Types.Edge(element.Document, ARDB.Reference.ParseFromStableRepresentation(element.Document, x))));
-        //Params.TrySetDataList(DA, "Vertices", () => GetEdges(geometry).Where(x => x.Reference is object).Select(x => new Types.Vertex(element.Document, x.Reference, 0)));
+        var document = element.Document;
+        var uniqueId = element.Value.UniqueId;
+
+        Params.TrySetDataList
+        (
+          DA, "Faces", () => GetFaceReferences(document, uniqueId, geometry).Select
+          (x => new Types.GeometryFace(document, ARDB.Reference.ParseFromStableRepresentation(document, x)))
+        );
+
+        Params.TrySetDataList
+        (
+          DA, "Edges", () => GetEdgeReferences(document, uniqueId, geometry).Select
+          (x => new Types.GeometryCurve(document, ARDB.Reference.ParseFromStableRepresentation(document, x)))
+        );
+
+        Params.TrySetDataList
+        (
+          DA, "Vertices", () => GetEdgeReferences(document, uniqueId, geometry).SelectMany
+          (
+            x => new Types.GeometryPoint[]
+            {
+              new Types.GeometryPoint(document, ARDB.Reference.ParseFromStableRepresentation(document, $"{x}/0")),
+              new Types.GeometryPoint(document, ARDB.Reference.ParseFromStableRepresentation(document, $"{x}/1"))
+            }
+          )
+        );
       }
     }
   }

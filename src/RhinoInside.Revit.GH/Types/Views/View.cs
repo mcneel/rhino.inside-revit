@@ -315,6 +315,35 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Properties
+
+    public bool? CropBoxActive
+    {
+      get => Value?.CropBoxActive;
+      set
+      {
+        if (value is object && Value is ARDB.View view && view.CropBoxActive != value)
+        {
+          if (value == true)
+          {
+            var cropBoxVisible = view.CropBoxVisible;
+            view.CropBoxActive = true;
+            view.CropBoxVisible = cropBoxVisible;
+          }
+          else view.CropBoxActive = false;
+        }
+      }
+    }
+
+    public bool? CropBoxVisible
+    {
+      get => Value?.CropBoxVisible;
+      set
+      {
+        if (value is object && Value is ARDB.View view && view.CropBoxVisible != value)
+          view.CropBoxVisible = value.Value;
+      }
+    }
+
     public Phase Phase
     {
       get => Phase.FromElementId(Document, Value.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ARDB.ElementId.InvalidElementId) as Phase;

@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected abstract void RefreshList(IEnumerable<IGH_Goo> goos);
 
-    public override void PostProcessData()
+    public override void PostProcessData() => Rhinoceros.InvokeInHostContext(() =>
     {
       base.PostProcessData();
 
@@ -117,8 +117,8 @@ namespace RhinoInside.Revit.GH.Parameters
       if (SelectedItems.Count == 0)
         m_data.AppendRange(new IGH_Goo[0], path);
       else foreach (var item in SelectedItems)
-          m_data.Append(item.Value, path);
-    }
+        m_data.Append(item.Value, path);
+    });
 
     protected override void CollectVolatileData_FromSources()
     {

@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
   using External.DB.Extensions;
 
   #region DocumentCategoriesPicker
-  public abstract class DocumentCategoriesPicker : GH_ValueList, Kernel.IGH_ElementIdParam
+  public abstract class DocumentCategoriesPicker : GH_ValueList, Kernel.IGH_ReferenceParam
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     protected abstract bool CategoryIsInSet(ARDB.Category category);
@@ -62,13 +62,13 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       base.CollectVolatileData_Custom();
     }
 
-    #region IGH_ElementIdParam
+    #region IGH_ReferenceParam
     public virtual bool PassesFilter(ARDB.Document document, ARDB.ElementId id)
     {
       return id.IsCategoryId(document);
     }
 
-    bool Kernel.IGH_ElementIdParam.NeedsToBeExpired
+    bool Kernel.IGH_ReferenceParam.NeedsToBeExpired
     (
       ARDB.Document doc,
       ICollection<ARDB.ElementId> added,
@@ -81,7 +81,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
         return true;
 
       // If selected items are modified we need to expire dependant components
-      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
+      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_Element>())
       {
         if (!data.IsValid)
           continue;
@@ -151,7 +151,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
   #region DocumentElementPicker
   public abstract class DocumentElementPicker<T> : Grasshopper.Special.ValueSet<T>,
-  Kernel.IGH_ElementIdParam
+  Kernel.IGH_ReferenceParam
   where T : class, IGH_Goo
   {
     protected DocumentElementPicker(string name, string nickname, string description, string category, string subcategory) :
@@ -164,14 +164,14 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
       base.Icon;
 
-    #region IGH_ElementIdParam
+    #region IGH_ReferenceParam
     protected virtual ARDB.ElementFilter ElementFilter => null;
     public virtual bool PassesFilter(ARDB.Document document, ARDB.ElementId id)
     {
       return ElementFilter?.PassesFilter(document, id) ?? true;
     }
 
-    bool Kernel.IGH_ElementIdParam.NeedsToBeExpired
+    bool Kernel.IGH_ReferenceParam.NeedsToBeExpired
     (
       ARDB.Document doc,
       ICollection<ARDB.ElementId> added,
@@ -180,7 +180,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     )
     {
       // If selected items are modified we need to expire dependant components
-      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_ElementId>())
+      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_Element>())
       {
         if (!doc.IsEquivalent(data.Document))
           continue;
@@ -197,7 +197,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
         if (!updateListItems)
         {
           // If an item in ListItems is deleted we need to update ListItems
-          foreach (var item in ListItems.Select(x => x.Value).OfType<Types.IGH_ElementId>())
+          foreach (var item in ListItems.Select(x => x.Value).OfType<Types.IGH_Element>())
           {
             if (!doc.IsEquivalent(item.Document))
               continue;

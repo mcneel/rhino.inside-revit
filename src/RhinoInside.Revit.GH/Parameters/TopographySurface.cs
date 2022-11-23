@@ -8,7 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class TopographySurface : GraphicalElementT<Types.TopographySurface, ARDB.Architecture.TopographySurface>
+  public class TopographySurface : GraphicalElement<Types.TopographySurface, ARDB.Architecture.TopographySurface>
   {
     public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("0700BE5F-9B9C-4235-ADD5-787E42898114");

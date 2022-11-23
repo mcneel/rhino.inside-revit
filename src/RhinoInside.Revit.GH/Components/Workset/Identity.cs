@@ -134,7 +134,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Workset", out Types.Workset workset)) return;
+      if (!Params.GetData(DA, "Workset", out Types.Workset workset, x => x.IsValid)) return;
       else Params.TrySetData(DA, "Workset", () => workset);
 
       if (Params.GetData(DA, "Name", out string name))

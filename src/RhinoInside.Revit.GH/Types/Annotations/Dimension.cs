@@ -112,6 +112,12 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public GeometryObject[] References =>
+      Value?.References.
+      Cast<ARDB.Reference>().
+      Select(GetGeometryObjectFromReference<GeometryObject>).
+      ToArray();
+
     public virtual bool? HasLeader
     {
 #if REVIT_2021

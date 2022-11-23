@@ -33,18 +33,9 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var category = default(ARDB.Category);
-      if (!DA.GetData("Category", ref category))
-        return;
+      if (!Params.GetData(DA, "Category", out Types.Category category)) return;
 
-      if (category.Document() is ARDB.Document doc)
-      {
-        using (var subCategories = category.SubCategories)
-        {
-          var list = subCategories.Cast<ARDB.Category>();
-          DA.SetDataList("SubCategories", list.Select(x => new Types.Category(doc, x.Id)));
-        }
-      }
+      DA.SetDataList("SubCategories", category.SubCategories);
     }
   }
 }

@@ -1,27 +1,28 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Display;
-  using External.DB;
   using External.DB.Extensions;
-  using External.UI.Extensions;
+  using RhinoInside.Revit.External.DB;
 
   [Kernel.Attributes.Name("Element")]
-  public interface IGH_Element : IGH_ElementId
+  public interface IGH_Element : IGH_Reference
   {
     Category Category { get; }
     ElementType Type { get; set; }
   }
 
   [Kernel.Attributes.Name("Element")]
-  public class Element : ElementId, IGH_Element
+  public class Element : Reference, IGH_Element
   {
     #region IGH_Goo
     public override bool IsValid => base.IsValid && Value is object;
@@ -45,63 +46,142 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    ARDB.Element value => base.Value as ARDB.Element;
+    public override string DisplayName => Nomen ?? (IsReferencedData ? string.Empty : "<None>");
+
     public new ARDB.Element Value
     {
       get
       {
-        if (value?.IsValidObject == false)
-          ResetValue();
+        var element = base.Value as ARDB.Element;
+        switch (element?.IsValidObject)
+        {
+          case false:
+            Debug.WriteLine("Element is not valid.");
+            ResetValue();
+            return base.Value as ARDB.Element;
 
-        return value;
+          case true:  return element;
+          default:    return null;
+        }
       }
     }
 
-    public override string DisplayName => Nomen ?? (IsReferencedData ? string.Empty : "<None>");
+    protected override void ResetValue()
+    {
+      SubInvalidateGraphics();
+
+      _ReferenceDocument = default;
+      _ReferenceId = default;
+      _Id = default;
+
+      base.ResetValue();
+    }
+
+    protected override object FetchValue()
+    {
+      LoadReferencedData();
+      return Document?.GetElement(Id);
+    }
+
+    protected void SetValue(ARDB.Document doc, ARDB.ElementId id)
+    {
+      ResetValue();
+
+      if (!id.IsValid())
+        doc = null;
+
+      _ReferenceDocument = Document = doc;
+      _ReferenceId = _Id = id ?? ARDB.ElementId.InvalidElementId;
+
+      if (Document is object)
+      {
+        ReferenceDocumentId = _ReferenceDocument.GetFingerprintGUID();
+
+        if (_Id.IsBuiltInId())
+        {
+          ReferenceUniqueId = ERDB.UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(Document), _Id.ToValue());
+          base.Value = null;
+        }
+        else
+        {
+          var element = Document.GetElement(_Id);
+          ReferenceUniqueId = element?.UniqueId ?? string.Empty;
+          base.Value = element;
+        }
+      }
+    }
+
+    protected virtual bool SetValue(ARDB.Element element)
+    {
+      if (ValueType.IsInstanceOfType(element))
+      {
+        _ReferenceDocument = Document = element.Document;
+        _ReferenceId = _Id = element.Id;
+
+        ReferenceDocumentId = _ReferenceDocument.GetFingerprintGUID();
+        ReferenceUniqueId = element.UniqueId;
+
+        base.Value = element;
+        return true;
+      }
+
+      return false;
+    }
     #endregion
 
     #region ReferenceObject
-    ARDB.ElementId id = ARDB.ElementId.InvalidElementId;
-    public override ARDB.ElementId Id => id;
+    public override bool? IsEditable => IsValid ? !Document.IsLinked && CanDelete : default(bool?);
     #endregion
 
-    #region IGH_ElementId
-    public override ARDB.Reference Reference
+    #region Reference
+    ARDB.ElementId _Id = ARDB.ElementId.InvalidElementId;
+    public override ARDB.ElementId Id => _Id;
+
+    ARDB.Document _ReferenceDocument;
+    public override ARDB.Document ReferenceDocument => _ReferenceDocument?.IsValidObject == true ? _ReferenceDocument : null;
+
+    public override ARDB.Reference GetReference()
     {
-      get
-      {
-        try { return ARDB.Reference.ParseFromStableRepresentation(Document, UniqueID); }
-        catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
-        catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
-      }
+      try { return ReferenceExtension.ParseFromPersistentRepresentation(ReferenceDocument, ReferenceUniqueId); }
+      catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
+      catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
     }
 
-    public override bool IsReferencedDataLoaded => Document is object && Id is object;
+    ARDB.ElementId _ReferenceId = ARDB.ElementId.InvalidElementId;
+    public override ARDB.ElementId ReferenceId => _ReferenceId;
+
+    public string UniqueId =>
+      Document is ARDB.Document document && ERDB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument) ?
+      referenceId.Element.ToString(document) : default;
+    #endregion
+
+    #region IGH_ReferencedData
+    public override bool IsReferencedDataLoaded => ReferenceDocument is object && _Id is object;
     public sealed override bool LoadReferencedData()
     {
-      if (IsReferencedData)
+      if (IsReferencedData && !IsReferencedDataLoaded)
       {
         UnloadReferencedData();
 
-        if (Types.Document.TryGetDocument(DocumentGUID, out var document))
+        if (Types.Document.TryGetDocument(ReferenceDocumentId, out _ReferenceDocument))
         {
-          if (document.TryGetElementId(UniqueID, out id))
-            Document = document;
+          if (_ReferenceDocument.TryGetLinkElementId(ReferenceUniqueId, out var linkElementId))
+          {
+            _ReferenceId = _Id = linkElementId.HostElementId;
+            if (_ReferenceId == ARDB.ElementId.InvalidElementId)
+            {
+              _ReferenceId = linkElementId.LinkInstanceId;
+              _Id = linkElementId.LinkedElementId;
+              Document = (_ReferenceDocument.GetElement(_ReferenceId) as ARDB.RevitLinkInstance).GetLinkDocument();
+            }
+            else Document = _ReferenceDocument;
+          }
+          else _ReferenceDocument = null;
         }
       }
 
       return IsReferencedDataLoaded;
     }
-
-    public override void UnloadReferencedData()
-    {
-      if (IsReferencedData)
-        id = default;
-
-      base.UnloadReferencedData();
-    }
-
-    protected override object FetchValue() => Document.GetElement(Id);
     #endregion
 
     protected internal void InvalidateGraphics()
@@ -112,17 +192,6 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     protected virtual void SubInvalidateGraphics() { }
-
-    public static Element FromValue(object data)
-    {
-      switch (data)
-      {
-        case ARDB.Category category: return new Category(category);
-        case ARDB.Element element: return Element.FromElement(element);
-      }
-
-      return null;
-    }
 
     public static readonly Dictionary<Type, Func<ARDB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<ARDB.Element, Element>>()
     {
@@ -215,6 +284,57 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Architecture.BuildingPad),        (element)=> new BuildingPad           (element as ARDB.Architecture.BuildingPad) },
       { typeof(ARDB.Architecture.Railing),            (element)=> new Railing               (element as ARDB.Architecture.Railing) },
     };
+
+    public static Element FromValue(ARDB.Document doc, object data)
+    {
+      try
+      {
+        switch (data)
+        {
+          case string s:
+
+            if (ERDB.FullUniqueId.TryParse(s, out var documentId, out var stableId))
+            {
+              if (documentId != doc.GetFingerprintGUID()) return null;
+              s = stableId;
+            }
+
+            if (doc.TryGetLinkElementId(s, out var linkElementId))
+              return FromLinkElementId(doc, linkElementId);
+
+            return default;
+
+          case ARDB.BuiltInCategory c:    return FromElementId(doc, new ARDB.ElementId(c));
+          case ARDB.BuiltInParameter p:   return FromElementId(doc, new ARDB.ElementId(p));
+          case ARDB.ElementId id:         return FromElementId(doc, id);
+          case ARDB.LinkElementId id:     return FromLinkElementId(doc, id);
+          case ARDB.Reference r:          return FromReference(doc, r);
+          case ARDB.Element element:      return doc.IsEquivalent(element.Document) ? FromElement(element) : null;
+          case ARDB.Category category:    return doc.IsEquivalent(category.Document()) ? new Category(category) : null;
+#if REVIT_2024
+          case Int64 id:                  return FromElementId(doc, new ARDB.ElementId(id));
+          case IConvertible convertible:  return FromElementId(doc, new ARDB.ElementId(System.Convert.ToInt64(convertible)));
+#else
+          case Int32 id:                  return FromElementId(doc, new ARDB.ElementId(id));
+          case IConvertible convertible:  return FromElementId(doc, new ARDB.ElementId(System.Convert.ToInt32(convertible)));
+#endif
+        }
+      }
+      catch { }
+
+      return null;
+    }
+
+    public static Element FromValue(object data)
+    {
+      switch (data)
+      {
+        case ARDB.Category category: return new Category(category);
+        case ARDB.Element element: return Element.FromElement(element);
+      }
+
+      return null;
+    }
 
     public static Element FromElement(ARDB.Element element)
     {
@@ -324,94 +444,57 @@ namespace RhinoInside.Revit.GH.Types
       return new Element(doc, id);
     }
 
-    public static Element FromElementId(ARDB.Document doc, ARDB.LinkElementId id)
+    public static Element FromLinkElementId(ARDB.Document doc, ARDB.LinkElementId id)
     {
       if (id.HostElementId != ARDB.ElementId.InvalidElementId)
         return FromElementId(doc, id.HostElementId);
 
-      if (doc.GetElement(id.LinkInstanceId) is ARDB.RevitLinkInstance instance)
-        return FromElementId(instance.GetLinkDocument(), id.LinkedElementId);
+      if (doc.GetElement(id.LinkInstanceId) is ARDB.RevitLinkInstance link)
+      {
+        if (FromElement(link.GetLinkDocument()?.GetElement(id.LinkedElementId)) is Element element)
+        {
+          using (var linkedElementReference = ARDB.Reference.ParseFromStableRepresentation(element.Document, element.ReferenceUniqueId))
+          {
+            using (var elementReference = linkedElementReference.CreateLinkReference(link))
+            {
+              element.ReferenceDocumentId = doc.GetFingerprintGUID();
+              element.ReferenceUniqueId = elementReference.ConvertToPersistentRepresentation(doc);
+              element._ReferenceDocument = doc;
+              element._ReferenceId = link.Id;
+              return element;
+            }
+          }
+        }
+      }
 
       return default;
     }
 
-    public static T FromElementId<T>(ARDB.Document doc, ARDB.ElementId id) where T : Element, new()
-    {
-      if (doc is null || id is null) return default;
-      if (id == ARDB.ElementId.InvalidElementId) return new T();
-
-      return FromElementId(doc, id) as T;
-    }
-
     public static Element FromReference(ARDB.Document doc, ARDB.Reference reference)
     {
-      if (doc.GetElement(reference) is ARDB.Element value)
-      {
-        if (value is ARDB.RevitLinkInstance link)
-        {
-          if (reference.LinkedElementId != ARDB.ElementId.InvalidElementId)
-          {
-            var linkedDoc = link.GetLinkDocument();
-            return FromValue(linkedDoc?.GetElement(reference.LinkedElementId));
-          }
-        }
-
-        return FromElement(value);
-      }
-
-      return null;
-    }
-
-    protected internal void SetValue(ARDB.Document doc, ARDB.ElementId id)
-    {
-      if (id == ARDB.ElementId.InvalidElementId)
-        doc = null;
-
-      Document = doc;
-      DocumentGUID = doc.GetFingerprintGUID();
-
-      this.id = id;
-      if (doc is object && id is object)
-      {
-        UniqueID = id.IsBuiltInId() ?
-          UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(doc), id.IntegerValue) :
-          doc.GetElement(id)?.UniqueId ?? string.Empty;
-      }
-      else UniqueID = string.Empty;
-    }
-
-    protected virtual bool SetValue(ARDB.Element element)
-    {
-      if (ValueType.IsInstanceOfType(element))
-      {
-        Document = element.Document;
-        DocumentGUID = Document.GetFingerprintGUID();
-        id = element.Id;
-        UniqueID = element.UniqueId;
-        base.Value = element;
-        return true;
-      }
-
-      return false;
-    }
-
-    protected override void ResetValue()
-    {
-      SubInvalidateGraphics();
-
-      base.ResetValue();
+      // We call FromLinkElementId to truncate the geometry part of the reference and create a persistent UniqueId if is linked.
+      return FromLinkElementId
+      (
+          doc,
+          reference.LinkedElementId != ARDB.ElementId.InvalidElementId ?
+          new ARDB.LinkElementId(reference.ElementId, reference.LinkedElementId) :
+          new ARDB.LinkElementId(reference.ElementId)
+      );
     }
 
     public Element() { }
     internal Element(ARDB.Document doc, ARDB.ElementId id) => SetValue(doc, id);
     protected Element(ARDB.Element element) : base(element?.Document, element)
     {
-      DocumentGUID = Document.GetFingerprintGUID();
-
       if (element is object)
       {
-        UniqueID = element.UniqueId;
-        id = element.Id;
+        _ReferenceDocument  = Document;
+        _ReferenceId        = _Id       = element.Id;
+
+        ReferenceDocumentId = Document.GetFingerprintGUID();
+        ReferenceUniqueId   = element.UniqueId;
+
+        Debug.Assert(ReferenceEquals(base.Value, element));
       }
     }
 
@@ -436,7 +519,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (source is string uniqueid)
       {
-        if (FullUniqueId.TryParse(uniqueid, out var documentId, out var uniqueId))
+        if (ERDB.FullUniqueId.TryParse(uniqueid, out var documentId, out var uniqueId))
         {
           if (Types.Document.TryGetDocument(documentId, out var doc))
           {
@@ -506,7 +589,8 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    protected new class Proxy : ElementId.Proxy
+    [TypeConverter(typeof(Proxy.ObjectConverter))]
+    protected new class Proxy : Reference.Proxy
     {
       protected new Element owner => base.owner as Element;
 
@@ -517,15 +601,118 @@ namespace RhinoInside.Revit.GH.Types
         return owner.DisplayName;
       }
 
-      [System.ComponentModel.Description("The element identifier in this session.")]
-      [System.ComponentModel.RefreshProperties(System.ComponentModel.RefreshProperties.All)]
-      public virtual int? Id
+      protected virtual bool IsValidId(ARDB.Document doc, ARDB.ElementId id) =>
+        owner.GetType() == Element.FromElementId(doc, id).GetType();
+
+      [DisplayName("Document"), Description("The document that references this element."), Category("Reference")]
+      public string ReferenceDocument => owner.ReferenceDocument?.GetTitle();
+
+      [DisplayName("Built In"), Description("Element is built in Revit."), Category("Object")]
+      public bool IsBuiltIn => owner.IsReferencedData && owner.Id.IsBuiltInId();
+
+      [DisplayName("Element ID"), Description("The element identifier in this session."), Category("Object")]
+      //[RefreshProperties(RefreshProperties.All)]
+      public virtual int? Id => owner.Id?.ToValue();
+
+      [DisplayName("Unique ID"),Description("A stable unique identifier for an element within the model."), Category("Object")]
+      public virtual string UniqueId => owner.UniqueId;
+
+      [Description("A human readable name for the Element."), Category("Object")]
+      public string Name => owner.Nomen;
+
+      class ObjectConverter : ExpandableObjectConverter
       {
-        get => owner.Id?.ToValue();
+        public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
+        {
+          var properties = base.GetProperties(context, value, attributes);
+          if (value is Proxy proxy && proxy.Valid)
+          {
+            var element = proxy.owner.Document?.GetElement(proxy.owner.Id);
+            if (element is object)
+            {
+              var parameters = element.GetParameters(External.DB.ParameterClass.Any).
+                Select(p => new ParameterPropertyDescriptor(p)).
+                ToArray();
+
+              var descriptors = new PropertyDescriptor[properties.Count + parameters.Length];
+              properties.CopyTo(descriptors, 0);
+              parameters.CopyTo(descriptors, properties.Count);
+
+              return new PropertyDescriptorCollection(descriptors, true);
+            }
+          }
+
+          return properties;
+        }
       }
 
-      [System.ComponentModel.Description("A human readable name for the Element.")]
-      public string Name => owner.Nomen;
+      private class ParameterPropertyDescriptor : PropertyDescriptor
+      {
+        readonly ARDB.Parameter parameter;
+        public ParameterPropertyDescriptor(ARDB.Parameter p) : base(p.Definition?.Name ?? p.Id.ToValue().ToString(), null) { parameter = p; }
+        public override Type ComponentType => typeof(Proxy);
+        public override bool IsReadOnly => true;
+        public override string Name => parameter.Definition?.Name ?? string.Empty;
+        public override string Category => parameter.Definition is null ? string.Empty : ARDB.LabelUtils.GetLabelFor(parameter.Definition.ParameterGroup);
+        public override string Description
+        {
+          get
+          {
+            var description = string.Empty;
+            if (parameter.Definition is ARDB.Definition definition)
+            {
+              External.DB.Schemas.DataType dataType = definition.GetDataType();
+              description = dataType.Label.ToLower();
+
+              if (string.IsNullOrEmpty(description))
+                description = parameter.StorageType.ToString();
+            }
+
+            string parameterClass = "Unknown";
+            if (parameter.Id.IsBuiltInId()) parameterClass = "Built-in";
+            else if (parameter.IsShared) parameterClass = "Shared";
+            else parameterClass = "Project";
+
+            if (parameter.IsReadOnly)
+              description = "read only " + description;
+
+            description = $"{parameterClass} {description} parameter.{Environment.NewLine}{Environment.NewLine}";
+            description += $"ParameterId : {((External.DB.Schemas.ParameterId) parameter.GetTypeId()).FullName}";
+
+            if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
+              description += $"{Environment.NewLine}BuiltInParameter : {builtInParameter.ToStringGeneric()}";
+
+            return description;
+          }
+        }
+        public override bool Equals(object obj)
+        {
+          if (obj is ParameterPropertyDescriptor other)
+            return other.parameter.Id == parameter.Id;
+
+          return false;
+        }
+        public override int GetHashCode() => parameter.Id.GetHashCode();
+        public override bool ShouldSerializeValue(object component) { return false; }
+        public override void ResetValue(object component) { }
+        public override bool CanResetValue(object component) { return false; }
+        public override void SetValue(object component, object value) { }
+        public override Type PropertyType => typeof(string);
+        public override object GetValue(object component)
+        {
+          if (parameter.Element is object && parameter.Definition is object)
+          {
+            if (parameter.StorageType == ARDB.StorageType.String)
+              return parameter.AsString();
+
+            return parameter.Element.GetParameterFormatOptions(parameter.Id) is ARDB.FormatOptions options ?
+              parameter.AsValueString(options) :
+              parameter.AsValueString();
+          }
+
+          return null;
+        }
+      }
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
@@ -533,22 +720,22 @@ namespace RhinoInside.Revit.GH.Types
     #region Version
     public Guid? ExportID => Document?.GetExportID(Id);
 
-    public override bool? IsEditable => IsValid ?
-      !Id.IsBuiltInId() && (Document?.IsLinked == false) : default(bool?);
-
     public (Guid? Created, Guid? Updated) Version
     {
       get
       {
         var created = default(Guid?);
-        if (UniqueId.TryParse(UniqueID, out var episode, out var _) && episode != default)
-          created = episode;
-
         var updated = default(Guid?);
-#if REVIT_2021
+
         if (Value is ARDB.Element element)
+        {
+          if (ERDB.UniqueId.TryParse(element.UniqueId, out var episode, out var _) && episode != default)
+            created = episode;
+
+#if REVIT_2021
           updated = element.VersionGuid;
 #endif
+        }
 
         return (created, updated);
       }
@@ -626,7 +813,7 @@ namespace RhinoInside.Revit.GH.Types
           if (start >= 0)
           {
             var uniqueId = name.Substring(start + 1, name.Length - start - 2);
-            if (UniqueId.TryParse(uniqueId, out var _, out var _))
+            if (ERDB.UniqueId.TryParse(uniqueId, out var _, out var _))
               name = name.Substring(0, Math.Max(0, start - 1));
           }
         }

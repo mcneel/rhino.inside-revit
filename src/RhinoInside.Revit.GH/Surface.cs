@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
@@ -275,8 +276,8 @@ namespace RhinoInside.Revit.GH.Components
 
       if (GetValue("UnionBox", false))
       {
-        DA.SetData(0, frustums.FirstOr(null));
-        DA.SetData(1, boxes.FirstOr(null));
+        DA.SetData(0, frustums.FirstOrDefault());
+        DA.SetData(1, boxes.FirstOrDefault());
       }
       else
       {

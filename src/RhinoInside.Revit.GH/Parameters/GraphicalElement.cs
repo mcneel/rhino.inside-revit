@@ -15,14 +15,14 @@ namespace RhinoInside.Revit.GH.Parameters
   using External.DB.Extensions;
   using External.UI.Selection;
 
-  public abstract class GraphicalElementT<T, R> :
+  public abstract class GraphicalElement<T, R> :
     Element<T, R>,
     IGH_PreviewObject,
     ARUI.Selection.ISelectionFilter
     where T : class, Types.IGH_GraphicalElement
     where R : ARDB.Element
   {
-    protected GraphicalElementT(string name, string nickname, string description, string category, string subcategory) :
+    protected GraphicalElement(string name, string nickname, string description, string category, string subcategory) :
     base(name, nickname, description, category, subcategory)
     {
       ObjectChanged += OnObjectChanged;
@@ -44,14 +44,11 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
 
     #region ISelectionFilter
-    public virtual bool AllowElement(ARDB.Element elem) => elem is R && Types.GraphicalElement.IsValidElement(elem);
-    public bool AllowReference(ARDB.Reference reference, ARDB.XYZ position)
-    {
-      if (reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
-        return AllowElement(Revit.ActiveUIDocument.Document.GetElement(reference));
+    public virtual bool AllowElement(ARDB.Element elem) =>
+      elem is R && Types.GraphicalElement.IsValidElement(elem);
 
-      return false;
-    }
+    public bool AllowReference(ARDB.Reference reference, ARDB.XYZ position) =>
+      reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE;
     #endregion
 
     #region UI methods
@@ -84,7 +81,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
 
-      switch (uiDocument.PickObject(out var reference, ARUI.Selection.ObjectType.LinkedElement, this))
+      switch (uiDocument.PickObject(out var reference, ARUI.Selection.ObjectType.LinkedElement, new LinkedElementSelectionFilter(this)))
       {
         case ARUI.Result.Succeeded:
           if (Types.Element.FromReference(doc, reference) is T element)
@@ -138,7 +135,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
 
-      switch (uiDocument.PickObjects(out var references, ARUI.Selection.ObjectType.LinkedElement, this))
+      switch (uiDocument.PickObjects(out var references, ARUI.Selection.ObjectType.LinkedElement, new LinkedElementSelectionFilter(this)))
       {
         case ARUI.Result.Succeeded:
           value = new GH_Structure<T>();
@@ -171,8 +168,8 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         if (reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
         {
-          if (Revit.ActiveUIDocument.Document.GetElement(reference) is ARDB.RevitLinkInstance link)
-            return SelectionFilter.AllowElement(link.GetLinkDocument().GetElement(reference.LinkedElementId));
+          if (Revit.ActiveUIDocument.Document.GetElement(reference.ElementId) is ARDB.RevitLinkInstance link)
+            return SelectionFilter.AllowElement(link.GetLinkDocument()?.GetElement(reference.LinkedElementId));
         }
 
         return false;
@@ -185,13 +182,13 @@ namespace RhinoInside.Revit.GH.Parameters
       var doc = uiDocument.Document;
       var docGUID = doc.GetFingerprintGUID();
 
-      var documents = value.AllData(true).OfType<T>().GroupBy(x => x.DocumentGUID);
+      var documents = value.AllData(true).OfType<T>().GroupBy(x => x.ReferenceDocumentId);
       var activeElements = (
                             preSelect ?
                             documents.Where(x => x.Key == docGUID).
                             SelectMany(x => x).
                             Where(x => x.IsValid).
-                            Select(x => x.Reference).
+                            Select(x => x.GetReference()).
                             OfType<ARDB.Reference>() :
                             Enumerable.Empty<ARDB.Reference>()
                            ).
@@ -791,7 +788,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #endregion
   }
 
-  public class GraphicalElement : GraphicalElementT<Types.IGH_GraphicalElement, ARDB.Element>
+  public class GraphicalElement : GraphicalElement<Types.IGH_GraphicalElement, ARDB.Element>
   {
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override Guid ComponentGuid => new Guid("EF607C2A-2F44-43F4-9C39-369CE114B51F");

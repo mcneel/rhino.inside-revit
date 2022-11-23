@@ -17,18 +17,18 @@ namespace RhinoInside.Revit.GH.Parameters
     public Category() : base("Category", "Category", "Contains a collection of Revit categories", "Params", "Revit") { }
 
     #region UI
-    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      base.AppendAdditionalMenuItems(menu);
-
       var activeApp = Revit.ActiveUIApplication;
       var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ObjectStyles);
       Menu_AppendItem
       (
         menu, $"Open Object Styles…",
         (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.CanPostCommand(commandId), false
+        activeApp.ActiveUIDocument is object && activeApp.CanPostCommand(commandId), false
       );
+
+      base.Menu_AppendActions(menu);
     }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)

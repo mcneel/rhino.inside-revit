@@ -7,6 +7,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Documents
 {
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.0", updated: "1.4")]
   public class DocumentLinks : ElementCollectorComponent
   {
@@ -79,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
         var links = collector.Cast<ARDB.RevitLinkInstance>();
 
         if (!string.IsNullOrEmpty(name))
-          links = links.Where(x => x.Name.IsSymbolNameLike(name));
+          links = links.Where(x => x.GetElementNomen(ARDB.BuiltInParameter.RVT_LINK_INSTANCE_NAME).IsSymbolNameLike(name));
 
         Params.TrySetDataList(DA, "Links", () => links);
         Params.TrySetDataList(DA, "Documents", () => links.Select(x => x.GetLinkDocument()));

@@ -57,20 +57,20 @@ namespace RhinoInside.Revit.GH.Components
                     Enumerable.Empty<ARDB.ElementFilter>() :
                     Params.Input[_Filter_].VolatileData.AllData(true).
                     OfType<Types.ElementFilter>().
-                    Select(x => new ARDB.LogicalAndFilter(elementFilter, x.Value));
+                    Select(x => CompoundElementFilter.Intersect(elementFilter, x.Value));
 
-      foreach (var filter in filters.Any() ? filters : Enumerable.Repeat(elementFilter, 1))
+      foreach (var filter in filters.Any() ? filters : new ARDB.ElementFilter[] { elementFilter })
       {
-        if (added.Where(x => filter?.PassesFilter(document, x) ?? true).Any())
+        if (added.Any(x => filter.PassesFilter(document, x)))
           return true;
 
-        if (modified.Where(x => filter?.PassesFilter(document, x) ?? true).Any())
+        if (modified.Any(x => filter.PassesFilter(document, x)))
           return true;
 
         if (deleted.Count > 0)
         {
           var empty = new ARDB.ElementId[0];
-          foreach (var param in Params.Output.OfType<Kernel.IGH_ElementIdParam>())
+          foreach (var param in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
           {
             if (param.NeedsToBeExpired(document, empty, deleted, empty))
               return true;

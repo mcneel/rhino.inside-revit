@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc) || !doc.IsWorkshared) return;
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
       if (!Params.TryGetData(DA, "Kind", out Types.WorksetKind kind)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
 

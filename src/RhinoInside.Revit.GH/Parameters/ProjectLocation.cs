@@ -5,7 +5,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class ProjectLocation : GraphicalElementT<Types.ProjectLocation, ARDB.ProjectLocation>
+  public class ProjectLocation : GraphicalElement<Types.ProjectLocation, ARDB.ProjectLocation>
   {
     public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("1A2A68F4-7F16-4EF6-829D-83531A5C043E");

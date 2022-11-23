@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Kernel
   /// <summary>
   /// Base interface for all Parameter types in RhinoInside.Revit.GH that reference Revit elements.
   /// </summary>
-  internal interface IGH_ElementIdParam : IGH_Param
+  internal interface IGH_ReferenceParam : IGH_Param
   {
     bool NeedsToBeExpired
     (
@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Kernel
   /// <summary>
   /// Base interface for all Component types in RhinoInside.Revit.GH that reference Revit elements.
   /// </summary>
-  internal interface IGH_ElementIdComponent : IGH_Component
+  internal interface IGH_ReferenceComponent : IGH_Component
   {
     bool NeedsToBeExpired
     (

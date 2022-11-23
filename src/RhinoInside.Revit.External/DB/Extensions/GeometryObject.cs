@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 
@@ -9,6 +8,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   struct GeometryObjectEqualityComparer :
     IEqualityComparer<double>,
+    IEqualityComparer<UV>,
+    IEqualityComparer<XYZ>,
     IEqualityComparer<Point>,
     IEqualityComparer<PolyLine>,
     IEqualityComparer<Line>,
@@ -97,12 +98,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static GeometryObjectEqualityComparer Comparer(double tolerance) => new GeometryObjectEqualityComparer(tolerance);
 
     #region Length
-    public bool Equals(double x, double y) => NumericTolerance.AlmostEquals(x, y, Tolerance);
+    public bool Equals(double x, double y) => NumericTolerance.Abs(x - y) < Tolerance;
     public int GetHashCode(double value) => Math.Round(value / Tolerance).GetHashCode();
     #endregion
 
     #region UV
-    public bool Equals(UV x, UV y) => XYZExtension.GetLength(x.U - y.U, x.V - y.V, 0.0) < Tolerance;
+    public bool Equals(UV x, UV y) => NumericTolerance.Abs(x.U - y.U, x.V - y.V) < Tolerance;
     public int GetHashCode(UV obj) => CombineHash
     (
       GetHashCode(obj.U),
@@ -111,7 +112,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region XYZ
-    public bool Equals(XYZ x, XYZ y) => XYZExtension.GetLength(x.X - y.X, x.Y - y.Y, x.Z - y.Z) < Tolerance;
+    public bool Equals(XYZ x, XYZ y) => NumericTolerance.Abs(x.X - y.X, x.Y - y.Y, x.Z - y.Z) < Tolerance;
     public int GetHashCode(XYZ obj) => CombineHash
     (
       GetHashCode(obj.X),
@@ -212,14 +213,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Line
     public bool Equals(Line left, Line right) =>
       left.IsBound == right.IsBound &&
-      left.IsBound ?
       (
-        Equals(left.GetEndPoint(CurveEnd.Start), right.GetEndPoint(CurveEnd.Start)) &&
-        Equals(left.GetEndPoint(CurveEnd.End),   right.GetEndPoint(CurveEnd.End))
-      ):
-      (
-        Equals(left.Origin, right.Origin) &&
-        Equals(left.Direction, right.Direction)
+        left.IsBound ?
+        (
+          Equals(left.GetEndPoint(CurveEnd.Start), right.GetEndPoint(CurveEnd.Start)) &&
+          Equals(left.GetEndPoint(CurveEnd.End),   right.GetEndPoint(CurveEnd.End))
+        ):
+        (
+          Equals(left.Origin, right.Origin) &&
+          Equals(left.Direction, right.Direction)
+        )
       );
 
     public int GetHashCode(Line value) => CombineHash
@@ -238,17 +241,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Equals(left.XDirection, right.XDirection) &&
       Equals(left.YDirection, right.YDirection) &&
       Equals(left.Normal, right.Normal) &&
-      left.IsBound ?
       (
-        Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 2.0, true)) &&
-        Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 2.0, true)) &&
-        Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 2.0, true))
-      ) :
-      (
-        Equals(left.Evaluate(left.Period * 0.0 / 4.0, false), right.Evaluate(right.Period * 0.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 1.0 / 4.0, false), right.Evaluate(right.Period * 1.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 2.0 / 4.0, false), right.Evaluate(right.Period * 2.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 3.0 / 4.0, false), right.Evaluate(right.Period * 3.0 / 4.0, false))
+        left.IsBound ?
+        (
+          Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 2.0, true)) &&
+          Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 2.0, true)) &&
+          Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 2.0, true))
+        ) :
+        (
+          Equals(left.Evaluate(left.Period * 0.0 / 4.0, false), right.Evaluate(right.Period * 0.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 1.0 / 4.0, false), right.Evaluate(right.Period * 1.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 2.0 / 4.0, false), right.Evaluate(right.Period * 2.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 3.0 / 4.0, false), right.Evaluate(right.Period * 3.0 / 4.0, false))
+        )
       );
 
     public int GetHashCode(Arc value) => CombineHash
@@ -283,17 +288,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Equals(left.XDirection, right.XDirection) &&
       Equals(left.YDirection, right.YDirection) &&
       Equals(left.Normal, right.Normal) &&
-      left.IsBound ?
       (
-        Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 2.0, true)) &&
-        Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 2.0, true)) &&
-        Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 2.0, true))
-      ) :
-      (
-        Equals(left.Evaluate(left.Period * 0.0 / 4.0, false), right.Evaluate(right.Period * 0.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 1.0 / 4.0, false), right.Evaluate(right.Period * 1.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 2.0 / 4.0, false), right.Evaluate(right.Period * 2.0 / 4.0, false)) &&
-        Equals(left.Evaluate(left.Period * 3.0 / 4.0, false), right.Evaluate(right.Period * 3.0 / 4.0, false))
+        left.IsBound ?
+        (
+          Equals(left.Evaluate(0.0 / 2.0, true), right.Evaluate(0.0 / 2.0, true)) &&
+          Equals(left.Evaluate(1.0 / 2.0, true), right.Evaluate(1.0 / 2.0, true)) &&
+          Equals(left.Evaluate(2.0 / 2.0, true), right.Evaluate(2.0 / 2.0, true))
+        ) :
+        (
+          Equals(left.Evaluate(left.Period * 0.0 / 4.0, false), right.Evaluate(right.Period * 0.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 1.0 / 4.0, false), right.Evaluate(right.Period * 1.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 2.0 / 4.0, false), right.Evaluate(right.Period * 2.0 / 4.0, false)) &&
+          Equals(left.Evaluate(left.Period * 3.0 / 4.0, false), right.Evaluate(right.Period * 3.0 / 4.0, false))
+        )
       );
 
     public int GetHashCode(Ellipse value) => CombineHash
@@ -431,6 +438,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class GeometryObjectExtension
   {
+    internal static bool IsValid(this GeometryObject geometry) => geometry?.IsValidObject() ?? false;
+
+    internal static bool IsValidObject(this GeometryObject geometry)
+    {
+#if REVIT_2021
+      try { return geometry.Id >= 0; }
+#else
+      // TODO : Test this, type by type, and use a faster fail check.
+      try { return geometry.TryGetLocation(out var _, out var _, out var _);}
+#endif
+      catch { return false; }
+    }
+
     public static bool AlmostEquals<G>(this G left, G right)
       where G : GeometryObject
     {

@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    static ViewFamily ToViewFamily(this ViewType viewType)
+    static ViewFamily ToViewFamily(ViewType viewType)
     {
       switch (viewType)
       {
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return ViewFamily.Invalid;
     }
 
-    public static ViewFamily GetViewFamily(this View view) => view.ViewType.ToViewFamily();
+    public static ViewFamily GetViewFamily(this View view) => ToViewFamily(view.ViewType);
 
     /// <summary>
     /// Checks if the provided <see cref="Autodesk.Revit.DB.ViewType"/> represents a graphical view.
@@ -148,26 +148,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    /// <summary>
-    /// The bounds of the view in paper space (in pixels).
-    /// </summary>
-    /// <param name="view"></param>
-    /// <param name="DPI"></param>
-    /// <returns>Empty <see cref="Rectangle"/> on empty views.</returns>
-    public static Rectangle GetOutlineRectangle(this View view, int DPI = 72)
-    {
-      using (var outline = view.Outline)
-      {
-        return new Rectangle
-        (
-          left    : (int) Math.Round(outline.Min.U * 12.0 * DPI),
-          top     : (int) Math.Round(outline.Min.V * 12.0 * DPI),
-          right   : (int) Math.Round(outline.Max.U * 12.0 * DPI),
-          bottom  : (int) Math.Round(outline.Max.V * 12.0 * DPI)
-        );
-      }
-    }
-
+    #region SketchGrid
     static readonly ElementFilter OST_IOSSketchGridFilter = new ElementCategoryFilter(BuiltInCategory.OST_IOSSketchGrid);
     internal static ElementId GetSketchGridId(this View view) => view.GetDependentElements(OST_IOSSketchGridFilter).FirstOrDefault();
 
@@ -222,7 +203,112 @@ namespace RhinoInside.Revit.External.DB.Extensions
       gridSpacing = double.NaN;
       return false;
     }
+    #endregion
 
+    /// <summary>
+    /// The bounds of the view in paper space (in pixels).
+    /// </summary>
+    /// <param name="view"></param>
+    /// <param name="DPI"></param>
+    /// <returns>Empty <see cref="Rectangle"/> on empty views.</returns>
+    public static Rectangle GetOutlineRectangle(this View view, int DPI = 72)
+    {
+      using (var outline = view.Outline)
+      {
+        return new Rectangle
+        (
+          left    : (int) Math.Round(outline.Min.U * 12.0 * DPI),
+          top     : (int) Math.Round(outline.Min.V * 12.0 * DPI),
+          right   : (int) Math.Round(outline.Max.U * 12.0 * DPI),
+          bottom  : (int) Math.Round(outline.Max.V * 12.0 * DPI)
+        );
+      }
+    }
+
+    public static BoundingBoxXYZ GetClipBox(this View view)
+    {
+      switch (view.CropBox)
+      {
+        case BoundingBoxXYZ cropBox:
+          cropBox.Enabled = true;//view.CropBoxActive;
+
+          cropBox.set_MinEnabled(BoundingBoxXYZExtension.AxisX, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_LEFT)?.AsInteger() == 1);
+          cropBox.set_MaxEnabled(BoundingBoxXYZExtension.AxisX, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_RIGHT)?.AsInteger() == 1);
+
+          cropBox.set_MinEnabled(BoundingBoxXYZExtension.AxisY, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_BOTTOM)?.AsInteger() == 1);
+          cropBox.set_MaxEnabled(BoundingBoxXYZExtension.AxisY, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_TOP)?.AsInteger() == 1);
+
+          cropBox.set_MinEnabled(BoundingBoxXYZExtension.AxisZ, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR)?.AsInteger() == 1);
+          cropBox.set_MaxEnabled(BoundingBoxXYZExtension.AxisZ, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_NEAR)?.AsInteger() == 1);
+
+          return cropBox;
+        default:
+          return default;
+      }
+    }
+
+    static ElementFilter GetViewRangeFilter(this View view, bool clipped = false)
+    {
+      if (view is ViewPlan viewPlan)
+      {
+        using (var viewRange = viewPlan.GetViewRange())
+        {
+          var bottom = view.Document.GetElement(viewRange.GetLevelId(PlanViewPlane.ViewDepthPlane)) is Level bottomLevel ?
+            bottomLevel.ProjectElevation + viewRange.GetOffset(PlanViewPlane.ViewDepthPlane) :
+            -CompoundElementFilter.BoundingBoxLimits;
+
+          var top = view.Document.GetElement(viewRange.GetLevelId(PlanViewPlane.TopClipPlane)) is Level topLevel ?
+            topLevel.ProjectElevation + viewRange.GetOffset(PlanViewPlane.TopClipPlane) :
+            +CompoundElementFilter.BoundingBoxLimits;
+
+          return new BoundingBoxIntersectsFilter
+          (
+            new Outline
+            (
+              new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, bottom),
+              new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, top)
+            ),
+            clipped
+          );
+        }
+      }
+
+      return default;
+    }
+
+    static ElementFilter GetUnderlayFilter(this View view, bool clipped = false)
+    {
+      var bottomId = view.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_BOTTOM_ID)?.AsElementId() ?? ElementId.InvalidElementId;
+      if (bottomId == ElementId.InvalidElementId) return default;
+
+      var topId    = view.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_TOP_ID   )?.AsElementId() ?? ElementId.InvalidElementId;
+      var bottom = (view.Document.GetElement(bottomId) as Level)?.ProjectElevation ?? -CompoundElementFilter.BoundingBoxLimits;
+      var top    = (view.Document.GetElement(topId   ) as Level)?.ProjectElevation ?? +CompoundElementFilter.BoundingBoxLimits;
+
+      return new BoundingBoxIntersectsFilter
+      (
+        new Outline
+        (
+          new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, bottom),
+          new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, top)
+        ),
+        clipped
+      );
+    }
+
+    public static ElementFilter GetOutlineFilter(this View view, bool clipped = false)
+    {
+      if (view is ViewSchedule)
+        return new ElementCategoryFilter(view.get_Parameter(BuiltInParameter.SCHEDULE_CATEGORY).AsElementId(), clipped);
+
+      var filter = clipped ?
+        CompoundElementFilter.Intersect(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped)) :
+        CompoundElementFilter.Union    (GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped));
+
+      return filter.IsEmpty() ? default : filter;
+    }
+
+    #region ViewSection
     static int IndexOfViewSection(ElevationMarker marker, ElementId viewId)
     {
       if (marker.HasElevations())
@@ -248,5 +334,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
           FirstOrDefault(x => IndexOfViewSection(x, viewSection.Id) >= 0);
       }
     }
+    #endregion
   }
 }
