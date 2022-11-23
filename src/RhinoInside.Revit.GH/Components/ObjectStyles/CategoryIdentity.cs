@@ -41,16 +41,16 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Category", out Types.Category category) || category.APIObject is null) return;
+      if (!Params.GetData(DA, "Category", out Types.Category category)) return;
 
       Params.TrySetData(DA, "Type", () => category.CategoryType);
-      Params.TrySetData(DA, "Parent", () => category.APIObject.Parent);
+      Params.TrySetData(DA, "Parent", () => category.Parent);
       Params.TrySetData(DA, "Name", () => category.FullName);
-      Params.TrySetData(DA, "Is Subcategory", () => category.APIObject.Parent is object);
-      Params.TrySetData(DA, "Allows Subcategories", () => category.APIObject.CanAddSubcategory);
-      Params.TrySetData(DA, "Allows Parameters", () => category.APIObject.AllowsBoundParameters);
-      Params.TrySetData(DA, "Has Material Quantities", () => category.APIObject.HasMaterialQuantities);
-      Params.TrySetData(DA, "Cuttable", () => category.APIObject.IsCuttable);
+      Params.TrySetData(DA, "Is Subcategory", () => category.IsSubcategory);
+      Params.TrySetData(DA, "Allows Subcategories", () => category.CanAddSubcategory);
+      Params.TrySetData(DA, "Allows Parameters", () => category.AllowsBoundParameters);
+      Params.TrySetData(DA, "Has Material Quantities", () => category.HasMaterialQuantities);
+      Params.TrySetData(DA, "Cuttable", () => category.IsCuttable);
     }
   }
 }
