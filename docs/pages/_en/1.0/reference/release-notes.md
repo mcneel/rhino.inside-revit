@@ -12,6 +12,30 @@ group: Deployment & Configs
 
 ### RC 
 
+- Now minimum Revit 2022 is 2022.1 to enable 'Delete Workset'.
+- Added 'Edit Type…' context menu to 'Type' parameters.
+- Added support for far-from-origin on DirectShape components.
+- Added warning when a component receives geometry far-from-origin.
+- Fixed pick linked element on other parameters than 'Graphical Element'.
+- Added support for geometry on linked files.
+- Added support for closed curves and poly-lines to `ShapeEncoder`.
+- Added conversion from 'Level' and 'View' to 'Work Plane'.
+- Added 'Ensure Workset' component.
+- Fix for NurbsCurve.ToCurve when is periodic.
+- Fixed a problem with ellipses with model-line creation components.
+- Fix for PolylineCurve.ToCurve and PolyCurve.ToCurve extension methods when Rhino is not in feet.
+- Fix for `HostObject` creation components when using closed curves.
+- Fix on 'Add Wall (Profile)' when profile is moved parallel to its plane.
+- Fix on recent version of Revit for 'View Extents' component. Now it does not take into account Grasshopper previews.
+- Fix for 'Element Face Paint'.
+- Fix for 'Element Type Picker' parameter.
+- Fixed `Types.Category.BakeElement`, it was baking more than necessary.
+- Improved `ARDB.Arc` conversion from Revit to Rhino.
+- Fix for Line components when used with closed curves.
+- Added `ARDB.View.GetClipBox` extension method. 
+- Added `ARDB.View.GetOutlineFilter` extension method.
+- Added ARDB.Element.GetGeometryObjectFromReference extension method that also returns the transform.
+- Added Selection.PickPoints method.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return Reference.ParseFromStableRepresentation(document, stable);
     }
 
-    internal static Reference CreateReferenceInLink(this Reference reference, RevitLinkInstance instance)
+    public static Reference CreateReferenceInLink(this Reference reference, RevitLinkInstance instance)
     {
       if (reference is null) throw new ArgumentNullException(nameof(reference));
       if (instance is null) throw new ArgumentNullException(nameof(instance));
