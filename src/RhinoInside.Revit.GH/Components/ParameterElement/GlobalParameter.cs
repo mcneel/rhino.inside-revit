@@ -137,15 +137,17 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
               }
 
               var builtInIntegerName = builtInInteger.ToString();
-              if (builtInIntegerName.Contains("COLOR_") || builtInIntegerName.Contains("_COLOR_") || builtInIntegerName.Contains("_COLOR"))
+              if (builtInIntegerName.EndsWith("_COLOR"))
               {
-                int r = value % 256;
-                value /= 256;
-                int g = value % 256;
-                value /= 256;
-                int b = value % 256;
+                // `value` is in BGR format
+                var color = System.Drawing.Color.FromArgb
+                (
+                  (value >>  0) & byte.MaxValue,
+                  (value >>  8) & byte.MaxValue,
+                  (value >> 16) & byte.MaxValue
+                );
 
-                return new GH_Colour(System.Drawing.Color.FromArgb(r, g, b));
+                return new GH_Colour(color);
               }
             }
           }
@@ -208,12 +210,12 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
               else if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
               {
                 var builtInParameterName = builtInParameter.ToString();
-                if (builtInParameterName.Contains("COLOR_") || builtInParameterName.Contains("_COLOR_") || builtInParameterName.Contains("_COLOR"))
+                if (builtInParameterName.EndsWith("_COLOR"))
                 {
                   if (!GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
                     throw new InvalidCastException();
 
-                  i.Value = ((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16);
+                  i.Value = (color.B >> 16) | (color.G << 8) | (color.R << 0);
                   parameter.SetValue(i);
                   return true;
                 }

@@ -71,15 +71,17 @@ namespace RhinoInside.Revit.GH
               }
 
               var builtInIntegerName = builtInInteger.ToString();
-              if (builtInIntegerName.Contains("COLOR_") || builtInIntegerName.Contains("_COLOR_") || builtInIntegerName.Contains("_COLOR"))
+              if (builtInIntegerName.EndsWith("_COLOR"))
               {
-                int r = integer % 256;
-                integer /= 256;
-                int g = integer % 256;
-                integer /= 256;
-                int b = integer % 256;
+                // integer is in BGR format
+                var color = System.Drawing.Color.FromArgb
+                (
+                  (integer >>  0) & byte.MaxValue,
+                  (integer >>  8) & byte.MaxValue,
+                  (integer >> 16) & byte.MaxValue
+                );
 
-                return new GH_Colour(System.Drawing.Color.FromArgb(r, g, b));
+                return new GH_Colour(color);
               }
             }
           }
@@ -135,12 +137,12 @@ namespace RhinoInside.Revit.GH
             else if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
             {
               var builtInParameterName = builtInParameter.ToString();
-              if (builtInParameterName.Contains("COLOR_") || builtInParameterName.Contains("_COLOR_") || builtInParameterName.Contains("_COLOR"))
+              if (builtInParameterName.EndsWith("_COLOR"))
               {
                 if (!GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
                   throw new InvalidCastException();
 
-                var _color = ((int) color.R) | ((int) color.G << 8) | ((int) color.B << 16);
+                var _color = (color.B << 16) | (color.G << 8) | (color.R << 0);
                 return parameter.Update(_color);
               }
             }
@@ -288,15 +290,17 @@ namespace RhinoInside.Revit.GH
             if (parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
             {
               var builtInIntegerName = builtInInteger.ToString();
-              if (builtInIntegerName.Contains("COLOR_") || builtInIntegerName.Contains("_COLOR_") || builtInIntegerName.Contains("_COLOR"))
+              if (builtInIntegerName.EndsWith("_COLOR"))
               {
-                int r = integer % 256;
-                integer /= 256;
-                int g = integer % 256;
-                integer /= 256;
-                int b = integer % 256;
+                // integer is in BGR format
+                var color = System.Drawing.Color.FromArgb
+                (
+                  (integer >>  0) & byte.MaxValue,
+                  (integer >>  8) & byte.MaxValue,
+                  (integer >> 16) & byte.MaxValue
+                );
 
-                return System.Drawing.Color.FromArgb(r, g, b).ToArgb();
+                return color.ToArgb();
               }
             }
           }
