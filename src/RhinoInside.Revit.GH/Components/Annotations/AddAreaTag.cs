@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Autodesk.Revit.DB.Architecture;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -36,7 +37,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           Name = "Area Plan",
           NickName = "AP",
           Description = "The Area Plan where the tag will be added.",
-        }
+          Optional = true,
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -89,24 +91,60 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Area", out ARDB.Area area)) return;
+      if (!Params.GetData(DA, "Area", out Types.AreaElement area, x => x.IsValid)) return;
 
       ReconstructElement<ARDB.AreaTag>
       (
-        area.Document, _Tag_, areaTag =>
+        area.ReferenceDocument, _Tag_, areaTag =>
         {
+          if (area.IsLinked)
+          {
+            // I'm unable to found API to tag linked areas.
+            // So we trait linked areas as invalid to tag.
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Tags to linked Areas are currently not supported in this Revit version.");
+            return null;
+          }
+
           // Input
-          if (!Params.TryGetData(DA, "Area Plan", out ARDB.ViewPlan viewPlan)) return null;
+          if (!Params.TryGetData(DA, "Area Plan", out Types.AreaPlan view, x => area.ReferenceDocument.IsEquivalent(x.Document))) return null;
+          if (view is null)
+          {
+            if (area.IsLinked)
+            {
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Area Plan cannot be null if Area is in an RVT Link.");
+              return null;
+            }
+            else
+            {
+              using (var collector = new ARDB.FilteredElementCollector(area.ReferenceDocument).OfClass(typeof(ARDB.ViewPlan)))
+              {
+                using (var areaScheme = area.Value.AreaScheme)
+                {
+                  view = collector.Cast<ARDB.ViewPlan>().
+                    Where(x => x.ViewType == ARDB.ViewType.AreaPlan && !x.IsTemplate && areaScheme.IsEquivalent(x.AreaScheme)).
+                    Select(x => new Types.AreaPlan(x)).FirstOrDefault();
+
+                  if (view is null)
+                  {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "No good default Area Plan its been found.");
+                    return null;
+                  }
+                }
+              }
+            }
+          }
           if (!Params.TryGetData(DA, "Head Location", out Point3d? headLocation)) return null;
-          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.AreaTagType type, Types.Document.FromValue(area.Document), ARDB.BuiltInCategory.OST_AreaTags)) return null;
+          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.AreaTagType type, Types.Document.FromValue(area.ReferenceDocument), ARDB.BuiltInCategory.OST_AreaTags)) return null;
 
           // Snap Point to the 'Area' 'Elevation'
-          var source = (area.Location as ARDB.LocationPoint).Point;
-          var target = headLocation?.ToXYZ();
-          target = new ARDB.XYZ(target?.X ?? source.X, target?.Y ?? source.Y, source.Z);
+          var target = (area.Value.Location as ARDB.LocationPoint).Point;
+          target = area.GetReferenceTransform().OfPoint(target);
+
+          var head = headLocation?.ToXYZ();
+          head = new ARDB.XYZ(head?.X ?? target.X, head?.Y ?? target.Y, target.Z);
 
           // Compute
-          areaTag = Reconstruct(areaTag, viewPlan, area, target, type);
+          areaTag = Reconstruct(areaTag, view?.Value, area.Value, target, head, type);
 
           DA.SetData(_Tag_, areaTag);
           return areaTag;
@@ -114,14 +152,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       );
     }
 
-    bool Reuse(ARDB.AreaTag areaTag, ARDB.ViewPlan view, ARDB.XYZ point, ARDB.AreaTagType type)
+    bool Reuse(ARDB.AreaTag areaTag, ARDB.ViewPlan view, ARDB.Area area, ARDB.XYZ target, ARDB.AreaTagType type)
     {
       if (areaTag is null) return false;
       if (view is object && !areaTag.View.IsEquivalent(view)) return false;
+      if (!areaTag.Area.IsEquivalent(area)) return false;
       if (areaTag.GetTypeId() != type.Id) areaTag.ChangeTypeId(type.Id);
       if (areaTag.Location is ARDB.LocationPoint areaTagLocation)
       {
-        var target = point;
         var position = areaTagLocation.Point;
         if (!target.IsAlmostEqualTo(position))
         {
@@ -135,17 +173,27 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       return true;
     }
 
-    ARDB.AreaTag Reconstruct(ARDB.AreaTag areaTag, ARDB.ViewPlan view, ARDB.Area area, ARDB.XYZ headPosition, ARDB.AreaTagType type)
+    ARDB.AreaTag Reconstruct
+    (
+      ARDB.AreaTag areaTag,
+      ARDB.ViewPlan view,
+      ARDB.Area area,
+      ARDB.XYZ target,
+      ARDB.XYZ head,
+      ARDB.AreaTagType type
+    )
     {
-      var areaLocation = (area.Location as ARDB.LocationPoint).Point;
-      if (!Reuse(areaTag, view, areaLocation, type))
-        areaTag = area.Document.Create.NewAreaTag(view, area, new ARDB.UV(areaLocation.X, areaLocation.Y));
+      if (!Reuse(areaTag, view, area, target, type))
+      {
+        areaTag = type.Document.Create.NewAreaTag(view, area, new ARDB.UV(target.X, target.Y));
+        areaTag.ChangeTypeId(type.Id);
+      }
 
-      if (!areaTag.TagHeadPosition.IsAlmostEqualTo(headPosition))
+      if (!areaTag.TagHeadPosition.IsAlmostEqualTo(head))
       {
         var pinned = areaTag.Pinned;
         areaTag.Pinned = false;
-        areaTag.TagHeadPosition = headPosition;
+        areaTag.TagHeadPosition = head;
         areaTag.Pinned = pinned;
       }
 

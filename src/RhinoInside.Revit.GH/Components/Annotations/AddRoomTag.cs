@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -37,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           NickName = "V",
           Description = "The view where the tag will be added.",
           Optional = true
-        }, ParamRelevance.Occasional
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -90,24 +89,31 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Room", out ARDB.Architecture.Room room)) return;
+      if (!Params.GetData(DA, "Room", out Types.RoomElement room, x => x.IsValid)) return;
 
       ReconstructElement<ARDB.Architecture.RoomTag>
       (
-        room.Document, _Tag_, roomTag =>
+        room.ReferenceDocument, _Tag_, roomTag =>
         {
           // Input
-          if (!Params.TryGetData(DA, "View", out ARDB.View view)) return null;
+          if (!Params.TryGetData(DA, "View", out Types.View view, x => room.ReferenceDocument.IsEquivalent(x.Document))) return null;
+          if (view is null && room.IsLinked)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "View cannot be null if Room is in an RVT Link.");
+            return null;
+          }
           if (!Params.TryGetData(DA, "Head Location", out Point3d? headLocation)) return null;
-          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.Architecture.RoomTagType type, Types.Document.FromValue(room.Document), ARDB.BuiltInCategory.OST_RoomTags)) return null;
+          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.Architecture.RoomTagType type, Types.Document.FromValue(room.ReferenceDocument), ARDB.BuiltInCategory.OST_RoomTags)) return null;
 
           // Snap Point to the 'Room' 'Elevation'
-          var source = (room.Location as ARDB.LocationPoint).Point;
-          var target = headLocation?.ToXYZ();
-          target = new ARDB.XYZ(target?.X ?? source.X, target?.Y ?? source.Y, source.Z);
+          var target = (room.Value.Location as ARDB.LocationPoint).Point;
+          target = room.GetReferenceTransform().OfPoint(target);
+
+          var head = headLocation?.ToXYZ();
+          head = new ARDB.XYZ(head?.X ?? target.X, head?.Y ?? target.Y, target.Z);
 
           // Compute
-          roomTag = Reconstruct(roomTag, view, room, target, type);
+          roomTag = Reconstruct(roomTag, view?.Value, room.Value, room.GetReference(), target, head, type);
 
           DA.SetData(_Tag_, roomTag);
           return roomTag;
@@ -115,14 +121,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       );
     }
 
-    bool Reuse(ARDB.Architecture.RoomTag roomTag, ARDB.View view, ARDB.XYZ point, ARDB.Architecture.RoomTagType type)
+    bool Reuse(ARDB.Architecture.RoomTag roomTag, ARDB.View view, ARDB.Architecture.Room room, ARDB.XYZ target, ARDB.Architecture.RoomTagType type)
     {
       if (roomTag is null) return false;
       if (view is object && !roomTag.View.IsEquivalent(view)) return false;
+      if (!roomTag.Room.IsEquivalent(room)) return false;
       if (roomTag.GetTypeId() != type.Id) roomTag.ChangeTypeId(type.Id);
       if (roomTag.Location is ARDB.LocationPoint areaTagLocation)
       {
-        var target = point;
         var position = areaTagLocation.Point;
         if (!target.IsAlmostEqualTo(position))
         {
@@ -136,22 +142,33 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       return true;
     }
 
-    ARDB.Architecture.RoomTag Reconstruct(ARDB.Architecture.RoomTag roomTag, ARDB.View view, ARDB.Architecture.Room room, ARDB.XYZ headPosition, ARDB.Architecture.RoomTagType type)
+    ARDB.Architecture.RoomTag Reconstruct
+    (
+      ARDB.Architecture.RoomTag roomTag,
+      ARDB.View view,
+      ARDB.Architecture.Room room,
+      ARDB.Reference roomReference,
+      ARDB.XYZ target,
+      ARDB.XYZ head,
+      ARDB.Architecture.RoomTagType type
+    )
     {
-      var areaLocation = (room.Location as ARDB.LocationPoint).Point;
-      if (!Reuse(roomTag, view, areaLocation, type))
-        roomTag = room.Document.Create.NewRoomTag
+      if (!Reuse(roomTag, view, room, target, type))
+      {
+        roomTag = type.Document.Create.NewRoomTag
         (
-          new ARDB.LinkElementId(room.Id),
-          new ARDB.UV(areaLocation.X, areaLocation.Y),
+          roomReference.ToLinkElementId(),
+          new ARDB.UV(target.X, target.Y),
           view?.Id
         );
+        roomTag.ChangeTypeId(type.Id);
+      }
 
-      if (!roomTag.TagHeadPosition.IsAlmostEqualTo(headPosition))
+      if (!roomTag.TagHeadPosition.IsAlmostEqualTo(head))
       {
         var pinned = roomTag.Pinned;
         roomTag.Pinned = false;
-        roomTag.TagHeadPosition = headPosition;
+        roomTag.TagHeadPosition = head;
         roomTag.Pinned = pinned;
       }
 

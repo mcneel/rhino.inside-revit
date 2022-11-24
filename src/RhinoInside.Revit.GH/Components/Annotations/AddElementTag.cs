@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           (
             independentTag,
             view,
-            element.Value,
+            element.GetReference(),
             headPosition,
             leaderEnd,
             !headPosition.IsAlmostEqualTo(leaderEnd),
@@ -107,14 +107,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     (
       ARDB.IndependentTag independetTag,
       ARDB.View view,
-      ARDB.Element element,
+      ARDB.Reference reference,
       ARDB.XYZ point
     )
     {
       if (independetTag is null) return false;
       if (independetTag.OwnerViewId != view.Id) return false;
-      var taggedIds = independetTag.GetTaggedLocalElementIds();
-      if (taggedIds.Count != 1 || !taggedIds.Contains(element.Id)) return false;
+      var taggedIds = independetTag.GetTaggedElementIds();
+      if (taggedIds.Count != 1 || !taggedIds.Contains(reference.ToLinkElementId())) return false;
       if (independetTag.Location is ARDB.LocationPoint independentTagLocation)
       {
         var target = point;
@@ -134,7 +134,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     ARDB.IndependentTag Create
     (
       ARDB.View view,
-      ARDB.Element element,
+      ARDB.Reference reference,
       ARDB.XYZ point,
       bool leader,
       ARDB.TagOrientation orientation
@@ -143,16 +143,21 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       try
       {
 #if REVIT_2018
-        var reference = new ARDB.Reference(element);
         return ARDB.IndependentTag.Create(view.Document, view.Id, reference, leader, TagMode, orientation, point);
 #else
+        var element = view.Document.GetElement(reference.ElementId, reference.LinkedElementId);
         return view.Document.Create.NewTag(view, element, leader, TagMode, orientation, point);
 #endif
       }
       catch (Autodesk.Revit.Exceptions.InvalidOperationException)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"There is no tag loaded for '{element.Category.Name}'.");
-        return null;
+        if (view.Document.GetElement(reference.ElementId, reference.LinkedElementId) is ARDB.Element element)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"There is no tag loaded for '{element.Category.Name}'.");
+          return null;
+        }
+
+        throw;
       }
     }
 
@@ -160,15 +165,15 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     (
       ARDB.IndependentTag independentTag,
       ARDB.View view,
-      ARDB.Element element,
+      ARDB.Reference reference,
       ARDB.XYZ headPosition,
       ARDB.XYZ leaderEnd,
       bool leader,
       ARDB.TagOrientation orientation
     )
     {
-      if (!Reuse(independentTag, view, element, headPosition))
-        independentTag = Create(view, element, headPosition, leader, orientation);
+      if (!Reuse(independentTag, view, reference, headPosition))
+        independentTag = Create(view, reference, headPosition, leader, orientation);
 
       if (independentTag is object)
       {
@@ -177,10 +182,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         if (view.ViewType == ARDB.ViewType.ThreeD)
         {
           independentTag.get_Parameter(ARDB.BuiltInParameter.TAG_LEADER_TYPE).Update(1);
-          if (independentTag.GetTaggedReferences().FirstOrDefault() is ARDB.Reference reference)
+          if (independentTag.GetTaggedReferences().FirstOrDefault() is ARDB.Reference referenceTagged)
           {
-            if (!independentTag.GetLeaderEnd(reference).IsAlmostEqualTo(leaderEnd))
-              independentTag.SetLeaderEnd(reference, leaderEnd);
+            if (!independentTag.GetLeaderEnd(referenceTagged).IsAlmostEqualTo(leaderEnd))
+              independentTag.SetLeaderEnd(referenceTagged, leaderEnd);
           }
         }
 
