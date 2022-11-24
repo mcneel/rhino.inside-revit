@@ -62,6 +62,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   internal static class ReferenceExtension
   {
+    public static LinkElementId ToLinkElementId(this Reference reference)
+    {
+      if (reference is null) throw new ArgumentNullException(nameof(reference));
+      return reference.LinkedElementId == ElementId.InvalidElementId ?
+        new LinkElementId(reference.ElementId) :
+        new LinkElementId(reference.ElementId, reference.LinkedElementId);
+    }
+
     public static Reference CreateLinkReference(this Reference reference, Document document, ElementId linkInstanceId, Document linkedDocument)
     {
       if (reference is null) throw new ArgumentNullException(nameof(reference));
