@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.External.DB
     public ElevationElementReference(ARDB.Level level)
     {
       var basePoint = default(ARDB.BasePoint);
-      switch ((ElevationBase) level.Document.GetElement(level.GetTypeId()).get_Parameter(ARDB.BuiltInParameter.LEVEL_RELATIVE_BASE_TYPE).AsInteger())
+      switch (level.Document.GetElement(level.GetTypeId()).GetParameterValue<ElevationBase>(ARDB.BuiltInParameter.LEVEL_RELATIVE_BASE_TYPE))
       {
         case ElevationBase.ProjectBasePoint: basePoint = BasePointExtension.GetProjectBasePoint(level.Document); break;
         case ElevationBase.SurveyPoint: basePoint = BasePointExtension.GetSurveyPoint(level.Document); break;
