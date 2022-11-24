@@ -576,7 +576,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     internal static string GetElementNomen(this Element element, out BuiltInParameter nomenParameter)
     {
       if ((nomenParameter = GetNomenParameter(element)) != BuiltInParameter.INVALID)
-        return GetParameterValue<string>(element, nomenParameter);
+        return element.get_Parameter(nomenParameter).AsString();
       else
         return element.Name;
     }
@@ -584,7 +584,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     internal static string GetElementNomen(this Element element, BuiltInParameter nomenParameter)
     {
       if (nomenParameter != BuiltInParameter.INVALID)
-        return GetParameterValue<string>(element, nomenParameter);
+        return element.get_Parameter(nomenParameter).AsString();
       else
         return element.Name;
     }
@@ -735,7 +735,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if !REVIT_2022
     public static Parameter GetParameter(this Element element, Schemas.ParameterId parameterId)
     {
-      return element.get_Parameter(parameterId);
+      if (element is null) throw new System.ArgumentNullException("A non-optional argument was NULL", nameof(element));
+      if (parameterId is null) throw new System.ArgumentNullException("A non-optional argument was NULL", nameof(parameterId));
+
+      BuiltInParameter builtInParameter = parameterId;
+      if (builtInParameter == BuiltInParameter.INVALID)
+        throw new System.ArgumentException($"{nameof(parameterId)} does not identify a built-in parameter.", nameof(parameterId));
+
+      return element.get_Parameter(builtInParameter);
     }
 #endif
 
@@ -824,21 +831,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
           if (param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Boolean.YesNo)
             throw new System.InvalidCastException();
 
-          return (T) (object) (param.AsInteger() != 0);
+          return (T) (object) param.AsBoolean();
         }
         else if (typeof(T) == typeof(int))
         {
           if (param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Int.Integer)
             throw new System.InvalidCastException();
 
-          return (T) (object) (param.AsInteger() != 0);
+          return (T) (object) param.AsInteger();
         }
         else if (typeof(T).IsSubclassOf(typeof(Enum)))
         {
           if (param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Int.Integer)
             throw new System.InvalidCastException();
 
-          return (T) (object) (param.AsInteger() != 0);
+          return (T) (object) param.AsInteger();
         }
         else if (typeof(T) == typeof(double))
         {

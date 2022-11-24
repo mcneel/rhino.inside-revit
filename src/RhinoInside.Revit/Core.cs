@@ -228,6 +228,12 @@ namespace RhinoInside.Revit
 
       // Check if Revit.exe is a supported version
       var RevitVersion = new Version(app.Services.SubVersionNumber);
+      if (RevitVersion.Major != MinimumRevitVersion.Major)
+      {
+        app.Services.WriteJournalComment($"Expected Revit version is ({MinimumRevitVersion}) or above!!", timeStamp: false);
+        return ARUI.Result.Cancelled;
+      }
+
       if (RevitVersion < MinimumRevitVersion)
       {
         using
@@ -238,7 +244,7 @@ namespace RhinoInside.Revit
             MainIcon = UIX.TaskDialogIcons.IconInformation,
             AllowCancellation = true,
             MainInstruction = "Unsupported Revit version",
-            MainContent = $"Expected Revit version is ({MinimumRevitVersion}) or above.",
+            MainContent = $"Please update Revit to version {MinimumRevitVersion} or higher.",
             ExpandedContent =
             (RhinoVersionInfo is null ? "Rhino\n" :
             $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n") +
@@ -253,13 +259,22 @@ namespace RhinoInside.Revit
         )
         {
           taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink1, $"Revit {RevitVersion.Major} Product Updates…");
-          if (taskDialog.Show() == ARUI.TaskDialogResult.CommandLink1)
+          taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink2, $"Continue without updating Revit…", $"Running {Core.Product} in Revit version {RevitVersion} is not supported.");
+
+          switch(taskDialog.Show())
           {
-            using (Process.Start($@"https://knowledge.autodesk.com/support/revit?s=Download%20Updates&v={RevitVersion.Major}&sort=score")) { }
+            case ARUI.TaskDialogResult.CommandLink1:
+              using (Process.Start($@"https://knowledge.autodesk.com/support/revit?s=Download%20Updates&v={RevitVersion.Major}&sort=score")) { }
+              return ARUI.Result.Cancelled;
+
+            case ARUI.TaskDialogResult.CommandLink2:
+              app.Services.WriteJournalComment($"Minimum Revit version is ({MinimumRevitVersion}) or above!!", timeStamp: false);
+              break;
+
+            default:
+              return ARUI.Result.Cancelled;
           }
         }
-
-        return ARUI.Result.Cancelled;
       }
 
       // Check if we have 'opennurbs_private.manifest' file on Revit folder.
