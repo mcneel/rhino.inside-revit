@@ -147,6 +147,15 @@ namespace RhinoInside.Revit.GH.Types
       catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
     }
 
+    static readonly ARDB.Transform IdentityTransform = ARDB.Transform.Identity;
+    internal ARDB.Transform GetReferenceTransform()
+    {
+      // TODO : Keep the transform for preview and other purposes.
+      return IsLinked ?
+        (ReferenceDocument.GetElement(ReferenceId) as ARDB.RevitLinkInstance).GetTransform() :
+        IdentityTransform;
+    }
+
     ARDB.ElementId _ReferenceId = ARDB.ElementId.InvalidElementId;
     public override ARDB.ElementId ReferenceId => _ReferenceId;
 

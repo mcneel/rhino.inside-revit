@@ -1,5 +1,6 @@
 using System;
-using System.Linq;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -37,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           NickName = "V",
           Description = "The view where the tag will be added.",
           Optional = true
-        }, ParamRelevance.Occasional
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -90,24 +91,39 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Space", out ARDB.Mechanical.Space space)) return;
+      if (!Params.GetData(DA, "Space", out Types.SpaceElement space, x => x.IsValid)) return;
 
       ReconstructElement<ARDB.Mechanical.SpaceTag>
       (
-        space.Document, _Tag_, spaceTag =>
+        space.ReferenceDocument, _Tag_, spaceTag =>
         {
+          if (space.IsLinked)
+          {
+            // I'm unable to found API to tag linked spaces.
+            // So we trait linked spaces as invalid to tag.
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Tags to linked Spaces are currently not supported in this Revit version.");
+            return null;
+          }
+
           // Input
-          if (!Params.TryGetData(DA, "View", out ARDB.View view)) return null;
+          if (!Params.TryGetData(DA, "View", out Types.View view, x => space.ReferenceDocument.IsEquivalent(x.Document))) return null;
+          if (view is null && space.IsLinked)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "View cannot be null if Space is in an RVT Link.");
+            return null;
+          }
           if (!Params.TryGetData(DA, "Head Location", out Point3d? headLocation)) return null;
-          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.Mechanical.SpaceTagType type, Types.Document.FromValue(space.Document), ARDB.BuiltInCategory.OST_MEPSpaceTags)) return null;
+          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.Mechanical.SpaceTagType type, Types.Document.FromValue(space.ReferenceDocument), ARDB.BuiltInCategory.OST_MEPSpaceTags)) return null;
 
           // Snap Point to the 'Space' 'Elevation'
-          var source = (space.Location as ARDB.LocationPoint).Point;
-          var target = headLocation?.ToXYZ();
-          target = new ARDB.XYZ(target?.X ?? source.X, target?.Y ?? source.Y, source.Z);
+          var target = (space.Value.Location as ARDB.LocationPoint).Point;
+          target = space.GetReferenceTransform().OfPoint(target);
+
+          var head = headLocation?.ToXYZ();
+          head = new ARDB.XYZ(head?.X ?? target.X, head?.Y ?? target.Y, target.Z);
 
           // Compute
-          spaceTag = Reconstruct(spaceTag, view, space, target, type);
+          spaceTag = Reconstruct(spaceTag, view?.Value, space.Value, target, head, type);
 
           DA.SetData(_Tag_, spaceTag);
           return spaceTag;
@@ -115,14 +131,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       );
     }
 
-    bool Reuse(ARDB.Mechanical.SpaceTag spaceTag, ARDB.View view, ARDB.XYZ point, ARDB.Mechanical.SpaceTagType type)
+    bool Reuse(ARDB.Mechanical.SpaceTag spaceTag, ARDB.View view, ARDB.Mechanical.Space space, ARDB.XYZ target, ARDB.Mechanical.SpaceTagType type)
     {
       if (spaceTag is null) return false;
       if (view is object && !spaceTag.View.IsEquivalent(view)) return false;
+      if (!spaceTag.Space.IsEquivalent(space)) return false;
       if (spaceTag.GetTypeId() != type.Id) spaceTag.ChangeTypeId(type.Id);
       if (spaceTag.Location is ARDB.LocationPoint areaTagLocation)
       {
-        var target = point;
         var position = areaTagLocation.Point;
         if (!target.IsAlmostEqualTo(position))
         {
@@ -136,22 +152,32 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       return true;
     }
 
-    ARDB.Mechanical.SpaceTag Reconstruct(ARDB.Mechanical.SpaceTag spaceTag, ARDB.View view, ARDB.Mechanical.Space space, ARDB.XYZ headPosition, ARDB.Mechanical.SpaceTagType type)
+    ARDB.Mechanical.SpaceTag Reconstruct
+    (
+      ARDB.Mechanical.SpaceTag spaceTag,
+      ARDB.View view,
+      ARDB.Mechanical.Space space,
+      ARDB.XYZ target,
+      ARDB.XYZ head,
+      ARDB.Mechanical.SpaceTagType type
+    )
     {
-      var areaLocation = (space.Location as ARDB.LocationPoint).Point;
-      if (!Reuse(spaceTag, view, areaLocation, type))
-        spaceTag = space.Document.Create.NewSpaceTag
+      if (!Reuse(spaceTag, view, space, target, type))
+      {
+        spaceTag = type.Document.Create.NewSpaceTag
         (
           space,
-          new ARDB.UV(areaLocation.X, areaLocation.Y),
+          new ARDB.UV(target.X, target.Y),
           view
         );
+        spaceTag.ChangeTypeId(type.Id);
+      }
 
-      if (!spaceTag.TagHeadPosition.IsAlmostEqualTo(headPosition))
+      if (!spaceTag.TagHeadPosition.IsAlmostEqualTo(head))
       {
         var pinned = spaceTag.Pinned;
         spaceTag.Pinned = false;
-        spaceTag.TagHeadPosition = headPosition;
+        spaceTag.TagHeadPosition = head;
         spaceTag.Pinned = pinned;
       }
 
