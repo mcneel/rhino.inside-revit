@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           NickName = "V",
           Description = "The view where the tag will be added.",
           Optional = true
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
