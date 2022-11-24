@@ -735,7 +735,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if !REVIT_2022
     public static Parameter GetParameter(this Element element, Schemas.ParameterId parameterId)
     {
-      return element.get_Parameter(parameterId);
+      if (element is null) throw new System.ArgumentNullException("A non-optional argument was NULL", nameof(element));
+      if (parameterId is null) throw new System.ArgumentNullException("A non-optional argument was NULL", nameof(parameterId));
+
+      BuiltInParameter builtInParameter = parameterId;
+      if (builtInParameter == BuiltInParameter.INVALID)
+        throw new System.ArgumentException($"{nameof(parameterId)} does not identify a built-in parameter.", nameof(parameterId));
+
+      return element.get_Parameter(builtInParameter);
     }
 #endif
 
