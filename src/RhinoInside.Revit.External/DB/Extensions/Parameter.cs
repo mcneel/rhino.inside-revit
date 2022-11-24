@@ -5,6 +5,8 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  using External.DB.Schemas;
+
   internal static class ParameterEqualityComparer
   {
     /// <summary>
@@ -135,12 +137,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
   {
     public static bool AsBoolean(this Parameter parameter)
     {
+      if (parameter.Definition.GetDataType() != SpecType.Boolean.YesNo)
+        throw new InvalidCastException();
+
       return parameter.AsInteger() != 0;
     }
 
     public static T AsEnum<T>(this Parameter parameter) where T : Enum
     {
+      if (parameter.Definition.GetDataType() != SpecType.Int.Integer)
+        throw new InvalidCastException();
+
       return (T) (object) parameter.AsInteger();
+    }
+
+    public static Color AsColor(this Parameter parameter)
+    {
+      if (parameter.Definition.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().ToString().EndsWith("_COLOR"))
+        throw new InvalidCastException();
+
+      var abgr = parameter.AsInteger();
+      return new Color((byte) ((abgr >> 0) & byte.MaxValue), (byte) ((abgr >> 8) & byte.MaxValue), (byte) ((abgr >> 16) & byte.MaxValue));
     }
 
     public static bool Update(this Parameter parameter, bool value)
