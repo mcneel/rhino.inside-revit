@@ -130,11 +130,11 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_ItemDescription
     public string Name => ToString();
 
-    public string NickName => Value.ToString("B");
+    public string Identity => Value.ToString("B");
 
     public string Description => TypeDescription;
 
-    public Bitmap GetImage(Size size) => default;
+    public Bitmap GetTypeIcon(Size size) => Properties.Resources.DocumentWarnings;
     #endregion
   }
 }

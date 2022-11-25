@@ -13,8 +13,7 @@ namespace Grasshopper.Kernel.Parameters
     public override Guid ComponentGuid => new Guid("DF028C15-D188-42B6-B50A-2EF7A5D5B4F0");
     public override GH_Exposure Exposure => GH_Exposure.hidden;
 
-    static readonly Guid ColourParamComponentGuid = new Guid("203A91C3-287A-43b6-A9C5-EBB96240A650");
-    protected override Bitmap Icon => Instances.ComponentServer.EmitObjectIcon(ColourParamComponentGuid);
+    protected override Bitmap Icon => GH_ColorRGBA.TypeIcon;
 
     public Param_ColorRGBA() : base("Colour", "Col", "Contains a collection of RGB colours defined by 4 double floating point values.", "Params", "Primitive") { }
 

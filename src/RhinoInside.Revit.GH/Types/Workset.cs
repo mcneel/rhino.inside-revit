@@ -166,9 +166,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ItemDescription
-    Bitmap IGH_ItemDescription.GetImage(Size size) => default;
+    Bitmap IGH_ItemDescription.GetTypeIcon(Size size) => Properties.Resources.Workset;
     string IGH_ItemDescription.Name => DisplayName;
-    string IGH_ItemDescription.NickName => $"{{{Id?.ToString()}}}";
+    string IGH_ItemDescription.Identity => $"{{{Id?.ToString()}}}";
     string IGH_ItemDescription.Description => Document?.GetTitle();
     #endregion
 

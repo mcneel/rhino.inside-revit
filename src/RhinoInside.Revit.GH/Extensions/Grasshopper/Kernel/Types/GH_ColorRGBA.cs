@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -17,11 +18,14 @@ namespace Grasshopper.Kernel.Types
     public override string TypeDescription => "A double-precision, RGBA color";
 
     #region IGH_ItemDescription
-    public System.Drawing.Bitmap GetImage(System.Drawing.Size size) => default;
+    static readonly Guid ColourParamComponentGuid = new Guid("203A91C3-287A-43b6-A9C5-EBB96240A650");
+    internal static readonly System.Drawing.Bitmap TypeIcon = Instances.ComponentServer.EmitObjectIcon(ColourParamComponentGuid);
+
+    public System.Drawing.Bitmap GetTypeIcon(System.Drawing.Size size) => TypeIcon;
 
     public string Name => ToString();
 
-    public string NickName => Value.A == 1.0 ?
+    public string Identity => Value.A == 1.0 ?
       $"{Value.R:F2},{Value.G:F2},{Value.B:F2}":
       $"{Value.R:F2},{Value.G:F2},{Value.B:F2},{Value.A:F2}";
 

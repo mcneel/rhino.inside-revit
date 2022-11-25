@@ -1,5 +1,8 @@
 using System;
+using System.Linq;
 using System.Drawing;
+using Grasshopper;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Special;
 using ARDB = Autodesk.Revit.DB;
@@ -66,25 +69,26 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
+        if (IsValid) return null;
+
         if (ReferenceDocumentId == Guid.Empty) return $"Reference Document Id '{Guid.Empty}' is invalid";
-        if (!External.DB.UniqueId.TryParse(ReferenceUniqueId, out var _, out var _)) return $"Reference Unique Id '{ReferenceUniqueId}' is invalid";
-
         if (ReferenceDocument is null)
-        {
           return $"Referenced Revit document '{ReferenceDocumentId}' was closed.";
-        }
-        else if (Document is null)
-        {
-          return "Referenced Revit linked document is not loaded.";
-        }
-        else
-        {
-          var id = Id;
-          if (id is null) return $"Referenced Revit element '{ReferenceUniqueId}' is not available.";
-          if (id == ARDB.ElementId.InvalidElementId) return "Id is equal to InvalidElementId.";
-        }
 
-        return default;
+        if (Document is null)
+          return "Referenced Revit linked document is not loaded.";
+
+        if (!External.DB.ReferenceId.TryParse(ReferenceUniqueId, out var _, ReferenceDocument))
+          return $"Reference Unique Id '{ReferenceUniqueId}' is invalid";
+
+        var id = Id;
+        if (id is null)
+          return $"Referenced Revit element '{ReferenceUniqueId}' is not available.";
+
+        if (id == ARDB.ElementId.InvalidElementId)
+          return "Id is equal to InvalidElementId.";
+
+        return "Invalid";
       }
     }
 
@@ -108,9 +112,29 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ItemDescription
-    Bitmap IGH_ItemDescription.GetImage(Size size) => default;
+    Bitmap IGH_ItemDescription.GetTypeIcon(Size size)
+    {
+      // Try with a parameter that has the same name.
+      var typeName = (this as IGH_Goo).TypeName;
+      if (typeName.StartsWith("Revit "))
+        typeName = typeName.Substring(6);
+
+      var location = GetType().Assembly.Location;
+      var proxy = Instances.ComponentServer.ObjectProxies.
+        Where
+        (
+          x => typeof(IGH_Param).IsAssignableFrom(x.Type) &&
+          string.Equals(x.Desc.Name, typeName, StringComparison.OrdinalIgnoreCase) &&
+          string.Equals(x.Location, location, StringComparison.OrdinalIgnoreCase)
+        ).
+        OrderBy(x => !x.SDKCompliant).
+        ThenBy(x => x.Obsolete).
+        FirstOrDefault();
+
+      return proxy?.Icon ?? Properties.Resources.GeometryObject;
+    }
     string IGH_ItemDescription.Name => DisplayName;
-    string IGH_ItemDescription.NickName => $"{{{Id?.ToString()}}}";
+    string IGH_ItemDescription.Identity => $"{{{Id?.ToString()}}}";
     string IGH_ItemDescription.Description => Document?.GetTitle();
     #endregion
 

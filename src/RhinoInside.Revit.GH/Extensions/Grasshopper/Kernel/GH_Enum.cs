@@ -311,9 +311,9 @@ namespace RhinoInside.Revit.GH.Types
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
     #region IGH_ItemDescription
-    Bitmap IGH_ItemDescription.GetImage(Size size) => default;
+    Bitmap IGH_ItemDescription.GetTypeIcon(Size size) => Properties.Resources.UnknownIcon;
     string IGH_ItemDescription.Name => Text;
-    string IGH_ItemDescription.NickName => Value.ToString("D");
+    string IGH_ItemDescription.Identity => Value.ToString("D");
     string IGH_ItemDescription.Description => TypeDescription;
     #endregion
 
