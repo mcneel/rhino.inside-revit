@@ -312,6 +312,9 @@ namespace RhinoInside.Revit.External.DB
         for (var n = nesting; n < geometryId.Length; ++n)
           geometryId[n] = geometryId[nesting - 1];
 
+        if (geometryId[0].Type != GeometryObjectType.RVTLINK)
+          geometryId[1] = geometryId[0];
+
         return new ReferenceId(geometryId);
       }
       catch (FormatException)
