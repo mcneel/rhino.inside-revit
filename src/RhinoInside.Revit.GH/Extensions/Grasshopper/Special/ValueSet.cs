@@ -180,8 +180,8 @@ namespace Grasshopper.Special
     IGH_PreviewObject
     where T : class, IGH_Goo
   {
-    protected override Bitmap Icon => ClassIcon;
-    static readonly Bitmap ClassIcon = BuildIcon();
+    protected override Bitmap Icon => _Icon;
+    static readonly Bitmap _Icon = BuildIcon();
     static Bitmap BuildIcon()
     {
       var bitmap = new Bitmap(24, 24);
@@ -274,7 +274,8 @@ namespace Grasshopper.Special
       return string.Empty;
     }
 
-   public string SearchPattern { get; set; } = string.Empty;
+    public string SearchPattern { get; set; } = string.Empty;
+
     protected internal int LayoutLevel { get; set; } = 1;
 
     public class ListItem
@@ -552,6 +553,15 @@ namespace Grasshopper.Special
 
       float ScrollRatio = 0.0f;
 
+      enum ScrollMode
+      {
+        None,
+        Scrolling,
+        Panning
+      }
+
+      ScrollMode ActiveScrollMode = ScrollMode.None;
+
       float Scrolling = float.NaN;
       float ScrollingY = float.NaN;
 
@@ -602,9 +612,12 @@ namespace Grasshopper.Special
               {
                 using
                 (
-                  var capsuleName = GH_Capsule.CreateTextCapsule(iconBox, iconBox,
-                                    GH_Palette.Black, Owner.NickName,
-                                    GH_FontServer.LargeAdjusted, GH_Orientation.vertical_center, 3, 6))
+                  var capsuleName = GH_Capsule.CreateTextCapsule
+                  (
+                    iconBox, iconBox,
+                    GH_Palette.Black, Owner.NickName,
+                    GH_FontServer.LargeAdjusted, GH_Orientation.vertical_center, 3, 6)
+                  )
                 {
                   capsuleName.Render(graphics, Selected, Owner.Locked, false);
                 }
@@ -836,17 +849,24 @@ namespace Grasshopper.Special
       {
         if (canvas.Viewport.Zoom >= GH_Viewport.ZoomDefault * 0.6f)
         {
+          var canvasLocation = new Point((int) e.CanvasLocation.X, (int) e.CanvasLocation.Y);
+
           if (e.Button == MouseButtons.Left)
           {
-            var clientBounds = new RectangleF(Bounds.X + SizingBorders.Left, Bounds.Y + SizingBorders.Top, Bounds.Width - SizingBorders.Horizontal, Bounds.Height - SizingBorders.Vertical);
+            var clientBounds = new RectangleF
+            (
+              Bounds.X + SizingBorders.Left, Bounds.Y + SizingBorders.Top,
+              Bounds.Width - SizingBorders.Horizontal, Bounds.Height - SizingBorders.Vertical
+            );
+
             if (clientBounds.Contains(e.CanvasLocation))
             {
-              var canvasLocation = new Point((int) e.CanvasLocation.X, (int) e.CanvasLocation.Y);
               if (ScrollerBounds.Contains(canvasLocation))
               {
+                ActiveScrollMode = ScrollMode.Scrolling;
                 ScrollingY = e.CanvasY;
                 Scrolling = ScrollRatio;
-                return GH_ObjectResponse.Handled;
+                return GH_ObjectResponse.Capture;
               }
               else if (ListBounds.Contains(canvasLocation) && canvas.Viewport.Zoom >= GH_Viewport.ZoomDefault * 0.8f /*&& Owner.DataType == GH_ParamData.remote*/)
               {
@@ -891,35 +911,59 @@ namespace Grasshopper.Special
               }
             }
           }
+
+          if (e.Button == MouseButtons.Right)
+          {
+            if (ListBounds.Contains(canvasLocation) && Control.ModifierKeys.HasFlag(Keys.Shift))
+            {
+              ActiveScrollMode = ScrollMode.Panning;
+              Instances.CursorServer.AttachCursor(canvas, "GH_HandPan");
+              ScrollingY = e.CanvasY;
+              Scrolling = ScrollRatio;
+              return GH_ObjectResponse.Capture;
+            }
+          }
         }
 
         return base.RespondToMouseDown(canvas, e);
       }
 
-      public override GH_ObjectResponse RespondToMouseUp(GH_Canvas sender, GH_CanvasMouseEvent e)
+      public override GH_ObjectResponse RespondToMouseUp(GH_Canvas canvas, GH_CanvasMouseEvent e)
       {
-        Scrolling = float.NaN;
-        ScrollingY = float.NaN;
+        if (ActiveScrollMode != ScrollMode.None)
+        {
+          ActiveScrollMode = ScrollMode.None;
+          Instances.CursorServer.ResetCursor(canvas);
+          Scrolling = float.NaN;
+          ScrollingY = float.NaN;
+          return GH_ObjectResponse.Release;
+        }
 
-        return base.RespondToMouseUp(sender, e);
+        return base.RespondToMouseUp(canvas, e);
       }
 
-      public override GH_ObjectResponse RespondToMouseMove(GH_Canvas sender, GH_CanvasMouseEvent e)
+      public override GH_ObjectResponse RespondToMouseMove(GH_Canvas canvas, GH_CanvasMouseEvent e)
       {
-        if (e.Button == MouseButtons.Left && !float.IsNaN(Scrolling))
+        if (ActiveScrollMode != ScrollMode.None)
         {
-          var dy = e.CanvasY - ScrollingY;
-          var ty = ListBounds.Height - ScrollerBounds.Height;
-          var f = dy / ty;
+          if (!float.IsNaN(Scrolling))
+          {
+            var dy = e.CanvasY - ScrollingY;
+            var ty = ActiveScrollMode == ScrollMode.Scrolling ?
+              ListBounds.Height - ScrollerBounds.Height :
+              -((Owner.ListItems.Count * ItemHeight) - ListBounds.Height);
+            var f = dy / ty;
 
-          ScrollRatio = Math.Max(0.0f, Math.Min(Scrolling + f, 1.0f));
+            ScrollRatio = Math.Max(0.0f, Math.Min(Scrolling + f, 1.0f));
 
-          ExpireLayout();
-          sender.Refresh();
+            ExpireLayout();
+            canvas.Refresh();
+          }
+
           return GH_ObjectResponse.Handled;
         }
 
-        return base.RespondToMouseMove(sender, e);
+        return base.RespondToMouseMove(canvas, e);
       }
 
       public override GH_ObjectResponse RespondToMouseDoubleClick(GH_Canvas canvas, GH_CanvasMouseEvent e)
@@ -946,13 +990,18 @@ namespace Grasshopper.Special
         return GH_ObjectResponse.Ignore;
       }
 
+      public override GH_ObjectResponse RespondToKeyDown(GH_Canvas sender, KeyEventArgs e)
+      {
+        return base.RespondToKeyDown(sender, e);
+      }
+
       class SearchInputBox : GUI.Base.GH_TextBoxInputBase
       {
-        ResizableAttributes attributes;
-        public SearchInputBox(ResizableAttributes attributes)
+        readonly ResizableAttributes ParentAttributes;
+        public SearchInputBox(ResizableAttributes parentAttributes)
         {
-          this.attributes = attributes;
-          var bounds = attributes.CaptionBounds;
+          ParentAttributes = parentAttributes;
+          var bounds = parentAttributes.CaptionBounds;
           bounds.X += 2;
           bounds.Width -= 4;
           bounds.Y += 1;
@@ -964,19 +1013,19 @@ namespace Grasshopper.Special
 
         protected override void HandleTextInputAccepted(string text)
         {
-          attributes.ScrollRatio = 0.0f;
+          ParentAttributes.ScrollRatio = 0.0f;
 
-          if (attributes.Owner.SearchPattern == text)
+          if (ParentAttributes.Owner.SearchPattern == text)
           {
-            attributes.Owner.OnDisplayExpired(true);
+            ParentAttributes.Owner.OnDisplayExpired(true);
             return;
           }
 
-          attributes.Owner.RecordUndoEvent("Set Search Pattern");
-          attributes.Owner.SearchPattern = text;
-          attributes.Owner.OnObjectChanged(GH_ObjectEventType.Custom);
+          ParentAttributes.Owner.RecordUndoEvent("Set Search Pattern");
+          ParentAttributes.Owner.SearchPattern = text;
+          ParentAttributes.Owner.OnObjectChanged(GH_ObjectEventType.Custom);
 
-          attributes.Owner.ExpireSolution(true);
+          ParentAttributes.Owner.ExpireSolution(true);
         }
       }
     }
@@ -1312,8 +1361,8 @@ namespace Grasshopper.Special
   [EditorBrowsable(EditorBrowsableState.Never)]
   public class ValuePicker : ValueSet<IGH_Goo>
   {
-    static readonly Guid ComponentClassGuid = new Guid("AFB12752-3ACB-4ACF-8102-16982A69CDAE");
-    public override Guid ComponentGuid => ComponentClassGuid;
+    static readonly Guid _ComponentGuid = new Guid("AFB12752-3ACB-4ACF-8102-16982A69CDAE");
+    public override Guid ComponentGuid => _ComponentGuid;
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override string TypeName => "Data";
 
