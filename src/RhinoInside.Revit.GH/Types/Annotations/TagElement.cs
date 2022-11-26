@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Types
     public override ARDB.ElementId LevelId => Value?.View.GenLevel.Id;
     #endregion
 
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB.SpatialElementTag tag)
       {

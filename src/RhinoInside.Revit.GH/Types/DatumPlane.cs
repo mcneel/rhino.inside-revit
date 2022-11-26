@@ -59,27 +59,31 @@ namespace RhinoInside.Revit.GH.Types
     public override BoundingBox GetBoundingBox(Transform xform) => NaN.BoundingBox;
 
     #region IGH_PreviewData
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override bool GetClippingBox(out BoundingBox clippingBox)
+    {
+      clippingBox = NaN.BoundingBox;
+      return false;
+    }
+
+    protected override bool IsVisible(Rhino.Display.DisplayPipeline pipeline) =>
+      pipeline.Viewport.IsParallelProjection &&
+      pipeline.Viewport.CameraDirection.IsPerpendicularTo(Vector3d.ZAxis);
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       var height = Elevation;
       if (double.IsNaN(height))
         return;
 
-      if (args.Viewport.IsParallelProjection)
-      {
-        if (args.Viewport.CameraDirection.IsPerpendicularTo(Vector3d.ZAxis))
-        {
-          var viewportBBox = args.Viewport.GetFrustumBoundingBox();
-          var length = viewportBBox.Diagonal.Length;
-          args.Viewport.GetFrustumCenter(out var center);
+      var viewportBBox = args.Viewport.GetFrustumBoundingBox();
+      var length = viewportBBox.Diagonal.Length;
+      args.Viewport.GetFrustumCenter(out var center);
 
-          var point = new Point3d(center.X, center.Y, height);
-          var from = point - args.Viewport.CameraX * length;
-          var to = point + args.Viewport.CameraX * length;
+      var point = new Point3d(center.X, center.Y, height);
+      var from = point - args.Viewport.CameraX * length;
+      var to = point + args.Viewport.CameraX * length;
 
-          args.Pipeline.DrawPatternedLine(from, to, args.Color, 0x00000F0F, args.Thickness);
-        }
-      }
+      args.Pipeline.DrawPatternedLine(from, to, args.Color, 0x00000F0F, args.Thickness);
     }
     #endregion
 
@@ -245,7 +249,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB.Grid grid)
       {
@@ -456,7 +460,7 @@ namespace RhinoInside.Revit.GH.Types
     public ReferencePlane(ARDB.ReferencePlane value) : base(value) { }
 
     #region IGH_PreviewData
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (args.Viewport.IsParallelProjection)
       {
@@ -609,7 +613,7 @@ namespace RhinoInside.Revit.GH.Types
     public ReferencePoint(ARDB.ReferencePoint value) : base(value) { }
 
     #region IGH_PreviewData
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB.ReferencePoint referencePoint)
       {

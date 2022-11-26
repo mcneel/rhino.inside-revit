@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_PreviewData
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB_ScopeBox box)
       {

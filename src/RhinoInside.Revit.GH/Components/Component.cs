@@ -442,14 +442,13 @@ namespace RhinoInside.Revit.GH.Components
     {
       base.DrawViewportWires(args);
 
-      var viewport = args.Display.Viewport;
-
       /// To speed up display in case there are a lot of errors,
       /// something that may happen with dense meshes,
       /// we avoid drawing while in dynamic display.
       if (!Attributes.Selected && args.Display.IsDynamicDisplay)
         return;
 
+      var viewport = args.Display.Viewport;
       var dpi = args.Display.DpiScale;
       var pointRadius = 2.0f * args.Display.DisplayPipelineAttributes.PointRadius * dpi;
       var curveThickness = (int) Math.Round(1.5f * args.DefaultCurveThickness * dpi, MidpointRounding.AwayFromZero);

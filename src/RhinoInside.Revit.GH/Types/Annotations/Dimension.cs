@@ -199,7 +199,7 @@ namespace RhinoInside.Revit.GH.Types
       return $"{GeometryDecoder.ToModelLength(dimension.Value.Value).ToString($"N{precision}", provider)} {GH_Format.RhinoUnitSymbol()}";
     }
 
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB.Dimension dimension)
       {

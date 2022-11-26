@@ -39,8 +39,23 @@ namespace RhinoInside.Revit.GH.Parameters
     bool IGH_PreviewObject.Hidden { get; set; }
     bool IGH_PreviewObject.IsPreviewCapable => !VolatileData.IsEmpty;
     BoundingBox IGH_PreviewObject.ClippingBox => Preview_ComputeClippingBox();
-    void IGH_PreviewObject.DrawViewportMeshes(IGH_PreviewArgs args) => Preview_DrawMeshes(args);
-    void IGH_PreviewObject.DrawViewportWires(IGH_PreviewArgs args) => Preview_DrawWires(args);
+    void IGH_PreviewObject.DrawViewportMeshes(IGH_PreviewArgs args)
+    {
+      var bbox = Preview_ComputeClippingBox();
+      if (bbox.IsValid && args.Display.IsVisible(bbox))
+        return;
+
+      Preview_DrawMeshes(args);
+    }
+
+    void IGH_PreviewObject.DrawViewportWires(IGH_PreviewArgs args)
+    {
+      var bbox = Preview_ComputeClippingBox();
+      if (bbox.IsValid && args.Display.IsVisible(bbox))
+        return;
+
+      Preview_DrawWires(args);
+    }
     #endregion
 
     #region ISelectionFilter
