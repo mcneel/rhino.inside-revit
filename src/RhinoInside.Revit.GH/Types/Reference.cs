@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Types
         ThenBy(x => x.Obsolete).
         FirstOrDefault();
 
-      return proxy?.Icon ?? Properties.Resources.GeometryObject;
+      return proxy?.Icon ?? (this is GraphicalElement ? Properties.Resources.GraphicalElement : Properties.Resources.Element);
     }
     string IGH_ItemDescription.Name => DisplayName;
     string IGH_ItemDescription.Identity => $"{{{Id?.ToString()}}}";
