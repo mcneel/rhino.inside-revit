@@ -51,8 +51,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class ElementIdExtension
   {
-    public static bool IsValid(this ElementId id) => id is object && id != ElementId.InvalidElementId;
-    public static bool IsBuiltInId(this ElementId id) => id is object && id <= ElementId.InvalidElementId;
+    public static ElementId InvalidElementId { get; } = ElementId.InvalidElementId;
+    public static ElementId[] EmptyCollection { get; } = new ElementId[0];
+
+    public static bool IsValid(this ElementId id) => id is object && id != InvalidElementId;
+    public static bool IsBuiltInId(this ElementId id) => id is object && id <= InvalidElementId;
     public static int ToValue(this ElementId id) => id.IntegerValue;
 
     #region Parameters
@@ -67,7 +70,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsParameterId(this ElementId id, Document doc)
     {
       // Check if is not a BuiltIn Parameter
-      if (id.IntegerValue > ElementId.InvalidElementId.IntegerValue)
+      if (id.IntegerValue > InvalidElementId.IntegerValue)
       {
         try { return doc.GetElement(id) is ParameterElement; }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
@@ -105,7 +108,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsCategoryId(this ElementId id, Document doc)
     {
       // Check if is not a BuiltIn Category
-      if (id.IntegerValue > ElementId.InvalidElementId.IntegerValue)
+      if (id.IntegerValue > InvalidElementId.IntegerValue)
       {
         // 1. We try with the regular way calling Category.GetCategory
         try { return Category.GetCategory(doc, id) is object; }
@@ -151,7 +154,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsLinePatternId(this ElementId id, Document doc)
     {
       // Check if is not a BuiltIn Line Pattern
-      if (id.IntegerValue > ElementId.InvalidElementId.IntegerValue)
+      if (id.IntegerValue > InvalidElementId.IntegerValue)
       {
         try { return doc.GetElement(id) is LinePatternElement; }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
