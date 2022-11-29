@@ -8,7 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations
 {
-  [ComponentVersion(introduced: "1.10")]
+  [ComponentVersion(introduced: "1.11")]
   public class AddImage : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("506D5C19-5054-4428-A857-A4D7E8DB8AD8");
