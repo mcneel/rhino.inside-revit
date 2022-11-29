@@ -191,6 +191,7 @@
     <Compile Include="Components\Filters\QueryFilters.cs" />
     <Compile Include="Components\Filters\Selection\SelectionElements.cs" />
     <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
+    <Compile Include="Components\Import\AddImage.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
     <Compile Include="Components\Model\AddWorkPlaneByPlane.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
