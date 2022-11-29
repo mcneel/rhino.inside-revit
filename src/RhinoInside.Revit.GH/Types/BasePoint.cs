@@ -32,39 +32,28 @@ namespace RhinoInside.Revit.GH.Types
     public BasePoint(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public BasePoint(ARDB.BasePoint point) : base(point) { }
 
-    public override string DisplayName
-    {
-      get
-      {
-        if (Value is ARDB.BasePoint point)
-          return point.Category.Name;
-
-        return base.DisplayName;
-      }
-    }
+    public override string DisplayName => Value is ARDB.BasePoint point ? point.Category.Name : base.DisplayName;
 
     #region IGH_PreviewData
-    public override BoundingBox ClippingBox
+    protected override bool GetClippingBox(out BoundingBox clippingBox)
     {
-      get
+      if (Value is ARDB.BasePoint point)
       {
-        if (Value is ARDB.BasePoint point)
-        {
-          return new BoundingBox
-          (
-            new Point3d[]
-            {
-              point.GetPosition().ToPoint3d(),
-              (point.GetPosition() - point.GetSharedPosition()).ToPoint3d()
-            }
-          );
-        }
-
-        return BoundingBox.Empty;
+        clippingBox = new BoundingBox
+        (
+          new Point3d[]
+          {
+            point.GetPosition().ToPoint3d(),
+            (point.GetPosition() - point.GetSharedPosition()).ToPoint3d()
+          }
+        );
       }
+      else clippingBox = NaN.BoundingBox;
+
+      return true;
     }
 
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB.BasePoint point)
       {
@@ -164,7 +153,7 @@ namespace RhinoInside.Revit.GH.Types
           return new Plane(origin, axisX, axisY);
         }
 
-        return base.Location;
+        return NaN.Plane;
       }
     }
     #endregion
@@ -209,23 +198,19 @@ namespace RhinoInside.Revit.GH.Types
     }
 #endif
 
-    public override string DisplayName
-    {
-      get
-      {
-        if (Value is ARDB_InternalOrigin point)
-          return point.Category.Name;
-
-        return base.DisplayName;
-      }
-    }
+    public override string DisplayName => Value is ARDB_InternalOrigin point ? point.Category.Name : base.DisplayName;
 
     #region IGH_PreviewData
-    public override BoundingBox ClippingBox => Value is ARDB_InternalOrigin ?
-      new BoundingBox(Point3d.Origin, Point3d.Origin) :
-      NaN.BoundingBox;
+    protected override bool GetClippingBox(out BoundingBox clippingBox)
+    {
+      clippingBox = Value is ARDB_InternalOrigin ?
+        new BoundingBox(Point3d.Origin, Point3d.Origin) :
+        NaN.BoundingBox;
 
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+      return true;
+    }
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB_InternalOrigin)
       {
@@ -242,8 +227,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public override Plane Location => Value is ARDB_InternalOrigin ?
-      Plane.WorldXY : base.Location;
+    public override Plane Location => Value is ARDB_InternalOrigin ? Plane.WorldXY : NaN.Plane;
     #endregion
   }
 }

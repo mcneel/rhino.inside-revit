@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
     public CurtainGridLine(ARDB.CurtainGridLine gridLine) : base(gridLine) { }
 
     #region IGH_PreviewData
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB.CurtainGridLine gridLine)
       {

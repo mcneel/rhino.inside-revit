@@ -36,10 +36,32 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
-    public override BoundingBox GetBoundingBox(Transform xform) => NaN.BoundingBox;
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      var location = Location;
+      if (location.IsValid)
+      {
+        var radius = Grasshopper.CentralSettings.PreviewPlaneRadius;
+        var origin = location.Origin;
+        origin.Transform(xform);
+        return new BoundingBox
+        (
+          origin - new Vector3d(radius, radius, radius),
+          origin + new Vector3d(radius, radius, radius)
+        );
+      }
+
+      return NaN.BoundingBox;
+    }
 
     #region IGH_PreviewData
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override bool GetClippingBox(out BoundingBox clippingBox)
+    {
+      clippingBox = GetBoundingBox(Transform.Identity);
+      return !clippingBox.IsValid;
+    }
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       var location = Location;
       if (!location.IsValid)

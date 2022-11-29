@@ -311,7 +311,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_PreviewData
-    public override void DrawViewportMeshes(GH_PreviewMeshArgs args)
+    protected override void DrawViewportMeshes(GH_PreviewMeshArgs args)
     {
       if (!IsValid)
         return;
@@ -366,7 +366,7 @@ namespace RhinoInside.Revit.GH.Types
         args.Pipeline.DrawMeshShaded(mesh, material);
     }
 
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (!IsValid)
         return;

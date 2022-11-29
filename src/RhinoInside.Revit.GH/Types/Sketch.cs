@@ -30,13 +30,13 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_PreviewData
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       foreach(var loop in Profiles)
         args.Pipeline.DrawCurve(loop, args.Color, args.Thickness);
     }
 
-    public override void DrawViewportMeshes(GH_PreviewMeshArgs args)
+    protected override void DrawViewportMeshes(GH_PreviewMeshArgs args)
     {
       if(TrimmedSurface is object)
         args.Pipeline.DrawBrepShaded(TrimmedSurface, args.Material);

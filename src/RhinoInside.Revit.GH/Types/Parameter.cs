@@ -394,8 +394,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ItemDescription
-    System.Drawing.Bitmap IGH_ItemDescription.GetImage(System.Drawing.Size size) => default;
-    string IGH_ItemDescription.NickName
+    System.Drawing.Bitmap IGH_ItemDescription.GetTypeIcon(System.Drawing.Size size) => Properties.Resources.Parameter;
+    string IGH_ItemDescription.Identity
     {
       get
       {

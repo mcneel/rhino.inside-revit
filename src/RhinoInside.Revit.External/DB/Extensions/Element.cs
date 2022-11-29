@@ -329,17 +329,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
       public string GetUpdaterName() => "Delete Updater";
       public string GetAdditionalInformation() => "N/A";
       public ChangePriority GetChangePriority() => ChangePriority.Annotations;
-      public UpdaterId GetUpdaterId() => updaterId;
-      readonly UpdaterId updaterId;
+      public UpdaterId GetUpdaterId() => UpdaterId;
+      readonly UpdaterId UpdaterId;
 
-      static readonly ElementId[] Empty = new ElementId[0];
-
-      public ICollection<ElementId> DeletedElementIds { get; private set; } = Empty;
-      public ICollection<ElementId> ModifiedElementIds { get; private set; } = Empty;
+      public ICollection<ElementId> DeletedElementIds { get; private set; } = ElementIdExtension.EmptyCollection;
+      public ICollection<ElementId> ModifiedElementIds { get; private set; } = ElementIdExtension.EmptyCollection;
 
       public DeleteUpdater(Document document, ElementFilter filter)
       {
-        updaterId = new UpdaterId
+        UpdaterId = new UpdaterId
         (
           document.Application.ActiveAddInId,
           new Guid("9536C7C9-C58B-4D48-9103-5C8EBAA6F6C8")
@@ -350,14 +348,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (filter is null)
           filter = CompoundElementFilter.All;
 
-        UpdaterRegistry.AddTrigger(updaterId, document, filter, Element.GetChangeTypeAny());
-        UpdaterRegistry.AddTrigger(updaterId, document, filter, Element.GetChangeTypeElementDeletion());
+        UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeAny());
+        UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeElementDeletion());
       }
 
       void IDisposable.Dispose()
       {
-        UpdaterRegistry.RemoveAllTriggers(updaterId);
-        UpdaterRegistry.UnregisterUpdater(updaterId);
+        UpdaterRegistry.RemoveAllTriggers(UpdaterId);
+        UpdaterRegistry.UnregisterUpdater(UpdaterId);
       }
 
       public void Execute(UpdaterData data)

@@ -41,6 +41,9 @@ namespace RhinoInside.Revit.GH.Types
       if (!element.IsValid())
         return false;
 
+      if (element is ARDB.Family)
+        return false;
+
       if (element is ARDB.ElementType)
         return false;
 
@@ -99,24 +102,73 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_PreviewData
     private BoundingBox? _ClippingBox;
-    BoundingBox IGH_PreviewData.ClippingBox => _ClippingBox ?? (_ClippingBox = ClippingBox).Value;
 
     /// <summary>
-    /// Not necessarily accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for display.
+    /// Not necessarily accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> used for display.
     /// </summary>
-    public virtual BoundingBox ClippingBox => BoundingBox;
-
-    public virtual void DrawViewportWires(GH_PreviewWireArgs args)
+    /// <returns>
+    /// A finite axis aligned bounding box.
+    /// </returns>
+    public BoundingBox ClippingBox
     {
-      var bbox = ClippingBox;
-      if (!bbox.IsValid)
+      get
+      {
+        if (_ClippingBox.HasValue)
+          return _ClippingBox.Value;
+
+        if (GetClippingBox(out var clippingBox))
+          _ClippingBox = clippingBox;
+
+        return clippingBox;
+      }
+    }
+
+    protected virtual bool GetClippingBox(out BoundingBox clippingBox)
+    {
+      clippingBox = BoundingBox;
+      return true;
+    }
+
+    protected virtual bool IsVisible(Rhino.Display.DisplayPipeline pipeline)
+    {
+      var clippingBox = ClippingBox;
+
+      if (!clippingBox.IsValid)
+        return false;
+
+      if (!pipeline.IsVisible(clippingBox))
+        return false;
+
+      return true;
+    }
+
+    void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (args.Thickness <= 0 || args.Color.A == 0)
         return;
 
-      foreach (var edge in bbox.GetEdges() ?? Enumerable.Empty<Line>())
+      if (!IsVisible(args.Pipeline))
+        return;
+
+      DrawViewportWires(args);
+    }
+    protected virtual void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      foreach (var edge in _ClippingBox?.GetEdges() ?? Enumerable.Empty<Line>())
         args.Pipeline.DrawPatternedLine(edge.From, edge.To, args.Color, 0x00003333, args.Thickness);
     }
 
-    public virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
+    void IGH_PreviewData.DrawViewportMeshes(GH_PreviewMeshArgs args)
+    {
+      if (args.MeshingParameters is null)
+        return;
+
+      if (!IsVisible(args.Pipeline))
+        return;
+
+      DrawViewportMeshes(args);
+    }
+    protected virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
     public override bool CastTo<Q>(out Q target)

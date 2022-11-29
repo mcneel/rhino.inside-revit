@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
 #if REVIT_2021
       if (Value is ARDB.SpotDimension spot)

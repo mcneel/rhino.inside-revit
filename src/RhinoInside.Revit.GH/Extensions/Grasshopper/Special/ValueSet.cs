@@ -167,9 +167,10 @@ namespace Grasshopper.Special
 
   interface IGH_ItemDescription
   {
-    Bitmap GetImage(Size size);
+    //bool RenderPreview(Graphics graphics, Size size);
+    Bitmap GetTypeIcon(Size size);
     string Name { get; }
-    string NickName { get; }
+    string Identity { get; }
     string Description { get; }
   }
 
@@ -180,8 +181,8 @@ namespace Grasshopper.Special
     IGH_PreviewObject
     where T : class, IGH_Goo
   {
-    protected override Bitmap Icon => ClassIcon;
-    static readonly Bitmap ClassIcon = BuildIcon();
+    protected override Bitmap Icon => _Icon;
+    static readonly Bitmap _Icon = BuildIcon();
     static Bitmap BuildIcon()
     {
       var bitmap = new Bitmap(24, 24);
@@ -232,6 +233,41 @@ namespace Grasshopper.Special
 
     public virtual DataCulling CullingMask => DataCulling.Nulls | DataCulling.Invalids | DataCulling.Duplicates | DataCulling.Empty;
 
+    static readonly Dictionary<Type, Bitmap> TypeIcons = new Dictionary<Type, Bitmap>();
+    protected virtual Bitmap GetItemIcon(T value, Size size)
+    {
+      var type = value.GetType();
+      if (TypeIcons.TryGetValue(GetType(), out var icon))
+        return icon;
+
+      var bitmap = default(Bitmap);
+      switch (value)
+      {
+        case IGH_ItemDescription item: bitmap = item.GetTypeIcon(size); break;
+      }
+
+      if (bitmap is null)
+      {
+        // Try with a parameter that has the same name.
+        var typeName = value.TypeName;
+        var location = value.GetType().Assembly.Location;
+        var proxy = Instances.ComponentServer.ObjectProxies.
+          Where
+          (
+            x => typeof(IGH_Param).IsAssignableFrom(x.Type) &&
+            string.Equals(x.Desc.Name, typeName, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(x.Location, location, StringComparison.OrdinalIgnoreCase)
+          ).
+          OrderBy(x => !x.SDKCompliant).
+          ThenBy(x => x.Obsolete).
+          FirstOrDefault();
+
+        bitmap = proxy?.Icon;
+      }
+
+      return TypeIcons[type] = bitmap;
+    }
+
     protected virtual string GetItemName(T value)
     {
       switch (value)
@@ -243,18 +279,22 @@ namespace Grasshopper.Special
       return value.ToString();
     }
 
-    protected virtual string GetItemNickName(T value)
+    protected virtual string GetItemIdentity(T value)
     {
       switch (value)
       {
-        case IGH_ItemDescription item: return item.NickName;
+        case IGH_ItemDescription item:
+          return item.Identity;
+
         case GH_Colour color:
           if (color.Value.IsNamedColor) return color.Value.Name;
           return GH_ColorRGBA.TryGetName(color.Value, out var name) ? name: string.Empty;
-        case IGH_GeometricGoo geom: return geom.IsReferencedGeometry ?
-            geom.ReferenceID.ToString("B") :
-            string.Empty;
-        case IGH_Goo goo: return string.Empty;
+
+        case IGH_GeometricGoo geom:
+          return geom.IsReferencedGeometry ? geom.ReferenceID.ToString("B") : string.Empty;
+
+        case IGH_Goo goo:
+          return string.Empty;
       }
 
       return string.Empty;
@@ -264,17 +304,21 @@ namespace Grasshopper.Special
     {
       switch (value)
       {
-        case IGH_ItemDescription item: return item.Description;
-        case IGH_GeometricGoo geom: return geom.IsReferencedGeometry ?
-            Rhino.RhinoDoc.ActiveDoc?.Name ?? "Untitled.3dm" :
-            value.TypeDescription;
-        case IGH_Goo goo: return goo.TypeDescription;
+        case IGH_ItemDescription item:
+          return item.Description;
+
+        case IGH_GeometricGoo geom:
+          return geom.IsReferencedGeometry ? Rhino.RhinoDoc.ActiveDoc?.Name ?? "Untitled.3dm" : value.TypeDescription;
+
+        case IGH_Goo goo:
+          return goo.TypeDescription;
       }
 
       return string.Empty;
     }
 
-   public string SearchPattern { get; set; } = string.Empty;
+    public string SearchPattern { get; set; } = string.Empty;
+
     protected internal int LayoutLevel { get; set; } = 1;
 
     public class ListItem
@@ -496,7 +540,7 @@ namespace Grasshopper.Special
         base.Layout();
       }
 
-      static readonly Font NickNameFont = GH_FontServer.NewFont(GH_FontServer.StandardAdjusted, FontStyle.Italic);
+      static readonly Font TypeNameFont = GH_FontServer.NewFont(GH_FontServer.StandardAdjusted, FontStyle.Italic);
       const int CaptionHeight = 20;
       const int FootnoteHeight = 18;
       const int ScrollerWidth = 8;
@@ -552,6 +596,15 @@ namespace Grasshopper.Special
 
       float ScrollRatio = 0.0f;
 
+      enum ScrollMode
+      {
+        None,
+        Scrolling,
+        Panning
+      }
+
+      ScrollMode ActiveScrollMode = ScrollMode.None;
+
       float Scrolling = float.NaN;
       float ScrollingY = float.NaN;
 
@@ -602,9 +655,12 @@ namespace Grasshopper.Special
               {
                 using
                 (
-                  var capsuleName = GH_Capsule.CreateTextCapsule(iconBox, iconBox,
-                                    GH_Palette.Black, Owner.NickName,
-                                    GH_FontServer.LargeAdjusted, GH_Orientation.vertical_center, 3, 6))
+                  var capsuleName = GH_Capsule.CreateTextCapsule
+                  (
+                    iconBox, iconBox,
+                    GH_Palette.Black, Owner.NickName,
+                    GH_FontServer.LargeAdjusted, GH_Orientation.vertical_center, 3, 6)
+                  )
                 {
                   capsuleName.Render(graphics, Selected, Owner.Locked, false);
                 }
@@ -614,6 +670,8 @@ namespace Grasshopper.Special
             var alpha = GH_Canvas.ZoomFadeLow;
             if (alpha > 0)
             {
+              var layoutLevel = Owner.LayoutLevel;
+
               canvas.SetSmartTextRenderingHint();
               var style = GH_CapsuleRenderEngine.GetImpliedStyle(palette, this);
               var textColor = Color.FromArgb(alpha, style.Text);
@@ -634,12 +692,12 @@ namespace Grasshopper.Special
               }
 
               {
-                var clip = ListBounds;
+                var listBounds = ListBounds;
 
                 Brush alternateBrush = null;
                 if (GH_Canvas.ZoomFadeMedium > 0 /*&& Owner.DataType == GH_ParamData.remote*/)
                 {
-                  graphics.FillRectangle(Brushes.White, clip);
+                  graphics.FillRectangle(Brushes.White, listBounds);
                   alternateBrush = Brushes.WhiteSmoke;
                 }
                 else
@@ -647,116 +705,122 @@ namespace Grasshopper.Special
                   alternateBrush = new SolidBrush(Color.FromArgb(70, style.Fill));
                 }
 
-                graphics.SetClip(clip);
+                var worldClip = graphics.Clip;
+                graphics.SetClip(listBounds, System.Drawing.Drawing2D.CombineMode.Intersect);
 
-                var transform = graphics.Transform;
+                var worldTransform = graphics.Transform;
                 if (!ScrollerBounds.IsEmpty)
                 {
-                  var scroll = -((Owner.ListItems.Count * ItemHeight) - clip.Height) * ScrollRatio;
+                  var scroll = -((Owner.ListItems.Count * ItemHeight) - listBounds.Height) * ScrollRatio;
                   graphics.TranslateTransform(0.0f, scroll);
                 }
 
-                using (var nameFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center })
-                using (var nickNameBrush = new SolidBrush(Color.FromArgb(80, 80, 80)))
-                using (var nickNameFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center })
-                using (var typeFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Far })
-                using (var descriptionFormat = new StringFormat(StringFormatFlags.NoWrap) { LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Far })
+                try
                 {
-                  var itemBounds = new RectangleF(clip.X, clip.Y, clip.Width, ItemHeight);
-                  for(int index = 0; index < Owner.ListItems.Count; ++index)
+                  using (var nameBrush          = new SolidBrush(textColor))
+                  using (var descriptionBrush   = new SolidBrush(Color.FromArgb(GH_Canvas.ZoomFadeLow, 80, 80, 80)))
+                  using (var secondaryBrush     = new SolidBrush(Color.FromArgb(GH_Canvas.ZoomFadeMedium, Color.Gray)))
+                  using (var primaryFormat      = new StringFormat(StringFormatFlags.NoWrap) { Trimming = StringTrimming.EllipsisCharacter, LineAlignment = StringAlignment.Center })
+                  using (var secondaryFormat    = new StringFormat(StringFormatFlags.NoWrap) { Trimming = StringTrimming.EllipsisPath, LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Far })
                   {
-                    if (graphics.IsVisible(itemBounds))
+                    var itemBounds = new RectangleF(listBounds.X, listBounds.Y, listBounds.Width, ItemHeight);
+
+                    for (int index = 0; index < Owner.ListItems.Count; ++index)
                     {
-                      var item = Owner.ListItems[index];
-
-                      if (index % 2 != 0)
-                        graphics.FillRectangle(alternateBrush, itemBounds);
-
-                      var nameBounds = new RectangleF(itemBounds.X + 22, itemBounds.Y + 1, itemBounds.Width - 22, (itemBounds.Height - 2) / Owner.LayoutLevel);
-
-                      if (GH_Canvas.ZoomFadeMedium > 0 && clip.Width > 250f)
+                      if (graphics.IsVisible(itemBounds))
                       {
-                        var typeBounds = nameBounds; typeBounds.Width -= 2;
-                        graphics.DrawString(item.Value.TypeName, GH_FontServer.StandardAdjusted, Brushes.LightGray, typeBounds, typeFormat);
-                      }
+                        var item = Owner.ListItems[index];
 
-                      if (Owner.LayoutLevel > 1)
-                      {
-                        if (Owner.GetItemDescription(item.Value) is string description && description != string.Empty)
+                        if (index % 2 != 0)
+                          graphics.FillRectangle(alternateBrush, itemBounds);
+
+                        // Info
                         {
-                          if (GH_Canvas.ZoomFadeMedium > 0 && clip.Width > 250f)
-                          {
-                            var nickNameBounds = new RectangleF
-                            {
-                              X = nameBounds.X,
-                              Y = nameBounds.Y + 16,
-                              Width = nameBounds.Width,
-                              Height = nameBounds.Height
-                            };
+                          var infoBounds = new RectangleF(itemBounds.X + 22, itemBounds.Y + 1, itemBounds.Width - 22 - ScrollerBounds.Width, (itemBounds.Height - 2));
+                          infoBounds.Width -= (layoutLevel * 12) + 4;
 
-                            var descriptionBounds = nickNameBounds; descriptionBounds.Width -= 2;
-                            graphics.DrawString(description, GH_FontServer.StandardAdjusted, Brushes.LightGray, descriptionBounds, descriptionFormat);
+                          if (GH_Canvas.ZoomFadeMedium > 0 && listBounds.Width > 250f)
+                          {
+                            var secondaryInfoBounds = infoBounds;
+                            secondaryInfoBounds.Width -= 2;
+                            secondaryInfoBounds.Height /= layoutLevel;
+
+                            if (Owner.GetItemIdentity(item.Value) is string identity && identity != string.Empty)
+                            {
+                              graphics.DrawString(identity, GH_FontServer.StandardAdjusted, secondaryBrush, secondaryInfoBounds, secondaryFormat);
+                            }
+
+                            if (layoutLevel > 1)
+                            {
+                              if (Owner.GetItemDescription(item.Value) is string itemDescription && itemDescription != string.Empty)
+                              {
+                                var descriptionBounds = secondaryInfoBounds;
+                                descriptionBounds.Y += 16;
+                                graphics.DrawString(itemDescription, GH_FontServer.StandardAdjusted, secondaryBrush, descriptionBounds, secondaryFormat);
+                              }
+                            }
                           }
                         }
-                      }
 
-                      if (item.Selected)
-                      {
-                        if (GH_Canvas.ZoomFadeMedium > 0 /*&& Owner.DataType == GH_ParamData.remote*/)
+                        if (item.Selected)
                         {
-                          var highlightBounds = itemBounds;
-                          highlightBounds.Inflate(-1, -1);
-                          GH_GraphicsUtil.RenderHighlightBox(graphics, GH_Convert.ToRectangle(highlightBounds), 2, true, true);
-                        }
-
-                        var markBounds = new RectangleF(itemBounds.X + 1, itemBounds.Y, 22, itemBounds.Height);
-                        RenderCheckMark(graphics, markBounds, textColor);
-                      }
-
-                      {
-                        string name = item.Name;
-                        var brush = Brushes.Black;
-
-                        if (item.Name is null)
-                        {
-                          name = "<null>";
-                          brush = Brushes.LightGray;
-                        }
-                        else if (item.Name.Length == 0)
-                        {
-                          name = "<empty>";
-                          brush = Brushes.LightGray;
-                        }
-
-                        graphics.DrawString(name, GH_FontServer.StandardAdjusted, brush, nameBounds, nameFormat);
-
-                        if (Owner.LayoutLevel > 1)
-                        {
-                          if (Owner.GetItemNickName(item.Value) is string nickName && nickName != string.Empty)
+                          if (GH_Canvas.ZoomFadeMedium > 0 /*&& Owner.DataType == GH_ParamData.remote*/)
                           {
-                            var nickNameBounds = new RectangleF
-                            {
-                              X = nameBounds.X,
-                              Y = nameBounds.Y + 16,
-                              Width = nameBounds.Width,
-                              Height = nameBounds.Height
-                            };
-
-                            graphics.DrawString(nickName, NickNameFont, nickNameBrush, nickNameBounds, nickNameFormat);
+                            var highlightBounds = itemBounds;
+                            highlightBounds.Inflate(-1, -1);
+                            GH_GraphicsUtil.RenderHighlightBox(graphics, GH_Convert.ToRectangle(highlightBounds), 2, true, true);
                           }
+
+                          var markBounds = new RectangleF(itemBounds.X + 1, itemBounds.Y, 22, itemBounds.Height);
+                          RenderCheckMark(graphics, markBounds, textColor);
+                        }
+
+                        if (GH_Canvas.ZoomFadeMedium > 0 && listBounds.Width > 250f)
+                        {
+                          var iconSize = layoutLevel * 12;
+                          var image = Owner.GetItemIcon(item.Value, new Size(iconSize, iconSize)) ?? DefaultItemIcon;
+                          var rect = new Rectangle
+                          (
+                            (int) (itemBounds.X + itemBounds.Width - 2 - iconSize - 2 - ScrollerBounds.Width),
+                            (int) (itemBounds.Y + (ItemHeight / 2) - (iconSize / 2)),
+                            iconSize, iconSize
+                          );
+
+                          GH_GraphicsUtil.RenderFadedImage(graphics, image, rect, GH_Canvas.ZoomFadeMedium);
+                        }
+
+                        // Item
+                        {
+                          var itemClip = graphics.Clip;
+                          graphics.SetClip(itemBounds, System.Drawing.Drawing2D.CombineMode.Intersect);
+
+                          var itemTransform = graphics.Transform;
+                          {
+                            graphics.TranslateTransform(itemBounds.X, itemBounds.Y);
+                            RenderItem
+                            (
+                              item, graphics, itemBounds.Size,
+                              (nameBrush, primaryFormat),
+                              (descriptionBrush, primaryFormat),
+                              layoutLevel
+                            );
+                          }
+                          graphics.Transform = itemTransform;
+                          graphics.Clip = itemClip;
                         }
                       }
+
+                      itemBounds.Y += itemBounds.Height;
                     }
-
-                    itemBounds.Y += itemBounds.Height;
                   }
                 }
-
-                graphics.Transform = transform;
+                finally
+                {
+                  graphics.Transform = worldTransform;
+                  graphics.Clip = worldClip;
+                }
 
                 RenderScrollBar(canvas, graphics, style.Text);
-
-                graphics.ResetClip();
 
                 if (GH_Canvas.ZoomFadeMedium > 0 /*&& Owner.DataType == GH_ParamData.remote*/)
                 {
@@ -764,16 +828,16 @@ namespace Grasshopper.Special
                     graphics.DrawRectangle
                     (
                       edge,
-                      clip.X, clip.Y,
-                      clip.Width, clip.Height
+                      listBounds.X, listBounds.Y,
+                      listBounds.Width, listBounds.Height
                     );
 
-                  GH_GraphicsUtil.ShadowHorizontal(graphics, clip.Left, clip.Right, clip.Top);
+                  GH_GraphicsUtil.ShadowHorizontal(graphics, listBounds.Left, listBounds.Right, listBounds.Top);
                 }
                 else
                 {
-                  GH_GraphicsUtil.EtchFadingHorizontal(graphics, clip.Left, clip.Right, clip.Top, (int) (0.8 * alpha), (int) (0.3 * alpha));
-                  GH_GraphicsUtil.EtchFadingHorizontal(graphics, clip.Left, clip.Right, clip.Bottom + 1, (int) (0.8 * alpha), (int) (0.3 * alpha));
+                  GH_GraphicsUtil.EtchFadingHorizontal(graphics, listBounds.Left, listBounds.Right, listBounds.Top, (int) (0.8 * alpha), (int) (0.3 * alpha));
+                  GH_GraphicsUtil.EtchFadingHorizontal(graphics, listBounds.Left, listBounds.Right, listBounds.Bottom + 1, (int) (0.8 * alpha), (int) (0.3 * alpha));
                 }
 
                 graphics.DrawString($"{Owner.ListItems.Count} items", GH_FontServer.StandardAdjusted, Brushes.Gray, FootnoteBounds, GH_TextRenderingConstants.FarCenter);
@@ -785,6 +849,51 @@ namespace Grasshopper.Special
         }
 
         base.Render(canvas, graphics, channel);
+      }
+
+      static readonly Guid GenericDataParamComponentGuid = new Guid("{8EC86459-BF01-4409-BAEE-174D0D2B13D0}");
+      static readonly Bitmap DefaultItemIcon = Instances.ComponentServer.EmitObjectIcon(GenericDataParamComponentGuid);
+
+      void RenderItem
+      (
+        ListItem item, Graphics graphics, SizeF itemSize,
+        (Brush Brush, StringFormat Format) name,
+        (Brush Brush, StringFormat Format) typeName,
+        int layoutLevel
+      )
+      {
+        var nameBounds = new RectangleF(22, 1, itemSize.Width - 22, (itemSize.Height - 2) / layoutLevel);
+
+        // Name & NickName
+        {
+          string itemName = item.Name;
+
+          if (itemName is null)
+          {
+            itemName = "<null>";
+            name.Brush = Brushes.LightGray;
+          }
+          else if (itemName.Length == 0)
+          {
+            itemName = "<empty>";
+            name.Brush = Brushes.LightGray;
+          }
+
+          graphics.DrawString(itemName, GH_FontServer.StandardAdjusted, name.Brush, nameBounds, name.Format);
+
+          if (layoutLevel > 1)
+          {
+            var textBounds = new RectangleF
+            {
+              X = nameBounds.X,
+              Y = nameBounds.Y + 16,
+              Width = nameBounds.Width,
+              Height = nameBounds.Height
+            };
+
+            graphics.DrawString(item.Value.TypeName, TypeNameFont, typeName.Brush, textBounds, typeName.Format);
+          }
+        }
       }
 
       public static void RenderCheckMark(Graphics graphics, RectangleF bounds, Color color)
@@ -817,7 +926,7 @@ namespace Grasshopper.Special
           var scrollerBounds = ScrollerBounds;
           if (!scrollerBounds.IsEmpty)
           {
-            using (var pen = new Pen(Color.FromArgb(100, color), ScrollerWidth)
+            using (var pen = new Pen(Color.FromArgb(Math.Min(GH_Canvas.ZoomFadeMedium, 100), color), ScrollerWidth)
             {
               StartCap = System.Drawing.Drawing2D.LineCap.Round,
               EndCap = System.Drawing.Drawing2D.LineCap.Round
@@ -836,17 +945,24 @@ namespace Grasshopper.Special
       {
         if (canvas.Viewport.Zoom >= GH_Viewport.ZoomDefault * 0.6f)
         {
+          var canvasLocation = new Point((int) e.CanvasLocation.X, (int) e.CanvasLocation.Y);
+
           if (e.Button == MouseButtons.Left)
           {
-            var clientBounds = new RectangleF(Bounds.X + SizingBorders.Left, Bounds.Y + SizingBorders.Top, Bounds.Width - SizingBorders.Horizontal, Bounds.Height - SizingBorders.Vertical);
+            var clientBounds = new RectangleF
+            (
+              Bounds.X + SizingBorders.Left, Bounds.Y + SizingBorders.Top,
+              Bounds.Width - SizingBorders.Horizontal, Bounds.Height - SizingBorders.Vertical
+            );
+
             if (clientBounds.Contains(e.CanvasLocation))
             {
-              var canvasLocation = new Point((int) e.CanvasLocation.X, (int) e.CanvasLocation.Y);
               if (ScrollerBounds.Contains(canvasLocation))
               {
+                ActiveScrollMode = ScrollMode.Scrolling;
                 ScrollingY = e.CanvasY;
                 Scrolling = ScrollRatio;
-                return GH_ObjectResponse.Handled;
+                return GH_ObjectResponse.Capture;
               }
               else if (ListBounds.Contains(canvasLocation) && canvas.Viewport.Zoom >= GH_Viewport.ZoomDefault * 0.8f /*&& Owner.DataType == GH_ParamData.remote*/)
               {
@@ -891,35 +1007,59 @@ namespace Grasshopper.Special
               }
             }
           }
+
+          if (e.Button == MouseButtons.Right)
+          {
+            if (ListBounds.Contains(canvasLocation) && Control.ModifierKeys.HasFlag(Keys.Shift))
+            {
+              ActiveScrollMode = ScrollMode.Panning;
+              Instances.CursorServer.AttachCursor(canvas, "GH_HandPan");
+              ScrollingY = e.CanvasY;
+              Scrolling = ScrollRatio;
+              return GH_ObjectResponse.Capture;
+            }
+          }
         }
 
         return base.RespondToMouseDown(canvas, e);
       }
 
-      public override GH_ObjectResponse RespondToMouseUp(GH_Canvas sender, GH_CanvasMouseEvent e)
+      public override GH_ObjectResponse RespondToMouseUp(GH_Canvas canvas, GH_CanvasMouseEvent e)
       {
-        Scrolling = float.NaN;
-        ScrollingY = float.NaN;
+        if (ActiveScrollMode != ScrollMode.None)
+        {
+          ActiveScrollMode = ScrollMode.None;
+          Instances.CursorServer.ResetCursor(canvas);
+          Scrolling = float.NaN;
+          ScrollingY = float.NaN;
+          return GH_ObjectResponse.Release;
+        }
 
-        return base.RespondToMouseUp(sender, e);
+        return base.RespondToMouseUp(canvas, e);
       }
 
-      public override GH_ObjectResponse RespondToMouseMove(GH_Canvas sender, GH_CanvasMouseEvent e)
+      public override GH_ObjectResponse RespondToMouseMove(GH_Canvas canvas, GH_CanvasMouseEvent e)
       {
-        if (e.Button == MouseButtons.Left && !float.IsNaN(Scrolling))
+        if (ActiveScrollMode != ScrollMode.None)
         {
-          var dy = e.CanvasY - ScrollingY;
-          var ty = ListBounds.Height - ScrollerBounds.Height;
-          var f = dy / ty;
+          if (!float.IsNaN(Scrolling))
+          {
+            var dy = e.CanvasY - ScrollingY;
+            var ty = ActiveScrollMode == ScrollMode.Scrolling ?
+              ListBounds.Height - ScrollerBounds.Height :
+              -((Owner.ListItems.Count * ItemHeight) - ListBounds.Height);
+            var f = dy / ty;
 
-          ScrollRatio = Math.Max(0.0f, Math.Min(Scrolling + f, 1.0f));
+            ScrollRatio = Math.Max(0.0f, Math.Min(Scrolling + f, 1.0f));
 
-          ExpireLayout();
-          sender.Refresh();
+            ExpireLayout();
+            canvas.Refresh();
+          }
+
           return GH_ObjectResponse.Handled;
         }
 
-        return base.RespondToMouseMove(sender, e);
+        return base.RespondToMouseMove(canvas, e);
       }
 
       public override GH_ObjectResponse RespondToMouseDoubleClick(GH_Canvas canvas, GH_CanvasMouseEvent e)
@@ -946,13 +1086,18 @@ namespace Grasshopper.Special
         return GH_ObjectResponse.Ignore;
       }
 
+      public override GH_ObjectResponse RespondToKeyDown(GH_Canvas sender, KeyEventArgs e)
+      {
+        return base.RespondToKeyDown(sender, e);
+      }
+
       class SearchInputBox : GUI.Base.GH_TextBoxInputBase
       {
-        ResizableAttributes attributes;
-        public SearchInputBox(ResizableAttributes attributes)
+        readonly ResizableAttributes ParentAttributes;
+        public SearchInputBox(ResizableAttributes parentAttributes)
         {
-          this.attributes = attributes;
-          var bounds = attributes.CaptionBounds;
+          ParentAttributes = parentAttributes;
+          var bounds = parentAttributes.CaptionBounds;
           bounds.X += 2;
           bounds.Width -= 4;
           bounds.Y += 1;
@@ -964,19 +1109,19 @@ namespace Grasshopper.Special
 
         protected override void HandleTextInputAccepted(string text)
         {
-          attributes.ScrollRatio = 0.0f;
+          ParentAttributes.ScrollRatio = 0.0f;
 
-          if (attributes.Owner.SearchPattern == text)
+          if (ParentAttributes.Owner.SearchPattern == text)
           {
-            attributes.Owner.OnDisplayExpired(true);
+            ParentAttributes.Owner.OnDisplayExpired(true);
             return;
           }
 
-          attributes.Owner.RecordUndoEvent("Set Search Pattern");
-          attributes.Owner.SearchPattern = text;
-          attributes.Owner.OnObjectChanged(GH_ObjectEventType.Custom);
+          ParentAttributes.Owner.RecordUndoEvent("Set Search Pattern");
+          ParentAttributes.Owner.SearchPattern = text;
+          ParentAttributes.Owner.OnObjectChanged(GH_ObjectEventType.Custom);
 
-          attributes.Owner.ExpireSolution(true);
+          ParentAttributes.Owner.ExpireSolution(true);
         }
       }
     }
@@ -1312,8 +1457,8 @@ namespace Grasshopper.Special
   [EditorBrowsable(EditorBrowsableState.Never)]
   public class ValuePicker : ValueSet<IGH_Goo>
   {
-    static readonly Guid ComponentClassGuid = new Guid("AFB12752-3ACB-4ACF-8102-16982A69CDAE");
-    public override Guid ComponentGuid => ComponentClassGuid;
+    static readonly Guid _ComponentGuid = new Guid("AFB12752-3ACB-4ACF-8102-16982A69CDAE");
+    public override Guid ComponentGuid => _ComponentGuid;
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     public override string TypeName => "Data";
 

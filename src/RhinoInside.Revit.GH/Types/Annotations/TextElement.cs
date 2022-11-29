@@ -37,8 +37,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override BoundingBox ClippingBox => base.BoundingBox;
-
     public override BoundingBox GetBoundingBox(Transform xform) => Box.GetBoundingBox(xform);
 
     public override Box Box
@@ -74,7 +72,14 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override void DrawViewportWires(GH_PreviewWireArgs args)
+    #region IGH_PreviewData
+    protected override bool GetClippingBox(out BoundingBox clippingBox)
+    {
+      clippingBox = base.GetBoundingBox(Transform.Identity);
+      return true;
+    }
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB.TextElement text)
       {
@@ -168,5 +173,6 @@ namespace RhinoInside.Revit.GH.Types
       }
       else base.DrawViewportWires(args);
     }
+    #endregion
   }
 }

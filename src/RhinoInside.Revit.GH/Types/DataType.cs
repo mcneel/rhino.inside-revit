@@ -110,9 +110,25 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ItemDescription
-    Bitmap IGH_ItemDescription.GetImage(Size size) => default;
+    Bitmap IGH_ItemDescription.GetTypeIcon(Size size)
+    {
+      if (typeof(EDBS.DataType).IsAssignableFrom(typeof(T)))
+        return Properties.Resources.BuiltInParameterTypes;
+
+      if (typeof(EDBS.ParameterGroup).IsAssignableFrom(typeof(T)))
+        return Properties.Resources.BuiltInParameterGroups;
+
+      if (typeof(EDBS.ParameterId).IsAssignableFrom(typeof(T)))
+        return Properties.Resources.BuiltInParameters;
+
+      if (typeof(EDBS.CategoryId).IsAssignableFrom(typeof(T)))
+        return Properties.Resources.BuiltInCategories;
+
+      return Properties.Resources.UnknownIcon;
+    }
+
     string IGH_ItemDescription.Name => Value?.Label;
-    string IGH_ItemDescription.NickName => Value?.Name;
+    string IGH_ItemDescription.Identity => Value?.Name;
     string IGH_ItemDescription.Description => Value?.Namespace;
     #endregion
 

@@ -13,6 +13,9 @@ group: Deployment & Configs
 ### RC 
 
 - Now minimum Revit 2022 is 2022.1 to enable 'Delete Workset'.
+- Now Grasshopper previews persist between solutions.
+- Added type icon column to 'Value Picker' component.
+- Enabled content panning on 'Value Picker'.
 - Added 'Edit Type…' context menu to 'Type' parameters.
 - Added support for far-from-origin on DirectShape components.
 - Added warning when a component receives geometry far-from-origin.
