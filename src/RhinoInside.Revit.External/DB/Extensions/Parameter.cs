@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   static class BuiltInParameterExtension
   {
-    private static readonly SortedSet<BuiltInParameter> builtInParameters =
+    private static readonly SortedSet<BuiltInParameter> _BuiltInParameters =
       new SortedSet<BuiltInParameter>
       (
         Enum.GetValues(typeof(BuiltInParameter)).
@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <summary>
     /// Set of valid <see cref="Autodesk.Revit.DB.BuiltInParameter"/> enum values.
     /// </summary>
-    public static IReadOnlyCollection<BuiltInParameter> BuiltInParameters => builtInParameters;
+    public static IReadOnlyCollection<BuiltInParameter> BuiltInParameters => _BuiltInParameters;
 
     /// <summary>
     /// Checks if a <see cref="Autodesk.Revit.DB.BuiltInParameter"/> is valid.
@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsValid(this BuiltInParameter value)
     {
       if (-2000000 < (int) value && (int) value < -1000000)
-        return builtInParameters.Contains(value);
+        return _BuiltInParameters.Contains(value);
 
       return false;
     }
@@ -176,6 +176,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (parameter.HasValue && parameter.AsInteger() == value) return true;
       return parameter.Set(value);
+    }
+
+    public static bool Update(this Parameter parameter, Color value)
+    {
+      if (parameter.Definition.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().ToString().EndsWith("_COLOR"))
+        throw new InvalidCastException();
+
+      var abgr = (value.Blue << 16) | (value.Green << 8) | (value.Red << 0);
+      if (parameter.HasValue && parameter.AsInteger() == abgr) return true;
+      return parameter.Set(abgr);
     }
 
     public static bool Update(this Parameter parameter, double value)
