@@ -10,6 +10,7 @@ using ARDB3D = Autodesk.Revit.DB.DirectContext3D;
 using Rhino;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry.Raw;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit
 {
@@ -162,7 +163,7 @@ namespace RhinoInside.Revit
             {
               using (var clr = new ARDB.ColorWithTransparency(color.R, color.G, color.B, AlphaToTransparency(color.A)))
               {
-                using (var vtx = new ARDB3D.VertexPositionNormalColored(ARDB.XYZ.Zero, ARDB.XYZ.Zero, clr))
+                using (var vtx = new ARDB3D.VertexPositionNormalColored(XYZExtension.Zero, XYZExtension.Zero, clr))
                 {
                   for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
                   {
@@ -195,7 +196,7 @@ namespace RhinoInside.Revit
 
             using (var stream = vb.GetVertexStreamPositionNormal())
             {
-              using (var vtx = new ARDB3D.VertexPositionNormal(ARDB.XYZ.Zero, ARDB.XYZ.Zero))
+              using (var vtx = new ARDB3D.VertexPositionNormal(XYZExtension.Zero, XYZExtension.Zero))
               {
                 for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
                 {
@@ -222,7 +223,7 @@ namespace RhinoInside.Revit
             {
               using (var clr = new ARDB.ColorWithTransparency(color.R, color.G, color.B, AlphaToTransparency(color.A)))
               {
-                using (var vtx = new ARDB3D.VertexPositionColored(ARDB.XYZ.Zero, clr))
+                using (var vtx = new ARDB3D.VertexPositionColored(XYZExtension.Zero, clr))
                 {
                   for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
                   {
@@ -252,7 +253,7 @@ namespace RhinoInside.Revit
             vb.Map(verticesCount * ARDB3D.VertexPosition.GetSizeInFloats());
             using (var stream = vb.GetVertexStreamPosition())
             {
-              using (var vtx = new ARDB3D.VertexPosition(ARDB.XYZ.Zero))
+              using (var vtx = new ARDB3D.VertexPosition(XYZExtension.Zero))
               {
                 for (int v = part.StartVertexIndex; v < part.EndVertexIndex; ++v)
                 {
@@ -459,7 +460,7 @@ namespace RhinoInside.Revit
         vb.Map(vertexCount * ARDB3D.VertexPosition.GetSizeInFloats());
         using (var vstream = vb.GetVertexStreamPosition())
         {
-          using (var vtx = new ARDB3D.VertexPosition(ARDB.XYZ.Zero))
+          using (var vtx = new ARDB3D.VertexPosition(XYZExtension.Zero))
           {
             foreach (var v in polyline)
             {
@@ -550,7 +551,7 @@ namespace RhinoInside.Revit
             {
               using (var clr = new ARDB.ColorWithTransparency())
               {
-                using (var vtx = new ARDB3D.VertexPositionNormalColored(ARDB.XYZ.Zero, ARDB.XYZ.Zero, clr))
+                using (var vtx = new ARDB3D.VertexPositionNormalColored(XYZExtension.Zero, XYZExtension.Zero, clr))
                 {
                   for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
                   {
@@ -578,7 +579,7 @@ namespace RhinoInside.Revit
 
             using (var vstream = vb.GetVertexStreamPositionNormal())
             {
-              using (var vtx = new ARDB3D.VertexPositionNormal(ARDB.XYZ.Zero, ARDB.XYZ.Zero))
+              using (var vtx = new ARDB3D.VertexPositionNormal(XYZExtension.Zero, XYZExtension.Zero))
               {
                 for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
                 {
@@ -605,7 +606,7 @@ namespace RhinoInside.Revit
             {
               using (var clr = new ARDB.ColorWithTransparency())
               {
-                using (var vtx = new ARDB3D.VertexPositionColored(ARDB.XYZ.Zero, clr))
+                using (var vtx = new ARDB3D.VertexPositionColored(XYZExtension.Zero, clr))
                 {
                   for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
                   {
@@ -632,7 +633,7 @@ namespace RhinoInside.Revit
 
             using (var vstream = vb.GetVertexStreamPosition())
             {
-              using (var vtx = new ARDB3D.VertexPosition(ARDB.XYZ.Zero))
+              using (var vtx = new ARDB3D.VertexPosition(XYZExtension.Zero))
               {
                 for (int p = part.StartVertexIndex; p < part.EndVertexIndex; ++p)
                 {

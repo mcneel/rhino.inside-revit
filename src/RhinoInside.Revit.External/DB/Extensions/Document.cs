@@ -1057,7 +1057,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
                   // Hopefully will be fast enough.
                   var drafting = ViewDrafting.Create(document, document.GetDefaultElementTypeId(ElementTypeGroup.ViewTypeDrafting));
                   var typeId = document.GetDefaultElementTypeId(ElementTypeGroup.TextNoteType);
-                  textNoteId = TextNote.Create(document, drafting.Id, XYZ.Zero, "Show me!!", typeId).Id;
+                  textNoteId = TextNote.Create(document, drafting.Id, XYZExtension.Zero, "Show me!!", typeId).Id;
 
                   var options = tx.GetFailureHandlingOptions().
                                    SetClearAfterRollback(true).

@@ -224,7 +224,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                 if (trans.Start() == TransactionStatus.Started)
                 {
                   // Move elements to Active Design Option
-                  var elementIdsCopied = ElementTransformUtils.CopyElements(options.Document, elementIdsToAssignDO, XYZ.Zero);
+                  var elementIdsCopied = ElementTransformUtils.CopyElements(options.Document, elementIdsToAssignDO, XYZExtension.Zero);
                   options.Document.Delete(elementIdsToAssignDO);
                   resultingElementIds?.AddRange(elementIdsCopied);
 

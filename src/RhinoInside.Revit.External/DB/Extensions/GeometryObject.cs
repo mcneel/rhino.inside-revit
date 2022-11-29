@@ -502,8 +502,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case Point point:
           origin = point.Coord;
-          basisX = XYZ.BasisX;
-          basisY = XYZ.BasisY;
+          basisX = XYZExtension.BasisX;
+          basisY = XYZExtension.BasisY;
           return true;
 
         case PolyLine polyline:

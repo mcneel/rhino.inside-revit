@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ ComputeMeanNormal(this Mesh mesh)
     {
       if (mesh.NumTriangles < 1)
-        return XYZ.Zero;
+        return XYZExtension.Zero;
 
       Sum normalX = default, normalY = default, normalZ = default;
       var numTriangles = mesh.NumTriangles;
