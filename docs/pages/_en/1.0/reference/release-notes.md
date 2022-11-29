@@ -12,26 +12,32 @@ group: Deployment & Configs
 
 ### RC 
 
-- Now minimum Revit 2022 is 2022.1 to enable 'Delete Workset'.
-- Now Grasshopper previews persist between solutions.
+
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.10 RC4" version="v1.10.8368.15363" pre_release=true time="11/29/2022" %}
+
+- Now minimum Revit 2022 is 2022.1 to enable {% include ltr/comp.html uuid='bf1b9be9' %}
+- Now Grasshopper previews persist between solutions. This means that only geometry that is being modified is redrawn and preview performance is much better.
 - Added type icon column to 'Value Picker' component.
 - Enabled content panning on 'Value Picker'.
-- Added 'Edit Type…' context menu to 'Type' parameters.
+- Added 'Edit Type…' context menu to {% include ltr/comp.html uuid='97dd546d' %} parameters.
 - Added support for far-from-origin on DirectShape components.
 - Added warning when a component receives geometry far-from-origin.
-- Fixed pick linked element on other parameters than 'Graphical Element'.
+- Fixed pick linked element on other parameters than {% include ltr/comp.html uuid='ef607c2a' %}.
 - Added support for geometry on linked files.
 - Added support for closed curves and poly-lines to `ShapeEncoder`.
-- Added conversion from 'Level' and 'View' to 'Work Plane'.
-- Added 'Ensure Workset' component.
+- Added conversion from {% include ltr/comp.html uuid='3238f8bc' %} and {% include ltr/comp.html uuid='2dc4b866' %} to {% include ltr/comp.html uuid='93bf1f61' %}.
+- Added {% include ltr/comp.html uuid='a406c6a0' %} component.
 - Fix for `NurbsCurve.ToCurve` when is periodic.
 - Fixed a problem with ellipses on model-line creation components.
 - Fix for `PolylineCurve.ToCurve` and `PolyCurve.ToCurve` extension methods when Rhino is not in feet.
 - Fix for `HostObject` creation components when using closed curves.
-- Fix on 'Add Wall (Profile)' when profile is moved parallel to its plane.
-- Fix on recent version of Revit for 'View Extents' component. Now it does not take into account Grasshopper previews.
-- Fix for 'Element Face Paint'.
-- Fix for 'Element Type Picker' parameter.
+- Fix on {% include ltr/comp.html uuid='78b02ae8' %} when profile is moved parallel to its plane.
+- Fix on recent version of Revit for {% include ltr/comp.html uuid='d4593785' %} component. Now it does not take into account Grasshopper previews.
+- Fix for {% include ltr/comp.html uuid='2a4a95d5' %}.
+- Fix for {% include ltr/comp.html uuid='d3fb53d3' %} parameter.
 - Fixed `Types.Category.BakeElement`, it was baking more than necessary.
 - Improved `ARDB.Arc` conversion from Revit to Rhino.
 - Fix for Line creation components when used with closed curves.
@@ -39,9 +45,6 @@ group: Deployment & Configs
 - Added `ARDB.View.GetOutlineFilter` extension method.
 - Added `ARDB.Element.GetGeometryObjectFromReference` extension method that also returns the transform.
 - Added `Selection.PickPoints` method.
-
-{% endcapture %}
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 {% include ltr/release-header.html title="v1.10 RC3" version="v1.10.8342.22296" pre_release=true time="11/08/2022" %}
 
