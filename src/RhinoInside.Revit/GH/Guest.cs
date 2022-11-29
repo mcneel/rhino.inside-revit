@@ -866,7 +866,7 @@ namespace RhinoInside.Revit.GH
           if (allowModelessHandling)
           {
             try { deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, CompoundElementFilter.ElementIsNotInternalFilter(revitDocument)); }
-            catch (Autodesk.Revit.Exceptions.ArgumentException) { deletedIds = elementIds; modifiedIds = new ARDB.ElementId[0]; }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { deletedIds = elementIds; modifiedIds = ElementIdExtension.EmptyCollection; }
           }
 
           using (var tx = new ARDB.Transaction(revitDocument, "Release Elements"))

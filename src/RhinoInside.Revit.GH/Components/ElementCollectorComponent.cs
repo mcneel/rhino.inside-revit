@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using External.DB;
+  using External.DB.Extensions;
+
   public abstract class ElementCollectorComponent : ZuiComponent
   {
     protected ElementCollectorComponent(string name, string nickname, string description, string category, string subCategory)
@@ -69,10 +71,9 @@ namespace RhinoInside.Revit.GH.Components
 
         if (deleted.Count > 0)
         {
-          var empty = new ARDB.ElementId[0];
           foreach (var param in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
           {
-            if (param.NeedsToBeExpired(document, empty, deleted, empty))
+            if (param.NeedsToBeExpired(document, ElementIdExtension.EmptyCollection, deleted, ElementIdExtension.EmptyCollection))
               return true;
           }
         }

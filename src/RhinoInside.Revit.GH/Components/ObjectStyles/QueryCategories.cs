@@ -31,10 +31,9 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
 
       if (deleted.Any())
       {
-        var empty = new ARDB.ElementId[0];
         foreach (var param in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
         {
-          if (param.NeedsToBeExpired(document, empty, deleted, empty))
+          if (param.NeedsToBeExpired(document, ElementIdExtension.EmptyCollection, deleted, ElementIdExtension.EmptyCollection))
             return true;
         }
       }

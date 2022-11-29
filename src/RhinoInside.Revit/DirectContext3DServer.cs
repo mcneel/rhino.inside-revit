@@ -722,6 +722,7 @@ namespace RhinoInside.Revit
 
         public int VertexCount => EndVertexIndex - StartVertexIndex;
         public int FaceCount   => EndFaceIndex - StartFaceIndex;
+        public bool IsEmpty    => VertexCount == 0 && FaceCount == 0;
 
         public Part(int startVertexIndex, int endVertexIndex, int startFaceIndex, int endFaceIndex)
         {
@@ -749,6 +750,7 @@ namespace RhinoInside.Revit
       protected Part part;
 
       public readonly BoundingBox ClippingBox;
+      protected virtual bool IsGeometryDisposable => false;
 
       public Primitive(Point p)               { geometry = p; ClippingBox = geometry.GetBoundingBox(false); }
       public Primitive(PointCloud pc)         { geometry = pc; ClippingBox = geometry.GetBoundingBox(false); part = pc; }
@@ -757,27 +759,29 @@ namespace RhinoInside.Revit
       public Primitive(Mesh m)                { geometry = m; ClippingBox = geometry.GetBoundingBox(false); part = m; }
       public Primitive(Mesh m, Part p)        { geometry = m; ClippingBox = geometry.GetBoundingBox(false); part = p; }
 
-      void IDisposable.Dispose()
+      public virtual void Dispose()
       {
-        effectInstance?.Dispose(); effectInstance = null;
+        if (IsGeometryDisposable && part.IsEmpty)
+        geometry?.Dispose();        geometry = null;
+        effectInstance?.Dispose();  effectInstance = null;
         if(linesBuffer != indexLinesBuffer && linesBuffer != indexPointsBuffer)
-        linesBuffer?.Dispose();    linesBuffer = null; linesCount = 0;
-        triangleBuffer?.Dispose(); triangleBuffer = null; triangleCount = 0;
-        vertexFormat?.Dispose();   vertexFormat = null;
-        vertexBuffer?.Dispose();   vertexBuffer = null; vertexCount = 0;
+        linesBuffer?.Dispose();     linesBuffer = null; linesCount = 0;
+        triangleBuffer?.Dispose();  triangleBuffer = null; triangleCount = 0;
+        vertexFormat?.Dispose();    vertexFormat = null;
+        vertexBuffer?.Dispose();    vertexBuffer = null; vertexCount = 0;
       }
 
       public virtual ARDB3D.EffectInstance EffectInstance(ARDB.DisplayStyle displayStyle, bool IsShadingPass)
       {
-        if (effectInstance == null)
+        if (effectInstance is null)
           effectInstance = new ARDB3D.EffectInstance(vertexFormatBits);
 
         return effectInstance;
       }
 
-      public virtual bool Regen()
+      public bool Regen()
       {
-        if (geometry != null)
+        if (geometry is object)
         {
           if (!BeginRegen())
             return false;
@@ -826,6 +830,7 @@ namespace RhinoInside.Revit
               vertexFormat = new ARDB3D.VertexFormat(vertexFormatBits);
           }
 
+          if (IsGeometryDisposable && part.IsEmpty) geometry.Dispose();
           geometry = null;
 
           EndRegen();
@@ -904,7 +909,7 @@ namespace RhinoInside.Revit
       }
     }
 
-    static Stopwatch RegenTime = new Stopwatch();
+    static readonly Stopwatch RegenTime = new Stopwatch();
     public static long RegenThreshold = 200;
 
     static bool BeginRegen()
