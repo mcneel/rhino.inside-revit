@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Parameters
     void IGH_PreviewObject.DrawViewportMeshes(IGH_PreviewArgs args)
     {
       var bbox = Preview_ComputeClippingBox();
-      if (bbox.IsValid && args.Display.IsVisible(bbox))
+      if (bbox.IsValid && !args.Display.IsVisible(bbox))
         return;
 
       Preview_DrawMeshes(args);
@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Parameters
     void IGH_PreviewObject.DrawViewportWires(IGH_PreviewArgs args)
     {
       var bbox = Preview_ComputeClippingBox();
-      if (bbox.IsValid && args.Display.IsVisible(bbox))
+      if (bbox.IsValid && !args.Display.IsVisible(bbox))
         return;
 
       Preview_DrawWires(args);
