@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static XYZ GetBasePointLocation(this Document doc, ElevationBase elevationBase)
     {
-      var position = XYZ.Zero;
+      var position = XYZExtension.Zero;
       switch (elevationBase)
       {
         //case ElevationBase.InternalOrigin:
@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       switch (datum)
       {
         case Level level:
-          return new PlaneEquation(XYZ.BasisZ, -level.ProjectElevation);
+          return new PlaneEquation(XYZExtension.BasisZ, -level.ProjectElevation);
 
         case Grid grid:
           if (grid.IsCurved) return default;

@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   static class BuiltInParameterExtension
   {
-    private static readonly SortedSet<BuiltInParameter> builtInParameters =
+    private static readonly SortedSet<BuiltInParameter> _BuiltInParameters =
       new SortedSet<BuiltInParameter>
       (
         Enum.GetValues(typeof(BuiltInParameter)).
@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <summary>
     /// Set of valid <see cref="Autodesk.Revit.DB.BuiltInParameter"/> enum values.
     /// </summary>
-    public static IReadOnlyCollection<BuiltInParameter> BuiltInParameters => builtInParameters;
+    public static IReadOnlyCollection<BuiltInParameter> BuiltInParameters => _BuiltInParameters;
 
     /// <summary>
     /// Checks if a <see cref="Autodesk.Revit.DB.BuiltInParameter"/> is valid.
@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsValid(this BuiltInParameter value)
     {
       if (-2000000 < (int) value && (int) value < -1000000)
-        return builtInParameters.Contains(value);
+        return _BuiltInParameters.Contains(value);
 
       return false;
     }
@@ -137,6 +137,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
   {
     public static bool AsBoolean(this Parameter parameter)
     {
+      if (parameter.StorageType != StorageType.Integer)
+        throw new InvalidCastException();
+
       if (parameter.Definition.GetDataType() != SpecType.Boolean.YesNo)
         throw new InvalidCastException();
 
@@ -145,7 +148,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static T AsEnum<T>(this Parameter parameter) where T : Enum
     {
-      if (parameter.Definition.GetDataType() != SpecType.Int.Integer)
+      if (parameter.StorageType != StorageType.Integer)
+        throw new InvalidCastException();
+
+      if (parameter.Definition?.GetDataType() != SpecType.Int.Integer)
         throw new InvalidCastException();
 
       return (T) (object) parameter.AsInteger();
@@ -153,11 +159,22 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static Color AsColor(this Parameter parameter)
     {
-      if (parameter.Definition.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().ToString().EndsWith("_COLOR"))
+      if (parameter.StorageType != StorageType.Integer)
+        throw new InvalidCastException();
+
+      if (parameter.Definition?.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().ToString().EndsWith("_COLOR"))
         throw new InvalidCastException();
 
       var abgr = parameter.AsInteger();
       return new Color((byte) ((abgr >> 0) & byte.MaxValue), (byte) ((abgr >> 8) & byte.MaxValue), (byte) ((abgr >> 16) & byte.MaxValue));
+    }
+
+    public static Element AsElement(this Parameter parameter)
+    {
+      if (parameter.StorageType != StorageType.ElementId)
+        throw new InvalidCastException();
+
+      return parameter.Element.Document.GetElement(parameter.AsElementId());
     }
 
     public static bool Update(this Parameter parameter, bool value)
@@ -178,6 +195,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return parameter.Set(value);
     }
 
+    public static bool Update(this Parameter parameter, Color value)
+    {
+      if (parameter.Definition.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().ToString().EndsWith("_COLOR"))
+        throw new InvalidCastException();
+
+      var abgr = (value.Blue << 16) | (value.Green << 8) | (value.Red << 0);
+      if (parameter.HasValue && parameter.AsInteger() == abgr) return true;
+      return parameter.Set(abgr);
+    }
+
     public static bool Update(this Parameter parameter, double value)
     {
       if (parameter.HasValue && parameter.AsDouble() == value) return true;
@@ -196,7 +223,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       // `DB.Parameter.Set` does not validate `value` is a valid type for `parameter.Element`.
       // Revit editor crashes when that element with a wrong type is selected.
-      if (parameter.GetTypeId() == Schemas.ParameterId.ElemTypeParam)
+      if (parameter.GetTypeId() == ParameterId.ElemTypeParam)
       {
         if (!parameter.Element.GetValidTypes().Contains(value))
           return false;
@@ -212,6 +239,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return parameter.Set(value);
+    }
+
+    public static bool Update(this Parameter parameter, Element value)
+    {
+      if (value is object && !parameter.Element.Document.IsEquivalent(value.Document))
+        throw new InvalidCastException();
+
+      return Update(parameter, value?.Id ?? ElementIdExtension.InvalidElementId);
     }
 
     public static bool ResetValue(this Parameter parameter)

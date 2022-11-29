@@ -163,7 +163,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool TryGetLocation(this Line curve, out XYZ origin, out XYZ basisX, out XYZ basisY)
     {
       var curveDirection = curve.Direction;
-      if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, DefaultTolerance))
+      if (!curveDirection.IsAlmostEqualTo(XYZExtension.Zero, DefaultTolerance))
       {
         if (curve.IsBound)
         {
@@ -193,7 +193,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var end = curve.GetEndPoint(1);
         var curveDirection = end - start;
 
-        if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, DefaultTolerance))
+        if (!curveDirection.IsAlmostEqualTo(XYZExtension.Zero, DefaultTolerance))
         {
           origin = start + (curveDirection * 0.5);
           basisX = curveDirection.Normalize(0D);
@@ -221,7 +221,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var end = curve.GetEndPoint(1);
         var curveDirection = end - start;
 
-        if (!curveDirection.IsAlmostEqualTo(XYZ.Zero, DefaultTolerance))
+        if (!curveDirection.IsAlmostEqualTo(XYZExtension.Zero, DefaultTolerance))
         {
           origin = start + (curveDirection * 0.5);
           basisX = curveDirection.Normalize(0D);
@@ -258,12 +258,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var end = curve.GetEndPoint(1);
         var curveDirection = end - start;
 
-        if (!curveDirection.AlmostEquals(XYZ.Zero, 0D))
+        if (!curveDirection.AlmostEquals(XYZExtension.Zero, 0D))
         {
           origin = start + (curveDirection * 0.5);
           basisX = curveDirection.Normalize(0D);
 
-          var normal = XYZ.Zero;
+          var normal = XYZExtension.Zero;
           {
             var ctrlPoints = curve.CtrlPoints;
             var cov = XYZExtension.ComputeCovariance(ctrlPoints);
@@ -307,8 +307,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case 1:
           origin = curve.GetCoordinate(0);
-          basisX = XYZ.BasisX;
-          basisY = XYZ.BasisY;
+          basisX = XYZExtension.BasisX;
+          basisY = XYZExtension.BasisY;
           return true;
 
         default:
@@ -367,7 +367,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region TryGetCentroid
     public static bool TryGetCentroid(this IEnumerable<Curve> curves, out XYZ centroid)
     {
-      centroid = XYZ.Zero;
+      centroid = XYZExtension.Zero;
       var count = 0;
       foreach (var curve in curves)
       {

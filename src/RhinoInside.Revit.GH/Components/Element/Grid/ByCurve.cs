@@ -217,15 +217,15 @@ namespace RhinoInside.Revit.GH.Components.Grids
 
         // Move newCurve to same plane as current curve
         var elevationDelta = origin0.Z - origin.Z;
-        newCurve = newCurve.CreateTransformed(ARDB.Transform.CreateTranslation(ARDB.XYZ.BasisZ * elevationDelta));
+        newCurve = newCurve.CreateTransformed(ARDB.Transform.CreateTranslation(XYZExtension.BasisZ * elevationDelta));
         newCurve.TryGetLocation(out var origin1, out var basisX1, out var basisY1);
 
         var pinned = grid.Pinned;
         grid.Pinned = false;
 
         grid.Location.Move(origin1 - origin0);
-        using (var axis = ARDB.Line.CreateUnbound(origin1, ARDB.XYZ.BasisZ))
-          grid.Location.Rotate(axis, basisX0.AngleOnPlaneTo(basisX1, ARDB.XYZ.BasisZ));
+        using (var axis = ARDB.Line.CreateUnbound(origin1, XYZExtension.BasisZ))
+          grid.Location.Rotate(axis, basisX0.AngleOnPlaneTo(basisX1, XYZExtension.BasisZ));
 
         grid.SetCurveInView(ARDB.DatumExtentType.Model, view, newCurve);
         grid.Pinned = pinned;

@@ -110,7 +110,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
 
     ARDB.GroupType Create(ARDB.Document doc, IList<ARDB.ElementId> elementIds)
     {
-      var elementIdsCopy = ARDB.ElementTransformUtils.CopyElements(doc, elementIds, ARDB.XYZ.Zero);
+      var elementIdsCopy = ARDB.ElementTransformUtils.CopyElements(doc, elementIds, XYZExtension.Zero);
       var newGroup = doc.IsFamilyDocument ?
                      doc.FamilyCreate.NewGroup(elementIdsCopy) :
                      doc.Create.NewGroup(elementIdsCopy);

@@ -934,7 +934,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                 (
                   var OptionsSAT = new ARDB.SATImportOptions()
                   {
-                    ReferencePoint = ARDB.XYZ.Zero,
+                    ReferencePoint = XYZExtension.Zero,
                     Placement = ARDB.ImportPlacement.Origin,
                     CustomScale = ARDB.UnitUtils.Convert
                     (
@@ -974,6 +974,93 @@ namespace RhinoInside.Revit.Convert.Geometry
       finally
       {
         try { FileSAT.Delete(); } catch { }
+      }
+
+      return default;
+    }
+    #endregion
+
+    #region DWG
+    internal static ARDB.Solid ToDWG(/*const*/ Brep brep, double factor)
+    {
+      var FileDWG = NewSwapFileInfo("dwg");
+      try
+      {
+        if (ExportGeometry(FileDWG.FullName, brep, factor))
+        {
+          var doc = GeometryEncoder.Context.Peek.Document ?? IODocument;
+
+          if (ARDB.ShapeImporter.IsServiceAvailable())
+          {
+            using (var importer = new ARDB.ShapeImporter())
+            {
+              var list = importer.Convert(doc, FileDWG.FullName);
+              if (list.OfType<ARDB.Solid>().FirstOrDefault() is ARDB.Solid shape)
+                return shape;
+
+              GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit Data conversion service failed to import geometry", default);
+
+              // Looks like ARDB.Document.Import do more cleaning while importing, let's try it.
+              //return null;
+            }
+          }
+          else GeometryEncoder.Context.Peek.RuntimeMessage(255, "Revit Data conversion service is not available", default);
+
+          // Looks like importing on a different document than the destination one
+          // prevents Revit from reusing the Solids, so we obtain unique Solids.
+          doc = IODocument;
+          {
+            try
+            {
+              // Everything in this scope should be rolledback.
+              using (doc.RollBackScope())
+              {
+                using
+                (
+                  var OptionsDWG = new ARDB.DWGImportOptions()
+                  {
+                    ReferencePoint = XYZExtension.Zero,
+                    Placement = ARDB.ImportPlacement.Origin,
+                    CustomScale = ARDB.UnitUtils.Convert
+                    (
+                      factor,
+                      External.DB.Schemas.UnitType.Feet,
+                      doc.GetUnits().GetFormatOptions(External.DB.Schemas.SpecType.Measurable.Length).GetUnitTypeId()
+                    )
+                  }
+                )
+                {
+                  // Create a 3D view to import the SAT file
+                  var typeId = doc.GetDefaultElementTypeId(ARDB.ElementTypeGroup.ViewType3D);
+                  var view = ARDB.View3D.CreatePerspective(doc, typeId);
+
+                  if (doc.Import(FileDWG.FullName, OptionsDWG, view, out var instanceId))
+                  {
+                    var center = brep.GetBoundingBox(accurate: true).Center.ToXYZ(factor);
+                    if (TryGetSolidFromInstance(doc, instanceId, center, out var solid))
+                      return solid;
+                  }
+                }
+              }
+            }
+            catch (Autodesk.Revit.Exceptions.OptionalFunctionalityNotAvailableException e)
+            {
+              GeometryEncoder.Context.Peek.RuntimeMessage(255, e.Message, default);
+            }
+            finally
+            {
+              if (!doc.IsEquivalent(ioDocument) && !doc.IsEquivalent(GeometryEncoder.Context.Peek.Document))
+                doc.Close(false);
+            }
+          }
+
+          GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit DWG module failed to import geometry", default);
+        }
+        else GeometryEncoder.Context.Peek.RuntimeMessage(20, "Failed to export geometry to DWG file", default);
+      }
+      finally
+      {
+        try { FileDWG.Delete(); } catch { }
       }
 
       return default;
@@ -1020,7 +1107,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                 (
                   var Options3DM = new ARDB.ImportOptions3DM()
                   {
-                    ReferencePoint = ARDB.XYZ.Zero,
+                    ReferencePoint = XYZExtension.Zero,
                     Placement = ARDB.ImportPlacement.Origin,
                     CustomScale = ARDB.UnitUtils.Convert
                     (

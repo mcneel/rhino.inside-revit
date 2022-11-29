@@ -1,19 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using Rhino.Geometry;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
+using SD = System.Drawing;
 
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
+  using External.DB.Extensions;
 
   [EditorBrowsable(EditorBrowsableState.Never)]
   public abstract class GH_Component : Grasshopper.Kernel.GH_Component
@@ -21,12 +22,18 @@ namespace RhinoInside.Revit.GH.Components
     protected GH_Component(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected override Bitmap Icon => ((Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
-                                      ImageBuilder.BuildIcon(IconTag, Properties.Resources.UnknownIcon);
+    protected override SD.Bitmap Icon =>
+      ((SD.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
+      ImageBuilder.BuildIcon(IconTag, Properties.Resources.UnknownIcon);
 
     protected virtual string IconTag => GetType().Name.Substring(0, 1);
 
-    #region Bake
+    #region IGH_PreviewObject
+    // Grasshopper default implementation does not take into Hidden property and produce a bigger than necessary ClippingBox.
+    public override BoundingBox ClippingBox => Hidden ? BoundingBox.Empty : base.ClippingBox;
+    #endregion
+
+    #region IGH_BakeAwareObject
     // Grasshopper default implementation has a bug, it checks inputs instead of outputs
     public override bool IsBakeCapable => Params?.Output.OfType<IGH_BakeAwareObject>().Any(x => x.IsBakeCapable) ?? false;
 
@@ -67,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components
       ComponentVersion = CurrentVersion;
 
       ComponentVersionAttribute.GetVersionHistory(GetType(), out var _, out var _, out var deprecated);
-      obsolete = Obsolete || deprecated is object;
+      _Obsolete = Obsolete || deprecated is object;
     }
 
     #if DEBUG
@@ -103,12 +110,12 @@ namespace RhinoInside.Revit.GH.Components
     #endif
 
     #region Obsolete
-    readonly bool? obsolete;
-    public override bool Obsolete => obsolete.GetValueOrDefault(base.Obsolete);
+    readonly bool? _Obsolete;
+    public override bool Obsolete => _Obsolete.GetValueOrDefault(base.Obsolete);
     #endregion
 
-    static readonly string[] keywords = new string[] { "Revit" };
-    public override IEnumerable<string> Keywords => base.Keywords is null ? keywords : Enumerable.Concat(base.Keywords, keywords);
+    static readonly string[] _Keywords = new string[] { "Revit" };
+    public override IEnumerable<string> Keywords => base.Keywords is null ? _Keywords : Enumerable.Concat(base.Keywords, _Keywords);
 
     #region IO
     private Version CurrentVersion
@@ -174,8 +181,8 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region IGH_ActiveObject
-    Exception unhandledException;
-    protected bool IsAborted => unhandledException is object;
+    Exception UnhandledException;
+    protected bool IsAborted => UnhandledException is object;
     protected virtual bool AbortOnContinuableException => false;
 
     static Component ComputingComponent;
@@ -187,9 +194,9 @@ namespace RhinoInside.Revit.GH.Components
       {
         Rhinoceros.InvokeInHostContext(() => base.ComputeData());
 
-        if (unhandledException is object)
+        if (UnhandledException is object)
         {
-          unhandledException = default;
+          UnhandledException = default;
           ResetData();
         }
       }
@@ -341,14 +348,10 @@ namespace RhinoInside.Revit.GH.Components
 
     public override void CollectData()
     {
-      bool IsWithinLengthLimits(Point3d point)
-      {
-        var LengthLimit = GeometryDecoder.ToModelLength(52_800); // feet.
-        var distance = point.DistanceTo(Point3d.Origin);
-        return distance <= LengthLimit;
-      }
-
       base.CollectData();
+
+      const double DesignLimits = 52_800.0; // feet.
+      var LengthLimit = GeometryDecoder.ToModelLength(DesignLimits); 
 
       foreach (var input in Params.Input.Where(x => x is IGH_BakeAwareObject))
       {
@@ -362,13 +365,13 @@ namespace RhinoInside.Revit.GH.Components
             if (branch[i] is IGH_GeometricGoo goo)
             {
               var bbox = goo.Boundingbox;
-              if (!IsWithinLengthLimits(bbox.Min) || !IsWithinLengthLimits(bbox.Max))
+              if (bbox.Min.DistanceTo(Point3d.Origin) > LengthLimit || bbox.Max.DistanceTo(Point3d.Origin) > LengthLimit)
               {
                 if (!reported) AddGeometryRuntimeError
                 (
                   GH_RuntimeMessageLevel.Warning,
                   $"The input {input.NickName} lies outside of Revit design limits." +
-                  $" Design limits are ±{GeometryDecoder.ToModelLength(52_800):N0} {GH_Format.RhinoUnitSymbol()} around the origin.",
+                  $" Design limits are ±{GeometryDecoder.ToModelLength(DesignLimits):N0} {GH_Format.RhinoUnitSymbol()} around the origin.",
                   GH_Convert.ToGeometryBase(goo)
                 );
               }
@@ -379,32 +382,8 @@ namespace RhinoInside.Revit.GH.Components
     }
     #endregion
 
-    #region IGH_PreviewObject
-    public override Rhino.Geometry.BoundingBox ClippingBox
-    {
-      get
-      {
-        var clippingBox = Rhino.Geometry.BoundingBox.Empty;
-
-        foreach (var param in Params)
-        {
-          if (param.SourceCount > 0)
-            continue;
-
-          if (param is IGH_PreviewObject previewObject)
-          {
-            if (!previewObject.Hidden && previewObject.IsPreviewCapable)
-              clippingBox.Union(previewObject.ClippingBox);
-          }
-        }
-
-        return clippingBox;
-      }
-    }
-    #endregion
-
     #region AddGeometryRuntimeError
-    readonly List<(Rhino.Geometry.GeometryBase geometry, Rhino.Geometry.BoundingBox bbox)> RuntimeErrorGeometry = new List<(Rhino.Geometry.GeometryBase, Rhino.Geometry.BoundingBox)>();
+    readonly List<(GeometryBase Geometry, BoundingBox BoundingBox)> RuntimeErrorGeometry = new List<(GeometryBase, BoundingBox)>();
 
     public override void ClearData()
     {
@@ -412,7 +391,7 @@ namespace RhinoInside.Revit.GH.Components
       RuntimeErrorGeometry.Clear();
     }
 
-    public void AddGeometryConversionError(GH_RuntimeMessageLevel level, string text, Rhino.Geometry.GeometryBase geometry)
+    public void AddGeometryConversionError(GH_RuntimeMessageLevel level, string text, GeometryBase geometry)
     {
 #if DEBUG
       switch (geometry)
@@ -432,7 +411,7 @@ namespace RhinoInside.Revit.GH.Components
       AddGeometryRuntimeError(level, text, geometry?.InRhinoUnits());
     }
 
-    public void AddGeometryRuntimeError(GH_RuntimeMessageLevel level, string text, Rhino.Geometry.GeometryBase geometry)
+    public void AddGeometryRuntimeError(GH_RuntimeMessageLevel level, string text, GeometryBase geometry)
     {
       if (text is object) AddRuntimeMessage(level, text);
       if (geometry is object) RuntimeErrorGeometry.Add((geometry, geometry.GetBoundingBox(false)));
@@ -453,41 +432,29 @@ namespace RhinoInside.Revit.GH.Components
       var pointRadius = 2.0f * args.Display.DisplayPipelineAttributes.PointRadius * dpi;
       var curveThickness = (int) Math.Round(1.5f * args.DefaultCurveThickness * dpi, MidpointRounding.AwayFromZero);
 
-      var index = 0;
       foreach (var error in RuntimeErrorGeometry)
       {
-        index++;
         // Skip geometry outside the viewport
-        if (!viewport.IsVisible(error.bbox))
+        if (!viewport.IsVisible(error.BoundingBox))
           continue;
 
-        var center = error.bbox.Center;
+        var center = error.BoundingBox.Center;
         if (viewport.GetWorldToScreenScale(center, out var pixelsPerUnits))
         {
           // If geometry is smaller than a point diameter we show it as a point
-          if (error.bbox.Diagonal.Length * pixelsPerUnits < pointRadius * 2.0)
+          if (error.BoundingBox.Diagonal.Length * pixelsPerUnits < pointRadius * 2.0)
           {
-            args.Display.DrawPoint(center, Rhino.Display.PointStyle.RoundControlPoint, Color.Orange, Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
+            args.Display.DrawPoint(center, Rhino.Display.PointStyle.RoundControlPoint, SD.Color.Orange, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
           }
           else
           {
-            switch (error.geometry)
+            switch (error.Geometry)
             {
-              case Rhino.Geometry.Point point:
-                args.Display.DrawPoint(point.Location, Rhino.Display.PointStyle.X, Color.Orange, Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
-                break;
-              case Rhino.Geometry.Curve curve:
-                args.Display.DrawCurve(curve, Color.Orange, curveThickness);
-                break;
-              case Rhino.Geometry.Surface surface:
-                args.Display.DrawSurface(surface, Color.Orange, curveThickness);
-                break;
-              case Rhino.Geometry.Brep brep:
-                args.Display.DrawBrepWires(brep, Color.Orange, curveThickness);
-                break;
-              case Rhino.Geometry.Mesh mesh:
-                args.Display.DrawMeshWires(mesh, Color.Orange, curveThickness);
-                break;
+              case Point point:     args.Display.DrawPoint(point.Location, Rhino.Display.PointStyle.X, SD.Color.Orange, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false); break;
+              case Curve curve:     args.Display.DrawCurve(curve, SD.Color.Orange, curveThickness); break;
+              case Surface surface: args.Display.DrawSurface(surface, SD.Color.Orange, curveThickness); break;
+              case Brep brep:       args.Display.DrawBrepWires(brep, SD.Color.Orange, curveThickness); break;
+              case Mesh mesh:       args.Display.DrawMeshWires(mesh, SD.Color.Orange, curveThickness); break;
             }
           }
         }
@@ -496,7 +463,6 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region IGH_ReferenceComponent
-    static readonly ARDB.ElementId[] EmptyElementIds = new ARDB.ElementId[0];
     public virtual bool NeedsToBeExpired
     (
       ARDB.Document document,
@@ -516,7 +482,7 @@ namespace RhinoInside.Revit.GH.Components
         // Check inputs
         foreach (var param in persistentInputs)
         {
-          if (param.NeedsToBeExpired(document, EmptyElementIds, deleted, modified))
+          if (param.NeedsToBeExpired(document, ElementIdExtension.EmptyCollection, deleted, modified))
             return true;
         }
       }

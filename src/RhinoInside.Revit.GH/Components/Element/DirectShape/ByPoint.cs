@@ -9,6 +9,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   using Convert;
   using Convert.Geometry;
   using Kernel.Attributes;
+  using External.DB.Extensions;
 
   public class DirectShapeByPoint : ReconstructElementComponent
   {
@@ -50,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
         try
         {
-          var shape = new ARDB.Point[] { ARDB.Point.Create(ARDB.XYZ.Zero) };
+          var shape = new ARDB.Point[] { ARDB.Point.Create(XYZExtension.Zero) };
           element.SetShape(shape);
           element.Pinned = false;
           element.Location.Move(point.ToXYZ());
