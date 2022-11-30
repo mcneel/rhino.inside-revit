@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -23,12 +24,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
       double.PositiveInfinity, double.PositiveInfinity
     );
 
-    public static bool IsUnset(this BoundingBoxUV value)
+    public static bool IsEmpty(this BoundingBoxUV value)
     {
-      if (value is null) return true;
-
       var (min, max) = value;
       return !(min.U <= max.U && min.V <= max.V);
+    }
+
+    public static bool IsNullOrEmpty(this BoundingBoxUV value)
+    {
+      return value?.IsEmpty() != false;
     }
 
     public static void Deconstruct
@@ -43,8 +47,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static UV Evaluate(this BoundingBoxUV value, UV uv)
     {
-      if (value.IsUnset()) return default;
       if (uv is null) return default;
+      if (value.IsEmpty()) return UVExtension.NaN;
 
       var (u, v) = uv;
       var (min, max) = value;
@@ -58,27 +62,39 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static void Union(this BoundingBoxUV value, BoundingBoxUV uv)
     {
-      if (uv.IsUnset()) return;
+      if (uv.IsNullOrEmpty()) return;
 
-      Union(value, uv.Min);
-      Union(value, uv.Max);
+      if (value.IsEmpty())
+      {
+        value.Min = uv.Min;
+        value.Max = uv.Max;
+      }
+      else
+      {
+        UnionNotEmpty(value, uv.Min);
+        UnionNotEmpty(value, uv.Max);
+      }
     }
 
     public static void Union(this BoundingBoxUV value, UV uv)
     {
-      if (value.IsUnset())
+      if (value.IsEmpty())
       {
         value.Min = uv;
         value.Max = uv;
       }
-      else
-      {
-        var (u, v) = uv;
-        var (min, max) = value;
+      else UnionNotEmpty(value, uv);
+    }
 
-        value.Min = new UV(Math.Min(min.U, u), Math.Min(min.V, v));
-        value.Max = new UV(Math.Max(max.U, u), Math.Max(max.V, v));
-      }
+    static void UnionNotEmpty(this BoundingBoxUV value, UV uv)
+    {
+      Debug.Assert(!value.IsEmpty());
+
+      var (u, v) = uv;
+      var (min, max) = value;
+
+      value.Min = new UV(Math.Min(min.U, u), Math.Min(min.V, v));
+      value.Max = new UV(Math.Max(max.U, u), Math.Max(max.V, v));
     }
   }
 }

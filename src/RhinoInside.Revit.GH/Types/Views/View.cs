@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.GH.Types
               var unitsScale = UnitScale.Internal / UnitScale.GetUnitScale(RhinoDoc.ActiveDoc, space == ActiveSpace.None ? ActiveSpace.PageSpace : space);
               var viewScale = space == ActiveSpace.None ? 1.0 : (view.Scale == 0 ? 1.0 : (double) view.Scale);
 
-              if (!outline.IsUnset()) return new UVInterval
+              if (!outline.IsNullOrEmpty()) return new UVInterval
               (
                 new Interval(viewScale * outline.Min.U * unitsScale, viewScale * outline.Max.U * unitsScale),
                 new Interval(viewScale * outline.Min.V * unitsScale, viewScale * outline.Max.V * unitsScale)

@@ -24,12 +24,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Max = XYZExtension.PositiveInfinity,
     };
 
-    public static bool IsUnset(this BoundingBoxXYZ value)
+    public static bool IsEmpty(this BoundingBoxXYZ value)
     {
-      if (value is null) return true;
-
       var (min, max) = value;
       return !(min.X <= max.X && min.Y <= max.Y && min.Z <= max.Z);
+    }
+
+    public static bool IsNullOrEmpty(this BoundingBoxXYZ value)
+    {
+      return value?.IsEmpty() != false;
     }
 
     public static void Deconstruct
@@ -55,8 +58,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static XYZ Evaluate(this BoundingBoxXYZ value, XYZ xyz)
     {
-      if (value.IsUnset()) return default;
       if (xyz is null) return default;
+      if (value.IsEmpty()) return XYZExtension.NaN;
 
       var (x, y, z) = xyz;
       var (min, max) = value;
@@ -71,8 +74,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static void Union(this BoundingBoxXYZ value, BoundingBoxXYZ xyz)
     {
-      if (xyz.IsUnset()) return;
-      if (value.IsUnset())
+      if (xyz.IsNullOrEmpty()) return;
+      if (value.IsEmpty())
       {
         value.Transform = xyz.Transform;
         value.Min = xyz.Min;
@@ -80,56 +83,59 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
       else
       {
-        using (var transform = value.Transform)
+        using (var transform = xyz.Transform)
         {
-          foreach (var corner in xyz.GetLocalCorners())
-            UnionLocal(value, transform.OfPoint(corner));
+          var corners = Corners(xyz.Min, xyz.Max);
+          for (int c = 0; c < corners.Length; ++c)
+            corners[c] = transform.OfPoint(corners[c]);
+
+          Union(value, corners);
         }
       }
     }
 
     public static void Union(this BoundingBoxXYZ value, params XYZ[] xyz)
     {
-      var inverse = value.Transform.Inverse;
-      for(int i = 0; i < xyz.Length; i++)
-        UnionLocal(value, inverse.OfPoint(xyz[i]));
-    }
-
-    static void UnionLocal(this BoundingBoxXYZ value, XYZ xyz)
-    {
-      if (value.IsUnset())
+      if (xyz.Length > 0)
       {
-        value.Min = xyz;
-        value.Max = xyz;
-      }
-      else
-      {
-        var (x, y, z) = xyz;
-        var (min, max) = value;
+        using (var inverse = value.Transform.Inverse)
+        {
+          int p = 0;
+          if (value.IsEmpty())
+          {
+            var point = inverse.OfPoint(xyz[p++]);
+            value.Min = point;
+            value.Max = point;
+          }
 
-        value.Min = new XYZ(Math.Min(min.X, x), Math.Min(min.Y, y), Math.Min(min.Z, z));
-        value.Max = new XYZ(Math.Max(max.X, x), Math.Max(max.Y, y), Math.Max(max.Z, z));
+          for (; p < xyz.Length; p++)
+            UnionLocalNotEmpty(value, inverse.OfPoint(xyz[p]));
+        }
       }
     }
 
-    static XYZ[] GetLocalCorners(this BoundingBoxXYZ value)
+    static void UnionLocalNotEmpty(this BoundingBoxXYZ value, XYZ xyz)
     {
+      var (x, y, z) = xyz;
       var (min, max) = value;
 
-      return new XYZ[]
-      {
-        new XYZ(min.X, min.Y, min.Z),
-        new XYZ(max.X, min.Y, min.Z),
-        new XYZ(max.X, max.Y, min.Z),
-        new XYZ(min.X, max.Y, min.Z),
-        new XYZ(min.X, min.Y, max.Z),
-        new XYZ(max.X, min.Y, max.Z),
-        new XYZ(max.X, max.Y, max.Z),
-        new XYZ(min.X, max.Y, max.Z)
-      };
+      value.Min = new XYZ(Math.Min(min.X, x), Math.Min(min.Y, y), Math.Min(min.Z, z));
+      value.Max = new XYZ(Math.Max(max.X, x), Math.Max(max.Y, y), Math.Max(max.Z, z));
     }
 
-    static (XYZ Min, XYZ Max) GetOutline(params XYZ[] points)
+    static XYZ[] Corners(XYZ min, XYZ max) => new XYZ[]
+    {
+      new XYZ(min.X, min.Y, min.Z),
+      new XYZ(max.X, min.Y, min.Z),
+      new XYZ(max.X, max.Y, min.Z),
+      new XYZ(min.X, max.Y, min.Z),
+      new XYZ(min.X, min.Y, max.Z),
+      new XYZ(max.X, min.Y, max.Z),
+      new XYZ(max.X, max.Y, max.Z),
+      new XYZ(min.X, max.Y, max.Z)
+    };
+
+    static (XYZ Min, XYZ Max) Outline(params XYZ[] points)
     {
       (double X, double Y, double Z) min = (double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
       (double X, double Y, double Z) max = (double.NegativeInfinity, double.NegativeInfinity, double.NegativeInfinity);
@@ -152,11 +158,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       using (var transform = value.Transform)
       {
-        var corners = value.GetLocalCorners();
+        var corners = Corners(value.Min, value.Max);
         for (int c = 0; c < corners.Length; ++c)
           corners[c] = transform.OfPoint(corners[c]);
 
-        var (min, max) = GetOutline(corners);
+        var (min, max) = Outline(corners);
         return new Outline(min, max);
       }
     }

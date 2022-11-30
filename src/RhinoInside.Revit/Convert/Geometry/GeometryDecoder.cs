@@ -503,7 +503,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     internal static Interval[] ToIntervals(ARDB.BoundingBoxUV value)
     {
-      return !value.IsUnset() ?
+      return !value.IsNullOrEmpty() ?
       new Interval[]
       {
         new Interval(value.Min.U, value.Max.U),
