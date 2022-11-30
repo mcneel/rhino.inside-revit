@@ -31,14 +31,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     readonly double Tolerance;
-    GeometryObjectEqualityComparer(double tolerance) => Tolerance = Math.Max(tolerance, Upsilon);
+    readonly double ReciprocalTolerance;
+
+    GeometryObjectEqualityComparer(double tolerance)
+    {
+      Tolerance = Math.Max(tolerance, Upsilon);
+      ReciprocalTolerance = 1.0 / Tolerance;
+    }
 
     struct ParamComparer : IEqualityComparer<double>, IEqualityComparer<IList<double>>, IEqualityComparer<DoubleArray>
     {
-      public const double Tolerance = 1e-9;
+      public const double ParamTolerance = DefaultTolerance;
+      const double ReciprocalParamTolerance = 1.0 / DefaultTolerance;
 
-      public bool Equals(double x, double y) => NumericTolerance.AlmostEquals(x, y, Tolerance);
-      public int GetHashCode(double value) => (int) Math.Round(value * 1e+9);
+      public bool Equals(double x, double y) => AlmostEquals(x, y, ParamTolerance);
+      public int GetHashCode(double value) => (int) Math.Round(value * ReciprocalParamTolerance);
 
       public bool Equals(IList<double> left, IList<double> right)
       {
@@ -98,12 +105,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static GeometryObjectEqualityComparer Comparer(double tolerance) => new GeometryObjectEqualityComparer(tolerance);
 
     #region Length
-    public bool Equals(double x, double y) => NumericTolerance.Abs(x - y) < Tolerance;
-    public int GetHashCode(double value) => Math.Round(value / Tolerance).GetHashCode();
+    public bool Equals(double x, double y) => Abs(x - y) < Tolerance;
+    public int GetHashCode(double value) => Math.Round(value * ReciprocalTolerance).GetHashCode();
     #endregion
 
     #region UV
-    public bool Equals(UV x, UV y) => NumericTolerance.Abs(x.U - y.U, x.V - y.V) < Tolerance;
+    public bool Equals(UV x, UV y) => Abs(x.U - y.U, x.V - y.V) < Tolerance;
     public int GetHashCode(UV obj) => CombineHash
     (
       GetHashCode(obj.U),
@@ -111,8 +118,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
     );
     #endregion
 
+    #region BoundingBoxUV
+    public bool Equals(BoundingBoxUV x, BoundingBoxUV y)
+    {
+      return Default.Equals(x.Min, y.Max);
+    }
+
+    public int GetHashCode(BoundingBoxUV value) => CombineHash
+    (
+      GetHashCode(value.Min),
+      GetHashCode(value.Max)
+    );
+    #endregion
+
     #region XYZ
-    public bool Equals(XYZ x, XYZ y) => NumericTolerance.Abs(x.X - y.X, x.Y - y.Y, x.Z - y.Z) < Tolerance;
+    public bool Equals(XYZ left, XYZ right) => Abs(left.X - right.X, left.Y - right.Y, left.Z - right.Z) < Tolerance;
     public int GetHashCode(XYZ obj) => CombineHash
     (
       GetHashCode(obj.X),
@@ -130,14 +150,48 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return true;
     }
 
-    public int GetHashCode(IList<XYZ> values)
+    int GetHashCode(IList<XYZ> values, int maxSamples = int.MaxValue)
     {
-      int hash = values.Count;
-      for (int h = 0; h < values.Count; h++)
-        hash = hash * -1521134295 + GetHashCode(values[h]);
+      var valuesCount = values.Count;
+      int hash = valuesCount.GetHashCode();
+
+      if (valuesCount < maxSamples)
+      {
+        for (int h = 0; h < valuesCount; h++)
+          hash = hash * -1521134295 + GetHashCode(values[h]);
+      }
+      else
+      {
+        for (int h = 0; h < maxSamples; h++)
+          hash = hash * -1521134295 + GetHashCode(values[(int) Math.Round(((double) valuesCount / maxSamples) * h)]);
+      }
 
       return hash;
     }
+    #endregion
+
+    #region BoundingBoxXYZ
+    public bool Equals(BoundingBoxXYZ x, BoundingBoxXYZ y)
+    {
+      if (!Equals(x.Min, y.Max)) return false;
+
+      using (var xT = x.Transform) using (var yT = y.Transform)
+      {
+        if (!Equals(xT.Origin, yT.Origin)) return false;
+        if (!Default.Equals(xT.BasisX, yT.BasisX)) return false;
+        if (!Default.Equals(xT.BasisY, yT.BasisY)) return false;
+        if (!Default.Equals(xT.BasisZ, yT.BasisZ)) return false;
+      }
+
+      return true;
+    }
+
+    public int GetHashCode(BoundingBoxXYZ value) => CombineHash
+    (
+      GetHashCode(value.Min),
+      GetHashCode(value.Max),
+      GetHashCode(value.Transform.Origin)
+    );
     #endregion
 
     #region Point
@@ -159,45 +213,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public int GetHashCode(PolyLine value) => CombineHash
     (
       value.GetType().GetHashCode(),
-      GetHashCode(value.GetCoordinates())
+      GetHashCode(value.GetCoordinates(), 16)
     );
     #endregion
 
-    #region PolyLine
-    public bool Equals(Mesh left, Mesh right) =>
-      TrianglesEquals(left, right) &&
-      Equals(left.Vertices, right.Vertices);
-
-    public int GetHashCode(Mesh value) => CombineHash
-    (
-      value.GetType().GetHashCode(),
-      VerticesHashCode(value.Vertices, 16)
-    );
-
-    int VerticesHashCode(IList<XYZ> vertices, int sampleCount)
+    #region Mesh
+    public bool Equals(Mesh left, Mesh right)
     {
-      int hash = vertices.Count.GetHashCode();
+      var trianglesCount = left.NumTriangles;
+      if (trianglesCount != right.NumTriangles) return false;
 
-      if (vertices.Count < sampleCount)
-      {
-        for (int h = 0; h < vertices.Count; h++)
-          hash = hash * -1521134295 + GetHashCode(vertices[h]);
-      }
-      else
-      {
-        for (int h = 0; h < sampleCount; h++)
-          hash = hash * -1521134295 + GetHashCode(vertices[(int) Math.Round(((double) vertices.Count / sampleCount) * h)]);
-      }
-
-      return hash;
-    }
-
-    static bool TrianglesEquals(Mesh left, Mesh right)
-    {
-      var count = left.NumTriangles;
-      if (count != right.NumTriangles) return false;
-
-      for(int t = 0; t < count; ++t)
+      for (int t = 0; t < trianglesCount; ++t)
       {
         var lTriangle = left.get_Triangle(t);
         var rTriangle = right.get_Triangle(t);
@@ -206,8 +232,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (lTriangle.get_Index(2) != rTriangle.get_Index(2)) return false;
       }
 
-      return true;
+      return Equals(left.Vertices, right.Vertices);
     }
+
+    public int GetHashCode(Mesh value) => CombineHash
+    (
+      value.GetType().GetHashCode(),
+      GetHashCode(value.Vertices, 32)
+    );
     #endregion
 
     #region Line
@@ -340,8 +372,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     (
       value.GetType().GetHashCode(),
       value.IsBound.GetHashCode(),
-      GetHashCode(value.ControlPoints),
-      GetHashCode(value.Tangents),
+      GetHashCode(value.ControlPoints, 16),
+      GetHashCode(value.Tangents, 16),
       DoubleArray.GetHashCode(value.Parameters)
     );
     #endregion
@@ -358,7 +390,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     (
       value.GetType().GetHashCode(),
       value.IsBound.GetHashCode(),
-      GetHashCode(value.CtrlPoints),
+      GetHashCode(value.CtrlPoints, 16),
       DoubleArray.GetHashCode(value.Weights),
       DoubleArray.GetHashCode(value.Knots)
     );
@@ -397,6 +429,70 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public int GetHashCode(Curve value) => GetHashCode((GeometryObject) value);
     #endregion
 
+    #region Face
+    public bool Equals(Face left, Face right)
+    {
+      if (left.GetType() != right.GetType()) return false;
+
+      var uv = left.GetBoundingBox();
+      if (!Equals(uv, right.GetBoundingBox())) return false;
+
+      var (min, max) = uv;
+      var mid = (max + min) / 2.0;
+      if (!Equals(left.Evaluate(mid), right.Evaluate(mid))) return false;
+
+      var leftEdges = left.EdgeLoops;
+      var rightEdges = right.EdgeLoops;
+      if (leftEdges.Size != rightEdges.Size) return false;
+
+      return Equals(left.Triangulate(), right.Triangulate());
+    }
+
+    public int GetHashCode(Face value)
+    {
+      using (var uv = value.GetBoundingBox())
+      {
+        var (min, max) = uv;
+        var mid = (max + min) / 2.0;
+        return CombineHash
+        (
+          value.GetType().GetHashCode(),
+          GetHashCode(uv),
+          GetHashCode(value.Evaluate(mid)),
+          GetHashCode(value.Evaluate(new UV(min.U, min.V))),
+          GetHashCode(value.Evaluate(new UV(max.U, min.V))),
+          GetHashCode(value.Evaluate(new UV(min.U, max.V))),
+          GetHashCode(value.Evaluate(new UV(max.U, max.V)))
+        );
+      }
+    }
+    #endregion
+
+    #region Solid
+    public bool Equals(Solid left, Solid right)
+    {
+      if (!Equals(left.GetBoundingBox(), right.GetBoundingBox())) return false;
+
+      var leftFaces = left.Faces;
+      var rightFaces = right.Faces;
+
+      var faceCoumt = leftFaces.Size;
+      if (faceCoumt != rightFaces.Size) return false;
+
+      for(int f = 0; f < faceCoumt; ++f)
+        if (!Equals(leftFaces.get_Item(f), rightFaces.get_Item(f))) return false;
+
+      return true;
+    }
+
+    public int GetHashCode(Solid value) => CombineHash
+    (
+      value.GetType().GetHashCode(),
+      value.Faces.Size.GetHashCode(),
+      GetHashCode(value.GetBoundingBox())
+    );
+    #endregion
+
     #region GeometryObject
     public bool Equals(GeometryObject left, GeometryObject right)
     {
@@ -414,6 +510,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case HermiteSpline hermite:   return Equals(hermite,  (HermiteSpline)     right);
         case NurbSpline spline:       return Equals(spline,   (NurbSpline)        right);
         case CylindricalHelix helix:  return Equals(helix,    (CylindricalHelix)  right);
+        case Solid solid:             return Equals(solid,    (Solid)             right);
+        case Face face:               return Equals(face,     (Face)              right);
       }
 
       throw new NotImplementedException($"{nameof(GeometryObjectEqualityComparer)} is not implemented for {left.GetType()}.");
@@ -429,6 +527,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case HermiteSpline hermite:   return GetHashCode(hermite);
         case NurbSpline spline:       return GetHashCode(spline);
         case CylindricalHelix helix:  return GetHashCode(helix);
+        case Solid solid:             return GetHashCode(solid);
+        case Face face:               return GetHashCode(face);
       }
 
       throw new NotImplementedException($"{nameof(GeometryObjectEqualityComparer)} is not implemented for {value.GetType()}.");
