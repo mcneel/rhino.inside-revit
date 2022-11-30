@@ -9,6 +9,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class XYZExtension
   {
+    public static XYZ NaN { get; } = new XYZ(double.NaN, double.NaN, double.NaN);
     public static XYZ Zero { get; } = XYZ.Zero;
     public static XYZ BasisX { get; } = XYZ.BasisX;
     public static XYZ BasisY { get; } = XYZ.BasisY;

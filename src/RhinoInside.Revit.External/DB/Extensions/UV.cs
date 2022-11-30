@@ -9,6 +9,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class UVExtension
   {
+    public static UV NaN { get; } = new UV(double.NaN, double.NaN);
     public static UV Zero { get; } = UV.Zero;
     public static UV BasisU { get; } = UV.BasisU;
     public static UV BasisV { get; } = UV.BasisV;
