@@ -215,7 +215,7 @@ namespace RhinoInside.Revit.GH.Types
     public Category(ARDB.Category value) : base(value.Document(), value?.Id ?? ARDB.ElementId.InvalidElementId)
     {
       // Only cache values that can not change.
-      if (Id.IsBuiltInId()) _FullName = value.FullName();
+      if (Id.IsBuiltInId()) _FullName = value?.FullName();
       _CategoryType = value?.CategoryType;
       _IsTagCategory = value?.IsTagCategory;
       _IsSubcategory = value?.Parent is object;
