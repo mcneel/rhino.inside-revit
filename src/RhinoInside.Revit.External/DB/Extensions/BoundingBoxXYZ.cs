@@ -12,10 +12,24 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public const int BoundsMin = 0;
     public const int BoundsMax = 1;
 
+    public static BoundingBoxXYZ Empty => new BoundingBoxXYZ()
+    {
+      Min = XYZExtension.PositiveInfinity,
+      Max = XYZExtension.NegativeInfinity,
+    };
+
+    public static BoundingBoxXYZ All => new BoundingBoxXYZ()
+    {
+      Min = XYZExtension.NegativeInfinity,
+      Max = XYZExtension.PositiveInfinity,
+    };
+
     public static bool IsUnset(this BoundingBoxXYZ value)
     {
-      var ((minX, minY, minZ), (maxX, maxY, maxZ)) = value;
-      return !(value is object && minX <= maxX && minY <= maxY && minZ <= maxZ);
+      if (value is null) return true;
+
+      var (min, max) = value;
+      return !(min.X <= max.X && min.Y <= max.Y && min.Z <= max.Z);
     }
 
     public static void Deconstruct
@@ -58,22 +72,94 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static void Union(this BoundingBoxXYZ value, BoundingBoxXYZ xyz)
     {
       if (xyz.IsUnset()) return;
-
-      Union(value, xyz.Min);
-      Union(value, xyz.Max);
+      if (value.IsUnset())
+      {
+        value.Transform = xyz.Transform;
+        value.Min = xyz.Min;
+        value.Max = xyz.Max;
+      }
+      else
+      {
+        using (var transform = value.Transform)
+        {
+          foreach (var corner in xyz.GetLocalCorners())
+            UnionLocal(value, transform.OfPoint(corner));
+        }
+      }
     }
 
-    public static void Union(this BoundingBoxXYZ value, XYZ xyz)
+    public static void Union(this BoundingBoxXYZ value, params XYZ[] xyz)
     {
-      var (x, y, z) = xyz;
+      var inverse = value.Transform.Inverse;
+      for(int i = 0; i < xyz.Length; i++)
+        UnionLocal(value, inverse.OfPoint(xyz[i]));
+    }
+
+    static void UnionLocal(this BoundingBoxXYZ value, XYZ xyz)
+    {
+      if (value.IsUnset())
+      {
+        value.Min = xyz;
+        value.Max = xyz;
+      }
+      else
+      {
+        var (x, y, z) = xyz;
+        var (min, max) = value;
+
+        value.Min = new XYZ(Math.Min(min.X, x), Math.Min(min.Y, y), Math.Min(min.Z, z));
+        value.Max = new XYZ(Math.Max(max.X, x), Math.Max(max.Y, y), Math.Max(max.Z, z));
+      }
+    }
+
+    static XYZ[] GetLocalCorners(this BoundingBoxXYZ value)
+    {
       var (min, max) = value;
 
-      value.Min = new XYZ(Math.Min(min.X, x), Math.Min(min.Y, y), Math.Min(min.Z, z));
-      value.Max = new XYZ(Math.Max(max.X, x), Math.Max(max.Y, y), Math.Max(max.Z, z));
+      return new XYZ[]
+      {
+        new XYZ(min.X, min.Y, min.Z),
+        new XYZ(max.X, min.Y, min.Z),
+        new XYZ(max.X, max.Y, min.Z),
+        new XYZ(min.X, max.Y, min.Z),
+        new XYZ(min.X, min.Y, max.Z),
+        new XYZ(max.X, min.Y, max.Z),
+        new XYZ(max.X, max.Y, max.Z),
+        new XYZ(min.X, max.Y, max.Z)
+      };
     }
 
-    public static Outline ToOutLine(this BoundingBoxXYZ value) =>
-      new Outline(value.Transform.OfPoint(value.Min), value.Transform.OfPoint(value.Max));
+    static (XYZ Min, XYZ Max) GetOutline(params XYZ[] points)
+    {
+      (double X, double Y, double Z) min = (double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
+      (double X, double Y, double Z) max = (double.NegativeInfinity, double.NegativeInfinity, double.NegativeInfinity);
+
+      foreach (var point in points)
+      {
+        var (x, y, z) = point;
+        min = (Math.Min(min.X, x), Math.Min(min.Y, y), Math.Min(min.Z, z));
+        max = (Math.Min(max.X, x), Math.Min(max.Y, y), Math.Min(max.Z, z));
+      }
+
+      return
+      (
+        new XYZ(min.X, min.Y, min.Z),
+        new XYZ(max.X, max.Y, max.Z)
+      );
+    }
+
+    public static Outline ToOutLine(this BoundingBoxXYZ value)
+    {
+      using (var transform = value.Transform)
+      {
+        var corners = value.GetLocalCorners();
+        for (int c = 0; c < corners.Length; ++c)
+          corners[c] = transform.OfPoint(corners[c]);
+
+        var (min, max) = GetOutline(corners);
+        return new Outline(min, max);
+      }
+    }
 
     internal static bool GetPlaneEquations
     (
