@@ -14,14 +14,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static BoundingBoxXYZ Empty => new BoundingBoxXYZ()
     {
-      Min = XYZExtension.PositiveInfinity,
-      Max = XYZExtension.NegativeInfinity,
+      Min = XYZExtension.MaxValue,
+      Max = XYZExtension.MinValue,
     };
 
     public static BoundingBoxXYZ All => new BoundingBoxXYZ()
     {
-      Min = XYZExtension.NegativeInfinity,
-      Max = XYZExtension.PositiveInfinity,
+      Min = XYZExtension.MinValue,
+      Max = XYZExtension.MaxValue,
     };
 
     public static bool IsEmpty(this BoundingBoxXYZ value)

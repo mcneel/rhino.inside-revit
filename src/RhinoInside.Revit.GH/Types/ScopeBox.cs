@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.GH.Types
               var origin = XYZExtension.ComputeMeanPoint(points);
               var cov = XYZExtension.ComputeCovariance(points);
               var basisX = cov.GetPrincipalComponent(0D);
-              var basisZ = ARDB.XYZ.BasisZ;
+              var basisZ = XYZExtension.BasisZ;
               var basisY = basisZ.CrossProduct(basisX).Normalize(0D);
               var plane = ARDB.Plane.CreateByOriginAndBasis(origin, basisX, basisY);
 
@@ -132,7 +132,7 @@ namespace RhinoInside.Revit.GH.Types
               var origin = XYZExtension.ComputeMeanPoint(points);
               var cov = XYZExtension.ComputeCovariance(points);
               var basisX = cov.GetPrincipalComponent(0D);
-              var basisZ = ARDB.XYZ.BasisZ;
+              var basisZ = XYZExtension.BasisZ;
               var basisY = basisZ.CrossProduct(basisX).Normalize(0D);
 
               return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());

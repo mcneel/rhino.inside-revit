@@ -9,14 +9,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class XYZExtension
   {
-    public static XYZ NaN { get; } = new XYZ(double.NaN, double.NaN, double.NaN);
+    public static XYZ NaN { get; } = null; // new XYZ(double.NaN, double.NaN, double.NaN);
     public static XYZ Zero { get; } = XYZ.Zero;
     public static XYZ BasisX { get; } = XYZ.BasisX;
     public static XYZ BasisY { get; } = XYZ.BasisY;
     public static XYZ BasisZ { get; } = XYZ.BasisZ;
 
-    public static XYZ NegativeInfinity { get; } = new XYZ(double.NegativeInfinity, double.NegativeInfinity, double.NegativeInfinity);
-    public static XYZ PositiveInfinity { get; } = new XYZ(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
+    //public static XYZ NegativeInfinity { get; } = new XYZ(double.NegativeInfinity, double.NegativeInfinity, double.NegativeInfinity);
+    //public static XYZ PositiveInfinity { get; } = new XYZ(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
+
+    public static XYZ MinValue { get; } = new XYZ(double.MinValue, double.MinValue, double.MinValue);
+    public static XYZ MaxValue { get; } = new XYZ(double.MaxValue, double.MaxValue, double.MaxValue);
 
     public static void Deconstruct
     (
