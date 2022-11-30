@@ -30,6 +30,7 @@ namespace RhinoInside.Revit.GH
   {
     public AssemblyInfo() { }
 
+    public override Guid Id => new Guid("1FA46AFC-7B70-D4EB-C77A-D6DF5E36BA5C");
     public override System.Drawing.Bitmap Icon => (System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject("logo_24x24");
     public override string Name => Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title;
     public override string Version => Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
