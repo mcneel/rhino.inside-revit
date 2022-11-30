@@ -155,39 +155,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static Outline GetOutline(this Element element)
     {
-      var bbox = element.GetBoundingBoxXYZ();
-      if (bbox is null)
-        return null;
-
-      var xform = bbox.Transform;
-      if (xform.IsIdentity)
-        return new Outline(bbox.Min, bbox.Max);
-
-      var min = bbox.Min;
-      var max = bbox.Max;
-      var corners = new XYZ[]
-      {
-        xform.OfPoint(new XYZ(min.X, min.Y, min.Z)),
-        xform.OfPoint(new XYZ(max.X, min.Y, min.Z)),
-        xform.OfPoint(new XYZ(max.X, max.Y, min.Z)),
-        xform.OfPoint(new XYZ(min.X, max.Y, min.Z)),
-        xform.OfPoint(new XYZ(min.X, min.Y, max.Z)),
-        xform.OfPoint(new XYZ(max.X, min.Y, max.Z)),
-        xform.OfPoint(new XYZ(max.X, max.Y, max.Z)),
-        xform.OfPoint(new XYZ(min.X, max.Y, max.Z))
-      };
-
-      var minX = double.PositiveInfinity; var minY = double.PositiveInfinity; var minZ = double.PositiveInfinity;
-      var maxX = double.NegativeInfinity; var maxY = double.NegativeInfinity; var maxZ = double.NegativeInfinity;
-
-      foreach (var xyz in corners)
-      {
-        minX = Math.Min(minX, xyz.X); maxX = Math.Max(maxX, xyz.X);
-        minY = Math.Min(minY, xyz.Y); maxY = Math.Max(maxY, xyz.Y);
-        minZ = Math.Min(minZ, xyz.Z); maxZ = Math.Max(maxZ, xyz.Z);
-      }
-
-      return new Outline(new XYZ(minX, minY, minZ), new XYZ(maxX, maxY, maxZ));
+      return element.GetBoundingBoxXYZ()?.ToOutLine();
     }
 
     public static bool HasBoundingBoxXYZ(this Element element)

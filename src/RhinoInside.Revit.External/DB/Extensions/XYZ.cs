@@ -9,10 +9,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class XYZExtension
   {
+    public static XYZ NaN { get; } = new XYZ(double.NaN, double.NaN, double.NaN);
     public static XYZ Zero { get; } = XYZ.Zero;
     public static XYZ BasisX { get; } = XYZ.BasisX;
     public static XYZ BasisY { get; } = XYZ.BasisY;
     public static XYZ BasisZ { get; } = XYZ.BasisZ;
+
+    public static XYZ NegativeInfinity { get; } = new XYZ(double.NegativeInfinity, double.NegativeInfinity, double.NegativeInfinity);
+    public static XYZ PositiveInfinity { get; } = new XYZ(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
 
     public static void Deconstruct
     (
@@ -210,17 +214,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       foreach (var point in points)
       {
-        var value = point.X;
-        minX = Math.Min(minX, value);
-        maxX = Math.Max(maxX, value);
+        var (x, y, z) = point;
 
-        value = point.Y;
-        minY = Math.Min(minY, value);
-        maxY = Math.Max(maxY, value);
-
-        value = point.Z;
-        minZ = Math.Min(minZ, value);
-        maxZ = Math.Max(maxZ, value);
+        minX = Math.Min(minX, x); maxX = Math.Max(maxX, x);
+        minY = Math.Min(minY, y); maxY = Math.Max(maxY, y);
+        minZ = Math.Min(minZ, z); maxZ = Math.Max(maxZ, z);
       }
 
       if (minX <= maxX && minY <= maxY && minZ <= maxZ)
@@ -251,13 +249,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (!coordSystem.IsConformal)
         throw new ArgumentException("Transform is not conformal", nameof(coordSystem));
 
-      if (!coordSystem.TryGetInverse(out coordSystem))
+      if (!coordSystem.TryGetInverse(out var inverse))
       {
         bbox = default;
         return false;
       }
 
-      return TryGetBoundingBox(points.Select(coordSystem.OfPoint), out bbox);
+      using (inverse)
+      {
+        if (TryGetBoundingBox(points.Select(inverse.OfPoint), out bbox))
+        {
+          bbox.Transform = coordSystem;
+          return true;
+        }
+      }
+
+      bbox = default;
+      return false;
     }
 
     /// <summary>

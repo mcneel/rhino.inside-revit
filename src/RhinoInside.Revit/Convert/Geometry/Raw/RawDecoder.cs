@@ -70,7 +70,8 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
       if (bbox?.Enabled ?? false)
       {
         var box = new BoundingBox(AsPoint3d(bbox.Min), AsPoint3d(bbox.Max));
-        return AsTransform(bbox.Transform).TransformBoundingBox(box);
+        box.Transform(AsTransform(bbox.Transform));
+        return box;
       }
 
       return NaN.BoundingBox;
