@@ -69,6 +69,7 @@
     <Compile Include="DB\Extensions\Solid.cs" />
     <Compile Include="DB\Extensions\Surface.cs" />
     <Compile Include="DB\Extensions\Transform.cs" />
+    <Compile Include="DB\Extensions\UV.cs" />
     <Compile Include="DB\Extensions\View.cs" />
     <Compile Include="DB\Extensions\Wall.cs" />
     <Compile Include="DB\Extensions\XYZ.cs" />
