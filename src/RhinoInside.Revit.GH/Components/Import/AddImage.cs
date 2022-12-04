@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       if (!Params.GetData(DA, "View", out ARDB.View view)) return;
 
-#if REVIT_2022
+#if REVIT_2021
       ReconstructElement<ARDB.ImageInstance>
       (
         view.Document, _Output_, imgInstance =>

@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-#if REVIT_2022
+#if REVIT_2021
       ReconstructElement<ARDB.ImageType>
       (
         doc.Value, _Output_, imgInstance =>
