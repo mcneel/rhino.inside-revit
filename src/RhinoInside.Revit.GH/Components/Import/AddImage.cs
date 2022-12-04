@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     (
       name: "Add Image",
       nickname: "Image",
-      description: "Given the path, it adds an image to the given View",
+      description: "Given the point, it adds an image to the given View",
       category: "Revit",
       subCategory: "Element"
     )
@@ -39,11 +39,11 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ),
       new ParamDefinition
       (
-        new Param_String
+        new Parameters.ElementType()
         {
-          Name = "Path",
-          NickName = "P",
-          Description = "Absolute path to the image",
+          Name = "Type",
+          NickName = "T",
+          Description = "Element Type for the image",
           Access = GH_ParamAccess.item
         }
       ),
@@ -80,31 +80,33 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       if (!Params.GetData(DA, "View", out ARDB.View view)) return;
 
+#if REVIT_2022
       ReconstructElement<ARDB.ImageInstance>
       (
         view.Document, _Output_, imgInstance =>
         {
           // Input
           if (!view.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
-          if (!Params.GetData(DA, "Path", out string path)) return null;
+          if (!Params.GetData(DA, "Type", out ARDB.ImageType imageType)) return null;
           if (!Params.GetData(DA, "Point", out Point3d? pt)) return null;
 
           // Compute
-          imgInstance = Reconstruct(imgInstance, view, GeometryEncoder.ToXYZ(pt.Value), path);
+          imgInstance = Reconstruct(imgInstance, view, GeometryEncoder.ToXYZ(pt.Value), imageType);
 
           DA.SetData(_Output_, imgInstance);
           return imgInstance;
         }
       );
+#endif
     }
 
-    bool Reuse(ARDB.ImageInstance img, ARDB.View view, ARDB.XYZ pt, string path)
+    bool Reuse(ARDB.ImageInstance img, ARDB.View view, ARDB.XYZ pt, ARDB.ImageType imageType)
     {
       if (img is null) return false;
       if (img.OwnerViewId != view.Id) return false;
 
-      ARDB.ImageType imgType = view.Document.GetElement(img.GetTypeId()) as ARDB.ImageType;
-      if (imgType.Path != path) return false;
+      ARDB.ImageType currentImgType = view.Document.GetElement(img.GetTypeId()) as ARDB.ImageType;
+      if (currentImgType.Id != imageType.Id) return false;
 
       if (img.GetLocation(ARDB.BoxPlacement.Center) != pt)
         img.SetLocation(pt, ARDB.BoxPlacement.Center);
@@ -112,12 +114,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       return true;
     }
 
-    ARDB.ImageInstance Reconstruct(ARDB.ImageInstance img, ARDB.View view, ARDB.XYZ pt, string path)
+    ARDB.ImageInstance Reconstruct(ARDB.ImageInstance img, ARDB.View view, ARDB.XYZ pt, ARDB.ImageType imageType)
     {
-      if (!Reuse(img, view, pt, path))
+      if (!Reuse(img, view, pt, imageType))
       {
-        ARDB.ImageType imageType = ARDB.ImageType.Create(view.Document,
-                                                         new ARDB.ImageTypeOptions(path, false, ARDB.ImageTypeSource.Import));
         img = ARDB.ImageInstance.Create(view.Document,
                                         view,
                                         imageType.Id,
