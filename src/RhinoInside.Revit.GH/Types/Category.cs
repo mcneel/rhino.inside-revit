@@ -337,7 +337,11 @@ namespace RhinoInside.Revit.GH.Types
             layer.IsExpanded = false;
           }
 
-          layer.Color = category.LineColor.ToColor();
+          // Color
+          {
+            var lineColor = category.LineColor.ToColor();
+            layer.Color = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
+          }
 
           // Linetype
           {
