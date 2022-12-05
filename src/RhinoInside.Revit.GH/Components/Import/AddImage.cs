@@ -81,6 +81,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 #if !REVIT_2021
       AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is only supported on Revit 2021 or above.");
 #endif
+      base.BeforeSolveInstance();
     }
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
