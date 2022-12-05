@@ -385,7 +385,8 @@ namespace RhinoInside.Revit.GH.Types
               layer.IsLocked = true;
               break;
 
-            case ARDB.BuiltInCategory.OST_LightingFixtures:
+            case ARDB.BuiltInCategory.OST_LightingFixtureSource:
+              layer.Color = System.Drawing.Color.FromArgb(35, layer.Color);
               layer.IsVisible = false;
               break;
           }
