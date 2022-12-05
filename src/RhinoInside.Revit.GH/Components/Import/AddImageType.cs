@@ -71,6 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
+#if REVIT_2021
       ReconstructElement<ARDB.ImageType>
       (
         doc.Value, _Output_, imgInstance =>
@@ -85,6 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           return imgInstance;
         }
       );
+#endif
     }
 
 #if REVIT_2021
@@ -105,7 +107,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         imageType = ARDB.ImageType.Create(doc, new ARDB.ImageTypeOptions(path, false, ARDB.ImageTypeSource.Import));
       }
       return imageType;
-    }
+  }
 #endif
   }
 }

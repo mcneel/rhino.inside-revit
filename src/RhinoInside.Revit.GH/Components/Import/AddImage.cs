@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 #endif
     }
 
-#if REVIT_2021
+
     bool Reuse(ARDB.ImageInstance img, ARDB.View view, ARDB.XYZ pt, ARDB.ImageType imageType)
     {
       if (img is null) return false;
@@ -120,9 +120,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
       return true;
     }
-#endif
 
-#if REVIT_2021
+
     ARDB.ImageInstance Reconstruct(ARDB.ImageInstance img, ARDB.View view, ARDB.XYZ pt, ARDB.ImageType imageType)
     {
       if (!Reuse(img, view, pt, imageType))
@@ -134,6 +133,5 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       }
       return img;
     }
-#endif
   }
 }
