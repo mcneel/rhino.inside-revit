@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -252,49 +253,70 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool TryGetLocation(this NurbSpline curve, out XYZ origin, out XYZ basisX, out XYZ basisY)
     {
-      if (curve.IsBound)
-      {
-        var start = curve.GetEndPoint(0);
-        var end = curve.GetEndPoint(1);
-        var curveDirection = end - start;
+      if (!curve.IsBound)
+        throw new NotImplementedException();
 
-        if (!curveDirection.AlmostEquals(XYZExtension.Zero, 0D))
+      var start = curve.GetEndPoint(CurveEnd.Start);
+      var end = curve.GetEndPoint(CurveEnd.End);
+      var curveDirection = end - start;
+
+      var ctrlPoints = curve.CtrlPoints;
+      var cov = Transform.Identity;
+      int closed = curveDirection.IsZeroLength() ? 1 : 0;
+      cov.SetCovariance(ctrlPoints.Skip(closed));
+
+      if (closed == 0)
+      {
+        basisX = curveDirection.Normalize(0D);
+
+        if (cov.TryGetInverse(out var inverse))
+        {
+          var basisZ = inverse.GetPrincipalComponent(0D);
+          origin = new PlaneEquation(cov.Origin, basisZ).Project(start + (curveDirection * 0.5));
+
+          basisY = basisZ.CrossProduct(basisX).Normalize(0D);
+        }
+        else
         {
           origin = start + (curveDirection * 0.5);
-          basisX = curveDirection.Normalize(0D);
 
-          var normal = XYZExtension.Zero;
-          {
-            var ctrlPoints = curve.CtrlPoints;
-            var cov = XYZExtension.ComputeCovariance(ctrlPoints);
-            
-            bool planar = !cov.TryGetInverse(out var inverse);
-            if (planar)
-              inverse = cov;
+          var principal = cov.GetPrincipalComponent(0D);
+          var plane = new PlaneEquation(principal, 0.0);
+          for (int p = 0; p < ctrlPoints.Count; ++p)
+            ctrlPoints[p] = plane.Project(ctrlPoints[p]);
 
-            normal = inverse.GetPrincipalComponent(0D);
+          cov.SetCovariance(ctrlPoints, plane.Project(cov.Origin));
+          basisY = cov.GetPrincipalComponent(0D);
 
-            if (planar)
-            {
-              var plane = new PlaneEquation(normal, 0.0);
-              for (int p = 0; p < ctrlPoints.Count; ++p)
-                ctrlPoints[p] = plane.Project(ctrlPoints[p]);
-
-              cov = XYZExtension.ComputeCovariance(ctrlPoints);
-              normal = cov.GetPrincipalComponent(0D);
-              normal = basisX.CrossProduct(normal).Normalize(0D);
-            }
-          }
-
-
-          basisY = normal.CrossProduct(basisX).Normalize(0D);
-          return true;
+          if (basisY.IsZeroLength())
+            basisY = basisX.PerpVector(0D);
         }
       }
-      else throw new NotImplementedException();
+      else
+      {
+        origin = cov.Origin;
+        basisX = cov.GetPrincipalComponent(0D);
 
-      origin = basisX = basisY = default;
-      return false;
+        if (cov.TryGetInverse(out var inverse))
+        {
+          var basisZ = inverse.GetPrincipalComponent(0D);
+          basisY = basisZ.CrossProduct(basisX).Normalize(0D);
+        }
+        else
+        {
+          var plane = new PlaneEquation(basisX, 0.0);
+          for (int p = 0; p < ctrlPoints.Count; ++p)
+            ctrlPoints[p] = plane.Project(ctrlPoints[p]);
+
+          cov.SetCovariance(ctrlPoints.Skip(closed), plane.Project(cov.Origin));
+          basisY = cov.GetPrincipalComponent(0D);
+
+          if (basisY.IsZeroLength())
+            basisY = basisX.PerpVector(0D);
+        }
+      }
+
+      return true;
     }
 
     public static bool TryGetLocation(this PolyLine curve, out XYZ origin, out XYZ basisX, out XYZ basisY)

@@ -76,8 +76,10 @@ namespace RhinoInside.Revit.GH.Types
                 points.Add(line.GetEndPoint(1));
               }
 
-              var origin = XYZExtension.ComputeMeanPoint(points);
-              var cov = XYZExtension.ComputeCovariance(points);
+              var cov = ARDB.Transform.Identity;
+              cov.SetCovariance(points);
+
+              var origin = cov.Origin;
               var basisX = cov.GetPrincipalComponent(0D);
               var basisZ = XYZExtension.BasisZ;
               var basisY = basisZ.CrossProduct(basisX).Normalize(0D);
@@ -129,8 +131,10 @@ namespace RhinoInside.Revit.GH.Types
                 points.Add(line.GetEndPoint(1));
               }
 
-              var origin = XYZExtension.ComputeMeanPoint(points);
-              var cov = XYZExtension.ComputeCovariance(points);
+              var cov = ARDB.Transform.Identity;
+              cov.SetCovariance(points);
+
+              var origin = cov.Origin;
               var basisX = cov.GetPrincipalComponent(0D);
               var basisZ = XYZExtension.BasisZ;
               var basisY = basisZ.CrossProduct(basisX).Normalize(0D);
