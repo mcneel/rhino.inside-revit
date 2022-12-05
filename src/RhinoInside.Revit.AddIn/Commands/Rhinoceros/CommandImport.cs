@@ -325,6 +325,38 @@ namespace RhinoInside.Revit.AddIn.Commands
     }
     #endregion
 
+    #region Symbols
+    static Dictionary<string, ARDB.FamilySymbol> GetSymbolsByName(ARDB.Document doc)
+    {
+      var collector = new ARDB.FilteredElementCollector(doc);
+      return collector.OfCategoryId(doc.OwnerFamily.FamilyCategoryId).
+        OfClass(typeof(ARDB.FamilySymbol)).OfType<ARDB.FamilySymbol>().
+        GroupBy(x => x.Name).
+        ToDictionary(x => x.Key, x => x.First());
+    }
+
+    static ARDB.ElementId ImportBlock
+    (
+      ImportContext context,
+      File3dm model,
+      InstanceDefinition block
+    )
+    {
+      var id = ARDB.ElementId.InvalidElementId;
+      if (block.HasName && block.Name is string blockName)
+      {
+        blockName = ElementNaming.MakeValidName(blockName);
+        if (context.Symbols.TryGetValue(blockName, out var symbol)) id = symbol.Id;
+        else
+        {
+          
+        }
+      }
+
+      return id;
+    }
+    #endregion
+
     static Point3d ImportPlacement(File3dm model, ARDB.ImportPlacement placement)
     {
       switch (placement)
@@ -557,6 +589,168 @@ namespace RhinoInside.Revit.AddIn.Commands
     #endregion
 
     #region Family
+    class ImportContext
+    {
+      public double Scale;
+      public Transform Transform;
+      public bool VisibleLayersOnly;
+
+      public readonly ARDB.Document Document;
+      public readonly Dictionary<string, ARDB.Category> Categories;
+      public readonly Dictionary<string, ARDB.Material> Materials;
+      public readonly Dictionary<string, ARDB.FamilySymbol> Symbols;
+
+      public ImportContext(ARDB.Document document)
+      {
+        Document = document;
+        Categories = GetCategoriesByName(document);
+        Materials = GetMaterialsByName(document);
+        Symbols = GetSymbolsByName(document);
+        Scale = 1.0;
+        Transform = Transform.Identity;
+        VisibleLayersOnly = false;
+      }
+
+      public ImportContext(ImportContext context, Transform transform)
+      {
+        Document = context.Document;
+        Categories = context.Categories;
+        Materials = context.Materials;
+        Symbols = context.Symbols;
+        Scale = context.Scale;
+        Transform = context.Transform * transform;
+        VisibleLayersOnly = context.VisibleLayersOnly;
+      }
+    }
+
+    static void ImportObjectsToFamily
+    (
+      ImportContext context,
+      List<ARDB.ElementId> elements,
+      File3dm model,
+      IEnumerable<File3dmObject> objects
+    )
+    {
+      foreach (var obj in objects)
+      {
+        if (!obj.Attributes.Visible)
+          continue;
+
+        var layer = model.AllLayers.FindIndex(obj.Attributes.LayerIndex);
+        if (context.VisibleLayersOnly && layer?.IsVisible != true)
+          continue;
+
+        var geometry = default(GeometryBase);
+        switch (obj.Geometry)
+        {
+          case null: continue;
+          case InstanceReferenceGeometry instance:
+
+            if (model.AllInstanceDefinitions.FindId(instance.ParentIdefId) is InstanceDefinitionGeometry definition)
+            {
+              ImportObjectsToFamily
+              (
+                new ImportContext(context, instance.Xform),
+                elements,
+                model,
+                definition.GetObjectIds().Select(x => model.Objects.FindId(x))
+              );
+            }
+
+            continue;
+
+          case Extrusion extrusion: geometry = extrusion.ToBrep(); break;
+          case SubD subD: geometry = subD.ToBrep(SubDToBrepOptions.Default); break;
+          default: geometry = obj.Geometry.Duplicate(); break;
+        }
+
+        if (geometry is null)
+          continue;
+
+        if (!geometry.Transform(context.Transform))
+          continue;
+
+        try
+        {
+          switch (geometry)
+          {
+            case Point point:
+              if (context.Document.OwnerFamily.IsConceptualMassFamily)
+              {
+                var referncePoint = context.Document.FamilyCreate.NewReferencePoint(point.Location.ToXYZ(context.Scale));
+                elements.Add(referncePoint.Id);
+              }
+              break;
+
+            case Curve curve:
+              if (curve.TryGetPlane(out var plane, GeometryTolerance.Internal.VertexTolerance / context.Scale))
+              {
+                var sketchPlane = ARDB.SketchPlane.Create(context.Document, plane.ToPlane(context.Scale));
+                foreach (var crv in curve.ToCurveMany(context.Scale))
+                {
+                  var modelCurve = context.Document.FamilyCreate.NewModelCurve(crv, sketchPlane);
+                  elements.Add(modelCurve.Id);
+
+                  {
+                    var subCategoryId = ImportLayer(context.Document, model, layer, context.Categories, context.Materials);
+                    if (ARDB.Category.GetCategory(context.Document, subCategoryId) is ARDB.Category subCategory)
+                    {
+                      var familyGraphicsStyle = subCategory?.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection);
+
+                      if (familyGraphicsStyle is object)
+                        modelCurve.Subcategory = familyGraphicsStyle;
+                    }
+                  }
+                }
+              }
+              else if (ARDB.DirectShape.IsSupportedDocument(context.Document) && ARDB.DirectShape.IsValidCategoryId(context.Document.OwnerFamily.FamilyCategory.Id, context.Document))
+              {
+                var subCategoryId = ImportLayer(context.Document, model, layer, context.Categories, context.Materials);
+                var shape = curve.ToShape();
+                if (shape.Length > 0)
+                {
+                  var ds = ARDB.DirectShape.CreateElement(context.Document, context.Document.OwnerFamily.FamilyCategory.Id);
+                  ds.SetShape(shape);
+                  elements.Add(ds.Id);
+                }
+              }
+              break;
+
+            case Brep brep:
+              if (brep.ToSolid(context.Scale) is ARDB.Solid solid)
+              {
+                if (ARDB.FreeFormElement.Create(context.Document, solid) is ARDB.FreeFormElement freeForm)
+                {
+                  elements.Add(freeForm.Id);
+
+                  {
+                    var categoryId = ImportLayer(context.Document, model, layer, context.Categories, context.Materials);
+                    if (categoryId != ARDB.ElementId.InvalidElementId)
+                      freeForm.GetParameter(ParameterId.FamilyElemSubcategory).Set(categoryId);
+                  }
+
+                  if (obj.Attributes.MaterialSource == ObjectMaterialSource.MaterialFromObject)
+                  {
+                    if (model.AllMaterials.FindIndex(obj.Attributes.MaterialIndex) is Material material)
+                    {
+                      var categoryId = ImportMaterial(context.Document, material, context.Materials);
+                      if (categoryId != ARDB.ElementId.InvalidElementId)
+                        freeForm.GetParameter(ParameterId.MaterialIdParam).Set(categoryId);
+                    }
+                  }
+                }
+              }
+              break;
+
+            case InstanceReferenceGeometry instance:
+
+              break;
+          }
+        }
+        catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+      }
+    }
+
     static Result Import3DMFileToFamily
     (
       ARDB.Document doc,
@@ -599,95 +793,15 @@ namespace RhinoInside.Revit.AddIn.Commands
               }
             }
 
-            foreach (var obj in model.Objects.Where(x => !x.Attributes.IsInstanceDefinitionObject && x.Attributes.Space == ActiveSpace.ModelSpace))
+            var context = new ImportContext(doc)
             {
-              if (!obj.Attributes.Visible)
-                continue;
+              Scale = scaleFactor,
+              Transform = Transform.Translation(translationVector),
+              VisibleLayersOnly = visibleLayersOnly
+            };
 
-              var layer = model.AllLayers.FindIndex(obj.Attributes.LayerIndex);
-              if (visibleLayersOnly && layer?.IsVisible != true)
-                continue;
-
-              var geometry = obj.Geometry;
-              if (geometry is Extrusion extrusion) geometry = extrusion.ToBrep();
-              else if (geometry is SubD subD) geometry = subD.ToBrep(SubDToBrepOptions.Default);
-
-              if (translationVector != Vector3d.Zero)
-                geometry?.Translate(translationVector);
-
-              try
-              {
-                switch (geometry)
-                {
-                  case Point point:
-                    if (doc.OwnerFamily.IsConceptualMassFamily)
-                    {
-                      var referncePoint = doc.FamilyCreate.NewReferencePoint(point.Location.ToXYZ(scaleFactor));
-                      elements.Add(referncePoint.Id);
-                    }
-                    break;
-                  case Curve curve:
-                    if (curve.TryGetPlane(out var plane, GeometryTolerance.Internal.VertexTolerance / scaleFactor))
-                    {
-                      var sketchPlane = ARDB.SketchPlane.Create(doc, plane.ToPlane(scaleFactor));
-                      foreach(var crv in curve.ToCurveMany(scaleFactor))
-                      {
-                        var modelCurve = doc.FamilyCreate.NewModelCurve(crv, sketchPlane);
-                        elements.Add(modelCurve.Id);
-
-                        {
-                          var subCategoryId = ImportLayer(doc, model, layer, categories, materials);
-                          if (ARDB.Category.GetCategory(doc, subCategoryId) is ARDB.Category subCategory)
-                          {
-                            var familyGraphicsStyle = subCategory?.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection);
-
-                            if (familyGraphicsStyle is object)
-                              modelCurve.Subcategory = familyGraphicsStyle;
-                          }
-                        }
-                      }
-                    }
-                    else if (ARDB.DirectShape.IsSupportedDocument(doc) && ARDB.DirectShape.IsValidCategoryId(doc.OwnerFamily.FamilyCategory.Id, doc))
-                    {
-                      var subCategoryId = ImportLayer(doc, model, layer, categories, materials);
-                      var shape = curve.ToShape();
-                      if (shape.Length > 0)
-                      {
-                        var ds = ARDB.DirectShape.CreateElement(doc, doc.OwnerFamily.FamilyCategory.Id);
-                        ds.SetShape(shape);
-                        elements.Add(ds.Id);
-                      }
-                    }
-                    break;
-                  case Brep brep:
-                    if (brep.ToSolid(scaleFactor) is ARDB.Solid solid)
-                    {
-                      if (ARDB.FreeFormElement.Create(doc, solid) is ARDB.FreeFormElement freeForm)
-                      {
-                        elements.Add(freeForm.Id);
-
-                        {
-                          var categoryId = ImportLayer(doc, model, layer, categories, materials);
-                          if (categoryId != ARDB.ElementId.InvalidElementId)
-                            freeForm.GetParameter(ParameterId.FamilyElemSubcategory).Set(categoryId);
-                        }
-
-                        if (obj.Attributes.MaterialSource == ObjectMaterialSource.MaterialFromObject)
-                        {
-                          if (model.AllMaterials.FindIndex(obj.Attributes.MaterialIndex) is Material material)
-                          {
-                            var categoryId = ImportMaterial(doc, material, materials);
-                            if (categoryId != ARDB.ElementId.InvalidElementId)
-                              freeForm.GetParameter(ParameterId.MaterialIdParam).Set(categoryId);
-                          }
-                        }
-                      }
-                    }
-                    break;
-                }
-              }
-              catch (Autodesk.Revit.Exceptions.ArgumentException) { }
-            }
+            var objects = model.Objects.Where(x => !x.Attributes.IsInstanceDefinitionObject && x.Attributes.Space == ActiveSpace.ModelSpace);
+            ImportObjectsToFamily(context, elements, model, objects);
 
             if (trans.Commit() == ARDB.TransactionStatus.Committed)
             {
