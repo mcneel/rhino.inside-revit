@@ -452,19 +452,20 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     /// <summary>
-    /// Decorates instance definition name using "Category:FamilyName:TypeName" when posible.
+    /// Decorates instance definition name using "Category::FamilyName::TypeName" when posible.
     /// </summary>
     /// <param name="element"></param>
     /// <param name="description"></param>
     /// <returns></returns>
     protected static string GetBakeInstanceDefinitionName(ARDB.Element element, out string description)
     {
+      const string NS = "::";
       var name = FullUniqueId.Format(element.Document.GetFingerprintGUID(), element.UniqueId);
       description = string.Empty;
 
       if (element is ARDB.ElementType type)
       {
-        name = $"Revit:{type.Category?.FullName()}:{type.FamilyName}:{type.Name} {{{name}}}";
+        name = $"Revit{NS}{type.Category?.FullName()}{NS}{type.FamilyName}{NS}{type.Name} {{{name}}}";
         description = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
 
         if (type.Category?.CategoryType != ARDB.CategoryType.Model)
@@ -472,7 +473,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (element.Document.GetElement(element.GetTypeId()) is ARDB.ElementType elementType)
       {
-        name = $"Revit:{elementType.Category?.FullName()}:{elementType.FamilyName}:{elementType.Name} {{{name}}}";
+        name = $"Revit{NS}{elementType.Category?.FullName()}{NS}{elementType.FamilyName}{NS}{elementType.Name} {{{name}}}";
         description = elementType.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
 
         if (elementType.Category?.CategoryType != ARDB.CategoryType.Model)
@@ -480,7 +481,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       else
       {
-        name = $"*Revit:{element.Category?.FullName()}:: {{{name}}}";
+        name = $"*Revit{NS}{element.Category?.FullName()}{NS} {{{name}}}";
       }
 
       return name;

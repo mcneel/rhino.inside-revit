@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     {
       return color.IsValid ?
              Color.FromArgb(0xFF, color.Red, color.Green, color.Blue) :
-             Color.FromArgb(0, 0, 0, 0);
+             Color.Empty;
     }
 
     /// <summary>
@@ -128,7 +128,7 @@ namespace RhinoInside.Revit.Convert.System.Drawing
     /// <since>1.0</since>
     public static ARDB.Color ToColor(this Color color)
     {
-      return color.ToArgb() == 0 ?
+      return color.IsEmpty ?
              ARDB.Color.InvalidColorValue :
              new ARDB.Color(color.R, color.G, color.B);
     }

@@ -80,6 +80,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool AlmostEquals(this XYZ a, XYZ b, double tolerance)
     {
+      tolerance = Math.Max(tolerance, Upsilon);
+
       return NumericTolerance.Abs(a.X - b.X, a.Y - b.Y, a.Z - b.Z) < tolerance;
     }
 
@@ -94,6 +96,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The normalized XYZ or zero if the vector is almost Zero.</returns>
     public static XYZ Normalize(this XYZ xyz, double tolerance = DefaultTolerance)
     {
+      tolerance = Math.Max(tolerance, Upsilon);
+
       var (x, y, z) = xyz;
       var length = NumericTolerance.Abs(x, y, z);
       if (length < tolerance)
@@ -116,6 +120,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The vector equal to the cross product.</returns>
     public static XYZ CrossProduct(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
+      tolerance = Math.Max(tolerance, Upsilon);
+
       var (aX, aY, aZ) = a;
       var lengthA = NumericTolerance.Abs(aX, aY, aZ);
       if (lengthA < tolerance)
@@ -182,7 +188,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var A = a.Normalize(tolerance);
       var B = b.Normalize(tolerance);
 
-      return Math.Abs(A.DotProduct(B)) < tolerance;
+      tolerance = Math.Max(tolerance, Upsilon);
+      return NumericTolerance.Abs(A.DotProduct(B)) < tolerance;
     }
 
     /// <summary>
@@ -195,6 +202,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>X axis of the corresponding coordinate system</returns>
     public static XYZ PerpVector(this XYZ value, double tolerance = DefaultTolerance)
     {
+      tolerance = Math.Max(tolerance, Upsilon);
+
       var (x, y, z) = value;
       var length = NumericTolerance.Abs(x, y, z);
       if (length < tolerance)
@@ -290,68 +299,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return new XYZ(meanX.Value / numPoints, meanY.Value / numPoints, meanZ.Value / numPoints);
-    }
-
-    /// <summary>
-    /// Computes a covariance matrix out of a collection of XYZ points.
-    /// </summary>
-    /// <param name="points"></param>
-    /// <param name="meanPoint"></param>
-    /// <returns></returns>
-    internal static Transform ComputeCovariance(IEnumerable<XYZ> points, XYZ meanPoint = default)
-    {
-      var (x, y, z) = meanPoint ?? ComputeMeanPoint(points);
-      Sum covXx = default, covXy = default, covXz = default;
-      Sum covYx = default, covYy = default, covYz = default;
-      Sum covZx = default, covZy = default, covZz = default;
-
-      foreach (var loc in points)
-      {
-        // Translate loc relative to centroid
-        double locX = loc.X - x, locY = loc.Y - y, locZ = loc.Z - z;
-
-        covXx.Add(locX * locX);
-        covXy.Add(locX * locY);
-        covXz.Add(locX * locZ);
-
-        covYx.Add(locY * locX);
-        covYy.Add(locY * locY);
-        covYz.Add(locY * locZ);
-
-        covZx.Add(locZ * locX);
-        covZy.Add(locZ * locY);
-        covZz.Add(locZ * locZ);
-      }
-
-      var cov = Transform.Identity;
-      cov.BasisX = new XYZ(covXx.Value, covXy.Value, covXz.Value);
-      cov.BasisY = new XYZ(covYx.Value, covYy.Value, covYz.Value);
-      cov.BasisZ = new XYZ(covZx.Value, covZy.Value, covZz.Value);
-
-      return cov;
-    }
-
-    /// <summary>
-    /// Computes the principal component of a covariance matrix.
-    /// </summary>
-    /// <param name="covarianceMatrix"></param>
-    /// <param name="tolerance"></param>
-    /// <returns></returns>
-    internal static XYZ GetPrincipalComponent(this Transform covarianceMatrix, double tolerance = DefaultTolerance)
-    {
-      tolerance = Math.Max(Delta, tolerance);
-
-      var previous = new XYZ(1.0, 1.0, 1.0);
-      var principal = covarianceMatrix.OfVector(previous).Normalize(Upsilon);
-
-      var iterations = 50;
-      while (--iterations > 0 && !AlmostEquals(previous, principal, tolerance))
-      {
-        previous = principal;
-        principal = covarianceMatrix.OfVector(previous).Normalize(Upsilon);
-      }
-
-      return principal;
     }
   }
 }

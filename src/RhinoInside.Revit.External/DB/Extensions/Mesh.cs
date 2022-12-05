@@ -7,7 +7,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool TryGetLocation(this Mesh mesh, out XYZ origin, out XYZ basisX, out XYZ basisY)
     {
       origin = mesh.ComputeCentroid();
-      var cov = XYZExtension.ComputeCovariance(mesh.Vertices);
+      var cov = Transform.Identity;
+      cov.SetCovariance(mesh.Vertices);
 
       basisX = cov.GetPrincipalComponent(0D);
 

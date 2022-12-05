@@ -337,7 +337,11 @@ namespace RhinoInside.Revit.GH.Types
             layer.IsExpanded = false;
           }
 
-          layer.Color = category.LineColor.ToColor();
+          // Color
+          {
+            var lineColor = category.LineColor.ToColor();
+            layer.Color = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
+          }
 
           // Linetype
           {
@@ -381,7 +385,8 @@ namespace RhinoInside.Revit.GH.Types
               layer.IsLocked = true;
               break;
 
-            case ARDB.BuiltInCategory.OST_LightingFixtures:
+            case ARDB.BuiltInCategory.OST_LightingFixtureSource:
+              layer.Color = System.Drawing.Color.FromArgb(35, layer.Color);
               layer.IsVisible = false;
               break;
           }
