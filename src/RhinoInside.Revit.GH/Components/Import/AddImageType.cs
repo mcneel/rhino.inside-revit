@@ -71,7 +71,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-#if REVIT_2021
       ReconstructElement<ARDB.ImageType>
       (
         doc.Value, _Output_, imgInstance =>
@@ -86,9 +85,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           return imgInstance;
         }
       );
-#endif
     }
 
+#if REVIT_2021
     bool Reuse(ARDB.ImageType imageType, ARDB.Document doc, string path)
     {
       if (imageType is null) return false;
@@ -96,7 +95,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
       return true;
     }
+#endif
 
+#if REVIT_2021
     ARDB.ImageType Reconstruct(ARDB.ImageType imageType, ARDB.Document doc, string path)
     {
       if (!Reuse(imageType, doc, path))
@@ -105,5 +106,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       }
       return imageType;
     }
+#endif
   }
 }
