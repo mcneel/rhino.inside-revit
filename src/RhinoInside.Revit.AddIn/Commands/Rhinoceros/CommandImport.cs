@@ -628,6 +628,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       ImportContext context,
       List<ARDB.ElementId> elements,
       File3dm model,
+      ObjectAttributes parentAttributes,
       IEnumerable<File3dmObject> objects
     )
     {
@@ -648,11 +649,24 @@ namespace RhinoInside.Revit.AddIn.Commands
 
             if (model.AllInstanceDefinitions.FindId(instance.ParentIdefId) is InstanceDefinitionGeometry definition)
             {
+              var attributes = obj.Attributes.Duplicate();
+
+              // Solve by parent attributes
+              {
+                switch (attributes.MaterialSource)
+                {
+                  case ObjectMaterialSource.MaterialFromLayer:
+                    attributes.MaterialIndex = layer.RenderMaterialIndex;
+                    break;
+                }
+              }
+
               ImportObjectsToFamily
               (
                 new ImportContext(context, instance.Xform),
                 elements,
                 model,
+                attributes,
                 definition.GetObjectIds().Select(x => model.Objects.FindId(x))
               );
             }
@@ -729,14 +743,23 @@ namespace RhinoInside.Revit.AddIn.Commands
                       freeForm.GetParameter(ParameterId.FamilyElemSubcategory).Set(categoryId);
                   }
 
-                  if (obj.Attributes.MaterialSource == ObjectMaterialSource.MaterialFromObject)
+                  var materialIndex = -1;
+                  switch (obj.Attributes.MaterialSource)
                   {
-                    if (model.AllMaterials.FindIndex(obj.Attributes.MaterialIndex) is Material material)
-                    {
-                      var categoryId = ImportMaterial(context.Document, material, context.Materials);
-                      if (categoryId != ARDB.ElementId.InvalidElementId)
-                        freeForm.GetParameter(ParameterId.MaterialIdParam).Set(categoryId);
-                    }
+                    case ObjectMaterialSource.MaterialFromObject:
+                      materialIndex = obj.Attributes.MaterialIndex;
+                      break;
+
+                    case ObjectMaterialSource.MaterialFromParent:
+                      materialIndex = parentAttributes.MaterialIndex;
+                      break;
+                  }
+
+                  if (model.AllMaterials.FindIndex(materialIndex) is Material material)
+                  {
+                    var categoryId = ImportMaterial(context.Document, material, context.Materials);
+                    if (categoryId != ARDB.ElementId.InvalidElementId)
+                      freeForm.GetParameter(ParameterId.MaterialIdParam).Set(categoryId);
                   }
                 }
               }
@@ -801,7 +824,7 @@ namespace RhinoInside.Revit.AddIn.Commands
             };
 
             var objects = model.Objects.Where(x => !x.Attributes.IsInstanceDefinitionObject && x.Attributes.Space == ActiveSpace.ModelSpace);
-            ImportObjectsToFamily(context, elements, model, objects);
+            ImportObjectsToFamily(context, elements, model, new ObjectAttributes(), objects);
 
             if (trans.Commit() == ARDB.TransactionStatus.Committed)
             {
