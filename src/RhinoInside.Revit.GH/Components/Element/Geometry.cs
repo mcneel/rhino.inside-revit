@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     (
       // Not 100% sure but looks like only elements with category have geometry.
       CompoundElementFilter.ElementHasCategoryFilter,
-      CompoundElementFilter.ElementHasBoundingBoxFilter,
+      CompoundElementFilter.ElementHasBoundingBoxFilter.Union(CompoundElementFilter.ElementClassFilter(typeof(ARDB.FamilySymbol))),
       // Types below return no geometry.
       new ARDB.ElementMulticlassFilter
       (
@@ -154,7 +154,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
               // 'Element Geometry' works with types.
               (options.View is null || !(element is ARDB.ElementType)) &&
               (options.View is object || ElementHasGeometryFilter.PassesFilter(element)) &&
-              visibleInViewFilter?.PassesFilter(element) != false
+              (visibleInViewFilter?.PassesFilter(element) != false)
             )
           )
         )
