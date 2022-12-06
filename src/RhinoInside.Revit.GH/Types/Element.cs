@@ -208,6 +208,10 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.InternalOrigin),                  (element)=> new InternalOrigin        (element as ARDB.InternalOrigin)    },
       { typeof(ARDB.BasePoint),                       (element)=> new BasePoint             (element as ARDB.BasePoint)         },
 #endif
+#if REVIT_2020
+      { typeof(ARDB.ImageInstance),                   (element)=> new ImageInstance         (element as ARDB.ImageInstance)     },
+#endif
+
       { typeof(ARDB.DesignOption),                    (element)=> new DesignOption          (element as ARDB.DesignOption)      },
       { typeof(ARDB.Phase),                           (element)=> new Phase                 (element as ARDB.Phase)             },
       { typeof(ARDB.SelectionFilterElement),          (element)=> new SelectionFilterElement(element as ARDB.SelectionFilterElement)},
@@ -374,7 +378,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      // By type
+      // By Type
       for (var type = element.GetType(); type != typeof(ARDB.Element); type = type.BaseType)
       {
         if (ActivatorDictionary.TryGetValue(type, out var activator))
@@ -394,6 +398,7 @@ namespace RhinoInside.Revit.GH.Types
           case ARDB.BuiltInCategory.OST_DesignOptionSets:
             if (DesignOptionSet.IsValidElement(element)) return new DesignOptionSet(element);
             break;
+
 #if !REVIT_2021
           case ARDB.BuiltInCategory.OST_IOS_GeoSite:
             if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element);
@@ -415,6 +420,12 @@ namespace RhinoInside.Revit.GH.Types
               else if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
             }
             break;
+
+#if !REVIT_2020
+          case ARDB.BuiltInCategory.OST_RasterImages:
+            if (ImageInstance.IsValidElement(element)) return new ImageInstance(element);
+            break;
+#endif
         }
       }
 
@@ -726,7 +737,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    #region Version
+#region Version
     public Guid? ExportID => Document?.GetExportID(Id);
 
     public (Guid? Created, Guid? Updated) Version
@@ -749,9 +760,9 @@ namespace RhinoInside.Revit.GH.Types
         return (created, updated);
       }
     }
-    #endregion
+#endregion
 
-    #region Properties
+#region Properties
     public bool CanDelete => IsValid && ARDB.DocumentValidation.CanDeleteElement(Document, Id);
 
     public bool? Pinned
@@ -856,7 +867,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    #region Category
+#region Category
     public virtual Category Category
     {
       get => Value is object ?
@@ -867,7 +878,7 @@ namespace RhinoInside.Revit.GH.Types
 
       set => throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Category.");
     }
-    #endregion
+#endregion
 
     public virtual ElementType Type
     {
@@ -924,9 +935,9 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
-    #endregion
+#endregion
 
-    #region Identity Data
+#region Identity Data
     public virtual string Description
     {
       get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
@@ -1010,6 +1021,6 @@ namespace RhinoInside.Revit.GH.Types
           Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.Update(value);
       }
     }
-    #endregion
+#endregion
   }
 }
