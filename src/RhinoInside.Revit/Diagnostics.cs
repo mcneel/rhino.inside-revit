@@ -867,12 +867,12 @@ namespace RhinoInside.Revit
       static void Log(Entry entry, EntryRole role, Severity severity, string name, params string[] details)
       {
         if (Active && ThreadLogStream is Stream threadLogStream)
-          DispatchAsynch(() => entry.LogEntry(threadLogStream, role, severity, name, details));
+          DispatchAsync(() => entry.LogEntry(threadLogStream, role, severity, name, details));
       }
 
       #region Dispatcher
       static readonly WeakReference<Task> dispatcher = new WeakReference<Task>(default);
-      static void DispatchAsynch(Action action)
+      static void DispatchAsync(Action action)
       {
         lock (dispatcher)
         {
