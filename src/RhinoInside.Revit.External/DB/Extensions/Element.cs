@@ -616,7 +616,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               }
             ).
             Where(x => x?.Definition is object).
-            Union(element.Parameters.Cast<Parameter>().Where(x => x.StorageType != StorageType.None), ParameterEqualityComparer.SameDocument).
+            Union(element.Parameters.Cast<Parameter>().Where(x => x.Definition is object && x.StorageType != StorageType.None), ParameterEqualityComparer.SameDocument).
             OrderBy(x => x.Id.ToValue());
 
         case ParameterClass.BuiltIn:
