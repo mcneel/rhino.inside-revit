@@ -74,9 +74,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
           var defaultElementTypeIds = new HashSet<string>();
           foreach (var typeGroup in Enum.GetValues(typeof(ARDB.ElementTypeGroup)).Cast<ARDB.ElementTypeGroup>())
           {
-            var elementTypeId = Revit.ActiveDBDocument.GetDefaultElementTypeId(typeGroup);
-            if (elementTypeId != ARDB.ElementId.InvalidElementId)
-              defaultElementTypeIds.Add(elementTypeId.IntegerValue.ToString());
+            if (doc.GetElement(doc.GetDefaultElementTypeId(typeGroup)) is ARDB.ElementType type)
+              defaultElementTypeIds.Add(FullUniqueId.Format(doc.GetFingerprintGUID(), type.UniqueId));
           }
 
           foreach (var item in ListItems)
@@ -169,13 +168,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
           var defaultElementTypeIds = new HashSet<string>();
           foreach (var typeGroup in Enum.GetValues(typeof(ARDB.ElementTypeGroup)).Cast<ARDB.ElementTypeGroup>())
           {
-            var elementTypeId = doc.GetDefaultElementTypeId(typeGroup);
-            if (elementTypeId != ARDB.ElementId.InvalidElementId)
-            {
-              var type = doc.GetElement(elementTypeId);
-              var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), type.UniqueId);
-              defaultElementTypeIds.Add(elementTypeId.IntegerValue.ToString());
-            }
+            if (doc.GetElement(doc.GetDefaultElementTypeId(typeGroup)) is ARDB.ElementType type)
+              defaultElementTypeIds.Add(FullUniqueId.Format(doc.GetFingerprintGUID(), type.UniqueId));
           }
 
           foreach (var item in ListItems)
