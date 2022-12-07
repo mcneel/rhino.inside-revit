@@ -10,8 +10,16 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added 'Add Image Type' component. (Revit 2020)
+- Added 'Add Image' component. (Revit 2020)
+- Fixed 'Element Geometry' to work with `FamilySymbol`.
+- Added `ARDB.AppearanceAssetElement.ToRenderMaterial` extension method.
+
 ### RC 
 
+- Now 'Import 3DM' imports block geometry in families.
+- Now Baked blocks name use '::' as a separator.
+- Now 'Light Source' category ís hidden and transparent by default on bake.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
