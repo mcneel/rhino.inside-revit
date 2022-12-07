@@ -1,12 +1,14 @@
 using System;
 using Rhino.Geometry;
+using Rhino.Display;
+using Rhino.DocObjects;
 using ARDB = Autodesk.Revit.DB;
+using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using External.DB.Extensions;
-  using Grasshopper.Kernel;
-  using RhinoInside.Revit.Convert.Geometry;
+  using Convert.Geometry;
 
 #if REVIT_2020
   using ARDB_ImageInstance = ARDB.ImageInstance;
@@ -38,7 +40,8 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void ResetValue()
     {
-      _Mesh = default;
+      using (_DisplayTexture) _DisplayTexture = null;
+      using (_Mesh)           _Mesh = default;
 
       base.ResetValue();
     }
@@ -57,15 +60,17 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Mesh is Mesh mesh)
       {
-        // TODO : Cache the DisplayMaterial
-        //if (Type.Value.get_Parameter(ARDB.BuiltInParameter.RASTER_SYMBOL_FILENAME)?.AsString() is string imageFilePath)
-        //{
-        //  var material = new Rhino.Display.DisplayMaterial(args.Color, transparency: args.Thickness > 1 ? 0.05 : 0.0);
-        //  {
-        //    material.SetBitmapTexture(imageFilePath, front: true);
-        //    args.Pipeline.DrawMeshShaded(mesh, material);
-        //  }
-        //}
+        if (DisplayTexture is Texture texture)
+        {
+          var material = new DisplayMaterial(System.Drawing.Color.White, transparency: 0.0);
+          {
+            if (args.Thickness > 1)
+              material.Emission = args.Color;
+
+            material.SetBitmapTexture(texture, front: true);
+            args.Pipeline.DrawMeshShaded(mesh, material);
+          }
+        }
 
         args.Pipeline.DrawMeshWires(mesh, args.Color, args.Thickness);
       }
@@ -207,6 +212,24 @@ namespace RhinoInside.Revit.GH.Types
           }
         }
         return _Mesh;
+      }
+    }
+
+    Texture _DisplayTexture;
+    Texture DisplayTexture
+    {
+      get
+      {
+        if (_DisplayTexture is null)
+        {
+          if (Type.Value.get_Parameter(ARDB.BuiltInParameter.RASTER_SYMBOL_FILENAME)?.AsString() is string imageFilePath)
+          {
+            if (System.IO.File.Exists(imageFilePath))
+              _DisplayTexture = new Texture() { FileName = imageFilePath };
+          }
+        }
+
+        return _DisplayTexture;
       }
     }
     #endregion
