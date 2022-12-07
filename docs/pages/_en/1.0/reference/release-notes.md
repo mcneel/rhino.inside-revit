@@ -16,6 +16,10 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.10 RC5" version="v1.10.8375.11132" pre_release=true time="12/06/2022" %}
+
+- Minor Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.10 RC4" version="v1.10.8368.15363" pre_release=true time="11/29/2022" %}
 
 - Now minimum Revit 2022 is 2022.1 to enable {% include ltr/comp.html uuid='bf1b9be9' %}
