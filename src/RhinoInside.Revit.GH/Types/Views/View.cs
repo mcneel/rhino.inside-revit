@@ -2,11 +2,12 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using Rhino;
-using Rhino.DocObjects;
-using Rhino.Display;
-using Rhino.Geometry;
+using System.Linq;
 using Grasshopper.Kernel.Types;
+using Rhino;
+using Rhino.Display;
+using Rhino.DocObjects;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -290,7 +291,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         var elementCollector = collector.WherePasses(filter);
 
-        foreach (var element in collector)
+        foreach (var element in elementCollector)
         {
           if (element.get_BoundingBox(Value) is ARDB.BoundingBoxXYZ bboxXYZ)
           {
@@ -298,11 +299,13 @@ namespace RhinoInside.Revit.GH.Types
             if (uv.Contains(bbox.Min) && uv.Contains(bbox.Max))
               continue;
 
-            foreach (var sample in ElementExtension.GetSamplePoints(element, Value))
+            var samples = ElementExtension.GetSamplePoints(element, Value);
+            if (samples.Any())
             {
-              var uvw = projection * sample.ToPoint3d();
-              uv.Union(uvw);
+              foreach (var sample in samples)
+                uv.Union(projection * sample.ToPoint3d());
             }
+            else uv.Union(bbox);
           }
         }
       }
