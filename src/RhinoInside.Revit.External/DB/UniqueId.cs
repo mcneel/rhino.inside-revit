@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.External.DB
 
   public static class UniqueId
   {
-    public static string Format(Guid episodeId, IntId id) => $"{episodeId:D}-{id,NumHexDigits.ElementId:x}";
+    public static string Format(Guid episodeId, IntId id) => $"{episodeId:D}-{id.ToString($"x{NumHexDigits.ElementId}")}";
     public static bool TryParse(string s, out Guid episodeId, out IntId id)
     {
       episodeId = Guid.Empty;
