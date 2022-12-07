@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -56,9 +57,28 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool IsValid(this ElementId id) => id is object && id != InvalidElementId;
     public static bool IsBuiltInId(this ElementId id) => id is object && id <= InvalidElementId;
-    public static int ToValue(this ElementId id) => id.IntegerValue;
 
-    #region Parameters
+#if REVIT_2024
+    public static long ToValue(this ElementId id) => id.Value;
+#else
+    public static int ToValue(this ElementId id) => id.IntegerValue;
+#endif
+
+    static readonly string LowerHexFormat = $"x{NumHexDigits.IntId}";
+    static readonly string UpperHexFormat = $"X{NumHexDigits.IntId}";
+
+    public static string ToString(this ElementId id, string format)
+    {
+      if (format == "x")
+        return id.ToValue().ToString(LowerHexFormat, CultureInfo.InvariantCulture);
+
+      if (format == "X")
+        return id.ToValue().ToString(UpperHexFormat, CultureInfo.InvariantCulture);
+
+      return id.ToValue().ToString(format, CultureInfo.InvariantCulture);
+    }
+
+#region Parameters
     public static BuiltInParameter ToBuiltInParameter(this ElementId id) => TryGetBuiltInParameter(id, out var value) ? value : BuiltInParameter.INVALID;
 
     /// <summary>
@@ -70,13 +90,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsParameterId(this ElementId id, Document doc)
     {
       // Check if is not a BuiltIn Parameter
-      if (id.IntegerValue > InvalidElementId.IntegerValue)
+      if (id.ToValue() > InvalidElementId.ToValue())
       {
         try { return doc.GetElement(id) is ParameterElement; }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
       }
 
-      return ((BuiltInParameter) id.IntegerValue).IsValid();
+      return ((BuiltInParameter) id.ToValue()).IsValid();
     }
 
     /// <summary>
@@ -87,16 +107,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static bool TryGetBuiltInParameter(this ElementId id, out BuiltInParameter builtInParameter)
     {
-      builtInParameter = (BuiltInParameter) id.IntegerValue;
+      builtInParameter = (BuiltInParameter) id.ToValue();
       if (builtInParameter.IsValid())
         return true;
 
       builtInParameter = BuiltInParameter.INVALID;
       return false;
     }
-    #endregion
+#endregion
 
-    #region Categories
+#region Categories
     public static BuiltInCategory ToBuiltInCategory(this ElementId id) => TryGetBuiltInCategory(id, out var value) ? value : BuiltInCategory.INVALID;
 
     /// <summary>
@@ -108,7 +128,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsCategoryId(this ElementId id, Document doc)
     {
       // Check if is not a BuiltIn Category
-      if (id.IntegerValue > InvalidElementId.IntegerValue)
+      if (id.ToValue() > InvalidElementId.ToValue())
       {
         // 1. We try with the regular way calling Category.GetCategory
         try { return Category.GetCategory(doc, id) is object; }
@@ -122,7 +142,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
       }
 
-      return ((BuiltInCategory) id.IntegerValue).IsValid();
+      return ((BuiltInCategory) id.ToValue()).IsValid();
     }
 
     /// <summary>
@@ -133,16 +153,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static bool TryGetBuiltInCategory(this ElementId id, out BuiltInCategory builtInCategory)
     {
-      builtInCategory = (BuiltInCategory) id.IntegerValue;
+      builtInCategory = (BuiltInCategory) id.ToValue();
       if (builtInCategory.IsValid())
         return true;
 
       builtInCategory = BuiltInCategory.INVALID;
       return false;
     }
-    #endregion
+#endregion
 
-    #region LinePattern
+#region LinePattern
     public static BuiltInLinePattern ToBuiltInLinePattern(this ElementId id) => TryGetBuiltInLinePattern(id, out var value) ? value : BuiltInLinePattern.INVALID;
 
     /// <summary>
@@ -154,13 +174,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsLinePatternId(this ElementId id, Document doc)
     {
       // Check if is not a BuiltIn Line Pattern
-      if (id.IntegerValue > InvalidElementId.IntegerValue)
+      if (id.ToValue() > InvalidElementId.ToValue())
       {
         try { return doc.GetElement(id) is LinePatternElement; }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
       }
 
-      return ((BuiltInLinePattern) id.IntegerValue).IsValid();
+      return ((BuiltInLinePattern) id.ToValue()).IsValid();
     }
 
     /// <summary>
@@ -171,14 +191,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static bool TryGetBuiltInLinePattern(this ElementId id, out BuiltInLinePattern builtInPattern)
     {
-      builtInPattern = (BuiltInLinePattern) id.IntegerValue;
+      builtInPattern = (BuiltInLinePattern) id.ToValue();
       if (builtInPattern.IsValid())
         return true;
 
       builtInPattern = BuiltInLinePattern.INVALID;
       return false;
     }
-    #endregion
+#endregion
 
     /// <summary>
     /// Checks if <paramref name="id"/> corresponds to an <see cref="Autodesk.Revit.DB.ElementType"/> in <paramref name="doc"/>.
