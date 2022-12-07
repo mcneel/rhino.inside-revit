@@ -10,11 +10,13 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     public LinkedScriptAssembly()
     {
-      Name = $"LinkedScriptAssm-{Guid.NewGuid()}";
+      Name = Guid.NewGuid().ToString();
       FileName = $"{Name}.dll";
-      FileLocation = Path.GetTempPath();
+      FileLocation = Path.Combine(Core.SwapFolder, "LinkedScripts");
+      Directory.CreateDirectory(FileLocation);
 
-      AssmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
+      AssmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly
+      (
         new AssemblyName
         {
           Name = Name,
@@ -22,7 +24,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         },
         AssemblyBuilderAccess.RunAndSave,
         FileLocation
-        );
+      );
 
       ModuleBuilder = AssmBuilder.DefineDynamicModule(Name, FileName);
     }
