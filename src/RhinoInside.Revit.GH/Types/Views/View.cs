@@ -298,11 +298,13 @@ namespace RhinoInside.Revit.GH.Types
             if (uv.Contains(bbox.Min) && uv.Contains(bbox.Max))
               continue;
 
-            foreach (var sample in ElementExtension.GetSamplePoints(element, Value))
+            var samples = ElementExtension.GetSamplePoints(element, Value);
+            if (samples.Any())
             {
-              var uvw = projection * sample.ToPoint3d();
-              uv.Union(uvw);
+              foreach (var sample in samples)
+                uv.Union(projection * sample.ToPoint3d());
             }
+            else uv.Union(bbox);
           }
         }
       }
