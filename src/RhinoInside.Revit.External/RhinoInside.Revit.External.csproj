@@ -43,6 +43,7 @@
     <Compile Include="DB\Extensions\BoundingBoxUV.cs" />
     <Compile Include="DB\Extensions\BoundingBoxXYZ.cs" />
     <Compile Include="DB\Extensions\Category.cs" />
+    <Compile Include="DB\Extensions\Color.cs" />
     <Compile Include="DB\Extensions\Curve.cs" />
     <Compile Include="DB\Extensions\CurveLoop.cs" />
     <Compile Include="DB\Extensions\Document.cs" />
