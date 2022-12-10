@@ -801,14 +801,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
         else if (typeof(T) == typeof(int))
         {
-          if (param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Int.Integer)
+          if (param.StorageType != StorageType.Integer)
             throw new System.InvalidCastException();
 
           return (T) (object) param.AsInteger();
         }
         else if (typeof(T).IsSubclassOf(typeof(Enum)))
         {
-          if (param.StorageType != StorageType.Integer || (Schemas.DataType) param.Definition.GetDataType() != Schemas.SpecType.Int.Integer)
+          if (param.StorageType != StorageType.Integer)
             throw new System.InvalidCastException();
 
           return (T) (object) param.AsInteger();
