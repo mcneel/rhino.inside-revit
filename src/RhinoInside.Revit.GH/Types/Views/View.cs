@@ -231,7 +231,7 @@ namespace RhinoInside.Revit.GH.Types
 
             // We rename texture file to avoid conflicts
             // between Rhino and Revit accessing the same file
-            FileExtension.MoveFile(filename, texturename, overwrite: true);
+            new FileInfo(filename).MoveTo(texturename, overwrite: true);
 
             var material = new DisplayMaterial(System.Drawing.Color.White, transparency: 0.0);
             material.SetBitmapTexture(texturename, front: true);

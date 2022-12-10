@@ -377,14 +377,14 @@ namespace RhinoInside.Revit.GH.Components.Views
                 blackImage.Dispose();
 
                 targetImage.Save(filename, ImageFormat.Png);
-                FileExtension.MoveFile(filename, imageFile, overwrite: true);
+                new FileInfo(filename).MoveTo(imageFile, overwrite: true);
               }
             }
             else
             {
               Directory.CreateDirectory(folder);
               view.Document.ExportImage(options);
-              FileExtension.MoveFile(filename, imageFile, overwrite: true);
+              new FileInfo(filename).MoveTo(imageFile, overwrite: true);
             }
 
             DA.SetData("Image File", imageFile);
