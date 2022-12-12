@@ -124,6 +124,7 @@
       <DependentUpon>ProductInfo.tt</DependentUpon>
     </Compile>
     <Compile Include="Settings\AddIns.cs" />
+    <Compile Include="TemporaryDirectory.cs" />
     <Compile Include="UI\Application.cs" />
     <Compile Include="UI\Command.cs" />
     <Compile Include="UI\EditScope.cs" />
