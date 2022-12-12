@@ -17,6 +17,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.System.Drawing;
   using Convert.Units;
   using External.DB.Extensions;
+  using External.UI.Selection;
 
   [Kernel.Attributes.Name("View")]
   public interface IGH_View : IGH_Element { }
@@ -105,23 +106,17 @@ namespace RhinoInside.Revit.GH.Types
     public Level GenLevel => Value?.GenLevel is ARDB.Level genLevel ? new Level(genLevel) : default;
 
     public double Scale => Value is ARDB.View view ?
-      view.Scale == 0 ? 1.0 : (double)view.Scale :
+      view.Scale == 0 ? 1.0 : (double) view.Scale :
       double.NaN;
 
-    public UVInterval GetOutline(ActiveSpace space) => Rhinoceros.InvokeInHostContext(() =>
+    public UVInterval GetOutline(ActiveSpace space)
     {
       if (Value is ARDB.View view)
       {
-        using (var uiDoc = new Autodesk.Revit.UI.UIDocument(view.Document))
+        try
         {
-          var selectedIds = uiDoc.Selection.GetElementIds();
-
-          try
+          using (view.Document.NoSelectionScope())
           {
-            // Clear selection
-            if (selectedIds.Count > 0)
-              uiDoc.Selection.SetElementIds(new ARDB.ElementId[] { });
-
             using (var outline = view.Outline)
             {
               var unitsScale = UnitScale.Internal / UnitScale.GetUnitScale(RhinoDoc.ActiveDoc, space == ActiveSpace.None ? ActiveSpace.PageSpace : space);
@@ -134,18 +129,34 @@ namespace RhinoInside.Revit.GH.Types
               );
             }
           }
-          catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-          finally
-          {
-            // Restore selection
-            if (selectedIds.Count > 0)
-              uiDoc.Selection.SetElementIds(selectedIds);
-          }
         }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { }
       }
 
       return new UVInterval(NaN.Interval, NaN.Interval);
-    });
+    }
+
+    Plane CutPlane
+    {
+      get
+      {
+        var location = Location;
+        if (Value is ARDB.ViewPlan plan)
+        {
+          using (var viewRange = plan.GetViewRange())
+          {
+            var z = GeometryDecoder.ToModelLength
+            (
+              (plan.Document.GetElement(viewRange.GetLevelId(ARDB.PlanViewPlane.CutPlane)) as ARDB.Level).ProjectElevation +
+              viewRange.GetOffset(ARDB.PlanViewPlane.CutPlane)
+            );
+            location.Origin = new Point3d(location.Origin.X, location.Origin.Y, z);
+          }
+        }
+
+        return location;
+      }
+    }
 
     public Plane Location => Value is ARDB.View view ? new Plane
     (
@@ -161,46 +172,58 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var outline = GetOutline(ActiveSpace.ModelSpace);
-        var location = Location;
-        if (Value is ARDB.ViewPlan plan)
+        if (outline.IsValid)
         {
-          using (var viewRange = plan.GetViewRange())
+          // Looks like Revit never exports and image with an aspect ratio below 10:1
+          // So we correct here the outline.
           {
-            var z = GeometryDecoder.ToModelLength
-            (
-              (plan.Document.GetElement(viewRange.GetLevelId(ARDB.PlanViewPlane.CutPlane)) as ARDB.Level).ProjectElevation +
-              viewRange.GetOffset(ARDB.PlanViewPlane.CutPlane)
-            );
-            location.Origin = new Point3d(location.Origin.X, location.Origin.Y, z);
+            (double U, double V) length = (outline.U.Length, outline.V.Length);
+            if (length.U < length.V)
+            {
+              if (length.U < length.V * 0.1)
+              {
+                var mid = outline.U.Mid;
+                outline = new UVInterval
+                (
+                  new Interval(mid - length.V * 0.05, mid + length.V * 0.05),
+                  outline.V
+                );
+              }
+            }
+            else
+            {
+              if (length.V < length.U * 0.1)
+              {
+                var mid = outline.V.Mid;
+                outline = new UVInterval
+                (
+                  outline.U,
+                  new Interval(mid - length.U * 0.05, mid + length.U * 0.05)
+                );
+              }
+            }
           }
-        }
 
-        if (outline.IsValid) return new PlaneSurface
-        (
-          plane: location,
-          xExtents: new Interval(outline.U0, outline.U1),
-          yExtents: new Interval(outline.V0, outline.V1)
-        );
+          return new PlaneSurface(Location, outline.U, outline.V);
+        }
 
         return default;
       }
     }
 
-    public DisplayMaterial ToDisplayMaterial() => Rhinoceros.InvokeInHostContext(() =>
+    public DisplayMaterial ToDisplayMaterial()
     {
-      if (Value is ARDB.View view)
+      if
+      (
+        Value is ARDB.View view &&
+        view.CanBePrinted &&
+        (view.IsGraphicalView() /*|| (view is ARDB.ViewSchedule schedule && !schedule.IsInternalKeynoteSchedule && !schedule.IsTitleblockRevisionSchedule)*/)
+      )
       {
-        var swapFolder = Path.Combine(Core.SwapFolder, view.Document.GetFingerprintGUID().ToString());
-        Directory.CreateDirectory(swapFolder);
-
-        using (var uiDoc = new Autodesk.Revit.UI.UIDocument(view.Document))
+        var viewId = view.Id;
+        using (var viewDocument = view.Document)
+        using (new NoSelectionScope(viewDocument))
         {
-          var selectedIds = uiDoc.Selection.GetElementIds();
-
-          // Clear selection
-          if (selectedIds.Count > 0)
-            uiDoc.Selection.SetElementIds(new ARDB.ElementId[] { });
-
           var rect = view.GetOutlineRectangle().ToRectangle();
           var fitDirection = rect.Width > rect.Height ?
             ARDB.FitDirectionType.Horizontal :
@@ -209,6 +232,7 @@ namespace RhinoInside.Revit.GH.Types
           if (pixelSize == 0) return default;
           pixelSize = Math.Min(4096, pixelSize);
 
+          var document = Types.Document.FromValue(viewDocument);
           try
           {
             var options = new ARDB.ImageExportOptions()
@@ -220,35 +244,29 @@ namespace RhinoInside.Revit.GH.Types
               ShadowViewsFileType = ARDB.ImageFileType.PNG,
               HLRandWFViewsFileType = ARDB.ImageFileType.PNG,
               ExportRange = ARDB.ExportRange.SetOfViews,
-              FilePath = swapFolder + Path.DirectorySeparatorChar
+              FilePath = document.SwapFolder.Directory.FullName + Path.DirectorySeparatorChar
             };
-            options.SetViewsAndSheets(new ARDB.ElementId[] { view.Id });
-            view.Document.ExportImage(options);
+            options.SetViewsAndSheets(new ARDB.ElementId[] { viewId });
+            viewDocument.ExportImage(options);
 
-            var viewName = ARDB.ImageExportOptions.GetFileName(view.Document, view.Id);
-            var filename = Path.Combine(options.FilePath, viewName) + ".png";
-            var texturename = Path.Combine(options.FilePath, view.UniqueId) + ".png";
+            var viewName = ARDB.ImageExportOptions.GetFileName(viewDocument, viewId);
+            var sourceFile = new FileInfo(Path.Combine(options.FilePath, viewName) + ".png");
 
-            // We rename texture file to avoid conflicts
-            // between Rhino and Revit accessing the same file
-            new FileInfo(filename).MoveTo(texturename, overwrite: true);
-
-            var material = new DisplayMaterial(System.Drawing.Color.White, transparency: 0.0);
-            material.SetBitmapTexture(texturename, front: true);
-            return material;
+            if (sourceFile.Exists)
+            {
+              var textureFile = document.SwapFolder.MoveFrom(this, sourceFile, $"-Thumbnail");
+              var contrast = byte.MaxValue - (byte) Math.Round(viewDocument.Application.BackgroundColor.ToColor().GetBrightness() * byte.MaxValue);
+              var material = new DisplayMaterial(System.Drawing.Color.FromArgb(contrast, contrast, contrast), transparency: 0.0);
+              material.SetBitmapTexture(new Texture() { FileName = textureFile.FullName }, front: true);
+              return material;
+            }
           }
-          catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-          finally
-          {
-            // Restore selection
-            if (selectedIds.Count > 0)
-              uiDoc.Selection.SetElementIds(selectedIds);
-          }
+          catch (Exception e) { Debug.Fail(e.Source, e.Message); }
         }
       }
 
       return default;
-    });
+    }
 
     public Transform GetModelToProjectionTransform()
     {
@@ -275,37 +293,40 @@ namespace RhinoInside.Revit.GH.Types
     internal UVInterval GetElementsBoundingRectangle(ElementFilter elementFilter) => GetElementsBoundingRectangle(GetModelToProjectionTransform(), elementFilter);
     internal UVInterval GetElementsBoundingRectangle(Transform projection, ElementFilter elementFilter)
     {
-      var filter = elementFilter?.Value ?? new ARDB.ElementMulticategoryFilter
-      (
-        new ARDB.BuiltInCategory[] { ARDB.BuiltInCategory.OST_Cameras, ARDB.BuiltInCategory.OST_SectionBox },
-        inverted: true
-      );
-
       var uv = new BoundingBox
       (
-        new Point3d(double.MaxValue, double.MaxValue, double.MaxValue),
-        new Point3d(double.MinValue, double.MinValue, double.MinValue)
+        new Point3d(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity),
+        new Point3d(double.NegativeInfinity, double.NegativeInfinity, double.NegativeInfinity)
       );
 
-      using (var collector = new ARDB.FilteredElementCollector(Document, Id))
+      if (Value is ARDB.View view)
       {
-        var elementCollector = collector.WherePasses(filter);
+        var filter = elementFilter?.Value ?? new ARDB.ElementMulticategoryFilter
+        (
+          new ARDB.BuiltInCategory[] { ARDB.BuiltInCategory.OST_Cameras, ARDB.BuiltInCategory.OST_SectionBox },
+          inverted: true
+        );
 
-        foreach (var element in elementCollector)
+        using (var collector = new ARDB.FilteredElementCollector(Document, Id))
         {
-          if (element.get_BoundingBox(Value) is ARDB.BoundingBoxXYZ bboxXYZ)
-          {
-            var bbox = bboxXYZ.ToBox().GetBoundingBox(projection);
-            if (uv.Contains(bbox.Min) && uv.Contains(bbox.Max))
-              continue;
+          var elementCollector = collector.WherePasses(filter);
 
-            var samples = ElementExtension.GetSamplePoints(element, Value);
-            if (samples.Any())
+          foreach (var element in elementCollector)
+          {
+            if (element.get_BoundingBox(view) is ARDB.BoundingBoxXYZ bboxXYZ)
             {
-              foreach (var sample in samples)
-                uv.Union(projection * sample.ToPoint3d());
+              var bbox = bboxXYZ.ToBox().GetBoundingBox(projection);
+              if (uv.Contains(bbox.Min) && uv.Contains(bbox.Max))
+                continue;
+
+              var samples = ElementExtension.GetSamplePoints(element, view);
+              if (samples.Any())
+              {
+                foreach (var sample in samples)
+                  uv.Union(projection * sample.ToPoint3d());
+              }
+              else uv.Union(bbox);
             }
-            else uv.Union(bbox);
           }
         }
       }
@@ -318,7 +339,6 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Properties
-
     public bool? CropBoxActive
     {
       get => Value?.CropBoxActive;
