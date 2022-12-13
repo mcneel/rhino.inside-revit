@@ -230,9 +230,12 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         foreach (var edge in brep.Edges)
         {
-          var normalizedDomain = edge.EdgeCurve.Domain.NormalizedIntervalAt(edge.Domain);
-          writer.Write(RoundNormalizedKnot(normalizedDomain.T0));
-          writer.Write(RoundNormalizedKnot(normalizedDomain.T1));
+          if (edge.EdgeCurve is Curve edgeCurve)
+          {
+            var normalizedDomain = edgeCurve.Domain.NormalizedIntervalAt(edge.Domain);
+            writer.Write(RoundNormalizedKnot(normalizedDomain.T0));
+            writer.Write(RoundNormalizedKnot(normalizedDomain.T1));
+          }
         }
 
         foreach (var curve in brep.Curves3D)
