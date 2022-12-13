@@ -247,7 +247,7 @@ namespace RhinoInside.Revit.GH.Types
               FilePath = document.SwapFolder.Directory.FullName + Path.DirectorySeparatorChar
             };
             options.SetViewsAndSheets(new ARDB.ElementId[] { viewId });
-            viewDocument.ExportImage(options);
+            Rhinoceros.InvokeInHostContext(() => viewDocument.ExportImage(options));
 
             var viewName = ARDB.ImageExportOptions.GetFileName(viewDocument, viewId);
             var sourceFile = new FileInfo(Path.Combine(options.FilePath, viewName) + ".png");
