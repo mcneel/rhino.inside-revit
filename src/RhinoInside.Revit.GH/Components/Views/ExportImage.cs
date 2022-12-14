@@ -208,7 +208,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       if (Params.Input<IGH_Param>("Folder") is IGH_Param Folder)
       {
         Folder.Description = Folder.DataType != GH_ParamData.@void ?
-          "Default folder" : $"Default is under \"{Textures.Directory.FullName}\"";
+          "Folder to store resulting images." : $"Default is under \"{Textures.Directory.FullName}\"";
       }
 
       Textures.Delete(this);
@@ -468,8 +468,8 @@ namespace RhinoInside.Revit.GH.Components.Views
                       {
                         if (canSetBackground)
                           view.Value.SetBackground(ARDB.ViewDisplayBackground.CreateGradient(ColorExtension.White, ColorExtension.White, ColorExtension.White));
-                        else
-                          app.BackgroundColor = ColorExtension.White;
+
+                        app.BackgroundColor = ColorExtension.White;
                       }
 
                       view.Document.ExportImage(options);
@@ -484,8 +484,8 @@ namespace RhinoInside.Revit.GH.Components.Views
                       {
                         if (canSetBackground)
                           view.Value.SetBackground(ARDB.ViewDisplayBackground.CreateGradient(ColorExtension.Black, ColorExtension.Black, ColorExtension.Black));
-                        else
-                          app.BackgroundColor = ColorExtension.Black;
+
+                        app.BackgroundColor = ColorExtension.Black;
                       }
 
                       view.Document.ExportImage(options);
@@ -513,6 +513,7 @@ namespace RhinoInside.Revit.GH.Components.Views
                       var targetScanData = bitmapImage.LockBits(rectangle, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
                       var opacityScanData = opacityImage?.LockBits(rectangle, ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
 
+                      var backgroundColor = appBackgroundColor.ToColor();
                       for (int y = 0; y < rectangle.Height; ++y)
                       {
                         Marshal.Copy(blackScanData.Scan0 + (blackScanData.Stride * y), blackScanLine, 0, rectangle.Width);
@@ -530,7 +531,7 @@ namespace RhinoInside.Revit.GH.Components.Views
                             if (w == White)
                             {
                               alpha = 0;
-                              t = Color.FromArgb(0x00, w);
+                              t = Color.FromArgb(0x00, backgroundColor);
                             }
                             else
                             {
