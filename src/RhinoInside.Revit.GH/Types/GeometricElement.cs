@@ -371,17 +371,17 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsValid)
         return;
 
-      if (!args.Pipeline.DisplayPipelineAttributes.ShowSurfaceEdges)
+      if (!args.Pipeline.DisplayPipelineAttributes.ShowSurfaceEdges && args.Thickness <= 1)
         return;
 
       int thickness = 1; //args.Thickness;
-      const int factor = 3;
 
       var color = args.Color;
       var element = Value;
       if (element is null)
       {
         // Erased element
+        const int factor = 3;
         color = System.Drawing.Color.FromArgb(args.Color.R / factor, args.Color.G / factor, args.Color.B / factor);
       }
       else if (!element.Pinned)
@@ -412,11 +412,7 @@ namespace RhinoInside.Revit.GH.Types
               args.Pipeline.DrawMeshWires(mesh, color, thickness);
           }
         }
-        else
-        {
-          foreach (var edge in ClippingBox.GetEdges() ?? Enumerable.Empty<Line>())
-            args.Pipeline.DrawPatternedLine(edge.From, edge.To, System.Drawing.Color.Black /*color*/, 0x00001111, thickness);
-        }
+        else base.DrawViewportWires(args);
       }
     }
     #endregion
