@@ -120,7 +120,7 @@ namespace RhinoInside.Revit.GH.Types
             using (var outline = view.Outline)
             {
               var unitsScale = UnitScale.Internal / UnitScale.GetUnitScale(RhinoDoc.ActiveDoc, space == ActiveSpace.None ? ActiveSpace.PageSpace : space);
-              var viewScale = space == ActiveSpace.None ? 1.0 : (view.Scale == 0 ? 1.0 : (double) view.Scale);
+              var viewScale = space != ActiveSpace.ModelSpace ? 1.0 : (view.Scale == 0 ? 1.0 : (double) view.Scale);
 
               if (!outline.IsNullOrEmpty()) return new UVInterval
               (
@@ -211,7 +211,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public DisplayMaterial ToDisplayMaterial()
+    public DisplayMaterial ToDisplayMaterial() => Rhinoceros.InvokeInHostContext(() =>
     {
       if
       (
@@ -247,7 +247,7 @@ namespace RhinoInside.Revit.GH.Types
               FilePath = document.SwapFolder.Directory.FullName + Path.DirectorySeparatorChar
             };
             options.SetViewsAndSheets(new ARDB.ElementId[] { viewId });
-            Rhinoceros.InvokeInHostContext(() => viewDocument.ExportImage(options));
+            viewDocument.ExportImage(options);
 
             var viewName = ARDB.ImageExportOptions.GetFileName(viewDocument, viewId);
             var sourceFile = new FileInfo(Path.Combine(options.FilePath, viewName) + ".png");
@@ -266,7 +266,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return default;
-    }
+    });
 
     public Transform GetModelToProjectionTransform()
     {

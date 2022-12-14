@@ -1,11 +1,12 @@
 using System;
 using Rhino.Geometry;
+using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
-  using Grasshopper.Kernel;
 
   [Kernel.Attributes.Name("Viewport")]
   public class Viewport : GraphicalElement
@@ -23,15 +24,19 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(ViewSheet).IsAssignableFrom(typeof(Q)))
       {
-        target = (Q) (object) ViewSheet.FromElementId(Document, Value?.SheetId);
-
+        target = (Q) (object) Sheet;
         return true;
       }
 
       if (typeof(Q).IsAssignableFrom(typeof(View)))
       {
-        target = (Q) (object) View.FromElementId(Document, Value?.ViewId);
+        target = (Q) (object) View;
+        return true;
+      }
 
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Material)))
+      {
+        target = (Q) (object) new GH_Material { Value = View.ToDisplayMaterial() };
         return true;
       }
 
@@ -64,6 +69,87 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public override Surface Surface
+    {
+      get
+      {
+        var surface = default(PlaneSurface);
+        var boxOutline = Value.GetBoxOutline().ToBoundingBox();
+        if (boxOutline.IsValid)
+        {
+          var padding = 0.01 * Revit.ModelUnits;
+          var location = Location;
+          switch (Value.Rotation)
+          {
+            case ARDB.ViewportRotation.None:
+            {
+              var outlineU = new Interval(boxOutline.Min.X - location.Origin.X + padding, boxOutline.Max.X - location.Origin.X - padding);
+              var outlineV = new Interval(boxOutline.Min.Y - location.Origin.Y + padding, boxOutline.Max.Y - location.Origin.Y - padding);
+              surface = new PlaneSurface(location, outlineU, outlineV);
+              break;
+            }
+
+            case ARDB.ViewportRotation.Clockwise:
+            {
+              var outlineU = new Interval(boxOutline.Min.Y - location.Origin.Y + padding, boxOutline.Max.Y - location.Origin.Y - padding);
+              var outlineV = new Interval(boxOutline.Min.X - location.Origin.X + padding, boxOutline.Max.X - location.Origin.X - padding);
+              surface = new PlaneSurface(location, outlineU, outlineV);
+              break;
+            }
+
+            case ARDB.ViewportRotation.Counterclockwise:
+            {
+              var outlineU = new Interval(boxOutline.Min.Y - location.Origin.Y + padding, boxOutline.Max.Y - location.Origin.Y - padding);
+              var outlineV = new Interval(boxOutline.Min.X - location.Origin.X + padding, boxOutline.Max.X - location.Origin.X - padding);
+              surface = new PlaneSurface(location, outlineU, outlineV);
+              break;
+            }
+          }
+
+          var viewOutline = View.GetOutline(Rhino.DocObjects.ActiveSpace.ModelSpace);
+          surface.SetDomain(0, viewOutline.U);
+          surface.SetDomain(1, viewOutline.V);
+        }
+
+        return surface;
+      }
+    }
+
+    Mesh _Mesh;
+    public override Mesh Mesh
+    {
+      get
+      {
+        if (_Mesh is null)
+        {
+          var box = Box;
+          if (box.IsValid)
+          {
+            var padding = 0.01 * Revit.ModelUnits;
+            box.Inflate(-padding);
+
+            _Mesh = new Mesh();
+            var vertices = _Mesh.Vertices;
+            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T0) + (box.Plane.YAxis * box.Y.T0));
+            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T1) + (box.Plane.YAxis * box.Y.T0));
+            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T1) + (box.Plane.YAxis * box.Y.T1));
+            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T0) + (box.Plane.YAxis * box.Y.T1));
+
+            var coordinates = _Mesh.TextureCoordinates;
+            coordinates.Add(0.0, 0.0);
+            coordinates.Add(1.0, 0.0);
+            coordinates.Add(1.0, 1.0);
+            coordinates.Add(0.0, 1.0);
+
+            _Mesh.Faces.AddFace(new MeshFace(0, 1, 2, 3));
+            _Mesh.Normals.ComputeNormals();
+          }
+        }
+        return _Mesh;
+      }
+    }
+
+    #region IGH_PreviewData
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB.Viewport viewport && viewport.SheetId != ARDB.ElementId.InvalidElementId)
@@ -115,5 +201,17 @@ namespace RhinoInside.Revit.GH.Types
       }
       else base.DrawViewportWires(args);
     }
+
+    protected override void DrawViewportMeshes(GH_PreviewMeshArgs args)
+    {
+      if (Mesh is Mesh mesh)
+        args.Pipeline.DrawMeshShaded(mesh, args.Material);
+    }
+    #endregion
+
+    #region Properties
+    public View View => View.FromElementId(Document, Value?.ViewId) as View;
+    public ViewSheet Sheet => ViewSheet.FromElementId(Document, Value?.SheetId) as ViewSheet;
+    #endregion
   }
 }
