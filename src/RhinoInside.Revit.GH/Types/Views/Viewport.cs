@@ -70,41 +70,47 @@ namespace RhinoInside.Revit.GH.Types
       {
         using (var boxOutline = viewport.GetBoxOutline())
         {
-          var points = new Point3d[]
+          if (!boxOutline.IsEmpty)
           {
+            var points = new Point3d[]
+            {
             boxOutline.MinimumPoint.ToPoint3d(),
             Point3d.Origin,
             boxOutline.MaximumPoint.ToPoint3d(),
             Point3d.Origin
-          };
+            };
 
-          points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
-          points[1] = new Point3d(points[2].X, points[0].Y, 0.0);
-          points[2] = new Point3d(points[2].X, points[2].Y, 0.0);
-          points[3] = new Point3d(points[0].X, points[2].Y, 0.0);
+            points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
+            points[1] = new Point3d(points[2].X, points[0].Y, 0.0);
+            points[2] = new Point3d(points[2].X, points[2].Y, 0.0);
+            points[3] = new Point3d(points[0].X, points[2].Y, 0.0);
 
-          args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x00003333, args.Thickness, close: true);
+            args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x00003333, args.Thickness, close: true);
+          }
         }
 
         var view = Document.GetElement(viewport.ViewId) as ARDB.View;
         if (view is ARDB.ImageView) return;
 
-        using (var boxOutline = viewport.GetLabelOutline())
+        using (var labelOutline = viewport.GetLabelOutline())
         {
-          var points = new Point3d[]
+          if (!labelOutline.IsEmpty)
           {
-            boxOutline.MinimumPoint.ToPoint3d(),
+            var points = new Point3d[]
+            {
+            labelOutline.MinimumPoint.ToPoint3d(),
             Point3d.Origin,
-            boxOutline.MaximumPoint.ToPoint3d(),
+            labelOutline.MaximumPoint.ToPoint3d(),
             Point3d.Origin
-          };
+            };
 
-          points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
-          points[1] = new Point3d(points[2].X, points[0].Y, 0.0);
-          points[2] = new Point3d(points[2].X, points[2].Y, 0.0);
-          points[3] = new Point3d(points[0].X, points[2].Y, 0.0);
+            points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
+            points[1] = new Point3d(points[2].X, points[0].Y, 0.0);
+            points[2] = new Point3d(points[2].X, points[2].Y, 0.0);
+            points[3] = new Point3d(points[0].X, points[2].Y, 0.0);
 
-          args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x00003333, args.Thickness, close: true);
+            args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x00003333, args.Thickness, close: true);
+          }
         }
       }
       else base.DrawViewportWires(args);
