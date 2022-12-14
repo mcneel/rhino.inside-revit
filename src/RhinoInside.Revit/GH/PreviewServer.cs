@@ -130,6 +130,7 @@ namespace RhinoInside.Revit.GH
 
     public override bool CanExecute(ARDB.View dBView) =>
       GH_Document.EnableSolutions &&
+      !IsInterrupted &&
       PreviewMode != GH_PreviewMode.Disabled &&
       ActiveDefinition is object &&
       IsModelView(dBView);
