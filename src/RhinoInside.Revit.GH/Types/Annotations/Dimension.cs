@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.GH.Types
     public GeometryObject[] References =>
       Value?.References.
       Cast<ARDB.Reference>().
-      Select(GetGeometryObjectFromReference<GeometryObject>).
+      Select(x => GeometryObject.FromReference(ReferenceDocument, x)).
       ToArray();
 
     public virtual bool? HasLeader
