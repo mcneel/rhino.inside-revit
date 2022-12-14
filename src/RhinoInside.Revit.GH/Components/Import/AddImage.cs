@@ -142,7 +142,11 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       if (image is null) return false;
       if (image.OwnerViewId != view.Id) return false;
-      if (image.GetTypeId() != type.Id) type.ChangeTypeId(type.Id);
+      if (image.GetTypeId() != type.Id)
+      {
+        if (!image.CanHaveTypeAssigned()) return false;
+        type.ChangeTypeId(type.Id);
+      }
 
       if (!image.GetLocation(ARDB.BoxPlacement.Center).IsAlmostEqualTo(point))
         image.SetLocation(point, ARDB.BoxPlacement.Center);
