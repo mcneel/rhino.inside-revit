@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
+using ARUI = Autodesk.Revit.UI;
 using ARDB = Autodesk.Revit.DB;
 using ARDBES = Autodesk.Revit.DB.ExternalService;
 using ARDB3D = Autodesk.Revit.DB.DirectContext3D;
@@ -16,7 +17,7 @@ using Grasshopper.GUI.Canvas;
 namespace RhinoInside.Revit.GH
 {
   using Convert.Geometry;
-
+  
   internal class PreviewServer : DirectContext3DServer
   {
     static GH_Document ActiveDefinition => Instances.ActiveCanvas?.Document;
@@ -130,7 +131,7 @@ namespace RhinoInside.Revit.GH
 
     public override bool CanExecute(ARDB.View dBView) =>
       GH_Document.EnableSolutions &&
-      !IsInterrupted &&
+      !IsBusy &&
       PreviewMode != GH_PreviewMode.Disabled &&
       ActiveDefinition is object &&
       IsModelView(dBView);
@@ -190,18 +191,28 @@ namespace RhinoInside.Revit.GH
     {
       var primitivesCache = new Dictionary<Guid, PreviewNode>();
 
-      IsInterrupted = true;
+      IsBusy = true;
       Monitor.Enter(PreviewNodesToken, ref PreviewNodesWasTaken);
 
+      // Magic trick to force Revit update the Outline.
+      {
+        using (var uiDocument = new ARUI.UIDocument(Revit.ActiveDBDocument))
+          uiDocument.Selection.SetElementIds(uiDocument.Selection.GetElementIds());
+      }
+
+      var expireAllObjects = !e.Document.Objects.Cast<IGH_ActiveObject>().Any(x => x.Phase != GH_SolutionPhase.Computed);
       foreach (var node in PreviewNodes)
       {
-        if (!(e.Document.FindObject(node.Key, topLevelOnly: false) is IGH_ActiveObject activeObject))
-          continue;
-
-        if (activeObject.Phase == GH_SolutionPhase.Computed)
+        if
+        (
+          !expireAllObjects &&
+          e.Document.FindObject(node.Key, topLevelOnly: false) is IGH_ActiveObject activeObject &&
+          activeObject.Phase == GH_SolutionPhase.Computed
+        )
+        {
           primitivesCache.Add(node.Key, node.Value);
-        else
-          node.Value.Dispose();
+        }
+        else node.Value.Dispose();
       }
 
       PreviewNodes = primitivesCache;
@@ -210,7 +221,7 @@ namespace RhinoInside.Revit.GH
     void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e)
     {
       if (PreviewNodesWasTaken) { Monitor.Exit(PreviewNodesToken); PreviewNodesWasTaken = false; }
-      IsInterrupted = false;
+      IsBusy = false;
 
       if (PreviewMode != GH_PreviewMode.Disabled)
       {
@@ -225,6 +236,7 @@ namespace RhinoInside.Revit.GH
         }
 
         Revit.RefreshActiveView();
+        //Revit.ActiveUIApplication.ActiveUIDocument.UpdateAllOpenViews();
       }
     }
 
@@ -297,22 +309,24 @@ namespace RhinoInside.Revit.GH
 
     void RebuildPrimitives()
     {
-      IsInterrupted = true;
+      IsBusy = true;
       lock (PreviewNodesToken) PreviewNodes.Clear();
-      IsInterrupted = false;
+      IsBusy = false;
     }
 
-    int _IsInterrupted = 0;
-    bool IsInterrupted
+    int _IsBusy = 0;
+    bool IsBusy
     {
       get
       {
         Interlocked.MemoryBarrier();
-        return (_IsInterrupted != 0) || ARDB3D.DrawContext.IsInterrupted();
+        return _IsBusy != 0;
       }
 
-      set => _IsInterrupted = value ? 1 : 0;
+      set => _IsBusy = value ? 1 : 0;
     }
+
+    bool IsInterrupted => IsBusy || ARDB3D.DrawContext.IsInterrupted();
 
     IEnumerable<IGH_Param> DrawableParams
     {
@@ -437,7 +451,7 @@ namespace RhinoInside.Revit.GH
     {
       var outline = Rhino.Geometry.BoundingBox.Empty;
 
-      if (PreviewMode != GH_PreviewMode.Disabled)
+      if (!IsBusy && PreviewMode != GH_PreviewMode.Disabled)
       {
         lock (PreviewNodesToken)
         {
@@ -465,6 +479,8 @@ namespace RhinoInside.Revit.GH
 
     public override void RenderScene(ARDB.View dBView, ARDB.DisplayStyle displayStyle)
     {
+      if (IsBusy) return;
+
       try
       {
         lock (PreviewNodesToken)
