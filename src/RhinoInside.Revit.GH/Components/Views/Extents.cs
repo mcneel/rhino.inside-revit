@@ -109,25 +109,6 @@ namespace RhinoInside.Revit.GH.Components.Views
       )
     };
 
-    GH_PreviewMode PreviewMode = GH_PreviewMode.Disabled;
-    protected override void BeforeSolveInstance()
-    {
-      // CropBox should not take into account the Previews.
-      // In recent versions of Revit this helps.
-      PreviewMode = PreviewServer.PreviewMode;
-      PreviewServer.PreviewMode = GH_PreviewMode.Disabled;
-
-      base.BeforeSolveInstance();
-    }
-
-    protected override void AfterSolveInstance()
-    {
-      base.AfterSolveInstance();
-
-      PreviewServer.PreviewMode = PreviewMode;
-      PreviewMode = GH_PreviewMode.Disabled;
-    }
-
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
