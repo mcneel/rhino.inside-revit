@@ -210,6 +210,7 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 #if REVIT_2020
       { typeof(ARDB.ImageInstance),                   (element)=> new ImageInstance         (element as ARDB.ImageInstance)     },
+      { typeof(ARDB.ImageType),                       (element)=> new ImageType             (element as ARDB.ImageType)         },
 #endif
 
       { typeof(ARDB.DesignOption),                    (element)=> new DesignOption          (element as ARDB.DesignOption)      },
@@ -417,12 +418,13 @@ namespace RhinoInside.Revit.GH.Types
             if (element is ARDB.PropertySetElement pset)
             {
               if (StructuralAssetElement.IsValidElement(element)) return new StructuralAssetElement(pset);
-              else if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
+              if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
             }
             break;
 
 #if !REVIT_2020
           case ARDB.BuiltInCategory.OST_RasterImages:
+            if (ImageType.IsValidElement(element)) return new ImageType(element as ARDB.ElementType);
             if (ImageInstance.IsValidElement(element)) return new ImageInstance(element);
             break;
 #endif
