@@ -4,16 +4,20 @@ using Rhino.Display;
 using Rhino.DocObjects;
 using ARDB = Autodesk.Revit.DB;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using External.DB.Extensions;
   using Convert.Geometry;
+  using Convert.System.Drawing;
 
 #if REVIT_2020
   using ARDB_ImageInstance = ARDB.ImageInstance;
+  using ARDB_ImageType = ARDB.ImageType;
 #else
   using ARDB_ImageInstance = ARDB.Element;
+  using ARDB_ImageType = ARDB.ElementType;
 #endif
 
   [Kernel.Attributes.Name("Raster Image")]
@@ -25,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
-      return element is ARDB_ImageInstance &&
+      return element.GetType() == typeof(ARDB_ImageInstance) &&
              element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_RasterImages;
     }
 
@@ -40,10 +44,25 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void ResetValue()
     {
-      using (_DisplayTexture) _DisplayTexture = null;
-      using (_Mesh)           _Mesh = default;
+      using (_DisplayMaterial)  _DisplayMaterial = null;
+      using (_DisplayTexture)   _DisplayTexture = null;
+      using (_Mesh)             _Mesh = default;
 
       base.ResetValue();
+    }
+
+    public override bool CastTo<Q>(out Q target)
+    {
+      if (base.CastTo(out target))
+        return true;
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Material)))
+      {
+        target = (Q) (object) new GH_Material { Value = GetDisplayMaterial(System.Drawing.Color.Empty) };
+        return true;
+      }
+
+      return false;
     }
 
     public override BoundingBox GetBoundingBox(Transform xform)
@@ -60,24 +79,52 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Mesh is Mesh mesh)
       {
-        if (DisplayTexture is Texture texture)
+        var material = GetDisplayMaterial(System.Drawing.Color.Empty);
         {
-          var material = new DisplayMaterial(System.Drawing.Color.White, transparency: 0.0);
-          {
-            if (args.Thickness > 1)
-              material.Emission = args.Color;
+          if (args.Thickness > 1)
+            material = new DisplayMaterial(material) { Emission = args.Color}; 
 
-            material.SetBitmapTexture(texture, front: true);
-            args.Pipeline.DrawMeshShaded(mesh, material);
-          }
+          args.Pipeline.DrawMeshShaded(mesh, material);
         }
 
         args.Pipeline.DrawMeshWires(mesh, args.Color, args.Thickness);
       }
     }
+
+    Texture _DisplayTexture;
+    Texture GetDisplayTexture() => _DisplayTexture ?? (_DisplayTexture = Type?.GetDisplayTexture());
+
+    DisplayMaterial _DisplayMaterial;
+    DisplayMaterial GetDisplayMaterial(System.Drawing.Color diffuse)
+    {
+      var material = default(DisplayMaterial);
+
+      if (diffuse.IsEmpty)
+      {
+        var backgroundColor = ReferenceDocument?.Application.BackgroundColor.ToColor() ?? System.Drawing.Color.White;
+        if (_DisplayMaterial is null)
+        {
+          _DisplayMaterial = new DisplayMaterial(backgroundColor, transparency: 0.0);
+          if (GetDisplayTexture() is Texture texture)
+            _DisplayMaterial.SetBitmapTexture(texture, front: true);
+        }
+        else _DisplayMaterial.Diffuse = backgroundColor;
+
+        material = _DisplayMaterial;
+      }
+      else
+      {
+        material = new DisplayMaterial(diffuse, transparency: (byte.MaxValue - diffuse.A) / (double) byte.MaxValue);
+        material.SetBitmapTexture(GetDisplayTexture(), front: true);
+      }
+
+      return material;
+    }
     #endregion
 
     #region Properties
+    public new ImageType Type => base.Type as ImageType;
+
     public override Box Box
     {
       get
@@ -214,23 +261,94 @@ namespace RhinoInside.Revit.GH.Types
         return _Mesh;
       }
     }
+    #endregion
+  }
 
-    Texture _DisplayTexture;
-    Texture DisplayTexture
+  [Kernel.Attributes.Name("Raster Image Type")]
+  public class ImageType : ElementType
+  {
+    protected override Type ValueType => typeof(ARDB_ImageType);
+    public new ARDB_ImageType Value => base.Value as ARDB_ImageType;
+
+    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
+    public static bool IsValidElement(ARDB.Element element)
     {
-      get
-      {
-        if (_DisplayTexture is null)
-        {
-          if (Type.Value.get_Parameter(ARDB.BuiltInParameter.RASTER_SYMBOL_FILENAME)?.AsString() is string imageFilePath)
-          {
-            if (System.IO.File.Exists(imageFilePath))
-              _DisplayTexture = new Texture() { FileName = imageFilePath };
-          }
-        }
+      return element.GetType() == typeof(ARDB_ImageType) &&
+             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_RasterImages;
+    }
 
-        return _DisplayTexture;
+    public ImageType() { }
+    public ImageType(ARDB_ImageType imageType) : base(imageType)
+    {
+#if !REVIT_2020
+      if (!IsValidElement(imageType))
+        throw new ArgumentException("Invalid Element", nameof(imageType));
+#endif
+    }
+
+    protected override void ResetValue()
+    {
+      using (_DisplayMaterial) _DisplayMaterial = null;
+      using (_DisplayTexture) _DisplayTexture = null;
+
+      base.ResetValue();
+    }
+
+    public override bool CastTo<Q>(out Q target)
+    {
+      if (base.CastTo(out target))
+        return true;
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Material)))
+      {
+        target = (Q) (object) new GH_Material { Value = GetDisplayMaterial(System.Drawing.Color.Empty) };
+        return true;
       }
+
+      return false;
+    }
+
+    #region Preview
+    Texture _DisplayTexture;
+    internal Texture GetDisplayTexture()
+    {
+      if (_DisplayTexture is null)
+      {
+        if (Value?.get_Parameter(ARDB.BuiltInParameter.RASTER_SYMBOL_FILENAME)?.AsString() is string imageFilePath)
+        {
+          if (System.IO.File.Exists(imageFilePath))
+            _DisplayTexture = new Texture() { FileName = imageFilePath };
+        }
+      }
+
+      return _DisplayTexture;
+    }
+
+    DisplayMaterial _DisplayMaterial;
+    DisplayMaterial GetDisplayMaterial(System.Drawing.Color diffuse)
+    {
+      var material = default(DisplayMaterial);
+
+      if (diffuse.IsEmpty)
+      {
+        var backgroundColor = ReferenceDocument?.Application.BackgroundColor.ToColor() ?? System.Drawing.Color.White;
+        if (_DisplayMaterial is null)
+        {
+          _DisplayMaterial = new DisplayMaterial(backgroundColor, transparency: 0.0);
+          if (GetDisplayTexture() is Texture texture)
+            _DisplayMaterial.SetBitmapTexture(texture, front: true);
+        }
+        else _DisplayMaterial.Diffuse = backgroundColor;
+
+        material = _DisplayMaterial;
+      }
+      else
+      {
+        material = new DisplayMaterial(diffuse, transparency: (byte.MaxValue - diffuse.A) / (double) byte.MaxValue);
+        material.SetBitmapTexture(GetDisplayTexture(), front: true);
+      }
+
+      return material;
     }
     #endregion
   }

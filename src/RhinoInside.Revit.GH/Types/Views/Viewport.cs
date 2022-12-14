@@ -17,6 +17,13 @@ namespace RhinoInside.Revit.GH.Types
     public Viewport() { }
     public Viewport(ARDB.Viewport element) : base(element) { }
 
+    protected override void ResetValue()
+    {
+      using (_Mesh) _Mesh = default;
+
+      base.ResetValue();
+    }
+
     public override bool CastTo<Q>(out Q target)
     {
       if (base.CastTo(out target))
