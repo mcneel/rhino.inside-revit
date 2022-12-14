@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Rhino.Geometry;
 using Rhino.Display;
 using Rhino.DocObjects;
@@ -45,7 +46,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override void ResetValue()
     {
       using (_DisplayMaterial)  _DisplayMaterial = null;
-      using (_DisplayTexture)   _DisplayTexture = null;
       using (_Mesh)             _Mesh = default;
 
       base.ResetValue();
@@ -87,12 +87,10 @@ namespace RhinoInside.Revit.GH.Types
           args.Pipeline.DrawMeshShaded(mesh, material);
         }
 
-        args.Pipeline.DrawMeshWires(mesh, args.Color, args.Thickness);
+        if (args.Thickness > 1)
+          args.Pipeline.DrawMeshWires(mesh, args.Color, args.Thickness);
       }
     }
-
-    Texture _DisplayTexture;
-    Texture GetDisplayTexture() => _DisplayTexture ?? (_DisplayTexture = Type?.GetDisplayTexture());
 
     DisplayMaterial _DisplayMaterial;
     DisplayMaterial GetDisplayMaterial(System.Drawing.Color diffuse)
@@ -100,23 +98,9 @@ namespace RhinoInside.Revit.GH.Types
       var material = default(DisplayMaterial);
 
       if (diffuse.IsEmpty)
-      {
-        var backgroundColor = ReferenceDocument?.Application.BackgroundColor.ToColor() ?? System.Drawing.Color.White;
-        if (_DisplayMaterial is null)
-        {
-          _DisplayMaterial = new DisplayMaterial(backgroundColor, transparency: 0.0);
-          if (GetDisplayTexture() is Texture texture)
-            _DisplayMaterial.SetBitmapTexture(texture, front: true);
-        }
-        else _DisplayMaterial.Diffuse = backgroundColor;
-
-        material = _DisplayMaterial;
-      }
+        material = _DisplayMaterial ?? (_DisplayMaterial = Type?.GetDisplayMaterial(System.Drawing.Color.Empty));
       else
-      {
-        material = new DisplayMaterial(diffuse, transparency: (byte.MaxValue - diffuse.A) / (double) byte.MaxValue);
-        material.SetBitmapTexture(GetDisplayTexture(), front: true);
-      }
+        material = Type.GetDisplayMaterial(diffuse);
 
       return material;
     }
@@ -289,7 +273,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override void ResetValue()
     {
       using (_DisplayMaterial) _DisplayMaterial = null;
-      using (_DisplayTexture) _DisplayTexture = null;
+      using (_DiffuseTexture) _DiffuseTexture = null;
+      using (_OpacityTexture) _OpacityTexture = null;
 
       base.ResetValue();
     }
@@ -309,23 +294,43 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Preview
-    Texture _DisplayTexture;
-    internal Texture GetDisplayTexture()
+    Texture _DiffuseTexture;
+    Texture _OpacityTexture;
+    void GetDisplayTextures(out Texture diffuse, out Texture opacity)
     {
-      if (_DisplayTexture is null)
+      if (_DiffuseTexture is null)
       {
         if (Value?.get_Parameter(ARDB.BuiltInParameter.RASTER_SYMBOL_FILENAME)?.AsString() is string imageFilePath)
         {
-          if (System.IO.File.Exists(imageFilePath))
-            _DisplayTexture = new Texture() { FileName = imageFilePath };
+          var imageFile = new FileInfo(imageFilePath);
+          if (imageFile.Exists)
+          {
+            var document = Types.Document.FromValue(Document);
+            var diffuseFile = document.SwapFolder.CopyFrom(this, imageFile, "-Diffuse");
+            _DiffuseTexture = new Texture() { FileName = diffuseFile.FullName };
+
+            using (var diffuseBitmap = new System.Drawing.Bitmap(diffuseFile.FullName))
+            {
+              var opacityFile = new FileInfo(Path.Combine(document.SwapFolder.Directory.FullName, document.SwapFolder.PrefixOf(this) + "-Opacity" + ".png"));
+              if (ImageBuilder.BuildOpacityMap(diffuseBitmap) is System.Drawing.Bitmap opacityBitmap)
+              {
+                opacityBitmap.Save(opacityFile.FullName, System.Drawing.Imaging.ImageFormat.Png);
+                opacityBitmap.Dispose();
+
+                opacityFile.Attributes |= FileAttributes.Temporary;
+                _OpacityTexture = new Texture() { FileName = opacityFile.FullName };
+              }
+            }
+          }
         }
       }
 
-      return _DisplayTexture;
+      diffuse = _DiffuseTexture;
+      opacity = _OpacityTexture;
     }
 
     DisplayMaterial _DisplayMaterial;
-    DisplayMaterial GetDisplayMaterial(System.Drawing.Color diffuse)
+    internal DisplayMaterial GetDisplayMaterial(System.Drawing.Color diffuse)
     {
       var material = default(DisplayMaterial);
 
@@ -335,8 +340,9 @@ namespace RhinoInside.Revit.GH.Types
         if (_DisplayMaterial is null)
         {
           _DisplayMaterial = new DisplayMaterial(backgroundColor, transparency: 0.0);
-          if (GetDisplayTexture() is Texture texture)
-            _DisplayMaterial.SetBitmapTexture(texture, front: true);
+          GetDisplayTextures(out var diffuseTexture, out var opacityTexture);
+          if(diffuseTexture is object) _DisplayMaterial.SetBitmapTexture(diffuseTexture, front: true);
+          if(opacityTexture is object) _DisplayMaterial.SetTransparencyTexture(opacityTexture, front: true);
         }
         else _DisplayMaterial.Diffuse = backgroundColor;
 
@@ -345,7 +351,9 @@ namespace RhinoInside.Revit.GH.Types
       else
       {
         material = new DisplayMaterial(diffuse, transparency: (byte.MaxValue - diffuse.A) / (double) byte.MaxValue);
-        material.SetBitmapTexture(GetDisplayTexture(), front: true);
+        GetDisplayTextures(out var diffuseTexture, out var opacityTexture);
+        if (diffuseTexture is object) material.SetBitmapTexture(diffuseTexture, front: true);
+        if (opacityTexture is object) material.SetTransparencyTexture(opacityTexture, front: true);
       }
 
       return material;

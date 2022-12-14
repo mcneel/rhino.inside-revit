@@ -65,7 +65,6 @@ namespace RhinoInside.Revit
 
       var fileInfo = new FileInfo(temporaryFilePath);
       fileInfo.Attributes |= FileAttributes.Temporary;
-      GC.AddMemoryPressure(fileInfo.Length);
       return fileInfo;
     }
 
@@ -79,7 +78,6 @@ namespace RhinoInside.Revit
 
       var fileInfo = new FileInfo(temporaryFilePath);
       fileInfo.Attributes |= FileAttributes.Temporary;
-      GC.AddMemoryPressure(fileInfo.Length);
       return fileInfo;
     }
   }
