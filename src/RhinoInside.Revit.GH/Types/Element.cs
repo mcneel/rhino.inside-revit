@@ -210,8 +210,8 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 #if REVIT_2020
       { typeof(ARDB.ImageInstance),                   (element)=> new ImageInstance         (element as ARDB.ImageInstance)     },
-      { typeof(ARDB.ImageType),                       (element)=> new ImageType             (element as ARDB.ImageType)         },
 #endif
+      { typeof(ARDB.ImageType),                       (element)=> new ImageType             (element as ARDB.ImageType)         },
 
       { typeof(ARDB.DesignOption),                    (element)=> new DesignOption          (element as ARDB.DesignOption)      },
       { typeof(ARDB.Phase),                           (element)=> new Phase                 (element as ARDB.Phase)             },
@@ -424,7 +424,6 @@ namespace RhinoInside.Revit.GH.Types
 
 #if !REVIT_2020
           case ARDB.BuiltInCategory.OST_RasterImages:
-            if (ImageType.IsValidElement(element)) return new ImageType(element as ARDB.ElementType);
             if (ImageInstance.IsValidElement(element)) return new ImageInstance(element);
             break;
 #endif
