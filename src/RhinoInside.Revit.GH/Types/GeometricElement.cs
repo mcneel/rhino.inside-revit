@@ -563,7 +563,6 @@ namespace RhinoInside.Revit.GH.Types
               if (!identity)
                 geo.Transform(transform);
 
-              geometry.Add(geo);
               var geoAtt = PeekAttributes(idMap, doc, att, element.Document);
 
               // In case geo is a Brep and has different materials per face.
@@ -630,8 +629,14 @@ namespace RhinoInside.Revit.GH.Types
                     }
                   }
                 }
+                else
+                {
+                  if (geo is Brep brepFrom && brepFrom.TryGetExtrusion(out var extrusion))
+                    geo = extrusion;
+                }
               }
 
+              geometry.Add(geo);
               attributes.Add(geoAtt);
             }
           }
