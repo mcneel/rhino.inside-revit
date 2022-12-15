@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         {
           Name = "Phase",
           NickName = "P",
-          Description = $"Project phase to which the room belongs.{Environment.NewLine}Room will be placed in the last project phase if this parameter is not set.",
+          Description = $"Project phase to which the room belongs.{Environment.NewLine}Room will be placed in the 'View' phase if this parameter is not set.",
           Optional = true
         }, ParamRelevance.Secondary
       )
