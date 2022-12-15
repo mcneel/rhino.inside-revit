@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         var (x, y, z) = point;
         min = (Math.Min(min.X, x), Math.Min(min.Y, y), Math.Min(min.Z, z));
-        max = (Math.Min(max.X, x), Math.Min(max.Y, y), Math.Min(max.Z, z));
+        max = (Math.Max(max.X, x), Math.Max(max.Y, y), Math.Max(max.Z, z));
       }
 
       return new Outline
