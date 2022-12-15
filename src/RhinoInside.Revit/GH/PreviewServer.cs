@@ -344,7 +344,10 @@ namespace RhinoInside.Revit.GH
               foreach (var param in component.Params.Output)
               {
                 if (param is IGH_PreviewObject preview)
+                {
+                  if (preview.Hidden) continue;
                   yield return param;
+                }
               }
             }
             else if (obj is IGH_Param param)
