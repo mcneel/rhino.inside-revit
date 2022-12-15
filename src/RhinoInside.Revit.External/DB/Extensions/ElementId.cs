@@ -58,6 +58,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsBuiltInId(this ElementId id) => id is object && id <= InvalidElementId;
     public static int ToValue(this ElementId id) => id.IntegerValue;
 
+    static readonly string LowerHexFormat = $"x{NumHexDigits.IntId}";
+    static readonly string UpperHexFormat = $"X{NumHexDigits.IntId}";
+
+    public static string ToString(this ElementId id, string format)
+    {
+      if (format == "x")
+        return id.ToValue().ToString(LowerHexFormat, CultureInfo.InvariantCulture);
+
+      if (format == "X")
+        return id.ToValue().ToString(UpperHexFormat, CultureInfo.InvariantCulture);
+
+      return id.ToValue().ToString(format, CultureInfo.InvariantCulture);
+    }
+    
     #region Parameters
     public static BuiltInParameter ToBuiltInParameter(this ElementId id) => TryGetBuiltInParameter(id, out var value) ? value : BuiltInParameter.INVALID;
 
