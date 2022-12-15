@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         };
 
         newView.SetOrientation(orientation);
-        newView.get_Parameter(ARDB.BuiltInParameter.VIEWER_CROP_REGION).Update(0);
+        newView.CropBoxActive = false;
         ReplaceElement(ref view3D, newView, parametersMask);
       }
       else
@@ -84,7 +84,7 @@ namespace RhinoInside.Revit.GH.Components.Views
           view3D.SetOrientation(orientation);
 
           if (perspective.HasValue)
-            view3D.get_Parameter(ARDB.BuiltInParameter.VIEWER_PERSPECTIVE).Update(perspective.Value ? 1 : 0);
+            view3D.get_Parameter(ARDB.BuiltInParameter.VIEWER_PERSPECTIVE).Update(perspective.Value);
         }
 
         ChangeElementTypeId(ref view3D, type.Value.Id);
