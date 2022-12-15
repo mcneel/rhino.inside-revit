@@ -9,12 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddImageType : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("09BD0AA8-52D7-4C2B-B7B1-C66304C939AF");
-#if REVIT_2020
     public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
-#else
-    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.hidden;
-    public override bool SDKCompliancy(int exeVersion, int exeServiceRelease) => false;
-#endif
 
     protected override string IconTag => string.Empty;
 
@@ -74,19 +69,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     const string _Output_ = "Type";
 
-    protected override void BeforeSolveInstance()
-    {
-#if !REVIT_2020
-      AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is only supported on Revit 2020 or above.");
-#endif
-      base.BeforeSolveInstance();
-    }
-
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-#if REVIT_2020
       ReconstructElement<ARDB.ImageType>
       (
         doc.Value, _Output_, type =>
@@ -101,7 +87,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           return type;
         }
       );
-#endif
     }
 
 #if REVIT_2020
@@ -113,6 +98,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       return new ARDB.ImageTypeOptions(path, useRelativePath: false);
 #endif
     }
+#else
+    static string CreateImageTypeOptions(string path) => path;
+#endif
 
     bool Reuse(ARDB.ImageType imageType, ARDB.Document doc, string path)
     {
@@ -130,6 +118,5 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
       return imageType;
     }
-#endif
   }
 }

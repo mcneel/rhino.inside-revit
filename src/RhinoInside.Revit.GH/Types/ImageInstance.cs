@@ -15,10 +15,8 @@ namespace RhinoInside.Revit.GH.Types
 
 #if REVIT_2020
   using ARDB_ImageInstance = ARDB.ImageInstance;
-  using ARDB_ImageType = ARDB.ImageType;
 #else
   using ARDB_ImageInstance = ARDB.Element;
-  using ARDB_ImageType = ARDB.ElementType;
 #endif
 
   [Kernel.Attributes.Name("Raster Image")]
@@ -251,24 +249,12 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Raster Image Type")]
   public class ImageType : ElementType
   {
-    protected override Type ValueType => typeof(ARDB_ImageType);
-    public new ARDB_ImageType Value => base.Value as ARDB_ImageType;
-
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
-    public static bool IsValidElement(ARDB.Element element)
-    {
-      return element.GetType() == typeof(ARDB_ImageType) &&
-             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_RasterImages;
-    }
+    protected override Type ValueType => typeof(ARDB.ImageType);
+    public new ARDB.ImageType Value => base.Value as ARDB.ImageType;
 
     public ImageType() { }
-    public ImageType(ARDB_ImageType imageType) : base(imageType)
-    {
-#if !REVIT_2020
-      if (!IsValidElement(imageType))
-        throw new ArgumentException("Invalid Element", nameof(imageType));
-#endif
-    }
+    public ImageType(ARDB.ImageType imageType) : base(imageType)
+    { }
 
     protected override void ResetValue()
     {
