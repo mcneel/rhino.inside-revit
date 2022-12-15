@@ -10,13 +10,22 @@ namespace RhinoInside.Revit.GH.Types
   public class Mullion : FamilyInstance
   {
     protected override Type ValueType => typeof(ARDB.Mullion);
-    public static explicit operator ARDB.Mullion(Mullion value) => value?.Value;
     public new ARDB.Mullion Value => base.Value as ARDB.Mullion;
 
     public Mullion() { }
     public Mullion(ARDB.Mullion value) : base(value) { }
 
     public override Rhino.Geometry.Curve Curve => Value?.LocationCurve.ToCurve();
+  }
+
+  [Kernel.Attributes.Name("Mullion Type")]
+  public class MullionType : FamilySymbol
+  {
+    protected override Type ValueType => typeof(ARDB.MullionType);
+    public new ARDB.MullionType Value => base.Value as ARDB.MullionType;
+
+    public MullionType() { }
+    public MullionType(ARDB.MullionType value) : base(value) { }
   }
 
   [Kernel.Attributes.Name("Mullion Position")]
@@ -43,9 +52,9 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Mullion Profile")]
-  public class MullionProfile : ElementType
+  public class MullionProfile : FamilySymbol
   {
-    protected override Type ValueType => typeof(ARDB.ElementType);
+    protected override Type ValueType => typeof(ARDB.FamilySymbol);
 
     public MullionProfile() { }
     public MullionProfile(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
@@ -57,7 +66,7 @@ namespace RhinoInside.Revit.GH.Types
         switch ((External.DB.BuiltInMullionProfileId) Id.ToValue())
         {
           case External.DB.BuiltInMullionProfileId.Rectangular: return "Rectangular";
-          case External.DB.BuiltInMullionProfileId.Circular:    return "Circular";
+          case External.DB.BuiltInMullionProfileId.Circular: return "Circular";
         }
 
         return base.Nomen;

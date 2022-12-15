@@ -48,4 +48,14 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
   }
+
+  [Kernel.Attributes.Name("Panel Type")]
+  public class PanelType : FamilySymbol
+  {
+    protected override Type ValueType => typeof(ARDB.PanelType);
+    public new ARDB.PanelType Value => base.Value as ARDB.PanelType;
+
+    public PanelType() { }
+    public PanelType(ARDB.PanelType value) : base(value) { }
+  }
 }

@@ -270,7 +270,9 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Wall),                            (element)=> new Wall                  (element as ARDB.Wall)              },
       { typeof(ARDB.FamilyInstance),                  (element)=> new FamilyInstance        (element as ARDB.FamilyInstance)    },
       { typeof(ARDB.Panel),                           (element)=> new Panel                 (element as ARDB.Panel)             },
+      { typeof(ARDB.PanelType),                       (element)=> new PanelType             (element as ARDB.PanelType)         },
       { typeof(ARDB.Mullion),                         (element)=> new Mullion               (element as ARDB.Mullion)           },
+      { typeof(ARDB.MullionType),                     (element)=> new MullionType           (element as ARDB.MullionType)       },
 
       { typeof(ARDB.TextElement),                     (element)=> new TextElement           (element as ARDB.TextElement)       },
       { typeof(ARDB.Dimension),                       (element)=> new Dimension             (element as ARDB.Dimension)         },
