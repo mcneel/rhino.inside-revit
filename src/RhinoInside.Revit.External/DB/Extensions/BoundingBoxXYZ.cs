@@ -208,4 +208,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return clipped;
     }
   }
+
+  public static class OutlineExtension
+  {
+    public static void Deconstruct(this Outline outline, out XYZ min, out XYZ max)
+    {
+      min = outline.MinimumPoint;
+      max = outline.MaximumPoint;
+    }
+
+    public static XYZ CenterPoint(this Outline outline)
+    {
+      var (min, max) = outline;
+      return min + ((max - min) * 0.5);
+    }
+  }
 }

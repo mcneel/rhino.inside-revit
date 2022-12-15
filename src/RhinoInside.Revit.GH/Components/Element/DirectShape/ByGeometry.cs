@@ -167,15 +167,21 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
       if (IsValidCategoryId(category.Value.Id, document))
       {
-        if (directShape is object && directShape.Category.Id == category.Value.Id) { }
-        else ReplaceElement(ref directShape, ARDB.DirectShape.CreateElement(document, category.Value.Id));
+        //Remove nulls.
+        geometry = geometry.OfType<IGH_GeometricGoo>().ToArray();
 
         var bbox = BoundingBox.Empty;
         foreach (var g in geometry) bbox.Union(g.Boundingbox);
 
+        if (directShape is object && directShape.Category.Id == category.Value.Id)
+        {
+          directShape.Pinned = false;
+          directShape.Location.Move(-directShape.GetOutline().CenterPoint());
+        }
+        else ReplaceElement(ref directShape, ARDB.DirectShape.CreateElement(document, category.Value.Id));
+
         directShape.Name = name ?? string.Empty;
         directShape.SetShape(BuildShape(directShape, bbox.Center, geometry, material, out var paintIds));
-        directShape.Pinned = false;
         directShape.Location.Move(bbox.Center.ToXYZ());
 
         PaintElementSolids(directShape, paintIds);

@@ -9,6 +9,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   using Convert;
   using Convert.Geometry;
   using Kernel.Attributes;
+  using External.DB.Extensions;
 
   public class DirectShapeByBrep : ReconstructElementComponent
   {
@@ -39,13 +40,18 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       if (!ThrowIfNotValid(nameof(brep), brep))
         return;
 
+      var bbox = brep.GetBoundingBox(accurate: false);
+
       var genericModel = new ARDB.ElementId(ARDB.BuiltInCategory.OST_GenericModel);
-      if (element is object && element.Category.Id == genericModel) { }
+      if (element is object && element.Category.Id == genericModel)
+      {
+        element.Pinned = false;
+        element.Location.Move(-element.GetOutline().CenterPoint());
+      }
       else ReplaceElement(ref element, ARDB.DirectShape.CreateElement(document, genericModel));
 
       using (var ctx = GeometryEncoder.Context.Push(element))
       {
-        var bbox = brep.GetBoundingBox(accurate: false);
         var transform = Transform.Translation(Point3d.Origin - bbox.Center);
         var inverse = Transform.Translation(bbox.Center / Revit.ModelUnits - Point3d.Origin);
 
@@ -60,7 +66,6 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         {
           brep.Transform(transform);
           element.SetShape(brep.ToShape());
-          element.Pinned = false;
           element.Location.Move(bbox.Center.ToXYZ());
         }
         catch (ConversionException e)

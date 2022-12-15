@@ -41,7 +41,11 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         return;
 
       var genericModel = new ARDB.ElementId(ARDB.BuiltInCategory.OST_GenericModel);
-      if (element is object && element.Category.Id == genericModel) { }
+      if (element is object && element.Category.Id == genericModel)
+      {
+        element.Pinned = false;
+        element.Location.Move(-element.GetOutline().CenterPoint());
+      }
       else ReplaceElement(ref element, ARDB.DirectShape.CreateElement(document, genericModel));
 
       using (var ctx = GeometryEncoder.Context.Push(element))
@@ -53,7 +57,6 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         {
           var shape = new ARDB.Point[] { ARDB.Point.Create(XYZExtension.Zero) };
           element.SetShape(shape);
-          element.Pinned = false;
           element.Location.Move(point.ToXYZ());
         }
         catch (ConversionException e)
