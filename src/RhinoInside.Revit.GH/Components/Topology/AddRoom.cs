@@ -144,19 +144,12 @@ namespace RhinoInside.Revit.GH.Components.Topology
           if (!Params.TryGetData(DA, "Name", out string name)) return null;
           if (!Params.TryGetData(DA, "Base", out ERDB.ElevationElementReference? baseElevation)) return null;
           if (!Params.TryGetData(DA, "Top", out ERDB.ElevationElementReference? topElevation)) return null;
-          if (!Params.TryGetData(DA, "Phase", out ARDB.Phase phase)) return null;
+          if (!Params.TryGetData(DA, "Phase", out Types.Phase phase)) return null;
+          if (phase is null) phase = view.Phase;
 
           // Compute
           if (CanReconstruct(_Room_, out var untracked, ref room, view.Document, number, categoryId: ARDB.BuiltInCategory.OST_Rooms))
           {
-            if (phase is null)
-            {
-              // We avoid `Reconstruct` recreates the element in an other phase unless is necessary…
-              phase = untracked ?
-                room?.Document.GetElement(room.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE).AsElementId()) as ARDB.Phase:
-                view.Document.Phases.Cast<ARDB.Phase>().LastOrDefault();
-            }
-
             if (location.HasValue)
             {
               // Solve missing Base & Top
@@ -188,7 +181,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
               number, name,
               baseElevation ?? default,
               topElevation ?? default,
-              phase
+              phase.Value
             );
           }
 
