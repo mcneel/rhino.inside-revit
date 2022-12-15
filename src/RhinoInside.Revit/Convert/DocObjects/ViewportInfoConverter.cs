@@ -76,15 +76,21 @@ namespace RhinoInside.Revit.Convert.DocObjects
         }
 
         {
-          var min = view.CropBox.Min;
-          var max = view.CropBox.Max;
+          var scale = Math.Max(view.Scale, 1);
+          var (min, max) = view.Outline;
+          min *= scale;
+          max *= scale;
+          var (minX, minY) = min;
+          var (maxX, maxY) = max;
+          var((_, _, minZ), (_, _, maxZ)) = view.CropBox;
+
           camera.IsPerspective    = (view as ARDB.View3D)?.IsPerspective ?? false;
-          camera.HorizontalExtent = max.X - min.X;
-          camera.VerticalExtent   = max.Y - min.Y;
-          camera.RightOffset      = min.X + 0.5 * camera.HorizontalExtent;
-          camera.UpOffset         = min.Y + 0.5 * camera.VerticalExtent;
-          camera.NearDistance     = -max.Z;
-          camera.FarDistance      = -min.Z;
+          camera.HorizontalExtent = maxX - minX;
+          camera.VerticalExtent   = maxY - minY;
+          camera.RightOffset      = minX + 0.5 * camera.HorizontalExtent;
+          camera.UpOffset         = minY + 0.5 * camera.VerticalExtent;
+          camera.NearDistance     = -maxZ;
+          camera.FarDistance      = -minZ;
           camera.TargetDistance   = camera.IsPerspective ? camera.NearDistance : 1e30;
           return camera;
         }
