@@ -6,10 +6,10 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
-  using System.Windows;
   using Convert;
   using Convert.Geometry;
   using Kernel.Attributes;
+  using External.DB.Extensions;
 
   public class DirectShapeByMesh : ReconstructElementComponent
   {
@@ -40,13 +40,18 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       if (!ThrowIfNotValid(nameof(mesh), mesh))
         return;
 
+      var bbox = mesh.GetBoundingBox(accurate: false);
+
       var genericModel = new ARDB.ElementId(ARDB.BuiltInCategory.OST_GenericModel);
-      if (element is object && element.Category.Id == genericModel) { }
+      if (element is object && element.Category.Id == genericModel)
+      {
+        element.Pinned = false;
+        element.Location.Move(-element.GetOutline().CenterPoint());
+      }
       else ReplaceElement(ref element, ARDB.DirectShape.CreateElement(document, genericModel));
 
       using (var ctx = GeometryEncoder.Context.Push(element))
       {
-        var bbox = mesh.GetBoundingBox(accurate: false);
         var transform = Transform.Translation(Point3d.Origin - bbox.Center);
         var inverse = Transform.Translation(bbox.Center / Revit.ModelUnits - Point3d.Origin);
 
@@ -60,7 +65,6 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         {
           mesh.Transform(transform);
           element.SetShape(mesh.ToShape());
-          element.Pinned = false;
           element.Location.Move(bbox.Center.ToXYZ());
         }
         catch (ConversionException e)
