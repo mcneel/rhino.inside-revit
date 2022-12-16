@@ -176,7 +176,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       DA.SetData("Location", element.Location);
       Params.TrySetData(DA, "Hand", () => element.HandOrientation);
       Params.TrySetData(DA, "Facing", () => element.FacingOrientation);
-      Params.TrySetData(DA, "Work Plane", () => element.PlaneOrientation);
+      Params.TrySetData(DA, "Work Plane", () => element.WorkPlaneOrientation);
     }
   }
 
