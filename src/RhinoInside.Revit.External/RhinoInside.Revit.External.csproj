@@ -29,8 +29,8 @@
     <Compile Include="ApplicationServices\HostServices.cs" />
     <Compile Include="DB\Application.cs" />
     <Compile Include="DB\BuiltInLinePattern.cs" />
-    <Compile Include="DB\BuiltInMullionPositionId.cs" />
-    <Compile Include="DB\BuiltInProfileTypeId.cs" />
+    <Compile Include="DB\BuiltInMullionPosition.cs" />
+    <Compile Include="DB\BuiltInProfileType.cs" />
     <Compile Include="DB\CompoundElementFilter.cs" />
     <Compile Include="DB\CurtainGridJoinCondition.cs" />
     <Compile Include="DB\CurtainGridLayout.cs" />
