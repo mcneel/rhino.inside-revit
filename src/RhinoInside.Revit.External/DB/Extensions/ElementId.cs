@@ -163,7 +163,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #endregion
 
 #region LinePattern
-    public static BuiltInLinePattern ToBuiltInLinePattern(this ElementId id) => TryGetBuiltInLinePattern(id, out var value) ? value : BuiltInLinePattern.INVALID;
+    public static BuiltInLinePattern ToBuiltInLinePattern(this ElementId id) => TryGetBuiltInLinePattern(id, out var value) ? value : BuiltInLinePattern.Invalid;
 
     /// <summary>
     /// Checks if <paramref name="id"/> corresponds to a <see cref="Autodesk.Revit.DB.LinePatternElement"/> in <paramref name="doc"/>.
@@ -195,7 +195,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (builtInPattern.IsValid())
         return true;
 
-      builtInPattern = BuiltInLinePattern.INVALID;
+      builtInPattern = BuiltInLinePattern.Invalid;
       return false;
     }
 #endregion
