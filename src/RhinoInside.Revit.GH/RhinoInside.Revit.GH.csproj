@@ -417,6 +417,7 @@
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />
     <Compile Include="Types\Phase.cs" />
+    <Compile Include="Types\ProfileType.cs" />
     <Compile Include="Types\ProjectLocation.cs" />
     <Compile Include="Types\Railing.cs" />
     <Compile Include="Types\Reference.cs" />
