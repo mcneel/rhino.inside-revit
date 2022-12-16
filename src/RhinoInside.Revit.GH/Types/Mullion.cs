@@ -46,10 +46,10 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        switch ((External.DB.BuiltInMullionPositionId) Id.ToValue())
+        switch ((External.DB.BuiltInMullionPosition) Id.ToValue())
         {
-          case External.DB.BuiltInMullionPositionId.PerpendicularToFace: return "Perpendicular To Face";
-          case External.DB.BuiltInMullionPositionId.ParallelToGround:    return "Parallel To Ground";
+          case External.DB.BuiltInMullionPosition.PerpendicularToFace: return "Perpendicular To Face";
+          case External.DB.BuiltInMullionPosition.ParallelToGround:    return "Parallel To Ground";
         }
 
         return base.Nomen;

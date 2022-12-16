@@ -32,10 +32,10 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        switch ((External.DB.BuiltInProfileTypeId) Id.ToValue())
+        switch ((External.DB.BuiltInProfileType) Id.ToValue())
         {
-          case External.DB.BuiltInProfileTypeId.Rectangular: return "Rectangular";
-          case External.DB.BuiltInProfileTypeId.Circular: return "Circular";
+          case External.DB.BuiltInProfileType.Rectangular: return "Rectangular";
+          case External.DB.BuiltInProfileType.Circular: return "Circular";
         }
 
         return base.Nomen;

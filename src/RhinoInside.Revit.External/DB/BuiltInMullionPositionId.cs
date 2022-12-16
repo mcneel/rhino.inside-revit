@@ -1,6 +1,6 @@
 namespace RhinoInside.Revit.External.DB
 {
-  public enum BuiltInMullionPositionId
+  public enum BuiltInMullionPosition
   {
     PerpendicularToFace = -3,
     ParallelToGround = -2,

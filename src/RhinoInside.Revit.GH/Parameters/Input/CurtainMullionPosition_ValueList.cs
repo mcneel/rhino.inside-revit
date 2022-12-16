@@ -19,8 +19,8 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       ListItems.Clear();
 
-      ListItems.Add(new GH_ValueListItem("Parallel to Ground", ((int) External.DB.BuiltInMullionPositionId.ParallelToGround).ToString()));
-      ListItems.Add(new GH_ValueListItem("Perpendicular to Face", ((int) External.DB.BuiltInMullionPositionId.PerpendicularToFace).ToString()));
+      ListItems.Add(new GH_ValueListItem("Parallel to Ground", ((int) External.DB.BuiltInMullionPosition.ParallelToGround).ToString()));
+      ListItems.Add(new GH_ValueListItem("Perpendicular to Face", ((int) External.DB.BuiltInMullionPosition.PerpendicularToFace).ToString()));
     }
   }
 }
