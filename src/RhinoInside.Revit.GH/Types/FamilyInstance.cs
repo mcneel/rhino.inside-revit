@@ -125,42 +125,16 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.FamilyInstance instance)
         {
           instance.GetLocation(out var origin, out var basisX, out var basisY);
-          var baseLocation = new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
-
-          if (Value?.Mirrored == true)
-          {
-            baseLocation.XAxis = -baseLocation.XAxis;
-            baseLocation.YAxis = -baseLocation.YAxis;
-          }
-
-          return baseLocation;
+          return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
         }
 
-        return base.Location;
+        return NaN.Plane;
       }
     }
 
-    public override Vector3d FacingOrientation
-    {
-      get
-      {
-        if (Value?.CanFlipFacing == true)
-          return Value.FacingOrientation.ToVector3d();
-
-        return base.FacingOrientation;
-      }
-    }
-
-    public override Vector3d HandOrientation
-    {
-      get
-      {
-        if (Value?.CanFlipHand == true)
-          return Value.HandOrientation.ToVector3d();
-
-        return base.HandOrientation;
-      }
-    }
+    public override Vector3d HandOrientation => WorkPlaneFlipped == true ? -base.HandOrientation : base.HandOrientation;
+    public override Vector3d FacingOrientation => Value?.HandFlipped != Value?.FacingFlipped ? -base.FacingOrientation : base.FacingOrientation;
+    public override Vector3d WorkPlaneOrientation => base.WorkPlaneOrientation;
 
     public override Curve Curve
     {
@@ -219,31 +193,6 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Flip
-    public override bool CanFlipFacing => Value?.CanFlipFacing ?? false;
-    public override bool? FacingFlipped
-    {
-      get
-      {
-        return Value is ARDB.FamilyInstance instance && instance.CanFlipFacing ?
-          (bool?) instance.FacingFlipped :
-          default;
-      }
-      set
-      {
-        if (value.HasValue && Value is ARDB.FamilyInstance instance)
-        {
-          if (!instance.CanFlipFacing)
-            throw new Exceptions.RuntimeErrorException("Facing can not be flipped for this element.");
-
-          if (instance.FacingFlipped != value)
-          {
-            InvalidateGraphics();
-            instance.flipFacing();
-          }
-        }
-      }
-    }
-
     public override bool CanFlipHand => Value?.CanFlipHand ?? false;
     public override bool? HandFlipped
     {
@@ -264,6 +213,31 @@ namespace RhinoInside.Revit.GH.Types
           {
             InvalidateGraphics();
             instance.flipHand();
+          }
+        }
+      }
+    }
+
+    public override bool CanFlipFacing => Value?.CanFlipFacing ?? false;
+    public override bool? FacingFlipped
+    {
+      get
+      {
+        return Value is ARDB.FamilyInstance instance && instance.CanFlipFacing ?
+          (bool?) instance.FacingFlipped :
+          default;
+      }
+      set
+      {
+        if (value.HasValue && Value is ARDB.FamilyInstance instance)
+        {
+          if (!instance.CanFlipFacing)
+            throw new Exceptions.RuntimeErrorException("Facing can not be flipped for this element.");
+
+          if (instance.FacingFlipped != value)
+          {
+            InvalidateGraphics();
+            instance.flipFacing();
           }
         }
       }

@@ -590,11 +590,11 @@ namespace RhinoInside.Revit.GH.Types
     public virtual Point3d Position => Curve is Curve curve ?
     curve.PointAtStart : Location.Origin;
     public virtual Vector3d Direction => Curve is Curve curve ?
-    curve.PointAtEnd - curve.PointAtStart : PlaneOrientation;
+    curve.PointAtEnd - curve.PointAtStart : WorkPlaneOrientation;
 
     public virtual Vector3d HandOrientation => Location.XAxis;
     public virtual Vector3d FacingOrientation => Location.YAxis;
-    public virtual Vector3d PlaneOrientation => Location.ZAxis;
+    public virtual Vector3d WorkPlaneOrientation => Location.ZAxis;
 
     public virtual Curve Curve
     {
