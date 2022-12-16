@@ -109,7 +109,7 @@ namespace RhinoInside.Revit.GH
               case ARDB.BuiltInParameter.ID_PARAM:          return new GH_Integer(elementId.IntegerValue);
               case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:   return new GH_Integer(elementId.IntegerValue);
               case ARDB.BuiltInParameter.MULLION_POSITION:  return new Types.MullionPosition(parameter.Element.Document, elementId);
-              case ARDB.BuiltInParameter.MULLION_PROFILE:   return new Types.MullionProfile(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.MULLION_PROFILE:   return new Types.ProfileType(parameter.Element.Document, elementId);
             }
           }
 

@@ -367,7 +367,7 @@ namespace RhinoInside.Revit.GH.Types
           break;
 
         case ARDB.FamilySymbol familySymbol:
-          if (MullionProfile.IsValidElement(element)) return new MullionProfile(familySymbol);
+          if (ProfileType.IsValidElement(element)) return new ProfileType(familySymbol);
           break;
       }
 

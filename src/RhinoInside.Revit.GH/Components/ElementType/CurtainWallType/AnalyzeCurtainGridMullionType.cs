@@ -170,7 +170,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       DA.SetData("Angle", mullionType?.get_Parameter(ARDB.BuiltInParameter.MULLION_ANGLE).AsGoo());
       DA.SetData("Offset", mullionType?.get_Parameter(ARDB.BuiltInParameter.MULLION_OFFSET).AsGoo());
 
-      var profile = new Types.MullionProfile(mullionType.Document, mullionType.get_Parameter(ARDB.BuiltInParameter.MULLION_PROFILE).AsElementId());
+      var profile = new Types.ProfileType(mullionType.Document, mullionType.get_Parameter(ARDB.BuiltInParameter.MULLION_PROFILE).AsElementId());
       DA.SetData("Profile", profile);
 
       var position = new Types.MullionPosition(mullionType.Document, mullionType.get_Parameter(ARDB.BuiltInParameter.MULLION_POSITION).AsElementId());

@@ -1,6 +1,6 @@
 namespace RhinoInside.Revit.External.DB
 {
-  public enum BuiltInMullionProfileId
+  public enum BuiltInProfileTypeId
   {
     Rectangular = -3,
     Circular = -2,
