@@ -4,7 +4,6 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
-  using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Mullion")]
   public class Mullion : FamilyInstance
@@ -27,11 +26,19 @@ namespace RhinoInside.Revit.GH.Types
     public MullionType() { }
     public MullionType(ARDB.MullionType value) : base(value) { }
   }
+}
+
+namespace RhinoInside.Revit.GH.Types
+{
+  using External.DB.Extensions;
+
+  using ARDB_MullionPosition = ARDB.ElementType;
+  using ARDB_MullionProfile  = ARDB.FamilySymbol;
 
   [Kernel.Attributes.Name("Mullion Position")]
   public class MullionPosition : ElementType
   {
-    protected override Type ValueType => typeof(ARDB.ElementType);
+    protected override Type ValueType => typeof(ARDB_MullionPosition);
 
     public MullionPosition() { }
     public MullionPosition(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
@@ -54,10 +61,23 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Mullion Profile")]
   public class MullionProfile : FamilySymbol
   {
-    protected override Type ValueType => typeof(ARDB.FamilySymbol);
+    protected override Type ValueType => typeof(ARDB_MullionProfile);
+    public new ARDB_MullionProfile Value => base.Value as ARDB_MullionProfile;
+
+    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
+    public static bool IsValidElement(ARDB.Element element)
+    {
+      return element is ARDB_MullionProfile &&
+             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_ProfileFamilies;
+    }
 
     public MullionProfile() { }
     public MullionProfile(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public MullionProfile(ARDB_MullionProfile profile) : base(profile)
+    {
+      if (!IsValidElement(profile))
+        throw new ArgumentException("Invalid Element", nameof(profile));
+    }
 
     public override string Nomen
     {

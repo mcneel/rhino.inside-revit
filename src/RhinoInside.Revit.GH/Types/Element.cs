@@ -12,7 +12,6 @@ namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Display;
   using External.DB.Extensions;
-  using RhinoInside.Revit.External.DB;
 
   [Kernel.Attributes.Name("Element")]
   public interface IGH_Element : IGH_Reference
@@ -357,13 +356,19 @@ namespace RhinoInside.Revit.GH.Types
       if (!element.IsValid())
         return null;
 
-      // Special FamilyInstance
-      if (element is ARDB.FamilyInstance familyInstance)
+      // Overrides
+      switch(element)
       {
-        if (StructuralBeam.IsValidElement(familyInstance)) return new StructuralBeam(familyInstance);
-        if (StructuralBrace.IsValidElement(familyInstance)) return new StructuralBrace(familyInstance);
-        if (StructuralColumn.IsValidElement(familyInstance)) return new StructuralColumn(familyInstance);
-        if (Panel.IsValidElement(element)) return new Panel(familyInstance);
+        case ARDB.FamilyInstance familyInstance:
+          if (StructuralBeam.IsValidElement(familyInstance)) return new StructuralBeam(familyInstance);
+          if (StructuralBrace.IsValidElement(familyInstance)) return new StructuralBrace(familyInstance);
+          if (StructuralColumn.IsValidElement(familyInstance)) return new StructuralColumn(familyInstance);
+          if (Panel.IsValidElement(element)) return new Panel(familyInstance);
+          break;
+
+        case ARDB.FamilySymbol familySymbol:
+          if (MullionProfile.IsValidElement(element)) return new MullionProfile(familySymbol);
+          break;
       }
 
       if (element is ARDB.View view)
@@ -402,12 +407,14 @@ namespace RhinoInside.Revit.GH.Types
             if (DesignOptionSet.IsValidElement(element)) return new DesignOptionSet(element);
             break;
 
-#if !REVIT_2021
-          case ARDB.BuiltInCategory.OST_IOS_GeoSite:
-            if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element);
-            if (BasePoint.IsValidElement(element)) return new BasePoint(element as ARDB.BasePoint);
+          case ARDB.BuiltInCategory.OST_PropertySet:
+            if (element is ARDB.PropertySetElement pset)
+            {
+              if (StructuralAssetElement.IsValidElement(element)) return new StructuralAssetElement(pset);
+              if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
+            }
             break;
-#endif
+
           case ARDB.BuiltInCategory.OST_VolumeOfInterest:
             if (ScopeBox.IsValidElement(element)) return new ScopeBox(element);
             break;
@@ -416,13 +423,12 @@ namespace RhinoInside.Revit.GH.Types
             if (SectionBox.IsValidElement(element)) return new SectionBox(element);
             break;
 
-          case ARDB.BuiltInCategory.OST_PropertySet:
-            if (element is ARDB.PropertySetElement pset)
-            {
-              if (StructuralAssetElement.IsValidElement(element)) return new StructuralAssetElement(pset);
-              if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
-            }
+#if !REVIT_2021
+          case ARDB.BuiltInCategory.OST_IOS_GeoSite:
+            if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element);
+            if (BasePoint.IsValidElement(element)) return new BasePoint(element as ARDB.BasePoint);
             break;
+#endif
 
 #if !REVIT_2020
           case ARDB.BuiltInCategory.OST_RasterImages:
@@ -523,6 +529,10 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
+      // Hack to force `ParameterValue.CastTo` to be called.
+      if (source is ParameterValue)
+        return false;
+
       if (source is IGH_Goo goo)
       {
         if (source is IGH_Element element)
