@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Max = XYZExtension.MinValue,
     };
 
-    public static BoundingBoxXYZ All => new BoundingBoxXYZ()
+    public static BoundingBoxXYZ Universe => new BoundingBoxXYZ()
     {
       Min = XYZExtension.MinValue,
       Max = XYZExtension.MaxValue,
@@ -72,16 +72,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       );
     }
 
-    public static void Union(this BoundingBoxXYZ value, BoundingBoxXYZ xyz)
+    public static void Union(this BoundingBoxXYZ value, BoundingBoxXYZ other)
     {
-      if (xyz.IsNullOrEmpty()) return;
+      if (other.IsNullOrEmpty()) return;
       if (value.IsEmpty())
       {
-        value.Transform = xyz.Transform;
-        value.Min = xyz.Min;
-        value.Max = xyz.Max;
+        value.Transform = other.Transform;
+        value.Min = other.Min;
+        value.Max = other.Max;
       }
-      else Union(value, xyz.GetCorners());
+      else Union(value, other.GetCorners());
     }
 
     public static void Union(this BoundingBoxXYZ value, params XYZ[] xyz)

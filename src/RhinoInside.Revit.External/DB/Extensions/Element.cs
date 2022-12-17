@@ -314,7 +314,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
         if (filter is null)
-          filter = CompoundElementFilter.All;
+          filter = CompoundElementFilter.Universe;
 
         UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeAny());
         UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeElementDeletion());
