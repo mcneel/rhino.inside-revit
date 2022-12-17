@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (GetReference() is object && typeof(IGH_Element).IsAssignableFrom(typeof(Q)))
       {
-        target = (Q) (object) Element.FromReference(ReferenceDocument, GetReference()) is Q goo ? goo : default;
+        target = (Q) (object) (Element.FromReference(ReferenceDocument, GetReference()) is Q goo ? goo : default);
         return true;
       }
 

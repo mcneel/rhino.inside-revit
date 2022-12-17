@@ -18,7 +18,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
             return;
 
           case LocationCurve curveLocation:
-            if (curveLocation.Curve.TryGetLocation(out origin, out basisX, out basisY)) return;
+            if (curveLocation.Curve.TryGetLocation(out origin, out basisX, out basisY))
+            {
+              if (instance is FamilyInstance familyInstance)
+              {
+                basisY = familyInstance.HandOrientation.CrossProduct(familyInstance.FacingOrientation).CrossProduct(basisX);
+
+                if (familyInstance.Mirrored)
+                  basisY = -basisY;
+              }
+
+              return;
+            }
             break;
         }
 
