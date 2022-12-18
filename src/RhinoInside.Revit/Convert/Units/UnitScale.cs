@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.Convert.Units
     const ulong SignificandMask = 0x000F_FFFF_FFFF_FFFFUL;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsFinite(double value)
+    static bool IsFinite(double value)
     {
       return ((ulong) BitConverter.DoubleToInt64Bits(value) & ~SignMask) < ExponentMask;
     }
@@ -40,12 +40,14 @@ namespace RhinoInside.Revit.Convert.Units
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static bool IsNegative(double value)
     {
+      if (double.IsNaN(value)) return false;
       return ((ulong) BitConverter.DoubleToInt64Bits(value) & SignMask) != 0UL;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static bool IsPositive(double value)
     {
+      if (double.IsNaN(value)) return false;
       return ((ulong) BitConverter.DoubleToInt64Bits(value) & SignMask) == 0UL;
     }
     #endregion
@@ -91,14 +93,15 @@ namespace RhinoInside.Revit.Convert.Units
     #region Static methods
     public static Ratio Rationalize(double value)
     {
-      if (double.IsNaN(value)) return NaN;
-
       const int MaximumBits = sizeof(ulong) * 8;
       const ulong MaximumDenominator = 2UL << (52 + 1);
       const ulong MaximumExponent = 1UL << (MaximumBits - 1);
 
       ulong a, x, d, n = 1;
-      var sign = IsNegative(value) ? -1.0 : +1.0;
+
+      var sign = 0;
+      if (double.IsNaN(value) || (sign = Math.Sign(value)) == 0)
+        return (Ratio) value; // Keeps NaN type and Zero sign.
 
       value *= sign;
       {
@@ -109,7 +112,7 @@ namespace RhinoInside.Revit.Convert.Units
         }
 
         if (n == 1)
-          return new Ratio(sign * value); // Integers and Infinities are returned here including +-0.0
+          return new Ratio(sign * value); // Integers and Infinities are returned here including ±0.0
 
         d = (ulong) Math.Round(f);
       }
