@@ -74,6 +74,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static double GetLength(this XYZ xyz, double tolerance = DefaultTolerance)
     {
+      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
+
       var length = NumericTolerance.Abs(xyz.X, xyz.Y, xyz.Z);
       return length < tolerance ? 0.0 : length;
     }

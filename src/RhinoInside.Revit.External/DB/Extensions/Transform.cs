@@ -142,5 +142,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return principal;
     }
+
+    /// <summary>
+    /// Applies the transformation to the bouding box and returns the result.
+    /// </summary>
+    /// <param name="transform">The transform to apply.</param>
+    /// <param name="value">The box to transform.</param>
+    /// <returns>The transformed bounding box</returns>
+    /// <remarks>
+    /// Transformation of a bounding box is affected by the translational part of the transformation.
+    /// </remarks>
+    public static BoundingBoxXYZ OfBoundingBoxXYZ(this Transform transform, BoundingBoxXYZ value)
+    {
+      var other = value.Clone();
+      other.Transform = transform * value.Transform;
+      return other;
+    }
   }
 }
