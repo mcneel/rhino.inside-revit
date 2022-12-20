@@ -22,7 +22,14 @@ group: Deployment & Configs
 - Fixed 'Element Geometry' to work with `FamilySymbol`.
 - Added `ARDB.AppearanceAssetElement.ToRenderMaterial` extension method.
 
-{% include ltr/release-header.html title="v1.10" version="v1.10.8385.26573" time="12/20/2022" %}
+{% include ltr/release-header.html title="v1.11 RC1" version="v1.11.8389.21414" pre_release=true time="12/20/2022" %}
+
+- Added {% include ltr/comp.html uuid='09bd0aa8' %} component.
+- Added {% include ltr/comp.html uuid='506d5c19' %} component. (Revit 2020)
+- Fixed 'Element Geometry' to work with `FamilySymbol`.
+- Added `ARDB.AppearanceAssetElement.ToRenderMaterial` extension method.
+
+{% include ltr/release-header.html title="v1.10" version="v1.10.8389.27599" time="12/20/2022" %}
 
 - Now 'Import 3DM' imports block geometry in families.
 - Now Baked blocks name use `::` as a separator.
