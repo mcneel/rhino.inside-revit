@@ -841,8 +841,8 @@
   }, 
   {
     "desc": "Contains a collection of Revit drafting views", 
-    "iconsrc": null, 
-    "icontag": "V", 
+    "iconsrc": "/static/images/GH/ViewDrafting.png", 
+    "icontag": null, 
     "panel": "Revit", 
     "since": "1.10", 
     "tab": "Params", 
@@ -1537,8 +1537,8 @@
   }, 
   {
     "desc": "Ensures a user-created workset exist at Document", 
-    "iconsrc": null, 
-    "icontag": "C", 
+    "iconsrc": "/static/images/GH/CreateWorkset.png", 
+    "icontag": null, 
     "panel": "Document", 
     "since": "1.10", 
     "tab": "Revit", 
