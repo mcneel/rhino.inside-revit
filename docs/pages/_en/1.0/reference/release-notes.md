@@ -16,6 +16,20 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.10" version="v1.10.8385.26573" time="12/20/2022" %}
+
+- Now 'Import 3DM' imports block geometry in families.
+- Now Baked blocks name use `::` as a separator.
+- Now 'Light Source' category ís hidden and transparent by default on bake.
+- Added some null checking at {% include ltr/comp.html uuid='ad88cf11' %} component.
+- Added some null checking at {% include ltr/comp.html uuid='0bfbda45' %} component.
+- Now Raster Images do have preview in Grasshopper.
+- Fix on `BoundingBoxXYZ.ToOutline` method.
+- Now {% include ltr/comp.html uuid='de5e832b' %} uses view Phase.
+- Now Bake try to use extrusions if the geometry do not have material per face and is closed.
+- Fix for {% include ltr/comp.html uuid='a5c63076' %} component when managing mirrored elements.
+
+
 {% include ltr/release-header.html title="v1.10 RC5" version="v1.10.8375.11132" pre_release=true time="12/06/2022" %}
 
 - Minor Fixes and Improvements
