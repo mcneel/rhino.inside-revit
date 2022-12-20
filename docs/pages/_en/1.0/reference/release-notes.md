@@ -10,7 +10,7 @@ group: Deployment & Configs
 
 ### WIP
 
-- Added 'Add Image Type' component. (Revit 2020)
+- Added 'Add Image Type' component.
 - Added 'Add Image' component. (Revit 2020)
 - Fixed 'Element Geometry' to work with `FamilySymbol`.
 - Added `ARDB.AppearanceAssetElement.ToRenderMaterial` extension method.
@@ -20,6 +20,13 @@ group: Deployment & Configs
 - Now 'Import 3DM' imports block geometry in families.
 - Now Baked blocks name use '::' as a separator.
 - Now 'Light Source' category ís hidden and transparent by default on bake.
+- Added some null checking at 'Add Region' component.
+- Added some null checking at 'Add Geometry DirectShape' component.
+- Now Raster Images do have preview in Grasshopper.
+- Fix on `BoundingBoxXYZ.ToOutline` method.
+- Now 'Add Room' uses 'View' Phase.
+- Now Bake try to use extrusions if the geometry do not have material per face and is closed.
+- Fix for 'Element Location' component when managing mirrored elements.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
