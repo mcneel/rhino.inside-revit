@@ -15,7 +15,7 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.11 RC1" version="v1.11.8389.21414" pre_release=true time="12/20/2022" %}
+{% include ltr/release-header.html title="v1.11 RC1" version="v1.11.8389.27977" pre_release=true time="12/20/2022" %}
 
 - Added {% include ltr/comp.html uuid='09bd0aa8' %} component.
 - Added {% include ltr/comp.html uuid='506d5c19' %} component. (Revit 2020)
