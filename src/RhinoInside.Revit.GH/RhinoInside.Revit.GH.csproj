@@ -21,6 +21,7 @@
   <ItemGroup>
     <Compile Include="Attributes.cs" />
     <Compile Include="Components\Annotations\AddAngularDimension.cs" />
+    <Compile Include="Components\Annotations\AddDetailGroup.cs" />
     <Compile Include="Components\Annotations\AddRevisionCloud.cs" />
     <Compile Include="Components\Annotations\AddSymbol.cs" />
     <Compile Include="Components\Annotations\AddElementTag.cs" />

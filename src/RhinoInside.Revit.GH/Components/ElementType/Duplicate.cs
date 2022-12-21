@@ -146,15 +146,20 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
         //}
         //else
         {
-          var ids = ARDB.ElementTransformUtils.CopyElements
-          (
-            template.Document,
-            new ARDB.ElementId[] { template.Id },
-            doc, default, default
-          );
+          using (var options = new ARDB.CopyPasteOptions() { })
+          {
+            options.SetDuplicateTypeNamesAction(ARDB.DuplicateTypeAction.UseDestinationTypes);
 
-          type = ids.Select(x => doc.GetElement(x)).OfType<ARDB.ElementType>().FirstOrDefault();
-          type.Name = name;
+            var ids = ARDB.ElementTransformUtils.CopyElements
+            (
+              template.Document,
+              new ARDB.ElementId[] { template.Id },
+              doc, default, options
+            );
+
+            type = ids.Select(x => doc.GetElement(x)).OfType<ARDB.ElementType>().FirstOrDefault();
+            type.Name = name;
+          }
         }
       }
 

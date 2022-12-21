@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   public class GroupByLocation : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("DF634530-634D-43F8-9C42-73F4A8D62C1E");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public GroupByLocation() : base
     (
@@ -36,6 +36,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
 
       [Description("Location where to place the group.")]
       Rhino.Geometry.Plane location,
+      [Description("Model group type.")]
       ARDB.GroupType type,
       Optional<ARDB.Level> level
     )

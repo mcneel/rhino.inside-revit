@@ -39,46 +39,48 @@ namespace RhinoInside.Revit.GH.Types
 
     public override Plane Location
     {
-      get
+      get => Rhinoceros.InvokeInHostContext(() =>
       {
-        if (Value is ARDB.Group group && group.Category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_IOSModelGroups)
+        if (Value is ARDB.Group group)
         {
           try
           {
             var doc = group.Document;
             using (doc.RollBackScope())
             {
-              var plane = Plane.WorldXY.ToPlane();
-              var sketchPlane = ARDB.SketchPlane.Create(doc, plane);
-              var circle = ARDB.Arc.Create(plane, 1.0, 0.0, 2.0 * Math.PI);
-              var modelCurve = default(ARDB.ModelCurve);
-              var identity = default(ARDB.Group);
-              if (doc.IsFamilyDocument)
+              using (var create = doc.Create())
               {
-                modelCurve = doc.FamilyCreate.NewModelCurve(circle, sketchPlane);
-                identity = doc.FamilyCreate.NewGroup(new ARDB.ElementId[] { modelCurve.Id });
-              }
-              else
-              {
-                modelCurve = doc.Create.NewModelCurve(circle, sketchPlane);
-                identity = doc.Create.NewGroup(new ARDB.ElementId[] { modelCurve.Id });
-              }
+                var curve = default(ARDB.CurveElement);
+                if (OwnerView is View ownerView)
+                {
+                  var plane = ARDB.Plane.CreateByOriginAndBasis(ownerView.Value.Origin, ownerView.Value.RightDirection, ownerView.Value.UpDirection);
+                  var circle = ARDB.Arc.Create(plane, 1.0, 0.0, 2.0 * Math.PI);
+                  curve = create.NewDetailCurve(ownerView.Value, circle);
+                }
+                else
+                {
+                  var plane = ARDB.Plane.CreateByOriginAndBasis(XYZExtension.Zero, XYZExtension.BasisX, XYZExtension.BasisY);
+                  var circle = ARDB.Arc.Create(plane, 1.0, 0.0, 2.0 * Math.PI);
+                  curve = create.NewModelCurve(circle, ARDB.SketchPlane.Create(doc, plane));
+                }
+                var identity = create.NewGroup(new ARDB.ElementId[] { curve.Id });
 
-              group.ChangeTypeId(identity.GetTypeId());
-              var geometries = group.GetMemberIds();
-              if
-              (
-                geometries.Count == 1 &&
-                group.Document.GetElement(geometries[0]) is ARDB.ModelCurve transformedModelCurve &&
-                transformedModelCurve.GeometryCurve is ARDB.Arc transformedCircle
-              )
-              {
-                return new Plane
+                group.ChangeTypeId(identity.GetTypeId());
+                var geometries = group.GetMemberIds();
+                if
                 (
-                  transformedCircle.Center.ToPoint3d(),
-                  transformedCircle.XDirection.ToVector3d(),
-                  transformedCircle.YDirection.ToVector3d()
-                );
+                  geometries.Count == 1 &&
+                  group.Document.GetElement(geometries[0]) is ARDB.CurveElement transformedCurve &&
+                  transformedCurve.GeometryCurve is ARDB.Arc transformedCircle
+                )
+                {
+                  return new Plane
+                  (
+                    transformedCircle.Center.ToPoint3d(),
+                    transformedCircle.XDirection.ToVector3d(),
+                    transformedCircle.YDirection.ToVector3d()
+                  );
+                }
               }
             }
           }
@@ -86,14 +88,20 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return base.Location;
-      }
+      });
     }
     #endregion
 
     protected override bool GetClippingBox(out BoundingBox clippingBox)
     {
       clippingBox = GetBoundingBox(Transform.Identity);
-      clippingBox.Inflate(0.5 * Revit.ModelUnits);
+
+      switch (Category?.Id.ToBuiltInCategory())
+      {
+        case ARDB.BuiltInCategory.OST_IOSModelGroups:  clippingBox.Inflate(0.5 * Revit.ModelUnits); break;
+        case ARDB.BuiltInCategory.OST_IOSDetailGroups: clippingBox.Inflate(0.005 * Revit.ModelUnits, 0.005 * Revit.ModelUnits, 0.0); break;
+      }
+
       return true;
     }
 

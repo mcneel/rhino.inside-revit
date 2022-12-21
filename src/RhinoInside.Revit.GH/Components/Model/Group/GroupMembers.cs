@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   public class GroupMembers : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("7C7D3739-7609-4F7F-BAB5-1E3648508891");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     public GroupMembers() : base
     (
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       nickname: "Group",
       description: "Get group members list",
       category: "Revit",
-      subCategory: "Model"
+      subCategory: "Type"
     )
     { }
 

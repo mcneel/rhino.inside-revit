@@ -6,6 +6,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.ModelElements
 {
+  using External.DB;
   using External.DB.Extensions;
   using Grasshopper.Kernel.Parameters;
 
@@ -13,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   public class GroupTypeCreate : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("39E42448-1C1C-4140-BC37-7399ABF82117");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     public GroupTypeCreate() : base
     (
@@ -21,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       nickname: "GroupType",
       description: "Given a collection of elements, it adds a Group type to the active Revit document",
       category: "Revit",
-      subCategory: "Model"
+      subCategory: "Type"
     )
     { }
 
@@ -90,12 +91,22 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         {
           // Input
           if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
-          if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elementIds)) return null;
+          if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return null;
+
 
           // Compute
           StartTransaction(doc.Value);
           if (CanReconstruct(_GroupType_, out var untracked, ref type, doc.Value, name, categoryId: ARDB.BuiltInCategory.OST_IOSModelGroups))
-            type = Reconstruct(type, doc.Value, name, elementIds.Select(x => x.Id).ToList());
+          {
+            var validElements = elements.Where(x => x?.IsValid == true).ToArray();
+            var sourceDocuments = validElements.Select(x => x.Document).Distinct().ToArray();
+            if (sourceDocuments.Length == 1)
+            {
+              var elementIds = validElements.Select(x => x.Id).ToArray();
+              type = Reconstruct(type, doc.Value, name, sourceDocuments[0], elementIds);
+            }
+            else type = null;
+          }
 
           DA.SetData(_GroupType_, type);
           return untracked ? null : type;
@@ -103,28 +114,48 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       );
     }
 
-    bool Reuse(ARDB.GroupType groupType, IList<ARDB.ElementId> elementIds)
+    bool Reuse(ARDB.GroupType groupType, ARDB.Document sourceDocument, IList<ARDB.ElementId> elementIds)
     {
+      if (groupType is object)
+        groupType.Name = Guid.NewGuid().ToString();
+
       return false;
     }
 
-    ARDB.GroupType Create(ARDB.Document doc, IList<ARDB.ElementId> elementIds)
+    ARDB.GroupType Create(ARDB.Document doc, ARDB.Document sourceDocument, IList<ARDB.ElementId> elementIds)
     {
-      var elementIdsCopy = ARDB.ElementTransformUtils.CopyElements(doc, elementIds, XYZExtension.Zero);
-      var newGroup = doc.IsFamilyDocument ?
-                     doc.FamilyCreate.NewGroup(elementIdsCopy) :
-                     doc.Create.NewGroup(elementIdsCopy);
-      var groupType = newGroup.GroupType;
-      doc.Delete(newGroup.Id);
+      using (var scope = doc.IsEquivalent(sourceDocument) ? null : sourceDocument.RollBackScope())
+      {
+        var elementIdsCopy = ARDB.ElementTransformUtils.CopyElements(sourceDocument, elementIds, XYZExtension.Zero);
 
-      return groupType;
+        using (var create = sourceDocument.Create())
+        {
+          var newGroup = create.NewGroup(elementIdsCopy);
+
+          var groupType = newGroup.GroupType;
+          sourceDocument.Delete(newGroup.Id);
+
+          if (scope is object)
+          {
+            using (var options = new ARDB.CopyPasteOptions())
+            {
+              options.SetDuplicateTypeNamesAction(ARDB.DuplicateTypeAction.UseDestinationTypes);
+
+              var groupTypeId = ARDB.ElementTransformUtils.CopyElements(sourceDocument, new ARDB.ElementId[] { groupType.Id }, doc, default, options);
+              return doc.GetElement(groupTypeId.First()) as ARDB.GroupType;
+            }
+          }
+
+          return groupType;
+        }
+      }
     }
 
-    ARDB.GroupType Reconstruct(ARDB.GroupType groupType, ARDB.Document doc, string name, IList<ARDB.ElementId> elementIds)
+    ARDB.GroupType Reconstruct(ARDB.GroupType groupType, ARDB.Document doc, string name, ARDB.Document sourceDocument, IList<ARDB.ElementId> elementIds)
     {
-      if (!Reuse(groupType, elementIds))
+      if (!Reuse(groupType, sourceDocument, elementIds))
       {
-        var newGroupType = Create(doc, elementIds);
+        var newGroupType = Create(doc, sourceDocument, elementIds);
         groupType.ReplaceElement(newGroupType, ExcludeUniqueProperties);
 
         if (groupType is object)
