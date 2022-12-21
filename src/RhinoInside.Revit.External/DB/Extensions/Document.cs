@@ -1153,6 +1153,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
     #endregion
 
+    #region Create
+    internal static Autodesk.Revit.Creation.ItemFactoryBase Create(this Document document)
+    {
+      return document.IsFamilyDocument ? (Autodesk.Revit.Creation.ItemFactoryBase) document.FamilyCreate : (Autodesk.Revit.Creation.ItemFactoryBase) document.Create;
+    }
+    #endregion
+
     #region Delete
     /// <summary>
     /// Indicates if a collection of elements can be deleted.
