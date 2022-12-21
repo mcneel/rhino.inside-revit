@@ -1,19 +1,15 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations
 {
-  using Convert.Geometry;
-  using External.DB.Extensions;
-
   [ComponentVersion(introduced: "1.8")]
   public class AddRevision : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("221E53A6-54A2-45FB-82B1-220D6E5BE884");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => string.Empty;
 
     public AddRevision() : base
@@ -22,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "Revision",
       description: "Adds a revision at the end of the sequence of existing revisions into the active Revit document",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "View"
     )
     { }
 

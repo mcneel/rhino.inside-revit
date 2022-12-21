@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Views
   public class QueryRevisions : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("8EAD987D-EAF8-4E79-B33A-0E29DAF7F9BB");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => String.Empty;
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.Revision));
 
@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       nickname: "Revisions",
       description: "Get all document revisions",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "View"
     )
     { }
 
