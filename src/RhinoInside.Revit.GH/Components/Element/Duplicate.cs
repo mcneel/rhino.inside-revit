@@ -291,6 +291,24 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
     };
 
+    static bool CanReconstruct(ARDB.View view, ARDB.Element x, ARDB.Element y)
+    {
+      if (x is null) return false;
+      if (x.OwnerViewId != (view?.Id ?? y.OwnerViewId)) return false;
+
+      if (x.GetType() != y.GetType()) return false;
+      if (x.Category.Id != y.Category.Id) return false;
+      if (x.ViewSpecific != y.ViewSpecific) return false;
+
+      var xLocation = x.Location;
+      var yLocation = y.Location;
+
+      if (xLocation.GetType() != yLocation.GetType()) return false;
+      if (xLocation is ARDB.LocationCurve xCurve && !(yLocation as ARDB.LocationCurve).Curve.IsSameKindAs(xCurve.Curve)) return false;
+
+      return true;
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
@@ -313,18 +331,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
             {
               if (location.HasValue && location.Value.IsValid)
               {
-                if
-                (
-                  x?.GetType()   == element.Value.GetType() &&
-                  x.Category.Id  == element.Category.Id &&
-                  x.ViewSpecific == element.ViewSpecific &&
-                  x.OwnerViewId == (view?.Id ?? element.Value.OwnerViewId)
-                )
+                if(CanReconstruct(view?.Value, x, element.Value))
                 {
-                  if (x.GetTypeId() != element.Type.Id)
-                    x = x.Document.GetElement(x.ChangeTypeId(element.Type.Id)) ?? x;
+                  // TODO : Implement a DeepCopy here
+                  // Duplicate any missing type, material on demand
+                  //x.DeepCopyParametersFrom(element.Value);
 
-                  x.CopyParametersFrom(element.Value, ExcludeUniqueProperties);
+                  x.CopyParametersFrom(element.Value);
                   return x;
                 }
 
@@ -359,14 +372,17 @@ namespace RhinoInside.Revit.GH.Components.Elements
           )
         ) as Types.GraphicalElement;
 
-        if
-        (
-          clone is object &&
-          location.HasValue && location.Value.IsValid &&
-          !clone.Location.EpsilonEquals(location.Value, GeometryTolerance.Model.VertexTolerance)
-        )
+        if (clone is object)
         {
-          clone.SetLocation(location.Value);
+          switch (element.Value.Location)
+          {
+            case ARDB.LocationCurve locationCurve:
+              clone.SetCurve(locationCurve.Curve.ToCurve(), keepJoins: false);
+              break;
+          }
+
+          if (location.HasValue && location.Value.IsValid && !clone.Location.EpsilonEquals(location.Value, GeometryTolerance.Model.VertexTolerance))
+            clone.SetLocation(location.Value);
         }
 
         clones.Add(clone);

@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Grasshopper.Kernel;
 
-namespace RhinoInside.Revit.GH.Components.ModelElements
+namespace RhinoInside.Revit.GH.Components.Groups
 {
   [ComponentVersion(introduced: "1.0", updated: "1.9")]
   public class GroupMembers : ZuiComponent

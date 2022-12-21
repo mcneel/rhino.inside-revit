@@ -21,7 +21,6 @@
   <ItemGroup>
     <Compile Include="Attributes.cs" />
     <Compile Include="Components\Annotations\AddAngularDimension.cs" />
-    <Compile Include="Components\Annotations\AddDetailGroup.cs" />
     <Compile Include="Components\Annotations\AddRevisionCloud.cs" />
     <Compile Include="Components\Annotations\AddSymbol.cs" />
     <Compile Include="Components\Annotations\AddElementTag.cs" />
@@ -190,15 +189,16 @@
     <Compile Include="Components\Filters\QueryFilters.cs" />
     <Compile Include="Components\Filters\Selection\SelectionElements.cs" />
     <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
+    <Compile Include="Components\Groups\AddDetailGroup.cs" />
+    <Compile Include="Components\Groups\AddModelGroup.cs" />
+    <Compile Include="Components\Groups\CreateGroupType.cs" />
+    <Compile Include="Components\Groups\GroupMembers.cs" />
+    <Compile Include="Components\Groups\QueryGroupTypes.cs" />
     <Compile Include="Components\Import\AddImage.cs" />
     <Compile Include="Components\Import\AddImageType.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
     <Compile Include="Components\Model\AddWorkPlaneByPlane.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
-    <Compile Include="Components\Model\Group\AddModelGroup.cs" />
-    <Compile Include="Components\Model\Group\CreateGroupType.cs" />
-    <Compile Include="Components\Model\Group\GroupMembers.cs" />
-    <Compile Include="Components\Model\Group\QueryGroupTypes.cs" />
     <Compile Include="Components\Model\ReferenceElement\AddReferenceLine.cs" />
     <Compile Include="Components\Model\ReferenceElement\AddReferencePlane.cs" />
     <Compile Include="Components\Model\SketchDeconstruct.cs" />
@@ -481,7 +481,9 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Components\Model\Group\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TextTemplating\Microsoft.TextTemplating.targets" />
   <PropertyGroup>
