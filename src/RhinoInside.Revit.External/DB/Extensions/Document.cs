@@ -1191,4 +1191,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
     #endregion
   }
+
+  public static class CopyPasteOptionsExtension
+  {
+    struct UseDestinationTypeHandler : IDuplicateTypeNamesHandler
+    {
+      public DuplicateTypeAction OnDuplicateTypeNamesFound(DuplicateTypeNamesHandlerArgs args) => DuplicateTypeAction.UseDestinationTypes;
+    }
+
+    struct UseUniqueTypeHandler : IDuplicateTypeNamesHandler
+    {
+      public DuplicateTypeAction OnDuplicateTypeNamesFound(DuplicateTypeNamesHandlerArgs args) => DuplicateTypeAction.Abort;
+    }
+
+    public static void SetDuplicateTypeNamesAction(this CopyPasteOptions options, DuplicateTypeAction action)
+    {
+      switch (action)
+      {
+        case DuplicateTypeAction.UseDestinationTypes: options.SetDuplicateTypeNamesHandler(default(UseDestinationTypeHandler)); break;
+        case DuplicateTypeAction.Abort:               options.SetDuplicateTypeNamesHandler(default(UseUniqueTypeHandler));      break;
+        default: throw new ArgumentOutOfRangeException(nameof(action));
+      }
+    }
+  }
 }
