@@ -294,7 +294,8 @@ namespace RhinoInside.Revit.GH.Types
 
     ~Document()
     {
-      try { Directory.Delete(SwapFolder.Directory.FullName, recursive: true); } catch { }
+      if (SwapFolder is object)
+        try { Directory.Delete(SwapFolder.Directory.FullName, recursive: true); } catch { }
     }
 
     static Document()
