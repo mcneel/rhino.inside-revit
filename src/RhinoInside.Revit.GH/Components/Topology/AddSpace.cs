@@ -4,13 +4,15 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Topology
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+  using External.DB;
+
   [ComponentVersion(introduced: "1.7")]
   public class AddSpace : ElementTrackerComponent
   {
@@ -133,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
     protected override void BeforeSolveInstance()
     {
-      ActiveView = Revit.ActiveDBDocument?.GetActiveGraphicalView();
+      ActiveView = Revit.ActiveUIDocument?.ActiveView;
 
       base.BeforeSolveInstance();
     }
@@ -153,7 +155,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       {
         foreach (var views in TemporaryViews.Values.GroupBy(x => x.Document).Reverse())
         {
-          using (var scope = External.DB.DisposableScope.CommitScope(views.Key))
+          using (var scope = views.Key.CommitScope())
           {
             views.Key.Delete(views.Select(x => x.Id).ToArray());
             scope.Commit();
