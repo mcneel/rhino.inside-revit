@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   public class GroupTypeCreate : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("39E42448-1C1C-4140-BC37-7399ABF82117");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     public GroupTypeCreate() : base
     (
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       nickname: "GroupType",
       description: "Given a collection of elements, it adds a Group type to the active Revit document",
       category: "Revit",
-      subCategory: "Model"
+      subCategory: "Type"
     )
     { }
 
