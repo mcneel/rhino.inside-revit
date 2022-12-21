@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -29,6 +30,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Document"), AssemblyPriority]
+  [DebuggerDisplay("{this.ToString()}: id {Id}")]
   public class Document : IGH_Document, IGH_ReferenceData, ICloneable
   {
     #region System.Object
@@ -277,9 +279,22 @@ namespace RhinoInside.Revit.GH.Types
     protected Document(ARDB.Document value)
     {
       if (value is null) return;
+
+      if (DocumentsDictionary.TryGetValue(value, out var document))
+        Id = document.Id;
+      else
+        Id = ++NextId;
+
+      SwapFolder = new TemporaryDirectory(Path.Combine(Core.SwapFolder, $"{Id:X8}"), default(ElementsObjectIDGenerator));
+
       _Document = value;
       DocumentId = value.GetFingerprintGUID();
       RefreshReferenceData();
+    }
+
+    ~Document()
+    {
+      try { Directory.Delete(SwapFolder.Directory.FullName, recursive: true); } catch { }
     }
 
     static Document()
@@ -289,16 +304,30 @@ namespace RhinoInside.Revit.GH.Types
         foreach (var document in host.Application.Documents.Cast<ARDB.Document>())
           AddDocument(document);
 
-        // Create a Grasshopper document
-        // Create a Revit document
-        //Crash!!
-
         host.Application.DocumentCreated += Host_DocumentCreated;
         host.Application.DocumentOpened += Host_DocumentOpened;
         host.Application.DocumentClosed += Host_DocumentClosed;
         host.Application.DocumentClosing += Host_DocumentClosing;
       }
     }
+
+    static int NextId = 0;
+    public int Id { get; }
+
+    #region SwapFolder
+    struct ElementsObjectIDGenerator : ITemporaryPrefixGenerator
+    {
+      public string PrefixOf(object value)
+      {
+        if (value is Element element)
+          return element.IsLinked ? $"{element.ReferenceId.ToString("X")}-{element.Id.ToString("X")}" : $"{element.ReferenceId.ToString("X")}";
+
+        throw new NotImplementedException();
+      }
+    }
+
+    internal TemporaryDirectory SwapFolder { get; }
+    #endregion
 
     private static void Host_DocumentCreated(object sender, ARDB.Events.DocumentCreatedEventArgs e)
     {
@@ -331,6 +360,9 @@ namespace RhinoInside.Revit.GH.Types
         twins.Add(document);
       else
         DocumentsRegistry.Add(document.GetFingerprintGUID(), new List<ARDB.Document>() { document });
+
+      // Add document to DocumentsDictionary
+      Document.FromValue(document);
     }
 
     static void RemoveDocument(ARDB.Document document)
@@ -348,10 +380,13 @@ namespace RhinoInside.Revit.GH.Types
         if (twins.Count == 0)
           DocumentsRegistry.Remove(document.GetFingerprintGUID());
       }
+
+      DocumentsDictionary.Remove(document);
     }
 
     static readonly Dictionary<int, ARDB.Document> ClosingDocuments = new Dictionary<int, ARDB.Document>();
     static readonly Dictionary<Guid, List<ARDB.Document>> DocumentsRegistry = new Dictionary<Guid, List<ARDB.Document>>();
+    static readonly Dictionary<ARDB.Document, Document> DocumentsDictionary = new Dictionary<ARDB.Document, Document>();
 
     internal static bool TryGetDocument(Guid guid, out ARDB.Document document)
     {
@@ -418,9 +453,16 @@ namespace RhinoInside.Revit.GH.Types
       if (document?.IsValidObject != true)
         return null;
 
-      var value = document.IsFamilyDocument ?
-        (Document) new FamilyDocument(document) :
-        (Document) new ProjectDocument(document);
+      if (!DocumentsDictionary.TryGetValue(document, out var value))
+      {
+        DocumentsDictionary.Add
+        (
+          document,
+          value = document.IsFamilyDocument ?
+          (Document) new FamilyDocument(document) :
+          (Document) new ProjectDocument(document)
+        );
+      }
 
       return value;
     }

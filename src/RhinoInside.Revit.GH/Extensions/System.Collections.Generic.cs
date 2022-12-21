@@ -62,5 +62,25 @@ namespace System.Collections.Generic
         index++;
       }
     }
+
+    public static IEnumerable<TResult> ZipOrLast<TFirst, TSecond, TResult>(this IEnumerable<TFirst> first, IEnumerable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)
+    {
+      if (first is null) throw new ArgumentNullException(nameof(first));
+      if (second is null) throw new ArgumentNullException(nameof(second));
+      if (resultSelector is null) throw new ArgumentNullException(nameof(resultSelector));
+
+      using (var e1 = first.GetEnumerator())
+      using (var e2 = second.GetEnumerator())
+      {
+        var next1 = true;
+        var next2 = true;
+        var last1 = default(TFirst);
+        var last2 = default(TSecond);
+        while ((next1 && (next1 = e1.MoveNext())) | (next2 && (next2 = e2.MoveNext())))
+        {
+          yield return resultSelector(next1 ? (last1 = e1.Current) : last1, next2 ? (last2 = e2.Current) : last2);
+        }
+      }
+    }
   }
 }

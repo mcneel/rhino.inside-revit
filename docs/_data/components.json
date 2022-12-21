@@ -5086,5 +5086,29 @@
     "typename": "AddText", 
     "until": null, 
     "uuid": "49acc84c-793f-40a4-a1bf-2d8bafbb3604"
+  }, 
+  {
+    "desc": "Given the point, it adds an image to the given View", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "View", 
+    "since": "1.11", 
+    "tab": "Revit", 
+    "title": "Add Image", 
+    "typename": "AddImage", 
+    "until": null, 
+    "uuid": "506d5c19-5054-4428-a857-a4d7e8db8ad8"
+  }, 
+  {
+    "desc": "Given the path, it adds an image type to the given View", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "View", 
+    "since": "1.11", 
+    "tab": "Revit", 
+    "title": "Add Image Type", 
+    "typename": "AddImageType", 
+    "until": null, 
+    "uuid": "09bd0aa8-52d7-4c2b-b7b1-c66304c939af"
   }
 ]

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -7,6 +8,7 @@ using Autodesk.Revit.UI.Selection;
 namespace RhinoInside.Revit.External.UI.Selection
 {
   using External.ApplicationServices.Extensions;
+  using External.DB.Extensions;
 
   public static class Selection
   {
@@ -149,6 +151,49 @@ namespace RhinoInside.Revit.External.UI.Selection
 
       return snapTypes;
     }
+
+    internal static IDisposable NoSelectionScope(this Document document)
+    {
+      return UI.Selection.NoSelectionScope.Documents.Contains(document) ? default : new NoSelectionScope(document);
+    }
+  }
+
+  class NoSelectionScope : IDisposable
+  {
+    static readonly HashSet<Document> _Documents = new HashSet<Document>();
+    public static IReadOnlyCollection<Document> Documents => _Documents;
+
+    UIDocument UIDocument;
+    ICollection<ElementId> ElementIds;
+
+    public NoSelectionScope(Document document) => HostedApplication.Active.InvokeInHostContext(() =>
+    {
+      UIDocument = new UIDocument(document);
+      ElementIds = UIDocument.Selection.GetElementIds();
+      if (ElementIds.Count > 0) UIDocument.Selection.SetElementIds(ElementIdExtension.EmptyCollection);
+
+      _Documents.Add(document);
+    });
+
+    public void Dispose() => HostedApplication.Active.InvokeInHostContext(() =>
+    {
+      using (UIDocument)
+      {
+        if (UIDocument.IsValidObject)
+        {
+          _Documents.Remove(UIDocument.Document);
+
+          /*if (ElementIds.Count > 0) */
+          UIDocument.Selection.SetElementIds(ElementIds);
+          UIDocument = default;
+        }
+        else
+        {
+          foreach(var document in _Documents.ToArray())
+            if (!document.IsValidObject) _Documents.Remove(document);
+        }
+      }
+    });
   }
 }
 

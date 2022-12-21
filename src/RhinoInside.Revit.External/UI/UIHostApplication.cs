@@ -301,14 +301,16 @@ namespace System.Windows.Interop
 {
   static class UIHostApplicationInterop
   {
+    static HwndTarget MainWindowTarget;
     public static Window GetMainWindow(this RhinoInside.Revit.External.UI.UIHostApplication app)
     {
       if (app.MainWindowHandle != IntPtr.Zero)
       {
-        if (HwndSource.FromHwnd(app.MainWindowHandle).RootVisual is Window window)
+        if (HwndSource.FromHwnd(app.MainWindowHandle)?.RootVisual is Window window)
           return window;
 
-        try { return new HwndTarget(app.MainWindowHandle).RootVisual as Window; }
+        var target = MainWindowTarget ?? (MainWindowTarget = new HwndTarget(app.MainWindowHandle));
+        try { return target.RootVisual as Window; }
         catch { }
       }
 

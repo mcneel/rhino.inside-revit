@@ -1,10 +1,12 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace RhinoInside.Revit.External.DB
 {
   public static class NumericTolerance
   {
+    #region Constants
     /// <summary>
     /// Tolerance value that represents the minimum supported tolerance.
     /// </summary>
@@ -41,6 +43,60 @@ namespace RhinoInside.Revit.External.DB
     /// Same as DBL_EPSILON 2.2204460492503131e-16
     /// </remarks>
     public const double Delta = double.MaxValue * double.Epsilon / 4.0;
+    #endregion
+
+    #region Class
+    const ulong ZeroMask          = 0x0000_0000_0000_0000UL;
+    const ulong SignMask          = 0x8000_0000_0000_0000UL;
+    const ulong ExponentMask      = 0x7FF0_0000_0000_0000UL;
+    const ulong SignificandMask   = 0x000F_FFFF_FFFF_FFFFUL;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static ulong ToBits(double value) => ((ulong) BitConverter.DoubleToInt64Bits(value));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsFinite(double value)
+    {
+      return (ToBits(value) & ~SignMask) < ExponentMask;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsNegative(double value)
+    {
+      if (double.IsNaN(value)) return false;
+      return (ToBits(value) & SignMask) != 0UL;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsPositive(double value)
+    {
+      if (double.IsNaN(value)) return false;
+      return (ToBits(value) & SignMask) == 0UL;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsNegativeZero(double value)
+    {
+      return ToBits(value) == SignMask;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsPositiveZero(double value)
+    {
+      return ToBits(value) == 0UL;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static double Direction(double value)
+    {
+      // NaN               --> value
+      // IsNegative(value) --> -1.0
+      // IsPositive(value) --> +1.0
+
+      if (double.IsNaN(value)) return value;
+      return ((ulong) BitConverter.DoubleToInt64Bits(value) & SignMask) == 0UL ? +1.0 : -1.0;
+    }
+    #endregion
 
     #region Abs
     /// <summary>
@@ -101,7 +157,7 @@ namespace RhinoInside.Revit.External.DB
     }
     #endregion
 
-    #region AlmostEqual
+    #region AlmostEquals
     /// <summary>
     /// Compares two doubles and determines if they are equal within the specified maximum absolute error.
     /// </summary>
@@ -119,14 +175,41 @@ namespace RhinoInside.Revit.External.DB
       return Math.Abs(x - y) <= tolerance;
     }
     #endregion
+
+    #region MinNumber
+    /// <summary>
+    /// Compares two values to compute which is lesser and returning the other value if an input is <see cref="double.NaN"/>.
+    /// </summary>
+    /// <param name="x">The value to compare with <paramref name="y"/>.</param>
+    /// <param name="y">The value to compare with <paramref name="x"/>.</param>
+    /// <returns><paramref name="x"/> if is less than <paramref name="y"/>; otherwise <paramref name="y"/></returns>
+    /// <remarks>
+    /// This requires <see cref="double.NaN"/> inputs to not be propagated back to the caller and for -0.0 to be treated as less than +0.0.
+    /// </remarks>
+    public static double MinNumber(double x, double y) => x < y ? x : IsNegativeZero(y) || IsNegativeZero(x) ? -0.0 : y;
+    #endregion
+
+    #region MaxNumber
+    /// <summary>
+    /// Compares two values to compute which is greater and returning the other value if an input is <see cref="double.NaN"/>.
+    /// </summary>
+    /// <param name="x">The value to compare with <paramref name="y"/>.</param>
+    /// <param name="y">The value to compare with <paramref name="x"/>.</param>
+    /// <returns><paramref name="x"/> if is grater than <paramref name="y"/>; otherwise <paramref name="y"/></returns>
+    /// <remarks>
+    /// This requires <see cref="double.NaN"/> inputs to not be propagated back to the caller and for -0.0 to be treated as less than +0.0.
+    /// </remarks>
+    public static double MaxNumber(double x, double y) => x > y ? x : IsPositiveZero(y) || IsPositiveZero(x) ? +0.0 : y;
+    #endregion
   }
 
   /// <summary>
-  /// This class represents a Summation ∑ of floating points values.
+  /// This class represents a Summation ∑ of <see cref="System.Double"/> values.
   /// </summary>
   /// <remarks>
   /// Implemented using Neumaier summation algorithm.
   /// </remarks>
+  [DebuggerDisplay("{Value}")]
   struct Sum
   {
     double sum; // An accumulator.
@@ -153,6 +236,228 @@ namespace RhinoInside.Revit.External.DB
     {
       for (int v = 0; v < values.Length; ++v)
         Add(values[v]);
+    }
+  }
+
+  /// <summary>
+  /// This class represents a bounding interval endpoint on the set of <see cref="System.Double"/> numbers.
+  /// </summary>
+  [DebuggerDisplay("{Bound}")]
+  readonly struct BoundingValue
+  {
+    public enum Bounding
+    {
+      DisabledMin = -1,
+      Enabled = 0,
+      DisabledMax = +1
+    }
+
+    public bool IsEnabled => Value == Bound;
+    public bool IsDisabled => Value != Bound;
+
+    public readonly double Value;
+    public readonly double Bound;
+
+    #region Constructors
+    BoundingValue(double value, double bound) { Value = value; Bound = bound; }
+
+    public BoundingValue(BoundingValue value) : this(value.Value, value.Bound) { }
+    public BoundingValue(double value) : this(value, Bounding.Enabled) { }
+    public BoundingValue(double value, Bounding bounding)
+    {
+      switch (value)
+      {
+        case double.NegativeInfinity: Value = double.MinValue; break;
+        case double.PositiveInfinity: Value = double.MaxValue; break;
+        default: Value = value; break;
+      }
+
+      switch (bounding)
+      {
+        case Bounding.DisabledMin: Bound = double.NegativeInfinity; break;
+        case Bounding.DisabledMax: Bound = double.PositiveInfinity; break;
+        default:                   Bound = Value;                   break;
+      }
+    }
+
+    public static implicit operator BoundingValue(double value) => new BoundingValue(value);
+    public static implicit operator BoundingValue((double Value, Bounding Bounding) value) => new BoundingValue(value.Value, value.Bounding);
+    #endregion
+
+    #region Deconstuctors
+    public void Deconstruct(out double value, out Bounding bounding)
+    {
+      value = Value;
+      switch (Bound)
+      {
+        case double.NegativeInfinity: bounding = Bounding.DisabledMin;  break;
+        case double.PositiveInfinity: bounding = Bounding.DisabledMax;  break;
+        default:                      bounding = Bounding.Enabled;      break;
+      }
+    }
+
+    public static implicit operator double(BoundingValue value) => value.Bound;
+
+    public static bool operator true(BoundingValue value) => value.IsEnabled;
+    public static bool operator false(BoundingValue value) => value.IsDisabled;
+    #endregion
+
+    #region System.Object
+    public override string ToString() => Bound.ToString();
+    public override bool Equals(object obj) => obj is BoundingValue value && value == this;
+    public override int GetHashCode() => Bound.GetHashCode();
+    #endregion
+
+    #region Operators
+    public static bool operator ==(BoundingValue value, BoundingValue other) => value.Bound == other.Bound;
+    public static bool operator !=(BoundingValue value, BoundingValue other) => value.Bound != other.Bound;
+
+    public static bool operator <(BoundingValue value, BoundingValue other) => value.Bound < other.Bound;
+    public static bool operator >(BoundingValue value, BoundingValue other) => value.Bound > other.Bound;
+
+    public static bool operator <=(BoundingValue value, BoundingValue other) => value.Bound <= other.Bound;
+    public static bool operator >=(BoundingValue value, BoundingValue other) => value.Bound >= other.Bound;
+
+    public static BoundingValue operator -(BoundingValue value) => new BoundingValue(-value.Value, -value.Bound);
+    #endregion
+
+    /// <summary>
+    /// Compares two values to compute which is lesser and returning the other value if an input is <see cref="double.NaN"/>.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static BoundingValue MinBound(BoundingValue value, BoundingValue other)
+    {
+      var a = value.Bound;
+      var b = other.Bound;
+      return (a < b ? value.Value : other.Value, value.IsDisabled || other.IsDisabled ? Bounding.DisabledMin : Bounding.Enabled);
+    }
+
+    /// <summary>
+    /// Compares two values to compute the median and returning the other value if an input is <see cref="double.NaN"/>.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static BoundingValue MidBound(BoundingValue value, BoundingValue other)
+    {
+      var a = value.Bound;
+      var b = other.Bound;
+      if (double.IsNaN(a)) return other;
+      if (double.IsNaN(b)) return value;
+
+      return (a * 0.5) + (b * 0.5);
+    }
+
+    /// <summary>
+    /// Compares two values to compute which is greater and returning the other value if an input is <see cref="double.NaN"/>.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static BoundingValue MaxBound(BoundingValue value, BoundingValue other)
+    {
+      var a = value.Bound;
+      var b = other.Bound;
+      return (a > b ? value.Value : other.Value, value.IsDisabled || other.IsDisabled ? Bounding.DisabledMax : Bounding.Enabled);
+    }
+
+    public static BoundingValue Min(BoundingValue value, BoundingValue other)
+    {
+      var a = value.Bound;
+      var b = other.Bound;
+      return a < b ? value : double.IsNaN(value.Value) ? value : other;
+    }
+    public static BoundingValue Mid(BoundingValue value, BoundingValue other) => (value * 0.5) + (other * 0.5);
+    public static BoundingValue Max(BoundingValue value, BoundingValue other)
+    {
+      var a = value.Bound;
+      var b = other.Bound;
+      return a > b ? value : double.IsNaN(value.Value) ? value : other;
+    }
+  }
+
+  /// <summary>
+  /// This class represents a bounding interval on the set of <see cref="System.Double"/> numbers.
+  /// </summary>
+  [DebuggerDisplay("{Left} .. {Right}")]
+  readonly struct BoundingInterval
+  {
+    public static readonly BoundingInterval Empty    = (double.NaN,                           double.NaN);
+    public static readonly BoundingInterval Universe = (double.NegativeInfinity, double.PositiveInfinity);
+
+    public readonly BoundingValue Left;
+    public readonly BoundingValue Right;
+
+    public BoundingValue Min => BoundingValue.MinBound(Left, Right);
+    public BoundingValue Mid => BoundingValue.MidBound(Left, Right);
+    public BoundingValue Max => BoundingValue.MaxBound(Right, Left);
+
+    #region Constructors
+    public BoundingInterval(BoundingValue left, BoundingValue right) { Left = left; Right = right; }
+
+    public static implicit operator BoundingInterval((BoundingValue Left, BoundingValue Right) value) => new BoundingInterval(value.Left, value.Right);
+    #endregion
+
+    #region Deconstructors
+    public void Deconstruct(out BoundingValue left, out BoundingValue right)
+    {
+      left = Left;
+      right = Right;
+    }
+
+    public static bool operator true(BoundingInterval value) => value.IsIncreasing;
+    public static bool operator false(BoundingInterval value) => value.IsDecreasing;
+    #endregion
+
+    #region System.Object
+    public override string ToString() => $"{Left} .. {Right}";
+    public override bool Equals(object obj) => obj is BoundingInterval value && value == this;
+    public override int GetHashCode()
+    {
+      int hashCode = -1051820395;
+      hashCode = hashCode * -1521134295 + Left.GetHashCode();
+      hashCode = hashCode * -1521134295 + Right.GetHashCode();
+      return hashCode;
+    }
+    #endregion
+
+    #region Classification
+    public bool IsIncreasing => Left < Right;
+    public bool IsDecreasing => Left > Right;
+    public bool IsDegenerate => Left == Right;
+    public bool IsProper => Left != Right;
+    public bool IsEmpty => !IsDegenerate && !IsProper;
+    #endregion
+
+    #region Operators
+    public static bool operator ==(BoundingInterval left, BoundingInterval right) => left.Left == right.Left && left.Right == right.Right;
+    public static bool operator !=(BoundingInterval left, BoundingInterval right) => left.Left != right.Left || left.Right != right.Right;
+
+    public static BoundingInterval operator -(BoundingInterval value) => (-value.Right, -value.Left);
+
+    public static BoundingInterval operator !(BoundingInterval value) => (value.Right, value.Left);
+    public static BoundingInterval operator &(BoundingInterval left, BoundingInterval right) => (BoundingValue.MaxBound(left.Left, right.Left), BoundingValue.MinBound(left.Right, right.Right));
+    public static BoundingInterval operator |(BoundingInterval left, BoundingInterval right) => (BoundingValue.MinBound(left.Left, right.Left), BoundingValue.MaxBound(left.Right, right.Right));
+    #endregion
+
+    public BoundingValue GetRadius() => (Right * 0.5) - (Left * 0.5);
+
+    public bool Contains(BoundingValue value, bool closed = false)
+    {
+      if (closed)
+      {
+        if (IsIncreasing) return Left  <= value && value <= Right;
+        if (IsDecreasing) return Right <= value || value <= Left;
+      }
+      else
+      {
+        if (IsIncreasing) return Left  <  value && value <  Right;
+        if (IsDecreasing) return Right <  value || value <  Left;
+      }
+
+      return false;
     }
   }
 }

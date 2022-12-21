@@ -46,6 +46,9 @@ namespace RhinoInside.Revit.External.DB
     #endregion
 
     #region Logical Filters
+    /// <summary>
+    /// <see cref="Autodesk.Revit.DB.ElementFilter"/> that returns no element on any Revit <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
     public static ElementFilter Empty { get; } = new LogicalAndFilter
     (
       new ElementFilter[]
@@ -76,7 +79,10 @@ namespace RhinoInside.Revit.External.DB
 #endif
     }
 
-    public static ElementFilter All { get; } = new LogicalOrFilter
+    /// <summary>
+    /// <see cref="Autodesk.Revit.DB.ElementFilter"/> that returns all elements on any Revit <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    public static ElementFilter Universe { get; } = new LogicalOrFilter
     (
       new ElementFilter[]
       {
@@ -85,7 +91,7 @@ namespace RhinoInside.Revit.External.DB
       }
     );
 
-    public static bool IsAll(this ElementFilter filter)
+    public static bool IsUniverse(this ElementFilter filter)
     {
 #if REVIT_2019
       if (filter is LogicalOrFilter or)
@@ -102,7 +108,7 @@ namespace RhinoInside.Revit.External.DB
 
       return false;
 #else
-      return ReferenceEquals(filter, All);
+      return ReferenceEquals(filter, Universe);
 #endif
     }
 
@@ -122,7 +128,7 @@ namespace RhinoInside.Revit.External.DB
 
     public static ElementFilter ExclusionFilter(ICollection<ElementId> ids, bool inverted = false) =>
       ids.Count == 0 ?
-      (inverted ? Empty : All) :
+      (inverted ? Empty : Universe) :
       (inverted ? (ElementFilter) new ElementIdSetFilter(ids) : (ElementFilter) new ExclusionFilter(ids));
     #endregion
 
@@ -139,7 +145,7 @@ namespace RhinoInside.Revit.External.DB
       else if (typeof(ElementType) == type)                 return new ElementIsElementTypeFilter();
       else if (typeof(Element) != type)                     return new ElementClassFilter(type);
 
-      return All;
+      return Universe;
     }
 
     public static ElementFilter ElementClassFilter(params Type[] types)
@@ -149,7 +155,7 @@ namespace RhinoInside.Revit.External.DB
       var set = new HashSet<Type>(types);
       var filters = new List<ElementFilter>();
 
-      if (set.Remove(typeof(Element)))      return All;
+      if (set.Remove(typeof(Element)))      return Universe;
       if (set.Remove(typeof(ElementType)))  { filters.Add(new ElementIsElementTypeFilter());  specialTypesIncluded = allTypesIncluded = true; }
       if (set.Remove(typeof(Area)))         { filters.Add(new AreaFilter());                  specialTypesIncluded = true; }
       if (set.Remove(typeof(AreaTag)))      { filters.Add(new AreaTagFilter());               specialTypesIncluded = true; }
@@ -314,20 +320,20 @@ namespace RhinoInside.Revit.External.DB
       Quick = 1,
       Logical = 2,
       Slow = 4,
-      All = int.MaxValue
+      Universe = int.MaxValue
     }
 
     private static FilterCost GetFilterCost(this ElementFilter filter)
     {
-      if (ReferenceEquals(filter, null))    return FilterCost.Null;
-      if (ReferenceEquals(filter, Empty))   return FilterCost.Empty;
-      if (ReferenceEquals(filter, All))     return FilterCost.All;
+      if (ReferenceEquals(filter, null))      return FilterCost.Null;
+      if (ReferenceEquals(filter, Empty))     return FilterCost.Empty;
+      if (ReferenceEquals(filter, Universe))  return FilterCost.Universe;
 
       switch (filter)
       {
-        case ElementQuickFilter _:          return FilterCost.Quick;
-        case ElementLogicalFilter logical:  return logical.GetFilterCost();
-        default:                            return FilterCost.Slow;
+        case ElementQuickFilter _:            return FilterCost.Quick;
+        case ElementLogicalFilter logical:    return logical.GetFilterCost();
+        default:                              return FilterCost.Slow;
       }
     }
 
@@ -351,9 +357,9 @@ namespace RhinoInside.Revit.External.DB
       var selfCost = self.GetFilterCost();
       var otherCost = other.GetFilterCost();
 
-      if (selfCost  == FilterCost.All   || otherCost == FilterCost.All) return All;
-      if (selfCost  == FilterCost.Empty || selfCost  == FilterCost.Null) return other;
-      if (otherCost == FilterCost.Empty || otherCost == FilterCost.Null) return self;
+      if (selfCost  == FilterCost.Universe  || otherCost == FilterCost.Universe) return Universe;
+      if (selfCost  == FilterCost.Empty     || selfCost  == FilterCost.Null) return other;
+      if (otherCost == FilterCost.Empty     || otherCost == FilterCost.Null) return self;
 
       return selfCost < otherCost ?
         new LogicalOrFilter(self, other) :
@@ -370,7 +376,7 @@ namespace RhinoInside.Revit.External.DB
       var list = new List<ElementFilter>(filters.Count);
       foreach (var filter in filters.Distinct())
       {
-        if (ReferenceEquals(filter, All)) return All;
+        if (ReferenceEquals(filter, Universe)) return Universe;
         if (ReferenceEquals(filter, Empty)) continue;
         if (ReferenceEquals(filter, null)) continue;
         list.Add(filter);
@@ -386,9 +392,9 @@ namespace RhinoInside.Revit.External.DB
       var selfCost = self.GetFilterCost();
       var otherCost = other.GetFilterCost();
 
-      if (selfCost  == FilterCost.Empty || otherCost == FilterCost.Empty) return Empty;
-      if (selfCost  == FilterCost.All   || selfCost  == FilterCost.Null) return other;
-      if (otherCost == FilterCost.All   || otherCost == FilterCost.Null) return self;
+      if (selfCost  == FilterCost.Empty     || otherCost == FilterCost.Empty) return Empty;
+      if (selfCost  == FilterCost.Universe  || selfCost  == FilterCost.Null) return other;
+      if (otherCost == FilterCost.Universe  || otherCost == FilterCost.Null) return self;
 
       return selfCost < otherCost ?
         new LogicalAndFilter(self, other) :
@@ -406,7 +412,7 @@ namespace RhinoInside.Revit.External.DB
       foreach (var filter in filters.Distinct())
       {
         if (ReferenceEquals(filter, Empty)) return Empty;
-        if (ReferenceEquals(filter, All)) continue;
+        if (ReferenceEquals(filter, Universe)) continue;
         if (ReferenceEquals(filter, null)) continue;
         list.Add(filter);
       }

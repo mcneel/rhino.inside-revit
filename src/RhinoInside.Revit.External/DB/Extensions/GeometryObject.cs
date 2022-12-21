@@ -652,6 +652,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       switch (geometry)
       {
+        case null:
+          return null;
+
         case GeometryElement element:
           return element.GetBoundingBox();
 
@@ -707,9 +710,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
               return bbox;
           }
           break;
+
+        default:
+          throw new NotImplementedException($"{nameof(GetBoundingBox)} is not implemented for {geometry.GetType()}.");
       }
 
-      return new BoundingBoxXYZ() { Enabled = false };
+      return BoundingBoxXYZExtension.Empty;
     }
 
     public static Element GetSymbol(this GeometryInstance instance)

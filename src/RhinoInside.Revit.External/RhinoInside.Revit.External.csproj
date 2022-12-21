@@ -29,8 +29,8 @@
     <Compile Include="ApplicationServices\HostServices.cs" />
     <Compile Include="DB\Application.cs" />
     <Compile Include="DB\BuiltInLinePattern.cs" />
-    <Compile Include="DB\BuiltInMullionPositionId.cs" />
-    <Compile Include="DB\BuiltInMullionProfileId.cs" />
+    <Compile Include="DB\BuiltInMullionPosition.cs" />
+    <Compile Include="DB\BuiltInProfileType.cs" />
     <Compile Include="DB\CompoundElementFilter.cs" />
     <Compile Include="DB\CurtainGridJoinCondition.cs" />
     <Compile Include="DB\CurtainGridLayout.cs" />
@@ -43,6 +43,7 @@
     <Compile Include="DB\Extensions\BoundingBoxUV.cs" />
     <Compile Include="DB\Extensions\BoundingBoxXYZ.cs" />
     <Compile Include="DB\Extensions\Category.cs" />
+    <Compile Include="DB\Extensions\Color.cs" />
     <Compile Include="DB\Extensions\Curve.cs" />
     <Compile Include="DB\Extensions\CurveLoop.cs" />
     <Compile Include="DB\Extensions\Document.cs" />
@@ -123,6 +124,7 @@
       <DependentUpon>ProductInfo.tt</DependentUpon>
     </Compile>
     <Compile Include="Settings\AddIns.cs" />
+    <Compile Include="TemporaryDirectory.cs" />
     <Compile Include="UI\Application.cs" />
     <Compile Include="UI\Command.cs" />
     <Compile Include="UI\EditScope.cs" />

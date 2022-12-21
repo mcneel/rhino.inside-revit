@@ -97,9 +97,9 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string ToString()
     {
-      if (!IsValid)         return $"Invalid {TypeName}";
-      if (Value.IsEmpty())  return "<empty>";
-      if (Value.IsAll())    return "<all>";
+      if (!IsValid)           return $"Invalid {TypeName}";
+      if (Value.IsEmpty())    return "<nothing>";
+      if (Value.IsUniverse()) return "<everything>";
 
       return Value.GetType().Name;
     }

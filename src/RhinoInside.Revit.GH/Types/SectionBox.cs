@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value is ARDB_SectionBox box)
       {
-        if (box.GetFirstDependent<ARDB.View>() is ARDB.View3D view)
+        if (box.GetFirstDependent<ARDB.View3D>() is ARDB.View3D view)
         {
           var sectionBox = view.GetSectionBox();
           sectionBox.Enabled = true;

@@ -1,17 +1,19 @@
 using System;
+using System.Globalization;
 using System.Text;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB
 {
   using Extensions;
+
 #if REVIT_2024
   using IntId = Int64;
 #else
   using IntId = Int32;
 #endif
 
-  static class NumHexDigits
+  internal static class NumHexDigits
   {
     public const int IntId = sizeof(IntId) * 2;
     public const int Guid = 4 + (sizeof(Int32) * 8);
@@ -25,14 +27,14 @@ namespace RhinoInside.Revit.External.DB
 
   static class RuntimeId
   {
-    public static string Format(IntId id) => id.ToString("D", System.Globalization.CultureInfo.InvariantCulture);
-    public static IntId Parse(string s) => IntId.Parse(s, System.Globalization.NumberStyles.AllowLeadingSign, System.Globalization.CultureInfo.InvariantCulture);
-    public static bool TryParse(string s, out IntId id) => IntId.TryParse(s, System.Globalization.NumberStyles.AllowLeadingSign, System.Globalization.CultureInfo.InvariantCulture, out id);
+    public static string Format(IntId id) => id.ToString("D", CultureInfo.InvariantCulture);
+    public static IntId Parse(string s) => IntId.Parse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
+    public static bool TryParse(string s, out IntId id) => IntId.TryParse(s, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out id);
   }
 
   public static class UniqueId
   {
-    public static string Format(Guid episodeId, IntId id) => $"{episodeId:D}-{id.ToString($"x{NumHexDigits.ElementId}")}";
+    public static string Format(Guid episodeId, IntId id) => $"{episodeId:D}-{id.ToString($"x{NumHexDigits.ElementId}", CultureInfo.InvariantCulture)}";
     public static bool TryParse(string s, out Guid episodeId, out IntId id)
     {
       episodeId = Guid.Empty;
@@ -42,7 +44,7 @@ namespace RhinoInside.Revit.External.DB
 
       return Guid.TryParseExact(s.Substring(0, NumHexDigits.EpisodeId), "D", out episodeId) &&
              s[NumHexDigits.EpisodeId] == '-' &&
-             IntId.TryParse(s.Substring(NumHexDigits.EpisodeId + 1, NumHexDigits.ElementId), System.Globalization.NumberStyles.AllowHexSpecifier, System.Globalization.CultureInfo.InvariantCulture, out id);
+             IntId.TryParse(s.Substring(NumHexDigits.EpisodeId + 1, NumHexDigits.ElementId), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out id);
     }
   }
 
@@ -133,7 +135,7 @@ namespace RhinoInside.Revit.External.DB
       if (Index >= 0)
       {
         builder.Append(':');
-        builder.Append(Index.ToString("D", System.Globalization.CultureInfo.InvariantCulture));
+        builder.Append(Index.ToString("D", CultureInfo.InvariantCulture));
       }
 
       if (Type != GeometryObjectType.ELEMENT)

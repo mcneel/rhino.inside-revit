@@ -12,7 +12,6 @@ namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Display;
   using External.DB.Extensions;
-  using RhinoInside.Revit.External.DB;
 
   [Kernel.Attributes.Name("Element")]
   public interface IGH_Element : IGH_Reference
@@ -208,6 +207,11 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.InternalOrigin),                  (element)=> new InternalOrigin        (element as ARDB.InternalOrigin)    },
       { typeof(ARDB.BasePoint),                       (element)=> new BasePoint             (element as ARDB.BasePoint)         },
 #endif
+#if REVIT_2020
+      { typeof(ARDB.ImageInstance),                   (element)=> new ImageInstance         (element as ARDB.ImageInstance)     },
+#endif
+      { typeof(ARDB.ImageType),                       (element)=> new ImageType             (element as ARDB.ImageType)         },
+
       { typeof(ARDB.DesignOption),                    (element)=> new DesignOption          (element as ARDB.DesignOption)      },
       { typeof(ARDB.Phase),                           (element)=> new Phase                 (element as ARDB.Phase)             },
       { typeof(ARDB.SelectionFilterElement),          (element)=> new SelectionFilterElement(element as ARDB.SelectionFilterElement)},
@@ -265,7 +269,9 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Wall),                            (element)=> new Wall                  (element as ARDB.Wall)              },
       { typeof(ARDB.FamilyInstance),                  (element)=> new FamilyInstance        (element as ARDB.FamilyInstance)    },
       { typeof(ARDB.Panel),                           (element)=> new Panel                 (element as ARDB.Panel)             },
+      { typeof(ARDB.PanelType),                       (element)=> new PanelType             (element as ARDB.PanelType)         },
       { typeof(ARDB.Mullion),                         (element)=> new Mullion               (element as ARDB.Mullion)           },
+      { typeof(ARDB.MullionType),                     (element)=> new MullionType           (element as ARDB.MullionType)       },
 
       { typeof(ARDB.TextElement),                     (element)=> new TextElement           (element as ARDB.TextElement)       },
       { typeof(ARDB.Dimension),                       (element)=> new Dimension             (element as ARDB.Dimension)         },
@@ -350,13 +356,19 @@ namespace RhinoInside.Revit.GH.Types
       if (!element.IsValid())
         return null;
 
-      // Special FamilyInstance
-      if (element is ARDB.FamilyInstance familyInstance)
+      // Overrides
+      switch(element)
       {
-        if (StructuralBeam.IsValidElement(familyInstance)) return new StructuralBeam(familyInstance);
-        if (StructuralBrace.IsValidElement(familyInstance)) return new StructuralBrace(familyInstance);
-        if (StructuralColumn.IsValidElement(familyInstance)) return new StructuralColumn(familyInstance);
-        if (Panel.IsValidElement(element)) return new Panel(familyInstance);
+        case ARDB.FamilyInstance familyInstance:
+          if (StructuralBeam.IsValidElement(familyInstance)) return new StructuralBeam(familyInstance);
+          if (StructuralBrace.IsValidElement(familyInstance)) return new StructuralBrace(familyInstance);
+          if (StructuralColumn.IsValidElement(familyInstance)) return new StructuralColumn(familyInstance);
+          if (Panel.IsValidElement(element)) return new Panel(familyInstance);
+          break;
+
+        case ARDB.FamilySymbol familySymbol:
+          if (ProfileType.IsValidElement(element)) return new ProfileType(familySymbol);
+          break;
       }
 
       if (element is ARDB.View view)
@@ -374,7 +386,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      // By type
+      // By Type
       for (var type = element.GetType(); type != typeof(ARDB.Element); type = type.BaseType)
       {
         if (ActivatorDictionary.TryGetValue(type, out var activator))
@@ -394,12 +406,15 @@ namespace RhinoInside.Revit.GH.Types
           case ARDB.BuiltInCategory.OST_DesignOptionSets:
             if (DesignOptionSet.IsValidElement(element)) return new DesignOptionSet(element);
             break;
-#if !REVIT_2021
-          case ARDB.BuiltInCategory.OST_IOS_GeoSite:
-            if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element);
-            if (BasePoint.IsValidElement(element)) return new BasePoint(element as ARDB.BasePoint);
+
+          case ARDB.BuiltInCategory.OST_PropertySet:
+            if (element is ARDB.PropertySetElement pset)
+            {
+              if (StructuralAssetElement.IsValidElement(element)) return new StructuralAssetElement(pset);
+              if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
+            }
             break;
-#endif
+
           case ARDB.BuiltInCategory.OST_VolumeOfInterest:
             if (ScopeBox.IsValidElement(element)) return new ScopeBox(element);
             break;
@@ -408,13 +423,18 @@ namespace RhinoInside.Revit.GH.Types
             if (SectionBox.IsValidElement(element)) return new SectionBox(element);
             break;
 
-          case ARDB.BuiltInCategory.OST_PropertySet:
-            if (element is ARDB.PropertySetElement pset)
-            {
-              if (StructuralAssetElement.IsValidElement(element)) return new StructuralAssetElement(pset);
-              else if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
-            }
+#if !REVIT_2021
+          case ARDB.BuiltInCategory.OST_IOS_GeoSite:
+            if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element);
+            if (BasePoint.IsValidElement(element)) return new BasePoint(element as ARDB.BasePoint);
             break;
+#endif
+
+#if !REVIT_2020
+          case ARDB.BuiltInCategory.OST_RasterImages:
+            if (ImageInstance.IsValidElement(element)) return new ImageInstance(element);
+            break;
+#endif
         }
       }
 
@@ -509,6 +529,10 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
+      // Hack to force `ParameterValue.CastTo` to be called.
+      if (source is ParameterValue)
+        return false;
+
       if (source is IGH_Goo goo)
       {
         if (source is IGH_Element element)
@@ -726,7 +750,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);
 
-    #region Version
+#region Version
     public Guid? ExportID => Document?.GetExportID(Id);
 
     public (Guid? Created, Guid? Updated) Version
@@ -749,9 +773,9 @@ namespace RhinoInside.Revit.GH.Types
         return (created, updated);
       }
     }
-    #endregion
+#endregion
 
-    #region Properties
+#region Properties
     public bool CanDelete => IsValid && ARDB.DocumentValidation.CanDeleteElement(Document, Id);
 
     public bool? Pinned
@@ -856,7 +880,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    #region Category
+#region Category
     public virtual Category Category
     {
       get => Value is object ?
@@ -867,7 +891,7 @@ namespace RhinoInside.Revit.GH.Types
 
       set => throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Category.");
     }
-    #endregion
+#endregion
 
     public virtual ElementType Type
     {
@@ -924,9 +948,9 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
-    #endregion
+#endregion
 
-    #region Identity Data
+#region Identity Data
     public virtual string Description
     {
       get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
@@ -1010,6 +1034,6 @@ namespace RhinoInside.Revit.GH.Types
           Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.Update(value);
       }
     }
-    #endregion
+#endregion
   }
 }

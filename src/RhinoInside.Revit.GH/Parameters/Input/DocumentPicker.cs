@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
             if (category.CategoryType == ARDB.CategoryType.Invalid)
               continue;
 
-            var item = new GH_ValueListItem(category.Name, category.Id.IntegerValue.ToString());
+            var item = new GH_ValueListItem(category.Name, category.Id.ToString("D"));
             item.Selected = selectedItems.Contains(item.Expression);
             ListItems.Add(item);
           }

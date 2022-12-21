@@ -29,6 +29,78 @@ namespace RhinoInside.Revit.Convert.Render
   public static class RenderMaterialConverter
   {
     /// <summary>
+    /// Converts the specified <see cref="ARDB.AppearanceAssetElement" /> to an equivalent <see cref="Rhino.Render.RenderMaterial" /> in given <see cref="Rhino.RhinoDoc" />.
+    /// </summary>
+    /// <example>
+    /// 
+    /// Using <see cref="ToRenderMaterial(ARDB.AppearanceAssetElement, RhinoDoc)" /> as extension method:
+    ///
+    /// <code language="csharp">
+    /// using Rhino;
+    /// using DB = Autodesk.Revit.DB;
+    /// using RhinoInside.Revit.Convert.Render;
+    ///
+    /// RhinoDoc doc = Rhino.RhinoDoc.ActiveDoc;
+    /// RenderMaterial rhinoMaterial = appearanceAssetElement.ToRenderMaterial(doc);
+    /// </code>
+    /// 
+    /// <code language="Python">
+    /// import clr
+    /// clr.AddReference("RhinoCommon")
+    /// clr.AddReference("RevitAPI")
+    /// clr.AddReference("RhinoInside.Revit")
+    /// from Rhino.Render import RenderMaterial
+    /// import Autodesk.Revit.DB as DB
+    /// import RhinoInside.Revit.Convert.Render
+    /// clr.ImportExtensions(RhinoInside.Revit.Convert.Render)
+    /// 
+    /// rhino_material = revit_appearance_asset_element.ToRenderMaterial()	# type: RenderMaterial
+    /// </code>
+    /// 
+    /// Using <see cref="ToRenderMaterial(ARDB.AppearanceAssetElement, RhinoDoc)" /> as static method:
+    ///
+    /// <code language="csharp">
+    /// using Rhino;
+    /// using DB = Autodesk.Revit.DB;
+    /// using RhinoInside.Revit.Convert.Render;
+    ///
+    /// RhinoDoc doc = Rhino.RhinoDoc.ActiveDoc;
+    /// RenderMaterial rhinoMaterial = RenderMaterialConverter.ToRenderMaterial(appearanceAssetElement, doc);
+    /// </code>
+    /// 
+    /// <code language="Python">
+    /// import clr
+    /// clr.AddReference("RhinoCommon")
+    /// clr.AddReference("RevitAPI")
+    /// clr.AddReference("RhinoInside.Revit")
+    /// from Rhino import RhinoDoc
+    /// from Rhino.Render import RenderMaterial
+    /// import Autodesk.Revit.DB as DB
+    /// import RhinoInside.Revit.Convert.Render.RenderMaterialConverter as RMC
+    ///
+    /// doc = RhinoDoc.ActiveDoc	# type: RhinoDoc
+    /// rhino_material = RMC.ToRenderMaterial(revit_appearance_asset_element, doc)	# type: RenderMaterial
+    /// </code>
+    ///
+    /// </example>
+    /// <param name="appearanceAssetElement">Revit appearance element to convert.</param>
+    /// <param name="rhinoDoc">Rhino document to associate the resulting material with.</param>
+    /// <returns>Rhino render material that is equivalent to the provided Revit appearance asset.</returns>
+    /// <since>1.11</since>
+    internal static RenderMaterial ToRenderMaterial(this ARDB.AppearanceAssetElement appearanceAssetElement, RhinoDoc rhinoDoc)
+    {
+      var renderMaterial = RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, rhinoDoc);
+      renderMaterial.Name = appearanceAssetElement.Name;
+
+#if REVIT_2018
+      using (var asset = appearanceAssetElement.GetRenderingAsset())
+        renderMaterial.SimulateRenderingAsset(asset, rhinoDoc);
+#endif
+
+      return renderMaterial;
+    }
+
+    /// <summary>
     /// Converts the specified <see cref="ARDB.Material" /> to an equivalent <see cref="Rhino.Render.RenderMaterial" /> in given <see cref="Rhino.RhinoDoc" />.
     /// </summary>
     /// <example>
@@ -85,7 +157,7 @@ namespace RhinoInside.Revit.Convert.Render
     /// </example>
     /// <param name="material">Revit material to convert.</param>
     /// <param name="rhinoDoc">Rhino document to associate the resulting material with.</param>
-    /// <returns>Rhino renderMaterial that is equivalent to the provided Revit material.</returns>
+    /// <returns>Rhino render material that is equivalent to the provided Revit material.</returns>
     /// <since>1.3</since>
     public static RenderMaterial ToRenderMaterial(this ARDB.Material material, RhinoDoc rhinoDoc)
     {

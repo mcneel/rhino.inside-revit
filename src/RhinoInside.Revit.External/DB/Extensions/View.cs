@@ -229,19 +229,38 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       switch (view.CropBox)
       {
-        case BoundingBoxXYZ cropBox:
-          cropBox.Enabled = true;//view.CropBoxActive;
+        case BoundingBoxXYZ clipBox:
 
-          cropBox.set_MinEnabled(BoundingBoxXYZExtension.AxisX, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_LEFT)?.AsInteger() == 1);
-          cropBox.set_MaxEnabled(BoundingBoxXYZExtension.AxisX, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_RIGHT)?.AsInteger() == 1);
+          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisX, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_LEFT  )?.AsInteger() == 1);
+          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisX, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_RIGHT )?.AsInteger() == 1);
 
-          cropBox.set_MinEnabled(BoundingBoxXYZExtension.AxisY, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_BOTTOM)?.AsInteger() == 1);
-          cropBox.set_MaxEnabled(BoundingBoxXYZExtension.AxisY, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_TOP)?.AsInteger() == 1);
+          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisY, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_BOTTOM)?.AsInteger() == 1);
+          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisY, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_TOP   )?.AsInteger() == 1);
 
-          cropBox.set_MinEnabled(BoundingBoxXYZExtension.AxisZ, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR)?.AsInteger() == 1);
-          cropBox.set_MaxEnabled(BoundingBoxXYZExtension.AxisZ, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_NEAR)?.AsInteger() == 1);
+          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisZ, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR   )?.AsInteger() == 1);
+          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisZ, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_NEAR  )?.AsInteger() == 1);
 
-          return cropBox;
+          // Intersect with Outline
+          using (var outline = view.Outline)
+          {
+            var scale = Math.Max(view.Scale, 1);
+            var (min, max) = clipBox;
+
+            clipBox.Min = new XYZ(NumericTolerance.MinNumber(min.X, outline.Min.U * scale), NumericTolerance.MinNumber(min.Y, outline.Min.V * scale), min.Z);
+            clipBox.Max = new XYZ(NumericTolerance.MaxNumber(max.X, outline.Max.U * scale), NumericTolerance.MaxNumber(max.Y, outline.Max.V * scale), max.Z);
+          }
+
+          if (view is View3D view3D && view3D.IsSectionBoxActive)
+            clipBox.Intersection(view3D.GetSectionBox());
+
+          for (int bound = BoundingBoxXYZExtension.BoundsMin; bound <= BoundingBoxXYZExtension.BoundsMax; ++bound)
+          {
+            for (int dim = BoundingBoxXYZExtension.AxisX; dim <= BoundingBoxXYZExtension.AxisZ; ++dim)
+              clipBox.Enabled |= clipBox.get_BoundEnabled(bound, dim);
+          }
+
+          return clipBox;
+
         default:
           return default;
       }
@@ -261,15 +280,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
             topLevel.ProjectElevation + viewRange.GetOffset(PlanViewPlane.TopClipPlane) :
             +CompoundElementFilter.BoundingBoxLimits;
 
-          return new BoundingBoxIntersectsFilter
-          (
-            new Outline
+          using (var outline = view.Outline)
+          {
+            var scale = Math.Max(view.Scale, 1);
+            return new BoundingBoxIntersectsFilter
             (
-              new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, bottom),
-              new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, top)
-            ),
-            clipped
-          );
+              new Outline
+              (
+                new XYZ(outline.Min.U * scale, outline.Min.V * scale, bottom),
+                new XYZ(outline.Max.U * scale, outline.Max.V * scale, top)
+              ),
+              clipped
+            );
+          }
         }
       }
 
@@ -281,22 +304,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var bottomId = view.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_BOTTOM_ID)?.AsElementId() ?? ElementId.InvalidElementId;
       if (bottomId == ElementId.InvalidElementId) return default;
 
-      var topId    = view.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_TOP_ID   )?.AsElementId() ?? ElementId.InvalidElementId;
+      var topId  = view.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_TOP_ID   )?.AsElementId() ?? ElementId.InvalidElementId;
       var bottom = (view.Document.GetElement(bottomId) as Level)?.ProjectElevation ?? -CompoundElementFilter.BoundingBoxLimits;
       var top    = (view.Document.GetElement(topId   ) as Level)?.ProjectElevation ?? +CompoundElementFilter.BoundingBoxLimits;
 
-      return new BoundingBoxIntersectsFilter
-      (
-        new Outline
+      using (var outline = view.Outline)
+      {
+        var scale = Math.Max(view.Scale, 1);
+
+        return new BoundingBoxIntersectsFilter
         (
-          new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, bottom),
-          new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, top)
-        ),
-        clipped
-      );
+          new Outline
+          (
+            new XYZ(outline.Min.U * scale, outline.Min.V * scale, bottom),
+            new XYZ(outline.Max.U * scale, outline.Max.V * scale, top)
+          ),
+          clipped
+        );
+      }
     }
 
-    public static ElementFilter GetOutlineFilter(this View view, bool clipped = false)
+    public static ElementFilter GetViewTypeFilter(this View view, bool clipped = false)
     {
       if (view is ViewSchedule)
         return new ElementCategoryFilter(view.get_Parameter(BuiltInParameter.SCHEDULE_CATEGORY).AsElementId(), clipped);

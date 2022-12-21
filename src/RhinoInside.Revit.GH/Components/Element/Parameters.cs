@@ -104,8 +104,13 @@ namespace RhinoInside.Revit.GH
           var elementId = parameter.AsElementId();
           if (parameter.Id.TryGetBuiltInParameter(out var builtInElementId))
           {
-            if (builtInElementId == ARDB.BuiltInParameter.ID_PARAM || builtInElementId == ARDB.BuiltInParameter.SYMBOL_ID_PARAM)
-              return new GH_Integer(elementId.IntegerValue);
+            switch (builtInElementId)
+            {
+              case ARDB.BuiltInParameter.ID_PARAM:          return new GH_Integer(elementId.IntegerValue);
+              case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:   return new GH_Integer(elementId.IntegerValue);
+              case ARDB.BuiltInParameter.MULLION_POSITION:  return new Types.MullionPosition(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.MULLION_PROFILE:   return new Types.ProfileType(parameter.Element.Document, elementId);
+            }
           }
 
           return Types.Element.FromElementId(parameter.Element?.Document, parameter.AsElementId());

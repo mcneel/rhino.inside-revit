@@ -191,6 +191,8 @@
     <Compile Include="Components\Filters\QueryFilters.cs" />
     <Compile Include="Components\Filters\Selection\SelectionElements.cs" />
     <Compile Include="Components\Filters\Selection\SelectionFilter.cs" />
+    <Compile Include="Components\Import\AddImage.cs" />
+    <Compile Include="Components\Import\AddImageType.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
     <Compile Include="Components\Model\AddWorkPlaneByPlane.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
@@ -405,6 +407,7 @@
     <Compile Include="Types\GeometryObject.cs" />
     <Compile Include="Types\GraphicalElement.cs" />
     <Compile Include="Types\Group.cs" />
+    <Compile Include="Types\ImageInstance.cs" />
     <Compile Include="Types\Instance.cs" />
     <Compile Include="Types\InstanceElement.cs" />
     <Compile Include="Types\LinePatternElement.cs" />
@@ -414,6 +417,7 @@
     <Compile Include="Types\Parameter.cs" />
     <Compile Include="Types\DatumPlane.cs" />
     <Compile Include="Types\Phase.cs" />
+    <Compile Include="Types\ProfileType.cs" />
     <Compile Include="Types\ProjectLocation.cs" />
     <Compile Include="Types\Railing.cs" />
     <Compile Include="Types\Reference.cs" />

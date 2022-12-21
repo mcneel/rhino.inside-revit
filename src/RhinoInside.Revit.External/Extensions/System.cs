@@ -60,12 +60,15 @@ namespace System
       return builder.ToString();
     }
   }
+}
 
-  internal static class FileExtension
+namespace System.IO
+{
+  internal static class FileInfoExtension
   {
-    public static void MoveFile(string sourceFileName, string destinationFileName, bool overwrite)
+    public static void MoveTo(this FileInfo source, string destFileName, bool overwrite)
     {
-      Microsoft.VisualBasic.FileIO.FileSystem.MoveFile(sourceFileName, destinationFileName, overwrite);
+      Microsoft.VisualBasic.FileIO.FileSystem.MoveFile(source.FullName, destFileName, overwrite);
     }
   }
 }
