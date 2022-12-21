@@ -12,6 +12,10 @@ group: Deployment & Configs
 
 ### RC 
 
+- Added 'Sheet Revisions' component.
+- Moved 'Add Revision' and 'Query Revisions' to the View panel.
+- Added 'Add Detail Group' component.
+- Now 'Create Group Type' works across documents.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
