@@ -465,6 +465,9 @@ namespace RhinoInside.Revit.GH.Types
         );
       }
 
+      if (!value.Value.IsValidObject)
+        value.Value = document;
+
       return value;
     }
 
