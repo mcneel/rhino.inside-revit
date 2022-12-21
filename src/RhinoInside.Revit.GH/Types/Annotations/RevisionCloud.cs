@@ -15,27 +15,27 @@ namespace RhinoInside.Revit.GH.Types
     public RevisionCloud() { }
     public RevisionCloud(ARDB.RevisionCloud element) : base(element) { }
 
+    public override bool CastTo<Q>(out Q target)
+    {
+      if (base.CastTo(out target))
+        return true;
+
+      if (typeof(Q).IsAssignableFrom(typeof(Revision)))
+      {
+        target = (Q) (object) Types.Element.FromElementId(Document, Value?.RevisionId);
+        return true;
+      }
+
+      return false;
+    }
+
     #region ISketchAccess
-    public Sketch Sketch => Value is ARDB.RevisionCloud rvision ?
-      new Sketch(rvision.GetSketch()) : default;
+    public Sketch Sketch => Value is ARDB.RevisionCloud revision ? new Sketch(revision.GetSketch()) : default;
     #endregion
 
-    #region Location
-    public override Plane Location
-    {
-      get
-      {
-        if (Sketch is Sketch sketch)
-        {
-          var plane = sketch.ProfilesPlane;
-          plane.Origin = plane.ClosestPoint(BoundingBox.Center);
-
-          return plane;
-        }
-
-        return base.Location;
-      }
-    }
+    #region Properties
+    public override Plane Location => Sketch.ProfilesPlane;
+    public override Brep TrimmedSurface => Sketch.TrimmedSurface;
     #endregion
   }
 }

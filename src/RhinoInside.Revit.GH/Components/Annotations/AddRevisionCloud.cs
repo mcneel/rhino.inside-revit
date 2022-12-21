@@ -92,7 +92,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
           var tol = GeometryTolerance.Model;
           var viewPlane = view.Location;
-          var loops = boundary.SelectMany(x => x.Loops).Select(x => { var c = x.To3dCurve(); c.Reverse(); return c; }).ToArray();
+          var loops = boundary.OfType<Brep>().SelectMany(x => x.Loops).Select(x => { var c = x.To3dCurve(); c.Reverse(); return c; }).ToArray();
           foreach (var loop in loops)
           {
             if (loop is null) return null;
@@ -145,7 +145,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (!Reuse(cloud, view, boundaries, revision))
       {
         var curves = boundaries.SelectMany(x => GeometryEncoder.ToCurveMany(x)).ToArray();
-        cloud = ARDB.RevisionCloud.Create(view.Document, view, revision.Id, curves);
+        if (curves.Length > 0)
+          cloud = ARDB.RevisionCloud.Create(view.Document, view, revision.Id, curves);
       }
 
       return cloud;

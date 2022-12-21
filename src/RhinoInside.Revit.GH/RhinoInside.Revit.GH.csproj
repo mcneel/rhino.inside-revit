@@ -231,6 +231,7 @@
     <Compile Include="Components\Sheets\SheetByNumber_Assembly.cs" />
     <Compile Include="Components\Sheets\SheetByNumber_Placeholder.cs" />
     <Compile Include="Components\Sheets\SheetIdentity.cs" />
+    <Compile Include="Components\Sheets\SheetRevisions.cs" />
     <Compile Include="Components\Site\AddBuildingPad.cs" />
     <Compile Include="Components\Site\AddSiteSubRegion.cs" />
     <Compile Include="Components\Site\AddTopographyByMesh.cs" />

@@ -13,9 +13,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   {
     public override Guid ComponentGuid => new Guid("506D5C19-5054-4428-A857-A4D7E8DB8AD8");
 #if REVIT_2020
-    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
 #else
-    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.hidden;
     public override bool SDKCompliancy(int exeVersion, int exeServiceRelease) => false;
 #endif
     protected override string IconTag => string.Empty;
