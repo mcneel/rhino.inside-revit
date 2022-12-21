@@ -147,7 +147,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
             using (var options = new ARDB.CopyPasteOptions())
             {
-              options.SetDuplicateTypeNamesHandler(default(DuplicateTypeNamesHandler));
+              options.SetDuplicateTypeNamesAction(ARDB.DuplicateTypeAction.UseDestinationTypes);
 
               // Duplicate elements
               var copiedElements = ARDB.ElementTransformUtils.CopyElements
@@ -195,12 +195,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
         DA.SetDataList(_Duplicates_, duplicates);
       }
-    }
-
-    struct DuplicateTypeNamesHandler : ARDB.IDuplicateTypeNamesHandler
-    {
-      public ARDB.DuplicateTypeAction OnDuplicateTypeNamesFound(ARDB.DuplicateTypeNamesHandlerArgs args) =>
-        ARDB.DuplicateTypeAction.UseDestinationTypes;
     }
   }
 
