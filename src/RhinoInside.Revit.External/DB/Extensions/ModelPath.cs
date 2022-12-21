@@ -135,20 +135,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (IsCloudUri(uri, out var region, out var projectId, out var modelId))
       {
-        //return Rhinoceros.InvokeInHostContext(() =>
+        try
         {
-          try
-          {
 #if REVIT_2021
-            return ModelPathUtils.ConvertCloudGUIDsToCloudPath(region, projectId, modelId);
+          return ModelPathUtils.ConvertCloudGUIDsToCloudPath(region, projectId, modelId);
 #elif REVIT_2019
-            return ModelPathUtils.ConvertCloudGUIDsToCloudPath(projectId, modelId);
+          return ModelPathUtils.ConvertCloudGUIDsToCloudPath(projectId, modelId);
 #else
-            return default(ModelPath);
+          return default(ModelPath);
 #endif
-          }
-          catch (Autodesk.Revit.Exceptions.ApplicationException) { return default; }
-        }/*)*/;
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { return default; }
       }
 
       throw new ArgumentException($"Failed to convert {nameof(Uri)} in to {nameof(ModelPath)}", nameof(uri));
