@@ -7,7 +7,7 @@ using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components.Element.HostObject
+namespace RhinoInside.Revit.GH.Components.HostObjects
 {
   using Convert.Geometry;
   using External.DB.Extensions;

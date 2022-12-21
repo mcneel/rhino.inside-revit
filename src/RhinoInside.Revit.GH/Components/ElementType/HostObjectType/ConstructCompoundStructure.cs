@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 
-namespace RhinoInside.Revit.GH.Components.Hosts
+namespace RhinoInside.Revit.GH.Components.HostObjects
 {
   public class ConstructCompoundStructure : ZuiComponent
   {

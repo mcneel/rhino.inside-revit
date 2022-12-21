@@ -1,7 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 
-namespace RhinoInside.Revit.GH.Components.Hosts
+namespace RhinoInside.Revit.GH.Components.HostObjects
 {
   public class HostObjectGrids : Component
   {

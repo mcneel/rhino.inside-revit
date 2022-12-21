@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Hosts
+namespace RhinoInside.Revit.GH.Components.HostObjects
 {
   public class DeconstructCompoundStructureLayer : ZuiComponent
   {
@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Hosts.Obsolete
+namespace RhinoInside.Revit.GH.Components.HostObjects.Obsolete
 {
   [Obsolete("Since 2021-03-24")]
   public class DeconstructCompoundStructureLayer : Component
