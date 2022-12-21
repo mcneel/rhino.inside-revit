@@ -143,12 +143,11 @@ namespace RhinoInside.Revit.GH.Components
       if (detail.OwnerViewId != view.Id) return false;
       if (detail.GetTypeId() != type.Id)
       {
-        if (ARDB.Element.IsValidType(detail.Document, new ARDB.ElementId[] { detail.Id }, type.Id))
-        {
-          if (detail.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
-            detail = detail.Document.GetElement(id) as ARDB.FamilyInstance;
-        }
-        else return false;
+        if (!ARDB.Element.IsValidType(detail.Document, new ARDB.ElementId[] { detail.Id }, type.Id))
+          return false;
+
+        if (detail.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
+          detail = detail.Document.GetElement(id) as ARDB.FamilyInstance;
       }
 
       return false;

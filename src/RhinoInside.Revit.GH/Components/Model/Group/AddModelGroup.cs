@@ -36,6 +36,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
 
       [Description("Location where to place the group.")]
       Rhino.Geometry.Plane location,
+      [Description("Model group type.")]
       ARDB.GroupType type,
       Optional<ARDB.Level> level
     )
