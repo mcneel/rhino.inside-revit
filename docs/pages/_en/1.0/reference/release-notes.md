@@ -16,7 +16,7 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.10" version="v1.10.8389.27599" time="12/20/2022" %}
+{% include ltr/release-header.html title="v1.10" version="v1.10.8390.5758" time="12/20/2022" %}
 
 - Now 'Import 3DM' imports block geometry in families.
 - Now Baked blocks name use `::` as a separator.
