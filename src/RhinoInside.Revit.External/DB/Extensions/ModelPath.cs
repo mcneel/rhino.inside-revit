@@ -124,6 +124,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (uri is null)
         return default;
 
+      if (IsEmptyUri(uri))
+        return new FilePath(string.Empty);
+
       if (uri.IsFile)
         return new FilePath(uri.LocalPath);
 
