@@ -2,7 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Hosts
+namespace RhinoInside.Revit.GH.Components.HostObjects
 {
   public class HostObjectTypeCompoundStructure : TransactionalChainComponent
   {
@@ -99,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Hosts
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Hosts.Obsolete
+namespace RhinoInside.Revit.GH.Components.HostObjects.Obsolete
 {
   [Obsolete("Since 2021-03-23")]
   public class HostObjectTypeCompoundStructure : Component

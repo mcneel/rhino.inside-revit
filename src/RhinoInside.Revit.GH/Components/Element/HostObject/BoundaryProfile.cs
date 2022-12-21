@@ -7,7 +7,7 @@ using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 using ARUI = Autodesk.Revit.UI;
 
-namespace RhinoInside.Revit.GH.Components.Hosts
+namespace RhinoInside.Revit.GH.Components.HostObjects
 {
   using External.DB.Extensions;
   using Convert.Geometry;

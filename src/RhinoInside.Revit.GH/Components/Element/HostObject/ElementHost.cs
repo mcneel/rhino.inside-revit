@@ -2,7 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Hosts
+namespace RhinoInside.Revit.GH.Components.HostObjects
 {
   using External.DB;
   using External.DB.Extensions;
