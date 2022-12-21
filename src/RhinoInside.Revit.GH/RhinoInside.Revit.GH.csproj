@@ -22,7 +22,6 @@
     <Compile Include="Attributes.cs" />
     <Compile Include="Components\Annotations\AddAngularDimension.cs" />
     <Compile Include="Components\Annotations\AddRevisionCloud.cs" />
-    <Compile Include="Components\Annotations\AddRevision.cs" />
     <Compile Include="Components\Annotations\AddSymbol.cs" />
     <Compile Include="Components\Annotations\AddElementTag.cs" />
     <Compile Include="Components\Annotations\AddAreaTag.cs" />
@@ -35,7 +34,6 @@
     <Compile Include="Components\Annotations\AddSpotElevation.cs" />
     <Compile Include="Components\Annotations\AddDetailItem.cs" />
     <Compile Include="Components\Annotations\AddText.cs" />
-    <Compile Include="Components\Annotations\QueryRevisions.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Documents\ActiveDocument.cs" />
     <Compile Include="Components\Documents\DocumentWarnings.cs" />
@@ -224,8 +222,10 @@
     <Compile Include="Components\ParameterElement\ProjectParameter.cs" />
     <Compile Include="Components\ParameterElement\QueryParameters.cs" />
     <Compile Include="Components\ParameterElement\SharedParameters.cs" />
+    <Compile Include="Components\Sheets\AddRevision.cs" />
     <Compile Include="Components\Sheets\AddTitleBlock.cs" />
     <Compile Include="Components\Sheets\AddViewport.cs" />
+    <Compile Include="Components\Sheets\QueryRevisions.cs" />
     <Compile Include="Components\Sheets\QuerySheets.cs" />
     <Compile Include="Components\Sheets\SheetByNumber.cs" />
     <Compile Include="Components\Sheets\SheetByNumber_Assembly.cs" />
