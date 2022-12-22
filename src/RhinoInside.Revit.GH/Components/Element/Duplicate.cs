@@ -329,9 +329,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
             doc.Value, _Clones_,
             x =>
             {
-              if (location.HasValue && location.Value.IsValid)
+              if (element.Value is ARDB.Element elementValue && location.HasValue && location.Value.IsValid)
               {
-                if(CanReconstruct(view?.Value, x, element.Value))
+                if(CanReconstruct(view?.Value, x, elementValue))
                 {
                   // TODO : Implement a DeepCopy here
                   // Duplicate any missing type, material on demand
@@ -364,7 +364,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
                   }
                 }
 
-                return element.Value.CloneElement(doc.Value, view?.Value);
+                return elementValue.CloneElement(doc.Value, view?.Value);
               }
 
               return default;
