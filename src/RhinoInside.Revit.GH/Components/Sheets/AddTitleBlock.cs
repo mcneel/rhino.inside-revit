@@ -127,7 +127,7 @@ namespace RhinoInside.Revit.GH.Components.TitleBlocks
       {
         titleBlock = titleBlock.ReplaceElement
         (
-          sheet.Document.Create.NewFamilyInstance(location.Origin.ToXYZ(), type, sheet),
+          sheet.Document.Create().NewFamilyInstance(location.Origin.ToXYZ(), type, sheet),
           ExcludeUniqueProperties
         );
       }

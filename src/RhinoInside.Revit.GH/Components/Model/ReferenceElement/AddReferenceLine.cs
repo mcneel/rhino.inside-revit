@@ -136,12 +136,12 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       ARDB.Curve curve, ARDB.SketchPlane sketchPlane
     )
     {
-      var referenceLine = doc.IsFamilyDocument ?
-        doc.FamilyCreate.NewModelCurve(curve, sketchPlane) :
-        doc.Create.NewModelCurve(curve, sketchPlane);
-
-      referenceLine.ChangeToReferenceLine();
-      return referenceLine;
+      using (var create = doc.Create())
+      {
+        var referenceLine = create.NewModelCurve(curve, sketchPlane);
+        referenceLine.ChangeToReferenceLine();
+        return referenceLine;
+      }
     }
 
     ARDB.ModelCurve Reconstruct

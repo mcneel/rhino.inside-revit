@@ -99,7 +99,8 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 #if REVIT_2022
         // TODO: Compare with current profiles, maybe no transaction is necessary
 
-        using (var scope = new ARDB.SketchEditScope(host.Document, NickName))
+        var hostDocument = host.Document;
+        using (var scope = new ARDB.SketchEditScope(hostDocument, NickName))
         {
           if (scope.IsSketchEditingSupportedForSketchBasedElement(host.Value))
           {
@@ -118,50 +119,57 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
             if (sketch is object)
             {
-              using (var tx = NewTransaction(host.Document))
+              using (var tx = NewTransaction(hostDocument))
               {
                 tx.Start();
 
-                var tol = GeometryTolerance.Model;
-                var modelCurves = sketch.GetProfileCurveElements();
-                foreach (var modelCurve in modelCurves)
-                  sketch.Document.Delete(modelCurve.Select(x => x.Id).ToArray());
-
-                foreach (var profile in profiles)
+                // Delete previous profiles
                 {
-                  var loop = Curve.ProjectToPlane(profile, sketch.SketchPlane.GetPlane().ToPlane());
+                  foreach (var modelProfile in sketch.GetProfileCurveElements())
+                    hostDocument.Delete(modelProfile.Select(x => x.Id).ToArray());
+                }
 
-                  var segments = loop.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
-                    polyCurve.DuplicateSegments() :
-                    new Curve[] { loop };
+                // Create new profiles
+                using (var create = hostDocument.Create())
+                {
+                  var tol = GeometryTolerance.Model;
+                  var sketchPlane = sketch.SketchPlane;
+                  var projectionPlane = sketchPlane.GetPlane().ToPlane();
 
-                  foreach (var segment in segments)
+                  foreach (var profile in profiles)
                   {
-                    var curve = segment.ToCurve();
-                    sketch.Document.Create.NewModelCurve(curve, sketch.SketchPlane);
+                    var loop = Curve.ProjectToPlane(profile, projectionPlane);
+
+                    var segments = loop.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
+                      polyCurve.DuplicateSegments() : new Curve[] { loop };
+
+                    foreach (var segment in segments)
+                      create.NewModelCurve(segment.ToCurve(), sketchPlane);
                   }
                 }
 
                 // Commit Scope
+                using (var uiApplication = new ARUI.UIApplication(hostDocument.Application))
                 {
                   EventHandler<ARUI.Events.DialogBoxShowingEventArgs> DialogBoxShowing = null;
                   try
                   {
-                    Revit.ActiveUIApplication.DialogBoxShowing += DialogBoxShowing = (sender, args) =>
+                    uiApplication.DialogBoxShowing += DialogBoxShowing = (sender, args) =>
                     {
                       if (args.DialogId == "TaskDialog_Sketch_Edits_Discarded")
                         args.OverrideResult(1001 /*IDYES*/);
                     };
 
-                    if (CommitTransaction(host.Document, tx) == ARDB.TransactionStatus.Committed)
+                    host.InvalidateGraphics();
+
+                    if (CommitTransaction(hostDocument, tx) == ARDB.TransactionStatus.Committed)
                     {
                       scope.Commit(CreateFailuresPreprocessor());
-                      host.InvalidateGraphics();
                     }
                     else scope.Cancel();
                   }
                   catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return; }
-                  finally { Revit.ActiveUIApplication.DialogBoxShowing -= DialogBoxShowing; }
+                  finally { uiApplication.DialogBoxShowing -= DialogBoxShowing; }
                 }
               }
             }

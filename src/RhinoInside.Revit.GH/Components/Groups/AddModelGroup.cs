@@ -68,9 +68,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
       }
       else
       {
-        var newGroup = document.IsFamilyDocument ?
-                       document.FamilyCreate.PlaceGroup(newLocation, type) :
-                       document.Create.PlaceGroup(newLocation, type);
+        var newGroup = document.Create().PlaceGroup(newLocation, type);
 
         var parametersMask = new ARDB.BuiltInParameter[]
         {

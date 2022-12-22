@@ -117,9 +117,7 @@ namespace RhinoInside.Revit.GH.Components.Families
         }
 
         var dataList = new List<FamilyInstanceCreationData>() { creationData };
-        var newElementIds = document.IsFamilyDocument ?
-                            document.FamilyCreate.NewFamilyInstances2(dataList) :
-                            document.Create.NewFamilyInstances2(dataList);
+        var newElementIds = document.Create().NewFamilyInstances2(dataList);
 
         if (newElementIds.Count != 1)
           throw new Exceptions.RuntimeErrorException("Failed to create Family Instance element.");

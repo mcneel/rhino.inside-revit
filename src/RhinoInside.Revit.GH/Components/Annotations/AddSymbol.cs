@@ -157,22 +157,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     ARDB.AnnotationSymbol Create(ARDB.View view, ARDB.XYZ point, ARDB.AnnotationSymbolType type)
     {
-      return
-      (
-        view.Document.IsFamilyDocument ?
-        view.Document.FamilyCreate.NewFamilyInstance
-        (
-          point,
-          type,
-          view
-        ) :
-        view.Document.Create.NewFamilyInstance
-        (
-          point,
-          type,
-          view
-        )
-      ) as ARDB.AnnotationSymbol;
+      using (var create = view.Document.Create())
+        return create.NewFamilyInstance(point, type, view) as ARDB.AnnotationSymbol;
     }
 
     ARDB.AnnotationSymbol Reconstruct

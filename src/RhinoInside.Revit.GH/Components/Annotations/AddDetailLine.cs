@@ -122,9 +122,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     ARDB.DetailCurve Create(ARDB.View view, ARDB.Curve curve)
     {
-      return view.Document.IsFamilyDocument ?
-        view.Document.FamilyCreate.NewDetailCurve(view, curve) :
-        view.Document.Create.NewDetailCurve(view, curve);
+      using (var create = view.Document.Create())
+        return create.NewDetailCurve(view, curve);
     }
 
     ARDB.DetailCurve Reconstruct(ARDB.DetailCurve detailCurve, ARDB.View view, ARDB.Curve curve)

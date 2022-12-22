@@ -83,6 +83,8 @@ namespace RhinoInside.Revit.GH.Components
 
       SolveOptionalLevel(document, boundary, ref level, out var bbox);
 
+      boundary = boundary.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? boundary;
+
       var orientation = boundary.ClosedCurveOrientation(Plane.WorldXY);
       if (orientation == CurveOrientation.CounterClockwise)
         boundary.Reverse();

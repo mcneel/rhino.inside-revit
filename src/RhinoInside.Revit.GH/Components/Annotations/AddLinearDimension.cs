@@ -136,23 +136,17 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     ARDB.Dimension Create(ARDB.View view, ARDB.Line line, IList<ARDB.Reference> references, ARDB.DimensionType type)
     {
-      var referenceArray = new ARDB.ReferenceArray();
-      for (int r = 0; r < references.Count; ++r)
-        referenceArray.Append(references[r]);
+      using (var referenceArray = new ARDB.ReferenceArray())
+      {
+        for (int r = 0; r < references.Count; ++r)
+          referenceArray.Append(references[r]);
 
-      if (view.Document.IsFamilyDocument)
-      {
-        if (type == default)
-          return view.Document.FamilyCreate.NewDimension(view, line, referenceArray);
-        else
-          return view.Document.FamilyCreate.NewDimension(view, line, referenceArray, type);
-      }
-      else
-      {
-        if (type == default)
-          return view.Document.Create.NewDimension(view, line, referenceArray);
-        else
-          return view.Document.Create.NewDimension(view, line, referenceArray, type);
+        using (var create = view.Document.Create())
+        {
+          return type == default ?
+            create.NewDimension(view, line, referenceArray) :
+            create.NewDimension(view, line, referenceArray, type);
+        }
       }
     }
 

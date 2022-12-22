@@ -13,6 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   using ElementTracking;
   using Kernel.Attributes;
   using Grasshopper.Kernel.Parameters;
+  using GH_IO.Serialization;
 
   [ComponentVersion(introduced: "1.0", updated: "1.8")]
   public class WallByProfile : ReconstructElementComponent
@@ -145,8 +146,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
       var tol = GeometryTolerance.Model;
       var boundaryPlane = default(Plane);
       var maxArea = 0.0;
-      foreach (var loop in loops)
+      for (int index = 0; index < loops.Length; ++index)
       {
+        var loop = loops[index];
         var plane = default(Plane);
         if
         (
@@ -157,6 +159,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
           !plane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance)
         )
           ThrowArgumentException(nameof(loops), "Boundary profile should be a valid vertical planar closed curve.", loop);
+
+        loops[index] = loop.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
 
         using (var properties = AreaMassProperties.Compute(loop))
         {

@@ -4,13 +4,13 @@ using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
-  public class PinUnPinElement: TransactionalChainComponent
+  public class ElementPin: TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("CC205221-1583-47D1-A715-226C39C3FB34");
     public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
     protected override string IconTag => "PIN";
 
-    public PinUnPinElement() : base
+    public ElementPin() : base
     (
       name: "Pin Element",
       nickname: "PinElem",
