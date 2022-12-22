@@ -4,13 +4,13 @@ using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
-  public class FlipUnflipElement : TransactionalChainComponent
+  public class ElementFlip : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("4CADC9AA-27D9-4804-87AC-477203862AFA");
     public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
     protected override string IconTag => "F";
 
-    public FlipUnflipElement()
+    public ElementFlip()
     : base
     (
       name: "Flip Element",
