@@ -285,29 +285,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
     };
 
     const string _Clones_ = "Clones";
-    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
-    {
-      ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
-      ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-    };
-
-    static bool CanReconstruct(ARDB.View view, ARDB.Element x, ARDB.Element y)
-    {
-      if (x is null) return false;
-      if (x.OwnerViewId != (view?.Id ?? y.OwnerViewId)) return false;
-
-      if (x.GetType() != y.GetType()) return false;
-      if (x.Category.Id != y.Category.Id) return false;
-      if (x.ViewSpecific != y.ViewSpecific) return false;
-
-      var xLocation = x.Location;
-      var yLocation = y.Location;
-
-      if (xLocation.GetType() != yLocation.GetType()) return false;
-      if (xLocation is ARDB.LocationCurve xCurve && !(yLocation as ARDB.LocationCurve).Curve.IsSameKindAs(xCurve.Curve)) return false;
-
-      return true;
-    }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -331,40 +308,35 @@ namespace RhinoInside.Revit.GH.Components.Elements
             {
               if (element.Value is ARDB.Element elementValue && location.HasValue && location.Value.IsValid)
               {
-                if(CanReconstruct(view?.Value, x, elementValue))
+                if(!Reuse(x, elementValue, view?.Value))
                 {
-                  // TODO : Implement a DeepCopy here
-                  // Duplicate any missing type, material on demand
-                  //x.DeepCopyParametersFrom(element.Value);
-
-                  x.CopyParametersFrom(element.Value);
-                  return x;
-                }
-
-                if (view?.IsValid == true && element.ViewSpecific != true)
-                {
-                  switch (FailureProcessingMode)
+                  if (view?.IsValid == true && element.ViewSpecific != true)
                   {
-                    case ARDB.FailureProcessingResult.Continue:
-                      AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Cannot clone the specified element into '{view.Nomen}' view. {{{element.Id}}}");
-                      return null;
-                    case ARDB.FailureProcessingResult.ProceedWithCommit:
-                      AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Cannot paste the specified element into '{view.Nomen}' view. {{{element.Id}}}");
-                      break;
-                    case ARDB.FailureProcessingResult.WaitForUserInput:
-                      using (var failure = new ARDB.FailureMessage(ARDB.BuiltInFailures.CopyPasteFailures.CannotPasteInView))
-                      {
-                        failure.SetFailingElement(view.Id);
-                        failure.SetAdditionalElement(element.Id);
-                        doc.Value.PostFailure(failure);
-                      }
-                      return null;
+                    switch (FailureProcessingMode)
+                    {
+                      case ARDB.FailureProcessingResult.Continue:
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Cannot clone the specified element into '{view.Nomen}' view. {{{element.Id}}}");
+                        return null;
+                      case ARDB.FailureProcessingResult.ProceedWithCommit:
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Cannot paste the specified element into '{view.Nomen}' view. {{{element.Id}}}");
+                        break;
+                      case ARDB.FailureProcessingResult.WaitForUserInput:
+                        using (var failure = new ARDB.FailureMessage(ARDB.BuiltInFailures.CopyPasteFailures.CannotPasteInView))
+                        {
+                          failure.SetFailingElement(view.Id);
+                          failure.SetAdditionalElement(element.Id);
+                          doc.Value.PostFailure(failure);
+                        }
+                        return null;
 
-                    default: throw new Exceptions.RuntimeException();
+                      default: throw new Exceptions.RuntimeException();
+                    }
                   }
+
+                  x = elementValue.CloneElement(doc.Value, view?.Value);
                 }
 
-                return elementValue.CloneElement(doc.Value, view?.Value);
+                return x;
               }
 
               return default;
@@ -388,6 +360,29 @@ namespace RhinoInside.Revit.GH.Components.Elements
         clones.Add(clone);
       }
       DA.SetDataList(_Clones_, clones);
+    }
+
+    bool Reuse(ARDB.Element target, ARDB.Element source, ARDB.View view)
+    {
+      if (target is null) return false;
+      if (target.OwnerViewId != (view?.Id ?? source.OwnerViewId)) return false;
+
+      if (target.GetType() != source.GetType()) return false;
+      if (target.Category.Id != source.Category.Id) return false;
+      if (target.ViewSpecific != source.ViewSpecific) return false;
+
+      var targetLocation = target.Location;
+      var sourceLocation = source.Location;
+
+      if (targetLocation.GetType() != sourceLocation.GetType()) return false;
+      if (targetLocation is ARDB.LocationCurve xCurve && !(sourceLocation as ARDB.LocationCurve).Curve.IsSameKindAs(xCurve.Curve)) return false;
+
+      // TODO : Implement a DeepCopy here
+      // Duplicate any missing type, material on demand
+      //x.DeepCopyParametersFrom(element.Value);
+
+      target.CopyParametersFrom(source);
+      return true;
     }
   }
 }
