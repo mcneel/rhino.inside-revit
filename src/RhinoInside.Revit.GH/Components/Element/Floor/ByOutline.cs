@@ -78,10 +78,11 @@ namespace RhinoInside.Revit.GH.Components.Families
       if (boundary is null) return;
 
       var tol = GeometryTolerance.Model;
-      var normal = default(Vector3d); var maxArea = 0.0;
-      var index = 0; var maxIndex = 0;
-      foreach (var loop in boundary)
+      var normal = default(Vector3d);
+      var maxArea = 0.0; var maxIndex = 0;
+      for(int index = 0; index < boundary.Count; ++ index)
       {
+        var loop = boundary[index];
         if (loop is null) return;
         var plane = default(Plane);
         if
@@ -92,6 +93,8 @@ namespace RhinoInside.Revit.GH.Components.Families
           plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
         )
           ThrowArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.", boundary);
+
+        boundary[index] = loop.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
 
         using (var properties = AreaMassProperties.Compute(loop))
         {
@@ -106,8 +109,6 @@ namespace RhinoInside.Revit.GH.Components.Families
               normal.Reverse();
           }
         }
-
-        index++;
       }
 
 #if !REVIT_2022
