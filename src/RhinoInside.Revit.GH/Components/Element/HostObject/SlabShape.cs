@@ -154,7 +154,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Host", out Types.HostObject host)) return;
+      if (!Params.GetData(DA, "Host", out Types.HostObject host, x => x.IsValid)) return;
 
       var shape = default(ARDB.SlabShapeEditor);
       switch (host)
@@ -172,21 +172,8 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       Params.TrySetData(DA, "Host", () => host);
 
       var curvedEdgeConditionParam = host.Value.get_Parameter(ARDB.BuiltInParameter.HOST_SSE_CURVED_EDGE_CONDITION_PARAM);
-      var curvedEdgeConditionValue = curvedEdgeConditionParam?.AsInteger();
-
-      var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>();
-      ARDB.SlabShapeVertex AddVertex(Point3d point)
-      {
-        if (vertices.TryGetValue(point, out var vertex)) return vertex;
-        vertex = shape.DrawPoint(point.ToXYZ());
-
-        if (vertex is null)
-          AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, "Failed to draw vertex", new Point(point));
-        else
-          vertices.Add(point, vertex);
-
-        return vertex;
-      }
+      var curvedEdgeConditionValue = curvedEdgeConditionParam?.AsEnum<ERDB.SlabShapeEditCurvedEdgeCondition>();
+      
 
       if
       (
@@ -195,6 +182,25 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       )
       {
         var tol = GeometryTolerance.Model;
+        var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>();
+
+        ARDB.SlabShapeVertex AddVertex(Point3d point)
+        {
+          if (!vertices.TryGetValue(point, out var vertex))
+          {
+            try
+            {
+              if ((vertex = shape.DrawPoint(point.ToXYZ())) is null)
+                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));
+              else
+                vertices.Add(point, vertex);
+            }
+            catch { AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, "Failed to add vertex.", new Point(point)); }
+          }
+
+          return vertex?.VertexType == ARDB.SlabShapeVertexType.Invalid ? null : vertex;
+        }
+
         StartTransaction(host.Document);
         host.InvalidateGraphics();
 
@@ -212,24 +218,22 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
           foreach (var edge in edges)
           {
             if (!edge.IsValid) continue;
-            if (edge.Length < tol.VertexTolerance) continue;
             try
             {
               var from = AddVertex(edge.From);
-              var to = AddVertex(edge.To);
-              if (from is null && to is null) continue;
-
-              shape.DrawSplitLine(from, to);
+              var to   = AddVertex(edge.To);
+              if (from is null || to is null || shape.DrawSplitLine(from, to) is null)
+                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, "Some short-creases were skipped.", new LineCurve(edge));
             }
-            catch { AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, "Failed to draw crease", new LineCurve(edge)); }
+            catch { AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, "Failed to add crease.", new LineCurve(edge)); }
           }
         }
       }
 
-      if (!Params.GetData(DA, "Curved Edge Condition", out int? curvedEdgeCondition))
+      if (!Params.GetData(DA, "Curved Edge Condition", out ERDB.SlabShapeEditCurvedEdgeCondition? curvedEdgeCondition))
         curvedEdgeCondition = curvedEdgeConditionValue;
 
-      curvedEdgeConditionValue = curvedEdgeConditionParam?.AsInteger();
+      curvedEdgeConditionValue = curvedEdgeConditionParam?.AsEnum<ERDB.SlabShapeEditCurvedEdgeCondition>();
       if (curvedEdgeCondition != curvedEdgeConditionValue)
       {
         if (curvedEdgeConditionParam is object && !curvedEdgeConditionParam.IsReadOnly)
@@ -240,40 +244,40 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Failed to update 'Curved Edge Condition'");
       }
 
-      Params.TrySetData
-      (
-        DA, "Curved Edge Condition",
-        () => curvedEdgeConditionParam?.AsInteger()
-      );
+      Params.TrySetData(DA, "Curved Edge Condition", () => curvedEdgeConditionParam?.AsEnum<ERDB.SlabShapeEditCurvedEdgeCondition>());
 
-      using (var shapeVertices = shape.SlabShapeVertices)
       {
+        var shapeVertices = default(ARDB.SlabShapeVertexArray);
+
         Params.TrySetDataList
         (
           DA, "Corners",
-          () => shapeVertices.Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Corner).
+          () => (shapeVertices = shapeVertices ?? shape.SlabShapeVertices).Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Corner).
           Select(x => x.Position.ToPoint3d())
         );
         Params.TrySetDataList
         (
           DA, "Exteriors",
-          () => shapeVertices.Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Edge).
+          () => (shapeVertices = shapeVertices ?? shape.SlabShapeVertices).Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Edge).
           Select(x => x.Position.ToPoint3d())
         );
         Params.TrySetDataList
         (
           DA, "Interiors",
-          () => shapeVertices.Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Interior).
+          () => (shapeVertices = shapeVertices ?? shape.SlabShapeVertices).Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Interior).
           Select(x => x.Position.ToPoint3d())
         );
+
+        shapeVertices?.Dispose();
       }
 
-      using (var shapeCreases = shape.SlabShapeCreases)
       {
+        var shapeCreases = default(ARDB.SlabShapeCreaseArray);
+
         Params.TrySetDataList
         (
           DA, "Boundary",
-          () => shapeCreases.Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.Boundary).
+          () => (shapeCreases = shapeCreases ?? shape.SlabShapeCreases).Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.Boundary).
           Select
           (
             x =>
@@ -287,7 +291,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         Params.TrySetDataList
         (
           DA, "Creases",
-          () => shapeCreases.Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.UserDrawn).
+          () => (shapeCreases = shapeCreases ?? shape.SlabShapeCreases).Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.UserDrawn).
           Select
           (
             x =>
@@ -301,7 +305,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         Params.TrySetDataList
         (
           DA, "Auto",
-          () => shapeCreases.Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.Auto).
+          () => (shapeCreases = shapeCreases ?? shape.SlabShapeCreases).Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.Auto).
           Select
           (
             x =>
