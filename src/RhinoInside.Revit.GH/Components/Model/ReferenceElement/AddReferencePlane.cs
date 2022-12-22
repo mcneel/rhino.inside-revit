@@ -193,10 +193,8 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         basisX *= 30.0;
         basisY *= 30.0;
 
-        if (doc.IsFamilyDocument)
-          referencePlane = doc.FamilyCreate.NewReferencePlane2(origin + basisX, origin, origin - basisY, default);
-        else
-          referencePlane = doc.Create.NewReferencePlane2(origin + basisX , origin, origin - basisY, default);
+        using (var create = doc.Create())
+          referencePlane = create.NewReferencePlane2(origin + basisX, origin, origin - basisY, default);
 
         referencePlane.CopyParametersFrom(template, ExcludeUniqueProperties);
       }

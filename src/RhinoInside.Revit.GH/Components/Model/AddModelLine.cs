@@ -147,9 +147,8 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       ARDB.Curve curve, ARDB.SketchPlane sketchPlane
     )
     {
-      return doc.IsFamilyDocument ?
-        doc.FamilyCreate.NewModelCurve(curve, sketchPlane):
-        doc.Create.NewModelCurve(curve, sketchPlane);
+      using (var create = doc.Create())
+        return create.NewModelCurve(curve, sketchPlane);
     }
 
     ARDB.ModelCurve Reconstruct

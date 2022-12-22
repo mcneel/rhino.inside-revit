@@ -183,10 +183,7 @@ namespace RhinoInside.Revit.GH.Components
         )
       };
 
-      var ids = doc.IsFamilyDocument ?
-        doc.FamilyCreate.NewFamilyInstances2(list) :
-        doc.Create.NewFamilyInstances2(list);
-
+      var ids = doc.Create().NewFamilyInstances2(list);
       var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
 
       // We turn analytical model off by default

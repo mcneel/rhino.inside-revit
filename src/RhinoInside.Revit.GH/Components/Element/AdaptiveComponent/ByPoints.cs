@@ -10,6 +10,7 @@ namespace RhinoInside.Revit.GH.Components
   using Convert.Geometry;
   using Convert.System.Collections.Generic;
   using Kernel.Attributes;
+  using External.DB.Extensions;
 
   public class AdaptiveComponentByPoints : ReconstructElementComponent
   {
@@ -64,15 +65,14 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
 
+      using (var create = document.Create())
       {
         var creationData = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>
         {
-          Revit.ActiveUIApplication.Application.Create.NewFamilyInstanceCreationData(type, adaptivePoints)
+          document.Application.Create.NewFamilyInstanceCreationData(type, adaptivePoints)
         };
 
-        var newElementIds = document.IsFamilyDocument ?
-                            document.FamilyCreate.NewFamilyInstances2( creationData ) :
-                            document.Create.NewFamilyInstances2( creationData );
+        var newElementIds = create.NewFamilyInstances2(creationData);
 
         if (newElementIds.Count != 1)
           throw new Exceptions.RuntimeErrorException("Failed to create Family Instance element.");

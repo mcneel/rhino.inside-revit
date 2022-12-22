@@ -155,19 +155,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     ARDB.FamilyInstance Create(ARDB.View view, ARDB.XYZ point, ARDB.FamilySymbol type)
     {
-      return (view.Document.IsFamilyDocument ?
-        view.Document.FamilyCreate.NewFamilyInstance
-        (
-          point,
-          type,
-          view
-        ) :
-        view.Document.Create.NewFamilyInstance
-        (
-          point,
-          type,
-          view
-        ));
+      using (var create = view.Document.Create())
+        return create.NewFamilyInstance(point, type, view);
     }
 
     ARDB.FamilyInstance Reconstruct

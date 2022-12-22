@@ -240,7 +240,7 @@ namespace RhinoInside.Revit.AddIn.Commands
             {
               if (trans.Start() == TransactionStatus.Started)
               {
-                var group = options.Document.Create.NewGroup(resultingElementIds);
+                var group = options.Document.Create().NewGroup(resultingElementIds);
                 trans.Commit();
 
                 resultingElementIds = new List<ElementId>() { group.Id };
