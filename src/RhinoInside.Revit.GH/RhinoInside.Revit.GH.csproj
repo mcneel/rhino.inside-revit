@@ -193,6 +193,7 @@
     <Compile Include="Components\Groups\AddModelGroup.cs" />
     <Compile Include="Components\Groups\CreateGroupType.cs" />
     <Compile Include="Components\Groups\GroupMembers.cs" />
+    <Compile Include="Components\Groups\GroupUngroup.cs" />
     <Compile Include="Components\Groups\QueryGroupTypes.cs" />
     <Compile Include="Components\Import\AddImage.cs" />
     <Compile Include="Components\Import\AddImageType.cs" />
