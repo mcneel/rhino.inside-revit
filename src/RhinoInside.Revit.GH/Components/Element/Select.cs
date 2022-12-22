@@ -10,13 +10,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
 {
   using External.ApplicationServices.Extensions;
 
-  public class SelectDeselectElement : ZuiComponent
+  public class ElementSelect : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("3E44D6BB-5F49-40E8-A2C4-53E5E3A63DDC");
     public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
     protected override string IconTag => "SDE";
 
-    public SelectDeselectElement() : base
+    public ElementSelect() : base
     (
       name: "Select Element",
       nickname: "SelElems",
