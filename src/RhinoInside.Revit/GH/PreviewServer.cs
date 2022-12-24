@@ -195,8 +195,9 @@ namespace RhinoInside.Revit.GH
       Monitor.Enter(PreviewNodesToken, ref PreviewNodesWasTaken);
 
       // Magic trick to force Revit update the Outline.
+      if (Revit.ActiveDBDocument is ARDB.Document activeDocument)
       {
-        using (var uiDocument = new ARUI.UIDocument(Revit.ActiveDBDocument))
+        using (var uiDocument = new ARUI.UIDocument(activeDocument))
           uiDocument.Selection.SetElementIds(uiDocument.Selection.GetElementIds());
       }
 
