@@ -24,6 +24,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
+#if REVIT_2021
+    const ViewType   ViewType_SystemsAnalysisReport   = ViewType.SystemsAnalysisReport;
+    const ViewFamily ViewFamily_SystemsAnalysisReport = ViewFamily.SystemsAnalysisReport;
+#else
+    const ViewType   ViewType_SystemsAnalysisReport   = (ViewType) 126;
+    const ViewFamily ViewFamily_SystemsAnalysisReport = (ViewFamily) 121;
+#endif
+
     static ViewFamily ToViewFamily(ViewType viewType)
     {
       switch (viewType)
@@ -50,11 +58,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case ViewType.PanelSchedule:          return ViewFamily.PanelSchedule;
         case ViewType.Walkthrough:            return ViewFamily.Walkthrough;
         case ViewType.Rendering:              return ViewFamily.ImageView;
-#if REVIT_2021
-        case ViewType.SystemsAnalysisReport:  return ViewFamily.SystemsAnalysisReport;
-#else
-        case (ViewType) 126:                  return (ViewFamily) 121;
-#endif
+        case ViewType_SystemsAnalysisReport:  return ViewFamily_SystemsAnalysisReport;
       }
 
       return ViewFamily.Invalid;
@@ -400,7 +404,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           case ViewType.CostReport:
           case ViewType.LoadsReport:
           case ViewType.PresureLossReport:
-          case ViewType.SystemsAnalysisReport:
+          case ViewType_SystemsAnalysisReport:
             return clipped ? CompoundElementFilter.Empty : CompoundElementFilter.Universe;
         }
 
