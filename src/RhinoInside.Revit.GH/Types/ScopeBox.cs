@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Types
   using ARDB_ScopeBox = ARDB.Element;
 
   [Kernel.Attributes.Name("Scope Box")]
-  class ScopeBox : GraphicalElement
+  public class ScopeBox : GraphicalElement
   {
     protected override Type ValueType => typeof(ARDB_ScopeBox);
     public new ARDB_ScopeBox Value => base.Value as ARDB_ScopeBox;

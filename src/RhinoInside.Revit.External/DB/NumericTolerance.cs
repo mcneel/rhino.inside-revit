@@ -1,9 +1,12 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB
 {
+  using Extensions;
+
   public static class NumericTolerance
   {
     #region Constants
@@ -296,7 +299,7 @@ namespace RhinoInside.Revit.External.DB
       }
     }
 
-    public static implicit operator double(BoundingValue value) => value.Bound;
+    public static implicit operator double(BoundingValue value) => value.IsEnabled ? value.Value : NumericTolerance.Direction(value.Bound) * 1e9;
 
     public static bool operator true(BoundingValue value) => value.IsEnabled;
     public static bool operator false(BoundingValue value) => value.IsDisabled;
@@ -331,7 +334,7 @@ namespace RhinoInside.Revit.External.DB
     {
       var a = value.Bound;
       var b = other.Bound;
-      return (a < b ? value.Value : other.Value, value.IsDisabled || other.IsDisabled ? Bounding.DisabledMin : Bounding.Enabled);
+      return a < b ? value.Value : other.Value;
     }
 
     /// <summary>
@@ -360,7 +363,7 @@ namespace RhinoInside.Revit.External.DB
     {
       var a = value.Bound;
       var b = other.Bound;
-      return (a > b ? value.Value : other.Value, value.IsDisabled || other.IsDisabled ? Bounding.DisabledMax : Bounding.Enabled);
+      return a > b ? value.Value : other.Value;
     }
 
     public static BoundingValue Min(BoundingValue value, BoundingValue other)
@@ -369,13 +372,14 @@ namespace RhinoInside.Revit.External.DB
       var b = other.Bound;
       return a < b ? value : double.IsNaN(value.Value) ? value : other;
     }
-    public static BoundingValue Mid(BoundingValue value, BoundingValue other) => (value * 0.5) + (other * 0.5);
+    public static BoundingValue Mid(BoundingValue value, BoundingValue other) => new BoundingValue((value.Value * 0.5) + (other.Value * 0.5), (value.Bound * 0.5) + (other.Bound * 0.5));
     public static BoundingValue Max(BoundingValue value, BoundingValue other)
     {
       var a = value.Bound;
       var b = other.Bound;
       return a > b ? value : double.IsNaN(value.Value) ? value : other;
     }
+    public static BoundingValue Radius(BoundingValue value, BoundingValue other) => new BoundingValue((value.Value * 0.5) - (other.Value * 0.5), (value.Bound * 0.5) - (other.Bound * 0.5));
   }
 
   /// <summary>
@@ -390,9 +394,9 @@ namespace RhinoInside.Revit.External.DB
     public readonly BoundingValue Left;
     public readonly BoundingValue Right;
 
-    public BoundingValue Min => BoundingValue.MinBound(Left, Right);
-    public BoundingValue Mid => BoundingValue.MidBound(Left, Right);
-    public BoundingValue Max => BoundingValue.MaxBound(Right, Left);
+    public BoundingValue Min => BoundingValue.Min(Left, Right);
+    public BoundingValue Mid => BoundingValue.Mid(Left, Right);
+    public BoundingValue Max => BoundingValue.Max(Right, Left);
 
     #region Constructors
     public BoundingInterval(BoundingValue left, BoundingValue right) { Left = left; Right = right; }
@@ -429,6 +433,7 @@ namespace RhinoInside.Revit.External.DB
     public bool IsDegenerate => Left == Right;
     public bool IsProper => Left != Right;
     public bool IsEmpty => !IsDegenerate && !IsProper;
+    public bool IsFinite => Left.IsEnabled && Right.IsEnabled;
     #endregion
 
     #region Operators
@@ -442,9 +447,9 @@ namespace RhinoInside.Revit.External.DB
     public static BoundingInterval operator |(BoundingInterval left, BoundingInterval right) => (BoundingValue.MinBound(left.Left, right.Left), BoundingValue.MaxBound(left.Right, right.Right));
     #endregion
 
-    public BoundingValue GetRadius() => (Right * 0.5) - (Left * 0.5);
+    public BoundingValue GetRadius() => BoundingValue.Radius(Left, Right);
 
-    public bool Contains(BoundingValue value, bool closed = false)
+    public bool Contains(BoundingValue value, bool closed = true)
     {
       if (closed)
       {
@@ -458,6 +463,129 @@ namespace RhinoInside.Revit.External.DB
       }
 
       return false;
+    }
+  }
+
+  /// <summary>
+  /// This class represents a General Form plane equation.
+  /// </summary>
+  readonly struct PlaneEquation
+  {
+    public readonly double A;
+    public readonly double B;
+    public readonly double C;
+    public readonly double D;
+
+    /// <summary>
+    /// Point on plane closest to world-origin.
+    /// </summary>
+    public XYZ Point => new XYZ(A * -D, B * -D, C * -D);
+
+    /// <summary>
+    /// Plane X axis according to the Arbitrary Axis Algorithm.
+    /// </summary>
+    /// <seealso cref="XYZExtension.PerpVector(XYZ, double)"/>
+    public XYZ Direction => NumericTolerance.Abs(A, B) < NumericTolerance.DefaultTolerance ?
+      new XYZ(C, 0.0, -A) :
+      new XYZ(-B, A, 0.0);
+
+    /// <summary>
+    /// Plane Y axis according to the Arbitrary Axis Algorithm.
+    /// </summary>
+    /// <seealso cref="XYZExtension.PerpVector(XYZ, double)"/>
+    //public XYZ Up => Normal.CrossProduct(Direction, NumericTolerance.DefaultTolerance);
+    public XYZ Up => NumericTolerance.Abs(A, B) < NumericTolerance.DefaultTolerance ?
+      new XYZ
+      (
+           (B * -A) /* - (C *  0.0) */,
+           (C * C) - (A * -A),
+        /* (A * 0.0) */ -(B * C)
+      ) :
+      new XYZ
+      (
+        /* (B * 0.0) */ -(C * A),
+           (C * -B) /* - (A * 0.0) */,
+           (A * A) - (B * -B)
+      );
+
+    /// <summary>
+    /// Plane Z axis according to the Arbitrary Axis Algorithm.
+    /// </summary>
+    public XYZ Normal => new XYZ(A, B, C);
+
+    /// <summary>
+    /// Signed distance from world origin.
+    /// </summary>
+    public double Elevation => -D;
+
+    PlaneEquation(double a, double b, double c, double d)
+    {
+      Debug.Assert(XYZExtension.IsUnitLength(a, b, c, NumericTolerance.Upsilon));
+
+      A = a;
+      B = b;
+      C = c;
+      D = d;
+    }
+
+    public PlaneEquation(XYZ vector, double originSignedDistance)
+    {
+      (A, B, C) = vector.Normalize(0D);
+      D = originSignedDistance;
+    }
+
+    public PlaneEquation(XYZ point, XYZ normal)
+    {
+      (A, B, C) = normal.Normalize(0D);
+      D = -(A * point.X + B * point.Y + C * point.Z);
+    }
+
+    public static PlaneEquation operator -(in PlaneEquation value)
+    {
+      return new PlaneEquation(-value.A, -value.B, -value.C, -value.D);
+    }
+
+    public double AbsoluteDistanceTo(XYZ point) => Math.Abs(SignedDistanceTo(point));
+    public double SignedDistanceTo(XYZ point) => A * point.X + B * point.Y + C * point.Z + D;
+
+    public XYZ Project(XYZ point) => point - SignedDistanceTo(point) * Normal;
+
+    (double X, double Y, double Z) MinOutlineCoords(XYZ min, XYZ max) =>
+    (
+      (A <= 0.0) ? max.X : min.X,
+      (B <= 0.0) ? max.Y : min.Y,
+      (C <= 0.0) ? max.Z : min.Z
+    );
+
+    (double X, double Y, double Z) MaxOutlineCoords(XYZ min, XYZ max) =>
+    (
+      (A >= 0.0) ? max.X : min.X,
+      (B >= 0.0) ? max.Y : min.Y,
+      (C >= 0.0) ? max.Z : min.Z
+    );
+
+    public XYZ MinOutlineCorner(XYZ min, XYZ max)
+    {
+      var (x, y, z) = MinOutlineCoords(min, max);
+      return new XYZ(x, y, z);
+    }
+
+    public XYZ MaxOutlineCorner(XYZ min, XYZ max)
+    {
+      var (x, y, z) = MaxOutlineCoords(min, max);
+      return new XYZ(x, y, z);
+    }
+
+    public bool IsBelowOutline(XYZ min, XYZ max)
+    {
+      var (x, y, z) = MinOutlineCoords(min, max);
+      return A * x + B * y + C * z > -D;
+    }
+
+    public bool IsAboveOutline(XYZ min, XYZ max)
+    {
+      var (x, y, z) = MaxOutlineCoords(min, max);
+      return A * x + B * y + C * z < -D;
     }
   }
 }
