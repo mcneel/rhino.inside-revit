@@ -225,38 +225,64 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
-    public static BoundingBoxXYZ GetClipBox(this View view)
+    public static BoundingBoxXYZ GetAnnotationClipBox(this View view)
     {
+      if (view is null || view.IsTemplate)
+        return BoundingBoxXYZExtension.Empty;
+
+      using (var shapeManager = view.GetCropRegionShapeManager())
+      {
+        if (!shapeManager.CanHaveAnnotationCrop)
+          return BoundingBoxXYZExtension.Universe;
+
+        switch (view.CropBox)
+        {
+          case BoundingBoxXYZ clipBox:
+
+            var scale = Math.Max(view.Scale, 1);
+            var (min, max) = clipBox;
+
+            clipBox.Min = new XYZ(clipBox.Min.X - shapeManager.LeftAnnotationCropOffset * scale, clipBox.Min.Y - shapeManager.BottomAnnotationCropOffset * scale, min.Z);
+            clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisX, true);
+            clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisY, true);
+            clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisZ, false);
+
+            clipBox.Max = new XYZ(clipBox.Max.X + shapeManager.RightAnnotationCropOffset * scale, clipBox.Max.Y + shapeManager.TopAnnotationCropOffset * scale, max.Z);
+            clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisX, true);
+            clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisY, true);
+            clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisZ, false);
+
+            clipBox.Enabled = view.get_Parameter(BuiltInParameter.VIEWER_ANNOTATION_CROP_ACTIVE)?.AsBoolean() ?? false;
+            return clipBox;
+
+          default:
+            return default;
+        }
+      }
+    }
+
+    public static BoundingBoxXYZ GetModelClipBox(this View view)
+    {
+      if (view is null || view.IsTemplate)
+        return BoundingBoxXYZExtension.Empty;
+
+      if (!view.ViewType.IsGraphicalViewType())
+        return BoundingBoxXYZExtension.Universe;
+
       switch (view.CropBox)
       {
         case BoundingBoxXYZ clipBox:
 
-          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisX, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_LEFT  )?.AsInteger() == 1);
-          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisX, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_RIGHT )?.AsInteger() == 1);
-
-          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisY, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_BOTTOM)?.AsInteger() == 1);
-          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisY, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_TOP   )?.AsInteger() == 1);
-
-          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisZ, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR   )?.AsInteger() == 1);
-          clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisZ, view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_NEAR  )?.AsInteger() == 1);
-
-          // Intersect with Outline
-          using (var outline = view.Outline)
+          switch (view)
           {
-            var scale = Math.Max(view.Scale, 1);
-            var (min, max) = clipBox;
+            case View3D view3D:
+              if (view3D.IsSectionBoxActive)
+                clipBox.Intersection(view3D.GetSectionBox());
+              break;
 
-            clipBox.Min = new XYZ(NumericTolerance.MinNumber(min.X, outline.Min.U * scale), NumericTolerance.MinNumber(min.Y, outline.Min.V * scale), min.Z);
-            clipBox.Max = new XYZ(NumericTolerance.MaxNumber(max.X, outline.Max.U * scale), NumericTolerance.MaxNumber(max.Y, outline.Max.V * scale), max.Z);
-          }
-
-          if (view is View3D view3D && view3D.IsSectionBoxActive)
-            clipBox.Intersection(view3D.GetSectionBox());
-
-          for (int bound = BoundingBoxXYZExtension.BoundsMin; bound <= BoundingBoxXYZExtension.BoundsMax; ++bound)
-          {
-            for (int dim = BoundingBoxXYZExtension.AxisX; dim <= BoundingBoxXYZExtension.AxisZ; ++dim)
-              clipBox.Enabled |= clipBox.get_BoundEnabled(bound, dim);
+            case ViewSection _:
+              clipBox.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisZ, true);
+              break;
           }
 
           return clipBox;
@@ -272,24 +298,30 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         using (var viewRange = viewPlan.GetViewRange())
         {
-          var bottom = view.Document.GetElement(viewRange.GetLevelId(PlanViewPlane.ViewDepthPlane)) is Level bottomLevel ?
-            bottomLevel.ProjectElevation + viewRange.GetOffset(PlanViewPlane.ViewDepthPlane) :
+          var depth = view.Document.GetElement(viewRange.GetLevelId(PlanViewPlane.ViewDepthPlane)) is Level depthLevel ?
+            depthLevel.ProjectElevation + viewRange.GetOffset(PlanViewPlane.ViewDepthPlane) :
             -CompoundElementFilter.BoundingBoxLimits;
+
+          var bottom = view.Document.GetElement(viewRange.GetLevelId(PlanViewPlane.BottomClipPlane)) is Level bottomLevel ?
+            bottomLevel.ProjectElevation + viewRange.GetOffset(PlanViewPlane.BottomClipPlane) :
+            -CompoundElementFilter.BoundingBoxLimits;
+
+          bottom = Math.Min(bottom, depth);
 
           var top = view.Document.GetElement(viewRange.GetLevelId(PlanViewPlane.TopClipPlane)) is Level topLevel ?
             topLevel.ProjectElevation + viewRange.GetOffset(PlanViewPlane.TopClipPlane) :
             +CompoundElementFilter.BoundingBoxLimits;
 
-          using (var outline = view.Outline)
+          if (bottom != -CompoundElementFilter.BoundingBoxLimits || top != +CompoundElementFilter.BoundingBoxLimits)
           {
-            var scale = Math.Max(view.Scale, 1);
             return new BoundingBoxIntersectsFilter
             (
               new Outline
               (
-                new XYZ(outline.Min.U * scale, outline.Min.V * scale, bottom),
-                new XYZ(outline.Max.U * scale, outline.Max.V * scale, top)
+                new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, bottom),
+                new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, top)
               ),
+              view.Document.Application.VertexTolerance,
               clipped
             );
           }
@@ -308,32 +340,84 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var bottom = (view.Document.GetElement(bottomId) as Level)?.ProjectElevation ?? -CompoundElementFilter.BoundingBoxLimits;
       var top    = (view.Document.GetElement(topId   ) as Level)?.ProjectElevation ?? +CompoundElementFilter.BoundingBoxLimits;
 
-      using (var outline = view.Outline)
+      if (bottom != -CompoundElementFilter.BoundingBoxLimits || top != +CompoundElementFilter.BoundingBoxLimits)
       {
-        var scale = Math.Max(view.Scale, 1);
-
         return new BoundingBoxIntersectsFilter
         (
           new Outline
           (
-            new XYZ(outline.Min.U * scale, outline.Min.V * scale, bottom),
-            new XYZ(outline.Max.U * scale, outline.Max.V * scale, top)
+            new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, bottom),
+            new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, top)
           ),
+          view.Document.Application.VertexTolerance,
           clipped
         );
       }
+
+      return default;
     }
 
-    public static ElementFilter GetViewTypeFilter(this View view, bool clipped = false)
+    public static ElementFilter GetModelClipFilter(this View view, bool clipped = false)
     {
-      if (view is ViewSchedule)
-        return new ElementCategoryFilter(view.get_Parameter(BuiltInParameter.SCHEDULE_CATEGORY).AsElementId(), clipped);
+      var filter = default(ElementFilter);
 
-      var filter = clipped ?
+      if (view.IsGraphicalView())
+      {
+        if (view is ViewSheet || view is ViewDrafting || view.ViewType == ViewType.Legend)
+          return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty; // No model elements here
+
+        filter = clipped ?
         CompoundElementFilter.Intersect(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped)) :
-        CompoundElementFilter.Union    (GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped));
+        CompoundElementFilter.Union(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped));
 
-      return filter.IsEmpty() ? default : filter;
+        var modelClipBox = view.GetModelClipBox();
+        if (modelClipBox.Enabled)
+          filter = CompoundElementFilter.Intersect(filter, new BoundingBoxIntersectsFilter(modelClipBox.ToOutLine(), view.Document.Application.VertexTolerance, clipped));
+      }
+      else if (view is TableView table)
+      {
+        if (table.TargetId.IsValid())
+          return CompoundElementFilter.ExclusionFilter(table.TargetId, inverted: true);
+
+        if (view is ViewSchedule && view.get_Parameter(BuiltInParameter.SCHEDULE_CATEGORY)?.AsElementId() is ElementId scheduleCategoryId)
+          return new ElementCategoryFilter(scheduleCategoryId, clipped);
+
+        return CompoundElementFilter.Universe;
+      }
+      else if (view is ImageView)
+      {
+        return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty;
+      }
+      else
+      {
+        switch (view.ViewType)
+        {
+          case ViewType.ProjectBrowser:
+          case ViewType.SystemBrowser:
+            return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty;
+
+          case ViewType.Report:
+          case ViewType.CostReport:
+          case ViewType.LoadsReport:
+          case ViewType.PresureLossReport:
+          case ViewType.SystemsAnalysisReport:
+            return clipped ? CompoundElementFilter.Empty : CompoundElementFilter.Universe;
+        }
+
+        return CompoundElementFilter.Empty;
+      }
+
+      return filter;
+    }
+
+    public static ElementFilter GetClipFilter(this View view, bool clipped = false)
+    {
+      var modelClipFilter = GetModelClipFilter(view, clipped);
+      var annotationClipFilter = new ElementOwnerViewFilter(view.Id, clipped);
+
+      return clipped ?
+        CompoundElementFilter.Intersect(modelClipFilter, annotationClipFilter) :
+        CompoundElementFilter.Union    (modelClipFilter, annotationClipFilter);
     }
 
     #region ViewSection

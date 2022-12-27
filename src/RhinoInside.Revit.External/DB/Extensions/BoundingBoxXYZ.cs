@@ -55,34 +55,49 @@ namespace RhinoInside.Revit.External.DB.Extensions
       out BoundingInterval x, out BoundingInterval y, out BoundingInterval z
     )
     {
-      var (min, max) = value;
+      var ((minX, minY, minZ), (maxX, maxY, maxZ)) = value;
+
+      var xDecreasing = maxX < minX;
       x = new BoundingInterval
       (
-        (min.X, value.get_BoundEnabled(BoundsMin, AxisX) ? BoundingValue.Bounding.Enabled : BoundingValue.Bounding.DisabledMin),
-        (max.X, value.get_BoundEnabled(BoundsMax, AxisX) ? BoundingValue.Bounding.Enabled : BoundingValue.Bounding.DisabledMax)
+        (minX, value.get_BoundEnabled(BoundsMin, AxisX) ? BoundingValue.Bounding.Enabled : xDecreasing ? BoundingValue.Bounding.DisabledMax : BoundingValue.Bounding.DisabledMin),
+        (maxX, value.get_BoundEnabled(BoundsMax, AxisX) ? BoundingValue.Bounding.Enabled : xDecreasing ? BoundingValue.Bounding.DisabledMin : BoundingValue.Bounding.DisabledMax)
       );
+
+      var yDecreasing = maxY < minY;
       y = new BoundingInterval
       (
-        (min.Y, value.get_BoundEnabled(BoundsMin, AxisY) ? BoundingValue.Bounding.Enabled : BoundingValue.Bounding.DisabledMin),
-        (max.Y, value.get_BoundEnabled(BoundsMax, AxisY) ? BoundingValue.Bounding.Enabled : BoundingValue.Bounding.DisabledMax)
+        (minY, value.get_BoundEnabled(BoundsMin, AxisY) ? BoundingValue.Bounding.Enabled : yDecreasing ? BoundingValue.Bounding.DisabledMax : BoundingValue.Bounding.DisabledMin),
+        (maxY, value.get_BoundEnabled(BoundsMax, AxisY) ? BoundingValue.Bounding.Enabled : yDecreasing ? BoundingValue.Bounding.DisabledMin : BoundingValue.Bounding.DisabledMax)
       );
+
+      var zDecreasing = maxZ < minZ;
       z = new BoundingInterval
       (
-        (min.Z, value.get_BoundEnabled(BoundsMin, AxisZ) ? BoundingValue.Bounding.Enabled : BoundingValue.Bounding.DisabledMin),
-        (max.Z, value.get_BoundEnabled(BoundsMax, AxisZ) ? BoundingValue.Bounding.Enabled : BoundingValue.Bounding.DisabledMax)
+        (minZ, value.get_BoundEnabled(BoundsMin, AxisZ) ? BoundingValue.Bounding.Enabled : zDecreasing ? BoundingValue.Bounding.DisabledMax : BoundingValue.Bounding.DisabledMin),
+        (maxZ, value.get_BoundEnabled(BoundsMax, AxisZ) ? BoundingValue.Bounding.Enabled : zDecreasing ? BoundingValue.Bounding.DisabledMin : BoundingValue.Bounding.DisabledMax)
       );
     }
 
     public static BoundingBoxXYZ Empty => new BoundingBoxXYZ()
     {
+      Enabled = false,
       Min = XYZExtension.MaxValue,
       Max = XYZExtension.MinValue,
     };
 
     public static bool IsEmpty(this BoundingBoxXYZ value)
     {
-      var (min, max) = value;
-      return min == XYZExtension.MaxValue && max == XYZExtension.MinValue;
+      if (!value.IsNegative()) return false;
+      if (!value.Enabled) return true;
+
+      for (var dim = AxisX; dim <= AxisZ; ++dim)
+      {
+        if (value.get_BoundEnabled(BoundsMin, dim) || value.get_BoundEnabled(BoundsMax, dim))
+          return false;
+      }
+
+      return true;
     }
 
     public static bool IsNullOrEmpty(this BoundingBoxXYZ value)
@@ -92,14 +107,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static BoundingBoxXYZ Universe => new BoundingBoxXYZ()
     {
+      Enabled = false,
       Min = XYZExtension.MinValue,
       Max = XYZExtension.MaxValue,
     };
 
     public static bool IsUniverse(this BoundingBoxXYZ value)
     {
-      var (min, max) = value;
-      return min == XYZExtension.MinValue && max == XYZExtension.MaxValue;
+      if (!value.IsPositive()) return false;
+      if (!value.Enabled) return true;
+
+      for (var dim = AxisX; dim <= AxisZ; ++dim)
+      {
+        if (value.get_BoundEnabled(BoundsMin, dim) || value.get_BoundEnabled(BoundsMax, dim))
+          return false;
+      }
+
+      return true;
     }
 
     public static bool IsNullOrUniverse(this BoundingBoxXYZ value)
@@ -127,7 +151,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static bool IsZeroLength(this BoundingBoxXYZ value, double tolerance = NumericTolerance.DefaultTolerance)
+    public static bool IsZeroDiagonal(this BoundingBoxXYZ value, double tolerance = NumericTolerance.DefaultTolerance)
     {
       tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
 
@@ -135,41 +159,57 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return XYZExtension.IsZeroLength(x, y, z, tolerance);
     }
 
-    public static double GetLength(this BoundingBoxXYZ value)
+    public static double GetDiagonal(this BoundingBoxXYZ value)
     {
       var (min, max) = value;
       var diagonal = max - min;
       var (x, y, z) = diagonal;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
-      if (x <  0.0 && y <  0.0 && z <  0.0) return -NumericTolerance.Abs(x, y, z);
-      if (x >  0.0 && y >  0.0 && z >  0.0) return +NumericTolerance.Abs(x, y, z);
+      if (x < 0.0 && y < 0.0 && z < 0.0) return -NumericTolerance.Abs(x, y, z);
+      if (x > 0.0 && y > 0.0 && z > 0.0) return +NumericTolerance.Abs(x, y, z);
+
+      return double.NaN;
+    }
+
+    public static double GetLength(this BoundingBoxXYZ value)
+    {
+      var (X, Y, Z) = value;
+      var x = X.GetRadius();
+      var y = Y.GetRadius();
+      var z = Z.GetRadius();
+
+      if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
+      if (x < 0.0 && y < 0.0 && z < 0.0) return (x + y + z) * 8.0;
+      if (x > 0.0 && y > 0.0 && z > 0.0) return (x + y + z) * 8.0;
 
       return double.NaN;
     }
 
     public static double GetArea(this BoundingBoxXYZ value)
     {
-      var (min, max) = value;
-      var diagonal = max - min;
-      var (x, y, z) = diagonal;
+      var (X, Y, Z) = value;
+      var x = X.GetRadius();
+      var y = Y.GetRadius();
+      var z = Z.GetRadius();
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
-      if (x < 0.0 && y < 0.0 && z < 0.0) return -((2.0 * x * x) + (2.0 * y * y) + (2.0 * z * z));
-      if (x > 0.0 && y > 0.0 && z > 0.0) return +((2.0 * x * x) + (2.0 * y * y) + (2.0 * z * z));
+      if (x < 0.0 && y < 0.0 && z < 0.0) return ((x * y) + (y * z) + (z * x)) * 8.0;
+      if (x > 0.0 && y > 0.0 && z > 0.0) return ((x * y) + (y * z) + (z * x)) * 8.0;
 
       return double.NaN;
     }
 
     public static double GetVolume(this BoundingBoxXYZ value)
     {
-      var (min, max) = value;
-      var diagonal = max - min;
-      var (x, y, z) = diagonal;
+      var (X, Y, Z) = value;
+      var x = X.GetRadius();
+      var y = Y.GetRadius();
+      var z = Z.GetRadius();
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
-      if (x < 0.0 && y < 0.0 && z < 0.0) return -(x * y * z);
-      if (x > 0.0 && y > 0.0 && z > 0.0) return +(x * y * z);
+      if (x < 0.0 && y < 0.0 && z < 0.0) return (x * y * z) * 8.0;
+      if (x > 0.0 && y > 0.0 && z > 0.0) return (x * y * z) * 8.0;
 
       return double.NaN;
     }
@@ -184,9 +224,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
         Max = value.Max,
       };
 
-      for (int bound = BoundsMin; bound <= BoundsMax; ++bound)
-        for (int dim = AxisX; dim <= AxisZ; ++dim)
-          value.set_BoundEnabled(bound, dim, other.get_BoundEnabled(bound, dim));
+      if (value.Enabled)
+      {
+        for (int bound = BoundsMin; bound <= BoundsMax; ++bound)
+          for (int dim = AxisX; dim <= AxisZ; ++dim)
+            other.set_BoundEnabled(bound, dim, value.get_BoundEnabled(bound, dim));
+      }
 
       return other;
     }
@@ -194,13 +237,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static void CopyFrom(this BoundingBoxXYZ value, BoundingBoxXYZ other)
     {
       value.Enabled = other.Enabled;
-      for (int bound = BoundsMin; bound <= BoundsMax; ++bound)
-        for (int dim = AxisX; dim <= AxisZ; ++dim)
-          value.set_BoundEnabled(bound, dim, other.get_BoundEnabled(bound, dim));
-
       value.Min = other.Min;
       value.Max = other.Max;
       value.Transform = other.Transform;
+
+      if (value.Enabled)
+      {
+        for (int bound = BoundsMin; bound <= BoundsMax; ++bound)
+          for (int dim = AxisX; dim <= AxisZ; ++dim)
+            value.set_BoundEnabled(bound, dim, other.get_BoundEnabled(bound, dim));
+      }
     }
 
     public static XYZ Evaluate(this BoundingBoxXYZ value, XYZ xyz)
@@ -220,39 +266,84 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static void Intersection(this BoundingBoxXYZ value, BoundingBoxXYZ other)
     {
-      var otherToValue = value.Transform * other.Transform.Inverse;
+      if (other.IsUniverse() || value.IsEmpty()) return;
+      if (other.IsEmpty())
+      {
+        value.Enabled = false;
+        value.Min = XYZExtension.MaxValue;
+        value.Max = XYZExtension.MinValue;
+        return;
+      }
 
-      var (aX, aY, aZ) = value;
-      var (bX, bY, bZ) = otherToValue.OfBoundingBoxXYZ(other);
+      var A = value.Clone();
+      A.Intersection(other.GetCorners());
+      var a = A.GetVolume();
 
-      var x = aX & bX;
-      var y = aY & bY;
-      var z = aZ & bZ;
+      var B = other.Clone();
+      B.Intersection(value.GetCorners());
+      var b = B.GetVolume();
 
-      value.Min = new XYZ(x.Left,  y.Left,  z.Left);
-      value.Max = new XYZ(x.Right, y.Right, z.Right);
+      value.CopyFrom(a < b ? A : B);
+    }
 
-      value.set_BoundEnabled(BoundsMin, AxisX, x.Left.IsEnabled);
-      value.set_BoundEnabled(BoundsMax, AxisX, x.Right.IsEnabled);
-      value.set_BoundEnabled(BoundsMin, AxisY, y.Left.IsEnabled);
-      value.set_BoundEnabled(BoundsMax, AxisY, y.Right.IsEnabled);
-      value.set_BoundEnabled(BoundsMin, AxisZ, z.Left.IsEnabled);
-      value.set_BoundEnabled(BoundsMax, AxisZ, z.Right.IsEnabled);
+    public static void Intersection(this BoundingBoxXYZ value, params XYZ[] xyz)
+    {
+      if (xyz.Length > 0)
+      {
+        using (var inverse = value.Transform.Inverse)
+        {
+          var minX = double.PositiveInfinity; var minY = double.PositiveInfinity; var minZ = double.PositiveInfinity;
+          var maxX = double.NegativeInfinity; var maxY = double.NegativeInfinity; var maxZ = double.NegativeInfinity;
+
+          for (int p = 0; p < xyz.Length; p++)
+          {
+            var (x, y, z) = inverse.OfPoint(xyz[p]);
+            minX = NumericTolerance.MinNumber(minX, x); maxX = NumericTolerance.MaxNumber(maxX, x);
+            minY = NumericTolerance.MinNumber(minY, y); maxY = NumericTolerance.MaxNumber(maxY, y);
+            minZ = NumericTolerance.MinNumber(minZ, z); maxZ = NumericTolerance.MaxNumber(maxZ, z);
+          }
+
+          var (X, Y, Z) = value;
+          X &= (minX, maxX);
+          Y &= (minY, maxY);
+          Z &= (minZ, maxZ);
+
+          value.Min = new XYZ(X.Left, Y.Left, Z.Left);
+          value.Max = new XYZ(X.Right, Y.Right, Z.Right);
+
+          var enabled = false;
+          value.Enabled = true;
+          value.set_BoundEnabled(BoundsMin, AxisX, enabled |= X.Left.IsEnabled);
+          value.set_BoundEnabled(BoundsMax, AxisX, enabled |= X.Right.IsEnabled);
+          value.set_BoundEnabled(BoundsMin, AxisY, enabled |= Y.Left.IsEnabled);
+          value.set_BoundEnabled(BoundsMax, AxisY, enabled |= Y.Right.IsEnabled);
+          value.set_BoundEnabled(BoundsMin, AxisZ, enabled |= Z.Left.IsEnabled);
+          value.set_BoundEnabled(BoundsMax, AxisZ, enabled |= Z.Right.IsEnabled);
+          value.Enabled = enabled;
+        }
+      }
     }
 
     public static void Union(this BoundingBoxXYZ value, BoundingBoxXYZ other)
     {
-      var otherToValue = value.Transform * other.Transform.Inverse;
+      if (other.IsEmpty() || value.IsUniverse()) return;
+      if (other.IsUniverse())
+      {
+        value.Enabled = false;
+        value.Min = XYZExtension.MinValue;
+        value.Max = XYZExtension.MaxValue;
+        return;
+      }
 
-      var (aX, aY, aZ) = value;
-      var (bX, bY, bZ) = otherToValue.OfBoundingBoxXYZ(other);
+      var A = value.Clone();
+      A.Union(other.GetCorners());
+      var a = A.GetVolume();
 
-      var x = aX | bX;
-      var y = aY | bY;
-      var z = aZ | bZ;
+      var B = other.Clone();
+      B.Union(value.GetCorners());
+      var b = B.GetVolume();
 
-      value.Min = new XYZ(x.Left, y.Left, z.Left);
-      value.Max = new XYZ(x.Right, y.Right, z.Right);
+      value.CopyFrom(a < b ? A : B);
     }
 
     public static void Union(this BoundingBoxXYZ value, params XYZ[] xyz)
@@ -261,18 +352,34 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         using (var inverse = value.Transform.Inverse)
         {
-          var ((minX, minY, minZ), (maxX, maxY, maxZ)) = value;
+          var minX = double.PositiveInfinity; var minY = double.PositiveInfinity; var minZ = double.PositiveInfinity;
+          var maxX = double.NegativeInfinity; var maxY = double.NegativeInfinity; var maxZ = double.NegativeInfinity;
 
           for (int p = 0; p < xyz.Length; p++)
           {
-            var (x, y, z) = xyz[p];
+            var (x, y, z) = inverse.OfPoint(xyz[p]);
             minX = NumericTolerance.MinNumber(minX, x); maxX = NumericTolerance.MaxNumber(maxX, x);
             minY = NumericTolerance.MinNumber(minY, y); maxY = NumericTolerance.MaxNumber(maxY, y);
             minZ = NumericTolerance.MinNumber(minZ, z); maxZ = NumericTolerance.MaxNumber(maxZ, z);
           }
 
-          value.Min = new XYZ(minX, minY, minZ);
-          value.Max = new XYZ(maxX, maxY, maxZ);
+          var (X, Y, Z) = value;
+          X |= (minX, maxX);
+          Y |= (minY, maxY);
+          Z |= (minZ, maxZ);
+
+          value.Min = new XYZ(X.Left, Y.Left, Z.Left);
+          value.Max = new XYZ(X.Right, Y.Right, Z.Right);
+
+          var enabled = false;
+          value.Enabled = true;
+          value.set_BoundEnabled(BoundsMin, AxisX, enabled |= X.Left.IsEnabled);
+          value.set_BoundEnabled(BoundsMax, AxisX, enabled |= X.Right.IsEnabled);
+          value.set_BoundEnabled(BoundsMin, AxisY, enabled |= Y.Left.IsEnabled);
+          value.set_BoundEnabled(BoundsMax, AxisY, enabled |= Y.Right.IsEnabled);
+          value.set_BoundEnabled(BoundsMin, AxisZ, enabled |= Z.Left.IsEnabled);
+          value.set_BoundEnabled(BoundsMax, AxisZ, enabled |= Z.Right.IsEnabled);
+          value.Enabled = enabled;
         }
       }
     }
@@ -332,28 +439,49 @@ namespace RhinoInside.Revit.External.DB.Extensions
       bool clipped = false;
       planes = default;
 
-      using (var transform = value.Transform)
+      if (value.Enabled)
       {
-        var (origin, basisX, basisY, basisZ) = transform;
-        var (min, max) = value;
+        using (var transform = value.Transform)
+        {
+          var (origin, basisX, basisY, basisZ) = transform;
+          var (min, max) = value;
 
-        if (clipped |= value.get_BoundEnabled(BoundsMin, AxisX))
-          planes.X.Min = new PlaneEquation(origin + min.X * basisX,  basisX);
+          if (value.get_BoundEnabled(BoundsMin, AxisX))
+          {
+            clipped = true;
+            planes.X.Min = new PlaneEquation(origin + min.X * basisX, basisX);
+          }
 
-        if (clipped |= value.get_BoundEnabled(BoundsMax, AxisX))
-          planes.X.Max = new PlaneEquation(origin + max.X * basisX, -basisX);
+          if (value.get_BoundEnabled(BoundsMax, AxisX))
+          {
+            clipped = true;
+            planes.X.Max = new PlaneEquation(origin + max.X * basisX, -basisX);
+          }
 
-        if (clipped |= value.get_BoundEnabled(BoundsMin, AxisY))
-          planes.Y.Min = new PlaneEquation(origin + min.Y * basisY,  basisY);
+          if (value.get_BoundEnabled(BoundsMin, AxisY))
+          {
+            clipped = true;
+            planes.Y.Min = new PlaneEquation(origin + min.Y * basisY, basisY);
+          }
 
-        if (clipped |= value.get_BoundEnabled(BoundsMax, AxisY))
-          planes.Y.Max = new PlaneEquation(origin + max.Y * basisY, -basisY);
+          if (value.get_BoundEnabled(BoundsMax, AxisY))
+          {
+            clipped = true;
+            planes.Y.Max = new PlaneEquation(origin + max.Y * basisY, -basisY);
+          }
 
-        if (clipped |= value.get_BoundEnabled(BoundsMin, AxisZ))
-          planes.Z.Min = new PlaneEquation(origin + min.Z * basisZ,  basisZ);
+          if (value.get_BoundEnabled(BoundsMin, AxisZ))
+          {
+            clipped = true;
+            planes.Z.Min = new PlaneEquation(origin + min.Z * basisZ, basisZ);
+          }
 
-        if (clipped |= value.get_BoundEnabled(BoundsMax, AxisZ))
-          planes.Z.Max = new PlaneEquation(origin + max.Z * basisZ, -basisZ);
+          if (value.get_BoundEnabled(BoundsMax, AxisZ))
+          {
+            clipped = true;
+            planes.Z.Max = new PlaneEquation(origin + max.Z * basisZ, -basisZ);
+          }
+        }
       }
 
       return clipped;

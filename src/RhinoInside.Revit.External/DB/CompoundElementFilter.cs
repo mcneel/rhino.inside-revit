@@ -49,7 +49,11 @@ namespace RhinoInside.Revit.External.DB
     /// <summary>
     /// <see cref="Autodesk.Revit.DB.ElementFilter"/> that returns no element on any Revit <see cref="Autodesk.Revit.DB.Document"/>.
     /// </summary>
+#if REVIT_2019
+    public static ElementFilter Empty => new LogicalAndFilter
+#else
     public static ElementFilter Empty { get; } = new LogicalAndFilter
+#endif
     (
       new ElementFilter[]
       {
@@ -82,7 +86,11 @@ namespace RhinoInside.Revit.External.DB
     /// <summary>
     /// <see cref="Autodesk.Revit.DB.ElementFilter"/> that returns all elements on any Revit <see cref="Autodesk.Revit.DB.Document"/>.
     /// </summary>
+#if REVIT_2019
+    public static ElementFilter Universe => new LogicalOrFilter
+#else
     public static ElementFilter Universe { get; } = new LogicalOrFilter
+#endif
     (
       new ElementFilter[]
       {
@@ -527,7 +535,7 @@ namespace Autodesk.Revit.DB
     CompoundElementFilter.ExclusionFilter(filter.VisibleElementIds, inverted: false):
     CompoundElementFilter.Intersect
     (
-      #region Quick exclusion
+    #region Quick exclusion
       // Types are never visible on views.
       CompoundElementFilter.ElementIsElementTypeFilter(inverted: true),
       CompoundElementFilter.Union
@@ -539,8 +547,8 @@ namespace Autodesk.Revit.DB
         // or be on one of those categories
         new ElementMulticategoryFilter(filter.VisibleCategoryIds)
       ),
-      #endregion
-      #region Slow inclusion
+    #endregion
+    #region Slow inclusion
       CompoundElementFilter.Union
       (
         // Cameras do not have parameter Id, so we select all except... ->
@@ -557,7 +565,7 @@ namespace Autodesk.Revit.DB
           FirstOrDefault() ?? ElementId.InvalidElementId
         }
       )
-      #endregion
+    #endregion
     );
   }
 }
