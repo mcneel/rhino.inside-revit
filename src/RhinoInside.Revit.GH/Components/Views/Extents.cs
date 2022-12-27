@@ -207,11 +207,11 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     internal static void GetFrontAndBackClipOffsets(ARDB.View view, out double backOffset, out double frontOffset)
     {
-      backOffset = view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR)?.AsInteger() == 1 ?
-                   (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR)?.AsDouble() ?? double.NegativeInfinity) : double.NegativeInfinity;
+      backOffset = -(view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR)?.AsInteger() == 1 ?
+                    (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR)?.AsDouble() ?? double.PositiveInfinity) : double.PositiveInfinity);
 
-      frontOffset = view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_NEAR)?.AsInteger() == 1 ?
-                   (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_NEAR)?.AsDouble() ?? double.PositiveInfinity) : double.PositiveInfinity;
+      frontOffset = +(view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_NEAR)?.AsInteger() == 1 ?
+                     (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_NEAR)?.AsDouble() ?? double.PositiveInfinity) : double.PositiveInfinity);
     }
 
     internal static void GetViewRangeOffsets(ARDB.View view, out double backOffset, out double frontOffset)
