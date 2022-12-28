@@ -62,15 +62,15 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ),
       new ParamDefinition
       (
-        new Param_Boolean() { Name = "Background Visible : Surface Patterns", NickName = "BVSP", Description = "Element background surface patterns visibility", Optional = true }, ParamRelevance.Primary
+        new Param_Boolean() { Name = "Background Visible : Surface Patterns", NickName = "BVSP", Description = "Element background surface patterns visibility", Optional = true }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
-        new Parameters.FillPatternElement() { Name = "Background Pattern : Surface Patterns", NickName = "BPSP", Description = "Element background surface pattern", Optional = true }, ParamRelevance.Primary
+        new Parameters.FillPatternElement() { Name = "Background Pattern : Surface Patterns", NickName = "BPSP", Description = "Element background surface pattern", Optional = true }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
-        new Param_Colour() { Name = "Background Color : Surface Patterns", NickName = "BCSP", Description = "Element background surface color", Optional = true }, ParamRelevance.Primary
+        new Param_Colour() { Name = "Background Color : Surface Patterns", NickName = "BCSP", Description = "Element background surface color", Optional = true }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -102,15 +102,15 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ),
       new ParamDefinition
       (
-        new Param_Boolean() { Name = "Background Visible : Cut Patterns", NickName = "BVCP", Description = "Element background cut patterns visibility", Optional = true }, ParamRelevance.Primary
+        new Param_Boolean() { Name = "Background Visible : Cut Patterns", NickName = "BVCP", Description = "Element background cut patterns visibility", Optional = true }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
-        new Parameters.FillPatternElement() { Name = "Background Pattern : Cut Patterns", NickName = "BPCP", Description = "Element background cut pattern", Optional = true }, ParamRelevance.Primary
+        new Parameters.FillPatternElement() { Name = "Background Pattern : Cut Patterns", NickName = "BPCP", Description = "Element background cut pattern", Optional = true }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
-        new Param_Colour() { Name = "Background Color : Cut Patterns", NickName = "BCCP", Description = "Element background cut color", Optional = true }, ParamRelevance.Primary
+        new Param_Colour() { Name = "Background Color : Cut Patterns", NickName = "BCCP", Description = "Element background cut color", Optional = true }, ParamRelevance.Secondary
       ),
     };
 
@@ -147,7 +147,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.TryGetData(DA, "Background Pattern : Surface Patterns", out Types.FillPatternElement surfaceBackgroundPattern)) return;
       if (!Params.TryGetData(DA, "Background Color : Surface Patterns", out System.Drawing.Color? surfaceBackgroundPatternColor)) return;
 
-      if (!Params.TryGetData(DA, "Transarency : Surface", out double? surfaceTransparency)) return;
+      if (!Params.TryGetData(DA, "Transparency : Surface", out double? surfaceTransparency)) return;
 
       if (!Params.TryGetData(DA, "Pattern : Cut Lines", out Types.LinePatternElement cutLinePattern)) return;
       if (!Params.TryGetData(DA, "Color : Cut Lines", out System.Drawing.Color? cutLineColor)) return;
