@@ -173,6 +173,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           settings.SetProjectionLineColor(projectionLineColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
           settings.SetProjectionLineWeight(projectionLineWeight.GetValueOrDefault(ARDB.OverrideGraphicSettings.InvalidPenNumber));
 
+#if REVIT_2019
           settings.SetSurfaceForegroundPatternVisible(surfaceForegroundPatternVisible.GetValueOrDefault(true));
           settings.SetSurfaceForegroundPatternId(surfaceForegroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
           settings.SetSurfaceForegroundPatternColor(surfaceForegroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
@@ -180,6 +181,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
           settings.SetSurfaceBackgroundPatternVisible(surfaceBackgroundPatternVisible.GetValueOrDefault(true));
           settings.SetSurfaceBackgroundPatternId(surfaceBackgroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
           settings.SetSurfaceBackgroundPatternColor(surfaceBackgroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
+#else
+          settings.SetProjectionFillPatternVisible(surfaceForegroundPatternVisible.GetValueOrDefault(true));
+          settings.SetProjectionFillPatternId(surfaceForegroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
+          settings.SetProjectionFillColor(surfaceForegroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
+#endif
 
           settings.SetSurfaceTransparency((int) Rhino.RhinoMath.Clamp(surfaceTransparency.GetValueOrDefault(0.0) * 100, 0, 100));
 
@@ -187,6 +193,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           settings.SetCutLineColor(cutLineColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
           settings.SetCutLineWeight(cutLineWeight.GetValueOrDefault(ARDB.OverrideGraphicSettings.InvalidPenNumber));
 
+#if REVIT_2019
           settings.SetCutForegroundPatternVisible(cutForegroundPatternVisible.GetValueOrDefault(true));
           settings.SetCutForegroundPatternId(cutForegroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
           settings.SetCutForegroundPatternColor(cutForegroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
@@ -194,6 +201,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
           settings.SetCutBackgroundPatternVisible(cutBackgroundPatternVisible.GetValueOrDefault(true));
           settings.SetCutBackgroundPatternId(cutBackgroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
           settings.SetCutBackgroundPatternColor(cutBackgroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
+#else
+          settings.SetCutFillPatternVisible(cutForegroundPatternVisible.GetValueOrDefault(true));
+          settings.SetCutFillPatternId(cutForegroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
+          settings.SetCutFillColor(cutForegroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
+#endif
 
           return new Types.OverrideGraphicSettings(doc.Value, settings);
         }
