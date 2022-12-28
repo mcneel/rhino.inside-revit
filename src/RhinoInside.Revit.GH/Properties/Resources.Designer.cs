@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -2083,6 +2083,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementFlip {
+            get {
+                object obj = ResourceManager.GetObject("ElementFlip", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementGeometry {
             get {
                 object obj = ResourceManager.GetObject("ElementGeometry", resourceCulture);
@@ -2296,6 +2306,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementPhaseStatusFilter {
             get {
                 object obj = ResourceManager.GetObject("ElementPhaseStatusFilter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementPin {
+            get {
+                object obj = ResourceManager.GetObject("ElementPin", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2746,16 +2766,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap FilterRule {
             get {
                 object obj = ResourceManager.GetObject("FilterRule", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap FlipUnflipElement {
-            get {
-                object obj = ResourceManager.GetObject("FlipUnflipElement", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -3366,16 +3376,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap Phase {
             get {
                 object obj = ResourceManager.GetObject("Phase", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap PinUnPinElement {
-            get {
-                object obj = ResourceManager.GetObject("PinUnPinElement", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

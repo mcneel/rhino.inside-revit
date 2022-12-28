@@ -814,7 +814,7 @@
   <data name="DeconstructBitmapTexture" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\DeconstructBitmapTexture.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="PinUnPinElement" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="ElementPin" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\PinUnPinElement.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="AnalyzeGenericShader" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -889,7 +889,7 @@
   <data name="ThermalMaterialType_ValueList" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\params\ThermalMaterialType_ValueList.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="FlipUnflipElement" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="ElementFlip" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\FlipUnflipElement.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="MaterialGraphics" type="System.Resources.ResXFileRef, System.Windows.Forms">
