@@ -211,6 +211,7 @@
     <Compile Include="Components\ObjectStyles\CategoryStyle.cs" />
     <Compile Include="Components\ObjectStyles\CategorySubCategories.cs" />
     <Compile Include="Components\ObjectStyles\CurveLineStyle.cs" />
+    <Compile Include="Components\ObjectStyles\GraphicOverrides.cs" />
     <Compile Include="Components\ObjectStyles\QueryCategories.cs" />
     <Compile Include="Components\ObjectStyles\QueryLineStyles.cs" />
     <Compile Include="Components\Options\RevitUser.cs" />

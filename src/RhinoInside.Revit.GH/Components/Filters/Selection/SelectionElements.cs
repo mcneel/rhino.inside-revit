@@ -8,6 +8,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 {
   using External.DB.Extensions;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.11")]
   public class SelectionElements : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("E90F2139-FA13-4EE2-BFD3-6642FA9053AB");
@@ -26,14 +27,14 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.Element>("Selection Filter", "S"),
+      ParamDefinition.Create<Parameters.FilterElement>("Selection Filter", "S"),
       ParamDefinition.Create<Parameters.Element>("Elements", "E", access: GH_ParamAccess.list, optional: true, relevance: ParamRelevance.Primary)
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Element>("Selection Filter", "S"),
+      ParamDefinition.Create<Parameters.FilterElement>("Selection Filter", "S"),
       ParamDefinition.Create<Parameters.Element>("Elements", "E", access: GH_ParamAccess.list, relevance: ParamRelevance.Primary)
     };
 

@@ -404,4 +404,47 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
   }
+
+  [Kernel.Attributes.Name("Graphic Settings")]
+  public class OverrideGraphicSettings : ValueObject, ICloneable
+  {
+    #region DocumentObject
+    public override string DisplayName
+    {
+      get
+      {
+        if (Value is ARDB.OverrideGraphicSettings)
+          return "Override Graphic Settings";
+
+        return "<None>";
+      }
+    }
+    #endregion
+
+    public new ARDB.OverrideGraphicSettings Value => base.Value as ARDB.OverrideGraphicSettings;
+
+    object ICloneable.Clone()
+    {
+      return new OverrideGraphicSettings
+      (
+        Document,
+        Value is ARDB.OverrideGraphicSettings settings ? new ARDB.OverrideGraphicSettings(settings) : default
+      );
+    }
+
+    public OverrideGraphicSettings() : base() { }
+
+    public OverrideGraphicSettings(OverrideGraphicSettings value) :
+      base(value?.Document, value is null ? null : new ARDB.OverrideGraphicSettings(value.Value))
+    { }
+
+    public OverrideGraphicSettings(ARDB.Document doc, ARDB.OverrideGraphicSettings value) :
+      base(doc, value)
+    { }
+
+    public OverrideGraphicSettings(ARDB.Document doc) :
+      base(doc, new ARDB.OverrideGraphicSettings())
+    { }
+
+  }
 }

@@ -7,6 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
+  [ComponentVersion(introduced: "1.0", updated: "1.11")]
   public class QueryFilters : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("B7B1740B-0721-49C8-92F5-057775DA9792");
@@ -51,8 +52,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Element>("Parameter Filters", "P", "Parameter filter list", GH_ParamAccess.list),
-      ParamDefinition.Create<Parameters.Element>("Selection Filters", "S", "Selection filter list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.FilterElement>("Parameter Filters", "P", "Parameter filter list", GH_ParamAccess.list),
+      ParamDefinition.Create<Parameters.FilterElement>("Selection Filters", "S", "Selection filter list", GH_ParamAccess.list)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

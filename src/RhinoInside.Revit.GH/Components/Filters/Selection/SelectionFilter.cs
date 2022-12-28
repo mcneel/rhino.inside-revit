@@ -8,9 +8,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
-  using ElementTracking;
   using External.DB.Extensions;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.11")]
   public class SelectionFilterElementByName : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("29618F71-3B57-4A20-9CB2-4C3D17774172");
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     {
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.FilterElement()
         {
           Name = _SelectionFilter_,
           NickName = _SelectionFilter_.Substring(0, 1),
