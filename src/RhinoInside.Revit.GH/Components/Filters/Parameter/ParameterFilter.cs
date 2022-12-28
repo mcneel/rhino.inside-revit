@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     {
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.FilterElement()
         {
           Name = _ParameterFilter_,
           NickName = _ParameterFilter_.Substring(0, 1),

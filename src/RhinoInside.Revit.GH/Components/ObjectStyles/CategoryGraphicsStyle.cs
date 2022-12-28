@@ -1,8 +1,5 @@
 using System;
-using System.Linq;
-using System.Windows.Forms;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.ObjectStyles

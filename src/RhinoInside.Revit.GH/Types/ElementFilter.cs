@@ -7,8 +7,19 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB;
   using External.DB.Extensions;
 
+  [Kernel.Attributes.Name("Filter")]
+  public abstract class FilterElement : Element
+  {
+    protected override Type ValueType => typeof(ARDB.FilterElement);
+    public new ARDB.FilterElement Value => base.Value as ARDB.FilterElement;
+
+    public FilterElement() { }
+    public FilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public FilterElement(ARDB.FilterElement value) : base(value) { }
+  }
+
   [Kernel.Attributes.Name("Selection Filter")]
-  public class SelectionFilterElement : Element
+  public class SelectionFilterElement : FilterElement
   {
     protected override Type ValueType => typeof(ARDB.SelectionFilterElement);
     public new ARDB.SelectionFilterElement Value => base.Value as ARDB.SelectionFilterElement;
@@ -36,7 +47,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Parameter Filter")]
-  public class ParameterFilterElement : Element
+  public class ParameterFilterElement : FilterElement
   {
     protected override Type ValueType => typeof(ARDB.ParameterFilterElement);
     public new ARDB.ParameterFilterElement Value => base.Value as ARDB.ParameterFilterElement;
