@@ -418,6 +418,7 @@
     <Compile Include="Types\ObjectStyles\Category.cs" />
     <Compile Include="Types\ObjectStyles\FillPatternElement.cs" />
     <Compile Include="Types\ObjectStyles\LinePatternElement.cs" />
+    <Compile Include="Types\ObjectStyles\OverrideGraphicSettings.cs" />
     <Compile Include="Types\Opening.cs" />
     <Compile Include="Types\Panel.cs" />
     <Compile Include="Types\Parameter.cs" />
