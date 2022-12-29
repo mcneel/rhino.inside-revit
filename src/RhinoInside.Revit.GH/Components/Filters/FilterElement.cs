@@ -6,17 +6,18 @@ using Grasshopper.Kernel.Types;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
-  public class FilterElement : Component
+  [ComponentVersion(introduced: "1.0", updated: "1.11")]
+  public class FilterElements : Component
   {
     public override Guid ComponentGuid => new Guid("36180A9E-04CA-4B38-82FE-C6707B32C680");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "Y";
 
-    public FilterElement() : base
+    public FilterElements() : base
     (
-      name: "Filter Element",
+      name: "Filter Elements",
       nickname: "FiltElem",
-      description: "Evaluate if an Element pass a Filter",
+      description: "Evaluate if input Elements pass a Filter",
       category: "Revit",
       subCategory: "Filter"
     )

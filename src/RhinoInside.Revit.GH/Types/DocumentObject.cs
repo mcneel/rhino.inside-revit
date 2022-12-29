@@ -142,7 +142,7 @@ namespace RhinoInside.Revit.GH.Types
   /// Interface to wrap document related types that can be created-duplicated-updated-deleted without starting a Revit Transaction.
   /// </summary>
   /// <remarks>
-  /// For example: <see cref="ARDB.CompoundStructureLayer"/>
+  /// For example: <see cref="ARDB.CompoundStructure"/>, <see cref="ARDB.CompoundStructureLayer"/>, <see cref="ARDB.OverrideGraphicSettings"/>
   /// </remarks>
   public interface IGH_ValueObject : IGH_DocumentObject
   {

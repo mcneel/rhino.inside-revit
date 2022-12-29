@@ -176,7 +176,7 @@ namespace RhinoInside.Revit.GH.Types
           var materialColor = material.Color;
           var valueColor = value.Value;
 
-          if (materialColor.Red != valueColor.R || materialColor.Green != valueColor.G || materialColor.Blue != valueColor.B)
+          if(materialColor.ToColor() != valueColor)
             material.Color = valueColor.ToColor();
         }
       }
@@ -264,11 +264,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is ARDB.Material material)
         {
-          using (var color = value.Value.ToColor())
-          {
-            if (color != material.SurfaceForegroundPatternColor)
-              material.SurfaceForegroundPatternColor = color;
-          }
+          if (material.SurfaceForegroundPatternColor.ToColor() != value.Value)
+            material.SurfaceForegroundPatternColor = value.Value.ToColor();
         }
       }
     }
@@ -303,11 +300,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is ARDB.Material material)
         {
-          using (var color = value.Value.ToColor())
-          {
-            if (color != material.SurfaceBackgroundPatternColor)
-              material.SurfaceBackgroundPatternColor = color;
-          }
+          if (material.SurfaceBackgroundPatternColor.ToColor() != value.Value)
+            material.SurfaceBackgroundPatternColor = value.Value.ToColor();
         }
       }
     }
@@ -342,11 +336,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is ARDB.Material material)
         {
-          using (var color = value.Value.ToColor())
-          {
-            if (color != material.CutForegroundPatternColor)
-              material.CutForegroundPatternColor = color;
-          }
+          if (material.CutForegroundPatternColor.ToColor() != value.Value)
+            material.CutForegroundPatternColor = value.Value.ToColor();
         }
       }
     }
@@ -381,11 +372,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is ARDB.Material material)
         {
-          using (var color = value.Value.ToColor())
-          {
-            if (color != material.CutBackgroundPatternColor)
-              material.CutBackgroundPatternColor = color;
-          }
+          if (material.CutBackgroundPatternColor.ToColor() != value.Value)
+            material.CutBackgroundPatternColor = value.Value.ToColor();
         }
       }
     }
@@ -420,11 +408,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is ARDB.Material material)
         {
-          using (var color = value.Value.ToColor())
-          {
-            if (color != material.SurfacePatternColor)
-              material.SurfacePatternColor = color;
-          }
+          if (material.SurfacePatternColor.ToColor() != value.Value)
+            material.SurfacePatternColor = value.Value.ToColor();
         }
       }
     }
@@ -477,11 +462,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && Value is ARDB.Material material)
         {
-          using (var color = value.Value.ToColor())
-          {
-            if (color != material.CutPatternColor)
-              material.CutPatternColor = color;
-          }
+          if (material.CutPatternColor.ToColor() != value.Value)
+            material.CutPatternColor = value.Value.ToColor();
         }
       }
     }

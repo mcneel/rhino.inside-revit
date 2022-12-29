@@ -8,14 +8,39 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Filter")]
-  public abstract class FilterElement : Element
+  public interface IGH_FilterElement : IGH_Element
+  {
+    ElementFilter GetElementFilter();
+  }
+
+  [Kernel.Attributes.Name("Filter")]
+  public class FilterElement : Element, IGH_FilterElement
   {
     protected override Type ValueType => typeof(ARDB.FilterElement);
     public new ARDB.FilterElement Value => base.Value as ARDB.FilterElement;
 
     public FilterElement() { }
-    public FilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
-    public FilterElement(ARDB.FilterElement value) : base(value) { }
+    protected FilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    protected FilterElement(ARDB.FilterElement value) : base(value) { }
+
+    public override bool CastTo<Q>(out Q target)
+    {
+      if (base.CastTo(out target))
+        return true;
+
+      if (IsValid)
+      {
+        if (typeof(Q).IsAssignableFrom(typeof(ElementFilter)))
+        {
+          target = (Q) (object) GetElementFilter();
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    public virtual ElementFilter GetElementFilter() => new ElementFilter(CompoundElementFilter.Empty);
   }
 
   [Kernel.Attributes.Name("Selection Filter")]
@@ -28,22 +53,8 @@ namespace RhinoInside.Revit.GH.Types
     public SelectionFilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public SelectionFilterElement(ARDB.SelectionFilterElement value) : base(value) { }
 
-    public override bool CastTo<Q>(out Q target)
-    {
-      if (base.CastTo(out target))
-        return true;
-
-      if (Value is ARDB.SelectionFilterElement value)
-      {
-        if (typeof(Q).IsAssignableFrom(typeof(ElementFilter)))
-        {
-          target = (Q) (object) new ElementFilter(CompoundElementFilter.ExclusionFilter(value.GetElementIds(), inverted: true));
-          return true;
-        }
-      }
-
-      return false;
-    }
+    public override ElementFilter GetElementFilter() => Value is ARDB.SelectionFilterElement filter ?
+      new ElementFilter(CompoundElementFilter.ExclusionFilter(filter.GetElementIds(), inverted: true)) : null;
   }
 
   [Kernel.Attributes.Name("Parameter Filter")]
@@ -56,22 +67,8 @@ namespace RhinoInside.Revit.GH.Types
     public ParameterFilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public ParameterFilterElement(ARDB.ParameterFilterElement value) : base(value) { }
 
-    public override bool CastTo<Q>(out Q target)
-    {
-      if (base.CastTo(out target))
-        return true;
-
-      if (Value is ARDB.ParameterFilterElement value)
-      {
-        if (typeof(Q).IsAssignableFrom(typeof(ElementFilter)))
-        {
-          target = (Q) (object) new ElementFilter(value.GetElementFilter());
-          return true;
-        }
-      }
-
-      return false;
-    }
+    public override ElementFilter GetElementFilter() => Value is ARDB.ParameterFilterElement filter ?
+      new ElementFilter(filter.GetElementFilter()) : null;
   }
 
   public class ElementFilter : GH_Goo<ARDB.ElementFilter>

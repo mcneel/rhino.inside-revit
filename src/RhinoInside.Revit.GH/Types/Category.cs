@@ -481,11 +481,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (value is object && APIObject is ARDB.Category category)
         {
-          using (var color = value.Value.ToColor())
-          {
-            if (color != category.LineColor)
-              category.LineColor = color;
-          }
+          if (category.LineColor.ToColor() != value.Value)
+            category.LineColor = value.Value.ToColor();
         }
       }
     }

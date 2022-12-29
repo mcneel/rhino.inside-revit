@@ -12,16 +12,16 @@ namespace RhinoInside.Revit.GH.Components.Elements
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.11")]
-  public class GraphicSettings : ZuiComponent
+  public class GraphicOverrides : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("BFD4A970-CE90-47D3-B196-103E0DDCE977");
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
-    protected override string IconTag => "GS";
+    protected override string IconTag => "GO";
 
-    public GraphicSettings() : base
+    public GraphicOverrides() : base
     (
-      name: "Graphic Settings",
-      nickname: "G-Settings",
+      name: "Graphic Overrides",
+      nickname: "G-Overrides",
       description: "Get-Set element graphics overrides on the specified View",
       category: "Revit",
       subCategory: "View"
@@ -31,7 +31,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.Document() { Optional = true }, ParamRelevance.Occasional),
+      new ParamDefinition
+      (
+        new Parameters.OverrideGraphicSettings() { Name = "Overrides", NickName = "O", Description = "Graphic Overrides", Optional = true}, ParamRelevance.Primary
+      ),
       new ParamDefinition
       (
         new Param_Boolean() { Name = "Halftone", NickName = "H", Description = "Element Halftone state", Optional = true }, ParamRelevance.Primary
@@ -42,7 +46,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ),
       new ParamDefinition
       (
-        new Param_Colour() { Name = "Color : Projection Lines", NickName = "CPL", Description = "Element projection line color", Optional = true }, ParamRelevance.Primary
+        new Parameters.Color() { Name = "Color : Projection Lines", NickName = "CPL", Description = "Element projection line color", Optional = true }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -58,7 +62,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ),
       new ParamDefinition
       (
-        new Param_Colour() { Name = "Foreground Color : Surface Patterns", NickName = "FCSP", Description = "Element foreground surface color", Optional = true }, ParamRelevance.Primary
+        new Parameters.Color() { Name = "Foreground Color : Surface Patterns", NickName = "FCSP", Description = "Element foreground surface color", Optional = true }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -70,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ),
       new ParamDefinition
       (
-        new Param_Colour() { Name = "Background Color : Surface Patterns", NickName = "BCSP", Description = "Element background surface color", Optional = true }, ParamRelevance.Secondary
+        new Parameters.Color() { Name = "Background Color : Surface Patterns", NickName = "BCSP", Description = "Element background surface color", Optional = true }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -82,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ),
       new ParamDefinition
       (
-        new Param_Colour() { Name = "Color : Cut Lines", NickName = "CCL", Description = "Element cut line color", Optional = true }, ParamRelevance.Primary
+        new Parameters.Color() { Name = "Color : Cut Lines", NickName = "CCL", Description = "Element cut line color", Optional = true }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -98,7 +102,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ),
       new ParamDefinition
       (
-        new Param_Colour() { Name = "Foreground Color : Cut Patterns", NickName = "FCCP", Description = "Element foreground cut color", Optional = true }, ParamRelevance.Primary
+        new Parameters.Color() { Name = "Foreground Color : Cut Patterns", NickName = "FCCP", Description = "Element foreground cut color", Optional = true }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -110,29 +114,115 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ),
       new ParamDefinition
       (
-        new Param_Colour() { Name = "Background Color : Cut Patterns", NickName = "BCCP", Description = "Element background cut color", Optional = true }, ParamRelevance.Secondary
+        new Parameters.Color() { Name = "Background Color : Cut Patterns", NickName = "BCCP", Description = "Element background cut color", Optional = true }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Param_Enum<Types.ViewDetailLevel>() { Name = "Detail Level", NickName = "DL", Description = "Element Detail Level", Optional = true }, ParamRelevance.Tertiary
       ),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       new ParamDefinition
       (
-        new Parameters.OverrideGraphicSettings()
-        {
-          Name = "Settings",
-          NickName = "S",
-          Description = "Graphic Settings",
-        }
+        new Parameters.OverrideGraphicSettings() { Name = "Overrides", NickName = "O", Description = "Graphic Overrides", }
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean() { Name = "Halftone", NickName = "H", Description = "Element Halftone state" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.LinePatternElement() { Name = "Projection Lines : Pattern", NickName = "PLP", Description = "Element projection line pattern" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Color() { Name = "Projection Lines : Color", NickName = "PLC", Description = "Element projection line color" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Integer() { Name = "Projection Lines : Weight", NickName = "PLW", Description = "Element projection line weight" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean() { Name = "Surface Patterns : Foreground Visible", NickName = "SPFV", Description = "Element foreground surface patterns visibility" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.FillPatternElement() { Name = "Surface Patterns : Foreground Pattern", NickName = "SPFP", Description = "Element foreground surface pattern" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Colour() { Name = "Surface Patterns : Foreground Color", NickName = "SPFC", Description = "Element foreground surface color" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean() { Name = "Surface Patterns : Background Visible", NickName = "SPBV", Description = "Element background surface patterns visibility" }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.FillPatternElement() { Name = "Surface Patterns : Background Pattern", NickName = "SPBP", Description = "Element background surface pattern" }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Color() { Name = "Surface Patterns : Background Color", NickName = "SPBC", Description = "Element background surface color" }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Param_Number() { Name = "Surface : Transparency", NickName = "ST", Description = "Element surface transparency [0.0 .. 1.0]" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.LinePatternElement() { Name = "Cut Lines : Pattern", NickName = "CLP", Description = "Element cut line pattern" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Color() { Name = "Cut Lines : Color", NickName = "CLC", Description = "Element cut line color" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Integer() { Name = "Cut Lines : Weight", NickName = "CLW", Description = "Element cut line weight" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean() { Name = "Cut Patterns : Foreground Visible", NickName = "CPFV", Description = "Element foreground cut patterns visibility" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.FillPatternElement() { Name = "Cut Patterns : Foreground Pattern", NickName = "CPFP", Description = "Element foreground cut pattern" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Color() { Name = "Cut Patterns : Foreground Color", NickName = "CPFC", Description = "Element foreground cut color" }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean() { Name = "Cut Patterns : Background Visible", NickName = "CPBV", Description = "Element background cut patterns visibility" }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.FillPatternElement() { Name = "Cut Patterns : Background Pattern", NickName = "CPBP", Description = "Element background cut pattern" }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Color() { Name = "Cut Patterns : Background Color", NickName = "CPBC", Description = "Element background cut color" }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Param_Enum<Types.ViewDetailLevel>() { Name = "Detail Level", NickName = "DL", Description = "Element Detail Level" }, ParamRelevance.Tertiary
       ),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc))
-        return;
+      #region Get
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Overrides", out Types.OverrideGraphicSettings overrides)) return;
 
+      if (!Params.TryGetData(DA, "Detail Level", out ARDB.ViewDetailLevel? detailLevel)) return;
       if (!Params.TryGetData(DA, "Halftone", out bool? halftone)) return;
 
       if (!Params.TryGetData(DA, "Pattern : Projection Lines", out Types.LinePatternElement projectionLinePattern)) return;
@@ -160,56 +250,105 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.TryGetData(DA, "Background Visible : Cut Patterns", out bool? cutBackgroundPatternVisible)) return;
       if (!Params.TryGetData(DA, "Background Pattern : Cut Patterns", out Types.FillPatternElement cutBackgroundPattern)) return;
       if (!Params.TryGetData(DA, "Background Color : Cut Patterns", out System.Drawing.Color? cutBackgroundPatternColor)) return;
+      #endregion
 
-      Params.TrySetData
-      (
-        DA, "Settings", () =>
-        {
-          var settings = new ARDB.OverrideGraphicSettings();
+      #region Merge
+      var newOverrides = new Types.OverrideGraphicSettings(doc.Value);
 
-          settings.SetHalftone(halftone.GetValueOrDefault(false));
+      newOverrides.Value.SetDetailLevel(detailLevel ?? overrides?.Value.DetailLevel ?? default);
+      newOverrides.Value.SetHalftone(halftone ?? overrides?.Value.Halftone ?? default);
 
-          settings.SetProjectionLinePatternId(projectionLinePattern?.Id ?? ElementIdExtension.InvalidElementId);
-          settings.SetProjectionLineColor(projectionLineColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
-          settings.SetProjectionLineWeight(projectionLineWeight.GetValueOrDefault(ARDB.OverrideGraphicSettings.InvalidPenNumber));
-
-#if REVIT_2019
-          settings.SetSurfaceForegroundPatternVisible(surfaceForegroundPatternVisible.GetValueOrDefault(true));
-          settings.SetSurfaceForegroundPatternId(surfaceForegroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
-          settings.SetSurfaceForegroundPatternColor(surfaceForegroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
-
-          settings.SetSurfaceBackgroundPatternVisible(surfaceBackgroundPatternVisible.GetValueOrDefault(true));
-          settings.SetSurfaceBackgroundPatternId(surfaceBackgroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
-          settings.SetSurfaceBackgroundPatternColor(surfaceBackgroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
-#else
-          settings.SetProjectionFillPatternVisible(surfaceForegroundPatternVisible.GetValueOrDefault(true));
-          settings.SetProjectionFillPatternId(surfaceForegroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
-          settings.SetProjectionFillColor(surfaceForegroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
-#endif
-
-          settings.SetSurfaceTransparency((int) Rhino.RhinoMath.Clamp(surfaceTransparency.GetValueOrDefault(0.0) * 100, 0, 100));
-
-          settings.SetCutLinePatternId(cutLinePattern?.Id ?? ElementIdExtension.InvalidElementId);
-          settings.SetCutLineColor(cutLineColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
-          settings.SetCutLineWeight(cutLineWeight.GetValueOrDefault(ARDB.OverrideGraphicSettings.InvalidPenNumber));
+      newOverrides.Value.SetProjectionLinePatternId(doc.GetNamesakeElement(projectionLinePattern)?.Id ?? overrides?.Value.ProjectionLinePatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetProjectionLineColor(projectionLineColor?.ToColor() ?? overrides?.Value.ProjectionLineColor ?? ARDB.Color.InvalidColorValue);
+      newOverrides.Value.SetProjectionLineWeight(projectionLineWeight ?? overrides?.Value.ProjectionLineWeight ?? ARDB.OverrideGraphicSettings.InvalidPenNumber);
 
 #if REVIT_2019
-          settings.SetCutForegroundPatternVisible(cutForegroundPatternVisible.GetValueOrDefault(true));
-          settings.SetCutForegroundPatternId(cutForegroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
-          settings.SetCutForegroundPatternColor(cutForegroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
+      newOverrides.Value.SetSurfaceForegroundPatternVisible(surfaceForegroundPatternVisible ?? overrides?.Value.IsSurfaceForegroundPatternVisible ?? true);
+      surfaceForegroundPattern = doc.GetNamesakeElement(surfaceForegroundPattern) as Types.FillPatternElement;
+      newOverrides.Value.SetSurfaceForegroundPatternId(surfaceForegroundPattern?.Id ?? overrides?.Value.SurfaceForegroundPatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetSurfaceForegroundPatternColor(surfaceForegroundPatternColor?.ToColor() ?? overrides?.Value.SurfaceForegroundPatternColor ?? ARDB.Color.InvalidColorValue);
 
-          settings.SetCutBackgroundPatternVisible(cutBackgroundPatternVisible.GetValueOrDefault(true));
-          settings.SetCutBackgroundPatternId(cutBackgroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
-          settings.SetCutBackgroundPatternColor(cutBackgroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
+      newOverrides.Value.SetSurfaceBackgroundPatternVisible(surfaceBackgroundPatternVisible ?? overrides?.Value.IsSurfaceBackgroundPatternVisible ?? true);
+      surfaceBackgroundPattern = doc.GetNamesakeElement(surfaceBackgroundPattern) as Types.FillPatternElement;
+      newOverrides.Value.SetSurfaceBackgroundPatternId(surfaceBackgroundPattern?.Id ?? overrides?.Value.SurfaceBackgroundPatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetSurfaceBackgroundPatternColor(surfaceBackgroundPatternColor?.ToColor() ?? overrides?.Value.SurfaceBackgroundPatternColor ?? ARDB.Color.InvalidColorValue);
 #else
-          settings.SetCutFillPatternVisible(cutForegroundPatternVisible.GetValueOrDefault(true));
-          settings.SetCutFillPatternId(cutForegroundPattern?.Id ?? ElementIdExtension.InvalidElementId);
-          settings.SetCutFillColor(cutForegroundPatternColor.GetValueOrDefault(System.Drawing.Color.Empty).ToColor());
+      newOverrides.Value.SetProjectionFillPatternVisible(surfaceForegroundPatternVisible ?? overrides?.Value.IsProjectionFillPatternVisible ?? true);
+      surfaceForegroundPattern = doc.GetNamesakeElement(surfaceForegroundPattern) as Types.FillPatternElement;
+      newOverrides.Value.SetProjectionFillPatternId(surfaceForegroundPattern?.Id ?? overrides?.Value.ProjectionFillPatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetProjectionFillColor(surfaceForegroundPatternColor?.ToColor() ?? overrides?.Value.ProjectionFillColor ?? ARDB.Color.InvalidColorValue);
 #endif
 
-          return new Types.OverrideGraphicSettings(doc.Value, settings);
-        }
-      );
+      newOverrides.Value.SetSurfaceTransparency(surfaceTransparency.HasValue ? Rhino.RhinoMath.Clamp((int) Math.Round(surfaceTransparency.Value * 100), 0, 100) : overrides?.Value.Transparency ?? 0);
+
+      cutLinePattern = doc.GetNamesakeElement(cutLinePattern) as Types.LinePatternElement;
+      newOverrides.Value.SetCutLinePatternId(cutLinePattern?.Id ?? overrides?.Value.CutLinePatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetCutLineColor(cutLineColor?.ToColor() ?? overrides?.Value.CutLineColor ?? ARDB.Color.InvalidColorValue);
+      newOverrides.Value.SetCutLineWeight(cutLineWeight ?? overrides?.Value.CutLineWeight ?? ARDB.OverrideGraphicSettings.InvalidPenNumber);
+
+#if REVIT_2019
+      newOverrides.Value.SetCutForegroundPatternVisible(cutForegroundPatternVisible ?? overrides?.Value.IsCutForegroundPatternVisible ?? true);
+      cutForegroundPattern = doc.GetNamesakeElement(cutForegroundPattern) as Types.FillPatternElement;
+      newOverrides.Value.SetCutForegroundPatternId(cutForegroundPattern?.Id ?? overrides?.Value.CutForegroundPatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetCutForegroundPatternColor(cutForegroundPatternColor?.ToColor() ?? overrides?.Value.CutForegroundPatternColor ?? ARDB.Color.InvalidColorValue);
+
+      newOverrides.Value.SetCutBackgroundPatternVisible(cutBackgroundPatternVisible ?? overrides?.Value.IsCutBackgroundPatternVisible ?? true);
+      cutBackgroundPattern = doc.GetNamesakeElement(cutBackgroundPattern) as Types.FillPatternElement;
+      newOverrides.Value.SetCutBackgroundPatternId(cutBackgroundPattern?.Id ?? overrides?.Value.CutBackgroundPatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetCutBackgroundPatternColor(cutBackgroundPatternColor?.ToColor() ?? overrides?.Value.CutBackgroundPatternColor ?? ARDB.Color.InvalidColorValue);
+#else
+      newOverrides.Value.SetCutFillPatternVisible(cutForegroundPatternVisible ?? overrides?.Value.IsCutFillPatternVisible ?? true);
+      cutForegroundPattern = doc.GetNamesakeElement(cutForegroundPattern) as Types.FillPatternElement;
+      newOverrides.Value.SetCutFillPatternId(cutForegroundPattern?.Id ?? overrides?.Value.CutFillPatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetCutFillColor(cutForegroundPatternColor?.ToColor() ?? overrides?.Value.CutFillColor ?? ARDB.Color.InvalidColorValue);
+#endif
+      #endregion
+
+      #region Set
+      Params.TrySetData(DA, "Document", () => newOverrides.Document);
+      Params.TrySetData(DA, "Overrides", () => newOverrides);
+
+      Params.TrySetData(DA, "Detail Level", () => newOverrides.Value.DetailLevel);
+      Params.TrySetData(DA, "Halftone", () => newOverrides.Value.Halftone);
+
+      Params.TrySetData(DA, "Projection Lines : Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.ProjectionLinePatternId));
+      Params.TrySetData(DA, "Projection Lines : Color", () => newOverrides.Value.ProjectionLineColor.ToColor());
+      Params.TrySetData(DA, "Projection Lines : Weight", () => newOverrides.Value.ProjectionLineWeight);
+
+#if REVIT_2019
+      Params.TrySetData(DA, "Surface Patterns : Foreground Visible", () => newOverrides.Value.IsSurfaceForegroundPatternVisible);
+      Params.TrySetData(DA, "Surface Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.SurfaceForegroundPatternId));
+      Params.TrySetData(DA, "Surface Patterns : Foreground Color", () => newOverrides.Value.SurfaceForegroundPatternColor.ToColor());
+
+      Params.TrySetData(DA, "Surface Patterns : Background Visible", () => newOverrides.Value.IsSurfaceBackgroundPatternVisible);
+      Params.TrySetData(DA, "Surface Patterns : Background Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.SurfaceBackgroundPatternId));
+      Params.TrySetData(DA, "Surface Patterns : Background Color", () => newOverrides.Value.SurfaceBackgroundPatternColor.ToColor());
+#else
+      Params.TrySetData(DA, "Surface Patterns : Foreground Visible", () => newOverrides.Value.IsProjectionFillPatternVisible);
+      Params.TrySetData(DA, "Surface Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.ProjectionFillPatternId));
+      Params.TrySetData(DA, "Surface Patterns : Foreground Color", () => newOverrides.Value.ProjectionFillColor.ToColor());
+#endif
+
+      Params.TrySetData(DA, "Surface : Transparency", () => newOverrides.Value.Transparency / 100.0);
+
+      Params.TrySetData(DA, "Cut Lines : Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.CutLinePatternId));
+      Params.TrySetData(DA, "Cut Lines : Color", () => newOverrides.Value.CutLineColor.ToColor());
+      Params.TrySetData(DA, "Cut Lines : Weight", () => newOverrides.Value.CutLineWeight);
+
+#if REVIT_2019
+      Params.TrySetData(DA, "Cut Patterns : Foreground Visible", () => newOverrides.Value.IsCutForegroundPatternVisible);
+      Params.TrySetData(DA, "Cut Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.CutForegroundPatternId));
+      Params.TrySetData(DA, "Cut Patterns : Foreground Color", () => newOverrides.Value.CutForegroundPatternColor.ToColor());
+
+      Params.TrySetData(DA, "Cut Patterns : Background Visible", () => newOverrides.Value.IsCutBackgroundPatternVisible);
+      Params.TrySetData(DA, "Cut Patterns : Background Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.CutBackgroundPatternId));
+      Params.TrySetData(DA, "Cut Patterns : Background Color", () => newOverrides.Value.CutBackgroundPatternColor.ToColor());
+#else
+      Params.TrySetData(DA, "Cut Patterns : Foreground Visible", () => newOverrides.Value.IsCutFillPatternVisible);
+      Params.TrySetData(DA, "Cut Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.CutFillPatternId));
+      Params.TrySetData(DA, "Cut Patterns : Foreground Color", () => newOverrides.Value.CutFillColor.ToColor());
+#endif
+      #endregion
     }
   }
 
@@ -239,7 +378,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "View",
           NickName = "V",
-          Description = "View to query element visibility",
+          Description = "View to query category graphics overrides",
         }
       ),
       new ParamDefinition
@@ -248,7 +387,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Category",
           NickName = "C",
-          Description = "Category to access graphics overrides state",
+          Description = "Category to access graphics overrides",
           Access = GH_ParamAccess.list
         }
       ),
@@ -267,9 +406,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.OverrideGraphicSettings()
         {
-          Name = "Settings",
-          NickName = "S",
-          Description = "Element graphic settings",
+          Name = "Overrides",
+          NickName = "O",
+          Description = "Element graphic overrides",
           Access = GH_ParamAccess.list,
           Optional = true
         }, ParamRelevance.Primary
@@ -285,7 +424,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "View",
           NickName = "V",
-          Description = "View to query element visibility",
+          Description = "View to query category graphic overrides",
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -294,7 +433,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Category",
           NickName = "C",
-          Description = "Category to access graphics overrides state",
+          Description = "Category to access graphic overrides",
           Access = GH_ParamAccess.list
         }, ParamRelevance.Primary
       ),
@@ -312,9 +451,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.OverrideGraphicSettings()
         {
-          Name = "Settings",
-          NickName = "S",
-          Description = "Element graphic settings state",
+          Name = "Overrides",
+          NickName = "O",
+          Description = "Element graphic overrides",
           Access = GH_ParamAccess.list
         }, ParamRelevance.Primary
       ),
@@ -373,13 +512,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         DA, "Hidden", () => categories.Select
         (
-          x => view.Document.IsEquivalent(x?.Document) && view.Value is ARDB.View viewValue && x.Id is ARDB.ElementId categoryId ?
-               viewValue.GetCategoryHidden(categoryId) :
-               default
+          x => view.Document.IsEquivalent(x?.Document) && x.Id is ARDB.ElementId categoryId ?
+               view.Value.GetCategoryHidden(categoryId) :
+               default(bool?)
         )
       );
 
-      if (Params.GetDataList(DA, "Settings", out IList<Types.OverrideGraphicSettings> settings) && settings.Count > 0)
+      if (Params.GetDataList(DA, "Overrides", out IList<Types.OverrideGraphicSettings> settings) && settings.Count > 0)
       {
         if (view.Value.AreGraphicsOverridesAllowed())
         {
@@ -404,7 +543,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       Params.TrySetDataList
       (
-        DA, "Settings", () => categories.Select
+        DA, "Overrides", () => categories.Select
         (
           x => view.Document.IsEquivalent(x?.Document) && x?.Id is ARDB.ElementId categoryId &&
                view.Value.GetCategoryOverrides(categoryId) is ARDB.OverrideGraphicSettings overrideSettings ?
@@ -458,6 +597,17 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Param_Boolean()
         {
+          Name = "Enabled",
+          NickName = "E",
+          Description = "Filter enabled state",
+          Access = GH_ParamAccess.list,
+          Optional = true
+        }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean()
+        {
           Name = "Hidden",
           NickName = "H",
           Description = "Filter hidden state",
@@ -469,8 +619,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.OverrideGraphicSettings()
         {
-          Name = "Settings",
-          NickName = "S",
+          Name = "Overrides",
+          NickName = "O",
           Description = "Filter graphic overrides",
           Access = GH_ParamAccess.list,
           Optional = true
@@ -487,7 +637,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "View",
           NickName = "V",
-          Description = "View to query filter graphics overrides",
+          Description = "View to query filter graphic overrides",
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -496,9 +646,19 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Filter",
           NickName = "F",
-          Description = "Filter to access graphics overrides state",
+          Description = "Filter to access graphic overrides state",
           Access = GH_ParamAccess.list
         }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean()
+        {
+          Name = "Enabled",
+          NickName = "E",
+          Description = "Filter enabled state",
+          Access = GH_ParamAccess.list,
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -514,9 +674,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.OverrideGraphicSettings()
         {
-          Name = "Settings",
-          NickName = "S",
-          Description = "Filter graphic overrides state",
+          Name = "Overrides",
+          NickName = "O",
+          Description = "Filter graphic overrides",
           Access = GH_ParamAccess.list
         }, ParamRelevance.Primary
       ),
@@ -529,6 +689,58 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       if (!Params.GetDataList(DA, "Filter", out IList<Types.FilterElement> filters)) return;
       else Params.TrySetDataList(DA, "Filter", () => filters);
+#if REVIT_2021
+      if (Params.GetDataList(DA, "Enabled", out IList<bool?> enabled) && enabled.Count > 0)
+      {
+        if (view.Value.AreGraphicsOverridesAllowed())
+        {
+          var filtersToDisable = new HashSet<ARDB.ElementId>(filters.Count);
+          var filtersToEnable = new HashSet<ARDB.ElementId>(filters.Count);
+
+          foreach (var pair in filters.ZipOrLast(enabled, (Filter, Enabled) => (Filter, Enabled)))
+          {
+            if (!pair.Enabled.HasValue) continue;
+            if (!view.Document.IsEquivalent(pair.Filter?.Document)) continue;
+            if (pair.Filter?.IsValid != true) continue;
+            if (!view.Value.GetFilters().Contains(pair.Filter.Id))
+            {
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Filter '{pair.Filter.Nomen}' is not applied to view '{view.Value.Title}'.");
+              continue;
+            }
+
+            if (pair.Enabled.Value)
+            {
+              filtersToEnable.Remove(pair.Filter.Id);
+              filtersToDisable.Add(pair.Filter.Id);
+            }
+            else
+            {
+              filtersToDisable.Remove(pair.Filter.Id);
+              filtersToEnable.Add(pair.Filter.Id);
+            }
+          }
+
+          StartTransaction(view.Document);
+
+          foreach (var filterId in filtersToDisable)
+            view.Value.SetIsFilterEnabled(filterId, false);
+
+          foreach (var filterId in filtersToEnable)
+            view.Value.SetIsFilterEnabled(filterId, true);
+        }
+        else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Graphics Overrides are not allowed on View '{view.Value.Title}'");
+      }
+
+      Params.TrySetDataList
+      (
+        DA, "Enabled", () => filters.Select
+        (
+          x => view.Document.IsEquivalent(x?.Document) && x.Id is ARDB.ElementId filterId && view.Value.GetFilters().Contains(filterId) ?
+               view.Value.GetIsFilterEnabled(filterId) :
+               default(bool?)
+        )
+      );
+#endif
 
       if (Params.GetDataList(DA, "Hidden", out IList<bool?> hidden) && hidden.Count > 0)
       {
@@ -577,11 +789,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
         (
           x => view.Document.IsEquivalent(x?.Document) && x.Id is ARDB.ElementId filterId && view.Value.GetFilters().Contains(filterId) ?
                !view.Value.GetFilterVisibility(filterId) :
-               default
+               default(bool?)
         )
       );
 
-      if (Params.GetDataList(DA, "Settings", out IList<Types.OverrideGraphicSettings> settings) && settings.Count > 0)
+      if (Params.GetDataList(DA, "Overrides", out IList<Types.OverrideGraphicSettings> settings) && settings.Count > 0)
       {
         if (view.Value.AreGraphicsOverridesAllowed())
         {
@@ -610,7 +822,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       Params.TrySetDataList
       (
-        DA, "Settings", () => filters.Select
+        DA, "Overrides", () => filters.Select
         (
           x => view.Document.IsEquivalent(x?.Document) && x?.Id is ARDB.ElementId filterId && view.Value.GetFilters().Contains(filterId) &&
                view.Value.GetFilterOverrides(filterId) is ARDB.OverrideGraphicSettings overrideSettings ?
@@ -647,7 +859,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "View",
           NickName = "V",
-          Description = "View to query element graphics overrides",
+          Description = "View to query element graphic overrides",
         }
       ),
       new ParamDefinition
@@ -656,7 +868,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access graphics overrides",
+          Description = "Element to access graphic overrides",
           Access = GH_ParamAccess.list
         }
       ),
@@ -675,8 +887,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.OverrideGraphicSettings()
         {
-          Name = "Settings",
-          NickName = "S",
+          Name = "Overrides",
+          NickName = "O",
           Description = "Element graphic overrides",
           Access = GH_ParamAccess.list,
           Optional = true
@@ -693,7 +905,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "View",
           NickName = "V",
-          Description = "View to query element visibility",
+          Description = "View to query element graphic overrides",
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -702,7 +914,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access graphics overrides state",
+          Description = "Element to access graphics overrides",
           Access = GH_ParamAccess.list
         }, ParamRelevance.Primary
       ),
@@ -720,8 +932,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.OverrideGraphicSettings()
         {
-          Name = "Settings",
-          NickName = "S",
+          Name = "Overrides",
+          NickName = "O",
           Description = "Element graphic overrides",
           Access = GH_ParamAccess.list
         }, ParamRelevance.Primary
@@ -780,11 +992,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
         (
           x => view.Document.IsEquivalent(x?.Document) ?
                x?.Value?.IsHidden(view.Value) :
-               default
+               default(bool?)
         )
       );
 
-      if (Params.GetDataList(DA, "Settings", out IList<Types.OverrideGraphicSettings> settings) && settings.Count > 0)
+      if (Params.GetDataList(DA, "Overrides", out IList<Types.OverrideGraphicSettings> settings) && settings.Count > 0)
       {
         if (view.Value.AreGraphicsOverridesAllowed())
         {
@@ -806,7 +1018,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       Params.TrySetDataList
       (
-        DA, "Settings", () => elements.Select
+        DA, "Overrides", () => elements.Select
         (
           x => view.Document.IsEquivalent(x?.Document) && x?.Id is ARDB.ElementId elementId &&
                view.Value.GetElementOverrides(elementId) is ARDB.OverrideGraphicSettings overrideSettings ?

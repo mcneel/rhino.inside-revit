@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
             else
               entry.Add(element.Id);
           }
-          else outputTypes?.Add(default);
+          else if (types.Count > 0) outputTypes?.Add(default);
 
           index++;
         }
