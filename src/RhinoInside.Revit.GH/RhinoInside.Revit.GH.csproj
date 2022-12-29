@@ -205,12 +205,15 @@
     <Compile Include="Components\Model\ReferenceElement\AddReferencePlane.cs" />
     <Compile Include="Components\Model\SketchDeconstruct.cs" />
     <Compile Include="Components\ObjectStyles\AddSubCategory.cs" />
+    <Compile Include="Components\ObjectStyles\CategoryGraphicOverrides.cs" />
     <Compile Include="Components\ObjectStyles\CategoryGraphicsStyle.cs" />
     <Compile Include="Components\ObjectStyles\CategoryIdentity.cs" />
     <Compile Include="Components\ObjectStyles\CategoryParameters.cs" />
     <Compile Include="Components\ObjectStyles\CategoryStyle.cs" />
     <Compile Include="Components\ObjectStyles\CategorySubCategories.cs" />
     <Compile Include="Components\ObjectStyles\CurveLineStyle.cs" />
+    <Compile Include="Components\ObjectStyles\ElementGraphicOverrides.cs" />
+    <Compile Include="Components\ObjectStyles\FilterGraphicOverrides.cs" />
     <Compile Include="Components\ObjectStyles\GraphicOverrides.cs" />
     <Compile Include="Components\ObjectStyles\QueryCategories.cs" />
     <Compile Include="Components\ObjectStyles\QueryLineStyles.cs" />
