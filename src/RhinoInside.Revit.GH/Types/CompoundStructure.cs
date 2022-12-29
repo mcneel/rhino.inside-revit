@@ -423,9 +423,9 @@ namespace RhinoInside.Revit.GH.Types
           if (settings.SurfaceBackgroundPatternId.IsValid())      description.Add($"Surface Patterns : Background Pattern = {(Document.GetElement(settings.SurfaceBackgroundPatternId)?.Name ?? "<Solid fill>")}");
           if (settings.SurfaceBackgroundPatternColor.IsValid)     description.Add($"Surface Patterns : Background Color = {GH_Format.FormatColour(settings.SurfaceBackgroundPatternColor.ToColor())}");
 #else
-          if (!settings.IsProjectionPatternVisible)               description.Add($"Surface Patterns : Foreground Visible = {settings.IsProjectionPatternVisible}");
-          if (settings.ProjectionPatternId.IsValid())             description.Add($"Surface Patterns : Foreground Pattern = {(Document.GetElement(settings.ProjectionPatternId)?.Name ?? "<Solid fill>")}");
-          if (settings.ProjectionPatternColor.IsValid)            description.Add($"Surface Patterns : Foreground Color = {GH_Format.FormatColour(settings.ProjectionPatternColor.ToColor())}");
+          if (!settings.IsProjectionFillPatternVisible)           description.Add($"Surface Patterns : Foreground Visible = {settings.IsProjectionFillPatternVisible}");
+          if (settings.ProjectionFillPatternId.IsValid())         description.Add($"Surface Patterns : Foreground Pattern = {(Document.GetElement(settings.ProjectionFillPatternId)?.Name ?? "<Solid fill>")}");
+          if (settings.ProjectionFillColor.IsValid)               description.Add($"Surface Patterns : Foreground Color = {GH_Format.FormatColour(settings.ProjectionFillColor.ToColor())}");
 #endif
           if (settings.Transparency != default)                   description.Add($"Surface : Transparency = {settings.Transparency}%");
 
@@ -441,9 +441,9 @@ namespace RhinoInside.Revit.GH.Types
           if (settings.CutBackgroundPatternId.IsValid())          description.Add($"Cut Patterns : Background Pattern = {(Document.GetElement(settings.CutBackgroundPatternId)?.Name ?? "<Solid fill>")}");
           if (settings.CutBackgroundPatternColor.IsValid)         description.Add($"Cut Patterns : Background Color = {GH_Format.FormatColour(settings.CutBackgroundPatternColor.ToColor())}");
 #else
-          if (!settings.IsCutPatternVisible)                      description.Add($"Cut Patterns : Foreground Visible = {settings.IsCutPatternVisible}");
-          if (settings.CutPatternId.IsValid())                    description.Add($"Cut Patterns : Foreground Pattern = {(Document.GetElement(settings.CutPatternId)?.Name ?? "<Solid fill>")}");
-          if (settings.CutPatternColor.IsValid)                   description.Add($"Cut Patterns : Foreground Color = {GH_Format.FormatColour(settings.CutPatternColor.ToColor())}");
+          if (!settings.IsCutFillPatternVisible)                  description.Add($"Cut Patterns : Foreground Visible = {settings.IsCutFillPatternVisible}");
+          if (settings.CutFillPatternId.IsValid())                description.Add($"Cut Patterns : Foreground Pattern = {(Document.GetElement(settings.CutFillPatternId)?.Name ?? "<Solid fill>")}");
+          if (settings.CutFillColor.IsValid)                      description.Add($"Cut Patterns : Foreground Color = {GH_Format.FormatColour(settings.CutFillColor.ToColor())}");
 #endif
 
           if (description.Count > 0)

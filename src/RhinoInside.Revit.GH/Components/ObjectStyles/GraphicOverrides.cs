@@ -273,10 +273,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
       newOverrides.Value.SetSurfaceBackgroundPatternId(surfaceBackgroundPattern?.Id ?? overrides?.Value.SurfaceBackgroundPatternId ?? ElementIdExtension.InvalidElementId);
       newOverrides.Value.SetSurfaceBackgroundPatternColor(surfaceBackgroundPatternColor?.ToColor() ?? overrides?.Value.SurfaceBackgroundPatternColor ?? ARDB.Color.InvalidColorValue);
 #else
-      newOverrides.Value.SetProjectionFillPatternVisible(surfaceForegroundPatternVisible ?? overrides?.Value.IsProjectionPatternVisible ?? true);
+      newOverrides.Value.SetProjectionFillPatternVisible(surfaceForegroundPatternVisible ?? overrides?.Value.IsProjectionFillPatternVisible ?? true);
       surfaceForegroundPattern = doc.GetNamesakeElement(surfaceForegroundPattern) as Types.FillPatternElement;
-      newOverrides.Value.SetProjectionFillPatternId(surfaceForegroundPattern?.Id ?? overrides?.Value.ProjectionPatternId ?? ElementIdExtension.InvalidElementId);
-      newOverrides.Value.SetProjectionFillColor(surfaceForegroundPatternColor?.ToColor() ?? overrides?.Value.ProjectionPatternColor ?? ARDB.Color.InvalidColorValue);
+      newOverrides.Value.SetProjectionFillPatternId(surfaceForegroundPattern?.Id ?? overrides?.Value.ProjectionFillPatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetProjectionFillColor(surfaceForegroundPatternColor?.ToColor() ?? overrides?.Value.ProjectionFillColor ?? ARDB.Color.InvalidColorValue);
 #endif
 
       newOverrides.Value.SetSurfaceTransparency(surfaceTransparency.HasValue ? Rhino.RhinoMath.Clamp((int) Math.Round(surfaceTransparency.Value * 100), 0, 100) : overrides?.Value.Transparency ?? 0);
@@ -297,10 +297,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
       newOverrides.Value.SetCutBackgroundPatternId(cutBackgroundPattern?.Id ?? overrides?.Value.CutBackgroundPatternId ?? ElementIdExtension.InvalidElementId);
       newOverrides.Value.SetCutBackgroundPatternColor(cutBackgroundPatternColor?.ToColor() ?? overrides?.Value.CutBackgroundPatternColor ?? ARDB.Color.InvalidColorValue);
 #else
-      newOverrides.Value.SetCutFillPatternVisible(cutForegroundPatternVisible ?? overrides?.Value.IsCutPatternVisible ?? true);
+      newOverrides.Value.SetCutFillPatternVisible(cutForegroundPatternVisible ?? overrides?.Value.IsCutFillPatternVisible ?? true);
       cutForegroundPattern = doc.GetNamesakeElement(cutForegroundPattern) as Types.FillPatternElement;
-      newOverrides.Value.SetCutFillPatternId(cutForegroundPattern?.Id ?? overrides?.Value.CutPatternId ?? ElementIdExtension.InvalidElementId);
-      newOverrides.Value.SetCutFillColor(cutForegroundPatternColor?.ToColor() ?? overrides?.Value.CutPatternColor ?? ARDB.Color.InvalidColorValue);
+      newOverrides.Value.SetCutFillPatternId(cutForegroundPattern?.Id ?? overrides?.Value.CutFillPatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetCutFillColor(cutForegroundPatternColor?.ToColor() ?? overrides?.Value.CutFillColor ?? ARDB.Color.InvalidColorValue);
 #endif
       #endregion
 
@@ -315,6 +315,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       Params.TrySetData(DA, "Projection Lines : Color", () => newOverrides.Value.ProjectionLineColor.ToColor());
       Params.TrySetData(DA, "Projection Lines : Weight", () => newOverrides.Value.ProjectionLineWeight);
 
+#if REVIT_2019
       Params.TrySetData(DA, "Surface Patterns : Foreground Visible", () => newOverrides.Value.IsSurfaceForegroundPatternVisible);
       Params.TrySetData(DA, "Surface Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.SurfaceForegroundPatternId));
       Params.TrySetData(DA, "Surface Patterns : Foreground Color", () => newOverrides.Value.SurfaceForegroundPatternColor.ToColor());
@@ -322,6 +323,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
       Params.TrySetData(DA, "Surface Patterns : Background Visible", () => newOverrides.Value.IsSurfaceBackgroundPatternVisible);
       Params.TrySetData(DA, "Surface Patterns : Background Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.SurfaceBackgroundPatternId));
       Params.TrySetData(DA, "Surface Patterns : Background Color", () => newOverrides.Value.SurfaceBackgroundPatternColor.ToColor());
+#else
+      Params.TrySetData(DA, "Surface Patterns : Foreground Visible", () => newOverrides.Value.IsProjectionFillPatternVisible);
+      Params.TrySetData(DA, "Surface Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.ProjectionFillPatternId));
+      Params.TrySetData(DA, "Surface Patterns : Foreground Color", () => newOverrides.Value.ProjectionFillColor.ToColor());
+#endif
 
       Params.TrySetData(DA, "Surface : Transparency", () => newOverrides.Value.Transparency / 100.0);
 
@@ -329,6 +335,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       Params.TrySetData(DA, "Cut Lines : Color", () => newOverrides.Value.CutLineColor.ToColor());
       Params.TrySetData(DA, "Cut Lines : Weight", () => newOverrides.Value.CutLineWeight);
 
+#if REVIT_2019
       Params.TrySetData(DA, "Cut Patterns : Foreground Visible", () => newOverrides.Value.IsCutForegroundPatternVisible);
       Params.TrySetData(DA, "Cut Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.CutForegroundPatternId));
       Params.TrySetData(DA, "Cut Patterns : Foreground Color", () => newOverrides.Value.CutForegroundPatternColor.ToColor());
@@ -336,6 +343,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
       Params.TrySetData(DA, "Cut Patterns : Background Visible", () => newOverrides.Value.IsCutBackgroundPatternVisible);
       Params.TrySetData(DA, "Cut Patterns : Background Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.CutBackgroundPatternId));
       Params.TrySetData(DA, "Cut Patterns : Background Color", () => newOverrides.Value.CutBackgroundPatternColor.ToColor());
+#else
+      Params.TrySetData(DA, "Cut Patterns : Foreground Visible", () => newOverrides.Value.IsCutFillPatternVisible);
+      Params.TrySetData(DA, "Cut Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.CutFillPatternId));
+      Params.TrySetData(DA, "Cut Patterns : Foreground Color", () => newOverrides.Value.CutFillColor.ToColor());
+#endif
       #endregion
     }
   }
@@ -590,7 +602,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           Description = "Filter enabled state",
           Access = GH_ParamAccess.list,
           Optional = true
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -646,7 +658,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           NickName = "E",
           Description = "Filter enabled state",
           Access = GH_ParamAccess.list,
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -677,7 +689,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       if (!Params.GetDataList(DA, "Filter", out IList<Types.FilterElement> filters)) return;
       else Params.TrySetDataList(DA, "Filter", () => filters);
-
+#if REVIT_2021
       if (Params.GetDataList(DA, "Enabled", out IList<bool?> enabled) && enabled.Count > 0)
       {
         if (view.Value.AreGraphicsOverridesAllowed())
@@ -728,15 +740,16 @@ namespace RhinoInside.Revit.GH.Components.Elements
                default(bool?)
         )
       );
+#endif
 
-      if (Params.GetDataList(DA, "Hidden", out IList<bool?> hidden) && enabled.Count > 0)
+      if (Params.GetDataList(DA, "Hidden", out IList<bool?> hidden) && hidden.Count > 0)
       {
         if (view.Value.AreGraphicsOverridesAllowed())
         {
           var filtersToHide = new HashSet<ARDB.ElementId>(filters.Count);
           var filtersToUnhide = new HashSet<ARDB.ElementId>(filters.Count);
 
-          foreach (var pair in filters.ZipOrLast(enabled, (Filter, Hidden) => (Filter, Hidden)))
+          foreach (var pair in filters.ZipOrLast(hidden, (Filter, Hidden) => (Filter, Hidden)))
           {
             if (!pair.Hidden.HasValue) continue;
             if (!view.Document.IsEquivalent(pair.Filter?.Document)) continue;
