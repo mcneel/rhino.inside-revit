@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       ParamDefinition.Create<Param_Integer>("Line Weight [projection]", "LWP", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Integer>("Line Weight [cut]", "LWC", optional: true, relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Param_Colour>("Line Color", "LC", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.Color>("Line Color", "LC", optional: true, relevance: ParamRelevance.Primary),
 
       ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [projection]", "LPP", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [cut]", "LPC", optional: true, relevance: ParamRelevance.Occasional),
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       ParamDefinition.Create<Param_Integer>("Line Weight [projection]", "LWP", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Integer>("Line Weight [cut]", "LWC", relevance: ParamRelevance.Primary),
 
-      ParamDefinition.Create<Param_Colour>("Line Color", "LC", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.Color>("Line Color", "LC", relevance: ParamRelevance.Primary),
 
       ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [projection]", "LPP", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.LinePatternElement>("Line Pattern [cut]", "LPC", relevance: ParamRelevance.Occasional),

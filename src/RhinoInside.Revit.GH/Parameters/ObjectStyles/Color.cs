@@ -8,6 +8,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using Convert.System.Drawing;
 
+  [ComponentVersion(introduced: "1.11")]
   public class Color : Grasshopper.Kernel.Parameters.Param_Colour
   {
     public override Guid ComponentGuid => new Guid("51F2A94A-A0F9-4E61-B6B8-DF4025E393DA");
