@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using ARDB = Autodesk.Revit.DB;
@@ -83,7 +84,7 @@ namespace RhinoInside.Revit.External.DB
   struct GeometryObjectId : IEquatable<GeometryObjectId>
   {
     public IntId Id;
-    public int Index;
+    public int[] Index;
     public GeometryObjectType Type;
     public IntId TypeId; // May be 0 or 1 for LINEAR or an ElementType Id for RVTLINK
 
@@ -91,7 +92,8 @@ namespace RhinoInside.Revit.External.DB
     {
       int hashCode = 942107248;
       hashCode = hashCode * -1521134295 + Id.GetHashCode();
-      hashCode = hashCode * -1521134295 + Index.GetHashCode();
+      for (int i = 0; i < (Index?.Length ?? 0); ++ i)
+        hashCode = hashCode * -1521134295 + Index[i].GetHashCode();
       hashCode = hashCode * -1521134295 + Type.GetHashCode();
       hashCode = hashCode * -1521134295 + TypeId.GetHashCode();
       return hashCode;
@@ -102,14 +104,14 @@ namespace RhinoInside.Revit.External.DB
 
     public static bool operator ==(GeometryObjectId left, GeometryObjectId right)
     {
-      return left.Id == right.Id && left.Index == right.Index && left.Type == right.Type && left.TypeId == right.TypeId;
+      return left.Id == right.Id && left.Index.ItemsEqual(right.Index) && left.Type == right.Type && left.TypeId == right.TypeId;
     }
     public static bool operator !=(GeometryObjectId left, GeometryObjectId right)
     {
-      return left.Id != right.Id || left.Index != right.Index || left.Type != right.Type || left.TypeId != right.TypeId;
+      return left.Id != right.Id || !left.Index.ItemsEqual(right.Index) || left.Type != right.Type || left.TypeId != right.TypeId;
     }
 
-    public GeometryObjectId(IntId id, int index = -1, GeometryObjectType type = GeometryObjectType.ELEMENT, IntId parameter = -1)
+    public GeometryObjectId(IntId id, int[] index = default, GeometryObjectType type = GeometryObjectType.ELEMENT, IntId parameter = -1)
     {
       Id = id;
       Index = index;
@@ -132,10 +134,13 @@ namespace RhinoInside.Revit.External.DB
 
       var builder = new StringBuilder(FormatId(Id), 128);
 
-      if (Index >= 0)
+      if (Index is object)
       {
-        builder.Append(':');
-        builder.Append(Index.ToString("D", CultureInfo.InvariantCulture));
+        for (int i = 0; i < Index.Length; i++)
+        {
+          builder.Append(':');
+          builder.Append(Index[i].ToString("D", CultureInfo.InvariantCulture));
+        }
       }
 
       if (Type != GeometryObjectType.ELEMENT)
@@ -274,38 +279,45 @@ namespace RhinoInside.Revit.External.DB
         {
           geometryId[nesting].Id = ParseId(tokens[t++]);
 
+          // Index
+          {
+            var index = new List<int>();
+            while (t < tokens.Length && Int32.TryParse(tokens[t], out var i))
+            {
+              index.Add(i);
+              t++;
+            }
+
+            if (index.Count > 0)
+              geometryId[nesting].Index = index.ToArray();
+          }
+
+          // Type
           if (t < tokens.Length)
           {
-            if (Int32.TryParse(tokens[t], out geometryId[nesting].Index)) t++;
-            else geometryId[nesting].Index = -1;
+            var types = tokens[t++].Split('/');
+            if (types.Length > 2)
+              throw new FormatException($"{nameof(s)} is not in the correct format.");
 
-            if (t < tokens.Length)
+            if (types[0] != string.Empty)
+              geometryId[nesting].Type = (GeometryObjectType) Enum.Parse(typeof(GeometryObjectType), types[0]);
+
+            if (types.Length == 2)
             {
-              var types = tokens[t++].Split('/');
-              if (types.Length > 2)
-                throw new FormatException($"{nameof(s)} is not in the correct format.");
-
-              if (types[0] != string.Empty)
-                geometryId[nesting].Type = (GeometryObjectType) Enum.Parse(typeof(GeometryObjectType), types[0]);
-
-              if (types.Length == 2)
+              switch (geometryId[nesting].Type)
               {
-                switch (geometryId[nesting].Type)
-                {
-                  case GeometryObjectType.RVTLINK:
-                    geometryId[nesting].TypeId = ParseId(types[1]);
-                    document = (document.GetElement(new ARDB.ElementId(geometryId[0].Id)) as ARDB.RevitLinkInstance)?.GetLinkDocument();
-                    break;
+                case GeometryObjectType.RVTLINK:
+                  geometryId[nesting].TypeId = ParseId(types[1]);
+                  document = (document.GetElement(new ARDB.ElementId(geometryId[0].Id)) as ARDB.RevitLinkInstance)?.GetLinkDocument();
+                  break;
 
-                  default:
-                    geometryId[nesting].TypeId = RuntimeId.Parse(types[1]);
-                    break;
-                }
+                default:
+                  geometryId[nesting].TypeId = RuntimeId.Parse(types[1]);
+                  break;
               }
-              else geometryId[nesting].TypeId = -1;
             }
+            else geometryId[nesting].TypeId = -1;
           }
-          else geometryId[nesting].Index = -1;
         }
 
         if (t < tokens.Length)

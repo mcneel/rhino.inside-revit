@@ -139,7 +139,7 @@ namespace RhinoInside.Revit.GH.Types
       );
     }
     string IGH_ItemDescription.Name => DisplayName;
-    string IGH_ItemDescription.Identity => IsLinked ? $"{{{ReferenceId.ToString("D")}:{Id.ToString("D")}}}" : $"{{{Id.ToString("D")}}}";
+    string IGH_ItemDescription.Identity => IsLinked ? $"{{{ReferenceId?.ToString("D")}:{Id?.ToString("D")}}}" : $"{{{Id?.ToString("D")}}}";
     string IGH_ItemDescription.Description => Document?.GetTitle();
     #endregion
 

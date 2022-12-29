@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var referenceId = ReferenceId.Parse(stable, linkedDocument);
       referenceId = new ReferenceId
       (
-        new GeometryObjectId(linkInstanceId.ToValue(), 0, GeometryObjectType.RVTLINK),
+        new GeometryObjectId(linkInstanceId.ToValue(), new int[] { 0 }, GeometryObjectType.RVTLINK),
         referenceId.Element,
         referenceId.Symbol
       );
@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           new ReferenceId(new GeometryObjectId(reference.ElementId.ToValue())) :
           new ReferenceId
           (
-            new GeometryObjectId(reference.ElementId.ToValue(), -1, GeometryObjectType.RVTLINK, document.GetElement(reference.ElementId).GetTypeId().ToValue()),
+            new GeometryObjectId(reference.ElementId.ToValue(), default, GeometryObjectType.RVTLINK, document.GetElement(reference.ElementId).GetTypeId().ToValue()),
             new GeometryObjectId(reference.LinkedElementId.ToValue())
           );
 
