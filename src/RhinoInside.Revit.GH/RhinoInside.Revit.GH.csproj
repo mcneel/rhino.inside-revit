@@ -278,7 +278,11 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Optional.cs" />
+    <Compile Include="Parameters\ObjectStyles\Category.cs" />
+    <Compile Include="Parameters\ObjectStyles\CategoryTypes.cs" />
     <Compile Include="Parameters\ObjectStyles\Color.cs" />
+    <Compile Include="Parameters\ObjectStyles\FillPatternElement.cs" />
+    <Compile Include="Parameters\ObjectStyles\LinePatternElement.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -345,8 +349,6 @@
     <Compile Include="Parameters\CompoundStructure.cs" />
     <Compile Include="Parameters\CurtainGrid.cs" />
     <Compile Include="Parameters\CurveElement.cs" />
-    <Compile Include="Parameters\Category.cs" />
-    <Compile Include="Parameters\CategoryTypes.cs" />
     <Compile Include="Parameters\DatumPlane.cs" />
     <Compile Include="Parameters\Document.cs" />
     <Compile Include="Parameters\Elevation.cs" />
@@ -355,13 +357,11 @@
     <Compile Include="Parameters\ElementType.cs" />
     <Compile Include="Parameters\Family.cs" />
     <Compile Include="Parameters\FamilyInstance.cs" />
-    <Compile Include="Parameters\FillPatternElement.cs" />
     <Compile Include="Parameters\GeometryObject.cs" />
     <Compile Include="Parameters\GraphicalElement.cs" />
     <Compile Include="Parameters\Group.cs" />
     <Compile Include="Parameters\HostObject.cs" />
     <Compile Include="Parameters\LevelConstraint.cs" />
-    <Compile Include="Parameters\LinePatternElement.cs" />
     <Compile Include="Parameters\Material.cs" />
     <Compile Include="Parameters\Opening.cs" />
     <Compile Include="Parameters\Param.cs" />
