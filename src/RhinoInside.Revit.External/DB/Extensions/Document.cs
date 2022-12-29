@@ -630,7 +630,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
       }
 
-      return ElementId.InvalidElementId;
+      return ElementIdExtension.InvalidElementId;
     }
     #endregion
 
