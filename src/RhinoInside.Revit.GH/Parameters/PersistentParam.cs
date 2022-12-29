@@ -131,6 +131,11 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     protected override T InstantiateT() => typeof(T).IsAbstract || typeof(T).IsInterface ? default : base.InstantiateT();
+    protected override void Menu_AppendManageCollection(ToolStripDropDown menu)
+    {
+      if (!(typeof(T).IsAbstract || typeof(T).IsInterface))
+        base.Menu_AppendManageCollection(menu);
+    }
     #endregion
 
     #region VolatileData
@@ -297,8 +302,8 @@ namespace RhinoInside.Revit.GH.Parameters
           menu.Items.Add(more);
         }
         else Menu_AppendPromptMore(menu);
-        Menu_AppendManageCollection(menu);
 
+        Menu_AppendManageCollection(menu);
         Menu_AppendSeparator(menu);
         Menu_AppendDestroyPersistent(menu);
         Menu_AppendInternaliseData(menu);
