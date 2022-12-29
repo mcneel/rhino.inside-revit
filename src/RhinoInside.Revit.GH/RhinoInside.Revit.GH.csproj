@@ -283,6 +283,7 @@
     <Compile Include="Parameters\ObjectStyles\Color.cs" />
     <Compile Include="Parameters\ObjectStyles\FillPatternElement.cs" />
     <Compile Include="Parameters\ObjectStyles\LinePatternElement.cs" />
+    <Compile Include="Parameters\ObjectStyles\OverrideGraphicSettings.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
