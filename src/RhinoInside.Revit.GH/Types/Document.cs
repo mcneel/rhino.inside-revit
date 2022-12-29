@@ -465,7 +465,7 @@ namespace RhinoInside.Revit.GH.Types
         );
       }
 
-      if (!value.Value.IsValidObject)
+      if (value.Value is null)
         value.Value = document;
 
       return value;
@@ -696,6 +696,16 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    #endregion
+
+    #region Elements
+    public Element GetNamesakeElement(Element element)
+    {
+      if (element is object)
+        return Element.FromElementId(Value, Value.LookupElement(element.Document, element.Id));
+
+      return null;
+    }
     #endregion
   }
 
