@@ -33,6 +33,21 @@ namespace System
     }
   }
 
+  static class ArrayExtension
+  {
+    public static bool ItemsEqual<T>(this T[] left, T[] right)
+    {
+      if (ReferenceEquals(left, right)) return true;
+      if (left is null || right is null) return false;
+      if (left.Length != right.Length) return false;
+
+      for(int i=0; i < left.Length; ++i)
+        if (!left[i].Equals(right[i])) return false;
+
+      return true;
+    }
+  }
+
   static class StringExtension
   {
     /// <summary>

@@ -83,15 +83,15 @@ namespace RhinoInside.Revit.GH.Parameters
 
         if (PersistentValue?.Value is ARDB.Material current)
         {
-          var familyIndex = 0;
+          var materialClassIndex = 0;
           foreach (var materialClass in materialCategoryBox.Items.Cast<string>())
           {
             if (current.MaterialClass == materialClass)
             {
-              materialCategoryBox.SelectedIndex = familyIndex;
+              materialCategoryBox.SelectedIndex = materialClassIndex;
               break;
             }
-            familyIndex++;
+            materialClassIndex++;
           }
         }
         else RefreshMaterialsList(listBox, default);
