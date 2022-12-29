@@ -205,12 +205,15 @@
     <Compile Include="Components\Model\ReferenceElement\AddReferencePlane.cs" />
     <Compile Include="Components\Model\SketchDeconstruct.cs" />
     <Compile Include="Components\ObjectStyles\AddSubCategory.cs" />
+    <Compile Include="Components\ObjectStyles\CategoryGraphicOverrides.cs" />
     <Compile Include="Components\ObjectStyles\CategoryGraphicsStyle.cs" />
     <Compile Include="Components\ObjectStyles\CategoryIdentity.cs" />
     <Compile Include="Components\ObjectStyles\CategoryParameters.cs" />
     <Compile Include="Components\ObjectStyles\CategoryStyle.cs" />
     <Compile Include="Components\ObjectStyles\CategorySubCategories.cs" />
     <Compile Include="Components\ObjectStyles\CurveLineStyle.cs" />
+    <Compile Include="Components\ObjectStyles\ElementGraphicOverrides.cs" />
+    <Compile Include="Components\ObjectStyles\FilterGraphicOverrides.cs" />
     <Compile Include="Components\ObjectStyles\GraphicOverrides.cs" />
     <Compile Include="Components\ObjectStyles\QueryCategories.cs" />
     <Compile Include="Components\ObjectStyles\QueryLineStyles.cs" />
@@ -278,7 +281,12 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Optional.cs" />
+    <Compile Include="Parameters\ObjectStyles\Category.cs" />
+    <Compile Include="Parameters\ObjectStyles\CategoryTypes.cs" />
     <Compile Include="Parameters\ObjectStyles\Color.cs" />
+    <Compile Include="Parameters\ObjectStyles\FillPatternElement.cs" />
+    <Compile Include="Parameters\ObjectStyles\LinePatternElement.cs" />
+    <Compile Include="Parameters\ObjectStyles\OverrideGraphicSettings.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -345,8 +353,6 @@
     <Compile Include="Parameters\CompoundStructure.cs" />
     <Compile Include="Parameters\CurtainGrid.cs" />
     <Compile Include="Parameters\CurveElement.cs" />
-    <Compile Include="Parameters\Category.cs" />
-    <Compile Include="Parameters\CategoryTypes.cs" />
     <Compile Include="Parameters\DatumPlane.cs" />
     <Compile Include="Parameters\Document.cs" />
     <Compile Include="Parameters\Elevation.cs" />
@@ -355,13 +361,11 @@
     <Compile Include="Parameters\ElementType.cs" />
     <Compile Include="Parameters\Family.cs" />
     <Compile Include="Parameters\FamilyInstance.cs" />
-    <Compile Include="Parameters\FillPatternElement.cs" />
     <Compile Include="Parameters\GeometryObject.cs" />
     <Compile Include="Parameters\GraphicalElement.cs" />
     <Compile Include="Parameters\Group.cs" />
     <Compile Include="Parameters\HostObject.cs" />
     <Compile Include="Parameters\LevelConstraint.cs" />
-    <Compile Include="Parameters\LinePatternElement.cs" />
     <Compile Include="Parameters\Material.cs" />
     <Compile Include="Parameters\Opening.cs" />
     <Compile Include="Parameters\Param.cs" />
@@ -389,7 +393,6 @@
     <Compile Include="Types\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Types\BasePoint.cs" />
     <Compile Include="Types\BuildingPad.cs" />
-    <Compile Include="Types\Category.cs" />
     <Compile Include="Types\Ceiling.cs" />
     <Compile Include="Types\CombinableElement.cs" />
     <Compile Include="Types\CompoundStructure.cs" />
@@ -407,7 +410,6 @@
     <Compile Include="Types\FailureDefinition.cs" />
     <Compile Include="Types\Family.cs" />
     <Compile Include="Types\FamilyInstance.cs" />
-    <Compile Include="Types\FillPatternElement.cs" />
     <Compile Include="Types\Floor.cs" />
     <Compile Include="Types\GeometricElement.cs" />
     <Compile Include="Types\GeometryObject.cs" />
@@ -416,8 +418,11 @@
     <Compile Include="Types\ImageInstance.cs" />
     <Compile Include="Types\Instance.cs" />
     <Compile Include="Types\InstanceElement.cs" />
-    <Compile Include="Types\LinePatternElement.cs" />
     <Compile Include="Types\MEPCurve.cs" />
+    <Compile Include="Types\ObjectStyles\Category.cs" />
+    <Compile Include="Types\ObjectStyles\FillPatternElement.cs" />
+    <Compile Include="Types\ObjectStyles\LinePatternElement.cs" />
+    <Compile Include="Types\ObjectStyles\OverrideGraphicSettings.cs" />
     <Compile Include="Types\Opening.cs" />
     <Compile Include="Types\Panel.cs" />
     <Compile Include="Types\Parameter.cs" />

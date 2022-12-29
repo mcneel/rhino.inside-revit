@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
 
     public CategoryGraphicsStyle() : base
     (
-      name: "Category GraphicsStyle",
+      name: "Category Graphics Style",
       nickname: "GraphicsStyle",
       description: string.Empty,
       category: "Revit",
