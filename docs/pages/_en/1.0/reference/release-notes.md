@@ -16,6 +16,10 @@ group: Deployment & Configs
 - Moved 'Add Revision' and 'Query Revisions' to the View panel.
 - Added 'Add Detail Group' component.
 - Now 'Create Group Type' works across documents.
+- Added 'Graphic Overrides' component.
+- Added 'Category Graphic Overrides' component.
+- Added 'Element Graphic Overrides' component.
+- Added 'Filter Graphic Overrides' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
