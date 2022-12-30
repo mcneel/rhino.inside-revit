@@ -2383,6 +2383,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementSelect {
+            get {
+                object obj = ResourceManager.GetObject("ElementSelect", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementSelectableInViewFilter {
             get {
                 object obj = ResourceManager.GetObject("ElementSelectableInViewFilter", resourceCulture);
@@ -3866,16 +3876,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap SectionView {
             get {
                 object obj = ResourceManager.GetObject("SectionView", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap SelectDeselectElement {
-            get {
-                object obj = ResourceManager.GetObject("SelectDeselectElement", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
