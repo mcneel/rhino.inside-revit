@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -26,20 +27,20 @@ namespace RhinoInside.Revit.GH.Types
           if (settings.DetailLevel != default)                    description.Add($"Detail Level = {settings.DetailLevel}");
           if (settings.Halftone != default)                       description.Add($"Halftone = {settings.Halftone}");
 
-          if (settings.ProjectionLinePatternId.IsValid())         description.Add($"Projection Lines : Pattern = {(Document.GetElement(settings.ProjectionLinePatternId)?.Name ?? "<Solid>")}");
+          if (settings.ProjectionLinePatternId.IsValid())         description.Add($"Projection Lines : Pattern = {(Document?.GetElement(settings.ProjectionLinePatternId)?.Name ?? "<Solid>")}");
           if (settings.ProjectionLineColor.IsValid)               description.Add($"Projection Lines : Color = {GH_Format.FormatColour(settings.ProjectionLineColor.ToColor())}");
           if (settings.ProjectionLineWeight != InvalidPenNumber)  description.Add($"Projection Lines : Weight = {settings.ProjectionLineWeight}");
 
 #if REVIT_2019
           if (!settings.IsSurfaceForegroundPatternVisible)        description.Add($"Surface Patterns : Foreground Visible = {settings.IsSurfaceForegroundPatternVisible}");
-          if (settings.SurfaceForegroundPatternId.IsValid())      description.Add($"Surface Patterns : Foreground Pattern = {(Document.GetElement(settings.SurfaceForegroundPatternId)?.Name ?? "<Solid fill>")}");
+          if (settings.SurfaceForegroundPatternId.IsValid())      description.Add($"Surface Patterns : Foreground Pattern = {(Document?.GetElement(settings.SurfaceForegroundPatternId)?.Name ?? "<Solid fill>")}");
           if (settings.SurfaceForegroundPatternColor.IsValid)     description.Add($"Surface Patterns : Foreground Color = {GH_Format.FormatColour(settings.SurfaceForegroundPatternColor.ToColor())}");
           if (!settings.IsSurfaceBackgroundPatternVisible)        description.Add($"Surface Patterns : Background Visible = {settings.IsSurfaceBackgroundPatternVisible}");
-          if (settings.SurfaceBackgroundPatternId.IsValid())      description.Add($"Surface Patterns : Background Pattern = {(Document.GetElement(settings.SurfaceBackgroundPatternId)?.Name ?? "<Solid fill>")}");
+          if (settings.SurfaceBackgroundPatternId.IsValid())      description.Add($"Surface Patterns : Background Pattern = {(Document?.GetElement(settings.SurfaceBackgroundPatternId)?.Name ?? "<Solid fill>")}");
           if (settings.SurfaceBackgroundPatternColor.IsValid)     description.Add($"Surface Patterns : Background Color = {GH_Format.FormatColour(settings.SurfaceBackgroundPatternColor.ToColor())}");
 #else
           if (!settings.IsProjectionFillPatternVisible)           description.Add($"Surface Patterns : Foreground Visible = {settings.IsProjectionFillPatternVisible}");
-          if (settings.ProjectionFillPatternId.IsValid())         description.Add($"Surface Patterns : Foreground Pattern = {(Document.GetElement(settings.ProjectionFillPatternId)?.Name ?? "<Solid fill>")}");
+          if (settings.ProjectionFillPatternId.IsValid())         description.Add($"Surface Patterns : Foreground Pattern = {(Document?.GetElement(settings.ProjectionFillPatternId)?.Name ?? "<Solid fill>")}");
           if (settings.ProjectionFillColor.IsValid)               description.Add($"Surface Patterns : Foreground Color = {GH_Format.FormatColour(settings.ProjectionFillColor.ToColor())}");
 #endif
           if (settings.Transparency != default)                   description.Add($"Surface : Transparency = {settings.Transparency}%");
@@ -50,14 +51,14 @@ namespace RhinoInside.Revit.GH.Types
 
 #if REVIT_2019
           if (!settings.IsCutForegroundPatternVisible)            description.Add($"Cut Patterns : Foreground Visible = {settings.IsCutForegroundPatternVisible}");
-          if (settings.CutForegroundPatternId.IsValid())          description.Add($"Cut Patterns : Foreground Pattern = {(Document.GetElement(settings.CutForegroundPatternId)?.Name ?? "<Solid fill>")}");
+          if (settings.CutForegroundPatternId.IsValid())          description.Add($"Cut Patterns : Foreground Pattern = {(Document?.GetElement(settings.CutForegroundPatternId)?.Name ?? "<Solid fill>")}");
           if (settings.CutForegroundPatternColor.IsValid)         description.Add($"Cut Patterns : Foreground Color = {GH_Format.FormatColour(settings.CutForegroundPatternColor.ToColor())}");
           if (!settings.IsCutBackgroundPatternVisible)            description.Add($"Cut Patterns : Background Visible = {settings.IsCutBackgroundPatternVisible}");
-          if (settings.CutBackgroundPatternId.IsValid())          description.Add($"Cut Patterns : Background Pattern = {(Document.GetElement(settings.CutBackgroundPatternId)?.Name ?? "<Solid fill>")}");
+          if (settings.CutBackgroundPatternId.IsValid())          description.Add($"Cut Patterns : Background Pattern = {(Document?.GetElement(settings.CutBackgroundPatternId)?.Name ?? "<Solid fill>")}");
           if (settings.CutBackgroundPatternColor.IsValid)         description.Add($"Cut Patterns : Background Color = {GH_Format.FormatColour(settings.CutBackgroundPatternColor.ToColor())}");
 #else
           if (!settings.IsCutFillPatternVisible)                  description.Add($"Cut Patterns : Foreground Visible = {settings.IsCutFillPatternVisible}");
-          if (settings.CutFillPatternId.IsValid())                description.Add($"Cut Patterns : Foreground Pattern = {(Document.GetElement(settings.CutFillPatternId)?.Name ?? "<Solid fill>")}");
+          if (settings.CutFillPatternId.IsValid())                description.Add($"Cut Patterns : Foreground Pattern = {(Document?.GetElement(settings.CutFillPatternId)?.Name ?? "<Solid fill>")}");
           if (settings.CutFillColor.IsValid)                      description.Add($"Cut Patterns : Foreground Color = {GH_Format.FormatColour(settings.CutFillColor.ToColor())}");
 #endif
 
@@ -70,7 +71,7 @@ namespace RhinoInside.Revit.GH.Types
         return "<None>";
       }
     }
-#endregion
+    #endregion
 
     public new ARDB.OverrideGraphicSettings Value => base.Value as ARDB.OverrideGraphicSettings;
 
@@ -80,5 +81,71 @@ namespace RhinoInside.Revit.GH.Types
     public OverrideGraphicSettings(OverrideGraphicSettings value) : base(value?.Document, value is null ? null : new ARDB.OverrideGraphicSettings(value.Value)) { }
     public OverrideGraphicSettings(ARDB.Document doc, ARDB.OverrideGraphicSettings value) : base(doc, value) { }
     public OverrideGraphicSettings(ARDB.Document doc) : this(doc, doc is null ? null : new ARDB.OverrideGraphicSettings()) { }
+    internal OverrideGraphicSettings(ARDB.Document doc, OverrideGraphicSettings value) : base(doc, new ARDB.OverrideGraphicSettings(value.Value))
+    {
+      if (value.Document.IsEquivalent(Document)) return;
+
+      if (Document is null || value.Document is null)
+      {
+        if (Value.ProjectionLinePatternId.ToBuiltInLinePattern() != ERDB.BuiltInLinePattern.Solid) Value.SetProjectionLinePatternId(ElementIdExtension.InvalidElementId);
+        if (Value.CutLinePatternId.ToBuiltInLinePattern() != ERDB.BuiltInLinePattern.Solid) Value.SetCutLinePatternId(ElementIdExtension.InvalidElementId);
+
+        if (Value.SurfaceForegroundPatternId != FillPatternElement.SolidId) Value.SetSurfaceForegroundPatternId(ElementIdExtension.InvalidElementId);
+        if (Value.SurfaceBackgroundPatternId != FillPatternElement.SolidId) Value.SetSurfaceBackgroundPatternId(ElementIdExtension.InvalidElementId);
+        if (Value.CutForegroundPatternId != FillPatternElement.SolidId) Value.SetCutForegroundPatternId(ElementIdExtension.InvalidElementId);
+        if (Value.CutBackgroundPatternId != FillPatternElement.SolidId) Value.SetCutBackgroundPatternId(ElementIdExtension.InvalidElementId);
+      }
+      else
+      {
+        Value.SetProjectionLinePatternId(Document.LookupElement(value.Document, value.Value.ProjectionLinePatternId));
+        Value.SetCutLinePatternId(Document.LookupElement(value.Document, value.Value.CutLinePatternId));
+
+        Value.SetSurfaceForegroundPatternId(Document.LookupElement(value.Document, value.Value.SurfaceForegroundPatternId));
+        Value.SetSurfaceBackgroundPatternId(Document.LookupElement(value.Document, value.Value.SurfaceBackgroundPatternId));
+        Value.SetCutForegroundPatternId(Document.LookupElement(value.Document, value.Value.CutForegroundPatternId));
+        Value.SetCutBackgroundPatternId(Document.LookupElement(value.Document, value.Value.CutBackgroundPatternId));
+      }
+    }
+
+    public override bool CastFrom(object source)
+    {
+      if (GH_Convert.ToColor(source, out var color, GH_Conversion.Both))
+      {
+        base.Value = new ARDB.OverrideGraphicSettings().
+          SetProjectionLineColor(color.ToColor()).
+          SetSurfaceForegroundPatternId(FillPatternElement.SolidId).
+          SetSurfaceForegroundPatternColor(color.ToColor()).
+          SetSurfaceTransparency((int) Math.Round((1.0 - (color.A / 255.0)) * 100.0));
+
+        return true;
+      }
+
+      if (GH_Convert.ToDouble(source, out var transparency, GH_Conversion.Primary))
+      {
+        base.Value = new ARDB.OverrideGraphicSettings().SetSurfaceTransparency((int) Rhino.RhinoMath.Clamp(Math.Round(transparency * 100.0), 0, 100));
+        return true;
+      }
+
+      if (GH_Convert.ToBoolean(source, out var reset, GH_Conversion.Primary))
+      {
+        if (reset)
+        {
+          var highlight = System.Drawing.Color.FromArgb(180, 255, 128, 0);
+          base.Value = new ARDB.OverrideGraphicSettings().
+            SetProjectionLineColor(highlight.ToColor()).
+            SetSurfaceForegroundPatternId(FillPatternElement.SolidId).
+            SetSurfaceForegroundPatternColor(highlight.ToColor()).
+            SetSurfaceTransparency((int) Math.Round((1.0 - (highlight.A / 255.0)) * 100.0));
+        }
+        else
+        {
+          base.Value = new ARDB.OverrideGraphicSettings();
+        }
+
+        return true;
+      }
+
+      return base.CastFrom(source);
+    }
   }
 }

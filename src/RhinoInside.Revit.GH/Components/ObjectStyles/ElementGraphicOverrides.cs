@@ -139,7 +139,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
             if (pair.Element?.IsValid != true) continue;
             if (!pair.Element.Value.CanBeHidden(view.Value))
             {
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Category '{pair.Element.Nomen}' can not be hidden on view '{view.Value.Title}'.");
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Element {{{pair.Element.Id.ToString("D")}}} can not be hidden on view '{view.Value.Title}'.");
               continue;
             }
 
@@ -173,21 +173,27 @@ namespace RhinoInside.Revit.GH.Components.Elements
         )
       );
 
-      if (Params.GetDataList(DA, "Overrides", out IList<Types.OverrideGraphicSettings> settings) && settings.Count > 0)
+      if (Params.GetDataList(DA, "Overrides", out IList<Types.OverrideGraphicSettings> overrides) && overrides.Count > 0)
       {
         if (view.Value.AreGraphicsOverridesAllowed())
         {
-
           StartTransaction(view.Document);
 
-          foreach (var pair in elements.ZipOrLast(settings, (Element, Settings) => (Element, Settings)))
+          foreach (var pair in elements.ZipOrLast(overrides, (Element, Overrides) => (Element, Overrides)))
           {
-            if (pair.Settings?.Value is null) continue;
+            if (pair.Overrides?.Value is null) continue;
             if (!view.Document.IsEquivalent(pair.Element?.Document)) continue;
             if (pair.Element?.IsValid != true) continue;
-            if (!pair.Element.Value.CanBeHidden(view.Value)) continue;
+            if (!pair.Element.Value.CanBeHidden(view.Value))
+            {
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Graphics Overrides are not allowed for Element {{{pair.Element.Id.ToString("D")}}} on view '{view.Value.Title}'.");
+              continue;
+            }
 
-            view.Value.SetElementOverrides(pair.Element.Id, pair.Settings.Value);
+            var settings = pair.Overrides.Document.IsEquivalent(view.Document) ? pair.Overrides :
+                           new Types.OverrideGraphicSettings(view.Document, pair.Overrides);
+
+            view.Value.SetElementOverrides(pair.Element.Id, settings.Value);
           }
         }
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Graphics Overrides are not allowed on View '{view.Value.Title}'");

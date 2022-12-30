@@ -311,41 +311,41 @@ namespace RhinoInside.Revit.GH.Components.Elements
       Params.TrySetData(DA, "Detail Level", () => newOverrides.Value.DetailLevel);
       Params.TrySetData(DA, "Halftone", () => newOverrides.Value.Halftone);
 
-      Params.TrySetData(DA, "Projection Lines : Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.ProjectionLinePatternId));
+      Params.TrySetData(DA, "Projection Lines : Pattern", () => Types.LinePatternElement.FromElementId(newOverrides.Document, newOverrides.Value.ProjectionLinePatternId));
       Params.TrySetData(DA, "Projection Lines : Color", () => newOverrides.Value.ProjectionLineColor.ToColor());
       Params.TrySetData(DA, "Projection Lines : Weight", () => newOverrides.Value.ProjectionLineWeight);
 
 #if REVIT_2019
       Params.TrySetData(DA, "Surface Patterns : Foreground Visible", () => newOverrides.Value.IsSurfaceForegroundPatternVisible);
-      Params.TrySetData(DA, "Surface Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.SurfaceForegroundPatternId));
+      Params.TrySetData(DA, "Surface Patterns : Foreground Pattern", () => Types.FillPatternElement.FromElementId(newOverrides.Document, newOverrides.Value.SurfaceForegroundPatternId));
       Params.TrySetData(DA, "Surface Patterns : Foreground Color", () => newOverrides.Value.SurfaceForegroundPatternColor.ToColor());
 
       Params.TrySetData(DA, "Surface Patterns : Background Visible", () => newOverrides.Value.IsSurfaceBackgroundPatternVisible);
-      Params.TrySetData(DA, "Surface Patterns : Background Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.SurfaceBackgroundPatternId));
+      Params.TrySetData(DA, "Surface Patterns : Background Pattern", () => Types.FillPatternElement.FromElementId(newOverrides.Document, newOverrides.Value.SurfaceBackgroundPatternId));
       Params.TrySetData(DA, "Surface Patterns : Background Color", () => newOverrides.Value.SurfaceBackgroundPatternColor.ToColor());
 #else
       Params.TrySetData(DA, "Surface Patterns : Foreground Visible", () => newOverrides.Value.IsProjectionFillPatternVisible);
-      Params.TrySetData(DA, "Surface Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.ProjectionFillPatternId));
+      Params.TrySetData(DA, "Surface Patterns : Foreground Pattern", () => Types.FillPatternElement.FromElementId(newOverrides.Document, newOverrides.Value.ProjectionFillPatternId));
       Params.TrySetData(DA, "Surface Patterns : Foreground Color", () => newOverrides.Value.ProjectionFillColor.ToColor());
 #endif
 
       Params.TrySetData(DA, "Surface : Transparency", () => newOverrides.Value.Transparency / 100.0);
 
-      Params.TrySetData(DA, "Cut Lines : Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.CutLinePatternId));
+      Params.TrySetData(DA, "Cut Lines : Pattern", () => Types.LinePatternElement.FromElementId(newOverrides.Document, newOverrides.Value.CutLinePatternId));
       Params.TrySetData(DA, "Cut Lines : Color", () => newOverrides.Value.CutLineColor.ToColor());
       Params.TrySetData(DA, "Cut Lines : Weight", () => newOverrides.Value.CutLineWeight);
 
 #if REVIT_2019
       Params.TrySetData(DA, "Cut Patterns : Foreground Visible", () => newOverrides.Value.IsCutForegroundPatternVisible);
-      Params.TrySetData(DA, "Cut Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.CutForegroundPatternId));
+      Params.TrySetData(DA, "Cut Patterns : Foreground Pattern", () => Types.FillPatternElement.FromElementId(newOverrides.Document, newOverrides.Value.CutForegroundPatternId));
       Params.TrySetData(DA, "Cut Patterns : Foreground Color", () => newOverrides.Value.CutForegroundPatternColor.ToColor());
 
       Params.TrySetData(DA, "Cut Patterns : Background Visible", () => newOverrides.Value.IsCutBackgroundPatternVisible);
-      Params.TrySetData(DA, "Cut Patterns : Background Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.CutBackgroundPatternId));
+      Params.TrySetData(DA, "Cut Patterns : Background Pattern", () => Types.FillPatternElement.FromElementId(newOverrides.Document, newOverrides.Value.CutBackgroundPatternId));
       Params.TrySetData(DA, "Cut Patterns : Background Color", () => newOverrides.Value.CutBackgroundPatternColor.ToColor());
 #else
       Params.TrySetData(DA, "Cut Patterns : Foreground Visible", () => newOverrides.Value.IsCutFillPatternVisible);
-      Params.TrySetData(DA, "Cut Patterns : Foreground Pattern", () => Types.Element.FromElementId(newOverrides.Document, newOverrides.Value.CutFillPatternId));
+      Params.TrySetData(DA, "Cut Patterns : Foreground Pattern", () => Types.FillPatternElement.FromElementId(newOverrides.Document, newOverrides.Value.CutFillPatternId));
       Params.TrySetData(DA, "Cut Patterns : Foreground Color", () => newOverrides.Value.CutFillColor.ToColor());
 #endif
       #endregion
