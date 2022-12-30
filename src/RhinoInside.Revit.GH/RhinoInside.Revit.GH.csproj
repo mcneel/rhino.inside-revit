@@ -97,9 +97,6 @@
     <Compile Include="Components\Element\Inspect.cs" />
     <Compile Include="Components\Element\Level\Identity.cs" />
     <Compile Include="Components\Element\Level\QueryLevels.cs" />
-    <Compile Include="Components\Element\LinePatternElement\LinePatternByName.cs" />
-    <Compile Include="Components\Element\LinePatternElement\LinePatternDashes.cs" />
-    <Compile Include="Components\Element\LinePatternElement\QueryLinePatterns.cs" />
     <Compile Include="Components\Element\Location.cs" />
     <Compile Include="Components\Element\MaterialQuantities.cs" />
     <Compile Include="Components\Element\Materials.cs" />
@@ -215,6 +212,9 @@
     <Compile Include="Components\ObjectStyles\ElementGraphicOverrides.cs" />
     <Compile Include="Components\ObjectStyles\FilterGraphicOverrides.cs" />
     <Compile Include="Components\ObjectStyles\GraphicOverrides.cs" />
+    <Compile Include="Components\ObjectStyles\LinePatternElement\LinePatternByName.cs" />
+    <Compile Include="Components\ObjectStyles\LinePatternElement\LinePatternDashes.cs" />
+    <Compile Include="Components\ObjectStyles\LinePatternElement\QueryLinePatterns.cs" />
     <Compile Include="Components\ObjectStyles\QueryCategories.cs" />
     <Compile Include="Components\ObjectStyles\QueryLineStyles.cs" />
     <Compile Include="Components\Options\RevitUser.cs" />
