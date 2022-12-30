@@ -78,7 +78,6 @@
     <Compile Include="Components\Element\Assembly\DisassembleAssembly.cs" />
     <Compile Include="Components\Element\Assembly\QueryAssemblies.cs" />
     <Compile Include="Components\Element\Ceiling\ByOutline.cs" />
-    <Compile Include="Components\Element\CompoundStructureGeometry.cs" />
     <Compile Include="Components\Element\BoundingGeometry.cs" />
     <Compile Include="Components\Element\Delete.cs" />
     <Compile Include="Components\Element\Dependents.cs" />
@@ -130,6 +129,7 @@
     <Compile Include="Components\Element\Level\ByElevation.cs" />
     <Compile Include="Components\Element\Material\ByColor.cs" />
     <Compile Include="Components\Element\Material\ByName.cs" />
+    <Compile Include="Components\Element\PartsGeometry.cs" />
     <Compile Include="Components\Element\Passport.cs" />
     <Compile Include="Components\Element\Phasing\ElementPhasing.cs" />
     <Compile Include="Components\Element\Phasing\QueryPhases.cs" />
