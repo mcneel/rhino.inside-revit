@@ -93,20 +93,19 @@ namespace RhinoInside.Revit.GH.Components.Phasing
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Element", out Types.Element element)) return;
+      else Params.TrySetData(DA, "Element", () => element);
 
-      if (Params.GetData(DA, "Created", out Types.Phase created))
+      bool update = false;
+      update |= Params.GetData(DA, "Created", out Types.Phase createdPhase);
+      update |= Params.GetData(DA, "Demolished", out Types.Phase demolishedPhase);
+
+      if (update)
       {
         StartTransaction(element.Document);
-        element.CreatedPhase = created;
+        element.CreatedPhase = createdPhase;
+        element.DemolishedPhase = demolishedPhase;
       }
 
-      if (Params.GetData(DA, "Demolished", out Types.Phase demolished))
-      {
-        StartTransaction(element.Document);
-        element.DemolishedPhase = demolished;
-      }
-
-      DA.SetData("Element", element);
       Params.TrySetData(DA, "Created", () => element.CreatedPhase);
       Params.TrySetData(DA, "Demolished", () => element.DemolishedPhase);
     }
