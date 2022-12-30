@@ -12,13 +12,13 @@ namespace RhinoInside.Revit.GH.Components.Geometry
   using Convert.Geometry;
   using Convert.System.Collections.Generic;
 
-  public class CompoundStructureGeometry : Component
+  public class ElementPartsGeometry : Component
   {
     public override Guid ComponentGuid => new Guid("3DBAAAE8-90D2-465E-A88B-FCC2B64E3BB3");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "SG";
 
-    public CompoundStructureGeometry() : base
+    public ElementPartsGeometry() : base
     (
       name: "Element Parts Geometry",
       nickname: "PartGeom",

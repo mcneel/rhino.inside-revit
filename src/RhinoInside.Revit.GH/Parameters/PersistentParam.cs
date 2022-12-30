@@ -133,7 +133,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override T InstantiateT() => typeof(T).IsAbstract || typeof(T).IsInterface ? default : base.InstantiateT();
     protected override void Menu_AppendManageCollection(ToolStripDropDown menu)
     {
-      if (!(typeof(T).IsAbstract || typeof(T).IsInterface))
+      if (InstantiateT() is object)
         base.Menu_AppendManageCollection(menu);
     }
     #endregion

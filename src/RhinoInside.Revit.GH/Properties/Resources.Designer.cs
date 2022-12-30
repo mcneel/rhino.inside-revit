@@ -1173,16 +1173,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap CompoundStructureGeometry {
-            get {
-                object obj = ResourceManager.GetObject("CompoundStructureGeometry", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap CompoundStructureLayer {
             get {
                 object obj = ResourceManager.GetObject("CompoundStructureLayer", resourceCulture);
@@ -2293,6 +2283,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementPartsGeometry {
+            get {
+                object obj = ResourceManager.GetObject("ElementPartsGeometry", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementPassport {
             get {
                 object obj = ResourceManager.GetObject("ElementPassport", resourceCulture);
@@ -2376,6 +2376,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementRelease {
             get {
                 object obj = ResourceManager.GetObject("ElementRelease", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementSelect {
+            get {
+                object obj = ResourceManager.GetObject("ElementSelect", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -3866,16 +3876,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap SectionView {
             get {
                 object obj = ResourceManager.GetObject("SectionView", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap SelectDeselectElement {
-            get {
-                object obj = ResourceManager.GetObject("SelectDeselectElement", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

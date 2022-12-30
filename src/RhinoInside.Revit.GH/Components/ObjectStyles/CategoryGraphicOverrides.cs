@@ -176,24 +176,27 @@ namespace RhinoInside.Revit.GH.Components.Elements
         )
       );
 
-      if (Params.GetDataList(DA, "Overrides", out IList<Types.OverrideGraphicSettings> settings) && settings.Count > 0)
+      if (Params.GetDataList(DA, "Overrides", out IList<Types.OverrideGraphicSettings> overrides) && overrides.Count > 0)
       {
         if (view.Value.AreGraphicsOverridesAllowed())
         {
           StartTransaction(view.Document);
 
-          foreach (var pair in categories.ZipOrLast(settings, (Category, Settings) => (Category, Settings)))
+          foreach (var pair in categories.ZipOrLast(overrides, (Category, Overrides) => (Category, Overrides)))
           {
-            if (pair.Settings?.Value is null) continue;
+            if (pair.Overrides?.Value is null) continue;
             if (!view.Document.IsEquivalent(pair.Category?.Document)) continue;
             if (pair.Category?.IsValid != true) continue;
-            if (!view.Value.CanCategoryBeHidden(pair.Category.Id))
+            if (!view.Value.IsCategoryOverridable(pair.Category.Id))
             {
               AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Graphics Overrides are not allowed for Category '{pair.Category.Nomen}' on view '{view.Value.Title}'.");
               continue;
             }
 
-            view.Value.SetCategoryOverrides(pair.Category.Id, pair.Settings.Value);
+            var settings = pair.Overrides.Document.IsEquivalent(view.Document) ? pair.Overrides :
+                           new Types.OverrideGraphicSettings(view.Document, pair.Overrides);
+
+            view.Value.SetCategoryOverrides(pair.Category.Id, settings.Value);
           }
         }
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Graphics Overrides are not allowed on View '{view.Value.Title}'");

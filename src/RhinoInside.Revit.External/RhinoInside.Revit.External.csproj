@@ -61,6 +61,7 @@
     <Compile Include="DB\Extensions\LinePattern.cs" />
     <Compile Include="DB\Extensions\Mesh.cs" />
     <Compile Include="DB\Extensions\ModelPath.cs" />
+    <Compile Include="DB\Extensions\OverrideGraphicSettings.cs" />
     <Compile Include="DB\Extensions\Parameter.cs" />
     <Compile Include="DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="DB\Extensions\Plane.cs" />

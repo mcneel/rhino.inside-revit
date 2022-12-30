@@ -13,9 +13,16 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.FillPatternElement);
     public new ARDB.FillPatternElement Value => base.Value as ARDB.FillPatternElement;
 
+    internal static readonly ARDB.ElementId SolidId = new ARDB.ElementId(3);
+
     public FillPatternElement() { }
     public FillPatternElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public FillPatternElement(ARDB.FillPatternElement value) : base(value) { }
+
+    public static new FillPatternElement FromElementId(ARDB.Document doc, ARDB.ElementId id)
+    {
+      return Element.FromElementId(doc, id) as FillPatternElement;
+    }
 
     #region IGH_BakeAwareElement
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>

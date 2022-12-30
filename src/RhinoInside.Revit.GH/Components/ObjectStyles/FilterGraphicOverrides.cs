@@ -210,7 +210,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
             if (!pair.Hidden.HasValue) continue;
             if (!view.Document.IsEquivalent(pair.Filter?.Document)) continue;
             if (pair.Filter?.IsValid != true) continue;
-            if (!view.Value.GetFilters().Contains(pair.Filter.Id))
+            if (!view.Value.IsFilterApplied(pair.Filter.Id))
             {
               AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Filter '{pair.Filter.Nomen}' is not applied to view '{view.Value.Title}'.");
               continue;
@@ -249,27 +249,30 @@ namespace RhinoInside.Revit.GH.Components.Elements
         )
       );
 
-      if (Params.GetDataList(DA, "Overrides", out IList<Types.OverrideGraphicSettings> settings) && settings.Count > 0)
+      if (Params.GetDataList(DA, "Overrides", out IList<Types.OverrideGraphicSettings> overrides) && overrides.Count > 0)
       {
         if (view.Value.AreGraphicsOverridesAllowed())
         {
           StartTransaction(view.Document);
 
-          foreach (var pair in filters.ZipOrLast(settings, (Filter, Settings) => (Filter, Settings)))
+          foreach (var pair in filters.ZipOrLast(overrides, (Filter, Overrides) => (Filter, Overrides)))
           {
-            if (pair.Settings?.Value is null) continue;
+            if (pair.Overrides?.Value is null) continue;
             if (!view.Document.IsEquivalent(pair.Filter?.Document)) continue;
             if (pair.Filter?.IsValid != true) continue;
-            if (!view.Value.GetFilters().Contains(pair.Filter.Id))
+            if (!view.Value.IsFilterApplied(pair.Filter.Id))
             {
               AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Filter '{pair.Filter.Nomen}' is not applied to view '{view.Value.Title}'.");
               continue;
             }
 
+            var settings = pair.Overrides.Document.IsEquivalent(view.Document) ? pair.Overrides :
+                           new Types.OverrideGraphicSettings(view.Document, pair.Overrides);
+
             // Reset filter visibility here to force Revit redraw using this new settings.
             var visibility = view.Value.GetFilterVisibility(pair.Filter.Id);
             if (visibility) view.Value.SetFilterVisibility(pair.Filter.Id, false);
-            view.Value.SetFilterOverrides(pair.Filter.Id, pair.Settings.Value);
+            view.Value.SetFilterOverrides(pair.Filter.Id, settings.Value);
             if (visibility) view.Value.SetFilterVisibility(pair.Filter.Id, true);
           }
         }

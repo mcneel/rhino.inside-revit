@@ -47,8 +47,9 @@ namespace RhinoInside.Revit.GH.Components.Phasing
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Phase name", GH_ParamAccess.item, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional)
     };
+
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
