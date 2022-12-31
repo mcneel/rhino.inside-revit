@@ -103,6 +103,17 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
           // Compute
           var references = geometries.Where(x => x.ReferenceDocument.IsEquivalent(view.Document)).Select(x => x?.GetDefaultReference()).OfType<ARDB.Reference>().ToArray();
+
+          if (references.Length == 1 && references[0]?.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR)
+          {
+            var stable = references[0].ConvertToStableRepresentation(view.Document);
+            references = new ARDB.Reference[]
+            {
+              ARDB.Reference.ParseFromStableRepresentation(view.Document, $"{stable}/0"),
+              ARDB.Reference.ParseFromStableRepresentation(view.Document, $"{stable}/1")
+            };
+          }
+
           dimension = Reconstruct(dimension, view.Value, line.Value.ToLine(), references, type);
 
           DA.SetData(_Output_, dimension);
