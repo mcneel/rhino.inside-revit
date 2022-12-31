@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       ARDB.Element element = null;
-      if (!DA.GetData("Element", ref element) && element is object)
+      if (!DA.GetData("Element", ref element) || element is null)
         return;
 
       for (int p = 0; p < Params.Output.Count; ++p)
