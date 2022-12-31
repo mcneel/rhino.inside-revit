@@ -1,10 +1,12 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components.ModelElements
 {
-  [ComponentVersion(introduced: "1.0", updated: "1.6")]
+  using External.DB.Extensions;
+
+  [ComponentVersion(introduced: "1.0", updated: "1.11")]
   public class SketchDeconstruct : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("F9BC3F5E-7415-485E-B74C-5CB855B818B8");
@@ -30,7 +32,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         {
           Name = "Sketch",
           NickName = "S",
-          Description = "Sketch to deconstruct",
+          Description = "Sketch to deconstruct.",
         }
       ),
     };
@@ -44,7 +46,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         {
           Name = "Sketch",
           NickName = "S",
-          Description = "Sketch element",
+          Description = "Sketch element.",
         }, ParamRelevance.Occasional
       ),
       new ParamDefinition
@@ -53,7 +55,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         {
           Name = "Owner",
           NickName = "O",
-          Description = "Sketch owner element",
+          Description = "Sketch owner element.",
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -62,18 +64,28 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         {
           Name = "Work Plane",
           NickName = "WP",
-          Description = "Work plane element",
+          Description = "Work plane element.",
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
-        new Param_Curve()
+        new Parameters.CurveElement()
         {
-          Name = "Profile",
-          NickName = "P",
-          Description = "Sketch profile curves",
-          Access = GH_ParamAccess.list
+          Name = "Model Lines",
+          NickName = "ML",
+          Description = $"Sketch curves grouped by boundary-profile.",
+          Access = GH_ParamAccess.tree
         }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.CurveElement()
+        {
+          Name = "Slope Arrow",
+          NickName = "SA",
+          Description = "Sketch Slope Arrow.",
+          Access = GH_ParamAccess.item
+        }, ParamRelevance.Secondary
       ),
     };
 
@@ -82,9 +94,17 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       if (!Params.GetData(DA, "Sketch", out Types.Sketch sketch, x => x.IsValid)) return;
       else Params.TrySetData(DA, "Sketch", () => sketch);
 
-      Params.TrySetData(DA, "Owner", () => sketch.Owner);
-      Params.TrySetData(DA, "Work Plane", () => sketch.SketchPlane);
-      Params.TrySetDataList(DA, "Profile", () => sketch.Profiles);
+      Params.TrySetData(DA, "Owner", () => sketch?.Owner);
+      Params.TrySetData(DA, "Work Plane", () => sketch?.SketchPlane);
+      Params.TrySetDataTree
+      (
+        DA, "Model Lines", () =>
+        sketch?.Value?.GetProfileCurveElements().
+        Select(x => x.Select(Types.CurveElement.FromElement)).
+        TakeWhileIsNotEscapeKeyDown(this)
+      );
+
+      Params.TrySetData(DA, "Slope Arrow", () => sketch?.SlopeArrow);
     }
   }
 }
