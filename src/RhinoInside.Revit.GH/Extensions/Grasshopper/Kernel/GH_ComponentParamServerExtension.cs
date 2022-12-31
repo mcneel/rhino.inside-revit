@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel.Types;
@@ -320,6 +319,49 @@ namespace Grasshopper.Kernel
     {
       var index = parameters.Output.IndexOf(name, out var _);
       return index >= 0 && DA.SetDataList(index, list());
+    }
+
+    readonly struct DataTree<T> : Data.IGH_DataTree
+    {
+      readonly Data.GH_Path Path;
+      readonly IEnumerable<IEnumerable<T>> Enumerable;
+      public DataTree(Data.GH_Path path, IEnumerable<IEnumerable<T>> enumerable)
+      {
+        Path = path;
+        Enumerable = enumerable;
+      }
+
+      bool Data.IGH_DataTree.MergeWithParameter(IGH_Param param)
+      {
+        if (param is null)
+          return false;
+
+        if (Enumerable is null)
+          return param.AddVolatileDataList(Path.AppendElement(0), default);
+
+        int index = 0;
+        foreach (var enumerable in Enumerable)
+          param.AddVolatileDataList(Path.AppendElement(index++), enumerable);
+
+        return true;
+      }
+    }
+
+    public static bool TrySetDataTree<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, Func<IEnumerable<IEnumerable<T?>>> tree)
+      where T : struct
+    {
+      var index = parameters.Output.IndexOf(name, out var _);
+      if (index < 0) return false;
+
+      return DA.SetDataTree(index, new DataTree<T?>(DA.ParameterTargetPath(index).AppendElement(DA.ParameterTargetIndex(index)), tree()));
+    }
+
+    public static bool TrySetDataTree<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, Func<IEnumerable<IEnumerable<T>>> tree)
+    {
+      var index = parameters.Output.IndexOf(name, out var _);
+      if (index < 0) return false;
+
+      return DA.SetDataTree(index, new DataTree<T>(DA.ParameterTargetPath(index).AppendElement(DA.ParameterTargetIndex(index)), tree()));
     }
 
     internal static IEnumerable<TSource> TakeWhileIsNotEscapeKeyDown<TSource>
