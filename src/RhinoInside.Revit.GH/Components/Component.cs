@@ -216,6 +216,19 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void SolveInstance(IGH_DataAccess DA)
     {
+      // Default Gap Logic
+      for (int index = 0; index < Params.Output.Count; ++index)
+      {
+        var output = Params.Output[index];
+
+        // Grashopper already takes care of items and lists.
+        if (output.Access == GH_ParamAccess.tree)
+        {
+          var path = DA.ParameterTargetPath(index).AppendElement(DA.ParameterTargetIndex(index)).AppendElement(0);
+          output.AddVolatileDataList(path, default);
+        }
+      }
+
       try
       {
         TrySolveInstance(DA);
