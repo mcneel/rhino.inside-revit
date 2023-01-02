@@ -155,7 +155,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
               // Solve missing Base & Top
               ERDB.ElevationElementReference.SolveBaseAndTop
               (
-                view.Document, view.Value.GenLevel.ProjectElevation,
+                view.Document, view.Value.GenLevel?.ProjectElevation ?? location.Value.Z / Revit.ModelUnits,
                 0.0, 10.0,
                 ref baseElevation, ref topElevation
               );

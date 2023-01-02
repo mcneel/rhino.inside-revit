@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var curveElements = new IList<CurveElement>[sketch.Profile.Size];
 
       var loopIndex = 0;
-      foreach (var profile in sketch.Profile.Cast<CurveArray>())
+      foreach (CurveArray profile in sketch.Profile)
       {
         curveElements[loopIndex++] = profile.Cast<Curve>().
           Distinct(CurveEqualityComparer.Reference).

@@ -234,7 +234,17 @@ namespace RhinoInside.Revit.GH.Components
     protected abstract void TrySolveInstance(IGH_DataAccess DA);
     protected virtual bool TryCatchException(IGH_DataAccess DA, Exception e)
     {
-      switch(e)
+      for (int o = 0; o < Params.Output.Count; ++o)
+      {
+        switch (Params.Output[o].Access)
+        {
+          case GH_ParamAccess.item: DA.SetData(o, default); break;
+          case GH_ParamAccess.list: DA.SetDataList(o, default); break;
+          case GH_ParamAccess.tree: Params.Output[o].AddVolatileDataList(DA.ParameterTargetPath(o).AppendElement(DA.ParameterTargetIndex(o)).AppendElement(0), default); break;
+        }
+      }
+
+      switch (e)
       {
         case Exceptions.RuntimeArgumentNullException _:
           // Grasshopper components use to send a Null when

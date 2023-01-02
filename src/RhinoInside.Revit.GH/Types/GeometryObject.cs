@@ -632,9 +632,9 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
       {
-        if (Curve is LineCurve curve)
+        if (Curve is Curve curve)
         {
-          target = (Q) (object) new GH_Line(curve.Line);
+          target = (Q) (object) new GH_Line(new Line(curve.PointAtStart, curve.PointAtEnd));
           return true;
         }
 

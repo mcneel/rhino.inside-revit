@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
@@ -23,8 +22,15 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
-      if (source is Element element && element.Value?.GetSketch() is ARDB.Sketch sketch)
-        return SetValue(sketch);
+      if (source is Element element)
+      {
+        if (element.Value?.GetSketch() is ARDB.Sketch sketch) return SetValue(sketch);
+        else
+        {
+          ResetValue();
+          return true;
+        }
+      }
 
       return base.CastFrom(source);
     }
@@ -32,13 +38,13 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      foreach(var loop in Profiles)
+      foreach (var loop in Profiles)
         args.Pipeline.DrawCurve(loop, args.Color, args.Thickness);
     }
 
     protected override void DrawViewportMeshes(GH_PreviewMeshArgs args)
     {
-      if(TrimmedSurface is object)
+      if (TrimmedSurface is object)
         args.Pipeline.DrawBrepShaded(TrimmedSurface, args.Material);
     }
     #endregion
@@ -151,6 +157,25 @@ namespace RhinoInside.Revit.GH.Types
     public SketchPlane SketchPlane =>
       Value is ARDB.Sketch sketch ? SketchPlane.FromElement(sketch.SketchPlane) as SketchPlane : default;
     #endregion
+
+    #region Slope Arrow
+    public CurveElement SlopeArrow
+    {
+      get
+      {
+        if (Value is ARDB.Sketch sketch)
+        {
+          var slopeArrow = sketch.GetDependentElements(ERDB.CompoundElementFilter.ElementClassFilter(typeof(ARDB.CurveElement))).
+            Select(Document.GetElement).FirstOrDefault(x => x.get_Parameter(ARDB.BuiltInParameter.SPECIFY_SLOPE_OR_OFFSET) is object);
+
+          return CurveElement.FromElement(slopeArrow) as CurveElement;
+        }
+
+        return default;
+      }
+    }
+    #endregion
+
 
     internal static bool SetProfile(ARDB.Sketch sketch, IList<Curve> boundaries, Vector3d normal)
     {
