@@ -472,7 +472,8 @@ namespace RhinoInside.Revit.GH
               if (!previewObject.IsPreviewCapable)
                 continue;
 
-              outline = Rhino.Geometry.BoundingBox.Union(outline, previewObject.ClippingBox);
+              foreach(var primitive in node.Primitives)
+                outline = Rhino.Geometry.BoundingBox.Union(outline, primitive.ClippingBox);
             }
           }
         }
