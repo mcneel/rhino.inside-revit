@@ -21,6 +21,7 @@ group: Deployment & Configs
 - Added 'Element Graphic Overrides' component.
 - Added 'Filter Graphic Overrides' component.
 - Added 'View Filters' component.
+- Added 'Query Fill Patterns' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

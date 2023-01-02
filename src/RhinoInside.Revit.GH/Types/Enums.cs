@@ -113,6 +113,18 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
+    ComponentGuid("88A41D83-3B2A-4ED8-9C3E-5F375B20420E"),
+    Name("Fill Pattern Type"),
+    Description("Contains a collection of fill pattern type values"),
+  ]
+  public class FillPatternTarget : GH_Enum<ARDB.FillPatternTarget>
+  {
+    public FillPatternTarget() : base(ARDB.FillPatternTarget.None) { }
+    public FillPatternTarget(ARDB.FillPatternTarget value) : base(value) { }
+    public override bool IsEmpty => Value == ARDB.FillPatternTarget.None;
+  }
+
+  [
     ComponentGuid("F992A251-4085-4525-A514-298F3155DF8A"),
     Name("Detail Level"),
     Description("Contains a collection of view detail level values"),
