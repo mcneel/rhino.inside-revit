@@ -91,8 +91,12 @@ namespace RhinoInside.Revit.GH.Components.Sheets
 
           if (point is null)
           {
-            var outline = sheet.GetOutline(Rhino.DocObjects.ActiveSpace.ModelSpace);
-            point = new Point3d(outline.U.Mid, outline.V.Mid, 0.0);
+            if (viewport is object) point = viewport.GetBoxCenter().ToPoint3d();
+            else
+            {
+              var outline = sheet.GetOutline(Rhino.DocObjects.ActiveSpace.ModelSpace);
+              point = new Point3d(outline.U.Mid, outline.V.Mid, 0.0);
+            }
           }
           else point = new Point3d(point.Value.X, point.Value.Y, 0.0);
 
