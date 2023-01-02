@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components.Views
   {
     public override Guid ComponentGuid => new Guid("F6B99FE2-19E1-4840-96C1-13873A0AECE8");
 
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
 
     public ClusterViewsByType() : base
     (

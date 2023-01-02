@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   public class GraphicOverrides : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("BFD4A970-CE90-47D3-B196-103E0DDCE977");
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "GO";
 
     public GraphicOverrides() : base

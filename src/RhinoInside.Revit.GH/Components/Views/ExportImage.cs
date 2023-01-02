@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Views
   public class ViewExportImage : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("4A962A0C-46A0-4A5F-B727-6747B715A975");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
     protected override string IconTag => "IMG";
 
     public ViewExportImage() : base

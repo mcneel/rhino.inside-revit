@@ -267,6 +267,7 @@
     <Compile Include="Components\Views\Default3DView.cs" />
     <Compile Include="Components\Views\ExportImage.cs" />
     <Compile Include="Components\Views\Extents.cs" />
+    <Compile Include="Components\Views\Filters.cs" />
     <Compile Include="Components\Views\Identity.cs" />
     <Compile Include="Components\Views\QueryViews.cs" />
     <Compile Include="Components\Views\SectionBox.cs" />

@@ -14,8 +14,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
   public class ElementGraphicOverrides : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("6F5E3619-4299-4FB5-8CAC-2C172A149142");
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
-    protected override string IconTag => "O";
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override string IconTag => "EO";
 
     public ElementGraphicOverrides() : base
     (

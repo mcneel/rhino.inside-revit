@@ -14,8 +14,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
   public class FilterGraphicOverrides : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("1A137425-C54D-465F-A2EE-79B9772E0C3D");
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
-    protected override string IconTag => "O";
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override string IconTag => "FO";
 
     public FilterGraphicOverrides() : base
     (
@@ -166,13 +166,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
             if (pair.Enabled.Value)
             {
-              filtersToEnable.Remove(pair.Filter.Id);
-              filtersToDisable.Add(pair.Filter.Id);
+              filtersToDisable.Remove(pair.Filter.Id);
+              filtersToEnable.Add(pair.Filter.Id);
             }
             else
             {
-              filtersToDisable.Remove(pair.Filter.Id);
-              filtersToEnable.Add(pair.Filter.Id);
+              filtersToEnable.Remove(pair.Filter.Id);
+              filtersToDisable.Add(pair.Filter.Id);
             }
           }
 
