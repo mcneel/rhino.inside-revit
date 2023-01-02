@@ -1,13 +1,13 @@
 using System;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
-using Grasshopper.Kernel.Types;
-using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
   using External.DB.Extensions;
+  using Grasshopper.Kernel.Parameters;
+  using Grasshopper.Kernel.Types;
+  using Rhino.Geometry;
 
   [ComponentVersion(introduced: "1.7")]
   public class ViewExtents : TransactionalChainComponent
