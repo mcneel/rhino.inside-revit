@@ -500,19 +500,6 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override bool TryCatchException(IGH_DataAccess DA, Exception e)
     {
-      if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
-      {
-        for (int o = 0; o < Params.Output.Count; ++o)
-        {
-          switch (Params.Output[o].Access)
-          {
-            case GH_ParamAccess.item: DA.SetData    (o, default);                 break;
-            case GH_ParamAccess.list: DA.SetDataList(o, default);                 break;
-            case GH_ParamAccess.tree: DA.SetDataTree(o, default(IGH_Structure));  break;
-          }
-        }
-      }
-
       if (base.TryCatchException(DA, e))
         return true;
 
