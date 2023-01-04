@@ -46,14 +46,14 @@ The DirectShape element store geometric shapes in a Revit document. The geometry
 </tr>
 <tr>
 <td markdown="span">Align Material</td>
-<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
-<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
 </tr>
 <tr>
 <td markdown="span">Placed in Assembly</td>
-<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
-<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
 </tr>
 <tr>
