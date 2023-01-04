@@ -6,6 +6,121 @@ subtitle: Workflows for Revit DirectShapes
 group: Modeling
 ---
 
+The DirectShape element store geometric shapes in a Revit document. The geometry can include closed points, lines, solids or meshes. DirectShape is primarily intended for placing elements quickly in a model without the need for a pre-configured family. Directshape contains some but not all the organizational information of Loadable Family/Types. See the chart below to see if directshapes might work for you.
+
+<i class="fa fa-envelope">
+
+<table>
+<colgroup>
+<col>
+<col width="20%" style="align:center">
+<col width="20%" style="align:center">
+<col width="20%" style="align:center">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Property</th>
+<th>DirectShape</th>
+<th>DirectShape Type</th>
+<th>Component Family</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">Nested Families</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Parameter Driven Shape</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Material Parameter</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-grey.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-grey.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Align Material</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Placed in Assembly</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Name Appears in Schedules</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-grey.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Multiple Instances for Schedules</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-grey.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">View Based Representation</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-grey.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-grey.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Instance Parameters</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Edit Geometry in Revit</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Appears in Browser</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Assign Subcategory</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Can be Hosted</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Workplane Based</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Place by Origin</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+</tbody>
+</table>
+
+Some of the options above are grey because to add materials, use the name in a way that can be scheduled additional shared parameters need to be created as these parameters are not built into the default Directshapes.
+
 ## DirectShape Categories
 
 Use the {% include ltr/comp.html uuid='7bafe137' %} component to get the DirectShape Categories.
