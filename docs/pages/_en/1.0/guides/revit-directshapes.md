@@ -21,7 +21,7 @@ The DirectShape element store geometric shapes in a Revit document. The geometry
 <tr class="header">
 <th>Property</th>
 <th>DirectShape</th>
-<th>DirectShape Type</th>
+<th>DirectShape Types</th>
 <th>Component Family</th>
 </tr>
 </thead>
@@ -30,6 +30,12 @@ The DirectShape element store geometric shapes in a Revit document. The geometry
 <td markdown="span">Nested Families</td>
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+</tr>
+<tr>
+<td markdown="span">Placed in Assembly</td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
+<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
 </tr>
 <tr>
@@ -48,12 +54,6 @@ The DirectShape element store geometric shapes in a Revit document. The geometry
 <td markdown="span">Align Material</td>
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
-<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
-</tr>
-<tr>
-<td markdown="span">Placed in Assembly</td>
-<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
-<td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
 </tr>
 <tr>
@@ -111,7 +111,7 @@ The DirectShape element store geometric shapes in a Revit document. The geometry
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
 </tr>
 <tr>
-<td markdown="span">Place by Origin</td>
+<td markdown="span">Always Placed at 0,0,0</td>
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-blank.svg"></td>
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
 <td markdown="span"><img style="width:16px;height:16px;" src="/rhino.inside-revit/assets/img/checkbox-checked.svg"></td>
