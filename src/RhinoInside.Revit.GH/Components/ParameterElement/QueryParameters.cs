@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.ParameterKey>("Parameter", "K", "Parameters list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.ParameterKey>("Parameter", "P", "Parameters list", GH_ParamAccess.list)
     };
 
     public override void AddedToDocument(GH_Document document)
