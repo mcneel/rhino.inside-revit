@@ -12,6 +12,13 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static new SpecType Empty => empty;
     public static SpecType Custom => new SpecType("autodesk.spec:custom-1.0.0");
 
+    public string LocalizedLabel =>
+#if REVIT_2022
+      Autodesk.Revit.DB.LabelUtils.GetLabelForSpec(this);
+#else
+      Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.UnitType) this);
+#endif
+
     public SpecType() { }
     public SpecType(string id) : base(id)
     {
@@ -53,7 +60,6 @@ namespace RhinoInside.Revit.External.DB.Schemas
       specType = default;
       return false;
     }
-
 
     /// <summary>
     /// Checks whether a unit type is valid for this spec.

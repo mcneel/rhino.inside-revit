@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.External.DB.Schemas
@@ -11,6 +10,14 @@ namespace RhinoInside.Revit.External.DB.Schemas
   {
     static readonly ParameterId empty = new ParameterId();
     public static new ParameterId Empty => empty;
+
+    public string LocalizedLabel =>
+#if REVIT_2022
+      Autodesk.Revit.DB.LabelUtils.GetLabelForBuiltInParameter(this);
+#else
+      Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInParameter) this);
+#endif
+
 
     public ParameterId() { }
     public ParameterId(string id) : base(id)
