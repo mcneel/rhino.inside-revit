@@ -12,19 +12,24 @@ group: Deployment & Configs
 
 ### RC 
 
-- Added 'Sheet Revisions' component.
-- Moved 'Add Revision' and 'Query Revisions' to the View panel.
-- Added 'Add Detail Group' component.
-- Now 'Create Group Type' works across documents.
-- Added 'Graphic Overrides' component.
-- Added 'Category Graphic Overrides' component.
-- Added 'Element Graphic Overrides' component.
-- Added 'Filter Graphic Overrides' component.
-- Added 'View Filters' component.
-- Added 'Query Fill Patterns' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.11 RC2" version="v1.11.8402.17166" pre_release=true time="01/03/2023" %}
+
+![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
+
+- Added {% include ltr/comp.html uuid='2120c0fb' %} component.
+- Moved {% include ltr/comp.html uuid='221e53a6' %} and {% include ltr/comp.html uuid='8ead987d' %} to the View panel.
+- Added {% include ltr/comp.html uuid='cc7790a0' %} component.
+- Now {% include ltr/comp.html uuid='39e42448' %} works across documents.
+- Added {% include ltr/comp.html uuid='bfd4a970' %} component.
+- Added {% include ltr/comp.html uuid='d296f72f' %} component.
+- Added {% include ltr/comp.html uuid='6f5e3619' %} component.
+- Added {% include ltr/comp.html uuid='1a137425' %} component.
+- Added {% include ltr/comp.html uuid='61812ade' %} component.
+- Added {% include ltr/comp.html uuid='71c06438' %} component.
 
 {% include ltr/release-header.html title="v1.11 RC1" version="v1.11.8390.7504" pre_release=true time="12/20/2022" %}
 
