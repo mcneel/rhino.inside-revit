@@ -174,7 +174,20 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.BuiltInParameter bip: parameterId = new ARDB.ElementId(bip); break;
         case ARDB.ElementId id: parameterId = id; break;
         case ARDB.Parameter parameter: return SetParameter(parameter);
-        case string n: name = n; return true;
+        case string n:
+          if (ERDB.Schemas.ParameterId.IsParameterId(n))
+          {
+            parameterId = new ARDB.ElementId(new ERDB.Schemas.ParameterId(n));
+            break;
+          }
+
+          if (ElementNaming.IsValidName(n))
+          {
+            name = n;
+            return true;
+          }
+
+          return false;
         case Guid g: guid = g; return true;
       }
 
@@ -395,6 +408,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_ItemDescription
     System.Drawing.Bitmap IGH_ItemDescription.GetTypeIcon(System.Drawing.Size size) => Properties.Resources.Parameter;
+
     string IGH_ItemDescription.Identity
     {
       get
@@ -416,11 +430,11 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+
     string IGH_ItemDescription.Description =>
       Id is object && Id.TryGetBuiltInParameter(out var bip) ?
       ((External.DB.Schemas.ParameterId) bip).Namespace :
       DataType?.Label;
-
     #endregion
 
     #region Properties
@@ -592,13 +606,7 @@ namespace RhinoInside.Revit.GH.Types
     ERDB.Schemas.ParameterGroup group;
     public ERDB.Schemas.ParameterGroup Group
     {
-      get
-      {
-        if (IsReferencedData)
-          return Value?.GetDefinition()?.GetGroupType();
-        else
-          return group;
-      }
+      get => group ?? (group = Value?.GetDefinition()?.GetGroupType());
       set
       {
         if (IsReferencedData)
@@ -606,14 +614,15 @@ namespace RhinoInside.Revit.GH.Types
           if (Id.IsBuiltInId()) throw new InvalidOperationException("This operation is not supported on built-in parameters");
           Value?.GetDefinition()?.SetGroupType(value);
         }
-        else group = value;
+
+        group = value;
       }
     }
 
     bool? visible;
     public bool? Visible
     {
-      get => Value?.GetDefinition()?.Visible ?? visible;
+      get => visible ?? (visible = Value?.GetDefinition()?.Visible);
       set
       {
         if (IsReferencedData) throw new InvalidOperationException();
@@ -902,17 +911,17 @@ namespace RhinoInside.Revit.GH.Types
       //  switch (parameter.StorageType)
       //  {
       //    case ARDB.StorageType.Integer: dataType = External.DB.Schemas.SpecType.Int.Integer; break;
-      //    case ARDB.StorageType.Double: dataType = External.DB.Schemas.SpecType.Measurable.Number; break;
-      //    case ARDB.StorageType.String: dataType = External.DB.Schemas.SpecType.String.Text; break;
+      //    case ARDB.StorageType.Double:  dataType = External.DB.Schemas.SpecType.Measurable.Number; break;
+      //    case ARDB.StorageType.String:  dataType = External.DB.Schemas.SpecType.String.Text; break;
       //    case ARDB.StorageType.ElementId:
       //      if (parameter.HasValue)
       //      {
       //        if (Document.GetElement(parameter.AsElementId()) is ARDB.Element value)
-      //        if (value.Category is ARDB.Category category)
-      //        if (category.Id.TryGetBuiltInCategory(out var categoryId))
-      //        {
-      //          dataType = (External.DB.Schemas.CategoryId) categoryId;
-      //        }
+      //          if (value.Category is ARDB.Category category)
+      //            if (category.Id.TryGetBuiltInCategory(out var categoryId))
+      //            {
+      //              dataType = (External.DB.Schemas.CategoryId) categoryId;
+      //            }
       //      }
       //      break;
       //  }
