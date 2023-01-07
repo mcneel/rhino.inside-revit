@@ -266,7 +266,7 @@ namespace RhinoInside.Revit.GH.Types
         if (IsEmpty) return "<empty>";
 
         if (EDBS.CategoryId.IsCategoryId(Value, out var _))
-          return "Family Type";
+          return $"Family Type : {Value.Label}";
 
         return Value.Label;
       }
@@ -314,21 +314,22 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case ARDB.ForgeTypeId f: Value = f; return true;
+          case ARDB.ForgeTypeId f:    Value = f; return true;
 #else
-          case int i: Value = (EDBS.SpecType) (ARDB.ParameterType) i; return true;
-          case ARDB.ParameterType u: Value = (EDBS.SpecType) u; return true;
-          case ARDB.UnitType t: Value = (EDBS.SpecType) t; return true;
+          case ARDB.ParameterType u:  Value = (EDBS.SpecType) u; return true;
+          case ARDB.UnitType t:       Value = (EDBS.SpecType) t; return true;
 #endif
           case EDBS.DataType s:
-            if (EDBS.DataType.IsNullOrEmpty(s)) { Value = EDBS.DataType.Empty; return true; }
-            if (!EDBS.SpecType.IsSpecType(s, out var id)) break;
-            Value = id; return true;
+            if (EDBS.DataType.IsNullOrEmpty(s))               { Value = EDBS.DataType.Empty; return true; }
+            if (EDBS.SpecType.IsSpecType(s, out var sid))     { Value = sid; return true; }
+            if (EDBS.CategoryId.IsCategoryId(s, out var cid)) { Value = cid; return true; }
+            break;
 
           case string t:
-            if (string.IsNullOrEmpty(t)) { Value = EDBS.DataType.Empty; return true; }
-            if (!EDBS.SpecType.IsSpecType(t)) break;
-            Value = new EDBS.SpecType(t); return true;
+            if (string.IsNullOrEmpty(t))          { Value = EDBS.DataType.Empty; return true; }
+            if (EDBS.SpecType.IsSpecType(t))      { Value = new EDBS.SpecType(t); return true; }
+            if (EDBS.CategoryId.IsCategoryId(t))  { Value = new EDBS.CategoryId(t); return true; }
+            break;            
         }
       }
       catch (ArgumentException) { return false; }
