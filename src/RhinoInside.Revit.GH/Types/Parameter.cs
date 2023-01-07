@@ -472,8 +472,13 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    static readonly Dictionary<ARDB.BuiltInParameter, ERDB.Schemas.DataType> BuiltInParametersTypes =
-      new Dictionary<ARDB.BuiltInParameter, ERDB.Schemas.DataType>();
+    internal static readonly Dictionary<ARDB.BuiltInParameter, ERDB.Schemas.DataType> BuiltInParametersTypes = new Dictionary<ARDB.BuiltInParameter, ERDB.Schemas.DataType>()
+    {
+      { ARDB.BuiltInParameter.RASTER_SYMBOL_WIDTH,  ERDB.Schemas.SpecType.Measurable.Length },
+      { ARDB.BuiltInParameter.RASTER_SYMBOL_HEIGHT, ERDB.Schemas.SpecType.Measurable.Length },
+      { ARDB.BuiltInParameter.RASTER_SHEETWIDTH,    ERDB.Schemas.SpecType.Measurable.Length },
+      { ARDB.BuiltInParameter.RASTER_SHEETHEIGHT,   ERDB.Schemas.SpecType.Measurable.Length }
+    };
 
     ERDB.Schemas.DataType dataType;
     public ERDB.Schemas.DataType DataType
@@ -493,9 +498,10 @@ namespace RhinoInside.Revit.GH.Types
                   break;
 
                 case ARDB.StorageType.Double:
+
                   var categoriesWhereDefined = doc.GetBuiltInCategoriesWithParameters().
                     Select(bic => new ARDB.ElementId(bic)).
-                    Where(cid => ARDB.TableView.GetAvailableParameters(doc, cid).Contains(Id)).
+                    Where(cid => new ReadOnlySortedElementIdCollection(ARDB.TableView.GetAvailableParameters(doc, cid)).Contains(Id)).
                     ToArray();
 
                   // Look into a Schedule table
@@ -561,11 +567,10 @@ namespace RhinoInside.Revit.GH.Types
                   break;
 
                 case ARDB.StorageType.String:
-                  if (builtInParameter.ToString().EndsWith("_COMMENTS"))
+                  if (builtInParameter.ToString().EndsWith("_URL"))
                     dataType = ERDB.Schemas.SpecType.String.Url;
-                  else if (builtInParameter.ToString().EndsWith("_URL"))
-                    dataType = ERDB.Schemas.SpecType.String.Url;
-                  else dataType = ERDB.Schemas.SpecType.String.Text;
+                  else
+                    dataType = ERDB.Schemas.SpecType.String.Text;
                   break;
               }
 
@@ -810,28 +815,28 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Id is object && Id.TryGetBuiltInParameter(out var _))
-          return External.DB.ParameterClass.BuiltIn;
+          return ERDB.ParameterClass.BuiltIn;
 
         if (!IsReferencedData)
         {
-          if (GUID.HasValue) return External.DB.ParameterClass.Shared;
-          return External.DB.ParameterClass.Invalid;
+          if (GUID.HasValue) return ERDB.ParameterClass.Shared;
+          return ERDB.ParameterClass.Invalid;
         }
 
         switch (Value)
         {
-          case ARDB.GlobalParameter _: return External.DB.ParameterClass.Global;
-          case ARDB.SharedParameterElement _: return External.DB.ParameterClass.Shared;
+          case ARDB.GlobalParameter _: return ERDB.ParameterClass.Global;
+          case ARDB.SharedParameterElement _: return ERDB.ParameterClass.Shared;
           case ARDB.ParameterElement project:
             switch (project.get_Parameter(ARDB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY).AsInteger())
-            {
-              case 0: return External.DB.ParameterClass.Family;
-              case 1: return External.DB.ParameterClass.Project;
+            { 
+              case 0: return ERDB.ParameterClass.Family;
+              case 1: return ERDB.ParameterClass.Project;
             }
             break;
         }
 
-        return External.DB.ParameterClass.Invalid;
+        return ERDB.ParameterClass.Invalid;
       }
     }
 
@@ -839,7 +844,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (!IsReferencedData) return External.DB.ParameterScope.Unknown;
+        if (!IsReferencedData) return ERDB.ParameterScope.Unknown;
 
         if (Document is ARDB.Document doc)
         {
@@ -852,30 +857,30 @@ namespace RhinoInside.Revit.GH.Types
               default;
 
             return familyParameter is null ?
-              External.DB.ParameterScope.Unknown :
+              ERDB.ParameterScope.Unknown :
               familyParameter.IsInstance ?
-              External.DB.ParameterScope.Instance :
-              External.DB.ParameterScope.Type;
+              ERDB.ParameterScope.Instance :
+              ERDB.ParameterScope.Type;
           }
           else switch (Value)
           {
-            case ARDB.GlobalParameter _: return External.DB.ParameterScope.Global;
+            case ARDB.GlobalParameter _: return ERDB.ParameterScope.Global;
             case ARDB.ParameterElement parameterElement:
               var definition = parameterElement.GetDefinition();
               if (!Id.IsBuiltInId())
               {
                 switch (doc.ParameterBindings.get_Item(definition))
                 {
-                  case ARDB.InstanceBinding _: return External.DB.ParameterScope.Instance;
-                  case ARDB.TypeBinding _: return External.DB.ParameterScope.Type;
+                  case ARDB.InstanceBinding _:  return ERDB.ParameterScope.Instance;
+                  case ARDB.TypeBinding _:      return ERDB.ParameterScope.Type;
                 }
               }
 
-              return External.DB.ParameterScope.Unknown;
+              return ERDB.ParameterScope.Unknown;
           }
         }
 
-        return External.DB.ParameterScope.Unknown;
+        return ERDB.ParameterScope.Unknown;
       }
     }
     #endregion

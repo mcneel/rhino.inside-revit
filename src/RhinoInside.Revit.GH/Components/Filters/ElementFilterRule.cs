@@ -30,8 +30,6 @@ namespace RhinoInside.Revit.GH.Components.Filters
       manager.AddParameter(new Parameters.FilterRule(), "Rule", "R", string.Empty, GH_ParamAccess.item);
     }
 
-    static readonly Dictionary<ARDB.BuiltInParameter, EDBS.DataType> BuiltInParametersTypes = new Dictionary<ARDB.BuiltInParameter, EDBS.DataType>();
-
     internal static bool TryGetParameterDefinition(ARDB.Document doc, ARDB.ElementId id, out ARDB.StorageType storageType, out EDBS.DataType dataType)
     {
       if (id.TryGetBuiltInParameter(out var builtInParameter))
@@ -46,74 +44,87 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
         if (storageType == ARDB.StorageType.Double)
         {
-          if (BuiltInParametersTypes.TryGetValue(builtInParameter, out dataType))
+          if (Types.ParameterKey.BuiltInParametersTypes.TryGetValue(builtInParameter, out dataType))
             return true;
 
           var categoriesWhereDefined = doc.GetBuiltInCategoriesWithParameters().
             Select(bic => new ARDB.ElementId(bic)).
-            Where(cid => ARDB.TableView.GetAvailableParameters(doc, cid).Contains(id)).
+            Where(cid => new ReadOnlySortedElementIdCollection(ARDB.TableView.GetAvailableParameters(doc, cid)).Contains(id)).
             ToArray();
 
-          // Look into a Schedule table
-          using (var scope = External.DB.DisposableScope.RollBackScope(doc))
+          if (categoriesWhereDefined.Length > 0)
           {
-            foreach (var categoryId in categoriesWhereDefined)
+            // Look into a Schedule table
+            using (var scope = doc.RollBackScope())
             {
-              var schedule = default(ARDB.ViewSchedule);
-              if (categoryId.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Areas)
+              foreach (var categoryId in categoriesWhereDefined)
               {
-                using (var collector = new ARDB.FilteredElementCollector(doc))
+                var schedule = default(ARDB.ViewSchedule);
+                if (ARDB.ViewSchedule.IsValidCategoryForSchedule(categoryId))
                 {
-                  var areaSchemeId = collector.OfClass(typeof(ARDB.AreaScheme)).FirstElementId();
-                  schedule = ARDB.ViewSchedule.CreateSchedule(doc, categoryId, areaSchemeId);
+                  if (categoryId.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Areas)
+                  {
+                    using (var collector = new ARDB.FilteredElementCollector(doc))
+                    {
+                      var areaSchemeId = collector.OfClass(typeof(ARDB.AreaScheme)).FirstElementId();
+                      schedule = ARDB.ViewSchedule.CreateSchedule(doc, categoryId, areaSchemeId);
+                    }
+                  }
+                  else schedule = ARDB.ViewSchedule.CreateSchedule(doc, categoryId);
+                }
+                else if (ARDB.ViewSchedule.IsValidCategoryForMaterialTakeoff(categoryId))
+                {
+                  schedule = ARDB.ViewSchedule.CreateMaterialTakeoff(doc, categoryId);
+                }
+
+                if (schedule is object)
+                {
+                  try
+                  {
+                    using (var field = schedule.Definition.AddField(ARDB.ScheduleFieldType.Instance, id))
+                      dataType = field.GetDataType();
+
+                    Types.ParameterKey.BuiltInParametersTypes.Add(builtInParameter, dataType);
+                    return true;
+                  }
+                  catch (Autodesk.Revit.Exceptions.ArgumentsInconsistentException) { }
+                  try
+                  {
+                    using (var field = schedule.Definition.AddField(ARDB.ScheduleFieldType.ElementType, id))
+                      dataType = field.GetDataType();
+
+                    Types.ParameterKey.BuiltInParametersTypes.Add(builtInParameter, dataType);
+                    return true;
+                  }
+                  catch (Autodesk.Revit.Exceptions.ArgumentsInconsistentException) { }
                 }
               }
-              else schedule = ARDB.ViewSchedule.CreateSchedule(doc, categoryId);
-
-              try
-              {
-                using (var field = schedule.Definition.AddField(ARDB.ScheduleFieldType.Instance, id))
-                  dataType = field.GetDataType();
-
-                BuiltInParametersTypes.Add(builtInParameter, dataType);
-                return true;
-              }
-              catch (Autodesk.Revit.Exceptions.ArgumentsInconsistentException) { }
-              try
-              {
-                using (var field = schedule.Definition.AddField(ARDB.ScheduleFieldType.ElementType, id))
-                  dataType = field.GetDataType();
-
-                BuiltInParametersTypes.Add(builtInParameter, dataType);
-                return true;
-              }
-              catch (Autodesk.Revit.Exceptions.ArgumentsInconsistentException) { }
             }
-          }
 
-          // Look into existig elements
-          if (dataType is null)
-          {
-            using (var collector = new ARDB.FilteredElementCollector(doc))
+            // Look into existig elements
+            if (dataType is null)
             {
-              using
-              (
-                var filteredCollector = categoriesWhereDefined.Length == 0 ?
-                collector.WherePasses(new ARDB.ElementClassFilter(typeof(ARDB.ParameterElement), false)) :
-                categoriesWhereDefined.Length > 1 ?
-                  collector.WherePasses(new ARDB.ElementMulticategoryFilter(categoriesWhereDefined)) :
-                  collector.WherePasses(new ARDB.ElementCategoryFilter(categoriesWhereDefined[0]))
-              )
+              using (var collector = new ARDB.FilteredElementCollector(doc))
               {
-                foreach (var element in filteredCollector)
+                using
+                (
+                  var filteredCollector = categoriesWhereDefined.Length == 0 ?
+                  collector.WherePasses(new ARDB.ElementClassFilter(typeof(ARDB.ParameterElement), inverted: true)) :
+                  categoriesWhereDefined.Length > 1 ?
+                    collector.WherePasses(new ARDB.ElementMulticategoryFilter(categoriesWhereDefined)) :
+                    collector.WherePasses(new ARDB.ElementCategoryFilter(categoriesWhereDefined[0]))
+                )
                 {
-                  var parameter = element.get_Parameter(builtInParameter);
-                  if (parameter is null)
-                    continue;
+                  foreach (var element in filteredCollector)
+                  {
+                    var parameter = element.get_Parameter(builtInParameter);
+                    if (parameter is null)
+                      continue;
 
-                  dataType = parameter.Definition.GetDataType();
-                  BuiltInParametersTypes.Add(builtInParameter, dataType);
-                  return true;
+                    dataType = parameter.Definition.GetDataType();
+                    Types.ParameterKey.BuiltInParametersTypes.Add(builtInParameter, dataType);
+                    return true;
+                  }
                 }
               }
             }
