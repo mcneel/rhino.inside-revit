@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         new Parameters.ParameterKey()
         {
           Name = _Definition_,
-          NickName = "P",
+          NickName = _Definition_.Substring(0,1),
           Description = $"Parameter {_Definition_}",
         }
       ),

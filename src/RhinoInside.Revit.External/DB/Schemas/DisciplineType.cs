@@ -1,15 +1,21 @@
 using System;
-using System.Collections.Generic;
 
 namespace RhinoInside.Revit.External.DB.Schemas
 {
   /// <summary>
-  /// Represents an Autodesk.Revit.DB.UnitGroup
+  /// Represents a Revit Discipline
   /// </summary>
   public partial class DisciplineType : DataType
   {
     static readonly DisciplineType empty = new DisciplineType();
     public static new DisciplineType Empty => empty;
+
+    public string LocalizedLabel =>
+#if REVIT_2022
+      Autodesk.Revit.DB.LabelUtils.GetLabelForDiscipline(this);
+#else
+      Label;
+#endif
 
     public DisciplineType() { }
     public DisciplineType(string id) : base(id)

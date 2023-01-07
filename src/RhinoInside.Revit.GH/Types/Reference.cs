@@ -32,10 +32,17 @@ namespace RhinoInside.Revit.GH.Types
     public override string ToString()
     {
       var valid = IsValid;
-      string Invalid = Id == ARDB.ElementId.InvalidElementId ?
-        (string.IsNullOrWhiteSpace(ReferenceUniqueId) ? string.Empty : "Unresolved ") :
-        valid ? string.Empty :
-        (IsReferencedData ? "❌ Deleted " : "⚠ Invalid ");
+      string Invalid = string.Empty;
+      if (!valid)
+      {
+        if (IsReferencedData)
+        {
+          if (IsReferencedDataLoaded)
+            Invalid = Id.IsBuiltInId() ? "Unknown " : "⚠ Invalid ";
+          else
+            Invalid = "❌ Deleted ";
+        }
+      }
       string TypeName = ((IGH_Goo) this).TypeName;
       string InstanceName = DisplayName;
 
