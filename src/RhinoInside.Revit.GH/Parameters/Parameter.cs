@@ -415,7 +415,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (ParameterGroup is object && ParameterGroup != EDBS.ParameterGroup.Empty)
         Name = $"{ParameterGroup.Label} : {ParameterName}";
       else
-        Name = ParameterName;
+        Name = $"Other : {ParameterName}";
 
       NickName = Name;
       MutableNickName = false;
