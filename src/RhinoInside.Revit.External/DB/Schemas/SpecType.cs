@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static SpecType Custom => new SpecType("autodesk.spec:custom-1.0.0");
 
     public string LocalizedLabel =>
-#if REVIT_2022
+#if REVIT_2021
       Autodesk.Revit.DB.LabelUtils.GetLabelForSpec(this);
 #else
       Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.UnitType) this);
