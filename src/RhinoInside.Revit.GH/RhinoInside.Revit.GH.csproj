@@ -440,8 +440,6 @@
     <Compile Include="Types\Railing.cs" />
     <Compile Include="Types\Reference.cs" />
     <Compile Include="Types\DataType.cs" />
-    <Compile Include="Types\ScopeBox.cs" />
-    <Compile Include="Types\SectionBox.cs" />
     <Compile Include="Types\Sketch.cs" />
     <Compile Include="Types\SketchPlane.cs" />
     <Compile Include="Types\Material.cs" />
@@ -451,6 +449,8 @@
     <Compile Include="Types\ThermalAsset.cs" />
     <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\TopographySurface.cs" />
+    <Compile Include="Types\Views\ScopeBox.cs" />
+    <Compile Include="Types\Views\SectionBox.cs" />
     <Compile Include="Types\Views\View.cs" />
     <Compile Include="Types\Views\View3D.cs" />
     <Compile Include="Types\Views\ViewDrafting.cs" />
