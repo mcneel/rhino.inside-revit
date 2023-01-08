@@ -390,9 +390,6 @@
     <Compile Include="Parameters\Views\ViewSection.cs" />
     <Compile Include="Parameters\Views\ViewSheet.cs" />
     <Compile Include="Parameters\Workset.cs" />
-    <Compile Include="Types\AppearanceAsset.cs" />
-    <Compile Include="Types\AssetPropertyDouble1DMap.cs" />
-    <Compile Include="Types\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Types\BasePoint.cs" />
     <Compile Include="Types\Ceiling.cs" />
     <Compile Include="Types\CombinableElement.cs" />
@@ -427,6 +424,13 @@
     <Compile Include="Types\ImageInstance.cs" />
     <Compile Include="Types\Instance.cs" />
     <Compile Include="Types\InstanceElement.cs" />
+    <Compile Include="Types\Materials\AppearanceAsset.cs" />
+    <Compile Include="Types\Materials\AssetPropertyDouble1DMap.cs" />
+    <Compile Include="Types\Materials\AssetPropertyDouble4DMap.cs" />
+    <Compile Include="Types\Materials\Material.cs" />
+    <Compile Include="Types\Materials\StructuralAsset.cs" />
+    <Compile Include="Types\Materials\TextureData.cs" />
+    <Compile Include="Types\Materials\ThermalAsset.cs" />
     <Compile Include="Types\ObjectStyles\Category.cs" />
     <Compile Include="Types\ObjectStyles\FillPatternElement.cs" />
     <Compile Include="Types\ObjectStyles\LinePatternElement.cs" />
@@ -442,11 +446,7 @@
     <Compile Include="Types\DataType.cs" />
     <Compile Include="Types\Sketch.cs" />
     <Compile Include="Types\SketchPlane.cs" />
-    <Compile Include="Types\Material.cs" />
     <Compile Include="Types\StructuralMember.cs" />
-    <Compile Include="Types\StructuralAsset.cs" />
-    <Compile Include="Types\TextureData.cs" />
-    <Compile Include="Types\ThermalAsset.cs" />
     <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\TopographySurface.cs" />
     <Compile Include="Types\Views\ScopeBox.cs" />
