@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
@@ -57,28 +58,29 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // grab input
-      ARDB.Wall wallInstance = default;
-      if (!DA.GetData("Curtain Wall", ref wallInstance))
-        return;
+      if (!Params.GetData(DA, "Curtain Wall", out Types.Wall wall, x => x.IsValid)) return;
 
       // only process curtain walls
-      if (wallInstance.WallType.Kind == ARDB.WallKind.Curtain)
+      if (wall.Value.WallType.Kind == ARDB.WallKind.Curtain)
       {
-        DA.SetData("Curtain Grid", new Types.CurtainGrid(wallInstance, wallInstance.CurtainGrid));
+        DA.SetData("Curtain Grid", wall.CurtainGrids?.FirstOrDefault());
 
         // determine if curtain wall is embeded in another wall
         // find all the wall elements that are intersecting the bbox of this wall
-        var bbf = new ARDB.BoundingBoxIntersectsFilter(wallInstance.GetOutline());
-        var walls = new ARDB.FilteredElementCollector(wallInstance.Document).OfClass(typeof(ARDB.Wall)).WherePasses(bbf);
-        // ask for embedded wall inserts from these instances
-        foreach (ARDB.Wall wall in walls)
+        using (var collector = new ARDB.FilteredElementCollector(wall.Document))
         {
-          var embeddedWalls = wall.FindInserts(addRectOpenings: false, includeShadows: false, includeEmbeddedWalls: true, includeSharedEmbeddedInserts: false);
-          if (embeddedWalls.Contains(wallInstance.Id))
+          var embededWalls = collector.OfClass(typeof(ARDB.Wall)).
+            WherePasses(new ARDB.BoundingBoxIntersectsFilter(wall.Value.GetOutline()));
+
+          // ask for embedded wall inserts from these instances
+          foreach (ARDB.Wall embededWall in embededWalls)
           {
-            DA.SetData("Host Wall", Types.Wall.FromElement(wall));
-            break;
+            var embeddedWalls = embededWall.FindInserts(addRectOpenings: false, includeShadows: false, includeEmbeddedWalls: true, includeSharedEmbeddedInserts: false);
+            if (embeddedWalls.Contains(embededWall.Id))
+            {
+              DA.SetData("Host Wall", Types.Wall.FromElement(embededWall));
+              break;
+            }
           }
         }
       }

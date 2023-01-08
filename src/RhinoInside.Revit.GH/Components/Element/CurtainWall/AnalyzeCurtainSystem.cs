@@ -45,16 +45,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // grab input
-      ARDB.CurtainSystem curtainSystemInstance = default;
-      if (!DA.GetData("Curtain System", ref curtainSystemInstance))
-        return;
+      if (!Params.GetData(DA, "Curtain System", out Types.CurtainSystem curtainSystem, x => x.IsValid)) return;
 
-      if (curtainSystemInstance.CurtainGrids != null)
-      {
-        var cGrids = curtainSystemInstance.CurtainGrids.Cast<ARDB.CurtainGrid>();
-        DA.SetDataList("Curtain Grids", cGrids.Select(x => new Types.CurtainGrid(curtainSystemInstance, x))) ;
-      }
+      DA.SetDataList("Curtain Grids", curtainSystem?.CurtainGrids);
     }
   }
 }

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
-using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using Rhino;
 
   [Kernel.Attributes.Name("Curtain System")]
   public class CurtainSystem : HostObject, ICurtainGridsAccess
@@ -18,30 +18,39 @@ namespace RhinoInside.Revit.GH.Types
     public CurtainSystem() { }
     public CurtainSystem(ARDB.CurtainSystem system) : base(system) { }
 
-    #region Location
-    public override Plane Location
+    #region IGH_CurtainGridsAccess
+    public IList<CurtainGrid> CurtainGrids => Value is ARDB.CurtainSystem system ?
+      system.CurtainGrids?.Cast<ARDB.CurtainGrid>().Select((x, i) => new CurtainGrid(this, x, i)).ToArray() :
+      default;
+    #endregion
+
+    #region Properties
+    protected override void ResetValue()
+    {
+      using (_PolySurface) _PolySurface = null;
+      using (_Mesh) _Mesh = null;
+
+      base.ResetValue();
+    }
+    public override Plane Location => base.Location;
+
+    Brep _PolySurface;
+    public override Brep PolySurface => _PolySurface ?? (_PolySurface = Brep.MergeBreps(CurtainGrids.Select(x => x.PolySurface), RhinoMath.UnsetValue));
+
+    Mesh _Mesh;
+    public override Mesh Mesh
     {
       get
       {
-        if (Value is ARDB.CurtainSystem system && system.Location is ARDB.LocationCurve curveLocation)
+        if (_Mesh is null && CurtainGrids is IList<CurtainGrid> curtainGrids)
         {
-          var start = curveLocation.Curve.GetEndPoint(ERDB.CurveEnd.Start).ToPoint3d();
-          var end   = curveLocation.Curve.GetEndPoint(ERDB.CurveEnd.End).ToPoint3d();
-          var direction  = end - start;
-          var origin = start + (direction * 0.5);
-          var perp = direction.PerpVector();
-          return new Plane(origin, direction, perp);
+          _Mesh = new Mesh();
+          foreach (var curtainGrid in curtainGrids)
+            _Mesh.Append(curtainGrid.Mesh);
         }
-
-        return base.Location;
+        return _Mesh; 
       }
     }
-    #endregion
-
-    #region IGH_CurtainGridsAccess
-    public IList<CurtainGrid> CurtainGrids => Value is ARDB.CurtainSystem system ?
-      system.CurtainGrids?.Cast<ARDB.CurtainGrid>().Select(x => new CurtainGrid(system, x)).ToArray() :
-      default;
     #endregion
   }
 }

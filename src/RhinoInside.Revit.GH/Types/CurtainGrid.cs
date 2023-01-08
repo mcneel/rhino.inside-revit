@@ -10,15 +10,26 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using Eto.Forms;
+  using External.DB;
+  using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Curtain Grid")]
   public class CurtainGrid : DocumentObject,
     IGH_GeometricGoo,
-    IGH_PreviewData
+    IGH_PreviewData,
+    IHostObjectAccess
   {
+    public new ARDB.CurtainGrid Value => base.Value as ARDB.CurtainGrid;
+    public HostObject Host { get; private set; }
+    int GridIndex = -1;
+
     public CurtainGrid() : base() { }
-    public CurtainGrid(ARDB.HostObject host, ARDB.CurtainGrid value) : base(host.Document, value)
-    { }
+    public CurtainGrid(HostObject host, ARDB.CurtainGrid value, int gridIndex) : base(host.Document, value)
+    {
+      Host = host;
+      GridIndex = gridIndex;
+    }
 
     #region DocumentObject
     public override string DisplayName
@@ -44,20 +55,42 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_Goo
     public override bool CastTo<Q>(out Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
+      target = default;
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
       {
-        target = (Q) (object) (Mesh is Mesh mesh ? new GH_Mesh(mesh) : default);
+        target = (Q) (object) new GH_Plane(Location);
         return true;
       }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
+      {
+        var mesh = Mesh;
+        if (mesh is null) return false;
+
+        target = (Q) (object) new GH_Mesh(mesh);
+        return target is object;
+      }
+
+      //if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
+      //{
+      //  var trimmedSurface = TrimmedSurface;
+      //  if (trimmedSurface is null) return false;
+
+      //  target = (Q) (object) new GH_Surface(trimmedSurface);
+      //  return target is object;
+      //}
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
       {
-        target = (Q) (object) (Brep is Brep brep ? new GH_Brep(brep) : default);
-        return true;
+        var polySurface = PolySurface;
+        if (polySurface is null) return false;
+
+        target = (Q) (object) new GH_Brep(polySurface);
+        return target is object;
       }
 
-      target = default;
-      return false;
+      return base.CastTo(out target);
     }
     #endregion
 
@@ -209,7 +242,25 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region Properties
+    #region Geometry
+    /// <summary>
+    /// <see cref="Rhino.Geometry.Plane"/> where this element is located.
+    /// </summary>
+    public Plane Location
+    {
+      get
+      {
+        if (TrimmedSurface is Brep trimmedSurface && trimmedSurface.Faces.Count == 1)
+        {
+          var surface = trimmedSurface.Faces[0];
+          if (surface.FrameAt(surface.Domain(0).Mid, surface.Domain(1).Mid, out var location))
+            return location;
+        }
+
+        return NaN.Plane;
+      }
+    }
+
     static readonly PolyCurve[] EmptyCurves = new PolyCurve[0];
 
     PolyCurve[] planarCurves;
@@ -233,40 +284,6 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return planarCurves;
-      }
-    }
-
-    public Mesh Mesh
-    {
-      get
-      {
-        if (Value is ARDB.CurtainGrid)
-        {
-          var mp = new MeshingParameters(0.0, GeometryTolerance.Model.ShortCurveTolerance)
-          {
-            Tolerance = GeometryTolerance.Model.VertexTolerance,
-            SimplePlanes = true,
-            JaggedSeams = true,
-            RefineGrid = false,
-            GridMinCount = 1,
-            GridMaxCount = 1,
-            GridAspectRatio = 0
-          };
-
-          var mesh = new Mesh();
-          mesh.Append(PlanarCurves.Select
-          (
-            x =>
-            {
-              var m = Mesh.CreateFromPlanarBoundary(x, mp, mp.Tolerance);
-              m.MergeAllCoplanarFaces(GeometryTolerance.Model.VertexTolerance, GeometryTolerance.Model.AngleTolerance);
-              return m;
-            })
-          );
-          return mesh;
-        }
-
-        return default;
       }
     }
 
@@ -294,37 +311,118 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Brep Brep
+    public Brep TrimmedSurface
     {
       get
       {
-        if (Value is ARDB.CurtainGrid)
+        if (Value is ARDB.CurtainGrid curtainGrid)
         {
-          var brep = Brep.MergeBreps
-          (
-            PlanarCurves.SelectMany
-            (
-              x =>
-              Brep.CreatePlanarBreps(x, GeometryTolerance.Model.VertexTolerance)
-            ),
-            RhinoMath.UnsetValue
-          );
-          if (brep?.IsValid == false)
-            brep.Repair(GeometryTolerance.Model.VertexTolerance);
+          var shells = new List<Brep>();
+          using (Document.RollBackScope())
+          {
+            // Looks like an additional scope is necessary here to avoid a memory corruption!?!?
+            using (Document.RollBackScope())
+            {
+              // We apply a type that has spacing layout set to None to generate just one Cell
+              {
+                var type = Host.Type.Value;
+                type = type.Duplicate(Guid.NewGuid().ToString()) as ARDB.HostObjAttributes;
+                if (type is ARDB.WallType)
+                  type.get_Parameter(ARDB.BuiltInParameter.AUTO_PANEL_WALL).Update(ElementIdExtension.InvalidElementId);
+                else
+                  type.get_Parameter(ARDB.BuiltInParameter.AUTO_PANEL).Update(ElementIdExtension.InvalidElementId);
+                type.get_Parameter(ARDB.BuiltInParameter.SPACING_LAYOUT_U).Update(0);
+                type.get_Parameter(ARDB.BuiltInParameter.SPACING_LAYOUT_V).Update(0);
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_VERT)?.Update(ElementIdExtension.InvalidElementId);
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_VERT)?.Update(ElementIdExtension.InvalidElementId);
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_HORIZ)?.Update(ElementIdExtension.InvalidElementId);
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_HORIZ)?.Update(ElementIdExtension.InvalidElementId);
+                Host.Type = ElementType.FromValue(type) as ElementType;
+              }
 
-          return brep;
+              var linesToDelete = new List<ARDB.ElementId>(curtainGrid.NumULines * curtainGrid.NumVLines);
+              foreach (var uId in curtainGrid.GetUGridLineIds())
+              {
+                var u = Document.GetElement(uId) as ARDB.CurtainGridLine;
+                u.get_Parameter(ARDB.BuiltInParameter.GRIDLINE_SPEC_STATUS)?.Update(0);
+                u.Lock = false;
+                linesToDelete.Add(uId);
+              }
+
+              foreach (var vId in curtainGrid.GetVGridLineIds())
+              {
+                var v = Document.GetElement(vId) as ARDB.CurtainGridLine;
+                v.get_Parameter(ARDB.BuiltInParameter.GRIDLINE_SPEC_STATUS)?.Update(0);
+                v.Lock = false;
+                linesToDelete.Add(vId);
+              }
+
+              Document.Delete(linesToDelete);
+              Document.Regenerate();
+
+              var identityGrid = (Host as ICurtainGridsAccess).CurtainGrids[GridIndex];
+              foreach (var cell in identityGrid.CurtainCells)
+              {
+                if (cell.PolySurface is Brep brep)
+                  shells.Add(brep);
+              }
+            }
+          }
+
+          return shells.Count == 1 ? shells[0] : Brep.MergeBreps(shells, RhinoMath.UnsetValue);
         }
 
         return default;
       }
     }
 
-    public IEnumerable<Curve> GridLineU => Value is ARDB.CurtainGrid grid ?
-      grid.GetUGridLineIds().Select(x => (Document.GetElement(x) as ARDB.CurtainGridLine).FullCurve.ToCurve()) :
+    public Brep PolySurface
+    {
+      get
+      {
+        if (Value is ARDB.CurtainGrid curtainGrid)
+        {
+          var cells = CurtainCells.Select(x => x.PolySurface).OfType<Brep>().ToArray();
+          var merged = Brep.MergeBreps(cells, RhinoMath.UnsetValue);
+
+          if (merged?.IsValid is false)
+            merged.Repair(GeometryDecoder.Tolerance.VertexTolerance);
+
+          return merged;
+        }
+
+        return default;
+      }
+    }
+
+    public Mesh Mesh
+    {
+      get
+      {
+        if (CurtainCells is IEnumerable<CurtainCell> curtainCells)
+        {
+          var mesh = new Mesh();
+          mesh.Append(curtainCells.Select(x => x.Mesh).OfType<Mesh>());
+          return mesh;
+        }
+
+        return default;
+      }
+    }
+    #endregion
+
+    #region Properties
+    public IEnumerable<CurtainGridLine> UGridLines => Value is ARDB.CurtainGrid grid ?
+      grid.GetUGridLineIds().Select(x => CurtainGridLine.FromElementId(Document, x) as Types.CurtainGridLine) :
       default;
 
-    public IEnumerable<Curve> GridLineV => Value is ARDB.CurtainGrid grid ?
-      grid.GetVGridLineIds().Select(x => (Document.GetElement(x) as ARDB.CurtainGridLine).FullCurve.ToCurve()) :
+    public IEnumerable<CurtainGridLine> VGridLines => Value is ARDB.CurtainGrid grid ?
+      grid.GetVGridLineIds().Select(x => CurtainGridLine.FromElementId(Document, x) as Types.CurtainGridLine) :
+      default;
+
+    public IEnumerable<CurtainCell> CurtainCells => Value is ARDB.CurtainGrid grid ?
+      grid.GetCurtainCells().Zip(grid.GetPanelIds(), (Cell, PanelId) => (Cell, PanelId)).
+      Select(x => new CurtainCell(InstanceElement.FromElementId(Document, x.PanelId) as InstanceElement, x.Cell)) :
       default;
     #endregion
   }
@@ -332,18 +430,174 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Curtain Cell")]
   public class CurtainCell : DocumentObject
   {
+    public new ARDB.CurtainCell Value => base.Value as ARDB.CurtainCell;
+    public InstanceElement Panel { get; private set; }
+
     public CurtainCell() : base() { }
-    public CurtainCell(ARDB.Document doc, ARDB.CurtainCell value) : base(doc, value)
-    { }
+    public CurtainCell(Types.InstanceElement panel, ARDB.CurtainCell value) : base(panel.Document, value)
+    {
+      Panel = panel;
+    }
 
     #region DocumentObject
     public override string DisplayName =>  "Curtain Cell";
+    #endregion
 
-    protected override void ResetValue()
+    #region IGH_Goo
+    public override bool CastTo<Q>(out Q target)
     {
-      base.ResetValue();
+      target = default;
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
+      {
+        target = (Q) (object) new GH_Plane(Location);
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
+      {
+        var mesh = Mesh;
+        if (mesh is null) return false;
+
+        target = (Q) (object) new GH_Mesh(mesh);
+        return target is object;
+      }
+
+      //if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
+      //{
+      //  var trimmedSurface = TrimmedSurface;
+      //  if (trimmedSurface is null) return false;
+
+      //  target = (Q) (object) new GH_Surface(trimmedSurface);
+      //  return target is object;
+      //}
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
+      {
+        var polySurface = PolySurface;
+        if (polySurface is null) return false;
+
+        target = (Q) (object) new GH_Brep(polySurface);
+        return target is object;
+      }
+
+      return base.CastTo(out target);
     }
     #endregion
 
+    #region Geometry
+    /// <summary>
+    /// <see cref="Rhino.Geometry.Plane"/> where this element is located.
+    /// </summary>
+    public Plane Location
+    {
+      get
+      {
+        if (Panel is InstanceElement panel)
+        {
+          var location = panel.Location;
+          location = new Plane(location.Origin, location.XAxis, Vector3d.CrossProduct(location.XAxis, location.YAxis));
+          return location;
+        }
+
+        return NaN.Plane;
+      }
+    }
+
+    static readonly PolyCurve[] EmptyCurves = new PolyCurve[0];
+
+    PolyCurve[] planarCurves;
+    public PolyCurve[] PlanarCurves
+    {
+      get
+      {
+        if (planarCurves is null && Value is ARDB.CurtainCell cell)
+        {
+          try { planarCurves = cell.PlanarizedCurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
+          catch { planarCurves = EmptyCurves; }
+        }
+
+        return planarCurves;
+      }
+    }
+
+    public Surface Surface
+    {
+      get
+      {
+        if (PlanarCurves is PolyCurve[] planarCurves)
+        {
+          var plane = Location;
+          var bbox = BoundingBox.Empty;
+          var curves = new List<Curve>();
+          foreach (var loop in planarCurves)
+          {
+            var curve = Curve.ProjectToPlane(loop, plane);
+            bbox.Union(curve.GetBoundingBox(plane));
+            curves.Add(curve);
+          }
+
+          if (bbox.IsValid)
+            return new PlaneSurface(plane, new Interval(bbox.Min.X, bbox.Max.X), new Interval(bbox.Min.Y, bbox.Max.Y));
+        }
+
+        return default;
+      }
+    }
+
+    public Brep TrimmedSurface => Brep.CreateFromSurface(Surface);
+
+    public Brep PolySurface
+    {
+      get
+      {
+        if (PlanarCurves is PolyCurve[] planarCurves && Surface is Surface surface)
+          return surface.CreateTrimmedSurface(planarCurves, GeometryDecoder.Tolerance.VertexTolerance);
+
+        return default;
+      }
+    }
+
+    public Mesh Mesh
+    {
+      get
+      {
+        if (PlanarCurves is Curve[] planarCurves && planarCurves.Length > 0)
+        {
+          using (var mp = new MeshingParameters(0.0, GeometryTolerance.Model.ShortCurveTolerance)
+          {
+            Tolerance = GeometryTolerance.Model.VertexTolerance,
+            SimplePlanes = true,
+            JaggedSeams = true,
+            RefineGrid = false,
+            GridMinCount = 1,
+            GridMaxCount = 1,
+            GridAspectRatio = 0
+          })
+          {
+            var mesh = new Mesh();
+            var breps = Brep.CreatePlanarBreps(planarCurves, GeometryTolerance.Model.VertexTolerance);
+            mesh.Append(breps.SelectMany
+            (
+              x =>
+              {
+                var faces = Mesh.CreateFromBrep(x, mp);
+                x.Dispose();
+
+                foreach(var face in faces)
+                  face.MergeAllCoplanarFaces(GeometryTolerance.Model.VertexTolerance, GeometryTolerance.Model.AngleTolerance);
+
+                return faces;
+              })
+            );
+
+            return mesh;
+          }
+        }
+
+        return default;
+      }
+    }
+    #endregion
   }
 }

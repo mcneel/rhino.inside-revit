@@ -188,8 +188,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region ICurtainGridsAccess
-    public IList<CurtainGrid> CurtainGrids => Value is ARDB.Wall wall && wall.CurtainGrid is ARDB.CurtainGrid grid?
-      new CurtainGrid[] { new CurtainGrid(wall, grid) } : default;
+    public IList<CurtainGrid> CurtainGrids => Value is ARDB.Wall wall && wall.CurtainGrid is ARDB.CurtainGrid grid ?
+      new CurtainGrid[] { new CurtainGrid(this, grid, 0) } : default;
     #endregion
 
     #region Joins

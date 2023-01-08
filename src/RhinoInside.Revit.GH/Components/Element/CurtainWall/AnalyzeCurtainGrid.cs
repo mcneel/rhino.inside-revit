@@ -142,23 +142,23 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Curtain Grid", out Types.CurtainGrid grid))
+      if (!Params.GetData(DA, "Curtain Grid", out Types.CurtainGrid grid, x => x.IsValid))
         return;
 
       if (grid.Value is ARDB.CurtainGrid cgrid)
       {
-        DA.SetDataList("Cells", cgrid.GetCurtainCells().Select(x => new Types.CurtainCell(grid.Document, x)));
+        DA.SetDataList("Cells", grid.CurtainCells);
         DA.SetDataList("Mullions", cgrid.GetMullionIds().Select(x => Types.Mullion.FromElementId(grid.Document, x)));
         DA.SetDataList("Panels", cgrid.GetPanelIds().Select(x => Types.Element.FromElementId(grid.Document, x)));
 
         // GetVGridLineIds returns grid lines perpendicular to V
-        DA.SetDataList("Vertical Lines", cgrid.GetVGridLineIds().Select(x => Types.CurtainGridLine.FromElementId(grid.Document, x)));
+        DA.SetDataList("Vertical Lines", grid.VGridLines);
         DA.SetData("Vertical Angle", cgrid.Grid1Angle);
         DA.SetData("Vertical Justification", cgrid.Grid1Justification);
         DA.SetData("Vertical Offset", cgrid.Grid1Offset * GeometryDecoder.ModelScaleFactor);
 
         // GetUGridLineIds returns grid lines perpendicular to U
-        DA.SetDataList("Horizontal Lines", cgrid.GetUGridLineIds().Select(x => Types.CurtainGridLine.FromElementId(grid.Document, x)));
+        DA.SetDataList("Horizontal Lines", grid.UGridLines);
         DA.SetData("Horizontal Angle", cgrid.Grid2Angle);
         DA.SetData("Horizontal Justification", cgrid.Grid2Justification);
         DA.SetData("Horizontal Offset", cgrid.Grid2Offset * GeometryDecoder.ModelScaleFactor);
