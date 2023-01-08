@@ -411,6 +411,7 @@
     <Compile Include="Types\Group.cs" />
     <Compile Include="Types\HostObjects\BuildingPad.cs" />
     <Compile Include="Types\HostObjects\CompoundStructure.cs" />
+    <Compile Include="Types\HostObjects\CurtainCell.cs" />
     <Compile Include="Types\HostObjects\CurtainGrid.cs" />
     <Compile Include="Types\HostObjects\CurtainGridLine.cs" />
     <Compile Include="Types\HostObjects\CurtainSystem.cs" />
