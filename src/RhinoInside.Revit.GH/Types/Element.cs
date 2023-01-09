@@ -280,6 +280,8 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Ceiling),                         (element)=> new Ceiling               (element as ARDB.Ceiling)           },
       { typeof(ARDB.RoofBase),                        (element)=> new Roof                  (element as ARDB.RoofBase)          },
       { typeof(ARDB.Wall),                            (element)=> new Wall                  (element as ARDB.Wall)              },
+      { typeof(ARDB.WallSweep),                       (element)=> new WallSweep             (element as ARDB.WallSweep)         },
+      { typeof(ARDB.WallFoundation),                  (element)=> new WallFoundation        (element as ARDB.WallFoundation)    },
       { typeof(ARDB.FamilyInstance),                  (element)=> new FamilyInstance        (element as ARDB.FamilyInstance)    },
       { typeof(ARDB.Panel),                           (element)=> new Panel                 (element as ARDB.Panel)             },
       { typeof(ARDB.PanelType),                       (element)=> new PanelType             (element as ARDB.PanelType)         },

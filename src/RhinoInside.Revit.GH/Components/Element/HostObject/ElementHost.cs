@@ -42,6 +42,11 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         DA.SetData("Host", access.Host);
         return;
       }
+      else if (element.Value is ARDB.Wall wall && wall.IsStackedWallMember)
+      {
+        DA.SetData("Host", Types.HostObject.FromElementId(element.Document, wall.StackedWallOwnerId));
+        return;
+      }
       else if (element.Value.get_Parameter(ARDB.BuiltInParameter.HOST_ID_PARAM) is ARDB.Parameter hostId)
       {
         DA.SetData("Host", Types.HostObject.FromElementId(element.Document, hostId.AsElementId()));
