@@ -23,43 +23,48 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(
+      manager.AddParameter
+      (
         param: new Parameters.Panel(),
         name: "Panel",
         nickname: "P",
         description: "Panel element to analyze",
         access: GH_ParamAccess.item
-        );
+      );
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(
+      manager.AddParameter
+      (
         param: new Parameters.ElementType(),
         name: "Type",
         nickname: "T",
         description: "Panel Symbol. This can be a DB.PanelType of a DB.FamilySymbol depending on the type of panel hosted on the curtain wall.",
         access: GH_ParamAccess.item
-        );
-      manager.AddParameter(
+      );
+      manager.AddParameter
+      (
         param: new Parameters.HostObject(),
         name: "Host Panel",
         nickname: "HP",
         description: "Finds the host panel (i.e., wall) associated with this panel",
         access: GH_ParamAccess.item
-        );
-      manager.AddPointParameter(
+      );
+      manager.AddPointParameter
+      (
         name: "Base Point",
         nickname: "BP",
         description: "Base point/anchor of the curtain panel",
         access: GH_ParamAccess.item
-        );
-      manager.AddVectorParameter(
+      );
+      manager.AddVectorParameter
+      (
         name: "Orientation",
         nickname: "O",
         description: "Orientation vector of the curtain panel",
         access: GH_ParamAccess.item
-        );
+      );
       // DB.Panel is missing a .Locked property ?!
       //manager.AddBooleanParameter(
       //  name: "Locked",
@@ -75,32 +80,32 @@ namespace RhinoInside.Revit.GH.Components.Walls
       //  );
 
       // panel properties
-      manager.AddNumberParameter(
+      manager.AddNumberParameter
+      (
         name: "Width",
         nickname: "W",
         description: "Panel width",
         access: GH_ParamAccess.item
-        );
-      manager.AddNumberParameter(
+      );
+      manager.AddNumberParameter
+      (
         name: "Height",
         nickname: "H",
         description: "Panel height",
         access: GH_ParamAccess.item
-        );
+      );
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // get input
-      var instance = default(ARDB.FamilyInstance);
-      if (!DA.GetData("Panel", ref instance))
+      if (!Params.GetData(DA, "Panel", out Types.Panel instance, x => x.IsValid))
         return;
 
-      DA.SetData("Type", instance.Symbol);
-      DA.SetData("Base Point", instance.GetTransform().Origin.ToPoint3d());
-      DA.SetData("Orientation", instance.FacingOrientation.ToVector3d());
+      DA.SetData("Type", instance.Type);
+      DA.SetData("Base Point", instance.Value.GetTransform().Origin.ToPoint3d());
+      DA.SetData("Orientation", instance.Value.FacingOrientation.ToVector3d());
 
-      if (instance is ARDB.Panel panel)
+      if (instance.Value is ARDB.Panel panel)
       {
         //DA.SetData("Locked", panel.Locked);
         //DA.SetData("Lockable", panel.Lockable);
@@ -113,8 +118,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
         DA.SetData("Host Panel", null);
       }
 
-      DA.SetData("Width", instance?.get_Parameter(ARDB.BuiltInParameter.GENERIC_WIDTH).AsGoo());
-      DA.SetData("Height", instance?.get_Parameter(ARDB.BuiltInParameter.GENERIC_HEIGHT).AsGoo());
+      DA.SetData("Width", instance.Value.get_Parameter(ARDB.BuiltInParameter.GENERIC_WIDTH).AsGoo());
+      DA.SetData("Height", instance.Value.get_Parameter(ARDB.BuiltInParameter.GENERIC_HEIGHT).AsGoo());
     }
   }
 }

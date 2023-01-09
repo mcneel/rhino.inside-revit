@@ -5,10 +5,11 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
+  [Obsolete("Since 2023-01-09")]
   public class AnalyzeCurtainSystem : Component
   {
     public override Guid ComponentGuid => new Guid("16DDB8A7-045E-4FED-B48F-93F3A7AE461A");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
     protected override string IconTag => "ACS";
 
     public AnalyzeCurtainSystem() : base(
