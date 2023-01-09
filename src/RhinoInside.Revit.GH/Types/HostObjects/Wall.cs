@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Grasshopper.Kernel;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
@@ -16,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
     public new ARDB.Wall Value => base.Value as ARDB.Wall;
 
     public Wall() { }
-    public Wall(ARDB.Wall host) : base(host) { }
+    public Wall(ARDB.Wall wall) : base(wall) { }
 
     #region Location
     public override Plane Location
@@ -145,7 +146,7 @@ namespace RhinoInside.Revit.GH.Types
 
               // We need to use `ARDB.Curve.CreateOffset` to obtain same kind of "offset"
               // else the resulting surface is not parameterized like Revit.
-              // This is important to evaluate rectangular openings on that surface.
+              // This is important to evaluate rectangular Opening and WallSweep on that surface.
               var o0 = axis0.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset0), ARDB.XYZ.BasisZ);
               var o1 = axis1.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset1), ARDB.XYZ.BasisZ);
 
@@ -157,7 +158,7 @@ namespace RhinoInside.Revit.GH.Types
 
           if (NurbsSurface.CreateRuledSurface(axis0, axis1) is Surface surface)
           {
-            surface.SetDomain(0, new Interval(0.0, axis.GetLength()));
+            surface.SetDomain(0, axis.Domain);
             surface.SetDomain(1, domain);
             return surface;
           }
@@ -236,5 +237,112 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
+  }
+
+  [Kernel.Attributes.Name("Wall Sweep")]
+  public class WallSweep : HostObject, IHostObjectAccess
+  {
+    protected override Type ValueType => typeof(ARDB.WallSweep);
+    public new ARDB.WallSweep Value => base.Value as ARDB.WallSweep;
+
+    public HostObject Host => Value is ARDB.WallSweep wallSweep ?
+      HostObject.FromElementId(Document, wallSweep.GetHostIds().FirstOrDefault() ?? ElementIdExtension.InvalidElementId) as HostObject :
+      default;
+
+    public WallSweep() { }
+    public WallSweep(ARDB.WallSweep wallSweep) : base(wallSweep) { }
+
+    #region IGH_PreviewData
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      using (var info = Value.GetWallSweepInfo())
+      {
+        if (info?.WallSweepType == ARDB.WallSweepType.Reveal)
+          return;
+      }
+
+      base.DrawViewportWires(args);
+    }
+
+    protected override void DrawViewportMeshes(GH_PreviewMeshArgs args)
+    {
+      using (var info = Value.GetWallSweepInfo())
+      {
+        if (info?.WallSweepType == ARDB.WallSweepType.Reveal)
+          return;
+      }
+
+      base.DrawViewportMeshes(args);
+    }
+    #endregion
+
+    #region Geometry
+    public override Plane Location
+    {
+      get
+      {
+        if (Curve is Curve curve)
+        {
+          var start = curve.PointAtStart;
+          var end = curve.PointAtEnd;
+          var axis = end - start;
+          var origin = start + (axis * 0.5);
+          var perp = axis.PerpVector();
+          return new Plane(origin, axis, perp);
+        }
+
+        return base.Location;
+      }
+    }
+
+    public override Curve Curve
+    {
+      get
+      {
+        using (var info = Value.GetWallSweepInfo())
+        {
+          if (Host is HostObject host)
+          {
+            var surface = host.Surface;
+            var direction0 = info.IsVertical ? 1 : 0;
+            var direction1 = info.IsVertical ? 0 : 1;
+            var domain1 = surface.Domain(direction1);
+            var t = double.NaN;
+
+            switch (info.DistanceMeasuredFrom)
+            {
+              case ARDB.DistanceMeasuredFrom.Base:
+                if (info.IsVertical) t = /*domain1.T0 + */info.Distance;
+                else t = domain1.T0 + info.Distance * Revit.ModelUnits;
+                break;
+
+              case ARDB.DistanceMeasuredFrom.Top:
+                if (info.IsVertical) t = /*domain1.T1 - */info.Distance;
+                else t = domain1.T1 - info.Distance * Revit.ModelUnits;
+                break;
+            }
+
+            return surface.IsoCurve(direction0, t);
+          }
+
+          return default;
+        }
+      }
+    }
+    #endregion
+  }
+
+  [Kernel.Attributes.Name("Wall Foundation")]
+  public class WallFoundation : HostObject, IHostObjectAccess
+  {
+    protected override Type ValueType => typeof(ARDB.WallFoundation);
+    public new ARDB.WallFoundation Value => base.Value as ARDB.WallFoundation;
+
+    public HostObject Host => Value is ARDB.WallFoundation wallFoundation?
+      HostObject.FromElementId(Document, wallFoundation.WallId) as HostObject:
+      default;
+
+    public WallFoundation() { }
+    public WallFoundation(ARDB.WallFoundation wallFoundation) : base(wallFoundation) { }
   }
 }
