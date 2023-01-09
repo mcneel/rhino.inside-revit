@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.GH.Types
       new Sketch(roof.GetSketch()) : default;
     #endregion
 
-    #region IGH_CurtainGridsAccess
+    #region ICurtainGridsAccess
     public IList<CurtainGrid> CurtainGrids
     {
       get
@@ -88,12 +88,14 @@ namespace RhinoInside.Revit.GH.Types
         switch (Value)
         {
           case ARDB.ExtrusionRoof extrusionRoof:
-            return extrusionRoof.CurtainGrids?.Cast<ARDB.CurtainGrid>().
-              Select((x, i) => new CurtainGrid(this, x, i)).ToArray();
+            return extrusionRoof.CurtainGrids is ARDB.CurtainGridSet extrusionGrids ?
+              extrusionGrids.Cast<ARDB.CurtainGrid>().Select((x, i) => new CurtainGrid(this, x, i)).ToArray() :
+              new CurtainGrid[] { };
 
           case ARDB.FootPrintRoof footPrintRoof:
-            return footPrintRoof.CurtainGrids?.Cast<ARDB.CurtainGrid>().
-              Select((x, i) => new CurtainGrid(this, x, i)).ToArray();
+            return footPrintRoof.CurtainGrids is ARDB.CurtainGridSet footPrintGrids ?
+              footPrintGrids.Cast<ARDB.CurtainGrid>().Select((x, i) => new CurtainGrid(this, x, i)).ToArray() :
+              new CurtainGrid[] { };
         }
 
         return default;

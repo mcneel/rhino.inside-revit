@@ -18,9 +18,11 @@ namespace RhinoInside.Revit.GH.Types
     public CurtainSystem() { }
     public CurtainSystem(ARDB.CurtainSystem system) : base(system) { }
 
-    #region IGH_CurtainGridsAccess
+    #region ICurtainGridsAccess
     public IList<CurtainGrid> CurtainGrids => Value is ARDB.CurtainSystem system ?
-      system.CurtainGrids?.Cast<ARDB.CurtainGrid>().Select((x, i) => new CurtainGrid(this, x, i)).ToArray() :
+      system.CurtainGrids is ARDB.CurtainGridSet gridSet ?
+      gridSet.Cast<ARDB.CurtainGrid>().Select((x, i) => new CurtainGrid(this, x, i)).ToArray() :
+      new CurtainGrid[] { } :
       default;
     #endregion
 
