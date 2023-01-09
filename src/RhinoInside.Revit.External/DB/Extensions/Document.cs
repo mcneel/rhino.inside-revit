@@ -457,7 +457,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       TryParseNomenId(nomen.Trim(), out nomen, out var _);
 
       var last = doc.GetNamesakeElements(nomen, type, parentName, categoryId).
-        OrderBy(x => x.GetElementNomen(), ElementNaming.NameComparer).LastOrDefault();
+        OrderBy(ElementExtension.GetElementNomen, ElementNaming.NameComparer).LastOrDefault();
 
       if (last is object)
       {

@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Types
     public bool Equals(DocumentObject other) => other is object &&
       Equals(Document, other.Document) && Equals(Value, other.Value);
     public override bool Equals(object obj) => (obj is DocumentObject id) ? Equals(id) : base.Equals(obj);
-    public override int GetHashCode() => Document.GetHashCode() ^ Value.GetHashCode();
+    public override int GetHashCode() => (Document?.GetHashCode() ?? 0) ^ (Value?.GetHashCode() ?? 0);
     public override string ToString()
     {
       string Invalid = IsValid ? string.Empty : "Invalid ";
@@ -132,7 +132,6 @@ namespace RhinoInside.Revit.GH.Types
 
     protected virtual void ResetValue()
     {
-      _Document = default;
       _Value = default;
     }
     #endregion
@@ -258,10 +257,13 @@ namespace RhinoInside.Revit.GH.Types
     public virtual bool IsReferencedData => ReferenceDocumentId != Guid.Empty;
     public abstract bool IsReferencedDataLoaded { get; }
     public abstract bool LoadReferencedData();
-    public void UnloadReferencedData()
+    public virtual void UnloadReferencedData()
     {
       if (IsReferencedData)
+      {
+        Document = null;
         ResetValue();
+      }
     }
     #endregion
 
