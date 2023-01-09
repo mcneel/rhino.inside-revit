@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -9,13 +10,14 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Curtain Cell")]
-  public class CurtainCell : DocumentObject
+  public class CurtainCell : DocumentObject,
+    IGH_PreviewData
   {
     public new ARDB.CurtainCell Value => base.Value as ARDB.CurtainCell;
-    public InstanceElement Panel { get; private set; }
+    public Panel Panel { get; private set; }
 
     public CurtainCell() : base() { }
-    public CurtainCell(Types.InstanceElement panel, ARDB.CurtainCell value) : base(panel.Document, value)
+    public CurtainCell(Panel panel, ARDB.CurtainCell value) : base(panel.Document, value)
     {
       Panel = panel;
     }
@@ -66,6 +68,36 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    #region IGH_PreviewData
+    void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      foreach (var curve in PlanarizedCurveLoops ?? EmptyCurves)
+        args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
+    }
+
+    void IGH_PreviewData.DrawViewportMeshes(GH_PreviewMeshArgs args)
+    {
+      if (Mesh is Mesh mesh)
+        args.Pipeline.DrawMeshShaded(mesh, args.Material);
+    }
+
+    private BoundingBox? _ClippingBox;
+    BoundingBox IGH_PreviewData.ClippingBox
+    {
+      get
+      {
+        if (!_ClippingBox.HasValue)
+        {
+          _ClippingBox = BoundingBox.Empty;
+          foreach (var curve in PlanarizedCurveLoops)
+            _ClippingBox.Value.Union(curve.GetBoundingBox(false));
+        }
+
+        return _ClippingBox.Value;
+      }
+    }
+    #endregion
+
     #region Geometry
     /// <summary>
     /// <see cref="Rhino.Geometry.Plane"/> where this element is located.
@@ -87,18 +119,33 @@ namespace RhinoInside.Revit.GH.Types
 
     static readonly PolyCurve[] EmptyCurves = new PolyCurve[0];
 
-    PolyCurve[] planarCurves;
-    public PolyCurve[] PlanarCurves
+    PolyCurve[] _PlanarizedCurveLoops;
+    public PolyCurve[] PlanarizedCurveLoops
     {
       get
       {
-        if (planarCurves is null && Value is ARDB.CurtainCell cell)
+        if (_PlanarizedCurveLoops is null && Value is ARDB.CurtainCell cell)
         {
-          try { planarCurves = cell.PlanarizedCurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
-          catch { planarCurves = EmptyCurves; }
+          try { _PlanarizedCurveLoops = cell.PlanarizedCurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
+          catch { _PlanarizedCurveLoops = EmptyCurves; }
         }
 
-        return planarCurves;
+        return _PlanarizedCurveLoops;
+      }
+    }
+
+    PolyCurve[] _CurveLoops;
+    public PolyCurve[] CurveLoops
+    {
+      get
+      {
+        if (_CurveLoops is null && Value is ARDB.CurtainCell cell)
+        {
+          try { _CurveLoops = cell.CurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
+          catch { _CurveLoops = EmptyCurves; }
+        }
+
+        return _CurveLoops;
       }
     }
 
@@ -106,7 +153,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (PlanarCurves is PolyCurve[] planarCurves)
+        if (PlanarizedCurveLoops is PolyCurve[] planarCurves)
         {
           var plane = Location;
           var bbox = BoundingBox.Empty;
@@ -132,7 +179,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (PlanarCurves is PolyCurve[] planarCurves && Surface is Surface surface)
+        if (PlanarizedCurveLoops is PolyCurve[] planarCurves && Surface is Surface surface)
           return surface.CreateTrimmedSurface(planarCurves, GeometryDecoder.Tolerance.VertexTolerance);
 
         return default;
@@ -143,7 +190,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (PlanarCurves is Curve[] planarCurves && planarCurves.Length > 0)
+        if (PlanarizedCurveLoops is Curve[] planarCurves && planarCurves.Length > 0)
         {
           using (var mp = new MeshingParameters(0.0, GeometryTolerance.Model.ShortCurveTolerance)
           {

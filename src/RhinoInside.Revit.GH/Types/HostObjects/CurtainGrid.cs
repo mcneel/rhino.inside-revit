@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override void ResetValue()
     {
       clippingBox = default;
-      curves = default;
+      _CurveLoops = default;
 
       base.ResetValue();
     }
@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Types
     public BoundingBox GetBoundingBox(Transform xform)
     {
       var bbox = BoundingBox.Empty;
-      foreach (var curve in Curves)
+      foreach (var curve in CurveLoops)
         bbox.Union(curve.GetBoundingBox(xform));
 
       return bbox;
@@ -123,7 +123,7 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
     {
-      foreach (var curve in Curves)
+      foreach (var curve in CurveLoops)
         args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
     }
 
@@ -137,7 +137,7 @@ namespace RhinoInside.Revit.GH.Types
         if (!clippingBox.HasValue)
         {
           clippingBox = BoundingBox.Empty;
-          foreach (var curve in Curves)
+          foreach (var curve in CurveLoops)
             clippingBox.Value.Union(curve.GetBoundingBox(false));
         }
 
@@ -262,15 +262,15 @@ namespace RhinoInside.Revit.GH.Types
 
     static readonly PolyCurve[] EmptyCurves = new PolyCurve[0];
 
-    PolyCurve[] planarCurves;
-    public PolyCurve[] PlanarCurves
+    PolyCurve[] _PlanarizedCurveLoops;
+    public PolyCurve[] PlanarizedCurveLoops
     {
       get
       {
-        if (planarCurves is null)
+        if (_PlanarizedCurveLoops is null)
         {
-          planarCurves = Value is ARDB.CurtainGrid grid ?
-            planarCurves = grid.GetCurtainCells().SelectMany
+          _PlanarizedCurveLoops = Value is ARDB.CurtainGrid grid ?
+            _PlanarizedCurveLoops = grid.GetCurtainCells().SelectMany
             (
               x =>
               {
@@ -282,18 +282,18 @@ namespace RhinoInside.Revit.GH.Types
             EmptyCurves;
         }
 
-        return planarCurves;
+        return _PlanarizedCurveLoops;
       }
     }
 
-    PolyCurve[] curves;
-    public PolyCurve[] Curves
+    PolyCurve[] _CurveLoops;
+    public PolyCurve[] CurveLoops
     {
       get
       {
-        if (curves is null)
+        if (_CurveLoops is null)
         {
-          curves = Value is ARDB.CurtainGrid grid ?
+          _CurveLoops = Value is ARDB.CurtainGrid grid ?
             grid.GetCurtainCells().SelectMany
             (
               x =>
@@ -306,7 +306,7 @@ namespace RhinoInside.Revit.GH.Types
             EmptyCurves;
         }
 
-        return curves;
+        return _CurveLoops;
       }
     }
 
@@ -339,25 +339,8 @@ namespace RhinoInside.Revit.GH.Types
                 Host.Type = ElementType.FromValue(type) as ElementType;
               }
 
-              var linesToDelete = new List<ARDB.ElementId>(curtainGrid.NumULines * curtainGrid.NumVLines);
-              foreach (var uId in curtainGrid.GetUGridLineIds())
-              {
-                var u = Document.GetElement(uId) as ARDB.CurtainGridLine;
-                u.get_Parameter(ARDB.BuiltInParameter.GRIDLINE_SPEC_STATUS)?.Update(0);
-                u.Lock = false;
-                linesToDelete.Add(uId);
-              }
-
-              foreach (var vId in curtainGrid.GetVGridLineIds())
-              {
-                var v = Document.GetElement(vId) as ARDB.CurtainGridLine;
-                v.get_Parameter(ARDB.BuiltInParameter.GRIDLINE_SPEC_STATUS)?.Update(0);
-                v.Lock = false;
-                linesToDelete.Add(vId);
-              }
-
-              Document.Delete(linesToDelete);
-              Document.Regenerate();
+              if (DeleteGridLines(instance: true, type: true) > 0)
+                Document.Regenerate();
 
               var identityGrid = (Host as ICurtainGridsAccess).CurtainGrids[GridIndex];
               foreach (var cell in identityGrid.CurtainCells)
@@ -412,17 +395,97 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Properties
     public IEnumerable<CurtainGridLine> UGridLines => Value is ARDB.CurtainGrid grid ?
-      grid.GetUGridLineIds().Select(x => CurtainGridLine.FromElementId(Document, x) as Types.CurtainGridLine) :
+      grid.GetUGridLineIds().Select(x => CurtainGridLine.FromElementId(Document, x) as CurtainGridLine).OfType<CurtainGridLine>() :
       default;
 
     public IEnumerable<CurtainGridLine> VGridLines => Value is ARDB.CurtainGrid grid ?
-      grid.GetVGridLineIds().Select(x => CurtainGridLine.FromElementId(Document, x) as Types.CurtainGridLine) :
+      grid.GetVGridLineIds().Select(x => CurtainGridLine.FromElementId(Document, x) as CurtainGridLine).OfType<CurtainGridLine>() :
       default;
 
     public IEnumerable<CurtainCell> CurtainCells => Value is ARDB.CurtainGrid grid ?
       grid.GetCurtainCells().Zip(grid.GetPanelIds(), (Cell, PanelId) => (Cell, PanelId)).
-      Select(x => new CurtainCell(InstanceElement.FromElementId(Document, x.PanelId) as InstanceElement, x.Cell)) :
+      Select(x => new CurtainCell(Panel.FromElementId(Document, x.PanelId) as Panel, x.Cell)) :
       default;
+    #endregion
+
+    #region Operations
+    public int DeleteGridLines(bool instance, bool type)
+    {
+      if (Value is ARDB.CurtainGrid curtainGrid)
+      {
+        var linesToDelete = new List<ARDB.ElementId>(curtainGrid.NumULines * curtainGrid.NumVLines);
+        foreach (var uId in curtainGrid.GetUGridLineIds())
+        {
+          var u = Document.GetElement(uId) as ARDB.CurtainGridLine;
+          if (u.get_Parameter(ARDB.BuiltInParameter.GRIDLINE_SPEC_STATUS) is ARDB.Parameter typeAssociation)
+          {
+            if (type)
+            {
+              typeAssociation.Update(0);
+              linesToDelete.Add(uId);
+            }
+          }
+          else if (instance)
+          {
+            u.Lock = false;
+            linesToDelete.Add(uId);
+          }
+        }
+
+        foreach (var vId in curtainGrid.GetVGridLineIds())
+        {
+          var v = Document.GetElement(vId) as ARDB.CurtainGridLine;
+          if (v.get_Parameter(ARDB.BuiltInParameter.GRIDLINE_SPEC_STATUS) is ARDB.Parameter typeAssociation)
+          {
+            if (type)
+            {
+              typeAssociation.Update(0);
+              linesToDelete.Add(vId);
+            }
+          }
+          else if (instance)
+          {
+            v.Lock = false;
+            linesToDelete.Add(vId);
+          }
+        }
+
+        Document.Delete(linesToDelete);
+        return linesToDelete.Count;
+      }
+
+      return -1;
+    }
+
+    public int DeleteMullions(bool instance, bool type)
+    {
+      if (Value is ARDB.CurtainGrid curtainGrid)
+      {
+        var mullionsToDelete = new List<ARDB.ElementId>(curtainGrid.NumULines * curtainGrid.NumVLines);
+        foreach (var uId in curtainGrid.GetMullionIds())
+        {
+          var m = Document.GetElement(uId) as ARDB.Mullion;
+          if (m.Lockable)
+          {
+            if (type)
+            {
+              m.Lock = false;
+              mullionsToDelete.Add(uId);
+            }
+          }
+          else if (instance)
+          {
+            m.Lock = false;
+            mullionsToDelete.Add(uId);
+          }
+        }
+
+        Document.Delete(mullionsToDelete);
+        return mullionsToDelete.Count;
+      }
+
+      return -1;
+    }
     #endregion
   }
 }
