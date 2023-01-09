@@ -68,11 +68,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override void ResetValue()
     {
       SubInvalidateGraphics();
-
-      _ReferenceDocument = default;
-      _ReferenceId = default;
-      _Id = default;
-
       base.ResetValue();
     }
 
@@ -164,31 +159,49 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ReferencedData
-    public override bool IsReferencedDataLoaded => ReferenceDocument is object && _Id is object;
+    public override bool IsReferencedDataLoaded => _ReferenceDocument is object && _ReferenceId is object && _Id is object;
+
     public sealed override bool LoadReferencedData()
     {
-      if (IsReferencedData && !IsReferencedDataLoaded)
+      if (IsReferencedData)
       {
-        UnloadReferencedData();
-
-        if (Types.Document.TryGetDocument(ReferenceDocumentId, out _ReferenceDocument))
+        if (!IsReferencedDataLoaded)
         {
-          if (_ReferenceDocument.TryGetLinkElementId(ReferenceUniqueId, out var linkElementId))
+          UnloadReferencedData();
+
+          if (Types.Document.TryGetDocument(ReferenceDocumentId, out _ReferenceDocument))
           {
-            _ReferenceId = _Id = linkElementId.HostElementId;
-            if (_ReferenceId == ARDB.ElementId.InvalidElementId)
+            if (_ReferenceDocument.TryGetLinkElementId(ReferenceUniqueId, out var linkElementId))
             {
-              _ReferenceId = linkElementId.LinkInstanceId;
-              _Id = linkElementId.LinkedElementId;
-              Document = (_ReferenceDocument.GetElement(_ReferenceId) as ARDB.RevitLinkInstance).GetLinkDocument();
+              _ReferenceId = _Id = linkElementId.HostElementId;
+              if (_ReferenceId == ARDB.ElementId.InvalidElementId)
+              {
+                _ReferenceId = linkElementId.LinkInstanceId;
+                _Id = linkElementId.LinkedElementId;
+                Document = (_ReferenceDocument.GetElement(_ReferenceId) as ARDB.RevitLinkInstance).GetLinkDocument();
+              }
+              else Document = _ReferenceDocument;
             }
-            else Document = _ReferenceDocument;
+            else _ReferenceDocument = null;
           }
-          else _ReferenceDocument = null;
         }
+
+        return _Id.IsValid();
       }
 
-      return IsReferencedDataLoaded;
+      return false;
+    }
+
+    public override void UnloadReferencedData()
+    {
+      if (IsReferencedData)
+      {
+        _ReferenceDocument = default;
+        _ReferenceId = default;
+        _Id = default;
+      }
+
+      base.UnloadReferencedData();
     }
     #endregion
 
@@ -367,6 +380,7 @@ namespace RhinoInside.Revit.GH.Types
           break;
 
         case ARDB.FamilySymbol familySymbol:
+          if (PanelType.IsValidElement(element)) return new PanelType(familySymbol);
           if (ProfileType.IsValidElement(element)) return new ProfileType(familySymbol);
           break;
       }

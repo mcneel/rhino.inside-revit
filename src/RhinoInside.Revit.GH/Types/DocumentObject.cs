@@ -132,7 +132,6 @@ namespace RhinoInside.Revit.GH.Types
 
     protected virtual void ResetValue()
     {
-      _Document = default;
       _Value = default;
     }
     #endregion
@@ -258,10 +257,13 @@ namespace RhinoInside.Revit.GH.Types
     public virtual bool IsReferencedData => ReferenceDocumentId != Guid.Empty;
     public abstract bool IsReferencedDataLoaded { get; }
     public abstract bool LoadReferencedData();
-    public void UnloadReferencedData()
+    public virtual void UnloadReferencedData()
     {
       if (IsReferencedData)
+      {
+        Document = null;
         ResetValue();
+      }
     }
     #endregion
 
