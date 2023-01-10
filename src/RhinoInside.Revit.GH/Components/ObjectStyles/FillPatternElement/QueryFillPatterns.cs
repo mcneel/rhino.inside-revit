@@ -7,6 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.LinePatternElements
 {
+  [ComponentVersion(introduced: "1.11")]
   public class QueryFillPatterns : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("71C06438-EC02-4A64-A818-49F4F6C5AD55");
