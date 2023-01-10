@@ -12,6 +12,14 @@ group: Deployment & Configs
 
 ### RC 
 
+- Fix for "Comments" parameter `DataType`.
+- Improved `Types.CurtainGridLine` previews.
+- Improved conversion from `CurtainGrid` and `CurtainCell` to `Brep`.
+- Fixed `Types.Panel` and `Types.PanelType` recognizing a `ARDB.FamilyInstance` as valid.
+- Implemented Previews on `Types.CurtainCell`.
+- Fixed 'Element Type' component when managing Types.Panel elements.
+- Improved 'Element Host' for walls that are member of a stacked wall.
+- Now conversion from Wall to Surface gives a Brep correctly oriented.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
