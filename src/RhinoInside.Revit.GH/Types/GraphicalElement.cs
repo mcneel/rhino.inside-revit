@@ -622,7 +622,16 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public virtual Surface Surface => null;
-    public virtual Brep TrimmedSurface => Brep.CreateFromSurface(Surface);
+    public virtual Brep TrimmedSurface
+    {
+      get
+      {
+        var brep = Brep.CreateFromSurface(Surface);
+        if (FacingFlipped is true) brep?.Flip();
+
+        return brep;
+      }
+    }
     public virtual Brep PolySurface => TrimmedSurface;
 
     public virtual Mesh Mesh => default;
