@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB;
   using External.DB.Extensions;
 
-  [Kernel.Attributes.Name("Filter")]
+  [Kernel.Attributes.Name("View Filter")]
   public interface IGH_FilterElement : IGH_Element
   {
     ElementFilter GetElementFilter();
