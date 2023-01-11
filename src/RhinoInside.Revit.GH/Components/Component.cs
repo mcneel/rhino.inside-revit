@@ -227,6 +227,7 @@ namespace RhinoInside.Revit.GH.Components
           ResetData();
           DA.AbortComponentSolution();
           Phase = GH_SolutionPhase.Failed;
+          UnhandledException = e;
         }
       }
     }

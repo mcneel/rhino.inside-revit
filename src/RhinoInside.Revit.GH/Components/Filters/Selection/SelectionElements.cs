@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
   public class SelectionElements : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("E90F2139-FA13-4EE2-BFD3-6642FA9053AB");
-    public override GH_Exposure Exposure => GH_Exposure.septenary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public SelectionElements() : base
     (
@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       nickname: "Selection",
       description: "Selection Elements list.",
       category: "Revit",
-      subCategory: "Filter"
+      subCategory: "View"
     )
     { }
 

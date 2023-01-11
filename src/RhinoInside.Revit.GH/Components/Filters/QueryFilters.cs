@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
   public class QueryFilters : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("B7B1740B-0721-49C8-92F5-057775DA9792");
-    public override GH_Exposure Exposure => GH_Exposure.septenary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "F";
 
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.FilterElement));
@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       nickname: "Filters",
       description: "Get document filters list",
       category: "Revit",
-      subCategory: "Filter"
+      subCategory: "View"
     )
     { }
 

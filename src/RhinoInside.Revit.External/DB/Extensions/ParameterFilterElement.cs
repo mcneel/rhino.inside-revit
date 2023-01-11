@@ -23,6 +23,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       throw new System.NotSupportedException("Parameter Filter is partially supported on Revit 2018.");
     }
+
+    public static bool ElementFilterIsAcceptableForParameterFilterElement(this ParameterFilterElement self, ElementFilter elementFilter)
+    {
+      return false;
+    }
 #endif
   }
 }
