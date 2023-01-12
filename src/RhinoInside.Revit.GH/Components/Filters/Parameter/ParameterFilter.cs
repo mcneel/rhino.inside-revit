@@ -100,7 +100,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     public override void AddedToDocument(GH_Document document)
     {
-      if (Params.Output<IGH_Param>("Parameter Filter") is IGH_Param pathName) pathName.Name = "Rule-Based Filter";
+      // V 1.12
+      if (Params.Output<IGH_Param>("Parameter Filter") is IGH_Param parameterFilter) parameterFilter.Name = "Rule-based Filter";
 
       base.AddedToDocument(document);
     }
@@ -112,7 +113,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
       ReconstructElement<ARDB.ParameterFilterElement>
       (
-        doc.Value, _RuleBasedFilter_, (ruleFilter) =>
+        doc.Value, _RuleBasedFilter_, ruleFilter =>
         {
           // Input
           if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;

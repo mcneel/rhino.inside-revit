@@ -7,7 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
-  [ComponentVersion(introduced: "1.0", updated: "1.11")]
+  [ComponentVersion(introduced: "1.0", updated: "1.12")]
   public class QueryFilters : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("B7B1740B-0721-49C8-92F5-057775DA9792");
@@ -52,9 +52,17 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.FilterElement>("Parameter Filters", "P", "Parameter filter list", GH_ParamAccess.list),
+      ParamDefinition.Create<Parameters.FilterElement>("Rule-based Filters", "R", "Rule-based filter list", GH_ParamAccess.list),
       ParamDefinition.Create<Parameters.FilterElement>("Selection Filters", "S", "Selection filter list", GH_ParamAccess.list)
     };
+
+    public override void AddedToDocument(GH_Document document)
+    {
+      // V 1.12
+      if (Params.Output<IGH_Param>("Parameter Filter") is IGH_Param parameterFilter) parameterFilter.Name = "Rule-based Filter";
+
+      base.AddedToDocument(document);
+    }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -73,8 +81,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
         if (!string.IsNullOrEmpty(name))
           filters = filters.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("Parameter Filters", filters.Where(x => x is ARDB.ParameterFilterElement));
-        DA.SetDataList("Selection Filters", filters.Where(x => x is ARDB.SelectionFilterElement));
+        DA.SetDataList("Rule-based Filters", filters.OfType<ARDB.ParameterFilterElement>());
+        DA.SetDataList("Selection Filters", filters.OfType<ARDB.SelectionFilterElement>());
       }
     }
   }
