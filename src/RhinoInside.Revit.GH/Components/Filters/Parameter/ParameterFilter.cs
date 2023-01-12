@@ -172,11 +172,12 @@ namespace RhinoInside.Revit.GH.Components.Filters
       var ruleFilter = default(ARDB.ParameterFilterElement);
 
       // Make sure the name is unique
+      if (name is null)
       {
         name = doc.NextIncrementalNomen
         (
-          name ?? template?.Name ?? _RuleBasedFilter_,
-          typeof(ARDB.ParameterFilterElement)
+          template?.Name ?? _RuleBasedFilter_, typeof(ARDB.ParameterFilterElement),
+          categoryId: ARDB.BuiltInCategory.INVALID
         );
       }
 
