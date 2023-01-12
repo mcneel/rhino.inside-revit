@@ -138,11 +138,12 @@ namespace RhinoInside.Revit.GH.Components.Filters
       var selection = default(ARDB.SelectionFilterElement);
 
       // Make sure the name is unique
+      if (name is null)
       {
         name = doc.NextIncrementalNomen
         (
-          name ?? template?.Name ?? _SelectionFilter_,
-          typeof(ARDB.SelectionFilterElement)
+          template?.Name ?? _SelectionFilter_, typeof(ARDB.SelectionFilterElement),
+          categoryId: ARDB.BuiltInCategory.INVALID
         );
       }
 
