@@ -240,11 +240,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
         if (categoryIds.Count == 0 || filter.IsEmpty()) ruleFilter.ClearRules();
         else 
         {
-          if (ruleFilter.ElementFilterIsAcceptableForParameterFilterElement(filter))
+          if (!ruleFilter.ElementFilterIsAcceptableForParameterFilterElement(filter))
             throw new Exceptions.RuntimeErrorException
             (
 #if REVIT_2019
-              $"The input 'Filter' is not acceptable for use by a Parameter Filter.\r" +
+              $"The input 'Filter' is not acceptable for use by a Rule-based Filter.\r" +
               "Only Parameter Filters or Logical combinations of these are accepted."
 #else
               "Parameter Filter is partially supported before Revit 2019."
