@@ -240,7 +240,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         if (categoryIds.Count == 0 || filter.IsEmpty()) ruleFilter.ClearRules();
         else 
         {
-          if (ruleFilter.ElementFilterIsAcceptableForParameterFilterElement(filter))
+          if (!ruleFilter.ElementFilterIsAcceptableForParameterFilterElement(filter))
             throw new Exceptions.RuntimeErrorException
             (
 #if REVIT_2019
