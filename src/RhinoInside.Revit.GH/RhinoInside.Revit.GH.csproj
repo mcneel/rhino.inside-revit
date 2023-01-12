@@ -283,6 +283,13 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Optional.cs" />
+    <Compile Include="Parameters\Materials\AppearanceAsset.cs" />
+    <Compile Include="Parameters\Materials\AssetPropertyDouble1DMap.cs" />
+    <Compile Include="Parameters\Materials\AssetPropertyDouble4DMap.cs" />
+    <Compile Include="Parameters\Materials\Material.cs" />
+    <Compile Include="Parameters\Materials\StructuralAsset.cs" />
+    <Compile Include="Parameters\Materials\TextureData.cs" />
+    <Compile Include="Parameters\Materials\ThermalAsset.cs" />
     <Compile Include="Parameters\ObjectStyles\Category.cs" />
     <Compile Include="Parameters\ObjectStyles\CategoryTypes.cs" />
     <Compile Include="Parameters\ObjectStyles\Color.cs" />
@@ -347,10 +354,7 @@
     <Compile Include="Parameters\Input\WallStructuralUsage_ValueList.cs" />
     <Compile Include="Parameters\Input\WallSystemFamily_ValueList.cs" />
     <Compile Include="Parameters\Input\WallWrapping_ValueList.cs" />
-    <Compile Include="Parameters\AppearanceAsset.cs" />
     <Compile Include="Parameters\AssemblyInstance.cs" />
-    <Compile Include="Parameters\AssetPropertyDouble1DMap.cs" />
-    <Compile Include="Parameters\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Parameters\BasePoint.cs" />
     <Compile Include="Parameters\CompoundStructure.cs" />
     <Compile Include="Parameters\CurtainGrid.cs" />
@@ -368,7 +372,6 @@
     <Compile Include="Parameters\Group.cs" />
     <Compile Include="Parameters\HostObject.cs" />
     <Compile Include="Parameters\LevelConstraint.cs" />
-    <Compile Include="Parameters\Material.cs" />
     <Compile Include="Parameters\Opening.cs" />
     <Compile Include="Parameters\Param.cs" />
     <Compile Include="Parameters\Parameter.cs" />
@@ -379,9 +382,6 @@
     <Compile Include="Parameters\Sketch.cs" />
     <Compile Include="Parameters\SketchPlane.cs" />
     <Compile Include="Parameters\SpatialElement.cs" />
-    <Compile Include="Parameters\StructuralAsset.cs" />
-    <Compile Include="Parameters\TextureData.cs" />
-    <Compile Include="Parameters\ThermalAsset.cs" />
     <Compile Include="Parameters\TopographySurface.cs" />
     <Compile Include="Parameters\Views\View.cs" />
     <Compile Include="Parameters\Views\View3D.cs" />
