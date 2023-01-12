@@ -12,6 +12,7 @@ group: Deployment & Configs
 
 ### RC 
 
+- Fixed 'Add Rule-based Filter' name is getting an unexpected integer added in creation. [#754](https://github.com/mcneel/rhino.inside-revit/issues/754)
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
