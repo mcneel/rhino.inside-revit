@@ -270,6 +270,7 @@
     <Compile Include="Components\Views\Graphics\FilterGraphicOverrides.cs" />
     <Compile Include="Components\Views\Graphics\Filters.cs" />
     <Compile Include="Components\Views\Graphics\GraphicOverrides.cs" />
+    <Compile Include="Components\Views\Graphics\WorksetVisibilityOverrides.cs" />
     <Compile Include="Components\Views\Identity.cs" />
     <Compile Include="Components\Views\QueryViews.cs" />
     <Compile Include="Components\Views\SectionBox.cs" />
@@ -280,6 +281,7 @@
     <Compile Include="Components\Workset\DeleteWorkset.cs" />
     <Compile Include="Components\Workset\Identity.cs" />
     <Compile Include="Components\Workset\QueryWorksets.cs" />
+    <Compile Include="Components\Workset\WorksetVisibility.cs" />
     <Compile Include="Components\ZuiComponent.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="ImageBuilder.cs" />
