@@ -166,8 +166,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var (x, y, z) = diagonal;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
-      if (x < 0.0 && y < 0.0 && z < 0.0) return -NumericTolerance.Abs(x, y, z);
-      if (x > 0.0 && y > 0.0 && z > 0.0) return +NumericTolerance.Abs(x, y, z);
+      if (x < 0.0 && y < 0.0 && z < 0.0) return -NumericTolerance.Norm(x, y, z);
+      if (x > 0.0 && y > 0.0 && z > 0.0) return +NumericTolerance.Norm(x, y, z);
 
       return double.NaN;
     }
