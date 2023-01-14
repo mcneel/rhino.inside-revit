@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void SubInvalidateGraphics()
     {
-      GeometryPreview = null;
+      using (_GeometryPreview) _GeometryPreview = null;
 
       base.SubInvalidateGraphics();
     }
@@ -278,11 +278,11 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     MeshingParameters meshingParameters;
-    Preview geometryPreview;
+    Preview _GeometryPreview;
     Preview GeometryPreview
     {
-      get { return geometryPreview ?? (geometryPreview = Preview.OrderNew(this)); }
-      set { if (geometryPreview != value) geometryPreview = value; }
+      get { return _GeometryPreview ?? (_GeometryPreview = Preview.OrderNew(this)); }
+      set { if (_GeometryPreview != value) _GeometryPreview = value; }
     }
 
     public Rhino.Display.DisplayMaterial[] TryGetPreviewMaterials()
@@ -295,9 +295,9 @@ namespace RhinoInside.Revit.GH.Types
       if (!ReferenceEquals(meshingParameters, parameters))
       {
         meshingParameters = parameters;
-        if (geometryPreview is object)
+        if (_GeometryPreview is object)
         {
-          if (geometryPreview.MeshingParameters?.RelativeTolerance != meshingParameters?.RelativeTolerance)
+          if (_GeometryPreview.MeshingParameters?.RelativeTolerance != meshingParameters?.RelativeTolerance)
             GeometryPreview = null;
         }
       }

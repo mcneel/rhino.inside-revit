@@ -265,7 +265,7 @@ namespace RhinoInside.Revit.GH.Parameters
         if (value is Types.IGH_ReferenceData data)
           data.LoadReferencedData();
 
-        return value?.IsValid == true ? value : default;
+        return value;
       }
     }
     #endregion

@@ -11,6 +11,13 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static new UnitType Empty => empty;
     public static UnitType Custom => new UnitType("autodesk.unit.unit:custom-1.0.0");
 
+    public string LocalizedLabel =>
+#if REVIT_2021
+      Autodesk.Revit.DB.LabelUtils.GetLabelForUnit(this);
+#else
+      Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.DisplayUnitType) this);
+#endif
+
     public UnitType() { }
     public UnitType(string id) : base(id)
     {

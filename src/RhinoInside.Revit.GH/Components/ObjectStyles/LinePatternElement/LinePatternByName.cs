@@ -130,8 +130,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
       {
         name = doc.NextIncrementalNomen
         (
-          name ?? template?.Name ?? _LinePattern_,
-          typeof(ARDB.LinePatternElement),
+          template?.Name ?? _LinePattern_, typeof(ARDB.LinePatternElement),
           categoryId: ARDB.BuiltInCategory.INVALID
         );
       }

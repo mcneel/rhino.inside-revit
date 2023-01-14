@@ -12,15 +12,15 @@ namespace RhinoInside.Revit.GH.Components.Filters
   public class SelectionElements : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("E90F2139-FA13-4EE2-BFD3-6642FA9053AB");
-    public override GH_Exposure Exposure => GH_Exposure.septenary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public SelectionElements() : base
     (
-      name: "Selection Elements",
-      nickname: "Selection",
-      description: "Selection Elements list.",
+      name: "Selection Filter Definition",
+      nickname: "SeleElms",
+      description: "Get-Set accessor for Selection Filter elements.",
       category: "Revit",
-      subCategory: "Filter"
+      subCategory: "View"
     )
     { }
 
@@ -41,6 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Selection Filter", out ARDB.SelectionFilterElement selection, x => x.IsValid())) return;
+      else DA.SetData("Selection Filter", selection);
 
       if (Params.GetDataList(DA, "Elements", out IList<Types.Element> elements))
       {
@@ -50,7 +51,6 @@ namespace RhinoInside.Revit.GH.Components.Filters
         selection.SetElementIds(elementIds);
       }
 
-      DA.SetData("Selection Filter", selection);
       Params.TrySetDataList(DA, "Elements", () => selection.GetElementIds().Select(x => Types.Element.FromElementId(selection.Document, x)));
     }
   }

@@ -31,13 +31,23 @@ namespace RhinoInside.Revit.GH.Types
     #region System.Object
     public override string ToString()
     {
-      var valid = IsValid;
-      string Invalid = Id == ARDB.ElementId.InvalidElementId ?
-        (string.IsNullOrWhiteSpace(ReferenceUniqueId) ? string.Empty : "Unresolved ") :
-        valid ? string.Empty :
-        (IsReferencedData ? "❌ Deleted " : "⚠ Invalid ");
+      string Invalid = string.Empty;
+      string InstanceName = string.Empty;
+
+      if (IsValid) InstanceName = DisplayName;
+      else
+      {
+        if (IsReferencedData)
+        {
+          if (IsReferencedDataLoaded)
+            Invalid = Id.IsBuiltInId() ? "⚠ Unknown" : "❌ Deleted ";
+          else
+            Invalid = "⚠ Unresolved ";
+        }
+        else InstanceName = DisplayName;
+      }
+
       string TypeName = ((IGH_Goo) this).TypeName;
-      string InstanceName = DisplayName;
 
       if (!string.IsNullOrWhiteSpace(InstanceName))
         InstanceName = $" : {InstanceName}";

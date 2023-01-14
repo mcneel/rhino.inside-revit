@@ -12,13 +12,28 @@ group: Deployment & Configs
 
 ### RC 
 
+- Fixed 'Add Rule-based Filter' name is getting an unexpected integer added in creation. [#754](https://github.com/mcneel/rhino.inside-revit/issues/754)
+- Added 'Rule-based Filter Definiton' component.
+- Added 'Workset Global Visibility' component.
+- Added 'Workset Visibility Overrides' component. [#753](https://github.com/mcneel/rhino.inside-revit/issues/753)
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.11 RC2" version="v1.11.8402.17166" pre_release=true time="01/03/2023" %}
-
 ![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
+
+{% include ltr/release-header.html title="v1.11" version="v1.11.8410.29937" time="01/10/2023" %}
+
+- Fix for "Comments" parameter `DataType`.
+- Improved `Types.CurtainGridLine` previews.
+- Improved conversion from `CurtainGrid` and `CurtainCell` to `Brep`.
+- Fixed `Types.Panel` and `Types.PanelType` recognizing a `ARDB.FamilyInstance` as valid.
+- Implemented Previews on `Types.CurtainCell`.
+- Fixed {% include ltr/comp.html uuid='fe427d04' %} component when managing Types.Panel elements.
+- Improved {% include ltr/comp.html uuid='6723beb1' %} for walls that are member of a stacked wall.
+- Now conversion from {% include ltr/comp.html uuid='15ad6bf9' %} to `Surface` gives a `Brep` correctly oriented.
+
+{% include ltr/release-header.html title="v1.11 RC2" version="v1.11.8402.17166" pre_release=true time="01/03/2023" %}
 
 - Added {% include ltr/comp.html uuid='2120c0fb' %} component.
 - Moved {% include ltr/comp.html uuid='221e53a6' %} and {% include ltr/comp.html uuid='8ead987d' %} to the View panel.

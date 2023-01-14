@@ -8,13 +8,13 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
-  using ElementTracking;
+  using External.DB;
   using External.DB.Extensions;
 
   public class ParameterFilterElementByName : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("01E86D7C-B143-47F6-BC26-0A234EB360F3");
-    public override GH_Exposure Exposure => GH_Exposure.septenary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -34,11 +34,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     public ParameterFilterElementByName() : base
     (
-      name: "Add Parameter Filter",
-      nickname: "ParaFilt",
-      description: "Create a parameter based filter",
+      name: "Add Rule-based Filter",
+      nickname: "RuleFilt",
+      description: "Create a parameter rule-based filter",
       category: "Revit",
-      subCategory: "Filter"
+      subCategory: "View"
     )
     { }
 
@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         {
           Name = "Name",
           NickName = "N",
-          Description = "Selection filter name",
+          Description = "Filter name",
         },
         ParamRelevance.Primary
       ),
@@ -76,7 +76,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
           Access = GH_ParamAccess.item,
           Optional = true
         },
+#if REVIT_2019
         ParamRelevance.Primary
+#else
+        ParamRelevance.Occasional
+#endif
       ),
     };
 
@@ -87,21 +91,29 @@ namespace RhinoInside.Revit.GH.Components.Filters
       (
         new Parameters.FilterElement()
         {
-          Name = _ParameterFilter_,
-          NickName = _ParameterFilter_.Substring(0, 1),
-          Description = $"Output {_ParameterFilter_}",
+          Name = _RuleBasedFilter_,
+          NickName = _RuleBasedFilter_.Substring(0, 1),
+          Description = $"Output {_RuleBasedFilter_}",
         }
       ),
     };
 
-    const string _ParameterFilter_ = "Parameter Filter";
+    public override void AddedToDocument(GH_Document document)
+    {
+      // V 1.12
+      if (Params.Output<IGH_Param>("Parameter Filter") is IGH_Param parameterFilter) parameterFilter.Name = "Rule-based Filter";
+
+      base.AddedToDocument(document);
+    }
+
+    const string _RuleBasedFilter_ = "Rule-based Filter";
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
       ReconstructElement<ARDB.ParameterFilterElement>
       (
-        doc.Value, _ParameterFilter_, (ruleFilter) =>
+        doc.Value, _RuleBasedFilter_, ruleFilter =>
         {
           // Input
           if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
@@ -110,13 +122,22 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
           // Compute
           StartTransaction(doc.Value);
-          if (CanReconstruct(_ParameterFilter_, out var untracked, ref ruleFilter, doc.Value, name))
+          if (CanReconstruct(_RuleBasedFilter_, out var untracked, ref ruleFilter, doc.Value, name))
           {
-            var categoryIds = categories?.Where(x => doc.Value.IsEquivalent(x.Document)).Select(x => x.Id).ToList();
-            ruleFilter = Reconstruct(ruleFilter, doc.Value, name, categoryIds, filter?.Value, default);
+            var categoryIds = categories?.Where(x => doc.Value.IsEquivalent(x?.Document)).Select(x => x.Id).ToHashSet();
+
+            try { ruleFilter = Reconstruct(ruleFilter, doc.Value, name, categoryIds, filter?.Value, default); }
+            catch (Exception e)
+            {
+              if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
+                throw new Exceptions.RuntimeException(e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0]);
+              else if (FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0]);
+              else throw new Exceptions.RuntimeErrorException(e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0]);
+            }
           }
 
-          DA.SetData(_ParameterFilter_, ruleFilter);
+          DA.SetData(_RuleBasedFilter_, ruleFilter);
           return untracked ? null : ruleFilter;
         }
       );
@@ -133,10 +154,9 @@ namespace RhinoInside.Revit.GH.Components.Filters
     {
       if (ruleFilter is null) return false;
       if (name is object) { if (ruleFilter.Name != name) ruleFilter.Name = name; }
-      else ruleFilter.SetIncrementalNomen(template?.Name ?? _ParameterFilter_);
+      else ruleFilter.SetIncrementalNomen(template?.Name ?? _RuleBasedFilter_);
       if (categoryIds is object) ruleFilter.SetCategories(categoryIds);
-      if (filter is object) ruleFilter.SetElementFilter(filter);
-      else ruleFilter.ClearRules();
+
       ruleFilter.CopyParametersFrom(template);
       return true;
     }
@@ -153,11 +173,12 @@ namespace RhinoInside.Revit.GH.Components.Filters
       var ruleFilter = default(ARDB.ParameterFilterElement);
 
       // Make sure the name is unique
+      if (name is null)
       {
         name = doc.NextIncrementalNomen
         (
-          name ?? template?.Name ?? _ParameterFilter_,
-          typeof(ARDB.ParameterFilterElement)
+          template?.Name ?? _RuleBasedFilter_, typeof(ARDB.ParameterFilterElement),
+          categoryId: ARDB.BuiltInCategory.INVALID
         );
       }
 
@@ -181,9 +202,6 @@ namespace RhinoInside.Revit.GH.Components.Filters
         (
           doc, name, categoryIds
         );
-
-        if(filter is object)
-          ruleFilter.SetElementFilter(filter);
       }
 
       return ruleFilter;
@@ -199,6 +217,16 @@ namespace RhinoInside.Revit.GH.Components.Filters
       ARDB.ParameterFilterElement template
     )
     {
+      var inputCategoryIds = categoryIds;
+      categoryIds = ARDB.ParameterFilterUtilities.RemoveUnfilterableCategories(inputCategoryIds);
+      if (categoryIds.Count != inputCategoryIds.Count)
+      {
+        if (FailureProcessingMode != ARDB.FailureProcessingResult.ProceedWithCommit)
+          throw new Exceptions.RuntimeErrorException("Input 'Categories' parameter contains unfilterable categories.");
+        else foreach(var id in inputCategoryIds.Where(x => !categoryIds.Contains(x)))
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Unfilterable category '{doc.GetCategory(id)?.Name}' was not applied.");
+      }
+
       if (!Reuse(ruleFilter, name, categoryIds, filter, template))
       {
         ruleFilter = ruleFilter.ReplaceElement
@@ -206,6 +234,26 @@ namespace RhinoInside.Revit.GH.Components.Filters
           Create(doc, name, categoryIds, filter, template),
           default
         );
+      }
+
+      if (ruleFilter is object && filter is object)
+      {
+        if (categoryIds.Count == 0 || filter.IsEmpty()) ruleFilter.ClearRules();
+        else 
+        {
+          if (!ruleFilter.ElementFilterIsAcceptableForParameterFilterElement(filter))
+            throw new Exceptions.RuntimeErrorException
+            (
+#if REVIT_2019
+              $"The input 'Filter' is not acceptable for use by a Rule-based Filter.\r" +
+              "Only Parameter Filters or Logical combinations of these are accepted."
+#else
+              "Parameter Filter is partially supported before Revit 2019."
+#endif
+            );
+
+          ruleFilter.SetElementFilter(filter);
+        }
       }
 
       return ruleFilter;

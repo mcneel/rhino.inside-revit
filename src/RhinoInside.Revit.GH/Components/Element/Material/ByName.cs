@@ -123,8 +123,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
       {
         name = doc.NextIncrementalNomen
         (
-          template?.Name ?? _Material_,
-          typeof(ARDB.Material),
+          template?.Name ?? _Material_, typeof(ARDB.Material),
           categoryId: ARDB.BuiltInCategory.OST_Materials
         );
       }
