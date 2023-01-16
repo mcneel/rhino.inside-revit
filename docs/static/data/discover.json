@@ -92,6 +92,28 @@
     },
     {
         "highlight": true,
+        "title": "PAZ Academy Classes",
+        "url": "https://pazacademy.ch/product/rhino-inside-revit-basics/",
+        "thumbnail": "/static/images/discover/PAZ-BSS-COVER.jpg",
+        "author": "PAZ Academy",
+        "authorUrl": "",
+        "description": "Lessons using Rhino.Inside.Revit in practical workflows.  Classes Can be conducted in German, English or Hungarian.",
+        "kinds": [
+            "course",
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "course",
+            "purchase"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "highlight": true,
         "title": "Building Systems Specialist",
         "url": "https://rhre.pazacademy.xyz/register-form/",
         "thumbnail": "/static/images/discover/PAZ-BSS-COVER.jpg",
