@@ -161,8 +161,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public override ARDB.ElementId ReferenceId => _Reference?.ElementId;
 
-    public override bool IsReferencedData => ReferenceDocumentId != Guid.Empty;
     public override bool IsReferencedDataLoaded => _ReferenceDocument is object && _Reference is object;
+
     public override bool LoadReferencedData()
     {
       if (IsReferencedData && !IsReferencedDataLoaded)
@@ -196,6 +196,17 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return IsReferencedDataLoaded;
+    }
+
+    public override void UnloadReferencedData()
+    {
+      if (IsReferencedData)
+      {
+        _ReferenceDocument = default;
+        _Reference = default;
+      }
+
+      base.UnloadReferencedData();
     }
     #endregion
 

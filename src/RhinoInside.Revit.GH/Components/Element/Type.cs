@@ -6,6 +6,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
+  using External.DB.Extensions;
+
   public class ElementPropertyType : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("FE427D04-1D8F-48BE-BFBA-EB28AD23FC03");
@@ -81,61 +83,65 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.GetDataList(DA, "Element", out IList<Types.Element> elements)) return;
       if (Params.GetDataList(DA, "Type", out IList<Types.ElementType> types))
       {
-        var outputTypes = Params.IndexOfOutputParam("Type") < 0 ? default : new List<Types.ElementType>();
         var typesSets = new Dictionary<Types.ElementType, List<ARDB.ElementId>>();
 
-        int index = 0;
-        foreach (var element in elements)
+        foreach (var item in elements.ZipOrLast(types, (Element, Type) => (Element, Type)))
         {
-          if (element is object && types.ElementAtOrLast(index) is Types.ElementType type)
+          var element = item.Element;
+          var type    = item.Type;
+
+          if (element?.IsValid is true && type?.IsValid is true)
           {
-            outputTypes?.Add(element is object ? type : default);
+            if (element.Type.Equals(type))
+              continue;
 
-            if (!typesSets.TryGetValue(type, out var entry))
-              typesSets.Add(type, new List<ARDB.ElementId> { element.Id });
-            else
-              entry.Add(element.Id);
+            if (!element.Document.IsEquivalent(type.Document))
+              type = Types.ElementType.FromElementId(element.Document, element.Document.LookupElement(type.Document, type.Id)) as Types.ElementType;
+
+            if (type is object)
+            {
+              // Special case for ARDB.Panel
+              if (element.Value is ARDB.Panel panel)
+              {
+                switch (type)
+                {
+                  case Types.HostObjectType hostType:
+                    if (panel.FindHostPanel() is ARDB.ElementId hostPanelId && hostPanelId.IsValid())
+                      element = Types.Element.FromElementId(element.Document, hostPanelId) ?? element;
+                    break;
+                }
+              }
+
+              // Special case for CurtainGrid based elements
+              if (element is Types.ICurtainGridsAccess grids)
+              {
+                foreach (var grid in grids.CurtainGrids)
+                {
+                  StartTransaction(element.Document);
+                  grid.DeleteGridLines(instance: false, type: true);
+                  //grid.DeleteMullions(instance: false, type: true);
+                }
+              }
+
+              if (!typesSets.TryGetValue(type, out var entry))
+                typesSets.Add(type, new List<ARDB.ElementId> { element.Id });
+              else
+                entry.Add(element.Id);
+            }
           }
-          else if (types.Count > 0) outputTypes?.Add(default);
-
-          index++;
         }
 
-        var map = new Dictionary<ARDB.ElementId, ARDB.ElementId>();
         foreach (var type in typesSets)
         {
           UpdateDocument
           (
-            type.Key.Document, () =>
-            {
-              foreach (var entry in ARDB.Element.ChangeTypeId(type.Key.Document, type.Value, type.Key.Id))
-              {
-                if (map.ContainsKey(entry.Key)) map.Remove(entry.Key);
-                map.Add(entry.Key, entry.Value);
-              }
-            }
+            type.Key.Document, () => ARDB.Element.ChangeTypeId(type.Key.Document, type.Value, type.Key.Id)
           );
         }
-
-        DA.SetDataList
-        (
-          "Element",
-          elements.Select
-          (
-            x =>
-            x is null ? null :
-            map.TryGetValue(x.Id, out var newId) ?
-            Types.Element.FromElementId(x.Document, newId) : x
-          )
-        );
-
-        Params.TrySetDataList(DA, "Type", () => outputTypes);
       }
-      else
-      {
-        DA.SetDataList("Element", elements);
-        Params.TrySetDataList(DA, "Type", () => elements.Select(x => x?.Type));
-      }
+
+      DA.SetDataList("Element", elements);
+      Params.TrySetDataList(DA, "Type", () => elements.Select(x => x?.Type));
     }
   }
 }

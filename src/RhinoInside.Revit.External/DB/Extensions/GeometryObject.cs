@@ -105,12 +105,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static GeometryObjectEqualityComparer Comparer(double tolerance) => new GeometryObjectEqualityComparer(tolerance);
 
     #region Length
-    public bool Equals(double x, double y) => Abs(x - y) < Tolerance;
+    public bool Equals(double x, double y) => Norm(x - y) < Tolerance;
     public int GetHashCode(double value) => Math.Round(value * ReciprocalTolerance).GetHashCode();
     #endregion
 
     #region UV
-    public bool Equals(UV x, UV y) => Abs(x.U - y.U, x.V - y.V) < Tolerance;
+    public bool Equals(UV x, UV y) => Norm(x.U - y.U, x.V - y.V) < Tolerance;
     public int GetHashCode(UV obj) => CombineHash
     (
       GetHashCode(obj.U),
@@ -132,7 +132,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region XYZ
-    public bool Equals(XYZ left, XYZ right) => Abs(left.X - right.X, left.Y - right.Y, left.Z - right.Z) < Tolerance;
+    public bool Equals(XYZ left, XYZ right) => Norm(left.X - right.X, left.Y - right.Y, left.Z - right.Z) < Tolerance;
     public int GetHashCode(XYZ obj) => CombineHash
     (
       GetHashCode(obj.X),

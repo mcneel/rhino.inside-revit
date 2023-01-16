@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using Autodesk.Revit.DB;
-
 namespace RhinoInside.Revit.External.DB.Schemas
 {
   public partial class ParameterGroup
@@ -54,7 +51,11 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static ParameterGroup Forces => new ParameterGroup("autodesk.parameter.group:forces-1.0.0");
     public static ParameterGroup General => new ParameterGroup("autodesk.parameter.group:general-1.0.0");
     public static ParameterGroup GeoLocation => new ParameterGroup("autodesk.revit.group:geoLocation-1.0.0");
+#if REVIT_2023
+    public static ParameterGroup Geometry => new ParameterGroup("autodesk.parameter.group:dimensions-1.0.0");
+#else
     public static ParameterGroup Geometry => new ParameterGroup("autodesk.parameter.group:geometry-1.0.0");
+#endif
     public static ParameterGroup GeometryPositioning => new ParameterGroup("autodesk.revit.group:geometryPositioning-1.0.0");
     public static ParameterGroup Graphics => new ParameterGroup("autodesk.parameter.group:graphics-1.0.0");
     public static ParameterGroup GreenBuilding => new ParameterGroup("autodesk.parameter.group:greenBuilding-1.0.0");
@@ -124,6 +125,6 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static ParameterGroup ViewCamera => new ParameterGroup("autodesk.revit.group:viewCamera-1.0.0");
     public static ParameterGroup ViewExtents => new ParameterGroup("autodesk.revit.group:viewExtents-1.0.0");
     public static ParameterGroup Visibility => new ParameterGroup("autodesk.parameter.group:visibility-1.0.0");
-    public static ParameterGroup WallCrossSection => new ParameterGroup("autodesk.revit.group:wallCrossSection-1.0.0");
+    public static ParameterGroup WallCrossSection => new ParameterGroup("autodesk.revit.group:wallCrossSectionDefinition-1.0.0");
   }
 }

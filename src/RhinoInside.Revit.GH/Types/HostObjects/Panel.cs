@@ -1,4 +1,3 @@
-using System;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -6,11 +5,24 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Panel")]
   public class Panel : FamilyInstance
   {
+    static readonly ARDB.ElementId CurtainWallPanelsId = new ARDB.ElementId(ARDB.BuiltInCategory.OST_CurtainWallPanels);
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
-      return element is ARDB.Panel ||
-             (element is ARDB.FamilyInstance instance && instance.Symbol.Family.IsCurtainPanelFamily);
+      if (element is ARDB.Panel)
+        return true;
+
+      if (element is ARDB.FamilyInstance instance)
+      {
+        var symbol = instance.Symbol;
+        if (symbol.Family.IsCurtainPanelFamily)
+          return true;
+
+        if (symbol.IsSimilarType(symbol.Document.GetDefaultFamilyTypeId(CurtainWallPanelsId)))
+          return true;
+      }
+
+      return false;
     }
 
     public Panel() { }
@@ -52,10 +64,26 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Panel Type")]
   public class PanelType : FamilySymbol
   {
-    protected override Type ValueType => typeof(ARDB.PanelType);
-    public new ARDB.PanelType Value => base.Value as ARDB.PanelType;
+    static readonly ARDB.ElementId CurtainWallPanelsId = new ARDB.ElementId(ARDB.BuiltInCategory.OST_CurtainWallPanels);
+    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
+    public static bool IsValidElement(ARDB.Element element)
+    {
+      if (element is ARDB.PanelType)
+        return true;
+
+      if (element is ARDB.FamilySymbol symbol)
+      {
+        if (symbol.Family.IsCurtainPanelFamily)
+          return true;
+
+        if (symbol.IsSimilarType(symbol.Document.GetDefaultFamilyTypeId(CurtainWallPanelsId)))
+          return true;
+      }
+
+      return false;
+    }
 
     public PanelType() { }
-    public PanelType(ARDB.PanelType value) : base(value) { }
+    public PanelType(ARDB.FamilySymbol value) : base(value) { }
   }
 }

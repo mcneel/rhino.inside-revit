@@ -223,7 +223,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       }
 
       if (categories?.Count == 0)
-        categories = doc.GetBuiltInCategoriesWithParameters().Select(x => doc.GetCategory(x)).ToList();
+        categories = doc.GetBuiltInCategoriesWithParameters().Select(doc.GetCategory).ToList();
 
       if (categories is object)
       {
@@ -244,7 +244,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
           if (parameter is ARDB.SharedParameterElement)
             throw new InvalidOperationException("Failed editing the parameter binding.");
           else
-            throw new InvalidOperationException($"Categories rebinding is only supported on shared parameters.");
+            throw new InvalidOperationException("Categories rebinding is only supported on shared parameters.");
         }
       }
 

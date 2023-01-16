@@ -174,7 +174,20 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.BuiltInParameter bip: parameterId = new ARDB.ElementId(bip); break;
         case ARDB.ElementId id: parameterId = id; break;
         case ARDB.Parameter parameter: return SetParameter(parameter);
-        case string n: name = n; return true;
+        case string n:
+          if (ERDB.Schemas.ParameterId.IsParameterId(n))
+          {
+            parameterId = new ARDB.ElementId(new ERDB.Schemas.ParameterId(n));
+            break;
+          }
+
+          if (ElementNaming.IsValidName(n))
+          {
+            name = n;
+            return true;
+          }
+
+          return false;
         case Guid g: guid = g; return true;
       }
 
@@ -395,6 +408,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_ItemDescription
     System.Drawing.Bitmap IGH_ItemDescription.GetTypeIcon(System.Drawing.Size size) => Properties.Resources.Parameter;
+
     string IGH_ItemDescription.Identity
     {
       get
@@ -416,11 +430,11 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+
     string IGH_ItemDescription.Description =>
       Id is object && Id.TryGetBuiltInParameter(out var bip) ?
       ((External.DB.Schemas.ParameterId) bip).Namespace :
       DataType?.Label;
-
     #endregion
 
     #region Properties
@@ -472,8 +486,13 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    static readonly Dictionary<ARDB.BuiltInParameter, ERDB.Schemas.DataType> BuiltInParametersTypes =
-      new Dictionary<ARDB.BuiltInParameter, ERDB.Schemas.DataType>();
+    internal static readonly Dictionary<ARDB.BuiltInParameter, ERDB.Schemas.DataType> BuiltInParametersTypes = new Dictionary<ARDB.BuiltInParameter, ERDB.Schemas.DataType>()
+    {
+      { ARDB.BuiltInParameter.RASTER_SYMBOL_WIDTH,  ERDB.Schemas.SpecType.Measurable.Length },
+      { ARDB.BuiltInParameter.RASTER_SYMBOL_HEIGHT, ERDB.Schemas.SpecType.Measurable.Length },
+      { ARDB.BuiltInParameter.RASTER_SHEETWIDTH,    ERDB.Schemas.SpecType.Measurable.Length },
+      { ARDB.BuiltInParameter.RASTER_SHEETHEIGHT,   ERDB.Schemas.SpecType.Measurable.Length }
+    };
 
     ERDB.Schemas.DataType dataType;
     public ERDB.Schemas.DataType DataType
@@ -493,9 +512,10 @@ namespace RhinoInside.Revit.GH.Types
                   break;
 
                 case ARDB.StorageType.Double:
+
                   var categoriesWhereDefined = doc.GetBuiltInCategoriesWithParameters().
                     Select(bic => new ARDB.ElementId(bic)).
-                    Where(cid => ARDB.TableView.GetAvailableParameters(doc, cid).Contains(Id)).
+                    Where(cid => new ReadOnlySortedElementIdCollection(ARDB.TableView.GetAvailableParameters(doc, cid)).Contains(Id)).
                     ToArray();
 
                   // Look into a Schedule table
@@ -561,11 +581,10 @@ namespace RhinoInside.Revit.GH.Types
                   break;
 
                 case ARDB.StorageType.String:
-                  if (builtInParameter.ToString().EndsWith("_COMMENTS"))
+                  if (builtInParameter.ToString().EndsWith("_URL"))
                     dataType = ERDB.Schemas.SpecType.String.Url;
-                  else if (builtInParameter.ToString().EndsWith("_URL"))
-                    dataType = ERDB.Schemas.SpecType.String.Url;
-                  else dataType = ERDB.Schemas.SpecType.String.Text;
+                  else
+                    dataType = ERDB.Schemas.SpecType.String.Text;
                   break;
               }
 
@@ -587,13 +606,7 @@ namespace RhinoInside.Revit.GH.Types
     ERDB.Schemas.ParameterGroup group;
     public ERDB.Schemas.ParameterGroup Group
     {
-      get
-      {
-        if (IsReferencedData)
-          return Value?.GetDefinition()?.GetGroupType();
-        else
-          return group;
-      }
+      get => group ?? (group = Value?.GetDefinition()?.GetGroupType());
       set
       {
         if (IsReferencedData)
@@ -601,14 +614,15 @@ namespace RhinoInside.Revit.GH.Types
           if (Id.IsBuiltInId()) throw new InvalidOperationException("This operation is not supported on built-in parameters");
           Value?.GetDefinition()?.SetGroupType(value);
         }
-        else group = value;
+
+        group = value;
       }
     }
 
     bool? visible;
     public bool? Visible
     {
-      get => Value?.GetDefinition()?.Visible ?? visible;
+      get => visible ?? (visible = Value?.GetDefinition()?.Visible);
       set
       {
         if (IsReferencedData) throw new InvalidOperationException();
@@ -810,28 +824,28 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Id is object && Id.TryGetBuiltInParameter(out var _))
-          return External.DB.ParameterClass.BuiltIn;
+          return ERDB.ParameterClass.BuiltIn;
 
         if (!IsReferencedData)
         {
-          if (GUID.HasValue) return External.DB.ParameterClass.Shared;
-          return External.DB.ParameterClass.Invalid;
+          if (GUID.HasValue) return ERDB.ParameterClass.Shared;
+          return ERDB.ParameterClass.Invalid;
         }
 
         switch (Value)
         {
-          case ARDB.GlobalParameter _: return External.DB.ParameterClass.Global;
-          case ARDB.SharedParameterElement _: return External.DB.ParameterClass.Shared;
+          case ARDB.GlobalParameter _: return ERDB.ParameterClass.Global;
+          case ARDB.SharedParameterElement _: return ERDB.ParameterClass.Shared;
           case ARDB.ParameterElement project:
             switch (project.get_Parameter(ARDB.BuiltInParameter.ELEM_DELETABLE_IN_FAMILY).AsInteger())
-            {
-              case 0: return External.DB.ParameterClass.Family;
-              case 1: return External.DB.ParameterClass.Project;
+            { 
+              case 0: return ERDB.ParameterClass.Family;
+              case 1: return ERDB.ParameterClass.Project;
             }
             break;
         }
 
-        return External.DB.ParameterClass.Invalid;
+        return ERDB.ParameterClass.Invalid;
       }
     }
 
@@ -839,7 +853,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (!IsReferencedData) return External.DB.ParameterScope.Unknown;
+        if (!IsReferencedData) return ERDB.ParameterScope.Unknown;
 
         if (Document is ARDB.Document doc)
         {
@@ -852,30 +866,30 @@ namespace RhinoInside.Revit.GH.Types
               default;
 
             return familyParameter is null ?
-              External.DB.ParameterScope.Unknown :
+              ERDB.ParameterScope.Unknown :
               familyParameter.IsInstance ?
-              External.DB.ParameterScope.Instance :
-              External.DB.ParameterScope.Type;
+              ERDB.ParameterScope.Instance :
+              ERDB.ParameterScope.Type;
           }
           else switch (Value)
           {
-            case ARDB.GlobalParameter _: return External.DB.ParameterScope.Global;
+            case ARDB.GlobalParameter _: return ERDB.ParameterScope.Global;
             case ARDB.ParameterElement parameterElement:
               var definition = parameterElement.GetDefinition();
               if (!Id.IsBuiltInId())
               {
                 switch (doc.ParameterBindings.get_Item(definition))
                 {
-                  case ARDB.InstanceBinding _: return External.DB.ParameterScope.Instance;
-                  case ARDB.TypeBinding _: return External.DB.ParameterScope.Type;
+                  case ARDB.InstanceBinding _:  return ERDB.ParameterScope.Instance;
+                  case ARDB.TypeBinding _:      return ERDB.ParameterScope.Type;
                 }
               }
 
-              return External.DB.ParameterScope.Unknown;
+              return ERDB.ParameterScope.Unknown;
           }
         }
 
-        return External.DB.ParameterScope.Unknown;
+        return ERDB.ParameterScope.Unknown;
       }
     }
     #endregion
@@ -897,17 +911,17 @@ namespace RhinoInside.Revit.GH.Types
       //  switch (parameter.StorageType)
       //  {
       //    case ARDB.StorageType.Integer: dataType = External.DB.Schemas.SpecType.Int.Integer; break;
-      //    case ARDB.StorageType.Double: dataType = External.DB.Schemas.SpecType.Measurable.Number; break;
-      //    case ARDB.StorageType.String: dataType = External.DB.Schemas.SpecType.String.Text; break;
+      //    case ARDB.StorageType.Double:  dataType = External.DB.Schemas.SpecType.Measurable.Number; break;
+      //    case ARDB.StorageType.String:  dataType = External.DB.Schemas.SpecType.String.Text; break;
       //    case ARDB.StorageType.ElementId:
       //      if (parameter.HasValue)
       //      {
       //        if (Document.GetElement(parameter.AsElementId()) is ARDB.Element value)
-      //        if (value.Category is ARDB.Category category)
-      //        if (category.Id.TryGetBuiltInCategory(out var categoryId))
-      //        {
-      //          dataType = (External.DB.Schemas.CategoryId) categoryId;
-      //        }
+      //          if (value.Category is ARDB.Category category)
+      //            if (category.Id.TryGetBuiltInCategory(out var categoryId))
+      //            {
+      //              dataType = (External.DB.Schemas.CategoryId) categoryId;
+      //            }
       //      }
       //      break;
       //  }

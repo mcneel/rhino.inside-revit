@@ -23,17 +23,21 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value is ARDB.CurtainGridLine gridLine)
       {
-        var points = gridLine.FullCurve?.Tessellate();
-        if (points is object)
-          args.Pipeline.DrawPatternedPolyline(points.Select(GeometryDecoder.ToPoint3d), args.Color, 0x00000101, args.Thickness, false);
-
-        foreach (var segment in gridLine.ExistingSegmentCurves.ToCurveMany())
+        foreach (ARDB.Curve segment in gridLine.ExistingSegmentCurves)
         {
-          if(segment is object)
-            args.Pipeline.DrawCurve(segment, args.Color, args.Thickness);
+          if (segment is object)
+            args.Pipeline.DrawCurve(segment.ToCurve(), args.Color, args.Thickness);
+        }
+
+        foreach (ARDB.Curve segment in gridLine.SkippedSegmentCurves)
+        {
+          if (segment is object)
+            args.Pipeline.DrawPatternedPolyline(segment.Tessellate().Select(GeometryDecoder.ToPoint3d), args.Color, 0x00000101, args.Thickness, false);
         }
       }
     }
+
+    protected override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
     #region Properties
@@ -41,21 +45,21 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.CurtainGridLine gridLine && gridLine ?.FullCurve is ARDB.Curve curve)
+        if (Curve is Curve curve)
         {
-          var start = curve.Evaluate(0.0, normalized: true).ToPoint3d();
-          var end = curve.Evaluate(1.0, normalized: true).ToPoint3d();
+          var start = curve.PointAtStart;
+          var end = curve.PointAtEnd;
           var axis = end - start;
           var origin = start + (axis * 0.5);
           var perp = axis.PerpVector();
           return new Plane(origin, axis, perp);
         }
 
-        return base.Location;
+        return NaN.Plane;
       }
     }
 
-    public override Curve Curve => Value?.FullCurve.ToCurve();
+    public override Curve Curve => Value?.AllSegmentCurves is ARDB.CurveArray segments ? Curve.JoinCurves(segments.ToCurveMany())[0] : default;
     #endregion
   }
 }

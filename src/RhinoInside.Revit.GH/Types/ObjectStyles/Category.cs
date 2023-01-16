@@ -54,6 +54,14 @@ namespace RhinoInside.Revit.GH.Types
             SetValue(default, ARDB.ElementId.InvalidElementId);
 
           return true;
+        case string n:
+          if (DBXS.CategoryId.IsCategoryId(n))
+          {
+            categoryId = new ARDB.ElementId(new DBXS.CategoryId(n));
+            break;
+          }
+
+          return false;
       }
 
       if (categoryId.TryGetBuiltInCategory(out var _))

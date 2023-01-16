@@ -61,7 +61,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       new SortedSet<BuiltInCategory>
       (
         Enum.GetValues(typeof(BuiltInCategory)).
-        Cast<BuiltInCategory>().Where(x => Category.IsBuiltInCategoryValid(x))
+        Cast<BuiltInCategory>().
+        Where(Category.IsBuiltInCategoryValid)
       );
 #else
     static readonly BuiltInCategory[] validBuiltInCategories =

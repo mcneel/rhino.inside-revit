@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using GH_IO.Serialization;
+using Grasshopper.Special;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
@@ -31,7 +32,7 @@ namespace RhinoInside.Revit.GH.Types
 
   [Kernel.Attributes.Name("Document"), AssemblyPriority]
   [DebuggerDisplay("{this.ToString()}: id {Id}")]
-  public class Document : IGH_Document, IGH_ReferenceData, ICloneable
+  public class Document : IGH_Document, IGH_ReferenceData, IGH_ItemDescription, ICloneable
   {
     #region System.Object
     public bool Equals(IGH_Document other)
@@ -248,6 +249,24 @@ namespace RhinoInside.Revit.GH.Types
           return ARDB.BasicFileInfo.Extract(filePath);
 
         return default;
+      }
+    }
+    #endregion
+
+    #region IGH_ItemDescription
+    System.Drawing.Bitmap IGH_ItemDescription.GetTypeIcon(System.Drawing.Size size) => Properties.Resources.Document;
+    string IGH_ItemDescription.Name => DisplayName;
+    string IGH_ItemDescription.Identity => DocumentId.ToString("B");
+    string IGH_ItemDescription.Description
+    {
+      get
+      {
+        var description = PathName;
+        var index = Math.Max(description.LastIndexOf(Path.DirectorySeparatorChar), description.LastIndexOf(Path.DirectorySeparatorChar)) + 1;
+        if (index > 0)
+          description = description.Substring(0, index);
+
+        return description.TripleDotPath(64);
       }
     }
     #endregion

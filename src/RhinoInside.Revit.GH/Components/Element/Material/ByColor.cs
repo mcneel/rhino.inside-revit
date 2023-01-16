@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       var mat = ReconstructElement<ARDB.Material>
       (
-        doc.Value, _Material_, (material) =>
+        doc.Value, _Material_, material =>
         {
           StartTransaction(doc.Value);
 
@@ -112,27 +112,25 @@ namespace RhinoInside.Revit.GH.Components.Materials
         }
       );
 
-      ReconstructElement<ARDB.AppearanceAssetElement>
+      var ass = ReconstructElement<ARDB.AppearanceAssetElement>
       (
-        doc.Value, _Asset_, (asset) =>
+        doc.Value, _Asset_, asset =>
         {
           StartTransaction(doc.Value);
 
           if (CanReconstruct(_Asset_, out var untracked, ref asset, doc.Value, name, categoryId: ARDB.BuiltInCategory.INVALID))
-          {
             asset = Reconstruct(asset, doc.Value, name, templateName, template);
-
-            if (mat is object && asset is object)
-            {
-              mat.AppearanceAssetId = asset.Id;
-              mat.UseRenderAppearanceForShading = true;
-            }
-          }
 
           DA.SetData(_Asset_, asset);
           return untracked ? null : asset;
         }
       );
+
+      if (mat is object)
+      {
+        mat.AppearanceAssetId = ass?.Id ?? ElementIdExtension.InvalidElementId;
+        mat.UseRenderAppearanceForShading = ass is object;
+      }
     }
 
     #region Utils
@@ -189,11 +187,11 @@ namespace RhinoInside.Revit.GH.Components.Materials
       var material = default(ARDB.Material);
 
       // Make sure the name is unique
+      if (name is null)
       {
         name = doc.NextIncrementalNomen
         (
-          name ?? templateName ?? _Material_,
-          typeof(ARDB.Material),
+          templateName ?? _Material_, typeof(ARDB.Material),
           categoryId: ARDB.BuiltInCategory.OST_Materials
         );
       }
@@ -275,11 +273,11 @@ namespace RhinoInside.Revit.GH.Components.Materials
       var assetElement = default(ARDB.AppearanceAssetElement);
 
       // Make sure the name is unique
+      if (name is null)
       {
         name = doc.NextIncrementalNomen
         (
-          name ?? templateName ?? _Asset_,
-          typeof(ARDB.AppearanceAssetElement),
+          templateName ?? _Asset_, typeof(ARDB.AppearanceAssetElement),
           categoryId: ARDB.BuiltInCategory.INVALID
         );
       }

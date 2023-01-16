@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Rhino;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
@@ -180,7 +181,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Architecture.Room room)
         {
           var solids = room.ClosedShell.OfType<ARDB.Solid>().Where(x => x.Faces.Size > 0);
-          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryTolerance.Model.VertexTolerance);
+          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), RhinoMath.UnsetValue);
         }
 
         return null;
@@ -206,7 +207,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Mechanical.Space space)
         {
           var solids = space.ClosedShell.OfType<ARDB.Solid>().Where(x => x.Faces.Size > 0);
-          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryTolerance.Model.VertexTolerance);
+          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), RhinoMath.UnsetValue);
         }
 
         return null;
