@@ -708,7 +708,7 @@ namespace Rhino.Geometry
         {
           ellipse.ClosestPoint(curve.PointAtStart, out var t0);
           ellipse.ClosestPoint(curve.PointAtEnd, out var t1);
-          domain = new Interval(t0, t1);
+          domain = new Interval(t0, t1 < t0 ? t1 + Math.PI * 2.0 : t1);
           return true;
         }
       }
