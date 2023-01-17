@@ -31,13 +31,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     readonly double Tolerance;
-    readonly double ReciprocalTolerance;
 
-    GeometryObjectEqualityComparer(double tolerance)
-    {
-      Tolerance = Math.Max(tolerance, Upsilon);
-      ReciprocalTolerance = 1.0 / Tolerance;
-    }
+    GeometryObjectEqualityComparer(double tolerance) => Tolerance = Math.Max(tolerance, Upsilon);
 
     struct ParamComparer : IEqualityComparer<double>, IEqualityComparer<IList<double>>, IEqualityComparer<DoubleArray>
     {
@@ -106,7 +101,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     #region Length
     public bool Equals(double x, double y) => Norm(x - y) < Tolerance;
-    public int GetHashCode(double value) => Math.Round(value * ReciprocalTolerance).GetHashCode();
+    public int GetHashCode(double value) => Math.Round(value / Tolerance).GetHashCode();
     #endregion
 
     #region UV
