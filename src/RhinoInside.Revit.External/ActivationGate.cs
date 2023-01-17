@@ -9,6 +9,8 @@ using System.Security.Permissions;
 using Autodesk.Revit.UI;
 using Microsoft.Win32.SafeHandles;
 using Microsoft.Win32.SafeHandles.InteropServices;
+using Rhino;
+using Rhino.Input;
 
 namespace RhinoInside.Revit.External
 {
@@ -449,7 +451,16 @@ namespace RhinoInside.Revit.External
                 windowToActivate = new WindowHandle(wParam);
 
                 if (externalEvent.IsPending)
+                {
+                  // HACK : If Rhino is in a Get we should allow it to finish.
+                  if (windowToActivate.Handle == RhinoApp.MainWindowHandle())
+                  {
+                    if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc && RhinoGet.InGet(rhinoDoc))
+                      return 0;
+                  }
+
                   WindowHandle.ActiveWindow.Flash();
+                }
                 else
                   externalEvent.Raise();
 
