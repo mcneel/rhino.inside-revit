@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Win32.SafeHandles;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 
 namespace Rhino.Geometry
@@ -15,6 +16,86 @@ namespace Rhino.Geometry
     public static readonly Plane Plane = new Plane(Point3d, Vector3d, Vector3d);
     public static readonly BoundingBox BoundingBox = new BoundingBox(Point3d, Point3d);
     public static readonly Box Box = new Box(Plane, BoundingBox);
+  }
+
+  readonly struct GeometryEqualityComparer :
+    IEqualityComparer<double>,
+    IEqualityComparer<Point3d>,
+    IEqualityComparer<Vector3d>
+  {
+    readonly double Tolerance;
+    readonly double ZeroTolerance;
+
+    GeometryEqualityComparer(double tolerance)
+    {
+      Tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
+      ZeroTolerance = Tolerance / 3.0;
+    }
+
+    /// <summary>
+    /// IEqualityComparer for <see cref="{T}"/> that compares geometrically using <see cref="RhinoMath.SqrtEpsilon"/> value.
+    /// </summary>
+    /// <param name="tolerance"></param>
+    /// <returns>A geometry comparer.</returns>
+    public static readonly GeometryEqualityComparer Default = new GeometryEqualityComparer(RhinoMath.SqrtEpsilon);
+
+    /// <summary>
+    /// IEqualityComparer for <see cref="{T}"/> that compares geometrically using <paramref name="tolerance"/> value.
+    /// </summary>
+    /// <param name="tolerance"></param>
+    /// <returns>A geometry comparer.</returns>
+    public static GeometryEqualityComparer Comparer(double tolerance) => new GeometryEqualityComparer(tolerance);
+
+    internal bool IsZeroLength(double x, double y, double z)
+    {
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+
+      double u = x, v = y, w = z;
+      if (x > w) { u = y; v = z; w = x; }
+      if (y > w) { u = z; v = x; w = y; }
+      if (w < ZeroTolerance) return true;
+      if (w > Tolerance) return false;
+
+      u /= w; v /= w;
+
+      return Math.Sqrt(1.0 + (u * u + v * v)) * w < Tolerance;
+    }
+
+    static int CombineHash(params int[] values)
+    {
+      int hash = 0;
+      for (int h = 0; h < values.Length; h++)
+        hash = hash * -1521134295 + values[h];
+
+      return hash;
+    }
+
+    #region Length
+    public bool Equals(double x, double y) => Math.Abs(x - y) < Tolerance;
+    public int GetHashCode(double value) => Math.Round(value / Tolerance).GetHashCode();
+    #endregion
+
+    #region Point3d
+    public bool Equals(Point3d left, Point3d right) => IsZeroLength(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+
+    public int GetHashCode(Point3d xyz) => CombineHash
+    (
+      GetHashCode(xyz.X),
+      GetHashCode(xyz.Y),
+      GetHashCode(xyz.Z)
+    );
+    #endregion
+
+    #region Vector3d
+    public bool Equals(Vector3d left, Vector3d right) => IsZeroLength(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+
+    public int GetHashCode(Vector3d xyz) => CombineHash
+    (
+      GetHashCode(xyz.X),
+      GetHashCode(xyz.Y),
+      GetHashCode(xyz.Z)
+    );
+    #endregion
   }
 
   static class UnitSystemExtension
@@ -38,8 +119,31 @@ namespace Rhino.Geometry
     }
   }
 
+  static class Point3dExtension
+  {
+    public static bool GeometryEquals(this Point3d left, Point3d right)
+    {
+      return GeometryEqualityComparer.Default.Equals(left, right);
+    }
+
+    public static bool GeometryEquals(this Point3d left, Point3d right, double tolerance)
+    {
+      return GeometryEqualityComparer.Comparer(tolerance).Equals(left, right);
+    }
+  }
+
   static class Vector3dExtension
   {
+    public static bool GeometryEquals(this Vector3d left, Vector3d right)
+    {
+      return GeometryEqualityComparer.Default.Equals(left, right);
+    }
+
+    public static bool GeometryEquals(this Vector3d left, Vector3d right, double tolerance)
+    {
+      return GeometryEqualityComparer.Comparer(tolerance).Equals(left, right);
+    }
+
     /// <summary>
     /// Arbitrary Axis Algorithm
     /// <para>Given a vector to be used as the Z axis of a coordinate system, this algorithm generates a corresponding X axis for the coordinate system.</para>
@@ -440,6 +544,7 @@ namespace Rhino.Geometry
       if (uv.Unitize())
       {
         t = Math.Atan2(uv.Y, uv.X);
+        if (t < 0.0) t += (2.0 * Math.PI);
         return true;
       }
       else
@@ -467,12 +572,13 @@ namespace Rhino.Geometry
 
   static class CurveExtension
   {
-    public static bool EpsilonEquals(this Curve curve, Curve other, double epsilon)
+    public static bool GeometryEquals(this Curve curve, Curve other, double tolerance)
     {
-      return curve.PointAtStart.EpsilonEquals(other.PointAtStart, epsilon) &&
-             curve.PointAtEnd.EpsilonEquals(other.PointAtEnd, epsilon) &&
-             Curve.GetDistancesBetweenCurves(curve, other, epsilon, out var max, out var _, out var _, out var _, out var _, out var _) &&
-             max < epsilon;
+      var comparer = GeometryEqualityComparer.Comparer(tolerance);
+      return comparer.Equals(curve.PointAtStart, other.PointAtStart) &&
+             comparer.Equals(curve.PointAtEnd, other.PointAtEnd) &&
+             Curve.GetDistancesBetweenCurves(curve, other, tolerance, out var max, out var _, out var _, out var _, out var _, out var _) &&
+             max < tolerance;
     }
 
     /// <summary>
@@ -603,7 +709,6 @@ namespace Rhino.Geometry
           ellipse.ClosestPoint(curve.PointAtStart, out var t0);
           ellipse.ClosestPoint(curve.PointAtEnd, out var t1);
           domain = new Interval(t0, t1);
-          if (domain.IsDecreasing) domain.Reverse();
           return true;
         }
       }

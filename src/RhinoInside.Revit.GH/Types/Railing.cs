@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value is ARDB.Architecture.Railing railing && curve is object)
       {
-        if (Curve.EpsilonEquals(curve, GeometryTolerance.Model.VertexTolerance) == false)
+        if (Curve.GeometryEquals(curve, GeometryTolerance.Model.VertexTolerance) == false)
         {
           railing.SetPath(curve.ToBoundedCurveLoop());
           InvalidateGraphics();
