@@ -119,18 +119,21 @@ namespace RhinoInside.Revit.GH.Components.Views
         StartTransaction(view.Document);
         view.CropBoxActive = cropView;
       }
-      Params.TrySetData(DA, "Crop View", () => view.Value.CropBoxActive);
+      Params.TrySetData(DA, "Crop View", () => view.CropBoxActive);
 
       if (Params.GetData(DA, "Crop Region Visible", out bool? cropRegionVisible))
       {
         StartTransaction(view.Document);
         view.CropBoxVisible = cropRegionVisible;
       }
-      Params.TrySetData(DA, "Crop Region Visible", () => view.Value.CropBoxVisible);
+      Params.TrySetData(DA, "Crop Region Visible", () => view.CropBoxVisible);
 
       if (Params.GetData(DA, "Crop Extents", out GH_Interval2D cropExtents))
       {
         StartTransaction(view.Document);
+
+        using (var cropManager = view.Value.GetCropRegionShapeManager())
+          if (cropManager.CanHaveShape) cropManager.RemoveCropRegionShape();
 
         var cropBox = view.Value.CropBox;
         cropBox.Min = new ARDB.XYZ
