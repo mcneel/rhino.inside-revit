@@ -10,7 +10,9 @@ group: Deployment & Configs
 
 ### WIP
 
-### RC 
+### RC
+
+- Added 'View Crop Region' component.
 
 
 {% endcapture %}
