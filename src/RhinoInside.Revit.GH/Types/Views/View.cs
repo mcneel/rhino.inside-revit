@@ -230,7 +230,7 @@ namespace RhinoInside.Revit.GH.Types
             ARDB.FitDirectionType.Vertical;
           var pixelSize = Math.Max(rect.Width, rect.Height);
           if (pixelSize == 0) return default;
-          pixelSize = Math.Min(4096, pixelSize);
+          pixelSize = Math.Min(pixelSize, 4096);
 
           var document = Types.Document.FromValue(viewDocument);
           try
@@ -239,7 +239,7 @@ namespace RhinoInside.Revit.GH.Types
             {
               ZoomType = ARDB.ZoomFitType.FitToPage,
               FitDirection = fitDirection,
-              PixelSize = pixelSize,
+              PixelSize = Math.Max(32, pixelSize),
               ImageResolution = ARDB.ImageResolution.DPI_72,
               ShadowViewsFileType = ARDB.ImageFileType.PNG,
               HLRandWFViewsFileType = ARDB.ImageFileType.PNG,
