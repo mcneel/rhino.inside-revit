@@ -243,8 +243,8 @@ namespace RhinoInside.Revit.GH.Components.Views
           break;
 
         case ARDB.ViewSection viewSection:
-          if (!double.IsInfinity(frontOffset) && !double.IsNaN(frontOffset))
-            frontOffset = 0.0;
+          if (double.IsInfinity(frontOffset) || double.IsNaN(frontOffset))
+            frontOffset = view.CropBox.Max.Z;
 
           break;
       }

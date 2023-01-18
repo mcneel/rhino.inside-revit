@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           _ClippingBox = BoundingBox.Empty;
           foreach (var curve in PlanarizedCurveLoops)
-            _ClippingBox.Value.Union(curve.GetBoundingBox(false));
+            _ClippingBox = BoundingBox.Union(_ClippingBox.Value, curve.GetBoundingBox(false));
         }
 
         return _ClippingBox.Value;

@@ -689,21 +689,50 @@ namespace RhinoInside.Revit.GH.ElementTracking
 
     public static void Add(ARDB.Element element, IList<Guid> authority, string name, int index)
     {
-      ARDBES.Entity GetEntity(ARDB.Element e)
+      var entity = element.GetEntity(Schema);
+      if (entity.Schema is null)
       {
-        if (e.GetEntity(Schema) is ARDBES.Entity entity && entity.Schema != null)
-          return entity;
-
-        return new ARDBES.Entity(Schema);
+        using (entity = new ARDBES.Entity(Schema))
+        {
+          entity.Set<string>(Fields.UniqueId, element.UniqueId);
+          entity.Set<IList<Guid>>(Fields.Authority, authority);
+          entity.Set<string>(Fields.Name, name);
+          entity.Set<int>(Fields.Index, index);
+          element.SetEntity(entity);
+        }
       }
-
-      using (var entity = GetEntity(element))
+      else using (entity)
       {
-        entity.Set<string>(Fields.UniqueId, element.UniqueId);
-        entity.Set<IList<Guid>>(Fields.Authority, authority);
-        entity.Set<string>(Fields.Name, name);
-        entity.Set<int>(Fields.Index, index);
-        element.SetEntity(entity);
+        var modified = false;
+
+        var elementUniqueId = element.UniqueId;
+        if (entity.Get<string>(Fields.UniqueId) != elementUniqueId)
+        {
+          modified = true;
+          entity.Set<string>(Fields.UniqueId, elementUniqueId);
+        }
+
+        var authorityComparer = default(AuthorityComparer);
+        if (!authorityComparer.Equals(entity.Get<IList<Guid>>(Fields.Authority), authority))
+        {
+          modified = true;
+          entity.Set<IList<Guid>>(Fields.Authority, authority);
+        }
+
+        if (entity.Get<string>(Fields.Name) != name)
+        {
+          modified = true;
+          entity.Set<string>(Fields.Name, name);
+        }
+
+        if (entity.Get<int>(Fields.Index) != index)
+        {
+          modified = true;
+          entity.Set<int>(Fields.Index, index);
+        }
+
+        if (modified)
+          element.SetEntity(entity);
       }
     }
 
