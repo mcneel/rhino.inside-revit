@@ -942,6 +942,22 @@ namespace RhinoInside.Revit.GH.Components
     #region IGH_TrackingComponent
     TrackingMode IGH_TrackingComponent.TrackingMode => TrackingMode;
     internal TrackingMode TrackingMode { get; set; } = TrackingMode.Reconstruct;
+
+    public override bool DestroyParameter(GH_ParameterSide side, int index)
+    {
+      if (!base.DestroyParameter(side, index))
+        return false;
+
+      if (side == GH_ParameterSide.Output)
+      {
+        var param = Params.Output[index];
+
+        if (param is IGH_TrackingParam)
+          Guest.Instance.ObjectsDeleted(Grasshopper.Instances.ActiveCanvas, (OnPingDocument(), new IGH_DocumentObject[] { param }));
+      }
+
+      return true;
+    }
     #endregion
 
     #region IO

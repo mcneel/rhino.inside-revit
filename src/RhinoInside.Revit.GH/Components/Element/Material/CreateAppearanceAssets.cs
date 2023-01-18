@@ -126,8 +126,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
       {
         name = doc.NextIncrementalNomen
         (
-          name ?? template?.Name ?? _Asset_,
-          typeof(ARDB.AppearanceAssetElement),
+          template?.Name ?? _Asset_, typeof(ARDB.AppearanceAssetElement),
           categoryId: ARDB.BuiltInCategory.INVALID
         );
       }

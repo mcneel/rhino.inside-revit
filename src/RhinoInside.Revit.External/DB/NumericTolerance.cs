@@ -101,14 +101,14 @@ namespace RhinoInside.Revit.External.DB
     }
     #endregion
 
-    #region Abs
+    #region Norm
     /// <summary>
     /// Absolute value of {<paramref name="x"/>}.
     /// </summary>
     /// <param name="x"></param>
     /// <returns>Distance from {0}.</returns>
     /// <remarks>This method returns denormals as zero.</remarks>
-    public static double Abs(double x)
+    public static double Norm(double x)
     {
       x = Math.Abs(x);
 
@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.External.DB
     /// <param name="y"></param>
     /// <returns>Distance from {0, 0}.</returns>
     /// <remarks>This method returns denormals as zero.</remarks>
-    public static double Abs(double x, double y)
+    public static double Norm(double x, double y)
     {
       x = Math.Abs(x); y = Math.Abs(y);
 
@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.External.DB
     /// <param name="z"></param>
     /// <returns>Distance from {0, 0, 0}.</returns>
     /// <remarks>This method returns denormals as zero.</remarks>
-    public static double Abs(double x, double y, double z)
+    public static double Norm(double x, double y, double z)
     {
       x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
 
@@ -485,7 +485,7 @@ namespace RhinoInside.Revit.External.DB
     /// Plane X axis according to the Arbitrary Axis Algorithm.
     /// </summary>
     /// <seealso cref="XYZExtension.PerpVector(XYZ, double)"/>
-    public XYZ Direction => NumericTolerance.Abs(A, B) < NumericTolerance.DefaultTolerance ?
+    public XYZ Direction => NumericTolerance.Norm(A, B) < NumericTolerance.DefaultTolerance ?
       new XYZ(C, 0.0, -A) :
       new XYZ(-B, A, 0.0);
 
@@ -494,7 +494,7 @@ namespace RhinoInside.Revit.External.DB
     /// </summary>
     /// <seealso cref="XYZExtension.PerpVector(XYZ, double)"/>
     //public XYZ Up => Normal.CrossProduct(Direction, NumericTolerance.DefaultTolerance);
-    public XYZ Up => NumericTolerance.Abs(A, B) < NumericTolerance.DefaultTolerance ?
+    public XYZ Up => NumericTolerance.Norm(A, B) < NumericTolerance.DefaultTolerance ?
       new XYZ
       (
            (B * -A) /* - (C *  0.0) */,
@@ -544,6 +544,15 @@ namespace RhinoInside.Revit.External.DB
     {
       return new PlaneEquation(-value.A, -value.B, -value.C, -value.D);
     }
+
+    #region AlmostEquals
+    public bool AlmostEquals(PlaneEquation other, double tolerance = NumericTolerance.DefaultTolerance)
+    {
+      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
+
+      return NumericTolerance.Norm(A - other.A, B - other.B, C - other.C) < tolerance && NumericTolerance.Norm(D, other.D) < tolerance;
+    }
+    #endregion
 
     public double AbsoluteDistanceTo(XYZ point) => Math.Abs(SignedDistanceTo(point));
     public double SignedDistanceTo(XYZ point) => A * point.X + B * point.Y + C * point.Z + D;

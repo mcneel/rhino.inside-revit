@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
 
-      var length = NumericTolerance.Abs(xyz.X, xyz.Y, xyz.Z);
+      var length = NumericTolerance.Norm(xyz.X, xyz.Y, xyz.Z);
       return length < tolerance ? 0.0 : length;
     }
 
@@ -84,7 +84,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       tolerance = Math.Max(tolerance, Upsilon);
 
-      return NumericTolerance.Abs(a.X - b.X, a.Y - b.Y, a.Z - b.Z) < tolerance;
+      return NumericTolerance.Norm(a.X - b.X, a.Y - b.Y, a.Z - b.Z) < tolerance;
     }
 
     /// <summary>
@@ -101,7 +101,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       tolerance = Math.Max(tolerance, Upsilon);
 
       var (x, y, z) = xyz;
-      var length = NumericTolerance.Abs(x, y, z);
+      var length = NumericTolerance.Norm(x, y, z);
       if (length < tolerance)
         return Zero;
 
@@ -125,12 +125,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       tolerance = Math.Max(tolerance, Upsilon);
 
       var (aX, aY, aZ) = a;
-      var lengthA = NumericTolerance.Abs(aX, aY, aZ);
+      var lengthA = NumericTolerance.Norm(aX, aY, aZ);
       if (lengthA < tolerance)
         return Zero;
 
       var (bX, bY, bZ) = b;
-      var lengthB = NumericTolerance.Abs(bX, bY, bZ);
+      var lengthB = NumericTolerance.Norm(bX, bY, bZ);
       if (lengthB < tolerance)
         return Zero;
 
@@ -191,7 +191,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var B = b.Normalize(tolerance);
 
       tolerance = Math.Max(tolerance, Upsilon);
-      return NumericTolerance.Abs(A.DotProduct(B)) < tolerance;
+      return NumericTolerance.Norm(A.DotProduct(B)) < tolerance;
     }
 
     /// <summary>
@@ -207,11 +207,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       tolerance = Math.Max(tolerance, Upsilon);
 
       var (x, y, z) = value;
-      var length = NumericTolerance.Abs(x, y, z);
+      var length = NumericTolerance.Norm(x, y, z);
       if (length < tolerance)
         return Zero;
 
-      return NumericTolerance.Abs(x / length, y / length) < tolerance ?
+      return NumericTolerance.Norm(x / length, y / length) < tolerance ?
         new XYZ(z, 0.0, -x) :
         new XYZ(-y, x, 0.0);
     }

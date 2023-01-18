@@ -424,6 +424,81 @@ namespace RhinoInside.Revit.External.DB.Extensions
         CompoundElementFilter.Union    (modelClipFilter, annotationClipFilter);
     }
 
+    #region Orientation
+    public static ViewOrientation3D GetSavedOrientation(this View view)
+    {
+      if (view is View3D view3D)
+        return view3D.GetSavedOrientation();
+
+      return new ViewOrientation3D(view.Origin, view.UpDirection, -view.ViewDirection);
+    }
+
+    public static void SetSavedOrientation(this View view, ViewOrientation3D newViewOrientation3D)
+    {
+      if (view is View3D view3D)
+      {
+        view3D.SetOrientation(newViewOrientation3D);
+        view3D.SaveOrientation();
+      }
+      else
+      {
+        var viewOrigin = view.Origin;
+        var viewBasisY = view.UpDirection;
+        var viewBasisX = view.RightDirection;
+        var viewBasisZ = viewBasisX.CrossProduct(viewBasisY);
+
+        var newOrigin = newViewOrientation3D.EyePosition;
+        var newBasisY = newViewOrientation3D.UpDirection;
+        var newBasisZ = (-newViewOrientation3D.ForwardDirection);
+        var newBasisX = newBasisY.CrossProduct(newBasisZ);
+
+        var dependents = view.GetDependentElements(new ElementCategoryFilter(BuiltInCategory.OST_Viewers));
+        if (dependents.Count == 1)
+        {
+          var viewer = view.Document.GetElement(dependents[0]);
+          var modified = false;
+          var pinned = viewer.Pinned;
+
+          try
+          {
+            if (!viewBasisZ.IsCodirectionalTo(newBasisZ))
+            {
+              var axisDirection = viewBasisZ.CrossProduct(newBasisZ);
+              if (axisDirection.IsZeroLength()) axisDirection = viewBasisY;
+
+              viewer.Pinned = !(modified = true);
+              using (var axis = Line.CreateUnbound(viewOrigin, axisDirection))
+                ElementTransformUtils.RotateElement(viewer.Document, viewer.Id, axis, viewBasisZ.AngleTo(newBasisZ));
+
+              viewBasisX = view.RightDirection;
+            }
+
+            if (!viewBasisX.IsCodirectionalTo(newBasisX))
+            {
+              viewer.Pinned = !(modified = true);
+              using (var axis = Line.CreateUnbound(viewOrigin, newBasisZ))
+                ElementTransformUtils.RotateElement(viewer.Document, viewer.Id, axis, viewBasisX.AngleOnPlaneTo(newBasisX, newBasisZ));
+            }
+
+            {
+              var trans = newOrigin - viewOrigin;
+              if (!trans.IsZeroLength())
+              {
+                viewer.Pinned = !(modified = true);
+                ElementTransformUtils.MoveElement(viewer.Document, viewer.Id, trans);
+              }
+            }
+          }
+          finally
+          {
+            if (modified)
+              viewer.Pinned = pinned;
+          }
+        }
+      }
+    }
+    #endregion
+
     #region ViewSection
     static int IndexOfViewSection(ElevationMarker marker, ElementId viewId)
     {

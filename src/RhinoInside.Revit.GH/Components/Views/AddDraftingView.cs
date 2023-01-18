@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       ),
       new ParamDefinition
       (
-        new Parameters.View()
+        new Parameters.ViewDrafting()
         {
           Name = "Template",
           NickName = "T",

@@ -123,11 +123,11 @@ namespace RhinoInside.Revit
                 writer.WriteLine();
                 writer.WriteLine("### Environment Variables");
                 writer.WriteLine();
-                writer.WriteLine("PATH|");
-                writer.WriteLine("|");
+                writer.WriteLine("|PATH|");
+                writer.WriteLine("|:---|");
                 var PATH = Environment.GetEnvironmentVariable("PATH");
                 foreach (var pathEntry in PATH.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
-                  writer.WriteLine($"{pathEntry} |");
+                  writer.WriteLine($"|{pathEntry}|");
 
                 if (loadedApplications is object)
                 {

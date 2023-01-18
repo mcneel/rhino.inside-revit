@@ -29,5 +29,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       distance = plane.SignedDistanceTo(point);
     }
 #endif
+
+    internal static PlaneEquation ToPlaneEquation(this Plane plane) => new PlaneEquation(plane.Origin, plane.Normal);
   }
 }
