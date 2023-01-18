@@ -13,6 +13,7 @@ group: Deployment & Configs
 ### RC
 
 - Added 'View Crop Region' component.
+- Added 'Add Section View' component.
 
 
 {% endcapture %}
