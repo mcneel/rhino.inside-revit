@@ -243,6 +243,27 @@
         ]
     },
     {
+        "title": "Getting Started with 6 lessons",
+        "url": "https://www.youtube.com/playlist?list=PLq-KJ9jF26E3D5gKawfjWnwiyxpM_oZXi",
+        "thumbnail": "https://i3.ytimg.com/vi/FhvJIWyc95o/maxresdefault.jpg",
+        "author": "Gediminas Kirdeikis",
+        "authorUrl": "https://www.youtube.com/@DesignGoBrr",
+        "description": "A 6 part video series on getting started with Rhino.Inside.Revit showing a set of practical workflows.",
+        "kinds": [
+            "webinar",
+            "video"
+        ],
+        "tags": [
+            "presentation",
+            "workflow",
+            "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
         "title": "Rhino.Inside.Revit Review",
         "url": "https://www.youtube.com/watch?v=J11LIrDIchw",
         "thumbnail": "https://i3.ytimg.com/vi/J11LIrDIchw/maxresdefault.jpg",
@@ -544,6 +565,27 @@
         ],
         "tags": [
             "modelmaking",
+            "workflow",
+            "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "title": "Wavy Facade using Graph Mapper",
+        "url": "https://youtu.be/VzI3vFLNRxI",
+        "thumbnail": "https://i3.ytimg.com/vi/VzI3vFLNRxI/maxresdefault.jpg",
+        "author": "Japhy Walton",
+        "authorUrl": "https://discourse.mcneel.com/u/japhy/summary",
+        "description": "A quick tutorial on createing a complex facade shape with Grasshopper.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "facade",
             "workflow",
             "overview"
         ],
