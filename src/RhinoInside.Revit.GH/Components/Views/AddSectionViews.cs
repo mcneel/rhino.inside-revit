@@ -1,12 +1,10 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  using Convert.Geometry;
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.12")]
@@ -42,11 +40,11 @@ namespace RhinoInside.Revit.GH.Components.Views
       ),
       new ParamDefinition
       (
-        new Param_Box
+        new Parameters.ViewFrame
         {
-          Name = "Box",
-          NickName = "B",
-          Description = "Section Box",
+          Name = "Frame",
+          NickName = "F",
+          Description = $"View camera frame.{Environment.NewLine}Plane, Rectangle and Box is also accepted.",
         }
       ),
       new ParamDefinition
@@ -126,7 +124,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         doc.Value, _View_, viewSection =>
         {
           // Input
-          if (!Params.TryGetData(DA, "Box", out Box? box, x => x.IsValid)) return null;
+          if (!Params.TryGetData(DA, "Frame", out Types.ViewFrame frame, x => x.IsValid)) return null;
           if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
           if (!Parameters.ViewFamilyType.GetDataOrDefault(this, DA, "Type", out Types.ViewFamilyType type, doc, ARDB.ElementTypeGroup.ViewTypeSection)) return null;
           Params.TryGetData(DA, "Template", out ARDB.ViewSection template);
@@ -134,7 +132,7 @@ namespace RhinoInside.Revit.GH.Components.Views
           // Compute
           StartTransaction(doc.Value);
           if (CanReconstruct(_View_, out var untracked, ref viewSection, doc.Value, name, ARDB.ViewType.DraftingView.ToString()))
-            viewSection = Reconstruct(viewSection, box.Value.ToBoundingBoxXYZ(), type.Value, name, template);
+            viewSection = Reconstruct(viewSection, frame.ToBoundingBoxXYZ(), type.Value, name, template);
 
           DA.SetData(_View_, viewSection);
           return untracked ? null : viewSection;
@@ -177,17 +175,24 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     ARDB.ViewSection Reconstruct(ARDB.ViewSection view, ARDB.BoundingBoxXYZ box, ARDB.ViewFamilyType type, string name, ARDB.ViewSection template)
     {
-      var transform = box.Transform;
+      var (min, max, transform, bounds) = box;
       using (var orientation = new ARDB.ViewOrientation3D(transform.Origin, transform.BasisY, -transform.BasisZ))
       {
         if (!Reuse(view, type))
           view = Create(type);
 
-        view.CropBoxActive = true;
         view.SetSavedOrientation(orientation);
-
         view.CropBox = box;
-        if (box.Max.Z - box.Min.Z < 0.02)
+        view.CropBoxVisible =
+        view.CropBoxActive =
+          bounds[BoundingBoxXYZExtension.AxisX, BoundingBoxXYZExtension.BoundsMin] ||
+          bounds[BoundingBoxXYZExtension.AxisX, BoundingBoxXYZExtension.BoundsMax] ||
+          bounds[BoundingBoxXYZExtension.AxisY, BoundingBoxXYZExtension.BoundsMin] ||
+          bounds[BoundingBoxXYZExtension.AxisY, BoundingBoxXYZExtension.BoundsMax];
+
+        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(bounds[BoundingBoxXYZExtension.AxisZ, BoundingBoxXYZExtension.BoundsMin] ? 1 : 0);
+
+        if (max.Z - min.Z < 0.02)
         {
           view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(1);
           view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR).Update(-Math.Min(0.0, view.CropBox.Max.Z - 0.02));
@@ -196,7 +201,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         else
         {
           view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(1);
-          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR).Update(-box.Min.Z);
+          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR).Update(-min.Z);
         }
 
         view.CopyParametersFrom(template, ExcludeUniqueProperties);
