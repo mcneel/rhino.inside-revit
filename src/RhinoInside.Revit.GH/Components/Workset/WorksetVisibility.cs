@@ -99,6 +99,26 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         DA, "Visible", () => worksets.Select(x => (x.Document is object ? visibilitySettings[x.Document] : null)?.IsWorksetVisible(x.Id))
       );
+
+      // TODO : 
+      // Add 'Overrides' here or on its own component?
+      // Same functionality may be per UserName, ModelUpdatesStatus or CheckoutStatus
+      //
+      //var displaySettings = worksets.Select(x => x.Document).OfType<ARDB.Document>().Distinct().ToDictionary(x => x, GetWorksharingDisplaySettings);
+
+      //foreach (var workset in worksets)
+      //{
+      //  Params.TrySetDataList
+      //  (
+      //    DA, "Overrides", () => worksets.Select(x => (x.Document is object ? displaySettings[x.Document] : null)?.GetGraphicOverrides(x.Id))
+      //  );
+      //}
     }
+
+    //static ARDB.WorksharingDisplaySettings GetWorksharingDisplaySettings(ARDB.Document doc)
+    //{
+    //  using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.WorksharingDisplaySettings)))
+    //    return collector.FirstElement() as ARDB.WorksharingDisplaySettings;
+    //}
   }
 }
