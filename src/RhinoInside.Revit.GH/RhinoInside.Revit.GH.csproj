@@ -259,6 +259,7 @@
     <Compile Include="Components\TransactionBaseComponent.cs" />
     <Compile Include="Components\Views\Active.cs" />
     <Compile Include="Components\Views\AddDependentView.cs" />
+    <Compile Include="Components\Views\AddDetailView.cs" />
     <Compile Include="Components\Views\AddDraftingView.cs" />
     <Compile Include="Components\Views\AddSectionViews.cs" />
     <Compile Include="Components\Views\AddViewPlan.cs" />
