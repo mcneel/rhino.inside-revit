@@ -734,7 +734,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           bic =>
           {
             try { return Category.GetCategory(doc, bic)?.AllowsBoundParameters == true; }
-            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+            catch { return false; }
           }
         ).
         ToArray();
