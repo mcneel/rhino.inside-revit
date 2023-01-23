@@ -49,7 +49,7 @@
         "highlight": true,
         "title": "Design to Production Workflow",
         "url": "https://www.thinkparametric.com/courses/design-to-production-with-rhino-inside",
-        "thumbnail": "design-to-workflow-thinkparametric.jpg",
+        "thumbnail": "/static/images/discover/design-to-workflow-thinkparametric.jpg",
         "author": "Oliver Thomas, BIG",
         "authorUrl": "",
         "description": "Learn how to use Rhino.Inside, a real game-changer that makes the transfer of information between Rhinoceros 3D and Autodesk Revit quick, easy and intuitive.",
