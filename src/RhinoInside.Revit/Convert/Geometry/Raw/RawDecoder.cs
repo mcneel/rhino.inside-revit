@@ -891,7 +891,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
             var start = loop.orientation[eA] > 0 ? (loop.edges[eA]).PointAtEnd   : (loop.edges[eA]).PointAtStart;
             var end   = loop.orientation[eB] > 0 ? (loop.edges[eB]).PointAtStart : (loop.edges[eB]).PointAtEnd;
 
-            if (start.EpsilonEquals(end, tol.VertexTolerance))
+            if (start.GeometryEquals(end, tol.VertexTolerance))
             {
               var startTrim = new Point2d(trims[tA].PointAtEnd);
               var endTrim = new Point2d(trims[tB].PointAtStart);

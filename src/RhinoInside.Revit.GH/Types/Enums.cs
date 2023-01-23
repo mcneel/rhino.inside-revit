@@ -667,6 +667,24 @@ namespace RhinoInside.Revit.GH.Types
     );
   }
 
+  [
+    ComponentVersion(introduced: "1.12"),
+    ComponentGuid("DBCC2A97-0410-4458-934F-3EB7A181E523"),
+    Name("Workset Visibility"),
+    Description("Represents workset visibility"),
+  ]
+  public class WorksetVisibility : GH_Enum<ARDB.WorksetVisibility>
+  {
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) ARDB.WorksetVisibility.Visible,           "Visible"             },
+        { (int) ARDB.WorksetVisibility.Hidden,            "Hidden"              },
+        { (int) ARDB.WorksetVisibility.UseGlobalSetting,  "Use Global Setting"  },
+      }
+    );
+  }
 
   [
     ComponentVersion(introduced: "1.2"),

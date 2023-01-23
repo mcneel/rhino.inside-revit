@@ -6,18 +6,26 @@ namespace RhinoInside.Revit.GH.Types
 {
   using External.DB;
   using External.DB.Extensions;
+  using Grasshopper.Special;
 
-  [Kernel.Attributes.Name("Filter")]
+  [Kernel.Attributes.Name("View Filter")]
   public interface IGH_FilterElement : IGH_Element
   {
     ElementFilter GetElementFilter();
   }
 
   [Kernel.Attributes.Name("Filter")]
-  public class FilterElement : Element, IGH_FilterElement
+  public class FilterElement : Element, IGH_FilterElement, IGH_ItemDescription
   {
     protected override Type ValueType => typeof(ARDB.FilterElement);
     public new ARDB.FilterElement Value => base.Value as ARDB.FilterElement;
+
+    #region IGH_ItemDescription
+    System.Drawing.Bitmap IGH_ItemDescription.GetTypeIcon(System.Drawing.Size size) => Properties.Resources.FilterElement;
+    string IGH_ItemDescription.Name => DisplayName;
+    string IGH_ItemDescription.Identity => IsLinked ? $"{{{ReferenceId?.ToString("D")}:{Id?.ToString("D")}}}" : $"{{{Id?.ToString("D")}}}";
+    string IGH_ItemDescription.Description => Document?.GetTitle();
+    #endregion
 
     public FilterElement() { }
     protected FilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
@@ -57,7 +65,7 @@ namespace RhinoInside.Revit.GH.Types
       new ElementFilter(CompoundElementFilter.ExclusionFilter(filter.GetElementIds(), inverted: true)) : null;
   }
 
-  [Kernel.Attributes.Name("Parameter Filter")]
+  [Kernel.Attributes.Name("Rule-based Filter")]
   public class ParameterFilterElement : FilterElement
   {
     protected override Type ValueType => typeof(ARDB.ParameterFilterElement);

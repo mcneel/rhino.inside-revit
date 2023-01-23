@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
               }
 
               var bbox = x;
-              var degenerate = bbox.IsDegenerate(0.0);
+              var degenerate = bbox.IsDegenerate(GeometryTolerance.Model.VertexTolerance);
               if (degenerate == 3)
                 return new ARDB.BoundingBoxContainsPointFilter(bbox.Center.ToXYZ(), Math.Abs(tolerance) / Revit.ModelUnits, inverted);
               else if (strict)
@@ -105,8 +105,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
             }
           );
 
-          filter = CompoundElementFilter.Union(filters.ToArray());
+          filter = inverted ? CompoundElementFilter.Intersect(filters.ToArray()) : CompoundElementFilter.Union(filters.ToArray());
         }
+
+        if (inverted)
+          filter = filter.Intersect(CompoundElementFilter.ElementHasBoundingBoxFilter);
       }
 
       DA.SetData("Filter", filter);

@@ -8,7 +8,6 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Materials
 {
-  using ElementTracking;
   using External.DB.Extensions;
 
   public abstract class BasePhysicalAssetComponent<T>
@@ -323,15 +322,17 @@ namespace RhinoInside.Revit.GH.Components.Materials
       if (assetElement is null) return false;
       if (assetElement.GetStructuralAsset() is ARDB.StructuralAsset asset)
       {
-        if (asset.StructuralAssetClass != type) return false;
+        using (asset)
+          if (asset.StructuralAssetClass != type) return false;
       }
       else return false;
 
       if (name is object) { if (assetElement.Name != name) assetElement.Name = name; }
       else assetElement.SetIncrementalNomen(template?.Name ?? _Asset_);
-      if (template?.GetStructuralAsset() is ARDB.StructuralAsset)
+      if (template?.GetStructuralAsset() is ARDB.StructuralAsset structuralAsset)
       {
-        template.CopyParametersFrom(template, ExcludeUniqueProperties);
+        using (structuralAsset)
+          template.CopyParametersFrom(template, ExcludeUniqueProperties);
       }
 
       return true;
@@ -342,11 +343,11 @@ namespace RhinoInside.Revit.GH.Components.Materials
       var assetElement = default(ARDB.PropertySetElement);
 
       // Make sure the name is unique
+      if (name is null)
       {
         name = doc.NextIncrementalNomen
         (
-          name ?? template?.Name ?? _Asset_,
-          typeof(ARDB.SelectionFilterElement),
+          template?.Name ?? _Asset_, typeof(ARDB.PropertySetElement),
           categoryId: ARDB.BuiltInCategory.OST_PropertySet
         );
       }
@@ -611,8 +612,8 @@ namespace RhinoInside.Revit.GH.Components.Materials
       if (assetElement is null) return false;
       if (assetElement.GetThermalAsset() is ARDB.ThermalAsset asset)
       {
-        if (asset.ThermalMaterialType != type) return false;
-        using (asset) { }
+        using (asset)
+          if (asset.ThermalMaterialType != type) return false;
       }
       else return false;
 
@@ -621,8 +622,8 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       if (template?.GetThermalAsset() is ARDB.ThermalAsset templateAsset)
       {
-        template.CopyParametersFrom(template, ExcludeUniqueProperties);
-        using (templateAsset) { }
+        using (templateAsset)
+          template.CopyParametersFrom(template, ExcludeUniqueProperties);
       }
 
       return true;
@@ -633,13 +634,13 @@ namespace RhinoInside.Revit.GH.Components.Materials
       var assetElement = default(ARDB.PropertySetElement);
 
       // Make sure the name is unique
+      if (name is null)
       {
         name = doc.NextIncrementalNomen
         (
-          name ?? template?.Name ?? _Asset_,
-          typeof(ARDB.SelectionFilterElement),
+          template?.Name ?? _Asset_, typeof(ARDB.PropertySetElement),
           categoryId: ARDB.BuiltInCategory.OST_PropertySet
-        );
+        );  
       }
 
       // Try to duplicate template
