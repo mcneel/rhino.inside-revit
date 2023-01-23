@@ -121,6 +121,8 @@ The DirectShape element store geometric shapes in a Revit document. The geometry
 
 Some of the options above are grey because to add materials, use the name in a way that can be scheduled additional shared parameters need to be created as these parameters are not built into the default Directshapes.
 
+{% include youtube_player.html id="qPDKA6yN-2c" %}
+
 ## DirectShape Categories
 
 Use the {% include ltr/comp.html uuid='7bafe137' %} component to get the DirectShape Categories.
