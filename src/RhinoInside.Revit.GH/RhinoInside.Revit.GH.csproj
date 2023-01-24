@@ -262,6 +262,7 @@
     <Compile Include="Components\Views\AddDetailView.cs" />
     <Compile Include="Components\Views\AddDraftingView.cs" />
     <Compile Include="Components\Views\AddSectionViews.cs" />
+    <Compile Include="Components\Views\AddView3D.cs" />
     <Compile Include="Components\Views\AddViewPlan.cs" />
     <Compile Include="Components\Views\ClusterViewsByType.cs" />
     <Compile Include="Components\Views\CropRegion.cs" />
@@ -277,7 +278,6 @@
     <Compile Include="Components\Views\Identity.cs" />
     <Compile Include="Components\Views\QueryViews.cs" />
     <Compile Include="Components\Views\SectionBox.cs" />
-    <Compile Include="Components\Views\View3DByPlane.cs" />
     <Compile Include="Components\Workset\Active.cs" />
     <Compile Include="Components\Workset\CreateWorkset.cs" />
     <Compile Include="Components\Workset\ElementWorkset.cs" />
