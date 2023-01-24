@@ -310,7 +310,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public ViewFrame GetViewFrame()
     {
-      if (Value?.TryGetViewportInfo(false, out var vport) is true)
+      var vport = default(ViewportInfo);
+      if (Value?.TryGetViewportInfo(false, out vport) is true)
       {
         var cropBox = Value.CropBox;
         var min = cropBox.Min.ToPoint3d();
