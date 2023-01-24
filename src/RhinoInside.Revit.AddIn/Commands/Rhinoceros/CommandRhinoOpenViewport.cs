@@ -22,13 +22,15 @@ namespace RhinoInside.Revit.AddIn.Commands
       (
         name: CommandName,
         iconName: "Ribbon.Rhinoceros.OpenViewport.png",
-        tooltip: "Opens a floating viewport",
+        tooltip: "Opens a floating viewport.",
         url: "reference/rir-interface#rhinoceros-panel"
       );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.LongDescription = $"Use CTRL key to open the viewport synchronizing camera and workplane";
+        pushButton.LongDescription =
+          $"Use CTRL key to open the viewport synchronizing camera and workplane.{Environment.NewLine}" +
+          "Use CTRL + SHIFT to also synchronize Zoom level.";
         StoreButton(CommandName, pushButton);
       }
     }
@@ -42,7 +44,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       {
         var rhinoDoc = Rhino.RhinoDoc.ActiveDoc;
         var modelScale = UnitScale.GetModelScale(rhinoDoc);
-        bool imperial = rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Feet || rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Inches;
+        bool imperial = Rhino.Geometry.UnitSystemExtension.IsImperial(rhinoDoc.ModelUnitSystem);
         var spacing = imperial ?
         UnitScale.Convert(1.0, UnitScale.Yards, modelScale) :
         UnitScale.Convert(1.0, UnitScale.Meters, modelScale);
