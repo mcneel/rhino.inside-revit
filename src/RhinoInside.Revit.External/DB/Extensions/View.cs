@@ -219,13 +219,48 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       using (var outline = view.Outline)
       {
+        var (min, max) = outline;
         return new Rectangle
         (
-          left    : (int) Math.Round(outline.Min.U * 12.0 * DPI),
-          top     : (int) Math.Round(outline.Min.V * 12.0 * DPI),
-          right   : (int) Math.Round(outline.Max.U * 12.0 * DPI),
-          bottom  : (int) Math.Round(outline.Max.V * 12.0 * DPI)
+          left    : (int) Math.Round(min.U * 12.0 * DPI),
+          top     : (int) Math.Round(min.V * 12.0 * DPI),
+          right   : (int) Math.Round(max.U * 12.0 * DPI),
+          bottom  : (int) Math.Round(max.V * 12.0 * DPI)
         );
+      }
+    }
+
+    /// <summary>
+    /// The bounds of the view in model space (in feet).
+    /// </summary>
+    /// <param name="view"></param>
+    /// <param name="DPI"></param>
+    /// <returns>Empty <see cref="BoundingBoxUV"/> on empty views.</returns>
+    public static BoundingBoxUV GetModelOutline(this View view)
+    {
+      if (!view.CanBePrinted)
+        return BoundingBoxUVExtension.Empty;
+
+      if (view is View3D view3D)
+      {
+        if (view.CropBoxActive)
+        {
+          using (var cropBox = view.CropBox)
+            return cropBox.ToBoundingBoxUV();
+        }
+        else
+        {
+          var radius = view3D.IsPerspective ? 0.1 : 1000.0;
+          return new BoundingBoxUV(-radius, -radius * 3.0 / 4.0, +radius, +radius * 3.0 / 4.0);
+        }
+      }
+      else
+      {
+        var scale = Math.Max(view.Scale, 1);
+        var outline = view.Outline;
+        outline.Min *= scale;
+        outline.Max *= scale;
+        return outline;
       }
     }
 
@@ -453,7 +488,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var newBasisX = newBasisY.CrossProduct(newBasisZ);
 
         var dependents = view.GetDependentElements(new ElementCategoryFilter(BuiltInCategory.OST_Viewers));
-        if (dependents.Count == 1)
+        if (dependents.Count != 1)
+          throw new NotSupportedException();
+
         {
           var viewer = view.Document.GetElement(dependents[0]);
           var modified = false;
