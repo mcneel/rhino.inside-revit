@@ -15,7 +15,11 @@ group: Deployment & Configs
 - Added 'View Crop Region' component.
 - Added 'Add Section View' component.
 - Added 'Add Detail View' component.
-
+- Updated 'Add 3D View' component, now it takes a Frame as input.
+- Now 'View' bake creates a named View in Rhino.
+- Now 'Open Viewport` grabs Revit active view settings.
+    * If CTRL is pressed grabs orientation.
+    * If SHIFT is also pressed zoom is also applied.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
