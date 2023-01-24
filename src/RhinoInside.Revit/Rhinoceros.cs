@@ -953,7 +953,7 @@ namespace RhinoInside.Revit
 
       if (OpenRevitViewport(cursorPosition.X + 50, cursorPosition.Y + 50) is RhinoView view)
       {
-        if (setScreenPort && view.Floating)
+        if (setScreenPort && view.Floating && !view.Maximized)
           view.SetClientSize(vport.ScreenPort.Size);
 
         if (vport is object)
