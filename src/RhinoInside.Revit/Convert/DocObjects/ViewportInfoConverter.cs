@@ -194,6 +194,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
         vport.SetCameraLocation(origin);
         vport.SetCameraDirection(-zDirection);
         vport.SetCameraUp(yDirection);
+        if (camera.IsPerspective)
         vport.TargetPoint = origin - zDirection * camera.NearDistance * Revit.ModelUnits;
 
         // Set Frustum
