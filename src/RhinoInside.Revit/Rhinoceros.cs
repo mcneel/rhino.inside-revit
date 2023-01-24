@@ -8,7 +8,6 @@ using Microsoft.Win32.SafeHandles;
 using Rhino;
 using Rhino.Commands;
 using Rhino.Display;
-using Rhino.DocObjects;
 using Rhino.Geometry;
 using Rhino.Input;
 using Rhino.PlugIns;
@@ -945,7 +944,8 @@ namespace RhinoInside.Revit
     internal static async void RunCommandOpenViewportAsync
     (
       Rhino.DocObjects.ViewportInfo vport,
-      Rhino.DocObjects.ConstructionPlane cplane
+      Rhino.DocObjects.ConstructionPlane cplane,
+      bool setScreenPort
     )
     {
       var cursorPosition = System.Windows.Forms.Cursor.Position;
@@ -953,6 +953,9 @@ namespace RhinoInside.Revit
 
       if (OpenRevitViewport(cursorPosition.X + 50, cursorPosition.Y + 50) is RhinoView view)
       {
+        if (setScreenPort && view.Floating)
+          view.SetClientSize(vport.ScreenPort.Size);
+
         if (vport is object)
           view.MainViewport.SetViewProjection(vport, updateScreenPort: true, updateTargetLocation: true);
 

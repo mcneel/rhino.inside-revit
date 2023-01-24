@@ -36,8 +36,9 @@ namespace RhinoInside.Revit.AddIn.Commands
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       var ctrlIsPressed = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+      var shiftIsPressed = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
 
-      if (ctrlIsPressed && data.View.TryGetViewportInfo(useUIView: true, out var vport))
+      if (ctrlIsPressed && data.View.TryGetViewportInfo(useUIView: shiftIsPressed, out var vport))
       {
         var rhinoDoc = Rhino.RhinoDoc.ActiveDoc;
         var modelScale = UnitScale.GetModelScale(rhinoDoc);
@@ -89,10 +90,17 @@ namespace RhinoInside.Revit.AddIn.Commands
           cplane.ShowZAxis = false;
         }
 
-        Rhinoceros.RunCommandOpenViewportAsync(vport, cplane);
+        // Make screen port a bit smaller than Revit one.
+        if (!vport.IsPerspectiveProjection || shiftIsPressed)
+        {
+          var port = vport.ScreenPort;
+          port.Width /= 2; port.Height /= 2;
+          vport.ScreenPort = port;
+        }
+
+        Rhinoceros.RunCommandOpenViewportAsync(vport, cplane, setScreenPort: true);
       }
-      else
-        Rhinoceros.RunCommandOpenViewportAsync(default, default);
+      else Rhinoceros.RunCommandOpenViewportAsync(default, default, setScreenPort: false);
 
       return Result.Succeeded;
     }
