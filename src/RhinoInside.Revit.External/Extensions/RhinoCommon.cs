@@ -1165,6 +1165,44 @@ namespace Rhino.Geometry
   }
 }
 
+namespace Rhino.DocObjects
+{
+  static class ViewportInfoExtension
+  {
+#if !RHINO8_OR_GREATER
+    public static double[] GetViewScale(this ViewportInfo vport) => new double[] { 1.0, 1.0, 1.0 };
+#endif
+
+    public static Geometry.Plane GetCameraFrameAt(this ViewportInfo vport, double depth = 0.0) =>
+      new Geometry.Plane(vport.CameraLocation - vport.CameraZ * depth, vport.CameraX, vport.CameraY);
+
+    public static Geometry.Point3d[] GetFramePlaneCorners(this ViewportInfo vport, double depth) =>
+      GetFramePlaneCorners(vport, depth, vport.GetFurstumWidth(), vport.GetFurstumHeight());
+
+    internal static Geometry.Point3d[] GetFramePlaneCorners(this ViewportInfo vport, double depth, Geometry.Interval width, Geometry.Interval height)
+    {
+      var plane = GetCameraFrameAt(vport, depth);
+      var s = vport.IsPerspectiveProjection ? depth / vport.FrustumNear : 1.0;
+
+      var scale = vport.GetViewScale();
+      var x = 1.0 / scale[0];
+      var y = 1.0 / scale[1];
+
+      return new Geometry.Point3d[]
+      {
+        plane.PointAt(s * x * width.T0, s * y * height.T0),
+        plane.PointAt(s * x * width.T1, s * y * height.T0),
+        plane.PointAt(s * x * width.T0, s * y * height.T1),
+        plane.PointAt(s * x * width.T1, s * y * height.T1),
+      };
+    }
+
+    public static Geometry.Interval GetFurstumWidth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
+    public static Geometry.Interval GetFurstumHeight(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
+    public static Geometry.Interval GetFurstumDepth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumNear, vport.FrustumFar);
+  }
+}
+
 namespace Rhino.DocObjects.Tables
 {
   static class NamedConstructionPlaneTableExtension
@@ -1246,6 +1284,22 @@ namespace Rhino.Display
 
         if (topMost.Visible == false) topMost.Visible = true;
         return topMost.BringToFront();
+      }
+
+      return false;
+    }
+
+    public static bool SetClientSize(this RhinoView view, System.Drawing.Size clientSize)
+    {
+      var viewWindow = new WindowHandle(view.Handle);
+      if (!viewWindow.IsZero)
+      {
+        if (view.Floating)
+          viewWindow.Parent.ClientSize = clientSize;
+        else
+          viewWindow.ClientSize = clientSize;
+
+        return true;
       }
 
       return false;

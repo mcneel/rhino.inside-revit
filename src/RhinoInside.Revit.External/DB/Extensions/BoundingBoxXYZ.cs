@@ -405,6 +405,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
       );
     }
 
+    public static BoundingBoxUV ToBoundingBoxUV(this BoundingBoxXYZ value, int axis = AxisZ)
+    {
+      var (min, max) = value;
+      switch (axis)
+      {
+        case AxisX: return new BoundingBoxUV(min.Y, min.Z, max.Y, max.Z);
+        case AxisY: return new BoundingBoxUV(min.Z, min.X, max.Z, max.X);
+        case AxisZ: return new BoundingBoxUV(min.X, min.Y, max.X, max.Y);
+        default: throw new ArgumentOutOfRangeException(nameof(axis));
+      }
+    }
+
     public static XYZ[] GetCorners(this BoundingBoxXYZ value)
     {
       using (var transform = value.Transform)

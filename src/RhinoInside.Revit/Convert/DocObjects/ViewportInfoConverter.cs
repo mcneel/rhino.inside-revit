@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
 
       void ARDB.IExportContext.OnViewEnd(ARDB.ElementId elementId) { }
 
-      public static CameraInfo GetCameraInfo(ARDB.View view)
+      public static CameraInfo GetCameraInfo(ARDB.View view) => Rhinoceros.InvokeInHostContext(() =>
       {
         var camera = new CameraInfo()
         {
@@ -62,7 +62,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
           UpDirection = view.UpDirection
         };
 
-        if (view is ARDB.View3D view3D)
+        if (view is ARDB.View3D view3D && view3D.IsPerspective)
         {
           try
           {
@@ -76,10 +76,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
         }
 
         {
-          var scale = Math.Max(view.Scale, 1);
-          var (min, max) = view.Outline;
-          min *= scale;
-          max *= scale;
+          var (min, max) = view.GetModelOutline();
           var (minX, minY) = min;
           var (maxX, maxY) = max;
           var((_, _, minZ), (_, _, maxZ)) = view.CropBox;
@@ -89,12 +86,12 @@ namespace RhinoInside.Revit.Convert.DocObjects
           camera.VerticalExtent   = maxY - minY;
           camera.RightOffset      = minX + 0.5 * camera.HorizontalExtent;
           camera.UpOffset         = minY + 0.5 * camera.VerticalExtent;
-          camera.NearDistance     = -maxZ;
+          camera.NearDistance     = camera.IsPerspective ? 0.1 : -maxZ;
           camera.FarDistance      = -minZ;
           camera.TargetDistance   = camera.IsPerspective ? camera.NearDistance : 1e30;
           return camera;
         }
-      }
+      });
 
       public bool IsPerspective       = default;
       public double HorizontalExtent  = double.NaN;
@@ -173,6 +170,9 @@ namespace RhinoInside.Revit.Convert.DocObjects
       else
       {
         var screenPort = view.GetOutlineRectangle().ToRectangle();
+        screenPort.X = 0;
+        screenPort.Y = 0;
+
         var camera = CameraInfo.GetCameraInfo(view);
         var origin = camera.EyePosition.ToPoint3d();
         var zDirection = camera.ViewDirection.ToVector3d();
@@ -194,6 +194,8 @@ namespace RhinoInside.Revit.Convert.DocObjects
         vport.SetCameraLocation(origin);
         vport.SetCameraDirection(-zDirection);
         vport.SetCameraUp(yDirection);
+        if (camera.IsPerspective)
+        vport.TargetPoint = origin - zDirection * camera.NearDistance * Revit.ModelUnits;
 
         // Set Frustum
         {

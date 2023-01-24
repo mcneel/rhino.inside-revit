@@ -113,6 +113,8 @@ namespace RhinoInside.Revit.GH.Components.Views
       ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_TOP,
       ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_LEFT,
       ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_RIGHT,
+
+      ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -192,17 +194,9 @@ namespace RhinoInside.Revit.GH.Components.Views
 
         view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(bounds[BoundingBoxXYZExtension.AxisZ, BoundingBoxXYZExtension.BoundsMin] ? 1 : 0);
 
-        if (max.Z - min.Z < 0.02)
-        {
-          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(1);
-          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR).Update(-Math.Min(0.0, view.CropBox.Max.Z - 0.02));
-          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(0);
-        }
-        else
-        {
-          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(1);
-          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR).Update(-min.Z);
-        }
+        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(1);
+        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR).Update(-min.Z);
+        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(bounds[BoundingBoxXYZExtension.AxisZ, BoundingBoxXYZExtension.BoundsMin] ? 1 : 0);
 
         view.CopyParametersFrom(template, ExcludeUniqueProperties);
         if (name is object) view?.get_Parameter(ARDB.BuiltInParameter.VIEW_NAME).Update(name);
