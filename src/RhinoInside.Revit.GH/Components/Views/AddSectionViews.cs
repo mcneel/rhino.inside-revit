@@ -131,6 +131,13 @@ namespace RhinoInside.Revit.GH.Components.Views
           if (!Parameters.ViewFamilyType.GetDataOrDefault(this, DA, "Type", out Types.ViewFamilyType type, doc, ARDB.ElementTypeGroup.ViewTypeSection)) return null;
           Params.TryGetData(DA, "Template", out ARDB.ViewSection template);
 
+          if (frame?.Value is Rhino.DocObjects.ViewportInfo vport && !vport.IsParallelProjection)
+          {
+            frame = new Types.ViewFrame(new Rhino.DocObjects.ViewportInfo(vport));
+            frame.Value.ChangeToParallelProjection(true);
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Section views do not support perspective 'Projection Mode'.");
+          }
+
           // Compute
           StartTransaction(doc.Value);
           if (CanReconstruct(_View_, out var untracked, ref viewSection, doc.Value, name, ARDB.ViewType.DraftingView.ToString()))
