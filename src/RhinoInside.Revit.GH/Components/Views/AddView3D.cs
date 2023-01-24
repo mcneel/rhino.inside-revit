@@ -53,6 +53,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         {
           Name = "Perspective",
           NickName = "P",
+          Optional = true
         }, ParamRelevance.Secondary
       ),
       new ParamDefinition
@@ -143,7 +144,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         {
           // Input
           if (!Params.TryGetData(DA, "Frame", out Types.ViewFrame frame, x => x.IsValid)) return null;
-          if (!Params.TryGetData(DA, "Perspective", out bool? perspetive)) return null;
+          if (!Params.TryGetData(DA, "Perspective", out bool? perspective)) return null;
           if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return null;
           if (!Parameters.ViewFamilyType.GetDataOrDefault(this, DA, "Type", out Types.ViewFamilyType type, doc, ARDB.ElementTypeGroup.ViewType3D)) return null;
           Params.TryGetData(DA, "Template", out ARDB.View3D template);
@@ -151,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components.Views
           // Compute
           StartTransaction(doc.Value);
           if (CanReconstruct(_View_, out var untracked, ref view, doc.Value, name, ARDB.ViewType.DraftingView.ToString()))
-            view = Reconstruct(view, frame.ToBoundingBoxXYZ(), frame?.Value?.IsParallelProjection is false, type.Value, name, template);
+            view = Reconstruct(view, frame.ToBoundingBoxXYZ(), perspective ?? frame?.Value?.IsParallelProjection is false, type.Value, name, template);
 
           DA.SetData(_View_, view);
           return untracked ? null : view;

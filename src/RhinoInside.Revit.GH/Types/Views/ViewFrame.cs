@@ -151,14 +151,14 @@ namespace RhinoInside.Revit.GH.Types
       if (source is ViewportInfo view)
       {
         Value = new ViewportInfo(view);
-        BoundEnabled = BoundEnabledPlanar;
+        BoundEnabled = BoundEnabledNone;
         Bound = BoundDefault;
         return true;
       }
       else if (source is GH_Goo<ViewportInfo> info)
       {
         Value = info.Value is null ? null : new ViewportInfo(info.Value);
-        BoundEnabled = BoundEnabledPlanar;
+        BoundEnabled = BoundEnabledNone;
         Bound = BoundDefault;
         return true;
       }
