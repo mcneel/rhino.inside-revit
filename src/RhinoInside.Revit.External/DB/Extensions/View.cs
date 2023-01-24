@@ -248,13 +248,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
           using (var cropBox = view.CropBox)
             return cropBox.ToBoundingBoxUV();
         }
-        else
+        else if (view3D.IsPerspective)
         {
-          var radius = view3D.IsPerspective ? 0.1 : 1000.0;
+          var radius = 0.1;
           return new BoundingBoxUV(-radius, -radius * 3.0 / 4.0, +radius, +radius * 3.0 / 4.0);
         }
       }
-      else
+
       {
         var scale = Math.Max(view.Scale, 1);
         var outline = view.Outline;
