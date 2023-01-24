@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.Display;
@@ -16,6 +18,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using Convert.System.Drawing;
   using Convert.Units;
+  using External.DB;
   using External.DB.Extensions;
   using External.UI.Selection;
 
@@ -23,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_View : IGH_Element { }
 
   [Kernel.Attributes.Name("View")]
-  public class View : Element, IGH_View
+  public class View : Element, IGH_View, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.View);
     public new ARDB.View Value => base.Value as ARDB.View;
@@ -79,6 +82,13 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(ViewFrame)))
+      {
+        target = (Q) (object) GetViewFrame();
+
+        return target is object;
+      }
+
       return false;
     }
 
@@ -113,19 +123,20 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value is ARDB.View view)
       {
+        space = space == ActiveSpace.None ? ActiveSpace.PageSpace : space;
+        var unitsScale = UnitScale.Internal / UnitScale.GetUnitScale(RhinoDoc.ActiveDoc, space);
+
         try
         {
           using (view.Document.NoSelectionScope())
           {
-            using (var outline = view.Outline)
+            using (var outline = space == ActiveSpace.PageSpace ? view.Outline : view.GetModelOutline())
             {
-              var unitsScale = UnitScale.Internal / UnitScale.GetUnitScale(RhinoDoc.ActiveDoc, space == ActiveSpace.None ? ActiveSpace.PageSpace : space);
-              var viewScale = space != ActiveSpace.ModelSpace ? 1.0 : (view.Scale == 0 ? 1.0 : (double) view.Scale);
-
-              if (!outline.IsNullOrEmpty()) return new UVInterval
+              var (min, max) = outline;
+              return new UVInterval
               (
-                new Interval(viewScale * outline.Min.U * unitsScale, viewScale * outline.Max.U * unitsScale),
-                new Interval(viewScale * outline.Min.V * unitsScale, viewScale * outline.Max.V * unitsScale)
+                new Interval(min.U * unitsScale, max.U * unitsScale),
+                new Interval(min.V * unitsScale, max.V * unitsScale)
               );
             }
           }
@@ -177,28 +188,19 @@ namespace RhinoInside.Revit.GH.Types
           // Looks like Revit never exports and image with an aspect ratio below 10:1
           // So we correct here the outline.
           {
-            (double U, double V) length = (outline.U.Length, outline.V.Length);
-            if (length.U < length.V)
+            var length = new Interval(outline.U.Length, outline.V.Length);
+            for (int u = 0; u < 2; ++u)
             {
-              if (length.U < length.V * 0.1)
+              var v = u == 0 ? 1 : 0;
+              if (length[u] < length[v] * 0.1)
               {
-                var mid = outline.U.Mid;
+                var outlineU = u == 0 ? outline.U : outline.V;
+                var outlineV = v == 0 ? outline.V : outline.U;
+                var mid = outlineU.Mid;
                 outline = new UVInterval
                 (
-                  new Interval(mid - length.V * 0.05, mid + length.V * 0.05),
-                  outline.V
-                );
-              }
-            }
-            else
-            {
-              if (length.V < length.U * 0.1)
-              {
-                var mid = outline.V.Mid;
-                outline = new UVInterval
-                (
-                  outline.U,
-                  new Interval(mid - length.U * 0.05, mid + length.U * 0.05)
+                  new Interval(mid - length[v] * 0.05, mid + length[v] * 0.05),
+                  outlineV
                 );
               }
             }
@@ -222,7 +224,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         var viewId = view.Id;
         using (var viewDocument = view.Document)
-        using (new NoSelectionScope(viewDocument))
+        using (viewDocument.NoSelectionScope())
         {
           var rect = view.GetOutlineRectangle().ToRectangle();
           var fitDirection = rect.Width > rect.Height ?
@@ -247,7 +249,23 @@ namespace RhinoInside.Revit.GH.Types
               FilePath = document.SwapFolder.Directory.FullName + Path.DirectorySeparatorChar
             };
             options.SetViewsAndSheets(new ARDB.ElementId[] { viewId });
-            viewDocument.ExportImage(options);
+
+            if (!view.CropBoxActive && view is ARDB.View3D)
+            {
+              using (viewDocument.RollBackScope())
+              {
+                var (min, max) = view.GetModelOutline();
+                var cropBox = view.CropBox;
+                var ((_ , _, min_W), (_ , _, max_W)) = cropBox;
+                cropBox.Min = new ARDB.XYZ(min.U, min.V, min_W);
+                cropBox.Max = new ARDB.XYZ(max.U, max.V, max_W);
+                view.CropBox = cropBox;
+                view.CropBoxActive = true;
+
+                viewDocument.ExportImage(options);
+              }
+            }
+            else viewDocument.ExportImage(options);
 
             var viewName = ARDB.ImageExportOptions.GetFileName(viewDocument, viewId);
             var sourceFile = new FileInfo(Path.Combine(options.FilePath, viewName) + ".png");
@@ -272,7 +290,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value is ARDB.View view && view.TryGetViewportInfo(useUIView: false, out var vport))
       {
-        var project = vport.GetXform(Rhino.DocObjects.CoordinateSystem.World, Rhino.DocObjects.CoordinateSystem.Clip);
+        var project = vport.GetXform(CoordinateSystem.World, CoordinateSystem.Clip);
         var scale = Transform.Scale(Plane.WorldXY, vport.FrustumWidth * 0.5, vport.FrustumHeight * 0.5, (vport.FrustumFar - vport.FrustumNear) * 0.5);
         var translate = Transform.Translation
         (
@@ -288,6 +306,43 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return Transform.ZeroTransformation;
+    }
+
+    public ViewFrame GetViewFrame()
+    {
+      if (Value?.TryGetViewportInfo(false, out var vport) is true)
+      {
+        var cropBox = Value.CropBox;
+        var min = cropBox.Min.ToPoint3d();
+        var max = cropBox.Max.ToPoint3d();
+
+        var bound = new Interval[]
+        {
+          new Interval(min.X, max.X),
+          new Interval(min.Y, max.Y),
+          new Interval(min.Z, max.Z),
+        };
+
+        var boundEnabled = new bool[,]
+        {
+          {
+            Value.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_LEFT).AsBoolean(),
+            Value.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_RIGHT).AsBoolean(),
+          },
+          {
+            Value.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_BOTTOM).AsBoolean(),
+            Value.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_TOP).AsBoolean(),
+          },
+          {
+            Value.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR).AsBoolean(),
+            Value.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_NEAR).AsBoolean(),
+          },
+        };
+
+        return new ViewFrame(vport) { /*Title = Nomen,*/ Bound = bound, BoundEnabled = boundEnabled };
+      }
+
+      return null;
     }
 
     internal UVInterval GetElementsBoundingRectangle(ElementFilter elementFilter) => GetElementsBoundingRectangle(GetModelToProjectionTransform(), elementFilter);
@@ -380,6 +435,113 @@ namespace RhinoInside.Revit.GH.Types
           view.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.Update(value.Id);
         }
       }
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is ARDB.View view)
+      {
+        var viewName = $"{Type.FamilyName}::{Nomen}";
+
+        // 2. Check if already exist
+        var index = doc.NamedViews.FindByName(viewName);
+        var info = index >= 0 ? doc.NamedViews[index] : null;
+
+        // 3. Update if necessary
+        if (index < 0 || overwrite)
+        {
+          if (!Value.TryGetViewportInfo(useUIView: false, out var vport))
+            return false;
+
+          var viewport = new RhinoViewport();
+          {
+            // Projection
+            viewport.SetViewProjection(vport, true);
+
+            // CPlane
+            {
+              var modelScale = UnitScale.GetModelScale(doc);
+              bool imperial = doc.ModelUnitSystem.IsImperial();
+              var spacing = imperial ?
+              UnitScale.Convert(1.0, UnitScale.Yards, modelScale) :
+              UnitScale.Convert(1.0, UnitScale.Meters, modelScale);
+
+              var cplane = new ConstructionPlane()
+              {
+                Plane = (view.SketchPlane?.GetPlane().ToPlane()) ?? vport.FrustumNearPlane,
+                GridSpacing = spacing,
+                SnapSpacing = spacing,
+                GridLineCount = 70,
+                ThickLineFrequency = imperial ? 6 : 5,
+                DepthBuffered = true,
+                Name = viewName,
+              };
+              if
+              (
+                view.TryGetSketchGridSurface(out var name, out var surface, out var bboxUV, out spacing) &&
+                surface is ARDB.Plane plane
+              )
+              {
+                cplane.Name = name;
+                cplane.Plane = plane.ToPlane();
+                cplane.GridSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
+                cplane.SnapSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
+                var min = bboxUV.Min.ToPoint2d();
+                min.X = Math.Round(min.X / cplane.GridSpacing) * cplane.GridSpacing;
+                min.Y = Math.Round(min.Y / cplane.GridSpacing) * cplane.GridSpacing;
+                var max = bboxUV.Max.ToPoint2d();
+                max.X = Math.Round(max.X / cplane.GridSpacing) * cplane.GridSpacing;
+                max.Y = Math.Round(max.Y / cplane.GridSpacing) * cplane.GridSpacing;
+                var gridUCount = Math.Max(1, (int) Math.Round((max.X - min.X) / cplane.GridSpacing * 0.5));
+                var gridVCount = Math.Max(1, (int) Math.Round((max.Y - min.Y) / cplane.GridSpacing * 0.5));
+                cplane.GridLineCount = Math.Max(gridUCount, gridVCount);
+                cplane.Plane = new Rhino.Geometry.Plane
+                (
+                  cplane.Plane.PointAt
+                  (
+                    min.X + gridUCount * cplane.GridSpacing,
+                    min.Y + gridVCount * cplane.GridSpacing
+                  ),
+                  cplane.Plane.XAxis, cplane.Plane.YAxis
+                );
+                cplane.ShowAxes = false;
+                cplane.ShowZAxis = false;
+              }
+
+              if (cplane.Plane.IsValid)
+                viewport.SetConstructionPlane(cplane);
+              else if (viewport.GetFrustumNearPlane(out var nearPlane))
+                viewport.SetConstructionPlane(nearPlane);
+            }
+          }
+
+          info = new ViewInfo(viewport) { Name = viewName };
+
+          if (index < 0) { index = doc.NamedViews.Add(info); info = doc.NamedViews[index]; }
+          else if (overwrite) { index = doc.NamedViews.Add(info); info = doc.NamedViews[index]; }
+        }
+
+        idMap.Add(Id, guid = info.Viewport.Id);
+        return true;
+      }
+
+      return false;
     }
     #endregion
   }
