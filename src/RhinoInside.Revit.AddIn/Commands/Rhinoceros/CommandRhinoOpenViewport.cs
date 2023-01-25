@@ -93,7 +93,6 @@ namespace RhinoInside.Revit.AddIn.Commands
         }
 
         // Make screen port a bit smaller than Revit one.
-        if (!vport.IsPerspectiveProjection || shiftIsPressed)
         {
           var port = vport.ScreenPort;
           port.Width /= 2; port.Height /= 2;

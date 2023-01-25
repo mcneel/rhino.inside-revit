@@ -76,10 +76,8 @@ namespace RhinoInside.Revit.Convert.DocObjects
         }
 
         {
-          var (min, max) = view.GetModelOutline();
-          var (minX, minY) = min;
-          var (maxX, maxY) = max;
-          var((_, _, minZ), (_, _, maxZ)) = view.CropBox;
+          var ((minX, minY), (maxX, maxY)) = view.GetModelOutline();
+          var((_, _, minZ), (_, _, maxZ))  = view.CropBox;
 
           camera.IsPerspective    = (view as ARDB.View3D)?.IsPerspective ?? false;
           camera.HorizontalExtent = maxX - minX;
@@ -163,22 +161,28 @@ namespace RhinoInside.Revit.Convert.DocObjects
               vport.SetFrustum(left, right, bottom, top, near, far);
             }
 
+            vport.FrustumAspect = vport.FrustumWidth / vport.FrustumHeight;
             vport.SetCameraDirection(-zDirection * far);
           }
         }
       }
       else
       {
-        var screenPort = view.GetOutlineRectangle().ToRectangle();
-        screenPort.X = 0;
-        screenPort.Y = 0;
-
         var camera = CameraInfo.GetCameraInfo(view);
         var origin = camera.EyePosition.ToPoint3d();
         var zDirection = camera.ViewDirection.ToVector3d();
         var yDirection = camera.UpDirection.ToVector3d();
         var xDirection = Vector3d.CrossProduct(yDirection, zDirection);
         xDirection.Unitize();
+
+        var extents = Revit.ActiveUIApplication.MainWindowExtents.ToRectangle();
+        var radius = Math.Min(extents.Right - extents.Left, extents.Bottom - extents.Top);
+        var screenPort = new global::System.Drawing.Rectangle
+        (
+          0, 0,
+          radius,
+          (int) Math.Round(radius * camera.VerticalExtent / camera.HorizontalExtent)
+        );
 
         var near = camera.IsPerspective ?
           Math.Max(1e-6, camera.TargetDistance * Revit.ModelUnits) :
@@ -188,7 +192,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
         vport = new ViewportInfo()
         {
           ScreenPort = screenPort,
-          FrustumAspect = (double) screenPort.Width / (double) screenPort.Height,
+          FrustumAspect = camera.HorizontalExtent / camera.VerticalExtent,
           IsPerspectiveProjection = camera.IsPerspective,
         };
         vport.SetCameraLocation(origin);

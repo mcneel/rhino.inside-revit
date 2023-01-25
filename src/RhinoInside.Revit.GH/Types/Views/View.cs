@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      if (typeof(Q).IsAssignableFrom(typeof(GH_GeometricGoo<ViewportInfo>)))
+      if (typeof(Q).IsAssignableFrom(typeof(ViewFrame)))
       {
         target = (Q) (object) GetViewFrame();
 
@@ -178,33 +178,38 @@ namespace RhinoInside.Revit.GH.Types
 
     public Box Box => Value?.get_BoundingBox(default).ToBox() ?? NaN.Box;
 
-    public Surface Surface 
+    static UVInterval StandardizeOutline(UVInterval outline, double minRatio = 0.1)
+    {
+      var length = new Interval(outline.U.Length, outline.V.Length);
+      for (int u = 0; u < 2; ++u)
+      {
+        var v = u == 0 ? 1 : 0;
+        if (length[u] < length[v] * minRatio)
+        {
+          var outlineU = u == 0 ? outline.U : outline.V;
+          var outlineV = v == 0 ? outline.V : outline.U;
+          var mid = outlineU.Mid;
+          outline = new UVInterval
+          (
+            new Interval(mid - length[v] * (minRatio * 0.5), mid + length[v] * (minRatio * 0.5)),
+            outlineV
+          );
+        }
+      }
+
+      return outline;
+    }
+
+    public Surface Surface
     {
       get
       {
         var outline = GetOutline(ActiveSpace.ModelSpace);
         if (outline.IsValid)
         {
-          // Looks like Revit never exports and image with an aspect ratio below 10:1
-          // So we correct here the outline.
-          {
-            var length = new Interval(outline.U.Length, outline.V.Length);
-            for (int u = 0; u < 2; ++u)
-            {
-              var v = u == 0 ? 1 : 0;
-              if (length[u] < length[v] * 0.1)
-              {
-                var outlineU = u == 0 ? outline.U : outline.V;
-                var outlineV = v == 0 ? outline.V : outline.U;
-                var mid = outlineU.Mid;
-                outline = new UVInterval
-                (
-                  new Interval(mid - length[v] * 0.05, mid + length[v] * 0.05),
-                  outlineV
-                );
-              }
-            }
-          }
+          // Looks like Revit never exports and image with an aspect ratio below 1:10
+          // So we correct here the outline to apply the material correctly.
+          outline = StandardizeOutline(outline, 0.1);
 
           return new PlaneSurface(Location, outline.U, outline.V);
         }
