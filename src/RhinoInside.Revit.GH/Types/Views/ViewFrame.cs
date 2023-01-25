@@ -6,7 +6,6 @@ using Rhino;
 using Rhino.Display;
 using Rhino.DocObjects;
 using Rhino.Geometry;
-using Rhino.Geometry.Intersect;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -14,7 +13,6 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
-  using RhinoInside.Revit.Convert.DocObjects;
   using static External.DB.Extensions.BoundingBoxXYZExtension;
 
   public class ViewFrame : GH_GeometricGoo<ViewportInfo>, IGH_PreviewData
@@ -148,23 +146,11 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
-      if (source is ViewportInfo view)
+      switch (source)
       {
-        Value = new ViewportInfo(view);
-        BoundEnabled = BoundEnabledNone;
-        Bound = BoundDefault;
-        return true;
+        case GH_Goo<ViewportInfo> info: source = info.Value; break;
+        case IGH_Goo goo: source = goo.ScriptVariable(); break;
       }
-      else if (source is GH_Goo<ViewportInfo> info)
-      {
-        Value = info.Value is null ? null : new ViewportInfo(info.Value);
-        BoundEnabled = BoundEnabledNone;
-        Bound = BoundDefault;
-        return true;
-      }
-
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
 
       switch (source)
       {
@@ -327,6 +313,20 @@ namespace RhinoInside.Revit.GH.Types
           }
           else return false;
         }
+
+        case ViewportInfo vport:
+
+          Value = new ViewportInfo(vport);
+          if (!Value.IsParallelProjection)
+          {
+            var near = 0.1 * Revit.ModelUnits;
+            var rect = Value.GetFurstumRectangle(near);
+            Value.SetFrustum(rect.X.T0, rect.X.T1, rect.Y.T0, rect.Y.T1, near, Value.FrustumFar);
+          }
+
+          BoundEnabled = BoundEnabledNone;
+          Bound = BoundDefault;
+          return true;
       }
 
       return false;

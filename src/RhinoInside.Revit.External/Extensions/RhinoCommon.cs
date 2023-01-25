@@ -1173,6 +1173,10 @@ namespace Rhino.DocObjects
     public static double[] GetViewScale(this ViewportInfo vport) => new double[] { 1.0, 1.0, 1.0 };
 #endif
 
+    public static Geometry.Interval GetFurstumWidth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
+    public static Geometry.Interval GetFurstumHeight(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
+    public static Geometry.Interval GetFurstumDepth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumNear, vport.FrustumFar);
+
     public static Geometry.Plane GetCameraFrameAt(this ViewportInfo vport, double depth = 0.0) =>
       new Geometry.Plane(vport.CameraLocation - vport.CameraZ * depth, vport.CameraX, vport.CameraY);
 
@@ -1197,9 +1201,23 @@ namespace Rhino.DocObjects
       };
     }
 
-    public static Geometry.Interval GetFurstumWidth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
-    public static Geometry.Interval GetFurstumHeight(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
-    public static Geometry.Interval GetFurstumDepth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumNear, vport.FrustumFar);
+    public static Geometry.Rectangle3d GetFurstumRectangle(this ViewportInfo vport, double depth)
+    {
+      var width = new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
+      var height = new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
+      var s = vport.IsPerspectiveProjection ? depth / vport.FrustumNear : 1.0;
+
+      var scale = vport.GetViewScale();
+      var x = 1.0 / scale[0];
+      var y = 1.0 / scale[1];
+
+      return new Geometry.Rectangle3d
+      (
+        vport.GetCameraFrameAt(depth),
+        new Geometry.Interval(s * x * width.T0, s * y * width.T1),
+        new Geometry.Interval(s * x * height.T0, s * y * height.T1)
+      );
+    }
   }
 }
 

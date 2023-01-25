@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      if (typeof(Q).IsAssignableFrom(typeof(ViewFrame)))
+      if (typeof(Q).IsAssignableFrom(typeof(GH_GeometricGoo<ViewportInfo>)))
       {
         target = (Q) (object) GetViewFrame();
 
