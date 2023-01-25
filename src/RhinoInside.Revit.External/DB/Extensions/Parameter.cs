@@ -151,9 +151,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (parameter.StorageType != StorageType.Integer)
         throw new InvalidCastException();
 
-      if (parameter.Definition?.GetDataType() != SpecType.Int.Integer)
-        throw new InvalidCastException();
-
       return (T) (object) parameter.AsInteger();
     }
 
