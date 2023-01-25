@@ -11,6 +11,13 @@ group: Deployment & Configs
 ### WIP
 
 
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
+
+{% include ltr/release-header.html title="v1.12 RC2" version="v1.12.8425.21537" pre_release=true time="01/24/2023" %}
+
 - Added 'View Crop Region' component.
 - Added 'Add Section View' component.
 - Added 'Add Detail View' component.
@@ -19,11 +26,6 @@ group: Deployment & Configs
 - Now 'Open Viewport` grabs Revit active view settings.
     * If CTRL is pressed grabs orientation.
     * If SHIFT is also pressed zoom is also applied.
-
-{% endcapture %}
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
-
-![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
 
 {% include ltr/release-header.html title="v1.12 RC1" version="v1.12.8417.6530" pre_release=true time="01/17/2023" %}
 
