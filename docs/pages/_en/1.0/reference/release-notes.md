@@ -10,7 +10,6 @@ group: Deployment & Configs
 
 ### WIP
 
-### RC
 
 - Added 'View Crop Region' component.
 - Added 'Add Section View' component.
@@ -34,7 +33,7 @@ group: Deployment & Configs
 - Added {% include ltr/comp.html uuid='b062c96e' %} component. [#753](https://github.com/mcneel/rhino.inside-revit/issues/753)
 
 
-{% include ltr/release-header.html title="v1.11" version="v1.11.8410.29937" time="01/10/2023" %}
+{% include ltr/release-header.html title="v1.11" version="v1.11.8425.15605" time="01/10/2023" %}
 
 - Fix for "Comments" parameter `DataType`.
 - Improved `Types.CurtainGridLine` previews.
