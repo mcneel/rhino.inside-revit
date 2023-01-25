@@ -166,8 +166,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var (x, y, z) = diagonal;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
-      if (x < 0.0 && y < 0.0 && z < 0.0) return -NumericTolerance.Abs(x, y, z);
-      if (x > 0.0 && y > 0.0 && z > 0.0) return +NumericTolerance.Abs(x, y, z);
+      if (x < 0.0 && y < 0.0 && z < 0.0) return -NumericTolerance.Norm(x, y, z);
+      if (x > 0.0 && y > 0.0 && z > 0.0) return +NumericTolerance.Norm(x, y, z);
 
       return double.NaN;
     }
@@ -403,6 +403,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
         new XYZ(min.X, min.Y, min.Z),
         new XYZ(max.X, max.Y, max.Z)
       );
+    }
+
+    public static BoundingBoxUV ToBoundingBoxUV(this BoundingBoxXYZ value, int axis = AxisZ)
+    {
+      var (min, max) = value;
+      switch (axis)
+      {
+        case AxisX: return new BoundingBoxUV(min.Y, min.Z, max.Y, max.Z);
+        case AxisY: return new BoundingBoxUV(min.Z, min.X, max.Z, max.X);
+        case AxisZ: return new BoundingBoxUV(min.X, min.Y, max.X, max.Y);
+        default: throw new ArgumentOutOfRangeException(nameof(axis));
+      }
     }
 
     public static XYZ[] GetCorners(this BoundingBoxXYZ value)

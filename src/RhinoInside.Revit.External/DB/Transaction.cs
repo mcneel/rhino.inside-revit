@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.External.DB
 {
   internal static class TransactionExtension
   {
-    public struct TransactionAwaitable
+    public readonly struct TransactionAwaitable
     {
       readonly TransactionAwaiter awaiter;
       internal TransactionAwaitable(Transaction transaction) => awaiter = new TransactionAwaiter(transaction);
@@ -22,9 +22,9 @@ namespace RhinoInside.Revit.External.DB
       {
         public readonly string Name;
         readonly ITransactionFinalizer TransactionFinalizer;
+        TransactionStatus result = TransactionStatus.Pending;
         Autodesk.Revit.UI.ExternalEvent external;
         Action continuation;
-        TransactionStatus result = TransactionStatus.Pending;
         Exception exception;
 
         internal TransactionAwaiter(Transaction transaction)
@@ -34,12 +34,8 @@ namespace RhinoInside.Revit.External.DB
             TransactionFinalizer = options.GetTransactionFinalizer();
 
             Name = transaction.GetName();
-            result = transaction.Commit
-            (
-              options.
-              SetTransactionFinalizer(this).
-              SetForcedModalHandling(false)
-            );
+            result = UI.HostedApplication.Active.InvokeInHostContext
+            (() => transaction.Commit(options.SetTransactionFinalizer(this).SetForcedModalHandling(false)));
           }
         }
 
@@ -50,17 +46,18 @@ namespace RhinoInside.Revit.External.DB
 
         #region ICriticalNotifyCompletion
         [SecuritySafeCritical]
-        void INotifyCompletion.OnCompleted(Action action) => continuation = action;
+        void INotifyCompletion.OnCompleted(Action action) => Rise(action);
 
         [SecuritySafeCritical]
-        void ICriticalNotifyCompletion.UnsafeOnCompleted(Action action) => continuation = action;
+        void ICriticalNotifyCompletion.UnsafeOnCompleted(Action action) => Rise(action);
 
-        void Rise()
+        void Rise(Action action)
         {
           // If TransactionAwaitable is not awaited or Transaction runs synchronously we are done.
-          if (continuation is null)
+          if (action is null)
             return;
 
+          continuation = action;
           external = Autodesk.Revit.UI.ExternalEvent.Create(this);
           switch (external.Raise())
           {
@@ -76,22 +73,18 @@ namespace RhinoInside.Revit.External.DB
         #region ITransactionFinalizer
         void ITransactionFinalizer.OnCommitted(Document document, string strTransactionName)
         {
-          result = TransactionStatus.Committed;
-
           try { TransactionFinalizer?.OnCommitted(document, strTransactionName); }
           catch (TargetInvocationException e) { exception = e.InnerException; }
 
-          Rise();
+          result = TransactionStatus.Committed;
         }
 
         void ITransactionFinalizer.OnRolledBack(Document document, string strTransactionName)
         {
-          result = TransactionStatus.RolledBack;
-
           try { TransactionFinalizer?.OnRolledBack(document, strTransactionName); }
           catch (TargetInvocationException e) { exception = e.InnerException; }
 
-          Rise();
+          result = TransactionStatus.RolledBack;
         }
         #endregion
 

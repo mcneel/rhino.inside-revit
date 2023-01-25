@@ -2,6 +2,18 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
+  static class EnumExtensions
+  {
+    public static T WithFlag<T>(this T @enum, T flag, bool value) where T : struct, Enum
+    {
+      var underlyingType = Enum.GetUnderlyingType(typeof(T));
+      dynamic e = Convert.ChangeType(@enum, underlyingType);
+      dynamic f = Convert.ChangeType(flag, underlyingType);
+
+      return (T) (value ? (e | f) : (e & ~f));
+    }
+  }
+
   static class TypeExtension
   {
     public static bool IsGenericSubclassOf(this Type type, Type baseGenericType)

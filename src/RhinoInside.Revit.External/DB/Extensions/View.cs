@@ -219,13 +219,48 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       using (var outline = view.Outline)
       {
+        var (min, max) = outline;
         return new Rectangle
         (
-          left    : (int) Math.Round(outline.Min.U * 12.0 * DPI),
-          top     : (int) Math.Round(outline.Min.V * 12.0 * DPI),
-          right   : (int) Math.Round(outline.Max.U * 12.0 * DPI),
-          bottom  : (int) Math.Round(outline.Max.V * 12.0 * DPI)
+          left    : (int) Math.Round(min.U * 12.0 * DPI),
+          top     : (int) Math.Round(min.V * 12.0 * DPI),
+          right   : (int) Math.Round(max.U * 12.0 * DPI),
+          bottom  : (int) Math.Round(max.V * 12.0 * DPI)
         );
+      }
+    }
+
+    /// <summary>
+    /// The bounds of the view in model space (in feet).
+    /// </summary>
+    /// <param name="view"></param>
+    /// <param name="DPI"></param>
+    /// <returns>Empty <see cref="BoundingBoxUV"/> on empty views.</returns>
+    public static BoundingBoxUV GetModelOutline(this View view)
+    {
+      if (!view.CanBePrinted)
+        return BoundingBoxUVExtension.Empty;
+
+      if (view is View3D view3D)
+      {
+        if (view.CropBoxActive)
+        {
+          using (var cropBox = view.CropBox)
+            return cropBox.ToBoundingBoxUV();
+        }
+        else if (view3D.IsPerspective)
+        {
+          var radius = 0.1;
+          return new BoundingBoxUV(-radius, -radius * 3.0 / 4.0, +radius, +radius * 3.0 / 4.0);
+        }
+      }
+
+      {
+        var scale = Math.Max(view.Scale, 1);
+        var outline = view.Outline;
+        outline.Min *= scale;
+        outline.Max *= scale;
+        return outline;
       }
     }
 
@@ -423,6 +458,83 @@ namespace RhinoInside.Revit.External.DB.Extensions
         CompoundElementFilter.Intersect(modelClipFilter, annotationClipFilter) :
         CompoundElementFilter.Union    (modelClipFilter, annotationClipFilter);
     }
+
+    #region Orientation
+    public static ViewOrientation3D GetSavedOrientation(this View view)
+    {
+      if (view is View3D view3D)
+        return view3D.GetSavedOrientation();
+
+      return new ViewOrientation3D(view.Origin, view.UpDirection, -view.ViewDirection);
+    }
+
+    public static void SetSavedOrientation(this View view, ViewOrientation3D newViewOrientation3D)
+    {
+      if (view is View3D view3D)
+      {
+        view3D.SetOrientation(newViewOrientation3D);
+        view3D.SaveOrientation();
+      }
+      else
+      {
+        var viewOrigin = view.Origin;
+        var viewBasisY = view.UpDirection;
+        var viewBasisX = view.RightDirection;
+        var viewBasisZ = viewBasisX.CrossProduct(viewBasisY);
+
+        var newOrigin = newViewOrientation3D.EyePosition;
+        var newBasisY = newViewOrientation3D.UpDirection;
+        var newBasisZ = (-newViewOrientation3D.ForwardDirection);
+        var newBasisX = newBasisY.CrossProduct(newBasisZ);
+
+        var dependents = view.GetDependentElements(new ElementCategoryFilter(BuiltInCategory.OST_Viewers));
+        if (dependents.Count != 1)
+          throw new NotSupportedException();
+
+        {
+          var viewer = view.Document.GetElement(dependents[0]);
+          var modified = false;
+          var pinned = viewer.Pinned;
+
+          try
+          {
+            if (!viewBasisZ.IsCodirectionalTo(newBasisZ))
+            {
+              var axisDirection = viewBasisZ.CrossProduct(newBasisZ);
+              if (axisDirection.IsZeroLength()) axisDirection = viewBasisY;
+
+              viewer.Pinned = !(modified = true);
+              using (var axis = Line.CreateUnbound(viewOrigin, axisDirection))
+                ElementTransformUtils.RotateElement(viewer.Document, viewer.Id, axis, viewBasisZ.AngleTo(newBasisZ));
+
+              viewBasisX = view.RightDirection;
+            }
+
+            if (!viewBasisX.IsCodirectionalTo(newBasisX))
+            {
+              viewer.Pinned = !(modified = true);
+              using (var axis = Line.CreateUnbound(viewOrigin, newBasisZ))
+                ElementTransformUtils.RotateElement(viewer.Document, viewer.Id, axis, viewBasisX.AngleOnPlaneTo(newBasisX, newBasisZ));
+            }
+
+            {
+              var trans = newOrigin - viewOrigin;
+              if (!trans.IsZeroLength())
+              {
+                viewer.Pinned = !(modified = true);
+                ElementTransformUtils.MoveElement(viewer.Document, viewer.Id, trans);
+              }
+            }
+          }
+          finally
+          {
+            if (modified)
+              viewer.Pinned = pinned;
+          }
+        }
+      }
+    }
+    #endregion
 
     #region ViewSection
     static int IndexOfViewSection(ElevationMarker marker, ElementId viewId)

@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
   public class SelectionFilterElementByName : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("29618F71-3B57-4A20-9CB2-4C3D17774172");
-    public override GH_Exposure Exposure => GH_Exposure.septenary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     #region UI
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       nickname: "Selection Filter",
       description: "Create a selection filter",
       category: "Revit",
-      subCategory: "Filter"
+      subCategory: "View"
     )
     { }
 
@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         {
           Name = "Name",
           NickName = "N",
-          Description = "Selection filter name",
+          Description = "Filter name",
         },
         ParamRelevance.Primary
       ),
@@ -138,11 +138,12 @@ namespace RhinoInside.Revit.GH.Components.Filters
       var selection = default(ARDB.SelectionFilterElement);
 
       // Make sure the name is unique
+      if (name is null)
       {
         name = doc.NextIncrementalNomen
         (
-          name ?? template?.Name ?? _SelectionFilter_,
-          typeof(ARDB.SelectionFilterElement)
+          template?.Name ?? _SelectionFilter_, typeof(ARDB.SelectionFilterElement),
+          categoryId: ARDB.BuiltInCategory.INVALID
         );
       }
 

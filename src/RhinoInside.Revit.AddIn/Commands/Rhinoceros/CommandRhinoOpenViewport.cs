@@ -22,13 +22,15 @@ namespace RhinoInside.Revit.AddIn.Commands
       (
         name: CommandName,
         iconName: "Ribbon.Rhinoceros.OpenViewport.png",
-        tooltip: "Opens a floating viewport",
+        tooltip: "Opens a floating viewport.",
         url: "reference/rir-interface#rhinoceros-panel"
       );
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.LongDescription = $"Use CTRL key to open the viewport synchronizing camera and workplane";
+        pushButton.LongDescription =
+          $"Use CTRL key to open the viewport synchronizing camera and workplane.{Environment.NewLine}" +
+          "Use CTRL + SHIFT to also synchronize Zoom level.";
         StoreButton(CommandName, pushButton);
       }
     }
@@ -36,12 +38,13 @@ namespace RhinoInside.Revit.AddIn.Commands
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
       var ctrlIsPressed = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+      var shiftIsPressed = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
 
-      if (ctrlIsPressed && data.View.TryGetViewportInfo(useUIView: true, out var vport))
+      if (ctrlIsPressed && data.View.TryGetViewportInfo(useUIView: shiftIsPressed, out var vport))
       {
         var rhinoDoc = Rhino.RhinoDoc.ActiveDoc;
         var modelScale = UnitScale.GetModelScale(rhinoDoc);
-        bool imperial = rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Feet || rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Inches;
+        bool imperial = Rhino.Geometry.UnitSystemExtension.IsImperial(rhinoDoc.ModelUnitSystem);
         var spacing = imperial ?
         UnitScale.Convert(1.0, UnitScale.Yards, modelScale) :
         UnitScale.Convert(1.0, UnitScale.Meters, modelScale);
@@ -89,10 +92,16 @@ namespace RhinoInside.Revit.AddIn.Commands
           cplane.ShowZAxis = false;
         }
 
-        Rhinoceros.RunCommandOpenViewportAsync(vport, cplane);
+        // Make screen port a bit smaller than Revit one.
+        {
+          var port = vport.ScreenPort;
+          port.Width /= 2; port.Height /= 2;
+          vport.ScreenPort = port;
+        }
+
+        Rhinoceros.RunCommandOpenViewportAsync(vport, cplane, setScreenPort: true);
       }
-      else
-        Rhinoceros.RunCommandOpenViewportAsync(default, default);
+      else Rhinoceros.RunCommandOpenViewportAsync(default, default, setScreenPort: false);
 
       return Result.Succeeded;
     }

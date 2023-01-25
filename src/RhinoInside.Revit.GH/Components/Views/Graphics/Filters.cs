@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       (
         name: "Filters",
         nickname: "F",
-        description:  "View Filters",
+        description:  "Set of document stored view filters to apply to the view",
         optional: true,
         access: GH_ParamAccess.list,
         relevance: ParamRelevance.Primary
@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       (
         name: "Filters",
         nickname: "F",
-        description:  "View Filters",
+        description:  "Set of document stored view filters applied to the view",
         access: GH_ParamAccess.list,
         relevance: ParamRelevance.Primary
       )
@@ -77,7 +77,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         var viewFilters = new ReadOnlySortedElementIdCollection(view.Value.GetFilters());
         var filtersToAdd = new HashSet<ARDB.ElementId>(filters.Count);
         
-        foreach (var filter in filters)
+        foreach (var filter in filters.OfType<Types.FilterElement>())
         {
           if (!filter.Document.IsEquivalent(view.Document)) continue;
 

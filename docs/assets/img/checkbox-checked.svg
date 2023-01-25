@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   id="svg2"
+   sodipodi:docname="checkbox-checked.svg"
+   inkscape:export-filename="/home/skinderknecht/workspace/vis/vis-ui-senator/war/images/exclude/checkbox_unchecked-30.png"
+   viewBox="0 0 535 531"
+   inkscape:export-xdpi="5.0847459"
+   version="1.1"
+   inkscape:export-ydpi="5.0847459"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs8" />
+  <sodipodi:namedview
+     id="base"
+     bordercolor="#666666"
+     inkscape:pageshadow="2"
+     inkscape:window-y="-8"
+     pagecolor="#ffffff"
+     inkscape:window-height="1377"
+     inkscape:window-maximized="1"
+     inkscape:zoom="0.64"
+     inkscape:window-x="-8"
+     showgrid="false"
+     borderopacity="1.0"
+     inkscape:current-layer="layer2"
+     inkscape:cx="305.46875"
+     inkscape:cy="269.53125"
+     inkscape:window-width="2560"
+     inkscape:pageopacity="0.0"
+     inkscape:document-units="px"
+     inkscape:pagecheckerboard="0" />
+  <g
+     id="layer2"
+     inkscape:label="Mark"
+     inkscape:groupmode="layer"
+     transform="translate(0,-521.36)"
+     style="display:inline">
+    <path
+       id="rect2816"
+       style="fill:none;stroke:#000000;stroke-width:55;stroke-linejoin:round"
+       d="m 139.59,551.39 h 252.13 c 61.025,0 110.15,44.742 110.15,100.32 v 271.8 c 0,55.577 -49.129,100.32 -110.15,100.32 H 139.59 c -61.025,0 -110.15,-44.742 -110.15,-100.32 v -271.8 c 0,-55.577 49.129,-100.32 110.15,-100.32 z" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="Check"
+     style="display:inline">
+    <path
+       style="fill:#0a0a0a;fill-rule:evenodd;stroke:#000000;stroke-width:45.335;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 80.418948,287.30512 c 0,0 25.343702,-40.41067 53.970362,-52.57413 7.7511,7.68145 51.69017,123.70667 59.44124,122.42642 8.72,-1.28021 66.15752,-107.01864 190.36973,-300.994054 0,0 35.94718,21.563276 102.0867,26.062974 -172.94375,179.2494 -262.39991,353.98243 -270.23829,362.42485 -22.28439,14.08267 -33.7066,5.93417 -41.45766,-0.46704 C 156.18217,422.42005 81.387834,292.42608 80.418948,287.30512 Z"
+       id="path5752"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccc" />
+  </g>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+        <dc:publisher>
+          <cc:Agent
+             rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:date>2010-11-17T19:44:22</dc:date>
+        <dc:description />
+        <dc:source>https://openclipart.org/detail/96265/checkbox-unchecked-by-skind</dc:source>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>skind</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>user interface</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>
