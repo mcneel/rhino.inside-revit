@@ -18,7 +18,7 @@ group: Deployment & Configs
 
 ![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
 
-{% include ltr/release-header.html title="v1.11" version="v1.11.8410.29937" time="01/10/2023" %}
+{% include ltr/release-header.html title="v1.11" version="v1.11.8425.15605" time="01/10/2023" %}
 
 - Fix for "Comments" parameter `DataType`.
 - Improved `Types.CurtainGridLine` previews.
