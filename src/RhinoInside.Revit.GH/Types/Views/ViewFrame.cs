@@ -168,9 +168,62 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (source)
       {
+        case Point3d point: source = new Plane(point, Vector3d.XAxis, Vector3d.YAxis);  break;
+      }
+
+      switch (source)
+      {
+        case Vector3d vector:
+        {
+          var radius = vector.Length;
+          var target = vector.Length;
+          var near = double.Epsilon;
+
+          var vport = new ViewportInfo { IsParallelProjection = true };
+          vport.SetCameraLocation(Point3d.Origin);
+          vport.SetCameraDirection(-vector);
+          vport.SetCameraUp(Vector3d.CrossProduct(vector, vector.PerpVector()));
+          vport.TargetPoint = Point3d.Origin - vector;
+
+          if (vport.SetFrustum(-radius, +radius, -radius, +radius, near, target))
+          {
+            BoundEnabled = BoundEnabledNone;
+            Bound[AxisX] = new Interval(-radius, +radius);
+            Bound[AxisY] = new Interval(-radius, +radius);
+            Bound[AxisZ] = new Interval(target, -target);
+            Value = vport;
+            return true;
+          }
+          else return false;
+        }
+
+        case Line line:
+        {
+          var radius = line.Length / 3.0;
+          var target = line.Length;
+          var near = double.Epsilon;
+
+          var vport = new ViewportInfo { IsParallelProjection = true };
+          vport.SetCameraLocation(line.From);
+          vport.SetCameraDirection(line.Direction);
+          vport.SetCameraUp(Vector3d.CrossProduct(-line.Direction, -line.Direction.PerpVector()));
+          vport.TargetPoint = line.To;
+
+          if (vport.SetFrustum(-radius, +radius, -radius * 3.0 / 4.0, +radius * 3.0 / 4.0, near, target))
+          {
+            BoundEnabled = BoundEnabledNone;
+            Bound[AxisX] = new Interval(-radius, +radius);
+            Bound[AxisY] = new Interval(-radius * 3.0 / 4.0, +radius * 3.0 / 4.0);
+            Bound[AxisZ] = new Interval(0.0, -target);
+            Value = vport;
+            return true;
+          }
+          else return false;
+        }
+
         case Plane plane:
         {
-          var radius = Grasshopper.CentralSettings.PreviewPlaneRadius;
+          var radius = 30 * Revit.ModelUnits;
           var width = radius * 2;
           var height = radius * 2;
 
@@ -183,12 +236,36 @@ namespace RhinoInside.Revit.GH.Types
           vport.SetCameraUp(plane.YAxis);
           vport.TargetPoint = plane.Origin - plane.ZAxis * (target * 0.5);
 
-          if (vport.SetFrustum(-radius, +radius, -radius, +radius, near, target))
+          if (vport.SetFrustum(-radius, +radius, -radius, +radius, near, target * 0.5))
           {
             BoundEnabled = BoundEnabledNone;
             Bound[AxisX] = new Interval(-radius, +radius);
             Bound[AxisY] = new Interval(-radius, +radius);
             Bound[AxisZ] = new Interval(target * +0.5, target * -0.5);
+            Value = vport;
+            return true;
+          }
+          else return false;
+        }
+
+        case Box box:
+        {
+          var vport = new ViewportInfo { IsParallelProjection = true };
+          vport.SetCameraLocation(box.Plane.Origin);
+          vport.SetCameraDirection(-box.Plane.ZAxis);
+          vport.SetCameraUp(box.Plane.YAxis);
+
+          var near = Math.Max(double.Epsilon, -box.Z.T0);
+          var far  = Math.Max(near + double.Epsilon, -box.Z.T1);
+          if (far == near) far += 0.001;// double.Epsilon;
+
+          if (vport.SetFrustum(box.X.T0, box.X.T1, box.Y.T0, box.Y.T1, near, far))
+          {
+            BoundEnabled = BoundEnabledBox;
+            Bound[AxisX] = box.X;
+            Bound[AxisY] = box.Y;
+            Bound[AxisZ] = box.Z;
+
             Value = vport;
             return true;
           }
@@ -223,24 +300,28 @@ namespace RhinoInside.Revit.GH.Types
           else return false;
         }
 
-        case Box box:
+        case Circle circle:
         {
+          var plane = circle.Plane;
+          var radius = circle.Radius;
+          var width = radius * 2.0;
+          var height = radius * 2.0;
+
+          var target = Math.Sqrt(width * width + height * height);
+          var near = double.Epsilon;
+
           var vport = new ViewportInfo { IsParallelProjection = true };
-          vport.SetCameraLocation(box.Plane.Origin);
-          vport.SetCameraDirection(-box.Plane.ZAxis);
-          vport.SetCameraUp(box.Plane.YAxis);
+          vport.SetCameraLocation(plane.Origin);
+          vport.SetCameraDirection(-plane.ZAxis);
+          vport.SetCameraUp(plane.YAxis);
+          vport.TargetPoint = plane.Origin - plane.ZAxis * (target * 0.5);
 
-          var near = Math.Max(double.Epsilon, -box.Z.T0);
-          var far  = Math.Max(near + double.Epsilon, -box.Z.T1);
-          if (far == near) far += 0.001;// double.Epsilon;
-
-          if (vport.SetFrustum(box.X.T0, box.X.T1, box.Y.T0, box.Y.T1, near, far))
+          if (vport.SetFrustum(-radius, +radius, -radius, +radius, near, target))
           {
-            BoundEnabled = BoundEnabledBox;
-            Bound[AxisX] = box.X;
-            Bound[AxisY] = box.Y;
-            Bound[AxisZ] = box.Z;
-
+            BoundEnabled = BoundEnabledPlanar;
+            Bound[AxisX] = new Interval(-radius, +radius);
+            Bound[AxisY] = new Interval(-radius, +radius);
+            Bound[AxisZ] = new Interval(0.0, target * -0.5);
             Value = vport;
             return true;
           }

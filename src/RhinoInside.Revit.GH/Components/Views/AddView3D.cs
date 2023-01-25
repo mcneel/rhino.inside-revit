@@ -118,6 +118,8 @@ namespace RhinoInside.Revit.GH.Components.Views
 
       ARDB.BuiltInParameter.VIEW_NAME,
       ARDB.BuiltInParameter.VIEWER_PERSPECTIVE,
+      ARDB.BuiltInParameter.VIEWER_CROP_REGION,
+      ARDB.BuiltInParameter.VIEWER_CROP_REGION_VISIBLE,
 
       ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_NEAR,
       ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR,
