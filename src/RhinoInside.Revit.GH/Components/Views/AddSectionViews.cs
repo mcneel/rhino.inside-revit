@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         {
           Name = "Frame",
           NickName = "F",
-          Description = $"View camera frame.{Environment.NewLine}Plane, Rectangle and Box is also accepted.",
+          Description = $"View camera frame.{Environment.NewLine}Line, Plane, Rectangle and Box are also accepted.",
         }
       ),
       new ParamDefinition
