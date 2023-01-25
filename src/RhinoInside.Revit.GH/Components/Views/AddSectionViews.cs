@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         {
           Name = "Frame",
           NickName = "F",
-          Description = $"View camera frame.{Environment.NewLine}Plane, Rectangle and Box is also accepted.",
+          Description = $"View camera frame.{Environment.NewLine}Line, Plane, Rectangle and Box are also accepted.",
         }
       ),
       new ParamDefinition
@@ -99,6 +99,8 @@ namespace RhinoInside.Revit.GH.Components.Views
       ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
 
       ARDB.BuiltInParameter.VIEW_NAME,
+      ARDB.BuiltInParameter.VIEWER_CROP_REGION,
+      ARDB.BuiltInParameter.VIEWER_CROP_REGION_VISIBLE,
 
       ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_NEAR,
       ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR,
