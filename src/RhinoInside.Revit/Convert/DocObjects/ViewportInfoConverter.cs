@@ -175,7 +175,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
         var xDirection = Vector3d.CrossProduct(yDirection, zDirection);
         xDirection.Unitize();
 
-        var extents = Revit.ActiveUIApplication.MainWindowExtents.ToRectangle();
+        var extents = Rhinoceros.InvokeInHostContext(() => Revit.ActiveUIApplication.MainWindowExtents.ToRectangle());
         var radius = Math.Min(extents.Right - extents.Left, extents.Bottom - extents.Top);
         var screenPort = new global::System.Drawing.Rectangle
         (
