@@ -1170,7 +1170,11 @@ namespace Rhino.DocObjects
   static class ViewportInfoExtension
   {
 #if !RHINO8_OR_GREATER
-    public static double[] GetViewScale(this ViewportInfo vport) => new double[] { 1.0, 1.0, 1.0 };
+    public static double[] GetViewScale(this ViewportInfo vport)
+    {
+      var scale = vport.ViewScale;
+      return new double[] { scale.Width, scale.Height, 1.0 };
+    }
 #endif
 
     public static Geometry.Interval GetFurstumWidth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
