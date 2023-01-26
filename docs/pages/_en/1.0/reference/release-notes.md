@@ -10,6 +10,8 @@ group: Deployment & Configs
 
 ### WIP
 
+- Updated `MeshEncoder` to produce Meshes whithout internal wires. (Revit 2023)
+
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
