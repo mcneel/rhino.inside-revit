@@ -99,6 +99,18 @@ namespace RhinoInside.Revit.AddIn.Commands
           vport.ScreenPort = port;
         }
 
+        if (!shiftIsPressed && vport.IsParallelProjection)
+        {
+          vport.DollyExtents
+          (
+            new Rhino.Geometry.BoundingBox
+            (
+              new Rhino.Geometry.Point3d(vport.FrustumLeft, vport.FrustumBottom, vport.FrustumNear),
+              new Rhino.Geometry.Point3d(vport.FrustumRight, vport.FrustumTop, vport.FrustumFar)
+            ), 1.1
+          );
+        }
+
         Rhinoceros.RunCommandOpenViewportAsync(vport, cplane, setScreenPort: true);
       }
       else Rhinoceros.RunCommandOpenViewportAsync(default, default, setScreenPort: false);

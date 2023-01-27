@@ -142,6 +142,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
             vport.SetCameraLocation(origin);
             vport.SetCameraDirection(-zDirection);
             vport.SetCameraUp(yDirection);
+            vport.TargetPoint = origin - zDirection * camera.FarDistance * 0.5 * Revit.ModelUnits;
 
             // Set Frustum
             {
@@ -176,12 +177,10 @@ namespace RhinoInside.Revit.Convert.DocObjects
         xDirection.Unitize();
 
         var extents = Rhinoceros.InvokeInHostContext(() => Revit.ActiveUIApplication.MainWindowExtents.ToRectangle());
-        var radius = Math.Min(extents.Right - extents.Left, extents.Bottom - extents.Top);
+        var ratio = camera.HorizontalExtent / camera.VerticalExtent;
         var screenPort = new global::System.Drawing.Rectangle
         (
-          0, 0,
-          radius,
-          (int) Math.Round(radius * camera.VerticalExtent / camera.HorizontalExtent)
+          0, 0, (int) Math.Round(extents.Height * ratio), extents.Height
         );
 
         var near = camera.IsPerspective ?
@@ -198,8 +197,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
         vport.SetCameraLocation(origin);
         vport.SetCameraDirection(-zDirection);
         vport.SetCameraUp(yDirection);
-        if (camera.IsPerspective)
-        vport.TargetPoint = origin - zDirection * camera.NearDistance * Revit.ModelUnits;
+        vport.TargetPoint = origin - zDirection * camera.FarDistance * 0.5 * Revit.ModelUnits;
 
         // Set Frustum
         {
