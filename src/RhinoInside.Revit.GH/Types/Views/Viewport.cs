@@ -17,13 +17,6 @@ namespace RhinoInside.Revit.GH.Types
     public Viewport() { }
     public Viewport(ARDB.Viewport element) : base(element) { }
 
-    protected override void ResetValue()
-    {
-      using (_Mesh) _Mesh = default;
-
-      base.ResetValue();
-    }
-
     public override bool CastTo<Q>(out Q target)
     {
       if (base.CastTo(out target))
@@ -157,6 +150,13 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_PreviewData
+    protected override void SubInvalidateGraphics()
+    {
+      using (_Mesh) _Mesh = default;
+
+      base.SubInvalidateGraphics();
+    }
+
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB.Viewport viewport && viewport.SheetId != ARDB.ElementId.InvalidElementId)
