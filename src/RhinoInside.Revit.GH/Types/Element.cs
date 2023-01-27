@@ -439,6 +439,10 @@ namespace RhinoInside.Revit.GH.Types
             if (SectionBox.IsValidElement(element)) return new SectionBox(element);
             break;
 
+          case ARDB.BuiltInCategory.OST_Viewers:
+            if (Viewer.IsValidElement(element)) return new Viewer(element);
+            break;
+
 #if !REVIT_2021
           case ARDB.BuiltInCategory.OST_IOS_GeoSite:
             if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element);
