@@ -139,6 +139,22 @@ namespace RhinoInside.Revit.GH.Types
       if (!pipeline.IsVisible(clippingBox))
         return false;
 
+#if DEBUG
+      var center = clippingBox.Center;
+      var viewport = pipeline.Viewport;
+      var dpi = pipeline.DpiScale;
+      var pointRadius = 2.0f * pipeline.DisplayPipelineAttributes.PointRadius * dpi;
+      if (viewport.GetWorldToScreenScale(center, out var pixelsPerUnits))
+      {
+        // If geometry is smaller than a point diameter we show it as a point
+        if (clippingBox.Diagonal.Length * pixelsPerUnits < pointRadius)
+        {
+          pipeline.DrawPoint(center, Rhino.Display.PointStyle.RoundControlPoint, System.Drawing.Color.Orange, System.Drawing.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
+          return false;
+        }
+      }
+#endif
+
       return true;
     }
 
@@ -150,7 +166,8 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsVisible(args.Pipeline))
         return;
 
-      DrawViewportWires(args);
+      try { DrawViewportWires(args); }
+      catch { _ClippingBox = BoundingBox.Empty; }
     }
     protected virtual void DrawViewportWires(GH_PreviewWireArgs args)
     {
@@ -166,7 +183,8 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsVisible(args.Pipeline))
         return;
 
-      DrawViewportMeshes(args);
+      try { DrawViewportMeshes(args); }
+      catch { _ClippingBox = BoundingBox.Empty; }
     }
     protected virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
@@ -471,7 +489,12 @@ namespace RhinoInside.Revit.GH.Types
       set => SetLocation(value, keepJoins: false);
     }
 
-    public void SetLocation(Plane location, bool keepJoins = false)
+    /// <summary>
+    /// Set the <see cref="Rhino.Geometry.Plane"/> where this element is located.
+    /// </summary>
+    /// <param name="location">New location for the element.</param>
+    /// <param name="keepJoins">When null a default action is taken by type.</param>
+    public void SetLocation(Plane location, bool? keepJoins = default)
     {
       using (var plane = location.ToPlane())
         SetLocation(plane.Origin, plane.XVec, plane.YVec, keepJoins);
@@ -485,7 +508,7 @@ namespace RhinoInside.Revit.GH.Types
       basisY = plane.YVec;
     }
 
-    void SetLocation(ARDB.XYZ newOrigin, ARDB.XYZ newBasisX, ARDB.XYZ newBasisY, bool keepJoins)
+    protected virtual void SetLocation(ARDB.XYZ newOrigin, ARDB.XYZ newBasisX, ARDB.XYZ newBasisY, bool? keepJoins)
     {
       if (Value is ARDB.Element element)
       {
@@ -503,7 +526,7 @@ namespace RhinoInside.Revit.GH.Types
           );
 
           if (!orientation.IsIdentity)
-            SetCurve(curveLocation.Curve.CreateTransformed(orientation).ToCurve(), keepJoins);
+            SetCurve(curveLocation.Curve.CreateTransformed(orientation).ToCurve(), keepJoins ?? false);
 
           return;
         }
