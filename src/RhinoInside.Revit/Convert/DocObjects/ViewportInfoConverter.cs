@@ -176,11 +176,11 @@ namespace RhinoInside.Revit.Convert.DocObjects
         var xDirection = Vector3d.CrossProduct(yDirection, zDirection);
         xDirection.Unitize();
 
-        var extents = Rhinoceros.InvokeInHostContext(() => Revit.ActiveUIApplication.MainWindowExtents.ToRectangle());
+        var bounds = Revit.MainWindow.Bounds;
         var ratio = camera.HorizontalExtent / camera.VerticalExtent;
         var screenPort = new global::System.Drawing.Rectangle
         (
-          0, 0, (int) Math.Round(extents.Height * ratio), extents.Height
+          0, 0, (int) Math.Round(bounds.Height * ratio), bounds.Height
         );
 
         var near = camera.IsPerspective ?
