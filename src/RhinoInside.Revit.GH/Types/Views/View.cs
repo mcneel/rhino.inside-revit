@@ -89,6 +89,13 @@ namespace RhinoInside.Revit.GH.Types
         return target is object;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(Viewer)))
+      {
+        target = (Q) (object) Viewer;
+
+        return target is object;
+      }
+
       return false;
     }
 
@@ -313,24 +320,27 @@ namespace RhinoInside.Revit.GH.Types
       return Transform.ZeroTransformation;
     }
 
+    ViewFrame _ViewFrame;
     public ViewFrame GetViewFrame()
     {
-      var vport = default(ViewportInfo);
-      if (Value?.TryGetViewportInfo(false, out vport) is true)
+      if (_ViewFrame is null)
       {
-        var cropBox = Value.CropBox;
-        var min = cropBox.Min.ToPoint3d();
-        var max = cropBox.Max.ToPoint3d();
-
-        var bound = new Interval[]
+        var vport = default(ViewportInfo);
+        if (Value?.TryGetViewportInfo(false, out vport) is true)
         {
+          var cropBox = Value.CropBox;
+          var min = cropBox.Min.ToPoint3d();
+          var max = cropBox.Max.ToPoint3d();
+
+          var bound = new Interval[]
+          {
           new Interval(min.X, max.X),
           new Interval(min.Y, max.Y),
           new Interval(min.Z, max.Z),
-        };
+          };
 
-        var boundEnabled = new bool[,]
-        {
+          var boundEnabled = new bool[,]
+          {
           {
             Value.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_LEFT).AsBoolean(),
             Value.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_RIGHT).AsBoolean(),
@@ -343,12 +353,13 @@ namespace RhinoInside.Revit.GH.Types
             Value.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR).AsBoolean(),
             Value.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_NEAR).AsBoolean(),
           },
-        };
+          };
 
-        return new ViewFrame(vport) { /*Title = Nomen,*/ Bound = bound, BoundEnabled = boundEnabled };
+          _ViewFrame = new ViewFrame(vport) { Title = Nomen, Bound = bound, BoundEnabled = boundEnabled };
+        }
       }
 
-      return null;
+      return _ViewFrame;
     }
 
     internal UVInterval GetElementsBoundingRectangle(ElementFilter elementFilter) => GetElementsBoundingRectangle(GetModelToProjectionTransform(), elementFilter);
@@ -399,6 +410,13 @@ namespace RhinoInside.Revit.GH.Types
       );
     }
 
+    protected override void SubInvalidateGraphics()
+    {
+      _ViewFrame = default;
+
+      base.SubInvalidateGraphics();
+    }
+
     #region Properties
     public bool? CropBoxActive
     {
@@ -441,6 +459,27 @@ namespace RhinoInside.Revit.GH.Types
           view.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.Update(value.Id);
         }
       }
+    }
+
+    public Viewer Viewer => View.FromElementId(Document, Value.GetDependentElements(GetViewerFilter()).FirstOrDefault()) as Viewer;
+
+    ARDB.ElementFilter GetViewerFilter()
+    {
+      return CompoundElementFilter.Intersect
+      (
+        new ARDB.ElementIsElementTypeFilter(inverted: true),
+        new ARDB.ElementMulticategoryFilter(Viewer.PossibleCategories),
+        new ARDB.ElementClassFilter(typeof(ARDB.View), inverted: true),
+        new ARDB.ElementParameterFilter
+        (
+          new ARDB.FilterElementIdRule
+          (
+            new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.ID_PARAM)),
+            new ARDB.FilterNumericEquals(),
+            Id
+          )
+        )
+      );
     }
     #endregion
 

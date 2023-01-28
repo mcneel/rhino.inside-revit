@@ -1169,6 +1169,16 @@ namespace Rhino.DocObjects
 {
   static class ViewportInfoExtension
   {
+    public static void SetScreenPortFromFrustum(this ViewportInfo vport, double unitsPerInch, double scale = 0.01, int DPI = 72)
+    {
+      scale *= unitsPerInch;
+
+      int width  = (int) Math.Round(vport.FrustumWidth * scale * DPI);
+      int height = (int) Math.Round(vport.FrustumHeight * scale * DPI);
+
+      vport.ScreenPort = new System.Drawing.Rectangle(0, 0, Math.Max(1, width), Math.Max(1, height));
+    }
+
 #if !RHINO8_OR_GREATER
     public static double[] GetViewScale(this ViewportInfo vport)
     {

@@ -412,8 +412,8 @@ namespace RhinoInside.Revit.GH.Types
       // By Category
       if (element.Category is null)
       {
-        if (DocumentExtension.AsCategory(element) is ARDB.Category category)
-          return new Category(category);
+        if (Viewer.IsValidElement(element))                                   return new Viewer(element);
+        if (DocumentExtension.AsCategory(element) is ARDB.Category category)  return new Category(category);
       }
       else if (element.Category.Id.TryGetBuiltInCategory(out var bic))
       {
@@ -440,6 +440,7 @@ namespace RhinoInside.Revit.GH.Types
             break;
 
           case ARDB.BuiltInCategory.OST_Viewers:
+          case ARDB.BuiltInCategory.OST_Cameras:
             if (Viewer.IsValidElement(element)) return new Viewer(element);
             break;
 
