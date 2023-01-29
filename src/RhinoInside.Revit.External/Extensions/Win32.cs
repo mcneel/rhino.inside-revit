@@ -66,36 +66,58 @@ namespace Microsoft.Win32.SafeHandles
 
   enum DialogResult
   {
-    IDOK            = 1,
-    IDCANCEL        = 2,
-    IDABORT         = 3,
-    IDRETRY         = 4,
-    IDIGNORE        = 5,
-    IDYES           = 6,
-    IDNO            = 7,
-    IDCLOSE         = 8,
-    IDHELP          = 9,
-    IDTRYAGAIN      = 10,
-    IDCONTINUE      = 11,
+    IDOK = 1,
+    IDCANCEL = 2,
+    IDABORT = 3,
+    IDRETRY = 4,
+    IDIGNORE = 5,
+    IDYES = 6,
+    IDNO = 7,
+    IDCLOSE = 8,
+    IDHELP = 9,
+    IDTRYAGAIN = 10,
+    IDCONTINUE = 11,
   };
 
-    [Flags]
+  [Flags]
   enum ExtendedWindowStyles
   {
-    ModalFrame      = 0x00000001,
-    NoParentNotify  = 0x00000004,
-    TopMost         = 0x00000008,
-    MDIChild        = 0x00000040,
-    ToolWindow      = 0x00000080,
-    WindowEdge      = 0x00000100,
-    ContextHelp     = 0x00000400,
-    AcceptFiles     = 0x00000010,
-    ControlParent   = 0x00010000,
-    StaticEdge      = 0x00020000,
-    AppWindow       = 0x00040000,
-    Layered         = 0x00080000,
-    Composited      = 0x02000000,
-    NoActivate      = 0x08000000,
+    ModalFrame = 0x00000001,
+    NoParentNotify = 0x00000004,
+    TopMost = 0x00000008,
+    MDIChild = 0x00000040,
+    ToolWindow = 0x00000080,
+    WindowEdge = 0x00000100,
+    ContextHelp = 0x00000400,
+    AcceptFiles = 0x00000010,
+    ControlParent = 0x00010000,
+    StaticEdge = 0x00020000,
+    AppWindow = 0x00040000,
+    Layered = 0x00080000,
+    Composited = 0x02000000,
+    NoActivate = 0x08000000,
+  }
+
+  [Flags]
+  enum SetWindowPosFlags
+  {
+    SWP_NOSIZE          = 0x0001,
+    SWP_NOMOVE          = 0x0002,
+    SWP_NOZORDER        = 0x0004,
+    SWP_NOREDRAW        = 0x0008,
+    SWP_NOACTIVATE      = 0x0010,
+    SWP_FRAMECHANGED    = 0x0020,
+    SWP_SHOWWINDOW      = 0x0040,
+    SWP_HIDEWINDOW      = 0x0080,
+    SWP_NOCOPYBITS      = 0x0100,
+    SWP_NOOWNERZORDER   = 0x0200,
+    SWP_NOSENDCHANGING  = 0x0400,
+    SWP_DRAWFRAME       = SWP_FRAMECHANGED,
+    SWP_NOREPOSITION    = SWP_NOOWNERZORDER,
+
+
+    SWP_DEFERERASE      = 0x2000,
+    SWP_ASYNCWINDOWPOS  = 0x4000,
   }
 
   internal class WindowHandle : SafeHandle, System.Windows.Forms.IWin32Window
@@ -235,6 +257,52 @@ namespace Microsoft.Win32.SafeHandles
     public bool BringToFront() => User32.BringWindowToTop(this);
     public bool ShowOwnedPopups() => User32.ShowOwnedPopups(this, true);
     public bool HideOwnedPopups() => User32.ShowOwnedPopups(this, false);
+
+    public System.Drawing.Rectangle Bounds
+    {
+      get
+      {
+        var rect = new User32.RECT(0, 0, 0, 0);
+        return User32.GetWindowRect(this, ref rect) ?
+          new System.Drawing.Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top):
+          System.Drawing.Rectangle.Empty;
+      }
+      set
+      {
+        const uint uFlags = (uint) SetWindowPosFlags.SWP_NOZORDER;
+        User32.SetWindowPos(this, Zero, value.Left, value.Top, value.Width, value.Height, uFlags);
+      }
+    }
+
+    public System.Drawing.Rectangle ClientRectangle
+    {
+      get
+      {
+        var rect = new User32.RECT(0, 0, 0, 0);
+        return User32.GetClientRect(this, ref rect) ?
+          new System.Drawing.Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top) :
+          System.Drawing.Rectangle.Empty;
+      }
+    }
+
+    public System.Drawing.Size ClientSize
+    {
+      get
+      {
+        var rect = new User32.RECT(0, 0, 0, 0);
+        return User32.GetClientRect(this, ref rect) ?
+          new System.Drawing.Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top).Size :
+          System.Drawing.Size.Empty;
+      }
+      set
+      {
+        var bounds = Bounds;
+        var client = ClientRectangle;
+
+        const uint uFlags = (uint) (SetWindowPosFlags.SWP_NOZORDER | SetWindowPosFlags.SWP_NOMOVE);
+        User32.SetWindowPos(this, Zero, 0, 0, value.Width + (bounds.Width - client.Width), value.Height + (bounds.Height - client.Height), uFlags);
+      }
+    }
   }
 
   internal class SafeWindowHandle : WindowHandle
@@ -369,6 +437,23 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
       }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct RECT
+    {
+      public int left;
+      public int top;
+      public int right;
+      public int bottom;
+
+      public RECT(int l, int t, int r, int b)
+      {
+        left = l;
+        top = t;
+        right = r;
+        bottom = b;
+      }
+    }
+
     [DllImport(USER32, SetLastError = true)]
     public static extern bool IsWindow(HWND hWnd);
 
@@ -436,6 +521,18 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     [DllImport(USER32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool ShowOwnedPopups(HWND hWnd, [MarshalAs(UnmanagedType.Bool)] bool fShow);
+
+    [DllImport(USER32, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetWindowRect(HWND hWnd, [MarshalAs(UnmanagedType.Struct)] ref RECT lpRect);
+
+    [DllImport(USER32, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetClientRect(HWND hWnd, [MarshalAs(UnmanagedType.Struct)] ref RECT lpRect);
+
+    [DllImport(USER32, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cX, int cY, uint uFlags);
 
     [StructLayout(LayoutKind.Sequential)]
     internal struct FLASHWINFO

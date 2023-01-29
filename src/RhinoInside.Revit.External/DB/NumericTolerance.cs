@@ -189,7 +189,10 @@ namespace RhinoInside.Revit.External.DB
     /// <remarks>
     /// This requires <see cref="double.NaN"/> inputs to not be propagated back to the caller and for -0.0 to be treated as less than +0.0.
     /// </remarks>
-    public static double MinNumber(double x, double y) => x < y ? x : IsNegativeZero(y) || IsNegativeZero(x) ? -0.0 : y;
+    public static double MinNumber(double x, double y) =>
+      x < y ? x :
+      IsNegativeZero(y) || IsNegativeZero(x) ? -0.0 :
+      double.IsNaN(y) ? x : y;
     #endregion
 
     #region MaxNumber
@@ -202,7 +205,10 @@ namespace RhinoInside.Revit.External.DB
     /// <remarks>
     /// This requires <see cref="double.NaN"/> inputs to not be propagated back to the caller and for -0.0 to be treated as less than +0.0.
     /// </remarks>
-    public static double MaxNumber(double x, double y) => x > y ? x : IsPositiveZero(y) || IsPositiveZero(x) ? +0.0 : y;
+    public static double MaxNumber(double x, double y) =>
+      x > y ? x :
+      IsPositiveZero(y) || IsPositiveZero(x) ? +0.0 :
+      double.IsNaN(y) ? x : y;
     #endregion
   }
 

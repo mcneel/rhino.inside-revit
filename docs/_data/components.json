@@ -1,5 +1,89 @@
 [
   {
+    "desc": "Contains a collection of Revit appearance asset elements", 
+    "iconsrc": "/static/images/GH/AppearanceAsset.png", 
+    "icontag": null, 
+    "panel": "Revit Elements", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Appearance Asset", 
+    "typename": "AppearanceAsset", 
+    "until": null, 
+    "uuid": "941b2ee3-5423-4fee-9df6-27c77fdb53c9"
+  }, 
+  {
+    "desc": "Contains a collection of Revit 1D appearance asset properties", 
+    "iconsrc": "/static/images/GH/AssetPropertyDouble1DMap.png", 
+    "icontag": null, 
+    "panel": "Revit", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Asset Property Double 1D Map", 
+    "typename": "AssetPropertyDouble1DMap", 
+    "until": null, 
+    "uuid": "49a94c44-26ec-4ee8-b9e7-37581968c3bf"
+  }, 
+  {
+    "desc": "Contains a collection of Revit 4D appearance asset properties", 
+    "iconsrc": "/static/images/GH/AssetPropertyDouble4DMap.png", 
+    "icontag": null, 
+    "panel": "Revit", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Asset Property Double 4D Map", 
+    "typename": "AssetPropertyDouble4DMap", 
+    "until": null, 
+    "uuid": "c2fc2e60-0336-465a-9ff0-1afc4b65d10d"
+  }, 
+  {
+    "desc": "Contains a collection of Revit material elements", 
+    "iconsrc": "/static/images/GH/Material.png", 
+    "icontag": null, 
+    "panel": "Revit Elements", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Material", 
+    "typename": "Material", 
+    "until": null, 
+    "uuid": "b18ef2cc-2e67-4a5e-9241-9010fb7d27ce"
+  }, 
+  {
+    "desc": "Contains a collection of Revit structural asset elements", 
+    "iconsrc": "/static/images/GH/StructuralAsset.png", 
+    "icontag": null, 
+    "panel": "Revit Elements", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Physical Asset", 
+    "typename": "StructuralAsset", 
+    "until": null, 
+    "uuid": "dde6da63-87bc-4250-9455-5233bfad8683"
+  }, 
+  {
+    "desc": "Wraps TypesTextureData", 
+    "iconsrc": "/static/images/GH/TextureData.png", 
+    "icontag": null, 
+    "panel": "Revit Elements", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Texture Data", 
+    "typename": "TextureData", 
+    "until": null, 
+    "uuid": "a7c7ecef-066d-4b39-b2e8-01b6d53adfeb"
+  }, 
+  {
+    "desc": "Contains a collection of Revit thermal assets elements", 
+    "iconsrc": "/static/images/GH/ThermalAsset.png", 
+    "icontag": null, 
+    "panel": "Revit Elements", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Thermal Asset", 
+    "typename": "ThermalAsset", 
+    "until": null, 
+    "uuid": "b0a6689a-f2cd-4360-980c-d61a1f0c0453"
+  }, 
+  {
     "desc": "Contains a collection of Revit categories", 
     "iconsrc": "/static/images/GH/Category.png", 
     "icontag": null, 
@@ -132,18 +216,6 @@
     "uuid": "7bafe137-332b-481a-be22-09e8bd4c86fc"
   }, 
   {
-    "desc": "Contains a collection of Revit appearance asset elements", 
-    "iconsrc": "/static/images/GH/AppearanceAsset.png", 
-    "icontag": null, 
-    "panel": "Revit Elements", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Appearance Asset", 
-    "typename": "AppearanceAsset", 
-    "until": null, 
-    "uuid": "941b2ee3-5423-4fee-9df6-27c77fdb53c9"
-  }, 
-  {
     "desc": "Contains a collection of Revit assemblies", 
     "iconsrc": "/static/images/GH/AssemblyInstance.png", 
     "icontag": null, 
@@ -154,30 +226,6 @@
     "typename": "AssemblyInstance", 
     "until": null, 
     "uuid": "d7958ccf-9847-4e27-996b-b7fdc0eb1086"
-  }, 
-  {
-    "desc": "Contains a collection of Revit 1D appearance asset properties", 
-    "iconsrc": "/static/images/GH/AssetPropertyDouble1DMap.png", 
-    "icontag": null, 
-    "panel": "Revit", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Asset Property Double 1D Map", 
-    "typename": "AssetPropertyDouble1DMap", 
-    "until": null, 
-    "uuid": "49a94c44-26ec-4ee8-b9e7-37581968c3bf"
-  }, 
-  {
-    "desc": "Contains a collection of Revit 4D appearance asset properties", 
-    "iconsrc": "/static/images/GH/AssetPropertyDouble4DMap.png", 
-    "icontag": null, 
-    "panel": "Revit", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Asset Property Double 4D Map", 
-    "typename": "AssetPropertyDouble4DMap", 
-    "until": null, 
-    "uuid": "c2fc2e60-0336-465a-9ff0-1afc4b65d10d"
   }, 
   {
     "desc": "Contains a collection of Revit base point elements", 
@@ -624,18 +672,6 @@
     "uuid": "4150d40a-7c02-4633-b3b5-cfe4b16855b5"
   }, 
   {
-    "desc": "Contains a collection of Revit material elements", 
-    "iconsrc": "/static/images/GH/Material.png", 
-    "icontag": null, 
-    "panel": "Revit Elements", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Material", 
-    "typename": "Material", 
-    "until": null, 
-    "uuid": "b18ef2cc-2e67-4a5e-9241-9010fb7d27ce"
-  }, 
-  {
     "desc": "Contains a collection of Revit opening elements", 
     "iconsrc": "/static/images/GH/Opening.png", 
     "icontag": null, 
@@ -790,42 +826,6 @@
     "typename": "SpaceElement", 
     "until": null, 
     "uuid": "30473b1d-6226-45ce-90a7-5f8e1e1dcbe3"
-  }, 
-  {
-    "desc": "Contains a collection of Revit structural asset elements", 
-    "iconsrc": "/static/images/GH/StructuralAsset.png", 
-    "icontag": null, 
-    "panel": "Revit Elements", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Physical Asset", 
-    "typename": "StructuralAsset", 
-    "until": null, 
-    "uuid": "dde6da63-87bc-4250-9455-5233bfad8683"
-  }, 
-  {
-    "desc": "Wraps TypesTextureData", 
-    "iconsrc": "/static/images/GH/TextureData.png", 
-    "icontag": null, 
-    "panel": "Revit Elements", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Texture Data", 
-    "typename": "TextureData", 
-    "until": null, 
-    "uuid": "a7c7ecef-066d-4b39-b2e8-01b6d53adfeb"
-  }, 
-  {
-    "desc": "Contains a collection of Revit thermal assets elements", 
-    "iconsrc": "/static/images/GH/ThermalAsset.png", 
-    "icontag": null, 
-    "panel": "Revit Elements", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Thermal Asset", 
-    "typename": "ThermalAsset", 
-    "until": null, 
-    "uuid": "b0a6689a-f2cd-4360-980c-d61a1f0c0453"
   }, 
   {
     "desc": "Contains a collection of Revit topography elements", 
@@ -2808,22 +2808,34 @@
     "uuid": "36180a9e-04ca-4b38-82fe-c6707b32c680"
   }, 
   {
-    "desc": "Create a parameter based filter", 
+    "desc": "Create a parameter rule-based filter", 
     "iconsrc": "/static/images/GH/ParameterFilterElementByName.png", 
     "icontag": null, 
-    "panel": "Filter", 
+    "panel": "View", 
     "since": null, 
     "tab": "Revit", 
-    "title": "Add Parameter Filter", 
+    "title": "Add Rule-based Filter", 
     "typename": "ParameterFilterElementByName", 
     "until": null, 
     "uuid": "01e86d7c-b143-47f6-bc26-0a234eb360f3"
   }, 
   {
+    "desc": "Get-Set accessor for Rule-based Filter definition", 
+    "iconsrc": null, 
+    "icontag": "P", 
+    "panel": "View", 
+    "since": "1.12", 
+    "tab": "Revit", 
+    "title": "Rule-based Filter Definiton", 
+    "typename": "ParameterFilterRules", 
+    "until": null, 
+    "uuid": "e4e08f99-1a83-4219-8afd-a02d30cd154d"
+  }, 
+  {
     "desc": "Get document filters list", 
     "iconsrc": "/static/images/GH/QueryFilters.png", 
     "icontag": null, 
-    "panel": "Filter", 
+    "panel": "View", 
     "since": "1.0", 
     "tab": "Revit", 
     "title": "Query Filters", 
@@ -2832,28 +2844,28 @@
     "uuid": "b7b1740b-0721-49c8-92f5-057775da9792"
   }, 
   {
-    "desc": "Selection Elements list", 
-    "iconsrc": "/static/images/GH/SelectionElements.png", 
-    "icontag": null, 
-    "panel": "Filter", 
-    "since": "1.0", 
-    "tab": "Revit", 
-    "title": "Selection Elements", 
-    "typename": "SelectionElements", 
-    "until": null, 
-    "uuid": "e90f2139-fa13-4ee2-bfd3-6642fa9053ab"
-  }, 
-  {
     "desc": "Create a selection filter", 
     "iconsrc": "/static/images/GH/SelectionFilterElementByName.png", 
     "icontag": null, 
-    "panel": "Filter", 
+    "panel": "View", 
     "since": "1.0", 
     "tab": "Revit", 
     "title": "Add Selection Filter", 
     "typename": "SelectionFilterElementByName", 
     "until": null, 
     "uuid": "29618f71-3b57-4a20-9cb2-4c3d17774172"
+  }, 
+  {
+    "desc": "Get-Set accessor for Selection Filter elements", 
+    "iconsrc": "/static/images/GH/SelectionElements.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Selection Filter Definition", 
+    "typename": "SelectionElements", 
+    "until": null, 
+    "uuid": "e90f2139-fa13-4ee2-bfd3-6642fa9053ab"
   }, 
   {
     "desc": "Filter used to match elements by their BoundingBox", 
@@ -4150,6 +4162,30 @@
     "typename": "GraphicOverrides", 
     "until": null, 
     "uuid": "bfd4a970-ce90-47d3-b196-103e0ddce977"
+  }, 
+  {
+    "desc": "Get-Set workset visibility overrides on the specified View", 
+    "iconsrc": null, 
+    "icontag": "W", 
+    "panel": "View", 
+    "since": "1.12", 
+    "tab": "Revit", 
+    "title": "Workset Visibility Overrides", 
+    "typename": "WorksetVisibilityOverrides", 
+    "until": null, 
+    "uuid": "b062c96e-d3aa-4cc1-b5ed-0aedfd67417b"
+  }, 
+  {
+    "desc": "Get-Set workset global visibility", 
+    "iconsrc": null, 
+    "icontag": "W", 
+    "panel": "Document", 
+    "since": "1.12", 
+    "tab": "Revit", 
+    "title": "Workset Global Visibility", 
+    "typename": "WorksetGlobalVisibility", 
+    "until": null, 
+    "uuid": "2922af4a-7252-4cdc-90d9-788e4576f500"
   }, 
   {
     "desc": "Deletes elements from Revit document", 

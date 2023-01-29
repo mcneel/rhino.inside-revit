@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void ResetValue()
     {
-      clippingBox = default;
+      _ClippingBox = default;
       _CurveLoops = default;
 
       base.ResetValue();
@@ -129,19 +129,19 @@ namespace RhinoInside.Revit.GH.Types
 
     void IGH_PreviewData.DrawViewportMeshes(GH_PreviewMeshArgs args) { }
 
-    private BoundingBox? clippingBox;
+    private BoundingBox? _ClippingBox;
     BoundingBox IGH_PreviewData.ClippingBox
     {
       get
       {
-        if (!clippingBox.HasValue)
+        if (!_ClippingBox.HasValue)
         {
-          clippingBox = BoundingBox.Empty;
+          _ClippingBox = BoundingBox.Empty;
           foreach (var curve in CurveLoops)
-            clippingBox.Value.Union(curve.GetBoundingBox(false));
+            _ClippingBox = BoundingBox.Union(_ClippingBox.Value, curve.GetBoundingBox(false));
         }
 
-        return clippingBox.Value;
+        return _ClippingBox.Value;
       }
     }
     #endregion
