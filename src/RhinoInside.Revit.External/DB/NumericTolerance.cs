@@ -160,6 +160,82 @@ namespace RhinoInside.Revit.External.DB
     }
     #endregion
 
+    #region IsZero
+    public static bool IsZero1(double x, double tolerance = Upsilon)
+    {
+      x = Math.Abs(x);
+
+      return x < tolerance;
+    }
+
+    public static bool IsZero2(double x, double y, double tolerance = Upsilon)
+    {
+      x = Math.Abs(x); y = Math.Abs(y);
+
+      double u = x, v = y;
+      if (x > v) { u = y; v = x; }
+      if (v < (0.0 + tolerance) / 2.0) return true;
+      if (v > (0.0 + tolerance)) return false;
+
+      u /= v;
+
+      return Math.Sqrt(1.0 + (u * u)) * v < tolerance;
+    }
+
+    public static bool IsZero3(double x, double y, double z, double tolerance = Upsilon)
+    {
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+
+      double u = x, v = y, w = z;
+      if (x > w) { u = y; v = z; w = x; }
+      if (y > w) { u = z; v = x; w = y; }
+      if (w < (0.0 + tolerance) / 3.0) return true;
+      if (w > (0.0 + tolerance)) return false;
+
+      u /= w; v /= w;
+
+      return Math.Sqrt(1.0 + (u * u + v * v)) * w < tolerance;
+    }
+    #endregion
+
+    #region IsUnit
+    public static bool IsUnit1(double x, double tolerance = Delta)
+    {
+      x = Math.Abs(1.0 - x);
+
+      return x < tolerance;
+    }
+
+    public static bool IsUnit2(double x, double y, double tolerance = Delta)
+    {
+      x = Math.Abs(x); y = Math.Abs(y);
+
+      double u = x, v = y;
+      if (x > v) { u = y; v = x; }
+      if (v < (1.0 - tolerance) / 2.0) return false;
+      if (v > (1.0 + tolerance)) return false;
+
+      u /= v;
+
+      return Math.Sqrt(1.0 + (u * u)) * v - 1.0 < tolerance;
+    }
+
+    public static bool IsUnit3(double x, double y, double z, double tolerance = Delta)
+    {
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+
+      double u = x, v = y, w = z;
+      if (x > w) { u = y; v = z; w = x; }
+      if (y > w) { u = z; v = x; w = y; }
+      if (w < (1.0 - tolerance) / 3.0) return false;
+      if (w > (1.0 + tolerance)) return false;
+
+      u /= w; v /= w;
+
+      return Math.Sqrt(1.0 + (u * u + v * v)) * w - 1.0 < tolerance;
+    }
+    #endregion
+
     #region AlmostEquals
     /// <summary>
     /// Compares two doubles and determines if they are equal within the specified maximum absolute error.
@@ -526,7 +602,7 @@ namespace RhinoInside.Revit.External.DB
 
     PlaneEquation(double a, double b, double c, double d)
     {
-      Debug.Assert(XYZExtension.IsUnitLength(a, b, c, NumericTolerance.Upsilon));
+      Debug.Assert(NumericTolerance.IsUnit3(a, b, c));
 
       A = a;
       B = b;

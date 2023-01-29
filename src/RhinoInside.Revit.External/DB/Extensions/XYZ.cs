@@ -32,34 +32,33 @@ namespace RhinoInside.Revit.External.DB.Extensions
       z = value.Z;
     }
 
-    internal static bool IsZeroLength(double x, double y, double z, double tolerance)
+    /// <summary>
+    /// The boolean value that indicates whether this vector is of unit length.
+    /// </summary>
+    /// <remarks>
+    /// A unit length vector has a length of one, and is considered normalized.
+    /// </remarks>
+    /// <param name="xyz"></param>
+    /// <param name="tolerance"></param>
+    /// <returns>The vector's length is one within the <paramref name="tolerance"/>.</returns>
+    public static bool IsUnitLength(this XYZ xyz, double tolerance)
     {
-      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+      tolerance = Math.Max(tolerance, NumericTolerance.Delta);
 
-      double u = x, v = y, w = z;
-      if (x > w) { u = y; v = z; w = x; }
-      if (y > w) { u = z; v = x; w = y; }
-      if (w < (0.0 + tolerance) / 3.0) return true;
-      if (w > (0.0 + tolerance)      ) return false;
-
-      u /= w; v /= w;
-
-      return Math.Sqrt(1.0 + (u * u + v * v)) * w < tolerance;
+      return NumericTolerance.IsUnit3(xyz.X, xyz.Y, xyz.Z, tolerance);
     }
 
-    internal static bool IsUnitLength(double x, double y, double z, double tolerance)
+    /// <summary>
+    /// The boolean value that indicates whether this vector is a zero vector.
+    /// </summary>
+    /// <param name="xyz"></param>
+    /// <param name="tolerance"></param>
+    /// <returns>The vector's length is zero within the <paramref name="tolerance"/>.</returns>
+    public static bool IsZeroLength(this XYZ xyz, double tolerance)
     {
-      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
 
-      double u = x, v = y, w = z;
-      if (x > w) { u = y; v = z; w = x; }
-      if (y > w) { u = z; v = x; w = y; }
-      if (w < (1.0 - tolerance) / 3.0) return false;
-      if (w > (1.0 + tolerance)      ) return false;
-
-      u /= w; v /= w;
-
-      return Math.Sqrt(1.0 + (u * u + v * v)) * w - 1.0 < tolerance;
+      return NumericTolerance.IsZero3(xyz.X, xyz.Y, xyz.Z, tolerance);
     }
 
     /// <summary>
@@ -82,9 +81,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool AlmostEquals(this XYZ a, XYZ b, double tolerance)
     {
-      tolerance = Math.Max(tolerance, Upsilon);
+      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
 
-      return NumericTolerance.Norm(a.X - b.X, a.Y - b.Y, a.Z - b.Z) < tolerance;
+      return NumericTolerance.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, tolerance);
     }
 
     /// <summary>
