@@ -64,6 +64,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+#if REVIT_2022
     public override Curve Curve
     {
       get
@@ -101,6 +102,7 @@ namespace RhinoInside.Revit.GH.Types
 
       set => base.Curve = value;
     }
+#endif
 
     public override Surface Surface
     {
@@ -151,7 +153,7 @@ namespace RhinoInside.Revit.GH.Types
     Mesh _Mesh;
     public override Mesh Mesh => _Mesh ?? (_Mesh = Mesh.CreateFromSurface(Surface));
 
-    #region IGH_PreviewData
+#region IGH_PreviewData
     protected override void SubInvalidateGraphics()
     {
       _Mesh = default;
@@ -218,11 +220,11 @@ namespace RhinoInside.Revit.GH.Types
       if (Mesh is Mesh mesh)
         args.Pipeline.DrawMeshShaded(mesh, args.Material);
     }
-    #endregion
+#endregion
 
-    #region Properties
+#region Properties
     public View View => View.FromElementId(Document, Value?.ViewId) as View;
     public ViewSheet Sheet => ViewSheet.FromElementId(Document, Value?.SheetId) as ViewSheet;
-    #endregion
+#endregion
   }
 }
