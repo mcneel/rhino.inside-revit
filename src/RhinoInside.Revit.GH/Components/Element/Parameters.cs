@@ -494,6 +494,10 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
           throw new Exceptions.RuntimeArgumentException("Parameter", message);
         }
 
+        // A Regenerate is needed when the parameter is a family parameter.
+        if (parameter.Id.ToBuiltInParameter() == ARDB.BuiltInParameter.INVALID && Params.IndexOfOutputParam("Value") >= 0)
+          element.Document.Regenerate();
+
         element.InvalidateGraphics();
       }
 
