@@ -132,7 +132,7 @@ namespace RhinoInside.Revit.GH.Components.Views
           var curveLoop = Curve.ProjectToPlane(cropRegion, viewLocation)?.ToCurveLoop();
           if (curveLoop is null || !cropManager.IsCropRegionShapeValid(curveLoop))
           {
-            AddGeometryRuntimeError
+            AddRuntimeMessage
             (
               GH_RuntimeMessageLevel.Error,
               "Crop Region should be one closed curve loop without self-intersections, consisting of non-zero length straight lines in a plane parallel to the view plane.",
@@ -149,7 +149,7 @@ namespace RhinoInside.Revit.GH.Components.Views
             var viewPlane = viewLocation.ToPlane();
             if (!curveLoop.IsRectangular(viewPlane))
             {
-              AddGeometryRuntimeError
+              AddRuntimeMessage
               (
                 GH_RuntimeMessageLevel.Warning,
                 $"View '{view.Value.Title}' does not permit to have a non-rectangular shape.",
