@@ -156,6 +156,13 @@ namespace RhinoInside.Revit.GH.Components.Views
       if (view is null) return false;
       if (type.Id != view.GetTypeId()) view.ChangeTypeId(type.Id);
 
+      // TODO: Scale the shape accoding the box UV to avoid destroing the Model Lines
+      using (var shape = view.GetCropRegionShapeManager())
+      {
+        if (shape.CanHaveShape && shape.ShapeSet)
+          shape.RemoveCropRegionShape();
+      }
+
       return true;
     }
 
