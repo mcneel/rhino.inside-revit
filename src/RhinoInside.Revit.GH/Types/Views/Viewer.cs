@@ -23,26 +23,8 @@ namespace RhinoInside.Revit.GH.Types
       if (element.GetType() != typeof(ARDB_Viewer))
         return false;
 
-      var category = element.Category;
-      if
-      (
-        category is object &&
-        (!category.Id.TryGetBuiltInCategory(out var bic) || !PossibleCategories.Contains(bic))
-      )
-        return false;
-
-      if (element.get_Parameter(ARDB.BuiltInParameter.ID_PARAM) is ARDB.Parameter idParam && idParam.AsElementId() != element.Id)
-        return idParam.AsElement() is ARDB.View;
-
-      return false;
+      return ViewExtension.IsViewer(element);
     }
-
-    internal static readonly ARDB.BuiltInCategory[] PossibleCategories =
-    {
-      ARDB.BuiltInCategory.OST_Viewers,
-      ARDB.BuiltInCategory.OST_Cameras,
-      ARDB.BuiltInCategory.INVALID,
-    };
 
     public Viewer() { }
     public Viewer(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
@@ -126,46 +108,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override Plane Location => View?.Location ?? NaN.Plane;
 
-    protected override void SetLocation(ARDB.XYZ newOrigin, ARDB.XYZ newBasisX, ARDB.XYZ newBasisY, bool? keepJoins)
-    {
-      if (keepJoins is false)
-      {
-        base.SetLocation(newOrigin, newBasisY, newBasisX, keepJoins);
-      }
-      else
-      {
-        //if (View?.Value is ARDB.View view)
-        //{
-        //  using (var shape = view.GetCropRegionShapeManager())
-        //  {
-        //    foreach (var curve in shape.GetCropShape().Select(GeometryDecoder.ToPolyCurve))
-        //      args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
-        //  }
-        //}
-
-        base.SetLocation(newOrigin, newBasisY, newBasisX, keepJoins);
-      }
-    }
-
-    public Plane CropPlane
-    {
-      get
-      {
-        if (Value is ARDB.Sketch sketch)
-        {
-          var plane = sketch.SketchPlane.GetPlane().ToPlane();
-
-          var bbox = BoundingBox.Empty;
-          foreach (var profile in CropShape)
-            bbox.Union(profile.GetBoundingBox(plane));
-
-          plane.Origin = plane.PointAt(bbox.Center.X, bbox.Center.Y);
-          return plane;
-        }
-
-        return NaN.Plane;
-      }
-    }
+    public Plane CropPlane => Sketch?.ProfilesPlane ?? Location;
 
     (bool HasValue, Curve[] Value) _CropShape;
     public Curve[] CropShape
@@ -177,10 +120,7 @@ namespace RhinoInside.Revit.GH.Types
           using (var shape = View.Value.GetCropRegionShapeManager())
           {
             if (shape.CanHaveShape)
-            {
-              var cropShape = shape.GetCropShape();
-                _CropShape.Value = cropShape.Select(GeometryDecoder.ToPolyCurve).ToArray();
-            }
+              _CropShape.Value = shape.GetCropShape().Select(GeometryDecoder.ToPolyCurve).ToArray();
           }
 
           _CropShape.HasValue = true;
