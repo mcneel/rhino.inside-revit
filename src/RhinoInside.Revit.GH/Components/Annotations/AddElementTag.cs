@@ -249,7 +249,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => string.Empty;
 
-    protected override ARDB.TagMode TagMode => ARDB.TagMode.TM_ADDBY_MULTICATEGORY;
+    protected override ARDB.TagMode TagMode => ARDB.TagMode.TM_ADDBY_MATERIAL;
 
     public AddElementTagByMaterial() : base
     (
