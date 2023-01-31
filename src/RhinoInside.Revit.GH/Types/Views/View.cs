@@ -40,6 +40,28 @@ namespace RhinoInside.Revit.GH.Types
       if (base.CastTo(out target))
         return true;
 
+#if DEBUG
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
+      {
+        var position = Center;
+        target = position.IsValid ? (Q) (object) new GH_Point(position) : default;
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Vector)))
+      {
+        var direction = Direction;
+        target = direction.IsValid ? (Q) (object) new GH_Vector(direction) : default;
+        return true;
+      }
+#endif
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Curve)))
+      {
+        var cropShape = CropShape;
+        target = cropShape is object ? (Q) (object) new GH_Curve(cropShape) : default;
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
       {
         var surface = Surface;
@@ -183,7 +205,53 @@ namespace RhinoInside.Revit.GH.Types
       view.UpDirection.ToVector3d()
     ) : NaN.Plane;
 
+    public Point3d Center
+    {
+      get
+      {
+        var rectangle = Rectangle;
+        return rectangle.IsValid ? rectangle.Center : NaN.Point3d;
+      }
+    }
+
+    public Vector3d Direction
+    {
+      get
+      {
+        var location = Location;
+        return location.IsValid ? location.ZAxis.PerpVector() : NaN.Vector3d;
+      }
+    }
+
     public Box Box => Value?.get_BoundingBox(default).ToBox() ?? NaN.Box;
+
+    public Rectangle3d Rectangle
+    {
+      get
+      {
+        var box = Box;
+        return box.IsValid ?
+          new Rectangle3d(box.Plane, box.X, box.Y):
+          new Rectangle3d(NaN.Plane, NaN.Interval, NaN.Interval);
+      }
+    }
+
+    public Curve CropShape
+    {
+      get
+      {
+        if (Value is ARDB.View view)
+        {
+          using (var shape = view.GetCropRegionShapeManager())
+          {
+            if (shape.CanHaveShape && !shape.Split)
+              return shape.GetCropShape().Select(GeometryDecoder.ToPolyCurve).FirstOrDefault();
+          }
+        }
+
+        return null;
+      }
+    }
 
     static UVInterval StandardizeOutline(UVInterval outline, double minRatio = 0.1)
     {
@@ -448,7 +516,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public Phase Phase
     {
-      get => Phase.FromElementId(Document, Value.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ARDB.ElementId.InvalidElementId) as Phase;
+      get => Phase.FromElement(Value.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElement()) as Phase;
       set
       {
         if (value is object && Value is ARDB.View view)
@@ -461,26 +529,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Viewer Viewer => View.FromElementId(Document, Value.GetDependentElements(GetViewerFilter()).FirstOrDefault()) as Viewer;
+    public SketchPlane SketchPlane => SketchPlane.FromElement(Value?.SketchPlane) as SketchPlane;
 
-    ARDB.ElementFilter GetViewerFilter()
-    {
-      return CompoundElementFilter.Intersect
-      (
-        new ARDB.ElementIsElementTypeFilter(inverted: true),
-        new ARDB.ElementMulticategoryFilter(Viewer.PossibleCategories),
-        new ARDB.ElementClassFilter(typeof(ARDB.View), inverted: true),
-        new ARDB.ElementParameterFilter
-        (
-          new ARDB.FilterElementIdRule
-          (
-            new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.ID_PARAM)),
-            new ARDB.FilterNumericEquals(),
-            Id
-          )
-        )
-      );
-    }
+    public Viewer Viewer => Viewer.FromElement(Value?.GetViewer()) as Viewer;
     #endregion
 
     #region IGH_BakeAwareElement
