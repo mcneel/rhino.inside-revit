@@ -9,8 +9,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class XYZExtension
   {
-    public static XYZ NaN { get; } = null; // new XYZ(double.NaN, double.NaN, double.NaN);
-    public static XYZ Zero { get; } = XYZ.Zero;
+    public static XYZ NaN    { get; } = null; // new XYZ(double.NaN, double.NaN, double.NaN);
+    public static XYZ Zero   { get; } = XYZ.Zero;
+    public static XYZ One    { get; } = new XYZ(1.0, 1.0, 1.0);
     public static XYZ BasisX { get; } = XYZ.BasisX;
     public static XYZ BasisY { get; } = XYZ.BasisY;
     public static XYZ BasisZ { get; } = XYZ.BasisZ;
@@ -105,6 +106,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return Zero;
 
       return new XYZ(x / length, y / length, z / length);
+    }
+
+    internal static XYZ Unitize(this XYZ xyz)
+    {
+      var (x, y, z) = xyz;
+      NumericTolerance.Unitize3(ref x, ref y, ref z);
+      return new XYZ(x, y, z);
     }
 
     /// <summary>
@@ -204,15 +212,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ PerpVector(this XYZ value, double tolerance = DefaultTolerance)
     {
       tolerance = Math.Max(tolerance, Upsilon);
-
       var (x, y, z) = value;
-      var length = NumericTolerance.Norm(x, y, z);
-      if (length < tolerance)
-        return Zero;
 
-      return NumericTolerance.Norm(x / length, y / length) < tolerance ?
-        new XYZ(z, 0.0, -x) :
-        new XYZ(-y, x, 0.0);
+      if (NumericTolerance.IsZero2(x, y, tolerance))
+      {
+        NumericTolerance.Unitize2(ref x, ref z);
+        return new XYZ(z, 0.0, -x);
+      }
+      else
+      {
+        NumericTolerance.Unitize2(ref x, ref y);
+        return new XYZ(-y, x, 0.0);
+      }
     }
 
     /// <summary>

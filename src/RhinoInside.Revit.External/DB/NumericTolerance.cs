@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.External.DB
     /// This field is constant.
     /// </summary>
     /// <remarks>
-    /// Same as <see cref="double.Epsilon"/> 4.94065645841247E-324
+    /// Same as DBL_TRUE_MIN 4.94065645841247E-324
     /// </remarks>
     public const double Epsilon = double.Epsilon;
 
@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.External.DB
     /// This field is constant.
     /// </summary>
     /// <remarks>
-    /// Same as DBL_MIN +2.2250738585072014e-308
+    /// Same as DBL_MIN 2.2250738585072014e-308
     /// </remarks>
     public const double Upsilon = 4.0 / double.MaxValue;
 
@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.External.DB
     const ulong SignificandMask   = 0x000F_FFFF_FFFF_FFFFUL;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static ulong ToBits(double value) => ((ulong) BitConverter.DoubleToInt64Bits(value));
+    static ulong ToBits(double value) => (ulong) BitConverter.DoubleToInt64Bits(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsFinite(double value)
@@ -233,6 +233,49 @@ namespace RhinoInside.Revit.External.DB
       u /= w; v /= w;
 
       return Math.Sqrt(1.0 + (u * u + v * v)) * w - 1.0 < tolerance;
+    }
+    #endregion
+
+    #region Unitize
+    internal static void Unitize1(ref double x)
+    {
+      if (x == 0.0 || !IsFinite(x)) x = double.NaN;
+      else x = x < 0.0 ? -1.0 : +1.0;
+    }
+
+    internal static void Unitize2(ref double x, ref double y)
+    {
+      double X = Math.Abs(x), Y = Math.Abs(y);
+
+      double u = X, v = Y;
+      if (X > v) { u = Y; v = X;}
+      if (v < Upsilon)
+      {
+        u *= double.MaxValue; v *= double.MaxValue;
+        x *= double.MaxValue; y *= double.MaxValue;
+      }
+
+      u /= v;
+      var length = Math.Sqrt(1.0 + (u * u)) * v;
+      x /= length; y /= length;
+    }
+
+    internal static void Unitize3(ref double x, ref double y, ref double z)
+    {
+      double X = Math.Abs(x), Y = Math.Abs(y), Z = Math.Abs(z);
+
+      double u = X, v = Y, w = Z;
+      if (X > w) { u = Y; v = Z; w = X; }
+      if (Y > w) { u = Z; v = X; w = Y; }
+      if (w < Upsilon)
+      {
+        u *= double.MaxValue; v *= double.MaxValue; w *= double.MaxValue;
+        x *= double.MaxValue; y *= double.MaxValue; z *= double.MaxValue;
+      }
+
+      u /= w; v /= w;
+      var length = Math.Sqrt(1.0 + (u * u + v * v)) * w;
+      x /= length; y /= length; z /= length;
     }
     #endregion
 
