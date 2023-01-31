@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     public ViewCropRegion() : base
     (
       name: "View Crop Region",
-      nickname: "Crop Region",
+      nickname: "CropRegn",
       description: "View Get-Set crop region",
       category: "Revit",
       subCategory: "View"

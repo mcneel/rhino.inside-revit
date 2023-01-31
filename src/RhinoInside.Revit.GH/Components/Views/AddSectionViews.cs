@@ -143,7 +143,7 @@ namespace RhinoInside.Revit.GH.Components.Views
           // Compute
           StartTransaction(doc.Value);
           if (CanReconstruct(_View_, out var untracked, ref viewSection, doc.Value, name, ARDB.ViewType.DraftingView.ToString()))
-            viewSection = Reconstruct(viewSection, frame.ToBoundingBoxXYZ(), type.Value, name, template);
+            viewSection = Reconstruct(viewSection, frame.ToBoundingBoxXYZ(true), type.Value, name, template);
 
           DA.SetData(_View_, viewSection);
           return untracked ? null : viewSection;
@@ -155,6 +155,13 @@ namespace RhinoInside.Revit.GH.Components.Views
     {
       if (view is null) return false;
       if (type.Id != view.GetTypeId()) view.ChangeTypeId(type.Id);
+
+      // TODO: Scale the shape accoding the box UV to avoid destroing the Model Lines
+      using (var shape = view.GetCropRegionShapeManager())
+      {
+        if (shape.CanHaveShape && shape.ShapeSet)
+          shape.RemoveCropRegionShape();
+      }
 
       return true;
     }

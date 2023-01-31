@@ -51,20 +51,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           var axisDirection = basisZ.CrossProduct(newBasisZ);
           if (axisDirection.IsZeroLength()) axisDirection = basisY;
-          double angle = basisZ.AngleTo(newBasisZ);
 
           using (var axis = Line.CreateUnbound(origin, axisDirection))
-            ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
+            ElementTransformUtils.RotateElement(element.Document, element.Id, axis, basisZ.AngleTo(newBasisZ));
 
           element.GetLocation(out origin, out basisX, out basisY);
-
         }
 
         if (!basisX.IsAlmostEqualTo(newBasisX))
         {
-          double angle = basisX.AngleOnPlaneTo(newBasisX, newBasisZ);
           using (var axis = Line.CreateUnbound(origin, newBasisZ))
-            ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
+            ElementTransformUtils.RotateElement(element.Document, element.Id, axis, basisX.AngleOnPlaneTo(newBasisX, newBasisZ));
+
+          element.GetLocation(out origin, out basisX, out basisY);
         }
 
         {

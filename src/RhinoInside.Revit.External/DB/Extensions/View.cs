@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 
@@ -473,9 +474,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (view is View3D view3D)
       {
         view3D.SetOrientation(newViewOrientation3D);
-        view3D.SaveOrientation();
+        if (ElementNaming.IsValidName(view3D.Name))
+          view3D.SaveOrientation();
       }
-      else
+      else if (view.GetViewer() is Element viewer)
       {
         var viewOrigin = view.Origin;
         var viewBasisY = view.UpDirection;
@@ -487,12 +489,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var newBasisZ = (-newViewOrientation3D.ForwardDirection);
         var newBasisX = newBasisY.CrossProduct(newBasisZ);
 
-        var dependents = view.GetDependentElements(new ElementCategoryFilter(BuiltInCategory.OST_Viewers));
-        if (dependents.Count != 1)
-          throw new NotSupportedException();
-
         {
-          var viewer = view.Document.GetElement(dependents[0]);
           var modified = false;
           var pinned = viewer.Pinned;
 
@@ -507,6 +504,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               using (var axis = Line.CreateUnbound(viewOrigin, axisDirection))
                 ElementTransformUtils.RotateElement(viewer.Document, viewer.Id, axis, viewBasisZ.AngleTo(newBasisZ));
 
+              viewOrigin = view.Origin;
               viewBasisX = view.RightDirection;
             }
 
@@ -515,10 +513,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
               viewer.Pinned = !(modified = true);
               using (var axis = Line.CreateUnbound(viewOrigin, newBasisZ))
                 ElementTransformUtils.RotateElement(viewer.Document, viewer.Id, axis, viewBasisX.AngleOnPlaneTo(newBasisX, newBasisZ));
+
+              viewOrigin = view.Origin;
             }
 
             {
-              var trans = newOrigin - viewOrigin;
+              var trans = (newOrigin - viewOrigin);
               if (!trans.IsZeroLength())
               {
                 viewer.Pinned = !(modified = true);
@@ -532,6 +532,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
               viewer.Pinned = pinned;
           }
         }
+      }
+    }
+
+    static readonly BuiltInCategory[] ViewerCategories =
+    {
+      BuiltInCategory.OST_Viewers,
+      BuiltInCategory.OST_Cameras,
+      BuiltInCategory.INVALID,
+    };
+
+    static ElementFilter GetViewerFilter(ElementId viewId, bool inverted = false)
+    {
+      return CompoundElementFilter.Intersect
+      (
+        new ElementIsElementTypeFilter(inverted: true),
+        new ElementMulticategoryFilter(ViewerCategories),
+        new ElementClassFilter(typeof(View), inverted: true),
+        new ElementParameterFilter
+        (
+          new FilterElementIdRule
+          (
+            new ParameterValueProvider(new ElementId(BuiltInParameter.ID_PARAM)),
+            new FilterNumericEquals(),
+            viewId
+          ), inverted
+        )
+      );
+    }
+
+    // TODO : Delete this Filter is unused.
+    static readonly ElementFilter IsViewerFilter = GetViewerFilter(ElementIdExtension.InvalidElementId, inverted: true);
+    internal static bool IsViewer(Element element) => GetViewerFilter(element.Id, inverted: true).PassesFilter(element);
+
+    public static Element GetViewer(this View view)
+    {
+      var dependents = view.GetDependentElements(GetViewerFilter(view.Id));
+      switch (dependents.Count)
+      {
+        case 0:   return null;
+        case 1:   return view.Document.GetElement(dependents[0]);
+        default:  throw new NotSupportedException();
       }
     }
     #endregion

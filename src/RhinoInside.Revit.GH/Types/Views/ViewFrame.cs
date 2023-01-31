@@ -11,6 +11,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using Convert.Units;
   using External.DB;
   using External.DB.Extensions;
   using static External.DB.Extensions.BoundingBoxXYZExtension;
@@ -28,6 +29,8 @@ namespace RhinoInside.Revit.GH.Types
       ReferenceID = other.ReferenceID;
       if (other.Value is object) Value = new ViewportInfo(other.Value);
       Title = other.Title;
+      BoundEnabled = (bool[,]) other.BoundEnabled.Clone();
+      Bound = (Interval[]) other.Bound.Clone();
     }
 
     public override bool IsValid => Value is object;
@@ -247,6 +250,8 @@ namespace RhinoInside.Revit.GH.Types
 
           if (vport.SetFrustum(box.X.T0, box.X.T1, box.Y.T0, box.Y.T1, near, far))
           {
+            vport.SetScreenPortFromFrustum((UnitScale.GetModelScale(RhinoDoc.ActiveDoc) / UnitScale.Inches).Ratio.Quotient);
+
             BoundEnabled = BoundEnabledBox;
             Bound[AxisX] = box.X;
             Bound[AxisY] = box.Y;
@@ -409,28 +414,39 @@ namespace RhinoInside.Revit.GH.Types
 
     public Point3d Min => new Point3d
     (
-      NumericTolerance.MinNumber( Value.FrustumLeft,   Bound[AxisX].T0),
-      NumericTolerance.MinNumber( Value.FrustumBottom, Bound[AxisY].T0),
-      NumericTolerance.MinNumber(-Value.FrustumFar,    Bound[AxisZ].T0)
+       NumericTolerance.MinNumber(Value.FrustumLeft,    Bound[AxisX].T0),
+       NumericTolerance.MinNumber(Value.FrustumBottom,  Bound[AxisY].T0),
+      -NumericTolerance.MinNumber(Value.FrustumFar,    -Bound[AxisZ].T0)
     );
 
     public Point3d Max => new Point3d
     (
-      NumericTolerance.MaxNumber( Value.FrustumRight, Bound[AxisX].T1),
-      NumericTolerance.MaxNumber( Value.FrustumTop,   Bound[AxisY].T1),
-      NumericTolerance.MaxNumber(-Value.FrustumNear,  Bound[AxisZ].T1)
+      NumericTolerance.MaxNumber( Value.FrustumRight,   Bound[AxisX].T1),
+      NumericTolerance.MaxNumber( Value.FrustumTop,     Bound[AxisY].T1),
+      NumericTolerance.MaxNumber(-Value.FrustumNear,    Bound[AxisZ].T1)
     );
 
-    internal ARDB.BoundingBoxXYZ ToBoundingBoxXYZ()
+    internal ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(bool ensurePositiveY = false)
     {
       if (Value is null) return null;
 
+      var vport = Value;
+
+      if (ensurePositiveY && vport.CameraY.Z < 0.0)
+      {
+        var positiveY = new ViewFrame(this);
+        if (positiveY.Transform(Rhino.Geometry.Transform.Rotation(-Math.PI, vport.CameraZ, vport.CameraLocation)) is ViewFrame transformed)
+          return transformed.ToBoundingBoxXYZ();
+
+        return null;
+      }
+
       var transform = ARDB.Transform.Identity;
       {
-        transform.Origin = Value.CameraLocation.ToXYZ();
-        transform.BasisX = Value.CameraX.ToXYZ();
-        transform.BasisY = Value.CameraY.ToXYZ();
-        transform.BasisZ = Value.CameraZ.ToXYZ();
+        transform.Origin = vport.CameraLocation.ToXYZ();
+        transform.BasisX = vport.CameraX.ToXYZ();
+        transform.BasisY = vport.CameraY.ToXYZ();
+        transform.BasisZ = vport.CameraZ.ToXYZ();
       }
 
       var box = new ARDB.BoundingBoxXYZ()
@@ -474,13 +490,12 @@ namespace RhinoInside.Revit.GH.Types
         var targetDistance = Value.TargetDistance(true);
         if (targetDistance == RhinoMath.UnsetValue) return;
 
+        int NoClipPattern = 0x0007FF0;
         var pN = Value.GetNearPlaneCorners();
         var pF = Value.GetFarPlaneCorners();
         var pC   = Value.GetFramePlaneCorners(Value.FrustumNear, Bound[AxisX], Bound[AxisY]);
         var pMin = Value.GetFramePlaneCorners(-Bound[AxisZ].T0,  Bound[AxisX], Bound[AxisY]);
         var pMax = Value.GetFramePlaneCorners(-Bound[AxisZ].T1,  Bound[AxisX], Bound[AxisY]);
-        var pT = Value.GetFramePlaneCorners(targetDistance);
-        var targetPlane = Value.GetCameraFrameAt(targetDistance);
 
         // Direction
         var cameraDirection = new Line(Value.CameraLocation, -Value.CameraZ * targetDistance);
@@ -516,32 +531,32 @@ namespace RhinoInside.Revit.GH.Types
         // Crop Far Plane
         {
           if (BoundEnabled[AxisZ, BoundsMin]) args.Pipeline.DrawLineNoClip(pMin[0], pMin[1], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMin[0], pMin[1], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[0], pMin[1], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisZ, BoundsMin]) args.Pipeline.DrawLineNoClip(pMin[1], pMin[3], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMin[1], pMin[3], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[1], pMin[3], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisZ, BoundsMin]) args.Pipeline.DrawLineNoClip(pMin[3], pMin[2], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMin[3], pMin[2], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[3], pMin[2], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisZ, BoundsMin]) args.Pipeline.DrawLineNoClip(pMin[2], pMin[0], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMin[2], pMin[0], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[2], pMin[0], args.Color, NoClipPattern, args.Thickness);
         }
 
 
         // Crop Near Plane
         {
           if (BoundEnabled[AxisZ, BoundsMax]) args.Pipeline.DrawLineNoClip(pMax[0], pMax[1], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMax[0], pMax[1], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMax[0], pMax[1], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisZ, BoundsMax]) args.Pipeline.DrawLineNoClip(pMax[1], pMax[3], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMax[1], pMax[3], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMax[1], pMax[3], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisZ, BoundsMax]) args.Pipeline.DrawLineNoClip(pMax[3], pMax[2], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMax[3], pMax[2], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMax[3], pMax[2], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisZ, BoundsMax]) args.Pipeline.DrawLineNoClip(pMax[2], pMax[0], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMax[2], pMax[0], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMax[2], pMax[0], args.Color, NoClipPattern, args.Thickness);
         }
 
         // Crop Far - Near
@@ -553,34 +568,34 @@ namespace RhinoInside.Revit.GH.Types
 
           if (BoundEnabled[AxisX, BoundsMin] || BoundEnabled[AxisY, BoundsMin])
             args.Pipeline.DrawLineNoClip(pMin[0], pMax[0], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMin[0], pMax[0], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[0], pMax[0], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisX, BoundsMin] || BoundEnabled[AxisY, BoundsMin])
             args.Pipeline.DrawLineNoClip(pMin[1], pMax[1], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMin[1], pMax[1], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[1], pMax[1], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisX, BoundsMin] || BoundEnabled[AxisY, BoundsMax])
             args.Pipeline.DrawLineNoClip(pMin[2], pMax[2], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMin[2], pMax[2], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[2], pMax[2], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisX, BoundsMax] || BoundEnabled[AxisY, BoundsMax])
             args.Pipeline.DrawLineNoClip(pMin[3], pMax[3], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pMin[3], pMax[3], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[3], pMax[3], args.Color, NoClipPattern, args.Thickness);
         }
 
         // Crop Box - View Plane
         {
           if (BoundEnabled[AxisX, BoundsMin]) args.Pipeline.DrawLineNoClip(pC[2], pC[0], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pC[2], pC[0], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pC[2], pC[0], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisX, BoundsMax]) args.Pipeline.DrawLineNoClip(pC[1], pC[3], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pC[1], pC[3], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pC[1], pC[3], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisY, BoundsMin]) args.Pipeline.DrawLineNoClip(pC[0], pC[1], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pC[0], pC[1], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pC[0], pC[1], args.Color, NoClipPattern, args.Thickness);
 
           if (BoundEnabled[AxisY, BoundsMax]) args.Pipeline.DrawLineNoClip(pC[3], pC[2], args.Color, args.Thickness);
-          else args.Pipeline.DrawPatternedLine(pC[3], pC[2], args.Color, 0x00000F0F, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pC[3], pC[2], args.Color, NoClipPattern, args.Thickness);
         }
 
         // Crop Box - Far Plane
@@ -650,7 +665,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override IGH_GeometricGoo DuplicateGeometry() => Value is null ? null : new ViewFrame(this);
+    public override IGH_GeometricGoo DuplicateGeometry() => new ViewFrame(this);
 
     public override BoundingBox Boundingbox
     {
@@ -690,11 +705,11 @@ namespace RhinoInside.Revit.GH.Types
           bbox.Union(point);
         }
 
-        {
-          var point = Value.CameraLocation;
-          point.Transform(xform);
-          bbox.Union(point);
-        }
+        //{
+        //  var point = Value.CameraLocation;
+        //  point.Transform(xform);
+        //  bbox.Union(point);
+        //}
 
         return bbox;
       }

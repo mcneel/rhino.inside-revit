@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         new Parameters.SketchPlane()
         {
           Name = _WorkPlane_,
-          NickName = "ML",
+          NickName = "WP",
           Description = $"Output {_WorkPlane_}",
         }
       ),

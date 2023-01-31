@@ -155,8 +155,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
 
-      var (x, y, z) = value.Max - value.Min;
-      return XYZExtension.IsZeroLength(x, y, z, tolerance);
+      return Math.Abs(GetDiagonal(value)) < tolerance;
     }
 
     public static double GetDiagonal(this BoundingBoxXYZ value)

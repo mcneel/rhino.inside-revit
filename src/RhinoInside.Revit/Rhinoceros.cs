@@ -957,7 +957,7 @@ namespace RhinoInside.Revit
           view.SetClientSize(vport.ScreenPort.Size);
 
         if (vport is object)
-          view.MainViewport.SetViewProjection(vport, updateScreenPort: true, updateTargetLocation: true);
+          view.MainViewport.SetViewportInfo(vport);
 
         if (cplane is object && view.MainViewport is RhinoViewport viewport)
         {

@@ -4,12 +4,12 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
+  using Convert.Geometry;
+
   [ComponentVersion(introduced: "1.7")]
   public class ViewSectionBox : TransactionalChainComponent
   {
@@ -97,13 +97,20 @@ namespace RhinoInside.Revit.GH.Components.Views
         StartTransaction(view.Document);
         view.Value.IsSectionBoxActive = active.Value;
       }
+
       Params.TrySetData(DA, "Active", () => view.Value.IsSectionBoxActive);
 
       if (Params.GetData(DA, "Box", out Box? box))
       {
         StartTransaction(view.Document);
+        var isSectionBoxActive = view.Value.IsSectionBoxActive;
         view.Value.SetSectionBox(box.Value.ToBoundingBoxXYZ());
+        view.Value.IsSectionBoxActive = isSectionBoxActive;
+
+        // Necessary to get the reoriented version of the 'Box' below.
+        view.Document.Regenerate();
       }
+
       Params.TrySetData(DA, "Box", () =>
       {
         var sbox = view.Value.GetSectionBox();

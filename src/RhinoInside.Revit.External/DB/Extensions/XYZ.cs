@@ -9,8 +9,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class XYZExtension
   {
-    public static XYZ NaN { get; } = null; // new XYZ(double.NaN, double.NaN, double.NaN);
-    public static XYZ Zero { get; } = XYZ.Zero;
+    public static XYZ NaN    { get; } = null; // new XYZ(double.NaN, double.NaN, double.NaN);
+    public static XYZ Zero   { get; } = XYZ.Zero;
+    public static XYZ One    { get; } = new XYZ(1.0, 1.0, 1.0);
     public static XYZ BasisX { get; } = XYZ.BasisX;
     public static XYZ BasisY { get; } = XYZ.BasisY;
     public static XYZ BasisZ { get; } = XYZ.BasisZ;
@@ -32,34 +33,33 @@ namespace RhinoInside.Revit.External.DB.Extensions
       z = value.Z;
     }
 
-    internal static bool IsZeroLength(double x, double y, double z, double tolerance)
+    /// <summary>
+    /// The boolean value that indicates whether this vector is of unit length.
+    /// </summary>
+    /// <remarks>
+    /// A unit length vector has a length of one, and is considered normalized.
+    /// </remarks>
+    /// <param name="xyz"></param>
+    /// <param name="tolerance"></param>
+    /// <returns>The vector's length is one within the <paramref name="tolerance"/>.</returns>
+    public static bool IsUnitLength(this XYZ xyz, double tolerance)
     {
-      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+      tolerance = Math.Max(tolerance, NumericTolerance.Delta);
 
-      double u = x, v = y, w = z;
-      if (x > w) { u = y; v = z; w = x; }
-      if (y > w) { u = z; v = x; w = y; }
-      if (w < (0.0 + tolerance) / 3.0) return true;
-      if (w > (0.0 + tolerance)      ) return false;
-
-      u /= w; v /= w;
-
-      return Math.Sqrt(1.0 + (u * u + v * v)) * w < tolerance;
+      return NumericTolerance.IsUnit3(xyz.X, xyz.Y, xyz.Z, tolerance);
     }
 
-    internal static bool IsUnitLength(double x, double y, double z, double tolerance)
+    /// <summary>
+    /// The boolean value that indicates whether this vector is a zero vector.
+    /// </summary>
+    /// <param name="xyz"></param>
+    /// <param name="tolerance"></param>
+    /// <returns>The vector's length is zero within the <paramref name="tolerance"/>.</returns>
+    public static bool IsZeroLength(this XYZ xyz, double tolerance)
     {
-      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
 
-      double u = x, v = y, w = z;
-      if (x > w) { u = y; v = z; w = x; }
-      if (y > w) { u = z; v = x; w = y; }
-      if (w < (1.0 - tolerance) / 3.0) return false;
-      if (w > (1.0 + tolerance)      ) return false;
-
-      u /= w; v /= w;
-
-      return Math.Sqrt(1.0 + (u * u + v * v)) * w - 1.0 < tolerance;
+      return NumericTolerance.IsZero3(xyz.X, xyz.Y, xyz.Z, tolerance);
     }
 
     /// <summary>
@@ -82,9 +82,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool AlmostEquals(this XYZ a, XYZ b, double tolerance)
     {
-      tolerance = Math.Max(tolerance, Upsilon);
+      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
 
-      return NumericTolerance.Norm(a.X - b.X, a.Y - b.Y, a.Z - b.Z) < tolerance;
+      return NumericTolerance.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, tolerance);
     }
 
     /// <summary>
@@ -106,6 +106,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return Zero;
 
       return new XYZ(x / length, y / length, z / length);
+    }
+
+    internal static XYZ Unitize(this XYZ xyz)
+    {
+      var (x, y, z) = xyz;
+      NumericTolerance.Unitize3(ref x, ref y, ref z);
+      return new XYZ(x, y, z);
     }
 
     /// <summary>
@@ -205,15 +212,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ PerpVector(this XYZ value, double tolerance = DefaultTolerance)
     {
       tolerance = Math.Max(tolerance, Upsilon);
-
       var (x, y, z) = value;
-      var length = NumericTolerance.Norm(x, y, z);
-      if (length < tolerance)
-        return Zero;
 
-      return NumericTolerance.Norm(x / length, y / length) < tolerance ?
-        new XYZ(z, 0.0, -x) :
-        new XYZ(-y, x, 0.0);
+      if (NumericTolerance.IsZero2(x, y, tolerance))
+      {
+        NumericTolerance.Unitize2(ref x, ref z);
+        return new XYZ(z, 0.0, -x);
+      }
+      else
+      {
+        NumericTolerance.Unitize2(ref x, ref y);
+        return new XYZ(-y, x, 0.0);
+      }
     }
 
     /// <summary>

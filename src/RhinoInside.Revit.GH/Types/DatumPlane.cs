@@ -267,7 +267,7 @@ namespace RhinoInside.Revit.GH.Types
 
         if (BoundaryPoints is IList<Point3d> boundary && boundary.Count > 0)
         {
-          args.Pipeline.DrawPatternedPolyline(boundary, args.Color, 0x0007E30, args.Thickness, true);
+          args.Pipeline.DrawPatternedPolyline(boundary, args.Color, 0x00001C47, args.Thickness, true);
 
           if
           (
