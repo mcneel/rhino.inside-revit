@@ -143,13 +143,24 @@ namespace RhinoInside.Revit.GH.Types
       var center = clippingBox.Center;
       var viewport = pipeline.Viewport;
       var dpi = pipeline.DpiScale;
-      var pointRadius = 2.0f * pipeline.DisplayPipelineAttributes.PointRadius * dpi;
+      var pointRadius = pipeline.DisplayPipelineAttributes.PointRadius * 1.5f;
       if (viewport.GetWorldToScreenScale(center, out var pixelsPerUnits))
       {
         // If geometry is smaller than a point diameter we show it as a point
-        if (clippingBox.Diagonal.Length * pixelsPerUnits < pointRadius)
+        if (0.5 * clippingBox.Diagonal.Length * pixelsPerUnits < 2.0/*pointRadius * dpi*/)
         {
-          pipeline.DrawPoint(center, Rhino.Display.PointStyle.RoundControlPoint, System.Drawing.Color.Orange, System.Drawing.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
+          pipeline.DrawPoint
+          (
+            center,
+            Rhino.Display.PointStyle.Clover,
+            System.Drawing.Color.Orange,
+            System.Drawing.Color.White,
+            pointRadius,
+            dpi,
+            pointRadius, 0.0f,
+            diameterIsInPixels: true,
+            autoScaleForDpi: true
+          );
           return false;
         }
       }
@@ -508,7 +519,7 @@ namespace RhinoInside.Revit.GH.Types
       basisY = plane.YVec;
     }
 
-    protected virtual void SetLocation(ARDB.XYZ newOrigin, ARDB.XYZ newBasisX, ARDB.XYZ newBasisY, bool? keepJoins)
+    protected void SetLocation(ARDB.XYZ newOrigin, ARDB.XYZ newBasisX, ARDB.XYZ newBasisY, bool? keepJoins)
     {
       if (Value is ARDB.Element element)
       {
@@ -590,18 +601,19 @@ namespace RhinoInside.Revit.GH.Types
 
     protected static Rhino.DocObjects.ConstructionPlane CreateConstructionPlane(string name, Plane location, Rhino.RhinoDoc rhinoDoc)
     {
-      bool imperial = rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Feet || rhinoDoc.ModelUnitSystem == Rhino.UnitSystem.Inches;
+      bool imperial = rhinoDoc.ModelUnitSystem.IsImperial();
+      var modelScale = UnitScale.GetModelScale(rhinoDoc);
 
       return new Rhino.DocObjects.ConstructionPlane()
       {
         Plane = location,
         GridSpacing = imperial ?
-        UnitScale.Convert(1.0, UnitScale.Yards, UnitScale.GetModelScale(rhinoDoc)) :
-        UnitScale.Convert(1.0, UnitScale.Meters, UnitScale.GetModelScale(rhinoDoc)),
+        UnitScale.Convert(1.0, UnitScale.Yards, modelScale) :
+        UnitScale.Convert(1.0, UnitScale.Meters, modelScale),
 
         SnapSpacing = imperial ?
-        UnitScale.Convert(1.0, UnitScale.Yards, UnitScale.GetModelScale(rhinoDoc)) :
-        UnitScale.Convert(1.0, UnitScale.Meters, UnitScale.GetModelScale(rhinoDoc)),
+        UnitScale.Convert(1.0, UnitScale.Yards, modelScale) :
+        UnitScale.Convert(1.0, UnitScale.Meters, modelScale),
 
         GridLineCount = 70,
         ThickLineFrequency = imperial ? 6 : 5,
@@ -610,10 +622,8 @@ namespace RhinoInside.Revit.GH.Types
       };
     }
 
-    public virtual Point3d Position => Curve is Curve curve ?
-    curve.PointAtStart : Location.Origin;
-    public virtual Vector3d Direction => Curve is Curve curve ?
-    curve.PointAtEnd - curve.PointAtStart : WorkPlaneOrientation;
+    public virtual Point3d Position => Curve is Curve curve ? curve.PointAtStart : Location.Origin;
+    public virtual Vector3d Direction => Curve is Curve curve ? curve.PointAtEnd - curve.PointAtStart : WorkPlaneOrientation;
 
     public virtual Vector3d HandOrientation => Location.XAxis;
     public virtual Vector3d FacingOrientation => Location.YAxis;
@@ -621,9 +631,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual Curve Curve
     {
-      get => Value?.Location is ARDB.LocationCurve curveLocation ?
-          curveLocation.Curve.ToCurve() :
-          default;
+      get => Value?.Location is ARDB.LocationCurve curveLocation ? curveLocation.Curve.ToCurve() : default;
       set => SetCurve(value, keepJoins: false);
     }
 
@@ -782,7 +790,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    struct DisableJoinsDisposable : IDisposable
+    readonly struct DisableJoinsDisposable : IDisposable
     {
       private readonly List<(ARDB.Element Element, int End)> AllowedJoinEnds;
 
