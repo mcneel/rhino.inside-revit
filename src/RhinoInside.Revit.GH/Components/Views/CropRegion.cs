@@ -1,12 +1,14 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
+using Rhino.Geometry;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  using System.Linq;
   using Convert.Geometry;
-  using Grasshopper.Kernel.Parameters;
-  using Rhino.Geometry;
+  using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.12")]
   public class ViewCropRegion : TransactionalChainComponent
@@ -96,6 +98,16 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
+
+      if (!view.Value.GetOrderedParameters().Any(x => x.Id.ToBuiltInParameter() == ARDB.BuiltInParameter.VIEWER_CROP_REGION))
+      {
+        AddRuntimeMessage
+        (
+          GH_RuntimeMessageLevel.Error,
+          $"'{view.Value.Title}' can't be cropped."
+        );
+        return;
+      }
       else Params.TrySetData(DA, "View", () => view);
 
       if (Params.GetData(DA, "Crop View", out bool? cropView))
@@ -116,21 +128,8 @@ namespace RhinoInside.Revit.GH.Components.Views
       {
         if (Params.GetData(DA, "Crop Region", out Curve cropRegion))
         {
-          if (!cropManager.CanHaveShape)
-          {
-            AddGeometryRuntimeError
-            (
-              GH_RuntimeMessageLevel.Error,
-              $"View '{view.Nomen}' does not permit to have a non-rectangular shape.",
-              cropRegion
-            );
-
-            return;
-          }
-
-          cropRegion = Curve.ProjectToPlane(cropRegion, view.Location);
-          var curveLoop = cropRegion?.ToCurveLoop();
-
+          var viewLocation = view.Location;
+          var curveLoop = Curve.ProjectToPlane(cropRegion, viewLocation)?.ToCurveLoop();
           if (curveLoop is null || !cropManager.IsCropRegionShapeValid(curveLoop))
           {
             AddGeometryRuntimeError
@@ -145,7 +144,34 @@ namespace RhinoInside.Revit.GH.Components.Views
 
           StartTransaction(view.Document);
 
-          cropManager.SetCropShape(curveLoop);
+          if (!cropManager.CanHaveShape)
+          {
+            var viewPlane = viewLocation.ToPlane();
+            if (!curveLoop.IsRectangular(viewPlane))
+            {
+              AddGeometryRuntimeError
+              (
+                GH_RuntimeMessageLevel.Warning,
+                $"View '{view.Value.Title}' does not permit to have a non-rectangular shape.",
+                cropRegion
+              );
+            }
+
+            var curveBox = cropRegion.GetBoundingBox(viewLocation);
+            var minCurve = curveBox.Corner(true, true, true).ToXYZ();
+            var maxCurve = curveBox.Corner(false, false, true).ToXYZ();
+
+            var cropBox = view.Value.CropBox;
+            var (min, max) = cropBox;
+            cropBox.Min = new ARDB.XYZ(minCurve.X, minCurve.Y, min.Z);
+            cropBox.Max = new ARDB.XYZ(maxCurve.X, maxCurve.Y, max.Z);
+
+            view.Value.CropBox = cropBox;
+          }
+          else
+          {
+            cropManager.SetCropShape(curveLoop);
+          }
 
           // Necessary to make GetCropShape below return updated geometry.
           view.Document.Regenerate();

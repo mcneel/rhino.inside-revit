@@ -4,6 +4,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
+  using System.Linq;
   using External.DB.Extensions;
   using Grasshopper.Kernel.Parameters;
   using Grasshopper.Kernel.Types;
@@ -112,6 +113,16 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
+
+      if (!view.Value.GetOrderedParameters().Any(x => x.Id.ToBuiltInParameter() == ARDB.BuiltInParameter.VIEWER_CROP_REGION))
+      {
+        AddRuntimeMessage
+        (
+          GH_RuntimeMessageLevel.Error,
+          $"View '{view.Value.Title}' can't be cropped."
+        );
+        return;
+      }
       else Params.TrySetData(DA, "View", () => view);
 
       if (Params.GetData(DA, "Crop View", out bool? cropView))
