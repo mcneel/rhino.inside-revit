@@ -394,12 +394,12 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region AddGeometryRuntimeError
-    readonly List<(GeometryBase Geometry, BoundingBox BoundingBox)> RuntimeErrorGeometry = new List<(GeometryBase, BoundingBox)>();
+    readonly List<(GH_RuntimeMessageLevel Level, GeometryBase Geometry, BoundingBox BoundingBox)> RuntimeGeometry = new List<(GH_RuntimeMessageLevel, GeometryBase, BoundingBox)>();
 
     public override void ClearData()
     {
       base.ClearData();
-      RuntimeErrorGeometry.Clear();
+      RuntimeGeometry.Clear();
     }
 
     public void AddGeometryConversionError(GH_RuntimeMessageLevel level, string text, GeometryBase geometry)
@@ -425,7 +425,7 @@ namespace RhinoInside.Revit.GH.Components
     public void AddGeometryRuntimeError(GH_RuntimeMessageLevel level, string text, GeometryBase geometry)
     {
       if (text is object) AddRuntimeMessage(level, text);
-      if (geometry is object) RuntimeErrorGeometry.Add((geometry, geometry.GetBoundingBox(false)));
+      if (geometry is object) RuntimeGeometry.Add((level, geometry, geometry.GetBoundingBox(false)));
     }
 
     public override void DrawViewportWires(IGH_PreviewArgs args)
@@ -443,7 +443,7 @@ namespace RhinoInside.Revit.GH.Components
       var pointRadius = 2.0f * args.Display.DisplayPipelineAttributes.PointRadius * dpi;
       var curveThickness = (int) Math.Round(1.5f * args.DefaultCurveThickness * dpi, MidpointRounding.AwayFromZero);
 
-      foreach (var error in RuntimeErrorGeometry)
+      foreach (var error in RuntimeGeometry)
       {
         // Skip geometry outside the viewport
         if (!viewport.IsVisible(error.BoundingBox))
@@ -452,25 +452,35 @@ namespace RhinoInside.Revit.GH.Components
         var center = error.BoundingBox.Center;
         if (viewport.GetWorldToScreenScale(center, out var pixelsPerUnits))
         {
+          var color = Attributes.Selected ? args.WireColour_Selected : args.WireColour;
+          switch (error.Level)
+          {
+            case GH_RuntimeMessageLevel.Blank:    color = SD.Color.Black; break;
+            case GH_RuntimeMessageLevel.Remark:   color = Attributes.Selected ? args.WireColour_Selected : args.WireColour; break;
+            case GH_RuntimeMessageLevel.Warning:  color = SD.Color.Orange; break;
+            case GH_RuntimeMessageLevel.Error:    color = SD.Color.HotPink; break;
+          }
+
           // If geometry is smaller than a point diameter we show it as a point
           if (error.BoundingBox.Diagonal.Length * pixelsPerUnits < pointRadius * 2.0)
           {
-            args.Display.DrawPoint(center, Rhino.Display.PointStyle.RoundControlPoint, SD.Color.Orange, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
+            args.Display.DrawPoint(center, Rhino.Display.PointStyle.RoundControlPoint, color, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
           }
-          else
+          else switch (error.Geometry)
           {
-            switch (error.Geometry)
-            {
-              case Point point:     args.Display.DrawPoint(point.Location, Rhino.Display.PointStyle.X, SD.Color.Orange, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false); break;
-              case Curve curve:     args.Display.DrawCurve(curve, SD.Color.Orange, curveThickness); break;
-              case Surface surface: args.Display.DrawSurface(surface, SD.Color.Orange, curveThickness); break;
-              case Brep brep:       args.Display.DrawBrepWires(brep, SD.Color.Orange, curveThickness); break;
-              case Mesh mesh:       args.Display.DrawMeshWires(mesh, SD.Color.Orange, curveThickness); break;
-            }
+            case Point point:               args.Display.DrawPoint(point.Location, Rhino.Display.PointStyle.X, color, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false); break;
+            case Curve curve:               args.Display.DrawCurve(curve, color, curveThickness); break;
+            case Surface surface:           args.Display.DrawSurface(surface, color, curveThickness); break;
+            case Brep brep:                 args.Display.DrawBrepWires(brep, color, curveThickness); break;
+            case Mesh mesh:                 args.Display.DrawMeshWires(mesh, color, curveThickness); break;
+            case AnnotationBase annotation: args.Display.DrawAnnotation(annotation, color); break;
           }
         }
       }
     }
+
+    public override bool IsPreviewCapable => RuntimeGeometry.Count > 0 || base.IsPreviewCapable;
+    public override BoundingBox ClippingBox => base.ClippingBox;
     #endregion
 
     #region IGH_ReferenceComponent
