@@ -175,6 +175,17 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (textNote.GetTypeId() != type.Id) textNote.ChangeTypeId(type.Id);
       if (textNote.IsTextWrappingActive && double.IsNaN(width)) return false;
 
+      if (textNote.LeaderLeftAttachment != ARDB.LeaderAtachement.Midpoint)
+        textNote.LeaderLeftAttachment = ARDB.LeaderAtachement.Midpoint;
+      if (textNote.LeaderRightAttachment != ARDB.LeaderAtachement.Midpoint)
+        textNote.LeaderRightAttachment = ARDB.LeaderAtachement.Midpoint;
+      if (textNote.HorizontalAlignment != ARDB.HorizontalTextAlignment.Center)
+        textNote.HorizontalAlignment = ARDB.HorizontalTextAlignment.Center;
+#if REVIT_2019
+      if (textNote.VerticalAlignment != ARDB.VerticalTextAlignment.Middle)
+        textNote.VerticalAlignment = ARDB.VerticalTextAlignment.Middle;
+#endif
+
       if (!textNote.Coord.IsAlmostEqualTo(point))
         textNote.Coord = point;
 
@@ -236,17 +247,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       if (!Reuse(textNote, view, point, rotation, text, width, type))
         textNote = Create(view, point, rotation, text, width, type);
-
-      if (textNote.LeaderLeftAttachment != ARDB.LeaderAtachement.Midpoint)
-        textNote.LeaderLeftAttachment = ARDB.LeaderAtachement.Midpoint;
-      if (textNote.LeaderRightAttachment != ARDB.LeaderAtachement.Midpoint)
-        textNote.LeaderRightAttachment = ARDB.LeaderAtachement.Midpoint;
-      if (textNote.HorizontalAlignment != ARDB.HorizontalTextAlignment.Center)
-        textNote.HorizontalAlignment = ARDB.HorizontalTextAlignment.Center;
-#if REVIT_2019
-      if (textNote.VerticalAlignment != ARDB.VerticalTextAlignment.Middle)
-        textNote.VerticalAlignment = ARDB.VerticalTextAlignment.Middle;
-#endif
 
       return textNote;
     }
