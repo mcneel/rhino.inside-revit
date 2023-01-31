@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         // Make screen port a bit smaller than Revit one.
         {
           var port = vport.ScreenPort;
-          port.Width /= 2; port.Height /= 2;
+          port.Width /= 3; port.Height /= 3;
           vport.ScreenPort = port;
         }
 
