@@ -10,13 +10,15 @@ group: Deployment & Configs
 
 ### WIP
 
-- Updated `MeshEncoder` to produce Meshes whithout internal wires. (Revit 2023)
-
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 ![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
+
+{% include ltr/release-header.html title="v1.12 RC3" version="v1.12.8431.23288" pre_release=true time="01/31/2023" %}
+
+- Updated `MeshEncoder` to produce Meshes whithout internal wires. (Revit 2023)
 
 {% include ltr/release-header.html title="v1.12 RC2" version="v1.12.8425.21537" pre_release=true time="01/24/2023" %}
 
