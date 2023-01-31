@@ -264,7 +264,7 @@ namespace RhinoInside.Revit.GH.Components
                   var inch = Revit.ModelUnits / 12.0;
                   var box = ge.Box; box.Inflate(inch, inch, inch);
                   var mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
-                  AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
+                  AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
                 }
                 else
                 {
@@ -277,11 +277,11 @@ namespace RhinoInside.Revit.GH.Components
                 var inch = Revit.ModelUnits / 12.0;
                 var box = graphicalElement.Box; box.Inflate(inch, inch, inch);
                 var mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
                 break;
               }
               case Rhino.Geometry.GeometryBase geometry:
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, geometry);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, geometry);
                 break;
 
               case BoundingBox bbox:
@@ -289,19 +289,19 @@ namespace RhinoInside.Revit.GH.Components
                 var inch = Revit.ModelUnits / 12.0;
                 var box = new Box(bbox); box.Inflate(inch, inch, inch);
                 var mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
                 break;
               }
 
               default:
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, default);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, default);
                 break;
             }
 
             return true;
           }
 
-          AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, argument.Message, argument.Value as Rhino.Geometry.GeometryBase);
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, argument.Message, argument.Value as Rhino.Geometry.GeometryBase);
           break;
 
         case Exceptions.RuntimeException _:
@@ -378,7 +378,7 @@ namespace RhinoInside.Revit.GH.Components
               var bbox = goo.Boundingbox;
               if (bbox.Min.DistanceTo(Point3d.Origin) > LengthLimit || bbox.Max.DistanceTo(Point3d.Origin) > LengthLimit)
               {
-                if (!reported) AddGeometryRuntimeError
+                if (!reported) AddRuntimeMessage
                 (
                   GH_RuntimeMessageLevel.Warning,
                   $"The input {input.NickName} lies outside of Revit design limits." +
@@ -419,10 +419,10 @@ namespace RhinoInside.Revit.GH.Components
           break;
       }
 #endif
-      AddGeometryRuntimeError(level, text, geometry?.InRhinoUnits());
+      AddRuntimeMessage(level, text, geometry?.InRhinoUnits());
     }
 
-    public void AddGeometryRuntimeError(GH_RuntimeMessageLevel level, string text, GeometryBase geometry)
+    public void AddRuntimeMessage(GH_RuntimeMessageLevel level, string text, GeometryBase geometry)
     {
       if (text is object) AddRuntimeMessage(level, text);
       if (geometry is object) RuntimeGeometry.Add((level, geometry, geometry.GetBoundingBox(false)));

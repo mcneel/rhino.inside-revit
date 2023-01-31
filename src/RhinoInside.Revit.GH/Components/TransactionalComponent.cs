@@ -766,7 +766,7 @@ namespace RhinoInside.Revit.GH.Components
                 }
               }
 
-              AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, message, mesh);
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, message, mesh);
             }
 
             output = input;
