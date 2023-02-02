@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  [ComponentVersion(introduced: "1.12")]
   public class Annotation : GraphicalElement<Types.IGH_Annotation, ARDB.Element>
   {
     public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.hidden;
