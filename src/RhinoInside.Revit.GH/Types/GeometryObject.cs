@@ -296,6 +296,33 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
+    public static GeometryObject FromElementId(ARDB.Document document, ARDB.ElementId id)
+    {
+      if (document.GetElement(id) is ARDB.Element element)
+        return new GeometryElement(document, ARDB.Reference.ParseFromStableRepresentation(document, element.UniqueId));
+
+      return null;
+    }
+
+    public static GeometryObject FromLinkElementId(ARDB.Document document, ARDB.LinkElementId id)
+    {
+      if (id.HostElementId != ARDB.ElementId.InvalidElementId)
+        return FromElementId(document, id.HostElementId);
+
+      if
+      (
+        document.GetElement(id.LinkInstanceId) is ARDB.RevitLinkInstance link &&
+        link.GetLinkDocument() is ARDB.Document linkedDocument &&
+        linkedDocument.GetElement(id.LinkedElementId) is ARDB.Element linkedElement
+      )
+      {
+        using (var linkedElementReference = ARDB.Reference.ParseFromStableRepresentation(linkedElement.Document, linkedElement.UniqueId))
+          return new GeometryElement(document, linkedElementReference.CreateLinkReference(link));
+      }
+
+      return default;
+    }
+
     /// <summary>
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
     /// </summary>

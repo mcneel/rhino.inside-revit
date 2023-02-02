@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using Rhino.Display;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
@@ -6,7 +8,6 @@ namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
   using Grasshopper.Kernel;
-  using Rhino.Display;
 
   [Kernel.Attributes.Name("Tag")]
   public class TagElement : GraphicalElement
@@ -17,7 +18,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Element Tag")]
-  public class IndependentTag : TagElement
+  public class IndependentTag : TagElement, IGH_Annotation
   {
     protected override Type ValueType => typeof(ARDB.IndependentTag);
     public new ARDB.IndependentTag Value => base.Value as ARDB.IndependentTag;
@@ -40,6 +41,14 @@ namespace RhinoInside.Revit.GH.Types
         return NaN.Plane;
       }
     }
+    #endregion
+
+    #region IGH_Annotation
+    public GeometryObject[] References =>
+      Value?.GetTaggedReferences().
+      Cast<ARDB.Reference>().
+      Select(x => GeometryObject.FromReference(ReferenceDocument, x)).
+      ToArray();
     #endregion
   }
 
@@ -130,32 +139,83 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Area Tag")]
-  public class AreaElementTag : SpatialElementTag
+  public class AreaElementTag : SpatialElementTag, IGH_Annotation
   {
     protected override Type ValueType => typeof(ARDB.AreaTag);
     public new ARDB.AreaTag Value => base.Value as ARDB.AreaTag;
 
     public AreaElementTag() { }
     public AreaElementTag(ARDB.AreaTag element) : base(element) { }
+
+    #region IGH_Annotation
+    public GeometryObject[] References
+    {
+      get
+      {
+        if (Value is ARDB.AreaTag tag && tag.Area is ARDB.Area area)
+        {
+          using (var reference = ARDB.Reference.ParseFromStableRepresentation(area.Document, area.UniqueId))
+            return new GeometryObject[] { GeometryElement.FromReference(area.Document, reference) };
+        }
+
+        return default;
+      }
+    }
+    #endregion
   }
 
   [Kernel.Attributes.Name("Room Tag")]
-  public class RoomElementTag : SpatialElementTag
+  public class RoomElementTag : SpatialElementTag, IGH_Annotation
   {
     protected override Type ValueType => typeof(ARDB.Architecture.RoomTag);
     public new ARDB.Architecture.RoomTag Value => base.Value as ARDB.Architecture.RoomTag;
 
     public RoomElementTag() { }
     public RoomElementTag(ARDB.Architecture.RoomTag element) : base(element) { }
+
+    #region IGH_Annotation
+    public GeometryObject[] References
+    {
+      get
+      {
+        if (Value is ARDB.Architecture.RoomTag tag)
+        {
+          try { return new GeometryObject[] { GeometryObject.FromLinkElementId(ReferenceDocument, tag.TaggedRoomId) }; }
+          catch { }
+
+          try { return new GeometryObject[] { GeometryObject.FromElementId(ReferenceDocument, tag.TaggedLocalRoomId) }; }
+          catch { }
+        }
+
+        return default;
+      }
+    }
+    #endregion
   }
 
   [Kernel.Attributes.Name("Space Tag")]
-  public class SpaceElementTag : SpatialElementTag
+  public class SpaceElementTag : SpatialElementTag, IGH_Annotation
   {
     protected override Type ValueType => typeof(ARDB.Mechanical.SpaceTag);
     public new ARDB.Mechanical.SpaceTag Value => base.Value as ARDB.Mechanical.SpaceTag;
 
     public SpaceElementTag() { }
     public SpaceElementTag(ARDB.Mechanical.SpaceTag element) : base(element) { }
+
+    #region IGH_Annotation
+    public GeometryObject[] References
+    {
+      get
+      {
+        if (Value is ARDB.Mechanical.SpaceTag tag && tag.Space is ARDB.Mechanical.Space space)
+        {
+          using (var reference = ARDB.Reference.ParseFromStableRepresentation(space.Document, space.UniqueId))
+            return new GeometryObject[] { GeometryElement.FromReference(space.Document, reference) };
+        }
+
+        return default;
+      }
+    }
+    #endregion
   }
 }

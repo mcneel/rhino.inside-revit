@@ -34,6 +34,7 @@
     <Compile Include="Components\Annotations\AddSpotElevation.cs" />
     <Compile Include="Components\Annotations\AddDetailItem.cs" />
     <Compile Include="Components\Annotations\AddText.cs" />
+    <Compile Include="Components\Annotations\References.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Documents\ActiveDocument.cs" />
     <Compile Include="Components\Documents\DocumentWarnings.cs" />
@@ -289,6 +290,7 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Optional.cs" />
+    <Compile Include="Parameters\Annotations\Annotation.cs" />
     <Compile Include="Parameters\Materials\AppearanceAsset.cs" />
     <Compile Include="Parameters\Materials\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Parameters\Materials\AssetPropertyDouble4DMap.cs" />
@@ -309,6 +311,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Surface.cs" />
+    <Compile Include="Types\Annotations\Annotation.cs" />
     <Compile Include="Types\Annotations\AnnotationSymbol.cs" />
     <Compile Include="Types\Annotations\Dimension.cs" />
     <Compile Include="Types\Annotations\FilledRegion.cs" />
@@ -502,9 +505,7 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Components\Model\Group\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TextTemplating\Microsoft.TextTemplating.targets" />
   <PropertyGroup>
