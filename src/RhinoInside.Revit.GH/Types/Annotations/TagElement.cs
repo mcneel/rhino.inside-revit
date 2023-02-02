@@ -2,12 +2,13 @@ using System;
 using System.Linq;
 using Rhino.Display;
 using Rhino.Geometry;
+using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
-  using Grasshopper.Kernel;
+  using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Tag")]
   public class TagElement : GraphicalElement
