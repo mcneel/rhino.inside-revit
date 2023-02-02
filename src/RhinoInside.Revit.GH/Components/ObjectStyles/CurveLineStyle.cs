@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
           NickName = "LS",
           Description = "Curve linestyle",
           Optional = true
-        },ParamRelevance.Secondary
+        },ParamRelevance.Primary
       ),
     };
 
