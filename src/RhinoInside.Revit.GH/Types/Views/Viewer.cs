@@ -87,8 +87,8 @@ namespace RhinoInside.Revit.GH.Types
     }
     protected override void DrawViewportMeshes(GH_PreviewMeshArgs args)
     {
-      if (PolySurface is object)
-        args.Pipeline.DrawBrepShaded(PolySurface, args.Material);
+      if (Mesh is Mesh mesh)
+        args.Pipeline.DrawMeshShaded(mesh, args.Material);
     }
     #endregion
 
@@ -100,6 +100,7 @@ namespace RhinoInside.Revit.GH.Types
       _AnnotationCropShape = default;
       _Surface = default;
       _PolySurface = default;
+      _Mesh = default;
 
       base.SubInvalidateGraphics();
     }
@@ -201,6 +202,22 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return _PolySurface.Value;
+      }
+    }
+
+    (bool HasValue, Mesh Value) _Mesh;
+    public override Mesh Mesh
+    {
+      get
+      {
+        if (!_Mesh.HasValue && Surface is Surface surface)
+        {
+          _Mesh.Value = Mesh.CreateFromSurface(surface, MeshingParameters.FastRenderMesh);
+          _Mesh.Value.Normals.ComputeNormals();
+          _Mesh.HasValue = true;
+        }
+
+        return _Mesh.Value;
       }
     }
     #endregion

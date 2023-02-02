@@ -10,6 +10,10 @@ group: Deployment & Configs
 
 ### WIP
 
+### RC
+
+- Added 'Annotation References' component.
+
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

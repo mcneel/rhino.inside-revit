@@ -144,7 +144,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       if (!Params.GetData(DA, "Spatial Element", out Types.SpatialElement element, x => x.IsValid)) return;
       else Params.TrySetData(DA, "Spatial Element", () => element);
 
-      Params.TrySetData(DA, "Point", () => element.Position);
+      Params.TrySetData(DA, "Location", () => element.Position);
       Params.TrySetData(DA, "Placed", () => element.IsPlaced);
       Params.TrySetData(DA, "Number", () => element.Number);
       Params.TrySetData(DA, "Name", () => element.Name);

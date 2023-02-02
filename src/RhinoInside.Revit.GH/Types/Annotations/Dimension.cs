@@ -1,16 +1,16 @@
 using System;
 using System.Linq;
 using Rhino.Geometry;
+using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
-  using Grasshopper.Kernel;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Dimension")]
-  public class Dimension : GraphicalElement
+  public class Dimension : GraphicalElement, IGH_Annotation
   {
     protected override Type ValueType => typeof(ARDB.Dimension);
     public new ARDB.Dimension Value => base.Value as ARDB.Dimension;
