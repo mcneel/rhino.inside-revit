@@ -53,4 +53,10 @@ Disassemble Assembly instance with the {% include ltr/comp.html uuid='ff0f49ca' 
 
 ![]({{ "/static/images/guides/revit-assembly-disassemble.png" | prepend: site.baseurl }})
 
+## Assembly Origin
+
+Get and Set the Assembly Origin with the {% include ltr/comp.html uuid='1c1cc766' %} component.
+
+![]({{ "/static/images/guides/revit-assembly-origin.png" | prepend: site.baseurl }})
+
 

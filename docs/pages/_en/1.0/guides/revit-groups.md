@@ -37,3 +37,8 @@ Use the {% include ltr/comp.html uuid='df634530' %} component to add a Add Model
 
 
 
+## Add Detail Group
+
+Use the {% include ltr/comp.html uuid='cc7790a0' %} component to add a Add Detail Group to the project.
+
+![]({{ "/static/images/guides/revit-group-addDetail.png" | prepend: site.baseurl }})

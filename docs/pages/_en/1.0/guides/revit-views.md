@@ -61,6 +61,12 @@ Use the {% include ltr/comp.html uuid='51f9e551' %} component to Add Structural 
 
 ![]({{ "/static/images/guides/revit-views-structural.png" | prepend: site.baseurl }})
 
+## Get Default 3D View
+
+Use the {% include ltr/comp.html uuid='f2277265' %} component to Get the Projects Default 3D View.
+
+![]({{ "/static/images/guides/revit-view-default3d.png" | prepend: site.baseurl }})
+
 ## Add 3D View
 
 Use the {% include ltr/comp.html uuid='f7b775c9' %} component to Add 3D View in the project.
@@ -72,4 +78,10 @@ Use the {% include ltr/comp.html uuid='f7b775c9' %} component to Add 3D View in 
 Use the {% include ltr/comp.html uuid='3896729d' %} component to Add Floor Plan in the project.
 
 ![]({{ "/static/images/guides/revit-views-floorplan.png" | prepend: site.baseurl }})
+
+## Add Drafting View
+
+Use the {% include ltr/comp.html uuid='c62d18a8' %} component to Add New Drafting View to the project.
+
+![]({{ "/static/images/guides/revit-view-addDrafting.png" | prepend: site.baseurl }})
 

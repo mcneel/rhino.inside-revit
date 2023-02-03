@@ -54,6 +54,26 @@ Use the {% include ltr/comp.html uuid='f7d56db0' %} to inspect the work-sharing 
 
 ![]({{ "/static/images/guides/revit-docs-wsidentity.png" | prepend: site.baseurl }})
 
+Use the {% include ltr/comp.html uuid='3917adb2' %} to get a list of failure messages generated from persistent (reviewable) warnings accumulated in the document
+
+![]({{ "/static/images/guides/revit-document-warnings.png" | prepend: site.baseurl }})
+
+Use the {% include ltr/comp.html uuid='825d7ab3' %} to the Revit Document Tolerances.
+
+![]({{ "/static/images/guides/revit-document-tolerance.png" | prepend: site.baseurl }})
+
+Use the {% include ltr/comp.html uuid='ace507e5' %} to the Revit Version.
+
+![]({{ "/static/images/guides/revit-document-revitVersion.png" | prepend: site.baseurl }})
+
+Use the {% include ltr/comp.html uuid='4bfeb1ee' %} to the Revit User Properties.
+
+![]({{ "/static/images/guides/revit-document-revitUser.png" | prepend: site.baseurl }})
+
+Use the {% include ltr/comp.html uuid='cb3d697e' %} to the default file paths.
+
+![]({{ "/static/images/guides/revit-document-fileLocations.png" | prepend: site.baseurl }})
+
 
 ## Saving Documents
 
