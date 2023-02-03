@@ -32,3 +32,15 @@ In Revit API, fill patterns are represented by the {% include api_type.html type
 
 ![]({{ "/static/images/guides/revit-styles-fillpattern-select.png" | prepend: site.baseurl }})
 ![]({{ "/static/images/guides/revit-styles-fillpatterns.png" | prepend: site.baseurl }})
+
+### Query Fill Patterns
+
+Query Fill Patterns by Type and Name wit the {% include ltr/comp.html uuid='71c06438' %} component.
+
+![]({{ "/static/images/guides/revit-pattern-query-fill.png" | prepend: site.baseurl }})
+
+### Curve Line-Style
+
+Get and Set a Curves Line-Style with the {% include ltr/comp.html uuid='60be53c5' %} component.
+
+![]({{ "/static/images/guides/revit-curve-lineStyle.png" | prepend: site.baseurl }})

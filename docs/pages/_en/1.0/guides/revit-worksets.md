@@ -80,3 +80,16 @@ To set workset of an element, use the *Set Workset* component shared here.
 ![]({{ "/static/images/guides/revit-worksets07.png" | prepend: site.baseurl }})
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Set Workset.ghuser' name='Set Workset' %}
+
+## Ensure Workset
+
+To make sure that a particular user created Workset is in the document use the {% include ltr/comp.html uuid='a406c6a0' %} component.
+
+![]({{ "/static/images/guides/revit-workset-ensure.png" | prepend: site.baseurl }})
+
+
+## Delete Workset
+
+To delete a Workset in the REvit document use the {% include ltr/comp.html uuid='bf1b9be9' %} component.
+
+![]({{ "/static/images/guides/revit-workset-delete.png" | prepend: site.baseurl }})
