@@ -11,6 +11,11 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using External.DB.Extensions;
 
+  interface ISketchAccess
+  {
+    Sketch Sketch { get; }
+  }
+
   [Kernel.Attributes.Name("Sketch")]
   public class Sketch : GraphicalElement
   {

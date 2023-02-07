@@ -13,6 +13,11 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB;
   using External.DB.Extensions;
 
+  interface ICurtainGridsAccess
+  {
+    IList<CurtainGrid> CurtainGrids { get; }
+  }
+
   [Kernel.Attributes.Name("Curtain Grid")]
   public class CurtainGrid : DocumentObject,
     IGH_GeometricGoo,
