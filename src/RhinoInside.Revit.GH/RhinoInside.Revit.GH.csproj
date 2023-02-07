@@ -197,6 +197,7 @@
     <Compile Include="Components\Groups\QueryGroupTypes.cs" />
     <Compile Include="Components\Import\AddImage.cs" />
     <Compile Include="Components\Import\AddImageType.cs" />
+    <Compile Include="Components\Import\ImageTypePath.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
     <Compile Include="Components\Model\AddWorkPlaneByPlane.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
