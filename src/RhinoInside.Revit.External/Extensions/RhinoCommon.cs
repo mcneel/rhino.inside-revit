@@ -568,6 +568,20 @@ namespace Rhino.Geometry
         ellipse.Radius2 * Math.Sin(t)
       );
     }
+
+    public static NurbsCurve ToNurbsCurve(this Ellipse ellipse, Interval domain)
+    {
+      var nurbsCurve = ellipse.ToNurbsCurve();
+
+      nurbsCurve.ClosestPoint(ellipse.PointAt(domain.T0), out var param0);
+      if (!nurbsCurve.ChangeClosedCurveSeam(param0))
+        nurbsCurve.Domain = new Interval(param0, param0 + nurbsCurve.Domain.Length);
+
+      nurbsCurve.ClosestPoint(ellipse.PointAt(domain.T1), out var param1);
+      nurbsCurve = nurbsCurve.Trim(param0, param1) as NurbsCurve;
+      nurbsCurve.Domain = domain;
+      return nurbsCurve;
+    }
   }
 
   static class CurveExtension
