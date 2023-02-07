@@ -105,8 +105,12 @@ namespace RhinoInside.Revit.GH.Types
 
       public override bool Visible
       {
+#if REVIT_2023
         get => element.Value.IsLeaderVisible(target);
         set => element.Value.SetIsLeaderVisible(target, value);
+#endif
+        get => true;
+        set { }
       }
 
       public override bool HasElbow => Visible;
@@ -131,7 +135,7 @@ namespace RhinoInside.Revit.GH.Types
         set => element.Value.TagHeadPosition = value.ToXYZ();
       }
     }
-    #endregion
+#endregion
 
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {

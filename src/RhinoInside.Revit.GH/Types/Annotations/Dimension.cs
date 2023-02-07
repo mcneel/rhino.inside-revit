@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IAnnotationLeadersAcces
-    public bool? HasLeader
+    public virtual bool? HasLeader
     {
       get => Value?.GetHasLeader();
       set
@@ -238,8 +238,10 @@ namespace RhinoInside.Revit.GH.Types
       {
         get
         {
+#if REVIT_2021
           if (dimension.Value is ARDB.SpotDimension spot)
             return spot.LeaderHasShoulder;
+#endif
 
           return false;
         }
@@ -248,16 +250,21 @@ namespace RhinoInside.Revit.GH.Types
       {
         get
         {
+#if REVIT_2021
           if (dimension.Value is ARDB.SpotDimension spot)
             return spot.LeaderShoulderPosition.ToPoint3d();
+#endif
 
           return NaN.Point3d;
         }
         set
         {
+#if REVIT_2021
           if (dimension.Value is ARDB.SpotDimension spot && spot.LeaderHasShoulder)
             spot.LeaderShoulderPosition = value.ToXYZ();
-          else throw new InvalidOperationException($"Dimension '{dimension.Nomen}' do not have shoulder. {{{dimension.Id.ToString("D")}}}");
+          else
+#endif
+          throw new InvalidOperationException($"Dimension '{dimension.Nomen}' do not have shoulder. {{{dimension.Id.ToString("D")}}}");
         }
       }
 
@@ -332,7 +339,7 @@ namespace RhinoInside.Revit.GH.Types
         set => DimensionSegment.TextPosition = value.ToXYZ();
       }
     }
-    #endregion
+#endregion
 
     static string FormatValue(double value, ARDB.DimensionShape dimensionShape)
     {
