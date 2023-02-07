@@ -571,16 +571,19 @@ namespace Rhino.Geometry
 
     public static NurbsCurve ToNurbsCurve(this Ellipse ellipse, Interval domain)
     {
-      var nurbsCurve = ellipse.ToNurbsCurve();
+      if (ellipse.ToNurbsCurve() is NurbsCurve nurbsCurve)
+      {
+        nurbsCurve.ClosestPoint(ellipse.PointAt(domain.T0), out var param0);
+        if (!nurbsCurve.ChangeClosedCurveSeam(param0))
+          nurbsCurve.Domain = new Interval(param0, param0 + nurbsCurve.Domain.Length);
 
-      nurbsCurve.ClosestPoint(ellipse.PointAt(domain.T0), out var param0);
-      if (!nurbsCurve.ChangeClosedCurveSeam(param0))
-        nurbsCurve.Domain = new Interval(param0, param0 + nurbsCurve.Domain.Length);
+        nurbsCurve.ClosestPoint(ellipse.PointAt(domain.T1), out var param1);
+        nurbsCurve = nurbsCurve.Trim(param0, param1) as NurbsCurve;
+        nurbsCurve.Domain = domain;
+        return nurbsCurve;
+      }
 
-      nurbsCurve.ClosestPoint(ellipse.PointAt(domain.T1), out var param1);
-      nurbsCurve = nurbsCurve.Trim(param0, param1) as NurbsCurve;
-      nurbsCurve.Domain = domain;
-      return nurbsCurve;
+      return null;
     }
   }
 
