@@ -47,6 +47,7 @@
     <Compile Include="DB\Extensions\Curve.cs" />
     <Compile Include="DB\Extensions\CurveLoop.cs" />
     <Compile Include="DB\Extensions\DatumPlane.cs" />
+    <Compile Include="DB\Extensions\Dimension.cs" />
     <Compile Include="DB\Extensions\Document.cs" />
     <Compile Include="DB\Extensions\Element.cs" />
     <Compile Include="DB\Extensions\ElementId.cs" />

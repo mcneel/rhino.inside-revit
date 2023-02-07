@@ -1,12 +1,13 @@
 using System;
+using Grasshopper.Kernel;
+using Rhino.Display;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
   using External.DB.Extensions;
-  using Grasshopper.Kernel;
-  using Rhino.Geometry;
-  using RhinoInside.Revit.Convert.Geometry;
 
   [Kernel.Attributes.Name("Spot Dimension")]
   public class SpotDimension : Dimension
@@ -40,7 +41,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 #endif
 
-    public override Curve Leader
+    Curve LeaderCurve
     {
       get
       {
@@ -80,18 +81,41 @@ namespace RhinoInside.Revit.GH.Types
 #if REVIT_2021
       if (Value is ARDB.SpotDimension spot)
       {
-        if (Leader is Curve leader)
+        var dpi = args.Pipeline.DpiScale;
+        var tagSize = 0.5; // feet
+        var dotPixels = 10.0 * args.Pipeline.DpiScale;
+        var arrowSize = (int) Math.Round(2.0 * Grasshopper.CentralSettings.PreviewPointRadius * dpi);
+
+        if (LeaderCurve is Curve leader)
         {
           args.Pipeline.DrawCurve(leader, args.Color, args.Thickness);
-          args.Pipeline.DrawArrowHead(leader.PointAtStart, -leader.TangentAtStart, args.Color, 16, 0.0);
+          if ((spot.DimensionType.get_Parameter(ARDB.BuiltInParameter.SPOT_ELEV_LEADER_ARROWHEAD)?.AsElementId()).IsValid())
+            args.Pipeline.DrawArrowHead(leader.PointAtStart, -leader.TangentAtStart, args.Color, arrowSize, 0.0);
         }
 
-        {
-          var text = FormatValue(spot, spot.DimensionType.StyleType);
-          var position = spot.DimensionType.StyleType == ARDB.DimensionStyleType.SpotSlope ?
-            spot.Origin : spot.TextPosition;
+        var styleType = spot.DimensionType.StyleType;
+        var position = (styleType == ARDB.DimensionStyleType.SpotSlope ? spot.Origin : spot.TextPosition).ToPoint3d();
 
-          args.Pipeline.DrawDot(position.ToPoint3d(), text, args.Color, System.Drawing.Color.White);
+        var pixelSize = ((1.0 / args.Pipeline.Viewport.PixelsPerUnit(position).X) / Revit.ModelUnits) / dpi;
+        //if (dotPixels * pixelSize > tagSize)
+        {
+          args.Pipeline.DrawPoint
+          (
+            spot.LeaderEndPosition.ToPoint3d(),
+            PointStyle.RoundActivePoint,
+            args.Color,
+            System.Drawing.Color.WhiteSmoke,
+            (float) (tagSize / pixelSize),
+            1.0f, 0.0f, 0.0f,
+            diameterIsInPixels: true,
+            autoScaleForDpi: false
+          );
+        }
+
+        if (dotPixels * pixelSize < tagSize)
+        {
+          var text = FormatValue(spot, styleType);
+          args.Pipeline.DrawDot(position, text, args.Color, System.Drawing.Color.White);
         }
       }
 #endif

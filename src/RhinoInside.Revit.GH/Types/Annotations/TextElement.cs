@@ -9,9 +9,11 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Text Element")]
-  public class TextElement : GraphicalElement
+  public class TextElement : GraphicalElement, IGH_Annotation,
+    IAnnotationLeadersAccess
   {
     protected override Type ValueType => typeof(ARDB.TextElement);
     public new ARDB.TextElement Value => base.Value as ARDB.TextElement;
@@ -174,5 +176,81 @@ namespace RhinoInside.Revit.GH.Types
       else base.DrawViewportWires(args);
     }
     #endregion
+
+    #region IAnnotationLeadersAccess
+    public bool? HasLeader
+    {
+      get => Value is ARDB.TextNote note && note.LeaderCount > 0;
+      set { }
+    }
+
+    public AnnotationLeader[] Leaders
+    {
+      get
+      {
+        if (Value is ARDB.TextNote text)
+        {
+          var leaders = new AnnotationLeader[text.LeaderCount];
+
+          var ls = text.GetLeaders();
+          for (int r = 0; r < Math.Min(leaders.Length, ls.Count); ++r)
+            leaders[r] = new MultiLeader(this, ls[r]);
+
+          return leaders;
+        }
+
+        return null;
+      }
+    }
+
+    class MultiLeader : AnnotationLeader
+    {
+      protected readonly TextElement text;
+      readonly ARDB.Leader Leader;
+      public MultiLeader(TextElement t, ARDB.Leader l) { text = t; Leader = l; }
+
+      public override Curve LeaderCurve
+      {
+        get
+        {
+          if (text.Value.get_Parameter(ARDB.BuiltInParameter.ARC_LEADER_PARAM)?.AsBoolean() is true)
+          {
+            var arc = new Arc(HeadPosition, ElbowPosition, EndPosition);
+            return new ArcCurve(arc);
+          }
+
+          return base.LeaderCurve;
+        }
+      }
+
+      public override Point3d HeadPosition => Leader.Anchor.ToPoint3d();
+
+      public override bool Visible
+      {
+        get => true;
+        set { }
+      }
+
+      public override bool HasElbow => true;
+      public override Point3d ElbowPosition
+      {
+        get => Leader.Elbow.ToPoint3d();
+        set => Leader.Elbow = value.ToXYZ();
+      }
+
+      public override Point3d EndPosition
+      {
+        get => Leader.End.ToPoint3d();
+        set => Leader.End = value.ToXYZ();
+      }
+
+      public override bool IsTextPositionAdjustable => false;
+      public override Point3d TextPosition
+      {
+        get => text.Position;
+        set => throw new Exceptions.RuntimeArgumentException($"Text Position can't be adjusted.{{{text.Id.ToString("D")}}}");
+      }
+    }
   }
+  #endregion
 }
