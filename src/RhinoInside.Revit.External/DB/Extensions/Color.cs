@@ -4,12 +4,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class ColorExtension
   {
-    public static Color InvalidColorValue { get; } = Color.InvalidColorValue;
-    public static Color Black { get; }  = new Color(0, 0, 0);
-    public static Color White { get; }  = new Color(255, 255, 255);
-    public static Color Red { get; }    = new Color(255, 0, 0);
-    public static Color Green { get; }  = new Color(0, 255, 0);
-    public static Color Blue { get; }   = new Color(0, 0, 255);
+    public static Color InvalidColorValue => Color.InvalidColorValue;
+    public static Color Black             => new Color(0x00, 0x00, 0x00);
+    public static Color White             => new Color(0xFF, 0xFF, 0xFF);
+    public static Color Red               => new Color(0xFF, 0x00, 0x00);
+    public static Color Green             => new Color(0x00, 0xFF, 0x00);
+    public static Color Blue              => new Color(0x00, 0x00, 0xFF);
 
     public static bool IsEquivalent(this Color self, Color other)
     {
