@@ -108,9 +108,10 @@ namespace RhinoInside.Revit.GH.Types
 #if REVIT_2023
         get => element.Value.IsLeaderVisible(target);
         set => element.Value.SetIsLeaderVisible(target, value);
-#endif
+#else
         get => true;
         set { }
+#endif
       }
 
       public override bool HasElbow => Visible;
