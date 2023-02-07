@@ -294,6 +294,48 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
+    ComponentGuid("7A84AF8B-257D-4EFE-98C6-6FDB5E8AE32C"),
+    Name("Horizontal Text Alignment"),
+    Description("Contains a collection of Revit image horizontal text alignment values"),
+  ]
+  public class HorizontalTextAlignment : GH_Enum<ARDB.HorizontalTextAlignment>
+  {
+    public HorizontalTextAlignment() : base(ARDB.HorizontalTextAlignment.Center) { }
+    public HorizontalTextAlignment(ARDB.HorizontalTextAlignment value) : base(value) { }
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) ARDB.HorizontalTextAlignment.Left, "Left" },
+        { (int) ARDB.HorizontalTextAlignment.Right, "Right" },
+        { (int) ARDB.HorizontalTextAlignment.Center, "Center" },
+      }
+    );
+  }
+
+  [
+    ComponentGuid("E19ABC7B-43C6-46D8-97A1-70F052CB2AA0"),
+    Name("Vertical Text Alignment"),
+    Description("Contains a collection of Revit image vertical text alignment values"),
+  ]
+  public class VerticalTextAlignment : GH_Enum<ARDB.VerticalTextAlignment>
+  {
+    public VerticalTextAlignment() : base(ARDB.VerticalTextAlignment.Middle) { }
+    public VerticalTextAlignment(ARDB.VerticalTextAlignment value) : base(value) { }
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) ARDB.VerticalTextAlignment.Top, "Top" },
+        { (int) ARDB.VerticalTextAlignment.Bottom, "Bottom" },
+        { (int) ARDB.VerticalTextAlignment.Middle, "Middle" },
+      }
+    );
+  }
+
+  [
   ComponentGuid("A78B2CFC-A9A5-4E7A-816E-5BEE0F6BDC7E"),
   Name("Slab Curved Edge Condition"),
   Description("Contains a collection of slab curves edge condition values"),
