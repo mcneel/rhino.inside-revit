@@ -17,16 +17,6 @@ namespace RhinoInside.Revit.GH.Types
     HostObject Host { get; }
   }
 
-  interface ISketchAccess
-  {
-    Sketch Sketch { get; }
-  }
-
-  interface ICurtainGridsAccess
-  {
-    IList<CurtainGrid> CurtainGrids { get; }
-  }
-
   [Kernel.Attributes.Name("Host")]
   public class HostObject : InstanceElement, IGH_HostObject
   {

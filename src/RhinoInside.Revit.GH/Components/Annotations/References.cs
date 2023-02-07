@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (!Params.GetData(DA, "Annotation", out Types.IGH_Annotation annotation, x => x.IsValid)) return;
       else Params.TrySetData(DA, "Annotation", () => annotation);
 
-      Params.TrySetDataList(DA, "References", () => annotation.References);
+      Params.TrySetDataList(DA, "References", () => (annotation as Types.IAnnotationReferencesAccess)?.References);
     }
   }
 }

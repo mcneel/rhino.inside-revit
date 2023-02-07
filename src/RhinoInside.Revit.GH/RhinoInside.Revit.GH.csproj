@@ -34,6 +34,7 @@
     <Compile Include="Components\Annotations\AddSpotElevation.cs" />
     <Compile Include="Components\Annotations\AddDetailItem.cs" />
     <Compile Include="Components\Annotations\AddText.cs" />
+    <Compile Include="Components\Annotations\Leaders.cs" />
     <Compile Include="Components\Annotations\References.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Documents\ActiveDocument.cs" />
@@ -318,6 +319,7 @@
     <Compile Include="Types\Annotations\Dimension.cs" />
     <Compile Include="Types\Annotations\FilledRegion.cs" />
     <Compile Include="Types\Annotations\RevisionCloud.cs" />
+    <Compile Include="Types\Annotations\SpatialElementTag.cs" />
     <Compile Include="Types\Annotations\SpotDimension.cs" />
     <Compile Include="Types\Annotations\Revision.cs" />
     <Compile Include="Types\Annotations\TagElement.cs" />
