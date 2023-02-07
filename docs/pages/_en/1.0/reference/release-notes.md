@@ -13,6 +13,7 @@ group: Deployment & Configs
 ### RC
 
 - Added 'Annotation References' component.
+- Added 'Image Type Path' component.
 
 
 {% endcapture %}

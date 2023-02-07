@@ -55,6 +55,7 @@
     <Compile Include="DB\Extensions\FilteredElementCollector.cs" />
     <Compile Include="DB\Extensions\GeometryObject.cs" />
     <Compile Include="DB\Extensions\HostObject.cs" />
+    <Compile Include="DB\Extensions\ImageType.cs" />
     <Compile Include="DB\Extensions\IndependentTag.cs" />
     <Compile Include="DB\Extensions\Instance.cs" />
     <Compile Include="DB\Extensions\InternalOrigin.cs" />
