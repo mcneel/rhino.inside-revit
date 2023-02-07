@@ -14,6 +14,7 @@ group: Deployment & Configs
 
 - Added 'Annotation References' component.
 - Added 'Image Type Path' component.
+- Added 'Horizontal Align' and 'Vertical Align' inputs to 'Add Text' component.
 
 
 {% endcapture %}

@@ -292,6 +292,7 @@
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Optional.cs" />
     <Compile Include="Parameters\Annotations\Annotation.cs" />
+    <Compile Include="Parameters\Annotations\TextElement.cs" />
     <Compile Include="Parameters\Materials\AppearanceAsset.cs" />
     <Compile Include="Parameters\Materials\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Parameters\Materials\AssetPropertyDouble4DMap.cs" />
