@@ -12,15 +12,16 @@ group: Deployment & Configs
 
 ### RC
 
-- Added 'Annotation References' component.
-- Added 'Image Type Path' component.
-- Added 'Horizontal Align' and 'Vertical Align' inputs to 'Add Text' component.
-
-
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 ![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
+
+{% include ltr/release-header.html title="v1.12 RC4" version="v1.12.8438.12884" pre_release=true time="02/07/2023" %}
+
+- Added {% include ltr/comp.html uuid='96d578c0' %} component.
+- Added {% include ltr/comp.html uuid='d4873f18' %} component.
+- Added **Horizontal Align** and **Vertical Align** inputs to {% include ltr/comp.html uuid='49acc84c' %} component.
 
 {% include ltr/release-header.html title="v1.12 RC3" version="v1.12.8431.23288" pre_release=true time="01/31/2023" %}
 

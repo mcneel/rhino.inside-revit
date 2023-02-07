@@ -1,5 +1,29 @@
 [
   {
+    "desc": "Contains a collection of Revit annotative elements", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Revit Elements", 
+    "since": "1.12", 
+    "tab": "Params", 
+    "title": "Annotation", 
+    "typename": "Annotation", 
+    "until": null, 
+    "uuid": "35d2829e-1f8e-494d-8d93-a4d2a7351729"
+  }, 
+  {
+    "desc": "Contains a collection of Revit text note elements", 
+    "iconsrc": null, 
+    "icontag": "T", 
+    "panel": "Revit Elements", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Text Note", 
+    "typename": "TextElement", 
+    "until": null, 
+    "uuid": "e2435930-2f95-4277-ba10-b1e3a660f9da"
+  }, 
+  {
     "desc": "Contains a collection of Revit appearance asset elements", 
     "iconsrc": "/static/images/GH/AppearanceAsset.png", 
     "icontag": null, 
@@ -4512,6 +4536,18 @@
     "uuid": "36842b86-7c55-42cb-ad8f-28ca779495d0"
   }, 
   {
+    "desc": "Given a name, it adds a section view to the active Revit document", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "View", 
+    "since": "1.12", 
+    "tab": "Revit", 
+    "title": "Add Detail View", 
+    "typename": "AddDetalView", 
+    "until": null, 
+    "uuid": "8484e108-408a-4835-ac21-537d4fb121c8"
+  }, 
+  {
     "desc": "Given a name, it adds a drafting view to the active Revit document", 
     "iconsrc": "/static/images/GH/AddDraftingView.png", 
     "icontag": null, 
@@ -4522,6 +4558,30 @@
     "typename": "AddDraftingView", 
     "until": null, 
     "uuid": "c62d18a8-93c5-406f-8c13-778d50a16b8d"
+  }, 
+  {
+    "desc": "Given a name, it adds a section view to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddSectionView.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.12", 
+    "tab": "Revit", 
+    "title": "Add Section View", 
+    "typename": "AddSectionView", 
+    "until": null, 
+    "uuid": "369b6109-d1c7-486a-a25f-6695719043a4"
+  }, 
+  {
+    "desc": "Given a camera frame, it adds a 3D View to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddView3D.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Add 3D View", 
+    "typename": "AddView3D", 
+    "until": null, 
+    "uuid": "f7b775c9-05e0-40f7-85e9-5cc2ef79731e"
   }, 
   {
     "desc": "Given a level, it adds a floor plan to the active Revit document", 
@@ -4570,6 +4630,18 @@
     "typename": "ClusterViewsByType", 
     "until": null, 
     "uuid": "f6b99fe2-19e1-4840-96c1-13873a0aece8"
+  }, 
+  {
+    "desc": "View Get-Set crop region", 
+    "iconsrc": null, 
+    "icontag": "V", 
+    "panel": "View", 
+    "since": "1.12", 
+    "tab": "Revit", 
+    "title": "View Crop Region", 
+    "typename": "ViewCropRegion", 
+    "until": null, 
+    "uuid": "3ae4fa67-5673-4153-b43c-962ab7f8afa1"
   }, 
   {
     "desc": "Gets the default 3D view", 
@@ -4654,18 +4726,6 @@
     "typename": "ViewSectionBox", 
     "until": null, 
     "uuid": "45e7e88c-76cf-45f8-a31b-ac07accb6dbd"
-  }, 
-  {
-    "desc": "Given a plane, it adds a 3D View to the active Revit document", 
-    "iconsrc": "/static/images/GH/View3DByPlane.png", 
-    "icontag": null, 
-    "panel": "View", 
-    "since": "1.0", 
-    "tab": "Revit", 
-    "title": "Add 3D View", 
-    "typename": "View3DByPlane", 
-    "until": null, 
-    "uuid": "f7b775c9-05e0-40f7-85e9-5cc2ef79731e"
   }, 
   {
     "desc": "Get-Set host type compound structure", 
@@ -5244,6 +5304,18 @@
     "uuid": "49acc84c-793f-40a4-a1bf-2d8bafbb3604"
   }, 
   {
+    "desc": "", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Annotation", 
+    "since": "1.12", 
+    "tab": "Revit", 
+    "title": "Annotation References", 
+    "typename": "AnnotationReferences", 
+    "until": null, 
+    "uuid": "96d578c0-d8d4-40d7-a96c-fc4481567733"
+  }, 
+  {
     "desc": "Given the point, it adds an image to the given View", 
     "iconsrc": "/static/images/GH/AddImage.png", 
     "icontag": null, 
@@ -5266,6 +5338,18 @@
     "typename": "AddImageType", 
     "until": null, 
     "uuid": "09bd0aa8-52d7-4c2b-b7b1-c66304c939af"
+  }, 
+  {
+    "desc": "Get-Set accessor for image type file path", 
+    "iconsrc": null, 
+    "icontag": "I", 
+    "panel": "View", 
+    "since": "1.12", 
+    "tab": "Revit", 
+    "title": "Image Type Path", 
+    "typename": "ImageTypePath", 
+    "until": null, 
+    "uuid": "d4873f18-3b73-4e5c-8c34-0df7d32be127"
   }, 
   {
     "desc": "Adds a revision at the end of the sequence of existing revisions into the active Revit document", 
