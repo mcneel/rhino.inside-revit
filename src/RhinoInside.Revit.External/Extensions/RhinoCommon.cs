@@ -903,6 +903,10 @@ namespace Rhino.Geometry
           surface = nurbs;
         }
 
+        // Duplicate Loops
+        for(var l = 0; l < loops.Length; ++l)
+          loops[l] = loops[l].DuplicateCurve();
+
         // Classify Loops
         var nesting = new int[loops.Length];
         var edgeLoops = new BrepBoundary[loops.Length];
