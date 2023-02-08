@@ -289,10 +289,12 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.MullionType),                     (element)=> new MullionType           (element as ARDB.MullionType)       },
 
       { typeof(ARDB.TextElement),                     (element)=> new TextElement           (element as ARDB.TextElement)       },
+      { typeof(ARDB.TextElementType),                 (element)=> new TextElementType       (element as ARDB.TextElementType)   },
       { typeof(ARDB.Dimension),                       (element)=> new Dimension             (element as ARDB.Dimension)         },
       { typeof(ARDB.DimensionType),                   (element)=> new DimensionType         (element as ARDB.DimensionType)     },
       { typeof(ARDB.SpotDimension),                   (element)=> new SpotDimension         (element as ARDB.SpotDimension)     },
       { typeof(ARDB.FilledRegion),                    (element)=> new FilledRegion          (element as ARDB.FilledRegion)      },
+      { typeof(ARDB.FilledRegionType),                (element)=> new FilledRegionType      (element as ARDB.FilledRegionType)  },
       { typeof(ARDB.Revision),                        (element)=> new Revision              (element as ARDB.Revision)          },
       { typeof(ARDB.RevisionCloud),                   (element)=> new RevisionCloud         (element as ARDB.RevisionCloud)     },
       { typeof(ARDB.AnnotationSymbol),                (element)=> new AnnotationSymbol      (element as ARDB.AnnotationSymbol)  },
@@ -383,6 +385,10 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.FamilySymbol familySymbol:
           if (PanelType.IsValidElement(element)) return new PanelType(familySymbol);
           if (ProfileType.IsValidElement(element)) return new ProfileType(familySymbol);
+          break;
+
+        case ARDB.ElementType elementType:
+          if (ArrowheadType.IsValidElement(elementType)) return new ArrowheadType(elementType);
           break;
       }
 
