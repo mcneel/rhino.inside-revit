@@ -231,7 +231,14 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_PreviewData
     private BoundingBox? _ClippingBox;
-    BoundingBox IGH_PreviewData.ClippingBox => _ClippingBox ?? (_ClippingBox = ClippingBox).Value;
+
+    /// <summary>
+    /// Not necessarily accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> used for display.
+    /// </summary>
+    /// <returns>
+    /// A finite axis aligned bounding box.
+    /// </returns>
+    public BoundingBox ClippingBox => _ClippingBox ?? (_ClippingBox = BoundingBox).Value;
 
     public virtual void DrawViewportWires(GH_PreviewWireArgs args) { }
     public virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
@@ -327,11 +334,6 @@ namespace RhinoInside.Revit.GH.Types
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
     /// </summary>
     public virtual BoundingBox BoundingBox => GetBoundingBox(Transform.Identity);
-
-    /// <summary>
-    /// Not necessarily accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for display.
-    /// </summary>
-    public virtual BoundingBox ClippingBox => BoundingBox;
 
     public virtual ARDB.Reference GetDefaultReference() => _Reference;
   }
