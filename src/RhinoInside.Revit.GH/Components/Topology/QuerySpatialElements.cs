@@ -3,13 +3,14 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Topology
 {
+  using Convert.Geometry;
+  using External.DB;
+  using External.DB.Extensions;
+
   public abstract class QuerySpatialElements : ElementCollectorComponent
   {
     protected internal static readonly ARDB.ElementFilter elementFilter =
@@ -298,7 +299,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
                 var plane = area.Location;
                 foreach (var boundary in area.Boundaries)
                 {
-                  var containment = boundary.Contains(point.Value, plane, NumericTolerance.DefaultTolerance);
+                  var containment = boundary.Contains(point.Value, plane, GeometryTolerance.Model.VertexTolerance);
                   if (containment == PointContainment.Inside)
                     return true;
                 }
