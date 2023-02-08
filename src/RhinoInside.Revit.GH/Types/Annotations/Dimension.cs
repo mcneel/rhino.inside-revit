@@ -392,7 +392,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (Value is ARDB.Dimension dimension)
+      if (Value is ARDB.Dimension dimension && Type is DimensionType type)
       {
         try
         {
@@ -401,22 +401,26 @@ namespace RhinoInside.Revit.GH.Types
           var dotPixels = 10.0 * dpi;
 
           var arrowSize = (int) Math.Round(2.0 * Grasshopper.CentralSettings.PreviewPointRadius * dpi);
-          var leaderTickMark = Type.LeaderTickMark;
+          var tickMark = type.TickMark;
+          var leaderTickMark = type.LeaderTickMark;
           foreach (var leader in Leaders.Cast<DimensionLeader>())
           {
+            var segmentCurve = leader.SegmentCurve;
+            if (segmentCurve.IsValid)
+            {
+              args.Pipeline.DrawCurve(segmentCurve, args.Color, args.Thickness);
+              if (tickMark is object)
+              {
+                args.Pipeline.DrawArrowHead(segmentCurve.PointAtStart, -segmentCurve.TangentAtStart, args.Color, arrowSize, 0.0);
+                args.Pipeline.DrawArrowHead(segmentCurve.PointAtEnd, segmentCurve.TangentAtEnd, args.Color, arrowSize, 0.0);
+              }
+            }
+
             if (HasLeader is true && leader.LeaderCurve is Curve leaderCurve)
             {
               args.Pipeline.DrawCurve(leaderCurve, args.Color, args.Thickness);
               if (leaderTickMark is object)
                 args.Pipeline.DrawArrowHead(leaderCurve.PointAtStart, -leaderCurve.TangentAtStart, args.Color, arrowSize, 0.0);
-            }
-
-            var segmentCurve = leader.SegmentCurve;
-            if (segmentCurve.IsValid)
-            {
-              args.Pipeline.DrawCurve(segmentCurve, args.Color, args.Thickness);
-              args.Pipeline.DrawArrowHead(segmentCurve.PointAtStart, -segmentCurve.TangentAtStart, args.Color, arrowSize, 0.0);
-              args.Pipeline.DrawArrowHead(segmentCurve.PointAtEnd, segmentCurve.TangentAtEnd, args.Color, arrowSize, 0.0);
             }
 
             var textPosition = leader.TextPosition;
@@ -452,7 +456,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Dimension Type")]
-  public class DimensionType : ElementType
+  public class DimensionType : AnnotationType
   {
     protected override Type ValueType => typeof(ARDB.DimensionType);
     public new ARDB.DimensionType Value => base.Value as ARDB.DimensionType;
@@ -460,7 +464,9 @@ namespace RhinoInside.Revit.GH.Types
     public DimensionType() { }
     protected internal DimensionType(ARDB.DimensionType type) : base(type) { }
 
-    internal int? LeaderType => Value.get_Parameter(ARDB.BuiltInParameter.DIM_LEADER_TYPE).AsInteger();
-    internal ElementType LeaderTickMark => ElementType.FromElementId(Document, Value.get_Parameter(ARDB.BuiltInParameter.DIM_LEADER_ARROWHEAD).AsElementId()) as ElementType;
+    internal ElementType TickMark => ElementType.FromElementId(Document, Value?.get_Parameter(ARDB.BuiltInParameter.DIM_LEADER_ARROWHEAD).AsElementId()) as ElementType;
+
+    internal int? LeaderType => Value?.get_Parameter(ARDB.BuiltInParameter.DIM_LEADER_TYPE).AsInteger();
+    internal ElementType LeaderTickMark => ElementType.FromElementId(Document, Value?.get_Parameter(ARDB.BuiltInParameter.DIM_STYLE_LEADER_TICK_MARK).AsElementId()) as ElementType;
   }
 }

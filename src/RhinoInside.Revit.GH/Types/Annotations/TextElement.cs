@@ -21,6 +21,8 @@ namespace RhinoInside.Revit.GH.Types
     public TextElement() { }
     public TextElement(ARDB.TextElement element) : base(element) { }
 
+    public new TextElementType Type => base.Type as TextElementType;
+
     public override Plane Location
     {
       get
@@ -47,7 +49,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.TextElement text)
         {
-          var scale = Revit.ModelUnits * (text.Document.GetElement(text.OwnerViewId) as ARDB.View)?.Scale ?? 1.0;
+          var scale = Revit.ModelUnits * OwnerView?.Scale ?? 1.0;
           var xSize = new Interval(0.5 * scale, 0.5 * scale);
           var ySize = new Interval(0.5 * scale, 0.5 * scale);
           var zSize = new Interval(-0.0, +0.0);
@@ -66,8 +68,7 @@ namespace RhinoInside.Revit.GH.Types
             case ARDB.VerticalTextAlignment.Bottom: ySize = new Interval(0.0, +text.Height * 2.0 * ySize.T1); break;
           }
 
-          var box = new Box(Location, xSize, ySize, zSize);
-          return box;
+          return new Box(Location, xSize, ySize, zSize);
         }
 
         return NaN.Box;
@@ -166,89 +167,86 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (Value is ARDB.TextElement text)
+      if (Value is ARDB.TextElement text && Type is TextElementType type)
       {
         if (!args.Pipeline.IsDynamicDisplay)
         {
-          var viewScale = (text.Document.GetElement(text.OwnerViewId) as ARDB.View)?.Scale ?? 1.0;
-          using (var type = text.Symbol)
+          var viewScale = OwnerView?.Scale ?? 1.0;
+          var horizontalAlignment = TextHorizontalAlignment.Center;
+          switch (text.HorizontalAlignment)
           {
-            var horizontalAlignment = TextHorizontalAlignment.Center;
-            switch (text.HorizontalAlignment)
-            {
-              case ARDB.HorizontalTextAlignment.Left: horizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Left; break;
-              case ARDB.HorizontalTextAlignment.Center: horizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Center; break;
-              case ARDB.HorizontalTextAlignment.Right: horizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Right; break;
-            }
+            case ARDB.HorizontalTextAlignment.Left: horizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Left; break;
+            case ARDB.HorizontalTextAlignment.Center: horizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Center; break;
+            case ARDB.HorizontalTextAlignment.Right: horizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Right; break;
+          }
 
-            var verticalAlignment = TextVerticalAlignment.Middle;
-            switch (text.VerticalAlignment)
-            {
-              case ARDB.VerticalTextAlignment.Top: verticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Top; break;
-              case ARDB.VerticalTextAlignment.Middle: verticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle; break;
-              case ARDB.VerticalTextAlignment.Bottom: verticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Bottom; break;
-            }
+          var verticalAlignment = TextVerticalAlignment.Middle;
+          switch (text.VerticalAlignment)
+          {
+            case ARDB.VerticalTextAlignment.Top: verticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Top; break;
+            case ARDB.VerticalTextAlignment.Middle: verticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle; break;
+            case ARDB.VerticalTextAlignment.Bottom: verticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Bottom; break;
+          }
 
-            var location = Location;
-            var plainText = text.Text.Replace('\r', '\n');
-            using (var textEntity = new Text3d(plainText)
-            {
-              HorizontalAlignment = horizontalAlignment,
-              VerticalAlignment = verticalAlignment,
-              TextPlane = Location,
-              Height = (type.get_Parameter(External.DB.Schemas.ParameterId.TextSize)?.AsDouble() ?? 1.0) * viewScale * Revit.ModelUnits,
-              FontFace = type.get_Parameter(External.DB.Schemas.ParameterId.TextFont)?.AsString() ?? "Arial",
-              Bold = (type.get_Parameter(External.DB.Schemas.ParameterId.TextStyleBold)?.AsInteger() ?? 0) != 0,
-              Italic = (type.get_Parameter(External.DB.Schemas.ParameterId.TextStyleItalic)?.AsInteger() ?? 0) != 0,
-            })
-            //using (var textEntity = new TextEntity()
-            //{
-            //  Font = new Font
-            //  (
-            //    type.get_Parameter(External.DB.Schemas.ParameterId.TextFont)?.AsString() ?? "Arial",
-            //    weight: (type.get_Parameter(External.DB.Schemas.ParameterId.TextStyleBold)?.AsInteger() ?? 0) != 0 ? Font.FontWeight.Bold : Font.FontWeight.Normal,
-            //    style: (type.get_Parameter(External.DB.Schemas.ParameterId.TextStyleItalic)?.AsInteger() ?? 0) != 0 ? Font.FontStyle.Italic : Font.FontStyle.Upright,
-            //    underlined: (type.get_Parameter(External.DB.Schemas.ParameterId.TextStyleUnderline)?.AsInteger() ?? 0) != 0,
-            //    strikethrough: false
-            //  ),
-            //  PlainText = plainText,
-            //  Justification = TextJustification.Center,
-            //  TextHorizontalAlignment = horizontalAlignment,
-            //  TextVerticalAlignment = verticalAlignment,
-            //  Plane = location,
-            //  TextHeight = (type.get_Parameter(External.DB.Schemas.ParameterId.TextSize)?.AsDouble() ?? 1.0) * viewScale * Revit.ModelUnits,
-            //})
-            {
-              var textWidthScale = type.get_Parameter(External.DB.Schemas.ParameterId.TextWidthScale)?.AsDouble() ?? 1.0;
-              if (textWidthScale != 1.0) args.Pipeline.PushModelTransform(args.Pipeline.ModelTransform * Transform.Scale(location, textWidthScale, 1.0, 1.0));
+          var location = Location;
+          var plainText = text.Text.Replace('\r', '\n');
+          using (var textEntity = new Text3d(plainText)
+          {
+            HorizontalAlignment = horizontalAlignment,
+            VerticalAlignment = verticalAlignment,
+            TextPlane = Location,
+            Height = (type.TextSize ?? 1.0) * viewScale * Revit.ModelUnits,
+            FontFace = type.TextFont ?? "Arial",
+            Bold = type.TextStyleBold ?? false,
+            Italic = type.TextStyleItalic ?? false,
+          })
+          //using (var textEntity = new TextEntity()
+          //{
+          //  Font = new Font
+          //  (
+          //    type.get_Parameter(External.DB.Schemas.ParameterId.TextFont)?.AsString() ?? "Arial",
+          //    weight: (type.get_Parameter(External.DB.Schemas.ParameterId.TextStyleBold)?.AsInteger() ?? 0) != 0 ? Font.FontWeight.Bold : Font.FontWeight.Normal,
+          //    style: (type.get_Parameter(External.DB.Schemas.ParameterId.TextStyleItalic)?.AsInteger() ?? 0) != 0 ? Font.FontStyle.Italic : Font.FontStyle.Upright,
+          //    underlined: (type.get_Parameter(External.DB.Schemas.ParameterId.TextStyleUnderline)?.AsInteger() ?? 0) != 0,
+          //    strikethrough: false
+          //  ),
+          //  PlainText = plainText,
+          //  Justification = TextJustification.Center,
+          //  TextHorizontalAlignment = horizontalAlignment,
+          //  TextVerticalAlignment = verticalAlignment,
+          //  Plane = location,
+          //  TextHeight = (type.get_Parameter(External.DB.Schemas.ParameterId.TextSize)?.AsDouble() ?? 1.0) * viewScale * Revit.ModelUnits,
+          //})
+          {
+            var textWidthScale = type.TextWidthScale ?? 1.0;
+            if (textWidthScale != 1.0) args.Pipeline.PushModelTransform(args.Pipeline.ModelTransform * Transform.Scale(location, textWidthScale, 1.0, 1.0));
 
+            {
+              double displacement = 0.0;
+              switch (textEntity.VerticalAlignment)
               {
-                double displacement = 0.0;
-                switch (textEntity.VerticalAlignment)
-                {
-                  case TextVerticalAlignment.Top:    displacement = 0.0; break;
-                  case TextVerticalAlignment.Middle: displacement = 0.5 * text.Height * Revit.ModelUnits * viewScale; break;
-                  case TextVerticalAlignment.Bottom: displacement = 1.0 * text.Height * Revit.ModelUnits * viewScale; break;
-                }
-                textEntity.VerticalAlignment = TextVerticalAlignment.Top;
-                displacement -= textEntity.Height * 0.5;
-
-                textEntity.TextPlane = new Plane
-                (
-                  location.Origin + location.YAxis * displacement,
-                  location.XAxis,
-                  location.YAxis
-                );
-
-                args.Pipeline.Draw3dText(textEntity, args.Color);
+                case TextVerticalAlignment.Top:    displacement = 0.0; break;
+                case TextVerticalAlignment.Middle: displacement = 0.5 * text.Height * Revit.ModelUnits * viewScale; break;
+                case TextVerticalAlignment.Bottom: displacement = 1.0 * text.Height * Revit.ModelUnits * viewScale; break;
               }
+              textEntity.VerticalAlignment = TextVerticalAlignment.Top;
+              displacement -= textEntity.Height * 0.5;
 
-              //{
-              //  args.Pipeline.DrawText(textEntity, args.Color);
-              //}
+              textEntity.TextPlane = new Plane
+              (
+                location.Origin + location.YAxis * displacement,
+                location.XAxis,
+                location.YAxis
+              );
 
-              if (textWidthScale != 1.0) args.Pipeline.PopModelTransform();
+              args.Pipeline.Draw3dText(textEntity, args.Color);
             }
+
+            //{
+            //  args.Pipeline.DrawText(textEntity, args.Color);
+            //}
+
+            if (textWidthScale != 1.0) args.Pipeline.PopModelTransform();
           }
         }
         else
@@ -260,8 +258,8 @@ namespace RhinoInside.Revit.GH.Types
         {
           var dpi = args.Pipeline.DpiScale;
           var arrowSize = (int) Math.Round(2.0 * Grasshopper.CentralSettings.PreviewPointRadius * dpi);
-          var hasArrow = (Type.Value.get_Parameter(ARDB.BuiltInParameter.LEADER_ARROWHEAD)?.AsElementId()).IsValid();
-          foreach (var leader in Leaders.Cast<AnnotationLeader>())
+          var hasArrow = type.LeaderArrowhead is object;
+          foreach (var leader in Leaders)
           {
             if (leader.LeaderCurve is Curve leaderCurve)
             {
@@ -275,5 +273,17 @@ namespace RhinoInside.Revit.GH.Types
       else base.DrawViewportWires(args);
     }
     #endregion
+  }
+
+  [Kernel.Attributes.Name("Text Element Type")]
+  public class TextElementType : LineAndTextAttrSymbol
+  {
+    protected override Type ValueType => typeof(ARDB.TextElementType);
+    public new ARDB.TextElementType Value => base.Value as ARDB.TextElementType;
+
+    public TextElementType() { }
+    protected internal TextElementType(ARDB.TextElementType type) : base(type) { }
+
+    internal ElementType LeaderArrowhead => ElementType.FromElementId(Document, Value?.get_Parameter(ARDB.BuiltInParameter.LEADER_ARROWHEAD).AsElementId()) as ElementType;
   }
 }
