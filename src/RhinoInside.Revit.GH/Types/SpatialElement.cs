@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Rhino;
 using Rhino.Geometry;
+using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -30,11 +31,18 @@ namespace RhinoInside.Revit.GH.Types
 
     public override ARDB.ElementId LevelId => Value?.Level?.Id ?? ARDB.ElementId.InvalidElementId;
 
+    protected override void SubInvalidateGraphics()
+    {
+      _Boundaries = null;
+      base.SubInvalidateGraphics();
+    }
+
+    Curve[] _Boundaries;
     public Curve[] Boundaries
     {
       get
       {
-        if (Value is ARDB.SpatialElement spatial)
+        if (_Boundaries is null && Value is ARDB.SpatialElement spatial)
         {
           using (var options = new ARDB.SpatialElementBoundaryOptions())
           {
@@ -51,14 +59,14 @@ namespace RhinoInside.Revit.GH.Types
             }
 
             var segments = spatial.GetBoundarySegments(options);
-            return segments.Select
+            _Boundaries = segments.Select
             (
               loop => Curve.JoinCurves(loop.Select(x => Curve.ProjectToPlane(x.GetCurve().ToCurve(), plane)), tol.VertexTolerance, preserveDirection: false)[0]
             ).ToArray();
           }
         }
 
-        return null;
+        return _Boundaries;
       }
     }
 
@@ -162,6 +170,35 @@ namespace RhinoInside.Revit.GH.Types
 
     public AreaElement() { }
     public AreaElement(ARDB.Area element) : base(element) { }
+
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      if (IsPlaced && IsEnclosed)
+      {
+        if (Boundaries is Curve[] boundaries)
+        {
+          var bbox = BoundingBox.Empty;
+          foreach (var boundary in boundaries)
+            bbox.Union(boundary.GetBoundingBox(xform));
+
+          return bbox;
+        }
+      }
+
+      return NaN.BoundingBox;
+    }
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (IsPlaced && IsEnclosed)
+      {
+        if (Boundaries is Curve[] boundaries)
+          foreach (var bopundary in boundaries)
+            args.Pipeline.DrawCurve(bopundary, args.Color, args.Thickness);
+      }
+    }
+
+    protected override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
   }
 
   [Kernel.Attributes.Name("Room")]
