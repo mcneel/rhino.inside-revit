@@ -159,6 +159,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
       if (annotation is Types.IAnnotationLeadersAccess leaderElement)
       {
+        var leaders = leaderElement.Leaders;
+
         if (Params.GetData(DA, "Leader", out bool? hasLeader))
         {
           StartTransaction(annotation.Document);
@@ -171,22 +173,22 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (Params.GetDataList(DA, "Shoulder Locations", out IList<Point3d?> shoulderPositions))
           {
             StartTransaction(annotation.Document);
-            foreach (var (segment, shoulder) in leaderElement.Leaders.ZipOrLast(shoulderPositions, (r, s) => (r, s)))
+            foreach (var (leader, shoulder) in leaders.ZipOrLast(shoulderPositions))
             {
               if (shoulder is null) continue;
-              if (segment is null) continue;
-              segment.ElbowPosition = shoulder.Value;
+              if (leader is null) continue;
+              leader.ElbowPosition = shoulder.Value;
             }
           }
 
           if (Params.GetDataList(DA, "End Locations", out IList<Point3d?> endPositions))
           {
             StartTransaction(annotation.Document);
-            foreach (var (segment, end) in leaderElement.Leaders.ZipOrLast(endPositions, (r, s) => (r, s)))
+            foreach (var (leader, end) in leaders.ZipOrLast(endPositions))
             {
               if (end is null) continue;
-              if (segment is null) continue;
-              segment.EndPosition = end.Value;
+              if (leader is null) continue;
+              leader.EndPosition = end.Value;
             }
           }
         }
@@ -194,7 +196,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         if (Params.GetDataList(DA, "Text Locations", out IList<Point3d?> textPositions))
         {
           StartTransaction(annotation.Document);
-          foreach (var (segment, text) in leaderElement.Leaders.ZipOrLast(textPositions, (r, s) => (r, s)))
+          foreach (var (segment, text) in leaderElement.Leaders.ZipOrLast(textPositions))
           {
             if (text is null) continue;
             if (segment is null) continue;
@@ -208,7 +210,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         Params.TrySetDataList
         (
           DA, "Head Locations",
-          () => leaderElement.Leaders?.Select(x => x.HeadPosition)
+          () => leaders.Select(x => x.HeadPosition)
         );
 
         if (leaderElement.HasLeader is true)
@@ -216,26 +218,26 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           Params.TrySetDataList
           (
             DA, "Curves",
-            () => leaderElement.Leaders?.Select(x => x.LeaderCurve)
+            () => leaders.Select(x => x.LeaderCurve)
           );
 
           Params.TrySetDataList
           (
             DA, "Shoulder Locations",
-            () => leaderElement.Leaders?.Select(x => x.HasElbow ? x.ElbowPosition : default(Point3d?))
+            () => leaders.Select(x => x.HasElbow ? x.ElbowPosition : default(Point3d?))
           );
 
           Params.TrySetDataList
           (
             DA, "End Locations",
-            () => leaderElement.Leaders?.Select(x => x.EndPosition)
+            () => leaders.Select(x => x.EndPosition)
           );
         }
 
         Params.TrySetDataList
         (
           DA, "Text Locations",
-          () => leaderElement.Leaders?.Select(x => x.TextPosition)
+          () => leaders.Select(x => x.TextPosition)
         );
       }
     }
