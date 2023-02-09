@@ -44,26 +44,30 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (_Boundaries is null && Value is ARDB.SpatialElement spatial)
         {
-          using (var options = new ARDB.SpatialElementBoundaryOptions())
+          if (IsPlaced && IsEnclosed)
           {
-            options.StoreFreeBoundaryFaces = true;
-            options.SpatialElementBoundaryLocation = spatial is ARDB.Area ?
-              ARDB.SpatialElementBoundaryLocation.Center :
-              ARDB.SpatialElementBoundaryLocation.Finish;
-
-            var tol = GeometryTolerance.Model;
-            var plane = Location;
+            using (var options = new ARDB.SpatialElementBoundaryOptions())
             {
-              var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
-              plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
-            }
+              options.StoreFreeBoundaryFaces = true;
+              options.SpatialElementBoundaryLocation = spatial is ARDB.Area ?
+                ARDB.SpatialElementBoundaryLocation.Center :
+                ARDB.SpatialElementBoundaryLocation.Finish;
 
-            var segments = spatial.GetBoundarySegments(options);
-            _Boundaries = segments.Select
-            (
-              loop => Curve.JoinCurves(loop.Select(x => Curve.ProjectToPlane(x.GetCurve().ToCurve(), plane)), tol.VertexTolerance, preserveDirection: false)[0]
-            ).ToArray();
+              var tol = GeometryTolerance.Model;
+              var plane = Location;
+              {
+                var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
+                plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
+              }
+
+              var segments = spatial.GetBoundarySegments(options);
+              _Boundaries = segments.Select
+              (
+                loop => Curve.JoinCurves(loop.Select(x => Curve.ProjectToPlane(x.GetCurve().ToCurve(), plane)), tol.VertexTolerance, preserveDirection: false)[0]
+              ).ToArray();
+            }
           }
+          else _Boundaries = new Curve[0];
         }
 
         return _Boundaries;
@@ -74,34 +78,31 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Boundaries is Curve[] loops)
+        if (Boundaries is Curve[] loops && loops.Length > 0)
         {
-          if (loops.Length > 0)
+          var plane = Location;
           {
-            var plane = Location;
-            {
-              var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
-              plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
-            }
-
-            var loopsBox = BoundingBox.Empty;
-            for (int l = 0; l< loops.Length; ++l)
-            {
-              if (loops[l].ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
-                loops[l].Reverse();
-
-              loopsBox.Union(loops[l].GetBoundingBox(plane));
-            }
-
-            var planeSurface = new PlaneSurface
-            (
-              plane,
-              new Interval(loopsBox.Min.X, loopsBox.Max.X),
-              new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
-            );
-
-            return planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
+            var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
+            plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
           }
+
+          var loopsBox = BoundingBox.Empty;
+          for (int l = 0; l< loops.Length; ++l)
+          {
+            if (loops[l].ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
+              loops[l].Reverse();
+
+            loopsBox.Union(loops[l].GetBoundingBox(plane));
+          }
+
+          var planeSurface = new PlaneSurface
+          (
+            plane,
+            new Interval(loopsBox.Min.X, loopsBox.Max.X),
+            new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
+          );
+
+          return planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
         }
 
         return null;
@@ -122,7 +123,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.SpatialElement element && Value.get_Parameter(ARDB.BuiltInParameter.ROOM_PERIMETER) is ARDB.Parameter roomPerimeter)
+        if (Value is ARDB.SpatialElement element && element.get_Parameter(ARDB.BuiltInParameter.ROOM_PERIMETER) is ARDB.Parameter roomPerimeter)
         {
           if (roomPerimeter.HasValue)
             return roomPerimeter.AsDouble() * Revit.ModelUnits;
@@ -136,7 +137,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.SpatialElement element && Value.get_Parameter(ARDB.BuiltInParameter.ROOM_AREA) is ARDB.Parameter roomArea)
+        if (Value is ARDB.SpatialElement element && element.get_Parameter(ARDB.BuiltInParameter.ROOM_AREA) is ARDB.Parameter roomArea)
         {
           if (roomArea.HasValue)
             return roomArea.AsDouble() * Revit.ModelUnits * Revit.ModelUnits;
@@ -150,7 +151,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.SpatialElement element && Value.get_Parameter(ARDB.BuiltInParameter.ROOM_VOLUME) is ARDB.Parameter roomVolume)
+        if (Value is ARDB.SpatialElement element && element.get_Parameter(ARDB.BuiltInParameter.ROOM_VOLUME) is ARDB.Parameter roomVolume)
         {
           if (roomVolume.HasValue)
             return roomVolume.AsDouble() * Revit.ModelUnits * Revit.ModelUnits * Revit.ModelUnits;
