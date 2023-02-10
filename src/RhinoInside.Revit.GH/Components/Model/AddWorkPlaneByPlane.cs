@@ -142,4 +142,99 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       return sketchPlane;
     }
   }
+
+  [ComponentVersion(introduced: "1.12")]
+  public class AddWorkPlaneByFace : ElementTrackerComponent
+  {
+    public override Guid ComponentGuid => new Guid("91757AE0-BFCB-43C3-B762-7C06A7A5D094");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+
+    public AddWorkPlaneByFace() : base
+    (
+      name: "Add Work Plane (Face)",
+      nickname: "WorkPlane",
+      description: "Given a Face, it adds a Work Plane element to the active Revit document",
+      category: "Revit",
+      subCategory: "Model"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition(new Parameters.Document() { Optional = true }, ParamRelevance.Occasional),
+      new ParamDefinition
+      (
+        new Parameters.GeometryFace()
+        {
+          Name = "Face",
+          NickName = "F",
+          Description = "Face reference",
+        }
+      )
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.SketchPlane()
+        {
+          Name = _WorkPlane_,
+          NickName = "WP",
+          Description = $"Output {_WorkPlane_}",
+        }
+      ),
+    };
+
+    const string _WorkPlane_ = "Work Plane";
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+
+      ReconstructElement<ARDB.SketchPlane>
+      (
+        doc.Value, _WorkPlane_, sketchPlane =>
+        {
+          // Input
+          if (!Params.GetData(DA, "Face", out Types.GeometryFace face, x => x.IsValid)) return null;
+
+          // Compute
+          sketchPlane = Reconstruct(sketchPlane, doc.Value, face.GetReference());
+
+          DA.SetData(_WorkPlane_, sketchPlane);
+          return sketchPlane;
+        }
+      );
+    }
+
+    bool Reuse(ARDB.SketchPlane sketchPlane, ARDB.Reference reference)
+    {
+      if (sketchPlane is null) return false;
+      if (!sketchPlane.Document.AreEquivalentReferences(sketchPlane.GetPlaneReference(), reference)) return false;
+
+      return true;
+    }
+
+    ARDB.SketchPlane Reconstruct
+    (
+      ARDB.SketchPlane sketchPlane,
+      ARDB.Document doc,
+      ARDB.Reference reference
+    )
+    {
+      if (!Reuse(sketchPlane, reference))
+      {
+        sketchPlane = sketchPlane.ReplaceElement
+        (
+          ARDB.SketchPlane.Create(doc, reference),
+          default
+        );
+      }
+
+      return sketchPlane;
+    }
+  }
 }
