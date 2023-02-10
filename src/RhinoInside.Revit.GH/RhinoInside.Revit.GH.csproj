@@ -200,7 +200,7 @@
     <Compile Include="Components\Import\AddImageType.cs" />
     <Compile Include="Components\Import\ImageTypePath.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
-    <Compile Include="Components\Model\AddWorkPlaneByPlane.cs" />
+    <Compile Include="Components\Model\AddWorkPlane.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
     <Compile Include="Components\Model\ReferenceElement\AddReferenceLine.cs" />
     <Compile Include="Components\Model\ReferenceElement\AddReferencePlane.cs" />
