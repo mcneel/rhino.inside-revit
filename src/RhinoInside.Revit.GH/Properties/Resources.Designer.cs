@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -573,6 +573,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddView3D {
+            get {
+                object obj = ResourceManager.GetObject("AddView3D", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddViewport {
             get {
                 object obj = ResourceManager.GetObject("AddViewport", resourceCulture);
@@ -586,6 +596,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AddWallOpening {
             get {
                 object obj = ResourceManager.GetObject("AddWallOpening", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddWorkPlaneByFace {
+            get {
+                object obj = ResourceManager.GetObject("AddWorkPlaneByFace", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -4336,16 +4356,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap View3D {
             get {
                 object obj = ResourceManager.GetObject("View3D", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap View3DByPlane {
-            get {
-                object obj = ResourceManager.GetObject("View3DByPlane", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

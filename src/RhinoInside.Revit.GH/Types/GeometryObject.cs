@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
 #if DEBUG
     public override string ToString()
     {
-      try   { return GetReference().ConvertToStableRepresentation(ReferenceDocument); }
+      try   { return GetReference()?.ConvertToStableRepresentation(ReferenceDocument) ?? base.ToString(); }
       catch { return base.ToString(); }
     }
 #endif

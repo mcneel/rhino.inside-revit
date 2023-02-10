@@ -14,6 +14,7 @@ group: Deployment & Configs
 
 - Added 'Annotation Leaders' component.
 - Added 'Query Area Schemes' component.
+- Added 'Add Work Plane (Face)' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

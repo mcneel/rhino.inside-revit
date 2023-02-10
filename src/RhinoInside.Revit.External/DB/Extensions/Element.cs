@@ -578,19 +578,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool SwapElementNomenWith(this Element element, Element other, out BuiltInParameter nomenParameter)
     {
-      if (element.GetType() != other.GetType())
-        throw new InvalidOperationException($"{nameof(element)} type and {nameof(other)} type should match");
+      if (!element.Document.IsEquivalent(other.Document))
+        throw new InvalidOperationException($"{nameof(element)} document '{element.Document.Title}' doesn't match with {nameof(other)} document '{element.Document.Title}'");
 
       var elementNomen = element.GetElementNomen(out var elementParameter);
       if (elementParameter != BuiltInParameter.INVALID)
       {
-        var otherNomen = other.GetElementNomen(out var otherParameter);
-        if (elementParameter != otherParameter)
-          throw new InvalidOperationException($"{nameof(element)} nomen parameter {elementParameter} doesn't match with {nameof(other)} nomen parameter {otherParameter}");
+        if (!element.Id.Equals(other.Id))
+        {
+          if (element.GetType() != other.GetType())
+            throw new InvalidOperationException($"{nameof(element)} type {element.GetType()} doesn't match with {nameof(other)} type {other.GetType()}");
 
-        other.SetElementNomen(otherParameter, Guid.NewGuid().ToString());
-        element.SetElementNomen(elementParameter, otherNomen);
-        other.SetElementNomen(otherParameter, elementNomen);
+          var otherNomen = other.GetElementNomen(out var otherParameter);
+          if (elementParameter != otherParameter)
+            throw new InvalidOperationException($"{nameof(element)} nomen parameter {elementParameter} doesn't match with {nameof(other)} nomen parameter {otherParameter}");
+
+          other.SetElementNomen(otherParameter, Guid.NewGuid().ToString());
+          element.SetElementNomen(elementParameter, otherNomen);
+          other.SetElementNomen(otherParameter, elementNomen);
+        }
+
         nomenParameter = elementParameter;
         return true;
       }
