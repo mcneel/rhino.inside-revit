@@ -325,7 +325,7 @@ namespace RhinoInside.Revit.GH.Types
           if (!Value.IsParallelProjection)
           {
             var near = 0.1 * Revit.ModelUnits;
-            var rect = Value.GetFurstumRectangle(near);
+            var rect = Value.GetFrustumRectangle(near);
             Value.SetFrustum(rect.X.T0, rect.X.T1, rect.Y.T0, rect.Y.T1, near, Value.FrustumFar);
           }
 

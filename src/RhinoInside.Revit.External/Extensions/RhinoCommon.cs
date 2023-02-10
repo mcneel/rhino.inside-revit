@@ -1200,23 +1200,28 @@ namespace Rhino.DocObjects
       vport.ScreenPort = new System.Drawing.Rectangle(0, 0, Math.Max(1, width), Math.Max(1, height));
     }
 
+    public static Geometry.Interval GetFrustumWidth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
+    public static Geometry.Interval GetFrustumHeight(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
+    public static Geometry.Interval GetFrustumDepth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumNear, vport.FrustumFar);
+
+    public static Geometry.Plane GetCameraFrameAt(this ViewportInfo vport, double depth = 0.0) =>
+      new Geometry.Plane(vport.CameraLocation - vport.CameraZ * depth, vport.CameraX, vport.CameraY);
+
 #if !RHINO8_OR_GREATER
     public static double[] GetViewScale(this ViewportInfo vport)
     {
       var scale = vport.ViewScale;
       return new double[] { scale.Width, scale.Height, 1.0 };
     }
+
+    public static Geometry.Point3d[] GetFramePlaneCorners(this ViewportInfo vport, double depth)
+    {
+      if (!vport.IsValidCamera || !vport.IsValidFrustum)
+        return new Geometry.Point3d[0];
+
+      return GetFramePlaneCorners(vport, depth, vport.GetFrustumWidth(), vport.GetFrustumHeight());
+    }
 #endif
-
-    public static Geometry.Interval GetFurstumWidth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
-    public static Geometry.Interval GetFurstumHeight(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
-    public static Geometry.Interval GetFurstumDepth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumNear, vport.FrustumFar);
-
-    public static Geometry.Plane GetCameraFrameAt(this ViewportInfo vport, double depth = 0.0) =>
-      new Geometry.Plane(vport.CameraLocation - vport.CameraZ * depth, vport.CameraX, vport.CameraY);
-
-    public static Geometry.Point3d[] GetFramePlaneCorners(this ViewportInfo vport, double depth) =>
-      GetFramePlaneCorners(vport, depth, vport.GetFurstumWidth(), vport.GetFurstumHeight());
 
     internal static Geometry.Point3d[] GetFramePlaneCorners(this ViewportInfo vport, double depth, Geometry.Interval width, Geometry.Interval height)
     {
@@ -1236,7 +1241,7 @@ namespace Rhino.DocObjects
       };
     }
 
-    public static Geometry.Rectangle3d GetFurstumRectangle(this ViewportInfo vport, double depth)
+    public static Geometry.Rectangle3d GetFrustumRectangle(this ViewportInfo vport, double depth)
     {
       var width = new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
       var height = new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
