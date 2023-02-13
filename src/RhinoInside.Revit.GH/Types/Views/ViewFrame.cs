@@ -179,7 +179,7 @@ namespace RhinoInside.Revit.GH.Types
             BoundEnabled = BoundEnabledNone;
             Bound[AxisX] = new Interval(-radius, +radius);
             Bound[AxisY] = new Interval(-radius, +radius);
-            Bound[AxisZ] = new Interval(target, -target);
+            Bound[AxisZ] = new Interval(-target, +target);
             Value = vport;
             return true;
           }
@@ -203,7 +203,7 @@ namespace RhinoInside.Revit.GH.Types
             BoundEnabled = BoundEnabledNone;
             Bound[AxisX] = new Interval(-radius, +radius);
             Bound[AxisY] = new Interval(-radius * 3.0 / 4.0, +radius * 3.0 / 4.0);
-            Bound[AxisZ] = new Interval(0.0, -target);
+            Bound[AxisZ] = new Interval(-target, 0.0);
             Value = vport;
             return true;
           }
@@ -230,7 +230,7 @@ namespace RhinoInside.Revit.GH.Types
             BoundEnabled = BoundEnabledNone;
             Bound[AxisX] = new Interval(-radius, +radius);
             Bound[AxisY] = new Interval(-radius, +radius);
-            Bound[AxisZ] = new Interval(target * +0.5, target * -0.5);
+            Bound[AxisZ] = new Interval(target * -0.5, target * +0.5);
             Value = vport;
             return true;
           }
@@ -284,7 +284,7 @@ namespace RhinoInside.Revit.GH.Types
             BoundEnabled = BoundEnabledPlanar;
             Bound[AxisX] = rect.X;
             Bound[AxisY] = rect.Y;
-            Bound[AxisZ] = new Interval(0.0, target * -0.5);
+            Bound[AxisZ] = new Interval(target * -0.5, 0.0);
             Value = vport;
             return true;
           }
@@ -312,7 +312,7 @@ namespace RhinoInside.Revit.GH.Types
             BoundEnabled = BoundEnabledPlanar;
             Bound[AxisX] = new Interval(-radius, +radius);
             Bound[AxisY] = new Interval(-radius, +radius);
-            Bound[AxisZ] = new Interval(0.0, target * -0.5);
+            Bound[AxisZ] = new Interval(target * -0.5, 0.0);
             Value = vport;
             return true;
           }
@@ -414,16 +414,16 @@ namespace RhinoInside.Revit.GH.Types
 
     public Point3d Min => new Point3d
     (
-       NumericTolerance.MinNumber(Value.FrustumLeft,    Bound[AxisX].T0),
-       NumericTolerance.MinNumber(Value.FrustumBottom,  Bound[AxisY].T0),
-      -NumericTolerance.MinNumber(Value.FrustumFar,    -Bound[AxisZ].T0)
+      NumericTolerance.MinNumber( Value.FrustumLeft,   Bound[AxisX].T0),
+      NumericTolerance.MinNumber( Value.FrustumBottom, Bound[AxisY].T0),
+      NumericTolerance.MinNumber(-Value.FrustumFar,    Bound[AxisZ].T0)
     );
 
     public Point3d Max => new Point3d
     (
-      NumericTolerance.MaxNumber( Value.FrustumRight,   Bound[AxisX].T1),
-      NumericTolerance.MaxNumber( Value.FrustumTop,     Bound[AxisY].T1),
-      NumericTolerance.MaxNumber(-Value.FrustumNear,    Bound[AxisZ].T1)
+      NumericTolerance.MaxNumber( Value.FrustumRight,  Bound[AxisX].T1),
+      NumericTolerance.MaxNumber( Value.FrustumTop,    Bound[AxisY].T1),
+      NumericTolerance.MaxNumber(-Value.FrustumNear,   Bound[AxisZ].T1)
     );
 
     internal ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(bool ensurePositiveY = false)
