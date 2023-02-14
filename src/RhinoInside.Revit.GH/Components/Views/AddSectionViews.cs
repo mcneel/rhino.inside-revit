@@ -142,7 +142,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
           // Compute
           StartTransaction(doc.Value);
-          if (CanReconstruct(_View_, out var untracked, ref viewSection, doc.Value, name, ARDB.ViewType.DraftingView.ToString()))
+          if (CanReconstruct(_View_, out var untracked, ref viewSection, doc.Value, name, ARDB.ViewType.Section.ToString()))
             viewSection = Reconstruct(viewSection, frame.ToBoundingBoxXYZ(true), type.Value, name, template);
 
           DA.SetData(_View_, viewSection);
