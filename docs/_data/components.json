@@ -1,8 +1,8 @@
 [
   {
     "desc": "Contains a collection of Revit annotative elements", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/Annotation.png", 
+    "icontag": null, 
     "panel": "Revit Elements", 
     "since": "1.12", 
     "tab": "Params", 
@@ -1752,6 +1752,18 @@
     "uuid": "d1940eb3-b81b-4e57-8f5a-94d045bfb509"
   }, 
   {
+    "desc": "Get document area shemes list", 
+    "iconsrc": "/static/images/GH/QueryAreaSchemes.png", 
+    "icontag": null, 
+    "panel": "Topology", 
+    "since": "1.12", 
+    "tab": "Revit", 
+    "title": "Query Area Schemes", 
+    "typename": "QueryAreaSchemes", 
+    "until": null, 
+    "uuid": "3e2a753b-6321-4c4c-b697-022d1f04f213"
+  }, 
+  {
     "desc": "Get document room elements list", 
     "iconsrc": "/static/images/GH/QueryRooms.png", 
     "icontag": null, 
@@ -2328,6 +2340,18 @@
     "uuid": "1fa679e4-1821-483a-99f8-dc166b0595f4"
   }, 
   {
+    "desc": "Given a Face, it adds a Work Plane element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddWorkPlaneByFace.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.12", 
+    "tab": "Revit", 
+    "title": "Add Work Plane (Face)", 
+    "typename": "AddWorkPlaneByFace", 
+    "until": null, 
+    "uuid": "91757ae0-bfcb-43c3-b762-7c06a7a5d094"
+  }, 
+  {
     "desc": "Element Subcategory Property Get-Set access component to Element Subcategory property", 
     "iconsrc": "/static/images/GH/ElementSubcategory.png", 
     "icontag": null, 
@@ -2845,8 +2869,8 @@
   }, 
   {
     "desc": "Get-Set accessor for Rule-based Filter definition", 
-    "iconsrc": null, 
-    "icontag": "P", 
+    "iconsrc": "/static/images/GH/ParameterFilterRules.png", 
+    "icontag": null, 
     "panel": "View", 
     "since": "1.12", 
     "tab": "Revit", 
@@ -4189,8 +4213,8 @@
   }, 
   {
     "desc": "Get-Set workset visibility overrides on the specified View", 
-    "iconsrc": null, 
-    "icontag": "W", 
+    "iconsrc": "/static/images/GH/WorksetVisibilityOverrides.png", 
+    "icontag": null, 
     "panel": "View", 
     "since": "1.12", 
     "tab": "Revit", 
@@ -4201,8 +4225,8 @@
   }, 
   {
     "desc": "Get-Set workset global visibility", 
-    "iconsrc": null, 
-    "icontag": "W", 
+    "iconsrc": "/static/images/GH/WorksetGlobalVisibility.png", 
+    "icontag": null, 
     "panel": "Document", 
     "since": "1.12", 
     "tab": "Revit", 
@@ -4420,7 +4444,7 @@
     "iconsrc": "/static/images/GH/AnalyzeCurtainGrid.png", 
     "icontag": null, 
     "panel": "Host", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Deconstruct Curtain Grid", 
     "typename": "AnalyzeCurtainGrid", 
@@ -4537,13 +4561,13 @@
   }, 
   {
     "desc": "Given a name, it adds a section view to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/AddDetailView.png", 
+    "icontag": null, 
     "panel": "View", 
     "since": "1.12", 
     "tab": "Revit", 
     "title": "Add Detail View", 
-    "typename": "AddDetalView", 
+    "typename": "AddDetailView", 
     "until": null, 
     "uuid": "8484e108-408a-4835-ac21-537d4fb121c8"
   }, 
@@ -4633,8 +4657,8 @@
   }, 
   {
     "desc": "View Get-Set crop region", 
-    "iconsrc": null, 
-    "icontag": "V", 
+    "iconsrc": "/static/images/GH/ViewCropRegion.png", 
+    "icontag": null, 
     "panel": "View", 
     "since": "1.12", 
     "tab": "Revit", 
@@ -5305,8 +5329,20 @@
   }, 
   {
     "desc": "", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/AnnotationLeaders.png", 
+    "icontag": null, 
+    "panel": "Annotation", 
+    "since": "1.12", 
+    "tab": "Revit", 
+    "title": "Annotation Leaders", 
+    "typename": "AnnotationLeaders", 
+    "until": null, 
+    "uuid": "71f014de-5ee8-4fc8-97e6-89e60ce9b772"
+  }, 
+  {
+    "desc": "", 
+    "iconsrc": "/static/images/GH/AnnotationReferences.png", 
+    "icontag": null, 
     "panel": "Annotation", 
     "since": "1.12", 
     "tab": "Revit", 
@@ -5341,8 +5377,8 @@
   }, 
   {
     "desc": "Get-Set accessor for image type file path", 
-    "iconsrc": null, 
-    "icontag": "I", 
+    "iconsrc": "/static/images/GH/ImageTypePath.png", 
+    "icontag": null, 
     "panel": "View", 
     "since": "1.12", 
     "tab": "Revit", 
