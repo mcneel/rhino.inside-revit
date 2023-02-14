@@ -8,82 +8,21 @@ group: Containers
 
 <!-- https://github.com/mcneel/rhino.inside-revit/issues/92 -->
 
-## Querying Worksets
+## Query Worksets
 
-Use the *Document Worksets* component shared here to get all the available worksets in the active document.
+To get the Worksets in a document us the {% include ltr/comp.html uuid='311316ba' %} component. Right click on the Kind (K) to Expose Picker.
 
-{% include ltr/bubble_note.html note='Revit has lots of built-in worksets. It is always better to list the **User Worksets** only.' %}
-
-![]({{ "/static/images/guides/revit-worksets01.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Document Worksets.ghuser' name='Document Worksets' %}
-
-{% capture api_note %}
-In Revit API, Worksets are represented by the {% include api_type.html type='Autodesk.Revit.DB.Workset' title='DB.Workset' %}. The worksets inside a Revit document are managed by an instance of {% include api_type.html type='Autodesk.Revit.DB.WorksetTable' title='DB.WorksetTable' %} provided by the `DB.Document.GetWorksetTable()`. However, to create new worksets, use the `DB.Workset.Create()` method. Deleting worksets is much more complex as existing workset elements need to be moved to another workset before delete
-{% endcapture %}
-{% include ltr/api_note.html note=api_note %}
-
-## Finding Specific Worksets
-
-To find a workset by name or by id in the active document, use the *Find Workset* component shared here.
-
-![]({{ "/static/images/guides/revit-worksets02.png" | prepend: site.baseurl }})
-
-![]({{ "/static/images/guides/revit-worksets03.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Find Workset.ghuser' name='Find Workset' %}
-
-## Reading Workset Properties
-
-Use the *Workset Properties* component shared here to extract important properties of a workset.
-
-![]({{ "/static/images/guides/revit-worksets04.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Workset Properties.ghuser' name='Workset Properties' %}
+![]({{ "/static/images/guides/Revit-Worksets-Query.png" | prepend: site.baseurl }})
 
 ## Active Workset
 
-To find the active workset in active document, use the *Active Workset* component shared here.
+To get the Active Workset use the {% include ltr/comp.html uuid='aa467c94' %} component. You can also Set the Active Workset when the input is added via the Zoom UI. 
 
-![]({{ "/static/images/guides/revit-worksets05.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Active Workset.ghuser' name='Active Workset' %}
-
-## Setting Active Workset
-
-To set the active workset in active document, use the *Set Active Workset* component shared here.
-
-![]({{ "/static/images/guides/revit-worksets05a.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Set Active Workset.ghuser' name='Set Active Workset' %}
-
-## Creating Worksets
-
-To create a new workset in active document, use the *Create Workset* component shared here.
-
-![]({{ "/static/images/guides/revit-worksets08.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Create Workset.ghuser' name='Create Workset' %}
-
-## Getting Element Workset
-
-To find workset of an element, use the *Get Workset* component shared here.
-
-![]({{ "/static/images/guides/revit-worksets06.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Get Workset.ghuser' name='Get Workset' %}
-
-## Setting Element Workset
-
-To set workset of an element, use the *Set Workset* component shared here.
-
-![]({{ "/static/images/guides/revit-worksets07.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Set Workset.ghuser' name='Set Workset' %}
+![]({{ "/static/images/guides/Revit-Worksets-Active.png" | prepend: site.baseurl }})
 
 ## Ensure Workset
 
-To make sure that a particular user created Workset is in the document use the {% include ltr/comp.html uuid='a406c6a0' %} component.
+To make sure that a particular user created Workset is in the document use the {% include ltr/comp.html uuid='a406c6a0' %} component. This is also the way to create a new Workset in the document.
 
 ![]({{ "/static/images/guides/revit-workset-ensure.png" | prepend: site.baseurl }})
 
@@ -93,3 +32,48 @@ To make sure that a particular user created Workset is in the document use the {
 To delete a Workset in the REvit document use the {% include ltr/comp.html uuid='bf1b9be9' %} component.
 
 ![]({{ "/static/images/guides/revit-workset-delete.png" | prepend: site.baseurl }})
+
+
+## Element Workset
+
+To Get or Set a Elements Workset use the {% include ltr/comp.html uuid='b441ba8c' %} component.
+
+![]({{ "/static/images/guides/Revit-Worksets-Element.png" | prepend: site.baseurl }})
+
+
+## Workset Global Visibility
+
+To Get or Set the Global Visibility of a Workset with the {% include ltr/comp.html uuid='2922af4a' %} component.
+
+![]({{ "/static/images/guides/Revit-Worksets-vis-global.png" | prepend: site.baseurl }})
+
+## Workset View Override
+
+Get-Set workset visibility overrides on the specified View with {% include ltr/comp.html uuid='b062c96e' %} component. To select the particular override option Right Click on Visibility to Expose Picker. 
+
+![]({{ "/static/images/guides/Revit-Worksets-vis-overrides.png" | prepend: site.baseurl }})
+
+
+## Workset Identity
+
+Workset properties Get-Set access component to workset information with the {% include ltr/comp.html uuid='c33cd128' %} component. To rename a Workset use the ZUI to expose the Name property.
+
+![]({{ "/static/images/guides/Revit-Worksets-Identity.png" | prepend: site.baseurl }})
+
+## Element Ownership Information
+
+Use the {% include ltr/comp.html uuid='f68f96ec' %} component to get Element Ownership properties.
+
+![]({{ "/static/images/guides/Revit-Worksets-Ownership.png" | prepend: site.baseurl }})
+
+## Document Worksharing Information
+
+Use the {% include ltr/comp.html uuid='f7d56db0' %} component to Get Document Worksharing properties.
+
+![]({{ "/static/images/guides/Revit-Worksets-Document.png" | prepend: site.baseurl }})
+
+## Document Server Information
+
+Us the {% include ltr/comp.html uuid='2577a55b' %} component to get Document Server properties.
+
+![]({{ "/static/images/guides/Revit-Worksets-Server.png" | prepend: site.baseurl }})
