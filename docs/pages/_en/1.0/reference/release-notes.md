@@ -12,14 +12,16 @@ group: Deployment & Configs
 
 ### RC
 
-- Added 'Annotation Leaders' component.
-- Added 'Query Area Schemes' component.
-- Added 'Add Work Plane (Face)' component.
-
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 ![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
+
+{% include ltr/release-header.html title="v1.12" version="v1.12.8445.26409" time="02/14/2023" %}
+
+- Added {% include ltr/comp.html uuid='71f014de' %} component.
+- Added {% include ltr/comp.html uuid='3e2a753b' %} component.
+- Added {% include ltr/comp.html uuid='91757ae0' %} component.
 
 {% include ltr/release-header.html title="v1.12 RC4" version="v1.12.8438.12884" pre_release=true time="02/07/2023" %}
 
@@ -33,10 +35,10 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.12 RC2" version="v1.12.8425.21537" pre_release=true time="01/24/2023" %}
 
-- Added 'View Crop Region' component.
-- Added 'Add Section View' component.
-- Added 'Add Detail View' component.
-- Updated 'Add 3D View' component, now it takes a Frame as input.
+- Added {% include ltr/comp.html uuid='3ae4fa67' %} component.
+- Added {% include ltr/comp.html uuid='369b6109' %} component.
+- Added {% include ltr/comp.html uuid='8484e108' %} component.
+- Updated {% include ltr/comp.html uuid='f7b775c9' %} component, now it takes a Frame as input.
 - Now 'View' bake creates a named View in Rhino.
 - Now 'Open Viewport` grabs Revit active view settings.
     * If CTRL is pressed grabs orientation.

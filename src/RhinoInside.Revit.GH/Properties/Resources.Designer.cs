@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -863,9 +863,39 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Annotation {
+            get {
+                object obj = ResourceManager.GetObject("Annotation", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AnnotationCategoriesPicker {
             get {
                 object obj = ResourceManager.GetObject("AnnotationCategoriesPicker", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnnotationLeaders {
+            get {
+                object obj = ResourceManager.GetObject("AnnotationLeaders", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnnotationReferences {
+            get {
+                object obj = ResourceManager.GetObject("AnnotationReferences", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -896,6 +926,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AreaPlan {
             get {
                 object obj = ResourceManager.GetObject("AreaPlan", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AreaScheme {
+            get {
+                object obj = ResourceManager.GetObject("AreaScheme", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -3163,6 +3203,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ImageTypePath {
+            get {
+                object obj = ResourceManager.GetObject("ImageTypePath", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap LayerFunction_ValueList {
             get {
                 object obj = ResourceManager.GetObject("LayerFunction_ValueList", resourceCulture);
@@ -3433,6 +3483,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ParameterFilterRules {
+            get {
+                object obj = ResourceManager.GetObject("ParameterFilterRules", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ParameterFormula {
             get {
                 object obj = ResourceManager.GetObject("ParameterFormula", resourceCulture);
@@ -3546,6 +3606,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap QueryAreas {
             get {
                 object obj = ResourceManager.GetObject("QueryAreas", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QueryAreaSchemes {
+            get {
+                object obj = ResourceManager.GetObject("QueryAreaSchemes", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -4373,6 +4443,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ViewCropRegion {
+            get {
+                object obj = ResourceManager.GetObject("ViewCropRegion", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ViewDetailLevel_ValueList {
             get {
                 object obj = ResourceManager.GetObject("ViewDetailLevel_ValueList", resourceCulture);
@@ -4573,9 +4653,29 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap WorksetGlobalVisibility {
+            get {
+                object obj = ResourceManager.GetObject("WorksetGlobalVisibility", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap WorksetIdentity {
             get {
                 object obj = ResourceManager.GetObject("WorksetIdentity", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap WorksetVisibilityOverrides {
+            get {
+                object obj = ResourceManager.GetObject("WorksetVisibilityOverrides", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
