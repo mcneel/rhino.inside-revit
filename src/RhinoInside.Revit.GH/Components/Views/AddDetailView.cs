@@ -8,13 +8,13 @@ namespace RhinoInside.Revit.GH.Components.Views
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.12")]
-  public class AddDetalView : ElementTrackerComponent
+  public class AddDetailView : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("8484E108-408A-4835-AC21-537D4FB121C8");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => string.Empty;
 
-    public AddDetalView() : base
+    public AddDetailView() : base
     (
       name: "Add Detail View",
       nickname: "DetailView",
