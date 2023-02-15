@@ -153,8 +153,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       origin = basisX = basisY = default;
 
-      var viewX = mark.Document.GetElement(mark.GetViewId(0)) as View;
-      var viewY = mark.Document.GetElement(mark.GetViewId(1)) as View;
+      var viewX = mark.Document.GetElement(mark.GetViewId(1)) as View;
+      var viewY = mark.Document.GetElement(mark.GetViewId(0)) as View;
 
       var lineX = viewX is object ? Line.CreateUnbound(new XYZ(viewX.Origin.X, viewX.Origin.Y, 0.0), viewX.RightDirection) : default;
       var lineY = viewY is object ? Line.CreateUnbound(new XYZ(viewY.Origin.X, viewY.Origin.Y, 0.0), viewY.RightDirection) : default;
@@ -169,13 +169,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
           if (lineX is null)
           {
-            viewX = mark.CreateElevation(mark.Document, plan.Id, 0);
+            viewX = mark.CreateElevation(mark.Document, plan.Id, 1);
             lineX = Line.CreateUnbound(new XYZ(viewX.Origin.X, viewX.Origin.Y, 0.0), viewX.RightDirection);
           }
 
           if (lineY is null)
           {
-            viewY = mark.CreateElevation(mark.Document, plan.Id, 1);
+            viewY = mark.CreateElevation(mark.Document, plan.Id, 0);
             lineY = Line.CreateUnbound(new XYZ(viewY.Origin.X, viewY.Origin.Y, 0.0), viewY.RightDirection);
           }
         }

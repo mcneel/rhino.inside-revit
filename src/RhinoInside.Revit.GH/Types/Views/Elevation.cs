@@ -80,9 +80,9 @@ namespace RhinoInside.Revit.GH.Types
         args.Pipeline.DrawPoint(location.Origin, pointStyle, strokeColor, args.Color, radius, 2.0f, secondarySize, angle, true, true);
 
         if (!Value.IsAvailableIndex(0)) args.Pipeline.DrawDirectionArrow(location.Origin, -location.XAxis, args.Color);
-        if (!Value.IsAvailableIndex(1)) args.Pipeline.DrawDirectionArrow(location.Origin, -location.YAxis, args.Color);
+        if (!Value.IsAvailableIndex(1)) args.Pipeline.DrawDirectionArrow(location.Origin,  location.YAxis, args.Color);
         if (!Value.IsAvailableIndex(2)) args.Pipeline.DrawDirectionArrow(location.Origin,  location.XAxis, args.Color);
-        if (!Value.IsAvailableIndex(3)) args.Pipeline.DrawDirectionArrow(location.Origin,  location.YAxis, args.Color);
+        if (!Value.IsAvailableIndex(3)) args.Pipeline.DrawDirectionArrow(location.Origin, -location.YAxis, args.Color);
       }
     }
 
