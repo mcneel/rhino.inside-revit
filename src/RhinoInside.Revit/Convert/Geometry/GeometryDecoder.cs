@@ -324,11 +324,66 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// </code>
     ///
     /// </example>
-    /// <param name="plane">Revit point to convert.</param>
+    /// <param name="plane">Revit plane to convert.</param>
     /// <returns>Rhino plane that is equivalent to the provided Revit plane.</returns>
     /// <since>1.0</since>
     public static Plane ToPlane(this ARDB.Plane plane)
     { var rhino = RawDecoder.AsPlane(plane); UnitConvertible.Scale(ref rhino, ModelScaleFactor); return rhino; }
+
+    /// <summary>
+    /// Converts the specified <see cref="ARDB.Frame" /> to an equivalent <see cref="Rhino.Geometry.Plane" />.
+    /// </summary>
+    /// <example>
+    /// 
+    /// Using <see cref="ToPlane(ARDB.Frame)" /> as extension method:
+    ///
+    /// <code language="csharp">
+    /// using DB = Autodesk.Revit.DB;
+    /// using RhinoInside.Revit.Convert.Geometry;
+    /// 
+    /// Plane rhinoPlane = revitFrame.ToPlane();
+    /// </code>
+    /// 
+    /// <code language="Python">
+    /// import clr
+    /// clr.AddReference("RhinoCommon")
+    /// clr.AddReference("RevitAPI")
+    /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
+    /// import Autodesk.Revit.DB as DB
+    /// import RhinoInside.Revit.Convert.Geometry
+    /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
+    /// 
+    /// rhino_plane = revit_frame.ToPlane() # type: RG.Plane
+    /// </code>
+    /// 
+    /// Using <see cref="ToPlane(ARDB.Frame)" /> as static method:
+    ///
+    /// <code language="csharp">
+    /// using DB = Autodesk.Revit.DB;
+    /// using RhinoInside.Revit.Convert.Geometry;
+    /// 
+    /// Plane rhinoPlane = GeometryEncoder.ToPlane(revitFrame)
+    /// </code>
+    /// 
+    /// <code language="Python">
+    /// import clr
+    /// clr.AddReference("RhinoCommon")
+    /// clr.AddReference("RevitAPI")
+    /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
+    /// import Autodesk.Revit.DB as DB
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
+    /// 
+    /// rhino_plane = GD.ToPlane(revit_frame) # type: RG.Plane
+    /// </code>
+    ///
+    /// </example>
+    /// <param name="frame">Revit frame to convert.</param>
+    /// <returns>Rhino plane that is equivalent to the provided Revit frame.</returns>
+    /// <since>1.13</since>
+    public static Plane ToPlane(this ARDB.Frame frame)
+    { var rhino = RawDecoder.AsPlane(frame); UnitConvertible.Scale(ref rhino, ModelScaleFactor); return rhino; }
 
     /// <summary>
     /// Converts the specified <see cref="ARDB.Transform" /> to an equivalent <see cref="Rhino.Geometry.Transform" />.

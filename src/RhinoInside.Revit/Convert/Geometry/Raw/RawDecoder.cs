@@ -110,6 +110,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     {
       return new Plane(AsPoint3d(plane.Origin), AsVector3d(plane.XVec), AsVector3d(plane.YVec));
     }
+
+    public static Plane AsPlane(ARDB.Frame frame)
+    {
+      return new Plane(AsPoint3d(frame.Origin), AsVector3d(frame.BasisX), AsVector3d(frame.BasisY));
+    }
     #endregion
 
     #region Point

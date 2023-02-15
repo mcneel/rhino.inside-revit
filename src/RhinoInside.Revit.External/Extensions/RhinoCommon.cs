@@ -1200,9 +1200,32 @@ namespace Rhino.DocObjects
       vport.ScreenPort = new System.Drawing.Rectangle(0, 0, Math.Max(1, width), Math.Max(1, height));
     }
 
-    public static Geometry.Interval GetFrustumWidth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
-    public static Geometry.Interval GetFrustumHeight(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
-    public static Geometry.Interval GetFrustumDepth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumNear, vport.FrustumFar);
+    public static Geometry.Interval Extents(this ViewportInfo vport, int direction)
+    {
+      switch (direction)
+      {
+        case 0: return new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
+        case 1: return new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
+        case 2: return new Geometry.Interval(vport.FrustumNear, vport.FrustumFar);
+      }
+
+      return Geometry.NaN.Interval;
+    }
+
+    public static bool SetExtents(this ViewportInfo vport, int direction, Geometry.Interval extents)
+    {
+      if (vport.GetFrustum(out var left, out var right, out var bottom, out var top, out var near, out var far))
+      {
+        switch (direction)
+        {
+          case 0: return vport.SetFrustum(extents.T0, extents.T1, bottom, top, near, far);
+          case 1: return vport.SetFrustum(left, right, extents.T0, extents.T1, near, far);
+          case 2: return vport.SetFrustumNearFar(extents.T0, extents.T1);
+        }
+      }
+
+      return false;
+    }
 
     public static Geometry.Plane GetCameraFrameAt(this ViewportInfo vport, double depth = 0.0) =>
       new Geometry.Plane(vport.CameraLocation - vport.CameraZ * depth, vport.CameraX, vport.CameraY);
@@ -1219,7 +1242,7 @@ namespace Rhino.DocObjects
       if (!vport.IsValidCamera || !vport.IsValidFrustum)
         return new Geometry.Point3d[0];
 
-      return GetFramePlaneCorners(vport, depth, vport.GetFrustumWidth(), vport.GetFrustumHeight());
+      return GetFramePlaneCorners(vport, depth, vport.Extents(0), vport.Extents(1));
     }
 #endif
 
