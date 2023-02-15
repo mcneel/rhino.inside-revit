@@ -249,6 +249,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.ViewPlan),                        (element)=> new ViewPlan              (element as ARDB.ViewPlan)          },
       { typeof(ARDB.ViewSection),                     (element)=> new ViewSection           (element as ARDB.ViewSection)       },
       { typeof(ARDB.ViewDrafting),                    (element)=> new ViewDrafting          (element as ARDB.ViewDrafting)      },
+      { typeof(ARDB.ElevationMarker),                 (element)=> new ElevationMarker       (element as ARDB.ElevationMarker)   },
 
       { typeof(ARDB.Instance),                        (element)=> new Instance              (element as ARDB.Instance)          },
       { typeof(ARDB.ProjectLocation),                 (element)=> new ProjectLocation       (element as ARDB.ProjectLocation)   },
