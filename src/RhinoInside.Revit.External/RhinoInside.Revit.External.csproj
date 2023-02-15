@@ -51,6 +51,7 @@
     <Compile Include="DB\Extensions\Document.cs" />
     <Compile Include="DB\Extensions\Element.cs" />
     <Compile Include="DB\Extensions\ElementId.cs" />
+    <Compile Include="DB\Extensions\ElementLocation.cs" />
     <Compile Include="DB\Extensions\ElementType.cs" />
     <Compile Include="DB\Extensions\Face.cs" />
     <Compile Include="DB\Extensions\FilteredElementCollector.cs" />
@@ -58,7 +59,6 @@
     <Compile Include="DB\Extensions\HostObject.cs" />
     <Compile Include="DB\Extensions\ImageType.cs" />
     <Compile Include="DB\Extensions\IndependentTag.cs" />
-    <Compile Include="DB\Extensions\Instance.cs" />
     <Compile Include="DB\Extensions\InternalOrigin.cs" />
     <Compile Include="DB\Extensions\Level.cs" />
     <Compile Include="DB\Extensions\LinePattern.cs" />
