@@ -1,13 +1,13 @@
 using System;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using Rhino.Geometry.Intersect;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [Kernel.Attributes.Name("Elevation")]
   public class ElevationView : ViewSection
   {
@@ -45,41 +45,8 @@ namespace RhinoInside.Revit.GH.Types
 
           if (Value is ARDB.ElevationMarker mark)
           {
-            try
-            {
-              var viewX = mark.Document.GetElement(mark.GetViewId(0)) as ARDB.View;
-              var viewY = mark.Document.GetElement(mark.GetViewId(1)) as ARDB.View;
-
-              var planeX = viewX is object ? new Plane(viewX.Origin.ToPoint3d(), viewX.RightDirection.ToVector3d(), viewX.UpDirection.ToVector3d()) : default;
-              var planeY = viewY is object ? new Plane(viewY.Origin.ToPoint3d(), viewY.RightDirection.ToVector3d(), viewY.UpDirection.ToVector3d()) : default;
-
-              if (mark.IsAvailableIndex(0) || mark.IsAvailableIndex(1))
-              {
-                using (mark.Document.RollBackScope())
-                using (mark.Document.RollBackScope()) // We need a SubTransaction here to avoid changes are made on the document.
-                {
-                  var level = ARDB.Level.Create(mark.Document, 0.0);
-                  var plan = ARDB.ViewPlan.Create(mark.Document, mark.Document.GetDefaultElementTypeId(ARDB.ElementTypeGroup.ViewTypeFloorPlan), level.Id);
-
-                  if (mark.IsAvailableIndex(0))
-                  {
-                    viewX = mark.CreateElevation(mark.Document, plan.Id, 0);
-                    planeX = new Plane(viewX.Origin.ToPoint3d(), viewX.RightDirection.ToVector3d(), viewX.UpDirection.ToVector3d());
-                  }
-
-                  if (mark.IsAvailableIndex(1))
-                  {
-                    viewY = mark.CreateElevation(mark.Document, plan.Id, 1);
-                    planeY = new Plane(viewY.Origin.ToPoint3d(), viewY.RightDirection.ToVector3d(), viewY.UpDirection.ToVector3d());
-                  }
-                }
-              }
-
-              _Location = Intersection.PlanePlane(planeX, planeY, out var line) ?
-                new Plane(new Point3d(line.FromX, line.FromY, 0.0), planeX.Normal, planeY.Normal) :
-                NaN.Plane;
-            }
-            catch { }
+            mark.GetLocation(out var origin, out var basisX, out var basisY);
+            _Location = new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
           }
         }
 

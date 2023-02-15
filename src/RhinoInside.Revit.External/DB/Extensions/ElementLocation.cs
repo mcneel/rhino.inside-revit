@@ -5,12 +5,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
   public static class ElementLocation
   {
     #region Element
-    delegate void LocationGetter<T>(T element, out XYZ origin, out XYZ basisX, out XYZ basisY) where T : Element;
+    internal delegate void LocationGetter<T>(T element, out XYZ origin, out XYZ basisX, out XYZ basisY) where T : Element;
 
-    static void SetLocation<T>(this T element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY, LocationGetter<T> GetLocation) where T : Element =>
+    internal static void SetLocation<T>(this T element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY, LocationGetter<T> GetLocation) where T : Element =>
       SetLocation(element, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
 
-    static void SetLocation<T>(this T element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY, LocationGetter<T> GetLocation, out bool modified)
+    internal static void SetLocation<T>(this T element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY, LocationGetter<T> GetLocation, out bool modified)
       where T : Element
     {
       modified = false;
@@ -181,7 +181,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
       }
 
-      if (lineX.Intersect(lineY, out var result) == SetComparisonResult.Disjoint)
+      if (lineX.Intersect(lineY, out var result) == SetComparisonResult.Overlap)
       {
         if (result.Size == 1)
         {
