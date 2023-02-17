@@ -241,7 +241,7 @@ namespace RhinoInside.Revit
           var taskDialog = new ARUI.TaskDialog("Update Revit")
           {
             Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}.UpdateRevit",
-            MainIcon = UIX.TaskDialogIcons.IconInformation,
+            MainIcon = UIX.TaskDialogIcons.IconWarning,
             AllowCancellation = true,
             MainInstruction = "Unsupported Revit version",
             MainContent = $"Please update Revit to version {MinimumRevitVersion} or higher.",
@@ -304,7 +304,7 @@ namespace RhinoInside.Revit
           var taskDialog = new ARUI.TaskDialog("Update Rhino")
           {
             Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}.UpdateRhino",
-            MainIcon = UIX.TaskDialogIcons.IconInformation,
+            MainIcon = UIX.TaskDialogIcons.IconError,
             AllowCancellation = true,
             MainInstruction = "Unsupported Rhino version",
             MainContent = $"Expected Rhino version is ({MinimumRhinoVersion}) or above.",
