@@ -523,12 +523,14 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value is ARDB.Element element)
       {
-        GetLocation(out var origin, out var basisX, out var basisY);
-        var basisZ = basisX.CrossProduct(basisY);
-        var newBasisZ = newBasisX.CrossProduct(newBasisY);
+        var modified = false;
 
         if (element.Location is ARDB.LocationCurve curveLocation)
         {
+          GetLocation(out var origin, out var basisX, out var basisY);
+          var basisZ = basisX.CrossProduct(basisY);
+          var newBasisZ = newBasisX.CrossProduct(newBasisY);
+
           var orientation = ARDB.Transform.Identity;
           orientation.SetAlignCoordSystem
           (
@@ -537,65 +539,22 @@ namespace RhinoInside.Revit.GH.Types
           );
 
           if (!orientation.IsIdentity)
+          {
             SetCurve(curveLocation.Curve.CreateTransformed(orientation).ToCurve(), keepJoins ?? false);
-
-          return;
-        }
-
-        var pinned = element.Pinned;
-        var modified = false;
-
-        try
-        {
-          {
-            if (!basisZ.IsParallelTo(newBasisZ))
-            {
-              var axisDirection = basisZ.CrossProduct(newBasisZ);
-              double angle = basisZ.AngleTo(newBasisZ);
-
-              using (var axis = ARDB.Line.CreateUnbound(origin, axisDirection))
-              {
-                element.Pinned = false;
-                ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
-                modified = true;
-              }
-
-              GetLocation(out origin, out basisX, out basisY);
-              basisZ = basisX.CrossProduct(basisY);
-            }
-
-            if (!basisX.IsAlmostEqualTo(newBasisX))
-            {
-              double angle = basisX.AngleOnPlaneTo(newBasisX, newBasisZ);
-              using (var axis = ARDB.Line.CreateUnbound(origin, newBasisZ))
-              {
-                element.Pinned = false;
-                ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
-                modified = true;
-              }
-            }
-
-            {
-              var trans = newOrigin - origin;
-              if (!trans.IsZeroLength())
-              {
-                element.Pinned = false;
-                ARDB.ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
-                modified = true;
-              }
-            }
+            modified = true;
           }
         }
-        finally
-        {
-          if (modified)
-          {
-            if (element.Pinned != pinned)
-              element.Pinned = pinned;
+        else element.SetLocation
+        (
+          newOrigin,
+          newBasisX,
+          newBasisY,
+          (ARDB.Element e, out ARDB.XYZ o, out ARDB.XYZ x, out ARDB.XYZ y) => GetLocation(out o, out x, out y),
+          out modified
+        );
 
-            InvalidateGraphics();
-          }
-        }
+        if (modified)
+          InvalidateGraphics();
       }
     }
 

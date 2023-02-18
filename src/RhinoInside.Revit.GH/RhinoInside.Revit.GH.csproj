@@ -264,6 +264,7 @@
     <Compile Include="Components\Views\AddDependentView.cs" />
     <Compile Include="Components\Views\AddDetailView.cs" />
     <Compile Include="Components\Views\AddDraftingView.cs" />
+    <Compile Include="Components\Views\AddElevationMarker.cs" />
     <Compile Include="Components\Views\AddSectionViews.cs" />
     <Compile Include="Components\Views\AddView3D.cs" />
     <Compile Include="Components\Views\AddViewPlan.cs" />
@@ -326,6 +327,7 @@
     <Compile Include="Types\Annotations\TagElement.cs" />
     <Compile Include="Types\Annotations\TextElement.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
+    <Compile Include="Types\Views\Elevation.cs" />
     <Compile Include="Types\Views\Viewer.cs" />
     <Compile Include="Types\Views\ViewFrame.cs" />
     <None Include="Extensions\README.md" />

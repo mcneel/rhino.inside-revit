@@ -47,6 +47,28 @@
     },
     {
         "highlight": true,
+        "title": "Design to Production Workflow",
+        "url": "https://www.thinkparametric.com/courses/design-to-production-with-rhino-inside",
+        "thumbnail": "/static/images/discover/design-to-workflow-thinkparametric.jpg",
+        "author": "Oliver Thomas, BIG",
+        "authorUrl": "",
+        "description": "Learn how to use Rhino.Inside, a real game-changer that makes the transfer of information between Rhinoceros 3D and Autodesk Revit quick, easy and intuitive.",
+        "kinds": [
+            "course",
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "workflow",
+            "purchase"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "highlight": true,
         "title": "101 Class LiveAcademy",
         "url": "oliver-thomas-training",
         "thumbnail": "/static/images/discover/liveacademy-oliver-101.jpg",
@@ -83,6 +105,28 @@
         "tags": [
             "basics",
             "workflow",
+            "purchase"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "highlight": true,
+        "title": "PAZ Academy Classes",
+        "url": "https://pazacademy.ch/product/rhino-inside-revit-basics/",
+        "thumbnail": "/static/images/discover/paz-classes.png",
+        "author": "PAZ Academy",
+        "authorUrl": "",
+        "description": "Lessons using Rhino.Inside.Revit in practical workflows.  Classes Can be conducted in German, English, Spanish or Hungarian.",
+        "kinds": [
+            "course",
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "course",
             "purchase"
         ],
         "versions" : [
@@ -206,6 +250,27 @@
         "author": "Modelical",
         "authorUrl": "https://www.modelical.com/en/",
         "description": "Webinar about the successful use of Rhino.Inside.Revit in several architectural projects at Modelical. Rhino.Inside.Revit is mainly well-known for its capacity of translating complex geometry from Rhino to Revit. Our speakers will show us how they manage both geometry and information and design optimal workflows.",
+        "kinds": [
+            "webinar",
+            "video"
+        ],
+        "tags": [
+            "presentation",
+            "workflow",
+            "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "title": "Getting Started with 6 lessons",
+        "url": "https://www.youtube.com/playlist?list=PLq-KJ9jF26E3D5gKawfjWnwiyxpM_oZXi",
+        "thumbnail": "https://i3.ytimg.com/vi/FhvJIWyc95o/maxresdefault.jpg",
+        "author": "Gediminas Kirdeikis",
+        "authorUrl": "https://www.youtube.com/@DesignGoBrr",
+        "description": "A 6 part video series on getting started with Rhino.Inside.Revit showing a set of practical workflows.",
         "kinds": [
             "webinar",
             "video"
@@ -522,6 +587,27 @@
         ],
         "tags": [
             "modelmaking",
+            "workflow",
+            "overview"
+        ],
+        "versions" : [
+            "beta",
+            "1.0"
+        ]
+    },
+    {
+        "title": "Wavy Facade using Graph Mapper",
+        "url": "https://youtu.be/VzI3vFLNRxI",
+        "thumbnail": "https://i3.ytimg.com/vi/VzI3vFLNRxI/maxresdefault.jpg",
+        "author": "Japhy Walton",
+        "authorUrl": "https://discourse.mcneel.com/u/japhy/summary",
+        "description": "A quick tutorial on createing a complex facade shape with Grasshopper.",
+        "kinds": [
+            "tutorial",
+            "video"
+        ],
+        "tags": [
+            "facade",
             "workflow",
             "overview"
         ],

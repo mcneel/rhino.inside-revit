@@ -24,3 +24,9 @@ Use the {% include ltr/comp.html uuid='e8d8d05a' %} component to Add Topography 
 
 ![]({{ "/static/images/guides/revit-site-add-topo-points.png" | prepend: site.baseurl }})
 
+## Add Topography Region
+
+Provide a Revit Topography Element and Planar Curves to the {% include ltr/comp.html uuid='0644989d' %} component to Add a Topography Region.
+
+![]({{ "/static/images/guides/revit-topo-addSubRegion.png" | prepend: site.baseurl }})
+

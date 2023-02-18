@@ -87,7 +87,12 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     public static ARDB.Plane AsPlane(Plane value)
     {
-      return ARDB.Plane.CreateByOriginAndBasis(AsXYZ(value.Origin), AsXYZ((Point3d) value.XAxis), AsXYZ((Point3d) value.YAxis));
+      return ARDB.Plane.CreateByOriginAndBasis(AsXYZ(value.Origin), AsXYZ(value.XAxis), AsXYZ(value.YAxis));
+    }
+
+    public static ARDB.Frame AsFrame(Plane value)
+    {
+      return new ARDB.Frame(AsXYZ(value.Origin), AsXYZ(value.XAxis), AsXYZ(value.YAxis), AsXYZ(value.ZAxis));
     }
 
     public static ARDB.PolyLine AsPolyLine(Polyline value)
