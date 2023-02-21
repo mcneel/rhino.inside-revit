@@ -273,57 +273,6 @@ namespace RhinoInside.Revit.GH.Types
     public HostObject Host => Value is ARDB.FamilyInstance instance ?
       HostObject.FromElement(instance.Host) as HostObject : default;
     #endregion
-
-    #region Joins
-    static bool IsStructuralFraming(ARDB.FamilyInstance frame) =>
-      frame.Category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralFraming;
-    
-    public bool? IsJoinAllowedAtStart
-    {
-      get => Value is ARDB.FamilyInstance frame && IsStructuralFraming(frame) ?
-        (bool?) ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(frame, 0) :
-        default;
-
-      set
-      {
-        if (value is object &&  Value is ARDB.FamilyInstance frame && value != IsJoinAllowedAtStart)
-        {
-          if (!IsStructuralFraming(frame))
-            throw new Exceptions.RuntimeErrorException("Join at start can not be set for this element.");
-
-          InvalidateGraphics();
-
-          if (value == true)
-            ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(frame, 0);
-          else
-            ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(frame, 0);
-        }
-      }
-    }
-
-    public bool? IsJoinAllowedAtEnd
-    {
-      get => Value is ARDB.FamilyInstance frame && IsStructuralFraming(frame) ?
-        (bool?) ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(frame, 1) :
-        default;
-
-      set
-      {
-        if (value is object && Value is ARDB.FamilyInstance frame && value != IsJoinAllowedAtEnd)
-        {
-          if (!IsStructuralFraming(frame))
-            throw new Exceptions.RuntimeErrorException("Join at end can not be set for this element.");
-
-          InvalidateGraphics();
-
-          if (value == true)
-            ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(frame, 1);
-          else
-            ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(frame, 1);
-        }
-      }
-    }
-    #endregion
   }
 
   [Kernel.Attributes.Name("Component Type")]
