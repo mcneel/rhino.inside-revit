@@ -7,9 +7,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Element
     internal delegate void LocationGetter<T>(T element, out XYZ origin, out XYZ basisX, out XYZ basisY) where T : Element;
 
-    internal static void SetLocation<T>(this T element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY, LocationGetter<T> GetLocation) where T : Element =>
-      SetLocation(element, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
-
     internal static void SetLocation<T>(this T element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY, LocationGetter<T> GetLocation, out bool modified)
       where T : Element
     {
@@ -61,6 +58,48 @@ namespace RhinoInside.Revit.External.DB.Extensions
           element.Pinned = pinned;
       }
     }
+
+    internal static void SetLocation<T>(this T element, XYZ newOrigin, XYZ newBasisX, LocationGetter<T> GetLocation, out bool modified)
+      where T : Element
+    {
+      modified = false;
+      var pinned = element.Pinned;
+
+      try
+      {
+        GetLocation(element, out var origin, out var basisX, out var basisY);
+        var basisZ = basisX.CrossProduct(basisY);
+
+        newBasisX = (new PlaneEquation(origin, basisZ).Project(origin + newBasisX) - origin).Unitize();
+
+        var newBasisZ = basisX.CrossProduct(basisY);
+
+        if (!newBasisX.IsZeroLength() && !basisX.IsAlmostEqualTo(newBasisX))
+        {
+          element.Pinned = false;
+          using (var axis = Line.CreateUnbound(origin, newBasisZ))
+            ElementTransformUtils.RotateElement(element.Document, element.Id, axis, basisX.AngleOnPlaneTo(newBasisX, newBasisZ));
+          modified = true;
+
+          GetLocation(element, out origin, out basisX, out basisY);
+        }
+
+        {
+          var trans = newOrigin - origin;
+          if (!trans.IsZeroLength())
+          {
+            element.Pinned = false;
+            ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
+            modified = true;
+          }
+        }
+      }
+      finally
+      {
+        if (element.Pinned != pinned)
+          element.Pinned = pinned;
+      }
+    }
     #endregion
 
     #region Instance
@@ -79,17 +118,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
           case LocationCurve curveLocation:
             if (curveLocation.Curve.TryGetLocation(out origin, out basisX, out basisY))
-            {
-              if (instance is FamilyInstance familyInstance)
-              {
-                basisY = familyInstance.HandOrientation.CrossProduct(familyInstance.FacingOrientation).CrossProduct(basisX);
-
-                if (familyInstance.Mirrored)
-                  basisY = -basisY;
-              }
-
               return;
-            }
+
             break;
         }
 
@@ -102,7 +132,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static void SetLocation(this Instance element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY)
     {
-      ElementLocation.SetLocation(element, newOrigin, newBasisX, newBasisY, GetLocation);
+      ElementLocation.SetLocation(element, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
+    }
+
+    public static void SetLocation(this Instance element, XYZ newOrigin, XYZ newBasisX)
+    {
+      ElementLocation.SetLocation(element, newOrigin, newBasisX, GetLocation, out var _);
     }
 
     public static void SetLocation(this Instance element, XYZ newOrigin, double newAngle)
@@ -194,7 +229,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static void SetLocation(this ElevationMarker mark, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY)
     {
-      ElementLocation.SetLocation(mark, newOrigin, newBasisX, newBasisY, GetLocation);
+      ElementLocation.SetLocation(mark, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
     }
     #endregion
   }
