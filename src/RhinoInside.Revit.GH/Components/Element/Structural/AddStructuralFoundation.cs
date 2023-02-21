@@ -122,6 +122,9 @@ namespace RhinoInside.Revit.GH.Components
           // Input
           if (!Params.GetData(DA, "Location", out Plane? location, x => x.IsValid)) return null;
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFoundation)) return null;
+          if (type.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_StructuralFoundation)
+            throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Nomen}' is not a valid structural foundation type.");
+
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Level", out Types.Level level, doc, location.Value.Origin.Z)) return null;
           if (!Params.TryGetData(DA, "Host", out Types.GraphicalElement host)) return null;
 
@@ -155,16 +158,12 @@ namespace RhinoInside.Revit.GH.Components
       if (foundation is null) return false;
 
       if (!foundation.Host.IsEquivalent(host)) return false;
-      if (foundation.LevelId != (level?.Id ?? ARDB.ElementId.InvalidElementId)) return false;
-      if (foundation.GetTypeId() != type.Id)
+      if (foundation.LevelId != (level?.Id ?? ARDB.ElementId.InvalidElementId))
       {
-        if (ARDB.Element.IsValidType(foundation.Document, new ARDB.ElementId[] { foundation.Id }, type.Id))
-        {
-          if (foundation.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
-            foundation = foundation.Document.GetElement(id) as ARDB.FamilyInstance;
-        }
-        else return false;
+        var levelParam = foundation.get_Parameter(ARDB.BuiltInParameter.FAMILY_LEVEL_PARAM);
+        if (levelParam.IsReadOnly || !levelParam.Update(level.Id)) return false;
       }
+      if (type.Id != foundation.GetTypeId()) foundation.ChangeTypeId(type.Id);
 
       return true;
     }
@@ -213,8 +212,6 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       foundation.get_Parameter(ARDB.BuiltInParameter.INSTANCE_MOVES_WITH_GRID_PARAM)?.Update(false);
-      var levelParam = foundation.get_Parameter(ARDB.BuiltInParameter.FAMILY_LEVEL_PARAM);
-      if (!levelParam.IsReadOnly) levelParam.Update(level.Id);
 
       {
         foundation.Document.Regenerate();

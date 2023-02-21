@@ -137,6 +137,8 @@ namespace RhinoInside.Revit.GH.Components
             throw new RuntimeArgumentException("Curve", $"Curve start point must be below curve end point.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralColumns)) return null;
+          if (type.Value.Family.FamilyPlacementType != ARDB.FamilyPlacementType.CurveDrivenStructural)
+            throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Nomen}' is not a valid curve driven structural type.");
 
           var bbox = curve.GetBoundingBox(accurate: true);
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Base Level", out Types.Level baseLevel, doc, bbox.Min.Z)) return null;

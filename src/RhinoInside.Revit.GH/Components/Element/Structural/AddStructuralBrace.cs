@@ -120,6 +120,8 @@ namespace RhinoInside.Revit.GH.Components
             throw new RuntimeArgumentException("Curve", $"Curve should be a line like curve.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
+          if (type.Value.Family.FamilyPlacementType != ARDB.FamilyPlacementType.CurveDrivenStructural)
+            throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Nomen}' is not a valid curve driven structural type.");
 
           var bbox = curve.GetBoundingBox(accurate: true);
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Reference Level", out Types.Level level, doc, bbox.Center.Z)) return null;
