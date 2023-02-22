@@ -152,4 +152,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
   }
 #endif
+
+  public static class SketchPlaneExtension
+  {
+    public static Element GetHost(this SketchPlane sketchPlane, out Reference hostFace)
+    {
+      var document = sketchPlane.Document;
+      using (var scope = document.CommitScope())
+      {
+        var symbol = document.EnsureWorkPlaneBasedSymbol();
+        scope.Commit();
+
+        using (document.RollBackScope())
+        {
+          using (var create = document.Create())
+          {
+            var instance = create.NewFamilyInstance(XYZExtension.Zero, symbol, sketchPlane, StructuralType.NonStructural);
+            hostFace = instance.HostFace;
+            return instance.Host;
+          }
+        }
+      }
+    }
+  }
 }
