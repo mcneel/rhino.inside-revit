@@ -4,9 +4,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class FamilyExtension
   {
-    public static FamilyHostingBehavior GetHostingBehavior(this Family family, out bool? workPlaneBased)
+    public static FamilyHostingBehavior GetHostingBehavior(this Family family)
     {
-      workPlaneBased = family.get_Parameter(BuiltInParameter.FAMILY_WORK_PLANE_BASED)?.AsBoolean();
       return family.get_Parameter(BuiltInParameter.FAMILY_HOSTING_BEHAVIOR).AsEnum<FamilyHostingBehavior>();
     }
   }
