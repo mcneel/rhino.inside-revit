@@ -100,6 +100,19 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE,
     };
 
+    static void AssertIsValidType(ARDB.FamilySymbol type)
+    {
+      if (type.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_StructuralFraming)
+        throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid structural framing type.");
+
+      switch (type.Family.FamilyPlacementType)
+      {
+        case ARDB.FamilyPlacementType.CurveDrivenStructural: return;
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid curve driven structural type.");
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
@@ -126,8 +139,7 @@ namespace RhinoInside.Revit.GH.Components
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
-          if (type.Value.Family.FamilyPlacementType != ARDB.FamilyPlacementType.CurveDrivenStructural)
-            throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Nomen}' is not a valid curve driven structural type.");
+          AssertIsValidType(type.Value);
 
           var bbox = curve.GetBoundingBox(accurate: true);
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Reference Level", out Types.Level level, doc, bbox.Center.Z)) return null;
