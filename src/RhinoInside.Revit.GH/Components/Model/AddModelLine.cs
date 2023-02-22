@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!curve.IsParallelToPlane(plane, tol.VertexTolerance, tol.AngleTolerance))
-            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to view plane.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to work plane.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           if ((curve = Curve.ProjectToPlane(curve, plane)) is null)
             throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project Curve into 'Work Plane'", curve);

@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
@@ -7,7 +10,6 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
 {
   using Convert.Geometry;
   using External.DB.Extensions;
-  using Grasshopper.Kernel.Parameters;
 
   [ComponentVersion(introduced: "1.0", updated: "1.8")]
   public class AddWorkPlaneByPlane : ElementTrackerComponent
@@ -199,7 +201,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         doc.Value, _WorkPlane_, sketchPlane =>
         {
           // Input
-          if (!Params.GetData(DA, "Face", out Types.GeometryFace face, x => x.IsValid)) return null;
+          if (!Params.GetData(DA, "Face", out Types.GeometryFace face, x => x.IsValid && x.Document.IsEquivalent(doc.Value))) return null;
 
           // Compute
           sketchPlane = Reconstruct(sketchPlane, doc.Value, face.GetReference());
@@ -213,7 +215,8 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     bool Reuse(ARDB.SketchPlane sketchPlane, ARDB.Reference reference)
     {
       if (sketchPlane is null) return false;
-      if (!sketchPlane.Document.AreEquivalentReferences(sketchPlane.GetPlaneReference(), reference)) return false;
+      if (sketchPlane.GetHost(out var hostFace) is null) return false;
+      if (!sketchPlane.Document.AreEquivalentReferences(hostFace, reference)) return false;
 
       return true;
     }
