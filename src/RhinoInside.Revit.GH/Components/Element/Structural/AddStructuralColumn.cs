@@ -114,6 +114,19 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE,
     };
 
+    static void AssertIsValidType(ARDB.FamilySymbol type)
+    {
+      if (type.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_StructuralColumns)
+        throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid structural column type.");
+
+      switch (type.Family.FamilyPlacementType)
+      {
+        case ARDB.FamilyPlacementType.TwoLevelsBased: return;
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid two levels based type.");
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
@@ -137,8 +150,7 @@ namespace RhinoInside.Revit.GH.Components
             throw new RuntimeArgumentException("Curve", $"Curve start point must be below curve end point.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralColumns)) return null;
-          if (type.Value.Family.FamilyPlacementType != ARDB.FamilyPlacementType.TwoLevelsBased)
-            throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Nomen}' is not a valid two levels based type.");
+          AssertIsValidType(type.Value);
 
           var bbox = curve.GetBoundingBox(accurate: true);
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Base Level", out Types.Level baseLevel, doc, bbox.Min.Z)) return null;
