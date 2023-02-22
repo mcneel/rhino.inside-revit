@@ -197,8 +197,10 @@ namespace RhinoInside.Revit.GH.Components
       switch (host)
       {
         case ARDB.SketchPlane sketchPlane:
-          if (sketchPlane.GetHost(out var hostFace) is null) return false;
+          var hostElement = sketchPlane.GetHost(out var hostFace);
+          if (hostElement is null) return false;
           if (!sketchPlane.Document.AreEquivalentReferences(hostFace, foundation.HostFace)) return false;
+          if (!hostElement.IsEquivalent(foundation.Host)) return false;
           return true;
       }
 
