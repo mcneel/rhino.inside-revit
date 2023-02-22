@@ -41,18 +41,57 @@ namespace RhinoInside.Revit.GH.Types
       if (!element.IsValid())
         return false;
 
-      if (element is ARDB.Family)
-        return false;
+      switch (element)
+      {
+        case ARDB.ProjectInfo _:            return false;
+        case ARDB.StartingViewSettings _:   return false;
+        case ARDB.ParameterElement _:       return false;
+        case ARDB.FilterElement _:          return false;
+        case ARDB.GraphicsStyle _:          return false;
+        case ARDB.ElementType _:            return false;
+        case ARDB.Family _:                 return false;
+        case ARDB.View _:                   return false;
+        case ARDB.DesignOption _:           return false;
+        case ARDB.Phase _:                  return false;
+        case ARDB.AreaScheme _:             return false;
+        case ARDB.Revision _:               return false;
+        case ARDB.LinePatternElement _:     return false;
+        case ARDB.FillPatternElement _:     return false;
+        case ARDB.Material _:               return false;
+        case ARDB.PropertySetElement _:     return false;
+        case ARDB.AppearanceAssetElement _: return false;
 
-      if (element is ARDB.ElementType)
-        return false;
+#if REVIT_2021
+        case ARDB.InternalOrigin _:         return true;
+#endif
+        case ARDB.BasePoint _:              return true;
+        case ARDB.Sketch _:                 return true;
+        case ARDB.SketchPlane _:            return true;
+        case ARDB.HostObject _:             return true;
+        case ARDB.FamilyInstance _:         return true;
+        case ARDB.DatumPlane _:             return true;
+        case ARDB.CurveElement _:           return true;
+        case ARDB.DirectShape _:            return true;
+        case ARDB.AssemblyInstance _:       return true;
+        case ARDB.Group _:                  return true;
+        case ARDB.CombinableElement _:      return true;
+        case ARDB.ModelText _:              return true;
+        case ARDB.TextElement _:            return true;
+        case ARDB.Dimension _:              return true;
+        case ARDB.FilledRegion _:           return true;
+        case ARDB.RevisionCloud _:          return true;
+        case ARDB.ElevationMarker _:        return true;
+        case ARDB.Viewport _:               return true;
+        case ARDB.SpatialElement _:         return true;
+        case ARDB.SpatialElementTag _:      return true;
+        case ARDB.IndependentTag _:         return true;
 
-      if (element is ARDB.View)
-        return false;
-
-      // Unplaced ARDB.SpatialElement is also a GraphicalElement
-      if (element is ARDB.SpatialElement)
-        return true;
+#if REVIT_2023
+        case ARDB.Structure.AnalyticalElement _: return true;
+#else
+        case ARDB.Structure.AnalyticalModel _: return true;
+#endif
+      }
 
       using (var location = element.Location)
       {
@@ -710,7 +749,7 @@ namespace RhinoInside.Revit.GH.Types
           return ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, end);
 
         case ARDB.FamilyInstance instance:
-          if (instance.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralFraming)
+          if (StructuralMember.IsStructuralFraming(instance))
             return ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(instance, end);
 
           break;
@@ -732,7 +771,7 @@ namespace RhinoInside.Revit.GH.Types
             return;
 
           case ARDB.FamilyInstance instance:
-            if (instance.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralFraming)
+            if (StructuralMember.IsStructuralFraming(instance))
             {
               if (allow.Value) ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(instance, end);
               else ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(instance, end);

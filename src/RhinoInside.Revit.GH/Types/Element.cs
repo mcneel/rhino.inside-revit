@@ -377,9 +377,14 @@ namespace RhinoInside.Revit.GH.Types
       switch(element)
       {
         case ARDB.FamilyInstance familyInstance:
-          if (StructuralBeam.IsValidElement(familyInstance)) return new StructuralBeam(familyInstance);
-          if (StructuralBrace.IsValidElement(familyInstance)) return new StructuralBrace(familyInstance);
-          if (StructuralColumn.IsValidElement(familyInstance)) return new StructuralColumn(familyInstance);
+          switch(familyInstance.StructuralType)
+          {
+            case ARDB.Structure.StructuralType.Beam: return new StructuralBeam(familyInstance);
+            case ARDB.Structure.StructuralType.Brace: return new StructuralBrace(familyInstance);
+            case ARDB.Structure.StructuralType.Column: return new StructuralColumn(familyInstance);
+            case ARDB.Structure.StructuralType.Footing: return new StructuralFooting(familyInstance);
+            case ARDB.Structure.StructuralType.UnknownFraming: return new StructuralFraming(familyInstance);
+          }
           if (Panel.IsValidElement(element)) return new Panel(familyInstance);
           break;
 

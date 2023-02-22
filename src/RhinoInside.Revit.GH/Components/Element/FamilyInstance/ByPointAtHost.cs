@@ -29,6 +29,26 @@ namespace RhinoInside.Revit.GH.Components.Families
     )
     { }
 
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      ARDB.BuiltInParameter.ELEMENT_LOCKED_PARAM,
+      ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
+      ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
+      ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+      ARDB.BuiltInParameter.FAMILY_LEVEL_PARAM,
+      ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_PARAM,
+      ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM,
+      ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_PARAM,
+      ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM,
+      ARDB.BuiltInParameter.SCHEDULE_LEVEL_PARAM,
+      ARDB.BuiltInParameter.SCHEDULE_BASE_LEVEL_PARAM,
+      ARDB.BuiltInParameter.SCHEDULE_BASE_LEVEL_OFFSET_PARAM,
+      ARDB.BuiltInParameter.SCHEDULE_TOP_LEVEL_PARAM,
+      ARDB.BuiltInParameter.SCHEDULE_TOP_LEVEL_OFFSET_PARAM,
+      ARDB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM,
+      ARDB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM
+    };
+
     bool Reuse(ref ARDB.FamilyInstance element, Plane location, ARDB.FamilySymbol type, ARDB.Level level, ARDB.Element host)
     {
       if (element is null) return false;
@@ -123,34 +143,16 @@ namespace RhinoInside.Revit.GH.Components.Families
           throw new Exceptions.RuntimeErrorException("Failed to create Family Instance element.");
 
         var newElement = document.GetElement(newElementIds.First()) as ARDB.FamilyInstance;
-
-        var parametersMask = new ARDB.BuiltInParameter[]
-        {
-          ARDB.BuiltInParameter.ELEMENT_LOCKED_PARAM,
-          ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
-          ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
-          ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
-          ARDB.BuiltInParameter.FAMILY_LEVEL_PARAM,
-          ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_PARAM,
-          ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM,
-          ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_PARAM,
-          ARDB.BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM,
-          ARDB.BuiltInParameter.SCHEDULE_LEVEL_PARAM,
-          ARDB.BuiltInParameter.SCHEDULE_BASE_LEVEL_PARAM,
-          ARDB.BuiltInParameter.SCHEDULE_BASE_LEVEL_OFFSET_PARAM,
-          ARDB.BuiltInParameter.SCHEDULE_TOP_LEVEL_PARAM,
-          ARDB.BuiltInParameter.SCHEDULE_TOP_LEVEL_OFFSET_PARAM,
-          ARDB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM,
-          ARDB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM
-        };
-
-        ReplaceElement(ref component, newElement, parametersMask);
+        ReplaceElement(ref component, newElement, ExcludeUniqueProperties);
 
         // Regenerate here to allow SetLocation get the current element location correctly.
         if (component.Symbol.Family.FamilyPlacementType != ARDB.FamilyPlacementType.OneLevelBasedHosted)
         {
           document.Regenerate();
-          component.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
+          if (host is object)
+            component.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ());
+          else
+            component.SetLocation(location.Origin.ToXYZ(), location.XAxis.ToXYZ(), location.YAxis.ToXYZ());
         }
       }
     }
