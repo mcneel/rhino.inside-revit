@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -579,7 +580,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="origin"></param>
     /// <param name="basisX"></param>
     /// <param name="basisY"></param>
-    /// <returns></returns>
+    /// <returns>True on success, False on fail.</returns>
     public static bool TryGetLocation(this GeometryObject geometry, out XYZ origin, out XYZ basisX, out XYZ basisY)
     {
       switch (geometry)
@@ -642,7 +643,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// Retrieves a box that encloses the geometry object.
     /// </summary>
     /// <param name="geometry"></param>
-    /// <returns>The bounding box</returns>
+    /// <returns>The geometry bounding box.</returns>
     public static BoundingBoxXYZ GetBoundingBox(this GeometryObject geometry)
     {
       switch (geometry)
@@ -713,6 +714,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return BoundingBoxXYZExtension.Empty;
     }
 
+    /// <summary>
+    /// Retrieves the symbol element that this instance is referring to.
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <returns>The Symbol element.</returns>
     public static Element GetSymbol(this GeometryInstance instance)
     {
 #if REVIT_2023
@@ -721,5 +727,117 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return instance.Symbol;
 #endif
     }
+
+    #region References
+    static IEnumerable<string> GetStableFaceReferences(this GeometryObject geometry, Document document, string uniqueId)
+    {
+      int instanceIndex = 0;
+      switch (geometry)
+      {
+        case GeometryElement element:
+          foreach (var g in element.SelectMany(x => GetStableFaceReferences(x, document, uniqueId)))
+            yield return g;
+          yield break;
+
+        case GeometryInstance instance:
+          foreach (var g in GetStableFaceReferences(instance.GetInstanceGeometry(), document, uniqueId))
+            yield return $"{uniqueId}:{instanceIndex}:INSTANCE:{g}";
+
+          instanceIndex++;
+          yield break;
+
+        case Mesh mesh:
+          yield break;
+
+        case Solid solid:
+          foreach (var face in solid.Faces.Cast<Face>())
+          {
+            if (face.Reference is Reference reference)
+              yield return reference.ConvertToStableRepresentation(document);
+          }
+
+          yield break;
+
+        case Curve curve:
+          yield break;
+
+        case PolyLine polyline:
+          yield break;
+      }
+    }
+
+    static IEnumerable<string> GetStableEdgeReferences(GeometryObject geometry, Document document, string uniqueId)
+    {
+      int instanceIndex = 0;
+      switch (geometry)
+      {
+        case GeometryElement element:
+          foreach (var g in element.SelectMany(x => GetStableEdgeReferences(x, document, uniqueId)))
+            yield return g;
+          yield break;
+
+        case GeometryInstance instance:
+          foreach (var g in GetStableEdgeReferences(instance.GetInstanceGeometry(), document, uniqueId))
+            yield return $"{uniqueId}:{instanceIndex}:INSTANCE:{g}";
+
+          instanceIndex++;
+          yield break;
+
+        case Mesh mesh:
+          yield break;
+
+        case Solid solid:
+          foreach (var edge in solid.Edges.Cast<Edge>())
+          {
+            if (edge.Reference is Reference reference)
+            {
+              if (reference.ElementReferenceType != ElementReferenceType.REFERENCE_TYPE_LINEAR)
+                continue;
+
+              var stable = reference.ConvertToStableRepresentation(document);
+              yield return stable;
+            }
+          }
+
+          yield break;
+
+        case Curve curve:
+          yield break;
+
+        case PolyLine polyline:
+          yield break;
+      }
+    }
+
+    public static IEnumerable<Reference> GetFaceReferences(this GeometryObject geometry, Element element)
+    {
+      var document = element.Document;
+      var uniqueId = element.UniqueId;
+
+      foreach(var stable in GetStableFaceReferences(geometry, document, uniqueId))
+        yield return Reference.ParseFromStableRepresentation(document, stable);
+    }
+
+    public static IEnumerable<Reference> GetEdgeReferences(this GeometryObject geometry, Element element)
+    {
+      var document = element.Document;
+      var uniqueId = element.UniqueId;
+
+      foreach (var stable in GetStableEdgeReferences(geometry, document, uniqueId))
+        yield return Reference.ParseFromStableRepresentation(document, stable);
+    }
+
+    public static IEnumerable<Reference> GetEdgeEndPointReferences(this GeometryObject geometry, Element element)
+    {
+      var document = element.Document;
+      var uniqueId = element.UniqueId;
+
+      foreach (var stable in GetStableEdgeReferences(geometry, document, uniqueId))
+      {
+        yield return Reference.ParseFromStableRepresentation(document, $"{stable}/0");
+        yield return Reference.ParseFromStableRepresentation(document, $"{stable}/1");
+      }
+    }
+    #endregion
   }
 }
