@@ -506,7 +506,7 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    Point Point
+    public Point Point
     {
       get
       {
@@ -751,7 +751,7 @@ namespace RhinoInside.Revit.GH.Types
     public GeometryFace() { }
     public GeometryFace(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
 
-    Brep Brep
+    public Brep PolySurface
     {
       get
       {
@@ -767,7 +767,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      return Brep is Brep brep ?
+      return PolySurface is Brep brep ?
       (
         xform == Transform.Identity ?
         brep.GetBoundingBox(true) :
