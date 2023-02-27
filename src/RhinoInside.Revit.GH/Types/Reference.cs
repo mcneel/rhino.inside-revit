@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected Reference(ARDB.Document doc, object value) : base(doc, value) { }
 
-    protected ARDB.Reference GetReference(ARDB.Reference reference)
+    protected internal ARDB.Reference GetAbsoluteReference(ARDB.Reference reference)
     {
       if (reference.LinkedElementId == ARDB.ElementId.InvalidElementId)
       {
@@ -191,12 +191,12 @@ namespace RhinoInside.Revit.GH.Types
       if (reference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
         throw new ArgumentException("Invalid ElementReferenceType", nameof(reference));
 
-      return Element.FromReference(ReferenceDocument, GetReference(reference)) as T;
+      return Element.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
     }
 
     internal T GetGeometryObjectFromReference<T>(ARDB.Reference reference) where T : GeometryObject
     {
-      return GeometryObject.FromReference(ReferenceDocument, GetReference(reference)) as T;
+      return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
     }
   }
 }

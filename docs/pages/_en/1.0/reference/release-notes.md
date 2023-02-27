@@ -13,6 +13,7 @@ group: Deployment & Configs
 ### RC
 
 - Added 'Add Elevation Marker' component.
+- Added 'Add Component (Work Plane)'.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

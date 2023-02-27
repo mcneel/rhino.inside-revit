@@ -6,7 +6,6 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using System.Runtime.CompilerServices;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Workset")]

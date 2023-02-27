@@ -90,38 +90,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     {
       if (sketchPlane is null) return false;
 
-      bool pinned = sketchPlane.Pinned;
-      sketchPlane.Pinned = false;
-
-      var plane0 = sketchPlane.GetPlane();
-      var plane1 = plane;
-      {
-        if (!plane0.Normal.IsParallelTo(plane1.Normal))
-        {
-          var axisDirection = plane0.Normal.CrossProduct(plane1.Normal);
-          double angle = plane0.Normal.AngleTo(plane1.Normal);
-
-          using (var axis = ARDB.Line.CreateUnbound(plane0.Origin, axisDirection))
-            ARDB.ElementTransformUtils.RotateElement(sketchPlane.Document, sketchPlane.Id, axis, angle);
-
-          plane0 = sketchPlane.GetPlane();
-        }
-
-        {
-          double angle = plane0.XVec.AngleOnPlaneTo(plane1.XVec, plane1.Normal);
-          if (angle != 0.0)
-          {
-            using (var axis = ARDB.Line.CreateUnbound(plane0.Origin, plane1.Normal))
-              ARDB.ElementTransformUtils.RotateElement(sketchPlane.Document, sketchPlane.Id, axis, angle);
-          }
-        }
-
-        var trans = plane1.Origin - plane0.Origin;
-        if (!trans.IsZeroLength())
-          ARDB.ElementTransformUtils.MoveElement(sketchPlane.Document, sketchPlane.Id, trans);
-      }
-
-      sketchPlane.Pinned = pinned;
+      sketchPlane.SetLocation(plane.Origin, plane.XVec, plane.YVec);
       return true;
     }
 

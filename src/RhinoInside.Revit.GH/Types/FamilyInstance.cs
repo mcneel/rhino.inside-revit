@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Component")]
   public class FamilyInstance : InstanceElement,
     IGH_FamilyInstance,
-    IHostObjectAccess,
+    //IHostObjectAccess,
     Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.FamilyInstance);
@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if(Value is ARDB.FamilyInstance instance && instance.Location is ARDB.LocationPoint location)
+        if (Value is ARDB.FamilyInstance instance && instance.Location is ARDB.LocationPoint location)
         {
           if (instance.Symbol.Family.FamilyPlacementType == ARDB.FamilyPlacementType.TwoLevelsBased)
           {
@@ -270,8 +270,31 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IHostObjectAccess
-    public HostObject Host => Value is ARDB.FamilyInstance instance ?
-      HostObject.FromElement(instance.Host) as HostObject : default;
+    public GraphicalElement Host
+    {
+      get
+      {
+        if (Value is ARDB.FamilyInstance instance)
+        {
+          return instance.HostFace is ARDB.Reference reference?
+            GraphicalElement.FromReference(Document, reference) as GraphicalElement :
+            GraphicalElement.FromElement(instance.Host) as GraphicalElement;
+        }
+
+        return default;
+      }
+    }
+
+    public GeometryFace HostFace
+    {
+      get
+      {
+        if (Value is ARDB.FamilyInstance instance && instance.HostFace is ARDB.Reference reference)
+          return GeometryObject.FromReference(Document, reference) as GeometryFace;
+
+        return default;
+      }
+    }
     #endregion
   }
 

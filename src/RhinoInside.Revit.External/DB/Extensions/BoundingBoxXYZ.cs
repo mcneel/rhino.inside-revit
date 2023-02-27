@@ -497,6 +497,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return clipped;
     }
+
+    public static bool IsInside(this BoundingBoxXYZ value, XYZ point)
+    {
+      var (min, max, transform, bounded) = value;
+      var (x, y, z) = transform.Inverse.OfPoint(point);
+
+      if (bounded[BoundsMin, AxisX] && x < min.X) return false;
+      if (bounded[BoundsMax, AxisX] && x > max.X) return false;
+      if (bounded[BoundsMin, AxisY] && y < min.X) return false;
+      if (bounded[BoundsMax, AxisY] && y > max.X) return false;
+      if (bounded[BoundsMin, AxisZ] && z < min.X) return false;
+      if (bounded[BoundsMax, AxisZ] && z > max.X) return false;
+
+      return true;
+    }
   }
 
   public static class OutlineExtension
