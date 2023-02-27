@@ -64,9 +64,9 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridMullionType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
-    <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="Components\Element\Category.cs" />
     <Compile Include="Components\Element\Clone.cs" />
+    <Compile Include="Components\Element\Components\AddComponent-Adaptive.cs" />
     <Compile Include="Components\Element\Flip.cs" />
     <Compile Include="Components\Element\HostObject\SlabShape.cs" />
     <Compile Include="Components\Element\Name.cs" />
