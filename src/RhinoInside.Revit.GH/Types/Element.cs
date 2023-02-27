@@ -543,6 +543,35 @@ namespace RhinoInside.Revit.GH.Types
       );
     }
 
+    protected T GetElement<T>(ARDB.Element element) where T : Element
+    {
+      if (element.IsValid())
+      {
+        if (!Document.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException($"Invalid {typeof(T)} Document", nameof(element));
+
+        return (T)
+          (IsLinked ?
+          Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, element.Id)) :
+          Element.FromElement(element));
+      }
+
+      return null;
+    }
+
+    protected T SetElement<T>(Element element) where T : ARDB.Element
+    {
+      if (element?.IsValid is true)
+      {
+        if (!Document.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException($"Invalid {typeof(T)} Document", nameof(element));
+
+        return (T) element.Value;
+      }
+
+      return null;
+    }
+
     public Element() { }
     internal Element(ARDB.Document doc, ARDB.ElementId id) => SetValue(doc, id);
     protected Element(ARDB.Element element) : base(element?.Document, element)
