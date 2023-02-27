@@ -83,7 +83,8 @@ namespace RhinoInside.Revit.GH.Types
     {
       LoadReferencedData();
 
-      _Transform = default;
+      _GeometryToWorldTransform = default;
+      _WorldToGeometryTransform = default;
 
       if (_ReferenceDocument is object && _Reference is object)
       {
@@ -92,15 +93,15 @@ namespace RhinoInside.Revit.GH.Types
           if (_ReferenceDocument.GetElement(_Reference) is ARDB.Element element)
           {
             var geometryReference = _Reference;
-            if (element is ARDB.RevitLinkInstance link)
+            if (element is ARDB.RevitLinkInstance link && _Reference.LinkedElementId.IsValid())
             {
-              _Transform = link.GetTransform().ToTransform();
+              _GeometryToWorldTransform = link.GetTransform().ToTransform();
               element = link.GetLinkDocument()?.GetElement(_Reference.LinkedElementId);
               geometryReference = _Reference.CreateReferenceInLink(link);
             }
 
-            if (element is ARDB.Instance instance)
-              _Transform = _Transform.HasValue ? _Transform.Value * instance.GetTransform().ToTransform() : instance.GetTransform().ToTransform();
+            if (geometryReference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_NONE && element is ARDB.Instance instance)
+              _GeometryToWorldTransform = _GeometryToWorldTransform.HasValue ? _GeometryToWorldTransform.Value * instance.GetTransform().ToTransform() : instance.GetTransform().ToTransform();
 
             Document = element?.Document;
             return element?.GetGeometryObjectFromReference(geometryReference);
@@ -250,14 +251,27 @@ namespace RhinoInside.Revit.GH.Types
     protected Mesh[] _Meshes = null;
     protected double _LevelOfDetail = double.NaN;
 
-    Transform? _Transform = default;
-    protected Transform Transform => _Transform ?? Transform.Identity;
-    protected bool HasTransform => _Transform.HasValue;
+    Transform? _GeometryToWorldTransform = default;
+    public Transform GeometryToWorldTransform => _GeometryToWorldTransform ?? Transform.Identity;
+
+    Transform? _WorldToGeometryTransform = default;
+    public Transform WorldToGeometryTransform => _WorldToGeometryTransform ??
+    (
+      !_GeometryToWorldTransform.HasValue ? Transform.Identity :
+      (
+        _GeometryToWorldTransform.Value.TryGetInverse(out var inverse) ?
+        (_WorldToGeometryTransform = inverse).Value :
+        throw new InvalidOperationException("Transform is not invertile")
+      )
+    );
+
+    protected bool HasTransform => _GeometryToWorldTransform.HasValue;
 
     void IGH_PreviewMeshData.DestroyPreviewMeshes()
     {
       _ClippingBox = null;
-      _Transform = null;
+      _GeometryToWorldTransform = null;
+      _WorldToGeometryTransform = null;
       _LevelOfDetail = double.NaN;
 
       _Point = null;
@@ -284,7 +298,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static GeometryObject FromReference(ARDB.Document document, ARDB.Reference reference)
     {
-      switch (reference.ElementReferenceType)
+      switch (reference?.ElementReferenceType)
       {
         case ARDB.ElementReferenceType.REFERENCE_TYPE_NONE:
           return new GeometryElement(document, reference);
@@ -344,7 +358,7 @@ namespace RhinoInside.Revit.GH.Types
     public new ARDB.GeometryElement Value => base.Value as ARDB.GeometryElement;
     public override ARDB.Reference GetDefaultReference()
     {
-      return GetReference(Document?.GetElement(Id)?.GetDefaultReference());
+      return GetAbsoluteReference(Document?.GetElement(Id)?.GetDefaultReference());
     }
 
     public GeometryElement() { }
@@ -384,7 +398,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value?.GetBoundingBox()?.ToBox() is Box box)
       {
-        if (HasTransform) box.Transform(Transform);
+        if (HasTransform) box.Transform(GeometryToWorldTransform);
         return xform == Transform.Identity ?
           box.BoundingBox :
           box.GetBoundingBox(xform);
@@ -515,7 +529,7 @@ namespace RhinoInside.Revit.GH.Types
           _Point = new Point(point.Coord.ToPoint3d());
 
           if (HasTransform)
-            _Point.Transform(Transform);
+            _Point.Transform(GeometryToWorldTransform);
         }
 
         return _Point;
@@ -599,7 +613,7 @@ namespace RhinoInside.Revit.GH.Types
           _Wires = new Curve[] { curve.ToCurve() };
 
           if (HasTransform)
-            _Wires[0].Transform(Transform);
+            _Wires[0].Transform(GeometryToWorldTransform);
         }
 
         return _Wires?.FirstOrDefault();
@@ -757,7 +771,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value?.ToBrep() is Brep brep)
         {
-          if (HasTransform) brep.Transform(Transform);
+          if (HasTransform) brep.Transform(GeometryToWorldTransform);
           return brep;
         }
 
@@ -787,7 +801,7 @@ namespace RhinoInside.Revit.GH.Types
           if (HasTransform)
           {
             foreach (var wire in _Wires)
-              wire.Transform(Transform);
+              wire.Transform(GeometryToWorldTransform);
           }
         }
 
@@ -804,7 +818,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           _Meshes = Enumerable.Repeat(face, 1).GetPreviewMeshes(Document, meshingParameters).ToArray();
 
-          var transform = Transform;
+          var transform = GeometryToWorldTransform;
           foreach (var mesh in _Meshes)
           {
             if (HasTransform) mesh.Transform(transform);
@@ -855,7 +869,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           if (face.ToBrep() is Brep brep)
           {
-            if (HasTransform) brep.Transform(Transform);
+            if (HasTransform) brep.Transform(GeometryToWorldTransform);
             target = (Q) (object) new GH_Surface(brep.Surfaces.FirstOrDefault());
           }
           else target = default;
@@ -865,7 +879,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           if (face.ToBrep() is Brep brep)
           {
-            if (HasTransform) brep.Transform(Transform);
+            if (HasTransform) brep.Transform(GeometryToWorldTransform);
             target = (Q) (object) new GH_Brep(brep);
           }
           else target = default;
