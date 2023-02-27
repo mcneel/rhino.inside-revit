@@ -102,6 +102,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
     #endregion
 
+    #region SketchPlane
+    public static void GetLocation(this SketchPlane sketchPlane, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    {
+      using (var plane = sketchPlane.GetPlane())
+      {
+        origin = plane.Origin;
+        basisX = plane.XVec;
+        basisY = plane.YVec;
+      }
+    }
+
+    public static void SetLocation(this SketchPlane sketchPlane, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY)
+    {
+      ElementLocation.SetLocation(sketchPlane, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
+    }
+    #endregion
+
     #region Instance
     public static void GetLocation(this Instance instance, out XYZ origin, out XYZ basisX, out XYZ basisY)
     {
