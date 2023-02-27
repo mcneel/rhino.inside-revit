@@ -99,7 +99,7 @@ namespace RhinoInside.Revit.External.DB
       return hashCode;
     }
 
-    public override bool Equals(object obj) => obj is GlobalReferenceId other && Equals(other);
+    public override bool Equals(object obj) => obj is GeometryObjectId other && Equals(other);
     public bool Equals(GeometryObjectId other) => this == other;
 
     public static bool operator ==(GeometryObjectId left, GeometryObjectId right)
@@ -350,16 +350,5 @@ namespace RhinoInside.Revit.External.DB
       return false;
     }
     #endregion
-  }
-
-  readonly struct GlobalReferenceId : IEquatable<GlobalReferenceId>
-  {
-    public readonly string Id;
-    public GlobalReferenceId(string id) => Id = id;
-
-    public override string ToString() => Id;
-    public override int GetHashCode() => Id.GetHashCode();
-    public override bool Equals(object obj) => obj is GlobalReferenceId other && Equals(other);
-    public bool Equals(GlobalReferenceId other) => Id == other.Id;
   }
 }
