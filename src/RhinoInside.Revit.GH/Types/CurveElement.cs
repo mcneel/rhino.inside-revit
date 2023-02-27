@@ -93,14 +93,11 @@ namespace RhinoInside.Revit.GH.Types
 
     public GraphicsStyle LineStyle
     {
-      get => GraphicsStyle.FromElement(Value?.LineStyle) as GraphicsStyle;
+      get => GetElement<GraphicsStyle>(Value?.LineStyle);
       set
       {
         if (value is object && Value is ARDB.CurveElement element)
-        {
-          AssertValidDocument(value, nameof(GraphicsStyle));
-          element.LineStyle = value.Value;
-        }
+          element.LineStyle = SetElement<ARDB.GraphicsStyle>(value);
       }
     }
     #endregion
@@ -120,6 +117,8 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+
+    public SketchPlane SketchPlane => GetElement<SketchPlane>(Value?.SketchPlane);
     #endregion
   }
 }
