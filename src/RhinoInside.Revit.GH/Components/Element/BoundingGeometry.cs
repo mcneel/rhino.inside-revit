@@ -271,7 +271,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
       using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = invisibles ?? false })
       {
-        if (element.Value.GetGeometry(options) is ARDB.GeometryObject geometry)
+        if (element.Value.GetGeometry(options) is ARDB.GeometryElement geometry)
         {
           Params.TrySetDataList(DA, "Faces", () =>
             geometry.GetFaceReferences(element.Value).Select(element.GetGeometryObjectFromReference<Types.GeometryFace>));
