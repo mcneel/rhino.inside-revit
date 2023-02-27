@@ -67,6 +67,7 @@
     <Compile Include="Components\Element\Category.cs" />
     <Compile Include="Components\Element\Clone.cs" />
     <Compile Include="Components\Element\Components\AddComponent-Adaptive.cs" />
+    <Compile Include="Components\Element\Components\AddComponent-Location.cs" />
     <Compile Include="Components\Element\Flip.cs" />
     <Compile Include="Components\Element\HostObject\SlabShape.cs" />
     <Compile Include="Components\Element\Name.cs" />
@@ -125,7 +126,6 @@
     <Compile Include="Components\Element\Opening\AddWallOpening.cs" />
     <Compile Include="Components\Element\Opening\OpeningBoundaryProfile.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
-    <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
     <Compile Include="Components\Element\Floor\ByOutline.cs" />
     <Compile Include="Components\Element\Grid\ByCurve.cs" />
     <Compile Include="Components\Element\Level\ByElevation.cs" />
