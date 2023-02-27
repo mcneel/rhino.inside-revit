@@ -124,24 +124,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </summary>
     /// <param name="solid"></param>
     /// <param name="point"></param>
+    /// <param name="edge"></param>
     /// <returns>Geometric information if projection is successful; if projection fails returns null</returns>
-    public static IntersectionResult Project(this Solid solid, XYZ point)
+    public static IntersectionResult Project(this Solid solid, XYZ point, out Edge edge)
     {
-      // Project on faces
+      // Project on edges
       var intersection = default(IntersectionResult);
-      intersection = solid.Faces.Cast<Face>().
-        Select(x => x.Project(point)).
-        Where(x => x is object).
-        OrderBy(x => x.Distance).
-        FirstOrDefault();
-
-      if (intersection is object) return intersection;
 
       // Project on edges
-      intersection = solid.Edges.Cast<Edge>().
-        Select(x => x.Project(point)).
-        Where(x => x is object).
-        OrderBy(x => x.Distance).
+      (intersection, edge) = solid.Edges.Cast<Edge>().
+        Select(x => (Intersection: x.Project(point), Edge: x)).
+        Where(x => x.Intersection is object).
+        OrderBy(x => x.Intersection.Distance).
         FirstOrDefault();
 
       return intersection;
@@ -171,6 +165,34 @@ namespace RhinoInside.Revit.External.DB.Extensions
         Select(x => (Intersection: x.Project(point, out var f), Face: f)).
         Where(x => x.Intersection is object).
         OrderBy(x => x.Intersection.Distance).
+        FirstOrDefault();
+
+      return intersection;
+    }
+
+    /// <summary>
+    /// Projects the specified point on the solid.
+    /// </summary>
+    /// <param name="solid"></param>
+    /// <param name="point"></param>
+    /// <returns>Geometric information if projection is successful; if projection fails returns null</returns>
+    public static IntersectionResult Project(this Solid solid, XYZ point)
+    {
+      // Project on faces
+      var intersection = default(IntersectionResult);
+      intersection = solid.Faces.Cast<Face>().
+        Select(x => x.Project(point)).
+        Where(x => x is object).
+        OrderBy(x => x.Distance).
+        FirstOrDefault();
+
+      if (intersection is object) return intersection;
+
+      // Project on edges
+      intersection = solid.Edges.Cast<Edge>().
+        Select(x => x.Project(point)).
+        Where(x => x is object).
+        OrderBy(x => x.Distance).
         FirstOrDefault();
 
       return intersection;
@@ -423,5 +445,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static void SetParameter(this IntersectionResult intersection, double parameter) =>
       SetPropertyValue(intersection, nameof(IntersectionResult.Parameter), parameter);
+
+    public static void SetXYZPoint(this IntersectionResult intersection, XYZ xyzPoint) =>
+      SetPropertyValue(intersection, nameof(IntersectionResult.XYZPoint), xyzPoint);
   }
 }
