@@ -293,7 +293,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           var stable = reference.ConvertToStableRepresentation(document);
           return (stable.EndsWith("/0") || stable.EndsWith("/1")) ?
-            (GeometryObject) GeometryPoint.FromReference(document, reference) :
+            (GeometryObject) new GeometryPoint(document, reference) :
             (GeometryObject) new GeometryCurve(document, reference);
         }
 
@@ -453,7 +453,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public static new GeometryPoint FromReference(ARDB.Document document, ARDB.Reference reference)
     {
-      if (document.GetGeometryObjectFromReference(reference, out var transform) is ARDB.GeometryObject geometry)
+      var stable = reference.ConvertToStableRepresentation(document);
+      if (reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR && stable.EndsWith("/0") || stable.EndsWith("/1"))
+      {
+        return new GeometryPoint(document, reference);
+      }
+      else if (document.GetGeometryObjectFromReference(reference, out var transform) is ARDB.GeometryObject geometry)
       {
         using (geometry)
         {
@@ -469,7 +474,7 @@ namespace RhinoInside.Revit.GH.Types
                   var points = new ARDB.XYZ[] { worldCurve.GetEndPoint(0), worldCurve.GetEndPoint(1) };
                   int end = result.XYZPoint.DistanceTo(points[0]) < result.XYZPoint.DistanceTo(points[1]) ? 0 : 1;
 
-                  var stable = reference.ConvertToStableRepresentation(document);
+                  stable = reference.ConvertToStableRepresentation(document);
                   reference = ARDB.Reference.ParseFromStableRepresentation(document, $"{stable}/{end}");
                   return new GeometryPoint(document, reference);
                 }
@@ -483,7 +488,6 @@ namespace RhinoInside.Revit.GH.Types
                   var points = new ARDB.XYZ[] { worldCurve.GetEndPoint(0), worldCurve.GetEndPoint(1) };
                   int end = result.XYZPoint.DistanceTo(points[0]) < result.XYZPoint.DistanceTo(points[1]) ? 0 : 1;
 
-                  var stable = reference.ConvertToStableRepresentation(document);
                   reference = ARDB.Reference.ParseFromStableRepresentation(document, $"{stable}/{end}");
                   return new GeometryPoint(document, reference);
                 }
