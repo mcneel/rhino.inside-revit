@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       name: "Add Component (Adaptive)",
       nickname: "A-Component",
-      description: "Given a collection of Points, it adds an AdaptiveComponent element to the active Revit document",
+      description: "Given a collection of Points, it adds an adaptive component element to the active Revit document",
       category: "Revit",
       subCategory: "Build"
     )
@@ -40,6 +40,8 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.FamilySymbol type
     )
     {
+      (Types.FamilySymbol.FromElement(type) as Types.FamilySymbol).AssertPlacementType(ARDB.FamilyPlacementType.Adaptive);
+
       var adaptivePoints = points.ConvertAll(GeometryEncoder.ToXYZ);
 
       if (!type.IsActive)

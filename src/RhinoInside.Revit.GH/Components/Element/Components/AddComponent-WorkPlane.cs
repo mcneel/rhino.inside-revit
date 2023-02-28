@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           Name = "Work Plane",
           NickName = "WP",
-          Description = "Work Plane Reference. Datum and Face references are accepted.",
+          Description = $"Work Plane.{Environment.NewLine}Face references are also accepted.",
           Optional = true
         }, ParamRelevance.Primary
       ),
@@ -129,15 +129,15 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.GetData(DA, "Type", out Types.FamilySymbol type, x => x.IsValid)) return;
       if (!Parameters.Level.GetDataOrDefault(this, DA, "Schedule Level", out Types.Level level, doc, location.Value.Origin.Z)) return;
       if (!Params.TryGetData(DA, "Work Plane", out Types.GeometryObject workPlane)) return;
-      var reference = default(ARDB.Reference);
 
-      if (type.Value.Family.FamilyPlacementType != ARDB.FamilyPlacementType.WorkPlaneBased)
-            throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.DisplayName}' is not a Work Plane-Based type.");
+      type.AssertPlacementType(ARDB.FamilyPlacementType.WorkPlaneBased);
 
       var tol = GeometryTolerance.Model;
       var origin = location.Value.Origin.ToXYZ();
       var basisX = location.Value.XAxis.ToXYZ();
       var basisY = location.Value.YAxis.ToXYZ();
+
+      var reference = default(ARDB.Reference);
       bool associatedWorkPlane = true;
 
       ReconstructElement<ARDB.SketchPlane>

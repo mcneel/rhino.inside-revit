@@ -100,19 +100,6 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE,
     };
 
-    static void AssertIsValidType(ARDB.FamilySymbol type)
-    {
-      if (type.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_StructuralFraming)
-        throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid structural framing type.");
-
-      switch (type.Family.FamilyPlacementType)
-      {
-        case ARDB.FamilyPlacementType.CurveDrivenStructural: return;
-      }
-
-      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid curve driven structural type.");
-    }
-
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
@@ -133,7 +120,7 @@ namespace RhinoInside.Revit.GH.Components
             throw new RuntimeArgumentException("Curve", $"Curve should be a line like curve.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
-          AssertIsValidType(type.Value);
+          type.AssertPlacementType(ARDB.FamilyPlacementType.CurveDrivenStructural);
 
           var bbox = curve.GetBoundingBox(accurate: true);
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Reference Level", out Types.Level level, doc, bbox.Center.Z)) return null;
@@ -159,8 +146,15 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
-    ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.Curve curve, ARDB.FamilySymbol type)
+    ARDB.FamilyInstance Create
+    (
+      ARDB.Document doc,
+      ARDB.Curve curve,
+      ARDB.FamilySymbol type
+    )
     {
+      if (!type.IsActive) type.Activate();
+
       var list = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>(1)
       {
         new Autodesk.Revit.Creation.FamilyInstanceCreationData
@@ -173,11 +167,16 @@ namespace RhinoInside.Revit.GH.Components
       };
 
       var ids = doc.Create().NewFamilyInstances2(list);
-      var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+      if (ids.Count == 1)
+      {
+        var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
 
-      // We turn analytical model off by default
-      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
-      return instance;
+        // We turn analytical model off by default
+        instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        return instance;
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is not a valid curve driven structural type.");
     }
 
     ARDB.FamilyInstance Reconstruct
@@ -240,10 +239,7 @@ namespace RhinoInside.Revit.GH.Components
         if (!locationCurve.Curve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
         {
           curve.TryGetLocation(out var origin, out var basisX, out var basisY);
-
-          brace.Pinned = false;
           brace.SetLocation(origin, basisX, basisY);
-
           locationCurve.Curve = curve;
         }
       }

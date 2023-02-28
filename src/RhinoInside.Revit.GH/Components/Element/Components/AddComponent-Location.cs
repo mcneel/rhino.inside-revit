@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.BuiltInParameter.FAMILY_LEVEL_PARAM,
     };
 
-    void AssertIsValidType(ARDB.FamilySymbol type, ARDB.Element host)
+    void AssertValidType(ARDB.FamilySymbol type, ARDB.Element host)
     {
       var family = type.Family;
       switch (family.FamilyPlacementType)
@@ -145,10 +145,22 @@ namespace RhinoInside.Revit.GH.Components
           }
           return;
 
+        case ARDB.FamilyPlacementType.ViewBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a view-base type.{Environment.NewLine}Consider use 'Add Detail Item' component.");
+
+        case ARDB.FamilyPlacementType.CurveBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a curve based type.{Environment.NewLine}Consider use 'Add Component (Curve)' component.");
+
+        case ARDB.FamilyPlacementType.CurveDrivenStructural:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a structural curve based type.{Environment.NewLine}Consider use 'Add Structural Beam' or 'Add Structural Brace' component.");
+
         case ARDB.FamilyPlacementType.WorkPlaneBased:
           if (!(host is null || host is ARDB.SketchPlane || host is ARDB.DatumPlane))
             throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' should be hosted on a Work Plane.");
           return;
+
+        case ARDB.FamilyPlacementType.Adaptive:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is an adaptive family type.{Environment.NewLine}Consider use 'Add Component (Adaptive)' component.");
       }
 
       throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid one-level or work-plane based type.");
@@ -162,14 +174,13 @@ namespace RhinoInside.Revit.GH.Components
       (
         doc.Value, _Component_, component =>
         {
-          var tol = GeometryTolerance.Model;
-
           // Input
           if (!Params.GetData(DA, "Location", out Plane? location, x => x.IsValid)) return null;
           if (!Params.GetData(DA, "Type", out Types.FamilySymbol type, x => x.IsValid)) return null;
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Level", out Types.Level level, doc, location.Value.Origin.Z)) return null;
           if (!Params.TryGetData(DA, "Host", out Types.GraphicalElement host)) return null;
 
+          var tol = GeometryTolerance.Model;
           var levelElement = level?.Value;
           var hostElement = host?.Value;
           if (hostElement is ARDB.Level hostLevel)
@@ -177,7 +188,7 @@ namespace RhinoInside.Revit.GH.Components
             levelElement = hostLevel;
             hostElement = default;
           }
-          AssertIsValidType(type.Value, hostElement);
+          AssertValidType(type.Value, hostElement);
 
           // Compute
           component = Reconstruct

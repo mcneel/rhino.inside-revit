@@ -48,9 +48,9 @@ namespace RhinoInside.Revit.GH.Types
         target = (Q) (object) GetReference();
         return true;
       }
-      else if (GetReference() is object && typeof(IGH_Element).IsAssignableFrom(typeof(Q)))
+      else if (GetReference() is ARDB.Reference reference && typeof(IGH_Element).IsAssignableFrom(typeof(Q)))
       {
-        target = (Q) (object) (Element.FromReference(ReferenceDocument, GetReference()) is Q goo ? goo : default);
+        target = (Q) (object) (Element.FromReference(ReferenceDocument, reference) is Q element ? element : default);
         return true;
       }
 
@@ -60,6 +60,8 @@ namespace RhinoInside.Revit.GH.Types
 
     #region DocumentObject
     public override string DisplayName => GetType().GetCustomAttribute<NameAttribute>().Name;
+
+    public override object ScriptVariable() => Value;
 
     public new ARDB.GeometryObject Value
     {
@@ -355,6 +357,8 @@ namespace RhinoInside.Revit.GH.Types
   [Name("Element")]
   public class GeometryElement : GeometryObject, IGH_PreviewData
   {
+    public override object ScriptVariable() => base.Value;
+
     public new ARDB.GeometryElement Value => base.Value as ARDB.GeometryElement;
     public override ARDB.Reference GetDefaultReference()
     {
@@ -364,6 +368,47 @@ namespace RhinoInside.Revit.GH.Types
     public GeometryElement() { }
     public GeometryElement(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
 
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      if (Value?.GetBoundingBox()?.ToBox() is Box box)
+      {
+        if (HasTransform) box.Transform(GeometryToWorldTransform);
+        return xform == Transform.Identity ?
+          box.BoundingBox :
+          box.GetBoundingBox(xform);
+      }
+
+      return NaN.BoundingBox;
+    }
+
+    #region IGH_PreviewData
+    void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (!IsValid) return;
+
+      var bbox = ClippingBox;
+      if (!bbox.IsValid)
+        return;
+
+      args.Pipeline.DrawBoxCorners(bbox, args.Color);
+    }
+    #endregion
+
+    #region Properties
+    public override string DisplayName
+    {
+      get
+      {
+        switch (Element.FromReference(ReferenceDocument, GetReference()))
+        {
+          case null: return $"Null {base.DisplayName}";
+          case Element element: return element.DisplayName;
+        }
+      }
+    }
+    #endregion
+
+    #region Casting
     public override bool CastTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.GeometryElement)))
@@ -393,37 +438,14 @@ namespace RhinoInside.Revit.GH.Types
 
       return base.CastFrom(source);
     }
-
-    public override BoundingBox GetBoundingBox(Transform xform)
-    {
-      if (Value?.GetBoundingBox()?.ToBox() is Box box)
-      {
-        if (HasTransform) box.Transform(GeometryToWorldTransform);
-        return xform == Transform.Identity ?
-          box.BoundingBox :
-          box.GetBoundingBox(xform);
-      }
-
-      return NaN.BoundingBox;
-    }
-
-    #region IGH_PreviewData
-    void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
-    {
-      if (!IsValid) return;
-
-      var bbox = ClippingBox;
-      if (!bbox.IsValid)
-        return;
-
-      args.Pipeline.DrawBoxCorners(bbox, args.Color);
-    }
     #endregion
   }
 
   [Name("Point")]
   public class GeometryPoint : GeometryObject, IGH_PreviewData
   {
+    public override object ScriptVariable() => Value;
+
     public new ARDB.Point Value
     {
       get
@@ -452,7 +474,6 @@ namespace RhinoInside.Revit.GH.Types
         return base.Value as ARDB.Point;
       }
     }
-    public override object ScriptVariable() => Value;
 
     public GeometryPoint() { }
     public GeometryPoint(ARDB.Document document, ARDB.XYZ xyz) : base(document, ARDB.Point.Create(xyz)) { }
@@ -582,6 +603,8 @@ namespace RhinoInside.Revit.GH.Types
   [Name("Curve")]
   public class GeometryCurve : GeometryObject, IGH_PreviewData, IGH_Goo
   {
+    public override object ScriptVariable() => base.Value;
+
     public new ARDB.Curve Value
     {
       get
@@ -683,54 +706,39 @@ namespace RhinoInside.Revit.GH.Types
         target = (Q) (object) (base.Value as ARDB.Curve);
         return true;
       }
-      if (typeof(Q).IsAssignableFrom(typeof(ARDB.Edge)))
+      else if (typeof(Q).IsAssignableFrom(typeof(ARDB.Edge)))
       {
         target = (Q) (object) (base.Value as ARDB.Edge);
         return true;
       }
-      else if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
+      if (Curve is Curve curve)
       {
-        if (Curve is Curve curve)
+        var tol = GeometryTolerance.Model;
+        if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
         {
-          target = (Q) (object) new GH_Line(new Line(curve.PointAtStart, curve.PointAtEnd));
-          return true;
+          target = curve.TryGetPlane(out var plane, tol.VertexTolerance) ? (Q) (object) new GH_Plane(plane) : default;
+          return target is object;
         }
-
-        target = default;
-        return false;
-      }
-      else if (typeof(Q).IsAssignableFrom(typeof(GH_Arc)))
-      {
-        if (Curve is ArcCurve curve)
+        else if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
         {
-          target = (Q) (object) new GH_Arc(curve.Arc);
-          return true;
+          target = curve.TryGetLine(out var line, tol.VertexTolerance) ? (Q) (object) new GH_Line(line) : default;
+          return target is object;
         }
-
-        target = default;
-        return false;
-      }
-      else if (typeof(Q).IsAssignableFrom(typeof(GH_Circle)))
-      {
-        if (Curve is ArcCurve curve && curve.IsCompleteCircle)
+        else if (typeof(Q).IsAssignableFrom(typeof(GH_Arc)))
         {
-          target = (Q) (object) new GH_Circle(new Circle(curve.Arc.Plane, curve.Arc.Radius));
-          return true;
+          target = curve.TryGetArc(out var arc, tol.VertexTolerance) ? (Q) (object) new GH_Arc(arc) : default;
+          return target is object;
         }
-
-        target = default;
-        return false;
-      }
-      else if (typeof(Q).IsAssignableFrom(typeof(GH_Curve))) 
-      {
-        if (Curve is Curve curve)
+        else if (typeof(Q).IsAssignableFrom(typeof(GH_Circle)))
+        {
+          target = curve.TryGetCircle(out var circle, tol.VertexTolerance) ? (Q) (object) new GH_Circle(new Circle(circle.Plane, circle.Radius)) : default;
+          return target is object;
+        }
+        else if (typeof(Q).IsAssignableFrom(typeof(GH_Curve)))
         {
           target = (Q) (object) new GH_Curve(curve);
           return true;
         }
-
-        target = default;
-        return false;
       }
 
       return base.CastTo(out target);
@@ -760,10 +768,18 @@ namespace RhinoInside.Revit.GH.Types
   [Name("Face")]
   public class GeometryFace : GeometryObject, IGH_PreviewData
   {
+    public override object ScriptVariable() => base.Value;
+
     public new ARDB.Face Value => base.Value as ARDB.Face;
 
     public GeometryFace() { }
     public GeometryFace(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
+
+    public static new GeometryFace FromReference(ARDB.Document document, ARDB.Reference reference)
+    {
+      return reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE ?
+        new GeometryFace(document, reference) : null;
+    }
 
     public Brep PolySurface
     {
@@ -863,29 +879,28 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (Value is ARDB.Face face)
       {
-        var element = GetReference() is ARDB.Reference reference ? Document?.GetElement(reference) : null;
-
-        if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
+        if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
         {
-          if (face.ToBrep() is Brep brep)
+          if (face is ARDB.PlanarFace planarFace)
           {
-            if (HasTransform) brep.Transform(GeometryToWorldTransform);
-            target = (Q) (object) new GH_Surface(brep.Surfaces.FirstOrDefault());
+            var plane = new Plane(planarFace.Origin.ToPoint3d(), planarFace.XVector.ToVector3d(), planarFace.YVector.ToVector3d());
+            if (HasTransform) plane.Transform(GeometryToWorldTransform);
+            target = (Q) (object) new GH_Plane(plane);
           }
           else target = default;
           return true;
+        }
+        else if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
+        {
+          target = PolySurface is Brep brep && brep.Surfaces.Count == 1 ? (Q) (object) new GH_Surface(brep.Surfaces.FirstOrDefault()) : default;
+          return target is object;
         }
         else if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
         {
-          if (face.ToBrep() is Brep brep)
-          {
-            if (HasTransform) brep.Transform(GeometryToWorldTransform);
-            target = (Q) (object) new GH_Brep(brep);
-          }
-          else target = default;
-          return true;
+          target = PolySurface is Brep brep && brep.Surfaces.Count > 0 ? (Q) (object) new GH_Brep(brep) : default;
+          return target is object;
         }
-        if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
+        else if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
         {
           if (_Meshes is object)
           {
@@ -893,11 +908,6 @@ namespace RhinoInside.Revit.GH.Types
             target = (Q) (object) new GH_Mesh(m);
           }
           else target = default;
-          return true;
-        }
-        else if (element is object && typeof(Q).IsAssignableFrom(typeof(Element)))
-        {
-          target = (Q) (object) Element.FromElement(element);
           return true;
         }
       }
