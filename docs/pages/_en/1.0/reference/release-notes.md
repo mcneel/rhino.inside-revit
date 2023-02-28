@@ -23,7 +23,7 @@ group: Deployment & Configs
 - Added {% include ltr/comp.html uuid='2101fff6' %} component.
 - Added {% include ltr/comp.html uuid='08586f77' %}.
 
-{% include ltr/release-header.html title="v1.12" version="v1.12.8445.26409" time="02/14/2023" %}
+{% include ltr/release-header.html title="v1.12" version="v1.12.8449.6358" time="02/28/2023" %}
 
 - Added {% include ltr/comp.html uuid='71f014de' %} component.
 - Added {% include ltr/comp.html uuid='3e2a753b' %} component.
