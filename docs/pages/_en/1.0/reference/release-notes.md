@@ -12,13 +12,16 @@ group: Deployment & Configs
 
 ### RC
 
-- Added 'Add Elevation Marker' component.
-- Added 'Add Component (Work Plane)'.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 ![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
+
+{% include ltr/release-header.html title="v1.13 RC1" version="v1.13.8445.26954" pre_release=true time="02/28/2023" %}
+
+- Added {% include ltr/comp.html uuid='2101fff6' %} component.
+- Added {% include ltr/comp.html uuid='08586f77' %}.
 
 {% include ltr/release-header.html title="v1.12" version="v1.12.8445.26409" time="02/14/2023" %}
 
