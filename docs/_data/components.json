@@ -1429,15 +1429,39 @@
   }, 
   {
     "desc": "Given a collection of Points, it adds an AdaptiveComponent element to the active Revit document", 
-    "iconsrc": "/static/images/GH/AdaptiveComponentByPoints.png", 
+    "iconsrc": "/static/images/GH/AddComponentAdaptive.png", 
     "icontag": null, 
     "panel": "Build", 
     "since": null, 
     "tab": "Revit", 
     "title": "Add Component (Adaptive)", 
-    "typename": "AdaptiveComponentByPoints", 
+    "typename": "AddComponentAdaptive", 
     "until": null, 
     "uuid": "e8ddc0e4-97e9-4659-9945-e8c77114273d"
+  }, 
+  {
+    "desc": "Given its Location, it adds a component element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddComponentLocation.png", 
+    "icontag": null, 
+    "panel": "Build", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Add Component (Location)", 
+    "typename": "AddComponentLocation", 
+    "until": null, 
+    "uuid": "0c642d7d-897b-479e-8668-91e09222d7b9"
+  }, 
+  {
+    "desc": "Given a Work Plane, it adds a component element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddComponentWorkPlane.png", 
+    "icontag": null, 
+    "panel": "Build", 
+    "since": "1.13", 
+    "tab": "Revit", 
+    "title": "Add Component (Work Plane)", 
+    "typename": "AddComponentWorkPlane", 
+    "until": null, 
+    "uuid": "08586f77-2844-4c0a-925a-200a091cf707"
   }, 
   {
     "desc": "Given its outline curve, it adds a Ceiling element to the active Revit document", 
@@ -2952,18 +2976,6 @@
     "uuid": "91e4d3e1-883a-44d9-a3d2-b836967869e1"
   }, 
   {
-    "desc": "Given its location, it reconstructs a Component element into the active Revit document", 
-    "iconsrc": "/static/images/GH/FamilyInstanceByLocation.png", 
-    "icontag": null, 
-    "panel": "Build", 
-    "since": "1.0", 
-    "tab": "Revit", 
-    "title": "Add Component (Location)", 
-    "typename": "FamilyInstanceByLocation", 
-    "until": null, 
-    "uuid": "0c642d7d-897b-479e-8668-91e09222d7b9"
-  }, 
-  {
     "desc": "Given its outline curve, it adds a Floor element to the active Revit document", 
     "iconsrc": "/static/images/GH/FloorByOutline.png", 
     "icontag": null, 
@@ -3696,14 +3708,14 @@
     "uuid": "3396dbc4-0e8f-4402-969a-ef5a0e30e093"
   }, 
   {
-    "desc": "Deconstruct geometry of given element into simpler geometry", 
+    "desc": "Retrieves geometry references of given element", 
     "iconsrc": null, 
-    "icontag": "D", 
+    "icontag": "E", 
     "panel": "Element", 
-    "since": "1.10", 
+    "since": "1.13", 
     "tab": "Revit", 
-    "title": "Deconstruct Element Geometry", 
-    "typename": "DeconstructElementGeometry", 
+    "title": "Element Geometry References", 
+    "typename": "ElementGeometryReferences", 
     "until": null, 
     "uuid": "bbd8187b-829a-4604-b6bc-de896a9ff62b"
   }, 
@@ -4585,6 +4597,18 @@
   }, 
   {
     "desc": "Given a name, it adds a section view to the active Revit document", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "View", 
+    "since": "1.13", 
+    "tab": "Revit", 
+    "title": "Add Elevation Marker", 
+    "typename": "AddElevationMarker", 
+    "until": null, 
+    "uuid": "2101fff6-0618-418c-ae1e-a3311e942535"
+  }, 
+  {
+    "desc": "Given a name, it adds a section view to the active Revit document", 
     "iconsrc": "/static/images/GH/AddSectionView.png", 
     "icontag": null, 
     "panel": "View", 
@@ -4848,7 +4872,7 @@
     "uuid": "6723beb1-dd99-40be-8da9-13b3812d6b46"
   }, 
   {
-    "desc": "Obtains a set of types that are owned by Family", 
+    "desc": "Obtains the faces of a Host element", 
     "iconsrc": "/static/images/GH/HostObjectFaces.png", 
     "icontag": null, 
     "panel": "Host", 
