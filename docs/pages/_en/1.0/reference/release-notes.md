@@ -18,7 +18,7 @@ group: Deployment & Configs
 
 ![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
 
-{% include ltr/release-header.html title="v1.13 RC1" version="v1.13.8445.26954" pre_release=true time="02/28/2023" %}
+{% include ltr/release-header.html title="v1.13 RC1" version="v1.13.8458.21732" pre_release=true time="02/28/2023" %}
 
 - Added {% include ltr/comp.html uuid='2101fff6' %} component.
 - Added {% include ltr/comp.html uuid='08586f77' %}.
