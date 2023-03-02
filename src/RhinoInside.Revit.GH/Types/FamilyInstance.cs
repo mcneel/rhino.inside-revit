@@ -366,5 +366,46 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     public Family Family => Value is ARDB.FamilySymbol symbol ? new Family(symbol.Family) : default;
+
+    internal void AssertPlacementType(ARDB.FamilyPlacementType placementType)
+    {
+      if (Value?.Family.FamilyPlacementType == placementType)
+        return;
+
+      switch (Value?.Family.FamilyPlacementType)
+      {
+        case ARDB.FamilyPlacementType.Invalid:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is not a valid type.");
+
+        case ARDB.FamilyPlacementType.OneLevelBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a level-based type.{Environment.NewLine}Consider use 'Add Component (Location)' component.");
+
+        case ARDB.FamilyPlacementType.OneLevelBasedHosted:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{Environment.NewLine}Consider use 'Add Component (Location)' component.");
+
+        case ARDB.FamilyPlacementType.TwoLevelsBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{Environment.NewLine}Consider use 'Add Component (Location)' component.");
+
+        case ARDB.FamilyPlacementType.ViewBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a view-base type.{Environment.NewLine}Consider use 'Add Detail Item (Location)' component.");
+
+        case ARDB.FamilyPlacementType.WorkPlaneBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a work plane-based type.{Environment.NewLine}Consider use 'Add Component (Work Plane)' component.");
+
+        case ARDB.FamilyPlacementType.CurveBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a curve based type.{Environment.NewLine}Consider use 'Add Component (Curve)' component.");
+
+        case ARDB.FamilyPlacementType.CurveBasedDetail:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a curve based type.{Environment.NewLine}Consider use 'Add Detail Item (Curve)' component.");
+
+        case ARDB.FamilyPlacementType.CurveDrivenStructural:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a structural curve based type.{Environment.NewLine}Consider use 'Add Structural Beam' or 'Add Structural Brace' component.");
+
+        case ARDB.FamilyPlacementType.Adaptive:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is an adaptive family type.{Environment.NewLine}Consider use 'Add Component (Adaptive)' component.");
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is not a valid {placementType} type.");
+    }
   }
 }

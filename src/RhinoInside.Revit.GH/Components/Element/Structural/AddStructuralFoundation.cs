@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM,
     };
 
-    static void AssertIsValidType(ARDB.FamilySymbol type, ARDB.Element host)
+    static void AssertValidType(ARDB.FamilySymbol type, ARDB.Element host)
     {
       if (type.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_StructuralFoundation)
         throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid structural foundation type.");
@@ -171,7 +171,7 @@ namespace RhinoInside.Revit.GH.Components
           if (!Params.TryGetData(DA, "Host", out Types.GraphicalElement host)) return null;
 
           var hostElement = host?.Value;
-          AssertIsValidType(type.Value, hostElement);
+          AssertValidType(type.Value, hostElement);
 
           // Compute
           foundation = Reconstruct
@@ -241,6 +241,8 @@ namespace RhinoInside.Revit.GH.Components
 
     ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.XYZ point, ARDB.FamilySymbol type, ARDB.Level level, ARDB.Element host)
     {
+      if (!type.IsActive) type.Activate();
+
       if (type.Family.FamilyPlacementType == ARDB.FamilyPlacementType.WorkPlaneBased)
       {
         switch (host)
@@ -268,11 +270,16 @@ namespace RhinoInside.Revit.GH.Components
       };
 
       var ids = doc.Create().NewFamilyInstances2(list);
-      var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+      if (ids.Count == 1)
+      {
+        var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
 
-      // We turn analytical model off by default
-      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
-      return instance;
+        // We turn analytical model off by default
+        instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        return instance;
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is not a valid structural foundation type.");
     }
 
     ARDB.FamilyInstance Reconstruct
