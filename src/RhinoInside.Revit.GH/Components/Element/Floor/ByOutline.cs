@@ -98,6 +98,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
         using (var properties = AreaMassProperties.Compute(loop))
         {
+          if (properties is null) return;
           if (properties.Area > maxArea)
           {
             normal = plane.Normal;
