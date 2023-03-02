@@ -5,20 +5,22 @@ namespace RhinoInside.Revit.External.DB.Extensions
   public static class ElementLocation
   {
     #region Element
-    internal delegate void LocationGetter<T>(T element, out XYZ origin, out XYZ basisX, out XYZ basisY) where T : Element;
+    internal delegate void LocationGetter<T>(T element, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY) where T : Element;
 
-    internal static void SetLocation<T>(this T element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY, LocationGetter<T> GetLocation, out bool modified)
+    internal static void SetLocation<T>(this T element, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY, LocationGetter<T> GetLocation, out bool modified)
       where T : Element
     {
+      if (!UnitXYZ.Orthonormal(newBasisX, newBasisY, out var newBasisZ))
+        throw new System.ArgumentException("Location basis is not Orthonormal");
+
       modified = false;
       var pinned = element.Pinned;
 
       try
       {
         GetLocation(element, out var origin, out var basisX, out var basisY);
-        var basisZ = basisX.CrossProduct(basisY);
+        UnitXYZ.Orthonormal(basisX, basisY, out var basisZ);
 
-        var newBasisZ = newBasisX.CrossProduct(newBasisY);
         if (!basisZ.IsCodirectionalTo(newBasisZ))
         {
           var axisDirection = basisZ.CrossProduct(newBasisZ);
@@ -32,7 +34,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           GetLocation(element, out origin, out basisX, out basisY);
         }
 
-        if (!basisX.IsAlmostEqualTo(newBasisX))
+        if (!basisX.AlmostEquals(newBasisX))
         {
           element.Pinned = false;
           using (var axis = Line.CreateUnbound(origin, newBasisZ))
@@ -59,7 +61,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
-    internal static void SetLocation<T>(this T element, XYZ newOrigin, XYZ newBasisX, LocationGetter<T> GetLocation, out bool modified)
+    internal static void SetLocation<T>(this T element, XYZ newOrigin, UnitXYZ newBasisX, LocationGetter<T> GetLocation, out bool modified)
       where T : Element
     {
       modified = false;
@@ -68,17 +70,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       try
       {
         GetLocation(element, out var origin, out var basisX, out var basisY);
-        var basisZ = basisX.CrossProduct(basisY);
+        UnitXYZ.Orthonormal(basisX, basisY, out var basisZ);
 
-        newBasisX = (new PlaneEquation(origin, basisZ).Project(origin + newBasisX) - origin).Unitize();
-
-        var newBasisZ = basisX.CrossProduct(basisY);
-
-        if (!newBasisX.IsZeroLength() && !basisX.IsAlmostEqualTo(newBasisX))
+        newBasisX = UnitXYZ.Unitize(new PlaneEquation(origin, basisZ).Project(origin + newBasisX) - origin);
+        if (newBasisX && !basisX.AlmostEquals(newBasisX))
         {
           element.Pinned = false;
-          using (var axis = Line.CreateUnbound(origin, newBasisZ))
-            ElementTransformUtils.RotateElement(element.Document, element.Id, axis, basisX.AngleOnPlaneTo(newBasisX, newBasisZ));
+          using (var axis = Line.CreateUnbound(origin, basisZ))
+            ElementTransformUtils.RotateElement(element.Document, element.Id, axis, basisX.AngleOnPlaneTo(newBasisX, basisZ));
           modified = true;
 
           GetLocation(element, out origin, out basisX, out basisY);
@@ -103,24 +102,41 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region SketchPlane
-    public static void GetLocation(this SketchPlane sketchPlane, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    public static void GetLocation(this SketchPlane sketchPlane, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       using (var plane = sketchPlane.GetPlane())
       {
         origin = plane.Origin;
-        basisX = plane.XVec;
-        basisY = plane.YVec;
+        basisX = (UnitXYZ) plane.XVec;
+        basisY = (UnitXYZ) plane.YVec;
       }
     }
 
-    public static void SetLocation(this SketchPlane sketchPlane, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY)
+    public static void SetLocation(this SketchPlane sketchPlane, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY)
     {
       ElementLocation.SetLocation(sketchPlane, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
     }
     #endregion
 
+    #region ReferencePlane
+    public static void GetLocation(this ReferencePlane referencePlane, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
+    {
+      using (var plane = referencePlane.GetPlane())
+      {
+        origin = plane.Origin;
+        basisX = (UnitXYZ) plane.XVec;
+        basisY = (UnitXYZ) plane.YVec;
+      }
+    }
+
+    public static void SetLocation(this ReferencePlane referencePlane, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY)
+    {
+      ElementLocation.SetLocation(referencePlane, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
+    }
+    #endregion
+
     #region Instance
-    public static void GetLocation(this Instance instance, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    public static void GetLocation(this Instance instance, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       using (var transform = instance.GetTransform())
       {
@@ -129,8 +145,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           case LocationPoint pointLocation:
             origin = pointLocation.Point;
-            basisX = transform.BasisX.Normalize(0D);
-            basisY = transform.BasisY.Normalize(0D);
+            basisX = UnitXYZ.Unitize(transform.BasisX);
+            basisY = UnitXYZ.Unitize(transform.BasisY);
             return;
 
           case LocationCurve curveLocation:
@@ -142,17 +158,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         // Default values
         origin = transform.Origin;
-        basisX = transform.BasisX.Normalize(0D);
-        basisY = transform.BasisY.Normalize(0D);
+        basisX = UnitXYZ.Unitize(transform.BasisX);
+        basisY = UnitXYZ.Unitize(transform.BasisY);
       }
     }
 
-    public static void SetLocation(this Instance element, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY)
+    public static void SetLocation(this Instance element, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY)
     {
       ElementLocation.SetLocation(element, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
     }
 
-    public static void SetLocation(this Instance element, XYZ newOrigin, XYZ newBasisX)
+    public static void SetLocation(this Instance element, XYZ newOrigin, UnitXYZ newBasisX)
     {
       ElementLocation.SetLocation(element, newOrigin, newBasisX, GetLocation, out var _);
     }
@@ -178,16 +194,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
 
         // Set Rotation
+        if (UnitXYZ.Orthonormal(basisX, basisY, out var basisZ))
         {
-          var normal = basisX.CrossProduct(basisY);
-          var right = normal.PerpVector();
-          var rotation = newAngle - basisX.AngleOnPlaneTo(right, normal);
+          var right = basisZ.Right();
+          var rotation = newAngle - basisX.AngleOnPlaneTo(right, basisZ);
           if (rotation > element.Document.Application.AngleTolerance)
           {
             element.Pinned = false;
             modified = true;
 
-            using (var axis = Line.CreateUnbound(newOrigin, normal))
+            using (var axis = Line.CreateUnbound(newOrigin, basisZ))
               ElementTransformUtils.RotateElement(element.Document, element.Id, axis, rotation);
           }
         }
@@ -201,7 +217,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region ElevationMarker
-    public static void GetLocation(this ElevationMarker mark, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    public static void GetLocation(this ElevationMarker mark, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       origin = basisX = basisY = default;
 
@@ -238,13 +254,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (result.Size == 1)
         {
           origin = result.get_Item(0).XYZPoint;
-          basisX = lineX.Direction;
-          basisY = lineY.Direction;
+          basisX = UnitXYZ.Unitize(lineX.Direction);
+          basisY = UnitXYZ.Unitize(lineY.Direction);
         }
       }
     }
 
-    public static void SetLocation(this ElevationMarker mark, XYZ newOrigin, XYZ newBasisX, XYZ newBasisY)
+    public static void SetLocation(this ElevationMarker mark, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY)
     {
       ElementLocation.SetLocation(mark, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
     }

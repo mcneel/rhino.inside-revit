@@ -2,6 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
@@ -124,7 +125,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       if (!Reuse(mark, location, type))
         mark = Create(location, type);
 
-      mark.SetLocation(location.Origin, location.BasisX, location.BasisY);
+      mark.SetLocation(location.Origin, (ERDB.UnitXYZ) location.BasisX, (ERDB.UnitXYZ) location.BasisY);
       return mark;
     }
   }

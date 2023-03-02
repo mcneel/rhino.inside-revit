@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.FamilyInstance instance)
         {
           instance.GetLocation(out var origin, out var basisX, out var basisY);
-          return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
+          return new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
         }
 
         return NaN.Plane;

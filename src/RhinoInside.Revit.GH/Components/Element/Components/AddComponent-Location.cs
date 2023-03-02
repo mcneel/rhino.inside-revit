@@ -5,12 +5,12 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
   using External.DB.Extensions;
-  using External.DB;
 
   [ComponentVersion(introduced: "1.0", updated: "1.13")]
   public class AddComponentLocation : ElementTrackerComponent
@@ -196,8 +196,7 @@ namespace RhinoInside.Revit.GH.Components
             component,
             doc.Value,
             location.Value.Origin.ToXYZ(),
-            location.Value.XAxis.ToXYZ(),
-            location.Value.YAxis.ToXYZ(),
+            (ERDB.UnitXYZ) location.Value.XAxis.ToXYZ(),
             type.Value,
             levelElement,
             hostElement
@@ -218,7 +217,7 @@ namespace RhinoInside.Revit.GH.Components
           case ARDB.SketchPlane sketchPlane:
 
             // <not associated>
-            var dependents = sketchPlane.GetDependentElements(CompoundElementFilter.ExclusionFilter(component.Id, inverted: true));
+            var dependents = sketchPlane.GetDependentElements(ERDB.CompoundElementFilter.ExclusionFilter(component.Id, inverted: true));
             if (dependents.Contains(component.Id)) return true;
 
             // Associated to a Datum or a Face
@@ -293,7 +292,14 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
-    ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.XYZ point, ARDB.FamilySymbol type, ARDB.Level level, ARDB.Element host)
+    ARDB.FamilyInstance Create
+    (
+      ARDB.Document doc,
+      ARDB.XYZ point,
+      ARDB.FamilySymbol type,
+      ARDB.Level level,
+      ARDB.Element host
+    )
     {
       if (type.Family.FamilyPlacementType == ARDB.FamilyPlacementType.WorkPlaneBased)
       {
@@ -333,8 +339,7 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.FamilyInstance component,
       ARDB.Document doc,
       ARDB.XYZ origin,
-      ARDB.XYZ basisX,
-      ARDB.XYZ basisY,
+      ERDB.UnitXYZ basisX,
       ARDB.FamilySymbol type,
       ARDB.Level level,
       ARDB.Element host
@@ -350,14 +355,8 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       component.get_Parameter(ARDB.BuiltInParameter.INSTANCE_OFFSET_POS_PARAM)?.Update(false);
-
-      {
-        component.Document.Regenerate();
-        //if (host is object)
-          component.SetLocation(origin, basisX);
-        //else
-        //  component.SetLocation(origin, basisX, basisY);
-      }
+      component.Document.Regenerate();
+      component.SetLocation(origin, basisX);
 
       return component;
     }

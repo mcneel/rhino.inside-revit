@@ -99,9 +99,9 @@ namespace RhinoInside.Revit.Convert.DocObjects
       public double NearDistance      = double.NaN;
       public double FarDistance       = double.NaN;
       public double TargetDistance    = double.NaN;
-      public ARDB.XYZ EyePosition     = XYZExtension.Zero;
-      public ARDB.XYZ ViewDirection   = XYZExtension.BasisZ;
-      public ARDB.XYZ UpDirection     = XYZExtension.BasisY;
+      public ARDB.XYZ EyePosition     = ARDB.XYZ.Zero;
+      public ARDB.XYZ ViewDirection   = ARDB.XYZ.BasisZ;
+      public ARDB.XYZ UpDirection     = ARDB.XYZ.BasisY;
     }
 
     public static bool TryGetViewportInfo(this ARDB.View view, bool useUIView, out ViewportInfo vport)

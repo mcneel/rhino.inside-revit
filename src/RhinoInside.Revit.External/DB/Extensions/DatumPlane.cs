@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       switch (datum)
       {
         case Level level:
-          return new PlaneEquation(XYZExtension.BasisZ, -level.ProjectElevation);
+          return new PlaneEquation(UnitXYZ.BasisZ, -level.ProjectElevation);
 
         case Grid grid:
           if (grid.IsCurved) return default;
@@ -20,12 +20,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
           var end = curve.GetEndPoint(CurveEnd.End);
           var axis = end - start;
           var origin = start + (axis * 0.5);
-          var perp = axis.PerpVector();
-          return new PlaneEquation(origin, -perp);
+          var right = UnitXYZ.Unitize(axis).Right();
+          return new PlaneEquation(origin, -right);
 
         case ReferencePlane referencePlane:
           var plane = referencePlane.GetPlane();
-          return new PlaneEquation(plane.Origin, plane.Normal);
+          return new PlaneEquation(plane.Origin, (UnitXYZ) plane.Normal);
 
         case DatumPlane _:
           return default;
@@ -54,12 +54,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
           if (sketchPlane.Name != datuName) continue;
           using (var plane = sketchPlane.GetPlane())
           {
-            var equation = new PlaneEquation(plane.Origin, plane.Normal);
+            var equation = new PlaneEquation(plane.Origin, (UnitXYZ) plane.Normal);
 
             if (!comparer.Equals(equation.Normal, datumNormal))
               continue;
 
-            var distance = Math.Abs(equation.D - datumEquation.D);
+            var distance = Math.Abs(equation.Offset - datumEquation.Offset);
             if (distance < minDistance)
             {
               minDistance = distance;

@@ -95,8 +95,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (!bbox.IsInside(point)) return false;
 
         var vector = bbox.Transform.Origin - point;
-        if (vector.IsZeroLength(0D)) vector = XYZExtension.BasisZ;
-        else vector = vector.Unitize();
+        if (vector.IsZeroLength(0D)) vector = UnitXYZ.BasisZ;
+        else vector = UnitXYZ.Unitize(vector);
 
         using (var line = Line.CreateBound(point, point + vector * 0.1))
         {
@@ -379,34 +379,32 @@ namespace RhinoInside.Revit.External.DB.Extensions
       try
       {
         var intersection = edge.Project(point);
-        var vector = point - intersection.XYZPoint;
+        var vector = UnitXYZ.Unitize(point - intersection.XYZPoint);
 
         var faces = new Face[] { edge.GetFace(0), edge.GetFace(1) };
-        if (vector.IsZeroLength(0D))
+        if (vector)
         {
-          face = faces[0] ?? faces[1];
-        }
-        else
-        {
-          vector = vector.Unitize();
-
           var dot0 = double.PositiveInfinity;
           if (faces[0] is object)
           {
             var uv = edge.EvaluateOnFace(intersection.EdgeParameter, faces[0]);
-            var normal = faces[0].ComputeNormal(uv);
-            dot0 = normal.AngleTo(vector);
+            var normal = (UnitXYZ) faces[0].ComputeNormal(uv);
+            dot0 = normal.DotProduct(vector);
           }
 
           var dot1 = double.PositiveInfinity;
           if (faces[1] is object)
           {
             var uv = edge.EvaluateOnFace(intersection.EdgeParameter, faces[1]);
-            var normal = faces[1].ComputeNormal(uv);
-            dot1 = normal.AngleTo(vector);
+            var normal = (UnitXYZ) faces[1].ComputeNormal(uv);
+            dot1 = normal.DotProduct(vector);
           }
 
-          face = dot1 < dot0 ? faces[1] : faces[0];
+          face = dot1 > dot0 ? faces[1] : faces[0];
+        }
+        else
+        {
+          face = faces[0] ?? faces[1];
         }
 
         var distance = intersection.Distance;

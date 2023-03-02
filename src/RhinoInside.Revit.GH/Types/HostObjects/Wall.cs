@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -147,8 +148,8 @@ namespace RhinoInside.Revit.GH.Types
               // We need to use `ARDB.Curve.CreateOffset` to obtain same kind of "offset"
               // else the resulting surface is not parameterized like Revit.
               // This is important to evaluate rectangular Opening and WallSweep on that surface.
-              var o0 = axis0.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset0), XYZExtension.BasisZ);
-              var o1 = axis1.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset1), XYZExtension.BasisZ);
+              var o0 = axis0.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset0), ERDB.UnitXYZ.BasisZ);
+              var o1 = axis1.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset1), ERDB.UnitXYZ.BasisZ);
 
               axis0 = o0.ToCurve();
               axis1 = o1.ToCurve();
