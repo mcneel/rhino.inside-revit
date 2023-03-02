@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Types
               if (curve.TryGetLocation(out var origin, out var basisX, out var basisY))
               {
                 origin = curve.Evaluate(0.5, normalized: true);
-                return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
+                return new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
               }
             }
             catch { }

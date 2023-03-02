@@ -3,12 +3,12 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
   using External.DB.Extensions;
-  using External.DB;
 
   [ComponentVersion(introduced: "1.13")]
   public class AddComponentWorkPlane : ElementTrackerComponent
@@ -134,8 +134,8 @@ namespace RhinoInside.Revit.GH.Components
 
       var tol = GeometryTolerance.Model;
       var origin = location.Value.Origin.ToXYZ();
-      var basisX = location.Value.XAxis.ToXYZ();
-      var basisY = location.Value.YAxis.ToXYZ();
+      var basisX = (ERDB.UnitXYZ) location.Value.XAxis.ToXYZ();
+      var basisY = (ERDB.UnitXYZ) location.Value.YAxis.ToXYZ();
 
       var reference = default(ARDB.Reference);
       bool associatedWorkPlane = true;
@@ -188,8 +188,8 @@ namespace RhinoInside.Revit.GH.Components
                 )
                 {
                   origin = projected.XYZPoint;
-                  var faceNormal = faceTransform.OfVector(face.ComputeNormal(projected.UVPoint));
-                  if (faceNormal.IsParallelTo(basisX)) basisX = faceNormal.PerpVector();
+                  var faceNormal = (ERDB.UnitXYZ) faceTransform.OfVector(face.ComputeNormal(projected.UVPoint));
+                  if (faceNormal.IsParallelTo(basisX)) basisX = faceNormal.Right();
                   reference = graphicalElement.GetAbsoluteReference(reference);
                 }
               }
@@ -240,7 +240,7 @@ namespace RhinoInside.Revit.GH.Components
     (
       ARDB.FamilyInstance component,
       ARDB.XYZ origin,
-      ARDB.XYZ basisX,
+      ERDB.UnitXYZ basisX,
       ARDB.FamilySymbol type,
       ARDB.Reference reference
     )
@@ -258,7 +258,7 @@ namespace RhinoInside.Revit.GH.Components
           var hostElement = component.Document.GetElement(reference);
           if (hostElement is ARDB.SketchPlane sketchPlane)
           {
-            var dependents = sketchPlane.GetDependentElements(CompoundElementFilter.ExclusionFilter(component.Id, inverted: true));
+            var dependents = sketchPlane.GetDependentElements(ERDB.CompoundElementFilter.ExclusionFilter(component.Id, inverted: true));
             return dependents.Contains(component.Id);
           }
 
@@ -309,7 +309,7 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.FamilyInstance component,
       ARDB.Document doc,
       ARDB.XYZ origin,
-      ARDB.XYZ basisX,
+      ERDB.UnitXYZ basisX,
       ARDB.FamilySymbol type,
       ARDB.Level level,
       ARDB.Reference reference

@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using ERDB = RhinoInside.Revit.External.DB;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -81,31 +82,34 @@ namespace RhinoInside.Revit.GH.Types
 
               var origin = cov.Origin;
               var basisX = cov.GetPrincipalComponent(0D);
-              var basisZ = XYZExtension.BasisZ;
-              var basisY = basisZ.CrossProduct(basisX).Normalize(0D);
-              var plane = ARDB.Plane.CreateByOriginAndBasis(origin, basisX, basisY);
+              var basisZ = ERDB.UnitXYZ.BasisZ;
 
-              var min = new Point3d(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
-              var max = new Point3d(double.NegativeInfinity, double.NegativeInfinity, double.NegativeInfinity);
-
-              foreach (var point in points)
+              if (ERDB.UnitXYZ.Orthonormal(basisZ, basisX, out var basisY))
               {
-                plane.Project(point, out var uv, out var _); var w = point.Z - origin.Z;
-                min.X = Math.Min(min.X, uv.U); max.X = Math.Max(max.X, uv.U);
-                min.Y = Math.Min(min.Y, uv.V); max.Y = Math.Max(max.Y, uv.V);
-                min.Z = Math.Min(min.Z, w);    max.Z = Math.Max(max.Z, w);
+                var plane = ARDB.Plane.CreateByOriginAndBasis(origin, basisX, basisY);
+
+                var min = new Point3d(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
+                var max = new Point3d(double.NegativeInfinity, double.NegativeInfinity, double.NegativeInfinity);
+
+                foreach (var point in points)
+                {
+                  plane.Project(point, out var uv, out var _); var w = point.Z - origin.Z;
+                  min.X = Math.Min(min.X, uv.U); max.X = Math.Max(max.X, uv.U);
+                  min.Y = Math.Min(min.Y, uv.V); max.Y = Math.Max(max.Y, uv.V);
+                  min.Z = Math.Min(min.Z, w);    max.Z = Math.Max(max.Z, w);
+                }
+
+                min *= UnitConverter.ToModelLength;
+                max *= UnitConverter.ToModelLength;
+
+                return new Box
+                (
+                  new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d()),
+                  new Interval(min.X, max.X),
+                  new Interval(min.Y, max.Y),
+                  new Interval(min.Z, max.Z)
+                );
               }
-
-              min *= UnitConverter.ToModelLength;
-              max *= UnitConverter.ToModelLength;
-
-              return new Box
-              (
-                new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d()),
-                new Interval(min.X, max.X),
-                new Interval(min.Y, max.Y),
-                new Interval(min.Z, max.Z)
-              );
             }
           }
         }
@@ -136,10 +140,10 @@ namespace RhinoInside.Revit.GH.Types
 
               var origin = cov.Origin;
               var basisX = cov.GetPrincipalComponent(0D);
-              var basisZ = XYZExtension.BasisZ;
-              var basisY = basisZ.CrossProduct(basisX).Normalize(0D);
+              var basisZ = ERDB.UnitXYZ.BasisZ;
 
-              return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
+              if (ERDB.UnitXYZ.Orthonormal(basisZ, basisX, out var basisY))
+                return new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
             }
           }
         }

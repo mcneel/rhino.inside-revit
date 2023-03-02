@@ -581,7 +581,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="basisX"></param>
     /// <param name="basisY"></param>
     /// <returns>True on success, False on fail.</returns>
-    public static bool TryGetLocation(this GeometryObject geometry, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    public static bool TryGetLocation(this GeometryObject geometry, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       switch (geometry)
       {
@@ -592,14 +592,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case GeometryInstance instance:
           origin = instance.Transform.Origin;
-          basisX = instance.Transform.BasisX;
-          basisY = instance.Transform.BasisY;
+          basisX = UnitXYZ.Unitize(instance.Transform.BasisX);
+          basisY = UnitXYZ.Unitize(instance.Transform.BasisY);
           return true;
 
         case Point point:
           origin = point.Coord;
-          basisX = XYZExtension.BasisX;
-          basisY = XYZExtension.BasisY;
+          basisX = UnitXYZ.BasisX;
+          basisY = UnitXYZ.BasisY;
           return true;
 
         case PolyLine polyline:
@@ -615,15 +615,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
           using (var derivatives = face.ComputeDerivatives(new UV(0.5, 0.5), normalized: true))
           {
             origin = derivatives.Origin;
-            basisX = derivatives.BasisX;
-            basisY = derivatives.BasisY;
 
             // Make sure is orthonormal.
-            var basisZ = basisX.CrossProduct(basisY).Normalize(0D);
-            basisX = basisX.Normalize(0D);
-            basisY = basisZ.CrossProduct(basisX);
+            return UnitXYZ.Orthonormalize(derivatives.BasisX, derivatives.BasisY, out basisX, out basisY, out _);
           }
-          return true;
 
         case Solid solid:
           if (!solid.Faces.IsEmpty)

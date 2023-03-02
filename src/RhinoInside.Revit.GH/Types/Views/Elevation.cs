@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.GH.Types
           if (Value is ARDB.ElevationMarker mark)
           {
             mark.GetLocation(out var origin, out var basisX, out var basisY);
-            _Location = new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
+            _Location = new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
           }
         }
 

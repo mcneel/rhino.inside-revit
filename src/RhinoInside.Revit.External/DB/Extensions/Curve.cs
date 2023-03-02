@@ -161,7 +161,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     #region TryGetLocation
-    public static bool TryGetLocation(this Line curve, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    public static bool TryGetLocation(this Line curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       var curveDirection = curve.Direction;
       if (!curveDirection.IsAlmostEqualTo(XYZExtension.Zero, DefaultTolerance))
@@ -169,15 +169,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (curve.IsBound)
         {
           origin = curve.Evaluate(0.5, true);
-          basisX = curveDirection.Normalize(0D);
-          basisY = basisX.PerpVector();
+          basisX = UnitXYZ.Unitize(curveDirection);
+          basisY = basisX.Right();
           return true;
         }
         else
         {
           origin = curve.Origin;
-          basisX = curveDirection.Normalize(0D);
-          basisY = basisX.PerpVector();
+          basisX = UnitXYZ.Unitize(curveDirection);
+          basisY = basisX.Right();
           return true;
         }
       }
@@ -186,7 +186,34 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static bool TryGetLocation(this Arc curve, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    public static bool TryGetLocation(this Arc curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
+    {
+      if (curve.IsBound)
+      {
+        var start = curve.GetEndPoint(0);
+        var end = curve.GetEndPoint(1);
+        var curveDirection = end - start;
+
+        if (!curveDirection.IsZeroLength())
+        {
+          origin = start + (curveDirection * 0.5);
+          basisX = UnitXYZ.Unitize(curveDirection);
+          return UnitXYZ.Orthonormal((UnitXYZ) curve.Normal, basisX, out basisY);
+        }
+      }
+      else
+      {
+        origin = curve.Center;
+        basisX = (UnitXYZ) curve.XDirection;
+        basisY = (UnitXYZ) curve.YDirection;
+        return true;
+      }
+
+      origin = basisX = basisY = default;
+      return false;
+    }
+
+    public static bool TryGetLocation(this Ellipse curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       if (curve.IsBound)
       {
@@ -197,16 +224,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (!curveDirection.IsAlmostEqualTo(XYZExtension.Zero, DefaultTolerance))
         {
           origin = start + (curveDirection * 0.5);
-          basisX = curveDirection.Normalize(0D);
-          basisY = curve.Normal.CrossProduct(basisX).Normalize(0D);
-          return true;
+          basisX = UnitXYZ.Unitize(curveDirection);
+          return UnitXYZ.Orthonormal((UnitXYZ) curve.Normal, basisX, out basisY);
         }
       }
       else
       {
         origin = curve.Center;
-        basisX = curve.XDirection;
-        basisY = curve.YDirection;
+        basisX = (UnitXYZ) curve.XDirection;
+        basisY = (UnitXYZ) curve.YDirection;
         return true;
       }
 
@@ -214,44 +240,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static bool TryGetLocation(this Ellipse curve, out XYZ origin, out XYZ basisX, out XYZ basisY)
-    {
-      if (curve.IsBound)
-      {
-        var start = curve.GetEndPoint(0);
-        var end = curve.GetEndPoint(1);
-        var curveDirection = end - start;
-
-        if (!curveDirection.IsAlmostEqualTo(XYZExtension.Zero, DefaultTolerance))
-        {
-          origin = start + (curveDirection * 0.5);
-          basisX = curveDirection.Normalize(0D);
-          basisY = curve.Normal.CrossProduct(basisX).Normalize(0D);
-          return true;
-        }
-      }
-      else
-      {
-        origin = curve.Center;
-        basisX = curve.XDirection;
-        basisY = curve.YDirection;
-        return true;
-      }
-
-      origin = basisX = basisY = default;
-      return false;
-    }
-
-    public static bool TryGetLocation(this CylindricalHelix curve, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    public static bool TryGetLocation(this CylindricalHelix curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       origin = curve.BasePoint;
-      basisX = curve.XVector;
-      basisY = curve.YVector;
+      basisX = (UnitXYZ) curve.XVector;
+      basisY = (UnitXYZ) curve.YVector;
 
       return true;
     }
 
-    public static bool TryGetLocation(this NurbSpline curve, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    public static bool TryGetLocation(this NurbSpline curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       if (!curve.IsBound)
         throw new NotImplementedException();
@@ -267,14 +265,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (closed == 0)
       {
-        basisX = curveDirection.Normalize(0D);
+        basisX = UnitXYZ.Unitize(curveDirection);
 
         if (cov.TryGetInverse(out var inverse))
         {
           var basisZ = inverse.GetPrincipalComponent(0D);
           origin = new PlaneEquation(cov.Origin, basisZ).Project(start + (curveDirection * 0.5));
-
-          basisY = basisZ.CrossProduct(basisX).Normalize(0D);
+          UnitXYZ.Orthonormal(basisZ, basisX, out basisY);
         }
         else
         {
@@ -288,8 +285,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
           cov.SetCovariance(ctrlPoints, plane.Project(cov.Origin));
           basisY = cov.GetPrincipalComponent(0D);
 
-          if (basisY.IsZeroLength())
-            basisY = basisX.PerpVector();
+          if (!basisY)
+            basisY = basisX.Right();
         }
       }
       else
@@ -300,7 +297,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (cov.TryGetInverse(out var inverse))
         {
           var basisZ = inverse.GetPrincipalComponent(0D);
-          basisY = basisZ.CrossProduct(basisX).Normalize(0D);
+          UnitXYZ.Orthonormal(basisZ, basisX, out basisY);
         }
         else
         {
@@ -311,15 +308,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
           cov.SetCovariance(ctrlPoints.Skip(closed), plane.Project(cov.Origin));
           basisY = cov.GetPrincipalComponent(0D);
 
-          if (basisY.IsZeroLength())
-            basisY = basisX.PerpVector();
+          if (!basisY)
+            basisY = basisX.Right();
         }
       }
 
       return true;
     }
 
-    public static bool TryGetLocation(this PolyLine curve, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    public static bool TryGetLocation(this PolyLine curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       switch (curve.NumberOfCoordinates)
       {
@@ -329,8 +326,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case 1:
           origin = curve.GetCoordinate(0);
-          basisX = XYZExtension.BasisX;
-          basisY = XYZExtension.BasisY;
+          basisX = UnitXYZ.BasisX;
+          basisY = UnitXYZ.BasisY;
           return true;
 
         default:
@@ -340,21 +337,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             origin = XYZExtension.ComputeMeanPoint(curve.GetCoordinates());
             var axis = start - origin;
-            basisX = axis.Normalize(0D);
-            basisY = basisX.PerpVector();
+            basisX = UnitXYZ.Unitize(axis);
+            basisY = basisX.Right();
           }
           else
           {
             var axis = end - start;
             origin = start + (axis * 0.5);
-            basisX = axis.Normalize(0D);
-            basisY = basisX.PerpVector();
+            basisX = UnitXYZ.Unitize(axis);
+            basisY = basisX.Right();
           }
           return true;
       }
     }
 
-    public static bool TryGetLocation(this Curve curve, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    public static bool TryGetLocation(this Curve curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       switch (curve)
       {

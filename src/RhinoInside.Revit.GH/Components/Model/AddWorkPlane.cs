@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.ModelElements
 {
@@ -90,7 +89,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     {
       if (sketchPlane is null) return false;
 
-      sketchPlane.SetLocation(plane.Origin, plane.XVec, plane.YVec);
+      sketchPlane.SetLocation(plane.Origin, (ERDB.UnitXYZ) plane.XVec, (ERDB.UnitXYZ) plane.YVec);
       return true;
     }
 

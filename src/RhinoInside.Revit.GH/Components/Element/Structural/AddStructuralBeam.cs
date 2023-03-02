@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Reference Level", out Types.Level level, doc, bbox.Center.Z)) return null;
 
           // Compute
-          beam = Reconstruct(beam, doc.Value, curve.ToCurve(), plane.Normal.ToXYZ(), type.Value, level.Value);
+          beam = Reconstruct(beam, doc.Value, curve.ToCurve(), (ERDB.UnitXYZ) plane.Normal.ToXYZ(), type.Value, level.Value);
 
           DA.SetData(_Beam_, beam);
           return beam;
@@ -142,7 +142,7 @@ namespace RhinoInside.Revit.GH.Components
     bool Reuse
     (
       ARDB.FamilyInstance beam,
-      ARDB.XYZ normal,
+      ERDB.UnitXYZ normal,
       ARDB.FamilySymbol type
     )
     {
@@ -150,10 +150,10 @@ namespace RhinoInside.Revit.GH.Components
       if (type.Id != beam.GetTypeId()) beam.ChangeTypeId(type.Id);
 
       beam.GetLocation(out var _, out var basisX, out var basisY);
-      var currentNormal = basisX.CrossProduct(basisY);
+      ERDB.UnitXYZ.Orthonormal(basisX, basisY, out var basisZ);
 
-      var wasVertical = currentNormal.IsPerpendicularTo(ARDB.XYZ.BasisZ);
-      var isVertical = normal.IsPerpendicularTo(ARDB.XYZ.BasisZ);
+      var wasVertical = basisZ.IsPerpendicularTo(ERDB.UnitXYZ.BasisZ);
+      var isVertical = normal.IsPerpendicularTo(ERDB.UnitXYZ.BasisZ);
       return isVertical == wasVertical;
     }
 
@@ -195,7 +195,7 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.FamilyInstance beam,
       ARDB.Document doc,
       ARDB.Curve curve,
-      ARDB.XYZ normal,
+      ERDB.UnitXYZ normal,
       ARDB.FamilySymbol type,
       ARDB.Level level
     )

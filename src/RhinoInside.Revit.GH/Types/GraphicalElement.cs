@@ -511,7 +511,7 @@ namespace RhinoInside.Revit.GH.Types
               break;
             case ARDB.LocationCurve curveLocation:
               if(curveLocation.Curve.TryGetLocation(out var cO, out var cX, out var cY))
-                return new Plane(cO.ToPoint3d(), cX.ToVector3d(), cY.ToVector3d());
+                return new Plane(cO.ToPoint3d(), cX.Direction.ToVector3d(), cY.Direction.ToVector3d());
 
               break;
             default:
@@ -519,7 +519,7 @@ namespace RhinoInside.Revit.GH.Types
               using (var options = new ARDB.Options { DetailLevel = ARDB.ViewDetailLevel.Undefined })
               {
                 if (element.get_Geometry(options).TryGetLocation(out var gO, out var gX, out var gY))
-                  return new Plane(gO.ToPoint3d(), gX.ToVector3d(), gY.ToVector3d());
+                  return new Plane(gO.ToPoint3d(), gX.Direction.ToVector3d(), gY.Direction.ToVector3d());
               }
 
               var bbox = BoundingBox;
@@ -546,19 +546,18 @@ namespace RhinoInside.Revit.GH.Types
     /// <param name="keepJoins">When null a default action is taken by type.</param>
     public void SetLocation(Plane location, bool? keepJoins = default)
     {
-      using (var plane = location.ToPlane())
-        SetLocation(plane.Origin, plane.XVec, plane.YVec, keepJoins);
+      SetLocation(location.Origin.ToXYZ(), (ERDB.UnitXYZ) location.XAxis.ToXYZ(), (ERDB.UnitXYZ) location.YAxis.ToXYZ(), keepJoins);
     }
 
-    void GetLocation(out ARDB.XYZ origin, out ARDB.XYZ basisX, out ARDB.XYZ basisY)
+    void GetLocation(out ARDB.XYZ origin, out ERDB.UnitXYZ basisX, out ERDB.UnitXYZ basisY)
     {
-      var plane = Location.ToPlane();
-      origin = plane.Origin;
-      basisX = plane.XVec;
-      basisY = plane.YVec;
+      var plane = Location;
+      origin = plane.Origin.ToXYZ();
+      basisX = (ERDB.UnitXYZ) plane.XAxis.ToXYZ();
+      basisY = (ERDB.UnitXYZ) plane.YAxis.ToXYZ();
     }
 
-    protected void SetLocation(ARDB.XYZ newOrigin, ARDB.XYZ newBasisX, ARDB.XYZ newBasisY, bool? keepJoins)
+    protected void SetLocation(ARDB.XYZ newOrigin, ERDB.UnitXYZ newBasisX, ERDB.UnitXYZ newBasisY, bool? keepJoins)
     {
       if (Value is ARDB.Element element)
       {
@@ -567,8 +566,10 @@ namespace RhinoInside.Revit.GH.Types
         if (element.Location is ARDB.LocationCurve curveLocation)
         {
           GetLocation(out var origin, out var basisX, out var basisY);
-          var basisZ = basisX.CrossProduct(basisY);
-          var newBasisZ = newBasisX.CrossProduct(newBasisY);
+          ERDB.UnitXYZ.Orthonormal(basisX, basisY, out var basisZ);
+
+          if (!ERDB.UnitXYZ.Orthonormal(newBasisX, newBasisY, out var newBasisZ))
+            throw new ArgumentException("Location basis is not Orthonormal");
 
           var orientation = ARDB.Transform.Identity;
           orientation.SetAlignCoordSystem
@@ -588,7 +589,7 @@ namespace RhinoInside.Revit.GH.Types
           newOrigin,
           newBasisX,
           newBasisY,
-          (ARDB.Element e, out ARDB.XYZ o, out ARDB.XYZ x, out ARDB.XYZ y) => GetLocation(out o, out x, out y),
+          (ARDB.Element e, out ARDB.XYZ o, out ERDB.UnitXYZ x, out ERDB.UnitXYZ y) => GetLocation(out o, out x, out y),
           out modified
         );
 

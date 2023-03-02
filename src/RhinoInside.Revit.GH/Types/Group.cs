@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Types
                 }
                 else
                 {
-                  var plane = ARDB.Plane.CreateByOriginAndBasis(XYZExtension.Zero, XYZExtension.BasisX, XYZExtension.BasisY);
+                  var plane = ARDB.Plane.CreateByOriginAndBasis(XYZExtension.Zero, UnitXYZ.BasisX, UnitXYZ.BasisY);
                   var circle = ARDB.Arc.Create(plane, 1.0, 0.0, 2.0 * Math.PI);
                   curve = create.NewModelCurve(circle, ARDB.SketchPlane.Create(doc, plane));
                 }

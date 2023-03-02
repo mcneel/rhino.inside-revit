@@ -179,8 +179,8 @@ namespace RhinoInside.Revit.GH.Components
             foundation,
             doc.Value,
             location.Value.Origin.ToXYZ(),
-            location.Value.XAxis.ToXYZ(),
-            location.Value.YAxis.ToXYZ(),
+            (ERDB.UnitXYZ) location.Value.XAxis.ToXYZ(),
+            (ERDB.UnitXYZ) location.Value.YAxis.ToXYZ(),
             type.Value,
             level.Value,
             hostElement
@@ -287,8 +287,8 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.FamilyInstance foundation,
       ARDB.Document doc,
       ARDB.XYZ origin,
-      ARDB.XYZ basisX,
-      ARDB.XYZ basisY,
+      ERDB.UnitXYZ basisX,
+      ERDB.UnitXYZ basisY,
       ARDB.FamilySymbol type,
       ARDB.Level level,
       ARDB.Element host
