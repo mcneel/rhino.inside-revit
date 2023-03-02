@@ -143,6 +143,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             var sketch = wall.CreateProfileSketch();
             tx.Commit();
+            scope.Start(sketch.Id);
             return sketch;
           }
       }
