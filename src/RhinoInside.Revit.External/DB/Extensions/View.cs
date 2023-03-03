@@ -561,8 +561,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       );
     }
 
-    // TODO : Delete this Filter is unused.
-    static readonly ElementFilter IsViewerFilter = GetViewerFilter(ElementIdExtension.InvalidElementId, inverted: true);
     internal static bool IsViewer(Element element) => GetViewerFilter(element.Id, inverted: true).PassesFilter(element);
 
     public static Element GetViewer(this View view)
