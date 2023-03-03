@@ -297,8 +297,8 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Optional.cs" />
-
-	<Compile Include="Parameters\BeamSystem.cs" />    <Compile Include="Parameters\Annotations\Annotation.cs" />
+    <Compile Include="Parameters\BeamSystem.cs" />
+    <Compile Include="Parameters\Annotations\Annotation.cs" />
     <Compile Include="Parameters\Annotations\TextElement.cs" />
     <Compile Include="Parameters\Materials\AppearanceAsset.cs" />
     <Compile Include="Parameters\Materials\AssetPropertyDouble1DMap.cs" />
@@ -313,7 +313,7 @@
     <Compile Include="Parameters\ObjectStyles\FillPatternElement.cs" />
     <Compile Include="Parameters\ObjectStyles\LinePatternElement.cs" />
     <Compile Include="Parameters\ObjectStyles\OverrideGraphicSettings.cs" />
-	<Compile Include="Parameters\Truss.cs" />
+    <Compile Include="Parameters\Truss.cs" />
     <Compile Include="Parameters\Views\ViewFrame.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -417,7 +417,6 @@
     <Compile Include="Parameters\Workset.cs" />
     <Compile Include="Types\BasePoint.cs" />
     <Compile Include="Types\BeamSystem.cs" />
-    <Compile Include="Types\BuildingPad.cs" />
     <Compile Include="Types\Ceiling.cs" />
     <Compile Include="Types\CombinableElement.cs" />
     <Compile Include="Types\CurveElement.cs" />
@@ -479,7 +478,7 @@
     <Compile Include="Types\TopographySurface.cs" />
     <Compile Include="Types\Views\ScopeBox.cs" />
     <Compile Include="Types\Views\SectionBox.cs" />
-	<Compile Include="Types\Truss.cs" />
+    <Compile Include="Types\Truss.cs" />
     <Compile Include="Types\Views\View.cs" />
     <Compile Include="Types\Views\View3D.cs" />
     <Compile Include="Types\Views\ViewDrafting.cs" />
@@ -487,7 +486,6 @@
     <Compile Include="Types\Views\Viewport.cs" />
     <Compile Include="Types\Views\ViewSection.cs" />
     <Compile Include="Types\Views\ViewSheet.cs" />
-    <Compile Include="Types\WallFoundation.cs" />
     <Compile Include="Types\Workset.cs" />
   </ItemGroup>
   <ItemGroup>

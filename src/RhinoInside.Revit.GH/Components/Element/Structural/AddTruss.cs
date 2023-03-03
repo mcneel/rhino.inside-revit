@@ -13,8 +13,8 @@ namespace RhinoInside.Revit.GH.Components
   using Exceptions;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.12")]
-  public class AddTruss : ElementTrackerComponent
+  [ComponentVersion(introduced: "1.14")]
+  class AddTruss : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("C0B04DC7-9AD5-4E49-9043-17CB06076132");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
