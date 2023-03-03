@@ -143,7 +143,13 @@ namespace RhinoInside.Revit.GH.Components
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Top Level", out Types.Level topLevel, doc, bbox.Max.Z)) return null;
 
           // Compute
-          column = Reconstruct(column, doc.Value, line.ToLine(), type.Value, baseLevel.Value, topLevel.Value);
+          column = Reconstruct(
+            column,
+            doc.Value,
+            line.ToLine(),
+            type.Value,
+            baseLevel.Value,
+            topLevel.Value);
 
           DA.SetData(_Column_, column);
           return column;

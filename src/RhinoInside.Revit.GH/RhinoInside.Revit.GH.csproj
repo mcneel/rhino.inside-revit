@@ -140,10 +140,13 @@
     <Compile Include="Components\Element\Railing\ByCurve.cs" />
     <Compile Include="Components\Element\Roof\ByOutline.cs" />
     <Compile Include="Components\Element\Select.cs" />
+    <Compile Include="Components\Element\Structural\AddBeamSystem.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBeam.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralFoundation.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />
+    <Compile Include="Components\Element\Structural\AddStructuralWallFoundation.cs" />
+    <Compile Include="Components\Element\Structural\AddTruss.cs" />
     <Compile Include="Components\Element\Type.cs" />
     <Compile Include="Components\Element\Version.cs" />
     <Compile Include="Components\Element\Wall\AnalyseStackedWall.cs" />
@@ -281,12 +284,14 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Optional.cs" />
+    <Compile Include="Parameters\BeamSystem.cs" />
     <Compile Include="Parameters\ObjectStyles\Category.cs" />
     <Compile Include="Parameters\ObjectStyles\CategoryTypes.cs" />
     <Compile Include="Parameters\ObjectStyles\Color.cs" />
     <Compile Include="Parameters\ObjectStyles\FillPatternElement.cs" />
     <Compile Include="Parameters\ObjectStyles\LinePatternElement.cs" />
     <Compile Include="Parameters\ObjectStyles\OverrideGraphicSettings.cs" />
+    <Compile Include="Parameters\Truss.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -392,6 +397,7 @@
     <Compile Include="Types\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Types\AssetPropertyDouble4DMap.cs" />
     <Compile Include="Types\BasePoint.cs" />
+    <Compile Include="Types\BeamSystem.cs" />
     <Compile Include="Types\BuildingPad.cs" />
     <Compile Include="Types\Ceiling.cs" />
     <Compile Include="Types\CombinableElement.cs" />
@@ -448,6 +454,7 @@
     <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\Mullion.cs" />
     <Compile Include="Types\TopographySurface.cs" />
+    <Compile Include="Types\Truss.cs" />
     <Compile Include="Types\Views\View.cs" />
     <Compile Include="Types\Views\View3D.cs" />
     <Compile Include="Types\Views\ViewDrafting.cs" />
@@ -456,6 +463,7 @@
     <Compile Include="Types\Views\ViewSection.cs" />
     <Compile Include="Types\Views\ViewSheet.cs" />
     <Compile Include="Types\Wall.cs" />
+    <Compile Include="Types\WallFoundation.cs" />
     <Compile Include="Types\Workset.cs" />
   </ItemGroup>
   <ItemGroup>
