@@ -88,6 +88,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
+    internal static bool IsColor(this BuiltInParameter value)
+    {
+      var name = value.ToString();
+      return name.EndsWith("_COLOR") || name.EndsWith("_COLOR_PARAM");
+    }
+
     /// <summary>
     /// Internal Dictionary that maps <see cref="BuiltInParameter"/> by name.
     /// Results are implicitly orderd by value in the <see cref="BuiltInParameter"/> enum.
@@ -159,7 +165,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (parameter.StorageType != StorageType.Integer)
         throw new InvalidCastException();
 
-      if (parameter.Definition?.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().ToString().EndsWith("_COLOR"))
+      if (parameter.Definition?.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().IsColor())
         throw new InvalidCastException();
 
       var abgr = parameter.AsInteger();
@@ -198,7 +204,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (parameter.StorageType != StorageType.Integer)
         throw new InvalidCastException();
 
-      if (!parameter.Id.ToBuiltInParameter().ToString().EndsWith("_COLOR"))
+      if (!parameter.Id.ToBuiltInParameter().IsColor())
         throw new InvalidCastException();
 
       return parameter.Set(value.ToBGR());
