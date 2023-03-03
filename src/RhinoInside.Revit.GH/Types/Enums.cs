@@ -113,6 +113,18 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
+    ComponentGuid("88A41D83-3B2A-4ED8-9C3E-5F375B20420E"),
+    Name("Fill Pattern Type"),
+    Description("Contains a collection of fill pattern type values"),
+  ]
+  public class FillPatternTarget : GH_Enum<ARDB.FillPatternTarget>
+  {
+    public FillPatternTarget() : base(ARDB.FillPatternTarget.None) { }
+    public FillPatternTarget(ARDB.FillPatternTarget value) : base(value) { }
+    public override bool IsEmpty => Value == ARDB.FillPatternTarget.None;
+  }
+
+  [
     ComponentGuid("F992A251-4085-4525-A514-298F3155DF8A"),
     Name("Detail Level"),
     Description("Contains a collection of view detail level values"),
@@ -277,6 +289,48 @@ namespace RhinoInside.Revit.GH.Types
         { (int) ARDB.ImageFileType.PNG,           "PNG" },
         { (int) ARDB.ImageFileType.TARGA,         "TARGA" },
         { (int) ARDB.ImageFileType.TIFF,          "TIFF" },
+      }
+    );
+  }
+
+  [
+    ComponentGuid("7A84AF8B-257D-4EFE-98C6-6FDB5E8AE32C"),
+    Name("Horizontal Text Alignment"),
+    Description("Contains a collection of Revit image horizontal text alignment values"),
+  ]
+  public class HorizontalTextAlignment : GH_Enum<ARDB.HorizontalTextAlignment>
+  {
+    public HorizontalTextAlignment() : base(ARDB.HorizontalTextAlignment.Center) { }
+    public HorizontalTextAlignment(ARDB.HorizontalTextAlignment value) : base(value) { }
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) ARDB.HorizontalTextAlignment.Left, "Left" },
+        { (int) ARDB.HorizontalTextAlignment.Right, "Right" },
+        { (int) ARDB.HorizontalTextAlignment.Center, "Center" },
+      }
+    );
+  }
+
+  [
+    ComponentGuid("E19ABC7B-43C6-46D8-97A1-70F052CB2AA0"),
+    Name("Vertical Text Alignment"),
+    Description("Contains a collection of Revit image vertical text alignment values"),
+  ]
+  public class VerticalTextAlignment : GH_Enum<ARDB.VerticalTextAlignment>
+  {
+    public VerticalTextAlignment() : base(ARDB.VerticalTextAlignment.Middle) { }
+    public VerticalTextAlignment(ARDB.VerticalTextAlignment value) : base(value) { }
+
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) ARDB.VerticalTextAlignment.Top, "Top" },
+        { (int) ARDB.VerticalTextAlignment.Bottom, "Bottom" },
+        { (int) ARDB.VerticalTextAlignment.Middle, "Middle" },
       }
     );
   }
@@ -655,6 +709,24 @@ namespace RhinoInside.Revit.GH.Types
     );
   }
 
+  [
+    ComponentVersion(introduced: "1.12"),
+    ComponentGuid("DBCC2A97-0410-4458-934F-3EB7A181E523"),
+    Name("Workset Visibility"),
+    Description("Represents workset visibility"),
+  ]
+  public class WorksetVisibility : GH_Enum<ARDB.WorksetVisibility>
+  {
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) ARDB.WorksetVisibility.Visible,           "Visible"             },
+        { (int) ARDB.WorksetVisibility.Hidden,            "Hidden"              },
+        { (int) ARDB.WorksetVisibility.UseGlobalSetting,  "Use Global Setting"  },
+      }
+    );
+  }
 
   [
     ComponentVersion(introduced: "1.2"),

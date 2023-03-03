@@ -92,6 +92,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       StartTransaction(doc.Value);
       {
+        var tracked    = new bool[elements.Count];
         var duplicates = new Types.Element[elements.Count];
 
         // Xlate Invalid elements -> None
@@ -110,34 +111,46 @@ namespace RhinoInside.Revit.GH.Components.Elements
         foreach (var document in documents)
         {
           var sourceBuiltIn = new List<(int index, Types.Element element)>();
-          var sourceNonBuiltIn = new List<(int index, Types.Element element)>();
+          var sourceSystem = new List<(int index, Types.Element element)>();
+          var sourceUser = new List<(int index, Types.Element element)>();
 
-          // Classify source entries in two lists, builtin and non builtin elements.
-          foreach (var entry in document)
+          // Classify source items.
+          foreach (var item in document)
           {
-            if (entry.element.Id.IsBuiltInId()) sourceBuiltIn.Add(entry);
-            else                                sourceNonBuiltIn.Add(entry);
+            if (item.element.Id.IsBuiltInId()) sourceBuiltIn.Add(item);
+            else if (item.element.Value is ARDB.Family family && !family.IsUserCreated) sourceSystem.Add(item);
+            else if (item.element.Value is ARDB.FamilySymbol symbol && !symbol.Family.IsUserCreated) sourceSystem.Add(item);
+            else sourceUser.Add(item);
           }
 
           // Xlate BuiltIn ids
           {
-            foreach (var copiedElement in sourceBuiltIn)
+            foreach (var sourceElement in sourceBuiltIn)
             {
-              var element = Types.Element.FromElementId(doc.Value, copiedElement.element.Id);
-              duplicates[copiedElement.index] = element;
+              var element = Types.Element.FromElementId(doc.Value, sourceElement.element.Id);
+              duplicates[sourceElement.index] = element;
             }
           }
 
-          // Xlate non BuiltIn ids
-          if (sourceNonBuiltIn.Count > 0)
+          // Xlate System ids
           {
-            // Create a map with unique elements to recover results of CopyElements in the correct order
+            foreach (var sourceElement in sourceSystem)
+            {
+              var element = Types.Element.FromElementId(doc.Value, doc.Value.LookupElement(sourceElement.element.Document, sourceElement.element.Id));
+              duplicates[sourceElement.index] = element;
+            }
+          }
+
+          // Xlate User ids
+          if (sourceUser.Count > 0)
+          {
+            // Create a map with unique elements to recover results of CopyElements in the input order
             var map = new SortedList<ARDB.ElementId, (string name, List<int> twins)>
             (
-              sourceNonBuiltIn.Count, ElementIdComparer.Ascending
+              sourceUser.Count, ElementIdComparer.Ascending
             );
 
-            foreach (var (index, element) in sourceNonBuiltIn)
+            foreach (var (index, element) in sourceUser)
             {
               if (!map.TryGetValue(element.Id, out var entry))
                 map.Add(element.Id, entry = (element.Nomen, new List<int>()));
@@ -179,19 +192,23 @@ namespace RhinoInside.Revit.GH.Components.Elements
                       $"{(element as Grasshopper.Kernel.Types.IGH_Goo).TypeName} \"{copiedElement.source.Value.name}\" has been renamed to \"{element.Nomen}\" to avoid conflicts with the existing Element. {{{element.Id}}}"
                     );
                   }
-                  catch (ArgumentException) { /* Invalid characters in the original name use to be view {3D} */ }
+                  catch (Exceptions.RuntimeArgumentException) { /* Invalid characters in the original name use to be view {3D} or <Building> */ }
+                  catch (Autodesk.Revit.Exceptions.InvalidOperationException) { /* Some elements can't be renamed */ }
                 }
 
                 // Populate duplicates Stream for the next iteration with unique duplicates
                 foreach (var index in copiedElement.source.Value.twins)
+                {
+                  tracked[index] = true;
                   duplicates[index] = element;
+                }
               }
             }
           }
         }
 
         for (int i = 0; i < duplicates.Length; ++i)
-          Params.WriteTrackedElement(_Duplicates_, doc.Value, duplicates[i]);
+          Params.WriteTrackedElement(_Duplicates_, doc.Value, tracked[i] ? duplicates[i] : None);
 
         DA.SetDataList(_Duplicates_, duplicates);
       }

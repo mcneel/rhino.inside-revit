@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         new Parameters.ParameterKey()
         {
           Name = _Parameter_,
-          NickName = "K",
+          NickName = _Parameter_.Substring(0, 1),
           Description = $"Output {_Parameter_}",
         }
       ),
@@ -314,7 +314,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
           using (var categorySet = new ARDB.CategorySet())
           {
-            var categories = doc.GetBuiltInCategoriesWithParameters().Select(x => doc.GetCategory(x)).ToList();
+            var categories = doc.GetBuiltInCategoriesWithParameters().Select(doc.GetCategory).ToList();
 
             var binding = default(ARDB.ElementBinding);
             switch (parameterScope)

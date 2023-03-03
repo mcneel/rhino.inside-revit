@@ -244,6 +244,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       var faceToNgon = new int[mesh.Faces.Count];
 
+#if !REVIT_2023
       for (int n = 0; n < mesh.Ngons.Count; ++n)
       {
         var ngon = mesh.Ngons[n];
@@ -394,6 +395,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           }
         }
       }
+#endif
 
       var triangle = new ARDB.XYZ[3];
       var quad = new ARDB.XYZ[4];
@@ -412,6 +414,20 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         if (face.IsQuad)
         {
+#if REVIT_2023
+          quad[0] = Raw.RawEncoder.AsXYZ(vertices[face.A]);
+          quad[1] = Raw.RawEncoder.AsXYZ(vertices[face.B]);
+          quad[2] = Raw.RawEncoder.AsXYZ(vertices[face.C]);
+          quad[3] = Raw.RawEncoder.AsXYZ(vertices[face.D]);
+
+          triangle[0] = quad[0]; triangle[1] = quad[1]; triangle[2] = quad[2];
+          builder.AddFace(new ARDB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+          faces++;
+
+          triangle[0] = quad[2]; triangle[1] = quad[3]; triangle[2] = quad[0];
+          builder.AddFace(new ARDB.TessellatedFace(triangle, GeometryEncoder.Context.Peek.MaterialId));
+          faces++;
+#else
           fitPoints[0] = vertices[face.A];
           fitPoints[1] = vertices[face.B];
           fitPoints[2] = vertices[face.C];
@@ -463,6 +479,7 @@ namespace RhinoInside.Revit.Convert.Geometry
               }
             }
           }
+#endif
         }
         else
         {
@@ -485,6 +502,6 @@ namespace RhinoInside.Revit.Convert.Geometry
         }
       }
     }
-    #endregion
+#endregion
   }
 }

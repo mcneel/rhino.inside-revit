@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Views
   public class ViewExportImage : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("4A962A0C-46A0-4A5F-B727-6747B715A975");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
     protected override string IconTag => "IMG";
 
     public ViewExportImage() : base
@@ -429,7 +429,7 @@ namespace RhinoInside.Revit.GH.Components.Views
                   FitDirection = fitDirection ??
                                 (cropExtents.Value.U.Length > cropExtents.Value.V.Length ?
                                 ARDB.FitDirectionType.Horizontal : ARDB.FitDirectionType.Vertical),
-                  PixelSize = pixelSize.GetValueOrDefault(512),
+                  PixelSize = Math.Max(32, pixelSize.GetValueOrDefault(512)),
                   Zoom = 100,
                   ImageResolution = resolution ?? ARDB.ImageResolution.DPI_150,
                   ShadowViewsFileType = fileType ?? ARDB.ImageFileType.PNG,

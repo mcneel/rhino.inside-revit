@@ -773,12 +773,14 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    private async void Doc_ObjectsDeleted(object sender, GH_DocObjectEventArgs e)
+    private void Doc_ObjectsDeleted(object sender, GH_DocObjectEventArgs e) => ObjectsDeleted(sender, (e.Document, e.Objects));
+
+    internal async void ObjectsDeleted(object sender, (GH_Document Document, IReadOnlyCollection<IGH_DocumentObject> Objects) e)
     {
       if (e.Document.Context != GH_DocumentContext.Loaded)
         return;
 
-      var canvas = Instances.ActiveCanvas;
+      var canvas = sender as GH_Canvas;
       var canvasModifiersEnabled = canvas?.ModifiersEnabled;
 
       var grasshopperDocument = e.Document;
@@ -822,6 +824,11 @@ namespace RhinoInside.Revit.GH
 
             if (ElementTracking.ElementStreamId.TryGetAuthority(grasshopperDocument, documentObject, out var authority))
               authorities.Add(authority);
+          }
+          else if (documentObject is ElementTracking.IGH_TrackingParam)
+          {
+            if (ElementTracking.ElementStreamId.TryGetAuthority(grasshopperDocument, documentObject, out var outputAuthority))
+              authorities.Add(outputAuthority);
           }
         }
       }
@@ -926,9 +933,6 @@ namespace RhinoInside.Revit.GH
         if (grasshopperDocumentEnabled.HasValue) grasshopperDocument.Enabled = grasshopperDocumentEnabled.Value;
 
         ShowEditor();
-
-        if (!activeDocument.IsEquivalent(Revit.ActiveUIDocument.Document))
-          e.Document.ExpireSolution();
 
         if (rolledback)
         {

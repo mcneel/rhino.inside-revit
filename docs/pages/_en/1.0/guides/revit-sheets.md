@@ -30,6 +30,12 @@ Use the {% include ltr/comp.html uuid='f2f3d866' %} component to Add Title Block
 
 ![]({{ "/static/images/guides/revit-sheet-add-title-block.png" | prepend: site.baseurl }})
 
+## Add Viewport
+
+Given a Sheet, Point & View not already on a sheet, the {% include ltr/comp.html uuid='493035d3' %} will add a Viewport. 
+
+![]({{ "/static/images/guides/revit-view-addViewport.png" | prepend: site.baseurl }})
+
 ## Sheet Identity
 
 Use the {% include ltr/comp.html uuid='cadf5fbb' %} component to get the Sheet Identity.

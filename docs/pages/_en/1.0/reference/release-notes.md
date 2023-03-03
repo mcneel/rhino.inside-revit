@@ -10,19 +10,77 @@ group: Deployment & Configs
 
 ### WIP
 
-### RC 
+### RC
 
-- Added 'Sheet Revisions' component.
-- Moved 'Add Revision' and 'Query Revisions' to the View panel.
-- Added 'Add Detail Group' component.
-- Now 'Create Group Type' works across documents.
-- Added 'Graphic Overrides' component.
-- Added 'Category Graphic Overrides' component.
-- Added 'Element Graphic Overrides' component.
-- Added 'Filter Graphic Overrides' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
+
+{% include ltr/release-header.html title="v1.13 RC1" version="v1.13.8458.21732" pre_release=true time="02/28/2023" %}
+
+- Added {% include ltr/comp.html uuid='2101fff6' %} component.
+- Added {% include ltr/comp.html uuid='08586f77' %}.
+
+{% include ltr/release-header.html title="v1.12" version="v1.12.8449.6358" time="02/28/2023" %}
+
+- Added {% include ltr/comp.html uuid='71f014de' %} component.
+- Added {% include ltr/comp.html uuid='3e2a753b' %} component.
+- Added {% include ltr/comp.html uuid='91757ae0' %} component.
+
+{% include ltr/release-header.html title="v1.12 RC4" version="v1.12.8438.12884" pre_release=true time="02/07/2023" %}
+
+- Added {% include ltr/comp.html uuid='96d578c0' %} component.
+- Added {% include ltr/comp.html uuid='d4873f18' %} component.
+- Added **Horizontal Align** and **Vertical Align** inputs to {% include ltr/comp.html uuid='49acc84c' %} component.
+
+{% include ltr/release-header.html title="v1.12 RC3" version="v1.12.8431.23288" pre_release=true time="01/31/2023" %}
+
+- Updated `MeshEncoder` to produce Meshes whithout internal wires. (Revit 2023)
+
+{% include ltr/release-header.html title="v1.12 RC2" version="v1.12.8425.21537" pre_release=true time="01/24/2023" %}
+
+- Added {% include ltr/comp.html uuid='3ae4fa67' %} component.
+- Added {% include ltr/comp.html uuid='369b6109' %} component.
+- Added {% include ltr/comp.html uuid='8484e108' %} component.
+- Updated {% include ltr/comp.html uuid='f7b775c9' %} component, now it takes a Frame as input.
+- Now 'View' bake creates a named View in Rhino.
+- Now 'Open Viewport` grabs Revit active view settings.
+    * If CTRL is pressed grabs orientation.
+    * If SHIFT is also pressed zoom is also applied.
+
+{% include ltr/release-header.html title="v1.12 RC1" version="v1.12.8417.6530" pre_release=true time="01/17/2023" %}
+
+- Fixed {% include ltr/comp.html uuid='01e86d7c' %} name is getting an unexpected integer added in creation. [#754](https://github.com/mcneel/rhino.inside-revit/issues/754)
+- Added {% include ltr/comp.html uuid='e4e08f99' %} component.
+- Added {% include ltr/comp.html uuid='2922af4a' %} component.
+- Added {% include ltr/comp.html uuid='b062c96e' %} component. [#753](https://github.com/mcneel/rhino.inside-revit/issues/753)
+
+
+{% include ltr/release-header.html title="v1.11" version="v1.11.8425.15605" time="01/10/2023" %}
+
+- Fix for "Comments" parameter `DataType`.
+- Improved `Types.CurtainGridLine` previews.
+- Improved conversion from `CurtainGrid` and `CurtainCell` to `Brep`.
+- Fixed `Types.Panel` and `Types.PanelType` recognizing a `ARDB.FamilyInstance` as valid.
+- Implemented Previews on `Types.CurtainCell`.
+- Fixed {% include ltr/comp.html uuid='fe427d04' %} component when managing Types.Panel elements.
+- Improved {% include ltr/comp.html uuid='6723beb1' %} for walls that are member of a stacked wall.
+- Now conversion from {% include ltr/comp.html uuid='15ad6bf9' %} to `Surface` gives a `Brep` correctly oriented.
+
+{% include ltr/release-header.html title="v1.11 RC2" version="v1.11.8402.17166" pre_release=true time="01/03/2023" %}
+
+- Added {% include ltr/comp.html uuid='2120c0fb' %} component.
+- Moved {% include ltr/comp.html uuid='221e53a6' %} and {% include ltr/comp.html uuid='8ead987d' %} to the View panel.
+- Added {% include ltr/comp.html uuid='cc7790a0' %} component.
+- Now {% include ltr/comp.html uuid='39e42448' %} works across documents.
+- Added {% include ltr/comp.html uuid='bfd4a970' %} component.
+- Added {% include ltr/comp.html uuid='d296f72f' %} component.
+- Added {% include ltr/comp.html uuid='6f5e3619' %} component.
+- Added {% include ltr/comp.html uuid='1a137425' %} component.
+- Added {% include ltr/comp.html uuid='61812ade' %} component.
+- Added {% include ltr/comp.html uuid='71c06438' %} component.
 
 {% include ltr/release-header.html title="v1.11 RC1" version="v1.11.8390.7504" pre_release=true time="12/20/2022" %}
 

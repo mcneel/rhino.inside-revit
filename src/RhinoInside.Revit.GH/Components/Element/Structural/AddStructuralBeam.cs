@@ -10,7 +10,6 @@ using ERDB = RhinoInside.Revit.External.DB;
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
-  using Exceptions;
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.0", updated: "1.6")]
@@ -120,18 +119,19 @@ namespace RhinoInside.Revit.GH.Components
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!curve.TryGetPlane(out var plane, tol.VertexTolerance))
-            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to view plane.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
+          type.AssertPlacementType(ARDB.FamilyPlacementType.CurveDrivenStructural);
 
           var bbox = curve.GetBoundingBox(accurate: true);
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Reference Level", out Types.Level level, doc, bbox.Center.Z)) return null;
 
           // Compute
-          beam = Reconstruct(beam, doc.Value, curve.ToCurve(), plane.Normal.ToXYZ(), type.Value, level.Value);
+          beam = Reconstruct(beam, doc.Value, curve.ToCurve(), (ERDB.UnitXYZ) plane.Normal.ToXYZ(), type.Value, level.Value);
 
           DA.SetData(_Beam_, beam);
           return beam;
@@ -142,7 +142,7 @@ namespace RhinoInside.Revit.GH.Components
     bool Reuse
     (
       ARDB.FamilyInstance beam,
-      ARDB.XYZ normal,
+      ERDB.UnitXYZ normal,
       ARDB.FamilySymbol type
     )
     {
@@ -150,15 +150,22 @@ namespace RhinoInside.Revit.GH.Components
       if (type.Id != beam.GetTypeId()) beam.ChangeTypeId(type.Id);
 
       beam.GetLocation(out var _, out var basisX, out var basisY);
-      var currentNormal = basisX.CrossProduct(basisY);
+      ERDB.UnitXYZ.Orthonormal(basisX, basisY, out var basisZ);
 
-      var wasVertical = currentNormal.IsPerpendicularTo(ARDB.XYZ.BasisZ);
-      var isVertical = normal.IsPerpendicularTo(ARDB.XYZ.BasisZ);
+      var wasVertical = basisZ.IsPerpendicularTo(ERDB.UnitXYZ.BasisZ);
+      var isVertical = normal.IsPerpendicularTo(ERDB.UnitXYZ.BasisZ);
       return isVertical == wasVertical;
     }
 
-    ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.Curve curve, ARDB.FamilySymbol type)
+    ARDB.FamilyInstance Create
+    (
+      ARDB.Document doc,
+      ARDB.Curve curve,
+      ARDB.FamilySymbol type
+    )
     {
+      if (!type.IsActive) type.Activate();
+
       var list = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>(1)
       {
         new Autodesk.Revit.Creation.FamilyInstanceCreationData
@@ -171,11 +178,16 @@ namespace RhinoInside.Revit.GH.Components
       };
 
       var ids = doc.Create().NewFamilyInstances2(list);
-      var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+      if (ids.Count == 1)
+      {
+        var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
 
-      // We turn analytical model off by default
-      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
-      return instance;
+        // We turn analytical model off by default
+        instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        return instance;
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is not a valid curve driven structural type.");
     }
 
     ARDB.FamilyInstance Reconstruct
@@ -183,7 +195,7 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.FamilyInstance beam,
       ARDB.Document doc,
       ARDB.Curve curve,
-      ARDB.XYZ normal,
+      ERDB.UnitXYZ normal,
       ARDB.FamilySymbol type,
       ARDB.Level level
     )
@@ -239,10 +251,7 @@ namespace RhinoInside.Revit.GH.Components
         if (!locationCurve.Curve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
         {
           curve.TryGetLocation(out var origin, out var basisX, out var basisY);
-
-          beam.Pinned = false;
           beam.SetLocation(origin, basisX, basisY);
-
           locationCurve.Curve = curve;
         }
       }

@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   public class ElementSubcategory : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("495330DB-5733-4718-ADBB-73C2FB5787A7");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
     protected override string IconTag => "SC";
 
     public ElementSubcategory()
@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       "Subcategory",
       "Element Subcategory Property. Get-Set access component to Element Subcategory property.",
       "Revit",
-      "Model"
+      "Element"
     )
     { }
 

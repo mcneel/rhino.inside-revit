@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static double AbsoluteDistanceTo(this Plane plane, XYZ point) => Math.Abs(SignedDistanceTo(plane, point));
     public static double SignedDistanceTo(this Plane plane, XYZ point)
     {
-      return new PlaneEquation(plane.Origin, plane.Normal).SignedDistanceTo(point);
+      return new PlaneEquation(plane.Origin, (UnitXYZ) plane.Normal).SignedDistanceTo(point);
     }
 
 #if !REVIT_2018
@@ -29,5 +29,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       distance = plane.SignedDistanceTo(point);
     }
 #endif
+
+    internal static PlaneEquation ToPlaneEquation(this Plane plane) => new PlaneEquation(plane.Origin, (UnitXYZ) plane.Normal);
   }
 }

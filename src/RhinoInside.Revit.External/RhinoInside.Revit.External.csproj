@@ -46,16 +46,19 @@
     <Compile Include="DB\Extensions\Color.cs" />
     <Compile Include="DB\Extensions\Curve.cs" />
     <Compile Include="DB\Extensions\CurveLoop.cs" />
+    <Compile Include="DB\Extensions\DatumPlane.cs" />
+    <Compile Include="DB\Extensions\Dimension.cs" />
     <Compile Include="DB\Extensions\Document.cs" />
     <Compile Include="DB\Extensions\Element.cs" />
     <Compile Include="DB\Extensions\ElementId.cs" />
+    <Compile Include="DB\Extensions\ElementLocation.cs" />
     <Compile Include="DB\Extensions\ElementType.cs" />
-    <Compile Include="DB\Extensions\Face.cs" />
+    <Compile Include="DB\Extensions\Family.cs" />
     <Compile Include="DB\Extensions\FilteredElementCollector.cs" />
     <Compile Include="DB\Extensions\GeometryObject.cs" />
     <Compile Include="DB\Extensions\HostObject.cs" />
+    <Compile Include="DB\Extensions\ImageType.cs" />
     <Compile Include="DB\Extensions\IndependentTag.cs" />
-    <Compile Include="DB\Extensions\Instance.cs" />
     <Compile Include="DB\Extensions\InternalOrigin.cs" />
     <Compile Include="DB\Extensions\Level.cs" />
     <Compile Include="DB\Extensions\LinePattern.cs" />
@@ -140,6 +143,7 @@
   <ItemGroup>
     <Compile Include="Settings\KeyboardShortcuts.cs" />
     <EmbeddedResource Include="Resources\RVT$(RevitVersion)\KeyboardShortcuts.xml" />
+    <EmbeddedResource Include="Resources\RVT$(RevitVersion)\RiR-Template.rte" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Properties\ProductInfo.tt">

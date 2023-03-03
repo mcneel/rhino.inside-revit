@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var curveElements = new IList<CurveElement>[sketch.Profile.Size];
 
       var loopIndex = 0;
-      foreach (var profile in sketch.Profile.Cast<CurveArray>())
+      foreach (CurveArray profile in sketch.Profile)
       {
         curveElements[loopIndex++] = profile.Cast<Curve>().
           Distinct(CurveEqualityComparer.Reference).
@@ -143,6 +143,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             var sketch = wall.CreateProfileSketch();
             tx.Commit();
+            scope.Start(sketch.Id);
             return sketch;
           }
       }
@@ -152,4 +153,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
   }
 #endif
+
+  public static class SketchPlaneExtension
+  {
+    public static Element GetHost(this SketchPlane sketchPlane, out Reference hostFace)
+    {
+      var document = sketchPlane.Document;
+      using (var scope = document.CommitScope())
+      {
+        var symbol = document.EnsureWorkPlaneBasedSymbol();
+        scope.Commit();
+
+        using (document.RollBackScope())
+        {
+          using (var create = document.Create())
+          {
+            var instance = create.NewFamilyInstance(XYZExtension.Zero, symbol, sketchPlane, StructuralType.NonStructural);
+            hostFace = instance.HostFace;
+            return instance.Host;
+          }
+        }
+      }
+    }
+  }
 }

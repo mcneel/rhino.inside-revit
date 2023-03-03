@@ -1,13 +1,14 @@
 using System;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
-using Grasshopper.Kernel.Types;
-using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
+  using System.Linq;
   using External.DB.Extensions;
+  using Grasshopper.Kernel.Parameters;
+  using Grasshopper.Kernel.Types;
+  using Rhino.Geometry;
 
   [ComponentVersion(introduced: "1.7")]
   public class ViewExtents : TransactionalChainComponent
@@ -112,6 +113,16 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
+
+      if (!view.Value.GetOrderedParameters().Any(x => x.Id.ToBuiltInParameter() == ARDB.BuiltInParameter.VIEWER_CROP_REGION))
+      {
+        AddRuntimeMessage
+        (
+          GH_RuntimeMessageLevel.Error,
+          $"View '{view.Value.Title}' can't be cropped."
+        );
+        return;
+      }
       else Params.TrySetData(DA, "View", () => view);
 
       if (Params.GetData(DA, "Crop View", out bool? cropView))
@@ -119,18 +130,21 @@ namespace RhinoInside.Revit.GH.Components.Views
         StartTransaction(view.Document);
         view.CropBoxActive = cropView;
       }
-      Params.TrySetData(DA, "Crop View", () => view.Value.CropBoxActive);
+      Params.TrySetData(DA, "Crop View", () => view.CropBoxActive);
 
       if (Params.GetData(DA, "Crop Region Visible", out bool? cropRegionVisible))
       {
         StartTransaction(view.Document);
         view.CropBoxVisible = cropRegionVisible;
       }
-      Params.TrySetData(DA, "Crop Region Visible", () => view.Value.CropBoxVisible);
+      Params.TrySetData(DA, "Crop Region Visible", () => view.CropBoxVisible);
 
       if (Params.GetData(DA, "Crop Extents", out GH_Interval2D cropExtents))
       {
         StartTransaction(view.Document);
+
+        using (var cropManager = view.Value.GetCropRegionShapeManager())
+          if (cropManager.CanHaveShape) cropManager.RemoveCropRegionShape();
 
         var cropBox = view.Value.CropBox;
         cropBox.Min = new ARDB.XYZ
@@ -240,8 +254,8 @@ namespace RhinoInside.Revit.GH.Components.Views
           break;
 
         case ARDB.ViewSection viewSection:
-          if (!double.IsInfinity(frontOffset) && !double.IsNaN(frontOffset))
-            frontOffset = 0.0;
+          if (double.IsInfinity(frontOffset) || double.IsNaN(frontOffset))
+            frontOffset = view.CropBox.Max.Z;
 
           break;
       }

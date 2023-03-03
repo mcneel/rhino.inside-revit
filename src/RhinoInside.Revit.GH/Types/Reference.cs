@@ -31,13 +31,23 @@ namespace RhinoInside.Revit.GH.Types
     #region System.Object
     public override string ToString()
     {
-      var valid = IsValid;
-      string Invalid = Id == ARDB.ElementId.InvalidElementId ?
-        (string.IsNullOrWhiteSpace(ReferenceUniqueId) ? string.Empty : "Unresolved ") :
-        valid ? string.Empty :
-        (IsReferencedData ? "❌ Deleted " : "⚠ Invalid ");
+      string Invalid = string.Empty;
+      string InstanceName = string.Empty;
+
+      if (IsValid) InstanceName = DisplayName;
+      else
+      {
+        if (IsReferencedData)
+        {
+          if (IsReferencedDataLoaded)
+            Invalid = Id.IsBuiltInId() ? "⚠ Unknown" : "❌ Deleted ";
+          else
+            Invalid = "⚠ Unresolved ";
+        }
+        else InstanceName = DisplayName;
+      }
+
       string TypeName = ((IGH_Goo) this).TypeName;
-      string InstanceName = DisplayName;
 
       if (!string.IsNullOrWhiteSpace(InstanceName))
         InstanceName = $" : {InstanceName}";
@@ -157,7 +167,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected Reference(ARDB.Document doc, object value) : base(doc, value) { }
 
-    protected ARDB.Reference GetReference(ARDB.Reference reference)
+    protected internal ARDB.Reference GetAbsoluteReference(ARDB.Reference reference)
     {
       if (reference.LinkedElementId == ARDB.ElementId.InvalidElementId)
       {
@@ -181,12 +191,12 @@ namespace RhinoInside.Revit.GH.Types
       if (reference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
         throw new ArgumentException("Invalid ElementReferenceType", nameof(reference));
 
-      return Element.FromReference(ReferenceDocument, GetReference(reference)) as T;
+      return Element.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
     }
 
     internal T GetGeometryObjectFromReference<T>(ARDB.Reference reference) where T : GeometryObject
     {
-      return GeometryObject.FromReference(ReferenceDocument, GetReference(reference)) as T;
+      return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
     }
   }
 }

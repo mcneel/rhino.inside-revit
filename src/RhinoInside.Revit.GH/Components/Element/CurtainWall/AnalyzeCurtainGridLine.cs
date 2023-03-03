@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
@@ -11,18 +12,18 @@ namespace RhinoInside.Revit.GH.Components.Walls
   public class AnalyzeCurtainGridLine : Component
   {
     public override Guid ComponentGuid => new Guid("FACE5E7D-174F-41DA-853E-CDC4B094F57C");
-    public override GH_Exposure Exposure => GH_Exposure.septenary;
-    protected override string IconTag => "ACGL";
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override string IconTag => "DCL";
 
-    public AnalyzeCurtainGridLine() : base(
-      name: "Analyze Curtain Grid Line",
-      nickname: "A-CGL",
-      description: "Analyze given curtain grid line",
+    public AnalyzeCurtainGridLine() : base
+    (
+      name: "Deconstruct Curtain Line",
+      nickname: "D-CL",
+      description: "Deconstruct given curtain grid line",
       category: "Revit",
-      subCategory: "Wall"
+      subCategory: "Host"
     )
-    {
-    }
+    { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
@@ -84,40 +85,46 @@ namespace RhinoInside.Revit.GH.Components.Walls
       if (!DA.GetData("Curtain Grid Line", ref gridLine))
         return;
 
-
       DA.SetData("Curve", gridLine.FullCurve.ToCurve());
       DA.SetDataList("Segments", gridLine.AllSegmentCurves.ToCurveMany());
       DA.SetDataList("Existing Segments", gridLine.ExistingSegmentCurves.ToCurveMany());
       DA.SetDataList("Skipped Segments", gridLine.SkippedSegmentCurves.ToCurveMany());
 
       // find attached mullions
-      const double EPSILON = 0.1;
+      double tolerance = gridLine.Document.Application.VertexTolerance;
       var attachedMullions = new List<Types.Element>();
-      var famInstFilter = new ARDB.ElementClassFilter(typeof(ARDB.FamilyInstance));
+      
       // collect familyinstances and filter for DB.Mullion
-      var dependentMullions = gridLine.GetDependentElements(famInstFilter).Select(x => gridLine.Document.GetElement(x)).OfType<ARDB.Mullion>();
+      var dependentMullionIds = gridLine.GetDependentElements(CompoundElementFilter.ElementClassFilter(typeof(ARDB.Mullion)));
+
       // for each DB.Mullion that is dependent on this DB.CurtainGridLine
-      foreach (ARDB.Mullion mullion in dependentMullions)
+      foreach (var mullion in dependentMullionIds.Select(gridLine.Document.GetElement).OfType<ARDB.Mullion>())
       {
-        if (mullion.LocationCurve != null)
+        if (mullion.LocationCurve is ARDB.Curve locationCurve)
         {
           // check the distance of the DB.Mullion curve start and end, to the DB.CurtainGridLine axis curve
-          var mcurve = mullion.LocationCurve;
-          var mstart = mcurve.GetEndPoint(0);
-          var mend = mcurve.GetEndPoint(1);
+          var mstart = locationCurve.GetEndPoint(0);
+          var mend = locationCurve.GetEndPoint(1);
+
           // if the distance is less than EPSILON, the DB.Mullion axis and DB.CurtainGridLine axis are almost overlapping
-          if (gridLine.FullCurve.Distance(mstart) < EPSILON && gridLine.FullCurve.Distance(mend) < EPSILON)
-                attachedMullions.Add(Types.Mullion.FromElement(mullion));
+          if (gridLine.FullCurve.Distance(mstart) < tolerance && gridLine.FullCurve.Distance(mend) < tolerance)
+            attachedMullions.Add(Types.Mullion.FromElement(mullion));
         }
       }
-      DA.SetDataList("Attached Mullions", attachedMullions);
+      DA.SetDataList("Attached Mullions", attachedMullions.OfType<Types.Mullion>());
 
       // filter attached panels
       // panels can be a mix of DB.Panel and DB.FamilyInstance
       // no need to filter for .OfType<DB.Panel>() like with DB.Mullion
       // but make sure to remove all the DB.FamilyInstance that are actually DB.Mullion
-      var dependentPanels = gridLine.GetDependentElements(famInstFilter).Select(x => gridLine.Document.GetElement(x)).Where(x => x as ARDB.Mullion is null);
-      DA.SetDataList("Attached Panels", dependentPanels.Select(x => Types.Element.FromElement(x)));
+      var dependentPanels = gridLine.GetDependentElements
+      (
+        CompoundElementFilter.ElementClassFilter(typeof(ARDB.FamilyInstance)).
+        ThatExcludes(dependentMullionIds.ToArray())
+      ).
+        Select(x => Types.Panel.FromElementId(gridLine.Document, x));
+
+      DA.SetDataList("Attached Panels", dependentPanels.OfType<Types.Panel>());
     }
   }
 }

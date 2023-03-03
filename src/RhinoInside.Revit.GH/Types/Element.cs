@@ -68,11 +68,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override void ResetValue()
     {
       SubInvalidateGraphics();
-
-      _ReferenceDocument = default;
-      _ReferenceId = default;
-      _Id = default;
-
       base.ResetValue();
     }
 
@@ -164,31 +159,49 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ReferencedData
-    public override bool IsReferencedDataLoaded => ReferenceDocument is object && _Id is object;
+    public override bool IsReferencedDataLoaded => _ReferenceDocument is object && _ReferenceId is object && _Id is object;
+
     public sealed override bool LoadReferencedData()
     {
-      if (IsReferencedData && !IsReferencedDataLoaded)
+      if (IsReferencedData)
       {
-        UnloadReferencedData();
-
-        if (Types.Document.TryGetDocument(ReferenceDocumentId, out _ReferenceDocument))
+        if (!IsReferencedDataLoaded)
         {
-          if (_ReferenceDocument.TryGetLinkElementId(ReferenceUniqueId, out var linkElementId))
+          UnloadReferencedData();
+
+          if (Types.Document.TryGetDocument(ReferenceDocumentId, out _ReferenceDocument))
           {
-            _ReferenceId = _Id = linkElementId.HostElementId;
-            if (_ReferenceId == ARDB.ElementId.InvalidElementId)
+            if (_ReferenceDocument.TryGetLinkElementId(ReferenceUniqueId, out var linkElementId))
             {
-              _ReferenceId = linkElementId.LinkInstanceId;
-              _Id = linkElementId.LinkedElementId;
-              Document = (_ReferenceDocument.GetElement(_ReferenceId) as ARDB.RevitLinkInstance).GetLinkDocument();
+              _ReferenceId = _Id = linkElementId.HostElementId;
+              if (_ReferenceId == ARDB.ElementId.InvalidElementId)
+              {
+                _ReferenceId = linkElementId.LinkInstanceId;
+                _Id = linkElementId.LinkedElementId;
+                Document = (_ReferenceDocument.GetElement(_ReferenceId) as ARDB.RevitLinkInstance).GetLinkDocument();
+              }
+              else Document = _ReferenceDocument;
             }
-            else Document = _ReferenceDocument;
+            else _ReferenceDocument = null;
           }
-          else _ReferenceDocument = null;
         }
+
+        return _Id.IsValid();
       }
 
-      return IsReferencedDataLoaded;
+      return false;
+    }
+
+    public override void UnloadReferencedData()
+    {
+      if (IsReferencedData)
+      {
+        _ReferenceDocument = default;
+        _ReferenceId = default;
+        _Id = default;
+      }
+
+      base.UnloadReferencedData();
     }
     #endregion
 
@@ -236,6 +249,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.ViewPlan),                        (element)=> new ViewPlan              (element as ARDB.ViewPlan)          },
       { typeof(ARDB.ViewSection),                     (element)=> new ViewSection           (element as ARDB.ViewSection)       },
       { typeof(ARDB.ViewDrafting),                    (element)=> new ViewDrafting          (element as ARDB.ViewDrafting)      },
+      { typeof(ARDB.ElevationMarker),                 (element)=> new ElevationMarker       (element as ARDB.ElevationMarker)   },
 
       { typeof(ARDB.Instance),                        (element)=> new Instance              (element as ARDB.Instance)          },
       { typeof(ARDB.ProjectLocation),                 (element)=> new ProjectLocation       (element as ARDB.ProjectLocation)   },
@@ -267,6 +281,8 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Ceiling),                         (element)=> new Ceiling               (element as ARDB.Ceiling)           },
       { typeof(ARDB.RoofBase),                        (element)=> new Roof                  (element as ARDB.RoofBase)          },
       { typeof(ARDB.Wall),                            (element)=> new Wall                  (element as ARDB.Wall)              },
+      { typeof(ARDB.WallSweep),                       (element)=> new WallSweep             (element as ARDB.WallSweep)         },
+      { typeof(ARDB.WallFoundation),                  (element)=> new WallFoundation        (element as ARDB.WallFoundation)    },
       { typeof(ARDB.FamilyInstance),                  (element)=> new FamilyInstance        (element as ARDB.FamilyInstance)    },
       { typeof(ARDB.Panel),                           (element)=> new Panel                 (element as ARDB.Panel)             },
       { typeof(ARDB.PanelType),                       (element)=> new PanelType             (element as ARDB.PanelType)         },
@@ -274,10 +290,12 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.MullionType),                     (element)=> new MullionType           (element as ARDB.MullionType)       },
 
       { typeof(ARDB.TextElement),                     (element)=> new TextElement           (element as ARDB.TextElement)       },
+      { typeof(ARDB.TextElementType),                 (element)=> new TextElementType       (element as ARDB.TextElementType)   },
       { typeof(ARDB.Dimension),                       (element)=> new Dimension             (element as ARDB.Dimension)         },
       { typeof(ARDB.DimensionType),                   (element)=> new DimensionType         (element as ARDB.DimensionType)     },
       { typeof(ARDB.SpotDimension),                   (element)=> new SpotDimension         (element as ARDB.SpotDimension)     },
       { typeof(ARDB.FilledRegion),                    (element)=> new FilledRegion          (element as ARDB.FilledRegion)      },
+      { typeof(ARDB.FilledRegionType),                (element)=> new FilledRegionType      (element as ARDB.FilledRegionType)  },
       { typeof(ARDB.Revision),                        (element)=> new Revision              (element as ARDB.Revision)          },
       { typeof(ARDB.RevisionCloud),                   (element)=> new RevisionCloud         (element as ARDB.RevisionCloud)     },
       { typeof(ARDB.AnnotationSymbol),                (element)=> new AnnotationSymbol      (element as ARDB.AnnotationSymbol)  },
@@ -290,7 +308,6 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Architecture.Room),               (element)=> new RoomElement           (element as ARDB.Architecture.Room) },
       { typeof(ARDB.Mechanical.Space),                (element)=> new SpaceElement          (element as ARDB.Mechanical.Space)  },
 
-      { typeof(ARDB.SpatialElementTag),               (element)=> new SpatialElementTag     (element as ARDB.SpatialElementTag)    },
       { typeof(ARDB.AreaTag),                         (element)=> new AreaElementTag        (element as ARDB.AreaTag)              },
       { typeof(ARDB.Architecture.RoomTag),            (element)=> new RoomElementTag        (element as ARDB.Architecture.RoomTag) },
       { typeof(ARDB.Mechanical.SpaceTag),             (element)=> new SpaceElementTag       (element as ARDB.Mechanical.SpaceTag)  },
@@ -360,14 +377,24 @@ namespace RhinoInside.Revit.GH.Types
       switch(element)
       {
         case ARDB.FamilyInstance familyInstance:
-          if (StructuralBeam.IsValidElement(familyInstance)) return new StructuralBeam(familyInstance);
-          if (StructuralBrace.IsValidElement(familyInstance)) return new StructuralBrace(familyInstance);
-          if (StructuralColumn.IsValidElement(familyInstance)) return new StructuralColumn(familyInstance);
+          switch(familyInstance.StructuralType)
+          {
+            case ARDB.Structure.StructuralType.Beam: return new StructuralBeam(familyInstance);
+            case ARDB.Structure.StructuralType.Brace: return new StructuralBrace(familyInstance);
+            case ARDB.Structure.StructuralType.Column: return new StructuralColumn(familyInstance);
+            case ARDB.Structure.StructuralType.Footing: return new StructuralFooting(familyInstance);
+            case ARDB.Structure.StructuralType.UnknownFraming: return new StructuralFraming(familyInstance);
+          }
           if (Panel.IsValidElement(element)) return new Panel(familyInstance);
           break;
 
         case ARDB.FamilySymbol familySymbol:
+          if (PanelType.IsValidElement(element)) return new PanelType(familySymbol);
           if (ProfileType.IsValidElement(element)) return new ProfileType(familySymbol);
+          break;
+
+        case ARDB.ElementType elementType:
+          if (ArrowheadType.IsValidElement(elementType)) return new ArrowheadType(elementType);
           break;
       }
 
@@ -396,8 +423,8 @@ namespace RhinoInside.Revit.GH.Types
       // By Category
       if (element.Category is null)
       {
-        if (DocumentExtension.AsCategory(element) is ARDB.Category category)
-          return new Category(category);
+        if (Viewer.IsValidElement(element))                                   return new Viewer(element);
+        if (DocumentExtension.AsCategory(element) is ARDB.Category category)  return new Category(category);
       }
       else if (element.Category.Id.TryGetBuiltInCategory(out var bic))
       {
@@ -421,6 +448,11 @@ namespace RhinoInside.Revit.GH.Types
 
           case ARDB.BuiltInCategory.OST_SectionBox:
             if (SectionBox.IsValidElement(element)) return new SectionBox(element);
+            break;
+
+          case ARDB.BuiltInCategory.OST_Viewers:
+          case ARDB.BuiltInCategory.OST_Cameras:
+            if (Viewer.IsValidElement(element)) return new Viewer(element);
             break;
 
 #if !REVIT_2021
@@ -509,6 +541,35 @@ namespace RhinoInside.Revit.GH.Types
           new ARDB.LinkElementId(reference.ElementId, reference.LinkedElementId) :
           new ARDB.LinkElementId(reference.ElementId)
       );
+    }
+
+    protected T GetElement<T>(ARDB.Element element) where T : Element
+    {
+      if (element.IsValid())
+      {
+        if (!Document.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException($"Invalid {typeof(T)} Document", nameof(element));
+
+        return (T)
+          (IsLinked ?
+          Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, element.Id)) :
+          Element.FromElement(element));
+      }
+
+      return null;
+    }
+
+    protected T SetElement<T>(Element element) where T : ARDB.Element
+    {
+      if (element?.IsValid is true)
+      {
+        if (!Document.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException($"Invalid {typeof(T)} Document", nameof(element));
+
+        return (T) element.Value;
+      }
+
+      return null;
     }
 
     public Element() { }

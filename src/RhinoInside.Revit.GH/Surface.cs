@@ -178,27 +178,27 @@ namespace RhinoInside.Revit.GH.Components
           var box = new Box(bbox.Value);
           var size = new Vector3d(box.X.Length, box.Y.Length, box.Z.Length);
 
-          if (size.EpsilonEquals(Vector3d.Zero, absoluteTolerance))
+          if (size.GeometryEquals(Vector3d.Zero, absoluteTolerance))
           {
             var point = new Point3d(box.X.Mid, box.Y.Mid, box.Z.Mid);
             point.Transform(inverse);
             frustums.Add(new GH_Point(point));
           }
-          else if (size.EpsilonEquals(Vector3d.XAxis * size.X, absoluteTolerance))
+          else if (size.GeometryEquals(Vector3d.XAxis * size.X, absoluteTolerance))
           {
             var line = new Line(new Point3d(box.X.T0, box.Y.Mid, box.Z.Mid), new Point3d(box.X.T1, box.Y.Mid, box.Z.Mid));
             var curve = new LineCurve(line, box.X.T0, box.X.T1);
             curve.Transform(inverse);
             frustums.Add(new GH_Curve(curve));
           }
-          else if (size.EpsilonEquals(Vector3d.YAxis * size.Y, absoluteTolerance))
+          else if (size.GeometryEquals(Vector3d.YAxis * size.Y, absoluteTolerance))
           {
             var line = new Line(new Point3d(box.X.Mid, box.Y.T0, box.Z.Mid), new Point3d(box.X.Mid, box.Y.T1, box.Z.Mid));
             var curve = new LineCurve(line, box.Y.T0, box.Y.T1);
             curve.Transform(inverse);
             frustums.Add(new GH_Curve(curve));
           }
-          else if (size.EpsilonEquals(Vector3d.ZAxis * size.Z, absoluteTolerance))
+          else if (size.GeometryEquals(Vector3d.ZAxis * size.Z, absoluteTolerance))
           {
             var line = new Line(new Point3d(box.X.Mid, box.Y.Mid, box.Z.T0), new Point3d(box.X.Mid, box.Y.Mid, box.Z.T1));
             var curve = new LineCurve(line, box.Z.T0, box.Z.T1);

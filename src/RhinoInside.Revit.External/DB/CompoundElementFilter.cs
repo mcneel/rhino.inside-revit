@@ -149,6 +149,8 @@ namespace RhinoInside.Revit.External.DB
       else if (typeof(RoomTag).IsAssignableFrom(type))      return new RoomTagFilter();
       else if (typeof(Space).IsAssignableFrom(type))        return new SpaceFilter();
       else if (typeof(SpaceTag).IsAssignableFrom(type))     return new SpaceTagFilter();
+      else if (typeof(Mullion) == type)                     return new ElementClassFilter(typeof(FamilyInstance)).Intersect(new ElementCategoryFilter(BuiltInCategory.OST_CurtainWallMullions));
+      else if (typeof(Panel) == type)                       return new ElementClassFilter(typeof(FamilyInstance)).Intersect(new ElementCategoryFilter(BuiltInCategory.OST_CurtainWallPanels));
       else if (typeof(CurveElement).IsAssignableFrom(type)) return new ElementClassFilter(typeof(CurveElement));
       else if (typeof(ElementType) == type)                 return new ElementIsElementTypeFilter();
       else if (typeof(Element) != type)                     return new ElementClassFilter(type);

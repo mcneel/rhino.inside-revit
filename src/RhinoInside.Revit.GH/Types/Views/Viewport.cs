@@ -17,13 +17,6 @@ namespace RhinoInside.Revit.GH.Types
     public Viewport() { }
     public Viewport(ARDB.Viewport element) : base(element) { }
 
-    protected override void ResetValue()
-    {
-      using (_Mesh) _Mesh = default;
-
-      base.ResetValue();
-    }
-
     public override bool CastTo<Q>(out Q target)
     {
       if (base.CastTo(out target))
@@ -61,20 +54,55 @@ namespace RhinoInside.Revit.GH.Types
 
           switch (viewport.Rotation)
           {
-            case ARDB.ViewportRotation.None:
-              return new Plane(boxCenter, Vector3d.XAxis, Vector3d.YAxis);
-
-            case ARDB.ViewportRotation.Clockwise:
-              return new Plane(boxCenter, -Vector3d.YAxis, Vector3d.XAxis);
-
-            case ARDB.ViewportRotation.Counterclockwise:
-              return new Plane(boxCenter, Vector3d.YAxis, -Vector3d.XAxis);
+            case ARDB.ViewportRotation.None:              return new Plane(boxCenter, Vector3d.XAxis, Vector3d.YAxis);
+            case ARDB.ViewportRotation.Clockwise:         return new Plane(boxCenter, -Vector3d.YAxis, Vector3d.XAxis);
+            case ARDB.ViewportRotation.Counterclockwise:  return new Plane(boxCenter, Vector3d.YAxis, -Vector3d.XAxis);
           }
         }
 
         return NaN.Plane;
       }
     }
+
+#if REVIT_2022
+    public override Curve Curve
+    {
+      get
+      {
+        if (Value is ARDB.Viewport viewport)
+        {
+          using (var labelOutline = viewport.GetLabelOutline())
+          {
+            if (!labelOutline.IsEmpty)
+            {
+              var box = new Box(viewport.GetBoxOutline().ToBoundingBox());
+              var corners = box.GetCorners();
+              var labelLineOffset = new Vector3d(viewport.LabelOffset.ToPoint3d());
+              var labelLineLength = GeometryDecoder.ToModelLength(viewport.LabelLineLength);
+
+              switch (viewport.Rotation)
+              {
+                case ARDB.ViewportRotation.None:
+                  return new LineCurve(new Line(corners[0] + labelLineOffset, Vector3d.XAxis * labelLineLength));
+
+                case ARDB.ViewportRotation.Clockwise:
+                  labelLineOffset = new Vector3d(labelLineOffset.Y, labelLineOffset.X, 0.0);
+                  return new LineCurve(new Line(corners[3] + labelLineOffset, -Vector3d.YAxis * labelLineLength));
+
+                case ARDB.ViewportRotation.Counterclockwise:
+                  labelLineOffset = new Vector3d(-labelLineOffset.Y, -labelLineOffset.X, 0.0);
+                  return new LineCurve(new Line(corners[1] + labelLineOffset, Vector3d.YAxis * labelLineLength));
+              }
+            }
+          }
+        }
+
+        return null;
+      }
+
+      set => base.Curve = value;
+    }
+#endif
 
     public override Surface Surface
     {
@@ -123,40 +151,16 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     Mesh _Mesh;
-    public override Mesh Mesh
+    public override Mesh Mesh => _Mesh ?? (_Mesh = Mesh.CreateFromSurface(Surface));
+
+#region IGH_PreviewData
+    protected override void SubInvalidateGraphics()
     {
-      get
-      {
-        if (_Mesh is null)
-        {
-          var box = Box;
-          if (box.IsValid)
-          {
-            var padding = 0.01 * Revit.ModelUnits;
-            box.Inflate(-padding);
+      _Mesh = default;
 
-            _Mesh = new Mesh();
-            var vertices = _Mesh.Vertices;
-            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T0) + (box.Plane.YAxis * box.Y.T0));
-            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T1) + (box.Plane.YAxis * box.Y.T0));
-            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T1) + (box.Plane.YAxis * box.Y.T1));
-            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T0) + (box.Plane.YAxis * box.Y.T1));
-
-            var coordinates = _Mesh.TextureCoordinates;
-            coordinates.Add(0.0, 0.0);
-            coordinates.Add(1.0, 0.0);
-            coordinates.Add(1.0, 1.0);
-            coordinates.Add(0.0, 1.0);
-
-            _Mesh.Faces.AddFace(new MeshFace(0, 1, 2, 3));
-            _Mesh.Normals.ComputeNormals();
-          }
-        }
-        return _Mesh;
-      }
+      base.SubInvalidateGraphics();
     }
 
-    #region IGH_PreviewData
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB.Viewport viewport && viewport.SheetId != ARDB.ElementId.InvalidElementId)
@@ -167,10 +171,10 @@ namespace RhinoInside.Revit.GH.Types
           {
             var points = new Point3d[]
             {
-            boxOutline.MinimumPoint.ToPoint3d(),
-            Point3d.Origin,
-            boxOutline.MaximumPoint.ToPoint3d(),
-            Point3d.Origin
+              boxOutline.MinimumPoint.ToPoint3d(),
+              Point3d.Origin,
+              boxOutline.MaximumPoint.ToPoint3d(),
+              Point3d.Origin
             };
 
             points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
@@ -191,10 +195,10 @@ namespace RhinoInside.Revit.GH.Types
           {
             var points = new Point3d[]
             {
-            labelOutline.MinimumPoint.ToPoint3d(),
-            Point3d.Origin,
-            labelOutline.MaximumPoint.ToPoint3d(),
-            Point3d.Origin
+              labelOutline.MinimumPoint.ToPoint3d(),
+              Point3d.Origin,
+              labelOutline.MaximumPoint.ToPoint3d(),
+              Point3d.Origin
             };
 
             points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
@@ -203,6 +207,8 @@ namespace RhinoInside.Revit.GH.Types
             points[3] = new Point3d(points[0].X, points[2].Y, 0.0);
 
             args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x00003333, args.Thickness, close: true);
+            args.Pipeline.DrawDot(Position, Value.get_Parameter(ARDB.BuiltInParameter.VIEWPORT_DETAIL_NUMBER)?.AsString() ?? string.Empty, args.Color, System.Drawing.Color.White);
+            args.Pipeline.DrawCurve(Curve, args.Color, args.Thickness);
           }
         }
       }
@@ -214,11 +220,11 @@ namespace RhinoInside.Revit.GH.Types
       if (Mesh is Mesh mesh)
         args.Pipeline.DrawMeshShaded(mesh, args.Material);
     }
-    #endregion
+#endregion
 
-    #region Properties
+#region Properties
     public View View => View.FromElementId(Document, Value?.ViewId) as View;
     public ViewSheet Sheet => ViewSheet.FromElementId(Document, Value?.SheetId) as ViewSheet;
-    #endregion
+#endregion
   }
 }

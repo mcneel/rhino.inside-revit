@@ -10,7 +10,6 @@ using ERDB = RhinoInside.Revit.External.DB;
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
-  using Exceptions;
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.9")]
@@ -109,6 +108,52 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM,
     };
 
+    static void AssertValidType(ARDB.FamilySymbol type, ARDB.Element host)
+    {
+      if (type.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_StructuralFoundation)
+        throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid structural foundation type.");
+
+      var family = type.Family;
+      switch (family.FamilyPlacementType)
+      {
+        case ARDB.FamilyPlacementType.OneLevelBased:
+          if (!(host is null)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances shouldn't be hosted.");
+          return;
+
+        case ARDB.FamilyPlacementType.OneLevelBasedHosted:
+          switch (family.GetHostingBehavior())
+          {
+            case ARDB.FamilyHostingBehavior.None:
+              if (!(host is null)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances shouldn't be hosted.");
+              break;
+
+            case ARDB.FamilyHostingBehavior.Wall:
+              if (!(host is ARDB.Wall)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Wall.");
+              break;
+
+            case ARDB.FamilyHostingBehavior.Floor:
+              if (!(host is ARDB.Floor)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Floor.");
+              break;
+
+            case ARDB.FamilyHostingBehavior.Ceiling:
+              if (!(host is ARDB.Ceiling)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Ceiling.");
+              break;
+
+            case ARDB.FamilyHostingBehavior.Roof:
+              if (!(host is ARDB.RoofBase)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Roof.");
+              break;
+          }
+          return;
+
+        case ARDB.FamilyPlacementType.WorkPlaneBased:
+          if (!(host is null || host is ARDB.SketchPlane || host is ARDB.DatumPlane))
+            throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' should be hosted on a Datum or a Work Plane.");
+          return;
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid one level or work-plane based type.");
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
@@ -125,23 +170,41 @@ namespace RhinoInside.Revit.GH.Components
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Level", out Types.Level level, doc, location.Value.Origin.Z)) return null;
           if (!Params.TryGetData(DA, "Host", out Types.GraphicalElement host)) return null;
 
+          var hostElement = host?.Value;
+          AssertValidType(type.Value, hostElement);
+
           // Compute
           foundation = Reconstruct
           (
             foundation,
             doc.Value,
             location.Value.Origin.ToXYZ(),
-            location.Value.XAxis.ToXYZ(),
-            location.Value.YAxis.ToXYZ(),
+            (ERDB.UnitXYZ) location.Value.XAxis.ToXYZ(),
+            (ERDB.UnitXYZ) location.Value.YAxis.ToXYZ(),
             type.Value,
             level.Value,
-            host?.Value
+            hostElement
           );
 
           DA.SetData(_Foundation_, foundation);
           return foundation;
         }
       );
+    }
+
+    static bool IsEquivalentHost(ARDB.FamilyInstance foundation, ARDB.Element host)
+    {
+      switch (host)
+      {
+        case ARDB.SketchPlane sketchPlane:
+          var hostElement = sketchPlane.GetHost(out var hostFace);
+          if (hostElement is null) return false;
+          if (!sketchPlane.Document.AreEquivalentReferences(hostFace, foundation.HostFace)) return false;
+          if (!hostElement.IsEquivalent(foundation.Host)) return false;
+          return true;
+      }
+
+      return foundation.Host.IsEquivalent(host);
     }
 
     bool Reuse
@@ -154,16 +217,23 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (foundation is null) return false;
 
-      if (!foundation.Host.IsEquivalent(host)) return false;
-      if (foundation.LevelId != (level?.Id ?? ARDB.ElementId.InvalidElementId)) return false;
-      if (foundation.GetTypeId() != type.Id)
+      if (!IsEquivalentHost(foundation, host)) return false;
+      if (type.Id != foundation.GetTypeId()) foundation.ChangeTypeId(type.Id);
+
+      if (foundation.LevelId == ElementIdExtension.InvalidElementId)
       {
-        if (ARDB.Element.IsValidType(foundation.Document, new ARDB.ElementId[] { foundation.Id }, type.Id))
+        var levelParam = foundation.get_Parameter(ARDB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
+        if (levelParam?.IsReadOnly is false && levelParam.Update(level.Id) == false) return false;
+      }
+      else if (foundation.LevelId != (level?.Id ?? ARDB.ElementId.InvalidElementId))
+      {
+        var levelParam = foundation.get_Parameter(ARDB.BuiltInParameter.FAMILY_LEVEL_PARAM);
+        if (levelParam.IsReadOnly)
         {
-          if (foundation.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
-            foundation = foundation.Document.GetElement(id) as ARDB.FamilyInstance;
+          levelParam = foundation.get_Parameter(ARDB.BuiltInParameter.INSTANCE_REFERENCE_LEVEL_PARAM);
+          if (levelParam?.Update(level.Id) == false) return false;
         }
-        else return false;
+        else if(!levelParam.Update(level.Id)) return false;
       }
 
       return true;
@@ -171,6 +241,22 @@ namespace RhinoInside.Revit.GH.Components
 
     ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.XYZ point, ARDB.FamilySymbol type, ARDB.Level level, ARDB.Element host)
     {
+      if (!type.IsActive) type.Activate();
+
+      if (type.Family.FamilyPlacementType == ARDB.FamilyPlacementType.WorkPlaneBased)
+      {
+        switch (host)
+        {
+          case ARDB.SketchPlane _:                                                                break;
+          case ARDB.DatumPlane datum:       host = datum.GetSketchPlane(ensureSketchPlane: true); break;
+          case ARDB.HostObject hostObject:  host = hostObject.GetSketch()?.SketchPlane;           break;
+          default:                          host = null; break;
+        }
+
+        if (host is null)
+          host = level.GetSketchPlane(ensureSketchPlane: true);
+      }
+
       var list = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>(1)
       {
         new Autodesk.Revit.Creation.FamilyInstanceCreationData
@@ -184,11 +270,16 @@ namespace RhinoInside.Revit.GH.Components
       };
 
       var ids = doc.Create().NewFamilyInstances2(list);
-      var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+      if (ids.Count == 1)
+      {
+        var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
 
-      // We turn analytical model off by default
-      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
-      return instance;
+        // We turn analytical model off by default
+        instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        return instance;
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is not a valid structural foundation type.");
     }
 
     ARDB.FamilyInstance Reconstruct
@@ -196,13 +287,18 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.FamilyInstance foundation,
       ARDB.Document doc,
       ARDB.XYZ origin,
-      ARDB.XYZ basisX,
-      ARDB.XYZ basisY,
+      ERDB.UnitXYZ basisX,
+      ERDB.UnitXYZ basisY,
       ARDB.FamilySymbol type,
       ARDB.Level level,
       ARDB.Element host
     )
     {
+      if (type.Family.FamilyPlacementType == ARDB.FamilyPlacementType.WorkPlaneBased)
+      {
+        if (host is null) host = level;
+      }
+
       if (!Reuse(foundation, type, level, host))
       {
         foundation = foundation.ReplaceElement
@@ -213,13 +309,14 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       foundation.get_Parameter(ARDB.BuiltInParameter.INSTANCE_MOVES_WITH_GRID_PARAM)?.Update(false);
-      var levelParam = foundation.get_Parameter(ARDB.BuiltInParameter.FAMILY_LEVEL_PARAM);
-      if (!levelParam.IsReadOnly) levelParam.Update(level.Id);
 
       {
         foundation.Document.Regenerate();
         foundation.Pinned = false;
-        foundation.SetLocation(origin, basisX, basisY);
+        if (foundation.Host is object)
+          foundation.SetLocation(origin, basisX);
+        else
+          foundation.SetLocation(origin, basisX, basisY);
       }
 
       return foundation;

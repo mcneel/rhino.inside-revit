@@ -3,11 +3,12 @@ using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.ModelElements
 {
   using External.DB.Extensions;
-  using RhinoInside.Revit.Convert.Geometry;
+  using Convert.Geometry;
 
   [ComponentVersion(introduced: "1.8")]
   public class AddReferencePlane : ElementTrackerComponent
@@ -101,7 +102,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
           // Compute
           StartTransaction(doc.Value);
           if (CanReconstruct(_ReferencePlane_, out var untracked, ref referencePlane, doc.Value, name, categoryId: ARDB.BuiltInCategory.OST_CLines))
-            referencePlane = Reconstruct(referencePlane, doc.Value, plane.Value.Origin.ToXYZ(), plane.Value.XAxis.ToXYZ(), plane.Value.YAxis.ToXYZ(), name, template);
+            referencePlane = Reconstruct(referencePlane, doc.Value, plane.Value.Origin.ToXYZ(), (ERDB.UnitXYZ) plane.Value.XAxis.ToXYZ(), (ERDB.UnitXYZ) plane.Value.YAxis.ToXYZ(), name, template);
 
           DA.SetData(_ReferencePlane_, referencePlane);
           return untracked ? null : referencePlane;
@@ -109,55 +110,10 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       );
     }
 
-    public static void SetLocation(ARDB.ReferencePlane element, ARDB.XYZ newOrigin, ARDB.XYZ newBasisX, ARDB.XYZ newBasisY)
-    {
-      var plane = element.GetPlane();
-      var origin = plane.Origin;
-      var basisX = plane.XVec;
-      var basisY = plane.YVec;
-      var basisZ = basisX.CrossProduct(basisY);
-
-      var newBasisZ = newBasisX.CrossProduct(newBasisY);
-      {
-        if (!basisZ.IsCodirectionalTo(newBasisZ))
-        {
-          var angle = Math.PI;
-          var axisDirection = basisZ.CrossProduct(newBasisZ);
-          if (axisDirection.IsZeroLength())
-            axisDirection = basisY;
-          else
-            angle = basisZ.AngleTo(newBasisZ);
-
-          using (var axis = ARDB.Line.CreateUnbound(origin, axisDirection))
-            ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
-
-          plane = element.GetPlane();
-          origin = plane.Origin;
-          basisX = plane.XVec;
-          basisY = plane.YVec;
-          basisZ = basisX.CrossProduct(basisY);
-        }
-
-        if (!basisX.IsAlmostEqualTo(newBasisX))
-        {
-          double angle = basisX.AngleOnPlaneTo(newBasisX, newBasisZ);
-          using (var axis = ARDB.Line.CreateUnbound(origin, newBasisZ))
-            ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
-        }
-
-        {
-          var trans = newOrigin - origin;
-          if (!trans.IsZeroLength())
-            ARDB.ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
-        }
-      }
-    }
-
-
     bool Reuse
     (
       ARDB.ReferencePlane referencePlane,
-      ARDB.XYZ origin, ARDB.XYZ basisX, ARDB.XYZ basisY,
+      ARDB.XYZ origin, ERDB.UnitXYZ basisX, ERDB.UnitXYZ basisY,
       ARDB.ReferencePlane template
     )
     {
@@ -165,7 +121,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
 
       var pinned = referencePlane.Pinned;
       referencePlane.Pinned = false;
-      SetLocation(referencePlane, origin, basisX, basisY);
+      referencePlane.SetLocation(origin, basisX, basisY);
       referencePlane.Pinned = pinned;
 
       referencePlane.CopyParametersFrom(template, ExcludeUniqueProperties);
@@ -175,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     ARDB.ReferencePlane Create
     (
       ARDB.Document doc,
-      ARDB.XYZ origin, ARDB.XYZ basisX, ARDB.XYZ basisY,
+      ARDB.XYZ origin, ERDB.UnitXYZ basisX, ERDB.UnitXYZ basisY,
       ARDB.ReferencePlane template
     )
     {
@@ -190,11 +146,8 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       // Else create a brand new
       if (referencePlane is null)
       {
-        basisX *= 30.0;
-        basisY *= 30.0;
-
         using (var create = doc.Create())
-          referencePlane = create.NewReferencePlane2(origin + basisX, origin, origin - basisY, default);
+          referencePlane = create.NewReferencePlane2(origin + basisX * 30.0, origin, origin - basisY * 30.0, default);
 
         referencePlane.CopyParametersFrom(template, ExcludeUniqueProperties);
       }
@@ -205,7 +158,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     ARDB.ReferencePlane Reconstruct
     (
       ARDB.ReferencePlane referencePlane, ARDB.Document doc,
-      ARDB.XYZ origin, ARDB.XYZ basisX, ARDB.XYZ basisY,
+      ARDB.XYZ origin, ERDB.UnitXYZ basisX, ERDB.UnitXYZ basisY,
       string name, ARDB.ReferencePlane template
     )
     {

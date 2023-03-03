@@ -10,6 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using System.Diagnostics;
   using Convert.Geometry;
   using Convert.Units;
   using ElementTracking;
@@ -630,6 +631,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       var type = GetType();
       var ReconstructInfo = type.GetMethod($"Reconstruct{type.Name}", BindingFlags.Instance | BindingFlags.NonPublic);
+      Debug.Assert( ReconstructInfo is object);
       GetParams(ReconstructInfo, out var ins, out var outs);
 
       inputs = ins.Select

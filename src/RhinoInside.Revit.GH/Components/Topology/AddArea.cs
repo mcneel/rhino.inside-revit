@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
           (
             location.Value.X,
             location.Value.Y,
-            viewPlan.GenLevel.ProjectElevation * Revit.ModelUnits
+            viewPlan.GenLevel?.ProjectElevation * Revit.ModelUnits ?? location.Value.Z
           );
 
           // Compute

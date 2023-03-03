@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       {
         if (element is null) continue;
         if (document is null) document = element.Document;
-        else if (!document.Equals(element.Document))
+        else if (element.Document is object && !document.Equals(element.Document))
         {
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input elements should be from the same document");
           return false;
@@ -89,7 +89,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       {
         if (scope is object)
         {
-          if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? ARDB.ElementId.InvalidElementId)).Count > 0)
+          if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? ElementIdExtension.InvalidElementId)).Count > 0)
             doc.Regenerate();
         }
 
@@ -120,11 +120,11 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       var index = level;
       {
         var elePath = elements is object ? elementsPath.AppendElement(index) : default;
-        if (level == 0 && ExpandDependents) elePath = elePath?.AppendElement(0);
+        if (level == 0) elePath = elePath?.AppendElement(0);
         elements?.EnsurePath(elePath);
 
         var geoPath = geometriesPath.AppendElement(index);
-        if (level == 0 && ExpandDependents) geoPath = geoPath.AppendElement(0);
+        if (level == 0) geoPath = geoPath.AppendElement(0);
         geometries.EnsurePath(geoPath);
       }
 
@@ -137,11 +137,11 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         }
 
         var elePath = elements is object ? elementsPath.AppendElement(index) : default;
-        if (level == 0 && ExpandDependents) elePath = elePath?.AppendElement(0);
+        if (level == 0) elePath = elePath?.AppendElement(0);
         elements?.EnsurePath(elePath);
 
         var geoPath = geometriesPath.AppendElement(index);
-        if (level == 0 && ExpandDependents) geoPath = geoPath.AppendElement(0);
+        if (level == 0) geoPath = geoPath.AppendElement(0);
         geometries.EnsurePath(geoPath);
 
         index++;
@@ -427,7 +427,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           Description = "Geometry category",
           Access = GH_ParamAccess.tree
         },
-        ParamRelevance.Occasional
+        ParamRelevance.Secondary
       ),
       //new ParamDefinition
       //(
@@ -438,7 +438,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       //    Description = "Geometry material",
       //    Access = GH_ParamAccess.tree
       //  },
-      //  ParamVisibility.Voluntary
+      //  ParamRelevance.Secondary
       //),
     };
 
@@ -447,22 +447,16 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
       if (!Params.TryGetData(DA, "Detail Level", out ARDB.ViewDetailLevel? detailLevel)) return;
-
-      if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var doc))
-        return;
+      if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var doc)) return;
 
       var scope = default(IDisposable);
-      if (!detailLevel.HasValue)
-      {
-        detailLevel = ARDB.ViewDetailLevel.Coarse;
-      }
-      else if (elements.Any(x => x.Value is ARDB.FamilySymbol symbol && !symbol.IsActive))
+      if (elements.Any(x => (x?.Value as ARDB.FamilySymbol)?.IsActive is false))
       {
         scope = doc.RollBackScope();
         try
         {
-          foreach (var symbol in elements.Select(x => x.Value).OfType<ARDB.FamilySymbol>())
-            symbol.Activate();
+          foreach (var symbol in elements.OfType<Types.FamilySymbol>())
+            symbol.Value.Activate();
 
           doc.Regenerate();
         }
@@ -470,24 +464,16 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       }
 
       using (scope)
-      using (var options = new ARDB.Options() { DetailLevel = detailLevel.Value })
+      using (var options = new ARDB.Options() { DetailLevel = detailLevel ?? ARDB.ViewDetailLevel.Medium, ComputeReferences = true })
       {
         var _Elements_ = Params.IndexOfOutputParam("Elements");
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
         SolveGeometry
         (
-          doc,
-          elements,
-          exclude,
-          options,
+          doc, elements, exclude, options,
           _Elements_ < 0 ? default : DA.ParameterTargetPath(_Elements_), out var Elements,
           DA.ParameterTargetPath(_Geometry_), out var Geometry
         );
-
-        if (Elements is object)
-          DA.SetDataTree(_Elements_, Elements);
-
-        DA.SetDataTree(_Geometry_, Geometry);
 
         var _Categories_ = Params.IndexOfOutputParam("Categories");
         var Categories = _Categories_ >= 0 ? new GH_Structure<Types.Category>() : default;
@@ -497,11 +483,10 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
         SolveAttributes(doc, Geometry, Categories, Materials);
 
-        if (Categories is object)
-          DA.SetDataTree(_Categories_, Categories);
-
-        if (Materials is object)
-          DA.SetDataTree(_Materials_, Materials);
+        if (Elements   is object) DA.SetDataTree(_Elements_,   Elements);
+                                  DA.SetDataTree(_Geometry_,   Geometry);
+        if (Categories is object) DA.SetDataTree(_Categories_, Categories);
+        if (Materials  is object) DA.SetDataTree(_Materials_,  Materials);
       }
     }
   }
@@ -591,7 +576,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           Description = "Geometry category",
           Access = GH_ParamAccess.tree
         },
-        ParamRelevance.Primary
+        ParamRelevance.Secondary
       ),
       //new ParamDefinition
       //(
@@ -602,7 +587,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       //    Description = "Geometry material",
       //    Access = GH_ParamAccess.tree
       //  },
-      //  ParamVisibility.Default
+      //  ParamRelevance.Secondary
       //),
     };
 
@@ -611,9 +596,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
-
-      if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()).Concat(Enumerable.Repeat(view, 1)), out var doc))
-        return;
+      if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()).Append(view), out var doc)) return;
 
       using (var options = new ARDB.Options() { View = view.Value })
       {
@@ -621,18 +604,10 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
         SolveGeometry
         (
-          doc,
-          elements,
-          exclude,
-          options,
+          doc, elements, exclude, options,
           _Elements_ < 0 ? default : DA.ParameterTargetPath(_Elements_), out var Elements,
           DA.ParameterTargetPath(_Geometry_), out var Geometry
         );
-
-        if (Elements is object)
-          DA.SetDataTree(_Elements_, Elements);
-
-        DA.SetDataTree(_Geometry_, Geometry);
 
         var _Categories_ = Params.IndexOfOutputParam("Categories");
         var Categories = _Categories_ >= 0 ? new GH_Structure<Types.Category>() : default;
@@ -642,11 +617,10 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
         SolveAttributes(doc, Geometry, Categories, Materials);
 
-        if (Categories is object)
-          DA.SetDataTree(_Categories_, Categories);
-
-        if (Materials is object)
-          DA.SetDataTree(_Materials_, Materials);
+        if (Elements   is object) DA.SetDataTree(_Elements_,   Elements);
+                                  DA.SetDataTree(_Geometry_,   Geometry);
+        if (Categories is object) DA.SetDataTree(_Categories_, Categories);
+        if (Materials  is object) DA.SetDataTree(_Materials_,  Materials);
       }
     }
   }

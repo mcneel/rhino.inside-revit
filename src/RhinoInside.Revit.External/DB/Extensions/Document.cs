@@ -457,7 +457,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       TryParseNomenId(nomen.Trim(), out nomen, out var _);
 
       var last = doc.GetNamesakeElements(nomen, type, parentName, categoryId).
-        OrderBy(x => x.GetElementNomen(), ElementNaming.NameComparer).LastOrDefault();
+        OrderBy(ElementExtension.GetElementNomen, ElementNaming.NameComparer).LastOrDefault();
 
       if (last is object)
       {
@@ -734,7 +734,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           bic =>
           {
             try { return Category.GetCategory(doc, bic)?.AllowsBoundParameters == true; }
-            catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+            catch { return false; }
           }
         ).
         ToArray();
@@ -1188,6 +1188,102 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return true;
+    }
+    #endregion
+
+    #region Resources
+    static readonly Dictionary<string, Document> Resources = new Dictionary<string, Document>();
+
+    static Document ResourceDocument(this Autodesk.Revit.ApplicationServices.Application app, string resourceName)
+    {
+      if (!Resources.TryGetValue(resourceName, out var document) || !document.IsValidObject)
+      {
+        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var assemblyName = new System.Reflection.AssemblyName(assembly.FullName);
+        var name = $"{assemblyName.Name}.Resources.RVT{app.VersionNumber}.{resourceName}";
+        using (var resourceStream = assembly.GetManifestResourceStream(name))
+        {
+          var activeWindow = Microsoft.Win32.SafeHandles.WindowHandle.ActiveWindow;
+          var tempPath = Path.Combine(Path.GetTempPath(), resourceName);
+          try
+          {
+            using (var temp = File.OpenWrite(tempPath))
+              resourceStream.CopyTo(temp);
+
+            Resources[resourceName] = document = app.NewProjectDocument(tempPath);
+          }
+          finally
+          {
+            File.Delete(tempPath);
+            Microsoft.Win32.SafeHandles.WindowHandle.ActiveWindow = activeWindow;
+          }
+        }
+      }
+
+      return document;
+    }
+
+    static readonly string WorkPlaneBasedFamilyName = ElementNaming.MakeValidName($"[{WorkPlaneBasedSymbolName}]");
+    const string WorkPlaneBasedSymbolName = "Work Plane-Based";
+
+    static FamilySymbol GetWorkPlaneBasedSymbol(this Document document)
+    {
+      if (document is object)
+      {
+        using
+        (
+          var collector = new FilteredElementCollector(document).WhereElementIsElementType().
+          OfCategoryId(new ElementId(BuiltInCategory.OST_GenericModel)).
+          OfClass(typeof(FamilySymbol)).
+          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, WorkPlaneBasedFamilyName).
+          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, WorkPlaneBasedSymbolName)
+        )
+        {
+          return collector.Cast<FamilySymbol>().FirstOrDefault();
+        }
+      }
+
+      return null;
+    }
+
+    internal static FamilySymbol EnsureWorkPlaneBasedSymbol(this Document document)
+    {
+      var symbol = GetWorkPlaneBasedSymbol(document);
+      if (symbol is null)
+      {
+        symbol = GetWorkPlaneBasedSymbol(document.Application.ResourceDocument("RiR-Template.rte"));
+        if (symbol is object)
+        {
+          using (var options = new CopyPasteOptions())
+          {
+            options.SetDuplicateTypeNamesAction(DuplicateTypeAction.UseDestinationTypes);
+
+            var copiedElementIds = ElementTransformUtils.CopyElements
+            (
+              symbol.Document,
+              new ElementId[] { symbol.Id },
+              document,
+              default,
+              options
+            );
+
+            if (copiedElementIds.Count == 1)
+            {
+              var newSymbol = document.GetElement(copiedElementIds.First()) as FamilySymbol;
+              newSymbol.Family.CopyParametersFrom(symbol.Family);
+              symbol = newSymbol;
+            }
+          }
+        }
+      }
+      else
+      {
+        symbol.Family.get_Parameter(BuiltInParameter.FAMILY_WORK_PLANE_BASED).Update(true);
+        symbol.Family.get_Parameter(BuiltInParameter.FAMILY_ALWAYS_VERTICAL).Update(false);
+        symbol.Family.get_Parameter(BuiltInParameter.FAMILY_SHARED).Update(false);
+      }
+
+      return symbol;
     }
     #endregion
   }

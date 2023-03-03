@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.External.DB
     /// This field is constant.
     /// </summary>
     /// <remarks>
-    /// Same as <see cref="double.Epsilon"/> 4.94065645841247E-324
+    /// Same as DBL_TRUE_MIN = 4.94065645841247E-324
     /// </remarks>
     public const double Epsilon = double.Epsilon;
 
@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.External.DB
     /// This field is constant.
     /// </summary>
     /// <remarks>
-    /// Same as DBL_MIN +2.2250738585072014e-308
+    /// Same as DBL_MIN = 2.2250738585072014e-308
     /// </remarks>
     public const double Upsilon = 4.0 / double.MaxValue;
 
@@ -43,9 +43,20 @@ namespace RhinoInside.Revit.External.DB
     /// This field is constant.
     /// </summary>
     /// <remarks>
-    /// Same as DBL_EPSILON 2.2204460492503131e-16
+    /// Same as DBL_EPSILON = 2.2204460492503131e-16
     /// </remarks>
     public const double Delta = double.MaxValue * double.Epsilon / 4.0;
+
+    /// <summary>
+    /// Represents a default value that is used when comparing square roots.
+    /// This field is constant.
+    /// </summary>
+    /// <remarks>
+    /// Same as Math.Sqrt(Delta) = 1.4901161193847655E-08
+    /// </remarks>
+    internal const double SqrtDelta = 1.4901161193847655E-8;
+
+    internal const double ZeroDelta = 2.3283064365386962890625E-10;
     #endregion
 
     #region Class
@@ -55,7 +66,7 @@ namespace RhinoInside.Revit.External.DB
     const ulong SignificandMask   = 0x000F_FFFF_FFFF_FFFFUL;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static ulong ToBits(double value) => ((ulong) BitConverter.DoubleToInt64Bits(value));
+    static ulong ToBits(double value) => (ulong) BitConverter.DoubleToInt64Bits(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsFinite(double value)
@@ -101,14 +112,14 @@ namespace RhinoInside.Revit.External.DB
     }
     #endregion
 
-    #region Abs
+    #region Norm
     /// <summary>
     /// Absolute value of {<paramref name="x"/>}.
     /// </summary>
     /// <param name="x"></param>
     /// <returns>Distance from {0}.</returns>
     /// <remarks>This method returns denormals as zero.</remarks>
-    public static double Abs(double x)
+    internal static double Norm(double x)
     {
       x = Math.Abs(x);
 
@@ -124,7 +135,7 @@ namespace RhinoInside.Revit.External.DB
     /// <param name="y"></param>
     /// <returns>Distance from {0, 0}.</returns>
     /// <remarks>This method returns denormals as zero.</remarks>
-    public static double Abs(double x, double y)
+    internal static double Norm(double x, double y)
     {
       x = Math.Abs(x); y = Math.Abs(y);
 
@@ -145,7 +156,7 @@ namespace RhinoInside.Revit.External.DB
     /// <param name="z"></param>
     /// <returns>Distance from {0, 0, 0}.</returns>
     /// <remarks>This method returns denormals as zero.</remarks>
-    public static double Abs(double x, double y, double z)
+    internal static double Norm(double x, double y, double z)
     {
       x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
 
@@ -157,6 +168,128 @@ namespace RhinoInside.Revit.External.DB
       u /= w; v /= w;
 
       return Math.Sqrt(1.0 + (u * u + v * v)) * w;
+    }
+    #endregion
+
+    #region IsZero
+    internal static bool IsZero1(double x, double tolerance = Upsilon)
+    {
+      x = Math.Abs(x);
+
+      return x < tolerance;
+    }
+
+    internal static bool IsZero2(double x, double y, double tolerance = Upsilon)
+    {
+      x = Math.Abs(x); y = Math.Abs(y);
+
+      double u = x, v = y;
+      if (x > v) { u = y; v = x; }
+      if (v < (0.0 + tolerance) / 2.0) return true;
+      if (v > (0.0 + tolerance)) return false;
+
+      u /= v;
+
+      return Math.Sqrt(1.0 + (u * u)) * v < tolerance;
+    }
+
+    internal static bool IsZero3(double x, double y, double z, double tolerance = Upsilon)
+    {
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+
+      double u = x, v = y, w = z;
+      if (x > w) { u = y; v = z; w = x; }
+      if (y > w) { u = z; v = x; w = y; }
+      if (w < (0.0 + tolerance) / 3.0) return true;
+      if (w > (0.0 + tolerance)) return false;
+
+      u /= w; v /= w;
+
+      return Math.Sqrt(1.0 + (u * u + v * v)) * w < tolerance;
+    }
+    #endregion
+
+    #region IsUnit
+    internal static bool IsUnit1(double x, double tolerance = Delta)
+    {
+      x = Math.Abs(1.0 - x);
+
+      return x < tolerance;
+    }
+
+    internal static bool IsUnit2(double x, double y, double tolerance = Delta)
+    {
+      x = Math.Abs(x); y = Math.Abs(y);
+
+      double u = x, v = y;
+      if (x > v) { u = y; v = x; }
+      if (v < (1.0 - tolerance) / 2.0) return false;
+      if (v > (1.0 + tolerance)) return false;
+
+      u /= v;
+
+      return IsUnit1(Math.Sqrt(1.0 + (u * u)) * v - 1.0, tolerance);
+    }
+
+    internal static bool IsUnit3(double x, double y, double z, double tolerance = Delta)
+    {
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
+
+      double u = x, v = y, w = z;
+      if (x > w) { u = y; v = z; w = x; }
+      if (y > w) { u = z; v = x; w = y; }
+      if (w < (1.0 - tolerance) / 3.0) return false;
+      if (w > (1.0 + tolerance)) return false;
+
+      u /= w; v /= w;
+
+      return IsUnit1(Math.Sqrt(1.0 + (u * u + v * v)) * w, tolerance);
+    }
+    #endregion
+
+    #region Unitize
+    internal static bool Unitize1(ref double x)
+    {
+      if (x == 0.0 || !IsFinite(x)) { x = double.NaN; return false; }
+      else x = x < 0.0 ? -1.0 : +1.0;
+      return true;
+    }
+
+    internal static bool Unitize2(ref double x, ref double y)
+    {
+      double X = Math.Abs(x), Y = Math.Abs(y);
+
+      double u = X, v = Y;
+      if (X > v) { u = Y; v = X;}
+      if (v < Upsilon)
+      {
+        u *= double.MaxValue; v *= double.MaxValue;
+        x *= double.MaxValue; y *= double.MaxValue;
+      }
+
+      u /= v;
+      var length = Math.Sqrt(1.0 + (u * u)) * v;
+      x /= length; y /= length;
+      return !double.IsNaN(x);
+    }
+
+    internal static bool Unitize3(ref double x, ref double y, ref double z)
+    {
+      double X = Math.Abs(x), Y = Math.Abs(y), Z = Math.Abs(z);
+
+      double u = X, v = Y, w = Z;
+      if (X > w) { u = Y; v = Z; w = X; }
+      if (Y > w) { u = Z; v = X; w = Y; }
+      if (w < Upsilon)
+      {
+        u *= double.MaxValue; v *= double.MaxValue; w *= double.MaxValue;
+        x *= double.MaxValue; y *= double.MaxValue; z *= double.MaxValue;
+      }
+
+      u /= w; v /= w;
+      var length = Math.Sqrt(1.0 + (u * u + v * v)) * w;
+      x /= length; y /= length; z /= length;
+      return !double.IsNaN(x);
     }
     #endregion
 
@@ -189,7 +322,10 @@ namespace RhinoInside.Revit.External.DB
     /// <remarks>
     /// This requires <see cref="double.NaN"/> inputs to not be propagated back to the caller and for -0.0 to be treated as less than +0.0.
     /// </remarks>
-    public static double MinNumber(double x, double y) => x < y ? x : IsNegativeZero(y) || IsNegativeZero(x) ? -0.0 : y;
+    public static double MinNumber(double x, double y) =>
+      x < y ? x :
+      IsNegativeZero(y) || IsNegativeZero(x) ? -0.0 :
+      double.IsNaN(y) ? x : y;
     #endregion
 
     #region MaxNumber
@@ -202,7 +338,10 @@ namespace RhinoInside.Revit.External.DB
     /// <remarks>
     /// This requires <see cref="double.NaN"/> inputs to not be propagated back to the caller and for -0.0 to be treated as less than +0.0.
     /// </remarks>
-    public static double MaxNumber(double x, double y) => x > y ? x : IsPositiveZero(y) || IsPositiveZero(x) ? +0.0 : y;
+    public static double MaxNumber(double x, double y) =>
+      x > y ? x :
+      IsPositiveZero(y) || IsPositiveZero(x) ? +0.0 :
+      double.IsNaN(y) ? x : y;
     #endregion
   }
 
@@ -467,83 +606,294 @@ namespace RhinoInside.Revit.External.DB
   }
 
   /// <summary>
+  /// This class represents a unit length vector.
+  /// </summary>
+  /// <remarks>
+  /// Sometimes called versor.
+  /// </remarks>
+  public readonly struct UnitXYZ
+  {
+    public readonly XYZ Direction;
+
+    public static UnitXYZ NaN { get; } = default;
+    public static UnitXYZ BasisX { get; } = new UnitXYZ(XYZ.BasisX);
+    public static UnitXYZ BasisY { get; } = new UnitXYZ(XYZ.BasisY);
+    public static UnitXYZ BasisZ { get; } = new UnitXYZ(XYZ.BasisZ);
+
+    public static implicit operator bool(UnitXYZ unit) => unit.Direction is object;
+    public static XYZ operator *(UnitXYZ unit, double magnitude) => unit.Direction * magnitude;
+    public static XYZ operator *(double magnitude, UnitXYZ unit) => magnitude * unit.Direction;
+
+    UnitXYZ(XYZ xyz) => Direction = xyz;
+    UnitXYZ(double x, double y, double z) => Direction = new XYZ(x, y, z);
+
+    public static implicit operator XYZ(UnitXYZ unit) => unit.Direction;
+    public static explicit operator UnitXYZ(XYZ xyz)
+    {
+      Debug.Assert(xyz.IsUnitLength(NumericTolerance.DefaultTolerance), $"Input {nameof(xyz)} is not a unit length vector.");
+      return new UnitXYZ(xyz);
+    }
+
+    public static UnitXYZ Unitize(XYZ xyz)
+    {
+      var (x, y, z) = xyz;
+      return NumericTolerance.Unitize3(ref x, ref y, ref z) ? new UnitXYZ(x, y, z) : default;
+    }
+
+    public void Deconstruct(out double x, out double y, out double z) => (x, y, z) = Direction;
+
+    public bool AlmostEquals(UnitXYZ other, double tolerance = NumericTolerance.DefaultTolerance)
+    {
+      var (aX, aY, aZ) = this;
+      var (bX, bY, bZ) = other;
+
+      return NumericTolerance.IsZero3(aX - bX, aY - bY, aZ - bZ, tolerance);
+    }
+
+    public static UnitXYZ operator -(UnitXYZ source) => new UnitXYZ(-source.Direction);
+
+    public static double DotProduct(XYZ a, XYZ b)
+    {
+      var (aX, aY, aZ) = a;
+      var (bX, bY, bZ) = b;
+
+      return aX * bX + aY * bY + aZ * bZ;
+    }
+    public double DotProduct(XYZ other) => DotProduct(this, other);
+
+    public static XYZ CrossProduct(UnitXYZ a, UnitXYZ b)
+    {
+      var (aX, aY, aZ) = a;
+      var (bX, bY, bZ) = b;
+
+      var x = aY * bZ - aZ * bY;
+      var y = aZ * bX - aX * bZ;
+      var z = aX * bY - aY * bX;
+
+      return new XYZ(x, y, z);
+    }
+    public XYZ CrossProduct(UnitXYZ other) => CrossProduct(this, other);
+
+    public static bool Orthonormal(UnitXYZ x, UnitXYZ y, out UnitXYZ z, double tolerance = NumericTolerance.DefaultTolerance)
+    {
+      if (x.IsPerpendicularTo(y, tolerance))
+      {
+        z = (UnitXYZ) CrossProduct(x, y);
+        return true;
+      }
+      else
+      {
+        z = default;
+        return false;
+      }
+    }
+    public bool Orthonormal(UnitXYZ y, out UnitXYZ z, double tolerance = NumericTolerance.DefaultTolerance) => Orthonormal(this, y, out z, tolerance);
+
+    public static bool Orthonormalize(XYZ u, XYZ v, out UnitXYZ x, out UnitXYZ y, out UnitXYZ z)
+    {
+      x = Unitize(u);
+      y = Unitize(v);
+      z = Unitize(CrossProduct(x, y));
+      if (!z) return false;
+
+      y = (UnitXYZ) CrossProduct(z, x);
+      return true;
+    }
+
+    public double AngleTo(UnitXYZ other)
+    {
+      var dot = DotProduct(this, other);
+      if (dot <= -1.0) return Math.PI;
+      if (dot >= +1.0) return 0.0;
+      return Math.Acos(dot);
+    }
+
+    public double AngleOnPlaneTo(UnitXYZ other, UnitXYZ normal)
+    {
+      var dotThisOther   = DotProduct(this, other);
+      var dotThisNormal  = DotProduct(this, normal);
+      var dotOtherNormal = DotProduct(other, normal);
+
+      var x = dotThisOther - dotOtherNormal * dotThisNormal;
+      var y = DotProduct(normal, CrossProduct(this, other));
+
+      var angle = Math.Atan2(y, x);
+      return angle < 0.0 ? angle + 2.0 * Math.PI : angle;
+    }
+
+    /// <summary>
+    /// Checks if the the given vector is parallel to this one.
+    /// </summary>
+    /// <param name="other"></param>
+    /// <param name="tolerance"></param>
+    /// <returns>true if <paramref name="this"/> and <paramref name="other"/> are parallel</returns>
+    public bool IsParallelTo(UnitXYZ other, double tolerance = NumericTolerance.DefaultTolerance)
+    {
+      var (thisX, thisY, thisZ) = this;
+      var (otherX, otherY, otherZ) = other;
+
+      return NumericTolerance.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance * 0.25) ||
+             NumericTolerance.IsZero3(thisX + otherX, thisY + otherY, thisZ + otherZ, tolerance * 0.25);
+    }
+
+    /// <summary>
+    /// Checks if the the given vector is codirectional to this one.
+    /// </summary>  
+    /// <param name="other"></param>
+    /// <param name="tolerance"></param>
+    /// <returns>true if <paramref name="this"/> and <paramref name="other"/> are codirectional</returns>
+    public bool IsCodirectionalTo(UnitXYZ other, double tolerance = NumericTolerance.DefaultTolerance)
+    {
+      var (thisX, thisY, thisZ) = this;
+      var (otherX, otherY, otherZ) = other;
+
+      return NumericTolerance.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance * 0.25);
+    }
+
+    /// <summary>
+    /// Checks if the the given vector is perpendicular perpendicular to this one.
+    /// </summary>
+    /// <param name="other"></param>
+    /// <param name="tolerance"></param>
+    /// <returns>true if <paramref name="this"/> and <paramref name="other"/> are perpendicular</returns>
+    public bool IsPerpendicularTo(UnitXYZ other, double tolerance = NumericTolerance.DefaultTolerance)
+    {
+      return Math.Abs(DotProduct(this, other)) < tolerance * 0.25;
+    }
+
+    /// <summary>
+    /// Coordinate System X axis according to the Arbitrary Axis Algorithm.
+    /// </summary>
+    /// <seealso cref="UnitXYZ.Right(double)"/>
+    /// <param name="tolerance"></param>
+    /// <returns>X axis of the corresponding coordinate system</returns>
+    public UnitXYZ Right(double tolerance = NumericTolerance.DefaultTolerance)
+    {
+      var (x, y, z) = Direction;
+
+      var normXY = NumericTolerance.Norm(x, y);
+      if (normXY < tolerance)
+      {
+        // To save CrossProduct and a Unitize3
+        //return Unitize(CrossProduct(BasisY, this));
+        NumericTolerance.Unitize2(ref z, ref x);
+        return new UnitXYZ(z, 0.0, -x);
+      }
+      else
+      {
+        // To save CrossProduct and a Unitize3
+        //return Unitize(CrossProduct(BasisZ, this));
+        return new UnitXYZ(-y / normXY, x / normXY, 0.0);
+      }
+    }
+
+    /// <summary>
+    /// Coordinate System Y axis according to the Arbitrary Axis Algorithm.
+    /// </summary>
+    /// <seealso cref="UnitXYZ.Right(double)"/>
+    /// <param name="tolerance"></param>
+    /// <returns>Y axis of the corresponding coordinate system</returns>
+    public UnitXYZ Up(double tolerance = NumericTolerance.DefaultTolerance)
+    {
+      // To save creating the Right XYZ and some operations on the cross product.
+      // return new UnitXYZ(CrossProduct(this, Right(tolerance)));
+
+      var (thisX, thisY, thisZ) = Direction;
+      var rightX = thisX; var rightY = thisY; var rightZ = thisZ;
+
+      var normXY = NumericTolerance.Norm(rightX, rightY);
+      if (normXY < tolerance)
+      {
+        NumericTolerance.Unitize2(ref rightZ, ref rightX);
+
+        rightY = rightX;
+        rightX = rightZ;
+        rightZ = -rightY;
+        //rightY = 0.0;
+
+        // Compute the cross product.
+        // Since a and b are unit and perpendicular there is no need to unitize.
+        return new UnitXYZ
+        (
+          thisY * rightZ /*- thisZ * rightY*/,
+          thisZ * rightX - thisX * rightZ,
+          /*thisX * rightY*/ -thisY * rightX
+        );
+      }
+      else
+      {
+        rightZ = rightX;
+        rightX = -rightY / normXY;
+        rightY = rightZ / normXY;
+        //rightZ = 0.0;
+
+        // Compute the cross product
+        // Since a and b are unit and perpendicular there is no need to unitize.
+        return new UnitXYZ
+        (
+          /*thisY * rightZ*/ -thisZ * rightY,
+          thisZ * rightX /*- thisX * rightZ*/,
+          thisX * rightY - thisY * rightX
+        );
+      }
+    }
+  }
+
+  /// <summary>
   /// This class represents a General Form plane equation.
   /// </summary>
   readonly struct PlaneEquation
   {
-    public readonly double A;
-    public readonly double B;
-    public readonly double C;
-    public readonly double D;
+    double A => Normal.Direction.X;
+    double B => Normal.Direction.Y;
+    double C => Normal.Direction.Z;
+    double D => Offset;
+
+    /// <summary>
+    /// Plane normal direction.
+    /// </summary>
+    public readonly UnitXYZ Normal;
+
+    /// <summary>
+    /// Signed distance of world origin.
+    /// </summary>
+    public readonly double Offset;
+
+    /// <summary>
+    /// Signed distance from world origin.
+    /// </summary>
+    public double Elevation => -Offset;
 
     /// <summary>
     /// Point on plane closest to world-origin.
     /// </summary>
     public XYZ Point => new XYZ(A * -D, B * -D, C * -D);
 
-    /// <summary>
-    /// Plane X axis according to the Arbitrary Axis Algorithm.
-    /// </summary>
-    /// <seealso cref="XYZExtension.PerpVector(XYZ, double)"/>
-    public XYZ Direction => NumericTolerance.Abs(A, B) < NumericTolerance.DefaultTolerance ?
-      new XYZ(C, 0.0, -A) :
-      new XYZ(-B, A, 0.0);
-
-    /// <summary>
-    /// Plane Y axis according to the Arbitrary Axis Algorithm.
-    /// </summary>
-    /// <seealso cref="XYZExtension.PerpVector(XYZ, double)"/>
-    //public XYZ Up => Normal.CrossProduct(Direction, NumericTolerance.DefaultTolerance);
-    public XYZ Up => NumericTolerance.Abs(A, B) < NumericTolerance.DefaultTolerance ?
-      new XYZ
-      (
-           (B * -A) /* - (C *  0.0) */,
-           (C * C) - (A * -A),
-        /* (A * 0.0) */ -(B * C)
-      ) :
-      new XYZ
-      (
-        /* (B * 0.0) */ -(C * A),
-           (C * -B) /* - (A * 0.0) */,
-           (A * A) - (B * -B)
-      );
-
-    /// <summary>
-    /// Plane Z axis according to the Arbitrary Axis Algorithm.
-    /// </summary>
-    public XYZ Normal => new XYZ(A, B, C);
-
-    /// <summary>
-    /// Signed distance from world origin.
-    /// </summary>
-    public double Elevation => -D;
-
-    PlaneEquation(double a, double b, double c, double d)
+    public PlaneEquation(UnitXYZ direction, double offset)
     {
-      Debug.Assert(XYZExtension.IsUnitLength(a, b, c, NumericTolerance.Upsilon));
-
-      A = a;
-      B = b;
-      C = c;
-      D = d;
+      Normal = direction;
+      Offset = offset;
     }
 
-    public PlaneEquation(XYZ vector, double originSignedDistance)
+    public PlaneEquation(XYZ point, UnitXYZ direction)
     {
-      (A, B, C) = vector.Normalize(0D);
-      D = originSignedDistance;
-    }
-
-    public PlaneEquation(XYZ point, XYZ normal)
-    {
-      (A, B, C) = normal.Normalize(0D);
-      D = -(A * point.X + B * point.Y + C * point.Z);
+      Normal = direction;
+      Offset = -(direction.Direction.X * point.X + direction.Direction.Y * point.Y + direction.Direction.Z * point.Z);
     }
 
     public static PlaneEquation operator -(in PlaneEquation value)
     {
-      return new PlaneEquation(-value.A, -value.B, -value.C, -value.D);
+      return new PlaneEquation(-value.Normal, -value.Offset);
     }
+
+    #region AlmostEquals
+    public bool AlmostEquals(PlaneEquation other, double tolerance = NumericTolerance.DefaultTolerance)
+    {
+      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
+
+      return NumericTolerance.Norm(A - other.A, B - other.B, C - other.C) < tolerance && NumericTolerance.Norm(D, other.D) < tolerance;
+    }
+    #endregion
 
     public double AbsoluteDistanceTo(XYZ point) => Math.Abs(SignedDistanceTo(point));
     public double SignedDistanceTo(XYZ point) => A * point.X + B * point.Y + C * point.Z + D;

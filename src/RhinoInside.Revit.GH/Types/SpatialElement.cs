@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
+using Rhino;
 using Rhino.Geometry;
+using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -29,35 +31,46 @@ namespace RhinoInside.Revit.GH.Types
 
     public override ARDB.ElementId LevelId => Value?.Level?.Id ?? ARDB.ElementId.InvalidElementId;
 
+    protected override void SubInvalidateGraphics()
+    {
+      _Boundaries = null;
+      base.SubInvalidateGraphics();
+    }
+
+    Curve[] _Boundaries;
     public Curve[] Boundaries
     {
       get
       {
-        if (Value is ARDB.SpatialElement spatial)
+        if (_Boundaries is null && Value is ARDB.SpatialElement spatial)
         {
-          using (var options = new ARDB.SpatialElementBoundaryOptions())
+          if (IsPlaced && IsEnclosed)
           {
-            options.StoreFreeBoundaryFaces = true;
-            options.SpatialElementBoundaryLocation = spatial is ARDB.Area ?
-              ARDB.SpatialElementBoundaryLocation.Center :
-              ARDB.SpatialElementBoundaryLocation.Finish;
-
-            var tol = GeometryTolerance.Model;
-            var plane = Location;
+            using (var options = new ARDB.SpatialElementBoundaryOptions())
             {
-              var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
-              plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
-            }
+              options.StoreFreeBoundaryFaces = true;
+              options.SpatialElementBoundaryLocation = spatial is ARDB.Area ?
+                ARDB.SpatialElementBoundaryLocation.Center :
+                ARDB.SpatialElementBoundaryLocation.Finish;
 
-            var segments = spatial.GetBoundarySegments(options);
-            return segments.Select
-            (
-              loop => Curve.JoinCurves(loop.Select(x => Curve.ProjectToPlane(x.GetCurve().ToCurve(), plane)), tol.VertexTolerance, preserveDirection: false)[0]
-            ).ToArray();
+              var tol = GeometryTolerance.Model;
+              var plane = Location;
+              {
+                var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
+                plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
+              }
+
+              var segments = spatial.GetBoundarySegments(options);
+              _Boundaries = segments.Select
+              (
+                loop => Curve.JoinCurves(loop.Select(x => Curve.ProjectToPlane(x.GetCurve().ToCurve(), plane)), tol.VertexTolerance, preserveDirection: false)[0]
+              ).ToArray();
+            }
           }
+          else _Boundaries = new Curve[0];
         }
 
-        return null;
+        return _Boundaries;
       }
     }
 
@@ -65,34 +78,31 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Boundaries is Curve[] loops)
+        if (Boundaries is Curve[] loops && loops.Length > 0)
         {
-          if (loops.Length > 0)
+          var plane = Location;
           {
-            var plane = Location;
-            {
-              var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
-              plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
-            }
-
-            var loopsBox = BoundingBox.Empty;
-            for (int l = 0; l< loops.Length; ++l)
-            {
-              if (loops[l].ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
-                loops[l].Reverse();
-
-              loopsBox.Union(loops[l].GetBoundingBox(plane));
-            }
-
-            var planeSurface = new PlaneSurface
-            (
-              plane,
-              new Interval(loopsBox.Min.X, loopsBox.Max.X),
-              new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
-            );
-
-            return planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
+            var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
+            plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
           }
+
+          var loopsBox = BoundingBox.Empty;
+          for (int l = 0; l< loops.Length; ++l)
+          {
+            if (loops[l].ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
+              loops[l].Reverse();
+
+            loopsBox.Union(loops[l].GetBoundingBox(plane));
+          }
+
+          var planeSurface = new PlaneSurface
+          (
+            plane,
+            new Interval(loopsBox.Min.X, loopsBox.Max.X),
+            new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
+          );
+
+          return planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
         }
 
         return null;
@@ -113,7 +123,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.SpatialElement element && Value.get_Parameter(ARDB.BuiltInParameter.ROOM_PERIMETER) is ARDB.Parameter roomPerimeter)
+        if (Value is ARDB.SpatialElement element && element.get_Parameter(ARDB.BuiltInParameter.ROOM_PERIMETER) is ARDB.Parameter roomPerimeter)
         {
           if (roomPerimeter.HasValue)
             return roomPerimeter.AsDouble() * Revit.ModelUnits;
@@ -127,7 +137,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.SpatialElement element && Value.get_Parameter(ARDB.BuiltInParameter.ROOM_AREA) is ARDB.Parameter roomArea)
+        if (Value is ARDB.SpatialElement element && element.get_Parameter(ARDB.BuiltInParameter.ROOM_AREA) is ARDB.Parameter roomArea)
         {
           if (roomArea.HasValue)
             return roomArea.AsDouble() * Revit.ModelUnits * Revit.ModelUnits;
@@ -141,7 +151,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value is ARDB.SpatialElement element && Value.get_Parameter(ARDB.BuiltInParameter.ROOM_VOLUME) is ARDB.Parameter roomVolume)
+        if (Value is ARDB.SpatialElement element && element.get_Parameter(ARDB.BuiltInParameter.ROOM_VOLUME) is ARDB.Parameter roomVolume)
         {
           if (roomVolume.HasValue)
             return roomVolume.AsDouble() * Revit.ModelUnits * Revit.ModelUnits * Revit.ModelUnits;
@@ -161,6 +171,35 @@ namespace RhinoInside.Revit.GH.Types
 
     public AreaElement() { }
     public AreaElement(ARDB.Area element) : base(element) { }
+
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      if (IsPlaced && IsEnclosed)
+      {
+        if (Boundaries is Curve[] boundaries)
+        {
+          var bbox = BoundingBox.Empty;
+          foreach (var boundary in boundaries)
+            bbox.Union(boundary.GetBoundingBox(xform));
+
+          return bbox;
+        }
+      }
+
+      return NaN.BoundingBox;
+    }
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (IsPlaced && IsEnclosed)
+      {
+        if (Boundaries is Curve[] boundaries)
+          foreach (var bopundary in boundaries)
+            args.Pipeline.DrawCurve(bopundary, args.Color, args.Thickness);
+      }
+    }
+
+    protected override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
   }
 
   [Kernel.Attributes.Name("Room")]
@@ -180,7 +219,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Architecture.Room room)
         {
           var solids = room.ClosedShell.OfType<ARDB.Solid>().Where(x => x.Faces.Size > 0);
-          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryTolerance.Model.VertexTolerance);
+          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), RhinoMath.UnsetValue);
         }
 
         return null;
@@ -206,7 +245,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Mechanical.Space space)
         {
           var solids = space.ClosedShell.OfType<ARDB.Solid>().Where(x => x.Faces.Size > 0);
-          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), GeometryTolerance.Model.VertexTolerance);
+          return Brep.MergeBreps(solids.Select(x => x.ToBrep()), RhinoMath.UnsetValue);
         }
 
         return null;

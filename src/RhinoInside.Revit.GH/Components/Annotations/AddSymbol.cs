@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddSymbol : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("2BEB60BA-F32C-469D-829F-5EC2B80492D9");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => string.Empty;
 
     public AddSymbol() : base

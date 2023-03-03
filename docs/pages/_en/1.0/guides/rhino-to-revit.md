@@ -38,7 +38,7 @@ And plan views using the categories to control graphics:
 
 ## Rhino objects as DirectShapes
 
-DirectShapes are the most obvious and many times the easiest way to get Geometry from Rhino into Revit. DirectShapes are generic Revit elements that can contain and categorize arbitrary non-parametric geometry inside the Revit model. However, since the geometry is not parametric, Revit does not know how they are created and can not resolve interactions between DirectShapes and other native elements. An example is that native Revit walls can not be extended to reach a DirectShape roof geometry.
+[DirectShapes](https://www.rhino3d.com/inside/revit/1.0/guides/revit-directshapes) are the most obvious and many times the easiest way to get Geometry from Rhino into Revit. DirectShapes are generic Revit elements that can contain and categorize arbitrary non-parametric geometry inside the Revit model. However, since the geometry is not parametric, Revit does not know how they are created and can not resolve interactions between DirectShapes and other native elements. An example is that native Revit walls can not be extended to reach a DirectShape roof geometry.
 
 Good reasons for using DirectShapes include:
 1. Temporary models used in a competition or early design study submission for quick drawings.
@@ -63,6 +63,8 @@ In addition to pushing Rhino geometry into Revit as DirectShapes, it is also pos
 DirectShapes created from smooth NURBS surfaces in Rhino may be imported as smooth solid or converted to a mesh by Revit. If the NURBS is converted to a mesh, that is a symptom that the NURBS geometry was rejected by Revit. There are many reasons for this, but very often this problem can be fixed in Rhino.
 {% endcapture %}
 {% include ltr/warning_note.html note=api_warning_note %}
+
+For a deeper look at Directshapes and detailed ways they can be used see the [DirectShape Guide](https://www.rhino3d.com/inside/revit/1.0/guides/revit-directshapes).
 
 ## Rhino objects as Loadable Families
 

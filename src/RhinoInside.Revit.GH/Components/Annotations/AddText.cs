@@ -2,13 +2,14 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations
 {
-  [ComponentVersion(introduced: "1.8")]
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
+  [ComponentVersion(introduced: "1.8", updated: "1.12")]
   public class AddText : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("49ACC84C-793F-40A4-A1BF-2D8BAFBB3604");
@@ -48,13 +49,12 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ),
       new ParamDefinition
       (
-        new Param_Number
+        new Param_Angle
         {
           Name = "Rotation",
           NickName = "R",
           Description = "Base line text rotation",
           Optional = true,
-          AngleParameter = true,
         }, ParamRelevance.Secondary
       ),
       new ParamDefinition
@@ -78,6 +78,26 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ),
       new ParamDefinition
       (
+        new Parameters.Param_Enum<Types.HorizontalTextAlignment>
+        {
+          Name = "Horizontal Align",
+          NickName = "HA",
+          Description = "Horizontal text alignment",
+          Optional = true
+        }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Param_Enum<Types.VerticalTextAlignment>
+        {
+          Name = "Vertical Align",
+          NickName = "VA",
+          Description = "Vertical text alignment",
+          Optional = true
+        }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
         new Parameters.ElementType
         {
           Name = "Type",
@@ -94,7 +114,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.TextElement()
         {
           Name = _Output_,
           NickName = _Output_.Substring(0, 1),
@@ -119,6 +139,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
           if (!Params.GetData(DA, "Content", out string text)) return null;
           if (!Params.TryGetData(DA, "Width", out double? width)) return null;
+          if (!Params.TryGetData(DA, "Horizontal Align", out ARDB.HorizontalTextAlignment? horizontalAlignment)) return null;
+          if (!Params.TryGetData(DA, "Vertical Align", out ARDB.VerticalTextAlignment? verticalAlignment)) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.TextNoteType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.TextNoteType)) return null;
 
           if (rotation.HasValue && Params.Input<Param_Number>("Rotation")?.UseDegrees == true)
@@ -152,6 +174,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             point.Value.ToXYZ(),
             rotation ?? 0.0,
             text,
+            horizontalAlignment ?? ARDB.HorizontalTextAlignment.Center,
+            verticalAlignment ?? ARDB.VerticalTextAlignment.Middle,
             width.Value,
             type
           );
@@ -166,7 +190,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     (
       ARDB.TextNote textNote, ARDB.View view,
       ARDB.XYZ point, double rotation,
-      string text, double width,
+      string text,
+      ARDB.HorizontalTextAlignment horizontalAlignment,
+      ARDB.VerticalTextAlignment verticalAlignment,
+      double width,
       ARDB.TextNoteType type
     )
     {
@@ -175,16 +202,28 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (textNote.GetTypeId() != type.Id) textNote.ChangeTypeId(type.Id);
       if (textNote.IsTextWrappingActive && double.IsNaN(width)) return false;
 
+      if (textNote.LeaderLeftAttachment != ARDB.LeaderAtachement.Midpoint)
+        textNote.LeaderLeftAttachment = ARDB.LeaderAtachement.Midpoint;
+      if (textNote.LeaderRightAttachment != ARDB.LeaderAtachement.Midpoint)
+        textNote.LeaderRightAttachment = ARDB.LeaderAtachement.Midpoint;
+
+      if (textNote.HorizontalAlignment != horizontalAlignment)
+        textNote.HorizontalAlignment = horizontalAlignment;
+#if REVIT_2019
+      if (textNote.VerticalAlignment != verticalAlignment)
+        textNote.VerticalAlignment = verticalAlignment;
+#endif
+
       if (!textNote.Coord.IsAlmostEqualTo(point))
         textNote.Coord = point;
 
-      var currentRotation = textNote.BaseDirection.AngleOnPlaneTo(view.RightDirection, view.ViewDirection);
+      var currentRotation = view.RightDirection.AngleOnPlaneTo(textNote.BaseDirection, view.ViewDirection);
       if (!GeometryTolerance.Internal.AlmostEqualAngles(currentRotation, rotation))
       {
         var pinned = textNote.Pinned;
         textNote.Pinned = false;
         using (var axis = ARDB.Line.CreateUnbound(textNote.Coord, view.ViewDirection))
-          ARDB.ElementTransformUtils.RotateElement(textNote.Document, textNote.Id, axis, rotation + currentRotation);
+          ARDB.ElementTransformUtils.RotateElement(textNote.Document, textNote.Id, axis, rotation - currentRotation);
         textNote.Pinned = pinned;
       }
 
@@ -204,15 +243,18 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     (
       ARDB.View view,
       ARDB.XYZ point, double rotation,
-      string text, double width,
+      string text,
+      ARDB.HorizontalTextAlignment horizontalAlignment,
+      ARDB.VerticalTextAlignment verticalAlignment,
+      double width,
       ARDB.TextNoteType type
     )
     {
       using (var opts = new ARDB.TextNoteOptions(type.Id))
       {
-        opts.HorizontalAlignment = ARDB.HorizontalTextAlignment.Center;
+        opts.HorizontalAlignment = horizontalAlignment;
 #if REVIT_2019
-        opts.VerticalAlignment = ARDB.VerticalTextAlignment.Middle;
+        opts.VerticalAlignment = verticalAlignment;
 #endif
         opts.Rotation = rotation;
 
@@ -230,23 +272,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ARDB.XYZ point,
       double rotation,
       string text,
+      ARDB.HorizontalTextAlignment horizontalAlignment,
+      ARDB.VerticalTextAlignment verticalAlignment,
       double width,
       ARDB.TextNoteType type
     )
     {
-      if (!Reuse(textNote, view, point, rotation, text, width, type))
-        textNote = Create(view, point, rotation, text, width, type);
-
-      if (textNote.LeaderLeftAttachment != ARDB.LeaderAtachement.Midpoint)
-        textNote.LeaderLeftAttachment = ARDB.LeaderAtachement.Midpoint;
-      if (textNote.LeaderRightAttachment != ARDB.LeaderAtachement.Midpoint)
-        textNote.LeaderRightAttachment = ARDB.LeaderAtachement.Midpoint;
-      if (textNote.HorizontalAlignment != ARDB.HorizontalTextAlignment.Center)
-        textNote.HorizontalAlignment = ARDB.HorizontalTextAlignment.Center;
-#if REVIT_2019
-      if (textNote.VerticalAlignment != ARDB.VerticalTextAlignment.Middle)
-        textNote.VerticalAlignment = ARDB.VerticalTextAlignment.Middle;
-#endif
+      if (!Reuse(textNote, view, point, rotation, text, horizontalAlignment, verticalAlignment, width, type))
+        textNote = Create(view, point, rotation, text, horizontalAlignment, verticalAlignment, width, type);
 
       return textNote;
     }

@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.Workset>("Active Workset", "W", "Active workset", optional: true, relevance: ParamRelevance.Occasional)
+      ParamDefinition.Create<Parameters.Workset>("Active Workset", "W", "Active workset", optional: true, relevance: ParamRelevance.Secondary)
     };
 
     protected override ParamDefinition[] Outputs => outputs;

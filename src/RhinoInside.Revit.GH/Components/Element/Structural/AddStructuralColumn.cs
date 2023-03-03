@@ -137,6 +137,7 @@ namespace RhinoInside.Revit.GH.Components
             throw new RuntimeArgumentException("Curve", $"Curve start point must be below curve end point.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralColumns)) return null;
+          type.AssertPlacementType(ARDB.FamilyPlacementType.TwoLevelsBased);
 
           var bbox = curve.GetBoundingBox(accurate: true);
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Base Level", out Types.Level baseLevel, doc, bbox.Min.Z)) return null;
@@ -171,6 +172,8 @@ namespace RhinoInside.Revit.GH.Components
 
     ARDB.FamilyInstance Create(ARDB.Document doc, ARDB.Curve curve, ARDB.FamilySymbol type, ARDB.Level level)
     {
+      if (!type.IsActive) type.Activate();
+
       var list = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>(1)
       {
         new Autodesk.Revit.Creation.FamilyInstanceCreationData
@@ -183,11 +186,16 @@ namespace RhinoInside.Revit.GH.Components
       };
 
       var ids = doc.Create().NewFamilyInstances2(list);
-      var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
+      if (ids.Count == 1)
+      {
+        var instance = doc.GetElement(ids.First()) as ARDB.FamilyInstance;
 
-      // We turn analytical model off by default
-      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
-      return instance;
+        // We turn analytical model off by default
+        instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+        return instance;
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is not a valid structural column type.");
     }
 
     ARDB.FamilyInstance Reconstruct
@@ -239,5 +247,4 @@ namespace RhinoInside.Revit.GH.Components
       return column;
     }
   }
-
 }

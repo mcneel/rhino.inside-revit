@@ -500,19 +500,6 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override bool TryCatchException(IGH_DataAccess DA, Exception e)
     {
-      if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
-      {
-        for (int o = 0; o < Params.Output.Count; ++o)
-        {
-          switch (Params.Output[o].Access)
-          {
-            case GH_ParamAccess.item: DA.SetData    (o, default);                 break;
-            case GH_ParamAccess.list: DA.SetDataList(o, default);                 break;
-            case GH_ParamAccess.tree: DA.SetDataTree(o, default(IGH_Structure));  break;
-          }
-        }
-      }
-
       if (base.TryCatchException(DA, e))
         return true;
 
@@ -779,7 +766,7 @@ namespace RhinoInside.Revit.GH.Components
                 }
               }
 
-              AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, message, mesh);
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, message, mesh);
             }
 
             output = input;
@@ -955,6 +942,22 @@ namespace RhinoInside.Revit.GH.Components
     #region IGH_TrackingComponent
     TrackingMode IGH_TrackingComponent.TrackingMode => TrackingMode;
     internal TrackingMode TrackingMode { get; set; } = TrackingMode.Reconstruct;
+
+    public override bool DestroyParameter(GH_ParameterSide side, int index)
+    {
+      if (!base.DestroyParameter(side, index))
+        return false;
+
+      if (side == GH_ParameterSide.Output)
+      {
+        var param = Params.Output[index];
+
+        if (param is IGH_TrackingParam)
+          Guest.Instance.ObjectsDeleted(Grasshopper.Instances.ActiveCanvas, (OnPingDocument(), new IGH_DocumentObject[] { param }));
+      }
+
+      return true;
+    }
     #endregion
 
     #region IO

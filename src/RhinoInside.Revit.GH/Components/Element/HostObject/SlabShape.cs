@@ -191,11 +191,11 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
             try
             {
               if ((vertex = shape.DrawPoint(point.ToXYZ())) is null)
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));
               else
                 vertices.Add(point, vertex);
             }
-            catch { AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, "Failed to add vertex.", new Point(point)); }
+            catch { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to add vertex.", new Point(point)); }
           }
 
           return vertex?.VertexType == ARDB.SlabShapeVertexType.Invalid ? null : vertex;
@@ -223,9 +223,9 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
               var from = AddVertex(edge.From);
               var to   = AddVertex(edge.To);
               if (from is null || to is null || shape.DrawSplitLine(from, to) is null)
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, "Some short-creases were skipped.", new LineCurve(edge));
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Some short-creases were skipped.", new LineCurve(edge));
             }
-            catch { AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, "Failed to add crease.", new LineCurve(edge)); }
+            catch { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to add crease.", new LineCurve(edge)); }
           }
         }
       }
