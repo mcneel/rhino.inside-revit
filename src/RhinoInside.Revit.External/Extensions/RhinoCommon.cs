@@ -159,11 +159,12 @@ namespace Rhino.Geometry
         return Vector3d.Zero;
 
       var normal = value / length;
+      var perp = Vector3d.Zero.EpsilonEquals(new Vector3d(normal.X, normal.Y, 0.0), tolerance) ?
+        new Vector3d(value.Z, 0.0, -value.X) :
+        new Vector3d(-value.Y, value.X, 0.0);
 
-      if (Vector3d.Zero.EpsilonEquals(new Vector3d(normal.X, normal.Y, 0.0), tolerance))
-        return new Vector3d(value.Z, 0.0, -value.X);
-      else
-        return new Vector3d(-value.Y, value.X, 0.0);
+      perp.Unitize();
+      return perp;
     }
   }
 
