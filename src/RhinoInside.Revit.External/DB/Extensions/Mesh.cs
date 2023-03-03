@@ -14,10 +14,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       var basisZ = cov.TryGetInverse(out var inverse) ?
                  inverse.GetPrincipalComponent(0D) :
-                 mesh.ComputeMeanNormal();
+                 UnitXYZ.Unitize(mesh.ComputeMeanNormal());
 
-      basisY = UnitXYZ.Unitize(basisZ.CrossProduct(basisX));
-      return basisY;
+      return UnitXYZ.Orthonormalize(basisZ, basisX, out basisZ, out basisX, out basisY);
     }
 
     /// <summary>
@@ -64,11 +63,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
             break;
 
           case 2:
-            w = XYZExtension.GetLength(XYZExtension.CrossProduct(v1 - v0, v2 - v0, 0D), 0D);
+            w = XYZExtension.GetLength(XYZExtension.CrossProduct(v1 - v0, v2 - v0), 0D);
             break;
 
           case 3:
-            w = XYZExtension.TripleProduct(v0, v1, v2, 0D);
+            w = XYZExtension.TripleProduct(v0, v1, v2);
             break;
         }
 
@@ -120,7 +119,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var v1 = triangle.get_Vertex(1);
         var v2 = triangle.get_Vertex(2);
 
-        var normal = XYZExtension.CrossProduct(v1 - v0, v2 - v0, 0D);
+        var normal = XYZExtension.CrossProduct(v1 - v0, v2 - v0);
         normalX.Add(normal.X);
         normalY.Add(normal.Y);
         normalZ.Add(normal.Z);

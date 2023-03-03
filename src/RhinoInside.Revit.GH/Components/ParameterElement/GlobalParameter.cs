@@ -117,9 +117,9 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
             if (dataType == SpecType.Boolean.YesNo)
               return new GH_Boolean(value != 0);
 
-            if (parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
+            if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
             {
-              switch (builtInInteger)
+              switch (builtInParameter)
               {
                 case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) value);
                 case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) value);
@@ -136,8 +136,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
                 case ARDB.BuiltInParameter.FUNCTION_PARAM: return new Types.WallFunction((ARDB.WallFunction) value);
               }
 
-              var builtInIntegerName = builtInInteger.ToString();
-              if (builtInIntegerName.EndsWith("_COLOR"))
+              if (builtInParameter.IsColor())
               {
                 // `value` is in BGR format
                 var color = System.Drawing.Color.FromArgb
@@ -209,8 +208,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
               }
               else if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
               {
-                var builtInParameterName = builtInParameter.ToString();
-                if (builtInParameterName.EndsWith("_COLOR"))
+                if (builtInParameter.IsColor())
                 {
                   if (!GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
                     throw new InvalidCastException();

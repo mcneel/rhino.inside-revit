@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Types
           var end = curveLocation.Curve.Evaluate(1.0, normalized: true).ToPoint3d();
           var axis = end - start;
           var origin = start + (axis * 0.5);
-          var perp = axis.PerpVector();
+          var perp = axis.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance);
           return new Plane(origin, axis, perp);
         }
 

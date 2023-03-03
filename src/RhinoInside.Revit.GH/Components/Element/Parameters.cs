@@ -48,9 +48,9 @@ namespace RhinoInside.Revit.GH
             if (dataType == ERDB.Schemas.SpecType.Boolean.YesNo)
               return new GH_Boolean(integer != 0);
 
-            if (parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
+            if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
             {
-              switch (builtInInteger)
+              switch (builtInParameter)
               {
                 case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) integer);
                 case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) integer);
@@ -70,8 +70,7 @@ namespace RhinoInside.Revit.GH
                 case ARDB.BuiltInParameter.HOST_SSE_CURVED_EDGE_CONDITION_PARAM: return new Types.SlabShapeEditCurvedEdgeCondition((ERDB.SlabShapeEditCurvedEdgeCondition) integer);
               }
 
-              var builtInIntegerName = builtInInteger.ToString();
-              if (builtInIntegerName.EndsWith("_COLOR"))
+              if (builtInParameter.IsColor())
               {
                 // integer is in BGR format
                 var color = System.Drawing.Color.FromArgb
@@ -141,8 +140,7 @@ namespace RhinoInside.Revit.GH
             }
             else if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
             {
-              var builtInParameterName = builtInParameter.ToString();
-              if (builtInParameterName.EndsWith("_COLOR"))
+              if (builtInParameter.IsColor())
               {
                 if (!GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
                   throw new InvalidCastException();
@@ -292,10 +290,9 @@ namespace RhinoInside.Revit.GH
             if (dataType == ERDB.Schemas.SpecType.Boolean.YesNo)
               return integer != 0;
 
-            if (parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
+            if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
             {
-              var builtInIntegerName = builtInInteger.ToString();
-              if (builtInIntegerName.EndsWith("_COLOR"))
+              if (builtInParameter.IsColor())
               {
                 // integer is in BGR format
                 var color = System.Drawing.Color.FromArgb

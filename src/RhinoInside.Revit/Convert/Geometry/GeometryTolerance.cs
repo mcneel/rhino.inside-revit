@@ -18,24 +18,35 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       if (scale == UnitScale.None)
       {
+        DefaultTolerance = Internal.DefaultTolerance;
         AngleTolerance = Internal.AngleTolerance;
         VertexTolerance = Internal.VertexTolerance;
         ShortCurveTolerance = Internal.ShortCurveTolerance;
       }
       else
       {
+        DefaultTolerance = UnitScale.Convert(Internal.DefaultTolerance, UnitScale.Internal, scale);
         AngleTolerance = Internal.AngleTolerance;
         VertexTolerance = UnitScale.Convert(Internal.VertexTolerance, UnitScale.Internal, scale);
         ShortCurveTolerance = UnitScale.Convert(Internal.ShortCurveTolerance, UnitScale.Internal, scale);
       }
     }
 
-    internal GeometryTolerance(double angle, double vertex, double curve)
+    internal GeometryTolerance(double tol, double angle, double vertex, double curve)
     {
+      DefaultTolerance = tol;
       AngleTolerance = angle;
       VertexTolerance = vertex;
       ShortCurveTolerance = curve;
     }
+
+    /// <summary>
+    /// Default tolerance.
+    /// </summary>
+    /// <remarks>
+    /// Two vectors within this distance are considered coincident.
+    /// </remarks>
+    public readonly double DefaultTolerance;
 
     /// <summary>
     /// Angle tolerance.
@@ -74,7 +85,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Default <see cref="GeometryTolerance"/> to be used on <see cref="ARDB.GeometryObject"/> instances.
     /// </summary>
-    public static GeometryTolerance Internal { get; internal set; } = new GeometryTolerance(double.NaN, double.NaN, double.NaN);
+    public static GeometryTolerance Internal { get; internal set; } = new GeometryTolerance(double.NaN, double.NaN, double.NaN, double.NaN);
 
     /// <summary>
     /// Default <see cref="GeometryTolerance"/> expresed in Rhino model unit system.
