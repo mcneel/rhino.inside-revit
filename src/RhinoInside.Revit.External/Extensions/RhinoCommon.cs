@@ -144,22 +144,35 @@ namespace Rhino.Geometry
       return GeometryEqualityComparer.Comparer(tolerance).Equals(left, right);
     }
 
-    /// <summary>
-    /// Arbitrary Axis Algorithm
-    /// <para>Given a vector to be used as the Z axis of a coordinate system, this algorithm generates a corresponding X axis for the coordinate system.</para>
-    /// <para>The Y axis follows by application of the right-hand rule.</para>
-    /// </summary>
-    /// <param name="value"></param>
-    /// <param name="tolerance"></param>
-    /// <returns>X axis of the corresponding coordinate system</returns>
-    public static Vector3d PerpVector(this Vector3d value, double tolerance = 1e-9)
+    public static Vector3d PerpVector(this Vector3d value, double tolerance = RhinoMath.SqrtEpsilon)
     {
       var length = value.Length;
       if (length < tolerance)
         return Vector3d.Zero;
 
       var normal = value / length;
-      var perp = Vector3d.Zero.EpsilonEquals(new Vector3d(normal.X, normal.Y, 0.0), tolerance) ?
+      var perp = new Vector3d(normal.X, normal.Y, 0.0).Length <= tolerance ?
+        new Vector3d(normal.Z, 0.0, -normal.X) :
+        new Vector3d(-normal.Y, normal.X, 0.0);
+
+      perp.Unitize();
+      return perp * length;
+    }
+
+    /// <summary>
+    /// Arbitrary Axis Algorithm
+    /// <para>Given a vector to be used as the Z axis of a coordinate system, this algorithm generates a corresponding X axis for the coordinate system.</para>
+    /// <para>The Y axis follows by application of the right-hand rule.</para>
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="tolerance">Tolerance used to classify <paramref name="value"/> as vertical. Use <see cref="GeometryDecoder.Tolerance.VectorTolerance"/> in case of doubt.</param>
+    /// <returns>X axis of the corresponding coordinate system</returns>
+    public static Vector3d RightDirection(this Vector3d value, double tolerance)
+    {
+      if (!value.Unitize())
+        return Vector3d.Zero;
+
+      var perp = new Vector3d(value.X, value.Y, 0.0).Length <= tolerance ?
         new Vector3d(value.Z, 0.0, -value.X) :
         new Vector3d(-value.Y, value.X, 0.0);
 

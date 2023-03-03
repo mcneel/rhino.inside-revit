@@ -219,7 +219,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var location = Location;
-        return location.IsValid ? location.ZAxis.PerpVector() : NaN.Vector3d;
+        return location.IsValid ? location.ZAxis.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance) : NaN.Vector3d;
       }
     }
 

@@ -661,6 +661,22 @@ namespace RhinoInside.Revit.External.DB
     }
     public double DotProduct(XYZ other) => DotProduct(this, other);
 
+    public static double TripleProduct(UnitXYZ x, UnitXYZ y, UnitXYZ z)
+    {
+      var (xX, xY, xZ) = x;
+      var (yX, yY, yZ) = y;
+      var (zX, zY, zZ) = z;
+
+      // (x ⨯ y)
+      var xyX = xY * yZ - xZ * yY;
+      var xyY = xZ * yX - xX * yZ;
+      var xyZ = xX * yY - xY * yX;
+
+      // (x ⨯ y) ⋅ z
+      return zX * xyX + zY * xyY + zZ * xyZ;
+    }
+    public double TripleProduct(UnitXYZ x, UnitXYZ y) => TripleProduct(x, y, this);
+
     public static XYZ CrossProduct(UnitXYZ a, UnitXYZ b)
     {
       var (aX, aY, aZ) = a;
@@ -715,7 +731,7 @@ namespace RhinoInside.Revit.External.DB
       var dotOtherNormal = DotProduct(other, normal);
 
       var x = dotThisOther - dotOtherNormal * dotThisNormal;
-      var y = DotProduct(normal, CrossProduct(this, other));
+      var y = normal.TripleProduct(this, other);
 
       var angle = Math.Atan2(y, x);
       return angle < 0.0 ? angle + 2.0 * Math.PI : angle;

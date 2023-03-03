@@ -115,61 +115,59 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// The cross product of vector <paramref name="a"/> and vector <paramref name="b"/>.
+    /// The cross product of vector <paramref name="x"/> and vector <paramref name="y"/>.
     /// </summary>
     /// <remarks>
     /// The cross product is defined as the vector which is perpendicular to both vectors
     /// with a magnitude equal to the area of the parallelogram they span.
     /// Also known as vector product or outer product.
     /// </remarks>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
     /// <param name="tolerance">Tolerance value to check if input vectors are zero length.</param>
-    /// <returns>The vector equal to a ⨯ b.</returns>
+    /// <returns>The vector equal to x ⨯ y.</returns>
     /// <seealso cref="https://en.wikipedia.org/wiki/Cross_product"/>
-    public static XYZ CrossProduct(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
+    public static XYZ CrossProduct(XYZ x, XYZ y)
     {
-      tolerance = Math.Max(tolerance, Upsilon);
-
-      var (aX, aY, aZ) = a;
-      var lengthA = NumericTolerance.Norm(aX, aY, aZ);
-      if (lengthA < tolerance)
+      var (xX, xY, xZ) = x;
+      var xLength = NumericTolerance.Norm(xX, xY, xZ);
+      if (xLength < Upsilon)
         return Zero;
 
-      var (bX, bY, bZ) = b;
-      var lengthB = NumericTolerance.Norm(bX, bY, bZ);
-      if (lengthB < tolerance)
+      var (yX, yY, yZ) = y;
+      var yLength = NumericTolerance.Norm(yX, yY, yZ);
+      if (yLength < Upsilon)
         return Zero;
 
       // Normalize a and b
-      aX /= lengthA; aY /= lengthA; aZ /= lengthA;
-      bX /= lengthB; bY /= lengthB; bZ /= lengthB;
+      xX /= xLength; xY /= xLength; xZ /= xLength;
+      yX /= yLength; yY /= yLength; yZ /= yLength;
 
       // Compute CrossProduct of normalized vectors
-      var x = aY * bZ - aZ * bY;
-      var y = aZ * bX - aX * bZ;
-      var z = aX * bY - aY * bX;
+      var zX = xY * yZ - xZ * yY;
+      var zY = xZ * yX - xX * yZ;
+      var zZ = xX * yY - xY * yX;
 
-      // Scale result back to be lengthA * lengthB * sin(𝛼) in magnitude
-      var lengthAB = lengthA * lengthB;
-      return new XYZ(x * lengthAB, y * lengthAB, z * lengthAB);
+      // Scale result back to be xLength * yLength * sin(𝛼) in magnitude
+      var xyLength = xLength * yLength;
+      return new XYZ(zX * xyLength, zY * xyLength, zZ * xyLength);
     }
 
     /// <summary>
-    /// The dot product of of vector <paramref name="a"/> and vector <paramref name="b"/>.
+    /// The dot product of of vector <paramref name="x"/> and vector <paramref name="y"/>.
     /// </summary>
     /// <remarks>
     /// Geometrically equal to the cosinus of the angle span between a and b times |a| ⋅ |b|.
     /// </remarks>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
     /// <param name="tolerance"></param>
-    /// <returns>The scalar equal to a ⋅ b.</returns>
+    /// <returns>The scalar equal to x ⋅ y.</returns>
     /// <seealso cref="https://en.wikipedia.org/wiki/Dot_product"/>
-    public static double DotProduct(this XYZ a, XYZ b)
+    public static double DotProduct(XYZ x, XYZ y)
     {
-      var (aX, aY, aZ) = a;
-      var (bX, bY, bZ) = b;
+      var (aX, aY, aZ) = x;
+      var (bX, bY, bZ) = y;
 
       return aX * bX + aY * bY + aZ * bZ;
     }
@@ -180,15 +178,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <remarks>
     /// Geometrically equal to the signed volume of the parallelepiped formed by the three vectors.
     /// </remarks>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <param name="c"></param>
-    /// <param name="tolerance"></param>
-    /// <returns>The scalar equal to a ⋅ (b ⨯ c).</returns>
+    /// <param name="z"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns>The scalar equal to z ⋅ (x ⨯ y).</returns>
     /// <seealso cref="https://en.wikipedia.org/wiki/Triple_product"/>
-    public static double TripleProduct(this XYZ a, XYZ b, XYZ c, double tolerance = DefaultTolerance)
+    public static double TripleProduct(XYZ x, XYZ y, XYZ z)
     {
-      return DotProduct(a, CrossProduct(b, c, tolerance));
+      return DotProduct(z, CrossProduct(x, y));
     }
 
     /// <summary>
