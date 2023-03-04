@@ -63,6 +63,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return NumericTolerance.IsUnit3(xyz.X, xyz.Y, xyz.Z, NumericTolerance.DefaultTolerance);
     }
 
+    public static bool AlmostEqualVectors(this XYZ a, XYZ b)
+    {
+      return NumericTolerance.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, DefaultTolerance);
+    }
+
+    public static bool AlmostEqualPoints(this XYZ a, XYZ b, double tolerance = DefaultTolerance * 100.0)
+    {
+      tolerance = Math.Max(tolerance, NumericTolerance.DefaultTolerance * 2.0);
+
+      return NumericTolerance.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, tolerance);
+    }
+
     /// <summary>
     /// Gets the distance form the origin or the length if this is a vector.
     /// </summary>
@@ -79,18 +91,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       var norm = NumericTolerance.Norm(xyz.X, xyz.Y, xyz.Z);
       return norm < tolerance ? 0.0 : norm;
-    }
-
-    public static bool AlmostEqualVectors(this XYZ a, XYZ b)
-    {
-      return NumericTolerance.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, DefaultTolerance);
-    }
-
-    public static bool AlmostEqualPoints(this XYZ a, XYZ b, double tolerance = DefaultTolerance * 100.0)
-    {
-      tolerance = Math.Max(tolerance, NumericTolerance.DefaultTolerance * 2.0);
-
-      return NumericTolerance.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, tolerance);
     }
 
     /// <summary>
