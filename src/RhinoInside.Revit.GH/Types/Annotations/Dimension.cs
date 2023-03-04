@@ -230,7 +230,7 @@ namespace RhinoInside.Revit.GH.Types
 
       public override bool Visible
       {
-        get => !dimension.Value.Origin.IsAlmostEqualTo(dimension.Value.LeaderEndPosition);
+        get => !dimension.Value.Origin.AlmostEqualPoints(dimension.Value.LeaderEndPosition, dimension.Document.Application.ShortCurveTolerance);
         set { }
       }
 
@@ -315,7 +315,7 @@ namespace RhinoInside.Revit.GH.Types
 
       public override bool Visible
       {
-        get => !DimensionSegment.Origin.IsAlmostEqualTo(DimensionSegment.LeaderEndPosition);
+        get => !DimensionSegment.Origin.AlmostEqualPoints(DimensionSegment.LeaderEndPosition, dimension.Document.Application.ShortCurveTolerance);
         set { }
       }
 

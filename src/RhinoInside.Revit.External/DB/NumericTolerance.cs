@@ -46,17 +46,6 @@ namespace RhinoInside.Revit.External.DB
     /// Same as DBL_EPSILON = 2.2204460492503131e-16
     /// </remarks>
     public const double Delta = double.MaxValue * double.Epsilon / 4.0;
-
-    /// <summary>
-    /// Represents a default value that is used when comparing square roots.
-    /// This field is constant.
-    /// </summary>
-    /// <remarks>
-    /// Same as Math.Sqrt(Delta) = 1.4901161193847655E-08
-    /// </remarks>
-    internal const double SqrtDelta = 1.4901161193847655E-8;
-
-    internal const double ZeroDelta = 2.3283064365386962890625E-10;
     #endregion
 
     #region Class
@@ -630,7 +619,7 @@ namespace RhinoInside.Revit.External.DB
     public static implicit operator XYZ(UnitXYZ unit) => unit.Direction;
     public static explicit operator UnitXYZ(XYZ xyz)
     {
-      Debug.Assert(xyz.IsUnitLength(NumericTolerance.DefaultTolerance), $"Input {nameof(xyz)} is not a unit length vector.");
+      Debug.Assert(xyz.IsUnitVector(), $"Input {nameof(xyz)} is not a unit length vector.");
       return new UnitXYZ(xyz);
     }
 
@@ -748,8 +737,8 @@ namespace RhinoInside.Revit.External.DB
       var (thisX, thisY, thisZ) = this;
       var (otherX, otherY, otherZ) = other;
 
-      return NumericTolerance.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance * 0.25) ||
-             NumericTolerance.IsZero3(thisX + otherX, thisY + otherY, thisZ + otherZ, tolerance * 0.25);
+      return NumericTolerance.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance) ||
+             NumericTolerance.IsZero3(thisX + otherX, thisY + otherY, thisZ + otherZ, tolerance);
     }
 
     /// <summary>
@@ -763,7 +752,7 @@ namespace RhinoInside.Revit.External.DB
       var (thisX, thisY, thisZ) = this;
       var (otherX, otherY, otherZ) = other;
 
-      return NumericTolerance.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance * 0.25);
+      return NumericTolerance.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance);
     }
 
     /// <summary>
@@ -774,7 +763,7 @@ namespace RhinoInside.Revit.External.DB
     /// <returns>true if <paramref name="this"/> and <paramref name="other"/> are perpendicular</returns>
     public bool IsPerpendicularTo(UnitXYZ other, double tolerance = NumericTolerance.DefaultTolerance)
     {
-      return Math.Abs(DotProduct(this, other)) < tolerance * 0.25;
+      return Math.Abs(DotProduct(this, other)) < tolerance;
     }
 
     /// <summary>

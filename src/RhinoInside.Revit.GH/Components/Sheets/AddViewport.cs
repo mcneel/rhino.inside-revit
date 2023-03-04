@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       if (viewport.SheetId != sheet.Id) return false;
       if (viewport.ViewId != view.Id) return false;
 
-      if (!viewport.GetBoxCenter().AlmostEquals(point, viewport.Document.Application.VertexTolerance))
+      if (!viewport.GetBoxCenter().AlmostEqualPoints(point))
         viewport.SetBoxCenter(point);
 
       return true;

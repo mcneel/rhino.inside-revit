@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Components
           foreach (var vertex in adaptivePointIds.Select(id => document.GetElement(id)).Cast<ARDB.ReferencePoint>())
           {
             var position = adaptivePoints[index++];
-            if (!vertex.Position.IsAlmostEqualTo(position))
+            if (!vertex.Position.AlmostEqualPoints(position))
               vertex.Position = position;
           }
 

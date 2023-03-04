@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
         locationPoint.Point.Z == newLocation.Z
       )
       {
-        if (!newLocation.IsAlmostEqualTo(locationPoint.Point))
+        if (!newLocation.AlmostEqualPoints(locationPoint.Point))
         {
           group.Pinned = false;
           locationPoint.Point = newLocation;
