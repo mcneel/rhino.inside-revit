@@ -127,7 +127,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       {
         var target = new ARDB.XYZ(location.X, location.Y, areaLocation.Point.Z);
         var position = areaLocation.Point;
-        if (!target.IsAlmostEqualTo(position))
+        if (!target.AlmostEqualPoints(position))
         {
           var pinned = area.Pinned;
           area.Pinned = false;

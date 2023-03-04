@@ -146,7 +146,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       // Looks like images can't change its type.
       if (image.GetTypeId() != type.Id) return false;
 
-      if (!image.GetLocation(ARDB.BoxPlacement.Center).IsAlmostEqualTo(point))
+      if (!image.GetLocation(ARDB.BoxPlacement.Center).AlmostEqualPoints(point))
         image.SetLocation(point, ARDB.BoxPlacement.Center);
 
       return true;

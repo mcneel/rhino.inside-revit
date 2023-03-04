@@ -95,10 +95,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (!bbox.IsInside(point)) return false;
 
         var vector = bbox.Transform.Origin - point;
-        if (vector.IsZeroLength(0D)) vector = UnitXYZ.BasisZ;
+        if (vector.IsZeroVector()) vector = UnitXYZ.BasisZ;
         else vector = UnitXYZ.Unitize(vector);
 
-        using (var line = Line.CreateBound(point, point + vector * 0.1))
+        using (var line = Line.CreateBound(point, point + vector))
         {
           try
           {

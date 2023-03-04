@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
         var Z = (ERDB.UnitXYZ) origin.Value.ZAxis.ToXYZ();
         if
         (
-          !o.IsAlmostEqualTo(O) ||
+          !o.AlmostEqualPoints(O) ||
           !x.AlmostEquals(X) ||
           !y.AlmostEquals(Y) ||
           !z.AlmostEquals(Z))

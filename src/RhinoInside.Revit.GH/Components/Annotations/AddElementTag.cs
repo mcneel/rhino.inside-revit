@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             element.GetReference(),
             headPosition,
             leaderEnd,
-            !headPosition.IsAlmostEqualTo(leaderEnd),
+            !headPosition.AlmostEqualPoints(leaderEnd, view.Document.Application.ShortCurveTolerance),
             ARDB.TagOrientation.Horizontal
           );
 
@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       {
         var target = point;
         var position = independentTagLocation.Point;
-        if (!target.IsAlmostEqualTo(position))
+        if (!target.AlmostEqualPoints(position))
         {
           var pinned = independetTag.Pinned;
           independetTag.Pinned = false;
@@ -184,12 +184,12 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           independentTag.get_Parameter(ARDB.BuiltInParameter.TAG_LEADER_TYPE).Update(1);
           if (independentTag.GetTaggedReferences().FirstOrDefault() is ARDB.Reference referenceTagged)
           {
-            if (!independentTag.GetLeaderEnd(referenceTagged).IsAlmostEqualTo(leaderEnd))
+            if (!independentTag.GetLeaderEnd(referenceTagged).AlmostEqualPoints(leaderEnd))
               independentTag.SetLeaderEnd(referenceTagged, leaderEnd);
           }
         }
 
-        if (!independentTag.TagHeadPosition.IsAlmostEqualTo(headPosition))
+        if (!independentTag.TagHeadPosition.AlmostEqualPoints(headPosition))
         {
           var pinned = independentTag.Pinned;
           independentTag.Pinned = false;

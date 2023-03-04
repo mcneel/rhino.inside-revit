@@ -161,7 +161,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (areaTag.Location is ARDB.LocationPoint areaTagLocation)
       {
         var position = areaTagLocation.Point;
-        if (!target.IsAlmostEqualTo(position))
+        if (!target.AlmostEqualPoints(position))
         {
           var pinned = areaTag.Pinned;
           areaTag.Pinned = false;
@@ -189,7 +189,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         areaTag.ChangeTypeId(type.Id);
       }
 
-      if (!areaTag.TagHeadPosition.IsAlmostEqualTo(head))
+      if (!areaTag.TagHeadPosition.AlmostEqualPoints(head))
       {
         var pinned = areaTag.Pinned;
         areaTag.Pinned = false;

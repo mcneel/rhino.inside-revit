@@ -59,11 +59,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
         switch (dimension)
         {
           case 1:
-            w = XYZExtension.GetLength(v1 - v0, 0D) + XYZExtension.GetLength(v2 - v1, 0D) + XYZExtension.GetLength(v0 - v2, 0D);
+            w = XYZExtension.Norm(v1 - v0, 0D) + XYZExtension.Norm(v2 - v1, 0D) + XYZExtension.Norm(v0 - v2, 0D);
             break;
 
           case 2:
-            w = XYZExtension.GetLength(XYZExtension.CrossProduct(v1 - v0, v2 - v0), 0D);
+            w = XYZExtension.Norm(XYZExtension.CrossProduct(v1 - v0, v2 - v0), 0D);
             break;
 
           case 3:

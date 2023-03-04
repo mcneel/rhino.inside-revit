@@ -151,15 +151,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (!spot.Document.AreEquivalentReferences(prevReference, reference)) return false;
 
       // Origin
-      var vertexTolerance = spot.Document.Application.VertexTolerance;
-      if (!spot.Origin.AlmostEquals(point, vertexTolerance))
+      if (!spot.Origin.AlmostEqualPoints(point))
       {
         spot.Pinned = false;
         spot.Location.Move(point - spot.Origin);
       }
 
       // Leader
-      if (point.AlmostEquals(end, vertexTolerance))
+      if (point.AlmostEqualPoints(end, view.Document.Application.ShortCurveTolerance))
       {
         spot.get_Parameter(ARDB.BuiltInParameter.SPOT_DIM_LEADER)?.Update(false);
       }
@@ -170,11 +169,11 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
         if (spot.LeaderHasShoulder)
         {
-          if (!bend.AlmostEquals(spot.LeaderShoulderPosition, vertexTolerance))
+          if (!bend.AlmostEqualPoints(spot.LeaderShoulderPosition))
             spot.LeaderShoulderPosition = bend;
         }
 
-        if (!end.AlmostEquals(spot.LeaderEndPosition, vertexTolerance))
+        if (!end.AlmostEqualPoints(spot.LeaderEndPosition))
           spot.LeaderEndPosition = end;
 #else
         return false;
@@ -193,7 +192,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       if (reference is null) return null;
 
-      var hasLeader = !point.AlmostEquals(end, view.Document.Application.VertexTolerance);
+      var hasLeader = !point.AlmostEqualPoints(end, view.Document.Application.ShortCurveTolerance);
       return view.Document.Create.NewSpotElevation(view, reference, point, bend, end, point, hasLeader);
     }
 

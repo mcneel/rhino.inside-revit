@@ -301,12 +301,11 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (room.Location is ARDB.LocationPoint roomLocation)
         {
           var position = roomLocation.Point;
-          var target = new ARDB.XYZ(location.X, location.Y, position.Z);
-          if (!target.IsAlmostEqualTo(position))
+          if (!location.AlmostEqualPoints(position))
           {
             var pinned = room.Pinned;
             room.Pinned = false;
-            roomLocation.Move(target - position);
+            roomLocation.Move(location - position);
             room.Pinned = pinned;
           }
 

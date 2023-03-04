@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.TitleBlocks
 
       if
       (
-        !origin.AlmostEquals(newOrigin) ||
+        !origin.AlmostEqualPoints(newOrigin) ||
         !basisX.AlmostEquals(newBasisX) ||
         !basisY.AlmostEquals(newBasisY)
       )

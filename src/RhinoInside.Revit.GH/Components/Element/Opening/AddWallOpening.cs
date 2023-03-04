@@ -137,13 +137,13 @@ namespace RhinoInside.Revit.GH.Components.Openings
 
         var isPointCoincident = true;
         foreach(var pt in projectedOpeningPoints)
-          isPointCoincident &= pt.IsAlmostEqualTo(ptA) || pt.IsAlmostEqualTo(ptB);
+          isPointCoincident &= pt.AlmostEqualPoints(ptA) || pt.AlmostEqualPoints(ptB);
 
         //var recoveredPtA = new ARDB.XYZ(ptA.X, ptA.Y, minPt.Z / Revit.ModelUnits);
         //var recoveredPtB = new ARDB.XYZ(ptB.X, ptB.Y, maxPt.Z / Revit.ModelUnits);
 
         //foreach (var pt in opening.BoundaryRect)
-        //  isPointCoincident &= pt.IsAlmostEqualTo(recoveredPtA) || pt.IsAlmostEqualTo(recoveredPtB);
+        //  isPointCoincident &= pt.AlmostEqualPoints(recoveredPtA) || pt.AlmostEqualPoints(recoveredPtB);
 
         if (isPointCoincident)
           return true;
