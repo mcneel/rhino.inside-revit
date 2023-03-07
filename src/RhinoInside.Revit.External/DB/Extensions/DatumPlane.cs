@@ -45,7 +45,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var closestSketchPlane = default(SketchPlane);
         var comparer = GeometryObjectEqualityComparer.Default;
         var datumEquation = GetPlaneEquation(datum);
-        var datumNormal = datumEquation.Normal;
         var datuName = datum.Name;
 
         foreach (var sketchPlane in collector.Cast<SketchPlane>())
@@ -56,7 +55,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             var equation = new PlaneEquation(plane.Origin, (UnitXYZ) plane.Normal);
 
-            if (!comparer.Equals(equation.Normal, datumNormal))
+            if (!equation.AlmostEquals(datumEquation))
               continue;
 
             var distance = Math.Abs(equation.Offset - datumEquation.Offset);

@@ -196,6 +196,22 @@ namespace RhinoInside.Revit.External.DB
 
       return Math.Sqrt(1.0 + (u * u + v * v)) * w < tolerance;
     }
+
+    internal static bool IsZero4(double x, double y, double z, double w, double tolerance = Upsilon)
+    {
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z); w = Math.Abs(w);
+
+      double a = x, b = y, c = z, d = w;
+      if (x > d) { a = y; b = z; c = w; d = x; }
+      if (y > d) { a = z; b = w; c = x; d = y; }
+      if (z > d) { a = w; b = x; c = y; d = z; }
+      if (d < (0.0 + tolerance) / 3.0) return true;
+      if (d > (0.0 + tolerance)) return false;
+
+      a /= d; b /= d; c /= d;
+
+      return Math.Sqrt(1.0 + (a * a + b * b + c * c)) * d < tolerance;
+    }
     #endregion
 
     #region IsUnit
@@ -650,21 +666,21 @@ namespace RhinoInside.Revit.External.DB
     }
     public double DotProduct(XYZ other) => DotProduct(this, other);
 
-    public static double TripleProduct(UnitXYZ x, UnitXYZ y, UnitXYZ z)
+    public static double TripleProduct(UnitXYZ a, UnitXYZ b, UnitXYZ c)
     {
-      var (xX, xY, xZ) = x;
-      var (yX, yY, yZ) = y;
-      var (zX, zY, zZ) = z;
+      var (aX, aY, aZ) = a;
+      var (bX, bY, bZ) = b;
+      var (cX, cY, cZ) = c;
 
-      // (x ⨯ y)
-      var xyX = xY * yZ - xZ * yY;
-      var xyY = xZ * yX - xX * yZ;
-      var xyZ = xX * yY - xY * yX;
+      // (a ⨯ b)
+      var xyX = aY * bZ - aZ * bY;
+      var xyY = aZ * bX - aX * bZ;
+      var xyZ = aX * bY - aY * bX;
 
-      // (x ⨯ y) ⋅ z
-      return zX * xyX + zY * xyY + zZ * xyZ;
+      // (a ⨯ b) ⋅ c
+      return cX * xyX + cY * xyY + cZ * xyZ;
     }
-    public double TripleProduct(UnitXYZ x, UnitXYZ y) => TripleProduct(x, y, this);
+    public double TripleProduct(UnitXYZ a, UnitXYZ b) => TripleProduct(a, b, this);
 
     public static XYZ CrossProduct(UnitXYZ a, UnitXYZ b)
     {
@@ -692,7 +708,6 @@ namespace RhinoInside.Revit.External.DB
         return false;
       }
     }
-    public bool Orthonormal(UnitXYZ y, out UnitXYZ z, double tolerance = NumericTolerance.DefaultTolerance) => Orthonormal(this, y, out z, tolerance);
 
     public static bool Orthonormalize(XYZ u, XYZ v, out UnitXYZ x, out UnitXYZ y, out UnitXYZ z)
     {
@@ -892,11 +907,9 @@ namespace RhinoInside.Revit.External.DB
     }
 
     #region AlmostEquals
-    public bool AlmostEquals(PlaneEquation other, double tolerance = NumericTolerance.DefaultTolerance)
+    public bool AlmostEquals(PlaneEquation other)
     {
-      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
-
-      return NumericTolerance.Norm(A - other.A, B - other.B, C - other.C) < tolerance && NumericTolerance.Norm(D, other.D) < tolerance;
+      return NumericTolerance.IsZero4(A - other.A, B - other.B, C - other.C, D - other.D, NumericTolerance.DefaultTolerance);
     }
     #endregion
 

@@ -303,16 +303,6 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
-      {
-        var curve = Curve;
-        if (!curve.IsValid || curve.IsClosed)
-          return false;
-
-        target = (Q) (object) new GH_Line(new Line(curve.PointAtStart, curve.PointAtEnd));
-        return true;
-      }
-
       if (typeof(Q).IsAssignableFrom(typeof(GH_Transform)))
       {
         var plane = Location;
@@ -346,7 +336,7 @@ namespace RhinoInside.Revit.GH.Types
       if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
       {
         var curve = Curve;
-        if (curve?.IsValid != true)
+        if (curve?.IsValid != true || curve.IsClosed)
           return false;
 
         target = (Q) (object) new GH_Line(new Line(curve.PointAtStart, curve.PointAtEnd));
