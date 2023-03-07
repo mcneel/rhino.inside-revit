@@ -138,8 +138,37 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    protected override void PrepareForPrompt() { }
-    protected override void RecoverFromPrompt() { }
+    static System.Drawing.Rectangle? _EditorBounds;
+    protected override void PrepareForPrompt()
+    {
+      if (Grasshopper.Instances.DocumentEditor is Form editor)
+      {
+        if (editor.Visible)
+        {
+          _EditorBounds = editor.Bounds;
+          editor.Hide();
+        }
+      }
+    }
+
+    protected override void RecoverFromPrompt()
+    {
+      if (Grasshopper.Instances.DocumentEditor is Form editor)
+      {
+        if (_EditorBounds.HasValue)
+        {
+          editor.Bounds = _EditorBounds.Value;
+
+          if (!editor.Visible)
+          {
+            editor.Show();
+            editor.Select();
+          }
+        }
+      }
+
+      _EditorBounds = default;
+    }
     #endregion
 
     #region IGH_ReferenceParam
