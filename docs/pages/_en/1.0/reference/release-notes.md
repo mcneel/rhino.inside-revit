@@ -12,7 +12,7 @@ group: Deployment & Configs
 
 ### RC
 
-- Now the Grasshopper Editor window stays at same position after picking from Revit.
+- Added 'Add Component (Curve)'.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

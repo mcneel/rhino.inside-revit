@@ -67,6 +67,7 @@
     <Compile Include="Components\Element\Category.cs" />
     <Compile Include="Components\Element\Clone.cs" />
     <Compile Include="Components\Element\Components\AddComponent-Adaptive.cs" />
+    <Compile Include="Components\Element\Components\AddComponent-Curve.cs" />
     <Compile Include="Components\Element\Components\AddComponent-Location.cs" />
     <Compile Include="Components\Element\Components\AddComponent-WorkPlane.cs" />
     <Compile Include="Components\Element\Flip.cs" />
