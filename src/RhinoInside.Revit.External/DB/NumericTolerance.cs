@@ -255,9 +255,14 @@ namespace RhinoInside.Revit.External.DB
     #region Unitize
     internal static bool Unitize1(ref double x)
     {
-      if (x == 0.0 || !IsFinite(x)) { x = double.NaN; return false; }
-      else x = x < 0.0 ? -1.0 : +1.0;
-      return true;
+      // Infinity is not handled.
+      // if (double.IsInfinity(x)) return false;
+      if (x < 0.0) { x = -1.0; return true; }
+      if (x > 0.0) { x = +1.0; return true; }
+      // -0.0 -> -0.0
+      // +0.0 -> +0.0
+      //  NaN -> NaN
+      return false;
     }
 
     internal static bool Unitize2(ref double x, ref double y)
@@ -265,9 +270,10 @@ namespace RhinoInside.Revit.External.DB
       double X = Math.Abs(x), Y = Math.Abs(y);
 
       double u = X, v = Y;
-      if (X > v) { u = Y; v = X;}
-      if (v < Upsilon)
+      if (!(X < v)) { u = Y; v = X;}
+      if (!(v >= Upsilon))
       {
+        if (!(v != 0.0)) return false; // { x, y } It is here for Zeros but also handles NaNs
         u *= double.MaxValue; v *= double.MaxValue;
         x *= double.MaxValue; y *= double.MaxValue;
       }
@@ -275,7 +281,7 @@ namespace RhinoInside.Revit.External.DB
       u /= v;
       var length = Math.Sqrt(1.0 + (u * u)) * v;
       x /= length; y /= length;
-      return !double.IsNaN(x);
+      return true; // !double.IsNaN(length); Infinity is not handled.
     }
 
     internal static bool Unitize3(ref double x, ref double y, ref double z)
@@ -283,10 +289,11 @@ namespace RhinoInside.Revit.External.DB
       double X = Math.Abs(x), Y = Math.Abs(y), Z = Math.Abs(z);
 
       double u = X, v = Y, w = Z;
-      if (X > w) { u = Y; v = Z; w = X; }
-      if (Y > w) { u = Z; v = X; w = Y; }
-      if (w < Upsilon)
+      if (!(X < w)) { u = Y; v = Z; w = X; }
+      if (!(Y < w)) { u = Z; v = X; w = Y; }
+      if (!(w >= Upsilon))
       {
+        if (!(w != 0.0)) return false; // { x, y, z } It is here for Zeros but also handles NaNs
         u *= double.MaxValue; v *= double.MaxValue; w *= double.MaxValue;
         x *= double.MaxValue; y *= double.MaxValue; z *= double.MaxValue;
       }
@@ -294,7 +301,7 @@ namespace RhinoInside.Revit.External.DB
       u /= w; v /= w;
       var length = Math.Sqrt(1.0 + (u * u + v * v)) * w;
       x /= length; y /= length; z /= length;
-      return !double.IsNaN(x);
+      return true; // !double.IsNaN(length); Infinity is not handled.
     }
     #endregion
 

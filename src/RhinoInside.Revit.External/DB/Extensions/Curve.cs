@@ -167,14 +167,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (curve.IsBound)
       {
         origin = curve.Evaluate(0.5, true);
-        basisX = UnitXYZ.Unitize(curveDirection);
+        basisX = (UnitXYZ) curveDirection;
         basisY = basisX.Right();
         return true;
       }
       else
       {
         origin = curve.Origin;
-        basisX = UnitXYZ.Unitize(curveDirection);
+        basisX = (UnitXYZ) curveDirection;
         basisY = basisX.Right();
         return true;
       }
