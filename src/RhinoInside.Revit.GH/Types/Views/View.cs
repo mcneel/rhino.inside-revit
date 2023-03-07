@@ -40,10 +40,22 @@ namespace RhinoInside.Revit.GH.Types
       if (base.CastTo(out target))
         return true;
 
-#if DEBUG
+      // `Viewer` is the Geometric representation of a `View`.
+      // This casting should be the first to enable components that handle `IGH_GeometricGoo` values.
+      //
+      // - 'Bounding Box' to extract the View `BoundingBox`.
+      // - 'Custom Preview' to display a textured surface of the view.
+
+      if (typeof(Q).IsAssignableFrom(typeof(Viewer)))
+      {
+        target = (Q) (object) Viewer;
+
+        return target is object;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
       {
-        var position = Center;
+        var position = Position;
         target = position.IsValid ? (Q) (object) new GH_Point(position) : default;
         return true;
       }
@@ -54,18 +66,19 @@ namespace RhinoInside.Revit.GH.Types
         target = direction.IsValid ? (Q) (object) new GH_Vector(direction) : default;
         return true;
       }
-#endif
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
+      {
+        var location = Location;
+        var viewLine = new Line(location.Origin, location.Origin + location.ZAxis * Value.CropBox.Min.Z * Revit.ModelUnits);
+        target = viewLine.IsValid ? (Q) (object) new GH_Line(viewLine) : default;
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Curve)))
       {
         var cropShape = CropShape;
         target = cropShape is object ? (Q) (object) new GH_Curve(cropShape) : default;
-        return true;
-      }
-
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
-      {
-        var surface = Surface;
-        target = surface is object ? (Q) (object) new GH_Surface(surface) : default;
         return true;
       }
 
@@ -75,17 +88,30 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Rectangle)))
+      {
+        target = (Q) (object) new GH_Rectangle(Rectangle);
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
       {
         target = (Q) (object) new GH_Plane(Location);
         return true;
       }
 
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Interval2D)))
-      {
-        var outline = GetOutline(ActiveSpace.ModelSpace);
-        target = outline.IsValid ? (Q) (object) new GH_Interval2D(outline) : default;
+      //if (typeof(Q).IsAssignableFrom(typeof(GH_Interval2D)))
+      //{
+      //  var outline = GetOutline(ActiveSpace.ModelSpace);
+      //  target = outline.IsValid ? (Q) (object) new GH_Interval2D(outline) : default;
 
+      //  return true;
+      //}
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
+      {
+        var surface = Surface;
+        target = surface is object ? (Q) (object) new GH_Surface(surface) : default;
         return true;
       }
 
@@ -107,13 +133,6 @@ namespace RhinoInside.Revit.GH.Types
       if (typeof(Q).IsAssignableFrom(typeof(ViewFrame)))
       {
         target = (Q) (object) GetViewFrame();
-
-        return target is object;
-      }
-
-      if (typeof(Q).IsAssignableFrom(typeof(Viewer)))
-      {
-        target = (Q) (object) Viewer;
 
         return target is object;
       }
@@ -205,23 +224,9 @@ namespace RhinoInside.Revit.GH.Types
       view.UpDirection.ToVector3d()
     ) : NaN.Plane;
 
-    public Point3d Center
-    {
-      get
-      {
-        var rectangle = Rectangle;
-        return rectangle.IsValid ? rectangle.Center : NaN.Point3d;
-      }
-    }
+    public Point3d Position => Location.Origin;
 
-    public Vector3d Direction
-    {
-      get
-      {
-        var location = Location;
-        return location.IsValid ? location.ZAxis.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance) : NaN.Vector3d;
-      }
-    }
+    public Vector3d Direction => Location.ZAxis;
 
     public Box Box => Value?.get_BoundingBox(default).ToBox() ?? NaN.Box;
 
