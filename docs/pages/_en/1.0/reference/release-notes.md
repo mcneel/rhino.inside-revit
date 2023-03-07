@@ -17,6 +17,11 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.13 RC2" version="v1.13.8466.15699" pre_release=true time="03/07/2023" %}
+
+- Improved how components recognize verticality in Revit
+- Now the Grasshopper Editor window stays at same position after picking from Revit.
+
 {% include ltr/release-header.html title="v1.13 RC1" version="v1.13.8458.21732" pre_release=true time="02/28/2023" %}
 
 - Added {% include ltr/comp.html uuid='2101fff6' %} component.
