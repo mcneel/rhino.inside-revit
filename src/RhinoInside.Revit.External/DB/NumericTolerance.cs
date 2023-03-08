@@ -103,7 +103,7 @@ namespace RhinoInside.Revit.External.DB
 
     #region Norm
     /// <summary>
-    /// Absolute value of {<paramref name="x"/>}.
+    /// Magnitude of {<paramref name="x"/>}.
     /// </summary>
     /// <param name="x"></param>
     /// <returns>Distance from {0}.</returns>
@@ -118,7 +118,7 @@ namespace RhinoInside.Revit.External.DB
     }
 
     /// <summary>
-    /// Absolute value of {<paramref name="x"/>, <paramref name="y"/>} .
+    /// Magnitude of {<paramref name="x"/>, <paramref name="y"/>} .
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
@@ -138,7 +138,7 @@ namespace RhinoInside.Revit.External.DB
     }
 
     /// <summary>
-    /// Absolute value of {<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>}.
+    /// Magnitude of {<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>}.
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
@@ -217,9 +217,9 @@ namespace RhinoInside.Revit.External.DB
     #region IsUnit
     internal static bool IsUnit1(double x, double tolerance = Delta)
     {
-      x = Math.Abs(1.0 - x);
+      x = Math.Abs(x);
 
-      return x < tolerance;
+      return 1.0 - x < tolerance;
     }
 
     internal static bool IsUnit2(double x, double y, double tolerance = Delta)
@@ -233,7 +233,7 @@ namespace RhinoInside.Revit.External.DB
 
       u /= v;
 
-      return IsUnit1(Math.Sqrt(1.0 + (u * u)) * v - 1.0, tolerance);
+      return 1.0 - (Math.Sqrt(1.0 + (u * u)) * v) < tolerance;
     }
 
     internal static bool IsUnit3(double x, double y, double z, double tolerance = Delta)
@@ -248,7 +248,7 @@ namespace RhinoInside.Revit.External.DB
 
       u /= w; v /= w;
 
-      return IsUnit1(Math.Sqrt(1.0 + (u * u + v * v)) * w, tolerance);
+      return 1.0 - (Math.Sqrt(1.0 + (u * u + v * v)) * w) < tolerance;
     }
     #endregion
 
