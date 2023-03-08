@@ -485,8 +485,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
         UnitXYZ.Orthonormal(viewBasisX, viewBasisY, out var viewBasisZ);
 
         var newOrigin = newViewOrientation3D.EyePosition;
-        var newBasisY = UnitXYZ.Unitize(newViewOrientation3D.UpDirection);
-        var newBasisZ = UnitXYZ.Unitize(-newViewOrientation3D.ForwardDirection);
+        var newBasisY = newViewOrientation3D.UpDirection.ToUnitXYZ();
+        var newBasisZ = -newViewOrientation3D.ForwardDirection.ToUnitXYZ();
         UnitXYZ.Orthonormal(newBasisY, newBasisZ, out var newBasisX);
 
         {

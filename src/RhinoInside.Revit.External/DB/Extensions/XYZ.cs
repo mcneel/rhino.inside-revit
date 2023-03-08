@@ -94,24 +94,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Returns a new XYZ whose coordinates are the normalized values from this vector.
+    /// Returns a new <see cref="UnitXYZ"/> whose coordinates are the normalized values from this vector.
     /// </summary>
     /// <remarks>
     /// Normalized indicates that the length of this vector equals one (a unit vector).
     /// </remarks>
     /// <param name="xyz"></param>
-    /// <param name="tolerance"></param>
-    /// <returns>The normalized XYZ or zero if the vector is almost Zero.</returns>
-    public static XYZ Normalize(this XYZ xyz, double tolerance = DefaultTolerance)
+    /// <returns>The normalized UnitXYZ or UnitXYZ.NaN if the vector is {0, 0, 0}.</returns>
+    public static UnitXYZ ToUnitXYZ(this XYZ xyz)
     {
-      tolerance = Math.Max(tolerance, Upsilon);
-
       var (x, y, z) = xyz;
-      var length = NumericTolerance.Norm(x, y, z);
-      if (length < tolerance)
-        return Zero;
-
-      return new XYZ(x / length, y / length, z / length);
+      return NumericTolerance.Normalize3(ref x, ref y, ref z) ? (UnitXYZ) new XYZ(x, y, z) : default;
     }
 
     /// <summary>
@@ -196,8 +189,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>true if <paramref name="a"/> and <paramref name="b"/> are parallel</returns>
     public static bool IsParallelTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
-      var A = UnitXYZ.Unitize(a);
-      var B = UnitXYZ.Unitize(b);
+      var A = a.ToUnitXYZ();
+      var B = b.ToUnitXYZ();
 
       return A.IsParallelTo(B, tolerance);
     }
@@ -211,8 +204,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>true if <paramref name="a"/> and <paramref name="b"/> are codirectional</returns>
     public static bool IsCodirectionalTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
-      var A = UnitXYZ.Unitize(a);
-      var B = UnitXYZ.Unitize(b);
+      var A = a.ToUnitXYZ();
+      var B = b.ToUnitXYZ();
 
       return A.IsCodirectionalTo(B, tolerance);
     }
@@ -226,8 +219,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>true if <paramref name="a"/> and <paramref name="b"/> are perpendicular</returns>
     public static bool IsPerpendicularTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
     {
-      var A = UnitXYZ.Unitize(a);
-      var B = UnitXYZ.Unitize(b);
+      var A = a.ToUnitXYZ();
+      var B = b.ToUnitXYZ();
 
       return A.IsPerpendicularTo(B, tolerance);
     }
@@ -251,12 +244,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (NumericTolerance.IsZero2(x, y, tolerance))
       {
-        NumericTolerance.Unitize2(ref x, ref z);
+        NumericTolerance.Normalize2(ref x, ref z);
         return new XYZ(z * norm, 0.0, -x * norm);
       }
       else
       {
-        NumericTolerance.Unitize2(ref x, ref y);
+        NumericTolerance.Normalize2(ref x, ref y);
         return new XYZ(-y * norm, x * norm, 0.0);
       }
     }

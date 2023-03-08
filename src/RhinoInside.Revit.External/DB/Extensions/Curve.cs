@@ -191,7 +191,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (!curveDirection.IsZeroLength())
         {
           origin = start + (curveDirection * 0.5);
-          basisX = UnitXYZ.Unitize(curveDirection);
+          basisX = curveDirection.ToUnitXYZ();
           return UnitXYZ.Orthonormal((UnitXYZ) curve.Normal, basisX, out basisY);
         }
       }
@@ -216,7 +216,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var curveDirection = end - start;
 
         origin = start + (curveDirection * 0.5);
-        basisX = UnitXYZ.Unitize(curveDirection);
+        basisX = curveDirection.ToUnitXYZ();
         return UnitXYZ.Orthonormal((UnitXYZ) curve.Normal, basisX, out basisY);
       }
       else
@@ -253,7 +253,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (closed == 0)
       {
-        basisX = UnitXYZ.Unitize(curveDirection);
+        basisX = curveDirection.ToUnitXYZ();
 
         if (cov.TryGetInverse(out var inverse))
         {
@@ -325,14 +325,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             origin = XYZExtension.ComputeMeanPoint(curve.GetCoordinates());
             var axis = start - origin;
-            basisX = UnitXYZ.Unitize(axis);
+            basisX = axis.ToUnitXYZ();
             basisY = basisX.Right();
           }
           else
           {
             var axis = end - start;
             origin = start + (axis * 0.5);
-            basisX = UnitXYZ.Unitize(axis);
+            basisX = axis.ToUnitXYZ();
             basisY = basisX.Right();
           }
           return true;

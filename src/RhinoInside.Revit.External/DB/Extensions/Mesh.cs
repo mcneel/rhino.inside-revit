@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       var basisZ = cov.TryGetInverse(out var inverse) ?
                  inverse.GetPrincipalComponent(0D) :
-                 UnitXYZ.Unitize(mesh.ComputeMeanNormal());
+                 mesh.ComputeMeanNormal().ToUnitXYZ();
 
       return UnitXYZ.Orthonormalize(basisZ, basisX, out basisZ, out basisX, out basisY);
     }
