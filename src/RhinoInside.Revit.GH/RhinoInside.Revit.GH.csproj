@@ -330,7 +330,10 @@
     <Compile Include="Types\Annotations\TagElement.cs" />
     <Compile Include="Types\Annotations\TextElement.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
+    <Compile Include="Types\Instances\ImportInstance.cs" />
     <Compile Include="Types\Instances\Instance.cs" />
+    <Compile Include="Types\Instances\PointCloudInstance.cs" />
+    <Compile Include="Types\Instances\RevitLinkInstance.cs" />
     <Compile Include="Types\Views\Elevation.cs" />
     <Compile Include="Types\Views\Viewer.cs" />
     <Compile Include="Types\Views\ViewFrame.cs" />
