@@ -330,6 +330,7 @@
     <Compile Include="Types\Annotations\TagElement.cs" />
     <Compile Include="Types\Annotations\TextElement.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
+    <Compile Include="Types\Instances\Instance.cs" />
     <Compile Include="Types\Views\Elevation.cs" />
     <Compile Include="Types\Views\Viewer.cs" />
     <Compile Include="Types\Views\ViewFrame.cs" />
@@ -445,7 +446,6 @@
     <Compile Include="Types\HostObjects\Roof.cs" />
     <Compile Include="Types\HostObjects\Wall.cs" />
     <Compile Include="Types\ImageInstance.cs" />
-    <Compile Include="Types\Instance.cs" />
     <Compile Include="Types\InstanceElement.cs" />
     <Compile Include="Types\Materials\AppearanceAsset.cs" />
     <Compile Include="Types\Materials\AssetPropertyDouble1DMap.cs" />
