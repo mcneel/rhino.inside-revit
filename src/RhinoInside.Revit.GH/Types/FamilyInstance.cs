@@ -384,7 +384,7 @@ namespace RhinoInside.Revit.GH.Types
           throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{Environment.NewLine}Consider use 'Add Component (Location)' component.");
 
         case ARDB.FamilyPlacementType.TwoLevelsBased:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{Environment.NewLine}Consider use 'Add Component (Location)' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{Environment.NewLine}Consider use 'Add Column' or 'Add Structural Column' component.");
 
         case ARDB.FamilyPlacementType.ViewBased:
           throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a view-based type.{Environment.NewLine}Consider use 'Add Detail Item (Location)' component.");

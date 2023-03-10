@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.External.DB
       return false;
     }
 
-    public double BaseElevation
+    public double? BaseElevation
     {
       get
       {
@@ -114,13 +114,15 @@ namespace RhinoInside.Revit.External.DB
           case ARDB.BasePoint basePoint: return basePoint.GetPosition().Z;
         }
 
-        return 0.0;
+        return default;
       }
     }
 
     public double Offset => Value ?? 0.0;
 
-    public double Elevation => BaseElevation + Offset;
+    public double Elevation => (BaseElevation ?? 0.0) + Offset;
+
+    public double GetElevation(double baseElevation) => (BaseElevation ?? baseElevation) + Offset;
 
     public override string ToString()
     {
@@ -179,7 +181,7 @@ namespace RhinoInside.Revit.External.DB
     {
       if (!baseElevation.HasValue || !baseElevation.Value.IsLevelConstraint(out var baseLevel, out var bottomOffset))
       {
-        baseLevel = document.GetNearestLevel(projectElevation);
+        baseLevel = document.GetNearestLevel(projectElevation + defaultBaseElevation);
 
         double elevation = projectElevation, offset = defaultBaseElevation;
         if (baseElevation.HasValue)
@@ -204,7 +206,7 @@ namespace RhinoInside.Revit.External.DB
           else if (topElevation.Value.IsOffset(out offset)) { elevation = projectElevation; }
         }
 
-        topElevation = new ElevationElementReference(default, elevation - baseLevel.ProjectElevation + offset);
+        topElevation = new ElevationElementReference(elevation - baseLevel.ProjectElevation + offset);
       }
       else if (topOffset is null)
       {
@@ -268,7 +270,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (Value.IsElevation(out var elevation))
       {
-        return $"{GH_Format.FormatDouble(GeometryDecoder.ToModelLength(elevation))} {GH_Format.RhinoUnitSymbol()}";
+        return $"{(elevation < 0.0 ? "-" : "+")} {GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(elevation)))} {GH_Format.RhinoUnitSymbol()}";
       }
 
       return string.Empty;

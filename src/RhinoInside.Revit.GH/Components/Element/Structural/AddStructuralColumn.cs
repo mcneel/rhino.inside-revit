@@ -225,8 +225,6 @@ namespace RhinoInside.Revit.GH.Components
         if (!locationCurve.Curve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
         {
           curve.TryGetLocation(out var origin, out var basisX, out var basisY);
-
-          column.Pinned = false;
           column.SetLocation(origin, basisX, basisY);
 
           locationCurve.Curve = curve;
