@@ -387,7 +387,7 @@ namespace RhinoInside.Revit.GH.Types
           throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{Environment.NewLine}Consider use 'Add Component (Location)' component.");
 
         case ARDB.FamilyPlacementType.ViewBased:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a view-base type.{Environment.NewLine}Consider use 'Add Detail Item (Location)' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a view-based type.{Environment.NewLine}Consider use 'Add Detail Item (Location)' component.");
 
         case ARDB.FamilyPlacementType.WorkPlaneBased:
           throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a work plane-based type.{Environment.NewLine}Consider use 'Add Component (Work Plane)' component.");
