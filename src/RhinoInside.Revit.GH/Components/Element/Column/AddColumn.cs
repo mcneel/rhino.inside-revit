@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components
   {
     public override Guid ComponentGuid => new Guid("BE2C26C7-9617-4E3F-A961-C66E076BA37B");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    //protected override string IconTag => "I";
+    protected override string IconTag => "I";
 
     public AddColumn() : base
     (
