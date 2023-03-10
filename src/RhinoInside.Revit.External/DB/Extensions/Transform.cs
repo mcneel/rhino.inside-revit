@@ -134,14 +134,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       tolerance = Math.Max(Delta, tolerance);
 
-      var previous  = UnitXYZ.Unitize(XYZExtension.One);
-      var principal = UnitXYZ.Unitize(covarianceMatrix.OfVector(previous));
+      var previous  = XYZExtension.One.ToUnitXYZ();
+      var principal = covarianceMatrix.OfVector(previous).ToUnitXYZ();
 
       var iterations = 50;
       while (--iterations > 0 && principal && !previous.AlmostEquals(principal, tolerance))
       {
         previous = principal;
-        principal = UnitXYZ.Unitize(covarianceMatrix.OfVector(previous));
+        principal = covarianceMatrix.OfVector(previous).ToUnitXYZ();
       }
 
       return principal;

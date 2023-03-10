@@ -592,8 +592,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case GeometryInstance instance:
           origin = instance.Transform.Origin;
-          basisX = UnitXYZ.Unitize(instance.Transform.BasisX);
-          basisY = UnitXYZ.Unitize(instance.Transform.BasisY);
+          basisX = instance.Transform.BasisX.ToUnitXYZ();
+          basisY = instance.Transform.BasisY.ToUnitXYZ();
           return true;
 
         case Point point:

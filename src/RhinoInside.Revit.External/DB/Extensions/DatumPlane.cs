@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           var end = curve.GetEndPoint(CurveEnd.End);
           var axis = end - start;
           var origin = start + (axis * 0.5);
-          var right = UnitXYZ.Unitize(axis).Right();
+          var right = axis.ToUnitXYZ().Right();
           return new PlaneEquation(origin, -right);
 
         case ReferencePlane referencePlane:

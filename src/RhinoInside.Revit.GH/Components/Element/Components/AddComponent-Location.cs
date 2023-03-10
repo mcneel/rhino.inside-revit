@@ -111,6 +111,7 @@ namespace RhinoInside.Revit.GH.Components
       switch (family.FamilyPlacementType)
       {
         case ARDB.FamilyPlacementType.OneLevelBased:
+        case ARDB.FamilyPlacementType.TwoLevelsBased:
           if (!(host is null) && TrackingMode == ElementTracking.TrackingMode.Reconstruct)
             AddRuntimeMessage
             (

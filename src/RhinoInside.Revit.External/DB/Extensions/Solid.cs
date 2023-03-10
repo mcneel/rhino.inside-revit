@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         var vector = bbox.Transform.Origin - point;
         if (vector.IsZeroVector()) vector = UnitXYZ.BasisZ;
-        else vector = UnitXYZ.Unitize(vector);
+        else vector = vector.ToUnitXYZ();
 
         using (var line = Line.CreateBound(point, point + vector))
         {
@@ -379,7 +379,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       try
       {
         var intersection = edge.Project(point);
-        var vector = UnitXYZ.Unitize(point - intersection.XYZPoint);
+        var vector = (point - intersection.XYZPoint).ToUnitXYZ();
 
         var faces = new Face[] { edge.GetFace(0), edge.GetFace(1) };
         if (vector)

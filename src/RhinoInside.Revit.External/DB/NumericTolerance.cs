@@ -252,8 +252,8 @@ namespace RhinoInside.Revit.External.DB
     }
     #endregion
 
-    #region Unitize
-    internal static bool Unitize1(ref double x)
+    #region Normalize
+    internal static bool Normalize1(ref double x)
     {
       // Infinity is not handled.
       // if (double.IsInfinity(x)) return false;
@@ -265,7 +265,7 @@ namespace RhinoInside.Revit.External.DB
       return false;
     }
 
-    internal static bool Unitize2(ref double x, ref double y)
+    internal static bool Normalize2(ref double x, ref double y)
     {
       double X = Math.Abs(x), Y = Math.Abs(y);
 
@@ -284,7 +284,7 @@ namespace RhinoInside.Revit.External.DB
       return true; // !double.IsNaN(length); Infinity is not handled.
     }
 
-    internal static bool Unitize3(ref double x, ref double y, ref double z)
+    internal static bool Normalize3(ref double x, ref double y, ref double z)
     {
       double X = Math.Abs(x), Y = Math.Abs(y), Z = Math.Abs(z);
 
@@ -646,12 +646,6 @@ namespace RhinoInside.Revit.External.DB
       return new UnitXYZ(xyz);
     }
 
-    public static UnitXYZ Unitize(XYZ xyz)
-    {
-      var (x, y, z) = xyz;
-      return NumericTolerance.Unitize3(ref x, ref y, ref z) ? new UnitXYZ(x, y, z) : default;
-    }
-
     public void Deconstruct(out double x, out double y, out double z) => (x, y, z) = Direction;
 
     public bool AlmostEquals(UnitXYZ other, double tolerance = NumericTolerance.DefaultTolerance)
@@ -718,9 +712,9 @@ namespace RhinoInside.Revit.External.DB
 
     public static bool Orthonormalize(XYZ u, XYZ v, out UnitXYZ x, out UnitXYZ y, out UnitXYZ z)
     {
-      x = Unitize(u);
-      y = Unitize(v);
-      z = Unitize(CrossProduct(x, y));
+      x = u.ToUnitXYZ();
+      y = v.ToUnitXYZ();
+      z = CrossProduct(x, y).ToUnitXYZ();
       if (!z) return false;
 
       y = (UnitXYZ) CrossProduct(z, x);
@@ -803,7 +797,7 @@ namespace RhinoInside.Revit.External.DB
       {
         // To save CrossProduct and a Unitize3
         //return Unitize(CrossProduct(BasisY, this));
-        NumericTolerance.Unitize2(ref z, ref x);
+        NumericTolerance.Normalize2(ref z, ref x);
         return new UnitXYZ(z, 0.0, -x);
       }
       else
@@ -831,7 +825,7 @@ namespace RhinoInside.Revit.External.DB
       var normXY = NumericTolerance.Norm(rightX, rightY);
       if (normXY < tolerance)
       {
-        NumericTolerance.Unitize2(ref rightZ, ref rightX);
+        NumericTolerance.Normalize2(ref rightZ, ref rightX);
 
         rightY = rightX;
         rightX = rightZ;
