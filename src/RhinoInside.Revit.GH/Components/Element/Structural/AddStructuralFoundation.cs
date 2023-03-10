@@ -117,6 +117,7 @@ namespace RhinoInside.Revit.GH.Components
       switch (family.FamilyPlacementType)
       {
         case ARDB.FamilyPlacementType.OneLevelBased:
+        case ARDB.FamilyPlacementType.TwoLevelsBased:
           if (!(host is null)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances shouldn't be hosted.");
           return;
 
