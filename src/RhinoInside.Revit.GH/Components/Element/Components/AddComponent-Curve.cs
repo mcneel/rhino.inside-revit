@@ -17,7 +17,8 @@ namespace RhinoInside.Revit.GH.Components
   public class AddComponentCurve : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("5A6D9A20-B05F-4CAF-AB75-500CEE23B7CD");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    protected override string IconTag => "C";
 
     public AddComponentCurve() : base
     (
