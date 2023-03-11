@@ -12,7 +12,8 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Instance Element")]
-  public class InstanceElement : GeometricElement, IGH_InstanceElement
+  public class InstanceElement : GeometricElement, IGH_InstanceElement,
+    IHostElementAccess
   {
     public InstanceElement() { }
     public InstanceElement(ARDB.Element element) : base(element) { }
@@ -25,5 +26,11 @@ namespace RhinoInside.Revit.GH.Types
 
       return GeometricElement.IsValidElement(element);
     }
+
+    #region IHostElementAccess
+    public virtual GraphicalElement HostElement => Value is ARDB.Element element ?
+      GetElement<GraphicalElement>(element.LevelId) :
+      default;
+    #endregion
   }
 }

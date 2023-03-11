@@ -24,6 +24,11 @@ namespace RhinoInside.Revit.GH.Types
     View OwnerView { get; }
   }
 
+  interface IHostElementAccess
+  {
+    GraphicalElement HostElement { get; }
+  }
+
   [Kernel.Attributes.Name("Graphical Element")]
   public class GraphicalElement :
     Element,

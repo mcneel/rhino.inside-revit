@@ -12,7 +12,8 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Curve Element")]
-  public class CurveElement : GraphicalElement, Bake.IGH_BakeAwareElement
+  public class CurveElement : GraphicalElement, Bake.IGH_BakeAwareElement,
+    IHostElementAccess
   {
     protected override Type ValueType => typeof(ARDB.CurveElement);
     public static explicit operator ARDB.CurveElement(CurveElement value) => value?.Value;
@@ -72,6 +73,22 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return false;
+    }
+    #endregion
+
+    #region IHostElementAccess
+    public virtual GraphicalElement HostElement
+    {
+      get
+      {
+        if (Value is ARDB.CurveElement curveElement)
+        {
+          var host = GetElement<GraphicalElement>(curveElement.SketchPlane.GetHost(out var hostReference));
+          return hostReference is object ? host?.GetElementFromReference<GraphicalElement>(hostReference) : host;
+        }
+
+        return default;
+      }
     }
     #endregion
 
