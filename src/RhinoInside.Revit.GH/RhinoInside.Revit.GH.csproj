@@ -332,6 +332,8 @@
     <Compile Include="Types\Annotations\TagElement.cs" />
     <Compile Include="Types\Annotations\TextElement.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
+    <Compile Include="Types\Instances\FamilyInstance.cs" />
+    <Compile Include="Types\Instances\ImageInstance.cs" />
     <Compile Include="Types\Instances\ImportInstance.cs" />
     <Compile Include="Types\Instances\Instance.cs" />
     <Compile Include="Types\Instances\PointCloudInstance.cs" />
@@ -432,7 +434,6 @@
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\FailureDefinition.cs" />
     <Compile Include="Types\Family.cs" />
-    <Compile Include="Types\FamilyInstance.cs" />
     <Compile Include="Types\GeometricElement.cs" />
     <Compile Include="Types\GeometryObject.cs" />
     <Compile Include="Types\GraphicalElement.cs" />
@@ -450,7 +451,6 @@
     <Compile Include="Types\HostObjects\Panel.cs" />
     <Compile Include="Types\HostObjects\Roof.cs" />
     <Compile Include="Types\HostObjects\Wall.cs" />
-    <Compile Include="Types\ImageInstance.cs" />
     <Compile Include="Types\InstanceElement.cs" />
     <Compile Include="Types\Materials\AppearanceAsset.cs" />
     <Compile Include="Types\Materials\AssetPropertyDouble1DMap.cs" />
