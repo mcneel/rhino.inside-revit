@@ -336,7 +336,7 @@ namespace RhinoInside.Revit.External.DB
     /// </remarks>
     public static double MinNumber(double x, double y) =>
       x < y ? x :
-      IsNegativeZero(y) || IsNegativeZero(x) ? -0.0 :
+      x == y ? IsNegativeZero(x) ? -0.0 : y:
       double.IsNaN(y) ? x : y;
     #endregion
 
@@ -352,7 +352,7 @@ namespace RhinoInside.Revit.External.DB
     /// </remarks>
     public static double MaxNumber(double x, double y) =>
       x > y ? x :
-      IsPositiveZero(y) || IsPositiveZero(x) ? +0.0 :
+      x == y ? IsPositiveZero(x) ? +0.0 : y :
       double.IsNaN(y) ? x : y;
     #endregion
   }
