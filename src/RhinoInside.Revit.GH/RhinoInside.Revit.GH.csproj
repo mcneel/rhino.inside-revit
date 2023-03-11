@@ -337,6 +337,7 @@
     <Compile Include="Types\Instances\ImportInstance.cs" />
     <Compile Include="Types\Instances\Instance.cs" />
     <Compile Include="Types\Instances\PointCloudInstance.cs" />
+    <Compile Include="Types\Instances\ProjectLocation.cs" />
     <Compile Include="Types\Instances\RevitLinkInstance.cs" />
     <Compile Include="Types\Views\Elevation.cs" />
     <Compile Include="Types\Views\Viewer.cs" />
@@ -468,7 +469,6 @@
     <Compile Include="Types\DatumPlane.cs" />
     <Compile Include="Types\Phase.cs" />
     <Compile Include="Types\ProfileType.cs" />
-    <Compile Include="Types\ProjectLocation.cs" />
     <Compile Include="Types\Railing.cs" />
     <Compile Include="Types\Reference.cs" />
     <Compile Include="Types\DataType.cs" />
