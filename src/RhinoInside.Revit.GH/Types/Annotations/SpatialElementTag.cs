@@ -90,9 +90,9 @@ namespace RhinoInside.Revit.GH.Types
         set
         {
           var position = value.ToXYZ();
-          if (!position.IsAlmostEqualTo(tag.Value.TagHeadPosition))
+          if (!position.AlmostEqualPoints(tag.Value.TagHeadPosition))
           {
-            try { tag.Value.TagHeadPosition = value.ToXYZ(); }
+            try { tag.Value.TagHeadPosition = position; }
             catch (Autodesk.Revit.Exceptions.ArgumentException)
             { throw new Exceptions.RuntimeArgumentException($"Tag is outside of its boundary.\nEnable Leader or move Tag within its boundary.{{{tag.Id.ToString("D")}}}"); }
 

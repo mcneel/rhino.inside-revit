@@ -144,26 +144,40 @@ namespace Rhino.Geometry
       return GeometryEqualityComparer.Comparer(tolerance).Equals(left, right);
     }
 
-    /// <summary>
-    /// Arbitrary Axis Algorithm
-    /// <para>Given a vector to be used as the Z axis of a coordinate system, this algorithm generates a corresponding X axis for the coordinate system.</para>
-    /// <para>The Y axis follows by application of the right-hand rule.</para>
-    /// </summary>
-    /// <param name="value"></param>
-    /// <param name="tolerance"></param>
-    /// <returns>X axis of the corresponding coordinate system</returns>
-    public static Vector3d PerpVector(this Vector3d value, double tolerance = 1e-9)
+    public static Vector3d PerpVector(this Vector3d value, double tolerance = RhinoMath.SqrtEpsilon)
     {
       var length = value.Length;
       if (length < tolerance)
         return Vector3d.Zero;
 
       var normal = value / length;
+      var perp = new Vector3d(normal.X, normal.Y, 0.0).Length <= tolerance ?
+        new Vector3d(normal.Z, 0.0, -normal.X) :
+        new Vector3d(-normal.Y, normal.X, 0.0);
 
-      if (Vector3d.Zero.EpsilonEquals(new Vector3d(normal.X, normal.Y, 0.0), tolerance))
-        return new Vector3d(value.Z, 0.0, -value.X);
-      else
-        return new Vector3d(-value.Y, value.X, 0.0);
+      perp.Unitize();
+      return perp * length;
+    }
+
+    /// <summary>
+    /// Arbitrary Axis Algorithm
+    /// <para>Given a vector to be used as the Z axis of a coordinate system, this algorithm generates a corresponding X axis for the coordinate system.</para>
+    /// <para>The Y axis follows by application of the right-hand rule.</para>
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="tolerance">Tolerance used to classify <paramref name="value"/> as vertical. Use <see cref="GeometryDecoder.Tolerance.VectorTolerance"/> in case of doubt.</param>
+    /// <returns>X axis of the corresponding coordinate system</returns>
+    public static Vector3d RightDirection(this Vector3d value, double tolerance)
+    {
+      if (!value.Unitize())
+        return Vector3d.Zero;
+
+      var perp = new Vector3d(value.X, value.Y, 0.0).Length <= tolerance ?
+        new Vector3d(value.Z, 0.0, -value.X) :
+        new Vector3d(-value.Y, value.X, 0.0);
+
+      perp.Unitize();
+      return perp;
     }
   }
 
@@ -1200,9 +1214,32 @@ namespace Rhino.DocObjects
       vport.ScreenPort = new System.Drawing.Rectangle(0, 0, Math.Max(1, width), Math.Max(1, height));
     }
 
-    public static Geometry.Interval GetFrustumWidth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
-    public static Geometry.Interval GetFrustumHeight(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
-    public static Geometry.Interval GetFrustumDepth(this ViewportInfo vport) => new Geometry.Interval(vport.FrustumNear, vport.FrustumFar);
+    public static Geometry.Interval Extents(this ViewportInfo vport, int direction)
+    {
+      switch (direction)
+      {
+        case 0: return new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
+        case 1: return new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
+        case 2: return new Geometry.Interval(vport.FrustumNear, vport.FrustumFar);
+      }
+
+      return Geometry.NaN.Interval;
+    }
+
+    public static bool SetExtents(this ViewportInfo vport, int direction, Geometry.Interval extents)
+    {
+      if (vport.GetFrustum(out var left, out var right, out var bottom, out var top, out var near, out var far))
+      {
+        switch (direction)
+        {
+          case 0: return vport.SetFrustum(extents.T0, extents.T1, bottom, top, near, far);
+          case 1: return vport.SetFrustum(left, right, extents.T0, extents.T1, near, far);
+          case 2: return vport.SetFrustumNearFar(extents.T0, extents.T1);
+        }
+      }
+
+      return false;
+    }
 
     public static Geometry.Plane GetCameraFrameAt(this ViewportInfo vport, double depth = 0.0) =>
       new Geometry.Plane(vport.CameraLocation - vport.CameraZ * depth, vport.CameraX, vport.CameraY);
@@ -1219,7 +1256,7 @@ namespace Rhino.DocObjects
       if (!vport.IsValidCamera || !vport.IsValidFrustum)
         return new Geometry.Point3d[0];
 
-      return GetFramePlaneCorners(vport, depth, vport.GetFrustumWidth(), vport.GetFrustumHeight());
+      return GetFramePlaneCorners(vport, depth, vport.Extents(0), vport.Extents(1));
     }
 #endif
 

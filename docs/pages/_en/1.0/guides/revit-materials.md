@@ -198,3 +198,9 @@ Use {% include ltr/comp.html uuid='bd9164c4-' %} document-aware component to cre
 ![]({{ "/static/images/guides/revit-materials-therasset-create.png" | prepend: site.baseurl }})
 
 Similar to the modify and analyze components discussed above, you can use {% include ltr/comp.html uuid='c3be363d-' %} and {% include ltr/comp.html uuid='2c8f541a-' %} to modify or analyze existing *Thermal* assets.
+
+## Paint
+
+Use the {% include ltr/comp.html uuid="2a4a95d5" %} to add a Material to a give Revit Face.
+
+![]({{ "/static/images/guides/revit-element-facePaint.png" | prepend: site.baseurl }})

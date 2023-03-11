@@ -17,7 +17,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Component")]
   public class FamilyInstance : InstanceElement,
     IGH_FamilyInstance,
-    IHostObjectAccess,
     Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.FamilyInstance);
@@ -118,20 +117,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Plane Location
-    {
-      get
-      {
-        if (Value is ARDB.FamilyInstance instance)
-        {
-          instance.GetLocation(out var origin, out var basisX, out var basisY);
-          return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
-        }
-
-        return NaN.Plane;
-      }
-    }
-
     public override Vector3d HandOrientation => WorkPlaneFlipped == true ? -base.HandOrientation : base.HandOrientation;
     public override Vector3d FacingOrientation => Value?.HandFlipped != Value?.FacingFlipped ? -base.FacingOrientation : base.FacingOrientation;
     public override Vector3d WorkPlaneOrientation => base.WorkPlaneOrientation;
@@ -140,7 +125,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if(Value is ARDB.FamilyInstance instance && instance.Location is ARDB.LocationPoint location)
+        if (Value is ARDB.FamilyInstance instance && instance.Location is ARDB.LocationPoint location)
         {
           if (instance.Symbol.Family.FamilyPlacementType == ARDB.FamilyPlacementType.TwoLevelsBased)
           {
@@ -269,58 +254,29 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region IHostObjectAccess
-    public HostObject Host => Value is ARDB.FamilyInstance instance ?
-      HostObject.FromElement(instance.Host) as HostObject : default;
-    #endregion
-
-    #region Joins
-    static bool IsStructuralFraming(ARDB.FamilyInstance frame) =>
-      frame.Category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralFraming;
-    
-    public bool? IsJoinAllowedAtStart
+    #region IHostElementAccess
+    public override GraphicalElement HostElement
     {
-      get => Value is ARDB.FamilyInstance frame && IsStructuralFraming(frame) ?
-        (bool?) ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(frame, 0) :
-        default;
-
-      set
+      get
       {
-        if (value is object &&  Value is ARDB.FamilyInstance frame && value != IsJoinAllowedAtStart)
+        if (Value is ARDB.FamilyInstance instance)
         {
-          if (!IsStructuralFraming(frame))
-            throw new Exceptions.RuntimeErrorException("Join at start can not be set for this element.");
-
-          InvalidateGraphics();
-
-          if (value == true)
-            ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(frame, 0);
-          else
-            ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(frame, 0);
+          var host = GetElement<GraphicalElement>(instance.Host);
+          return instance.HostFace is ARDB.Reference hostFace ? host?.GetElementFromReference<GraphicalElement>(hostFace) : host;
         }
+
+        return default;
       }
     }
 
-    public bool? IsJoinAllowedAtEnd
+    public GeometryFace HostFace
     {
-      get => Value is ARDB.FamilyInstance frame && IsStructuralFraming(frame) ?
-        (bool?) ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(frame, 1) :
-        default;
-
-      set
+      get
       {
-        if (value is object && Value is ARDB.FamilyInstance frame && value != IsJoinAllowedAtEnd)
-        {
-          if (!IsStructuralFraming(frame))
-            throw new Exceptions.RuntimeErrorException("Join at end can not be set for this element.");
+        if (Value is ARDB.FamilyInstance instance && instance.HostFace is ARDB.Reference reference)
+          return GetGeometryObjectFromReference<GeometryFace>(reference);
 
-          InvalidateGraphics();
-
-          if (value == true)
-            ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(frame, 1);
-          else
-            ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(frame, 1);
-        }
+        return default;
       }
     }
     #endregion
@@ -394,5 +350,46 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     public Family Family => Value is ARDB.FamilySymbol symbol ? new Family(symbol.Family) : default;
+
+    internal void AssertPlacementType(ARDB.FamilyPlacementType placementType)
+    {
+      if (Value?.Family.FamilyPlacementType == placementType)
+        return;
+
+      switch (Value?.Family.FamilyPlacementType)
+      {
+        case ARDB.FamilyPlacementType.Invalid:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is not a valid type.");
+
+        case ARDB.FamilyPlacementType.OneLevelBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a level-based type.{Environment.NewLine}Consider use 'Add Component (Location)' component.");
+
+        case ARDB.FamilyPlacementType.OneLevelBasedHosted:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{Environment.NewLine}Consider use 'Add Component (Location)' component.");
+
+        case ARDB.FamilyPlacementType.TwoLevelsBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{Environment.NewLine}Consider use 'Add Column' or 'Add Structural Column' component.");
+
+        case ARDB.FamilyPlacementType.ViewBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a view-based type.{Environment.NewLine}Consider use 'Add Detail Item (Location)' component.");
+
+        case ARDB.FamilyPlacementType.WorkPlaneBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a work plane-based type.{Environment.NewLine}Consider use 'Add Component (Work Plane)' component.");
+
+        case ARDB.FamilyPlacementType.CurveBased:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a curve based type.{Environment.NewLine}Consider use 'Add Component (Curve)' component.");
+
+        case ARDB.FamilyPlacementType.CurveBasedDetail:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a curve based type.{Environment.NewLine}Consider use 'Add Detail Item (Curve)' component.");
+
+        case ARDB.FamilyPlacementType.CurveDrivenStructural:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a structural curve based type.{Environment.NewLine}Consider use 'Add Structural Beam' or 'Add Structural Brace' component.");
+
+        case ARDB.FamilyPlacementType.Adaptive:
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is an adaptive family type.{Environment.NewLine}Consider use 'Add Component (Adaptive)' component.");
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is not a valid {placementType} type.");
+    }
   }
 }

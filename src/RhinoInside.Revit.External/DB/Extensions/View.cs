@@ -480,14 +480,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       else if (view.GetViewer() is Element viewer)
       {
         var viewOrigin = view.Origin;
-        var viewBasisY = view.UpDirection;
-        var viewBasisX = view.RightDirection;
-        var viewBasisZ = viewBasisX.CrossProduct(viewBasisY);
+        var viewBasisY = (UnitXYZ) view.UpDirection;
+        var viewBasisX = (UnitXYZ) view.RightDirection;
+        UnitXYZ.Orthonormal(viewBasisX, viewBasisY, out var viewBasisZ);
 
         var newOrigin = newViewOrientation3D.EyePosition;
-        var newBasisY = newViewOrientation3D.UpDirection;
-        var newBasisZ = (-newViewOrientation3D.ForwardDirection);
-        var newBasisX = newBasisY.CrossProduct(newBasisZ);
+        var newBasisY = newViewOrientation3D.UpDirection.ToUnitXYZ();
+        var newBasisZ = -newViewOrientation3D.ForwardDirection.ToUnitXYZ();
+        UnitXYZ.Orthonormal(newBasisY, newBasisZ, out var newBasisX);
 
         {
           var modified = false;
@@ -505,7 +505,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
                 ElementTransformUtils.RotateElement(viewer.Document, viewer.Id, axis, viewBasisZ.AngleTo(newBasisZ));
 
               viewOrigin = view.Origin;
-              viewBasisX = view.RightDirection;
+              viewBasisX = (UnitXYZ) view.RightDirection;
             }
 
             if (!viewBasisX.IsCodirectionalTo(newBasisX))
@@ -561,8 +561,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       );
     }
 
-    // TODO : Delete this Filter is unused.
-    static readonly ElementFilter IsViewerFilter = GetViewerFilter(ElementIdExtension.InvalidElementId, inverted: true);
     internal static bool IsViewer(Element element) => GetViewerFilter(element.Id, inverted: true).PassesFilter(element);
 
     public static Element GetViewer(this View view)

@@ -12,7 +12,8 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Curve Element")]
-  public class CurveElement : GraphicalElement, Bake.IGH_BakeAwareElement
+  public class CurveElement : GraphicalElement, Bake.IGH_BakeAwareElement,
+    IHostElementAccess
   {
     protected override Type ValueType => typeof(ARDB.CurveElement);
     public static explicit operator ARDB.CurveElement(CurveElement value) => value?.Value;
@@ -75,6 +76,22 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    #region IHostElementAccess
+    public virtual GraphicalElement HostElement
+    {
+      get
+      {
+        if (Value is ARDB.CurveElement curveElement)
+        {
+          var host = GetElement<GraphicalElement>(curveElement.SketchPlane.GetHost(out var hostReference));
+          return hostReference is object ? host?.GetElementFromReference<GraphicalElement>(hostReference) : host;
+        }
+
+        return default;
+      }
+    }
+    #endregion
+
     #region Category
     public override Category Subcategory
     {
@@ -93,14 +110,11 @@ namespace RhinoInside.Revit.GH.Types
 
     public GraphicsStyle LineStyle
     {
-      get => GraphicsStyle.FromElement(Value?.LineStyle) as GraphicsStyle;
+      get => GetElement<GraphicsStyle>(Value?.LineStyle);
       set
       {
         if (value is object && Value is ARDB.CurveElement element)
-        {
-          AssertValidDocument(value, nameof(GraphicsStyle));
-          element.LineStyle = value.Value;
-        }
+          element.LineStyle = SetElement<ARDB.GraphicsStyle>(value);
       }
     }
     #endregion
@@ -120,6 +134,8 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+
+    public SketchPlane SketchPlane => GetElement<SketchPlane>(Value?.SketchPlane);
     #endregion
   }
 }

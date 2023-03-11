@@ -4,7 +4,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   static class MeshExtension
   {
-    public static bool TryGetLocation(this Mesh mesh, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    public static bool TryGetLocation(this Mesh mesh, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       origin = mesh.ComputeCentroid();
       var cov = Transform.Identity;
@@ -14,11 +14,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       var basisZ = cov.TryGetInverse(out var inverse) ?
                  inverse.GetPrincipalComponent(0D) :
-                 mesh.ComputeMeanNormal();
+                 mesh.ComputeMeanNormal().ToUnitXYZ();
 
-      basisY = basisZ.CrossProduct(basisX).Normalize(0D);
-
-      return true;
+      return UnitXYZ.Orthonormalize(basisZ, basisX, out basisZ, out basisX, out basisY);
     }
 
     /// <summary>
@@ -61,15 +59,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
         switch (dimension)
         {
           case 1:
-            w = (v1 - v0).GetLength() + (v2 - v1).GetLength() + (v0 - v2).GetLength();
+            w = XYZExtension.Norm(v1 - v0, 0D) + XYZExtension.Norm(v2 - v1, 0D) + XYZExtension.Norm(v0 - v2, 0D);
             break;
 
           case 2:
-            w = (v1 - v0).CrossProduct(v2 - v0).GetLength();
+            w = XYZExtension.Norm(XYZExtension.CrossProduct(v1 - v0, v2 - v0), 0D);
             break;
 
           case 3:
-            w = v0.TripleProduct(v1, v2);
+            w = XYZExtension.TripleProduct(v0, v1, v2);
             break;
         }
 
@@ -121,7 +119,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var v1 = triangle.get_Vertex(1);
         var v2 = triangle.get_Vertex(2);
 
-        var normal = (v1 - v0).CrossProduct(v2 - v0, 0D);
+        var normal = XYZExtension.CrossProduct(v1 - v0, v2 - v0);
         normalX.Add(normal.X);
         normalY.Add(normal.Y);
         normalZ.Add(normal.Z);

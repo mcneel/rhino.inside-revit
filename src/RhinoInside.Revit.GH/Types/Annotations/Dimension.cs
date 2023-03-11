@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Types
               if (curve.TryGetLocation(out var origin, out var basisX, out var basisY))
               {
                 origin = curve.Evaluate(0.5, normalized: true);
-                return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
+                return new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
               }
             }
             catch { }
@@ -230,7 +230,7 @@ namespace RhinoInside.Revit.GH.Types
 
       public override bool Visible
       {
-        get => !dimension.Value.Origin.IsAlmostEqualTo(dimension.Value.LeaderEndPosition);
+        get => !dimension.Value.Origin.AlmostEqualPoints(dimension.Value.LeaderEndPosition, dimension.Document.Application.ShortCurveTolerance);
         set { }
       }
 
@@ -315,7 +315,7 @@ namespace RhinoInside.Revit.GH.Types
 
       public override bool Visible
       {
-        get => !DimensionSegment.Origin.IsAlmostEqualTo(DimensionSegment.LeaderEndPosition);
+        get => !DimensionSegment.Origin.AlmostEqualPoints(DimensionSegment.LeaderEndPosition, dimension.Document.Application.ShortCurveTolerance);
         set { }
       }
 

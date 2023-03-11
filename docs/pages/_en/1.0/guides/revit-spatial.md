@@ -57,6 +57,11 @@ Use the **Analyse Spatial Element** component shared here to get the common prop
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Analyse Spatial Element.ghuser' name='Analyse Spatial Element' %}
 
+Use the {% include ltr/comp.html uuid="e3d32938" %} component shared here to get the identity information of *Spatial Elements*:
+
+![]({{ "/static/images/guides/revit-element-identity-spatial.png" | prepend: site.baseurl }})
+
+
 ### Filtering Spatial Elements by Level
 
 The component shared above can be used to filter the *Spatial Elements* by level:

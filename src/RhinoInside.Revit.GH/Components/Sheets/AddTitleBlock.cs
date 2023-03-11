@@ -3,6 +3,7 @@ using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.TitleBlocks
 {
@@ -133,15 +134,15 @@ namespace RhinoInside.Revit.GH.Components.TitleBlocks
       }
 
       var newOrigin = location.Origin.ToXYZ();
-      var newBasisX = location.XAxis.ToXYZ();
-      var newBasisY = location.YAxis.ToXYZ();
+      var newBasisX = (ERDB.UnitXYZ) location.XAxis.ToXYZ();
+      var newBasisY = (ERDB.UnitXYZ) location.YAxis.ToXYZ();
       titleBlock.GetLocation(out var origin, out var basisX, out var basisY);
 
       if
       (
-        !origin.IsAlmostEqualTo(newOrigin) ||
-        !basisX.IsAlmostEqualTo(newBasisX) ||
-        !basisY.IsAlmostEqualTo(newBasisY)
+        !origin.AlmostEqualPoints(newOrigin) ||
+        !basisX.AlmostEquals(newBasisX) ||
+        !basisY.AlmostEquals(newBasisY)
       )
       {
         var pinned = titleBlock.Pinned;

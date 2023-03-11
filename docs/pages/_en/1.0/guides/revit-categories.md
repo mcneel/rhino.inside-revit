@@ -65,3 +65,8 @@ Use the {% include ltr/comp.html uuid="8de336fb" %} component to add a subcatego
 Use the {% include ltr/comp.html uuid="4915ab87" %} component to create a list of sub-categories within a specific category.
 
 ![]({{ "/static/images/guides/gh-category-subcategory.png" | prepend: site.baseurl }})
+
+
+Use the {% include ltr/comp.html uuid="495330db" %} component to Get-Set Element Sub-Categories.
+
+![]({{ "/static/images/guides/revit-element-subcategory.png" | prepend: site.baseurl }})

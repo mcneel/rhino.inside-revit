@@ -254,12 +254,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static GeometryElement GetGeometry(this Element element, Options options)
     {
-      if (!element.IsValid())
-        return default;
+      var geometry = element?.get_Geometry(options);
 
-      var geometry = element.get_Geometry(options);
-
-      if (!(geometry?.Any() ?? false) && element is GenericForm form && !form.Combinations.IsEmpty)
+      if (geometry?.Any() is false && element is CombinableElement combinable && !combinable.Combinations.IsEmpty)
       {
         geometry.Dispose();
 
@@ -961,7 +958,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
     #endregion
 
-    #region References
+    #region Geometry References
     public static Reference GetDefaultReference(this Element element)
     {
       var reference = default(Reference);
@@ -980,8 +977,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
           reference = modelLine.GeometryCurve.Reference;
           break;
 
-        case Level level:
-          reference = level.GetPlaneReference();
+        case DatumPlane datum:
+          reference = Reference.ParseFromStableRepresentation(datum.Document, $"{datum.UniqueId}:0:SURFACE");
           break;
 
         case SketchPlane sketchPlane:
@@ -1006,14 +1003,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static GeometryObject GetGeometryObjectFromReference(this Element element, Reference reference, out Transform transform)
     {
-      if (element.GetGeometryObjectFromReference(reference) is GeometryObject geometryObject)
+      if (element is object && reference is object && element.Id == reference.ElementId)
       {
-        transform = (element as Instance)?.GetTransform() ?? Transform.Identity;
-        return geometryObject;
+        if (element is RevitLinkInstance link)
+        {
+          transform = link.GetTransform();
+          reference = reference.CreateReferenceInLink(link);
+          element = link.GetLinkDocument()?.GetElement(reference.LinkedElementId);
+        }
+        else transform = Transform.Identity;
+
+        if (reference.ElementReferenceType != ElementReferenceType.REFERENCE_TYPE_NONE && element is Instance instance)
+          transform *= instance.GetTransform();
+      }
+      else
+      {
+        transform = null;
+        // `GetGeometryObjectFromReference` call below should rise the expected exception.
       }
 
-      transform = null;
-      return null;
+      return element?.GetGeometryObjectFromReference(reference);
     }
     #endregion
   }

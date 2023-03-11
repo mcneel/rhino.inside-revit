@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
     (
       name: "Host Faces",
       nickname: "Faces",
-      description: "Obtains a set of types that are owned by Family",
+      description: "Obtains the faces of a Host element",
       category: "Revit",
       subCategory: "Host"
     )
@@ -28,9 +28,9 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(new Parameters.GeometryFace(), "Top", "T", string.Empty, GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.GeometryFace(), "Interior", "I", string.Empty, GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.GeometryFace(), "Exterior", "E", string.Empty, GH_ParamAccess.list);
       manager.AddParameter(new Parameters.GeometryFace(), "Bottom", "B", string.Empty, GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.GeometryFace(), "Exterior", "E", string.Empty, GH_ParamAccess.list);
+      manager.AddParameter(new Parameters.GeometryFace(), "Interior", "I", string.Empty, GH_ParamAccess.list);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -43,17 +43,17 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       {
         try
         {
-          var bottom = ARDB.HostObjectUtils.GetBottomFaces(host.Value).
-                       Select(host.GetGeometryObjectFromReference<Types.GeometryFace>);
-          DA.SetDataList("Bottom", bottom);
+          var top = ARDB.HostObjectUtils.GetTopFaces(host.Value).
+                    Select(host.GetGeometryObjectFromReference<Types.GeometryFace>);
+          DA.SetDataList("Top", top);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
         try
         {
-          var top = ARDB.HostObjectUtils.GetTopFaces(host.Value).
-                    Select(host.GetGeometryObjectFromReference<Types.GeometryFace>);
-          DA.SetDataList("Top", top);
+          var bottom = ARDB.HostObjectUtils.GetBottomFaces(host.Value).
+                       Select(host.GetGeometryObjectFromReference<Types.GeometryFace>);
+          DA.SetDataList("Bottom", bottom);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }
       }
@@ -62,17 +62,17 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       {
         try
         {
-          var interior = ARDB.HostObjectUtils.GetSideFaces(host.Value, ARDB.ShellLayerType.Interior).
+          var exterior = ARDB.HostObjectUtils.GetSideFaces(host.Value, ARDB.ShellLayerType.Exterior).
                          Select(host.GetGeometryObjectFromReference<Types.GeometryFace>);
-          DA.SetDataList("Interior", interior);
+          DA.SetDataList("Exterior", exterior);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
         try
         {
-          var exterior = ARDB.HostObjectUtils.GetSideFaces(host.Value, ARDB.ShellLayerType.Exterior).
+          var interior = ARDB.HostObjectUtils.GetSideFaces(host.Value, ARDB.ShellLayerType.Interior).
                          Select(host.GetGeometryObjectFromReference<Types.GeometryFace>);
-          DA.SetDataList("Exterior", exterior);
+          DA.SetDataList("Interior", interior);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }
       }

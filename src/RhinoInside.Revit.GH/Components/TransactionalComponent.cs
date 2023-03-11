@@ -806,7 +806,7 @@ namespace RhinoInside.Revit.GH.Components
               }
             }
 
-            // In case element is crated on this iteratrion we pin it here by default
+            // In case element is crated on this iteration we pin it here by default
             if (!output.Pinned)
             {
               try { output.Pinned = true; }

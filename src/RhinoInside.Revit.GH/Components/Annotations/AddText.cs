@@ -214,7 +214,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         textNote.VerticalAlignment = verticalAlignment;
 #endif
 
-      if (!textNote.Coord.IsAlmostEqualTo(point))
+      if (!textNote.Coord.AlmostEqualPoints(point))
         textNote.Coord = point;
 
       var currentRotation = view.RightDirection.AngleOnPlaneTo(textNote.BaseDirection, view.ViewDirection);

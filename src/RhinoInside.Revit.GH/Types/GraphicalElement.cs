@@ -24,6 +24,11 @@ namespace RhinoInside.Revit.GH.Types
     View OwnerView { get; }
   }
 
+  interface IHostElementAccess
+  {
+    GraphicalElement HostElement { get; }
+  }
+
   [Kernel.Attributes.Name("Graphical Element")]
   public class GraphicalElement :
     Element,
@@ -41,18 +46,57 @@ namespace RhinoInside.Revit.GH.Types
       if (!element.IsValid())
         return false;
 
-      if (element is ARDB.Family)
-        return false;
+      switch (element)
+      {
+        case ARDB.ProjectInfo _:            return false;
+        case ARDB.StartingViewSettings _:   return false;
+        case ARDB.ParameterElement _:       return false;
+        case ARDB.FilterElement _:          return false;
+        case ARDB.GraphicsStyle _:          return false;
+        case ARDB.ElementType _:            return false;
+        case ARDB.Family _:                 return false;
+        case ARDB.View _:                   return false;
+        case ARDB.DesignOption _:           return false;
+        case ARDB.Phase _:                  return false;
+        case ARDB.AreaScheme _:             return false;
+        case ARDB.Revision _:               return false;
+        case ARDB.LinePatternElement _:     return false;
+        case ARDB.FillPatternElement _:     return false;
+        case ARDB.Material _:               return false;
+        case ARDB.PropertySetElement _:     return false;
+        case ARDB.AppearanceAssetElement _: return false;
 
-      if (element is ARDB.ElementType)
-        return false;
+#if REVIT_2021
+        case ARDB.InternalOrigin _:         return true;
+#endif
+        case ARDB.BasePoint _:              return true;
+        case ARDB.Sketch _:                 return true;
+        case ARDB.SketchPlane _:            return true;
+        case ARDB.HostObject _:             return true;
+        case ARDB.FamilyInstance _:         return true;
+        case ARDB.DatumPlane _:             return true;
+        case ARDB.CurveElement _:           return true;
+        case ARDB.DirectShape _:            return true;
+        case ARDB.AssemblyInstance _:       return true;
+        case ARDB.Group _:                  return true;
+        case ARDB.CombinableElement _:      return true;
+        case ARDB.ModelText _:              return true;
+        case ARDB.TextElement _:            return true;
+        case ARDB.Dimension _:              return true;
+        case ARDB.FilledRegion _:           return true;
+        case ARDB.RevisionCloud _:          return true;
+        case ARDB.ElevationMarker _:        return true;
+        case ARDB.Viewport _:               return true;
+        case ARDB.SpatialElement _:         return true;
+        case ARDB.SpatialElementTag _:      return true;
+        case ARDB.IndependentTag _:         return true;
 
-      if (element is ARDB.View)
-        return false;
-
-      // Unplaced ARDB.SpatialElement is also a GraphicalElement
-      if (element is ARDB.SpatialElement)
-        return true;
+#if REVIT_2023
+        case ARDB.Structure.AnalyticalElement _: return true;
+#else
+        case ARDB.Structure.AnalyticalModel _: return true;
+#endif
+      }
 
       using (var location = element.Location)
       {
@@ -264,16 +308,6 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
-      {
-        var curve = Curve;
-        if (!curve.IsValid || curve.IsClosed)
-          return false;
-
-        target = (Q) (object) new GH_Line(new Line(curve.PointAtStart, curve.PointAtEnd));
-        return true;
-      }
-
       if (typeof(Q).IsAssignableFrom(typeof(GH_Transform)))
       {
         var plane = Location;
@@ -307,7 +341,7 @@ namespace RhinoInside.Revit.GH.Types
       if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
       {
         var curve = Curve;
-        if (curve?.IsValid != true)
+        if (curve?.IsValid != true || curve.IsClosed)
           return false;
 
         target = (Q) (object) new GH_Line(new Line(curve.PointAtStart, curve.PointAtEnd));
@@ -472,7 +506,7 @@ namespace RhinoInside.Revit.GH.Types
               break;
             case ARDB.LocationCurve curveLocation:
               if(curveLocation.Curve.TryGetLocation(out var cO, out var cX, out var cY))
-                return new Plane(cO.ToPoint3d(), cX.ToVector3d(), cY.ToVector3d());
+                return new Plane(cO.ToPoint3d(), cX.Direction.ToVector3d(), cY.Direction.ToVector3d());
 
               break;
             default:
@@ -480,7 +514,7 @@ namespace RhinoInside.Revit.GH.Types
               using (var options = new ARDB.Options { DetailLevel = ARDB.ViewDetailLevel.Undefined })
               {
                 if (element.get_Geometry(options).TryGetLocation(out var gO, out var gX, out var gY))
-                  return new Plane(gO.ToPoint3d(), gX.ToVector3d(), gY.ToVector3d());
+                  return new Plane(gO.ToPoint3d(), gX.Direction.ToVector3d(), gY.Direction.ToVector3d());
               }
 
               var bbox = BoundingBox;
@@ -507,28 +541,31 @@ namespace RhinoInside.Revit.GH.Types
     /// <param name="keepJoins">When null a default action is taken by type.</param>
     public void SetLocation(Plane location, bool? keepJoins = default)
     {
-      using (var plane = location.ToPlane())
-        SetLocation(plane.Origin, plane.XVec, plane.YVec, keepJoins);
+      SetLocation(location.Origin.ToXYZ(), (ERDB.UnitXYZ) location.XAxis.ToXYZ(), (ERDB.UnitXYZ) location.YAxis.ToXYZ(), keepJoins);
     }
 
-    void GetLocation(out ARDB.XYZ origin, out ARDB.XYZ basisX, out ARDB.XYZ basisY)
+    void GetLocation(out ARDB.XYZ origin, out ERDB.UnitXYZ basisX, out ERDB.UnitXYZ basisY)
     {
-      var plane = Location.ToPlane();
-      origin = plane.Origin;
-      basisX = plane.XVec;
-      basisY = plane.YVec;
+      var plane = Location;
+      origin = plane.Origin.ToXYZ();
+      basisX = (ERDB.UnitXYZ) plane.XAxis.ToXYZ();
+      basisY = (ERDB.UnitXYZ) plane.YAxis.ToXYZ();
     }
 
-    protected void SetLocation(ARDB.XYZ newOrigin, ARDB.XYZ newBasisX, ARDB.XYZ newBasisY, bool? keepJoins)
+    protected void SetLocation(ARDB.XYZ newOrigin, ERDB.UnitXYZ newBasisX, ERDB.UnitXYZ newBasisY, bool? keepJoins)
     {
       if (Value is ARDB.Element element)
       {
-        GetLocation(out var origin, out var basisX, out var basisY);
-        var basisZ = basisX.CrossProduct(basisY);
-        var newBasisZ = newBasisX.CrossProduct(newBasisY);
+        var modified = false;
 
         if (element.Location is ARDB.LocationCurve curveLocation)
         {
+          GetLocation(out var origin, out var basisX, out var basisY);
+          ERDB.UnitXYZ.Orthonormal(basisX, basisY, out var basisZ);
+
+          if (!ERDB.UnitXYZ.Orthonormal(newBasisX, newBasisY, out var newBasisZ))
+            throw new ArgumentException("Location basis is not Orthonormal");
+
           var orientation = ARDB.Transform.Identity;
           orientation.SetAlignCoordSystem
           (
@@ -537,65 +574,22 @@ namespace RhinoInside.Revit.GH.Types
           );
 
           if (!orientation.IsIdentity)
+          {
             SetCurve(curveLocation.Curve.CreateTransformed(orientation).ToCurve(), keepJoins ?? false);
-
-          return;
-        }
-
-        var pinned = element.Pinned;
-        var modified = false;
-
-        try
-        {
-          {
-            if (!basisZ.IsParallelTo(newBasisZ))
-            {
-              var axisDirection = basisZ.CrossProduct(newBasisZ);
-              double angle = basisZ.AngleTo(newBasisZ);
-
-              using (var axis = ARDB.Line.CreateUnbound(origin, axisDirection))
-              {
-                element.Pinned = false;
-                ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
-                modified = true;
-              }
-
-              GetLocation(out origin, out basisX, out basisY);
-              basisZ = basisX.CrossProduct(basisY);
-            }
-
-            if (!basisX.IsAlmostEqualTo(newBasisX))
-            {
-              double angle = basisX.AngleOnPlaneTo(newBasisX, newBasisZ);
-              using (var axis = ARDB.Line.CreateUnbound(origin, newBasisZ))
-              {
-                element.Pinned = false;
-                ARDB.ElementTransformUtils.RotateElement(element.Document, element.Id, axis, angle);
-                modified = true;
-              }
-            }
-
-            {
-              var trans = newOrigin - origin;
-              if (!trans.IsZeroLength())
-              {
-                element.Pinned = false;
-                ARDB.ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
-                modified = true;
-              }
-            }
+            modified = true;
           }
         }
-        finally
-        {
-          if (modified)
-          {
-            if (element.Pinned != pinned)
-              element.Pinned = pinned;
+        else element.SetLocation
+        (
+          newOrigin,
+          newBasisX,
+          newBasisY,
+          (ARDB.Element e, out ARDB.XYZ o, out ERDB.UnitXYZ x, out ERDB.UnitXYZ y) => GetLocation(out o, out x, out y),
+          out modified
+        );
 
-            InvalidateGraphics();
-          }
-        }
+        if (modified)
+          InvalidateGraphics();
       }
     }
 
@@ -751,7 +745,7 @@ namespace RhinoInside.Revit.GH.Types
           return ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, end);
 
         case ARDB.FamilyInstance instance:
-          if (instance.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralFraming)
+          if (StructuralMember.IsStructuralFraming(instance))
             return ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(instance, end);
 
           break;
@@ -773,7 +767,7 @@ namespace RhinoInside.Revit.GH.Types
             return;
 
           case ARDB.FamilyInstance instance:
-            if (instance.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_StructuralFraming)
+            if (StructuralMember.IsStructuralFraming(instance))
             {
               if (allow.Value) ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(instance, end);
               else ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(instance, end);

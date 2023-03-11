@@ -7,6 +7,8 @@ using Autodesk.Revit.DB.Mechanical;
 
 namespace RhinoInside.Revit.External.DB
 {
+  using Extensions;
+
   internal static class CompoundElementFilter
   {
     #region Implementation Details
@@ -283,22 +285,19 @@ namespace RhinoInside.Revit.External.DB
 
     static ElementFilter ElementTypeFilter(ElementType elementType, bool inverted = false)
     {
-      using (var rule = new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, elementType?.Id ?? ElementId.InvalidElementId))
+      using (var rule = new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, elementType?.Id ?? ElementIdExtension.InvalidElementId))
       {
-        if (!inverted && elementType?.Category is Category category)
-        {
-          var filters = new ElementFilter[]
-          {
-            new ElementCategoryFilter(category.Id, inverted: false),
-            new ElementParameterFilter(rule,       inverted: false)
-          };
+        var parameterFilter = new ElementParameterFilter(rule, inverted);
 
-          return Intersect(filters);
-        }
-        else
+        // Add Category hint to the query.
+        if (elementType?.Category is Category category && category.Parent is null)
         {
-          return new ElementParameterFilter(rule, inverted);
+          return inverted ?
+            parameterFilter.Union    (new ElementCategoryFilter(category.Id, inverted)) :
+            parameterFilter.Intersect(new ElementCategoryFilter(category.Id, inverted)) ;
         }
+
+        return parameterFilter;
       }
     }
 
@@ -310,8 +309,8 @@ namespace RhinoInside.Revit.External.DB
       if (inverted)
       {
         var rules = elementTypes.
-          Distinct(Extensions.ElementEqualityComparer.SameDocument).
-          Select(x => new FilterInverseRule(new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, x?.Id ?? ElementId.InvalidElementId)));
+          Distinct(ElementEqualityComparer.SameDocument).
+          Select(x => new FilterInverseRule(new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, x?.Id ?? ElementIdExtension.InvalidElementId)));
         return new ElementParameterFilter(rules.ToArray());
       }
       else
@@ -493,8 +492,7 @@ namespace Autodesk.Revit.DB
       using (var collector = new FilteredElementCollector(document, viewId))
       {
         VisibleElementIds = collector.ToReadOnlyElementIdCollection();
-        VisibleCategoryIds = new HashSet<ElementId>
-          (collector.Select(x => x.Category).OfType<Category>().Select(x => x.Id));
+        VisibleCategoryIds = new HashSet<ElementId>(collector.Select(x => x.Category).OfType<Category>().Select(x => x.Id));
       }
 
 #if DEBUG
@@ -533,6 +531,8 @@ namespace Autodesk.Revit.DB
       return VisibleElementIds.Contains(element.Id) != Inverted;
     }
 
+    static readonly ElementCategoryFilter CamerasCategoryFilter = new ElementCategoryFilter(BuiltInCategory.OST_Cameras);
+
     public static implicit operator ElementFilter(VisibleInViewFilter filter) => filter.Inverted ?
     CompoundElementFilter.ExclusionFilter(filter.VisibleElementIds, inverted: false):
     CompoundElementFilter.Intersect
@@ -554,7 +554,7 @@ namespace Autodesk.Revit.DB
       CompoundElementFilter.Union
       (
         // Cameras do not have parameter Id, so we select all except... ->
-        new ElementCategoryFilter(BuiltInCategory.OST_Cameras),
+        CamerasCategoryFilter,
         CompoundElementFilter.ExclusionFilter(filter.VisibleElementIds, inverted: true)
       ),
       // -> ... the one related to this view.
@@ -563,8 +563,8 @@ namespace Autodesk.Revit.DB
         new ElementId[]
         {
           filter.Document.GetElement(filter.ViewId).
-          GetDependentElements(new ElementCategoryFilter(BuiltInCategory.OST_Cameras)).
-          FirstOrDefault() ?? ElementId.InvalidElementId
+          GetDependentElements(CamerasCategoryFilter).
+          FirstOrDefault() ?? ElementIdExtension.InvalidElementId
         }
       )
     #endregion

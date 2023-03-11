@@ -249,6 +249,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.ViewPlan),                        (element)=> new ViewPlan              (element as ARDB.ViewPlan)          },
       { typeof(ARDB.ViewSection),                     (element)=> new ViewSection           (element as ARDB.ViewSection)       },
       { typeof(ARDB.ViewDrafting),                    (element)=> new ViewDrafting          (element as ARDB.ViewDrafting)      },
+      { typeof(ARDB.ElevationMarker),                 (element)=> new ElevationMarker       (element as ARDB.ElevationMarker)   },
 
       { typeof(ARDB.Instance),                        (element)=> new Instance              (element as ARDB.Instance)          },
       { typeof(ARDB.ProjectLocation),                 (element)=> new ProjectLocation       (element as ARDB.ProjectLocation)   },
@@ -376,9 +377,14 @@ namespace RhinoInside.Revit.GH.Types
       switch(element)
       {
         case ARDB.FamilyInstance familyInstance:
-          if (StructuralBeam.IsValidElement(familyInstance)) return new StructuralBeam(familyInstance);
-          if (StructuralBrace.IsValidElement(familyInstance)) return new StructuralBrace(familyInstance);
-          if (StructuralColumn.IsValidElement(familyInstance)) return new StructuralColumn(familyInstance);
+          switch(familyInstance.StructuralType)
+          {
+            case ARDB.Structure.StructuralType.Beam: return new StructuralBeam(familyInstance);
+            case ARDB.Structure.StructuralType.Brace: return new StructuralBrace(familyInstance);
+            case ARDB.Structure.StructuralType.Column: return new StructuralColumn(familyInstance);
+            case ARDB.Structure.StructuralType.Footing: return new StructuralFooting(familyInstance);
+            case ARDB.Structure.StructuralType.UnknownFraming: return new StructuralFraming(familyInstance);
+          }
           if (Panel.IsValidElement(element)) return new Panel(familyInstance);
           break;
 
@@ -535,6 +541,48 @@ namespace RhinoInside.Revit.GH.Types
           new ARDB.LinkElementId(reference.ElementId, reference.LinkedElementId) :
           new ARDB.LinkElementId(reference.ElementId)
       );
+    }
+
+    protected T GetElement<T>(ARDB.ElementId elementId) where T : Element
+    {
+      if (elementId.IsValid())
+      {
+        return (T)
+          (IsLinked?
+          Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, elementId)) :
+          Element.FromElementId(Document, elementId));
+      }
+
+      return null;
+    }
+
+    protected internal T GetElement<T>(ARDB.Element element) where T : Element
+    {
+      if (element.IsValid())
+      {
+        if (!Document.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException($"Invalid {typeof(T)} Document", nameof(element));
+
+        return (T)
+          (IsLinked ?
+          Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, element.Id)) :
+          Element.FromElement(element));
+      }
+
+      return null;
+    }
+
+    protected T SetElement<T>(Element element) where T : ARDB.Element
+    {
+      if (element?.IsValid is true)
+      {
+        if (!Document.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException($"Invalid {typeof(T)} Document", nameof(element));
+
+        return (T) element.Value;
+      }
+
+      return null;
     }
 
     public Element() { }

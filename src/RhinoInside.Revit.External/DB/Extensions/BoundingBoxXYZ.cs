@@ -248,11 +248,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
-    public static XYZ Evaluate(this BoundingBoxXYZ value, XYZ xyz)
+    public static XYZ Evaluate(this BoundingBoxXYZ value, UnitXYZ xyz)
     {
-      if (xyz is null) return default;
+      if (!xyz) return default;
 
-      var (x, y, z) = xyz.Normalize(0D);
+      var (x, y, z) = xyz;
       var (min, max) = value;
 
       return new XYZ
@@ -454,48 +454,66 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         using (var transform = value.Transform)
         {
+          if (!transform.IsConformal)
+            throw new ArgumentException("Transform is not conformal", nameof(value));
+
           var (origin, basisX, basisY, basisZ) = transform;
           var (min, max) = value;
 
           if (value.get_BoundEnabled(BoundsMin, AxisX))
           {
             clipped = true;
-            planes.X.Min = new PlaneEquation(origin + min.X * basisX, basisX);
+            planes.X.Min = new PlaneEquation(origin + min.X * basisX, (UnitXYZ) basisX);
           }
 
           if (value.get_BoundEnabled(BoundsMax, AxisX))
           {
             clipped = true;
-            planes.X.Max = new PlaneEquation(origin + max.X * basisX, -basisX);
+            planes.X.Max = new PlaneEquation(origin + max.X * basisX, (UnitXYZ) (-basisX));
           }
 
           if (value.get_BoundEnabled(BoundsMin, AxisY))
           {
             clipped = true;
-            planes.Y.Min = new PlaneEquation(origin + min.Y * basisY, basisY);
+            planes.Y.Min = new PlaneEquation(origin + min.Y * basisY, (UnitXYZ) basisY);
           }
 
           if (value.get_BoundEnabled(BoundsMax, AxisY))
           {
             clipped = true;
-            planes.Y.Max = new PlaneEquation(origin + max.Y * basisY, -basisY);
+            planes.Y.Max = new PlaneEquation(origin + max.Y * basisY, (UnitXYZ) (-basisY));
           }
 
           if (value.get_BoundEnabled(BoundsMin, AxisZ))
           {
             clipped = true;
-            planes.Z.Min = new PlaneEquation(origin + min.Z * basisZ, basisZ);
+            planes.Z.Min = new PlaneEquation(origin + min.Z * basisZ, (UnitXYZ) basisZ);
           }
 
           if (value.get_BoundEnabled(BoundsMax, AxisZ))
           {
             clipped = true;
-            planes.Z.Max = new PlaneEquation(origin + max.Z * basisZ, -basisZ);
+            planes.Z.Max = new PlaneEquation(origin + max.Z * basisZ, (UnitXYZ) (-basisZ));
           }
         }
       }
 
       return clipped;
+    }
+
+    public static bool IsInside(this BoundingBoxXYZ value, XYZ point)
+    {
+      var (min, max, transform, bounded) = value;
+      var (x, y, z) = transform.Inverse.OfPoint(point);
+
+      if (bounded[BoundsMin, AxisX] && x < min.X) return false;
+      if (bounded[BoundsMax, AxisX] && x > max.X) return false;
+      if (bounded[BoundsMin, AxisY] && y < min.X) return false;
+      if (bounded[BoundsMax, AxisY] && y > max.X) return false;
+      if (bounded[BoundsMin, AxisZ] && z < min.X) return false;
+      if (bounded[BoundsMax, AxisZ] && z > max.X) return false;
+
+      return true;
     }
   }
 

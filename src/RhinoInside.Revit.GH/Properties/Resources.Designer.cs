@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -83,16 +83,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AdaptiveComponentByPoints {
-            get {
-                object obj = ResourceManager.GetObject("AdaptiveComponentByPoints", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap AddAngularDimension {
             get {
                 object obj = ResourceManager.GetObject("AddAngularDimension", resourceCulture);
@@ -146,6 +136,36 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AddCeilingPlan {
             get {
                 object obj = ResourceManager.GetObject("AddCeilingPlan", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddComponentAdaptive {
+            get {
+                object obj = ResourceManager.GetObject("AddComponentAdaptive", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddComponentLocation {
+            get {
+                object obj = ResourceManager.GetObject("AddComponentLocation", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddComponentWorkPlane {
+            get {
+                object obj = ResourceManager.GetObject("AddComponentWorkPlane", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2786,16 +2806,6 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap FamilyInstance {
             get {
                 object obj = ResourceManager.GetObject("FamilyInstance", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap FamilyInstanceByLocation {
-            get {
-                object obj = ResourceManager.GetObject("FamilyInstanceByLocation", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

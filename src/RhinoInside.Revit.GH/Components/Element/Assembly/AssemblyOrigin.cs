@@ -3,6 +3,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Assemblies
 {
@@ -84,15 +85,15 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       {
         assembly.Value.GetTransform().GetCoordSystem(out var o, out var x, out var y, out var z);
         var O = origin.Value.Origin.ToXYZ();
-        var X = origin.Value.XAxis.ToXYZ();
-        var Y = origin.Value.YAxis.ToXYZ();
-        var Z = origin.Value.ZAxis.ToXYZ();
+        var X = (ERDB.UnitXYZ) origin.Value.XAxis.ToXYZ();
+        var Y = (ERDB.UnitXYZ) origin.Value.YAxis.ToXYZ();
+        var Z = (ERDB.UnitXYZ) origin.Value.ZAxis.ToXYZ();
         if
         (
-          !o.IsAlmostEqualTo(O) ||
-          !x.IsAlmostEqualTo(X) ||
-          !y.IsAlmostEqualTo(Y) ||
-          !z.IsAlmostEqualTo(Z))
+          !o.AlmostEqualPoints(O) ||
+          !x.AlmostEquals(X) ||
+          !y.AlmostEquals(Y) ||
+          !z.AlmostEquals(Z))
         {
           StartTransaction(assembly.Document);
           var transform = ARDB.Transform.Identity;

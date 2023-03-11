@@ -174,21 +174,21 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     }
   }
 
-  [ComponentVersion(introduced: "1.10")]
+  [ComponentVersion(introduced: "1.13")]
 #if DEBUG
   public
 #endif
-  class DeconstructElementGeometry : ZuiComponent
+  class ElementGeometryReferences : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("BBD8187B-829A-4604-B6BC-DE896A9FF62B");
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
-    protected override string IconTag => "DG";
+    protected override string IconTag => "GR";
 
-    public DeconstructElementGeometry() : base
+    public ElementGeometryReferences() : base
     (
-      name: "Deconstruct Element Geometry",
-      nickname: "Deconstruct",
-      description: "Deconstruct geometry of given element into simpler geometry",
+      name: "Element Geometry References",
+      nickname: "G-References",
+      description: "Retrieves geometry references of given element.",
       category: "Revit",
       subCategory: "Element"
     )
@@ -244,9 +244,9 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       (
         new Parameters.GeometryCurve()
         {
-          Name = "Edges",
-          NickName = "E",
-          Description = "List of element edge references",
+          Name = "Curves",
+          NickName = "C",
+          Description = "List of element curve references",
           Access = GH_ParamAccess.list
         }, ParamRelevance.Primary
       ),
@@ -254,91 +254,13 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       (
         new Parameters.GeometryPoint()
         {
-          Name = "Vertices",
-          NickName = "V",
+          Name = "Points",
+          NickName = "P",
           Description = "List of element point references",
           Access = GH_ParamAccess.list
         },ParamRelevance.Secondary
       ),
     };
-
-    IEnumerable<string> GetFaceReferences(ARDB.Document document, string uniqueId, ARDB.GeometryObject geometry)
-    {
-      int instanceIndex = 0;
-      switch (geometry)
-      {
-        case ARDB.GeometryElement element:
-          foreach (var g in element.SelectMany(x => GetFaceReferences(document, uniqueId, x)))
-            yield return g;
-          yield break;
-
-        case ARDB.GeometryInstance instance:
-          foreach (var g in GetFaceReferences(document, uniqueId, instance.GetInstanceGeometry()))
-            yield return $"{uniqueId}:{instanceIndex}:INSTANCE:{g}";
-
-          instanceIndex++;
-          yield break;
-
-        case ARDB.Mesh mesh:
-          yield break;
-
-        case ARDB.Solid solid:
-          foreach (var face in solid.Faces.Cast<ARDB.Face>())
-          {
-            if (face.Reference is ARDB.Reference reference)
-            {
-              yield return reference.ConvertToStableRepresentation(document);
-            }
-          }
-
-          yield break;
-
-        case ARDB.Curve curve:
-          yield break;
-
-        case ARDB.PolyLine polyline:
-          yield break;
-      }
-    }
-
-    IEnumerable<string> GetEdgeReferences(ARDB.Document document, string uniqueId, ARDB.GeometryObject geometry)
-    {
-      int instanceIndex = 0;
-      switch (geometry)
-      {
-        case ARDB.GeometryElement element:
-          foreach (var g in element.SelectMany(x => GetEdgeReferences(document, uniqueId, x)))
-            yield return g;
-          yield break;
-
-        case ARDB.GeometryInstance instance:
-          foreach (var g in GetEdgeReferences(document, uniqueId, instance.GetInstanceGeometry()))
-            yield return $"{uniqueId}:{instanceIndex}:INSTANCE:{g}";
-
-          instanceIndex++;
-          yield break;
-
-        case ARDB.Mesh mesh:
-          yield break;
-
-        case ARDB.Solid solid:
-          foreach (var edge in solid.Edges.Cast<ARDB.Edge>())
-          {
-            if (edge.Reference is ARDB.Reference reference)
-            {
-              yield return reference.ConvertToStableRepresentation(document);
-            }
-          }
-
-          yield break;
-
-        case ARDB.Curve curve:
-          yield break;
-
-        case ARDB.PolyLine polyline:
-          yield break;
-      }
-    }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -348,37 +270,18 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       if (!Params.TryGetData(DA, "Invisble", out bool? invisibles)) return;
 
       using (var options = new ARDB.Options() { ComputeReferences = true, IncludeNonVisibleObjects = invisibles ?? false })
-
-      using (var geometry = element.Value.GetGeometry(options))
       {
-        if (geometry is null) return;
+        if (element.Value.GetGeometry(options) is ARDB.GeometryElement geometry)
+        {
+          Params.TrySetDataList(DA, "Faces", () =>
+            geometry.GetFaceReferences(element.Value).Select(element.GetGeometryObjectFromReference<Types.GeometryFace>));
 
-        var document = element.Document;
-        var uniqueId = element.Value.UniqueId;
+          Params.TrySetDataList(DA, "Curves", () =>
+            geometry.GetEdgeReferences(element.Value).Select(element.GetGeometryObjectFromReference<Types.GeometryCurve>));
 
-        Params.TrySetDataList
-        (
-          DA, "Faces", () => GetFaceReferences(document, uniqueId, geometry).Select
-          (x => new Types.GeometryFace(document, ARDB.Reference.ParseFromStableRepresentation(document, x)))
-        );
-
-        Params.TrySetDataList
-        (
-          DA, "Edges", () => GetEdgeReferences(document, uniqueId, geometry).Select
-          (x => new Types.GeometryCurve(document, ARDB.Reference.ParseFromStableRepresentation(document, x)))
-        );
-
-        Params.TrySetDataList
-        (
-          DA, "Vertices", () => GetEdgeReferences(document, uniqueId, geometry).SelectMany
-          (
-            x => new Types.GeometryPoint[]
-            {
-              new Types.GeometryPoint(document, ARDB.Reference.ParseFromStableRepresentation(document, $"{x}/0")),
-              new Types.GeometryPoint(document, ARDB.Reference.ParseFromStableRepresentation(document, $"{x}/1"))
-            }
-          )
-        );
+          Params.TrySetDataList(DA, "Points", () =>
+            geometry.GetEdgeEndPointReferences(element.Value).Select(element.GetGeometryObjectFromReference<Types.GeometryPoint>));
+        }
       }
     }
   }

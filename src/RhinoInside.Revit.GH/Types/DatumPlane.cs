@@ -396,7 +396,7 @@ namespace RhinoInside.Revit.GH.Types
           var end = curve.PointAtEnd;
           axis = end - start;
           origin = start + (axis * 0.5);
-          perp = axis.PerpVector();
+          perp = axis.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance);
         }
 
         return new Plane(origin, axis, perp);

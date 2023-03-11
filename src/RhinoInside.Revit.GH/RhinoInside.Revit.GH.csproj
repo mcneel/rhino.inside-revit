@@ -64,9 +64,13 @@
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridMullionType.cs" />
     <Compile Include="Components\ElementType\CurtainWallType\AnalyzeCurtainGridPanelType.cs" />
     <Compile Include="Components\ElementType\WallType\QueryWallTypes.cs" />
-    <Compile Include="Components\Element\AdaptiveComponent\ByPoints.cs" />
     <Compile Include="Components\Element\Category.cs" />
     <Compile Include="Components\Element\Clone.cs" />
+    <Compile Include="Components\Element\Column\AddColumn.cs" />
+    <Compile Include="Components\Element\Components\AddComponent-Adaptive.cs" />
+    <Compile Include="Components\Element\Components\AddComponent-Curve.cs" />
+    <Compile Include="Components\Element\Components\AddComponent-Location.cs" />
+    <Compile Include="Components\Element\Components\AddComponent-WorkPlane.cs" />
     <Compile Include="Components\Element\Flip.cs" />
     <Compile Include="Components\Element\HostObject\SlabShape.cs" />
     <Compile Include="Components\Element\Name.cs" />
@@ -125,7 +129,6 @@
     <Compile Include="Components\Element\Opening\AddWallOpening.cs" />
     <Compile Include="Components\Element\Opening\OpeningBoundaryProfile.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
-    <Compile Include="Components\Element\FamilyInstance\ByPointAtHost.cs" />
     <Compile Include="Components\Element\Floor\ByOutline.cs" />
     <Compile Include="Components\Element\Grid\ByCurve.cs" />
     <Compile Include="Components\Element\Level\ByElevation.cs" />
@@ -199,6 +202,7 @@
     <Compile Include="Components\Import\AddImage.cs" />
     <Compile Include="Components\Import\AddImageType.cs" />
     <Compile Include="Components\Import\ImageTypePath.cs" />
+    <Compile Include="Components\Import\QueryCloudPoints.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
     <Compile Include="Components\Model\AddWorkPlane.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
@@ -264,6 +268,7 @@
     <Compile Include="Components\Views\AddDependentView.cs" />
     <Compile Include="Components\Views\AddDetailView.cs" />
     <Compile Include="Components\Views\AddDraftingView.cs" />
+    <Compile Include="Components\Views\AddElevationMarker.cs" />
     <Compile Include="Components\Views\AddSectionViews.cs" />
     <Compile Include="Components\Views\AddView3D.cs" />
     <Compile Include="Components\Views\AddViewPlan.cs" />
@@ -294,6 +299,7 @@
     <Compile Include="Optional.cs" />
     <Compile Include="Parameters\Annotations\Annotation.cs" />
     <Compile Include="Parameters\Annotations\TextElement.cs" />
+    <Compile Include="Parameters\Instances\PointCloudInstance.cs" />
     <Compile Include="Parameters\Materials\AppearanceAsset.cs" />
     <Compile Include="Parameters\Materials\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Parameters\Materials\AssetPropertyDouble4DMap.cs" />
@@ -326,6 +332,14 @@
     <Compile Include="Types\Annotations\TagElement.cs" />
     <Compile Include="Types\Annotations\TextElement.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
+    <Compile Include="Types\Instances\FamilyInstance.cs" />
+    <Compile Include="Types\Instances\ImageInstance.cs" />
+    <Compile Include="Types\Instances\ImportInstance.cs" />
+    <Compile Include="Types\Instances\Instance.cs" />
+    <Compile Include="Types\Instances\PointCloudInstance.cs" />
+    <Compile Include="Types\Instances\ProjectLocation.cs" />
+    <Compile Include="Types\Instances\RevitLinkInstance.cs" />
+    <Compile Include="Types\Views\Elevation.cs" />
     <Compile Include="Types\Views\Viewer.cs" />
     <Compile Include="Types\Views\ViewFrame.cs" />
     <None Include="Extensions\README.md" />
@@ -421,7 +435,6 @@
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\FailureDefinition.cs" />
     <Compile Include="Types\Family.cs" />
-    <Compile Include="Types\FamilyInstance.cs" />
     <Compile Include="Types\GeometricElement.cs" />
     <Compile Include="Types\GeometryObject.cs" />
     <Compile Include="Types\GraphicalElement.cs" />
@@ -439,8 +452,6 @@
     <Compile Include="Types\HostObjects\Panel.cs" />
     <Compile Include="Types\HostObjects\Roof.cs" />
     <Compile Include="Types\HostObjects\Wall.cs" />
-    <Compile Include="Types\ImageInstance.cs" />
-    <Compile Include="Types\Instance.cs" />
     <Compile Include="Types\InstanceElement.cs" />
     <Compile Include="Types\Materials\AppearanceAsset.cs" />
     <Compile Include="Types\Materials\AssetPropertyDouble1DMap.cs" />
@@ -458,7 +469,6 @@
     <Compile Include="Types\DatumPlane.cs" />
     <Compile Include="Types\Phase.cs" />
     <Compile Include="Types\ProfileType.cs" />
-    <Compile Include="Types\ProjectLocation.cs" />
     <Compile Include="Types\Railing.cs" />
     <Compile Include="Types\Reference.cs" />
     <Compile Include="Types\DataType.cs" />

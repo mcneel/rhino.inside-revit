@@ -12,22 +12,22 @@ namespace RhinoInside.Revit.GH.Components
   using Kernel.Attributes;
   using External.DB.Extensions;
 
-  public class AdaptiveComponentByPoints : ReconstructElementComponent
+  public class AddComponentAdaptive : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("E8DDC0E4-97E9-4659-9945-E8C77114273D");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
-    public AdaptiveComponentByPoints() : base
+    public AddComponentAdaptive() : base
     (
       name: "Add Component (Adaptive)",
-      nickname: "CompAdap",
-      description: "Given a collection of Points, it adds an AdaptiveComponent element to the active Revit document",
+      nickname: "A-Component",
+      description: "Given a collection of Points, it adds an adaptive component element to the active Revit document",
       category: "Revit",
       subCategory: "Build"
     )
     { }
 
-    void ReconstructAdaptiveComponentByPoints
+    void ReconstructAddComponentAdaptive
     (
       [Optional, NickName("DOC")]
       ARDB.Document document,
@@ -40,6 +40,8 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.FamilySymbol type
     )
     {
+      (Types.FamilySymbol.FromElement(type) as Types.FamilySymbol).AssertPlacementType(ARDB.FamilyPlacementType.Adaptive);
+
       var adaptivePoints = points.ConvertAll(GeometryEncoder.ToXYZ);
 
       if (!type.IsActive)
@@ -57,7 +59,7 @@ namespace RhinoInside.Revit.GH.Components
           foreach (var vertex in adaptivePointIds.Select(id => document.GetElement(id)).Cast<ARDB.ReferencePoint>())
           {
             var position = adaptivePoints[index++];
-            if (!vertex.Position.IsAlmostEqualTo(position))
+            if (!vertex.Position.AlmostEqualPoints(position))
               vertex.Position = position;
           }
 
