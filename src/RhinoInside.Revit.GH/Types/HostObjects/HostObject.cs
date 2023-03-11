@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -11,11 +10,6 @@ namespace RhinoInside.Revit.GH.Types
 
   [Kernel.Attributes.Name("Host")]
   public interface IGH_HostObject : IGH_InstanceElement { }
-
-  interface IHostObjectAccess
-  {
-    HostObject Host { get; }
-  }
 
   [Kernel.Attributes.Name("Host")]
   public class HostObject : InstanceElement, IGH_HostObject

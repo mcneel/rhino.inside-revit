@@ -7,15 +7,15 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   using External.DB;
   using External.DB.Extensions;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.13")]
   public class ElementHost : Component
   {
     public override Guid ComponentGuid => new Guid("6723BEB1-DD99-40BE-8DA9-13B3812D6B46");
-    protected override string IconTag => "H";
 
     public ElementHost() : base
     (
       name: "Element Host",
-      nickname: "ElemHost",
+      nickname: "Host",
       description: "Obtains the host of the specified element",
       category: "Revit",
       subCategory: "Host"
@@ -24,78 +24,28 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Element", "E", "Element to query for a host", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.GraphicalElement(), "Element", "E", "Element to query for its host", GH_ParamAccess.item);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.HostObject(), "Host", "H", "Element host object", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.GraphicalElement(), "Host", "H", "Element host object", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
+      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
+
+      // Ask first to Element, maybe it knows its Host
+      if (element is Types.IHostElementAccess access && access.HostElement is Types.GraphicalElement hostElement)
+      {
+        DA.SetData("Host", hostElement);
+        return;
+      }
 
       // Special cases
-      if (element is Types.IHostObjectAccess access)
-      {
-        DA.SetData("Host", access.Host);
-        return;
-      }
-      else if (element.Value is ARDB.Wall wall && wall.IsStackedWallMember)
-      {
-        DA.SetData("Host", Types.HostObject.FromElementId(element.Document, wall.StackedWallOwnerId));
-        return;
-      }
-      else if (element.Value.get_Parameter(ARDB.BuiltInParameter.HOST_ID_PARAM) is ARDB.Parameter hostId)
-      {
-        DA.SetData("Host", Types.HostObject.FromElementId(element.Document, hostId.AsElementId()));
-        return;
-      }
-
-      // Search geometrically
-      if (element.Value.GetOutline() is ARDB.Outline outline)
-      {
-        using (var collector = new ARDB.FilteredElementCollector(element.Document))
-        {
-          var elementCollector = collector.OfClass(typeof(ARDB.HostObject));
-
-          // Element should be at the same Design Option
-          if (element.Value.DesignOption is ARDB.DesignOption designOption)
-            elementCollector = elementCollector.WherePasses(new ARDB.ElementDesignOptionFilter(designOption.Id));
-          else
-            elementCollector = elementCollector.WherePasses(new ARDB.ElementDesignOptionFilter(ARDB.ElementId.InvalidElementId));
-
-          if (element.Value.Category?.Parent is ARDB.Category hostCategory)
-            elementCollector = elementCollector.OfCategoryId(hostCategory.Id);
-
-          var bboxFilter = new ARDB.BoundingBoxIntersectsFilter(outline, element.Document.Application.VertexTolerance);
-          elementCollector = elementCollector.WherePasses(bboxFilter);
-
-          using (var includesFilter = CompoundElementFilter.InclusionFilter(element.Value))
-          {
-            foreach (ARDB.HostObject host in elementCollector)
-            {
-              if (host.Id == element.Id)
-                continue;
-
-              // Necessary to found Curtain walls embeded in an other Wall
-              if (host.FindInserts(false, false, true, false).Contains(element.Id))
-              {
-                DA.SetData("Host", Types.HostObject.FromElement(host));
-                break;
-              }
-
-              // Necessary to found Panel walls in a Curtain Wall
-              else if (host.GetDependentElements(includesFilter).Count > 0)
-              {
-                DA.SetData("Host", Types.HostObject.FromElement(host));
-                break;
-              }
-            }
-          }
-        }
-      }
+      var host = element.Value.get_Parameter(ARDB.BuiltInParameter.HOST_ID_PARAM)?.AsElement();
+      DA.SetData("Host", element.GetElement<Types.GraphicalElement>(host ?? element.Level?.Value));
     }
   }
 }

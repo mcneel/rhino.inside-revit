@@ -543,7 +543,20 @@ namespace RhinoInside.Revit.GH.Types
       );
     }
 
-    protected T GetElement<T>(ARDB.Element element) where T : Element
+    protected T GetElement<T>(ARDB.ElementId elementId) where T : Element
+    {
+      if (elementId.IsValid())
+      {
+        return (T)
+          (IsLinked?
+          Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, elementId)) :
+          Element.FromElementId(Document, elementId));
+      }
+
+      return null;
+    }
+
+    protected internal T GetElement<T>(ARDB.Element element) where T : Element
     {
       if (element.IsValid())
       {

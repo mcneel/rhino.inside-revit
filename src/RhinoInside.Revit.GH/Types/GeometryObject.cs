@@ -623,7 +623,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static new GeometryCurve FromReference(ARDB.Document document, ARDB.Reference reference)
     {
-      return reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR ?
+      return reference?.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR ?
         new GeometryCurve(document, reference) : null;
     }
 
@@ -777,7 +777,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static new GeometryFace FromReference(ARDB.Document document, ARDB.Reference reference)
     {
-      return reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE ?
+      return reference?.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE ?
         new GeometryFace(document, reference) : null;
     }
 

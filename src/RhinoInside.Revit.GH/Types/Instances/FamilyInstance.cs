@@ -17,7 +17,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Component")]
   public class FamilyInstance : InstanceElement,
     IGH_FamilyInstance,
-    //IHostObjectAccess,
     Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.FamilyInstance);
@@ -115,20 +114,6 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return default;
-      }
-    }
-
-    public override Plane Location
-    {
-      get
-      {
-        if (Value is ARDB.FamilyInstance instance)
-        {
-          instance.GetLocation(out var origin, out var basisX, out var basisY);
-          return new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
-        }
-
-        return NaN.Plane;
       }
     }
 
@@ -269,16 +254,15 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region IHostObjectAccess
-    public GraphicalElement Host
+    #region IHostElementAccess
+    public override GraphicalElement HostElement
     {
       get
       {
         if (Value is ARDB.FamilyInstance instance)
         {
-          return instance.HostFace is ARDB.Reference reference?
-            GraphicalElement.FromReference(Document, reference) as GraphicalElement :
-            GraphicalElement.FromElement(instance.Host) as GraphicalElement;
+          var host = GetElement<GraphicalElement>(instance.Host);
+          return instance.HostFace is ARDB.Reference hostFace ? host?.GetElementFromReference<GraphicalElement>(hostFace) : host;
         }
 
         return default;
@@ -290,7 +274,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Value is ARDB.FamilyInstance instance && instance.HostFace is ARDB.Reference reference)
-          return GeometryObject.FromReference(Document, reference) as GeometryFace;
+          return GetGeometryObjectFromReference<GeometryFace>(reference);
 
         return default;
       }

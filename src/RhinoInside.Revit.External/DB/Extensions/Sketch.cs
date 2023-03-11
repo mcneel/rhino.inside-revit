@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       using (var scope = document.CommitScope())
       {
         var symbol = document.EnsureWorkPlaneBasedSymbol();
-        scope.Commit();
+        if (!document.IsLinked) scope.Commit();
 
         using (document.RollBackScope())
         {
