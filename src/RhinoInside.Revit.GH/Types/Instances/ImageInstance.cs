@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
   using ARDB_ImageInstance = ARDB.Element;
 #endif
 
-  [Kernel.Attributes.Name("Raster Image")]
+  [Kernel.Attributes.Name("Image")]
   public class ImageInstance : GraphicalElement
   {
     protected override Type ValueType => typeof(ARDB_ImageInstance);
@@ -246,7 +246,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
   }
 
-  [Kernel.Attributes.Name("Raster Image Type")]
+  [Kernel.Attributes.Name("Image Type")]
   public class ImageType : ElementType
   {
     protected override Type ValueType => typeof(ARDB.ImageType);
