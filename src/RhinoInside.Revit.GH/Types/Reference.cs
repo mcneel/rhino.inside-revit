@@ -179,7 +179,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       else
       {
-        if (reference.ElementId != ReferenceId || reference.LinkedElementId != Id)
+        if (reference.ElementId != ReferenceId)
           throw new ArgumentException("Invalid Reference", nameof(reference));
       }
 
@@ -188,9 +188,6 @@ namespace RhinoInside.Revit.GH.Types
 
     internal T GetElementFromReference<T>(ARDB.Reference reference) where T : Element
     {
-      if (reference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
-        throw new ArgumentException("Invalid ElementReferenceType", nameof(reference));
-
       return Element.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
     }
 
