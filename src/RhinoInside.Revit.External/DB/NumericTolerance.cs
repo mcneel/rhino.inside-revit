@@ -336,7 +336,7 @@ namespace RhinoInside.Revit.External.DB
     /// </remarks>
     public static double MinNumber(double x, double y) =>
       x < y ? x :
-      x == y ? IsNegativeZero(x) ? -0.0 : y:
+      x == y ? IsNegativeZero(x) ? -0.0 : y :
       double.IsNaN(y) ? x : y;
     #endregion
 
