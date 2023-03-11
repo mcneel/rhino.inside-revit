@@ -1,5 +1,6 @@
 using System;
 using Rhino.Geometry;
+using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -34,6 +35,39 @@ namespace RhinoInside.Revit.GH.Types
 
         return base.Location;
       }
+    }
+
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      if (Value is ARDB.Instance instance)
+      {
+        var bbox = Type.Value.get_BoundingBox(default).ToBox();
+        return bbox.IsValid ?
+          bbox.GetBoundingBox(xform * instance.GetTransform().ToTransform()) :
+          instance.GetBoundingBoxXYZ().ToBox().GetBoundingBox(xform);
+      }
+
+      return NaN.BoundingBox;
+    }
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (Value is ARDB.Instance instance)
+      {
+        var bbox = Type.Value.get_BoundingBox(default).ToBoundingBox();
+        if (bbox.IsValid)
+        {
+          args.Pipeline.PushModelTransform(instance.GetTransform().ToTransform());
+
+          foreach (var edge in bbox.GetEdges())
+              args.Pipeline.DrawPatternedLine(edge.From, edge.To, args.Color, 0x00003333, args.Thickness);
+
+          args.Pipeline.PopModelTransform();
+          return;
+        }
+      }
+
+      base.DrawViewportWires(args);
     }
   }
 }

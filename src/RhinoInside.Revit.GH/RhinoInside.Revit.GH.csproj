@@ -202,6 +202,7 @@
     <Compile Include="Components\Import\AddImage.cs" />
     <Compile Include="Components\Import\AddImageType.cs" />
     <Compile Include="Components\Import\ImageTypePath.cs" />
+    <Compile Include="Components\Import\QueryCloudPoints.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
     <Compile Include="Components\Model\AddWorkPlane.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
@@ -298,6 +299,7 @@
     <Compile Include="Optional.cs" />
     <Compile Include="Parameters\Annotations\Annotation.cs" />
     <Compile Include="Parameters\Annotations\TextElement.cs" />
+    <Compile Include="Parameters\Instances\PointCloudInstance.cs" />
     <Compile Include="Parameters\Materials\AppearanceAsset.cs" />
     <Compile Include="Parameters\Materials\AssetPropertyDouble1DMap.cs" />
     <Compile Include="Parameters\Materials\AssetPropertyDouble4DMap.cs" />

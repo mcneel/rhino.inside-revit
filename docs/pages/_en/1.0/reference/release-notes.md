@@ -14,6 +14,7 @@ group: Deployment & Configs
 
 - Added 'Add Component (Curve)' component.
 - Added 'Add Column' component.
+- Added 'Query Cloud Points' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
