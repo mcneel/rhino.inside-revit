@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     (
       name: "Query Cloud Points",
       nickname: "CloudPts",
-      description: "Get-Set accessor for image type file path",
+      description: "Query Point Cloud points and colours.",
       category: "Revit",
       subCategory: "Model"
     )
