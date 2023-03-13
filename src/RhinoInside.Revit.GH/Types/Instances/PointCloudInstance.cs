@@ -135,20 +135,19 @@ namespace RhinoInside.Revit.GH.Types
 
         var mesh = ghMesh.Value.DuplicateMesh();
         var meshIsClosed = mesh.IsClosed;
-        var bbox = mesh.GetBoundingBox(true).ToBoundingBoxXYZ();
 
         var tol = GeometryTolerance.Model;
         mesh.Faces.ConvertNonPlanarQuadsToTriangles(tol.VertexTolerance, tol.AngleTolerance, 0);
         mesh.FaceNormals.ComputeFaceNormals();
-        var vertices = mesh.Vertices.ToPoint3dArray();
+        var meshVertices = mesh.Vertices.ToPoint3dArray();
 
         // Check if is convex
         for (int f = 0; f < mesh.Faces.Count; ++f)
         {
-          var plane = new Plane(vertices[mesh.Faces[f].A], mesh.FaceNormals[f]);
-          for (int v = 0; v < vertices.Length; ++v)
+          var plane = new Plane(meshVertices[mesh.Faces[f].A], mesh.FaceNormals[f]);
+          for (int v = 0; v < meshVertices.Length; ++v)
           {
-            if (plane.DistanceTo(vertices[v]) > tol.VertexTolerance)
+            if (plane.DistanceTo(meshVertices[v]) > tol.VertexTolerance)
               return false;
           }
         }
@@ -157,17 +156,20 @@ namespace RhinoInside.Revit.GH.Types
 
         int index = 0;
         foreach (var face in mesh.Faces)
-        {
-          var A = mesh.Vertices[face[0]];
-          var plane = new Plane(A, -mesh.FaceNormals[index++]);
-
-          planes.Add(plane.ToPlane());
-        }
+          planes.Add(new Plane(meshVertices[face[0]], -mesh.FaceNormals[index++]).ToPlane());
 
         var exactPlaneCount = planes.Count;
-
         if (meshIsClosed)
         {
+          var coordSystem = Transform.Identity;
+          if (Plane.FitPlaneToPoints(meshVertices, out var fitPlane) != PlaneFitResult.Failure)
+            coordSystem = Transform.ChangeBasis(Plane.WorldXY, fitPlane);
+          else
+            fitPlane = Plane.WorldXY;
+
+          var bbox = mesh.GetBoundingBox(coordSystem).ToBoundingBoxXYZ();
+          bbox.Transform = Transform.ChangeBasis(fitPlane, Plane.WorldXY).ToTransform();
+
           bbox.GetPlaneEquations(out var clippingPlanes);
           planes.Add(ARDB.Plane.CreateByNormalAndOrigin(clippingPlanes.X.Min.Value.Normal, clippingPlanes.X.Min.Value.Point));
           planes.Add(ARDB.Plane.CreateByNormalAndOrigin(clippingPlanes.X.Max.Value.Normal, clippingPlanes.X.Max.Value.Point));
