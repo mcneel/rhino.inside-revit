@@ -36,4 +36,21 @@ namespace RhinoInside.Revit.GH.Parameters
     }
     #endregion
   }
+
+  public class PointCloudFilter : Param<Types.PointCloudFilter>
+  {
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
+    public override Guid ComponentGuid => new Guid("F64607F0-0351-4869-9459-620E58FBDFAA");
+    protected override string IconTag => string.Empty;
+
+    public PointCloudFilter() : base
+    (
+      name: "Point Cloud Filter",
+      nickname: "Cloud Filter",
+      description: "Contains a collection of Revit point cloud filters",
+      category: "Params",
+      subcategory: "Revit"
+    )
+    { }
+  }
 }

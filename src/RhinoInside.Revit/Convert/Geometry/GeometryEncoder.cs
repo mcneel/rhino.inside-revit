@@ -801,7 +801,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       return new ARDB.BoundingBoxXYZ
       {
         Min = boundingBox.Min.ToXYZ(factor),
-        Max = boundingBox.Min.ToXYZ(factor),
+        Max = boundingBox.Max.ToXYZ(factor),
         Enabled = boundingBox.IsValid
       };
     }
