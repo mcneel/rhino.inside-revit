@@ -1,17 +1,15 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using Rhino.Geometry;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Parameters;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations
 {
+  using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
-  using Convert.Geometry;
 
   [ComponentVersion(introduced: "1.13")]
   public class QueryCloudPoints : ZuiComponent
