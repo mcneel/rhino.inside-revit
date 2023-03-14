@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
@@ -26,42 +26,41 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (!IsValid) return;
 
+      var cloud = Value;
       var box = Box;
       var corners = box.GetCorners();
       var diagonal = GeometryEncoder.ToInternalLength(corners[0].DistanceTo(corners[6]));
-
-      var cloud = Value;
       args.Viewport.GetWorldToScreenScale(box.Center, out var pixelPerUnit);
-      args.Viewport.GetFrustumLeftPlane(out var near);
-      args.Viewport.GetFrustumLeftPlane(out var far);
-      args.Viewport.GetFrustumLeftPlane(out var left);
-      args.Viewport.GetFrustumRightPlane(out var right);
+
+      // Frustum planes
+      args.Viewport.GetFrustumLeftPlane  (out var left);
+      args.Viewport.GetFrustumRightPlane (out var right);
       args.Viewport.GetFrustumBottomPlane(out var bottom);
-      args.Viewport.GetFrustumTopPlane(out var top);
+      args.Viewport.GetFrustumTopPlane   (out var top);
+      var near = new Plane(args.Viewport.CameraLocation, args.Viewport.CameraDirection);
+      var clippingPlanes = new List<ARDB.Plane>(6)
+      {
+        left.ToPlane(),   right.ToPlane(),
+        bottom.ToPlane(), top.ToPlane(),
+        near.ToPlane()
+      };
 
-      var filter = ARDB.PointClouds.PointCloudFilterFactory.CreateMultiPlaneFilter
-      (
-        new ARDB.Plane[]
-        {
-          left.ToPlane(),
-          right.ToPlane(),
-          bottom.ToPlane(),
-          top.ToPlane(),
-          near.ToPlane(),
-          far.ToPlane(),
-        }
-      );
+      // Clipping planes
+      var clipingPlaneObjects = args.Viewport?.ParentView?.Document.Objects.FindClippingPlanesForViewport(args.Viewport);
+      foreach (var clipPlaneObject in clipingPlaneObjects ?? Enumerable.Empty<ClippingPlaneObject>())
+        clippingPlanes.Add(clipPlaneObject.ClippingPlaneGeometry.Plane.ToPlane());
 
+      var filter = ARDB.PointClouds.PointCloudFilterFactory.CreateMultiPlaneFilter(clippingPlanes);
       var averageDistance = GeometryEncoder.ToInternalLength(1.0 / pixelPerUnit);
       var numPoints = args.Pipeline.IsDynamicDisplay ? 0xFFFF / 8 : (int) Math.Min(1_000_000 - 1, diagonal / 3.0 * 0x7FFF);
 
-      var hasColor = cloud.HasColor();
       var points = cloud.GetPoints(filter, averageDistance, numPoints);
       if (points.Count > 0)
       {
+        var hasColor = cloud.HasColor();
         var type = cloud.Document.GetElement(cloud.GetTypeId()) as ARDB.PointCloudType;
         var colorEncoding = type.ColorEncoding;
-        var dotColor = System.Drawing.Color.FromArgb(0xFF, System.Drawing.Color.LightGray);
+        var dotColor = System.Drawing.Color.FromArgb(0xFF, System.Drawing.Color.LightGray); // Ignore alpha component.
         var dotSize = (float) 2.0f * args.Pipeline.DpiScale;
 
         args.Pipeline.PushModelTransform(cloud.GetTransform().ToTransform());
