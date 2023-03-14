@@ -193,6 +193,31 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (reference is null) return null;
 
       var hasLeader = !point.AlmostEqualPoints(end, view.Document.Application.ShortCurveTolerance);
+
+      if (reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
+      {
+        var host = view.Document.GetElement(reference);
+        if (host is ARDB.Architecture.TopographySurface topography)
+        {
+          var extents = new Interval(-1.0 * Revit.ModelUnits, +1.0 * Revit.ModelUnits);
+          var surface = new PlaneSurface(Plane.WorldXY, extents, extents);
+          var directShape = ARDB.DirectShape.CreateElement(view.Document, new ARDB.ElementId(ARDB.BuiltInCategory.OST_GenericModel));
+          directShape.SetShape(surface.ToShape());
+          directShape.Document.Regenerate();
+
+          using (var geometry = directShape.get_Geometry(new ARDB.Options() { ComputeReferences = true }))
+          {
+            var faceReference = geometry.GetFaceReferences(directShape).FirstOrDefault();
+            var templateSpot = view.Document.Create.NewSpotElevation(view, faceReference, XYZExtension.Zero, bend, end, point, hasLeader);
+
+            var id = ARDB.ElementTransformUtils.CopyElement(templateSpot.Document, templateSpot.Id, point);
+            templateSpot.Document.Delete(templateSpot.Id);
+            directShape.Document.Delete(directShape.Id);
+            return view.Document.GetElement(id.FirstOrDefault() ?? ElementIdExtension.InvalidElementId) as ARDB.SpotDimension;
+          }
+        }
+      }
+
       return view.Document.Create.NewSpotElevation(view, reference, point, bend, end, point, hasLeader);
     }
 
