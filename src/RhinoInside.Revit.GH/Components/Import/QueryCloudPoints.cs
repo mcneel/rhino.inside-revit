@@ -142,45 +142,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (cloud.HasColor())
       {
         var type = cloud.Document.GetElement(cloud.GetTypeId()) as ARDB.PointCloudType;
-        switch (type.ColorEncoding)
-        {
-          case ARDB.PointClouds.PointCloudColorEncoding.ARGB:
-            Params.TrySetDataList(DA, "Colours", () => points.Select(x => FromArgb(x.Color)));
-            break;
-
-          case ARDB.PointClouds.PointCloudColorEncoding.ABGR:
-            Params.TrySetDataList(DA, "Colours", () => points.Select(x => FromAbgr(x.Color)));
-            break;
-        }
+        Params.TrySetDataList(DA, "Colours", () => points.Select(x => Types.PointCloudInstance.ToColor(type.ColorEncoding, x.Color)));
       }
 
       Params.TrySetData(DA, "Count", () => points.Count);
-    }
-
-    static System.Drawing.Color FromArgb(int color)
-    {
-      int r = color & 0xFF;
-      color >>= 8;
-      int g = color & 0xFF;
-      color >>= 8;
-      int b = color & 0xFF;
-      color >>= 8;
-      int a = color & 0xFF;
-
-      return System.Drawing.Color.FromArgb(a, r, g, b);
-    }
-
-    static System.Drawing.Color FromAbgr(int color)
-    {
-      int b = color & 0xFF;
-      color >>= 8;
-      int g = color & 0xFF;
-      color >>= 8;
-      int r = color & 0xFF;
-      color >>= 8;
-      int a = color & 0xFF;
-
-      return System.Drawing.Color.FromArgb(a, r, g, b);
     }
   }
 }

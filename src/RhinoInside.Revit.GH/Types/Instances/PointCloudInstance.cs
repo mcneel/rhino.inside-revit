@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
@@ -19,16 +20,17 @@ namespace RhinoInside.Revit.GH.Types
     public PointCloudInstance() { }
     public PointCloudInstance(ARDB.PointCloudInstance instance) : base(instance) { }
 
+    static Rhino.Display.DisplayBitmap DotBitmap = default;
+
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (!IsValid) return;
 
       var box = Box;
       var corners = box.GetCorners();
-      var diagonal = corners[0].DistanceTo(corners[6]);
+      var diagonal = GeometryEncoder.ToInternalLength(corners[0].DistanceTo(corners[6]));
 
       var cloud = Value;
-      var averageDistance = diagonal / 1000.0;
       args.Viewport.GetWorldToScreenScale(box.Center, out var pixelPerUnit);
       args.Viewport.GetFrustumLeftPlane(out var near);
       args.Viewport.GetFrustumLeftPlane(out var far);
@@ -50,21 +52,46 @@ namespace RhinoInside.Revit.GH.Types
         }
       );
 
-      var max = args.Pipeline.IsDynamicDisplay ? 4096 : 16384;
-      
-      var points = cloud.GetPoints(filter, GeometryEncoder.ToInternalLength(1.0 / pixelPerUnit), Math.Min(max, (int) (4096 * pixelPerUnit)));
+      var averageDistance = GeometryEncoder.ToInternalLength(1.0 / pixelPerUnit);
+      var numPoints = args.Pipeline.IsDynamicDisplay ? 0xFFFF / 8 : (int) Math.Min(1_000_000 - 1, diagonal / 3.0 * 0x7FFF);
+
+      var hasColor = cloud.HasColor();
+      var points = cloud.GetPoints(filter, averageDistance, numPoints);
       if (points.Count > 0)
       {
-        var dotColor = System.Drawing.Color.FromArgb(0x7F, System.Drawing.Color.Black);
+        var type = cloud.Document.GetElement(cloud.GetTypeId()) as ARDB.PointCloudType;
+        var colorEncoding = type.ColorEncoding;
+        var dotColor = System.Drawing.Color.FromArgb(0xFF, System.Drawing.Color.LightGray);
+        var dotSize = (float) 2.0f * args.Pipeline.DpiScale;
+
         args.Pipeline.PushModelTransform(cloud.GetTransform().ToTransform());
-        args.Pipeline.DrawPoints
-        (
-          points.Select(x => GeometryDecoder.ToPoint3d(x)),
-          Rhino.Display.PointStyle.RoundSimple,
-          args.Color, dotColor,
-          3.0f, 1.0f, 0.0f, 0.0f,
-          true, true
-        );
+        {
+          var particles = new ParticleSystem();
+          foreach (var point in points)
+            particles.Add
+            (
+              new Particle()
+              {
+                Location = GeometryDecoder.ToPoint3d(point),
+                Color = hasColor ? System.Drawing.Color.FromArgb(0xFF, ToColor(colorEncoding, point.Color)) : dotColor,
+                Size = dotSize,
+                DisplayBitmapIndex = 0,
+              }
+            );
+
+          if (DotBitmap is null)
+          {
+            using (var bitmap = new System.Drawing.Bitmap(32, 32))
+            {
+              using (var graphics = System.Drawing.Graphics.FromImage(bitmap))
+                graphics.FillRectangle(System.Drawing.Brushes.White, 0, 0, bitmap.Width, bitmap.Height);
+
+              DotBitmap = new Rhino.Display.DisplayBitmap(bitmap);
+            }
+          }
+
+          args.Pipeline.DrawParticles(particles, DotBitmap);
+        }
         args.Pipeline.PopModelTransform();
       }
 
@@ -72,6 +99,45 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     protected override void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
+
+    #region PointCloudColorEncoding
+    internal static System.Drawing.Color ToColor(ARDB.PointClouds.PointCloudColorEncoding encoding, int value)
+    {
+      switch (encoding)
+      {
+        case ARDB.PointClouds.PointCloudColorEncoding.ARGB: return FromArgb(value);
+        case ARDB.PointClouds.PointCloudColorEncoding.ABGR: return FromAbgr(value);
+      }
+
+      return System.Drawing.Color.Empty;
+    }
+
+    static System.Drawing.Color FromArgb(int color)
+    {
+      int r = color & 0xFF;
+      color >>= 8;
+      int g = color & 0xFF;
+      color >>= 8;
+      int b = color & 0xFF;
+      color >>= 8;
+      int a = color & 0xFF;
+
+      return System.Drawing.Color.FromArgb(a, r, g, b);
+    }
+
+    static System.Drawing.Color FromAbgr(int color)
+    {
+      int b = color & 0xFF;
+      color >>= 8;
+      int g = color & 0xFF;
+      color >>= 8;
+      int r = color & 0xFF;
+      color >>= 8;
+      int a = color & 0xFF;
+
+      return System.Drawing.Color.FromArgb(a, r, g, b);
+    }
+    #endregion
   }
 
   [Kernel.Attributes.Name("Point Cloud Filter")]
