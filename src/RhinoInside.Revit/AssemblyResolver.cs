@@ -457,6 +457,8 @@ namespace RhinoInside.Revit
 
     static void AssemblyLoaded(object sender, AssemblyLoadEventArgs args)
     {
+      if (args.LoadedAssembly.ReflectionOnly) return;
+
       var assemblyName = args.LoadedAssembly.GetName();
       if (references.TryGetValue(assemblyName.Name, out var location))
         location.Activate(args.LoadedAssembly);
