@@ -5,12 +5,12 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
   using External.DB.Extensions;
-  using External.DB;
   using GH.Exceptions;
 
   [ComponentVersion(introduced: "1.13")]
@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           Name = "Type",
           NickName = "T",
-          Description = "Family type.",
+          Description = "Component type.",
           SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_GenericModel
         }
       ),
@@ -71,6 +71,15 @@ namespace RhinoInside.Revit.GH.Components
           Description = $"Level or Face reference.",
           Optional = true
         }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Number()
+        {
+          Name = "Offset from Host",
+          NickName = "O",
+          Description = "Signed distance from 'Work Plane'.",
+        }.SetDefaultVale(0.0), ParamRelevance.Primary
       ),
     };
 
@@ -88,6 +97,15 @@ namespace RhinoInside.Revit.GH.Components
       ),
       new ParamDefinition
       (
+        new Parameters.GeometryFace()
+        {
+          Name = "Face",
+          NickName = "F",
+          Description = $"Work Plane face",
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
         new Parameters.GraphicalElement()
         {
           Name = _WorkPlane_,
@@ -97,13 +115,13 @@ namespace RhinoInside.Revit.GH.Components
       ),
       new ParamDefinition
       (
-        new Parameters.GeometryFace()
+        new Param_Number()
         {
-          Name = "Face",
-          NickName = "F",
-          Description = $"Work Plane face",
+          Name = "Offset from Host",
+          NickName = "O",
+          Description = "Signed distance from 'Work Plane'.",
         }, ParamRelevance.Primary
-      )
+      ),
     };
 
     const string _Component_ = "Component";
@@ -114,6 +132,7 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
       ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
       ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+      ARDB.BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM,
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -122,6 +141,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Type", out Types.FamilySymbol type)) return;
       if (!Params.TryGetData(DA, "Work Plane", out Types.GeometryObject workPlane)) return;
+      if (!Params.TryGetData(DA, "Offset from Host", out double? offsetFromHost)) return;
 
       type.AssertPlacementType(ARDB.FamilyPlacementType.CurveBased);
 
@@ -153,7 +173,7 @@ namespace RhinoInside.Revit.GH.Components
             {
               if (workPlane is null)
               {
-                if (sketchPlane is null || component is null || sketchPlane.GetDependentElements(CompoundElementFilter.ExclusionFilter(component.Id, true)).Count == 0)
+                if (sketchPlane is null || component is null || sketchPlane.GetDependentElements(ERDB.CompoundElementFilter.ExclusionFilter(component.Id, true)).Count == 0)
                 {
                   var extents = new Interval(-1.0 * Revit.ModelUnits, +1.0 * Revit.ModelUnits);
                   var surface = new PlaneSurface(new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d()), extents, extents);
@@ -206,10 +226,17 @@ namespace RhinoInside.Revit.GH.Components
                       ) is ARDB.IntersectionResult projected
                     )
                     {
-                      origin = projected.XYZPoint;
-                      var faceNormal = (UnitXYZ) faceTransform.OfVector(face.ComputeNormal(projected.UVPoint));
+                      var faceNormal = (ERDB.UnitXYZ) faceTransform.OfVector(face.ComputeNormal(projected.UVPoint));
                       if (faceNormal.IsParallelTo(basisX)) basisX = faceNormal.Right();
                       reference = graphicalElement.GetAbsoluteReference(reference);
+
+                      if (offsetFromHost.HasValue) origin = projected.XYZPoint;
+                      else
+                      {
+                        var facePlane = new ERDB.PlaneEquation(projected.XYZPoint, faceNormal);
+                        offsetFromHost = facePlane.SignedDistanceTo(origin) * Revit.ModelUnits;
+                        origin = facePlane.Project(origin);
+                      }
                     }
                   }
                 }
@@ -252,13 +279,20 @@ namespace RhinoInside.Revit.GH.Components
               if (component is object)
               {
                 DA.SetData(_Component_, component);
+
+                Params.TrySetData(DA, "Face", () => component.HostFace is object ? Types.GeometryFace.FromReference(component.Document, component.HostFace) as Types.GeometryFace:default);
+
                 if (associatedWorkPlane) Params.TrySetData
                 (
                   DA, "Work Plane", () => component.HostFace is ARDB.Reference referemce ?
                     Types.GraphicalElement.FromReference(component.Document, referemce) :
                     Types.GraphicalElement.FromElement(component.Host)
                 );
-                Params.TrySetData(DA, "Face", () => component.HostFace is object ? Types.GeometryFace.FromReference(component.Document, component.HostFace) as Types.GeometryFace:default);
+
+                if (offsetFromHost.HasValue)
+                  component.get_Parameter(ARDB.BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM)?.Set(offsetFromHost.Value / Revit.ModelUnits);
+
+                Params.TrySetData(DA, "Offset from Host", () => component.get_Parameter(ARDB.BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM)?.AsGoo());
               }
 
               return sketchPlane;
@@ -294,7 +328,7 @@ namespace RhinoInside.Revit.GH.Components
           var hostElement = component.Document.GetElement(reference);
           if (hostElement is ARDB.SketchPlane sketchPlane)
           {
-            var dependents = sketchPlane.GetDependentElements(CompoundElementFilter.ExclusionFilter(component.Id, inverted: true));
+            var dependents = sketchPlane.GetDependentElements(ERDB.CompoundElementFilter.ExclusionFilter(component.Id, inverted: true));
             if (!dependents.Contains(component.Id)) return false;
           }
           else if (!hostElement.IsEquivalent(component.Host)) return false;
@@ -307,7 +341,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           if (component.Host is ARDB.Level level)
           {
-            var plane = new PlaneEquation(UnitXYZ.BasisZ, -level.ProjectElevation);
+            var plane = new ERDB.PlaneEquation(ERDB.UnitXYZ.BasisZ, -level.ProjectElevation);
             line = ARDB.Line.CreateBound(plane.Project(line.Origin), plane.Project(line.Origin + line.Direction * line.Length));
           }
           else
@@ -355,7 +389,7 @@ namespace RhinoInside.Revit.GH.Components
           return doc.Create().NewFamilyInstance(reference, line, type);
       }
 
-      throw new Exceptions.RuntimeArgumentException("Host", $"Input Host is not valid for the Work Plane-Based type '{type.Name}'.");
+      throw new Exceptions.RuntimeArgumentException("Host", $"Input Host is not valid for the Curve Based type '{type.Name}'.");
     }
 
     ARDB.FamilyInstance Reconstruct
@@ -374,11 +408,7 @@ namespace RhinoInside.Revit.GH.Components
           Create(doc, line, type, reference),
           ExcludeUniqueProperties
         );
-
-        component.Document.Regenerate();
       }
-
-      component.get_Parameter(ARDB.BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM)?.Update(0.0);
 
       return component;
     }
