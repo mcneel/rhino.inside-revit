@@ -12,12 +12,14 @@ group: Deployment & Configs
 
 ### RC
 
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.13 RC3" version="v1.13.8474.22250" pre_release=true time="03/15/2023" %}
+
 - Added 'Add Component (Curve)' component.
 - Added 'Add Column' component.
 - Added 'Query Cloud Points' component.
-
-{% endcapture %}
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 {% include ltr/release-header.html title="v1.13 RC2" version="v1.13.8466.15699" pre_release=true time="03/07/2023" %}
 
