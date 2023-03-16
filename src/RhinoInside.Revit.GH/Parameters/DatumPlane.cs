@@ -144,7 +144,7 @@ namespace RhinoInside.Revit.GH.Parameters
             break;
 
           case Types.Element goo:
-            if (!document.Value.IsEquivalent(goo.Document))
+            if (goo.Document is object && !document.Value.IsEquivalent(goo.Document))
               throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(level)} from a diferent document.");
             break;
         }
