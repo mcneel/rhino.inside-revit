@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           NickName = "T",
           Optional = true,
           FileFilter = "Family Template Files (*.rft)|*.rft"
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           NickName = "C",
           Description = "Family Category",
           Optional = true
-        }
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (

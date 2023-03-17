@@ -101,7 +101,7 @@ namespace RhinoInside.Revit.GH.Components.Families
         else
         {
           if (doc.TryGetFamily(Path.GetFileNameWithoutExtension(filePath), out family) && overwrite != true)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Family '{family.Name}' already loaded!");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Family '{family.Name}' is already loaded.");
         }
 
         DA.SetData("Family", family);

@@ -44,8 +44,9 @@ namespace RhinoInside.Revit.GH.Components.Families
         {
           Name = "Path",
           NickName = "P",
+          Description = $"Path where to save the Family.{Environment.NewLine}If relative or missing a temporary location will be used.",
           FileFilter = "Family Files (*.rfa)|*.rfa"
-        }
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -93,6 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Families
         {
           Name = "Path",
           NickName = "P",
+          Description = "Path where Family is saved."
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -108,55 +110,60 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.TryGetData(DA, "Family", out ARDB.Family family)) return;
-      if (!Params.GetData(DA, "Path", out string filePath, x => !string.IsNullOrWhiteSpace(x))) return;
+      if (!Params.TryGetData(DA, "Family", out Types.Family family, x => x.IsValid)) return;
+      if (!Params.TryGetData(DA, "Path", out string filePath, x => !string.IsNullOrWhiteSpace(x))) return;
       if (!Params.TryGetData(DA, "Overwrite", out bool? overwrite)) return;
       if (!Params.TryGetData(DA, "Compact", out bool? compact)) return;
       if (!Params.TryGetData(DA, "Backups", out int? backups)) return;
 
-      if (family.Document.EditFamily(family) is ARDB.Document familyDoc) using (familyDoc)
+      if (filePath is null)
+        filePath = family.Nomen;
+
+      if (filePath.Last() == Path.DirectorySeparatorChar)
+        filePath = Path.Combine(filePath, family.Nomen);
+
+      if (!Path.HasExtension(filePath))
+        filePath += ".rfa";
+
+      if (!Path.IsPathRooted(filePath))
       {
-        try
+        filePath = Path.Combine(Types.Document.FromValue(family.Document).SwapFolder.Directory.FullName, "Families", filePath);
+        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+      }
+
+      var exist = File.Exists(filePath);
+      if (overwrite is true || !exist)
+      {
+        if (family.Document.EditFamily(family.Value) is ARDB.Document familyDoc) using (familyDoc)
         {
-          if (filePath.Last() == Path.DirectorySeparatorChar)
-            filePath = Path.Combine(filePath, familyDoc.Title);
-
-          if (Path.IsPathRooted(filePath) && filePath.Contains(Path.DirectorySeparatorChar))
+          try
           {
-            if (!Path.HasExtension(filePath))
-              filePath += ".rfa";
-
-            var exist = File.Exists(filePath);
-            if (overwrite is true || !exist)
+            using (var saveAsOptions = new ARDB.SaveAsOptions() { OverwriteExistingFile = true, Compact = compact is true })
             {
-              using (var saveAsOptions = new ARDB.SaveAsOptions() { OverwriteExistingFile = true, Compact = compact is true })
-              {
-                if (backups > -1)
-                  saveAsOptions.MaximumBackups = backups.Value;
+              if (backups > -1)
+                saveAsOptions.MaximumBackups = backups.Value;
 
-                familyDoc.SaveAs(filePath, saveAsOptions);
-                Params.TrySetData(DA, "Family", () => family);
-                Params.TrySetData(DA, "Path", () => filePath);
-                Params.TrySetData(DA, "Written", () => true);
-              }
-            }
-            else
-            {
+              familyDoc.SaveAs(filePath, saveAsOptions);
               Params.TrySetData(DA, "Family", () => family);
               Params.TrySetData(DA, "Path", () => filePath);
-              Params.TrySetData(DA, "Written", () => false);
+              Params.TrySetData(DA, "Written", () => true);
             }
           }
-          else
+          catch (Autodesk.Revit.Exceptions.InvalidOperationException e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message); }
+          finally
           {
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path should be absolute.");
+            familyDoc.Release();
           }
         }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message); }
-        finally
-        {
-          familyDoc.Release();
-        }
+      }
+      else
+      {
+        if (exist)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"File '{filePath}' already exist");
+
+        Params.TrySetData(DA, "Family", () => family);
+        Params.TrySetData(DA, "Path", () => filePath);
+        Params.TrySetData(DA, "Written", () => false);
       }
     }
   }
