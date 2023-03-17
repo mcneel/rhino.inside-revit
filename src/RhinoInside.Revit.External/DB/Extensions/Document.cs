@@ -805,34 +805,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region Family
-    public static bool TryGetFamily(this Document doc, string name, out Family family, ElementId clueCategoryId = default)
+    public static bool TryGetFamily(this Document doc, string familyName, out Family family, ElementId clueCategoryId = default)
     {
+      family = null;
+
       if (clueCategoryId.IsValid())
       {
+        using (var collector = new FilteredElementCollector(doc))
         {
-          // We use categoryId as a clue too speed up search.
-          using (var smallSet = new ElementCategoryFilter(clueCategoryId, false))
-          {
-            using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)).WherePasses(smallSet))
-              family = collector.FirstOrDefault(x => x.Name == name) as Family;
-          }
-        }
-
-        if (family is null)
-        {
-          // We look into other categories that are not 'clueCategoryId'.
-          using (var bigSet = new ElementCategoryFilter(clueCategoryId, true))
-          {
-            // We use categoryId as a clue too speed up search.
-            using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)).WherePasses(bigSet))
-              family = collector.FirstOrDefault(x => x.Name == name) as Family;
-          }
+          family = collector.OfClass(typeof(FamilySymbol)).
+            WhereElementIsElementType().
+            WhereCategoryIdEqualsTo(clueCategoryId).
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, familyName).
+            Cast<FamilySymbol>().
+            FirstOrDefault(x => ElementNaming.NameEqualityComparer.Equals(x.FamilyName, familyName))?. // To enfoce name casing.
+            Family;
         }
       }
-      else
+
+      // In case is not in `clueCategoryId`
+      if (family is null)
       {
-        using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)))
-          family = collector.FirstOrDefault(x => x.Name == name) as Family;
+        using (var collector = new FilteredElementCollector(doc))
+        {
+          family = collector.OfClass(typeof(FamilySymbol)).
+            WhereElementIsElementType().
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, familyName).
+            Cast<FamilySymbol>().
+            FirstOrDefault(x => ElementNaming.NameEqualityComparer.Equals(x.FamilyName, familyName))?. // To enfoce name casing.
+            Family;
+        }
+      }
+
+      // In case Family does not have any type
+      if (family is null)
+      {
+        using (var collector = new FilteredElementCollector(doc))
+        {
+          family = collector.OfClass(typeof(Family)).
+            FirstOrDefault(x => ElementNaming.NameEqualityComparer.Equals(x.Name, familyName)) as
+            Family;
+        }
       }
 
       return family is object;
@@ -1228,32 +1241,71 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     static FamilySymbol GetWorkPlaneBasedSymbol(this Document document)
     {
+      var symbol = default(FamilySymbol);
+
       if (document is object)
       {
-        using
-        (
-          var collector = new FilteredElementCollector(document).WhereElementIsElementType().
-          OfCategoryId(new ElementId(BuiltInCategory.OST_GenericModel)).
-          OfClass(typeof(FamilySymbol)).
-          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, WorkPlaneBasedFamilyName).
-          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, WorkPlaneBasedSymbolName)
-        )
+        if (symbol is null)
         {
-          return collector.Cast<FamilySymbol>().FirstOrDefault();
+          using
+          (
+            var collector = new FilteredElementCollector(document).WhereElementIsElementType().
+            OfCategoryId(new ElementId(BuiltInCategory.OST_GenericModel)).
+            OfClass(typeof(FamilySymbol)).
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, WorkPlaneBasedFamilyName).
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, WorkPlaneBasedSymbolName)
+          )
+          {
+            symbol = collector.Cast<FamilySymbol>().FirstOrDefault();
+          }
+        }
+
+        // Check if is in another category
+        if (symbol is null)
+        {
+          using
+          (
+            var collector = new FilteredElementCollector(document).WhereElementIsElementType().
+            OfClass(typeof(FamilySymbol)).
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, WorkPlaneBasedFamilyName).
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, WorkPlaneBasedSymbolName)
+          )
+          {
+            symbol = collector.Cast<FamilySymbol>().FirstOrDefault();
+          }
         }
       }
 
-      return null;
+      return symbol;
     }
 
     internal static FamilySymbol EnsureWorkPlaneBasedSymbol(this Document document)
     {
-      var symbol = GetWorkPlaneBasedSymbol(document);
-      if (symbol is null)
+      if (GetWorkPlaneBasedSymbol(document) is var symbol)
       {
-        symbol = GetWorkPlaneBasedSymbol(document.Application.ResourceDocument("RiR-Template.rte"));
-        if (symbol is object)
+        if(symbol.Family.FamilyCategoryId.ToBuiltInCategory() != BuiltInCategory.OST_GenericModel)
+          symbol.Family.FamilyCategoryId = new ElementId(BuiltInCategory.OST_GenericModel);
+
+        symbol.Family.get_Parameter(BuiltInParameter.FAMILY_WORK_PLANE_BASED).Update(true);
+        symbol.Family.get_Parameter(BuiltInParameter.FAMILY_ALWAYS_VERTICAL).Update(false);
+        symbol.Family.get_Parameter(BuiltInParameter.FAMILY_SHARED).Update(false);
+      }
+      else symbol = CreateWorkPlaneBasedSymbol(document, WorkPlaneBasedFamilyName, WorkPlaneBasedSymbolName);
+
+      return symbol;
+    }
+
+    internal static FamilySymbol CreateWorkPlaneBasedSymbol(this Document document, string familyName, string symbolName = default)
+    {
+      if (GetWorkPlaneBasedSymbol(document.Application.ResourceDocument("RiR-Template.rte")) is var symbol)
+      {
+        using (symbol.Document.RollBackScope())
         {
+          // Change the name to avoid any possible name collision
+          var uniqueName = Guid.NewGuid().ToString();
+          symbol.Family.Name = uniqueName;
+          symbol.Name = uniqueName;
+
           using (var options = new CopyPasteOptions())
           {
             options.SetDuplicateTypeNamesAction(DuplicateTypeAction.UseDestinationTypes);
@@ -1269,21 +1321,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
             if (copiedElementIds.Count == 1)
             {
-              var newSymbol = document.GetElement(copiedElementIds.First()) as FamilySymbol;
-              newSymbol.Family.CopyParametersFrom(symbol.Family);
-              symbol = newSymbol;
+              symbol = document.GetElement(copiedElementIds.First()) as FamilySymbol;
+              symbol.Family.Name = familyName;
+              symbol.Name = symbolName ?? familyName;
+              return symbol;
             }
           }
         }
       }
-      else
-      {
-        symbol.Family.get_Parameter(BuiltInParameter.FAMILY_WORK_PLANE_BASED).Update(true);
-        symbol.Family.get_Parameter(BuiltInParameter.FAMILY_ALWAYS_VERTICAL).Update(false);
-        symbol.Family.get_Parameter(BuiltInParameter.FAMILY_SHARED).Update(false);
-      }
 
-      return symbol;
+      return null;
     }
     #endregion
   }
