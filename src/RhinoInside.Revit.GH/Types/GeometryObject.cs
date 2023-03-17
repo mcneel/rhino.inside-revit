@@ -929,7 +929,8 @@ namespace RhinoInside.Revit.GH.Types
         {
           var sketchPlane = ARDB.SketchPlane.Create(referenceDocument, planeReference);
           var plane = sketchPlane.GetPlane().ToPlane();
-          if (HasTransform) plane.Transform(GeometryToWorldTransform);
+          // The `ARDB.SketchPlane` is already in WCS
+          // if (HasTransform) plane.Transform(GeometryToWorldTransform);
           target = (Q) (object) new GH_Plane(plane);
           return true;
         }
