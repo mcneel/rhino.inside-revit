@@ -12,6 +12,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Display;
   using Convert.Geometry;
+  using External.DB;
   using External.DB.Extensions;
   using GH.Kernel.Attributes;
 
@@ -48,9 +49,15 @@ namespace RhinoInside.Revit.GH.Types
         target = (Q) (object) GetReference();
         return true;
       }
-      else if (GetReference() is ARDB.Reference reference && typeof(IGH_Element).IsAssignableFrom(typeof(Q)))
+      else if (typeof(IGH_Element).IsAssignableFrom(typeof(Q)))
       {
-        target = (Q) (object) (Element.FromReference(ReferenceDocument, reference) is Q element ? element : default);
+        if (GetReference() is ARDB.Reference reference)
+          target = (Q) (object) (Element.FromReference(ReferenceDocument, reference) is Q element ? element : default);
+        else if (Id == ElementIdExtension.InvalidElementId)
+          target = (Q) (object) new Element();
+        else
+          target = default;
+
         return true;
       }
 
@@ -147,7 +154,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Reference
-    public override ARDB.ElementId Id => _Reference is null ? null :
+    public override ARDB.ElementId Id => ReferenceUniqueId == string.Empty ?
+      ElementIdExtension.InvalidElementId :
+      _Reference is null ? null :
       _Reference.LinkedElementId != ARDB.ElementId.InvalidElementId ?
       _Reference.LinkedElementId :
       _Reference.ElementId;
@@ -284,13 +293,17 @@ namespace RhinoInside.Revit.GH.Types
     protected GeometryObject(ARDB.Document document, ARDB.GeometryObject geometryObject) : base(document, geometryObject) { }
     protected GeometryObject(ARDB.Document document, ARDB.Reference reference)
     {
+      if (reference is null) document = null;
+
       ReferenceDocumentId = document.GetFingerprintGUID();
-      ReferenceUniqueId = reference.ConvertToPersistentRepresentation(document);
+      ReferenceUniqueId = reference?.ConvertToPersistentRepresentation(document) ?? string.Empty;
 
       _ReferenceDocument = document;
       _Reference = reference;
 
-      Document = reference.LinkedElementId == ARDB.ElementId.InvalidElementId ? _ReferenceDocument :
+      Document = reference is null ? document :
+        reference.LinkedElementId == ARDB.ElementId.InvalidElementId ?
+        _ReferenceDocument :
         _ReferenceDocument.GetElement<ARDB.RevitLinkInstance>(reference.ElementId)?.GetLinkDocument();
     }
 
@@ -312,6 +325,7 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE:
           return new GeometryFace(document, reference);
       }
+
       return null;
     }
 
@@ -395,6 +409,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
+        if (Id == ElementIdExtension.InvalidElementId) return "<None>";
         switch (Element.FromReference(ReferenceDocument, GetReference()))
         {
           case null: return $"Null {base.DisplayName}";
@@ -904,6 +919,19 @@ namespace RhinoInside.Revit.GH.Types
             target = (Q) (object) new GH_Mesh(m);
           }
           else target = default;
+          return true;
+        }
+      }
+      else if (ReferenceDocument is ARDB.Document referenceDocument && GetReference() is ARDB.Reference planeReference)
+      {
+        using (referenceDocument.RollBackScope())
+        using (referenceDocument.RollBackScope())
+        {
+          var sketchPlane = ARDB.SketchPlane.Create(referenceDocument, planeReference);
+          var plane = sketchPlane.GetPlane().ToPlane();
+          // The `ARDB.SketchPlane` is already in WCS
+          // if (HasTransform) plane.Transform(GeometryToWorldTransform);
+          target = (Q) (object) new GH_Plane(plane);
           return true;
         }
       }
