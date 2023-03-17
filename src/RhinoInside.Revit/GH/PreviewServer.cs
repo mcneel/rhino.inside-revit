@@ -201,7 +201,7 @@ namespace RhinoInside.Revit.GH
           uiDocument.Selection.SetElementIds(uiDocument.Selection.GetElementIds());
       }
 
-      var expireAllObjects = !e.Document.Objects.Cast<IGH_ActiveObject>().Any(x => x.Phase != GH_SolutionPhase.Computed);
+      var expireAllObjects = !e.Document.Objects.OfType<IGH_ActiveObject>().Any(x => x.Phase != GH_SolutionPhase.Computed);
       foreach (var node in PreviewNodes)
       {
         if
