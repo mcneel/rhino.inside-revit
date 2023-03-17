@@ -136,9 +136,14 @@ namespace RhinoInside.Revit.GH.Types
 
     public override ARDB.Reference GetReference()
     {
-      try { return ReferenceExtension.ParseFromPersistentRepresentation(ReferenceDocument, ReferenceUniqueId); }
-      catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
-      catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
+      if (ReferenceDocument is object)
+      {
+        try { return ReferenceExtension.ParseFromPersistentRepresentation(ReferenceDocument, ReferenceUniqueId); }
+        catch (FormatException) { return null; }
+      }
+
+      Debug.Assert(string.IsNullOrEmpty(ReferenceUniqueId));
+      return null;
     }
 
     static readonly ARDB.Transform IdentityTransform = ARDB.Transform.Identity;
