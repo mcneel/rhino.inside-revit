@@ -38,13 +38,13 @@
     <Compile Include="Components\Annotations\References.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Documents\ActiveDocument.cs" />
-    <Compile Include="Components\Documents\DocumentWarnings.cs" />
     <Compile Include="Components\Documents\DocumentIdentity.cs" />
+    <Compile Include="Components\Documents\DocumentSave.cs" />
     <Compile Include="Components\Documents\DocumentVersion.cs" />
+    <Compile Include="Components\Documents\DocumentWarnings.cs" />
     <Compile Include="Components\Documents\OpenDocuments.cs" />
     <Compile Include="Components\Documents\ProjectInformation.cs" />
     <Compile Include="Components\Documents\QueryRevitLinks.cs" />
-    <Compile Include="Components\Documents\SaveDocument.cs" />
     <Compile Include="Components\ElementType\Default.cs" />
     <Compile Include="Components\ElementType\Duplicate.cs" />
     <Compile Include="Components\ElementType\ExportImage.cs" />
