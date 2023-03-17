@@ -118,10 +118,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override void ResetValue()
     {
       (this as IGH_PreviewMeshData).DestroyPreviewMeshes();
-
-      _Reference = default;
-      _ReferenceDocument = default;
-
       base.ResetValue();
     }
 
