@@ -34,7 +34,12 @@
     <Compile Include="Components\Annotations\AddSpotElevation.cs" />
     <Compile Include="Components\Annotations\AddDetailItem.cs" />
     <Compile Include="Components\Annotations\AddText.cs" />
+    <Compile Include="Components\Annotations\Grids\AddGrid.cs" />
+    <Compile Include="Components\Annotations\Grids\QueryGrids.cs" />
     <Compile Include="Components\Annotations\Leaders.cs" />
+    <Compile Include="Components\Annotations\Levels\AddLevel.cs" />
+    <Compile Include="Components\Annotations\Levels\LevelIdentity.cs" />
+    <Compile Include="Components\Annotations\Levels\QueryLevels.cs" />
     <Compile Include="Components\Annotations\ReferenceElements\AddReferenceLine.cs" />
     <Compile Include="Components\Annotations\ReferenceElements\AddReferencePlane.cs" />
     <Compile Include="Components\Annotations\References.cs" />
@@ -95,7 +100,6 @@
     <Compile Include="Components\Element\DesignOption\Query.cs" />
     <Compile Include="Components\Element\Duplicate.cs" />
     <Compile Include="Components\Element\Geometry.cs" />
-    <Compile Include="Components\Element\Grid\QueryGrids.cs" />
     <Compile Include="Components\Element\HostObject\BoundaryProfile.cs" />
     <Compile Include="Components\Element\HostObject\ElementHost.cs" />
     <Compile Include="Components\Element\HostObject\Faces.cs" />
@@ -132,7 +136,6 @@
     <Compile Include="Components\Element\Opening\OpeningBoundaryProfile.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
     <Compile Include="Components\Element\Floor\ByOutline.cs" />
-    <Compile Include="Components\Element\Grid\ByCurve.cs" />
     <Compile Include="Components\Element\Level\ByElevation.cs" />
     <Compile Include="Components\Element\Material\ByColor.cs" />
     <Compile Include="Components\Element\Material\ByName.cs" />
