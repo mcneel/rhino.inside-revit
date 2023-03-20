@@ -39,6 +39,8 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_Goo
     public override bool CastTo<Q>(out Q target)
     {
+      if (base.CastTo<Q>(out target)) return true;
+
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.GeometryObject)))
       {
         target = (Q) (object) Value;
@@ -61,7 +63,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastTo(out target);
+      return false;
     }
     #endregion
 
@@ -422,13 +424,15 @@ namespace RhinoInside.Revit.GH.Types
     #region Casting
     public override bool CastTo<Q>(out Q target)
     {
+      if (base.CastTo(out target)) return true;
+
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.GeometryElement)))
       {
         target = (Q) (object) (IsValid ? Value : null);
         return true;
       }
 
-      return base.CastTo(out target);
+      return false;
     }
 
     public override bool CastFrom(object source)
@@ -589,6 +593,8 @@ namespace RhinoInside.Revit.GH.Types
     #region Casting
     public override bool CastTo<Q>(out Q target)
     {
+      if (base.CastTo(out target)) return true;
+
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Point)))
       {
         target = (Q) (object) (base.IsValid ? base.Value : null);
@@ -606,7 +612,7 @@ namespace RhinoInside.Revit.GH.Types
         return false;
       }
 
-      return base.CastTo(out target);
+      return false;
     }
     #endregion
   }
@@ -712,6 +718,8 @@ namespace RhinoInside.Revit.GH.Types
     #region Casting
     public override bool CastTo<Q>(out Q target)
     {
+      if (base.CastTo(out target)) return true;
+
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Curve)))
       {
         target = (Q) (object) (base.Value as ARDB.Curve);
@@ -752,7 +760,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return base.CastTo(out target);
+      return false;
     }
 
     public override bool CastFrom(object source)
@@ -878,6 +886,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(out Q target)
     {
+      if (base.CastTo(out target)) return true;
+
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Reference)))
       {
         target = (Q) (object) (IsValid ? GetReference() : null);
@@ -924,19 +934,22 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (ReferenceDocument is ARDB.Document referenceDocument && GetReference() is ARDB.Reference planeReference)
       {
-        using (referenceDocument.RollBackScope())
-        using (referenceDocument.RollBackScope())
+        if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
         {
-          var sketchPlane = ARDB.SketchPlane.Create(referenceDocument, planeReference);
-          var plane = sketchPlane.GetPlane().ToPlane();
-          // The `ARDB.SketchPlane` is already in WCS
-          // if (HasTransform) plane.Transform(GeometryToWorldTransform);
-          target = (Q) (object) new GH_Plane(plane);
-          return true;
+          using (referenceDocument.RollBackScope())
+          using (referenceDocument.RollBackScope())
+          {
+            var sketchPlane = ARDB.SketchPlane.Create(referenceDocument, planeReference);
+            var plane = sketchPlane.GetPlane().ToPlane();
+            // The `ARDB.SketchPlane` is already in WCS
+            // if (HasTransform) plane.Transform(GeometryToWorldTransform);
+            target = (Q) (object) new GH_Plane(plane);
+            return true;
+          }
         }
       }
 
-      return base.CastTo(out target);
+      return false;
     }
 
     public override bool CastFrom(object source)
