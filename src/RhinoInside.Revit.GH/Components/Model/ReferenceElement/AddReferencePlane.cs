@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   public class AddReferencePlane : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("4BE42EC7-5471-4448-8DD6-6F28F76BCB5F");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public AddReferencePlane() : base
     (
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       nickname: "Reference Plane",
       description: "Given a plane definition, it adds a Reference Plane to the current Revit document",
       category: "Revit",
-      subCategory: "Model"
+      subCategory: "Annotation"
     )
     { }
 

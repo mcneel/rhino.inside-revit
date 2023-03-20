@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   public class AddReferenceLine : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("A2ADB132-6956-423B-AAA4-315A8E6F234F");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public AddReferenceLine() : base
     (
@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       nickname: "Reference Line",
       description: "Given a curve, it adds a Reference Line to the provided Work Plane",
       category: "Revit",
-      subCategory: "Model"
+      subCategory: "Annotation"
     )
     { }
 

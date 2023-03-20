@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddSpotCoordinate : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("449b853b-423a-4007-ab6b-6f8e417a1175");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public AddSpotCoordinate() : base

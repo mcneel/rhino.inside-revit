@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Parameters
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Input
+namespace RhinoInside.Revit.GH.Components.Levels
 {
   public class ConstructLevelConstraint : Component
   {
