@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddLinearDimension : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("DF47C980-EF08-4BBE-A624-C956C07B04EC");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public AddLinearDimension() : base

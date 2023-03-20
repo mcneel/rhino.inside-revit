@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.ElementType>("Site Locations", "SL", "Site locations list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.SiteLocation>("Site Locations", "SL", "Site locations list", GH_ParamAccess.list)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

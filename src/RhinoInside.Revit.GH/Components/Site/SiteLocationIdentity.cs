@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.ElementType>("Site Location", "SL"),
+      ParamDefinition.Create<Parameters.SiteLocation>("Site Location", "SL"),
       ParamDefinition.Create<Param_String>("Place Name", "PN", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Number>("Time Zone", "TZ", "Hours ranging from -12 to +12. 0 represents GMT.", optional: true, relevance: ParamRelevance.Primary),
       new ParamDefinition
@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.ElementType>("Site Location", "SL", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.SiteLocation>("Site Location", "SL", relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Param_Number>("Elevation", "E", "The elevation of the site location", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_String>("Weather Station", "WS", "The name of the weather station at the site location", relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Place Name", "PN", "The place name of the site", relevance: ParamRelevance.Primary),

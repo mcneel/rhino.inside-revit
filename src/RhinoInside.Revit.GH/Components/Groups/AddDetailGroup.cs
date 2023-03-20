@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
   public class AddDetailGroup : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("CC7790A0-1BD7-4DA6-ABB5-CE0BB553381E");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => string.Empty;
 
     public AddDetailGroup() : base

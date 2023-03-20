@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddAngularDimension : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("0DBE67E7-7D8E-41F9-85B0-139C0B7F1745");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public AddAngularDimension() : base

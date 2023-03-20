@@ -139,7 +139,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   public class DirectShapeByGeometry : ReconstructDirectShapeComponent
   {
     public override Guid ComponentGuid => new Guid("0BFBDA45-49CC-4AC6-8D6D-ECD2CFED062A");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeByGeometry() : base
     (
@@ -200,7 +200,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   public class DirectShapeTypeByGeometry : ReconstructDirectShapeComponent
   {
     public override Guid ComponentGuid => new Guid("25DCFE8E-5BE9-460C-80E8-51B7041D8FED");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeTypeByGeometry() : base
     (
@@ -259,7 +259,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   public class DirectShapeByLocation : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("A811EFA4-8DE2-46F3-9F88-3D4F13FE40BE");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeByLocation() : base
     (

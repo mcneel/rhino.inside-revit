@@ -16,6 +16,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   public class SlabShape : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("516B2771-0A9A-4F87-9DB1-E27FE0FA968B");
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
 
     public SlabShape() : base
     (
