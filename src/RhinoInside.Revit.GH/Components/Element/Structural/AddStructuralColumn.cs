@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddStructuralColumn : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("47B560AC-1E1D-4576-9F17-BCCF612974D8");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public AddStructuralColumn() : base
     (

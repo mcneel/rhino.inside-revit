@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   public class AddWorkPlaneByPlane : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("1FA679E4-1821-483A-99F8-DC166B0595F4");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public AddWorkPlaneByPlane() : base
     (
@@ -117,7 +117,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   public class AddWorkPlaneByFace : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("91757AE0-BFCB-43C3-B762-7C06A7A5D094");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public AddWorkPlaneByFace() : base
     (

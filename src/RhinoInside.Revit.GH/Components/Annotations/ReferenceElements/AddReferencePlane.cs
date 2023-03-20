@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.ReferenceElements
   public class AddReferencePlane : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("4BE42EC7-5471-4448-8DD6-6F28F76BCB5F");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public AddReferencePlane() : base
     (
