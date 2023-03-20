@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       nickname: "New",
       description: "Creates a new Family from a template.",
       category: "Revit",
-      subCategory: "Family"
+      subCategory: "Component"
     )
     { }
 

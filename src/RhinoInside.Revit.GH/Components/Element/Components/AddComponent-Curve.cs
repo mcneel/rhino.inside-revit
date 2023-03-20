@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddComponentCurve : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("5A6D9A20-B05F-4CAF-AB75-500CEE23B7CD");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "C";
 
     public AddComponentCurve() : base
@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "C-Component",
       description: "Given a Curve, it adds a curve based component to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Component"
     )
     { }
 

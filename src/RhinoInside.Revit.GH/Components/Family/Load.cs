@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       nickname: "Load",
       description: "Loads a family into the document",
       category: "Revit",
-      subCategory: "Family"
+      subCategory: "Component"
     )
     { }
 

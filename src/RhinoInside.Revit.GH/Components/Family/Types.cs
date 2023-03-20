@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components.Families
   public class FamilyTypes : Component
   {
     public override Guid ComponentGuid => new Guid("742836D7-01C4-485A-BFA8-6CDA3F121F7B");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "T";
 
     public FamilyTypes() : base
@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       nickname: "Types",
       description: "Obtains a set of types that are owned by Family",
       category: "Revit",
-      subCategory: "Family"
+      subCategory: "Type"
     )
     { }
 

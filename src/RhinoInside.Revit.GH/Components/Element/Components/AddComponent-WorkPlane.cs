@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddComponentWorkPlane : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("08586F77-2844-4C0A-925A-200A091CF707");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public AddComponentWorkPlane() : base
     (
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "WP-Component",
       description: "Given a Work Plane, it adds a work plane-based component to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Component"
     )
     { }
 
