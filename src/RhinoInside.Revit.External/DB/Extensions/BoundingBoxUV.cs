@@ -14,14 +14,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static BoundingBoxUV Empty => new BoundingBoxUV
     (
-      double.PositiveInfinity, double.PositiveInfinity,
-      double.NegativeInfinity, double.NegativeInfinity
+      UVExtension.MaxValue.U, UVExtension.MaxValue.V,
+      UVExtension.MinValue.U, UVExtension.MinValue.V
     );
 
-    public static BoundingBoxUV All => new BoundingBoxUV
+    public static BoundingBoxUV Universe => new BoundingBoxUV
     (
-      double.NegativeInfinity, double.NegativeInfinity,
-      double.PositiveInfinity, double.PositiveInfinity
+      UVExtension.MinValue.U, UVExtension.MinValue.V,
+      UVExtension.MaxValue.U, UVExtension.MaxValue.V
     );
 
     public static bool IsEmpty(this BoundingBoxUV value)
