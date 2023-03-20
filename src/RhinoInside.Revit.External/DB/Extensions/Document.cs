@@ -1281,7 +1281,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static FamilySymbol EnsureWorkPlaneBasedSymbol(this Document document)
     {
-      if (GetWorkPlaneBasedSymbol(document) is var symbol)
+      if (GetWorkPlaneBasedSymbol(document) is FamilySymbol symbol)
       {
         if(symbol.Family.FamilyCategoryId.ToBuiltInCategory() != BuiltInCategory.OST_GenericModel)
           symbol.Family.FamilyCategoryId = new ElementId(BuiltInCategory.OST_GenericModel);
