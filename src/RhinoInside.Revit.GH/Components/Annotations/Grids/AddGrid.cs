@@ -6,19 +6,19 @@ using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components.Grids
+namespace RhinoInside.Revit.GH.Components.Annotations.Grids
 {
   using Convert.Geometry;
   using External.DB.Extensions;
   using GH.Exceptions;
 
   [ComponentVersion(introduced: "1.0", updated: "1.6")]
-  public class GridByCurve : ElementTrackerComponent
+  public class AddGrid : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("CEC2B3DF-C6BA-414F-BECE-E3DAEE2A3F2C");
     public override GH_Exposure Exposure => GH_Exposure.primary;
 
-    public GridByCurve() : base
+    public AddGrid() : base
     (
       name: "Add Grid",
       nickname: "Grid",

@@ -5,7 +5,7 @@ using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components.ModelElements
+namespace RhinoInside.Revit.GH.Components.Annotations.ReferenceElements
 {
   using External.DB.Extensions;
   using Convert.Geometry;

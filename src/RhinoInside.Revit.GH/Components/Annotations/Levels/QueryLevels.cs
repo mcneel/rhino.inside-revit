@@ -5,18 +5,17 @@ using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Levels
+namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 {
-  using Convert.Geometry;
   using External.DB.Extensions;
 
-  public class DocumentLevels : ElementCollectorComponent
+  public class QueryLevels : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("87715CAF-92A9-4B14-99E5-F8CCB2CC19BD");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.Level));
 
-    public DocumentLevels() : base
+    public QueryLevels() : base
     (
       name: "Query Levels",
       nickname: "Levels",

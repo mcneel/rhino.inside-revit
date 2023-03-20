@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components.Levels
+namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 {
   [ComponentVersion(introduced: "1.0", updated: "1.9")]
   public class LevelIdentity : TransactionalChainComponent

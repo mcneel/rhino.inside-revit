@@ -3,17 +3,17 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Levels
+namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 {
   using External.DB.Extensions;
   using RhinoInside.Revit.Convert.Geometry;
 
-  public class LevelByElevation : ElementTrackerComponent
+  public class AddLevel : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("C6DEC111-EAC6-4047-8618-28EE144D55C5");
     public override GH_Exposure Exposure => GH_Exposure.primary;
 
-    public LevelByElevation() : base
+    public AddLevel() : base
     (
       name: "Add Level",
       nickname: "Level",
