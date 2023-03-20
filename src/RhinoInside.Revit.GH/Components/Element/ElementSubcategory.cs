@@ -1,7 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 
-namespace RhinoInside.Revit.GH.Components.ModelElements
+namespace RhinoInside.Revit.GH.Components.Elements
 {
   [ComponentVersion(introduced: "1.8")]
   public class ElementSubcategory : TransactionalChainComponent
