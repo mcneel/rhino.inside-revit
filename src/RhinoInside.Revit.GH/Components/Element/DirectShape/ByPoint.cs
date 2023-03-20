@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   public class DirectShapeByPoint : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("7A889B89-C423-4ED8-91D9-5CECE1EE803D");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public DirectShapeByPoint() : base
     (

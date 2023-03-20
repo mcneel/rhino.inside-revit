@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "CloudPts",
       description: "Query Point Cloud points and colours.",
       category: "Revit",
-      subCategory: "Model"
+      subCategory: "Site"
     )
     { }
 
