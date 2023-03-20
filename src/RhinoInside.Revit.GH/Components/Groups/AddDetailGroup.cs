@@ -15,13 +15,13 @@ namespace RhinoInside.Revit.GH.Components.Groups
   public class AddDetailGroup : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("CC7790A0-1BD7-4DA6-ABB5-CE0BB553381E");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public AddDetailGroup() : base
     (
       name: "Add Detail Group",
-      nickname: "DetGroup",
+      nickname: "D-Group",
       description: "Given its Location, it adds a detail group element to the active Revit document",
       category: "Revit",
       subCategory: "Annotation"

@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     public AddModelLine() : base
     (
       name: "Add Model Line",
-      nickname: "Model Line",
+      nickname: "M-Line",
       description: "Given a curve, it adds a Model Line to the the provided Work Plane",
       category: "Revit",
       subCategory: "Model"
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         new Param_Curve()
         {
           Name = "Curve",
-          NickName = "Curve",
+          NickName = "C",
           Description = "Curve to sketch",
         }
       ),

@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
     public GroupByLocation() : base
     (
       name: "Add Model Group",
-      nickname: "ModelGroup",
+      nickname: "M-Group",
       description: "Given its location, it reconstructs a Model Group into the active Revit document",
       category: "Revit",
       subCategory: "Model"

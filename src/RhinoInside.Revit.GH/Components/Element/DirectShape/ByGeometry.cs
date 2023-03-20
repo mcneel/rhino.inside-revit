@@ -144,7 +144,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     public DirectShapeByGeometry() : base
     (
       name: "Add Geometry DirectShape",
-      nickname: "GeoDShape",
+      nickname: "G-Shape",
       description: "Given its Geometry, it adds a DirectShape element to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"
@@ -205,7 +205,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     public DirectShapeTypeByGeometry() : base
     (
       name: "Add DirectShape Type",
-      nickname: "DShapeTyp",
+      nickname: "D-ShapeType",
       description: "Given its Geometry, it reconstructs a DirectShape Type to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"
@@ -264,7 +264,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     public DirectShapeByLocation() : base
     (
       name: "Add DirectShape",
-      nickname: "DShape",
+      nickname: "D-Shape",
       description: "Given its location, it reconstructs a DirectShape into the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"

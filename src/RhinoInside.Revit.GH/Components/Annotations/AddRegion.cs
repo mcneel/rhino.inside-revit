@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddRegion : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("AD88CF11-1946-4429-8F4D-172E3F9B866F");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public AddRegion() : base

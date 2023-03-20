@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     public DirectShapeByBrep() : base
     (
       name: "Add Brep DirectShape",
-      nickname: "BrpDShape",
+      nickname: "B-Shape",
       description: "Given a Brep, it adds a Brep shape to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"

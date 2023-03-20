@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     public DirectShapeByPoint() : base
     (
       name: "Add Point DirectShape",
-      nickname: "PtDShape",
+      nickname: "P-Shape",
       description: "Given a Point, it adds a Point shape to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"

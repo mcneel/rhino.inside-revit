@@ -14,13 +14,13 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddSpotCoordinate : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("449b853b-423a-4007-ab6b-6f8e417a1175");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => string.Empty;
 
     public AddSpotCoordinate() : base
     (
       name: "Add Spot Coordinate",
-      nickname: "SpotCoor",
+      nickname: "C-Spot",
       description: "Given a point, it adds a spot coordinate to the given View",
       category: "Revit",
       subCategory: "Annotation"

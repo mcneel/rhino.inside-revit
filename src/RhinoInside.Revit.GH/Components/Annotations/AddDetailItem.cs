@@ -13,13 +13,13 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddDetailItem : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("FE258116-9184-41C9-8554-30BFFCC0E640");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public AddDetailItem() : base
     (
       name: "Add Detail Item",
-      nickname: "DetItem",
+      nickname: "D-Item",
       description: "Given its Location, it adds a detail item element to the active Revit document",
       category: "Revit",
       subCategory: "Annotation"

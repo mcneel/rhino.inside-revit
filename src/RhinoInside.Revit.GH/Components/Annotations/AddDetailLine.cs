@@ -12,13 +12,13 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddDetailLine : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("5A94EA62-3C27-4E48-B885-C98218264981");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public AddDetailLine() : base
     (
       name: "Add Detail Line",
-      nickname: "DetailLine",
+      nickname: "D-Line",
       description: "Given a Curve, it adds a detail line to the given View",
       category: "Revit",
       subCategory: "Annotation"
@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         new Parameters.CurveElement()
         {
           Name = _DetailLine_,
-          NickName = _DetailLine_.Substring(0, 1),
+          NickName = "DL",
           Description = $"Output {_DetailLine_}"
         }
       )

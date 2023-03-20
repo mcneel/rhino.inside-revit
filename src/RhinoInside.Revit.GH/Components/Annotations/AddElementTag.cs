@@ -214,7 +214,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddElementTagByCategory() : base
     (
       name: "Tag By Category",
-      nickname: "TagCategory",
+      nickname: "C-Tag",
       description: "Given a point, it adds an category tag to the given View",
       category: "Revit",
       subCategory: "Annotation"
@@ -234,7 +234,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddElementTagByMutliCategory() : base
     (
       name: "Multi-Category Tag",
-      nickname: "TagMultiCat",
+      nickname: "MC-Tag",
       description: "Given a point, it adds an multi-category tag to the given View",
       category: "Revit",
       subCategory: "Annotation"
@@ -254,7 +254,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddElementTagByMaterial() : base
     (
       name: "Material Tag",
-      nickname: "TagMaterial",
+      nickname: "M-Tag",
       description: "Given a point, it adds an material tag to the given View",
       category: "Revit",
       subCategory: "Annotation"
