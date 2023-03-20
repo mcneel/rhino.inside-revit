@@ -35,6 +35,8 @@
     <Compile Include="Components\Annotations\AddDetailItem.cs" />
     <Compile Include="Components\Annotations\AddText.cs" />
     <Compile Include="Components\Annotations\Leaders.cs" />
+    <Compile Include="Components\Annotations\ReferenceElements\AddReferenceLine.cs" />
+    <Compile Include="Components\Annotations\ReferenceElements\AddReferencePlane.cs" />
     <Compile Include="Components\Annotations\References.cs" />
     <Compile Include="Components\Component.cs" />
     <Compile Include="Components\Documents\ActiveDocument.cs" />
@@ -206,8 +208,6 @@
     <Compile Include="Components\Model\AddModelLine.cs" />
     <Compile Include="Components\Model\AddWorkPlane.cs" />
     <Compile Include="Components\Model\ElementSubcategory.cs" />
-    <Compile Include="Components\Model\ReferenceElement\AddReferenceLine.cs" />
-    <Compile Include="Components\Model\ReferenceElement\AddReferencePlane.cs" />
     <Compile Include="Components\Model\SketchDeconstruct.cs" />
     <Compile Include="Components\ObjectStyles\AddSubCategory.cs" />
     <Compile Include="Components\ObjectStyles\CategoryGraphicsStyle.cs" />
