@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   public class AnalyzeWall : Component
   {
     public override Guid ComponentGuid => new Guid("1169CEB6-381C-4353-8ACE-874938755694");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
     protected override string IconTag => "AW";
 
     public AnalyzeWall() : base
@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "A-W",
       description: "Analyze given Wall element",
       category: "Revit",
-      subCategory: "Wall"
+      subCategory: "Host"
     )
     { }
 

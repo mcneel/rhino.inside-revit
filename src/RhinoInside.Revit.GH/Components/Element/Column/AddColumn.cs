@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "Column",
       description: "Given its Location, it adds a column element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Host"
     )
     { }
 

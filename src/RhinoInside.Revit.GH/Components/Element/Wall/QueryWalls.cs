@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   public class QueryWalls : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("118F5744-292F-4BEC-9213-8073219D8563");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     protected override string IconTag => "W";
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.Wall));
 
@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "Walls",
       description: "Get all document walls",
       category: "Revit",
-      subCategory: "Wall"
+      subCategory: "Host"
     )
     { }
 

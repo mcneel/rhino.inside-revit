@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "Ceiling",
       description: "Given its outline curve, it adds a Ceiling element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Host"
     )
     { }
 

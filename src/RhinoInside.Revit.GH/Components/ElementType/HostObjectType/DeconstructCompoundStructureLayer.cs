@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   public class DeconstructCompoundStructureLayer : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("6B32703E-A8B4-49C9-B855-133D3DF925FE");
-    public override GH_Exposure Exposure => GH_Exposure.senary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "CSL";
 
     public DeconstructCompoundStructureLayer() : base

@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "S-Column",
       description: "Given its Axis, it adds a structural column element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Structure"
     )
     { }
 

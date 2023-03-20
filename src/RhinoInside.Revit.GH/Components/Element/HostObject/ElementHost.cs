@@ -11,6 +11,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   public class ElementHost : Component
   {
     public override Guid ComponentGuid => new Guid("6723BEB1-DD99-40BE-8DA9-13B3812D6B46");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public ElementHost() : base
     (

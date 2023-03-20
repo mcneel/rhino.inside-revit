@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "S-Foundation",
       description: "Given its Location, it adds a structural foundation element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Structure"
     )
     { }
 

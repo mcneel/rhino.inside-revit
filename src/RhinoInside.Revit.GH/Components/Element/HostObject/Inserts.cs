@@ -10,6 +10,8 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   public class HostObjectInserts : Component
   {
     public override Guid ComponentGuid => new Guid("70CCF7A6-856C-4D24-A82B-BC1D4FC63078");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
     protected override string IconTag => "I";
 
     public HostObjectInserts() : base

@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
   public class AddVerticalOpening : AddOpening
   {
     public override Guid ComponentGuid => new Guid("C9C0F4D2-B75E-42C8-A98F-909DF4AB4A1A");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public AddVerticalOpening() : base

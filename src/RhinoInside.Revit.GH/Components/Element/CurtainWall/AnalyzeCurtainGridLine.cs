@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   public class AnalyzeCurtainGridLine : Component
   {
     public override Guid ComponentGuid => new Guid("FACE5E7D-174F-41DA-853E-CDC4B094F57C");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => "DCL";
 
     public AnalyzeCurtainGridLine() : base
