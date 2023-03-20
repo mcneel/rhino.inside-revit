@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     public AddWorkPlaneByPlane() : base
     (
       name: "Add Work Plane (Plane)",
-      nickname: "WorkPlane",
+      nickname: "W-Plane",
       description: "Given a Plane, it adds a <not associated> Work Plane element to the active Revit document",
       category: "Revit",
       subCategory: "Model"
@@ -122,7 +122,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     public AddWorkPlaneByFace() : base
     (
       name: "Add Work Plane (Face)",
-      nickname: "WorkPlane",
+      nickname: "W-Plane",
       description: "Given a Face, it adds a Work Plane element to the active Revit document",
       category: "Revit",
       subCategory: "Model"

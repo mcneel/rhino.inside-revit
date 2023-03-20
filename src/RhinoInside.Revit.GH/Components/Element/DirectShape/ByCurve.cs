@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     public DirectShapeByCurve() : base
     (
       name: "Add Curve DirectShape",
-      nickname: "CrvDShape",
+      nickname: "C-Shape",
       description: "Given a Curve, it adds a Curve shape to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"

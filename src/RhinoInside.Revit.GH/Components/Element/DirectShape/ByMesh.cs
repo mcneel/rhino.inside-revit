@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     public DirectShapeByMesh() : base
     (
       name: "Add Mesh DirectShape",
-      nickname: "MshDShape",
+      nickname: "M-Shape",
       description: "Given a Mesh, it adds a Mesh shape to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"

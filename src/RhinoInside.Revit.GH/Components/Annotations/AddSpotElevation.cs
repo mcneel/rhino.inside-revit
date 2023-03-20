@@ -14,13 +14,13 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddSpotElevation : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("00c729f1-75be-4b13-8ab5-aefa4462f335");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => string.Empty;
 
     public AddSpotElevation() : base
     (
       name: "Add Spot Elevation",
-      nickname: "SpotEle",
+      nickname: "E-Spot",
       description: "Given a point, it adds a spot elevation to the given View",
       category: "Revit",
       subCategory: "Annotation"

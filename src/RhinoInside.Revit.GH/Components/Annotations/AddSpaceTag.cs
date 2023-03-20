@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddSpaceTag() : base
     (
       name: "Tag Space",
-      nickname: "TagSpace",
+      nickname: "S-Tag",
       description: "Given a point, it adds an space tag to the given view",
       category: "Revit",
       subCategory: "Annotation"
