@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components.Site
   public class QuerySiteLocations : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("9C352309-F20B-4C9B-AF46-3783D1106CDF");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "⌖";
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.SiteLocation));
 

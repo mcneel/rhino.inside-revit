@@ -5,7 +5,7 @@ using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components.ModelElements
+namespace RhinoInside.Revit.GH.Components.Annotations.ReferenceElements
 {
   using External.DB.Extensions;
   using Convert.Geometry;
@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   public class AddReferencePlane : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("4BE42EC7-5471-4448-8DD6-6F28F76BCB5F");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public AddReferencePlane() : base
     (

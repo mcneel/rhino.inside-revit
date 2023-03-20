@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       nickname: "Form",
       description: "Given its Geometry, it adds a Form element to the active Revit document",
       category: "Revit",
-      subCategory: "Family"
+      subCategory: "Component"
     )
     { }
 

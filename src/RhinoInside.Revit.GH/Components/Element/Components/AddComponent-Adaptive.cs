@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddComponentAdaptive : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("E8DDC0E4-97E9-4659-9945-E8C77114273D");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public AddComponentAdaptive() : base
     (
@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "A-Component",
       description: "Given a collection of Points, it adds an adaptive component element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Component"
     )
     { }
 

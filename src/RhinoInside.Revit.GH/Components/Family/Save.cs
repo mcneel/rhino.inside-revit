@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       nickname: "Save",
       description: "Saves the Family to a given file path.",
       category: "Revit",
-      subCategory: "Family"
+      subCategory: "Component"
     )
     { }
 

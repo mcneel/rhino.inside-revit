@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       nickname: "Deconstruct Visibility",
       description: string.Empty,
       category: "Revit",
-      subCategory: "Family"
+      subCategory: "Component"
     )
     { }
 

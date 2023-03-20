@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddComponentLocation : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("0C642D7D-897B-479E-8668-91E09222D7B9");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public AddComponentLocation() : base
     (
@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "L-Component",
       description: "Given its Location, it adds a component element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Component"
     )
     { }
 
