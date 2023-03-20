@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
   public class AddWallOpening : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("C86ED84C-2431-4E4F-A890-E5EFFED43BE2");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public AddWallOpening() : base
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
       nickname: "WallOpen",
       description: "Given a host wall, it adds an opening to the active Revit document",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   public class HostObjectTypeCompoundStructure : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("08CB62F1-68CB-4FD3-971C-25B0C82AC25A");
-    public override GH_Exposure Exposure => GH_Exposure.senary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "CS";
 
     public HostObjectTypeCompoundStructure() : base
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "CompStruct",
       description: "Get-Set host type compound structure",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 
@@ -114,7 +114,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects.Obsolete
       nickname: "CompStruct",
       description: "Get host object type compound structure",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

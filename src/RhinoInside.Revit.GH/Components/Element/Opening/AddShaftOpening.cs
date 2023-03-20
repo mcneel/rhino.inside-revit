@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
   public class AddShaftOpening : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("657811B7-6662-4FCF-A67A-A65C34FA0651");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public AddShaftOpening() : base
@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
       nickname: "Shaft",
       description: "Given its outline boundary, it adds a Shaft opening to the active Revit document",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

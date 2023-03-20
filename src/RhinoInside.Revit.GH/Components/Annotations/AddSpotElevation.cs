@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "E-Spot",
       description: "Given a point, it adds a spot elevation to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 

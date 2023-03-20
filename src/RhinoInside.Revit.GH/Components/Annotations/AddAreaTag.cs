@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "A-Tag",
       description: "Given a point, it adds an area tag to the given Area Plan",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 

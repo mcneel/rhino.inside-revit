@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Views
   public class Default3DView : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("F2277265-8845-403B-83A9-EF670FA036C8");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "3D";
 
     public Default3DView() : base

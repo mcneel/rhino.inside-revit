@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "Railing",
       description: "Given a curve, it adds a Railing element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Architecture"
     )
     { }
 

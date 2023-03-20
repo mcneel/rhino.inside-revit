@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "D-Group",
       description: "Given its Location, it adds a detail group element to the active Revit document",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 

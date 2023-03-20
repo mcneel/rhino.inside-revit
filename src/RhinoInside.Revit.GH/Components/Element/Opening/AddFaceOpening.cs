@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
       nickname: "FaceOpen",
       description: "Given its outline boundary and a host element, it adds an opening to the active Revit document",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

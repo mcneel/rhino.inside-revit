@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "D-Item",
       description: "Given its Location, it adds a detail item element to the active Revit document",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 

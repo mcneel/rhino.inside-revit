@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "Region",
       description: "Given a profile, it adds a region to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 

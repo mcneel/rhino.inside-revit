@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   public class AnalyzeCurtainSystemType : Component
   {
     public override Guid ComponentGuid => new Guid("83D08B81-B536-4A14-9E2D-F75E9652A824");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
     protected override string IconTag => "ACST";
 
     public AnalyzeCurtainSystemType() : base
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "A-CST",
       description: "Analyze given Curtain System Type",
       category: "Revit",
-      subCategory: "Wall"
+      subCategory: "Architecture"
     )
     { }
 

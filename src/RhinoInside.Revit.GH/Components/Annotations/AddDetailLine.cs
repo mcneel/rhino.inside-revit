@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "D-Line",
       description: "Given a Curve, it adds a detail line to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
