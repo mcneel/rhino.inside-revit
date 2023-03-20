@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
@@ -23,10 +25,10 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
 
     #region UI
-    //protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
-    //(
-    //  new string[] { "View", }
-    //);
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "View", }
+    );
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu) { }
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
