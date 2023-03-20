@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "A-PT",
       description: "Analyze given panel type",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

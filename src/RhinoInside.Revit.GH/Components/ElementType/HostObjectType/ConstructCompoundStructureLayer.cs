@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "CStructLayer",
       description: "Construct compound structure layer",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

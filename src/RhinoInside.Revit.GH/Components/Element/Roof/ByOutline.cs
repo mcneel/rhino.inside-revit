@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "Roof",
       description: "Given its outline curve, it adds a Roof element to the active Revit document",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

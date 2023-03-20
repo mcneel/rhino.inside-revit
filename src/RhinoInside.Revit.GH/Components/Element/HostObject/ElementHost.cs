@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "Host",
       description: "Obtains the host of the specified element",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

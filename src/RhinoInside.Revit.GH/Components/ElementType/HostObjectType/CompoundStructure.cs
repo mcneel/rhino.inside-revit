@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "CompStruct",
       description: "Get-Set host type compound structure",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 
@@ -114,7 +114,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects.Obsolete
       nickname: "CompStruct",
       description: "Get host object type compound structure",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

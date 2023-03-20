@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "Faces",
       description: "Obtains the faces of a Host element",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

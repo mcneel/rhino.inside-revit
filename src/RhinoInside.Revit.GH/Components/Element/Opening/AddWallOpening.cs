@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
       nickname: "WallOpen",
       description: "Given a host wall, it adds an opening to the active Revit document",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

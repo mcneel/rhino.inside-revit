@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "SubElems",
       description: "Manipulates points and edges on a slab, roof or floor.",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

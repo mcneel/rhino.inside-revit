@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "HostGrids",
       description: "Obtains the curtain grids of the specified host element",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

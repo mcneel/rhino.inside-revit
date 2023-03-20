@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
       nickname: "OpeningBoundProf",
       description: "Get the boundary profile of the given opening",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

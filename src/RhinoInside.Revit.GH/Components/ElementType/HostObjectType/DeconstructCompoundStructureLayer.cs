@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "DStructLayer",
       description: "Deconstruct compound structure layer",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 
@@ -150,7 +150,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects.Obsolete
       nickname: "DecStructLayer",
       description: "Deconstructs given compound structure layer into its properties",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

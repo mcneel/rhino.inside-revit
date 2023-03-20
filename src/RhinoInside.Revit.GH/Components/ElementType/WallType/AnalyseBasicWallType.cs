@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "A-BWT",
       description: "Analyze given Basic Wall type",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     {
     }

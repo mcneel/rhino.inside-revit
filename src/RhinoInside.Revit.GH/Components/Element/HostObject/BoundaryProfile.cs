@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "BoundProf",
       description: "Get the boundary profile of the given host element",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "A-CST",
       description: "Analyze given Curtain System Type",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

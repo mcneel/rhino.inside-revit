@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "A-CC",
       description: "Deconstruct given curtain grid cell in to geometry",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

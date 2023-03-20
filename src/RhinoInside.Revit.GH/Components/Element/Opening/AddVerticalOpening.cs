@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
       nickname: "VerticalOpen",
       description: "Given its outline boundary and a host element, it adds a vertical opening to the active Revit document",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

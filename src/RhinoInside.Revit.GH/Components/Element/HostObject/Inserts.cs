@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "Inserts",
       description: "Obtains a set of types that are owned by Family",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

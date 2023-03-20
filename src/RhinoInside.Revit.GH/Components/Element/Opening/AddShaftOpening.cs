@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
       nickname: "Shaft",
       description: "Given its outline boundary, it adds a Shaft opening to the active Revit document",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

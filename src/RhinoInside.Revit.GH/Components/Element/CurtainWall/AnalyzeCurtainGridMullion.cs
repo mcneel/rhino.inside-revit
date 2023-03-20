@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "A-M",
       description: "Analyze given mullion element",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

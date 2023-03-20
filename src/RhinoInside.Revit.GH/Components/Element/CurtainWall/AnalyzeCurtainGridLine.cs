@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "D-CL",
       description: "Deconstruct given curtain grid line",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

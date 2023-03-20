@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "Walls",
       description: "Get all document walls",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

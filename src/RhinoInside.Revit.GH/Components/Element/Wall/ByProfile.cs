@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "WallPrfl",
       description: "Given a base curve and profile curves, it adds a Wall element to the active Revit document",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "A-W",
       description: "Analyze given Wall element",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "A-WLC",
       description: "Analyze location curve of given wall instance",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 
