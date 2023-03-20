@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.GraphicalElement>("Shared Sites", "SS", "Shared sites list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Sites", "SS", "Shared sites list", GH_ParamAccess.list)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
