@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           NickName = "T",
           Optional = true,
           FileFilter = "Family Template Files (*.rft)|*.rft"
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -677,8 +677,15 @@ namespace RhinoInside.Revit.GH.Components.Families
       var templatePath = string.Empty;
       if (!doc.TryGetFamily(name, out var family, categoryId))
       {
+        var useTemplate = categoryId?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Mass;
+        if (!useTemplate)
+        {
+          if (doc.IsFamilyDocument && doc.OwnerFamily.FamilyPlacementType == ARDB.FamilyPlacementType.ViewBased)
+            useTemplate = true;
+        }
+        
         if (!Params.TryGetData(DA, "Template", out templatePath)) return;
-        if (templatePath is object || categoryId?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Mass)
+        if (templatePath is object || useTemplate)
         {
           templatePath = templatePath ?? GetDefaultTemplatePath(doc, categoryId);
 
