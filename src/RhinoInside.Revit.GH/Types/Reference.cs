@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Types
         if (IsReferencedData)
         {
           if (IsReferencedDataLoaded)
-            Invalid = Id.IsBuiltInId() ? "⚠ Unknown" : "❌ Deleted ";
+            Invalid = Id.IsBuiltInId() ? "⚠ Unknown " : "❌ Deleted ";
           else
             Invalid = "⚠ Unresolved ";
         }
