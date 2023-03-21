@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           NickName = "SC",
           Description = "Element Subcategory",
           Optional = true
-        },ParamRelevance.Secondary
+        },ParamRelevance.Primary
       ),
     };
 
