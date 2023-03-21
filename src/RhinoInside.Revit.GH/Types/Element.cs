@@ -548,7 +548,7 @@ namespace RhinoInside.Revit.GH.Types
       );
     }
 
-    protected T GetElement<T>(ARDB.ElementId elementId) where T : Element
+    protected internal T GetElement<T>(ARDB.ElementId elementId) where T : Element
     {
       if (elementId.IsValid())
       {

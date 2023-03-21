@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     (
       name: "Add Elevation Marker",
       nickname: "ElevMark",
-      description: "Given a name, it adds a section view to the active Revit document",
+      description: "Given a name, it adds a elevation marker to the active Revit document",
       category: "Revit",
       subCategory: "View"
     )

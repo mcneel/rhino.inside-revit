@@ -20,8 +20,8 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
     public SlabShape() : base
     (
-      name: "Host Sub Elements",
-      nickname: "SubElems",
+      name: "Host Shape",
+      nickname: "H-Shape",
       description: "Manipulates points and edges on a slab, roof or floor.",
       category: "Revit",
       subCategory: "Architecture"
