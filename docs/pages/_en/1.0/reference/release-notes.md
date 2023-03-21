@@ -12,6 +12,19 @@ group: Deployment & Configs
 
 ### RC
 
+- Renamed 'Annotation' panel to 'Annotate'.
+- Merged 'Build', 'Host' and 'Wall' panel under a new 'Architecture' panel.
+- Moved structural element creation components to 'Structure' panel.
+- Moved Component Family related components to 'Component' panel.
+- Renamed 'Host Inserts' component to 'Hosted Elements'.
+- Now 'Hosted Elements' keep linked elements on linked documents.
+- Fixd a bug on 'Add Region' component 'Line Style' input when used on a Family document. #788
+- Fixed a bug on previews when there are Groups on the canvas.
+- Now 'Save Component Family' traits relative paths as temporary.
+- Now 'Save Component Family' has a 'Path' output to allow chaining with 'Load Component Family'.
+- Now 'New Component Family' creates a Work Plane-Based family when no template is provided.
+- Added 'Offset from Host' parameters to work plane-based components.
+
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
