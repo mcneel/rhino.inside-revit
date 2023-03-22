@@ -12,6 +12,11 @@ group: Deployment & Configs
 
 ### RC
 
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.13 RC4" version="v" pre_release=true time="03/21/2023" %}
+
 - Renamed 'Annotation' panel to 'Annotate'.
 - Merged 'Build', 'Host' and 'Wall' panel under a new 'Architecture' panel.
 - Moved structural element creation components to 'Structure' panel.
@@ -24,9 +29,6 @@ group: Deployment & Configs
 - Now 'Save Component Family' has a 'Path' output to allow chaining with 'Load Component Family'.
 - Now 'New Component Family' creates a Work Plane-Based family when no template is provided.
 - Added 'Offset from Host' parameters to work plane-based components.
-
-{% endcapture %}
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 {% include ltr/release-header.html title="v1.13 RC3" version="v1.13.8474.22250" pre_release=true time="03/15/2023" %}
 
