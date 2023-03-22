@@ -11,7 +11,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Elements
 {
   [ComponentVersion(introduced: "1.13")]
-  public class ElementVisibility : TransactionalChainComponent
+  public class ElementVisibility : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("8ED1490F-DA5D-40FA-8612-4F4B166ECE52");
     public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     (
       name: "Element Visibility",
       nickname: "Visibility",
-      description: "Get-Set element visibility on the specified View",
+      description: "Check element visibility on a given View",
       category: "Revit",
       subCategory: "Element"
     )
@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access Visibility state",
+          Description = "Element to access Visibility status",
           Access = GH_ParamAccess.list
         }
       ),
@@ -46,20 +46,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "View",
           NickName = "V",
-          Description = "View to query element visibility",
+          Description = "View where to check element visibility",
         }
       ),
-      //new ParamDefinition
-      //(
-      //  new Param_Boolean()
-      //  {
-      //    Name = "Hidden",
-      //    NickName = "H",
-      //    Description = "Element Hidden state",
-      //    Access = GH_ParamAccess.list,
-      //    Optional = true
-      //  }, ParamRelevance.Secondary
-      //),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -71,9 +60,19 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access Visibility state",
+          Description = "Element to check visibility status",
           Access = GH_ParamAccess.list
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean()
+        {
+          Name = "Visible",
+          NickName = "V",
+          Description = "Element visibility status",
+          Access = GH_ParamAccess.list
+        }
       ),
       new ParamDefinition
       (
@@ -81,38 +80,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "View",
           NickName = "V",
-          Description = "View to query element visibility",
-        }, ParamRelevance.Primary
+          Description = "View where the element visibility has been checked",
+        }, ParamRelevance.Secondary
       ),
-      //new ParamDefinition
-      //(
-      //  new Param_Box()
-      //  {
-      //    Name = "Box",
-      //    NickName = "B",
-      //    Description = "View visible Box",
-      //  }, ParamRelevance.Secondary
-      //),
-      //new ParamDefinition
-      //(
-      //  new Param_Boolean()
-      //  {
-      //    Name = "Hidden",
-      //    NickName = "H",
-      //    Description = "Element Hidden state",
-      //    Access = GH_ParamAccess.list
-      //  }, ParamRelevance.Primary
-      //),
-      new ParamDefinition
-      (
-        new Param_Boolean()
-        {
-          Name = "Visible",
-          NickName = "V",
-          Description = "Element Visibility state",
-          Access = GH_ParamAccess.list
-        }
-      ),
+
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -122,50 +93,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
       else Params.TrySetData(DA, "View", () => view);
-
-      Params.TrySetData(DA, "Box", () => view.Value.GetModelClipBox().ToBox());
-
-      if (Params.GetDataList(DA, "Hidden", out IList<bool?> isHiddenByView) && isHiddenByView.Count > 0)
-      {
-        var elementsToHide = new HashSet<ARDB.ElementId>(elements.Count);
-        var elementsToUnhide = new HashSet<ARDB.ElementId>(elements.Count);
-
-        foreach (var pair in elements.ZipOrLast(isHiddenByView, (Element, Hidden) => (Element, Hidden)))
-        {
-          if (!pair.Hidden.HasValue) continue;
-          if (!view.Document.IsEquivalent(pair.Element?.Document)) continue;
-          if (pair.Element?.IsValid != true) continue;
-          if (pair.Element.Value.CanBeHidden(view.Value)) continue;
-
-          if (pair.Hidden.Value)
-          {
-            elementsToUnhide.Remove(pair.Element.Id);
-            elementsToHide.Add(pair.Element.Id);
-          }
-          else
-          {
-            elementsToHide.Remove(pair.Element.Id);
-            elementsToUnhide.Add(pair.Element.Id);
-          }
-        }
-
-        StartTransaction(view.Document);
-
-        if (elementsToHide.Count > 0) view.Value.HideElements(elementsToHide);
-        if (elementsToUnhide.Count > 0) view.Value.UnhideElements(elementsToUnhide);
-      }
-
-      Params.TrySetDataList
-      (
-        DA, "Hidden", () => elements.Select
-        (
-          x => view.Document.IsEquivalent(x?.Document) ?
-               x?.Value?.IsHidden(view.Value) :
-               default
-        )
-      );
-
-      StartTransaction(view.Document);
 
       Params.TrySetDataList
       (
