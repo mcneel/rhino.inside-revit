@@ -2412,7 +2412,7 @@
     "uuid": "240127b1-94ee-47c9-98f8-05de32447b01"
   }, 
   {
-    "desc": "Given a Plane, it adds a <not associated> Work Plane element to the active Revit document", 
+    "desc": "Given a Plane, it adds a &lt;not associated&gt; Work Plane element to the active Revit document", 
     "iconsrc": "/static/images/GH/AddWorkPlaneByPlane.png", 
     "icontag": null, 
     "panel": "Model", 
@@ -4188,6 +4188,18 @@
     "uuid": "3848c899-cc07-4397-855d-961e907c09d9"
   }, 
   {
+    "desc": "Get-Set element visibility on the specified View", 
+    "iconsrc": null, 
+    "icontag": "E", 
+    "panel": "Element", 
+    "since": "1.13", 
+    "tab": "Revit", 
+    "title": "Element Visibility", 
+    "typename": "ElementVisibility", 
+    "until": null, 
+    "uuid": "8ed1490f-da5d-40fa-8612-4f4b166ece52"
+  }, 
+  {
     "desc": "Get-Set category graphics overrides on the specified View", 
     "iconsrc": "/static/images/GH/CategoryGraphicOverrides.png", 
     "icontag": null, 
@@ -4596,7 +4608,7 @@
     "uuid": "c62d18a8-93c5-406f-8c13-778d50a16b8d"
   }, 
   {
-    "desc": "Given a name, it adds a section view to the active Revit document", 
+    "desc": "Given a name, it adds a elevation marker to the active Revit document", 
     "iconsrc": null, 
     "icontag": "A", 
     "panel": "View", 
@@ -4842,7 +4854,7 @@
     "panel": "Architecture", 
     "since": "1.9", 
     "tab": "Revit", 
-    "title": "Host Sub Elements", 
+    "title": "Host Shape", 
     "typename": "SlabShape", 
     "until": null, 
     "uuid": "516b2771-0a9a-4f87-9db1-e27fe0fa968b"
@@ -4896,13 +4908,13 @@
     "uuid": "4ad17d89-9044-4438-b468-7f3ab688ba68"
   }, 
   {
-    "desc": "Obtains a set of types that are owned by Family", 
+    "desc": "Obtains a set of elements hosted by the input Host", 
     "iconsrc": "/static/images/GH/HostObjectInserts.png", 
     "icontag": null, 
     "panel": "Architecture", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
-    "title": "Host Inserts", 
+    "title": "Hosted Elements", 
     "typename": "HostObjectInserts", 
     "until": null, 
     "uuid": "70ccf7a6-856c-4d24-a82b-bc1d4fc63078"

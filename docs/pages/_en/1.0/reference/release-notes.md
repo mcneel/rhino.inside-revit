@@ -12,21 +12,23 @@ group: Deployment & Configs
 
 ### RC
 
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.13 RC4" version="v1.13.8480.18315" pre_release=true time="03/21/2023" %}
+
 - Renamed 'Annotation' panel to 'Annotate'.
 - Merged 'Build', 'Host' and 'Wall' panel under a new 'Architecture' panel.
 - Moved structural element creation components to 'Structure' panel.
 - Moved Component Family related components to 'Component' panel.
-- Renamed 'Host Inserts' component to 'Hosted Elements'.
-- Now 'Hosted Elements' keep linked elements on linked documents.
-- Fixd a bug on 'Add Region' component 'Line Style' input when used on a Family document. #788
+- Renamed 'Host Inserts' component to {% include ltr/comp.html uuid='70ccf7a6' %}.
+- Now {% include ltr/comp.html uuid='70ccf7a6' %} keep linked elements on linked documents.
+- Fixd a bug on {% include ltr/comp.html uuid='ad88cf11' %} component 'Line Style' input when used on a Family document. #788
 - Fixed a bug on previews when there are Groups on the canvas.
-- Now 'Save Component Family' traits relative paths as temporary.
-- Now 'Save Component Family' has a 'Path' output to allow chaining with 'Load Component Family'.
-- Now 'New Component Family' creates a Work Plane-Based family when no template is provided.
+- Now {% include ltr/comp.html uuid='c2b9b045' %} treats relative paths as temporary.
+- Now {% include ltr/comp.html uuid='c2b9b045' %} has a 'Path' output to allow chaining with 'Load Component Family'.
+- Now {% include ltr/comp.html uuid='82523911' %} creates a Work Plane-Based family when no template is provided.
 - Added 'Offset from Host' parameters to work plane-based components.
-
-{% endcapture %}
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 {% include ltr/release-header.html title="v1.13 RC3" version="v1.13.8474.22250" pre_release=true time="03/15/2023" %}
 
