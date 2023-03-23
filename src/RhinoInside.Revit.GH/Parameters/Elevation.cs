@@ -309,6 +309,24 @@ namespace RhinoInside.Revit.GH.Types
         return false;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
+      {
+        if (IsProjectElevation(out var basePoint, out var offset))
+        {
+          var location = basePoint.Location;
+          location.Translate(Vector3d.ZAxis * offset);
+          target = (Q) (object) new GH_Plane(location);
+          return true;
+        }
+        else if (IsElevation(out offset))
+        {
+          var location = Plane.WorldXY;
+          location.Translate(Vector3d.ZAxis * offset);
+          target = (Q) (object) new GH_Plane(location);
+          return true;
+        }
+      }
+
       return base.CastTo(ref target);
     }
 

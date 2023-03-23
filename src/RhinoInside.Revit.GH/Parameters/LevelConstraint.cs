@@ -2,6 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
@@ -24,22 +25,17 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastTo<Q>(ref Q target)
     {
-      if (typeof(Q).IsAssignableFrom(typeof(External.DB.ElevationElementReference)))
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
       {
-        target = (Q) (object) Value;
-        return true;
-      }
+        if (IsLevelConstraint(out var level, out var offset))
+        {
+          var location = level.Location;
+          location.Translate(Vector3d.ZAxis * offset);
+          target = (Q) (object) new GH_Plane(location);
+          return true;
+        }
 
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
-      {
-        target = (Q) (object) new GH_Number(GeometryDecoder.ToModelLength(Value.Elevation));
-        return true;
-      }
-
-      if (typeof(Q).IsAssignableFrom(typeof(double)))
-      {
-        target = (Q) (object) GeometryDecoder.ToModelLength(Value.Elevation);
-        return true;
+        return false;
       }
 
       return base.CastTo(ref target);
