@@ -483,14 +483,17 @@ namespace RhinoInside.Revit.GH.Components.Input
       if (!Params.TryGetData(DA, "Base Point", out Types.IGH_BasePoint basePoint)) return;
       if (!Params.TryGetData(DA, "Offset", out double? offset)) return;
 
-      if (elevation?.IsProjectElevation(out var bp, out var o) is true)
+      if (elevation is object)
       {
-        basePoint = basePoint ?? bp;
-        offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
-      }
-      else if (elevation?.IsOffset(out o) is true)
-      {
-        offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
+        if (elevation.IsProjectElevation(out var bp, out var o))
+        {
+          basePoint = basePoint ?? bp;
+          offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
+        }
+        else if (elevation.IsOffset(out o))
+        {
+          offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
+        }
       }
 
       Params.TrySetData(DA, "Elevation", () => basePoint is object ? new Types.ProjectElevation(offset ?? 0.0, basePoint) : default);

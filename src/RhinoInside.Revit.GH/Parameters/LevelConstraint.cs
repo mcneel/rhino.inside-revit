@@ -151,14 +151,17 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
       if (!Params.TryGetData(DA, "Level", out Types.Level level)) return;
       if (!Params.TryGetData(DA, "Offset", out double? offset)) return;
 
-      if (elevation?.IsLevelConstraint(out var l, out var o) is true)
+      if (elevation is object)
       {
-        level = level ?? l;
-        offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
-      }
-      else if (elevation?.IsOffset(out o) is true)
-      {
-        offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
+        if (elevation.IsLevelConstraint(out var l, out var o))
+        {
+          level = level ?? l;
+          offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
+        }
+        else if (elevation.IsOffset(out o))
+        {
+          offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
+        }
       }
 
       Params.TrySetData(DA, "Elevation", () => level is object ? new Types.LevelConstraint(level, offset ?? 0.0) : default);
