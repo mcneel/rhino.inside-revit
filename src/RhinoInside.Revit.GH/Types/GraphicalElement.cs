@@ -22,6 +22,8 @@ namespace RhinoInside.Revit.GH.Types
   {
     bool? ViewSpecific { get; }
     View OwnerView { get; }
+
+    Plane Location { get; }
   }
 
   interface IHostElementAccess

@@ -10,6 +10,8 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added 'View Range Elevations' component.
+
 ### RC
 
 - Renamed 'Annotation' panel to 'Annotate'.

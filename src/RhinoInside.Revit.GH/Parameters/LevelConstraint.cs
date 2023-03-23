@@ -1,8 +1,8 @@
 using System;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool IsValid => Value != default;
 
-    public override string TypeName => "Level Constraint";
+    public override string TypeName => "Level Elevation";
 
     public override string TypeDescription => "A signed distance along Z-axis relative to a Level";
 
@@ -61,6 +61,20 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
+
+    public bool IsLevelConstraint(out Level level, out double offset)
+    {
+      if (Value.IsLevelConstraint(out var l, out var o))
+      {
+        level = Level.FromElement(l) as Level;
+        offset = (o ?? 0.0) * Revit.ModelUnits;
+        return true;
+      }
+
+      level = default;
+      offset = double.NaN;
+      return false;
+    }
   }
 }
 
@@ -92,37 +106,64 @@ namespace RhinoInside.Revit.GH.Parameters
 
 namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 {
-  public class ConstructLevelConstraint : Component
+  [ComponentVersion(introduced: "1.0", updated: "1.14")]
+  public class LevelOffset : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("01C853D8-87A3-4A76-8855-130BECA30DA1");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
-    public ConstructLevelConstraint() : base
+    public LevelOffset() : base
     (
-      name: "Level Constraint",
-      nickname: "LvlCnst",
-      description: "Constructs a level constraint",
+      name: "Level Offset",
+      nickname: "LvlOffset",
+      description: "Get-Set a level offset",
       category: "Revit",
       subCategory: "Model"
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(new Parameters.Level(), "Level", "L", "Reference level", GH_ParamAccess.item);
-      manager[manager.AddNumberParameter("Offset", "O", "Height above or below the Level", GH_ParamAccess.item, 0.0)].Optional = true;
-    }
+      ParamDefinition.Create<Parameters.LevelConstraint>("Elevation", "E", "Level offset elevation", optional: true),
+      ParamDefinition.Create<Parameters.Level>("Level", "L", "Reference level", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Offset", "O", "Offset above or below the Level", optional: true, relevance: ParamRelevance.Primary)
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.LevelConstraint(), "Constraint", "C", "Level constraint", GH_ParamAccess.item);
+      ParamDefinition.Create<Parameters.LevelConstraint>("Elevation", "E", "Level offset elevation"),
+      ParamDefinition.Create<Parameters.Level>("Level", "L", "Reference level", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Offset", "O", "Offset above or below the Level", relevance: ParamRelevance.Primary)
+    };
+
+    public override void AddedToDocument(GH_Document document)
+    {
+      if (Params.Output<IGH_Param>("Constraint") is IGH_Param constraint)
+        constraint.Name = "Elevation";
+
+      base.AddedToDocument(document);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Level", out Types.Level level)) return;
+      if (!Params.TryGetData(DA, "Elevation", out Types.LevelConstraint elevation)) return;
+      if (!Params.TryGetData(DA, "Level", out Types.Level level)) return;
       if (!Params.TryGetData(DA, "Offset", out double? offset)) return;
 
-      DA.SetData("Constraint", new Types.LevelConstraint(level, offset));
+      if (elevation?.IsLevelConstraint(out var l, out var o) is true)
+      {
+        level = level ?? l;
+        offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
+      }
+      else if (elevation?.IsOffset(out o) is true)
+      {
+        offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
+      }
+
+      Params.TrySetData(DA, "Elevation", () => level is object ? new Types.LevelConstraint(level, offset ?? 0.0) : default);
+      Params.TrySetData(DA, "Level", () => level);
+      Params.TrySetData(DA, "Offset", () => offset);
     }
   }
 }
