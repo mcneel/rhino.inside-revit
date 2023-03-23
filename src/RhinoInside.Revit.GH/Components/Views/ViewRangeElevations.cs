@@ -86,14 +86,24 @@ namespace RhinoInside.Revit.GH.Components.Views
       }
     }
 
-    Types.LevelConstraint GetLevelOffset(Types.View view, ARDB.PlanViewRange viewRange, ARDB.PlanViewPlane plane)
+    internal static Types.LevelConstraint GetLevelOffset(Types.View view, ARDB.PlanViewRange viewRange, ARDB.PlanViewPlane plane)
     {
       var level = default(Types.Level);
       var levelId = viewRange.GetLevelId(plane);
       if (levelId == ARDB.PlanViewRange.Current) level = view.GenLevel;
       else if (levelId == ARDB.PlanViewRange.LevelBelow) level = view.GetElement<Types.Level>(view.Document.GetNearestBaseLevel(view.Value.GenLevel.ProjectElevation, out var _));
       else if (levelId == ARDB.PlanViewRange.LevelAbove) level = view.GetElement<Types.Level>(view.Document.GetNearestTopLevel(view.Value.GenLevel.ProjectElevation, out var _));
-      else if (levelId == ARDB.PlanViewRange.Unlimited) return null;
+      else if (levelId == ARDB.PlanViewRange.Unlimited)
+      {
+        switch (plane)
+        {
+          case ARDB.PlanViewPlane.CutPlane:         return new Types.LevelConstraint(view.GenLevel, double.PositiveInfinity);
+          case ARDB.PlanViewPlane.TopClipPlane:     return new Types.LevelConstraint(view.GenLevel, double.PositiveInfinity);
+          case ARDB.PlanViewPlane.BottomClipPlane:  return new Types.LevelConstraint(view.GenLevel, double.NegativeInfinity);
+          case ARDB.PlanViewPlane.ViewDepthPlane:   return new Types.LevelConstraint(view.GenLevel, double.NegativeInfinity);
+          case ARDB.PlanViewPlane.UnderlayBottom:   return new Types.LevelConstraint(view.GenLevel, double.NegativeInfinity);
+        }
+      }
       else level = view.GetElement<Types.Level>(levelId);
 
       return new Types.LevelConstraint(level, viewRange.GetOffset(plane) * Revit.ModelUnits);

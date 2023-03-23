@@ -214,12 +214,12 @@ namespace RhinoInside.Revit.GH.Components.Views
       }
       Params.TrySetData(DA, "Depth", () =>
       {
-        GetViewRangeOffsets(view.Value, out var backOffset, out var frontOffset);
-        return new GH_Interval(new Interval(backOffset * Revit.ModelUnits, frontOffset * Revit.ModelUnits));
+        GetViewRangeOffsets(view, out var backOffset, out var frontOffset);
+        return new GH_Interval(new Interval(backOffset, frontOffset));
       });
     }
 
-    internal static void GetFrontAndBackClipOffsets(ARDB.View view, out double backOffset, out double frontOffset)
+    static void GetFrontAndBackClipOffsets(ARDB.View view, out double backOffset, out double frontOffset)
     {
       backOffset = -(view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR)?.AsInteger() == 1 ?
                     (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR)?.AsDouble() ?? double.PositiveInfinity) : double.PositiveInfinity);
@@ -228,11 +228,14 @@ namespace RhinoInside.Revit.GH.Components.Views
                      (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_NEAR)?.AsDouble() ?? double.PositiveInfinity) : double.PositiveInfinity);
     }
 
-    internal static void GetViewRangeOffsets(ARDB.View view, out double backOffset, out double frontOffset)
+    static void GetViewRangeOffsets(Types.View view, out double backOffset, out double frontOffset)
     {
-      GetFrontAndBackClipOffsets(view, out backOffset, out frontOffset);
+      GetFrontAndBackClipOffsets(view.Value, out backOffset, out frontOffset);
 
-      switch (view)
+      backOffset *= Revit.ModelUnits;
+      frontOffset *= Revit.ModelUnits;
+
+      switch (view.Value)
       {
         case ARDB.View3D view3D:
         {
@@ -245,17 +248,17 @@ namespace RhinoInside.Revit.GH.Components.Views
         case ARDB.ViewPlan viewPlan:
           using (var viewRange = viewPlan.GetViewRange())
           {
-            if (view.Document.GetElement(viewRange.GetLevelId(ARDB.PlanViewPlane.ViewDepthPlane)) is ARDB.Level bottomLevel)
-              backOffset = Math.Max(backOffset, bottomLevel.ProjectElevation + viewRange.GetOffset(ARDB.PlanViewPlane.ViewDepthPlane));
+            var bottom  = ViewRangeElevations.GetLevelOffset(view, viewRange, ARDB.PlanViewPlane.ViewDepthPlane);
+            var top     = ViewRangeElevations.GetLevelOffset(view, viewRange, ARDB.PlanViewPlane.TopClipPlane);
 
-            if (view.Document.GetElement(viewRange.GetLevelId(ARDB.PlanViewPlane.TopClipPlane)) is ARDB.Level topLevel)
-              frontOffset = Math.Min(frontOffset, topLevel.ProjectElevation + viewRange.GetOffset(ARDB.PlanViewPlane.TopClipPlane));
+            backOffset  = Math.Max(backOffset,  (bottom?.Elevation ?? double.NegativeInfinity) - view.Position.Z);
+            frontOffset = Math.Min(frontOffset, (top?.Elevation    ?? double.PositiveInfinity) - view.Position.Z);
           }
           break;
 
         case ARDB.ViewSection viewSection:
           if (double.IsInfinity(frontOffset) || double.IsNaN(frontOffset))
-            frontOffset = view.CropBox.Max.Z;
+            frontOffset = viewSection.CropBox.Max.Z * Revit.ModelUnits;
 
           break;
       }
