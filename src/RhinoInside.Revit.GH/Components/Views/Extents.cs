@@ -5,6 +5,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Views
 {
   using System.Linq;
+  using External.DB;
   using External.DB.Extensions;
   using Grasshopper.Kernel.Parameters;
   using Grasshopper.Kernel.Types;
@@ -214,7 +215,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       }
       Params.TrySetData(DA, "Depth", () =>
       {
-        GetViewRangeOffsets(view, out var backOffset, out var frontOffset);
+        GetViewRangeOffsets(view.Value, out var backOffset, out var frontOffset);
         return new GH_Interval(new Interval(backOffset, frontOffset));
       });
     }
@@ -228,38 +229,25 @@ namespace RhinoInside.Revit.GH.Components.Views
                      (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_NEAR)?.AsDouble() ?? double.PositiveInfinity) : double.PositiveInfinity);
     }
 
-    static void GetViewRangeOffsets(Types.View view, out double backOffset, out double frontOffset)
+    static void GetViewRangeOffsets(ARDB.View view, out double backOffset, out double frontOffset)
     {
-      GetFrontAndBackClipOffsets(view.Value, out backOffset, out frontOffset);
+      GetFrontAndBackClipOffsets(view, out backOffset, out frontOffset);
 
-      backOffset *= Revit.ModelUnits;
-      frontOffset *= Revit.ModelUnits;
-
-      switch (view.Value)
+      switch (view)
       {
         case ARDB.View3D view3D:
-        {
-          // `FilteredElementCollector` does not check near-plane on 3D-views. (Tested on Revit 2023.0)
-          //if (view3D.IsPerspective)
-          //  frontOffset = Math.Min(frontOffset, 0.0);
-        }
+          if (view3D.IsPerspective)
+            frontOffset = NumericTolerance.MinNumber(frontOffset, view3D.CropBox.Max.Z);
         break;
 
         case ARDB.ViewPlan viewPlan:
-          using (var viewRange = viewPlan.GetViewRange())
-          {
-            var bottom  = ViewRangeElevations.GetLevelOffset(view, viewRange, ARDB.PlanViewPlane.ViewDepthPlane);
-            var top     = ViewRangeElevations.GetLevelOffset(view, viewRange, ARDB.PlanViewPlane.TopClipPlane);
-
-            backOffset  = Math.Max(backOffset,  (bottom?.Elevation ?? double.NegativeInfinity) - view.Position.Z);
-            frontOffset = Math.Min(frontOffset, (top?.Elevation    ?? double.PositiveInfinity) - view.Position.Z);
-          }
-          break;
+          var interval = viewPlan.GetViewRangeInterval();
+          backOffset  = NumericTolerance.MaxNumber(backOffset,  interval.Left.Bound - view.Origin.Z);
+          frontOffset = NumericTolerance.MinNumber(frontOffset, interval.Right.Bound - view.Origin.Z);
+        break;
 
         case ARDB.ViewSection viewSection:
-          if (double.IsInfinity(frontOffset) || double.IsNaN(frontOffset))
-            frontOffset = viewSection.CropBox.Max.Z * Revit.ModelUnits;
-
+          frontOffset = NumericTolerance.MinNumber(frontOffset, viewSection.CropBox.Max.Z);
           break;
       }
     }
