@@ -238,8 +238,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 if (viewPhaseFilter is object && viewPhase.IsValid() && elementValue.HasPhases())
                 {
                   var status = elementValue.GetPhaseStatus(viewPhase);
-                  var presentation = viewPhaseFilter.GetPhaseStatusPresentation(status);
-                  if (presentation == ARDB.PhaseStatusPresentation.DontShow) continue;
+                  if (status != ARDB.ElementOnPhaseStatus.None)
+                  {
+                    var presentation = viewPhaseFilter.GetPhaseStatusPresentation(status);
+                    if (presentation == ARDB.PhaseStatusPresentation.DontShow) continue;
+                  }
                 }
 
                 if (isModelClipped)

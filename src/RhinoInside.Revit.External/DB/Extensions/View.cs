@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 
@@ -336,35 +335,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (view is ViewPlan viewPlan)
       {
-        using (var viewRange = viewPlan.GetViewRange())
+        var interval = viewPlan.GetViewRangeInterval();
+        if (interval.Left.IsEnabled || interval.Right.IsEnabled)
         {
-          var depth = view.Document.GetElement(viewRange.GetLevelId(PlanViewPlane.ViewDepthPlane)) is Level depthLevel ?
-            depthLevel.ProjectElevation + viewRange.GetOffset(PlanViewPlane.ViewDepthPlane) :
-            -CompoundElementFilter.BoundingBoxLimits;
-
-          var bottom = view.Document.GetElement(viewRange.GetLevelId(PlanViewPlane.BottomClipPlane)) is Level bottomLevel ?
-            bottomLevel.ProjectElevation + viewRange.GetOffset(PlanViewPlane.BottomClipPlane) :
-            -CompoundElementFilter.BoundingBoxLimits;
-
-          bottom = Math.Min(bottom, depth);
-
-          var top = view.Document.GetElement(viewRange.GetLevelId(PlanViewPlane.TopClipPlane)) is Level topLevel ?
-            topLevel.ProjectElevation + viewRange.GetOffset(PlanViewPlane.TopClipPlane) :
-            +CompoundElementFilter.BoundingBoxLimits;
-
-          if (bottom != -CompoundElementFilter.BoundingBoxLimits || top != +CompoundElementFilter.BoundingBoxLimits)
-          {
-            return new BoundingBoxIntersectsFilter
+          return new BoundingBoxIntersectsFilter
+          (
+            new Outline
             (
-              new Outline
-              (
-                new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, bottom),
-                new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, top)
-              ),
-              view.Document.Application.VertexTolerance,
-              clipped
-            );
-          }
+              new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, interval.Left),
+              new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, interval.Right)
+            ),
+            view.Document.Application.VertexTolerance,
+            clipped
+          );
         }
       }
 
@@ -460,7 +443,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         CompoundElementFilter.Union    (modelClipFilter, annotationClipFilter);
     }
 
-    #region Orientation
+    #region Viewer
     public static ViewOrientation3D GetSavedOrientation(this View view)
     {
       if (view is View3D view3D)
@@ -602,5 +585,40 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
     #endregion
+  }
+
+  public static class ViewPlanExtension
+  {
+    internal static BoundingInterval GetViewRangeInterval(this ViewPlan viewPlan)
+    {
+      var genLevel = viewPlan.GenLevel;
+      using (var viewRange = viewPlan.GetViewRange()) return
+      (
+        GetLevelElevation(viewRange, genLevel, PlanViewPlane.ViewDepthPlane),
+        GetLevelElevation(viewRange, genLevel, PlanViewPlane.TopClipPlane)
+      );
+    }
+
+    static BoundingValue GetLevelElevation(PlanViewRange viewRange, Level level, PlanViewPlane plane)
+    {
+      var levelId = viewRange.GetLevelId(plane);
+      if (levelId == PlanViewRange.Current) { } // just use the current
+      else if (levelId == PlanViewRange.LevelBelow) level = level.Document.GetNearestBaseLevel(level.ProjectElevation, out var _);
+      else if (levelId == PlanViewRange.LevelAbove) level = level.Document.GetNearestTopLevel (level.ProjectElevation, out var _);
+      else if (levelId == PlanViewRange.Unlimited)
+      {
+        switch (plane)
+        {
+          case PlanViewPlane.CutPlane:        return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMax);
+          case PlanViewPlane.TopClipPlane:    return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMax);
+          case PlanViewPlane.BottomClipPlane: return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMin);
+          case PlanViewPlane.ViewDepthPlane:  return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMin);
+          case PlanViewPlane.UnderlayBottom:  return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMin);
+        }
+      }
+      else level = level.Document.GetElement(levelId) as Level;
+
+      return new BoundingValue(level.ProjectElevation + viewRange.GetOffset(plane));
+    }
   }
 }
