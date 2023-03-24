@@ -501,22 +501,38 @@ namespace RhinoInside.Revit.GH.Components.Input
       if (!Params.TryGetData(DA, "Base Point", out Types.IGH_BasePoint basePoint)) return;
       if (!Params.TryGetData(DA, "Offset", out double? offset)) return;
 
-      if (elevation is object)
+      switch (elevation)
       {
-        if (elevation.IsProjectElevation(out var bp, out var o))
+        case Types.LevelConstraint levelOffset:
+          if (levelOffset.IsLevelConstraint(out var l, out var _))
+          {
+            basePoint = basePoint ?? new Types.InternalOrigin(InternalOriginExtension.Get(l.Document));
+            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : elevation.Elevation);
+          }
+          else if (elevation.IsOffset(out var _))
+          {
+            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : elevation.Elevation);
+          }
+          break;
+
+        case object _:
         {
-          basePoint = basePoint ?? bp;
-          offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
+          if (elevation.IsProjectElevation(out var bp, out var o))
+          {
+            basePoint = basePoint ?? bp;
+            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
+          }
+          else if (elevation.IsOffset(out o))
+          {
+            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
+          }
         }
-        else if (elevation.IsOffset(out o))
-        {
-          offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
-        }
+        break;
       }
 
-      Params.TrySetData(DA, "Elevation", () => basePoint is object ? new Types.ProjectElevation(offset ?? 0.0, basePoint) : default);
+      Params.TrySetData(DA, "Elevation",  () => basePoint is object || offset is object ? new Types.ProjectElevation(offset ?? 0.0, basePoint) : null);
       Params.TrySetData(DA, "Base Point", () => basePoint);
-      Params.TrySetData(DA, "Offset", () => offset);
+      Params.TrySetData(DA, "Offset",     () => offset ?? (basePoint is null ? default(double?) : 0.0));
     }
   }
 }
