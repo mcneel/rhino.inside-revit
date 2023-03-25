@@ -216,7 +216,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       Params.TrySetData(DA, "Depth", () =>
       {
         GetViewRangeOffsets(view.Value, out var backOffset, out var frontOffset);
-        return new GH_Interval(new Interval(backOffset, frontOffset));
+        return new GH_Interval(new Interval(backOffset * Revit.ModelUnits, frontOffset * Revit.ModelUnits));
       });
     }
 
