@@ -467,9 +467,10 @@ namespace RhinoInside.Revit
     #region Utils
     static bool IsInternalReference(ResolveEventArgs args)
     {
+      var assembly = new AssemblyName(args.Name);
       if
       (
-        InternalAssemblies.ContainsKey(args.Name) &&
+        InternalAssemblies.ContainsKey(assembly.Name) &&
         GetRequestingAssembly(args) is Assembly requestingAssembly
       )
         return requestingAssembly.GetReferencedAssemblies().Any(x => InternalAssemblies.ContainsKey(x.Name));
