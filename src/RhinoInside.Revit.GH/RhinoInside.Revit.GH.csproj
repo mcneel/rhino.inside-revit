@@ -334,6 +334,7 @@
     <Compile Include="Types\Annotations\TagElement.cs" />
     <Compile Include="Types\Annotations\TextElement.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
+    <Compile Include="Types\Element+Proxy.cs" />
     <Compile Include="Types\Instances\FamilyInstance.cs" />
     <Compile Include="Types\Instances\ImageInstance.cs" />
     <Compile Include="Types\Instances\ImportInstance.cs" />
