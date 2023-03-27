@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Types
 #if DEBUG
     public override string ToString()
     {
-      try   { return GetReference()?.ConvertToStableRepresentation(ReferenceDocument) ?? base.ToString(); }
+      try { return GetReference()?.ConvertToStableRepresentation(ReferenceDocument) ?? base.ToString(); }
       catch { return base.ToString(); }
     }
 #endif
@@ -326,6 +326,9 @@ namespace RhinoInside.Revit.GH.Types
 
         case ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE:
           return new GeometryFace(document, reference);
+
+        case ARDB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT:
+          return new GeometrySubelement(document, reference);
       }
 
       return null;
@@ -444,6 +447,100 @@ namespace RhinoInside.Revit.GH.Types
       {
         case ARDB.Element element:
           if (element.GetDefaultReference() is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
+          {
+            SetValue(element.Document, reference);
+            return true;
+          }
+          break;
+      }
+
+      return base.CastFrom(source);
+    }
+    #endregion
+  }
+
+  [Name("Subelement")]
+  public class GeometrySubelement : GeometryObject, IGH_PreviewData
+  {
+    public override object ScriptVariable() => base.Value;
+
+    public new ARDB.GeometryElement Value => base.Value as ARDB.GeometryElement;
+
+    public GeometrySubelement() { }
+    public GeometrySubelement(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
+
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      //using (var subelement = Document.GetSubelement(GetReference()))
+      //{
+      //  try
+      //  {
+      //    var bbox = subelement.GetBoundingBox(null);
+
+      //    var box = bbox.ToBox();
+      //    if (box.IsValid)
+      //    {
+      //      if (HasTransform) box.Transform(GeometryToWorldTransform);
+      //      return box.GetBoundingBox(xform);
+      //    }
+      //  }
+      //  catch (Exception e) { }
+      //}
+
+      return NaN.BoundingBox;
+    }
+
+    #region IGH_PreviewData
+    void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (!IsValid) return;
+
+      var bbox = ClippingBox;
+      if (!bbox.IsValid)
+        return;
+
+      args.Pipeline.DrawBoxCorners(bbox, args.Color);
+    }
+    #endregion
+
+    #region Properties
+    public override string DisplayName
+    {
+      get
+      {
+        if (Id == ElementIdExtension.InvalidElementId) return "<None>";
+        switch (Element.FromReference(ReferenceDocument, GetReference()))
+        {
+          case null: return $"Null {base.DisplayName} : Subelement";
+          case Element element: return $"{element.DisplayName} : Subelement";
+        }
+      }
+    }
+    #endregion
+
+    #region Casting
+    public override bool CastTo<Q>(out Q target)
+    {
+      if (base.CastTo(out target)) return true;
+
+      if (typeof(Q).IsAssignableFrom(typeof(ARDB.GeometryElement)))
+      {
+        target = (Q) (object) (IsValid ? Value : null);
+        return true;
+      }
+
+      return false;
+    }
+
+    public override bool CastFrom(object source)
+    {
+      if (source is IGH_Goo goo)
+        source = goo.ScriptVariable();
+
+      switch (source)
+      {
+        case ARDB.Subelement element:
+          if (element.GetReference() is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT)
           {
             SetValue(element.Document, reference);
             return true;
