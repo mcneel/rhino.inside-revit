@@ -5,6 +5,8 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 {
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.0", updated: "1.9")]
   public class LevelIdentity : TransactionalChainComponent
   {

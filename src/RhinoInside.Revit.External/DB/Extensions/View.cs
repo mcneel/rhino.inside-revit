@@ -402,8 +402,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (table.TargetId.IsValid())
           return CompoundElementFilter.ExclusionFilter(table.TargetId, inverted: true);
 
-        if (view is ViewSchedule && view.get_Parameter(BuiltInParameter.SCHEDULE_CATEGORY)?.AsElementId() is ElementId scheduleCategoryId)
-          return new ElementCategoryFilter(scheduleCategoryId, clipped);
+        if (view is ViewSchedule viewSchedule && viewSchedule.Definition is ScheduleDefinition definition)
+          return new ElementCategoryFilter(definition.CategoryId, clipped);
 
         return CompoundElementFilter.Universe;
       }

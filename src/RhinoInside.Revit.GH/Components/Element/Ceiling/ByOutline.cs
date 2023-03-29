@@ -13,17 +13,11 @@ namespace RhinoInside.Revit.GH.Components
   using External.DB.Extensions;
   using Kernel.Attributes;
 
-  [ComponentVersion(introduced: "1.3")]
+  [ComponentVersion(introduced: "1.3"), ComponentRevitAPIVersion(min: "2022.0")]
   public class CeilingByOutline : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("A39BBDF2-78F2-4501-BB6E-F9CC3E83516E");
-
-#if REVIT_2022
-    public override GH_Exposure Exposure => GH_Exposure.primary;
-#else
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
-    public override bool SDKCompliancy(int exeVersion, int exeServiceRelease) => false;
-#endif
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary);
 
     public CeilingByOutline() : base
     (
@@ -71,6 +65,7 @@ namespace RhinoInside.Revit.GH.Components
       Optional<ARDB.Level> level
     )
     {
+#if REVIT_2022
       if (boundary is null) return;
 
       var tol = GeometryTolerance.Model;
@@ -134,13 +129,10 @@ namespace RhinoInside.Revit.GH.Components
           ARDB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM
         };
 
-#if REVIT_2022
+
         var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
 
         ReplaceElement(ref ceiling, ARDB.Ceiling.Create(document, curveLoops, type.Value.Id, level.Value.Id, default, 0.0), parametersMask);
-#else
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is only supported on Revit 2022 or above.");
-#endif
       }
 
       if (ceiling is object)
@@ -148,6 +140,7 @@ namespace RhinoInside.Revit.GH.Components
         var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation();
         ceiling.get_Parameter(ARDB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
       }
+#endif
     }
   }
 }
