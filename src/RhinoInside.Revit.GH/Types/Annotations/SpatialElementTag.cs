@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Rhino.Display;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
@@ -70,7 +69,11 @@ namespace RhinoInside.Revit.GH.Types
         set { tag.HasLeader = value; tag.InvalidateGraphics(); }
       }
 
+#if REVIT_2018
       public override bool HasElbow => tag.Value?.HasElbow ?? false;
+#else
+      public override bool HasElbow => false;
+#endif
       public override Point3d ElbowPosition
       {
         get => tag.Value.LeaderElbow.ToPoint3d();

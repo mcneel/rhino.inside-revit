@@ -4,15 +4,15 @@ using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
-using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Documents
 {
-  [ComponentVersion(introduced: "1.10")]
+  [ComponentVersion(introduced: "1.10"), ComponentRevitAPIVersion(min: "2018.0")]
   public class DocumentWarnings : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("3917ADB2-706E-49A2-A3AF-6B5F610C4B78");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary | GH_Exposure.obscure);
+
     protected override string IconTag => "⚠";
 
     #region UI
@@ -30,7 +30,6 @@ namespace RhinoInside.Revit.GH.Components.Documents
       );
     }
     #endregion
-
 
     public DocumentWarnings() : base
     (
@@ -84,6 +83,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       else Params.TrySetData(DA, "Document", () => doc);
 
+#if REVIT_2018
       var warnings = doc.Value.GetWarnings();
 
       Params.TrySetDataList(DA, "Failure Definition", () => warnings.Select(x => new Types.FailureDefinition(x.GetFailureDefinitionId().Guid)));
@@ -120,6 +120,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
         DA.SetDataTree(_AdditionalElements_, additionalElements);
       }
+#endif
     }
   }
 }

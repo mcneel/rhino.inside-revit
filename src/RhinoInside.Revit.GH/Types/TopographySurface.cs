@@ -6,7 +6,8 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Topography")]
-  public class TopographySurface : GeometricElement
+  public class TopographySurface : GeometricElement,
+    IHostElementAccess
   {
     protected override Type ValueType => typeof(ARDB.Architecture.TopographySurface);
     public new ARDB.Architecture.TopographySurface Value => base.Value as ARDB.Architecture.TopographySurface;
@@ -39,6 +40,17 @@ namespace RhinoInside.Revit.GH.Types
         return null;
       }
     }
+    #endregion
+
+    #region IHostElementAccess
+    public GraphicalElement HostElement =>
+      Value is ARDB.Architecture.TopographySurface surface ?
+        surface.IsSiteSubRegion ?
+          GetElement<GraphicalElement>(surface.AsSiteSubRegion().HostId) :
+          surface.IsAssociatedWithBuildingPad ?
+            GetElement<GraphicalElement>(surface.AssociatedBuildingPadId) :
+            new GraphicalElement() :
+        default;
     #endregion
   }
 }

@@ -13,6 +13,7 @@ using SD = System.Drawing;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using System.Reflection;
   using Convert.Geometry;
   using External.DB.Extensions;
 
@@ -74,8 +75,19 @@ namespace RhinoInside.Revit.GH.Components
       ComponentVersion = CurrentVersion;
 
       ComponentVersionAttribute.GetVersionHistory(GetType(), out var _, out var _, out var deprecated);
-      _Obsolete = Obsolete || deprecated is object;
+      if (Obsolete || deprecated is object) VersioningStatus |= VersioningIssues.Obsolete;
+      if (!SDKCompliancy(Rhino.RhinoApp.ExeVersion, Rhino.RhinoApp.ExeServiceRelease)) VersioningStatus |= VersioningIssues.NotCompliant;
     }
+
+    [Flags]
+    enum VersioningIssues
+    {
+      None = 0,
+      Obsolete = 1,
+      NotCompliant = 2
+    }
+
+    readonly VersioningIssues VersioningStatus = default;
 
     #if DEBUG
     public override string InstanceDescription =>
@@ -110,8 +122,46 @@ namespace RhinoInside.Revit.GH.Components
     #endif
 
     #region Obsolete
-    readonly bool? _Obsolete;
-    public override bool Obsolete => _Obsolete.GetValueOrDefault(base.Obsolete);
+    public override bool Obsolete => VersioningStatus.HasFlag(VersioningIssues.Obsolete) || base.Obsolete;
+    #endregion
+
+    #region SDKCompliancy
+    static readonly Version VersionZero = new Version(0, 0, 0, 0);
+    public override bool SDKCompliancy(int exeVersion, int exeServiceRelease)
+    {
+      if (GetType().GetCustomAttribute<ComponentRevitAPIVersionAttribute>() is ComponentRevitAPIVersionAttribute componentAPIVersion)
+      {
+        var revitAPIVersion = new Version(Core.Host.Services.SubVersionNumber);
+        return componentAPIVersion.Min <= revitAPIVersion && (componentAPIVersion.Max ?? VersionZero) <= revitAPIVersion;
+      }
+
+      return true;
+    }
+
+    bool AssertCompliancy()
+    {
+      if (VersioningStatus.HasFlag(VersioningIssues.NotCompliant))
+      {
+        if (GetType().GetCustomAttribute<ComponentRevitAPIVersionAttribute>() is ComponentRevitAPIVersionAttribute componentAPIVersion)
+        {
+          var revitAPIVersion = new Version(Core.Host.Services.SubVersionNumber);
+          if (componentAPIVersion.Min > revitAPIVersion)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is not supported before Revit {componentAPIVersion.Min}.");
+
+          if (componentAPIVersion.Max is Version max && max < revitAPIVersion)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is not supported after Revit {componentAPIVersion.Max}.");
+        }
+        else
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is not compliant on the current setup.");
+
+        return false;
+      }
+
+      return true;
+    }
+
+    protected GH_Exposure SDKCompliancy(GH_Exposure exposure) =>
+      VersioningStatus == VersioningIssues.None ? exposure : exposure | GH_Exposure.hidden;
     #endregion
 
     static readonly string[] _Keywords = new string[] { "Revit" };
@@ -188,6 +238,9 @@ namespace RhinoInside.Revit.GH.Components
     static Component ComputingComponent;
     public sealed override void ComputeData()
     {
+      if (!AssertCompliancy())
+        return;
+
       var current = ComputingComponent;
       ComputingComponent = this;
       try

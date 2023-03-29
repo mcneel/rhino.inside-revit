@@ -4,9 +4,6 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.HostObjects
 {
-  using External.DB;
-  using External.DB.Extensions;
-
   [ComponentVersion(introduced: "1.0", updated: "1.13")]
   public class ElementHost : Component
   {
@@ -38,15 +35,29 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
 
       // Ask first to Element, maybe it knows its Host
-      if (element is Types.IHostElementAccess access && access.HostElement is Types.GraphicalElement hostElement)
+      if (element is Types.IHostElementAccess access)
       {
-        DA.SetData("Host", hostElement);
+        DA.SetData("Host", access.HostElement);
         return;
       }
 
-      // Special cases
-      var host = element.Value.get_Parameter(ARDB.BuiltInParameter.HOST_ID_PARAM)?.AsElement();
-      DA.SetData("Host", element.GetElement<Types.GraphicalElement>(host ?? element.Level?.Value));
+      var hostId = default(ARDB.ElementId);
+
+      if (element.Value is ARDB.Structure.Rebar rebar) hostId = rebar.GetHostId();
+      else if (element.Value is ARDB.Structure.RebarInSystem rebarInSystem) hostId = rebarInSystem.GetHostId();
+      else if (element.Value is ARDB.Structure.RebarContainer rebarContainer) hostId = rebarContainer.GetHostId();
+      else if (element.Value is ARDB.Structure.AreaReinforcement areaReinforcement) hostId = areaReinforcement.GetHostId();
+      else if (element.Value is ARDB.Structure.PathReinforcement pathReinforcement) hostId = pathReinforcement.GetHostId();
+      else if (element.Value is ARDB.Structure.FabricSheet fabricSheet) hostId = fabricSheet.HostId;
+      else if (element.Value is ARDB.FabricationPart fabricationPart)
+      {
+        using (var hostedInfo = fabricationPart.GetHostedInfo())
+          hostId = hostedInfo.HostId;
+      }
+      else hostId = element.Value.get_Parameter(ARDB.BuiltInParameter.HOST_ID_PARAM)?.AsElementId();
+
+      // Default to Level if hostId is null
+      DA.SetData("Host", element.GetElement<Types.GraphicalElement>(hostId ?? element.Level?.Id));
     }
   }
 }

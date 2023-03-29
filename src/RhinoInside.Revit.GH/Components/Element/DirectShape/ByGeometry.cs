@@ -130,9 +130,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     public static bool IsValidCategoryId(ARDB.ElementId categoryId, ARDB.Document doc)
     {
+#if REVIT_2018
       // For some unknown reason Revit dislikes 'Coordination Model' category (Tested in Revit 2023).
-      return categoryId.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_Coordination_Model &&
-        ARDB.DirectShape.IsValidCategoryId(categoryId, doc);
+      if (categoryId.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Coordination_Model)
+        return false;
+#endif
+      return ARDB.DirectShape.IsValidCategoryId(categoryId, doc);
     }
   }
 

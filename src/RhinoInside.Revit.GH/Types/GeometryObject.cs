@@ -327,8 +327,10 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE:
           return new GeometryFace(document, reference);
 
+#if REVIT_2018
         case ARDB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT:
           return new GeometrySubelement(document, reference);
+#endif
       }
 
       return null;
@@ -459,6 +461,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
   }
 
+#if REVIT_2018
   [Name("Subelement")]
   public class GeometrySubelement : GeometryObject, IGH_PreviewData
   {
@@ -552,6 +555,7 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
   }
+#endif
 
   [Name("Point")]
   public class GeometryPoint : GeometryObject, IGH_PreviewData

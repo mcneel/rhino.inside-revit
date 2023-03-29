@@ -43,5 +43,12 @@ namespace RhinoInside.Revit.GH.Types
     public Sketch Sketch => Value is ARDB.Architecture.BuildingPad pad ?
       new Sketch(pad.GetSketch()) : default;
     #endregion
+
+    #region IHostElementAccess
+    public override GraphicalElement HostElement =>
+      Value is ARDB.Architecture.BuildingPad pad && pad.HostId.IsValid() ?
+      GetElement<GraphicalElement>(pad.HostId) :
+      base.HostElement;
+    #endregion
   }
 }

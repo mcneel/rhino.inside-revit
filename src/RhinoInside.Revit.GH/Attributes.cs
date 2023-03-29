@@ -120,4 +120,28 @@ namespace RhinoInside.Revit.GH
       return maxVersion;
     }
   }
+
+  [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+  public sealed class ComponentRevitAPIVersionAttribute : Attribute
+  {
+    public readonly Version Min;
+    public readonly Version Max;
+
+    internal ComponentRevitAPIVersionAttribute(string min) : this(min, default) { }
+    internal ComponentRevitAPIVersionAttribute(string min, string max)
+    {
+      Min = Version.Parse(min);
+      Max = max is object ? Version.Parse(max) : default;
+    }
+
+    public static bool GetVersions(Type type, out Version min, out Version max)
+    {
+      var versions = (ComponentRevitAPIVersionAttribute[]) type.GetCustomAttributes(typeof(ComponentRevitAPIVersionAttribute), false);
+      var version = versions.Length == 1 ? versions[0] : default;
+
+      min = version?.Min;
+      max = version?.Max;
+      return version is object;
+    }
+  }
 }

@@ -7,16 +7,11 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Worksets
 {
-  [ComponentVersion(introduced: "1.9")]
+  [ComponentVersion(introduced: "1.9"), ComponentRevitAPIVersion(min: "2022.1")]
   public class DeleteWorkset : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("BF1B9BE9-2D5F-45DC-947B-A8ACFA6D6E2D");
-#if REVIT_2022
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
-#else
-    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.hidden;
-    public override bool SDKCompliancy(int exeVersion, int exeServiceRelease) => false;
-#endif
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.quarternary);
 
     public DeleteWorkset() : base
     (
@@ -71,10 +66,6 @@ namespace RhinoInside.Revit.GH.Components.Worksets
 
     protected override void BeforeSolveInstance()
     {
-#if !REVIT_2022
-      AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is only supported on Revit 2022.1 or above.");
-#endif
-
       Message = string.Empty;
       base.BeforeSolveInstance();
 
