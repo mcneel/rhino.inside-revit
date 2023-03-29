@@ -15,6 +15,11 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.13 RC5" version="v1.13.8486.7511" pre_release=true time="03/28/2023" %}
+
+- Fixed {% include ltr/comp.html uuid='96d578c0' %} component when the referenced element is a Rebar
+- Fixed AssemblyResolver. Now first call to RhinoCommon fully loads it
+
 {% include ltr/release-header.html title="v1.13 RC4" version="v1.13.8480.18315" pre_release=true time="03/21/2023" %}
 
 - Renamed 'Annotation' panel to 'Annotate'.
