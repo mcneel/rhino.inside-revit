@@ -338,7 +338,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var interval = viewPlan.GetViewRangeInterval();
         if (interval.Left.IsEnabled || interval.Right.IsEnabled)
         {
-          return new BoundingBoxIntersectsFilter
+          return CompoundElementFilter.BoundingBoxIntersectsFilter
           (
             new Outline
             (
@@ -365,7 +365,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (bottom != -CompoundElementFilter.BoundingBoxLimits || top != +CompoundElementFilter.BoundingBoxLimits)
       {
-        return new BoundingBoxIntersectsFilter
+        return CompoundElementFilter.BoundingBoxIntersectsFilter
         (
           new Outline
           (
@@ -395,7 +395,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         var modelClipBox = view.GetModelClipBox();
         if (modelClipBox.Enabled)
-          filter = CompoundElementFilter.Intersect(filter, new BoundingBoxIntersectsFilter(modelClipBox.ToOutLine(), view.Document.Application.VertexTolerance, clipped));
+          filter = CompoundElementFilter.Intersect(filter, CompoundElementFilter.BoundingBoxIntersectsFilter(modelClipBox.ToOutLine(), view.Document.Application.VertexTolerance, clipped));
       }
       else if (view is TableView table)
       {

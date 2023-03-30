@@ -437,6 +437,16 @@ namespace RhinoInside.Revit.External.DB
     public static ElementFilter ThatExcludes(this ElementFilter self, params ElementId[] idsToExclude) =>
       self.Intersect(ExclusionFilter(idsToExclude, inverted: false));
     #endregion
+
+    #region Geometry
+    public static ElementFilter BoundingBoxIntersectsFilter(Outline outline, double tolerance, bool inverted)
+    {
+      if (outline.IsEmpty)
+        return inverted ? Universe : Empty;
+
+      return new BoundingBoxIntersectsFilter(outline, tolerance, inverted);
+    }
+    #endregion
   }
 }
 
