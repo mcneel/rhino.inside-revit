@@ -21,6 +21,7 @@ namespace RhinoInside.Revit
   using Convert.Geometry;
   using Convert.Units;
   using External.ApplicationServices.Extensions;
+  using RhinoWindows.Forms;
   using static Diagnostics;
 
   /// <summary>
@@ -108,6 +109,7 @@ namespace RhinoInside.Revit
         RhinoApp.CommandWindowCaptureEnabled = false;
       }
 
+      FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", "Rhino.Inside ");
       Rhino.Runtime.PythonScript.AddRuntimeAssembly(Assembly.GetExecutingAssembly());
 
       MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
