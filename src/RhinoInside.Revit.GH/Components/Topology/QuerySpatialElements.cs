@@ -253,7 +253,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       if (!Params.TryGetData(DA, "Placed", out bool? placed)) return;
       if (!Params.TryGetData(DA, "Number", out string number)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
-      if (!Parameters.Level.TryGetDataOrDefault(this, DA, "Level", out Types.Level level, doc, point.HasValue ? point.Value.Z : double.NaN) && point.HasValue) return;
+      if (!Params.TryGetData(DA, "Level", out Types.Level level)) return;
       if (!Params.TryGetData(DA, "Area Scheme", out ARDB.AreaScheme scheme)) return;
       if (!Params.TryGetData(DA, "Enclosed", out bool? enclosed)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
@@ -315,14 +315,15 @@ namespace RhinoInside.Revit.GH.Components.Topology
             area =>
             {
               var plane = area.Location;
+              var count = 0;
               foreach (var boundary in area.Boundaries)
               {
                 var containment = boundary.Contains(point.Value, plane, GeometryTolerance.Model.VertexTolerance);
                 if (containment == PointContainment.Inside)
-                  return true;
+                  count++;
               }
 
-              return false;
+              return count % 2 != 0;
             }
           );
         }
