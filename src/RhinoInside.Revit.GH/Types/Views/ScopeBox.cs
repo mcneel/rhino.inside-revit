@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ERDB = RhinoInside.Revit.External.DB;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+  using External.DB;
+
   using ARDB_ScopeBox = ARDB.Element;
 
   [Kernel.Attributes.Name("Scope Box")]
@@ -59,6 +61,12 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      var box = Box;
+      return box.IsValid ? box.GetBoundingBox(xform) : NaN.BoundingBox;
+    }
+
     #region Properties
     public override Box Box
     {
@@ -70,45 +78,23 @@ namespace RhinoInside.Revit.GH.Types
           {
             if (box.get_Geometry(options) is ARDB.GeometryElement geometry)
             {
-              var points = new List<ARDB.XYZ>(24);
-              foreach (var line in geometry.Cast<ARDB.Line>())
+              var lines = geometry.OfType<ARDB.Line>().ToArray();
+              if (lines.Length == 12)
               {
-                points.Add(line.GetEndPoint(0));
-                points.Add(line.GetEndPoint(1));
-              }
-
-              var cov = ARDB.Transform.Identity;
-              cov.SetCovariance(points);
-
-              var origin = cov.Origin;
-              var basisX = cov.GetPrincipalComponent(0D);
-              var basisZ = ERDB.UnitXYZ.BasisZ;
-
-              if (ERDB.UnitXYZ.Orthonormal(basisZ, basisX, out var basisY))
-              {
-                var plane = ARDB.Plane.CreateByOriginAndBasis(origin, basisX, basisY);
-
-                var min = new Point3d(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
-                var max = new Point3d(double.NegativeInfinity, double.NegativeInfinity, double.NegativeInfinity);
-
-                foreach (var point in points)
+                var points = new List<ARDB.XYZ>(lines.Length * 2);
+                foreach (var line in lines)
                 {
-                  plane.Project(point, out var uv, out var _); var w = point.Z - origin.Z;
-                  min.X = Math.Min(min.X, uv.U); max.X = Math.Max(max.X, uv.U);
-                  min.Y = Math.Min(min.Y, uv.V); max.Y = Math.Max(max.Y, uv.V);
-                  min.Z = Math.Min(min.Z, w);    max.Z = Math.Max(max.Z, w);
+                  points.Add(line.GetEndPoint(0));
+                  points.Add(line.GetEndPoint(1));
                 }
 
-                min *= UnitConverter.ToModelLength;
-                max *= UnitConverter.ToModelLength;
-
-                return new Box
-                (
-                  new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d()),
-                  new Interval(min.X, max.X),
-                  new Interval(min.Y, max.Y),
-                  new Interval(min.Z, max.Z)
-                );
+                var origin = XYZExtension.ComputeMeanPoint(points);
+                if (UnitXYZ.Orthonormalize(-lines[2].Direction, -lines[1].Direction, out var basisX, out var basisY, out var basisZ))
+                {
+                  var coordSystem = ARDB.Transform.Identity; coordSystem.SetCoordSystem(origin, basisX, basisY, basisZ);
+                  if (XYZExtension.TryGetBoundingBox(points, out var bbox, coordSystem))
+                    return bbox.ToBox();
+                }
               }
             }
           }
@@ -128,22 +114,21 @@ namespace RhinoInside.Revit.GH.Types
           {
             if (box.get_Geometry(options) is ARDB.GeometryElement geometry)
             {
-              var points = new List<ARDB.XYZ>();
-              foreach (var line in geometry.Cast<ARDB.Line>())
+              var lines = geometry.OfType<ARDB.Line>().ToArray();
+              if (lines.Length == 12)
               {
-                points.Add(line.GetEndPoint(0));
-                points.Add(line.GetEndPoint(1));
+                var points = new List<ARDB.XYZ>(lines.Length * 2);
+                foreach (var line in lines)
+                {
+                  points.Add(line.GetEndPoint(0));
+                  points.Add(line.GetEndPoint(1));
+                }
+
+                var origin = XYZExtension.ComputeMeanPoint(points);
+                var basisX = -lines[2].Direction;
+                var basisY = -lines[1].Direction;
+                return new Plane(origin.ToPoint3d(), basisX.ToVector3d(), basisY.ToVector3d());
               }
-
-              var cov = ARDB.Transform.Identity;
-              cov.SetCovariance(points);
-
-              var origin = cov.Origin;
-              var basisX = cov.GetPrincipalComponent(0D);
-              var basisZ = ERDB.UnitXYZ.BasisZ;
-
-              if (ERDB.UnitXYZ.Orthonormal(basisZ, basisX, out var basisY))
-                return new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
             }
           }
         }
