@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (RhinoDoc.ActiveDoc is RhinoDoc doc)
         {
-          if(Value.ToRenderMaterial(doc) is Rhino.Render.RenderMaterial renderMaterial)
+          if(Value?.ToRenderMaterial(doc) is Rhino.Render.RenderMaterial renderMaterial)
             target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(renderMaterial);
           else
             target = default;
