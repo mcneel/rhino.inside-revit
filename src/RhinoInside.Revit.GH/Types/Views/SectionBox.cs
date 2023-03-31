@@ -1,12 +1,13 @@
 using System;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   using ARDB_SectionBox = ARDB.Element;
 
   [Kernel.Attributes.Name("Section Box")]
@@ -41,17 +42,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is ARDB_SectionBox box)
-      {
-        if (box.GetFirstDependent<ARDB.View3D>() is ARDB.View3D view)
-        {
-          var sectionBox = view.GetSectionBox();
-          sectionBox.Enabled = true;
-          return sectionBox.ToBox().GetBoundingBox(xform);
-        }
-      }
-
-      return NaN.BoundingBox;
+      var box = Box;
+      return box.IsValid ? box.GetBoundingBox(xform) : NaN.BoundingBox;
     }
 
     #region Properties
