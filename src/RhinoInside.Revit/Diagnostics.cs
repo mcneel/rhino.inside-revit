@@ -127,7 +127,7 @@ namespace RhinoInside.Revit
                 writer.WriteLine("|:---|");
                 var PATH = Environment.GetEnvironmentVariable("PATH");
                 foreach (var pathEntry in PATH.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
-                  writer.WriteLine($"|{pathEntry}|");
+                  writer.WriteLine($"| {pathEntry} |");
 
                 if (loadedApplications is object)
                 {
