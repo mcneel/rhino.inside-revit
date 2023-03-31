@@ -12,6 +12,11 @@ group: Deployment & Configs
 
 ### RC
 
+- Improved 'Element Host' component, now identifies more types.
+- Fixed 'Query Areas' on areas that have internal loops.
+- Fixed 'Element Clone' when cloning named elements.
+- Fixed 'Scope Box' location and bounding box.
+
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
