@@ -938,8 +938,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             {
               ids = ElementTransformUtils.CopyElements
               (
-                sourceView,
-                new ElementId[] { template.Id },
+                sourceView, new ElementId[] { template.Id },
                 destinationView, default, options
               );
             }
@@ -948,8 +947,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             ids = ElementTransformUtils.CopyElements
             (
-              sourceDocument,
-              new ElementId[] { template.Id },
+              sourceDocument, new ElementId[] { template.Id },
               destinationDocument, default, options
             );
           }

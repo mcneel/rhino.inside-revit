@@ -150,14 +150,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       // Try to duplicate template
       if (template is object)
       {
-        var ids = ARDB.ElementTransformUtils.CopyElements
-        (
-          template.Document,
-          new ARDB.ElementId[] { template.Id },
-          doc, default, default
-        );
-
-        selection = ids.Select(x => doc.GetElement(x)).OfType<ARDB.SelectionFilterElement>().FirstOrDefault();
+        selection = template.CloneElement(doc);
         selection.Name = name;
       }
 
