@@ -915,42 +915,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var sourceDocument = template.Document;
         destinationDocument = destinationDocument ?? sourceDocument;
 
-        var ids = default(ICollection<ElementId>);
-        if (template.ViewSpecific)
+        using (var options = new CopyPasteOptions())
         {
-          var sourceView = sourceDocument.GetElement(template.OwnerViewId) as View;
-          destinationView = destinationView ?? sourceView;
+          options.SetDuplicateTypeNamesAction(DuplicateTypeAction.UseDestinationTypes);
 
-          if (!destinationDocument.Equals(destinationView.Document))
+          var ids = default(ICollection<ElementId>);
+          if (template.ViewSpecific)
           {
-            var bic = BuiltInCategory.INVALID;
-            sourceView.Category?.Id.TryGetBuiltInCategory(out bic);
-            destinationView = destinationDocument.
-              GetNamesakeElements(sourceView.GetElementNomen(), sourceView.GetType(), parentName: sourceView.ViewType.ToString(), categoryId: bic).
-              Cast<View>().FirstOrDefault();
-          }
+            var sourceView = sourceDocument.GetElement(template.OwnerViewId) as View;
+            destinationView = destinationView ?? sourceView;
 
-          if (destinationView is object)
+            if (!destinationDocument.Equals(destinationView.Document))
+            {
+              var bic = BuiltInCategory.INVALID;
+              sourceView.Category?.Id.TryGetBuiltInCategory(out bic);
+              destinationView = destinationDocument.
+                GetNamesakeElements(sourceView.GetElementNomen(), sourceView.GetType(), parentName: sourceView.ViewType.ToString(), categoryId: bic).
+                Cast<View>().FirstOrDefault();
+            }
+
+            if (destinationView is object)
+            {
+              ids = ElementTransformUtils.CopyElements
+              (
+                sourceView,
+                new ElementId[] { template.Id },
+                destinationView, default, options
+              );
+            }
+          }
+          else
           {
             ids = ElementTransformUtils.CopyElements
             (
-              sourceView,
+              sourceDocument,
               new ElementId[] { template.Id },
-              destinationView, default, default
+              destinationDocument, default, options
             );
           }
-        }
-        else
-        {
-          ids = ElementTransformUtils.CopyElements
-          (
-            sourceDocument,
-            new ElementId[] { template.Id },
-            destinationDocument, default, default
-          );
-        }
 
-        return ids?.Select(destinationDocument.GetElement).OfType<T>().FirstOrDefault();
+          return ids?.Select(destinationDocument.GetElement).OfType<T>().FirstOrDefault();
+        }
       }
       catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
