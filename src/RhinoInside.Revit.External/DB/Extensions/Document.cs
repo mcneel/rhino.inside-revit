@@ -1306,27 +1306,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
           symbol.Family.Name = uniqueName;
           symbol.Name = uniqueName;
 
-          using (var options = new CopyPasteOptions())
-          {
-            options.SetDuplicateTypeNamesAction(DuplicateTypeAction.UseDestinationTypes);
-
-            var copiedElementIds = ElementTransformUtils.CopyElements
-            (
-              symbol.Document,
-              new ElementId[] { symbol.Id },
-              document,
-              default,
-              options
-            );
-
-            if (copiedElementIds.Count == 1)
-            {
-              symbol = document.GetElement(copiedElementIds.First()) as FamilySymbol;
-              symbol.Family.Name = familyName;
-              symbol.Name = symbolName ?? familyName;
-              return symbol;
-            }
-          }
+          symbol = symbol.CloneElement(document);
+          symbol.Family.Name = familyName;
+          symbol.Name = symbolName ?? familyName;
+          return symbol;
         }
       }
 
