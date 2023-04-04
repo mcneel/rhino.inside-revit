@@ -12,13 +12,16 @@ group: Deployment & Configs
 
 ### RC
 
-- Improved 'Element Host' component, now identifies more types.
-- Fixed 'Query Areas' on areas that have internal loops.
-- Fixed 'Element Clone' when cloning named elements.
-- Fixed 'Scope Box' location and bounding box.
-
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.13 RC6" version="v1.13.8494.18380" pre_release=true time="04/04/2023" %}
+
+- Improved {% include ltr/comp.html uuid='6723beb1' %} component, now identifies more types.
+- Fixed {% include ltr/comp.html uuid='d1940eb3' %} on areas that have internal loops.
+- Fixed {% include ltr/comp.html uuid='0ea8d61a' %} when cloning named elements.
+- {% include ltr/comp.html uuid='a5c63076' %} and *Bounding Box* components can now correctly provide location and bounds info for a Revit Scope Box right?.
+- Fixed issue with not reading Admin configuration file correctly
 
 {% include ltr/release-header.html title="v1.13 RC5" version="v1.13.8486.7511" pre_release=true time="03/28/2023" %}
 
