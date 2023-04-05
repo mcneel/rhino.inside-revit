@@ -16,6 +16,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case null:
         case Sketch _: return null;
 
+#if REVIT_2024
+        case Toposolid toposolid: return owner.Document.GetElement(toposolid.SketchId) as Sketch;
+#endif
+
 #if REVIT_2022
         case Ceiling ceiling: return owner.Document.GetElement(ceiling.SketchId) as Sketch;
         case Floor floor:     return owner.Document.GetElement(floor.SketchId) as Sketch;

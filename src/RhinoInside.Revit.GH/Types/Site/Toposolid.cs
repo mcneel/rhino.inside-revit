@@ -8,7 +8,8 @@ namespace RhinoInside.Revit.GH.Types
 {
 #if REVIT_2024
   [Kernel.Attributes.Name("Toposolid")]
-  public class Toposolid : HostObject
+  public class Toposolid : HostObject,
+    ISketchAccess
   {
     protected override Type ValueType => typeof(ARDB.Toposolid);
     public new ARDB.Toposolid Value => base.Value as ARDB.Toposolid;
@@ -50,6 +51,11 @@ namespace RhinoInside.Revit.GH.Types
           GetElement<GraphicalElement>(solid.HostTopoId) :
           new GraphicalElement():
         default;
+    #endregion
+
+    #region ISketchAccess
+    public Sketch Sketch => Value is ARDB.Toposolid solid ?
+      new Sketch(solid.GetSketch()) : default;
     #endregion
   }
 #endif
