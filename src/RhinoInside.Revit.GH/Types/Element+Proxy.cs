@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Types
 
       [DisplayName("Element ID"), Description("The element identifier in this session."), Category("Object")]
       //[RefreshProperties(RefreshProperties.All)]
-      public virtual int? Id => owner.Id?.ToValue();
+      public virtual long? Id => owner.Id?.ToValue();
 
       [DisplayName("Unique ID"), Description("A stable unique identifier for an element within the model."), Category("Object")]
       public virtual string UniqueId => owner.UniqueId;

@@ -1182,11 +1182,19 @@ namespace Rhino.Geometry
 
     public static bool TryGetUserString(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def)
     {
+#if REVIT_2024
+      if (geometry.TryGetUserString(key, out long id, def.ToValue()))
+      {
+        value = new Autodesk.Revit.DB.ElementId(id);
+        return true;
+      }
+#else
       if (geometry.TryGetUserString(key, out int id, def.ToValue()))
       {
         value = new Autodesk.Revit.DB.ElementId(id);
         return true;
       }
+#endif
 
       value = def;
       return false;
