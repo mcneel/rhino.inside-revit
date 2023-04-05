@@ -342,6 +342,8 @@
     <Compile Include="Types\Instances\PointCloudInstance.cs" />
     <Compile Include="Types\Instances\ProjectLocation.cs" />
     <Compile Include="Types\Instances\RevitLinkInstance.cs" />
+    <Compile Include="Types\Site\TopographySurface.cs" />
+    <Compile Include="Types\Site\Toposolid.cs" />
     <Compile Include="Types\Views\Elevation.cs" />
     <Compile Include="Types\Views\Viewer.cs" />
     <Compile Include="Types\Views\ViewFrame.cs" />
@@ -479,7 +481,6 @@
     <Compile Include="Types\SketchPlane.cs" />
     <Compile Include="Types\StructuralMember.cs" />
     <Compile Include="Types\SpatialElement.cs" />
-    <Compile Include="Types\TopographySurface.cs" />
     <Compile Include="Types\Views\ScopeBox.cs" />
     <Compile Include="Types\Views\SectionBox.cs" />
     <Compile Include="Types\Views\View.cs" />

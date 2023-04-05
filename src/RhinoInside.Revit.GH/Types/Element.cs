@@ -219,6 +219,9 @@ namespace RhinoInside.Revit.GH.Types
 
     public static readonly Dictionary<Type, Func<ARDB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<ARDB.Element, Element>>()
     {
+#if REVIT_2024
+      { typeof(ARDB.Toposolid),                       (element)=> new Toposolid             (element as ARDB.Toposolid)         },
+#endif
 #if REVIT_2021
       { typeof(ARDB.InternalOrigin),                  (element)=> new InternalOrigin        (element as ARDB.InternalOrigin)    },
       { typeof(ARDB.BasePoint),                       (element)=> new BasePoint             (element as ARDB.BasePoint)         },
