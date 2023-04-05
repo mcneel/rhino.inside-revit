@@ -10,6 +10,7 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added support for '{{ site.terms.revit }} 2024'
 - Added 'View Range Elevations' component.
 
 ### RC
