@@ -64,6 +64,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static int ToValue(this ElementId id) => id.IntegerValue;
 #endif
 
+    public static ElementId FromValue(int value)
+    {
+#if REVIT_2024
+      return new ElementId((long) value);
+#else
+      return new ElementId(value);
+#endif
+    }
+
     static readonly string LowerHexFormat = $"x{NumHexDigits.IntId}";
     static readonly string UpperHexFormat = $"X{NumHexDigits.IntId}";
 
