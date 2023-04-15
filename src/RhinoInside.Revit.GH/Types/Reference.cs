@@ -110,11 +110,13 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+#if !REVIT_2024
       if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
       {
         target = (Q) (object) new GH_Integer(Id.IntegerValue);
         return true;
       }
+#endif
 
       target = default;
       return false;

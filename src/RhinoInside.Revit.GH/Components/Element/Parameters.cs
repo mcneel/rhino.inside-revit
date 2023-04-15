@@ -105,8 +105,8 @@ namespace RhinoInside.Revit.GH
           {
             switch (builtInElementId)
             {
-              case ARDB.BuiltInParameter.ID_PARAM:          return new GH_Integer(elementId.IntegerValue);
-              case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:   return new GH_Integer(elementId.IntegerValue);
+              case ARDB.BuiltInParameter.ID_PARAM:          return new GH_String(elementId.ToString("D"));
+              case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:   return new GH_String(elementId.ToString("D"));
               case ARDB.BuiltInParameter.MULLION_POSITION:  return new Types.MullionPosition(parameter.Element.Document, elementId);
               case ARDB.BuiltInParameter.MULLION_PROFILE:   return new Types.ProfileType(parameter.Element.Document, elementId);
             }
