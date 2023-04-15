@@ -9,34 +9,35 @@ namespace RhinoInside.Revit.External.DB.Extensions
   public static class SketchExtension
   {
     static readonly ElementFilter ElementSketchFilter = new ElementClassFilter(typeof(Sketch));
-    public static Sketch GetSketch(this Element owner)
+    public static ElementId GetSketchId(this Element owner)
     {
       switch (owner)
       {
         case null:
-        case Sketch _: return null;
+        case Sketch _:          return ElementIdExtension.InvalidElementId;
 
 #if REVIT_2024
-        case Toposolid toposolid: return owner.Document.GetElement(toposolid.SketchId) as Sketch;
+        case Toposolid topo:    return topo.SketchId;
 #endif
 
 #if REVIT_2022
-        case Ceiling ceiling: return owner.Document.GetElement(ceiling.SketchId) as Sketch;
-        case Floor floor:     return owner.Document.GetElement(floor.SketchId) as Sketch;
-        case Wall wall:       return owner.Document.GetElement(wall.SketchId) as Sketch;
-        case Opening opening: return owner.Document.GetElement(opening.SketchId) as Sketch;
+        case Ceiling ceiling:   return ceiling.SketchId;
+        case Floor floor:       return floor.SketchId;
+        case Wall wall:         return wall.SketchId;
+        case Opening opening:   return opening.SketchId;
 #endif
-        case FabricArea  area : return owner.Document.GetElement(area.SketchId) as Sketch;
-        case FabricSheet sheet: return owner.Document.GetElement(sheet.SketchId) as Sketch;
+        case FabricArea area:   return area.SketchId;
+        case FabricSheet sheet: return sheet.SketchId;
       }
 
-      return owner.GetDependentElements(ElementSketchFilter).Select(owner.Document.GetElement).FirstOrDefault() as Sketch;
+      return owner.GetDependentElements(ElementSketchFilter).FirstOrDefault() ?? ElementIdExtension.InvalidElementId;
     }
+    public static Sketch GetSketch(this Element owner) => owner?.Document.GetElement(GetSketchId(owner)) as Sketch;
 
 #if REVIT_2022
-    public static Element GetOwner(this Sketch sketch) =>
-      sketch.Document.GetElement(sketch.OwnerId);
+    public static Element GetOwner(this Sketch sketch) => sketch.Document.GetElement(sketch.OwnerId);
 #else
+
     static readonly ElementFilter SketchOwnerFilter = new ElementMulticlassFilter
     (
       new System.Type[]
@@ -53,7 +54,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var id = sketch.Id;
 
       var dependents = sketch.GetDependentElements(SketchOwnerFilter).Select(document.GetElement);
-      if (dependents.FirstOrDefault(x => x.GetSketch()?.Id == id) is Element owner)
+      if (dependents.FirstOrDefault(x => x.GetSketchId() == id) is Element owner)
         return owner;
 
       using (var collector = new FilteredElementCollector(document))
@@ -62,22 +63,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
           WherePasses(SketchOwnerFilter).
           WherePasses(new BoundingBoxIntersectsFilter(sketch.GetOutline()));
 
-        return elementCollector.Cast<Element>().FirstOrDefault(x => x.GetSketch()?.Id == id);
+        return elementCollector.Cast<Element>().FirstOrDefault(x => x.GetSketchId() == id);
       }
     }
 #endif
 
     public static IList<IList<CurveElement>> GetProfileCurveElements(this Sketch sketch)
     {
+      var document = sketch.Document;
       var curveElements = new IList<CurveElement>[sketch.Profile.Size];
-
       var loopIndex = 0;
       foreach (CurveArray profile in sketch.Profile)
       {
         curveElements[loopIndex++] = profile.Cast<Curve>().
           Distinct(CurveEqualityComparer.Reference).
-          Select(x => sketch.Document.GetElement(x.Reference.ElementId) as CurveElement).
-          ToArray();
+          Select(x => document.GetElement(x.Reference.ElementId)).
+          OfType<CurveElement>().
+          ToList();
       }
 
       return curveElements;
