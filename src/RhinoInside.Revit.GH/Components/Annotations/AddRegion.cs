@@ -165,19 +165,22 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         region = ARDB.FilledRegion.Create(view.Document, type.Id, view.Id, curves);
       }
 
-      var validStyles = ARDB.FilledRegion.GetValidLineStyleIdsForFilledRegion(view.Document);
-      if (view.Document.IsFamilyDocument)
-        validStyles.Add(view.Document.OwnerFamily.FamilyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection).Id);
-
-      if (!validStyles.Contains(linestyle.Id))
-          throw new Exceptions.RuntimeArgumentException("Line Style", $"'{linestyle.Name}' is not a valid Line Style for Filled Regions.");
-
       if (linestyle is object)
       {
-        foreach (var curve in region.GetSketch().GetProfileCurveElements().SelectMany(x => x))
+        var validStyles = ARDB.FilledRegion.GetValidLineStyleIdsForFilledRegion(view.Document);
+        if (view.Document.IsFamilyDocument)
+          validStyles.Add(view.Document.OwnerFamily.FamilyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection).Id);
+
+        if (!validStyles.Contains(linestyle.Id))
+            throw new Exceptions.RuntimeArgumentException("Line Style", $"'{linestyle.Name}' is not a valid Line Style for Filled Regions.");
+
+        using (var sketch = region.GetSketch())
         {
-          if (linestyle.IsEquivalent(curve?.LineStyle)) continue;
-          curve.LineStyle = linestyle;
+          foreach (var curve in sketch.GetProfileCurveElements().SelectMany(x => x))
+          {
+            if (linestyle.IsEquivalent(curve.LineStyle)) continue;
+            curve.LineStyle = linestyle;
+          }
         }
       }
 
