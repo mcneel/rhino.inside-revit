@@ -308,8 +308,8 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (source)
       {
-        case int offset: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset)); return true;
-        case double offset: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset)); return true;
+        case int elevation: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation), null); return true;
+        case double elevation: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation), null); return true;
         case ARDB.Level level: Value = new External.DB.ElevationElementReference(level, default); return true;
         case ARDB.BasePoint basePoint: Value = new External.DB.ElevationElementReference(default, basePoint); return true;
         case External.DB.ElevationElementReference elevation: Value = elevation; return true;
