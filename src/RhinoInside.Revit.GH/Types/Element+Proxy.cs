@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Types
         public override Type ComponentType => typeof(Proxy);
         public override bool IsReadOnly => true;
         public override string Name => parameter.Definition?.Name ?? string.Empty;
-        public override string Category => parameter.Definition is null ? string.Empty : ARDB.LabelUtils.GetLabelFor(parameter.Definition.ParameterGroup);
+        public override string Category => parameter?.Definition?.GetGroupType()?.LocalizedLabel;
         public override string Description
         {
           get
