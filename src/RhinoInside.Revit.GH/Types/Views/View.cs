@@ -638,7 +638,7 @@ namespace RhinoInside.Revit.GH.Types
           else if (overwrite) { index = doc.NamedViews.Add(info); info = doc.NamedViews[index]; }
         }
 
-        idMap.Add(Id, guid = info.Viewport.Id);
+        idMap.Add(Id, guid = info.NamedViewId);
         return true;
       }
 
