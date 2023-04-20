@@ -10,6 +10,7 @@ group: Deployment & Configs
 
 ### WIP
 
+- Minimum Rhino version is now 7.28.
 - Added support for '{{ site.terms.revit }} 2024'
 - Added 'View Range Elevations' component.
 
