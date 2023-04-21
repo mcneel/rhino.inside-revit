@@ -52,6 +52,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class ElementIdExtension
   {
+    public static ElementId Default { get; } = new ElementId(0);
     public static ElementId InvalidElementId { get; } = ElementId.InvalidElementId;
     public static ElementId[] EmptyCollection { get; } = new ElementId[0];
 
