@@ -925,14 +925,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
             var sourceView = sourceDocument.GetElement(template.OwnerViewId) as View;
             destinationView = destinationView ?? sourceView;
 
-            if (!destinationDocument.Equals(destinationView.Document))
-            {
-              var bic = BuiltInCategory.INVALID;
-              sourceView.Category?.Id.TryGetBuiltInCategory(out bic);
-              destinationView = destinationDocument.
-                GetNamesakeElements(sourceView.GetElementNomen(), sourceView.GetType(), parentName: sourceView.ViewType.ToString(), categoryId: bic).
-                Cast<View>().FirstOrDefault();
-            }
+            if (!destinationDocument.IsEquivalent(destinationView.Document))
+              destinationView = destinationDocument.GetElement(destinationDocument.LookupElement(sourceDocument, sourceView.Id)) as View;
 
             if (destinationView is object)
             {
