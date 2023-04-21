@@ -80,6 +80,5 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
     #endregion
-
   }
 }

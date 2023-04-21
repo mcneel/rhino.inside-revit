@@ -506,52 +506,66 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return enumerable;
 
       var nomenParameter = ElementExtension.GetNomenParameter(type);
-
-      if (typeof(ElementType).IsAssignableFrom(type))
+      using (var elementCollector = new FilteredElementCollector(doc))
       {
-        enumerable = new FilteredElementCollector(doc).
-        WhereElementIsElementType().
-        WhereCategoryIdEqualsTo(categoryId).
-        WhereElementIsKindOf(type).
-        WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
-        WhereParameterBeginsWith(nomenParameter, name).
-        Cast<ElementType>().
-        Where(x => x.FamilyName.Equals(parentName, ElementNaming.ComparisonType));
-      }
-      else if (typeof(View).IsAssignableFrom(type))
-      {
-        enumerable = new FilteredElementCollector(doc).
-        WhereElementIsNotElementType().
-        WhereCategoryIdEqualsTo(categoryId).
-        WhereElementIsKindOf(type).
-        WhereParameterBeginsWith(nomenParameter, name).
-        Cast<View>().
-        Where(x => !x.IsTemplate && x.ViewType.ToString() == parentName);
-      }
-      else
-      {
-        var elementCollector = new FilteredElementCollector(doc).
-        WhereElementIsNotElementType().
-        WhereCategoryIdEqualsTo(categoryId).
-        WhereElementIsKindOf(type);
+        var isElementType = typeof(ElementType).IsAssignableFrom(type);
+        var collector =
+          (isElementType ? elementCollector.WhereElementIsElementType() : elementCollector.WhereElementIsNotElementType()).
+          WhereCategoryIdEqualsTo(categoryId).
+          WhereElementIsKindOf(type);
 
-        enumerable = nomenParameter != BuiltInParameter.INVALID ?
-          elementCollector.WhereParameterBeginsWith(nomenParameter, name) :
-          elementCollector;
-      }
+        if(nomenParameter != BuiltInParameter.INVALID)
+          collector = collector.WhereParameterBeginsWith(nomenParameter, name);
 
-      return enumerable.
-        // WhereElementIsKindOf sometimes is not enough.
-        Where(x => type.IsAssignableFrom(x.GetType())).
-        // Look for elements called "name" or "name 1" but not "name abc" or "Name 1".
-        Where
-        (
-          x =>
+        if (string.IsNullOrWhiteSpace(parentName))
+        {
+          enumerable = collector;
+        }
+        else
+        {
+          if (isElementType)
           {
-            TryParseNomenId(x.GetElementNomen(nomenParameter), out var prefix, out var _);
-            return prefix.Equals(name, ElementNaming.ComparisonType);
+            enumerable = collector.
+              WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
+              Cast<ElementType>().Where(x => x.FamilyName.Equals(parentName, ElementNaming.ComparisonType));
           }
-        );
+          else if (typeof(View).IsAssignableFrom(type))
+          {
+            if (Enum.TryParse(parentName, out ViewType viewType))
+            {
+              enumerable = collector.
+                Cast<View>().Where(x => !x.IsTemplate && x.ViewType == viewType);
+            }
+          }
+          else if (typeof(FillPatternElement).IsAssignableFrom(type))
+          {
+            if (Enum.TryParse(parentName, out FillPatternTarget target))
+            {
+              enumerable = collector.Cast<FillPatternElement>().Where
+              (
+                x =>
+                {
+                  using (var pattern = x.GetFillPattern())
+                    return pattern.Target == target;
+                }
+              );
+            }
+          }
+        }
+
+        return enumerable.
+          // WhereElementIsKindOf sometimes is not enough.
+          Where(x => type.IsAssignableFrom(x.GetType())).
+          // Look for elements called "name" or "name 1" but not "name abc" or "Name 1".
+          Where
+          (
+            x =>
+            {
+              TryParseNomenId(x.GetElementNomen(nomenParameter), out var prefix, out var _);
+              return prefix.Equals(name, ElementNaming.ComparisonType);
+            }
+          );
+      }
     }
 
     internal static ElementId LookupElement(this Document target, Document source, ElementId elementId)
@@ -602,6 +616,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
         else if (element is AppearanceAssetElement asset)
         {
           return AppearanceAssetElement.GetAppearanceAssetElementByName(target, asset.Name)?.Id ?? ElementIdExtension.InvalidElementId;
+        }
+        else if (element is FillPatternElement fillPattern)
+        {
+          using (var pattern = fillPattern.GetFillPattern())
+            return FillPatternElement.GetFillPatternElementByName(target, pattern.Target, fillPattern.Name)?.Id ?? ElementIdExtension.InvalidElementId;
         }
         else
         {
