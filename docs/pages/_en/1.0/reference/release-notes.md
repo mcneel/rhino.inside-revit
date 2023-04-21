@@ -19,6 +19,12 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.13" version="v1.13.8510.35816" time="04/20/2023" %}
+
+- Includes all changes under 1.13RC releases listed below
+- Added {% include ltr/comp.html uuid='e2435930' %} parameter
+- Added {% include ltr/comp.html uuid='4326c4aa' %} parameter
+
 {% include ltr/release-header.html title="v1.13 RC6" version="v1.13.8494.18380" pre_release=true time="04/04/2023" %}
 
 - Improved {% include ltr/comp.html uuid='6723beb1' %} component, now identifies more types.
@@ -49,9 +55,9 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.13 RC3" version="v1.13.8474.22250" pre_release=true time="03/15/2023" %}
 
-- Added 'Add Component (Curve)' component.
-- Added 'Add Column' component.
-- Added 'Query Cloud Points' component.
+- Added {% include ltr/comp.html uuid='5a6d9a20' %} component.
+- Added {% include ltr/comp.html uuid='be2c26c7' %} component.
+- Added {% include ltr/comp.html uuid='72b92e6a' %} component.
 
 {% include ltr/release-header.html title="v1.13 RC2" version="v1.13.8466.15699" pre_release=true time="03/07/2023" %}
 
