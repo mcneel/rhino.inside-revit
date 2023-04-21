@@ -7,15 +7,11 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using External.DB.Extensions;
-
   [Kernel.Attributes.Name("Fill Pattern")]
   public class FillPatternElement : Element, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.FillPatternElement);
     public new ARDB.FillPatternElement Value => base.Value as ARDB.FillPatternElement;
-
-    internal static readonly ARDB.ElementId SolidId = ElementIdExtension.FromValue(3);
 
     public FillPatternElement() { }
     public FillPatternElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
@@ -82,6 +78,5 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
     #endregion
-
   }
 }
