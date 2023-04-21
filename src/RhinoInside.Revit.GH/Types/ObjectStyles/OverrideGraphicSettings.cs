@@ -106,7 +106,9 @@ namespace RhinoInside.Revit.GH.Types
           SetProjectionLineColor(color.ToColor()).
           SetSurfaceForegroundPatternId(FillPatternElement.SolidId).
           SetSurfaceForegroundPatternColor(color.ToColor()).
-          SetSurfaceTransparency((int) Math.Round((1.0 - (color.A / 255.0)) * 100.0));
+          SetSurfaceTransparency((int) Math.Round((1.0 - (color.A / 255.0)) * 100.0)).
+          SetCutForegroundPatternId(FillPatternElement.SolidId).
+          SetCutForegroundPatternColor(color.ToColor());
 
         return true;
       }
@@ -126,7 +128,9 @@ namespace RhinoInside.Revit.GH.Types
             SetProjectionLineColor(highlight.ToColor()).
             SetSurfaceForegroundPatternId(FillPatternElement.SolidId).
             SetSurfaceForegroundPatternColor(highlight.ToColor()).
-            SetSurfaceTransparency((int) Math.Round((1.0 - (highlight.A / 255.0)) * 100.0));
+            SetSurfaceTransparency((int) Math.Round((1.0 - (highlight.A / 255.0)) * 100.0)).
+            SetCutForegroundPatternId(FillPatternElement.SolidId).
+            SetCutForegroundPatternColor(highlight.ToColor());
         }
         else
         {
