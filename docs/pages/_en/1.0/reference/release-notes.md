@@ -10,10 +10,6 @@ group: Deployment & Configs
 
 ### WIP
 
-- Minimum Rhino version is now 7.28.
-- Added support for '{{ site.terms.revit }} 2024'
-- Added 'View Range Elevations' component.
-
 ### RC
 
 {% endcapture %}
@@ -21,7 +17,9 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.14 RC1" version="v1.14.8510.35994" pre_release=true time="04/20/2023" %}
 
-- Minor Fixes and Improvements
+- Minimum Rhino version is now 7.28.
+- Added support for '{{ site.terms.revit }} 2024'
+- Added 'View Range Elevations' component.
 
 {% include ltr/release-header.html title="v1.13" version="v1.13.8510.35816" time="04/20/2023" %}
 

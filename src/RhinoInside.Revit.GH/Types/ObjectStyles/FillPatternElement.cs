@@ -7,8 +7,6 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using External.DB.Extensions;
-
   [Kernel.Attributes.Name("Fill Pattern")]
   public class FillPatternElement : Element, Bake.IGH_BakeAwareElement
   {
