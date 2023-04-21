@@ -506,7 +506,7 @@ namespace RhinoInside.Revit.GH.Types
     #region IHostElementAccess
     public override GraphicalElement HostElement => Value is ARDB.WallSweep wallSweep ?
       wallSweep.GetWallSweepInfo().IsFixed ?
-      GetElement<GraphicalElement>(wallSweep.GetHostIds().FirstOrDefault() ?? ElementIdExtension.InvalidElementId) :
+      GetElement<GraphicalElement>(wallSweep.GetHostIds().FirstOrDefault() ?? ElementIdExtension.Invalid) :
       base.HostElement :
       default;
     #endregion

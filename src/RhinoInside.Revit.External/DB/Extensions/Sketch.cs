@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       switch (owner)
       {
         case null:
-        case Sketch _:          return ElementIdExtension.InvalidElementId;
+        case Sketch _:          return ElementIdExtension.Invalid;
 
 #if REVIT_2024
         case Toposolid topo:    return topo.SketchId;
@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case FabricSheet sheet: return sheet.SketchId;
       }
 
-      return owner.GetDependentElements(ElementSketchFilter).FirstOrDefault() ?? ElementIdExtension.InvalidElementId;
+      return owner.GetDependentElements(ElementSketchFilter).FirstOrDefault() ?? ElementIdExtension.Invalid;
     }
     public static Sketch GetSketch(this Element owner) => owner?.Document.GetElement(GetSketchId(owner)) as Sketch;
 

@@ -276,7 +276,7 @@ namespace RhinoInside.Revit.GH.Components
         component.ChangeTypeId(type.Id);
       }
 
-      if (component.LevelId == ElementIdExtension.InvalidElementId)
+      if (component.LevelId == ElementIdExtension.Invalid)
       {
         var levelParam = component.get_Parameter(ARDB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
         if (levelParam.AsElementId() != level.Id)

@@ -223,7 +223,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return parameter.Element.ChangeTypeId(value) == ElementId.InvalidElementId;
       }
 
-      return parameter.Set(value ?? ElementIdExtension.InvalidElementId);
+      return parameter.Set(value ?? ElementIdExtension.Invalid);
     }
 
     public static bool Set(this Parameter parameter, Element value)
@@ -231,7 +231,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (value is object && !parameter.Element.Document.IsEquivalent(value.Document))
         throw new InvalidCastException();
 
-      return Set(parameter, value?.Id ?? ElementIdExtension.InvalidElementId);
+      return Set(parameter, value?.Id ?? ElementIdExtension.Invalid);
     }
 
     public static bool Update(this Parameter parameter, bool value)
@@ -274,7 +274,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (parameter.HasValue && parameter.AsElementId() == value) return true;
 
-      return Set(parameter, value ?? ElementIdExtension.InvalidElementId);
+      return Set(parameter, value ?? ElementIdExtension.Invalid);
     }
 
     public static bool Update(this Parameter parameter, Element value)
@@ -282,7 +282,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (value is object && !parameter.Element.Document.IsEquivalent(value.Document))
         throw new InvalidCastException();
 
-      return Update(parameter, value?.Id ?? ElementIdExtension.InvalidElementId);
+      return Update(parameter, value?.Id ?? ElementIdExtension.Invalid);
     }
 
     public static bool ResetValue(this Parameter parameter)

@@ -78,8 +78,8 @@ namespace RhinoInside.Revit.GH.Types
 
       if (other.Document is null)
       {
-        if (Value.ProjectionLinePatternId.ToBuiltInLinePattern() != ERDB.BuiltInLinePattern.Solid) Value.SetProjectionLinePatternId(ElementIdExtension.InvalidElementId);
-        if (Value.CutLinePatternId.ToBuiltInLinePattern() != ERDB.BuiltInLinePattern.Solid) Value.SetCutLinePatternId(ElementIdExtension.InvalidElementId);
+        if (Value.ProjectionLinePatternId.ToBuiltInLinePattern() != ERDB.BuiltInLinePattern.Solid) Value.SetProjectionLinePatternId(ElementIdExtension.Invalid);
+        if (Value.CutLinePatternId.ToBuiltInLinePattern() != ERDB.BuiltInLinePattern.Solid) Value.SetCutLinePatternId(ElementIdExtension.Invalid);
 
         using (var collector = new ARDB.FilteredElementCollector(Document))
         {
@@ -93,12 +93,12 @@ namespace RhinoInside.Revit.GH.Types
                   return pattern.Target == ARDB.FillPatternTarget.Drafting && pattern.IsSolidFill;
               }
             )?.
-            Id ?? ElementIdExtension.InvalidElementId;
+            Id ?? ElementIdExtension.Invalid;
 
-          Value.SetSurfaceForegroundPatternId(Value.SurfaceForegroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.InvalidElementId);
-          Value.SetSurfaceBackgroundPatternId(Value.SurfaceBackgroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.InvalidElementId);
-          Value.SetCutForegroundPatternId(Value.CutForegroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.InvalidElementId);
-          Value.SetCutBackgroundPatternId(Value.CutBackgroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.InvalidElementId);
+          Value.SetSurfaceForegroundPatternId(Value.SurfaceForegroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.Invalid);
+          Value.SetSurfaceBackgroundPatternId(Value.SurfaceBackgroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.Invalid);
+          Value.SetCutForegroundPatternId(Value.CutForegroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.Invalid);
+          Value.SetCutBackgroundPatternId(Value.CutBackgroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.Invalid);
         }
       }
       else

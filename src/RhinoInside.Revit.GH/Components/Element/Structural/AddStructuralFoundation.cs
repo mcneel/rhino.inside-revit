@@ -221,7 +221,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!IsEquivalentHost(foundation, host)) return false;
       if (type.Id != foundation.GetTypeId()) foundation.ChangeTypeId(type.Id);
 
-      if (foundation.LevelId == ElementIdExtension.InvalidElementId)
+      if (foundation.LevelId == ElementIdExtension.Invalid)
       {
         var levelParam = foundation.get_Parameter(ARDB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
         if (levelParam?.IsReadOnly is false && levelParam.Update(level.Id) == false) return false;
