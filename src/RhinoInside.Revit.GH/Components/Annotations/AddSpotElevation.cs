@@ -213,7 +213,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             var id = ARDB.ElementTransformUtils.CopyElement(templateSpot.Document, templateSpot.Id, point);
             templateSpot.Document.Delete(templateSpot.Id);
             directShape.Document.Delete(directShape.Id);
-            return view.Document.GetElement(id.FirstOrDefault() ?? ElementIdExtension.InvalidElementId) as ARDB.SpotDimension;
+            return view.Document.GetElement(id.FirstOrDefault() ?? ElementIdExtension.Invalid) as ARDB.SpotDimension;
           }
         }
       }

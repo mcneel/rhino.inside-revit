@@ -360,7 +360,7 @@ namespace RhinoInside.Revit.GH.Components
       using (var scheduleLevel = component.get_Parameter(ARDB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM))
       {
         if(scheduleLevel?.IsReadOnly is false)
-          scheduleLevel.Update(level?.Id ?? ElementIdExtension.InvalidElementId);
+          scheduleLevel.Update(level?.Id ?? ElementIdExtension.Invalid);
       }
 
       return component;

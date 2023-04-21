@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if REVIT_2019
       return settings.SurfaceBackgroundPatternId;
 #else
-      return ElementIdExtension.InvalidElementId;
+      return ElementIdExtension.Invalid;
 #endif
     }
 
@@ -99,7 +99,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if REVIT_2019
       return settings.CutBackgroundPatternId;
 #else
-      return ElementIdExtension.InvalidElementId;
+      return ElementIdExtension.Invalid;
 #endif
     }
 

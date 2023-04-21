@@ -128,7 +128,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
       if (mat is object)
       {
-        mat.AppearanceAssetId = ass?.Id ?? ElementIdExtension.InvalidElementId;
+        mat.AppearanceAssetId = ass?.Id ?? ElementIdExtension.Invalid;
         mat.UseRenderAppearanceForShading = ass is object;
       }
     }

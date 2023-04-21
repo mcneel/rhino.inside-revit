@@ -313,7 +313,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static Element GetElement(this Document doc, ElementId elementId, ElementId linkedElementId)
     {
       var element = doc.GetElement(elementId);
-      if (linkedElementId == ElementIdExtension.InvalidElementId) return element;
+      if (linkedElementId == ElementIdExtension.Invalid) return element;
       if (element is RevitLinkInstance link)
         return link.GetLinkDocument()?.GetElement(linkedElementId);
 
@@ -583,14 +583,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             return collector.WhereElementIsElementType().
               WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.InvalidElementId).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.Invalid).
               WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, type.FamilyName).
               WhereParameterEqualsTo(nomenParameter, nomen).
               Cast<ElementType>().
               Where(x => x.FamilyName.Equals(type.FamilyName, ElementNaming.ComparisonType)).
               Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
-              FirstOrDefault() ?? ElementIdExtension.InvalidElementId;
+              FirstOrDefault() ?? ElementIdExtension.Invalid;
           }
         }
         else if (element is View view)
@@ -599,28 +599,28 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             return collector.WhereElementIsElementType().
               WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.InvalidElementId).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.Invalid).
               WhereParameterEqualsTo(nomenParameter, nomen).
               Cast<View>().
               Where(x => x.IsTemplate == view.IsTemplate).
               Where(x => x.ViewType == view.ViewType).
               Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
-              FirstOrDefault() ?? ElementIdExtension.InvalidElementId;
+              FirstOrDefault() ?? ElementIdExtension.Invalid;
           }
         }
         else if (element is SharedParameterElement sharedParameter)
         {
-          return SharedParameterElement.Lookup(target, sharedParameter.GuidValue)?.Id ?? ElementIdExtension.InvalidElementId;
+          return SharedParameterElement.Lookup(target, sharedParameter.GuidValue)?.Id ?? ElementIdExtension.Invalid;
         }
         else if (element is AppearanceAssetElement asset)
         {
-          return AppearanceAssetElement.GetAppearanceAssetElementByName(target, asset.Name)?.Id ?? ElementIdExtension.InvalidElementId;
+          return AppearanceAssetElement.GetAppearanceAssetElementByName(target, asset.Name)?.Id ?? ElementIdExtension.Invalid;
         }
         else if (element is FillPatternElement fillPattern)
         {
           using (var pattern = fillPattern.GetFillPattern())
-            return FillPatternElement.GetFillPatternElementByName(target, pattern.Target, fillPattern.Name)?.Id ?? ElementIdExtension.InvalidElementId;
+            return FillPatternElement.GetFillPatternElementByName(target, pattern.Target, fillPattern.Name)?.Id ?? ElementIdExtension.Invalid;
         }
         else
         {
@@ -630,26 +630,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
             {
               return collector.WhereElementIsNotElementType().
               WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.InvalidElementId).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.Invalid).
               WhereParameterEqualsTo(nomenParameter, nomen).
               Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
-              FirstOrDefault() ?? ElementIdExtension.InvalidElementId;
+              FirstOrDefault() ?? ElementIdExtension.Invalid;
             }
             else if (element is Family || element is ParameterElement || element.CanBeRenominated())
             {
               return collector.WhereElementIsNotElementType().
               WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.InvalidElementId).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.Invalid).
               Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
-              FirstOrDefault() ?? ElementIdExtension.InvalidElementId;
+              FirstOrDefault() ?? ElementIdExtension.Invalid;
             }
           }
         }
       }
 
-      return ElementIdExtension.InvalidElementId;
+      return ElementIdExtension.Invalid;
     }
     #endregion
 
@@ -694,11 +694,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
         (
           collector.Cast<GraphicsStyle>().
           Select(x => x.GraphicsStyleCategory).
-          Where(x => x.Id != ElementIdExtension.InvalidElementId && x.Name != string.Empty)
+          Where(x => x.Id != ElementIdExtension.Invalid && x.Name != string.Empty)
         );
 
         if (parentId is object)
-          categories = categories.Where(x => parentId == (x.Parent?.Id ?? ElementIdExtension.InvalidElementId));
+          categories = categories.Where(x => parentId == (x.Parent?.Id ?? ElementIdExtension.Invalid));
 
         return new HashSet<Category>(categories, CategoryEqualityComparer.SameDocument);
       }
@@ -818,7 +818,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool TryGetParameter(this Document doc, out ParameterElement parameterElement, string parameterName, ParameterScope scope)
     {
       var (definition, _) = doc.GetParameterDefinitions(scope).FirstOrDefault(x => x.Definition.Name == parameterName);
-      parameterElement = doc.GetElement(definition?.Id ?? ElementIdExtension.InvalidElementId) as ParameterElement;
+      parameterElement = doc.GetElement(definition?.Id ?? ElementIdExtension.Invalid) as ParameterElement;
       return parameterElement is object;
     }
     #endregion

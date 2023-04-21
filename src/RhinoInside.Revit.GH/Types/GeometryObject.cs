@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (GetReference() is ARDB.Reference reference)
           target = (Q) (object) (Element.FromReference(ReferenceDocument, reference) is Q element ? element : default);
-        else if (Id == ElementIdExtension.InvalidElementId)
+        else if (Id == ElementIdExtension.Invalid)
           target = (Q) (object) new Element();
         else
           target = default;
@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Reference
     public override ARDB.ElementId Id => ReferenceUniqueId == string.Empty ?
-      ElementIdExtension.InvalidElementId :
+      ElementIdExtension.Invalid :
       _Reference is null ? null :
       _Reference.LinkedElementId != ARDB.ElementId.InvalidElementId ?
       _Reference.LinkedElementId :
@@ -416,7 +416,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Id == ElementIdExtension.InvalidElementId) return "<None>";
+        if (Id == ElementIdExtension.Invalid) return "<None>";
         switch (Element.FromReference(ReferenceDocument, GetReference()))
         {
           case null: return $"Null {base.DisplayName}";
@@ -511,7 +511,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Id == ElementIdExtension.InvalidElementId) return "<None>";
+        if (Id == ElementIdExtension.Invalid) return "<None>";
         switch (Element.FromReference(ReferenceDocument, GetReference()))
         {
           case null: return $"Null {base.DisplayName} : Subelement";

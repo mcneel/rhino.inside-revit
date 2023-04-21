@@ -332,15 +332,15 @@ namespace RhinoInside.Revit.GH.Types
                 var type = HostElement.Type.Value;
                 type = type.Duplicate(Guid.NewGuid().ToString()) as ARDB.HostObjAttributes;
                 if (type is ARDB.WallType)
-                  type.get_Parameter(ARDB.BuiltInParameter.AUTO_PANEL_WALL).Update(ElementIdExtension.InvalidElementId);
+                  type.get_Parameter(ARDB.BuiltInParameter.AUTO_PANEL_WALL).Update(ElementIdExtension.Invalid);
                 else
-                  type.get_Parameter(ARDB.BuiltInParameter.AUTO_PANEL).Update(ElementIdExtension.InvalidElementId);
+                  type.get_Parameter(ARDB.BuiltInParameter.AUTO_PANEL).Update(ElementIdExtension.Invalid);
                 type.get_Parameter(ARDB.BuiltInParameter.SPACING_LAYOUT_U).Update(0);
                 type.get_Parameter(ARDB.BuiltInParameter.SPACING_LAYOUT_V).Update(0);
-                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_VERT)?.Update(ElementIdExtension.InvalidElementId);
-                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_VERT)?.Update(ElementIdExtension.InvalidElementId);
-                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_HORIZ)?.Update(ElementIdExtension.InvalidElementId);
-                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_HORIZ)?.Update(ElementIdExtension.InvalidElementId);
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_VERT)?.Update(ElementIdExtension.Invalid);
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_VERT)?.Update(ElementIdExtension.Invalid);
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_HORIZ)?.Update(ElementIdExtension.Invalid);
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_HORIZ)?.Update(ElementIdExtension.Invalid);
                 HostElement.Type = ElementType.FromValue(type) as ElementType;
               }
 
