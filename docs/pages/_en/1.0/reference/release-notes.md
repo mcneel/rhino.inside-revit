@@ -32,7 +32,7 @@ group: Deployment & Configs
 - Improved {% include ltr/comp.html uuid='6723beb1' %} component, now identifies more types.
 - Fixed {% include ltr/comp.html uuid='d1940eb3' %} on areas that have internal loops.
 - Fixed {% include ltr/comp.html uuid='0ea8d61a' %} when cloning named elements.
-- {% include ltr/comp.html uuid='a5c63076' %} and *Bounding Box* components can now correctly provide location and bounds info for a Revit Scope Box right?.
+- {% include ltr/comp.html uuid='a5c63076' %} and *Bounding Box* components can now correctly provide location and bounds info for a Revit Scope Box .
 - Fixed issue with not reading Admin configuration file correctly
 
 {% include ltr/release-header.html title="v1.13 RC5" version="v1.13.8486.7511" pre_release=true time="03/28/2023" %}
