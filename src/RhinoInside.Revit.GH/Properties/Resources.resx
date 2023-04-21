@@ -1507,4 +1507,22 @@
   <data name="WorksetVisibilityOverrides" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\..\art\gh-icons\comps\WorksetVisibilityOverrides.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="PointCloudInstance" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\params\PointCloudInstance.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="QueryCloudPoints" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\QueryCloudPoints.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="TextElement" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\params\TextElement.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AddColumn" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\AddColumn.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AddComponentCurve" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\AddComponentCurve.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AddElevationMarker" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\..\art\gh-icons\comps\AddElevationMarker.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
