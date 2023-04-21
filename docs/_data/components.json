@@ -13,8 +13,8 @@
   }, 
   {
     "desc": "Contains a collection of Revit text note elements", 
-    "iconsrc": null, 
-    "icontag": "T", 
+    "iconsrc": "/static/images/GH/TextElement.png", 
+    "icontag": null, 
     "panel": "Revit Elements", 
     "since": null, 
     "tab": "Params", 
@@ -25,8 +25,8 @@
   }, 
   {
     "desc": "Contains a collection of Revit point cloud elements", 
-    "iconsrc": null, 
-    "icontag": "P", 
+    "iconsrc": "/static/images/GH/PointCloudInstance.png", 
+    "icontag": null, 
     "panel": "Revit", 
     "since": null, 
     "tab": "Params", 
@@ -1453,8 +1453,8 @@
   }, 
   {
     "desc": "Given its Location, it adds a column element to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/AddColumn.png", 
+    "icontag": null, 
     "panel": "Architecture", 
     "since": "1.13", 
     "tab": "Revit", 
@@ -1477,8 +1477,8 @@
   }, 
   {
     "desc": "Given a Curve, it adds a curve based component to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/AddComponentCurve.png", 
+    "icontag": null, 
     "panel": "Component", 
     "since": "1.13", 
     "tab": "Revit", 
@@ -2485,8 +2485,8 @@
   }, 
   {
     "desc": "Query Point Cloud points and colours", 
-    "iconsrc": null, 
-    "icontag": "Q", 
+    "iconsrc": "/static/images/GH/QueryCloudPoints.png", 
+    "icontag": null, 
     "panel": "Site", 
     "since": "1.13", 
     "tab": "Revit", 
@@ -4188,7 +4188,7 @@
     "uuid": "3848c899-cc07-4397-855d-961e907c09d9"
   }, 
   {
-    "desc": "Get-Set element visibility on the specified View", 
+    "desc": "Check element visibility on a given View", 
     "iconsrc": null, 
     "icontag": "E", 
     "panel": "Element", 
@@ -4609,8 +4609,8 @@
   }, 
   {
     "desc": "Given a name, it adds a elevation marker to the active Revit document", 
-    "iconsrc": null, 
-    "icontag": "A", 
+    "iconsrc": "/static/images/GH/AddElevationMarker.png", 
+    "icontag": null, 
     "panel": "View", 
     "since": "1.13", 
     "tab": "Revit", 
