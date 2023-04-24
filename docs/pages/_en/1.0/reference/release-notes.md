@@ -15,11 +15,12 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.13" version="v1.13.8510.35816" time="04/20/2023" %}
+{% include ltr/release-header.html title="v1.13" version="v1.13.8511.13600" time="04/20/2023" %}
 
 - Includes all changes under 1.13RC releases listed below
 - Added {% include ltr/comp.html uuid='e2435930' %} parameter
 - Added {% include ltr/comp.html uuid='4326c4aa' %} parameter
+- Misc fixes and improvements
 
 {% include ltr/release-header.html title="v1.13 RC6" version="v1.13.8494.18380" pre_release=true time="04/04/2023" %}
 
