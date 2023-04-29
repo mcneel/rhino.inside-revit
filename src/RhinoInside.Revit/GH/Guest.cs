@@ -284,8 +284,10 @@ namespace RhinoInside.Revit.GH
       {
         if (!Rhinoceros.Exposed && !RhinoDoc.ActiveDoc.Views.Any(x => x.Floating))
         {
-          var cursorPosition = System.Windows.Forms.Cursor.Position;
-          if (Rhinoceros.OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300) is null)
+          var bounds = Revit.MainWindow.Bounds;
+          var x = bounds.X + bounds.Width / 2;
+          var y = bounds.Y + bounds.Height / 2;
+          if (Rhinoceros.OpenRevitViewport(x - 400, y - 300) is null)
             Rhinoceros.Exposed = true;
         }
       }
