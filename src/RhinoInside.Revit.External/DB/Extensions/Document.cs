@@ -498,12 +498,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return default;
     }
 
-    internal static IEnumerable<Element> GetNamesakeElements(this Document doc, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
+    internal static IList<Element> GetNamesakeElements(this Document doc, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
     {
       var enumerable = Enumerable.Empty<Element>();
 
       if (string.IsNullOrWhiteSpace(name))
-        return enumerable;
+        return enumerable.ToList();
 
       var nomenParameter = ElementExtension.GetNomenParameter(type);
       using (var elementCollector = new FilteredElementCollector(doc))
@@ -564,7 +564,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
               TryParseNomenId(x.GetElementNomen(nomenParameter), out var prefix, out var _);
               return prefix.Equals(name, ElementNaming.ComparisonType);
             }
-          );
+          ).
+          ToList();
       }
     }
 
