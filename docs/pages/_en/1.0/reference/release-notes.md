@@ -15,6 +15,12 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.14 RC1" version="v1.14.8510.35994" pre_release=true time="04/20/2023" %}
+
+- Minimum Rhino version is now 7.28.
+- Added support for '{{ site.terms.revit }} 2024'
+- Added 'View Range Elevations' component.
+
 {% include ltr/release-header.html title="v1.13" version="v1.13.8511.13600" time="04/20/2023" %}
 
 - Includes all changes under 1.13RC releases listed below
@@ -27,7 +33,7 @@ group: Deployment & Configs
 - Improved {% include ltr/comp.html uuid='6723beb1' %} component, now identifies more types.
 - Fixed {% include ltr/comp.html uuid='d1940eb3' %} on areas that have internal loops.
 - Fixed {% include ltr/comp.html uuid='0ea8d61a' %} when cloning named elements.
-- {% include ltr/comp.html uuid='a5c63076' %} and *Bounding Box* components can now correctly provide location and bounds info for a Revit Scope Box right?.
+- {% include ltr/comp.html uuid='a5c63076' %} and *Bounding Box* components can now correctly provide location and bounds info for a Revit Scope Box .
 - Fixed issue with not reading Admin configuration file correctly
 
 {% include ltr/release-header.html title="v1.13 RC5" version="v1.13.8486.7511" pre_release=true time="03/28/2023" %}

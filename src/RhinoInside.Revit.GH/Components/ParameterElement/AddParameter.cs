@@ -379,9 +379,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
             try
             {
-              var familyParam = key.Group is object ?
-                doc.FamilyManager.AddParameter(definition, key.Group, parameterScope == ERDB.ParameterScope.Instance) :
-                doc.FamilyManager.AddParameter(definition, ARDB.BuiltInParameterGroup.INVALID, parameterScope == ERDB.ParameterScope.Instance);
+              var familyParam = doc.FamilyManager.AddParameter(definition, key.Group, parameterScope == ERDB.ParameterScope.Instance);
               return doc.GetElement(familyParam.Id) as ARDB.ParameterElement;
             }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException e)

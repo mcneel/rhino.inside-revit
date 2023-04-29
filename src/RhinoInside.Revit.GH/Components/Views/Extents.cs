@@ -220,7 +220,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       });
     }
 
-    internal static void GetFrontAndBackClipOffsets(ARDB.View view, out double backOffset, out double frontOffset)
+    static void GetFrontAndBackClipOffsets(ARDB.View view, out double backOffset, out double frontOffset)
     {
       backOffset = -(view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR)?.AsInteger() == 1 ?
                     (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR)?.AsDouble() ?? double.PositiveInfinity) : double.PositiveInfinity);
@@ -229,7 +229,7 @@ namespace RhinoInside.Revit.GH.Components.Views
                      (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_NEAR)?.AsDouble() ?? double.PositiveInfinity) : double.PositiveInfinity);
     }
 
-    internal static void GetViewRangeOffsets(ARDB.View view, out double backOffset, out double frontOffset)
+    static void GetViewRangeOffsets(ARDB.View view, out double backOffset, out double frontOffset)
     {
       GetFrontAndBackClipOffsets(view, out backOffset, out frontOffset);
 

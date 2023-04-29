@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Parameters
       listBox.BeginUpdate();
       listBox.Items.Clear();
       listBox.Items.Add(new Types.LinePatternElement());
-      listBox.Items.Add(new Types.LinePatternElement(doc, new ARDB.ElementId((int) External.DB.BuiltInLinePattern.Solid)));
+      listBox.Items.Add(new Types.LinePatternElement(doc, Types.LinePatternElement.SolidId));
 
       using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.LinePatternElement)))
       {

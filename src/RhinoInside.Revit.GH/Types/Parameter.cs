@@ -170,7 +170,7 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (source)
       {
-        case int integer: parameterId = new ARDB.ElementId(integer); break;
+        case int integer: parameterId = ElementIdExtension.FromValue(integer); break;
         case ARDB.BuiltInParameter bip: parameterId = new ARDB.ElementId(bip); break;
         case ARDB.ElementId id: parameterId = id; break;
         case ARDB.Parameter parameter: return SetParameter(parameter);

@@ -11,131 +11,94 @@ In Revit API, Spatial Elements are represented by the {% include api_type.html t
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-## Querying Spatial Elements
+## Querying Rooms
 
-Use a combination of category component, connected {% include ltr/comp.html uuid="d08f7ab1-" %} to collect specific *Spatial Elements*:
+Use the {% include ltr/comp.html uuid="5ddcb816-" %} component to gather all Rooms or filter by 
+criteria. 
+![]({{ "/static/images/guides/Revit-Spatial-Query-Rooms.png" | prepend: site.baseurl }})
 
-![]({{ "/static/images/guides/revit-spatial01.png" | prepend: site.baseurl }})
+## Add Room Separation Lines
 
-## Querying Separation Lines
+The {% include ltr/comp.html uuid="34186815-" %} component will add individual Separation Lines to a view.
+![]({{ "/static/images/guides/Revit-Spatial-Add-Room-Seperation.png" | prepend: site.baseurl }})
 
-To find the separation (or boundary) lines associated with a category of spatial elements (e.g. Rooms, Areas, Spaces) use the *Separation Lines* dropdown component shared here. This component helps filtering down the list of categories to the separation lines. The output can be used with {% include ltr/comp.html uuid="d08f7ab1-" %} and {% include ltr/comp.html uuid="0f7da57e-" %} components to grab the desired separation lines from the model.
+## Add Rooms
 
-![]({{ "/static/images/guides/revit-spatial02.png" | prepend: site.baseurl }})
+The {% include ltr/comp.html uuid="de5e832b-" %} component will add Rooms to a view given a location.
+![]({{ "/static/images/guides/Revit-Spatial-Add-Room.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Separation Lines.ghuser' name='Separation Lines' %}
+
+
+&nbsp;
+
+
+## Querying Spaces
+
+Use the {% include ltr/comp.html uuid="a1ccf034-" %} to gather all Spaces or filter by 
+criteria. 
+
+![]({{ "/static/images/guides/Revit-Spatial-Query-Spaces.png" | prepend: site.baseurl }})
+
+## Add Space Separation Lines
+
+The {% include ltr/comp.html uuid="dea31165-" %}  component will add individual Space Separation Lines to a view.
+
+![]({{ "/static/images/guides/Revit-Spatial-Add-Space-Seperation.png" | prepend: site.baseurl }})
+
+## Add Spaces
+
+The {% include ltr/comp.html uuid="07711559-" %} component will add Spaces to a view given a location.
+
+![]({{ "/static/images/guides/Revit-Spatial-Add-Space.png" | prepend: site.baseurl }})
+
+&nbsp;
 
 ## Querying Area Schemes
 
-*Area Schemes* are container for Area element. Each *Area Schemes* can contain many Area element, host on various levels. *Area* plans are directly associated with a Level (just like any other plan view) and also a specific *Area Scheme*. This is why you would see the *Area Scheme* name in parentheses in front of the *Area* plan name e.g. **My Area Plan (Gross Building)**.
+Use the {% include ltr/comp.html uuid="3e2a753b-" %} to get all Area Schemes or filter by Name.
+![]({{ "/static/images/guides/Revit-Spatial-Query-Area-Schemes.png" | prepend: site.baseurl }})
 
-Use the **Get Area Schemes** component shared here to query the available *Area Schemes*. Note that *Area Schemes* are Elements and you can use the {% include ltr/comp.html uuid='01934ad1' %} component to grab their Name:
+## Querying Areas
 
-![]({{ "/static/images/guides/revit-spatial03.png" | prepend: site.baseurl }})
+Use the {% include ltr/comp.html uuid="d1940eb3-" %} to gather all Areas or filter by 
+criteria. 
+![]({{ "/static/images/guides/Revit-Spatial-Query-Areas.png" | prepend: site.baseurl }})
 
-Grabbing the name as shown above, can help filtering *Area Schemes* by their Name:
+## Add Area Boundary Lines
 
-![]({{ "/static/images/guides/revit-spatial04.png" | prepend: site.baseurl }})
+Use the {% include ltr/comp.html uuid="34d68cdc-" %} to add individual Area Boundary Lines
 
-&nbsp;
+![]({{ "/static/images/guides/Revit-Spatial-Add-Area-Boundary.png" | prepend: site.baseurl }})
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Get Area Schemes.ghuser' name='Get Area Schemes' %}
+## Add Areas
 
-{% include ltr/issue_note.html issue_id='181' note='Category picker is missing OST_AreaSchemes builtin category' %}
+Use the {% include ltr/comp.html uuid="2ee360f3-" %} to add Areas to Views.
 
-## Querying HVAC Zones
-
-*HVAZ Zones* can be collected just like any other element type:
-
-![]({{ "/static/images/guides/revit-spatial04a.png" | prepend: site.baseurl }})
-
-## Analyzing Spatial Elements
-
-Use the **Analyse Spatial Element** component shared here to get the common properties of *Spatial Elements*:
-
-![]({{ "/static/images/guides/revit-spatial05.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Spatial Element.ghuser' name='Analyse Spatial Element' %}
-
-Use the {% include ltr/comp.html uuid="e3d32938" %} component shared here to get the identity information of *Spatial Elements*:
-
-![]({{ "/static/images/guides/revit-element-identity-spatial.png" | prepend: site.baseurl }})
-
-
-### Filtering Spatial Elements by Level
-
-The component shared above can be used to filter the *Spatial Elements* by level:
-
-![]({{ "/static/images/guides/revit-spatial06.png" | prepend: site.baseurl }})
-
-## Getting Spatial Element Geometry
-
-To grab the most accurate geometry of a spatial element, use the custom *Analyse Spatial Element* (shared above) and *Boundary Location* components shared here.
-
-![]({{ "/static/images/guides/revit-spatial07.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Boundary Location.ghuser' name='Boundary Location' %}
-
-{% include ltr/warning_note.html note='Currently Revit API does not return geometry for `CoreBoundary` and `CoreCenter` boundary locations' %}
-
-Make sure that the *Area and Volume* is checked under *Area and Volume Computations* configuration in your Revit model. Otherwise room geometry is not going to be correctly bound at the top and bottom.
-
-![]({{ "/static/images/guides/revit-spatial08.png" | prepend: site.baseurl }})
-
-Here is an example of using this workflow to get geometry of rooms:
-
-![]({{ "/static/images/guides/revit-spatial09.gif" | prepend: site.baseurl }})
-
-### Spatial Elements as Containers
-
-Sometimes it is necessary to use the spatial elements as spatial containers, meaning that you would want a single surface separating two containers from each other and not two overlapping surfaces that you would usually get when extracting spatial element geometries.
-
-This is an example of a geometry extracted from spatial elements. Each space has its own closed geometry. See the orange and light gray boxes representing two independent spatial elements:
-
-![]({{ "/static/images/guides/revit-spatial10.png" | prepend: site.baseurl }})
-
-Using the *NonManifold Merge* component shared here, you can merge the geometries shown above into a single Brep with single faces separating the containers. See the single red surface in the image below, separating the orange and light gray containers:
-
-![]({{ "/static/images/guides/revit-spatial11.png" | prepend: site.baseurl }})
-
-Make sure to grab the *Center* location lines when working with spatial containers. The extracted geometry is then passed to *NonManifold Merge* component to be merged:
-
-![]({{ "/static/images/guides/revit-spatial12.png" | prepend: site.baseurl }})
+![]({{ "/static/images/guides/Revit-Spatial-Add-Area.png" | prepend: site.baseurl }})
 
 &nbsp;
 
-{% include ltr/download_comp.html archive='/static/ghnodes/NonManifold Merge.ghuser' name='NonManifold Merge' %}
+## Analyze Instance Space
 
-## Analyzing Area Schemes
+When the Revit option to Room Calculation Point is enabled in a Family (such as doors) the {% include ltr/comp.html uuid="6ac37380-" %} component returns the associated Spatial information. 
 
-Use the **Analyse Area Scheme** component shared here to analyze the *Area Scheme* elements:
+![]({{ "/static/images/guides/Revit-Spatial-Analyze-Instance-space.png" | prepend: site.baseurl }})
 
-![]({{ "/static/images/guides/revit-spatial13.png" | prepend: site.baseurl }})
 
-&nbsp;
+## Spatial Element Identity
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Area Scheme.ghuser' name='Analyse Area Scheme' %}
+Get Spatial Element Properties with the {% include ltr/comp.html uuid="e3d32938-" %} component.
 
-## Analyzing Areas
+![]({{ "/static/images/guides/Revit-Spatial-Spatial-Element-Identity.png" | prepend: site.baseurl }})
 
-Use the **Analyse Area** component shared here to analyze the *Area* elements:
+## Spatial Element Boundary
 
-![]({{ "/static/images/guides/revit-spatial15.png" | prepend: site.baseurl }})
+Get Spatial Element Boundary based on its Location Property with the {% include ltr/comp.html uuid="419062df-" %} component.
 
-{% include ltr/download_comp.html archive='/static/ghnodes/Analyse Area.ghuser' name='Analyse Area' %}
+![]({{ "/static/images/guides/Revit-Spatial-Spatial-Element-Boundary.png" | prepend: site.baseurl }})
 
-### Filtering Areas by Area Scheme
+## Spatial Element Geometry
 
-Use the **Analyse Area** component shared above to filter the *Area* elements by their associated *Area Scheme*:
+Get Spatial Element Geometry with the {% include ltr/comp.html uuid="a1878f3d-" %} component.
 
-![]({{ "/static/images/guides/revit-spatial16.png" | prepend: site.baseurl }})
-
-## Creating Separation Lines
-
-### Area Boundary Lines
-
-To create area boundary lines, use the *Create Area Boundaries* component shared here. The component needs an Area Plan and curves as input.
-
-![]({{ "/static/images/guides/revit-spatial14.png" | prepend: site.baseurl }})
-
-{% include ltr/download_comp.html archive='/static/ghnodes/Create Area Boundaries.ghuser' name='Create Area Boundaries' %}
+![]({{ "/static/images/guides/Revit-Spatial-Spatial-Element-Geometry.png" | prepend: site.baseurl }})

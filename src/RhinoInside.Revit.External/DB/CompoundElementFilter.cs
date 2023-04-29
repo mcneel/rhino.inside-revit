@@ -285,7 +285,7 @@ namespace RhinoInside.Revit.External.DB
 
     static ElementFilter ElementTypeFilter(ElementType elementType, bool inverted = false)
     {
-      using (var rule = new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, elementType?.Id ?? ElementIdExtension.InvalidElementId))
+      using (var rule = new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, elementType?.Id ?? ElementIdExtension.Invalid))
       {
         var parameterFilter = new ElementParameterFilter(rule, inverted);
 
@@ -310,7 +310,7 @@ namespace RhinoInside.Revit.External.DB
       {
         var rules = elementTypes.
           Distinct(ElementEqualityComparer.SameDocument).
-          Select(x => new FilterInverseRule(new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, x?.Id ?? ElementIdExtension.InvalidElementId)));
+          Select(x => new FilterInverseRule(new FilterElementIdRule(ElemTypeParamProvider, NumericEqualsEvaluator, x?.Id ?? ElementIdExtension.Invalid)));
         return new ElementParameterFilter(rules.ToArray());
       }
       else
@@ -574,7 +574,7 @@ namespace Autodesk.Revit.DB
         {
           filter.Document.GetElement(filter.ViewId).
           GetDependentElements(CamerasCategoryFilter).
-          FirstOrDefault() ?? ElementIdExtension.InvalidElementId
+          FirstOrDefault() ?? ElementIdExtension.Invalid
         }
       )
     #endregion

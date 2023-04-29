@@ -258,35 +258,35 @@ namespace RhinoInside.Revit.GH.Components.Elements
       newOverrides.Value.SetDetailLevel(detailLevel ?? overrides?.Value.DetailLevel ?? default);
       newOverrides.Value.SetHalftone(halftone ?? overrides?.Value.Halftone ?? default);
 
-      newOverrides.Value.SetProjectionLinePatternId(doc.GetNamesakeElement(projectionLinePattern)?.Id ?? overrides?.Value.ProjectionLinePatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetProjectionLinePatternId(doc.GetNamesakeElement(projectionLinePattern)?.Id ?? overrides?.Value.ProjectionLinePatternId ?? ElementIdExtension.Invalid);
       newOverrides.Value.SetProjectionLineColor(projectionLineColor?.ToColor() ?? overrides?.Value.ProjectionLineColor ?? ARDB.Color.InvalidColorValue);
       newOverrides.Value.SetProjectionLineWeight(projectionLineWeight ?? overrides?.Value.ProjectionLineWeight ?? ARDB.OverrideGraphicSettings.InvalidPenNumber);
 
       newOverrides.Value.SetSurfaceForegroundPatternVisible(surfaceForegroundPatternVisible ?? overrides?.Value.IsSurfaceForegroundPatternVisible() ?? true);
       surfaceForegroundPattern = doc.GetNamesakeElement(surfaceForegroundPattern) as Types.FillPatternElement;
-      newOverrides.Value.SetSurfaceForegroundPatternId(surfaceForegroundPattern?.Id ?? overrides?.Value.SurfaceForegroundPatternId() ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetSurfaceForegroundPatternId(surfaceForegroundPattern?.Id ?? overrides?.Value.SurfaceForegroundPatternId() ?? ElementIdExtension.Invalid);
       newOverrides.Value.SetSurfaceForegroundPatternColor(surfaceForegroundPatternColor?.ToColor() ?? overrides?.Value.SurfaceForegroundPatternColor() ?? ARDB.Color.InvalidColorValue);
 
       newOverrides.Value.SetSurfaceBackgroundPatternVisible(surfaceBackgroundPatternVisible ?? overrides?.Value.IsSurfaceBackgroundPatternVisible() ?? true);
       surfaceBackgroundPattern = doc.GetNamesakeElement(surfaceBackgroundPattern) as Types.FillPatternElement;
-      newOverrides.Value.SetSurfaceBackgroundPatternId(surfaceBackgroundPattern?.Id ?? overrides?.Value.SurfaceBackgroundPatternId() ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetSurfaceBackgroundPatternId(surfaceBackgroundPattern?.Id ?? overrides?.Value.SurfaceBackgroundPatternId() ?? ElementIdExtension.Invalid);
       newOverrides.Value.SetSurfaceBackgroundPatternColor(surfaceBackgroundPatternColor?.ToColor() ?? overrides?.Value.SurfaceBackgroundPatternColor() ?? ARDB.Color.InvalidColorValue);
 
       newOverrides.Value.SetSurfaceTransparency(surfaceTransparency.HasValue ? Rhino.RhinoMath.Clamp((int) Math.Round(surfaceTransparency.Value * 100), 0, 100) : overrides?.Value.Transparency ?? 0);
 
       cutLinePattern = doc.GetNamesakeElement(cutLinePattern) as Types.LinePatternElement;
-      newOverrides.Value.SetCutLinePatternId(cutLinePattern?.Id ?? overrides?.Value.CutLinePatternId ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetCutLinePatternId(cutLinePattern?.Id ?? overrides?.Value.CutLinePatternId ?? ElementIdExtension.Invalid);
       newOverrides.Value.SetCutLineColor(cutLineColor?.ToColor() ?? overrides?.Value.CutLineColor ?? ARDB.Color.InvalidColorValue);
       newOverrides.Value.SetCutLineWeight(cutLineWeight ?? overrides?.Value.CutLineWeight ?? ARDB.OverrideGraphicSettings.InvalidPenNumber);
 
       newOverrides.Value.SetCutForegroundPatternVisible(cutForegroundPatternVisible ?? overrides?.Value.IsCutForegroundPatternVisible() ?? true);
       cutForegroundPattern = doc.GetNamesakeElement(cutForegroundPattern) as Types.FillPatternElement;
-      newOverrides.Value.SetCutForegroundPatternId(cutForegroundPattern?.Id ?? overrides?.Value.CutForegroundPatternId() ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetCutForegroundPatternId(cutForegroundPattern?.Id ?? overrides?.Value.CutForegroundPatternId() ?? ElementIdExtension.Invalid);
       newOverrides.Value.SetCutForegroundPatternColor(cutForegroundPatternColor?.ToColor() ?? overrides?.Value.CutForegroundPatternColor() ?? ARDB.Color.InvalidColorValue);
 
       newOverrides.Value.SetCutBackgroundPatternVisible(cutBackgroundPatternVisible ?? overrides?.Value.IsCutBackgroundPatternVisible() ?? true);
       cutBackgroundPattern = doc.GetNamesakeElement(cutBackgroundPattern) as Types.FillPatternElement;
-      newOverrides.Value.SetCutBackgroundPatternId(cutBackgroundPattern?.Id ?? overrides?.Value.CutBackgroundPatternId() ?? ElementIdExtension.InvalidElementId);
+      newOverrides.Value.SetCutBackgroundPatternId(cutBackgroundPattern?.Id ?? overrides?.Value.CutBackgroundPatternId() ?? ElementIdExtension.Invalid);
       newOverrides.Value.SetCutBackgroundPatternColor(cutBackgroundPatternColor?.ToColor() ?? overrides?.Value.CutBackgroundPatternColor() ?? ARDB.Color.InvalidColorValue);
       #endregion
 

@@ -52,18 +52,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class ElementIdExtension
   {
-    public static ElementId Default { get; } = new ElementId(0);
-    public static ElementId InvalidElementId { get; } = ElementId.InvalidElementId;
+    public static ElementId Default { get; } = FromValue(0);
+    public static ElementId Invalid { get; } = ElementId.InvalidElementId;
     public static ElementId[] EmptyCollection { get; } = new ElementId[0];
 
-    public static bool IsValid(this ElementId id) => id is object && id != InvalidElementId;
-    public static bool IsBuiltInId(this ElementId id) => id is object && id <= InvalidElementId;
+    public static bool IsValid(this ElementId id) => id is object && id != Invalid;
+    public static bool IsBuiltInId(this ElementId id) => id is object && id <= Invalid;
 
 #if REVIT_2024
     public static long ToValue(this ElementId id) => id.Value;
 #else
     public static int ToValue(this ElementId id) => id.IntegerValue;
 #endif
+
+    public static ElementId FromValue(int value)
+    {
+#if REVIT_2024
+      return new ElementId((long) value);
+#else
+      return new ElementId(value);
+#endif
+    }
 
     static readonly string LowerHexFormat = $"x{NumHexDigits.IntId}";
     static readonly string UpperHexFormat = $"X{NumHexDigits.IntId}";
@@ -91,7 +100,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsParameterId(this ElementId id, Document doc)
     {
       // Check if is not a BuiltIn Parameter
-      if (id.ToValue() > InvalidElementId.ToValue())
+      if (id.ToValue() > Invalid.ToValue())
       {
         try { return doc.GetElement(id) is ParameterElement; }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
@@ -129,7 +138,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsCategoryId(this ElementId id, Document doc)
     {
       // Check if is not a BuiltIn Category
-      if (id.ToValue() > InvalidElementId.ToValue())
+      if (id.ToValue() > Invalid.ToValue())
       {
         // 1. We try with the regular way calling Category.GetCategory
         try { return Category.GetCategory(doc, id) is object; }
@@ -175,7 +184,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsLinePatternId(this ElementId id, Document doc)
     {
       // Check if is not a BuiltIn Line Pattern
-      if (id.ToValue() > InvalidElementId.ToValue())
+      if (id.ToValue() > Invalid.ToValue())
       {
         try { return doc.GetElement(id) is LinePatternElement; }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }

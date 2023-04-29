@@ -105,8 +105,8 @@ namespace RhinoInside.Revit.GH
           {
             switch (builtInElementId)
             {
-              case ARDB.BuiltInParameter.ID_PARAM:          return new GH_Integer(elementId.IntegerValue);
-              case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:   return new GH_Integer(elementId.IntegerValue);
+              case ARDB.BuiltInParameter.ID_PARAM:          return new GH_String(elementId.ToString("D"));
+              case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:   return new GH_String(elementId.ToString("D"));
               case ARDB.BuiltInParameter.MULLION_POSITION:  return new Types.MullionPosition(parameter.Element.Document, elementId);
               case ARDB.BuiltInParameter.MULLION_PROFILE:   return new Types.ProfileType(parameter.Element.Document, elementId);
             }
@@ -224,16 +224,11 @@ namespace RhinoInside.Revit.GH
             }
           case int parameterId:
             {
-              var elementId = new ARDB.ElementId(parameterId);
+              var elementId = ElementIdExtension.FromValue(parameterId);
               if (elementId.TryGetBuiltInParameter(out var builtInParameter))
               {
                 parameter = element.get_Parameter(builtInParameter);
                 if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not defined in 'Element' {{{element.Id.ToValue()}}}");
-              }
-              else if (element.Document.GetElement(new ARDB.ElementId(parameterId)) is ARDB.ParameterElement parameterElement)
-              {
-                parameter = element.get_Parameter(parameterElement.GetDefinition());
-                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'. {{{element.Id.ToValue()}}}");
               }
               else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element");
               break;

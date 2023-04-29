@@ -116,39 +116,6 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
             if (dataType == SpecType.Boolean.YesNo)
               return new GH_Boolean(value != 0);
-
-            if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
-            {
-              switch (builtInParameter)
-              {
-                case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) value);
-                case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) value);
-                case ARDB.BuiltInParameter.SPACING_LAYOUT_U: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
-                case ARDB.BuiltInParameter.SPACING_LAYOUT_1: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
-                case ARDB.BuiltInParameter.SPACING_LAYOUT_VERT: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
-                case ARDB.BuiltInParameter.SPACING_LAYOUT_V: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
-                case ARDB.BuiltInParameter.SPACING_LAYOUT_2: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
-                case ARDB.BuiltInParameter.SPACING_LAYOUT_HORIZ: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) value);
-                case ARDB.BuiltInParameter.WRAPPING_AT_INSERTS_PARAM: return new Types.WallWrapping((ERDB.WallWrapping) value);
-                case ARDB.BuiltInParameter.WRAPPING_AT_ENDS_PARAM: return new Types.WallWrapping((ERDB.WallWrapping) value);
-                case ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM: return new Types.StructuralWallUsage((ARDB.Structure.StructuralWallUsage) value);
-                case ARDB.BuiltInParameter.WALL_KEY_REF_PARAM: return new Types.WallLocationLine((ARDB.WallLocationLine) value);
-                case ARDB.BuiltInParameter.FUNCTION_PARAM: return new Types.WallFunction((ARDB.WallFunction) value);
-              }
-
-              if (builtInParameter.IsColor())
-              {
-                // `value` is in BGR format
-                var color = System.Drawing.Color.FromArgb
-                (
-                  (value >>  0) & byte.MaxValue,
-                  (value >>  8) & byte.MaxValue,
-                  (value >> 16) & byte.MaxValue
-                );
-
-                return new GH_Colour(color);
-              }
-            }
           }
 
           return new GH_Integer(value);
@@ -170,14 +137,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
         case ARDB.ElementIdParameterValue id:
         {
-          var value = id.Value;
-          if (parameter.Id.TryGetBuiltInParameter(out var builtInElementId))
-          {
-            if (builtInElementId == ARDB.BuiltInParameter.ID_PARAM || builtInElementId == ARDB.BuiltInParameter.SYMBOL_ID_PARAM)
-              return new GH_Integer(value.IntegerValue);
-          }
-
-          return Types.Element.FromElementId(parameter.Document, value);
+          return Types.Element.FromElementId(parameter.Document, id.Value);
         }
 
         default:

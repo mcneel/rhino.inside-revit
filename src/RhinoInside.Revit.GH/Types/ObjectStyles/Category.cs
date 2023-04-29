@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (source)
       {
-        case int i:                     categoryId = new ARDB.ElementId(i); break;
+        case int i:                     categoryId = ElementIdExtension.FromValue(i); break;
         case ARDB.BuiltInCategory bic:  categoryId = new ARDB.ElementId(bic); break;
         case ARDB.ElementId id:         categoryId = id; break;
         case ARDB.Category c:           SetValue(c.Document(), c.Id); return true;

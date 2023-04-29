@@ -192,7 +192,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
           visibleIds = new List<ARDB.ElementId>(ids.Count);
           var viewPhaseFilter = ((viewValue.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE_FILTER)?.AsElement()) as ARDB.PhaseFilter);
-          var viewPhase = viewValue.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ElementIdExtension.InvalidElementId;
+          var viewPhase = viewValue.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ElementIdExtension.Invalid;
 
           using (var viewVisibilityFilter = GetElementVisibilityFilter(viewValue, hidden: true))
           {

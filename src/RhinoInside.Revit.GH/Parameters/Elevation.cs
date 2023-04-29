@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
@@ -276,7 +277,7 @@ namespace RhinoInside.Revit.GH.Types
       return string.Empty;
     }
 
-    private double Elevation => GeometryDecoder.ToModelLength(Value.Elevation);
+    internal double Elevation => GeometryDecoder.ToModelLength(Value.Elevation);
 
     public override bool CastTo<Q>(ref Q target)
     {
@@ -288,14 +289,42 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
       {
-        target = (Q) (object) new GH_Number(Elevation);
-        return true;
+        if (IsElevation(out var elevation))
+        {
+          target = (Q) (object) new GH_Number(elevation);
+          return true;
+        }
+
+        return false;
       }
 
       if (typeof(Q).IsAssignableFrom(typeof(double)))
       {
-        target = (Q) (object) Elevation;
-        return true;
+        if (IsElevation(out var elevation))
+        {
+          target = (Q) (object) elevation;
+          return true;
+        }
+
+        return false;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
+      {
+        if (IsProjectElevation(out var basePoint, out var offset))
+        {
+          var location = basePoint.Location;
+          location.Translate(Vector3d.ZAxis * offset);
+          target = (Q) (object) new GH_Plane(location);
+          return true;
+        }
+        else if (IsElevation(out offset))
+        {
+          var location = Plane.WorldXY;
+          location.Translate(Vector3d.ZAxis * offset);
+          target = (Q) (object) new GH_Plane(location);
+          return true;
+        }
       }
 
       return base.CastTo(ref target);
@@ -318,40 +347,79 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
+    public bool IsProjectElevation(out BasePoint basePoint, out double offset)
+    {
+      if (Value.IsRelative(out var o, out var e))
+      {
+        basePoint = BasePoint.FromElement(e) as BasePoint;
+        offset = o * Revit.ModelUnits;
+        return true;
+      }
+
+      basePoint = default;
+      offset = double.NaN;
+      return false;
+    }
+
+    public bool IsOffset(out double offset)
+    {
+      if (Value.IsOffset(out var o))
+      {
+        offset = o * Revit.ModelUnits;
+        return true;
+      }
+
+      offset = double.NaN;
+      return false;
+    }
+
+    public bool IsElevation(out double elevation)
+    {
+      if (Value.IsElevation(out var e))
+      {
+        elevation = e * Revit.ModelUnits;
+        return true;
+      }
+
+      elevation = double.NaN;
+      return false;
+    }
+
     #region IGH_QuickCast
     GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
+    private double QC_Value => IsElevation(out var elevation) ? elevation : double.NaN;
 
     double IGH_QuickCast.QC_Distance(IGH_QuickCast other)
     {
       switch (other.QC_Type)
       {
-        case GH_QuickCastType.@bool:  return Math.Abs((other.QC_Bool() ? 1.0 : 0.0) - Elevation);
-        case GH_QuickCastType.@int:   return Math.Abs(other.QC_Int() - Elevation);
-        case GH_QuickCastType.num:    return Math.Abs(other.QC_Num() - Elevation);
+        case GH_QuickCastType.@bool:  return Math.Abs((other.QC_Bool() ? 1.0 : 0.0) - QC_Value);
+        case GH_QuickCastType.@int:   return Math.Abs(other.QC_Int() - QC_Value);
+        case GH_QuickCastType.num:    return Math.Abs(other.QC_Num() - QC_Value);
         case GH_QuickCastType.text:   return other.QC_Distance(new GH_String(((IGH_QuickCast) this).QC_Text()));
         default: throw new InvalidOperationException($"{nameof(ProjectElevation)}.QC_Distance cannot be called with a parameter of type {other.GetType().FullName}");
       }
     }
 
-    int IGH_QuickCast.QC_Hash() => Math.Round(Elevation, 9).GetHashCode();
+    int IGH_QuickCast.QC_Hash() => Math.Round(QC_Value, 9).GetHashCode();
 
-    bool IGH_QuickCast.QC_Bool() => Elevation != 0.0; 
+    bool IGH_QuickCast.QC_Bool() => Math.Abs(QC_Value) > 0.0; // NaN is also False
 
-    int IGH_QuickCast.QC_Int() => System.Convert.ToInt32(Math.Round(Elevation, MidpointRounding.AwayFromZero));
+    int IGH_QuickCast.QC_Int() => System.Convert.ToInt32(Math.Round(QC_Value, MidpointRounding.AwayFromZero));
 
-    double IGH_QuickCast.QC_Num() => Elevation;
+    double IGH_QuickCast.QC_Num() => QC_Value;
 
-    string IGH_QuickCast.QC_Text() => Elevation.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
+    string IGH_QuickCast.QC_Text() => QC_Value.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
 
     Color IGH_QuickCast.QC_Col()
     {
-      var c = System.Convert.ToInt32(Math.Min(Math.Max(Elevation, 0.0), 1.0) * 255);
+      var c = System.Convert.ToInt32(Math.Min(Math.Max(QC_Value, 0.0), 1.0) * 255);
       return Color.FromArgb(c, c, c);
     }
 
     Point3d IGH_QuickCast.QC_Pt() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Point3d");
     Vector3d IGH_QuickCast.QC_Vec() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Vector3d");
-    Complex IGH_QuickCast.QC_Complex() => new Complex(Elevation);
+    Complex IGH_QuickCast.QC_Complex() => new Complex(QC_Value);
     Matrix IGH_QuickCast.QC_Matrix() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Matrix");
     Interval IGH_QuickCast.QC_Interval() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Interval");
 
@@ -360,9 +428,9 @@ namespace RhinoInside.Revit.GH.Types
       if (GH_QuickCastType.num != other.QC_Type) return other.QC_Type.CompareTo(GH_QuickCastType.num);
 
       var num = other.QC_Num();
-      if(Math.Abs(num - Elevation) < 0.000000001) return 0;
+      if(Math.Abs(num - QC_Value) < 0.000000001) return 0;
 
-      return Elevation.CompareTo(num);
+      return QC_Value.CompareTo(num);
     }
     #endregion
   }
@@ -396,7 +464,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
 namespace RhinoInside.Revit.GH.Components.Input
 {
-  public class ConstructProjectElevation : Component
+  [ComponentVersion(introduced: "1.0", updated: "1.14")]
+  public class ConstructProjectElevation : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("54C795D0-38F8-4703-8968-0336C9D9B066");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
@@ -410,23 +479,60 @@ namespace RhinoInside.Revit.GH.Components.Input
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager[manager.AddParameter(new Parameters.BasePoint(), "Base Point", "BP", "Reference base point", GH_ParamAccess.item)].Optional = true;
-      manager.AddNumberParameter("Offset", "O", "Offset above or below the base point", GH_ParamAccess.item, 0.0);
-    }
+      ParamDefinition.Create<Parameters.ProjectElevation>("Elevation", "E", "Elevation in a project", optional: true),
+      ParamDefinition.Create<Parameters.BasePoint>("Base Point", "BP", "Reference base point", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Offset", "O", "Offset above or below the base point", optional: true, relevance: ParamRelevance.Primary)
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.ProjectElevation(), "Elevation", "E", "Absolute elevation in the project", GH_ParamAccess.item);
-    }
+      ParamDefinition.Create<Parameters.ProjectElevation>("Elevation", "E", "Elevation in a project"),
+      ParamDefinition.Create<Parameters.BasePoint>("Base Point", "BP", "Reference base point", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Number>("Offset", "O", "Offset above or below the base point", relevance: ParamRelevance.Primary)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Params.TryGetData(DA, "Elevation", out Types.ProjectElevation elevation)) return;
       if (!Params.TryGetData(DA, "Base Point", out Types.IGH_BasePoint basePoint)) return;
-      if (!Params.GetData(DA, "Offset", out double? offset)) return;
+      if (!Params.TryGetData(DA, "Offset", out double? offset)) return;
 
-      DA.SetData("Elevation", new Types.ProjectElevation(offset.Value, basePoint));
+      switch (elevation)
+      {
+        case Types.LevelConstraint levelOffset:
+          if (levelOffset.IsLevelConstraint(out var l, out var _))
+          {
+            basePoint = basePoint ?? new Types.InternalOrigin(InternalOriginExtension.Get(l.Document));
+            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : elevation.Elevation);
+          }
+          else if (elevation.IsOffset(out var _))
+          {
+            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : elevation.Elevation);
+          }
+          break;
+
+        case object _:
+        {
+          if (elevation.IsProjectElevation(out var bp, out var o))
+          {
+            basePoint = basePoint ?? bp;
+            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
+          }
+          else if (elevation.IsOffset(out o))
+          {
+            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
+          }
+        }
+        break;
+      }
+
+      Params.TrySetData(DA, "Elevation",  () => basePoint is object || offset is object ? new Types.ProjectElevation(offset ?? 0.0, basePoint) : null);
+      Params.TrySetData(DA, "Base Point", () => basePoint);
+      Params.TrySetData(DA, "Offset",     () => offset ?? (basePoint is null ? default(double?) : 0.0));
     }
   }
 }

@@ -65,6 +65,11 @@
       <ComponentGroupRef Id="Addins.2023.RhinoInsideRevit" />
     </Feature>
 
+    <Feature Id="Revit.2024.Addin" Title="Revit 2024 Addin" Level="1">
+      <Condition Level="0">REVIT2024_INSTALLLOCATION=""</Condition>
+      <ComponentGroupRef Id="Addins.2024.RhinoInsideRevit" />
+    </Feature>
+
     <UIRef Id="WixUI_Advanced"/>
     <Property Id="ApplicationFolderName" Value="RhinoInside.Revit" />
     <Property Id="WixAppFolder" Value="WixPerMachine" />

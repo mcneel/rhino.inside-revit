@@ -40,12 +40,12 @@ namespace RhinoInside.Revit.External.DB
     {
       episodeId = Guid.Empty;
       id = -1;
-      if (s.Length != NumHexDigits.EpisodeId + 1 + NumHexDigits.ElementId)
+      if (NumHexDigits.EpisodeId + 1 > s.Length || s.Length > NumHexDigits.EpisodeId + 1 + NumHexDigits.ElementId)
         return false;
 
       return Guid.TryParseExact(s.Substring(0, NumHexDigits.EpisodeId), "D", out episodeId) &&
              s[NumHexDigits.EpisodeId] == '-' &&
-             IntId.TryParse(s.Substring(NumHexDigits.EpisodeId + 1, NumHexDigits.ElementId), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out id);
+             IntId.TryParse(s.Substring(NumHexDigits.EpisodeId + 1, s.Length - (NumHexDigits.EpisodeId + 1)), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out id);
     }
   }
 

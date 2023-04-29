@@ -1403,16 +1403,6 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ConstructLevelConstraint {
-            get {
-                object obj = ResourceManager.GetObject("ConstructLevelConstraint", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap ConstructProjectElevation {
             get {
                 object obj = ResourceManager.GetObject("ConstructProjectElevation", resourceCulture);
@@ -3296,6 +3286,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap LevelIdentity {
             get {
                 object obj = ResourceManager.GetObject("LevelIdentity", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LevelOffset {
+            get {
+                object obj = ResourceManager.GetObject("LevelOffset", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
