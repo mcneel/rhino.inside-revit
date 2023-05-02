@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
         loops[index] = loop.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
 
-        using (var properties = AreaMassProperties.Compute(loop))
+        using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
         {
           if (properties is null)
             ThrowArgumentException(nameof(loops), "Failed to compute Boundary Area", loop);

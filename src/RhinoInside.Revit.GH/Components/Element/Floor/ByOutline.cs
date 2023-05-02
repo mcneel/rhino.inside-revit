@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
         boundary[index] = loop.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
 
-        using (var properties = AreaMassProperties.Compute(loop))
+        using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
         {
           if (properties is null) return;
           if (properties.Area > maxArea)
