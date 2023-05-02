@@ -1635,7 +1635,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       {
         // ARDB.NurbSpline can't be periodic.
         nurbsCurve = isDuplicate ? nurbsCurve : nurbsCurve.DuplicateCurve() as NurbsCurve;
-        nurbsCurve.Knots.ClampEnd(CurveEnd.Both);
+        nurbsCurve.Knots.ClampEnd(Rhino.Geometry.CurveEnd.Both);
       }
 
       return NurbsSplineEncoder.ToNurbsSpline(nurbsCurve, factor);
