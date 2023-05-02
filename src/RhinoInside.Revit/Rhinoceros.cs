@@ -853,8 +853,10 @@ namespace RhinoInside.Revit
               // If there is no floating viewport visible...
               if (!rhinoDoc.Views.Any(x => x.Floating))
               {
-                var cursorPosition = System.Windows.Forms.Cursor.Position;
-                if (OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300) is null)
+                var bounds = Revit.MainWindow.Bounds;
+                var x = bounds.X + bounds.Width / 2;
+                var y = bounds.Y + bounds.Height / 2;
+                if (OpenRevitViewport(x - 400, y - 300) is null)
                   Exposed = true;
               }
             }
