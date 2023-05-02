@@ -7,6 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
+  using External.DB;
   using External.DB.Extensions;
   using Convert.System.Collections.Generic;
 
@@ -1114,14 +1115,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       var transform = default(ARDB.Transform);
       {
-        var scale = arc.Radius;
-        if (scale > 30_000 / factor)
+        if (arc.Radius * factor >= 30_000)
         {
+          var scale = (arc.Length * factor) / ((1.0 + NumericTolerance.Delta) * Tolerance.ShortCurveTolerance);
           factor /= scale;
           transform = ARDB.Transform.Identity.ScaleBasis(scale);
         }
 
-        if (Point3d.Origin.DistanceTo(arc.Plane.Origin) > 30_000 / factor)
+        if (Point3d.Origin.DistanceTo(arc.Plane.Origin) * factor >= 30_000)
         {
           transform = (transform ?? ARDB.Transform.Identity) * ARDB.Transform.CreateTranslation(arc.Plane.Origin.ToXYZ());
           arc.Plane = new Plane(Point3d.Origin, arc.Plane.XAxis, arc.Plane.YAxis);
