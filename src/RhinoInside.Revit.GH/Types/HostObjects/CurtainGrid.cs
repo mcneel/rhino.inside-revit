@@ -341,7 +341,7 @@ namespace RhinoInside.Revit.GH.Types
                 type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_VERT)?.Update(ElementIdExtension.Invalid);
                 type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_HORIZ)?.Update(ElementIdExtension.Invalid);
                 type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_HORIZ)?.Update(ElementIdExtension.Invalid);
-                HostElement.Type = ElementType.FromValue(type) as ElementType;
+                HostElement.Type = ElementType.FromElement(type) as ElementType;
               }
 
               if (DeleteGridLines(instance: true, type: true) > 0)
