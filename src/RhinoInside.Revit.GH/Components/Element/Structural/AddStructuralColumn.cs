@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddStructuralColumn : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("47B560AC-1E1D-4576-9F17-BCCF612974D8");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public AddStructuralColumn() : base
     (
@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "S-Column",
       description: "Given its Axis, it adds a structural column element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Structure"
     )
     { }
 
@@ -231,8 +231,6 @@ namespace RhinoInside.Revit.GH.Components
         if (!locationCurve.Curve.AlmostEquals(curve, GeometryTolerance.Internal.VertexTolerance))
         {
           curve.TryGetLocation(out var origin, out var basisX, out var basisY);
-
-          column.Pinned = false;
           column.SetLocation(origin, basisX, basisY);
 
           locationCurve.Curve = curve;

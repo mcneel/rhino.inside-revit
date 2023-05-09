@@ -46,17 +46,6 @@ namespace RhinoInside.Revit.External.DB
     /// Same as DBL_EPSILON = 2.2204460492503131e-16
     /// </remarks>
     public const double Delta = double.MaxValue * double.Epsilon / 4.0;
-
-    /// <summary>
-    /// Represents a default value that is used when comparing square roots.
-    /// This field is constant.
-    /// </summary>
-    /// <remarks>
-    /// Same as Math.Sqrt(Delta) = 1.4901161193847655E-08
-    /// </remarks>
-    internal const double SqrtDelta = 1.4901161193847655E-8;
-
-    internal const double ZeroDelta = 2.3283064365386962890625E-10;
     #endregion
 
     #region Class
@@ -114,7 +103,7 @@ namespace RhinoInside.Revit.External.DB
 
     #region Norm
     /// <summary>
-    /// Absolute value of {<paramref name="x"/>}.
+    /// Magnitude of {<paramref name="x"/>}.
     /// </summary>
     /// <param name="x"></param>
     /// <returns>Distance from {0}.</returns>
@@ -129,7 +118,7 @@ namespace RhinoInside.Revit.External.DB
     }
 
     /// <summary>
-    /// Absolute value of {<paramref name="x"/>, <paramref name="y"/>} .
+    /// Magnitude of {<paramref name="x"/>, <paramref name="y"/>} .
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
@@ -149,7 +138,7 @@ namespace RhinoInside.Revit.External.DB
     }
 
     /// <summary>
-    /// Absolute value of {<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>}.
+    /// Magnitude of {<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>}.
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
@@ -207,14 +196,30 @@ namespace RhinoInside.Revit.External.DB
 
       return Math.Sqrt(1.0 + (u * u + v * v)) * w < tolerance;
     }
+
+    internal static bool IsZero4(double x, double y, double z, double w, double tolerance = Upsilon)
+    {
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z); w = Math.Abs(w);
+
+      double a = x, b = y, c = z, d = w;
+      if (x > d) { a = y; b = z; c = w; d = x; }
+      if (y > d) { a = z; b = w; c = x; d = y; }
+      if (z > d) { a = w; b = x; c = y; d = z; }
+      if (d < (0.0 + tolerance) / 3.0) return true;
+      if (d > (0.0 + tolerance)) return false;
+
+      a /= d; b /= d; c /= d;
+
+      return Math.Sqrt(1.0 + (a * a + b * b + c * c)) * d < tolerance;
+    }
     #endregion
 
     #region IsUnit
     internal static bool IsUnit1(double x, double tolerance = Delta)
     {
-      x = Math.Abs(1.0 - x);
+      x = Math.Abs(x);
 
-      return x < tolerance;
+      return 1.0 - x < tolerance;
     }
 
     internal static bool IsUnit2(double x, double y, double tolerance = Delta)
@@ -228,7 +233,7 @@ namespace RhinoInside.Revit.External.DB
 
       u /= v;
 
-      return IsUnit1(Math.Sqrt(1.0 + (u * u)) * v - 1.0, tolerance);
+      return 1.0 - (Math.Sqrt(1.0 + (u * u)) * v) < tolerance;
     }
 
     internal static bool IsUnit3(double x, double y, double z, double tolerance = Delta)
@@ -243,26 +248,32 @@ namespace RhinoInside.Revit.External.DB
 
       u /= w; v /= w;
 
-      return IsUnit1(Math.Sqrt(1.0 + (u * u + v * v)) * w, tolerance);
+      return 1.0 - (Math.Sqrt(1.0 + (u * u + v * v)) * w) < tolerance;
     }
     #endregion
 
-    #region Unitize
-    internal static bool Unitize1(ref double x)
+    #region Normalize
+    internal static bool Normalize1(ref double x)
     {
-      if (x == 0.0 || !IsFinite(x)) { x = double.NaN; return false; }
-      else x = x < 0.0 ? -1.0 : +1.0;
-      return true;
+      // Infinity is not handled.
+      // if (double.IsInfinity(x)) return false;
+      if (x < 0.0) { x = -1.0; return true; }
+      if (x > 0.0) { x = +1.0; return true; }
+      // -0.0 -> -0.0
+      // +0.0 -> +0.0
+      //  NaN -> NaN
+      return false;
     }
 
-    internal static bool Unitize2(ref double x, ref double y)
+    internal static bool Normalize2(ref double x, ref double y)
     {
       double X = Math.Abs(x), Y = Math.Abs(y);
 
       double u = X, v = Y;
-      if (X > v) { u = Y; v = X;}
-      if (v < Upsilon)
+      if (!(X < v)) { u = Y; v = X;}
+      if (!(v >= Upsilon))
       {
+        if (!(v != 0.0)) return false; // { x, y } It is here for Zeros but also handles NaNs
         u *= double.MaxValue; v *= double.MaxValue;
         x *= double.MaxValue; y *= double.MaxValue;
       }
@@ -270,18 +281,19 @@ namespace RhinoInside.Revit.External.DB
       u /= v;
       var length = Math.Sqrt(1.0 + (u * u)) * v;
       x /= length; y /= length;
-      return !double.IsNaN(x);
+      return true; // !double.IsNaN(length); Infinity is not handled.
     }
 
-    internal static bool Unitize3(ref double x, ref double y, ref double z)
+    internal static bool Normalize3(ref double x, ref double y, ref double z)
     {
       double X = Math.Abs(x), Y = Math.Abs(y), Z = Math.Abs(z);
 
       double u = X, v = Y, w = Z;
-      if (X > w) { u = Y; v = Z; w = X; }
-      if (Y > w) { u = Z; v = X; w = Y; }
-      if (w < Upsilon)
+      if (!(X < w)) { u = Y; v = Z; w = X; }
+      if (!(Y < w)) { u = Z; v = X; w = Y; }
+      if (!(w >= Upsilon))
       {
+        if (!(w != 0.0)) return false; // { x, y, z } It is here for Zeros but also handles NaNs
         u *= double.MaxValue; v *= double.MaxValue; w *= double.MaxValue;
         x *= double.MaxValue; y *= double.MaxValue; z *= double.MaxValue;
       }
@@ -289,7 +301,7 @@ namespace RhinoInside.Revit.External.DB
       u /= w; v /= w;
       var length = Math.Sqrt(1.0 + (u * u + v * v)) * w;
       x /= length; y /= length; z /= length;
-      return !double.IsNaN(x);
+      return true; // !double.IsNaN(length); Infinity is not handled.
     }
     #endregion
 
@@ -324,7 +336,7 @@ namespace RhinoInside.Revit.External.DB
     /// </remarks>
     public static double MinNumber(double x, double y) =>
       x < y ? x :
-      IsNegativeZero(y) || IsNegativeZero(x) ? -0.0 :
+      x == y ? IsNegativeZero(x) ? -0.0 : y :
       double.IsNaN(y) ? x : y;
     #endregion
 
@@ -340,7 +352,7 @@ namespace RhinoInside.Revit.External.DB
     /// </remarks>
     public static double MaxNumber(double x, double y) =>
       x > y ? x :
-      IsPositiveZero(y) || IsPositiveZero(x) ? +0.0 :
+      x == y ? IsPositiveZero(x) ? +0.0 : y :
       double.IsNaN(y) ? x : y;
     #endregion
   }
@@ -630,14 +642,8 @@ namespace RhinoInside.Revit.External.DB
     public static implicit operator XYZ(UnitXYZ unit) => unit.Direction;
     public static explicit operator UnitXYZ(XYZ xyz)
     {
-      Debug.Assert(xyz.IsUnitLength(NumericTolerance.DefaultTolerance), $"Input {nameof(xyz)} is not a unit length vector.");
+      Debug.Assert(xyz.IsUnitVector(), $"Input {nameof(xyz)} is not a unit length vector.");
       return new UnitXYZ(xyz);
-    }
-
-    public static UnitXYZ Unitize(XYZ xyz)
-    {
-      var (x, y, z) = xyz;
-      return NumericTolerance.Unitize3(ref x, ref y, ref z) ? new UnitXYZ(x, y, z) : default;
     }
 
     public void Deconstruct(out double x, out double y, out double z) => (x, y, z) = Direction;
@@ -660,6 +666,22 @@ namespace RhinoInside.Revit.External.DB
       return aX * bX + aY * bY + aZ * bZ;
     }
     public double DotProduct(XYZ other) => DotProduct(this, other);
+
+    public static double TripleProduct(UnitXYZ a, UnitXYZ b, UnitXYZ c)
+    {
+      var (aX, aY, aZ) = a;
+      var (bX, bY, bZ) = b;
+      var (cX, cY, cZ) = c;
+
+      // (a ⨯ b)
+      var xyX = aY * bZ - aZ * bY;
+      var xyY = aZ * bX - aX * bZ;
+      var xyZ = aX * bY - aY * bX;
+
+      // (a ⨯ b) ⋅ c
+      return cX * xyX + cY * xyY + cZ * xyZ;
+    }
+    public double TripleProduct(UnitXYZ a, UnitXYZ b) => TripleProduct(a, b, this);
 
     public static XYZ CrossProduct(UnitXYZ a, UnitXYZ b)
     {
@@ -687,13 +709,12 @@ namespace RhinoInside.Revit.External.DB
         return false;
       }
     }
-    public bool Orthonormal(UnitXYZ y, out UnitXYZ z, double tolerance = NumericTolerance.DefaultTolerance) => Orthonormal(this, y, out z, tolerance);
 
     public static bool Orthonormalize(XYZ u, XYZ v, out UnitXYZ x, out UnitXYZ y, out UnitXYZ z)
     {
-      x = Unitize(u);
-      y = Unitize(v);
-      z = Unitize(CrossProduct(x, y));
+      x = u.ToUnitXYZ();
+      y = v.ToUnitXYZ();
+      z = CrossProduct(x, y).ToUnitXYZ();
       if (!z) return false;
 
       y = (UnitXYZ) CrossProduct(z, x);
@@ -715,7 +736,7 @@ namespace RhinoInside.Revit.External.DB
       var dotOtherNormal = DotProduct(other, normal);
 
       var x = dotThisOther - dotOtherNormal * dotThisNormal;
-      var y = DotProduct(normal, CrossProduct(this, other));
+      var y = normal.TripleProduct(this, other);
 
       var angle = Math.Atan2(y, x);
       return angle < 0.0 ? angle + 2.0 * Math.PI : angle;
@@ -732,8 +753,8 @@ namespace RhinoInside.Revit.External.DB
       var (thisX, thisY, thisZ) = this;
       var (otherX, otherY, otherZ) = other;
 
-      return NumericTolerance.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance * 0.25) ||
-             NumericTolerance.IsZero3(thisX + otherX, thisY + otherY, thisZ + otherZ, tolerance * 0.25);
+      return NumericTolerance.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance) ||
+             NumericTolerance.IsZero3(thisX + otherX, thisY + otherY, thisZ + otherZ, tolerance);
     }
 
     /// <summary>
@@ -747,7 +768,7 @@ namespace RhinoInside.Revit.External.DB
       var (thisX, thisY, thisZ) = this;
       var (otherX, otherY, otherZ) = other;
 
-      return NumericTolerance.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance * 0.25);
+      return NumericTolerance.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance);
     }
 
     /// <summary>
@@ -758,7 +779,7 @@ namespace RhinoInside.Revit.External.DB
     /// <returns>true if <paramref name="this"/> and <paramref name="other"/> are perpendicular</returns>
     public bool IsPerpendicularTo(UnitXYZ other, double tolerance = NumericTolerance.DefaultTolerance)
     {
-      return Math.Abs(DotProduct(this, other)) < tolerance * 0.25;
+      return Math.Abs(DotProduct(this, other)) < tolerance;
     }
 
     /// <summary>
@@ -776,7 +797,7 @@ namespace RhinoInside.Revit.External.DB
       {
         // To save CrossProduct and a Unitize3
         //return Unitize(CrossProduct(BasisY, this));
-        NumericTolerance.Unitize2(ref z, ref x);
+        NumericTolerance.Normalize2(ref z, ref x);
         return new UnitXYZ(z, 0.0, -x);
       }
       else
@@ -804,7 +825,7 @@ namespace RhinoInside.Revit.External.DB
       var normXY = NumericTolerance.Norm(rightX, rightY);
       if (normXY < tolerance)
       {
-        NumericTolerance.Unitize2(ref rightZ, ref rightX);
+        NumericTolerance.Normalize2(ref rightZ, ref rightX);
 
         rightY = rightX;
         rightX = rightZ;
@@ -887,11 +908,9 @@ namespace RhinoInside.Revit.External.DB
     }
 
     #region AlmostEquals
-    public bool AlmostEquals(PlaneEquation other, double tolerance = NumericTolerance.DefaultTolerance)
+    public bool AlmostEquals(PlaneEquation other)
     {
-      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
-
-      return NumericTolerance.Norm(A - other.A, B - other.B, C - other.C) < tolerance && NumericTolerance.Norm(D, other.D) < tolerance;
+      return NumericTolerance.IsZero4(A - other.A, B - other.B, C - other.C, D - other.D, NumericTolerance.DefaultTolerance);
     }
     #endregion
 

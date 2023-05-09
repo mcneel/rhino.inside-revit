@@ -16,6 +16,8 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   public class HostObjectBoundaryProfile : TransactionalComponent
   {
     public override Guid ComponentGuid => new Guid("7CE0BD56-A2AC-4D49-A39B-7B34FE897265");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
     protected override string IconTag => "B";
 
     public HostObjectBoundaryProfile() : base
@@ -24,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "BoundProf",
       description: "Get the boundary profile of the given host element",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

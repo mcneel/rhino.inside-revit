@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "Symbol",
       description: "Given its Location, it adds a symbol element to the active Revit document",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 

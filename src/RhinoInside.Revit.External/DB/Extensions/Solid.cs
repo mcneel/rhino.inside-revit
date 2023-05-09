@@ -95,10 +95,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (!bbox.IsInside(point)) return false;
 
         var vector = bbox.Transform.Origin - point;
-        if (vector.IsZeroLength(0D)) vector = UnitXYZ.BasisZ;
-        else vector = UnitXYZ.Unitize(vector);
+        if (vector.IsZeroVector()) vector = UnitXYZ.BasisZ;
+        else vector = vector.ToUnitXYZ();
 
-        using (var line = Line.CreateBound(point, point + vector * 0.1))
+        using (var line = Line.CreateBound(point, point + vector))
         {
           try
           {
@@ -379,7 +379,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       try
       {
         var intersection = edge.Project(point);
-        var vector = UnitXYZ.Unitize(point - intersection.XYZPoint);
+        var vector = (point - intersection.XYZPoint).ToUnitXYZ();
 
         var faces = new Face[] { edge.GetFace(0), edge.GetFace(1) };
         if (vector)

@@ -592,8 +592,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case GeometryInstance instance:
           origin = instance.Transform.Origin;
-          basisX = UnitXYZ.Unitize(instance.Transform.BasisX);
-          basisY = UnitXYZ.Unitize(instance.Transform.BasisY);
+          basisX = instance.Transform.BasisX.ToUnitXYZ();
+          basisY = instance.Transform.BasisY.ToUnitXYZ();
           return true;
 
         case Point point:
@@ -717,7 +717,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Func<TSource, IEnumerable<Reference>> selector
     )
     {
-      int instanceIndex = 0;
       switch (geometry)
       {
         case GeometryElement element:
@@ -732,10 +731,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
           foreach (var item in Select(instance.GetSymbolGeometry(), document, uniqueId, selector))
           {
             if (item is null) continue;
-            yield return Reference.ParseFromStableRepresentation(document, $"{uniqueId}:{instanceIndex}:INSTANCE:{item.ConvertToStableRepresentation(document)}");
+            yield return item;
           }
 
-          instanceIndex++;
           yield break;
 
         case TSource geometryObject:
@@ -755,7 +753,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Func<Transform, TSource, IEnumerable<TTarget>> selector
     )
     {
-      int instanceIndex = 0;
       switch (geometry)
       {
         case GeometryElement element:
@@ -767,7 +764,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
           foreach (var item in Select(instance.GetSymbolGeometry(), transform * instance.Transform, document, uniqueId, selector))
             yield return item;
 
-          instanceIndex++;
           yield break;
 
         case TSource geometryObject:
@@ -784,7 +780,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Func<Transform, TSource, IEnumerable<(TTarget Item, Reference Reference)>> selector
     )
     {
-      int instanceIndex = 0;
       switch (geometry)
       {
         case GeometryElement element:
@@ -798,12 +793,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
             (
               item.Transform,
               item.Item,
-              item.Reference is Reference itemReference ?
-              Reference.ParseFromStableRepresentation(document, $"{uniqueId}:{instanceIndex}:INSTANCE:{itemReference.ConvertToStableRepresentation(document)}") :
-              null
+              item.Reference
             );
 
-          instanceIndex++;
           yield break;
 
         case TSource geometryObject:
@@ -842,7 +834,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       (
         document, uniqueId,
         s =>
-        s.Edges.Cast<Face>().
+        s.Edges.Cast<Edge>().
         Where(x => x.Reference?.ElementReferenceType == ElementReferenceType.REFERENCE_TYPE_LINEAR).
         Select(x => x.Reference)
       );

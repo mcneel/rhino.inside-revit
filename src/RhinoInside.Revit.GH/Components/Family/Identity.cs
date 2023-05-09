@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       nickname: "Identity",
       description: "Queries family identity information",
       category: "Revit",
-      subCategory: "Family"
+      subCategory: "Type"
     )
     { }
 

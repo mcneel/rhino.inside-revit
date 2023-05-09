@@ -21,6 +21,8 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override Type ValueType => typeof(ARDB.LinePatternElement);
 
+    internal static readonly ARDB.ElementId SolidId = ElementIdExtension.FromValue((int) External.DB.BuiltInLinePattern.Solid);
+
     public sealed override bool CastFrom(object source)
     {
       if (base.CastFrom(source))
@@ -45,7 +47,7 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (source)
       {
-        case int integer: patternId = new ARDB.ElementId(integer); break;
+        case int integer: patternId = ElementIdExtension.FromValue(integer); break;
         case ARDB.ElementId id: patternId = id; break;
       }
 

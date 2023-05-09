@@ -22,6 +22,9 @@
         <Directory Id="APPLICATIONFOLDER2023" Name="2023">
             <Directory Id="INSTALLFOLDER2023" Name="RhinoInside.Revit" />
           </Directory>
+        <Directory Id="APPLICATIONFOLDER2024" Name="2024">
+          <Directory Id="INSTALLFOLDER2024" Name="RhinoInside.Revit" />
+        </Directory>
       </Directory>
       
       <Directory Id="CommonAppDataFolder">
@@ -44,6 +47,7 @@
     <SetProperty Id="INSTALLFOLDER2021" Value="[APPLICATIONFOLDER]2021\[ApplicationFolderName]\" After="CostFinalize"/>
     <SetProperty Id="INSTALLFOLDER2022" Value="[APPLICATIONFOLDER]2022\[ApplicationFolderName]\" After="CostFinalize"/>
     <SetProperty Id="INSTALLFOLDER2023" Value="[APPLICATIONFOLDER]2023\[ApplicationFolderName]\" After="CostFinalize"/>
+    <SetProperty Id="INSTALLFOLDER2024" Value="[APPLICATIONFOLDER]2024\[ApplicationFolderName]\" After="CostFinalize"/>
 
   </Fragment>
 
@@ -194,6 +198,31 @@
         <File Id="Addins.2023.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
       
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="Addins.2024.RhinoInsideRevit">
+
+      <Component Id="Revit.2024.opennurbs_private.manifest" Guid="{AC9A2E26-8BED-4ED0-8229-16A6A7627A24}" Directory="REVIT2024_INSTALLLOCATION">
+        <Condition>Privileged</Condition>
+        <File Id="Revit.2024.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
+      </Component>
+
+      <Component Id="Addins.2024.RhinoInsideRevit.addin" Guid="{FF874E50-D777-4DE2-B0AF-AE560E9F4D74}" Directory="APPLICATIONFOLDER2024">
+        <File Id="Addins.2024.RhinoInsideRevit.addin" Source="..\RhinoInside.Revit.AddIn\Properties\RhinoInside.Revit.addin"/>
+      </Component>
+
+      <Component Id="Addins.2024.RhinoInsideRevit" Guid="{2374D62C-AFC0-44C7-A833-82784ACBED9B}" Directory="INSTALLFOLDER2024">
+        <File Id="Addins.2024.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2024\RhinoInside.Revit.dll"/>
+        <File Id="Addins.2024.RhinoInside.Revit.xml" Source="..\RhinoInside.Revit\bin\x64\$(var.Configuration) 2024\RhinoInside.Revit.xml"/>
+        <File Id="Addins.2024.RhinoInside.Revit.External.dll" Source="..\RhinoInside.Revit.External\bin\x64\$(var.Configuration) 2024\RhinoInside.Revit.External.dll"/>
+        <File Id="Addins.2024.RhinoInside.Revit.AddIn.dll" Source="..\RhinoInside.Revit.AddIn\bin\x64\$(var.Configuration) 2024\RhinoInside.Revit.AddIn.dll"/>
+        <File Id="Addins.2024.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\x64\$(var.Configuration) 2024\RhinoInside.Revit.GH.gha"/>
+        <File Id="Addins.2024.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+        <File Id="Addins.2024.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
+      </Component>
+
     </ComponentGroup>
   </Fragment>
 </Include>

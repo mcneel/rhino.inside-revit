@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
   public class ElementTypeDuplicate : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("5ED7E612-E5C6-4F0E-AA69-814CF2478F7E");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "D";
 
     public ElementTypeDuplicate() : base
@@ -146,20 +146,8 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
         //}
         //else
         {
-          using (var options = new ARDB.CopyPasteOptions() { })
-          {
-            options.SetDuplicateTypeNamesAction(ARDB.DuplicateTypeAction.UseDestinationTypes);
-
-            var ids = ARDB.ElementTransformUtils.CopyElements
-            (
-              template.Document,
-              new ARDB.ElementId[] { template.Id },
-              doc, default, options
-            );
-
-            type = ids.Select(x => doc.GetElement(x)).OfType<ARDB.ElementType>().FirstOrDefault();
-            type.Name = name;
-          }
+          type = template.CloneElement(doc);
+          type.Name = name;
         }
       }
 

@@ -22,6 +22,13 @@ namespace RhinoInside.Revit.GH.Types
   {
     bool? ViewSpecific { get; }
     View OwnerView { get; }
+
+    Plane Location { get; }
+  }
+
+  interface IHostElementAccess
+  {
+    GraphicalElement HostElement { get; }
   }
 
   [Kernel.Attributes.Name("Graphical Element")]
@@ -303,16 +310,6 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
-      {
-        var curve = Curve;
-        if (!curve.IsValid || curve.IsClosed)
-          return false;
-
-        target = (Q) (object) new GH_Line(new Line(curve.PointAtStart, curve.PointAtEnd));
-        return true;
-      }
-
       if (typeof(Q).IsAssignableFrom(typeof(GH_Transform)))
       {
         var plane = Location;
@@ -346,7 +343,7 @@ namespace RhinoInside.Revit.GH.Types
       if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
       {
         var curve = Curve;
-        if (curve?.IsValid != true)
+        if (curve?.IsValid != true || curve.IsClosed)
           return false;
 
         target = (Q) (object) new GH_Line(new Line(curve.PointAtStart, curve.PointAtEnd));
@@ -391,6 +388,17 @@ namespace RhinoInside.Revit.GH.Types
 
         target = (Q) (object) new GH_Mesh(mesh);
         return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(IGH_View)))
+      {
+        if (ViewSpecific is true)
+        {
+          target = (Q) (object) OwnerView;
+          return true;
+        }
+
+        return false;
       }
 
       return base.CastTo(out target);

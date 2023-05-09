@@ -60,6 +60,8 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2022|x64'"></PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2023|x64'"></PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2023|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug 2024|x64'"></PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 2024|x64'"></PropertyGroup>
 
     <!-- revit-specific build configurations -->
     <PropertyGroup Condition="$(Configuration.Contains('2017'))">
@@ -96,6 +98,11 @@
         <RevitVersion>2023</RevitVersion>
         <RevitApiVersion>2023.0.0</RevitApiVersion>
         <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022;REVIT_2023</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="$(Configuration.Contains('2024'))">
+        <RevitVersion>2024</RevitVersion>
+        <RevitApiVersion>2024.0.0</RevitApiVersion>
+        <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022;REVIT_2023;REVIT_2024</DefineConstants>
     </PropertyGroup>
 
     <!-- revit install dir based on revit version -->
@@ -153,9 +160,9 @@
     </ItemGroup>
 
     <ItemGroup Condition="$(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)'=='.csproj'">
-        <PackageReference Include="RhinoCommon" Version="7.15.22039.13001" IncludeAssets="compile; build" />
-        <PackageReference Include="RhinoWindows" Version="7.15.22039.13001" IncludeAssets="compile; build" />
-        <PackageReference Include="Grasshopper" Version="7.15.22039.13001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoCommon" Version="7.28.23058.3001" IncludeAssets="compile; build" />
+        <PackageReference Include="RhinoWindows" Version="7.28.23058.3001" IncludeAssets="compile; build" />
+        <PackageReference Include="Grasshopper" Version="7.28.23058.3001" IncludeAssets="compile; build" />
         <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="compile; build" />
     </ItemGroup>
 </Project>

@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   public class HostObjectGrids : Component
   {
     public override Guid ComponentGuid => new Guid("4AD17D89-9044-4438-B468-7F3AB688BA68");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
     protected override string IconTag => "#";
 
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "HostGrids",
       description: "Obtains the curtain grids of the specified host element",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

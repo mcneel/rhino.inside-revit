@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "References",
       description: string.Empty,
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 

@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "Region",
       description: "Given a profile, it adds a region to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           NickName = "LS",
           Description = "Boundary line style",
           Optional = true
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Secondary
       )
     };
 
@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!view.Value.IsAnnotationView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
           if (!Params.GetDataList(DA, "Boundary", out IList<Brep> boundary) || boundary.Count == 0) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.FilledRegionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.FilledRegionType)) return null;
-          if (!Params.TryGetData(DA, "Line Style", out Types.GraphicsStyle linestyle, x => x.IsValid)) return null;
+          if (!Params.TryGetData(DA, "Line Style", out Types.GraphicsStyle linestyle, x => view.AssertValidDocument(x, "Line Style"))) return null;
 
           var tol = GeometryTolerance.Model;
           var viewPlane = view.Location;
@@ -166,7 +166,23 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       }
 
       if (linestyle is object)
-        region.SetLineStyleId(linestyle.Id);
+      {
+        var validStyles = ARDB.FilledRegion.GetValidLineStyleIdsForFilledRegion(view.Document);
+        if (view.Document.IsFamilyDocument)
+          validStyles.Add(view.Document.OwnerFamily.FamilyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection).Id);
+
+        if (!validStyles.Contains(linestyle.Id))
+            throw new Exceptions.RuntimeArgumentException("Line Style", $"'{linestyle.Name}' is not a valid Line Style for Filled Regions.");
+
+        using (var sketch = region.GetSketch())
+        {
+          foreach (var curve in sketch.GetProfileCurveElements().SelectMany(x => x))
+          {
+            if (linestyle.IsEquivalent(curve.LineStyle)) continue;
+            curve.LineStyle = linestyle;
+          }
+        }
+      }
 
       return region;
     }

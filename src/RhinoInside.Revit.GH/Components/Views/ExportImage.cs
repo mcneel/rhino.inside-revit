@@ -377,7 +377,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
             if (view.Value is ARDB.ViewSchedule schedule)
             {
-              var sheet = ARDB.ViewSheet.Create(view.Document, ElementIdExtension.InvalidElementId);
+              var sheet = ARDB.ViewSheet.Create(view.Document, ElementIdExtension.Invalid);
               ARDB.ScheduleSheetInstance.Create(view.Document, sheet.Id, view.Id, XYZExtension.Zero);
 
               view = Types.View.FromElement(sheet) as Types.View;

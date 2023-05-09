@@ -9,6 +9,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Views
 {
   using Convert.Geometry;
+  using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.7")]
   public class ViewSectionBox : TransactionalChainComponent

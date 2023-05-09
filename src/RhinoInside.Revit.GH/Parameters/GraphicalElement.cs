@@ -783,7 +783,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public override void AddedToDocument(GH_Document document)
     {
-      if (ActiveSelection)
+      if (ActiveSelection && Core.Host is object)
         Core.Host.SelectionChanged += Host_SelectionChanged;
 
       base.AddedToDocument(document);
@@ -792,13 +792,20 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.RemovedFromDocument(document);
 
-      if (ActiveSelection)
+      if (ActiveSelection && Core.Host is object)
         Core.Host.SelectionChanged -= Host_SelectionChanged;
     }
 
-    private void Host_SelectionChanged(object sender, ARUI.Events.SelectionChangedEventArgs e)
+    private async void Host_SelectionChanged(object sender, ARUI.Events.SelectionChangedEventArgs e)
     {
-      ExpireSolution(true);
+      if (OnPingDocument() is GH_Document document)
+      {
+        document.ScheduleSolution(int.MaxValue, doc => ExpireSolution(false));
+        await External.ActivationGate.Yield();
+
+        if (document.ScheduleDelay >= GH_Document.ScheduleRecursive)
+          document.NewSolution(false);
+      }
     }
     #endregion
   }

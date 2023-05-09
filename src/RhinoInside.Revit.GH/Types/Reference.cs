@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Types
         if (IsReferencedData)
         {
           if (IsReferencedDataLoaded)
-            Invalid = Id.IsBuiltInId() ? "⚠ Unknown" : "❌ Deleted ";
+            Invalid = Id.IsBuiltInId() ? "⚠ Unknown " : "❌ Deleted ";
           else
             Invalid = "⚠ Unresolved ";
         }
@@ -110,11 +110,13 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+#if !REVIT_2024
       if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
       {
         target = (Q) (object) new GH_Integer(Id.IntegerValue);
         return true;
       }
+#endif
 
       target = default;
       return false;
@@ -179,7 +181,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       else
       {
-        if (reference.ElementId != ReferenceId || reference.LinkedElementId != Id)
+        if (reference.ElementId != ReferenceId)
           throw new ArgumentException("Invalid Reference", nameof(reference));
       }
 
@@ -188,9 +190,6 @@ namespace RhinoInside.Revit.GH.Types
 
     internal T GetElementFromReference<T>(ARDB.Reference reference) where T : Element
     {
-      if (reference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
-        throw new ArgumentException("Invalid ElementReferenceType", nameof(reference));
-
       return Element.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
     }
 

@@ -98,10 +98,11 @@ namespace RhinoInside.Revit.GH.Types
 
         var pixelSize = ((1.0 / args.Pipeline.Viewport.PixelsPerUnit(position).X) / Revit.ModelUnits) / dpi;
         //if (dotPixels * pixelSize > tagSize)
+        var leaderEndPosition = spot.HasLeader ? spot.LeaderEndPosition.ToPoint3d() : spot.Origin.ToPoint3d();
         {
           args.Pipeline.DrawPoint
           (
-            spot.LeaderEndPosition.ToPoint3d(),
+            leaderEndPosition,
             PointStyle.RoundActivePoint,
             args.Color,
             System.Drawing.Color.WhiteSmoke,

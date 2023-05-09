@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
   public class AssemblyOrigin : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("1C1CC766-D782-4C4A-8B2E-FE8508E4A623");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
 
     protected override string IconTag => "⌖";
 
@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       nickname: "Origin",
       description: "Get-Set access component for assembly origin",
       category: "Revit",
-      subCategory: "Model"
+      subCategory: "Type"
     )
     { }
 
@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
         var Z = (ERDB.UnitXYZ) origin.Value.ZAxis.ToXYZ();
         if
         (
-          !o.IsAlmostEqualTo(O) ||
+          !o.AlmostEqualPoints(O) ||
           !x.AlmostEquals(X) ||
           !y.AlmostEquals(Y) ||
           !z.AlmostEquals(Z))

@@ -78,7 +78,7 @@ terms:
   rir: Rhino.Inside.Revit
   revit: Autodesk Revit®
   bim360: Autodesk BIM360®
-  revit_versions: 2018-2023
+  revit_versions: 2018-2024
   pyrevit: pyRevit
 
 # site collections (various languages)

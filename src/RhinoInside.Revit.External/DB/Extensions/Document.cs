@@ -313,7 +313,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static Element GetElement(this Document doc, ElementId elementId, ElementId linkedElementId)
     {
       var element = doc.GetElement(elementId);
-      if (linkedElementId == ElementIdExtension.InvalidElementId) return element;
+      if (linkedElementId == ElementIdExtension.Invalid) return element;
       if (element is RevitLinkInstance link)
         return link.GetLinkDocument()?.GetElement(linkedElementId);
 
@@ -506,52 +506,66 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return enumerable;
 
       var nomenParameter = ElementExtension.GetNomenParameter(type);
-
-      if (typeof(ElementType).IsAssignableFrom(type))
+      using (var elementCollector = new FilteredElementCollector(doc))
       {
-        enumerable = new FilteredElementCollector(doc).
-        WhereElementIsElementType().
-        WhereCategoryIdEqualsTo(categoryId).
-        WhereElementIsKindOf(type).
-        WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
-        WhereParameterBeginsWith(nomenParameter, name).
-        Cast<ElementType>().
-        Where(x => x.FamilyName.Equals(parentName, ElementNaming.ComparisonType));
-      }
-      else if (typeof(View).IsAssignableFrom(type))
-      {
-        enumerable = new FilteredElementCollector(doc).
-        WhereElementIsNotElementType().
-        WhereCategoryIdEqualsTo(categoryId).
-        WhereElementIsKindOf(type).
-        WhereParameterBeginsWith(nomenParameter, name).
-        Cast<View>().
-        Where(x => !x.IsTemplate && x.ViewType.ToString() == parentName);
-      }
-      else
-      {
-        var elementCollector = new FilteredElementCollector(doc).
-        WhereElementIsNotElementType().
-        WhereCategoryIdEqualsTo(categoryId).
-        WhereElementIsKindOf(type);
+        var isElementType = typeof(ElementType).IsAssignableFrom(type);
+        var collector =
+          (isElementType ? elementCollector.WhereElementIsElementType() : elementCollector.WhereElementIsNotElementType()).
+          WhereCategoryIdEqualsTo(categoryId).
+          WhereElementIsKindOf(type);
 
-        enumerable = nomenParameter != BuiltInParameter.INVALID ?
-          elementCollector.WhereParameterBeginsWith(nomenParameter, name) :
-          elementCollector;
-      }
+        if(nomenParameter != BuiltInParameter.INVALID)
+          collector = collector.WhereParameterBeginsWith(nomenParameter, name);
 
-      return enumerable.
-        // WhereElementIsKindOf sometimes is not enough.
-        Where(x => type.IsAssignableFrom(x.GetType())).
-        // Look for elements called "name" or "name 1" but not "name abc" or "Name 1".
-        Where
-        (
-          x =>
+        if (string.IsNullOrWhiteSpace(parentName))
+        {
+          enumerable = collector;
+        }
+        else
+        {
+          if (isElementType)
           {
-            TryParseNomenId(x.GetElementNomen(nomenParameter), out var prefix, out var _);
-            return prefix.Equals(name, ElementNaming.ComparisonType);
+            enumerable = collector.
+              WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
+              Cast<ElementType>().Where(x => x.FamilyName.Equals(parentName, ElementNaming.ComparisonType));
           }
-        );
+          else if (typeof(View).IsAssignableFrom(type))
+          {
+            if (Enum.TryParse(parentName, out ViewType viewType))
+            {
+              enumerable = collector.
+                Cast<View>().Where(x => !x.IsTemplate && x.ViewType == viewType);
+            }
+          }
+          else if (typeof(FillPatternElement).IsAssignableFrom(type))
+          {
+            if (Enum.TryParse(parentName, out FillPatternTarget target))
+            {
+              enumerable = collector.Cast<FillPatternElement>().Where
+              (
+                x =>
+                {
+                  using (var pattern = x.GetFillPattern())
+                    return pattern.Target == target;
+                }
+              );
+            }
+          }
+        }
+
+        return enumerable.
+          // WhereElementIsKindOf sometimes is not enough.
+          Where(x => type.IsAssignableFrom(x.GetType())).
+          // Look for elements called "name" or "name 1" but not "name abc" or "Name 1".
+          Where
+          (
+            x =>
+            {
+              TryParseNomenId(x.GetElementNomen(nomenParameter), out var prefix, out var _);
+              return prefix.Equals(name, ElementNaming.ComparisonType);
+            }
+          );
+      }
     }
 
     internal static ElementId LookupElement(this Document target, Document source, ElementId elementId)
@@ -569,14 +583,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             return collector.WhereElementIsElementType().
               WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.InvalidElementId).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.Invalid).
               WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, type.FamilyName).
               WhereParameterEqualsTo(nomenParameter, nomen).
               Cast<ElementType>().
               Where(x => x.FamilyName.Equals(type.FamilyName, ElementNaming.ComparisonType)).
               Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
-              FirstOrDefault() ?? ElementIdExtension.InvalidElementId;
+              FirstOrDefault() ?? ElementIdExtension.Invalid;
           }
         }
         else if (element is View view)
@@ -585,23 +599,28 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             return collector.WhereElementIsElementType().
               WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.InvalidElementId).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.Invalid).
               WhereParameterEqualsTo(nomenParameter, nomen).
               Cast<View>().
               Where(x => x.IsTemplate == view.IsTemplate).
               Where(x => x.ViewType == view.ViewType).
               Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
-              FirstOrDefault() ?? ElementIdExtension.InvalidElementId;
+              FirstOrDefault() ?? ElementIdExtension.Invalid;
           }
         }
         else if (element is SharedParameterElement sharedParameter)
         {
-          return SharedParameterElement.Lookup(target, sharedParameter.GuidValue)?.Id ?? ElementIdExtension.InvalidElementId;
+          return SharedParameterElement.Lookup(target, sharedParameter.GuidValue)?.Id ?? ElementIdExtension.Invalid;
         }
         else if (element is AppearanceAssetElement asset)
         {
-          return AppearanceAssetElement.GetAppearanceAssetElementByName(target, asset.Name)?.Id ?? ElementIdExtension.InvalidElementId;
+          return AppearanceAssetElement.GetAppearanceAssetElementByName(target, asset.Name)?.Id ?? ElementIdExtension.Invalid;
+        }
+        else if (element is FillPatternElement fillPattern)
+        {
+          using (var pattern = fillPattern.GetFillPattern())
+            return FillPatternElement.GetFillPatternElementByName(target, pattern.Target, fillPattern.Name)?.Id ?? ElementIdExtension.Invalid;
         }
         else
         {
@@ -611,26 +630,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
             {
               return collector.WhereElementIsNotElementType().
               WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.InvalidElementId).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.Invalid).
               WhereParameterEqualsTo(nomenParameter, nomen).
               Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
-              FirstOrDefault() ?? ElementIdExtension.InvalidElementId;
+              FirstOrDefault() ?? ElementIdExtension.Invalid;
             }
             else if (element is Family || element is ParameterElement || element.CanBeRenominated())
             {
               return collector.WhereElementIsNotElementType().
               WhereElementIsKindOf(element.GetType()).
-              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.InvalidElementId).
+              WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.Invalid).
               Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
-              FirstOrDefault() ?? ElementIdExtension.InvalidElementId;
+              FirstOrDefault() ?? ElementIdExtension.Invalid;
             }
           }
         }
       }
 
-      return ElementIdExtension.InvalidElementId;
+      return ElementIdExtension.Invalid;
     }
     #endregion
 
@@ -675,11 +694,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
         (
           collector.Cast<GraphicsStyle>().
           Select(x => x.GraphicsStyleCategory).
-          Where(x => x.Id != ElementIdExtension.InvalidElementId && x.Name != string.Empty)
+          Where(x => x.Id != ElementIdExtension.Invalid && x.Name != string.Empty)
         );
 
         if (parentId is object)
-          categories = categories.Where(x => parentId == (x.Parent?.Id ?? ElementIdExtension.InvalidElementId));
+          categories = categories.Where(x => parentId == (x.Parent?.Id ?? ElementIdExtension.Invalid));
 
         return new HashSet<Category>(categories, CategoryEqualityComparer.SameDocument);
       }
@@ -799,40 +818,53 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool TryGetParameter(this Document doc, out ParameterElement parameterElement, string parameterName, ParameterScope scope)
     {
       var (definition, _) = doc.GetParameterDefinitions(scope).FirstOrDefault(x => x.Definition.Name == parameterName);
-      parameterElement = doc.GetElement(definition?.Id ?? ElementIdExtension.InvalidElementId) as ParameterElement;
+      parameterElement = doc.GetElement(definition?.Id ?? ElementIdExtension.Invalid) as ParameterElement;
       return parameterElement is object;
     }
     #endregion
 
     #region Family
-    public static bool TryGetFamily(this Document doc, string name, out Family family, ElementId clueCategoryId = default)
+    public static bool TryGetFamily(this Document doc, string familyName, out Family family, ElementId clueCategoryId = default)
     {
+      family = null;
+
       if (clueCategoryId.IsValid())
       {
+        using (var collector = new FilteredElementCollector(doc))
         {
-          // We use categoryId as a clue too speed up search.
-          using (var smallSet = new ElementCategoryFilter(clueCategoryId, false))
-          {
-            using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)).WherePasses(smallSet))
-              family = collector.FirstOrDefault(x => x.Name == name) as Family;
-          }
-        }
-
-        if (family is null)
-        {
-          // We look into other categories that are not 'clueCategoryId'.
-          using (var bigSet = new ElementCategoryFilter(clueCategoryId, true))
-          {
-            // We use categoryId as a clue too speed up search.
-            using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)).WherePasses(bigSet))
-              family = collector.FirstOrDefault(x => x.Name == name) as Family;
-          }
+          family = collector.OfClass(typeof(FamilySymbol)).
+            WhereElementIsElementType().
+            WhereCategoryIdEqualsTo(clueCategoryId).
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, familyName).
+            Cast<FamilySymbol>().
+            FirstOrDefault(x => ElementNaming.NameEqualityComparer.Equals(x.FamilyName, familyName))?. // To enfoce name casing.
+            Family;
         }
       }
-      else
+
+      // In case is not in `clueCategoryId`
+      if (family is null)
       {
-        using (var collector = new FilteredElementCollector(doc).OfClass(typeof(Family)))
-          family = collector.FirstOrDefault(x => x.Name == name) as Family;
+        using (var collector = new FilteredElementCollector(doc))
+        {
+          family = collector.OfClass(typeof(FamilySymbol)).
+            WhereElementIsElementType().
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, familyName).
+            Cast<FamilySymbol>().
+            FirstOrDefault(x => ElementNaming.NameEqualityComparer.Equals(x.FamilyName, familyName))?. // To enfoce name casing.
+            Family;
+        }
+      }
+
+      // In case Family does not have any type
+      if (family is null)
+      {
+        using (var collector = new FilteredElementCollector(doc))
+        {
+          family = collector.OfClass(typeof(Family)).
+            FirstOrDefault(x => ElementNaming.NameEqualityComparer.Equals(x.Name, familyName)) as
+            Family;
+        }
       }
 
       return family is object;
@@ -1228,62 +1260,79 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     static FamilySymbol GetWorkPlaneBasedSymbol(this Document document)
     {
+      var symbol = default(FamilySymbol);
+
       if (document is object)
       {
-        using
-        (
-          var collector = new FilteredElementCollector(document).WhereElementIsElementType().
-          OfCategoryId(new ElementId(BuiltInCategory.OST_GenericModel)).
-          OfClass(typeof(FamilySymbol)).
-          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, WorkPlaneBasedFamilyName).
-          WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, WorkPlaneBasedSymbolName)
-        )
+        if (symbol is null)
         {
-          return collector.Cast<FamilySymbol>().FirstOrDefault();
+          using
+          (
+            var collector = new FilteredElementCollector(document).WhereElementIsElementType().
+            OfCategoryId(new ElementId(BuiltInCategory.OST_GenericModel)).
+            OfClass(typeof(FamilySymbol)).
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, WorkPlaneBasedFamilyName).
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, WorkPlaneBasedSymbolName)
+          )
+          {
+            symbol = collector.Cast<FamilySymbol>().FirstOrDefault();
+          }
+        }
+
+        // Check if is in another category
+        if (symbol is null)
+        {
+          using
+          (
+            var collector = new FilteredElementCollector(document).WhereElementIsElementType().
+            OfClass(typeof(FamilySymbol)).
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, WorkPlaneBasedFamilyName).
+            WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_TYPE_NAME, WorkPlaneBasedSymbolName)
+          )
+          {
+            symbol = collector.Cast<FamilySymbol>().FirstOrDefault();
+          }
         }
       }
 
-      return null;
+      return symbol;
     }
 
     internal static FamilySymbol EnsureWorkPlaneBasedSymbol(this Document document)
     {
-      var symbol = GetWorkPlaneBasedSymbol(document);
-      if (symbol is null)
+      if (GetWorkPlaneBasedSymbol(document) is FamilySymbol symbol)
       {
-        symbol = GetWorkPlaneBasedSymbol(document.Application.ResourceDocument("RiR-Template.rte"));
-        if (symbol is object)
-        {
-          using (var options = new CopyPasteOptions())
-          {
-            options.SetDuplicateTypeNamesAction(DuplicateTypeAction.UseDestinationTypes);
+        if(symbol.Family.FamilyCategoryId.ToBuiltInCategory() != BuiltInCategory.OST_GenericModel)
+          symbol.Family.FamilyCategoryId = new ElementId(BuiltInCategory.OST_GenericModel);
 
-            var copiedElementIds = ElementTransformUtils.CopyElements
-            (
-              symbol.Document,
-              new ElementId[] { symbol.Id },
-              document,
-              default,
-              options
-            );
-
-            if (copiedElementIds.Count == 1)
-            {
-              var newSymbol = document.GetElement(copiedElementIds.First()) as FamilySymbol;
-              newSymbol.Family.CopyParametersFrom(symbol.Family);
-              symbol = newSymbol;
-            }
-          }
-        }
-      }
-      else
-      {
         symbol.Family.get_Parameter(BuiltInParameter.FAMILY_WORK_PLANE_BASED).Update(true);
         symbol.Family.get_Parameter(BuiltInParameter.FAMILY_ALWAYS_VERTICAL).Update(false);
         symbol.Family.get_Parameter(BuiltInParameter.FAMILY_SHARED).Update(false);
       }
+      else symbol = CreateWorkPlaneBasedSymbol(document, WorkPlaneBasedFamilyName, WorkPlaneBasedSymbolName);
 
       return symbol;
+    }
+
+    internal static FamilySymbol CreateWorkPlaneBasedSymbol(this Document document, string familyName, string symbolName = default)
+    {
+      if (GetWorkPlaneBasedSymbol(document.Application.ResourceDocument("RiR-Template.rte")) is var symbol)
+      {
+        using (symbol.Document.RollBackScope())
+        {
+          // Change the name to avoid any possible name collision
+          var uniqueName = Guid.NewGuid().ToString();
+          symbol.Family.Name = uniqueName;
+          symbol.Name = uniqueName;
+
+          symbol = symbol.CloneElement(document);
+          symbol.Family.Name = familyName;
+          symbol.Name = symbolName ?? familyName;
+          return symbol;
+        }
+      }
+
+      return null;
     }
     #endregion
   }

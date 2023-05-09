@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
   public class OpeningBoundaryProfile : Component
   {
     public override Guid ComponentGuid => new Guid("E76B0F6B-4EE1-413D-825D-4A8EDD86D55F");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public OpeningBoundaryProfile() : base
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
       nickname: "OpeningBoundProf",
       description: "Get the boundary profile of the given opening",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

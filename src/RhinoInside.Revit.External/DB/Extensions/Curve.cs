@@ -164,26 +164,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool TryGetLocation(this Line curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       var curveDirection = curve.Direction;
-      if (!curveDirection.IsAlmostEqualTo(XYZExtension.Zero, DefaultTolerance))
+      if (curve.IsBound)
       {
-        if (curve.IsBound)
-        {
-          origin = curve.Evaluate(0.5, true);
-          basisX = UnitXYZ.Unitize(curveDirection);
-          basisY = basisX.Right();
-          return true;
-        }
-        else
-        {
-          origin = curve.Origin;
-          basisX = UnitXYZ.Unitize(curveDirection);
-          basisY = basisX.Right();
-          return true;
-        }
+        origin = curve.Evaluate(0.5, true);
+        basisX = (UnitXYZ) curveDirection;
+        basisY = basisX.Right();
+        return true;
       }
-
-      origin = basisX = basisY = default;
-      return false;
+      else
+      {
+        origin = curve.Origin;
+        basisX = (UnitXYZ) curveDirection;
+        basisY = basisX.Right();
+        return true;
+      }
     }
 
     public static bool TryGetLocation(this Arc curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
@@ -197,7 +191,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (!curveDirection.IsZeroLength())
         {
           origin = start + (curveDirection * 0.5);
-          basisX = UnitXYZ.Unitize(curveDirection);
+          basisX = curveDirection.ToUnitXYZ();
           return UnitXYZ.Orthonormal((UnitXYZ) curve.Normal, basisX, out basisY);
         }
       }
@@ -221,12 +215,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var end = curve.GetEndPoint(1);
         var curveDirection = end - start;
 
-        if (!curveDirection.IsAlmostEqualTo(XYZExtension.Zero, DefaultTolerance))
-        {
-          origin = start + (curveDirection * 0.5);
-          basisX = UnitXYZ.Unitize(curveDirection);
-          return UnitXYZ.Orthonormal((UnitXYZ) curve.Normal, basisX, out basisY);
-        }
+        origin = start + (curveDirection * 0.5);
+        basisX = curveDirection.ToUnitXYZ();
+        return UnitXYZ.Orthonormal((UnitXYZ) curve.Normal, basisX, out basisY);
       }
       else
       {
@@ -235,9 +226,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
         basisY = (UnitXYZ) curve.YDirection;
         return true;
       }
-
-      origin = basisX = basisY = default;
-      return false;
     }
 
     public static bool TryGetLocation(this CylindricalHelix curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
@@ -265,7 +253,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (closed == 0)
       {
-        basisX = UnitXYZ.Unitize(curveDirection);
+        basisX = curveDirection.ToUnitXYZ();
 
         if (cov.TryGetInverse(out var inverse))
         {
@@ -337,14 +325,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             origin = XYZExtension.ComputeMeanPoint(curve.GetCoordinates());
             var axis = start - origin;
-            basisX = UnitXYZ.Unitize(axis);
+            basisX = axis.ToUnitXYZ();
             basisY = basisX.Right();
           }
           else
           {
             var axis = end - start;
             origin = start + (axis * 0.5);
-            basisX = UnitXYZ.Unitize(axis);
+            basisX = axis.ToUnitXYZ();
             basisY = basisX.Right();
           }
           return true;

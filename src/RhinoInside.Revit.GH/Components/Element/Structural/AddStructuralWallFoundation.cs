@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.14")]
-  class AddStructuralWallFoundation : ElementTrackerComponent
+  public class AddStructuralWallFoundation : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("9FF1C32F-4855-4F32-95CA-ACCB4AA564DE");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "S-Wall Foundation",
       description: "Given its host element, it adds a structural wall foundation element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Structure"
     )
     { }
 

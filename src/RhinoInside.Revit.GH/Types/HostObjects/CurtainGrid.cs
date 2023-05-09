@@ -22,16 +22,16 @@ namespace RhinoInside.Revit.GH.Types
   public class CurtainGrid : DocumentObject,
     IGH_GeometricGoo,
     IGH_PreviewData,
-    IHostObjectAccess
+    IHostElementAccess
   {
     public new ARDB.CurtainGrid Value => base.Value as ARDB.CurtainGrid;
-    public HostObject Host { get; private set; }
-    int GridIndex = -1;
+    public GraphicalElement HostElement { get; }
+    readonly int GridIndex = -1;
 
     public CurtainGrid() : base() { }
     public CurtainGrid(HostObject host, ARDB.CurtainGrid value, int gridIndex) : base(host.Document, value)
     {
-      Host = host;
+      HostElement = host;
       GridIndex = gridIndex;
     }
 
@@ -329,25 +329,25 @@ namespace RhinoInside.Revit.GH.Types
             {
               // We apply a type that has spacing layout set to None to generate just one Cell
               {
-                var type = Host.Type.Value;
+                var type = HostElement.Type.Value;
                 type = type.Duplicate(Guid.NewGuid().ToString()) as ARDB.HostObjAttributes;
                 if (type is ARDB.WallType)
-                  type.get_Parameter(ARDB.BuiltInParameter.AUTO_PANEL_WALL).Update(ElementIdExtension.InvalidElementId);
+                  type.get_Parameter(ARDB.BuiltInParameter.AUTO_PANEL_WALL).Update(ElementIdExtension.Invalid);
                 else
-                  type.get_Parameter(ARDB.BuiltInParameter.AUTO_PANEL).Update(ElementIdExtension.InvalidElementId);
+                  type.get_Parameter(ARDB.BuiltInParameter.AUTO_PANEL).Update(ElementIdExtension.Invalid);
                 type.get_Parameter(ARDB.BuiltInParameter.SPACING_LAYOUT_U).Update(0);
                 type.get_Parameter(ARDB.BuiltInParameter.SPACING_LAYOUT_V).Update(0);
-                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_VERT)?.Update(ElementIdExtension.InvalidElementId);
-                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_VERT)?.Update(ElementIdExtension.InvalidElementId);
-                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_HORIZ)?.Update(ElementIdExtension.InvalidElementId);
-                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_HORIZ)?.Update(ElementIdExtension.InvalidElementId);
-                Host.Type = ElementType.FromValue(type) as ElementType;
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_VERT)?.Update(ElementIdExtension.Invalid);
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_VERT)?.Update(ElementIdExtension.Invalid);
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER1_HORIZ)?.Update(ElementIdExtension.Invalid);
+                type.get_Parameter(ARDB.BuiltInParameter.AUTO_MULLION_BORDER2_HORIZ)?.Update(ElementIdExtension.Invalid);
+                HostElement.Type = ElementType.FromValue(type) as ElementType;
               }
 
               if (DeleteGridLines(instance: true, type: true) > 0)
                 Document.Regenerate();
 
-              var identityGrid = (Host as ICurtainGridsAccess).CurtainGrids[GridIndex];
+              var identityGrid = (HostElement as ICurtainGridsAccess).CurtainGrids[GridIndex];
               foreach (var cell in identityGrid.CurtainCells)
               {
                 if (cell.PolySurface is Brep brep)

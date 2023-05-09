@@ -429,7 +429,13 @@ namespace RhinoInside.Revit.GH.Types
     public static Document FromValue(object value)
     {
       if (value is IGH_Goo goo)
-        value = goo.ScriptVariable();
+      {
+        switch (value)
+        {
+          case IGH_Reference reference: value = reference.Document; break;
+          default:                      value = goo.ScriptVariable(); break;
+        }
+      }
 
       switch (value)
       {

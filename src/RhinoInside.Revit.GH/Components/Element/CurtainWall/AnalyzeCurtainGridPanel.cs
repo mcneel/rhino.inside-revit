@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   public class AnalyzeCurtainGridPanel : Component
   {
     public override Guid ComponentGuid => new Guid("08507225-C8DA-44A8-A282-C9B1AF1C61F4");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => "ACGP";
 
     public AnalyzeCurtainGridPanel() : base
@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "A-P",
       description: "Analyze given panel element",
       category: "Revit",
-      subCategory: "Wall"
+      subCategory: "Architecture"
     )
     { }
 

@@ -20,10 +20,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddSpotCoordinate() : base
     (
       name: "Add Spot Coordinate",
-      nickname: "SpotCoor",
+      nickname: "C-Spot",
       description: "Given a point, it adds a spot coordinate to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -151,15 +151,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (!spot.Document.AreEquivalentReferences(prevReference, reference)) return false;
 
       // Origin
-      var vertexTolerance = spot.Document.Application.VertexTolerance;
-      if (!spot.Origin.AlmostEquals(point, vertexTolerance))
+      if (!spot.Origin.AlmostEqualPoints(point))
       {
         spot.Pinned = false;
         spot.Location.Move(point - spot.Origin);
       }
 
       // Leader
-      if (point.AlmostEquals(end, vertexTolerance))
+      if (point.AlmostEqualPoints(end, view.Document.Application.ShortCurveTolerance))
       {
         spot.get_Parameter(ARDB.BuiltInParameter.SPOT_DIM_LEADER)?.Update(false);
       }
@@ -170,11 +169,11 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
         if (spot.LeaderHasShoulder)
         {
-          if (!bend.AlmostEquals(spot.LeaderShoulderPosition, vertexTolerance))
+          if (!bend.AlmostEqualPoints(spot.LeaderShoulderPosition))
             spot.LeaderShoulderPosition = bend;
         }
 
-        if (!end.AlmostEquals(spot.LeaderEndPosition, vertexTolerance))
+        if (!end.AlmostEqualPoints(spot.LeaderEndPosition))
           spot.LeaderEndPosition = end;
 #else
         return false;
@@ -193,7 +192,32 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       if (reference is null) return null;
 
-      var hasLeader = !point.AlmostEquals(end, view.Document.Application.VertexTolerance);
+      var hasLeader = !point.AlmostEqualPoints(end, view.Document.Application.ShortCurveTolerance);
+
+      if (reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
+      {
+        var host = view.Document.GetElement(reference);
+        if (host is ARDB.Architecture.TopographySurface topography)
+        {
+          var extents = new Interval(-1.0 * Revit.ModelUnits, +1.0 * Revit.ModelUnits);
+          var surface = new PlaneSurface(Plane.WorldXY, extents, extents);
+          var directShape = ARDB.DirectShape.CreateElement(view.Document, new ARDB.ElementId(ARDB.BuiltInCategory.OST_GenericModel));
+          directShape.SetShape(surface.ToShape());
+          directShape.Document.Regenerate();
+
+          using (var geometry = directShape.get_Geometry(new ARDB.Options() { ComputeReferences = true }))
+          {
+            var faceReference = geometry.GetFaceReferences(directShape).FirstOrDefault();
+            var templateSpot = view.Document.Create.NewSpotCoordinate(view, faceReference, XYZExtension.Zero, bend, end, point, hasLeader);
+
+            var id = ARDB.ElementTransformUtils.CopyElement(templateSpot.Document, templateSpot.Id, point);
+            templateSpot.Document.Delete(templateSpot.Id);
+            directShape.Document.Delete(directShape.Id);
+            return view.Document.GetElement(id.FirstOrDefault() ?? ElementIdExtension.Invalid) as ARDB.SpotDimension;
+          }
+        }
+      }
+
       return view.Document.Create.NewSpotCoordinate(view, reference, point, bend, end, point, hasLeader);
     }
 

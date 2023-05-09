@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddStructuralBrace: ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("87E0CA19-088E-4A94-9770-180ABC7049AD");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public AddStructuralBrace() : base
     (
@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "S-Beam",
       description: "Given its Axis, it adds a brace element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Structure"
     )
     { }
 

@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.14")]
-  class AddTruss : ElementTrackerComponent
+  public class AddTruss : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("C0B04DC7-9AD5-4E49-9043-17CB06076132");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "S-Truss",
       description: "Given its location curve, it adds a truss to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Structure"
     )
     { }
 

@@ -12,11 +12,59 @@ group: Deployment & Configs
 
 ### RC
 
-
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
+{% include ltr/release-header.html title="v1.14 RC1" version="v1.14.8510.35994" pre_release=true time="04/20/2023" %}
+
+- Minimum Rhino version is now 7.28.
+- Added support for '{{ site.terms.revit }} 2024'
+- Added 'View Range Elevations' component.
+
+{% include ltr/release-header.html title="v1.13" version="v1.13.8510.35816" time="04/20/2023" %}
+
+- Includes all changes under 1.13RC releases listed below
+- Added {% include ltr/comp.html uuid='e2435930' %} parameter
+- Added {% include ltr/comp.html uuid='4326c4aa' %} parameter
+
+{% include ltr/release-header.html title="v1.13 RC6" version="v1.13.8494.18380" pre_release=true time="04/04/2023" %}
+
+- Improved {% include ltr/comp.html uuid='6723beb1' %} component, now identifies more types.
+- Fixed {% include ltr/comp.html uuid='d1940eb3' %} on areas that have internal loops.
+- Fixed {% include ltr/comp.html uuid='0ea8d61a' %} when cloning named elements.
+- {% include ltr/comp.html uuid='a5c63076' %} and *Bounding Box* components can now correctly provide location and bounds info for a Revit Scope Box .
+- Fixed issue with not reading Admin configuration file correctly
+
+{% include ltr/release-header.html title="v1.13 RC5" version="v1.13.8486.7511" pre_release=true time="03/28/2023" %}
+
+- Fixed {% include ltr/comp.html uuid='96d578c0' %} component when the referenced element is a Rebar
+- Fixed AssemblyResolver. Now first call to RhinoCommon fully loads it
+
+{% include ltr/release-header.html title="v1.13 RC4" version="v1.13.8480.18315" pre_release=true time="03/21/2023" %}
+
+- Renamed 'Annotation' panel to 'Annotate'.
+- Merged 'Build', 'Host' and 'Wall' panel under a new 'Architecture' panel.
+- Moved structural element creation components to 'Structure' panel.
+- Moved Component Family related components to 'Component' panel.
+- Renamed 'Host Inserts' component to {% include ltr/comp.html uuid='70ccf7a6' %}.
+- Now {% include ltr/comp.html uuid='70ccf7a6' %} keep linked elements on linked documents.
+- Fixd a bug on {% include ltr/comp.html uuid='ad88cf11' %} component 'Line Style' input when used on a Family document. #788
+- Fixed a bug on previews when there are Groups on the canvas.
+- Now {% include ltr/comp.html uuid='c2b9b045' %} treats relative paths as temporary.
+- Now {% include ltr/comp.html uuid='c2b9b045' %} has a 'Path' output to allow chaining with 'Load Component Family'.
+- Now {% include ltr/comp.html uuid='82523911' %} creates a Work Plane-Based family when no template is provided.
+- Added 'Offset from Host' parameters to work plane-based components.
+
+{% include ltr/release-header.html title="v1.13 RC3" version="v1.13.8474.22250" pre_release=true time="03/15/2023" %}
+
+- Added {% include ltr/comp.html uuid='5a6d9a20' %} component.
+- Added {% include ltr/comp.html uuid='be2c26c7' %} component.
+- Added {% include ltr/comp.html uuid='72b92e6a' %} component.
+
+{% include ltr/release-header.html title="v1.13 RC2" version="v1.13.8466.15699" pre_release=true time="03/07/2023" %}
+
+- Improved how components recognize verticality in Revit
+- Now the Grasshopper Editor window stays at same position after picking from Revit.
 
 {% include ltr/release-header.html title="v1.13 RC1" version="v1.13.8458.21732" pre_release=true time="02/28/2023" %}
 

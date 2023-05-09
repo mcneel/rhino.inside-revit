@@ -6,7 +6,7 @@ using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Groups
+namespace RhinoInside.Revit.GH.Components.Annotations
 {
   using Convert.Geometry;
   using External.DB.Extensions;
@@ -21,10 +21,10 @@ namespace RhinoInside.Revit.GH.Components.Groups
     public AddDetailGroup() : base
     (
       name: "Add Detail Group",
-      nickname: "DetGroup",
+      nickname: "D-Group",
       description: "Given its Location, it adds a detail group element to the active Revit document",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 

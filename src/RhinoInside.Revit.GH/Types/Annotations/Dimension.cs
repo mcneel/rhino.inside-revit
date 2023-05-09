@@ -230,7 +230,7 @@ namespace RhinoInside.Revit.GH.Types
 
       public override bool Visible
       {
-        get => !dimension.Value.Origin.IsAlmostEqualTo(dimension.Value.LeaderEndPosition);
+        get => !dimension.Value.Origin.AlmostEqualPoints(dimension.Value.LeaderEndPosition, dimension.Document.Application.ShortCurveTolerance);
         set { }
       }
 
@@ -315,7 +315,7 @@ namespace RhinoInside.Revit.GH.Types
 
       public override bool Visible
       {
-        get => !DimensionSegment.Origin.IsAlmostEqualTo(DimensionSegment.LeaderEndPosition);
+        get => !DimensionSegment.Origin.AlmostEqualPoints(DimensionSegment.LeaderEndPosition, dimension.Document.Application.ShortCurveTolerance);
         set { }
       }
 
@@ -405,14 +405,13 @@ namespace RhinoInside.Revit.GH.Types
           var leaderTickMark = type.LeaderTickMark;
           foreach (var leader in Leaders.Cast<DimensionLeader>())
           {
-            var segmentCurve = leader.SegmentCurve;
-            if (segmentCurve.IsValid)
+            if (leader.SegmentCurve is Curve segmentCurve && segmentCurve.IsValid)
             {
               args.Pipeline.DrawCurve(segmentCurve, args.Color, args.Thickness);
               if (tickMark is object)
               {
                 args.Pipeline.DrawArrowHead(segmentCurve.PointAtStart, -segmentCurve.TangentAtStart, args.Color, arrowSize, 0.0);
-                args.Pipeline.DrawArrowHead(segmentCurve.PointAtEnd, segmentCurve.TangentAtEnd, args.Color, arrowSize, 0.0);
+                args.Pipeline.DrawArrowHead(segmentCurve.PointAtEnd,    segmentCurve.TangentAtEnd,   args.Color, arrowSize, 0.0);
               }
             }
 

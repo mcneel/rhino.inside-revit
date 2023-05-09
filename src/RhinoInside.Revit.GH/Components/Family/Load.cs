@@ -7,6 +7,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 {
   using External.DB.Extensions;
 
+  [ComponentVersion(introduced: "1.0")]
   public class FamilyLoad : TransactionalComponent
   {
     public override Guid ComponentGuid => new Guid("0E244846-95AE-4B0E-8218-CB24FD4D34D1");
@@ -19,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       nickname: "Load",
       description: "Loads a family into the document",
       category: "Revit",
-      subCategory: "Family"
+      subCategory: "Component"
     )
     { }
 
@@ -43,9 +44,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           Name = "Overwrite",
           NickName = "O",
           Description = "Overwrite Family",
-        }.
-        SetDefaultVale(false),
-        ParamRelevance.Primary
+        }.SetDefaultVale(false), ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -54,9 +53,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           Name = "Overwrite Parameters",
           NickName = "OP",
           Description = "Overwrite Parameters",
-        }.
-        SetDefaultVale(false),
-        ParamRelevance.Occasional
+        }.SetDefaultVale(false), ParamRelevance.Occasional
       ),
     };
 
@@ -73,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       )
     };
 
-    public override void VariableParameterMaintenance()
+    public override void AddedToDocument(GH_Document document)
     {
       if (Params.Input<IGH_Param>("Override Family") is IGH_Param overrideFamily)
         overrideFamily.Name = "Overwrite";
@@ -81,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       if (Params.Input<IGH_Param>("Override Parameters") is IGH_Param overrideParameters)
         overrideParameters.Name = "Overwrite Parameters";
 
-      base.VariableParameterMaintenance();
+      base.AddedToDocument(document);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -103,11 +100,8 @@ namespace RhinoInside.Revit.GH.Components.Families
         }
         else
         {
-          var name = Path.GetFileNameWithoutExtension(filePath);
-          doc.TryGetFamily(name, out family);
-
-          if (family is object && overwrite != true)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Family '{name}' already loaded!");
+          if (doc.TryGetFamily(Path.GetFileNameWithoutExtension(filePath), out family) && overwrite != true)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Family '{family.Name}' is already loaded.");
         }
 
         DA.SetData("Family", family);

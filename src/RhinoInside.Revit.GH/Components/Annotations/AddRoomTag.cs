@@ -18,10 +18,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddRoomTag() : base
     (
       name: "Tag Room",
-      nickname: "TagRoom",
+      nickname: "R-Tag",
       description: "Given a point, it adds an room tag to the given view",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -130,7 +130,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (roomTag.Location is ARDB.LocationPoint areaTagLocation)
       {
         var position = areaTagLocation.Point;
-        if (!target.IsAlmostEqualTo(position))
+        if (!target.AlmostEqualPoints(position))
         {
           var pinned = roomTag.Pinned;
           roomTag.Pinned = false;
@@ -164,7 +164,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         roomTag.ChangeTypeId(type.Id);
       }
 
-      if (!roomTag.TagHeadPosition.IsAlmostEqualTo(head))
+      if (!roomTag.TagHeadPosition.AlmostEqualPoints(head))
       {
         var pinned = roomTag.Pinned;
         roomTag.Pinned = false;

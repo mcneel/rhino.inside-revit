@@ -3,15 +3,16 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using ARUI = Autodesk.Revit.UI;
 using ARDB = Autodesk.Revit.DB;
-using Microsoft.Win32;
-using static RhinoInside.Revit.Diagnostics;
-using RhinoInside.Revit.External.ApplicationServices.Extensions;
-using UIX = RhinoInside.Revit.External.UI;
+using ARUI = Autodesk.Revit.UI;
+using ERDB = RhinoInside.Revit.External.DB;
+using ERUI = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit
 {
+  using static Diagnostics;
+  using External.ApplicationServices.Extensions;
+
   enum CoreStartupMode
   {
     Cancelled = -2,
@@ -83,9 +84,9 @@ namespace RhinoInside.Revit
     internal static readonly string RegistryPath = @"SOFTWARE\McNeel\Rhinoceros\7.0";
     static readonly string SystemDir =
 #if DEBUG
-      Registry.GetValue($@"HKEY_CURRENT_USER\{RegistryPath}-WIP-Developer-Debug-trunk\Install", "Path", null) as string ??
+      Microsoft.Win32.Registry.GetValue($@"HKEY_CURRENT_USER\{RegistryPath}-WIP-Developer-Debug-trunk\Install", "Path", null) as string ??
 #endif
-      Registry.GetValue($@"HKEY_LOCAL_MACHINE\{RegistryPath}\Install", "Path", null) as string ??
+      Microsoft.Win32.Registry.GetValue($@"HKEY_LOCAL_MACHINE\{RegistryPath}\Install", "Path", null) as string ??
       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP", "System");
 
     internal static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
@@ -126,8 +127,8 @@ namespace RhinoInside.Revit
     #endregion
 
     #region IExternalApplication
-    static UIX.UIHostApplication host;
-    internal static UIX.UIHostApplication Host
+    static ERUI.UIHostApplication host;
+    internal static ERUI.UIHostApplication Host
     {
       get => host;
       private set { if (!ReferenceEquals(host, value)) { host?.Dispose(); host = value; } }
@@ -171,6 +172,7 @@ namespace RhinoInside.Revit
             Host = new ARUI.UIApplication(app);
             Convert.Geometry.GeometryTolerance.Internal = new Convert.Geometry.GeometryTolerance
             (
+              ERDB.NumericTolerance.DefaultTolerance,
               app.AngleTolerance,
               app.VertexTolerance,
               app.ShortCurveTolerance
@@ -205,7 +207,9 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Version
-#if REVIT_2023
+#if REVIT_2024
+    static readonly Version MinimumRevitVersion = new Version(2024, 0);
+#elif REVIT_2023
     static readonly Version MinimumRevitVersion = new Version(2023, 0);
 #elif REVIT_2022
     static readonly Version MinimumRevitVersion = new Version(2022, 1);
@@ -221,7 +225,7 @@ namespace RhinoInside.Revit
     static readonly Version MinimumRevitVersion = new Version(2017, 0);
 #endif
 
-    static ARUI.Result Startup(UIX.UIHostApplication app)
+    static ARUI.Result Startup(ERUI.UIHostApplication app)
     {
       if (StartupMode == CoreStartupMode.Cancelled)
         return ARUI.Result.Cancelled;
@@ -241,7 +245,7 @@ namespace RhinoInside.Revit
           var taskDialog = new ARUI.TaskDialog("Update Revit")
           {
             Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}.UpdateRevit",
-            MainIcon = UIX.TaskDialogIcons.IconWarning,
+            MainIcon = ERUI.TaskDialogIcons.IconWarning,
             AllowCancellation = true,
             MainInstruction = "Unsupported Revit version",
             MainContent = $"Please update Revit to version {MinimumRevitVersion} or higher.",
@@ -304,7 +308,7 @@ namespace RhinoInside.Revit
           var taskDialog = new ARUI.TaskDialog("Update Rhino")
           {
             Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}.UpdateRhino",
-            MainIcon = UIX.TaskDialogIcons.IconError,
+            MainIcon = ERUI.TaskDialogIcons.IconError,
             AllowCancellation = true,
             MainInstruction = "Unsupported Rhino version",
             MainContent = $"Expected Rhino version is ({MinimumRhinoVersion}) or above.",
@@ -365,7 +369,7 @@ namespace RhinoInside.Revit
         var taskDialog = new ARUI.TaskDialog("Days left")
         {
           Id = $"{MethodBase.GetCurrentMethod().DeclaringType}.{MethodBase.GetCurrentMethod().Name}",
-          MainIcon = UIX.TaskDialogIcons.IconInformation,
+          MainIcon = ERUI.TaskDialogIcons.IconInformation,
           TitleAutoPrefix = true,
           AllowCancellation = true,
           MainInstruction = expired ?

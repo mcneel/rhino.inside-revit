@@ -88,6 +88,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
+    internal static bool IsColor(this BuiltInParameter value)
+    {
+      var name = value.ToString();
+      return name.EndsWith("_COLOR") || name.EndsWith("_COLOR_PARAM");
+    }
+
     /// <summary>
     /// Internal Dictionary that maps <see cref="BuiltInParameter"/> by name.
     /// Results are implicitly orderd by value in the <see cref="BuiltInParameter"/> enum.
@@ -159,7 +165,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (parameter.StorageType != StorageType.Integer)
         throw new InvalidCastException();
 
-      if (parameter.Definition?.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().ToString().EndsWith("_COLOR"))
+      if (parameter.Definition?.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().IsColor())
         throw new InvalidCastException();
 
       var abgr = parameter.AsInteger();
@@ -198,7 +204,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (parameter.StorageType != StorageType.Integer)
         throw new InvalidCastException();
 
-      if (!parameter.Id.ToBuiltInParameter().ToString().EndsWith("_COLOR"))
+      if (!parameter.Id.ToBuiltInParameter().IsColor())
         throw new InvalidCastException();
 
       return parameter.Set(value.ToBGR());
@@ -217,7 +223,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return parameter.Element.ChangeTypeId(value) == ElementId.InvalidElementId;
       }
 
-      return parameter.Set(value ?? ElementIdExtension.InvalidElementId);
+      return parameter.Set(value ?? ElementIdExtension.Invalid);
     }
 
     public static bool Set(this Parameter parameter, Element value)
@@ -225,7 +231,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (value is object && !parameter.Element.Document.IsEquivalent(value.Document))
         throw new InvalidCastException();
 
-      return Set(parameter, value?.Id ?? ElementIdExtension.InvalidElementId);
+      return Set(parameter, value?.Id ?? ElementIdExtension.Invalid);
     }
 
     public static bool Update(this Parameter parameter, bool value)
@@ -268,7 +274,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (parameter.HasValue && parameter.AsElementId() == value) return true;
 
-      return Set(parameter, value ?? ElementIdExtension.InvalidElementId);
+      return Set(parameter, value ?? ElementIdExtension.Invalid);
     }
 
     public static bool Update(this Parameter parameter, Element value)
@@ -276,7 +282,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (value is object && !parameter.Element.Document.IsEquivalent(value.Document))
         throw new InvalidCastException();
 
-      return Update(parameter, value?.Id ?? ElementIdExtension.InvalidElementId);
+      return Update(parameter, value?.Id ?? ElementIdExtension.Invalid);
     }
 
     public static bool ResetValue(this Parameter parameter)

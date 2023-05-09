@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       nickname: "Families",
       description: "Get document families list",
       category: "Revit",
-      subCategory: "Family"
+      subCategory: "Type"
     )
     { }
 

@@ -353,24 +353,14 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (space.Location is ARDB.LocationPoint spaceLocation)
         {
           var position = spaceLocation.Point;
-          var target = new ARDB.XYZ(location.X, location.Y, position.Z);
-          if (!target.IsAlmostEqualTo(position))
+          if (!location.AlmostEqualPoints(position))
           {
             var pinned = space.Pinned;
             space.Pinned = false;
-            spaceLocation.Move(target - position);
+            spaceLocation.Move(location - position);
             space.Pinned = pinned;
           }
-
-          baseOffset = Math.Min
-          (
-            baseOffset.Value,
-            space.Level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble()
-          );
         }
-
-        if (space.BaseOffset != baseOffset.Value)
-          space.BaseOffset = baseOffset.Value;
 
         if (topElevation.IsLevelConstraint(out var topLevel, out var topOffset))
         {
@@ -387,6 +377,17 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
           if (space.LimitOffset != topElevation.Offset)
             space.LimitOffset = topElevation.Offset;
+        }
+
+        if (space.BaseOffset != baseOffset.Value)
+        {
+          var computationHeight = space.Level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble();
+          if (baseOffset.Value > computationHeight)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{space.Name}' lower offset is above the Computation Height. {{{space.Id}}}");
+
+          baseOffset = Math.Min(baseOffset.Value, computationHeight);
+          if (space.BaseOffset != baseOffset.Value)
+            space.BaseOffset = baseOffset.Value;
         }
       }
       else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"'{space.Name}' is unplaced. {{{space.Id}}}");

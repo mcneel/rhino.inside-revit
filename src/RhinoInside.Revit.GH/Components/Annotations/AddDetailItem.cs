@@ -19,10 +19,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddDetailItem() : base
     (
       name: "Add Detail Item",
-      nickname: "DetItem",
+      nickname: "D-Item",
       description: "Given its Location, it adds a detail item element to the active Revit document",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 

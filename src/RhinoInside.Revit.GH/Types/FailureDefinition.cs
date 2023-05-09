@@ -1,6 +1,5 @@
 using System;
 using System.Drawing;
-using Autodesk.Revit.DB.Visual;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;

@@ -76,15 +76,30 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (other.Document.IsEquivalent(Document)) return;
 
-      if (Document is null || other.Document is null)
+      if (other.Document is null)
       {
-        if (Value.ProjectionLinePatternId.ToBuiltInLinePattern() != ERDB.BuiltInLinePattern.Solid) Value.SetProjectionLinePatternId(ElementIdExtension.InvalidElementId);
-        if (Value.CutLinePatternId.ToBuiltInLinePattern() != ERDB.BuiltInLinePattern.Solid) Value.SetCutLinePatternId(ElementIdExtension.InvalidElementId);
+        if (Value.ProjectionLinePatternId.ToBuiltInLinePattern() != ERDB.BuiltInLinePattern.Solid) Value.SetProjectionLinePatternId(ElementIdExtension.Invalid);
+        if (Value.CutLinePatternId.ToBuiltInLinePattern() != ERDB.BuiltInLinePattern.Solid) Value.SetCutLinePatternId(ElementIdExtension.Invalid);
 
-        if (Value.SurfaceForegroundPatternId() != FillPatternElement.SolidId) Value.SetSurfaceForegroundPatternId(ElementIdExtension.InvalidElementId);
-        if (Value.SurfaceBackgroundPatternId() != FillPatternElement.SolidId) Value.SetSurfaceBackgroundPatternId(ElementIdExtension.InvalidElementId);
-        if (Value.CutForegroundPatternId() != FillPatternElement.SolidId) Value.SetCutForegroundPatternId(ElementIdExtension.InvalidElementId);
-        if (Value.CutBackgroundPatternId() != FillPatternElement.SolidId) Value.SetCutBackgroundPatternId(ElementIdExtension.InvalidElementId);
+        using (var collector = new ARDB.FilteredElementCollector(Document))
+        {
+          var solidPatternId = collector.OfClass(typeof(ARDB.FillPatternElement)).
+            Cast<ARDB.FillPatternElement>().
+            FirstOrDefault
+            (
+              x =>
+              {
+                using (var pattern = x.GetFillPattern())
+                  return pattern.Target == ARDB.FillPatternTarget.Drafting && pattern.IsSolidFill;
+              }
+            )?.
+            Id ?? ElementIdExtension.Invalid;
+
+          Value.SetSurfaceForegroundPatternId(Value.SurfaceForegroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.Invalid);
+          Value.SetSurfaceBackgroundPatternId(Value.SurfaceBackgroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.Invalid);
+          Value.SetCutForegroundPatternId(Value.CutForegroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.Invalid);
+          Value.SetCutBackgroundPatternId(Value.CutBackgroundPatternId() == ElementIdExtension.Default ? solidPatternId : ElementIdExtension.Invalid);
+        }
       }
       else
       {
@@ -104,9 +119,11 @@ namespace RhinoInside.Revit.GH.Types
       {
         base.Value = new ARDB.OverrideGraphicSettings().
           SetProjectionLineColor(color.ToColor()).
-          SetSurfaceForegroundPatternId(FillPatternElement.SolidId).
+          SetSurfaceForegroundPatternId(ElementIdExtension.Default).
           SetSurfaceForegroundPatternColor(color.ToColor()).
-          SetSurfaceTransparency((int) Math.Round((1.0 - (color.A / 255.0)) * 100.0));
+          SetSurfaceTransparency((int) Math.Round((1.0 - (color.A / 255.0)) * 100.0)).
+          SetCutForegroundPatternId(ElementIdExtension.Default).
+          SetCutForegroundPatternColor(color.ToColor());
 
         return true;
       }
@@ -124,9 +141,11 @@ namespace RhinoInside.Revit.GH.Types
           var highlight = System.Drawing.Color.FromArgb(180, 255, 128, 0);
           base.Value = new ARDB.OverrideGraphicSettings().
             SetProjectionLineColor(highlight.ToColor()).
-            SetSurfaceForegroundPatternId(FillPatternElement.SolidId).
+            SetSurfaceForegroundPatternId(ElementIdExtension.Default).
             SetSurfaceForegroundPatternColor(highlight.ToColor()).
-            SetSurfaceTransparency((int) Math.Round((1.0 - (highlight.A / 255.0)) * 100.0));
+            SetSurfaceTransparency((int) Math.Round((1.0 - (highlight.A / 255.0)) * 100.0)).
+            SetCutForegroundPatternId(ElementIdExtension.Default).
+            SetCutForegroundPatternColor(highlight.ToColor());
         }
         else
         {

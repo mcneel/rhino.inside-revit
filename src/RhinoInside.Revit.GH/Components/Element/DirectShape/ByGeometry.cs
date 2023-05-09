@@ -130,21 +130,24 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     public static bool IsValidCategoryId(ARDB.ElementId categoryId, ARDB.Document doc)
     {
+#if REVIT_2018
       // For some unknown reason Revit dislikes 'Coordination Model' category (Tested in Revit 2023).
-      return categoryId.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_Coordination_Model &&
-        ARDB.DirectShape.IsValidCategoryId(categoryId, doc);
+      if (categoryId.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Coordination_Model)
+        return false;
+#endif
+      return ARDB.DirectShape.IsValidCategoryId(categoryId, doc);
     }
   }
 
   public class DirectShapeByGeometry : ReconstructDirectShapeComponent
   {
     public override Guid ComponentGuid => new Guid("0BFBDA45-49CC-4AC6-8D6D-ECD2CFED062A");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeByGeometry() : base
     (
       name: "Add Geometry DirectShape",
-      nickname: "GeoDShape",
+      nickname: "G-Shape",
       description: "Given its Geometry, it adds a DirectShape element to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"
@@ -200,12 +203,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   public class DirectShapeTypeByGeometry : ReconstructDirectShapeComponent
   {
     public override Guid ComponentGuid => new Guid("25DCFE8E-5BE9-460C-80E8-51B7041D8FED");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeTypeByGeometry() : base
     (
       name: "Add DirectShape Type",
-      nickname: "DShapeTyp",
+      nickname: "D-ShapeType",
       description: "Given its Geometry, it reconstructs a DirectShape Type to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"
@@ -259,12 +262,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   public class DirectShapeByLocation : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("A811EFA4-8DE2-46F3-9F88-3D4F13FE40BE");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeByLocation() : base
     (
       name: "Add DirectShape",
-      nickname: "DShape",
+      nickname: "D-Shape",
       description: "Given its location, it reconstructs a DirectShape into the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"

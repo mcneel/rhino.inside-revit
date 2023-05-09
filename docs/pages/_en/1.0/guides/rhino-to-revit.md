@@ -51,7 +51,7 @@ DirectShapes can be placed in any top level Category enabling graphic and materi
 
 ![Create a DirectShapes]({{ "/static/images/guides/rhino-to-revit-directshape.png" | prepend: site.baseurl }})
 
-For additional graphic controls between elements within a category, [Rule-based View Filters](https://knowledge.autodesk.com/support/revit-products/learn-explore/caas/CloudHelp/cloudhelp/2019/ENU/Revit-DocumentPresent/files/GUID-145815E2-5699-40FE-A358-FFC739DB7C46-htm.html) can be applied with custom parameter values. DirectShapes cannot be placed in subcategories but the source geometry can be imported into Loadable Families and be assigned a cubcategory (discussed later in this guide):
+For additional graphic controls between elements within a category, [Rule-based View Filters](https://help.autodesk.com/view/RVT/2014/ENU/?guid=GUID-145815E2-5699-40FE-A358-FFC739DB7C46) can be applied with custom parameter values. DirectShapes cannot be placed in subcategories but the source geometry can be imported into Loadable Families and be assigned a cubcategory (discussed later in this guide):
 
 ![Add a Shared Parameter for a filter]({{ "/static/images/guides/directshape-filter-gh.png" | prepend: site.baseurl }})
 
@@ -68,7 +68,7 @@ For a deeper look at Directshapes and detailed ways they can be used see the [Di
 
 ## Rhino objects as Loadable Families
 
-Rhino objects imported as forms inside a Revit family allow for inserting multiple instances of an object and also assigning [subcategories](https://knowledge.autodesk.com/support/revit-products/learn-explore/caas/CloudHelp/cloudhelp/2018/ENU/Revit-Customize/files/GUID-8C1F9882-E4AB-4E03-A735-8C44F19E194B-htm.html). You can use subcategories to control the visibility and graphics of portions of a family within a top level category.
+Rhino objects imported as forms inside a Revit family allow for inserting multiple instances of an object and also assigning [subcategories](https://help.autodesk.com/view/RVT/2014/ENU/?guid=GUID-8C1F9882-E4AB-4E03-A735-8C44F19E194B). You can use subcategories to control the visibility and graphics of portions of a family within a top level category.
 
 Wrapping Rhino geometry inside Loadable Families have many advantages:
 * Repeated objects can be inserted multiple times allowing forms to be scheduled and counted correctly
@@ -99,7 +99,7 @@ Subcategory properties can be edited in the *Object Styles* dialog:
 
 ![An Exterior Walkway in Rhino]({{ "/static/images/guides/revit-objectstyles.jpg" | prepend: site.baseurl }})
 
-Subcategories can also be used with [Rule-based View Filters](https://knowledge.autodesk.com/support/revit-products/learn-explore/caas/CloudHelp/cloudhelp/2019/ENU/Revit-DocumentPresent/files/GUID-145815E2-5699-40FE-A358-FFC739DB7C46-htm.html) for additional graphic control.
+Subcategories can also be used with [Rule-based View Filters](https://help.autodesk.com/view/RVT/2024/ENU/?guid=GUID-145815E2-5699-40FE-A358-FFC739DB7C46) for additional graphic control.
 
 ## Using Revit built-in System Families
 

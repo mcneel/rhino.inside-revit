@@ -244,13 +244,13 @@ namespace RhinoInside.Revit.GH
     private void DocumentServer_DocumentAdded(GH_DocumentServer sender, GH_Document doc)
     {
       doc.ObjectsDeleted += Doc_ObjectsDeleted;
-      if (!External.ActivationGate.IsOpen)
+
+      // If we don't disable the solutions Grasshopper will
+      // evaluate doc before notifiy us the document is being active.
+      if (GH_Document.EnableSolutions)
       {
-        if (GH_Document.EnableSolutions)
-        {
-          GH_Document.EnableSolutions = false;
-          EnableSolutions = true;
-        }
+        GH_Document.EnableSolutions = false;
+        EnableSolutions = true;
       }
     }
 
@@ -537,6 +537,12 @@ namespace RhinoInside.Revit.GH
       {
         e.NewDocument.SolutionStart += ActiveDefinition_SolutionStart;
         e.NewDocument.SolutionEnd += ActiveDefinition_SolutionEnd;
+      }
+
+      if (EnableSolutions.HasValue)
+      {
+        GH_Document.EnableSolutions = EnableSolutions.Value;
+        EnableSolutions = null;
       }
     }
     #endregion

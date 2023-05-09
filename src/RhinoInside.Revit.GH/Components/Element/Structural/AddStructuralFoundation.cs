@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddStructuralFoundation : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("C1C7CDBB-EE50-40FC-A398-E01465EC65EB");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public AddStructuralFoundation() : base
     (
@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "S-Foundation",
       description: "Given its Location, it adds a structural foundation element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Structure"
     )
     { }
 
@@ -117,6 +117,7 @@ namespace RhinoInside.Revit.GH.Components
       switch (family.FamilyPlacementType)
       {
         case ARDB.FamilyPlacementType.OneLevelBased:
+        case ARDB.FamilyPlacementType.TwoLevelsBased:
           if (!(host is null)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances shouldn't be hosted.");
           return;
 
@@ -220,7 +221,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!IsEquivalentHost(foundation, host)) return false;
       if (type.Id != foundation.GetTypeId()) foundation.ChangeTypeId(type.Id);
 
-      if (foundation.LevelId == ElementIdExtension.InvalidElementId)
+      if (foundation.LevelId == ElementIdExtension.Invalid)
       {
         var levelParam = foundation.get_Parameter(ARDB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
         if (levelParam?.IsReadOnly is false && levelParam.Update(level.Id) == false) return false;

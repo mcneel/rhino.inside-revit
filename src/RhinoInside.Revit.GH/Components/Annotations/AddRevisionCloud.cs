@@ -20,10 +20,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddRevisionCloud() : base
     (
       name: "Add Revision Cloud",
-      nickname: "RevisionCloud",
+      nickname: "R-Cloud",
       description: "Given a profile, it adds a revision cloud to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 

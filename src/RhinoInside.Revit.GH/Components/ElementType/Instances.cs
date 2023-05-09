@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
   public class ElementTypeInstances : Component
   {
     public override Guid ComponentGuid => new Guid("9958995F-CCD4-48DE-B3B3-AE769F04F4DD");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     protected override string IconTag => "I";
 

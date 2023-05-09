@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Rhino.Display;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
@@ -70,7 +69,11 @@ namespace RhinoInside.Revit.GH.Types
         set { tag.HasLeader = value; tag.InvalidateGraphics(); }
       }
 
+#if REVIT_2018
       public override bool HasElbow => tag.Value?.HasElbow ?? false;
+#else
+      public override bool HasElbow => false;
+#endif
       public override Point3d ElbowPosition
       {
         get => tag.Value.LeaderElbow.ToPoint3d();
@@ -90,9 +93,9 @@ namespace RhinoInside.Revit.GH.Types
         set
         {
           var position = value.ToXYZ();
-          if (!position.IsAlmostEqualTo(tag.Value.TagHeadPosition))
+          if (!position.AlmostEqualPoints(tag.Value.TagHeadPosition))
           {
-            try { tag.Value.TagHeadPosition = value.ToXYZ(); }
+            try { tag.Value.TagHeadPosition = position; }
             catch (Autodesk.Revit.Exceptions.ArgumentException)
             { throw new Exceptions.RuntimeArgumentException($"Tag is outside of its boundary.\nEnable Leader or move Tag within its boundary.{{{tag.Id.ToString("D")}}}"); }
 

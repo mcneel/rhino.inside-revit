@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components.Site
   public class QueryProjectLocations : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("62641279-D4CE-4F93-8430-BD342BE123AB");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "⌖";
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.ProjectLocation));
 
@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.GraphicalElement>("Shared Sites", "SS", "Shared sites list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Sites", "SS", "Shared sites list", GH_ParamAccess.list)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

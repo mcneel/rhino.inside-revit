@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       nickname: "New",
       description: "Creates a new Family from a template.",
       category: "Revit",
-      subCategory: "Family"
+      subCategory: "Component"
     )
     { }
 
@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           NickName = "T",
           Optional = true,
           FileFilter = "Family Template Files (*.rft)|*.rft"
-        }
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           NickName = "C",
           Description = "Family Category",
           Optional = true
-        }
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -116,7 +116,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       )
     };
 
-    public override void VariableParameterMaintenance()
+    public override void AddedToDocument(GH_Document document)
     {
       if (Params.Input<IGH_Param>("Override Family") is IGH_Param overrideFamily)
         overrideFamily.Name = "Overwrite";
@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       if (Params.Input<IGH_Param>("Override Parameters") is IGH_Param overrideParameters)
         overrideParameters.Name = "Overwrite Parameters";
 
-      base.VariableParameterMaintenance();
+      base.AddedToDocument(document);
     }
 
     public static Dictionary<string, ARDB.ElementId> GetMaterialIdsByName(ARDB.Document doc)
@@ -512,39 +512,36 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     static string GetDefaultTemplateFileName(ARDB.Document doc, ARDB.ElementId categoryId)
     {
-      if (categoryId.TryGetBuiltInCategory(out var builtInCategory))
+      if (categoryId?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Mass)
       {
-        if (builtInCategory == ARDB.BuiltInCategory.OST_Mass)
+        switch (doc.Application.Language)
         {
-          switch (doc.Application.Language)
-          {
-            case Autodesk.Revit.ApplicationServices.LanguageType.English_USA:
+          case Autodesk.Revit.ApplicationServices.LanguageType.English_USA:
 #if REVIT_2018
-            case Autodesk.Revit.ApplicationServices.LanguageType.English_GB:
+          case Autodesk.Revit.ApplicationServices.LanguageType.English_GB:
 #endif
-              switch (doc.DisplayUnitSystem)
-              {
-                case ARDB.DisplayUnit.METRIC:   return @"Conceptual Mass\Metric Mass";
-                case ARDB.DisplayUnit.IMPERIAL: return @"Conceptual Mass\Mass";
-              }
-              break;
-            case Autodesk.Revit.ApplicationServices.LanguageType.German: return @"Entwurfskörper\M_Körper";
-            case Autodesk.Revit.ApplicationServices.LanguageType.Spanish: return @"Masas conceptuales\Masa métrica";
-            case Autodesk.Revit.ApplicationServices.LanguageType.French: return @"Volume conceptuel\Volume métrique";
-            case Autodesk.Revit.ApplicationServices.LanguageType.Italian: return @"Massa concettuale\Massa metrica";
-            case Autodesk.Revit.ApplicationServices.LanguageType.Chinese_Simplified: return @"概念体量\公制体量";
-            case Autodesk.Revit.ApplicationServices.LanguageType.Chinese_Traditional: return @"概念量體\公制量體";
-            case Autodesk.Revit.ApplicationServices.LanguageType.Japanese: return @"コンセプト マス\マス(メートル単位)";
-            case Autodesk.Revit.ApplicationServices.LanguageType.Korean: return @"개념 질량\미터법 질량";
-            case Autodesk.Revit.ApplicationServices.LanguageType.Russian: return @"Концептуальный формообразующий элемент\Метрическая система, формообразующий элемент";
-            case Autodesk.Revit.ApplicationServices.LanguageType.Czech: return null;
-            case Autodesk.Revit.ApplicationServices.LanguageType.Polish: return @"Bryła koncepcyjna\Bryła (metryczna)";
-            case Autodesk.Revit.ApplicationServices.LanguageType.Hungarian: return null;
-            case Autodesk.Revit.ApplicationServices.LanguageType.Brazilian_Portuguese: return @"Massa conceitual\Massa métrica";
-          }
-
-          return null;
+            switch (doc.DisplayUnitSystem)
+            {
+              case ARDB.DisplayUnit.METRIC:   return @"Conceptual Mass\Metric Mass";
+              case ARDB.DisplayUnit.IMPERIAL: return @"Conceptual Mass\Mass";
+            }
+            break;
+          case Autodesk.Revit.ApplicationServices.LanguageType.German: return @"Entwurfskörper\M_Körper";
+          case Autodesk.Revit.ApplicationServices.LanguageType.Spanish: return @"Masas conceptuales\Masa métrica";
+          case Autodesk.Revit.ApplicationServices.LanguageType.French: return @"Volume conceptuel\Volume métrique";
+          case Autodesk.Revit.ApplicationServices.LanguageType.Italian: return @"Massa concettuale\Massa metrica";
+          case Autodesk.Revit.ApplicationServices.LanguageType.Chinese_Simplified: return @"概念体量\公制体量";
+          case Autodesk.Revit.ApplicationServices.LanguageType.Chinese_Traditional: return @"概念量體\公制量體";
+          case Autodesk.Revit.ApplicationServices.LanguageType.Japanese: return @"コンセプト マス\マス(メートル単位)";
+          case Autodesk.Revit.ApplicationServices.LanguageType.Korean: return @"개념 질량\미터법 질량";
+          case Autodesk.Revit.ApplicationServices.LanguageType.Russian: return @"Концептуальный формообразующий элемент\Метрическая система, формообразующий элемент";
+          case Autodesk.Revit.ApplicationServices.LanguageType.Czech: return null;
+          case Autodesk.Revit.ApplicationServices.LanguageType.Polish: return @"Bryła koncepcyjna\Bryła (metryczna)";
+          case Autodesk.Revit.ApplicationServices.LanguageType.Hungarian: return null;
+          case Autodesk.Revit.ApplicationServices.LanguageType.Brazilian_Portuguese: return @"Massa conceitual\Massa métrica";
         }
+
+        return null;
       }
 
       switch (doc.Application.Language)
@@ -651,7 +648,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       foreach (var folder in folders)
       {
         var template = components.Length == 1 ?
-          Directory.EnumerateFiles(folder, components[0], SearchOption.AllDirectories).FirstOrDefault() :
+          Directory.EnumerateFiles(folder, components[0], SearchOption.TopDirectoryOnly).FirstOrDefault() :
           Path.GetFullPath(Path.Combine(folder, templatePath));
 
         if (File.Exists(template))
@@ -672,56 +669,62 @@ namespace RhinoInside.Revit.GH.Components.Families
       if (!Params.TryGetData(DA, "Overwrite Parameters", out bool? overwriteParameters)) return;
       if (!overwriteParameters.HasValue) overwriteParameters = overwrite;
       if (!Params.GetData(DA, "Name", out string name)) return;
-      if (!Params.GetData(DA, "Category", out ARDB.ElementId categoryId)) categoryId = ARDB.ElementId.InvalidElementId;
-      var updateCategory = categoryId != ARDB.ElementId.InvalidElementId;
+      if (!Params.TryGetData(DA, "Category", out ARDB.ElementId categoryId)) return;
 
       var geometry = new List<IGH_GeometricGoo>();
       var updateGeometry = !(!DA.GetDataList("Geometry", geometry) && Params.Input[Params.IndexOfInputParam("Geometry")].SourceCount == 0);
 
-      bool familyIsNew = !doc.TryGetFamily(name, out var family, categoryId);
-
       var templatePath = string.Empty;
-      if (familyIsNew)
+      if (!doc.TryGetFamily(name, out var family, categoryId))
       {
-        var isDefaultPath = false;
-        if (!DA.GetData("Template", ref templatePath))
+        var useTemplate = categoryId?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Mass;
+        if (!useTemplate)
         {
-          templatePath = GetDefaultTemplatePath(doc, categoryId);
-          isDefaultPath = templatePath is object;
+          if (doc.IsFamilyDocument && doc.OwnerFamily.FamilyPlacementType == ARDB.FamilyPlacementType.ViewBased)
+            useTemplate = true;
         }
-
-        if (!Path.HasExtension(templatePath))
-          templatePath += ".rft";
-
-        if (FindTemplatePath(doc, ref templatePath, out var pathWasRelative))
+        
+        if (!Params.TryGetData(DA, "Template", out templatePath)) return;
+        if (templatePath is object || useTemplate)
         {
-          if (pathWasRelative || isDefaultPath)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Using template file from '{templatePath}'");
+          templatePath = templatePath ?? GetDefaultTemplatePath(doc, categoryId);
+
+          if (!Path.HasExtension(templatePath))
+            templatePath += ".rft";
+
+          if (FindTemplatePath(doc, ref templatePath, out var pathWasRelative))
+          {
+            if (pathWasRelative)
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Using template file from '{templatePath}'");
+          }
+          else
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to found Template file '{templatePath}'.");
+            return;
+          }
         }
         else
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to found Template file '{templatePath}'.");
-          return;
+          using (var transaction = NewTransaction(doc))
+          {
+            transaction.Start(Name);
+
+            family = doc.CreateWorkPlaneBasedSymbol(name).Family;
+            overwrite = true;
+            updateGeometry = true;
+
+            CommitTransaction(doc, transaction);
+          }
         }
       }
-      else
-      {
-        updateCategory &= family.FamilyCategory.Id != categoryId;
-      }
 
-      if (familyIsNew || (overwrite == true && (updateCategory || updateGeometry)))
+      var updateCategory = categoryId is object && family?.FamilyCategory.Id != categoryId;
+      var updateName = family is null;
+      if (family is null || (overwrite == true && (updateCategory || updateGeometry)))
       {
         try
         {
-          if
-          (
-            (
-              familyIsNew ?
-              doc.Application.NewFamilyDocument(templatePath) :
-              doc.EditFamily(family)
-            )
-            is var familyDoc
-          )
+          if((family is null ? doc.Application.NewFamilyDocument(templatePath) : doc.EditFamily(family)) is var familyDoc)
           {
             try
             {
@@ -799,14 +802,14 @@ namespace RhinoInside.Revit.GH.Components.Families
                 CommitTransaction(familyDoc, transaction);
               }
 
-              family = familyDoc.LoadFamily(doc, new FamilyLoadOptions(overwrite == true, overwriteParameters == true));
+              family = familyDoc.LoadFamily(doc, new FamilyLoadOptions(overwrite is true, overwriteParameters is true));
             }
             finally
             {
               familyDoc.Release();
             }
 
-            if (familyIsNew)
+            if (updateName)
             {
               using (var transaction = NewTransaction(doc))
               {

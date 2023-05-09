@@ -457,6 +457,8 @@ namespace RhinoInside.Revit
 
     static void AssemblyLoaded(object sender, AssemblyLoadEventArgs args)
     {
+      if (args.LoadedAssembly.ReflectionOnly) return;
+
       var assemblyName = args.LoadedAssembly.GetName();
       if (references.TryGetValue(assemblyName.Name, out var location))
         location.Activate(args.LoadedAssembly);
@@ -465,9 +467,10 @@ namespace RhinoInside.Revit
     #region Utils
     static bool IsInternalReference(ResolveEventArgs args)
     {
+      var assembly = new AssemblyName(args.Name);
       if
       (
-        InternalAssemblies.ContainsKey(args.Name) &&
+        InternalAssemblies.ContainsKey(assembly.Name) &&
         GetRequestingAssembly(args) is Assembly requestingAssembly
       )
         return requestingAssembly.GetReferencedAssemblies().Any(x => InternalAssemblies.ContainsKey(x.Name));

@@ -14,12 +14,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   public class DirectShapeByMesh : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("5542506A-A09E-4EC9-92B4-F2B52417511C");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public DirectShapeByMesh() : base
     (
       name: "Add Mesh DirectShape",
-      nickname: "MshDShape",
+      nickname: "M-Shape",
       description: "Given a Mesh, it adds a Mesh shape to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"

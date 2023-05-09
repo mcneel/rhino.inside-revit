@@ -9,14 +9,15 @@
 If `ReleaseVersion` contains "wip" the product expires.
 
 -->
-<ProductInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<ProductInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Name>Rhino.Inside</Name>
   <Company>Robert McNeel &amp; Associates</Company>
   <Copyright>2019-2023 Robert McNeel &amp; Associates.</Copyright>
   <ReleaseVersion></ReleaseVersion>
   <MetaVersion></MetaVersion>
   <MajorVersion>1</MajorVersion>
-  <MinorVersion>14</MinorVersion>
+  <MinorVersion>15</MinorVersion>
   <!--
   <BuildVersion></BuildVersion>
   <RevisionVersion></RevisionVersion>

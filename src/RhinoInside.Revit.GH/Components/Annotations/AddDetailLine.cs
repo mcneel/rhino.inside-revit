@@ -18,10 +18,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddDetailLine() : base
     (
       name: "Add Detail Line",
-      nickname: "DetailLine",
+      nickname: "D-Line",
       description: "Given a Curve, it adds a detail line to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         new Parameters.CurveElement()
         {
           Name = _DetailLine_,
-          NickName = _DetailLine_.Substring(0, 1),
+          NickName = "DL",
           Description = $"Output {_DetailLine_}"
         }
       )

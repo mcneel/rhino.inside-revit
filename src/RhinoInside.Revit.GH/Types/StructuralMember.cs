@@ -145,40 +145,34 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (curve is object && Value is ARDB.FamilyInstance instance && curve is object)
       {
-        if (instance.StructuralType == ARDB.Structure.StructuralType.Column)
+        var columnStyleParam = instance.get_Parameter(ARDB.BuiltInParameter.SLANTED_COLUMN_TYPE_PARAM);
+        var columnStyle = columnStyleParam.AsInteger();
+
+        if (instance.Location is ARDB.LocationPoint)
+          columnStyleParam.Update(2);
+
+        if (instance.Location is ARDB.LocationCurve locationCurve)
         {
-          var columnStyleParam = instance.get_Parameter(ARDB.BuiltInParameter.SLANTED_COLUMN_TYPE_PARAM);
-          var columnStyle = columnStyleParam.AsInteger();
-
-          if (instance.Location is ARDB.LocationPoint)
-            columnStyleParam.Update(2);
-
-          if (instance.Location is ARDB.LocationCurve locationCurve)
+          var newCurve = curve.ToCurve();
+          if (!locationCurve.Curve.AlmostEquals(newCurve))
           {
-            var newCurve = curve.ToCurve();
-            if (!locationCurve.Curve.AlmostEquals(newCurve, GeometryTolerance.Internal.VertexTolerance))
+            using (!keepJoins ? ElementJoins.DisableJoinsScope(instance) : default)
+              locationCurve.Curve = newCurve;
+
+            InvalidateGraphics();
+          }
+
+          if (columnStyle == 0)
+          {
+            // Let's see if we can keep the Column Style as 'Vertical'.
+            var axis = curve.PointAtEnd - curve.PointAtStart; axis.Unitize();
+            if ((axis - Vector3d.ZAxis).Length <= GeometryTolerance.Model.DefaultTolerance)
             {
-              using (!keepJoins ? ElementJoins.DisableJoinsScope(instance) : default)
-                locationCurve.Curve = newCurve;
-
-              InvalidateGraphics();
+              instance.Document.Regenerate();
+              columnStyleParam.Set(0);
             }
-
-            if (columnStyle != 2)
-            {
-              if (Vector3d.VectorAngle(curve.PointAtEnd - curve.PointAtStart, Vector3d.ZAxis) < GeometryTolerance.Model.AngleTolerance)
-              {
-                instance.Document.Regenerate();
-                columnStyleParam.Set(0);
-              }
-              else columnStyleParam.Set(1);
-            }
-
-            return;
           }
         }
-
-        base.SetCurve(curve, keepJoins);
       }
     }
   }

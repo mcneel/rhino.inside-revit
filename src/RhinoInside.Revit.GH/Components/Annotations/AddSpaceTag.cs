@@ -20,10 +20,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddSpaceTag() : base
     (
       name: "Tag Space",
-      nickname: "TagSpace",
+      nickname: "S-Tag",
       description: "Given a point, it adds an space tag to the given view",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (spaceTag.Location is ARDB.LocationPoint areaTagLocation)
       {
         var position = areaTagLocation.Point;
-        if (!target.IsAlmostEqualTo(position))
+        if (!target.AlmostEqualPoints(position))
         {
           var pinned = spaceTag.Pinned;
           spaceTag.Pinned = false;
@@ -173,7 +173,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         spaceTag.ChangeTypeId(type.Id);
       }
 
-      if (!spaceTag.TagHeadPosition.IsAlmostEqualTo(head))
+      if (!spaceTag.TagHeadPosition.AlmostEqualPoints(head))
       {
         var pinned = spaceTag.Pinned;
         spaceTag.Pinned = false;

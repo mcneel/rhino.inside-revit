@@ -7,65 +7,162 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.HostObjects
 {
-  public class HostObjectInserts : Component
+  [ComponentVersion(introduced: "1.0", updated: "1.13")]
+  public class HostObjectInserts : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("70CCF7A6-856C-4D24-A82B-BC1D4FC63078");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
     protected override string IconTag => "I";
 
     public HostObjectInserts() : base
     (
-      name: "Host Inserts",
-      nickname: "Inserts",
-      description: "Obtains a set of types that are owned by Family",
+      name: "Hosted Elements",
+      nickname: "Hosted",
+      description: "Obtains a set of elements hosted by the input Host",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(new Parameters.HostObject(), "Host", "H", "Host object to query for its inserts", GH_ParamAccess.item);
-    }
+      new ParamDefinition
+      (
+        new Parameters.HostObject()
+        {
+          Name = "Host",
+          NickName = "H",
+          Description = "Host object to query for its inserts",
+        }
+      )
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.GraphicalElement(), "Inserts", "INS", "Embedded inserts", GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.GraphicalElement(), "Shared", "SHI", "Embedded shared inserts", GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.GraphicalElement(), "Shadows", "S", "Embedded shadows", GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.GraphicalElement(), "Openings", "O", "Embedded openings", GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.HostObject(), "Walls", "W", "Embedded walls", GH_ParamAccess.list);
-    }
+      new ParamDefinition
+      (
+        new Parameters.HostObject()
+        {
+          Name = "Host",
+          NickName = "H",
+          Description = "Accessed Host element",
+        },ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Inserts",
+          NickName = "INS",
+          Description = "Embedded inserts",
+          Access = GH_ParamAccess.list
+        },ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Shared",
+          NickName = "SHI",
+          Description = "Embedded shared inserts",
+          Access = GH_ParamAccess.list
+        },ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Shadows",
+          NickName = "S",
+          Description = "Embedded shadows",
+          Access = GH_ParamAccess.list
+        },ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Opening()
+        {
+          Name = "Openings",
+          NickName = "O",
+          Description = "Embedded openings",
+          Access = GH_ParamAccess.list
+        },ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Wall()
+        {
+          Name = "Walls",
+          NickName = "W",
+          Description = "Embedded walls",
+          Access = GH_ParamAccess.list
+        },ParamRelevance.Primary
+      ),
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      Types.HostObject host = null;
-      if (!DA.GetData("Host", ref host) || !host.IsValid)
-        return;
+      if (!Params.GetData(DA, "Host", out Types.HostObject host, x => x.IsValid)) return;
+      else Params.TrySetData(DA, "Host", () => host);
 
       var doc = host.Document;
 
       var inserts = new HashSet<ARDB.ElementId>(host.Value.FindInserts(false, false, false, false));
-      DA.SetDataList("Inserts", inserts.Select(x => Types.Element.FromElementId(doc, x)));
+      Params.TrySetDataList(DA, "Inserts", () => inserts.Select(x => host.GetElement<Types.GraphicalElement>(x)));
 
-      var shared = new HashSet<ARDB.ElementId>(host.Value.FindInserts(false, false, false, true));
-      shared.ExceptWith(inserts);
-      DA.SetDataList("Shared", shared.Select(x => Types.Element.FromElementId(doc, x)));
+      Params.TrySetDataList
+      (
+        DA, "Shared",
+        () =>
+        {
+          var shared = new HashSet<ARDB.ElementId>(host.Value.FindInserts(false, false, false, true));
+          shared.ExceptWith(inserts);
 
-      var openings = new HashSet<ARDB.ElementId>(host.Value.FindInserts(true, false, false, false));
-      openings.ExceptWith(inserts);
+          return shared.Select(x => host.GetElement<Types.GraphicalElement>(x));
+        }
+      );
 
-      foreach(var opening in host.Value.GetDependentElements(new ARDB.ElementClassFilter(typeof(ARDB.Opening))))
-        openings.Add(opening);
+      Params.TrySetDataList
+      (
+        DA, "Openings",
+        () =>
+        {
+          var openings = new HashSet<ARDB.ElementId>(host.Value.FindInserts(true, false, false, false));
+          openings.ExceptWith(inserts);
 
-      DA.SetDataList("Openings", openings.Select(x => Types.Element.FromElementId(doc, x)));
+          foreach (var opening in host.Value.GetDependentElements(new ARDB.ElementClassFilter(typeof(ARDB.Opening))))
+            openings.Add(opening);
 
-      var shadows = new HashSet<ARDB.ElementId>(host.Value.FindInserts(false, true, false, false));
-      shadows.ExceptWith(inserts);
-      DA.SetDataList("Shadows", shadows.Select(x => Types.Element.FromElementId(doc, x)));
+          return openings.Select(x => host.GetElement<Types.GraphicalElement>(x));
+        }
+      );
 
-      var walls = new HashSet<ARDB.ElementId>(host.Value.FindInserts(false, false, true, false));
-      walls.ExceptWith(inserts);
-      DA.SetDataList("Walls", walls.Select(x => Types.Element.FromElementId(doc, x)));
+      Params.TrySetDataList
+      (
+        DA, "Shadows",
+        () =>
+        {
+          var shadows = new HashSet<ARDB.ElementId>(host.Value.FindInserts(false, true, false, false));
+          shadows.ExceptWith(inserts);
+
+          return shadows.Select(x => host.GetElement<Types.GraphicalElement>(x));
+        }
+      );
+
+      Params.TrySetDataList
+      (
+        DA, "Walls",
+        () =>
+        {
+          var walls = new HashSet<ARDB.ElementId>(host.Value.FindInserts(false, false, true, false));
+          walls.ExceptWith(inserts);
+
+          return walls.Select(x => host.GetElement<Types.GraphicalElement>(x));
+        }
+      );
     }
   }
 }

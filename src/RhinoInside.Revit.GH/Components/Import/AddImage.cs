@@ -6,18 +6,13 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Annotations
+namespace RhinoInside.Revit.GH.Components.Import
 {
-  [ComponentVersion(introduced: "1.11")]
+  [ComponentVersion(introduced: "1.11"), ComponentRevitAPIVersion(min: "2020.0")]
   public class AddImage : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("506D5C19-5054-4428-A857-A4D7E8DB8AD8");
-#if REVIT_2020
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
-#else
-    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.hidden;
-    public override bool SDKCompliancy(int exeVersion, int exeServiceRelease) => false;
-#endif
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.quinary);
     protected override string IconTag => string.Empty;
 
     public AddImage() : base
@@ -91,13 +86,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     const string _Output_ = "Image";
 
-    protected override void BeforeSolveInstance()
-    {
-#if !REVIT_2020
-      AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is only supported on Revit 2020 or above.");
-#endif
-      base.BeforeSolveInstance();
-    }
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "View", out Types.View view)) return;
@@ -146,7 +134,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       // Looks like images can't change its type.
       if (image.GetTypeId() != type.Id) return false;
 
-      if (!image.GetLocation(ARDB.BoxPlacement.Center).IsAlmostEqualTo(point))
+      if (!image.GetLocation(ARDB.BoxPlacement.Center).AlmostEqualPoints(point))
         image.SetLocation(point, ARDB.BoxPlacement.Center);
 
       return true;

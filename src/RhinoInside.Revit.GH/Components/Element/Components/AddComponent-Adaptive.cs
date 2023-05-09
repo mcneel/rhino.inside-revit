@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "A-Component",
       description: "Given a collection of Points, it adds an adaptive component element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Component"
     )
     { }
 
@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Components
           foreach (var vertex in adaptivePointIds.Select(id => document.GetElement(id)).Cast<ARDB.ReferencePoint>())
           {
             var position = adaptivePoints[index++];
-            if (!vertex.Position.IsAlmostEqualTo(position))
+            if (!vertex.Position.AlmostEqualPoints(position))
               vertex.Position = position;
           }
 

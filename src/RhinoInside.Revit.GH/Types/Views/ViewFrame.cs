@@ -171,7 +171,7 @@ namespace RhinoInside.Revit.GH.Types
           var vport = new ViewportInfo { IsParallelProjection = true };
           vport.SetCameraLocation(Point3d.Origin);
           vport.SetCameraDirection(-vector);
-          vport.SetCameraUp(Vector3d.CrossProduct(vector, vector.PerpVector()));
+          vport.SetCameraUp(Vector3d.CrossProduct(vector, vector.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance)));
           vport.TargetPoint = Point3d.Origin - vector;
 
           if (vport.SetFrustum(-radius, +radius, -radius, +radius, near, target))
@@ -195,7 +195,7 @@ namespace RhinoInside.Revit.GH.Types
           var vport = new ViewportInfo { IsParallelProjection = true };
           vport.SetCameraLocation(line.From);
           vport.SetCameraDirection(line.Direction);
-          vport.SetCameraUp(Vector3d.CrossProduct(-line.Direction, -line.Direction.PerpVector()));
+          vport.SetCameraUp(Vector3d.CrossProduct(-line.Direction, -line.Direction.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance)));
           vport.TargetPoint = line.To;
 
           if (vport.SetFrustum(-radius, +radius, -radius * 3.0 / 4.0, +radius * 3.0 / 4.0, near, target))

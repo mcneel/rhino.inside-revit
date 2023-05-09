@@ -136,4 +136,4 @@ Add Global parameters to a project thru the standard [Add Pararameter Process](#
 
 ## Parameter Formula
 
-Use formulas in dimensions and parameters to drive and control parametric content in a model. The {% include ltr/comp.html uuid='21f9f9c6' %} component can be used to create Parameter Formulas using the syntax as covered in the [Valid Formula Syntax and Abbreviations](https://help.autodesk.com/view/RVT/2022/ENU/?guid=GUID-B37EA687-2BDF-4712-9951-2088B2A8E523)
+Use formulas in dimensions and parameters to drive and control parametric content in a model. The {% include ltr/comp.html uuid='21f9f9c6' %} component can be used to create Parameter Formulas using the syntax as covered in the [Valid Formula Syntax and Abbreviations](https://help.autodesk.com/view/RVT/2024/ENU/?guid=GUID-B37EA687-2BDF-4712-9951-2088B2A8E523)

@@ -16,14 +16,15 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   public class SlabShape : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("516B2771-0A9A-4F87-9DB1-E27FE0FA968B");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
 
     public SlabShape() : base
     (
-      name: "Host Sub Elements",
-      nickname: "SubElems",
+      name: "Host Shape",
+      nickname: "H-Shape",
       description: "Manipulates points and edges on a slab, roof or floor.",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 
@@ -156,13 +157,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
     {
       if (!Params.GetData(DA, "Host", out Types.HostObject host, x => x.IsValid)) return;
 
-      var shape = default(ARDB.SlabShapeEditor);
-      switch (host)
-      {
-        case Types.Floor floor: shape = floor.Value.SlabShapeEditor; break;
-        case Types.Roof roof:   shape = roof.Value.SlabShapeEditor; break;
-      }
-
+      var shape = host.Value.GetSlabShapeEditor();
       if (shape is null)
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Only flat and horizontal slabs, floors or roofs are valid for '{Name}'.");

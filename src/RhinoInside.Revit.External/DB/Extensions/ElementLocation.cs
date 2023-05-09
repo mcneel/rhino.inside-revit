@@ -72,7 +72,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         GetLocation(element, out var origin, out var basisX, out var basisY);
         UnitXYZ.Orthonormal(basisX, basisY, out var basisZ);
 
-        newBasisX = UnitXYZ.Unitize(new PlaneEquation(origin, basisZ).Project(origin + newBasisX) - origin);
+        newBasisX = (new PlaneEquation(origin, basisZ).Project(origin + newBasisX) - origin).ToUnitXYZ();
         if (newBasisX && !basisX.AlmostEquals(newBasisX))
         {
           element.Pinned = false;
@@ -96,6 +96,48 @@ namespace RhinoInside.Revit.External.DB.Extensions
       finally
       {
         if (element.Pinned != pinned)
+          element.Pinned = pinned;
+      }
+    }
+
+    internal static void SetLocation<T>(this T element, XYZ newOrigin, double newAngle, LocationGetter<T> GetLocation, out bool modified) where T : Element
+    {
+      modified = false;
+      var pinned = element.Pinned;
+
+      try
+      {
+        GetLocation(element, out var origin, out var basisX, out var basisY);
+
+        // Set Origin
+        {
+          var translation = newOrigin - origin;
+          if (translation.IsZeroLength())
+          {
+            element.Pinned = false;
+            modified = true;
+            ElementTransformUtils.MoveElement(element.Document, element.Id, translation);
+          }
+        }
+
+        // Set Rotation
+        if (UnitXYZ.Orthonormal(basisX, basisY, out var basisZ))
+        {
+          var right = basisZ.Right();
+          var rotation = newAngle - basisX.AngleOnPlaneTo(right, basisZ);
+          if (rotation > element.Document.Application.AngleTolerance)
+          {
+            element.Pinned = false;
+            modified = true;
+
+            using (var axis = Line.CreateUnbound(newOrigin, basisZ))
+              ElementTransformUtils.RotateElement(element.Document, element.Id, axis, rotation);
+          }
+        }
+      }
+      finally
+      {
+        if (modified)
           element.Pinned = pinned;
       }
     }
@@ -145,8 +187,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           case LocationPoint pointLocation:
             origin = pointLocation.Point;
-            basisX = UnitXYZ.Unitize(transform.BasisX);
-            basisY = UnitXYZ.Unitize(transform.BasisY);
+            basisX = transform.BasisX.ToUnitXYZ();
+            basisY = transform.BasisY.ToUnitXYZ();
             return;
 
           case LocationCurve curveLocation:
@@ -158,8 +200,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         // Default values
         origin = transform.Origin;
-        basisX = UnitXYZ.Unitize(transform.BasisX);
-        basisY = UnitXYZ.Unitize(transform.BasisY);
+        basisX = transform.BasisX.ToUnitXYZ();
+        basisY = transform.BasisY.ToUnitXYZ();
       }
     }
 
@@ -175,44 +217,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static void SetLocation(this Instance element, XYZ newOrigin, double newAngle)
     {
-      var modified = false;
-      var pinned = element.Pinned;
-
-      try
-      {
-        element.GetLocation(out var origin, out var basisX, out var basisY);
-
-        // Set Origin
-        {
-          var translation = newOrigin - origin;
-          if (translation.GetLength() > element.Document.Application.VertexTolerance)
-          {
-            element.Pinned = false;
-            modified = true;
-            ElementTransformUtils.MoveElement(element.Document, element.Id, translation);
-          }
-        }
-
-        // Set Rotation
-        if (UnitXYZ.Orthonormal(basisX, basisY, out var basisZ))
-        {
-          var right = basisZ.Right();
-          var rotation = newAngle - basisX.AngleOnPlaneTo(right, basisZ);
-          if (rotation > element.Document.Application.AngleTolerance)
-          {
-            element.Pinned = false;
-            modified = true;
-
-            using (var axis = Line.CreateUnbound(newOrigin, basisZ))
-              ElementTransformUtils.RotateElement(element.Document, element.Id, axis, rotation);
-          }
-        }
-      }
-      finally
-      {
-        if (modified)
-          element.Pinned = pinned;
-      }
+      ElementLocation.SetLocation(element, newOrigin, newAngle, GetLocation, out var _);
     }
     #endregion
 
@@ -254,8 +259,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (result.Size == 1)
         {
           origin = result.get_Item(0).XYZPoint;
-          basisX = UnitXYZ.Unitize(lineX.Direction);
-          basisY = UnitXYZ.Unitize(lineY.Direction);
+          basisX = (UnitXYZ) lineX.Direction;
+          basisY = (UnitXYZ) lineY.Direction;
         }
       }
     }

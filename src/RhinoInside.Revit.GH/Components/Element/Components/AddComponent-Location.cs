@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "L-Component",
       description: "Given its Location, it adds a component element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Component"
     )
     { }
 
@@ -111,6 +111,7 @@ namespace RhinoInside.Revit.GH.Components
       switch (family.FamilyPlacementType)
       {
         case ARDB.FamilyPlacementType.OneLevelBased:
+        case ARDB.FamilyPlacementType.TwoLevelsBased:
           if (!(host is null) && TrackingMode == ElementTracking.TrackingMode.Reconstruct)
             AddRuntimeMessage
             (
@@ -124,29 +125,29 @@ namespace RhinoInside.Revit.GH.Components
           switch (family.GetHostingBehavior())
           {
             case ARDB.FamilyHostingBehavior.None:
-              if (!(host is null)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances shouldn't be hosted.");
+              if (!(host is null)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' instances shouldn't be hosted.");
               break;
 
             case ARDB.FamilyHostingBehavior.Wall:
-              if (!(host is ARDB.Wall)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Wall.");
+              if (!(host is ARDB.Wall)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' instances should be hosted on a Wall.");
               break;
 
             case ARDB.FamilyHostingBehavior.Floor:
-              if (!(host is ARDB.Floor)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Floor.");
+              if (!(host is ARDB.Floor)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' instances should be hosted on a Floor.");
               break;
 
             case ARDB.FamilyHostingBehavior.Ceiling:
-              if (!(host is ARDB.Ceiling)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Ceiling.");
+              if (!(host is ARDB.Ceiling)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' instances should be hosted on a Ceiling.");
               break;
 
             case ARDB.FamilyHostingBehavior.Roof:
-              if (!(host is ARDB.RoofBase)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Roof.");
+              if (!(host is ARDB.RoofBase)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' instances should be hosted on a Roof.");
               break;
           }
           return;
 
         case ARDB.FamilyPlacementType.ViewBased:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a view-base type.{Environment.NewLine}Consider use 'Add Detail Item' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a view-based type.{Environment.NewLine}Consider use 'Add Detail Item' component.");
 
         case ARDB.FamilyPlacementType.CurveBased:
           throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a curve based type.{Environment.NewLine}Consider use 'Add Component (Curve)' component.");
@@ -156,14 +157,20 @@ namespace RhinoInside.Revit.GH.Components
 
         case ARDB.FamilyPlacementType.WorkPlaneBased:
           if (!(host is null || host is ARDB.SketchPlane || host is ARDB.DatumPlane))
-            throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' should be hosted on a Work Plane.");
+            throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' should be hosted on a Work Plane.");
+
+          AddRuntimeMessage
+          (
+            GH_RuntimeMessageLevel.Warning,
+            $"Type '{type.FamilyName} : {type.Name}' is a work plane-based type.{Environment.NewLine}Consider use 'Add Component (Work Plane)' component."
+          );
           return;
 
         case ARDB.FamilyPlacementType.Adaptive:
           throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is an adaptive family type.{Environment.NewLine}Consider use 'Add Component (Adaptive)' component.");
       }
 
-      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid one-level or work-plane based type.");
+      throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is not a valid one-level or work-plane based type.");
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -269,7 +276,7 @@ namespace RhinoInside.Revit.GH.Components
         component.ChangeTypeId(type.Id);
       }
 
-      if (component.LevelId == ElementIdExtension.InvalidElementId)
+      if (component.LevelId == ElementIdExtension.Invalid)
       {
         var levelParam = component.get_Parameter(ARDB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM);
         if (levelParam.AsElementId() != level.Id)
@@ -305,13 +312,22 @@ namespace RhinoInside.Revit.GH.Components
       {
         switch (host)
         {
-          case ARDB.SketchPlane _:                                                                break;
-          case ARDB.DatumPlane datum:       host = datum.GetSketchPlane(ensureSketchPlane: true); break;
-          default:                          host = null; break;
+          case ARDB.SketchPlane _:                                                           break;
+          case ARDB.DatumPlane datum:  host = datum.GetSketchPlane(ensureSketchPlane: true); break;
+          default:                     host = null; break;
         }
 
         if (host is null)
           host = level.GetSketchPlane(ensureSketchPlane: true);
+      }
+
+      var structuralType = ARDB.Structure.StructuralType.NonStructural;
+      switch (type.Family.FamilyCategoryId.ToBuiltInCategory())
+      {
+        case ARDB.BuiltInCategory.OST_StructuralFraming:     structuralType = ARDB.Structure.StructuralType.Beam;           break;
+        case ARDB.BuiltInCategory.OST_StructuralColumns:     structuralType = ARDB.Structure.StructuralType.Column;         break;
+        case ARDB.BuiltInCategory.OST_StructuralFoundation:  structuralType = ARDB.Structure.StructuralType.Footing;        break;
+        default: if (type.Family.CanHaveStructuralSection()) structuralType = ARDB.Structure.StructuralType.UnknownFraming; break;
       }
 
       var list = new List<Autodesk.Revit.Creation.FamilyInstanceCreationData>(1)
@@ -322,7 +338,7 @@ namespace RhinoInside.Revit.GH.Components
           symbol: type,
           host: host is ARDB.Level ? null : host,
           level: host as ARDB.Level ?? level,
-          structuralType: ARDB.Structure.StructuralType.NonStructural
+          structuralType
         )
       };
 

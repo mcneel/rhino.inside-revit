@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.14")]
-  class AddBeamSystem : ElementTrackerComponent
+  public class AddBeamSystem : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("5E6EE9A3-3AA0-4186-9E5E-30081A56ABEE");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "S-Beam System",
       description: "Given its profile curves, it adds a beam system to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Structure"
     )
     { }
 

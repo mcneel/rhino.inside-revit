@@ -89,7 +89,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       {
         if (scope is object)
         {
-          if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? ElementIdExtension.InvalidElementId)).Count > 0)
+          if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? ElementIdExtension.Invalid)).Count > 0)
             doc.Regenerate();
         }
 

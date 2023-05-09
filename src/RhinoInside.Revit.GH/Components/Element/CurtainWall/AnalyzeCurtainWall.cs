@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   public class AnalyzeCurtainWall : Component
   {
     public override Guid ComponentGuid => new Guid("734B2DAC-1CD2-4D51-B7BD-D3D377CF62DE");
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.septenary | GH_Exposure.hidden;
     protected override string IconTag => "ACW";
 
     public AnalyzeCurtainWall() : base
@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "A-CW",
       description: "Analyze given Curtain Wall element",
       category: "Revit",
-      subCategory: "Wall"
+      subCategory: "Architecture"
     )
     { }
 

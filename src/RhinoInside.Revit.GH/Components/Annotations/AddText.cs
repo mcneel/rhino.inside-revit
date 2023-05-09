@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "Text",
       description: "Given a content and a point, it adds a text to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -214,7 +214,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         textNote.VerticalAlignment = verticalAlignment;
 #endif
 
-      if (!textNote.Coord.IsAlmostEqualTo(point))
+      if (!textNote.Coord.AlmostEqualPoints(point))
         textNote.Coord = point;
 
       var currentRotation = view.RightDirection.AngleOnPlaneTo(textNote.BaseDirection, view.ViewDirection);

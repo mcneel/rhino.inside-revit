@@ -201,9 +201,13 @@ All changes to the Revit model need to be completed inside a *Transaction*. To f
 
 {% highlight python %}
 if Trigger:
-    Revit.EnqueueAction(
-        Action[DB.Document](create_geometry)
-    )
+# create and start the transaction
+with DB.Transaction(doc, '<give a descriptive name to your transaction>') as t:
+    t.Start()
+    # change Revit document here
+    create_geometry()
+    # commit the changes after all changes has been made
+    t.Commit()
 {% endhighlight %}
 
 And here is the complete sample code:
@@ -217,7 +221,6 @@ clr.AddReference('RevitAPIUI')
 
 from System import Enum, Action
 
-import rhinoscriptsyntax as rs
 import Rhino
 import RhinoInside
 import Grasshopper
@@ -238,9 +241,13 @@ def create_geometry(doc):
 Sphere = Rhino.Geometry.Sphere(Rhino.Geometry.Point3d.Origin, Radius)
 
 if Trigger:
-    Revit.EnqueueAction(
-        Action[DB.Document](create_geometry)
-    )
+    # create and start the transaction
+    with DB.Transaction(doc, '<give a descriptive name to your transaction>') as t:
+        t.Start()
+        # change Revit document here
+        create_geometry()
+        # commit the changes after all changes has been made
+        t.Commit()
 {% endhighlight %}
 
 ## Handling Transactions

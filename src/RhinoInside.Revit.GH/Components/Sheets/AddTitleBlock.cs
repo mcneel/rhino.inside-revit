@@ -5,18 +5,18 @@ using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components.TitleBlocks
+namespace RhinoInside.Revit.GH.Components.Sheets
 {
   using Convert.Geometry;
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.2.4", updated: "1.5")]
-  public class TitleBlockByType : ElementTrackerComponent
+  public class AddTitleBlock : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("F2F3D866-5A62-40C0-A85B-C417183E0A52");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public TitleBlockByType() : base
+    public AddTitleBlock() : base
     (
       name: "Add Title Block",
       nickname: "Title Block",
@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.TitleBlocks
 
       if
       (
-        !origin.AlmostEquals(newOrigin) ||
+        !origin.AlmostEqualPoints(newOrigin) ||
         !basisX.AlmostEquals(newBasisX) ||
         !basisY.AlmostEquals(newBasisY)
       )

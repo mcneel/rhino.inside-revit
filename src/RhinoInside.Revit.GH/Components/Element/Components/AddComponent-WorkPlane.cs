@@ -20,9 +20,9 @@ namespace RhinoInside.Revit.GH.Components
     (
       name: "Add Component (Work Plane)",
       nickname: "WP-Component",
-      description: "Given a Work Plane, it adds a component element to the active Revit document",
+      description: "Given a Work Plane, it adds a work plane-based component to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Component"
     )
     { }
 
@@ -55,6 +55,7 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Type",
           NickName = "T",
           Description = "Component type.",
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_GenericModel
         }
       ),
       new ParamDefinition
@@ -64,8 +65,7 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Schedule Level",
           NickName = "SL",
           Description = "Schedule Level.",
-          Optional = true
-        }, ParamRelevance.Secondary
+        }.SetDefaultVale(new Types.Level()), ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -76,6 +76,15 @@ namespace RhinoInside.Revit.GH.Components
           Description = $"Work Plane.{Environment.NewLine}Face references are also accepted.",
           Optional = true
         }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Number()
+        {
+          Name = "Offset from Host",
+          NickName = "O",
+          Description = "Signed distance from 'Work Plane'.",
+        }.SetDefaultVale(0.0), ParamRelevance.Secondary
       ),
     };
 
@@ -93,6 +102,15 @@ namespace RhinoInside.Revit.GH.Components
       ),
       new ParamDefinition
       (
+        new Parameters.GeometryFace()
+        {
+          Name = "Face",
+          NickName = "F",
+          Description = $"Work Plane face",
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
         new Parameters.GraphicalElement()
         {
           Name = _WorkPlane_,
@@ -102,24 +120,25 @@ namespace RhinoInside.Revit.GH.Components
       ),
       new ParamDefinition
       (
-        new Parameters.GeometryFace()
+        new Param_Number()
         {
-          Name = "Face",
-          NickName = "F",
-          Description = $"Work Plane face",
-        }, ParamRelevance.Primary
-      )
+          Name = "Offset from Host",
+          NickName = "O",
+          Description = "Signed distance from 'Work Plane'.",
+        }, ParamRelevance.Secondary
+      ),
     };
 
     const string _Component_ = "Component";
     const string _WorkPlane_ = "Work Plane";
+    
     static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
       ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
       ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
       ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
+      ARDB.BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM,
       ARDB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM,
-      ARDB.BuiltInParameter.INSTANCE_OFFSET_POS_PARAM,
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -129,6 +148,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!Params.GetData(DA, "Type", out Types.FamilySymbol type, x => x.IsValid)) return;
       if (!Parameters.Level.GetDataOrDefault(this, DA, "Schedule Level", out Types.Level level, doc, location.Value.Origin.Z)) return;
       if (!Params.TryGetData(DA, "Work Plane", out Types.GeometryObject workPlane)) return;
+      if (!Params.TryGetData(DA, "Offset from Host", out double? offsetFromHost)) return;
 
       type.AssertPlacementType(ARDB.FamilyPlacementType.WorkPlaneBased);
 
@@ -187,10 +207,16 @@ namespace RhinoInside.Revit.GH.Components
                   ) is ARDB.IntersectionResult projected
                 )
                 {
-                  origin = projected.XYZPoint;
                   var faceNormal = (ERDB.UnitXYZ) faceTransform.OfVector(face.ComputeNormal(projected.UVPoint));
                   if (faceNormal.IsParallelTo(basisX)) basisX = faceNormal.Right();
                   reference = graphicalElement.GetAbsoluteReference(reference);
+                  if (offsetFromHost.HasValue) origin = projected.XYZPoint;
+                  else
+                  {
+                    var facePlane = new ERDB.PlaneEquation(projected.XYZPoint, faceNormal);
+                    offsetFromHost = facePlane.SignedDistanceTo(origin) * Revit.ModelUnits;
+                    origin = facePlane.Project(origin);
+                  }
                 }
               }
             }
@@ -222,13 +248,20 @@ namespace RhinoInside.Revit.GH.Components
           if (component is object)
           {
             DA.SetData(_Component_, component);
+
+            Params.TrySetData(DA, "Face", () => Types.GeometryFace.FromReference(component.Document, component.HostFace) as Types.GeometryFace);
+
             if (associatedWorkPlane) Params.TrySetData
             (
               DA, "Work Plane", () => component.HostFace is ARDB.Reference referemce ?
                 Types.GraphicalElement.FromReference(component.Document, referemce) :
                 Types.GraphicalElement.FromElement(component.Host)
             );
-            Params.TrySetData(DA, "Face", () => Types.GeometryFace.FromReference(component.Document, component.HostFace) as Types.GeometryFace);
+
+            if (offsetFromHost.HasValue)
+              component.get_Parameter(ARDB.BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM)?.Set(offsetFromHost.Value / Revit.ModelUnits);
+
+            Params.TrySetData(DA, "Offset from Host", () => component.get_Parameter(ARDB.BuiltInParameter.INSTANCE_FREE_HOST_OFFSET_PARAM)?.AsGoo());
           }
 
           return component;
@@ -324,11 +357,10 @@ namespace RhinoInside.Revit.GH.Components
         );
       }
 
-      component.get_Parameter(ARDB.BuiltInParameter.INSTANCE_OFFSET_POS_PARAM)?.Update(false);
       using (var scheduleLevel = component.get_Parameter(ARDB.BuiltInParameter.INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM))
       {
         if(scheduleLevel?.IsReadOnly is false)
-          scheduleLevel.Update(level?.Id ?? ElementIdExtension.InvalidElementId);
+          scheduleLevel.Update(level?.Id ?? ElementIdExtension.Invalid);
       }
 
       return component;

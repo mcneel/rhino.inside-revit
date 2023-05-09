@@ -20,10 +20,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddLinearDimension() : base
     (
       name: "Add Linear Dimension",
-      nickname: "LineDim",
+      nickname: "L-Dim",
       description: "Given a line, it adds a linear dimension to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 

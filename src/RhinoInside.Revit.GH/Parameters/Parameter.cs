@@ -476,7 +476,9 @@ namespace RhinoInside.Revit.GH.Parameters
       ParameterGroup = EDBS.ParameterGroup.Empty;
       switch (GetValue("ParameterGroup"))
       {
+#if !REVIT_2024
         case int enumerate: ParameterGroup = ((ARDB.BuiltInParameterGroup) enumerate).ToParameterGroup(); break;
+#endif
         case string schema: ParameterGroup = new EDBS.ParameterGroup(schema); break;
       }
 

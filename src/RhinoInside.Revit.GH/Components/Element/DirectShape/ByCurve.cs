@@ -14,12 +14,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   public class DirectShapeByCurve : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("77F4FBDD-8A05-44A3-AC54-E52A79CF3E5A");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public DirectShapeByCurve() : base
     (
       name: "Add Curve DirectShape",
-      nickname: "CrvDShape",
+      nickname: "C-Shape",
       description: "Given a Curve, it adds a Curve shape to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"
