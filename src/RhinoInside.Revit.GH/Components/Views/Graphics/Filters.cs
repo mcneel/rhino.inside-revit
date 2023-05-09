@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         }
       }
 
-      Params.TrySetDataList(DA, "Filters", () => view.Value.GetFilters().Select(x => Types.FilterElement.FromValue(view.Document.GetElement(x))));
+      Params.TrySetDataList(DA, "Filters", () => view.Value.GetFilters().Select(x => Types.FilterElement.FromElement(view.Document.GetElement(x))));
     }
   }
 }
