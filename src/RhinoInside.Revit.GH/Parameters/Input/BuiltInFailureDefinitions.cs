@@ -24,7 +24,6 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     )
     {
       IconDisplayMode = GH_IconDisplayMode.name;
-      LayoutLevel = 2;
     }
 
     protected override void LoadVolatileData()
