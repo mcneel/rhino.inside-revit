@@ -179,7 +179,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
   {
     public override Guid ComponentGuid => new Guid("BBD8187B-829A-4604-B6BC-DE896A9FF62B");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override string IconTag => "GR";
+    protected override string IconTag => string.Empty;
 
     public ElementGeometryReferences() : base
     (
