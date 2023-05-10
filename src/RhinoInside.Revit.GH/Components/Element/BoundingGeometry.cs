@@ -174,14 +174,11 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     }
   }
 
-  [ComponentVersion(introduced: "1.13")]
-#if DEBUG
-  public
-#endif
-  class ElementGeometryReferences : ZuiComponent
+  [ComponentVersion(introduced: "1.14")]
+  public class ElementGeometryReferences : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("BBD8187B-829A-4604-B6BC-DE896A9FF62B");
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "GR";
 
     public ElementGeometryReferences() : base
