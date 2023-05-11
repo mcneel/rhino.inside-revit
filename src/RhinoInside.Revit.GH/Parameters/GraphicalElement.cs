@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
+using Microsoft.Win32.SafeHandles;
 using Rhino.Display;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -264,6 +265,7 @@ namespace RhinoInside.Revit.GH.Parameters
         comboBox.Width = (int) (250 * GH_GraphicsUtil.UiScale);
         comboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
         comboBox.Tag = menu;
+        menu.Tag = WindowHandle.ActiveWindow;
 
         Menu_AppendCustomItem(menu, comboBox);
         Menu_AppendPromptNew(menu);
@@ -658,7 +660,10 @@ namespace RhinoInside.Revit.GH.Parameters
           if (comboBox.Items[comboBox.SelectedIndex] is string value)
           {
             if (comboBox.Tag is ToolStripDropDown menu)
+            {
               menu.Close();
+              WindowHandle.ActiveWindow = menu.Tag as WindowHandle;
+            }
 
             RecordUndoEvent("Set: NickName");
             MutableNickName = comboBox.SelectedIndex == 0;
@@ -679,7 +684,7 @@ namespace RhinoInside.Revit.GH.Parameters
             {
               NickName = value;
               OnObjectChanged(GH_ObjectEventType.NickName);
-              ExpireSolution(true);
+              Rhino.RhinoApp.Idle += ExpireIdle;
             }
             else
             {
@@ -689,6 +694,12 @@ namespace RhinoInside.Revit.GH.Parameters
           }
         }
       }
+    }
+
+    private void ExpireIdle(object sender, EventArgs e)
+    {
+      Rhino.RhinoApp.Idle -= ExpireIdle;
+      ExpireSolution(true);
     }
 
     private void OnObjectChanged(IGH_DocumentObject sender, GH_ObjectChangedEventArgs e)
