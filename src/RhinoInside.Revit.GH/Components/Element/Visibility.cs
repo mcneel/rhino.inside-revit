@@ -14,8 +14,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
   public class ElementVisibility : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("8ED1490F-DA5D-40FA-8612-4F4B166ECE52");
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.hidden;
-    protected override string IconTag => "V";
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override string IconTag => string.Empty;
 
     public ElementVisibility() : base
     (
