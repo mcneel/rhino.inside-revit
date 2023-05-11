@@ -442,9 +442,17 @@ namespace RhinoInside.Revit.External.DB
     public static ElementFilter BoundingBoxIntersectsFilter(Outline outline, double tolerance, bool inverted)
     {
       if (outline.IsEmpty)
-        return inverted ? Universe : Empty;
+        return inverted ? ElementHasBoundingBoxFilter : Empty;
 
       return new BoundingBoxIntersectsFilter(outline, tolerance, inverted);
+    }
+
+    public static ElementFilter BoundingBoxIsInsideFilter(Outline outline, double tolerance, bool inverted)
+    {
+      if (outline.IsEmpty)
+        return inverted ? ElementHasBoundingBoxFilter : Empty;
+
+      return new BoundingBoxIsInsideFilter(outline, tolerance, inverted);
     }
     #endregion
   }

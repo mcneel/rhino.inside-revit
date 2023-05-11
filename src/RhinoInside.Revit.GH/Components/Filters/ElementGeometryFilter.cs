@@ -99,9 +99,9 @@ namespace RhinoInside.Revit.GH.Components.Filters
               if (degenerate == 3)
                 return new ARDB.BoundingBoxContainsPointFilter(bbox.Center.ToXYZ(), Math.Abs(tolerance) / Revit.ModelUnits, inverted);
               else if (strict)
-                return new ARDB.BoundingBoxIsInsideFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+                return CompoundElementFilter.BoundingBoxIsInsideFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
               else
-                return new ARDB.BoundingBoxIntersectsFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+                return CompoundElementFilter.BoundingBoxIntersectsFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
             }
           );
 
@@ -114,6 +114,56 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
       DA.SetData("Filter", filter);
       DA.SetDataList("Target", targets);
+    }
+  }
+
+  [ComponentVersion(introduced: "1.14")]
+  public class ElementElevationFilter : ElementFilterComponent
+  {
+    public override Guid ComponentGuid => new Guid("DDA08563-C19D-41FE-B492-E00C1111D91A");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    protected override string IconTag => "E";
+
+    public ElementElevationFilter()
+    : base("Elevation Filter", "ElevFltr", "Filter used to match elements located at specific elevation range", "Revit", "Filter")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager[manager.AddParameter(new Parameters.ProjectElevation(), "Base", "B", "Base elevation", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddParameter(new Parameters.ProjectElevation(), "Top", "T", "Top elevation", GH_ParamAccess.item)].Optional = true;
+      manager.AddBooleanParameter("Strict", "S", "True means element should be strictly contained", GH_ParamAccess.item, false);
+      manager.AddNumberParameter("Tolerance", "T", "Tolerance used to query", GH_ParamAccess.item, 0.0);
+      base.RegisterInputParams(manager);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.TryGetData(DA, "Base", out Types.ProjectElevation baseElevation)) return;
+      if (!Params.TryGetData(DA, "Top", out Types.ProjectElevation topElevation)) return;
+      if (!Params.GetData(DA, "Strict", out bool? strict)) return;
+      if (!Params.GetData(DA, "Tolerance", out double? tolerance)) return;
+      if (!Params.GetData(DA, "Inverted", out bool? inverted)) return;
+
+      var limits = CompoundElementFilter.BoundingBoxLimits;
+      var zMin = GeometryEncoder.ToInternalLength(baseElevation?.Elevation ?? -limits);
+      var zMax = GeometryEncoder.ToInternalLength(topElevation?.Elevation  ?? +limits);
+      var min = new ARDB.XYZ(-limits, -limits, zMin);
+      var max = new ARDB.XYZ(+limits, +limits, zMax);
+
+      using (var outline = new ARDB.Outline(min, max))
+      {
+        switch (strict)
+        {
+          case true:
+            DA.SetData("Filter", CompoundElementFilter.BoundingBoxIsInsideFilter(outline, GeometryEncoder.ToInternalLength(tolerance.Value), inverted.Value));
+            break;
+
+          case false:
+            DA.SetData("Filter", CompoundElementFilter.BoundingBoxIntersectsFilter(outline, GeometryEncoder.ToInternalLength(tolerance.Value), inverted.Value));
+            break;
+        }
+      }
     }
   }
 
