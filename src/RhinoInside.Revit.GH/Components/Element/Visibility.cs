@@ -307,7 +307,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
               break;
 
             case ARDB.ParameterFilterElement parameterFilterElement:
-              filters.Add(parameterFilterElement.GetElementFilter());
+              filters.Add(parameterFilterElement.ToElementFilter());
               break;
           }
         }

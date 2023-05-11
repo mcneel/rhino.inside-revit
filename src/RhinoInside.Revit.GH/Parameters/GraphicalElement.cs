@@ -743,7 +743,7 @@ namespace RhinoInside.Revit.GH.Parameters
                 }
                 else if (filter is ARDB.ParameterFilterElement parameter)
                 {
-                  if (parameter.GetElementFilter() is ARDB.ElementFilter parameterFilter)
+                  if (parameter.ToElementFilter() is ARDB.ElementFilter parameterFilter)
                   {
                     using (var elements = new ARDB.FilteredElementCollector(doc))
                     {
@@ -788,6 +788,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       base.AddedToDocument(document);
     }
+
     public override void RemovedFromDocument(GH_Document document)
     {
       base.RemovedFromDocument(document);
