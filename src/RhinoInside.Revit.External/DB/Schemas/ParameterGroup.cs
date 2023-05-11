@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
 
     public static bool IsParameterGroup(string id)
     {
-      return id.StartsWith("autodesk.parameter.group") || id.StartsWith("autodesk.revit.group");
+      return id == string.Empty || id.StartsWith("autodesk.parameter.group") || id.StartsWith("autodesk.revit.group");
     }
 
 #if REVIT_2021
