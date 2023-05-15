@@ -49,11 +49,11 @@ namespace RhinoInside.Revit.GH.Components
       ),
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.Wall()
         {
-          Name = "Host",
-          NickName = "H",
-          Description = "Host element.",
+          Name = "Wall",
+          NickName = "W",
+          Description = "Wall element.",
         }
       ),
     };
@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      ReconstructElement<ARDB.HostObject>
+      ReconstructElement<ARDB.WallFoundation>
       (
         doc.Value, _Foundation_, foundation =>
         {
@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components
 
           // Input
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.ElementType type, doc, ARDB.ElementTypeGroup.WallFoundationType)) return null;
-          if (!Params.GetData(DA, "Host", out Types.GraphicalElement host)) return null;
+          if (!Params.GetData(DA, "Wall", out Types.Wall wall)) return null;
 
           // Compute
           foundation = Reconstruct
@@ -103,7 +103,7 @@ namespace RhinoInside.Revit.GH.Components
             foundation,
             doc.Value,
             type.Id,
-            host.Value
+            wall.Value
           );
 
           DA.SetData(_Foundation_, foundation);
@@ -114,60 +114,53 @@ namespace RhinoInside.Revit.GH.Components
 
     bool Reuse
     (
-      ARDB.HostObject foundation,
+      ARDB.WallFoundation foundation,
       ARDB.ElementId typeId,
-      ARDB.Element host
+      ARDB.Wall wall
     )
     {
       if (foundation is null) return false;
 
-      var foundationMask = foundation as ARDB.WallFoundation;
-      if (foundationMask.WallId != host.Id) return false;
+      if (foundation.WallId != wall.Id) return false;
 
       if (foundation.GetTypeId() != typeId)
       {
-        if (ARDB.Element.IsValidType(foundation.Document, new ARDB.ElementId[] { foundation.Id }, typeId))
-        {
-          if (foundation.ChangeTypeId(typeId) is ARDB.ElementId id &&
-              id != ARDB.ElementId.InvalidElementId)
-            foundation = foundation.Document.GetElement(id) as ARDB.WallFoundation;
-        }
-        else
+        if (!ARDB.Element.IsValidType(foundation.Document, new ARDB.ElementId[] { foundation.Id }, typeId))
           return false;
+
+        foundation.ChangeTypeId(typeId);
       }
 
       return true;
     }
 
-    ARDB.WallFoundation Create(ARDB.Document doc, ARDB.ElementId typeId, ARDB.Element host)
+    ARDB.WallFoundation Create(ARDB.Document doc, ARDB.ElementId typeId, ARDB.Wall wall)
     {
-      var instance = ARDB.WallFoundation.Create(doc, typeId, host.Id);
+      var foundation = ARDB.WallFoundation.Create(doc, typeId, wall.Id);
 
       // We turn analytical model off by default
-      instance.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
-      return instance;
+      foundation.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+      return foundation;
     }
 
-    ARDB.HostObject Reconstruct
+    ARDB.WallFoundation Reconstruct
     (
-      ARDB.HostObject foundation,
+      ARDB.WallFoundation foundation,
       ARDB.Document doc,
       ARDB.ElementId typeId,
-      ARDB.Element host
+      ARDB.Wall wall
     )
     {
-      if (!Reuse(foundation, typeId, host))
+      if (!Reuse(foundation, typeId, wall))
       {
         foundation = foundation.ReplaceElement
         (
-          Create(doc, typeId, host),
+          Create(doc, typeId, wall),
           ExcludeUniqueProperties
         );
       }
 
-      foundation.get_Parameter(ARDB.BuiltInParameter.INSTANCE_MOVES_WITH_GRID_PARAM)?.Update(false);     
-      foundation.Document.Regenerate();
-      foundation.Pinned = false;     
+      foundation.get_Parameter(ARDB.BuiltInParameter.INSTANCE_MOVES_WITH_GRID_PARAM)?.Update(false);
 
       return foundation;
     }
