@@ -5,15 +5,13 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
-using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
-  using Exceptions;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.15")]
+  [ComponentVersion(introduced: "1.14")]
   public class AddBeamSystem : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("5E6EE9A3-3AA0-4186-9E5E-30081A56ABEE");
