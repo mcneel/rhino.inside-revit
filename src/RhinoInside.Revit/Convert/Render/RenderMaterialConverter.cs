@@ -544,9 +544,10 @@ namespace RhinoInside.Revit.Convert.Render
       else if (asset.Name == "MirrorSchema") GetMirrorSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "MasonryCMUSchema") GetMasonryCMUSchemaParameters(asset, ref materialParams);
 
-#if REVIT_2019
       else if (asset.Name == "PrismOpaqueSchema") GetPrismOpaqueSchemaParameters(asset, ref materialParams);
+      else if (asset.Name == "PrismTransparentSchema") GetPrismTransparentSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "PrismMetalSchema") GetPrismMetalSchemaParameters(asset, ref materialParams);
+#if REVIT_2020
       else if (asset.Name == "PrismGlazingSchema") GetPrismGlazingSchemaParameters(asset, ref materialParams);
 #endif
       else return false;
@@ -1499,7 +1500,6 @@ namespace RhinoInside.Revit.Convert.Render
       material.ClarityAmount = 1.0;
     }
 
-#if REVIT_2019
     static void GetPrismOpaqueSchemaParameters(Asset asset, ref BasicMaterialParameters material)
     {
       material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Cube;
@@ -1546,6 +1546,45 @@ namespace RhinoInside.Revit.Convert.Render
       }
     }
 
+    static void GetPrismTransparentSchemaParameters(Asset asset, ref BasicMaterialParameters material)
+    {
+      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Plane;
+
+      if (asset.FindByName(AdvancedTransparent.TransparentColor) is AssetPropertyDoubleArray4d transparency)
+      {
+        material.TransparencyColor = ToColor4f(transparency);
+      }
+
+      if (asset.FindByName(AdvancedTransparent.TransparentIor) is AssetPropertyDouble ior)
+      {
+        material.Transparency = 0.92;
+        material.Ior = ior.Value;
+        material.FresnelEnabled = true;
+      }
+
+      if (asset.FindByName(AdvancedTransparent.SurfaceRoughness) is AssetPropertyDouble roughness)
+      {
+        material.Shine = 1.0 - roughness.Value;
+        material.PolishAmount = 1.0 - roughness.Value;
+      }
+
+      if (asset.FindByName(AdvancedTransparent.SurfaceNormal) is AssetPropertyReference normal)
+      {
+        material.BumpTexture = ToSimulatedTexture(normal.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedTransparent.SurfaceCutout) is AssetPropertyReference cutout)
+      {
+        material.OpacityTexture = ToSimulatedTexture(cutout.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedTransparent.SurfaceAlbedo) is AssetPropertyDoubleArray4d diffuse)
+      {
+        material.Diffuse = ToColor4f(diffuse);
+        material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+      }
+    }
+
     static void GetPrismMetalSchemaParameters(Asset asset, ref BasicMaterialParameters material)
     {
       material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Cube;
@@ -1579,6 +1618,7 @@ namespace RhinoInside.Revit.Convert.Render
       }
     }
 
+#if REVIT_2020
     static void GetPrismGlazingSchemaParameters(Asset asset, ref BasicMaterialParameters material)
     {
       material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Plane;
