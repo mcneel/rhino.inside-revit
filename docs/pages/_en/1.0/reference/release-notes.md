@@ -10,6 +10,10 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added 'Add Beam System' component.
+- Added 'Add Wall Foundation' component.
+- Added 'Add Truss' component.
+
 ### RC
 
 - Added 'Element Geometry References' component.

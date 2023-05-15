@@ -198,8 +198,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!(beamSystem.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundary, sketch.SketchPlane.GetPlane().ToPlane().Normal)))
         return false;
 
-      if (beamSystem.get_Parameter(ARDB.BuiltInParameter.BEAM_SYSTEM_3D_PARAM).AsBoolean() != is3D)
-        beamSystem.get_Parameter(ARDB.BuiltInParameter.BEAM_SYSTEM_3D_PARAM).Update(is3D);
+      beamSystem.get_Parameter(ARDB.BuiltInParameter.BEAM_SYSTEM_3D_PARAM).Update(is3D);
 
       if (!beamSystem.Direction.IsCodirectionalTo(GeometryEncoder.ToXYZ(direction))) return false;
 

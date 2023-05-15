@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components
 
     public AddStructuralWallFoundation() : base
     (
-      name: "Add Structural Wall Foundation",
+      name: "Add Wall Foundation",
       nickname: "S-Wall Foundation",
       description: "Given its host element, it adds a structural wall foundation element to the active Revit document",
       category: "Revit",
