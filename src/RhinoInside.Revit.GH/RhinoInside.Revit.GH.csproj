@@ -148,10 +148,13 @@
     <Compile Include="Components\Element\Railing\ByCurve.cs" />
     <Compile Include="Components\Element\Roof\ByOutline.cs" />
     <Compile Include="Components\Element\Select.cs" />
+    <Compile Include="Components\Element\Structural\AddBeamSystem.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBeam.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralBrace.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralFoundation.cs" />
     <Compile Include="Components\Element\Structural\AddStructuralColumn.cs" />
+    <Compile Include="Components\Element\Structural\AddStructuralWallFoundation.cs" />
+    <Compile Include="Components\Element\Structural\AddTruss.cs" />
     <Compile Include="Components\Element\Type.cs" />
     <Compile Include="Components\Element\Version.cs" />
     <Compile Include="Components\Element\Visibility.cs" />
@@ -299,6 +302,7 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Optional.cs" />
+    <Compile Include="Parameters\BeamSystem.cs" />
     <Compile Include="Parameters\Annotations\Annotation.cs" />
     <Compile Include="Parameters\Annotations\TextElement.cs" />
     <Compile Include="Parameters\Instances\PointCloudInstance.cs" />
@@ -315,6 +319,7 @@
     <Compile Include="Parameters\ObjectStyles\FillPatternElement.cs" />
     <Compile Include="Parameters\ObjectStyles\LinePatternElement.cs" />
     <Compile Include="Parameters\ObjectStyles\OverrideGraphicSettings.cs" />
+    <Compile Include="Parameters\Truss.cs" />
     <Compile Include="Parameters\Views\ViewFrame.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -414,6 +419,7 @@
     <Compile Include="Types\Annotations\TextElement.cs" />
     <Compile Include="Types\AssemblyInstance.cs" />
     <Compile Include="Types\BasePoint.cs" />
+	<Compile Include="Types\BeamSystem.cs" />
     <Compile Include="Types\CombinableElement.cs" />
     <Compile Include="Types\CurveElement.cs" />
     <Compile Include="Types\DataType.cs" />
@@ -481,6 +487,7 @@
     <Compile Include="Types\StructuralMember.cs" />
     <Compile Include="Types\Views\ScopeBox.cs" />
     <Compile Include="Types\Views\SectionBox.cs" />
+    <Compile Include="Types\Truss.cs" />
     <Compile Include="Types\Views\Elevation.cs" />
     <Compile Include="Types\Views\View.cs" />
     <Compile Include="Types\Views\Viewer.cs" />
