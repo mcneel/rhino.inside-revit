@@ -544,10 +544,11 @@ namespace RhinoInside.Revit.Convert.Render
       else if (asset.Name == "MirrorSchema") GetMirrorSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "MasonryCMUSchema") GetMasonryCMUSchemaParameters(asset, ref materialParams);
 
+#if REVIT_2019
       else if (asset.Name == "PrismOpaqueSchema") GetPrismOpaqueSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "PrismMetalSchema") GetPrismMetalSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "PrismGlazingSchema") GetPrismGlazingSchemaParameters(asset, ref materialParams);
-
+#endif
       else return false;
 
       return true;
@@ -1498,6 +1499,7 @@ namespace RhinoInside.Revit.Convert.Render
       material.ClarityAmount = 1.0;
     }
 
+#if REVIT_2019
     static void GetPrismOpaqueSchemaParameters(Asset asset, ref BasicMaterialParameters material)
     {
       material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Cube;
@@ -1579,7 +1581,7 @@ namespace RhinoInside.Revit.Convert.Render
 
     static void GetPrismGlazingSchemaParameters(Asset asset, ref BasicMaterialParameters material)
     {
-      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Cube;
+      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Plane;
 
       material.Transparency = 0.92;
       material.Ior = 1.52;
@@ -1620,6 +1622,7 @@ namespace RhinoInside.Revit.Convert.Render
         material.ReflectivityColor = ToColor4f(albeldo);
       }
     }
+#endif
 #endif
   }
 }
