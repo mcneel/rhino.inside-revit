@@ -318,15 +318,13 @@
     <Compile Include="Parameters\ObjectStyles\FillPatternElement.cs" />
     <Compile Include="Parameters\ObjectStyles\LinePatternElement.cs" />
     <Compile Include="Parameters\ObjectStyles\OverrideGraphicSettings.cs" />
+    <Compile Include="Parameters\Site\BuildPad.cs" />
+    <Compile Include="Parameters\Site\TopographySurface.cs" />
+    <Compile Include="Parameters\Site\Toposolid.cs" />
     <Compile Include="Parameters\Structure\BeamSystem.cs" />
     <Compile Include="Parameters\Structure\Truss.cs" />
     <Compile Include="Parameters\Structure\WallFoundation.cs" />
     <Compile Include="Parameters\Views\ViewFrame.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_Enum.cs" />
@@ -398,7 +396,6 @@
     <Compile Include="Parameters\Sketch.cs" />
     <Compile Include="Parameters\SketchPlane.cs" />
     <Compile Include="Parameters\SpatialElement.cs" />
-    <Compile Include="Parameters\TopographySurface.cs" />
     <Compile Include="Parameters\Views\View.cs" />
     <Compile Include="Parameters\Views\View3D.cs" />
     <Compile Include="Parameters\Views\ViewDrafting.cs" />
@@ -501,6 +498,11 @@
     <Compile Include="Types\Views\ViewSection.cs" />
     <Compile Include="Types\Views\ViewSheet.cs" />
     <Compile Include="Types\Workset.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
