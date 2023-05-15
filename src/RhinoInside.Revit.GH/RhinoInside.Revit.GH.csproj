@@ -320,6 +320,7 @@
     <Compile Include="Parameters\ObjectStyles\OverrideGraphicSettings.cs" />
     <Compile Include="Parameters\Structure\BeamSystem.cs" />
     <Compile Include="Parameters\Structure\Truss.cs" />
+    <Compile Include="Parameters\Structure\WallFoundation.cs" />
     <Compile Include="Parameters\Views\ViewFrame.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -486,6 +487,7 @@
     <Compile Include="Types\Structure\BeamSystem.cs" />
     <Compile Include="Types\Structure\StructuralMember.cs" />
     <Compile Include="Types\Structure\Truss.cs" />
+    <Compile Include="Types\Structure\WallFoundation.cs" />
     <Compile Include="Types\Views\ScopeBox.cs" />
     <Compile Include="Types\Views\SectionBox.cs" />
     <Compile Include="Types\Views\Elevation.cs" />
