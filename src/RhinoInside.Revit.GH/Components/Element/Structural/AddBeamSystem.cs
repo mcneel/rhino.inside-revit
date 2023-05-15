@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
   using Exceptions;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.14")]
+  [ComponentVersion(introduced: "1.15")]
   public class AddBeamSystem : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("5E6EE9A3-3AA0-4186-9E5E-30081A56ABEE");

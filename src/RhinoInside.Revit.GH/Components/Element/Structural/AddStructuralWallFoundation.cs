@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Components
   using Convert.Geometry;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.14")]
+  [ComponentVersion(introduced: "1.15")]
   public class AddStructuralWallFoundation : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("9FF1C32F-4855-4F32-95CA-ACCB4AA564DE");

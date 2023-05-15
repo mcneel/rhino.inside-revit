@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components
   using Convert.Geometry;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.14")]
+  [ComponentVersion(introduced: "1.15")]
   public class AddTruss : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("C0B04DC7-9AD5-4E49-9043-17CB06076132");
