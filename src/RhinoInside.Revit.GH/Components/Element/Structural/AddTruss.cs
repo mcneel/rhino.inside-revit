@@ -1,16 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
-using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
   using Convert.Geometry;
-  using Exceptions;
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.14")]
