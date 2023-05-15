@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddStructuralBeam : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("26411AA6-8187-49DF-A908-A292A07918F1");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public AddStructuralBeam() : base
     (
