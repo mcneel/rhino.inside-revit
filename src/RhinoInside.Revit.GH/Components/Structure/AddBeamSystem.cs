@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components
     public AddBeamSystem() : base
     (
       name: "Add Beam System",
-      nickname: "S-Beam System",
+      nickname: "S-BeamSys",
       description: "Given its profile curves, it adds a beam system to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
