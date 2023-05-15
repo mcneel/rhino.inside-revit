@@ -302,7 +302,6 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="ImageBuilder.cs" />
     <Compile Include="Optional.cs" />
-    <Compile Include="Parameters\BeamSystem.cs" />
     <Compile Include="Parameters\Annotations\Annotation.cs" />
     <Compile Include="Parameters\Annotations\TextElement.cs" />
     <Compile Include="Parameters\Instances\PointCloudInstance.cs" />
@@ -319,7 +318,8 @@
     <Compile Include="Parameters\ObjectStyles\FillPatternElement.cs" />
     <Compile Include="Parameters\ObjectStyles\LinePatternElement.cs" />
     <Compile Include="Parameters\ObjectStyles\OverrideGraphicSettings.cs" />
-    <Compile Include="Parameters\Truss.cs" />
+    <Compile Include="Parameters\Structure\BeamSystem.cs" />
+    <Compile Include="Parameters\Structure\Truss.cs" />
     <Compile Include="Parameters\Views\ViewFrame.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
