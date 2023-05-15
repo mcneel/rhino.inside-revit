@@ -40,7 +40,11 @@ namespace RhinoInside.Revit.External.DB
     {
       episodeId = Guid.Empty;
       id = -1;
-      if (NumHexDigits.EpisodeId + 1 > s.Length || s.Length > NumHexDigits.EpisodeId + 1 + NumHexDigits.ElementId)
+      if
+      (
+        NumHexDigits.EpisodeId + 1 >= s.Length ||
+        s.Length > NumHexDigits.EpisodeId + 1 + NumHexDigits.ElementId
+      )
         return false;
 
       return Guid.TryParseExact(s.Substring(0, NumHexDigits.EpisodeId), "D", out episodeId) &&
@@ -56,7 +60,12 @@ namespace RhinoInside.Revit.External.DB
     {
       documentId = Guid.Empty;
       stableId = string.Empty;
-      if (s.Length < NumHexDigits.DocumentId + 1 + NumHexDigits.EpisodeId + 1 + NumHexDigits.ElementId)
+
+      if
+      (
+        NumHexDigits.DocumentId + 1 + NumHexDigits.EpisodeId + 1 >= s.Length ||
+        s.Length > NumHexDigits.DocumentId + 1 + NumHexDigits.EpisodeId + 1 + NumHexDigits.ElementId
+      )
         return false;
 
       if (Guid.TryParseExact(s.Substring(0, NumHexDigits.DocumentId), "D", out documentId) && s[NumHexDigits.DocumentId] == ':')

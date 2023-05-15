@@ -464,7 +464,7 @@ namespace RhinoInside.Revit.GH.Components
           text = $"* {text}{Environment.NewLine}Vertex Index = {vertex.VertexIndex} Location = {vertex.Location * Revit.ModelUnits}.";
           break;
         case Rhino.Geometry.BrepEdge edge:
-          text = $"◉ {text}{Environment.NewLine}Edge Index = {edge.EdgeIndex} Tolerance {edge.Tolerance * Revit.ModelUnits} Length = {edge.GetLength(edge.Domain) * Revit.ModelUnits}.";
+          text = $"◉ {text}{Environment.NewLine}Edge Index = {edge.EdgeIndex} Tolerance = {edge.Tolerance * Revit.ModelUnits} Length = {edge.GetLength(edge.Domain) * Revit.ModelUnits}.";
           break;
         case Rhino.Geometry.BrepFace face:
           var mass = Rhino.Geometry.AreaMassProperties.Compute(face);

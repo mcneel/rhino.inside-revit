@@ -221,7 +221,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
       // Set Location and Rotation
       {
-        var goo = Types.Group.FromValue(group) as Types.Group;
+        var goo = Types.Group.FromElement(group) as Types.Group;
         var location = new Plane
         (
           origin.ToPoint3d(),

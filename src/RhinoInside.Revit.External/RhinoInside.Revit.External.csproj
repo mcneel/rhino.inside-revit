@@ -55,6 +55,7 @@
     <Compile Include="DB\Extensions\ElementType.cs" />
     <Compile Include="DB\Extensions\Family.cs" />
     <Compile Include="DB\Extensions\FilteredElementCollector.cs" />
+    <Compile Include="DB\Extensions\FilterElement.cs" />
     <Compile Include="DB\Extensions\GeometryObject.cs" />
     <Compile Include="DB\Extensions\HostObject.cs" />
     <Compile Include="DB\Extensions\ImageType.cs" />
@@ -66,7 +67,6 @@
     <Compile Include="DB\Extensions\ModelPath.cs" />
     <Compile Include="DB\Extensions\OverrideGraphicSettings.cs" />
     <Compile Include="DB\Extensions\Parameter.cs" />
-    <Compile Include="DB\Extensions\ParameterFilterElement.cs" />
     <Compile Include="DB\Extensions\Plane.cs" />
     <Compile Include="DB\Extensions\ProjectLocation.cs" />
     <Compile Include="DB\Extensions\Reference.cs" />

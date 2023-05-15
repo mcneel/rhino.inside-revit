@@ -229,14 +229,14 @@ namespace RhinoInside.Revit.External.DB
     public static ElementFilter ElementIsElementTypeFilter(bool inverted = false) => inverted ?
       ElementIsNotElementTypeFilterInstance : ElementIsElementTypeFilterInstance;
 
-    public static ElementFilter ElementCategoryFilter(IList<ElementId> categoryIds, bool inverted = false, bool includeSubCategories = false)
+    public static ElementFilter ElementCategoryFilter(ICollection<ElementId> categoryIds, bool inverted = false, bool includeSubCategories = false)
     {
       if (categoryIds.Count == 0) return Empty;
-      if (categoryIds.Count == 1 && !includeSubCategories) return new ElementCategoryFilter(categoryIds[0], inverted);
+      if (categoryIds.Count == 1 && !includeSubCategories) return new ElementCategoryFilter(categoryIds.First(), inverted);
 
       var filters = new List<ElementFilter>();
 
-      if (categoryIds.Count == 1) filters.Add(new ElementCategoryFilter(categoryIds[0], inverted));
+      if (categoryIds.Count == 1) filters.Add(new ElementCategoryFilter(categoryIds.First(), inverted));
       else if (categoryIds.Count > 1) filters.Add(new ElementMulticategoryFilter(categoryIds, inverted));
 
       if (includeSubCategories)
@@ -251,7 +251,7 @@ namespace RhinoInside.Revit.External.DB
       return inverted ? Intersect(filters) : Union(filters);
     }
 
-    public static ElementFilter ElementSubCategoryFilter(IList<ElementId> categoryIds, bool inverted = false)
+    public static ElementFilter ElementSubCategoryFilter(ICollection<ElementId> categoryIds, bool inverted = false)
     {
       var filters = categoryIds.Select
       (
@@ -442,9 +442,17 @@ namespace RhinoInside.Revit.External.DB
     public static ElementFilter BoundingBoxIntersectsFilter(Outline outline, double tolerance, bool inverted)
     {
       if (outline.IsEmpty)
-        return inverted ? Universe : Empty;
+        return inverted ? ElementHasBoundingBoxFilter : Empty;
 
       return new BoundingBoxIntersectsFilter(outline, tolerance, inverted);
+    }
+
+    public static ElementFilter BoundingBoxIsInsideFilter(Outline outline, double tolerance, bool inverted)
+    {
+      if (outline.IsEmpty)
+        return inverted ? ElementHasBoundingBoxFilter : Empty;
+
+      return new BoundingBoxIsInsideFilter(outline, tolerance, inverted);
     }
     #endregion
   }
