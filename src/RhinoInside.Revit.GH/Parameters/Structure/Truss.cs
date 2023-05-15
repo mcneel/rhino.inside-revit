@@ -7,6 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  [ComponentVersion(introduced: "1.14")]
   public class Truss : GraphicalElement<Types.Truss, ARDB.Structure.Truss>
   {
     public override GH_Exposure Exposure => GH_Exposure.primary;

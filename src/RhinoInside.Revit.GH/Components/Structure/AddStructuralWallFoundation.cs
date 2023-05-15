@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components
       ),
       new ParamDefinition
       (
-        new Parameters.ElementType
+        new Parameters.HostObjectType
         {
           Name = "Type",
           NickName = "T",
@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       new ParamDefinition
       (
-        new Parameters.HostObject()
+        new Parameters.WallFoundation()
         {
           Name = _Foundation_,
           NickName = _Foundation_.Substring(0, 1),

@@ -4,6 +4,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  [ComponentVersion(introduced: "1.14")]
   public class BeamSystem : GraphicalElement<Types.BeamSystem, ARDB.BeamSystem>
   {
     public override GH_Exposure Exposure => GH_Exposure.primary;
