@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddBeamSystem : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("5E6EE9A3-3AA0-4186-9E5E-30081A56ABEE");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public AddBeamSystem() : base
     (
