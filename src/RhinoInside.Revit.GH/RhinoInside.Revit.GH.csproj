@@ -80,6 +80,7 @@
     <Compile Include="Components\Element\Components\AddComponent-WorkPlane.cs" />
     <Compile Include="Components\Element\ElementSubcategory.cs" />
     <Compile Include="Components\Element\Flip.cs" />
+    <Compile Include="Components\Element\Floor\AddFloor.cs" />
     <Compile Include="Components\Element\HostObject\SlabShape.cs" />
     <Compile Include="Components\Element\Name.cs" />
     <Compile Include="Components\Element\Opening\AddFaceOpening.cs" />
@@ -134,7 +135,6 @@
     <Compile Include="Components\Element\Opening\AddWallOpening.cs" />
     <Compile Include="Components\Element\Opening\OpeningBoundaryProfile.cs" />
     <Compile Include="Components\Element\Parameters.cs" />
-    <Compile Include="Components\Element\Floor\ByOutline.cs" />
     <Compile Include="Components\Element\Material\ByColor.cs" />
     <Compile Include="Components\Element\Material\ByName.cs" />
     <Compile Include="Components\Element\PartsGeometry.cs" />

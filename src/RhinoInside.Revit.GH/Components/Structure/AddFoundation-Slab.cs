@@ -178,6 +178,12 @@ namespace RhinoInside.Revit.GH.Components.Structure
           // Compute
           slab = Reconstruct(slab, doc.Value, boundary, floorType, level.Value, structural ?? true);
 
+          if (slab is object)
+          {
+            var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation();
+            slab.get_Parameter(ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
+          }
+
           DA.SetData(_Slab_, slab);
           return slab;
         }
