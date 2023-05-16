@@ -165,7 +165,7 @@ namespace RhinoInside.Revit.GH.Components
           foreach (var geometry in boundary)
             bbox.Union(geometry.GetBoundingBox(true));
 
-          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.ElementType type, doc, ARDB.ElementTypeGroup.FootingSlabType)) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.ElementType type, doc, ARDB.ElementTypeGroup.FloorType)) return null;
 
           if (!(type.Value is ARDB.FloorType floorType))
             throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid floor type.");
