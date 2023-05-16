@@ -251,6 +251,7 @@
     <Compile Include="Components\Site\SiteLocationIdentity.cs" />
     <Compile Include="Components\Structure\AddBeamSystem.cs" />
     <Compile Include="Components\Structure\AddFoundation-Isolated.cs" />
+    <Compile Include="Components\Structure\AddFoundation-Slab.cs" />
     <Compile Include="Components\Structure\AddFoundation-Wall.cs" />
     <Compile Include="Components\Structure\AddStructuralBeam.cs" />
     <Compile Include="Components\Structure\AddStructuralBrace.cs" />
