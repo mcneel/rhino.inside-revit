@@ -250,11 +250,11 @@
     <Compile Include="Components\Site\QuerySiteLocations.cs" />
     <Compile Include="Components\Site\SiteLocationIdentity.cs" />
     <Compile Include="Components\Structure\AddBeamSystem.cs" />
+    <Compile Include="Components\Structure\AddFoundation-Isolated.cs" />
+    <Compile Include="Components\Structure\AddFoundation-Wall.cs" />
     <Compile Include="Components\Structure\AddStructuralBeam.cs" />
     <Compile Include="Components\Structure\AddStructuralBrace.cs" />
     <Compile Include="Components\Structure\AddStructuralColumn.cs" />
-    <Compile Include="Components\Structure\AddStructuralFoundation.cs" />
-    <Compile Include="Components\Structure\AddStructuralWallFoundation.cs" />
     <Compile Include="Components\Structure\AddTruss.cs" />
     <Compile Include="Components\Topology\AddArea.cs" />
     <Compile Include="Components\Topology\AddAreaBoundaryLine.cs" />
