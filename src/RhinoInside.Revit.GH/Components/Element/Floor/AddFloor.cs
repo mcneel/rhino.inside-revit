@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components
       ),
       new ParamDefinition
        (
-        new Parameters.ElementType
+        new Parameters.HostObjectType
         {
           Name = "Type",
           NickName = "T",
