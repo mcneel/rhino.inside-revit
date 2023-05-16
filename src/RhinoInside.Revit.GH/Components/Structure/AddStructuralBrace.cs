@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     public AddStructuralBrace() : base
     (
       name: "Add Structural Brace",
-      nickname: "S-Beam",
+      nickname: "S-Brace",
       description: "Given its Axis, it adds a brace element to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
