@@ -11,8 +11,10 @@ group: Deployment & Configs
 ### WIP
 
 - Added 'Add Beam System' component.
-- Added 'Add Wall Foundation' component.
 - Added 'Add Truss' component.
+- Renamed component 'Add Structural Foundation' to 'Add Foundation (Isolated)'.
+- Added 'Add Foundation (Slab)' component.
+- Added 'Add Foundation (Wall)' component.
 
 ### RC
 
