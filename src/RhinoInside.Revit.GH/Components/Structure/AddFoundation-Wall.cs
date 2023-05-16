@@ -8,12 +8,12 @@ namespace RhinoInside.Revit.GH.Components
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.14")]
-  public class AddStructuralWallFoundation : ElementTrackerComponent
+  public class AddFoundationWall : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("9FF1C32F-4855-4F32-95CA-ACCB4AA564DE");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
-    public AddStructuralWallFoundation() : base
+    public AddFoundationWall() : base
     (
       name: "Add Foundation (Wall)",
       nickname: "W-Foundation",
