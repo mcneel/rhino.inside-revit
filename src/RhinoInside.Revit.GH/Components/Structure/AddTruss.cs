@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddTruss : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("C0B04DC7-9AD5-4E49-9043-17CB06076132");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
 
     public AddTruss() : base
     (

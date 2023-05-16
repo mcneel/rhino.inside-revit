@@ -13,15 +13,15 @@ namespace RhinoInside.Revit.GH.Components
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.9")]
-  public class AddStructuralFoundation : ElementTrackerComponent
+  public class AddFoundationIsolated : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("C1C7CDBB-EE50-40FC-A398-E01465EC65EB");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
-    public AddStructuralFoundation() : base
+    public AddFoundationIsolated() : base
     (
-      name: "Add Structural Foundation",
-      nickname: "S-Foundation",
+      name: "Add Foundation (Isolated)",
+      nickname: "I-Foundation",
       description: "Given its Location, it adds a structural foundation element to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
