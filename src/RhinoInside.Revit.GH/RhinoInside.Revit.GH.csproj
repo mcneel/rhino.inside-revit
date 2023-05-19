@@ -325,6 +325,11 @@
     <Compile Include="Parameters\Structure\BeamSystem.cs" />
     <Compile Include="Parameters\Structure\Truss.cs" />
     <Compile Include="Parameters\Structure\WallFoundation.cs" />
+    <Compile Include="Parameters\Topology\AreaElement.cs" />
+    <Compile Include="Parameters\Topology\AreaScheme.cs" />
+    <Compile Include="Parameters\Topology\RoomElement.cs" />
+    <Compile Include="Parameters\Topology\SpaceElement.cs" />
+    <Compile Include="Parameters\Topology\SpatialElement.cs" />
     <Compile Include="Parameters\Views\ViewFrame.cs" />
     <None Include="Extensions\README.md" />
     <Compile Include="Extensions\Grasshopper\Kernel\GH_ComponentParamServerExtension.cs" />
@@ -396,7 +401,6 @@
     <Compile Include="Parameters\Reference.cs" />
     <Compile Include="Parameters\Sketch.cs" />
     <Compile Include="Parameters\SketchPlane.cs" />
-    <Compile Include="Parameters\SpatialElement.cs" />
     <Compile Include="Parameters\Views\View.cs" />
     <Compile Include="Parameters\Views\View3D.cs" />
     <Compile Include="Parameters\Views\ViewDrafting.cs" />
@@ -481,11 +485,15 @@
     <Compile Include="Types\Site\Toposolid.cs" />
     <Compile Include="Types\Sketch.cs" />
     <Compile Include="Types\SketchPlane.cs" />
-    <Compile Include="Types\SpatialElement.cs" />
     <Compile Include="Types\Structure\BeamSystem.cs" />
     <Compile Include="Types\Structure\StructuralMember.cs" />
     <Compile Include="Types\Structure\Truss.cs" />
     <Compile Include="Types\Structure\WallFoundation.cs" />
+    <Compile Include="Types\Topology\AreaElement.cs" />
+    <Compile Include="Types\Topology\AreaScheme.cs" />
+    <Compile Include="Types\Topology\RoomlElement.cs" />
+    <Compile Include="Types\Topology\SpacelElement.cs" />
+    <Compile Include="Types\Topology\SpatialElement.cs" />
     <Compile Include="Types\Views\ScopeBox.cs" />
     <Compile Include="Types\Views\SectionBox.cs" />
     <Compile Include="Types\Views\Elevation.cs" />

@@ -329,6 +329,7 @@ namespace RhinoInside.Revit.GH.Types
 
       { typeof(ARDB.SpatialElement),                  (element)=> new SpatialElement        (element as ARDB.SpatialElement)    },
       { typeof(ARDB.Area),                            (element)=> new AreaElement           (element as ARDB.Area)              },
+      { typeof(ARDB.AreaScheme),                      (element)=> new AreaScheme            (element as ARDB.AreaScheme)        },
       { typeof(ARDB.Architecture.Room),               (element)=> new RoomElement           (element as ARDB.Architecture.Room) },
       { typeof(ARDB.Mechanical.Space),                (element)=> new SpaceElement          (element as ARDB.Mechanical.Space)  },
 

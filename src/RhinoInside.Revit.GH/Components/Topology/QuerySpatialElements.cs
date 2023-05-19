@@ -201,13 +201,13 @@ namespace RhinoInside.Revit.GH.Components.Topology
       ),
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.AreaScheme()
         {
           Name = "Area Scheme",
           NickName = "AS",
           Description = "Only areas on a specific Area Scheme.",
           Optional = true
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -340,7 +340,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     static readonly ARDB.ElementFilter elementFilter = CompoundElementFilter.ElementClassFilter(typeof(ARDB.AreaScheme));
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementClassFilter(typeof(ARDB.AreaScheme));
+    protected override ARDB.ElementFilter ElementFilter => elementFilter;
 
     public QueryAreaSchemes() : base
     (
@@ -392,11 +392,12 @@ namespace RhinoInside.Revit.GH.Components.Topology
     {
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.AreaScheme()
         {
           Name = "Area Schemes",
           NickName = "AS",
           Description = "Area Schemes list",
+          Access = GH_ParamAccess.list
         }
       )
     };
