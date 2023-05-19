@@ -18,14 +18,18 @@ group: Deployment & Configs
 
 ### RC
 
-- Added 'Element Geometry References' component.
-- Added 'Element Visibility' component.
-- Added 'Elevation Filter' component.
-
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.14 RC2" version="v1.14.8529.14229" pre_release=true time="05/20/2023" %}
+
+{% include ltr/release-header.html title="v1.14 RC3" version="v1.14.8536.14258" pre_release=true time="05/19/2023" %}
+
+- Added {% include ltr/comp.html uuid='bbd8187b' %} component.
+- Added {% include ltr/comp.html uuid='8ed1490f' %} component.
+- Added {% include ltr/comp.html uuid='dda08563' %} component.
+
+
+{% include ltr/release-header.html title="v1.14 RC2" version="v1.14.8529.14229" pre_release=true time="05/09/2023" %}
 
 - Misc fixes and improvements
 
