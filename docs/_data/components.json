@@ -216,6 +216,66 @@
     "uuid": "3ae08a20-8360-4ecf-acb0-5fd42a715545"
   }, 
   {
+    "desc": "Contains a collection of Revit building pad elements", 
+    "iconsrc": "/static/images/GH/BuildingPad.png", 
+    "icontag": null, 
+    "panel": "Revit Elements", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Building Pad", 
+    "typename": "BuildingPad", 
+    "until": null, 
+    "uuid": "0d0afe5f-4578-493e-8374-c6bd1c5395be"
+  }, 
+  {
+    "desc": "Contains a collection of Revit topography elements", 
+    "iconsrc": "/static/images/GH/TopographySurface.png", 
+    "icontag": null, 
+    "panel": "Revit", 
+    "since": null, 
+    "tab": "Params", 
+    "title": "Topography", 
+    "typename": "TopographySurface", 
+    "until": null, 
+    "uuid": "0700be5f-9b9c-4235-add5-787e42898114"
+  }, 
+  {
+    "desc": "Contains a collection of Revit Beam System elements", 
+    "iconsrc": null, 
+    "icontag": "B", 
+    "panel": "Revit Elements", 
+    "since": "1.14", 
+    "tab": "Params", 
+    "title": "Beam System", 
+    "typename": "BeamSystem", 
+    "until": null, 
+    "uuid": "45cd3655-4658-4c35-99fb-9975a1128ddf"
+  }, 
+  {
+    "desc": "Contains a collection of Revit Truss elements", 
+    "iconsrc": null, 
+    "icontag": "T", 
+    "panel": "Revit Elements", 
+    "since": "1.14", 
+    "tab": "Params", 
+    "title": "Truss", 
+    "typename": "Truss", 
+    "until": null, 
+    "uuid": "a3313847-9ace-483d-bed8-5fa7ca2de103"
+  }, 
+  {
+    "desc": "Contains a collection of Revit wall foundation elements", 
+    "iconsrc": null, 
+    "icontag": "W", 
+    "panel": "Revit Elements", 
+    "since": "1.14", 
+    "tab": "Params", 
+    "title": "Wall Foundation", 
+    "typename": "WallFoundation", 
+    "until": null, 
+    "uuid": "ca456fea-7c01-452e-bb76-73d749ef5b49"
+  }, 
+  {
     "desc": "Contains a collection of Revit dimension elements", 
     "iconsrc": "/static/images/GH/Dimension.png", 
     "icontag": null, 
@@ -624,18 +684,6 @@
     "uuid": "708ab072-878e-41ed-9b8c-aab0e1d85a53"
   }, 
   {
-    "desc": "Contains a collection of Revit building pad elements", 
-    "iconsrc": "/static/images/GH/BuildingPad.png", 
-    "icontag": null, 
-    "panel": "Revit Elements", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Building Pad", 
-    "typename": "BuildingPad", 
-    "until": null, 
-    "uuid": "0d0afe5f-4578-493e-8374-c6bd1c5395be"
-  }, 
-  {
     "desc": "Contains a collection of Revit curtain grid line elements", 
     "iconsrc": "/static/images/GH/CurtainGridLine.png", 
     "icontag": null, 
@@ -874,18 +922,6 @@
     "typename": "SpaceElement", 
     "until": null, 
     "uuid": "30473b1d-6226-45ce-90a7-5f8e1e1dcbe3"
-  }, 
-  {
-    "desc": "Contains a collection of Revit topography elements", 
-    "iconsrc": "/static/images/GH/TopographySurface.png", 
-    "icontag": null, 
-    "panel": "Revit", 
-    "since": null, 
-    "tab": "Params", 
-    "title": "Topography", 
-    "typename": "TopographySurface", 
-    "until": null, 
-    "uuid": "0700be5f-9b9c-4235-add5-787e42898114"
   }, 
   {
     "desc": "Contains a collection of Revit view elements", 
@@ -1512,6 +1548,18 @@
     "uuid": "08586f77-2844-4c0a-925a-200a091cf707"
   }, 
   {
+    "desc": "Given its outline curve, it adds a Floor element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddFloor.png", 
+    "icontag": null, 
+    "panel": "Architecture", 
+    "since": null, 
+    "tab": "Revit", 
+    "title": "Add Floor", 
+    "typename": "AddFloor", 
+    "until": null, 
+    "uuid": "dc8daf4f-cc93-43e2-a871-3a01a920a722"
+  }, 
+  {
     "desc": "Given its outline curve, it adds a Ceiling element to the active Revit document", 
     "iconsrc": "/static/images/GH/CeilingByOutline.png", 
     "icontag": null, 
@@ -1548,54 +1596,6 @@
     "uuid": "198e152b-6636-4d90-9443-ae77b8b1475e"
   }, 
   {
-    "desc": "Given its Axis, it adds a beam element to the active Revit document", 
-    "iconsrc": "/static/images/GH/AddStructuralBeam.png", 
-    "icontag": null, 
-    "panel": "Structure", 
-    "since": "1.0", 
-    "tab": "Revit", 
-    "title": "Add Structural Beam", 
-    "typename": "AddStructuralBeam", 
-    "until": null, 
-    "uuid": "26411aa6-8187-49df-a908-a292a07918f1"
-  }, 
-  {
-    "desc": "Given its Axis, it adds a brace element to the active Revit document", 
-    "iconsrc": "/static/images/GH/AddStructuralBrace.png", 
-    "icontag": null, 
-    "panel": "Structure", 
-    "since": "1.7", 
-    "tab": "Revit", 
-    "title": "Add Structural Brace", 
-    "typename": "AddStructuralBrace", 
-    "until": null, 
-    "uuid": "87e0ca19-088e-4a94-9770-180abc7049ad"
-  }, 
-  {
-    "desc": "Given its Location, it adds a structural foundation element to the active Revit document", 
-    "iconsrc": "/static/images/GH/AddStructuralFoundation.png", 
-    "icontag": null, 
-    "panel": "Structure", 
-    "since": "1.9", 
-    "tab": "Revit", 
-    "title": "Add Structural Foundation", 
-    "typename": "AddStructuralFoundation", 
-    "until": null, 
-    "uuid": "c1c7cdbb-ee50-40fc-a398-e01465ec65eb"
-  }, 
-  {
-    "desc": "Given its Axis, it adds a structural column element to the active Revit document", 
-    "iconsrc": "/static/images/GH/AddStructuralColumn.png", 
-    "icontag": null, 
-    "panel": "Structure", 
-    "since": "1.0", 
-    "tab": "Revit", 
-    "title": "Add Structural Column", 
-    "typename": "AddStructuralColumn", 
-    "until": null, 
-    "uuid": "47b560ac-1e1d-4576-9f17-bccf612974d8"
-  }, 
-  {
     "desc": "Release elements on Revit document", 
     "iconsrc": "/static/images/GH/ElementRelease.png", 
     "icontag": null, 
@@ -1612,7 +1612,7 @@
     "iconsrc": "/static/images/GH/ConstructProjectElevation.png", 
     "icontag": null, 
     "panel": "Site", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
     "title": "Project Elevation", 
     "typename": "ConstructProjectElevation", 
@@ -1870,6 +1870,102 @@
     "typename": "SpatialElementBoundary", 
     "until": null, 
     "uuid": "419062df-cd1c-4aeb-b4ca-e19402fe3317"
+  }, 
+  {
+    "desc": "Given its profile curves, it adds a beam system to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddBeamSystem.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.14", 
+    "tab": "Revit", 
+    "title": "Add Beam System", 
+    "typename": "AddBeamSystem", 
+    "until": null, 
+    "uuid": "5e6ee9a3-3aa0-4186-9e5e-30081a56abee"
+  }, 
+  {
+    "desc": "Given its Location, it adds a structural foundation element to the active Revit document", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Structure", 
+    "since": "1.9", 
+    "tab": "Revit", 
+    "title": "Add Foundation (Isolated)", 
+    "typename": "AddFoundationIsolated", 
+    "until": null, 
+    "uuid": "c1c7cdbb-ee50-40fc-a398-e01465ec65eb"
+  }, 
+  {
+    "desc": "Given its outline curve, it adds a foundation slab element to the active Revit document", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Structure", 
+    "since": "1.14", 
+    "tab": "Revit", 
+    "title": "Add Foundation (Slab)", 
+    "typename": "AddFoundationSlab", 
+    "until": null, 
+    "uuid": "83e76f44-2738-46f0-a2a2-aa609c5f6e98"
+  }, 
+  {
+    "desc": "Given its host element, it adds a structural wall foundation element to the active Revit document", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Structure", 
+    "since": "1.14", 
+    "tab": "Revit", 
+    "title": "Add Foundation (Wall)", 
+    "typename": "AddFoundationWall", 
+    "until": null, 
+    "uuid": "9ff1c32f-4855-4f32-95ca-accb4aa564de"
+  }, 
+  {
+    "desc": "Given its Axis, it adds a beam element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddStructuralBeam.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Add Structural Beam", 
+    "typename": "AddStructuralBeam", 
+    "until": null, 
+    "uuid": "26411aa6-8187-49df-a908-a292a07918f1"
+  }, 
+  {
+    "desc": "Given its Axis, it adds a brace element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddStructuralBrace.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.7", 
+    "tab": "Revit", 
+    "title": "Add Structural Brace", 
+    "typename": "AddStructuralBrace", 
+    "until": null, 
+    "uuid": "87e0ca19-088e-4a94-9770-180abc7049ad"
+  }, 
+  {
+    "desc": "Given its Axis, it adds a structural column element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddStructuralColumn.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Add Structural Column", 
+    "typename": "AddStructuralColumn", 
+    "until": null, 
+    "uuid": "47b560ac-1e1d-4576-9f17-bccf612974d8"
+  }, 
+  {
+    "desc": "Given its location curve, it adds a truss to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddTruss.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.14", 
+    "tab": "Revit", 
+    "title": "Add Truss", 
+    "typename": "AddTruss", 
+    "until": null, 
+    "uuid": "c0b04dc7-9ad5-4e49-9043-17cb06076132"
   }, 
   {
     "desc": "Given a set of contour Curves, it adds a BuildingPad element to the active Revit document", 
@@ -2760,6 +2856,18 @@
     "uuid": "3b8be676-390b-4be1-b6da-c02ffa3234b6"
   }, 
   {
+    "desc": "Filter used to match elements located at specific elevation range", 
+    "iconsrc": "/static/images/GH/ElementElevationFilter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "since": "1.14", 
+    "tab": "Revit", 
+    "title": "Elevation Filter", 
+    "typename": "ElementElevationFilter", 
+    "until": null, 
+    "uuid": "dda08563-c19d-41fe-b492-e00c1111d91a"
+  }, 
+  {
     "desc": "Filter used to match elements that intersect to the given element", 
     "iconsrc": "/static/images/GH/ElementIntersectsElementFilter.png", 
     "icontag": null, 
@@ -3012,42 +3120,6 @@
     "uuid": "f5a32842-b18e-470f-8bd3-bae1373ad982"
   }, 
   {
-    "desc": "Element Phasing properties Get-Set access component to element phasing information", 
-    "iconsrc": "/static/images/GH/GraphicalElementPhasing.png", 
-    "icontag": null, 
-    "panel": "Element", 
-    "since": "1.2", 
-    "tab": "Revit", 
-    "title": "Element Phasing", 
-    "typename": "GraphicalElementPhasing", 
-    "until": null, 
-    "uuid": "3ba4524a-d4e5-4392-88b3-17a0cf651b09"
-  }, 
-  {
-    "desc": "Get document construction phases list", 
-    "iconsrc": "/static/images/GH/QueryPhases.png", 
-    "icontag": null, 
-    "panel": "Document", 
-    "since": "1.2", 
-    "tab": "Revit", 
-    "title": "Query Phases", 
-    "typename": "QueryPhases", 
-    "until": null, 
-    "uuid": "91e4d3e1-883a-44d9-a3d2-b836967869e1"
-  }, 
-  {
-    "desc": "Given its outline curve, it adds a Floor element to the active Revit document", 
-    "iconsrc": "/static/images/GH/FloorByOutline.png", 
-    "icontag": null, 
-    "panel": "Architecture", 
-    "since": null, 
-    "tab": "Revit", 
-    "title": "Add Floor", 
-    "typename": "FloorByOutline", 
-    "until": null, 
-    "uuid": "dc8daf4f-cc93-43e2-a871-3a01a920a722"
-  }, 
-  {
     "desc": "Given a list of curves, it adds a Form element to the active Revit document", 
     "iconsrc": "/static/images/GH/FormByCurves.png", 
     "icontag": null, 
@@ -3214,6 +3286,30 @@
     "typename": "FamilyGeometryVoidByBrep", 
     "until": null, 
     "uuid": "f0887ad5-8acb-4806-bb12-7596bcedffed"
+  }, 
+  {
+    "desc": "Element Phasing properties Get-Set access component to element phasing information", 
+    "iconsrc": "/static/images/GH/GraphicalElementPhasing.png", 
+    "icontag": null, 
+    "panel": "Element", 
+    "since": "1.2", 
+    "tab": "Revit", 
+    "title": "Element Phasing", 
+    "typename": "GraphicalElementPhasing", 
+    "until": null, 
+    "uuid": "3ba4524a-d4e5-4392-88b3-17a0cf651b09"
+  }, 
+  {
+    "desc": "Get document construction phases list", 
+    "iconsrc": "/static/images/GH/QueryPhases.png", 
+    "icontag": null, 
+    "panel": "Document", 
+    "since": "1.2", 
+    "tab": "Revit", 
+    "title": "Query Phases", 
+    "typename": "QueryPhases", 
+    "until": null, 
+    "uuid": "91e4d3e1-883a-44d9-a3d2-b836967869e1"
   }, 
   {
     "desc": "Get-Set access component to element parameter values", 
@@ -3712,7 +3808,7 @@
     "iconsrc": null, 
     "icontag": "E", 
     "panel": "Element", 
-    "since": "1.13", 
+    "since": "1.14", 
     "tab": "Revit", 
     "title": "Element Geometry References", 
     "typename": "ElementGeometryReferences", 
@@ -4788,6 +4884,18 @@
     "uuid": "45e7e88c-76cf-45f8-a31b-ac07accb6dbd"
   }, 
   {
+    "desc": "Query view range elevations", 
+    "iconsrc": null, 
+    "icontag": "V", 
+    "panel": "View", 
+    "since": "1.14", 
+    "tab": "Revit", 
+    "title": "View Range Elevations", 
+    "typename": "ViewRangeElevations", 
+    "until": null, 
+    "uuid": "02234e1d-062e-49f0-baee-8917589c2533"
+  }, 
+  {
     "desc": "Get-Set host type compound structure", 
     "iconsrc": "/static/images/GH/HostObjectTypeCompoundStructure.png", 
     "icontag": null, 
@@ -5460,14 +5568,14 @@
     "uuid": "87715caf-92a9-4b14-99e5-f8ccb2cc19bd"
   }, 
   {
-    "desc": "Constructs a level constraint", 
-    "iconsrc": "/static/images/GH/ConstructLevelConstraint.png", 
+    "desc": "Get-Set a level offset", 
+    "iconsrc": "/static/images/GH/LevelOffset.png", 
     "icontag": null, 
     "panel": "Model", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
-    "title": "Level Constraint", 
-    "typename": "ConstructLevelConstraint", 
+    "title": "Level Offset", 
+    "typename": "LevelOffset", 
     "until": null, 
     "uuid": "01c853d8-87a3-4a76-8855-130beca30da1"
   }, 
