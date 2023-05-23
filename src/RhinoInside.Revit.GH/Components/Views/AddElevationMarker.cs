@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Views
   public class AddElevationMarker : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("2101FFF6-0618-418C-AE1E-A3311E942535");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.hidden;
     protected override string IconTag => string.Empty;
 
     public AddElevationMarker() : base
