@@ -18,6 +18,10 @@ group: Deployment & Configs
 
 ### RC
 
+- Now Area, Room and Space Tag components require a View.
+- Added 'Area Scheme' parameter.
+- Made 'Add Elevation Marker' component hidden.
+
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
