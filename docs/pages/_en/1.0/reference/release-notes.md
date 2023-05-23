@@ -10,13 +10,11 @@ group: Deployment & Configs
 
 ### WIP
 
-- Added 'Add Beam System' component.
-- Added 'Add Truss' component.
-- Renamed component 'Add Structural Foundation' to 'Add Foundation (Isolated)'.
-- Added 'Add Foundation (Slab)' component.
-- Added 'Add Foundation (Wall)' component.
-
 ### RC
+
+- Now Area, Room and Space Tag components require a View.
+- Added 'Area Scheme' parameter.
+- Made 'Add Elevation Marker' component hidden.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
@@ -31,7 +29,11 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.14 RC2" version="v1.14.8529.14229" pre_release=true time="05/09/2023" %}
 
-- Misc fixes and improvements
+- Added 'Add Beam System' component.
+- Added 'Add Truss' component.
+- Renamed component 'Add Structural Foundation' to 'Add Foundation (Isolated)'.
+- Added 'Add Foundation (Slab)' component.
+- Added 'Add Foundation (Wall)' component.
 
 {% include ltr/release-header.html title="v1.14 RC1" version="v1.14.8510.35994" pre_release=true time="04/20/2023" %}
 
