@@ -7,6 +7,7 @@ using GH_IO.Serialization;
 using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 
 namespace Grasshopper.Kernel
@@ -270,10 +271,11 @@ namespace Grasshopper.Kernel
         if (newParam.MutableNickName && CentralSettings.CanvasFullNames)
           newParam.NickName = newParam.Name;
 
-        if (newParam is Parameters.Param_Number newNumberParam)
+        // Special cases
+        if (param is Param_Number numberParam && newParam is Param_Number newNumberParam)
         {
-          newNumberParam.AngleParameter = ((Parameters.Param_Number) param).AngleParameter;
-          newNumberParam.UseDegrees = ((Parameters.Param_Number) param).UseDegrees;
+          newNumberParam.AngleParameter = numberParam.AngleParameter;
+          newNumberParam.UseDegrees = numberParam.UseDegrees;
         }
 
         return newParam;
@@ -379,6 +381,26 @@ namespace Grasshopper.Kernel
 
       param.PersistentData.Clear();
       param.PersistentData.Append(data);
+      return param;
+    }
+
+    public static GH_PersistentParam<T> SetDefaultValues<T>(this GH_PersistentParam<T> param, params object[] value)
+        where T : class, IGH_Goo, new()
+    {
+      var range = value.Select
+      (
+        x =>
+        {
+          var data = new T();
+          if (!data.CastFrom(x))
+            throw new InvalidCastException();
+
+          return data;
+        }
+      );
+
+      param.PersistentData.Clear();
+      param.PersistentData.AppendRange(range);
       return param;
     }
   }

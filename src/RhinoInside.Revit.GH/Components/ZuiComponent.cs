@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components
       None        = default,
     }
 
-    protected struct ParamDefinition
+    protected readonly struct ParamDefinition
     {
       public readonly IGH_Param Param;
       public readonly ParamRelevance Relevance;
@@ -295,11 +295,21 @@ namespace RhinoInside.Revit.GH.Components
 
     bool AreAllParametersConnected()
     {
-      foreach (var param in Params.Input)
-        if (param.Sources.Count == 0) return false;
+      for (int i = 0; i < Params.Input.Count; ++i)
+      {
+        var param = Params.Input[i];
+        if (param.DataType > GH_ParamData.@void) continue;
+        if (CanRemoveParameter(GH_ParameterSide.Input, i))
+          return false;
+      }
 
-      foreach (var param in Params.Output)
-        if (param.Recipients.Count == 0) return false;
+      for (int o = 0; o < Params.Output.Count; ++o)
+      {
+        var param = Params.Output[o];
+        if (param.DataType > GH_ParamData.@void) continue;
+        if (CanRemoveParameter(GH_ParameterSide.Output, o))
+          return false;
+      }
 
       return true;
     }
