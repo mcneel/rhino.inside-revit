@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using GH_IO.Serialization;
@@ -236,11 +237,165 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region Display
+    private enum ZuiIcon
+    {
+      None,
+      Remove,
+      Insert,
+      Cross,
+      Collapse,
+      Expand
+    }
+    
+    private class UpdateParamsRegion
+    {
+      public const float RadiusMin = 1.5F;
+      public const float RadiusMax = 3.0F;
+
+      private readonly ZuiAttributes m_attributes;
+      private readonly ZuiIcon m_icon = ZuiIcon.None;
+      public RectangleF Bounds;
+
+      public UpdateParamsRegion(ZuiAttributes attributes, ZuiIcon icon, PointF center)
+      {
+        m_attributes = attributes;
+        m_icon = icon;
+        Bounds = new RectangleF(center.X - RadiusMax, center.Y - RadiusMax, 2 * RadiusMax, 2 * RadiusMax);
+      }
+
+      public virtual bool Contains(PointF pt)
+      {
+        if (!(Bounds.Contains(pt)))
+          return false;
+
+        float xm = 0.5F * (Bounds.Left + Bounds.Right);
+        float ym = 0.5F * (Bounds.Top + Bounds.Bottom);
+
+        return GH_GraphicsUtil.Distance(pt, new PointF(xm, ym)) <= RadiusMax;
+      }
+      
+      public GH_PaletteStyle CreateButtonStyle(GH_PaletteStyle parent, int alpha)
+      {
+        Color fill = Color.Black;
+        Color edge = Color.Black;
+        Color text = Color.White;
+
+        switch (m_icon)
+        {
+          case ZuiIcon.Collapse:
+          case ZuiIcon.Remove:
+          case ZuiIcon.Cross:
+            fill = Color.White;
+            edge = Color.Black;
+            text = Color.Black;
+            break;
+
+          case ZuiIcon.Expand:
+          case ZuiIcon.Insert:
+            fill = Color.Black;
+            edge = Color.Black;
+            text = Color.White;
+            break;
+        }
+        return new GH_PaletteStyle(Color.FromArgb(alpha, fill), Color.FromArgb(alpha, edge), Color.FromArgb(alpha, text));
+      }
+
+      public virtual void Render(Graphics graphics, PointF cursor, int alpha)
+      {
+        var xm = Bounds.X + 0.5F * Bounds.Width;
+        var ym = Bounds.Y + 0.5F * Bounds.Height;
+
+        var d_range = new Rhino.Geometry.Interval(RadiusMax, RadiusMax * 3);
+        var s_range = new Rhino.Geometry.Interval(RadiusMax, RadiusMin);
+
+        var d = GH_GraphicsUtil.Distance(new PointF(xm, ym), cursor);
+        var t = d_range.NormalizedParameterAt(d);
+        var r = (float) s_range.ParameterAt(t);
+        r = Math.Min(r, RadiusMax);
+        r = Math.Max(r, RadiusMin);
+
+        Bounds = new RectangleF(xm - r, ym - r, 2 * r, 2 * r);
+
+        var palette = GH_CapsuleRenderEngine.GetImpliedPalette(m_attributes.Owner);
+        var capsuleStyle = GH_CapsuleRenderEngine.GetImpliedStyle(palette, m_attributes);
+        var buttonStyle = CreateButtonStyle(capsuleStyle, alpha);
+
+        var edgeColor = buttonStyle.Edge;
+        var fillColor = buttonStyle.Fill;
+        var symbolColor = buttonStyle.Text;
+
+        using (var fill = new SolidBrush(fillColor))
+          graphics.FillEllipse(fill, Bounds);
+
+        using (var edge = new Pen(edgeColor, 0.5F))
+          graphics.DrawEllipse(edge, Bounds);
+
+        var sz = 0.5F * r;
+        var sw = 0.25F * r;
+        var sf = (sz + 0.25f) * 0.75f;
+        using (var symbol = new Pen(symbolColor, sw))
+        {
+          switch (m_icon)
+          {
+            case ZuiIcon.None:
+              // don't draw the icon
+              break;
+
+            case ZuiIcon.Insert:
+              graphics.DrawLine(symbol, xm - sz, ym, xm + sz, ym);
+              graphics.DrawLine(symbol, xm, ym - sz, xm, ym + sz);
+              break;
+
+            case ZuiIcon.Remove:
+              graphics.DrawLine(symbol, xm - sz, ym, xm + sz, ym);
+              break;
+
+            case ZuiIcon.Cross:
+              sz -= 0.25F;
+              graphics.DrawLine(symbol, xm - sz, ym - sz, xm + sz, ym + sz);
+              graphics.DrawLine(symbol, xm - sz, ym + sz, xm + sz, ym - sz);
+              break;
+
+            case ZuiIcon.Collapse:
+              sz += 0.25f;
+              graphics.DrawLines
+              (
+                symbol, new PointF[]
+                {
+                  new PointF(xm - sf, ym + sz * 0.4f),
+                  new PointF(xm, ym - sz * 0.4f),
+                  new PointF(xm + sf, ym + sz * 0.4f)
+                }
+              );
+              break;
+
+            case ZuiIcon.Expand:
+              sz += 0.25f;
+              graphics.DrawLines
+              (
+                symbol, new PointF[]
+                {
+                  new PointF(xm - sf, ym - sz * 0.4f),
+                  new PointF(xm, ym + sz * 0.4f),
+                  new PointF(xm + sf, ym - sz * 0.4f)
+                }
+              );
+              break;
+
+          }
+        }
+      }
+    }
+      
     internal class ZuiAttributes : GH_ComponentAttributes
     {
       public ZuiAttributes(ZuiComponent owner) : base(owner) { }
 
       bool CanvasFullNames = CentralSettings.CanvasFullNames;
+
+      UpdateParamsRegion ShowParamsButton { get; set; }
+      UpdateParamsRegion HideParamsButton { get; set; }
+
       public override void ExpireLayout()
       {
         if (CanvasFullNames != CentralSettings.CanvasFullNames)
@@ -251,7 +406,65 @@ namespace RhinoInside.Revit.GH.Components
           CanvasFullNames = CentralSettings.CanvasFullNames;
         }
 
+        ShowParamsButton = null;
+        HideParamsButton = null;
+
         base.ExpireLayout();
+      }
+
+      protected override void Layout()
+      {
+        base.Layout();
+
+        var midX = ContentBox.X + (ContentBox.Width * 0.5f);
+        HideParamsButton = new UpdateParamsRegion(this, ZuiIcon.Collapse, new PointF(midX, ContentBox.Y));
+        ShowParamsButton = new UpdateParamsRegion(this, ZuiIcon.Expand, new PointF(midX, ContentBox.Y + ContentBox.Height));
+      }
+
+      protected override void Render(GH_Canvas canvas, Graphics graphics, GH_CanvasChannel channel)
+      {
+        base.Render(canvas, graphics, channel);
+        if (channel == GH_CanvasChannel.Objects && Owner is ZuiComponent component)
+        {
+          if(ShowParamsButton == null || HideParamsButton == null)
+            Layout();
+
+          int alpha = GH_Canvas.ZoomFadeHigh;
+          if (alpha < 5)
+            return;
+
+          PointF cursor = canvas.PointToClient(System.Windows.Forms.Cursor.Position);
+          cursor = canvas.Viewport.UnprojectPoint(cursor);
+
+          if (!component.AreAllParametersVisible())
+            ShowParamsButton.Render(graphics, cursor, alpha);
+
+          if (!component.AreAllParametersConnected())
+            HideParamsButton.Render(graphics, cursor, alpha);
+        }
+      }
+
+      public override GH_ObjectResponse RespondToMouseDown(GH_Canvas sender, GH_CanvasMouseEvent e)
+      {
+        if (Owner is ZuiComponent zuiComponent && e.Button == MouseButtons.Left)
+        {
+          if (GH_Canvas.ZoomFadeHigh > 5)
+          {
+            if (ShowParamsButton.Contains(e.CanvasLocation))
+            {
+              zuiComponent.Menu_ShowAllParameters(sender, e);
+              return GH_ObjectResponse.Handled;
+            }
+
+            if (HideParamsButton.Contains(e.CanvasLocation))
+            {
+              zuiComponent.Menu_HideUnconnectedParameters(sender, e);
+              return GH_ObjectResponse.Handled;
+            }
+          }
+        }
+
+        return base.RespondToMouseDown(sender, e);
       }
 
       public override GH_ObjectResponse RespondToMouseDoubleClick(GH_Canvas sender, GH_CanvasMouseEvent e)
@@ -275,6 +488,28 @@ namespace RhinoInside.Revit.GH.Components
         }
 
         return base.RespondToMouseDoubleClick(sender, e);
+      }
+
+
+      public override void SetupTooltip(PointF canvasPoint, GH_TooltipDisplayEventArgs e)
+      {
+        if (HideParamsButton != null && GH_Canvas.ZoomFadeHigh > 5 && HideParamsButton.Contains(canvasPoint))
+        {
+          e.Icon = Properties.Resources.RemoveParameter;
+          e.Title = "Hide Parameters";
+          e.Text = "Hide all unused parameters.\nCtrl + Dbl Click";
+          return;
+        }
+
+        if (ShowParamsButton != null && GH_Canvas.ZoomFadeHigh > 5 && ShowParamsButton.Contains(canvasPoint))
+        {
+          e.Icon = Properties.Resources.InsertParameter;
+          e.Title = "Show Parameters";
+          e.Text = "Show all available parameters.\nShift + Dbl Click";
+          return;
+        }
+
+        base.SetupTooltip(canvasPoint, e);
       }
     }
 
