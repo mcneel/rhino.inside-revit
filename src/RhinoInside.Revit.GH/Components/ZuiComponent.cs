@@ -256,24 +256,25 @@ namespace RhinoInside.Revit.GH.Components
 
       public override GH_ObjectResponse RespondToMouseDoubleClick(GH_Canvas sender, GH_CanvasMouseEvent e)
       {
-        bool ctrl = Control.ModifierKeys == Keys.Control;
-        bool shift = Control.ModifierKeys == Keys.Shift;
-
-        if (e.Button == MouseButtons.Left && (ctrl || shift))
+        if (sender.Viewport.Zoom >= GH_Viewport.ZoomDefault * 0.6f)
         {
-          if (Owner is ZuiComponent zuiComponent)
-          {
-            sender.ActiveInteraction = null;
-            if (shift)
-              zuiComponent.Menu_ShowAllParameters(sender, e);
-            else if (ctrl)
-              zuiComponent.Menu_HideUnconnectedParameters(sender, e);
+          bool ctrl = Control.ModifierKeys == Keys.Control;
+          bool shift = Control.ModifierKeys == Keys.Shift;
 
-            return GH_ObjectResponse.Handled;
+          if (e.Button == MouseButtons.Left && (ctrl || shift))
+          {
+            if (Owner is ZuiComponent zuiComponent)
+            {
+              sender.ActiveInteraction = null;
+              if (ctrl) zuiComponent.Menu_HideUnconnectedParameters(sender, e);
+              else if (shift) zuiComponent.Menu_ShowAllParameters(sender, e);
+
+              return GH_ObjectResponse.Handled;
+            }
           }
         }
 
-        return GH_ObjectResponse.Ignore;
+        return base.RespondToMouseDoubleClick(sender, e);
       }
     }
 
@@ -284,8 +285,8 @@ namespace RhinoInside.Revit.GH.Components
       base.AppendAdditionalMenuItems(menu);
 
       Menu_AppendSeparator(menu);
+      Menu_AppendItem(menu, "Hide unused parameters", Menu_HideUnconnectedParameters, !AreAllParametersConnected(), false);
       Menu_AppendItem(menu, "Show all parameters", Menu_ShowAllParameters, !AreAllParametersVisible(), false);
-      Menu_AppendItem(menu, "Hide unconnected parameters", Menu_HideUnconnectedParameters, !AreAllParametersConnected(), false);
     }
 
     bool AreAllParametersVisible()
