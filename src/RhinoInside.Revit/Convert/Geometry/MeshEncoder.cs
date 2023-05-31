@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (issues.HasFlag(MeshIssues.ShortEdges) && mesh.Ngons.Count == 0)
       {
         mesh.Ngons.Count = 0;
-        mesh.Vertices.Align(ShortEdgeTolerance / factor, mesh.GetNakedEdgePointStatus().Select(x => !x));
+        mesh.Vertices.Align(ShortEdgeTolerance / factor, mesh.GetNakedEdgePointStatus()?.Select(x => !x));
         mesh.Vertices.Align(ShortEdgeTolerance / factor, default);
         mesh.Weld(tol.AngleTolerance);
       }
