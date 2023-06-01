@@ -17,9 +17,9 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
     public HostObjectInserts() : base
     (
-      name: "Hosted Elements",
-      nickname: "Hosted",
-      description: "Obtains a set of elements hosted by the input Host",
+      name: "Host Inserts",
+      nickname: "Inserts",
+      description: "Obtains a set of elements inserted at the specified Host",
       category: "Revit",
       subCategory: "Architecture"
     )
