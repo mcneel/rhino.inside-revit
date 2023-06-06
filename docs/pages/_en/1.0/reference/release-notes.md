@@ -15,6 +15,9 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.15 RC1" version="v1.15.8557.7999" pre_release=true time="06/07/2023" %}
+
+- Misc fixes and improvements
 
 {% include ltr/release-header.html title="v1.14" version="v1.14.8557.24642" time="06/07/2023" %}
 
