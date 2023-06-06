@@ -143,6 +143,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddBeamSystem1 {
+            get {
+                object obj = ResourceManager.GetObject("AddBeamSystem1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddCeilingPlan {
             get {
                 object obj = ResourceManager.GetObject("AddCeilingPlan", resourceCulture);
@@ -336,6 +346,36 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AddFloorPlan {
             get {
                 object obj = ResourceManager.GetObject("AddFloorPlan", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddFoundationIsolated {
+            get {
+                object obj = ResourceManager.GetObject("AddFoundationIsolated", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddFoundationSlab {
+            get {
+                object obj = ResourceManager.GetObject("AddFoundationSlab", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddFoundationWall {
+            get {
+                object obj = ResourceManager.GetObject("AddFoundationWall", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -656,6 +696,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AddTruss {
             get {
                 object obj = ResourceManager.GetObject("AddTruss", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddTruss1 {
+            get {
+                object obj = ResourceManager.GetObject("AddTruss1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1136,6 +1186,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap Beam {
             get {
                 object obj = ResourceManager.GetObject("Beam", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap BeamSystem {
+            get {
+                object obj = ResourceManager.GetObject("BeamSystem", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2283,6 +2343,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementGeometryReferences {
+            get {
+                object obj = ResourceManager.GetObject("ElementGeometryReferences", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementGraphicOverrides {
             get {
                 object obj = ResourceManager.GetObject("ElementGraphicOverrides", resourceCulture);
@@ -2736,6 +2806,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementViewGeometry {
             get {
                 object obj = ResourceManager.GetObject("ElementViewGeometry", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementVisibility {
+            get {
+                object obj = ResourceManager.GetObject("ElementVisibility", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -4513,6 +4593,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Truss {
+            get {
+                object obj = ResourceManager.GetObject("Truss", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap UnifiedBitmapData {
             get {
                 object obj = ResourceManager.GetObject("UnifiedBitmapData", resourceCulture);
@@ -4653,6 +4743,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ViewRangeElevations {
+            get {
+                object obj = ResourceManager.GetObject("ViewRangeElevations", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ViewSectionBox {
             get {
                 object obj = ResourceManager.GetObject("ViewSectionBox", resourceCulture);
@@ -4696,6 +4796,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap WallByProfile {
             get {
                 object obj = ResourceManager.GetObject("WallByProfile", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap WallFoundation {
+            get {
+                object obj = ResourceManager.GetObject("WallFoundation", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
