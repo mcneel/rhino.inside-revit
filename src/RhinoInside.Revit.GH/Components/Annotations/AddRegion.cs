@@ -163,6 +163,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           return null;
 
         region = ARDB.FilledRegion.Create(view.Document, type.Id, view.Id, curves);
+
+        // `Regenerate` is necessary to apply Linestyle
+        if (linestyle is object)
+          region.Document.Regenerate();
       }
 
       if (linestyle is object)
@@ -172,15 +176,25 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           validStyles.Add(view.Document.OwnerFamily.FamilyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection).Id);
 
         if (!validStyles.Contains(linestyle.Id))
-            throw new Exceptions.RuntimeArgumentException("Line Style", $"'{linestyle.Name}' is not a valid Line Style for Filled Regions.");
+          throw new Exceptions.RuntimeArgumentException("Line Style", $"'{linestyle.Name}' is not a valid Line Style for Filled Regions.");
 
+        bool update = false;
         using (var sketch = region.GetSketch())
         {
           foreach (var curve in sketch.GetProfileCurveElements().SelectMany(x => x))
           {
             if (linestyle.IsEquivalent(curve.LineStyle)) continue;
             curve.LineStyle = linestyle;
+            update = true;
           }
+        }
+
+        // This forces a graphic refresh
+        if (update)
+        {
+          region.Pinned = false;
+          region.Location.Move(ARDB.XYZ.BasisZ);
+          region.Location.Move(-ARDB.XYZ.BasisZ);
         }
       }
 
