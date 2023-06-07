@@ -178,23 +178,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         if (!validStyles.Contains(linestyle.Id))
           throw new Exceptions.RuntimeArgumentException("Line Style", $"'{linestyle.Name}' is not a valid Line Style for Filled Regions.");
 
-        bool update = false;
         using (var sketch = region.GetSketch())
         {
-          foreach (var curve in sketch.GetProfileCurveElements().SelectMany(x => x))
-          {
-            if (linestyle.IsEquivalent(curve.LineStyle)) continue;
-            curve.LineStyle = linestyle;
-            update = true;
-          }
-        }
-
-        // This forces a graphic refresh
-        if (update)
-        {
-          region.Pinned = false;
-          region.Location.Move(ARDB.XYZ.BasisZ);
-          region.Location.Move(-ARDB.XYZ.BasisZ);
+          if(sketch.GetProfileCurveElements().SelectMany(x => x).Any(x => !linestyle.IsEquivalent(x.LineStyle)))
+            region.SetLineStyleId(linestyle.Id);
         }
       }
 

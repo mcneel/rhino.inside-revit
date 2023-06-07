@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using Grasshopper.Kernel;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.8")]
   public class CurveLineStyle : TransactionalChainComponent
   {
@@ -68,15 +72,54 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       ),
     };
 
+    readonly HashSet<ARDB.SketchPlane> sketchPlanes = new HashSet<ARDB.SketchPlane>(ElementEqualityComparer.InterDocument);
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Element", out Types.CurveElement element, x => x.IsValid)) return;
       else DA.SetData("Element", element);
 
       if (Params.GetData(DA, "Line Style", out Types.GraphicsStyle style))
-        UpdateElement(element.Value, () => element.LineStyle = style);
+        UpdateElement
+        (
+          element.Value,
+          () =>
+          {
+            if (!element.LineStyle.Equals(style))
+            {
+              element.LineStyle = style;
+
+              if (element.SketchPlane.Value is ARDB.SketchPlane sketchPlane)
+              {
+                if (sketchPlane.GetSketchId() != ElementIdExtension.Invalid)
+                  sketchPlanes.Add(sketchPlane);
+              }
+            }
+          }
+        );
 
       Params.TrySetData(DA, "Line Style", () => element.LineStyle);
+    }
+
+    public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
+    {
+      base.OnPrepare(documents);
+
+      // This forces a graphic refresh
+      foreach (var sketckPlane in sketchPlanes)
+      {
+        var pinned = sketckPlane.Pinned;
+        sketckPlane.Pinned = false;
+        sketckPlane.Location.Move( ARDB.XYZ.BasisZ);
+        sketckPlane.Location.Move(-ARDB.XYZ.BasisZ);
+        sketckPlane.Pinned = pinned;
+      }
+    }
+
+    protected override void AfterSolveInstance()
+    {
+      base.AfterSolveInstance();
+      sketchPlanes.Clear();
     }
   }
 }
