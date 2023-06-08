@@ -62,28 +62,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static Guid? GetExportID(this Document doc)
+    public static Guid GetCreationGUID(this Document doc)
     {
-      if (doc?.IsValidObject != true)
-        return default;
-
+#if REVIT_2024
+      return doc.CreationGUID;
+#else
       return ExportUtils.GetGBXMLDocumentId(doc);
+#endif
     }
 
-    public static Guid? GetExportID(this Document document, ElementId id)
-    {
-      if (document?.IsValidObject != true || id is null)
-        return default;
-
-      return ExportUtils.GetExportId(document, id);
-    }
-
-    public static Guid GetFingerprintGUID(this Document doc)
+    internal static Guid GetPersistentGUID(this Document doc)
     {
       if (doc?.IsValidObject != true)
         return Guid.Empty;
 
-      return ExportUtils.GetGBXMLDocumentId(doc);
+      return GetCreationGUID(doc);
     }
 
     private static int seed = 0;

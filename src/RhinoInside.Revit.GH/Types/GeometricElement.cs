@@ -456,7 +456,7 @@ namespace RhinoInside.Revit.GH.Types
     protected static string GetBakeInstanceDefinitionName(ARDB.Element element, out string description)
     {
       const string NS = "::";
-      var name = FullUniqueId.Format(element.Document.GetFingerprintGUID(), element.UniqueId);
+      var name = FullUniqueId.Format(element.Document.GetPersistentGUID(), element.UniqueId);
       description = string.Empty;
 
       if (element is ARDB.ElementType type)

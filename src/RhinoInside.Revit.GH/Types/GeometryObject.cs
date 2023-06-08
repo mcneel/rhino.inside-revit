@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Types
       if (document is object)
       {
         ReferenceUniqueId = reference.ConvertToPersistentRepresentation(document);
-        ReferenceDocumentId = document.GetFingerprintGUID();
+        ReferenceDocumentId = document.GetPersistentGUID();
 
         _ReferenceDocument = document;
         Document = reference.LinkedElementId == ARDB.ElementId.InvalidElementId ? _ReferenceDocument :
@@ -297,7 +297,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (reference is null) document = null;
 
-      ReferenceDocumentId = document.GetFingerprintGUID();
+      ReferenceDocumentId = document.GetPersistentGUID();
       ReferenceUniqueId = reference?.ConvertToPersistentRepresentation(document) ?? string.Empty;
 
       _ReferenceDocument = document;

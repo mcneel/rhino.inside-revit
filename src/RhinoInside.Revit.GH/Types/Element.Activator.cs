@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
 
             if (ERDB.FullUniqueId.TryParse(s, out var documentId, out var stableId))
             {
-              if (documentId != doc.GetFingerprintGUID()) return null;
+              if (documentId != doc.GetPersistentGUID()) return null;
               s = stableId;
             }
 
@@ -210,7 +210,7 @@ namespace RhinoInside.Revit.GH.Types
           {
             using (var elementReference = linkedElementReference.CreateLinkReference(link))
             {
-              element.ReferenceDocumentId = doc.GetFingerprintGUID();
+              element.ReferenceDocumentId = doc.GetPersistentGUID();
               element.ReferenceUniqueId = elementReference.ConvertToPersistentRepresentation(doc);
               element._ReferenceDocument = doc;
               element._ReferenceId = link.Id;
