@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
       Params.TrySetData(DA, "Edited", () => doc.IsModified);
       Params.TrySetData(DA, "Editable", () => doc.IsEditable);
-      Params.TrySetData(DA, "Created", () => doc.ExportID);
+      Params.TrySetData(DA, "Created", () => doc.CreationGUID);
 
       var version = doc.Version;
       if (version.HasValue)

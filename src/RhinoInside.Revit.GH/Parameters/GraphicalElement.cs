@@ -196,7 +196,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
-      var docGUID = doc.GetFingerprintGUID();
+      var docGUID = doc.GetPersistentGUID();
 
       var documents = value.AllData(true).OfType<T>().GroupBy(x => x.ReferenceDocumentId);
       var activeElements = (

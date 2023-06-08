@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Types
         doc = null;
 
       Document = doc;
-      ReferenceDocumentId = doc.GetFingerprintGUID();
+      ReferenceDocumentId = doc.GetPersistentGUID();
 
       Id = id;
       ReferenceUniqueId = doc?.GetWorksetTable()?.GetWorkset(id)?.UniqueId.ToString() ?? string.Empty;

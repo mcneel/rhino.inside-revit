@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!DA.GetData("Element", ref element))
         return;
 
-      DA.SetData("DocumentGUID", element?.Document.GetFingerprintGUID());
+      DA.SetData("DocumentGUID", element?.Document.GetPersistentGUID());
       DA.SetData("Document", element?.Document);
       DA.SetData("UniqueID", element?.UniqueId);
       DA.SetData("Id", element?.Id);

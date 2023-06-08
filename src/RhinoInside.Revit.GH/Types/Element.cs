@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Document is object)
       {
-        ReferenceDocumentId = _ReferenceDocument.GetFingerprintGUID();
+        ReferenceDocumentId = _ReferenceDocument.GetPersistentGUID();
 
         if (_Id.IsBuiltInId())
         {
@@ -109,7 +109,7 @@ namespace RhinoInside.Revit.GH.Types
         _ReferenceDocument = Document = element.Document;
         _ReferenceId = _Id = element.Id;
 
-        ReferenceDocumentId = _ReferenceDocument.GetFingerprintGUID();
+        ReferenceDocumentId = _ReferenceDocument.GetPersistentGUID();
         ReferenceUniqueId = element.UniqueId;
 
         base.Value = element;
@@ -267,7 +267,7 @@ namespace RhinoInside.Revit.GH.Types
         _ReferenceDocument  = Document;
         _ReferenceId        = _Id       = element.Id;
 
-        ReferenceDocumentId = Document.GetFingerprintGUID();
+        ReferenceDocumentId = Document.GetPersistentGUID();
         ReferenceUniqueId   = element.UniqueId;
 
         Debug.Assert(ReferenceEquals(base.Value, element));
@@ -370,8 +370,6 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Version
-    public Guid? ExportID => Document?.GetExportID(Id);
-
     public (Guid? Created, Guid? Updated) Version
     {
       get

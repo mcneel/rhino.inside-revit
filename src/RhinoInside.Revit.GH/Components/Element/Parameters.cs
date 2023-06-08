@@ -316,7 +316,7 @@ namespace RhinoInside.Revit.GH
         case ARDB.StorageType.ElementId:
 
           var document = parameter.Element.Document;
-          var documentGUID = document.GetFingerprintGUID();
+          var documentGUID = document.GetPersistentGUID();
           var elementId = parameter.AsElementId();
 
           return elementId.IsBuiltInId() ?
