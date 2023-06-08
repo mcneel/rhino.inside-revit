@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -127,5 +128,30 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return new XYZ(normalX.Value / numTriangles, normalY.Value / numTriangles, normalZ.Value / numTriangles);
     }
+
+#if !REVIT_2024
+    /// <summary>
+    /// Returns the surface area of the mesh.
+    /// </summary>
+    /// <param name="mesh"></param>
+    /// <returns>The sum of the areas of the constituent facets of the mesh.</returns>
+    public static double ComputeSurfaceArea(this Mesh mesh)
+    {
+      Sum area = default;
+
+      var numTriangles = mesh.NumTriangles;
+      for (int t = 0; t < numTriangles; ++t)
+      {
+        var triangle = mesh.get_Triangle(t);
+        var v0 = triangle.get_Vertex(0);
+        var v1 = triangle.get_Vertex(1);
+        var v2 = triangle.get_Vertex(2);
+
+        area.Add(XYZExtension.Norm(XYZExtension.CrossProduct(v1 - v0, v2 - v0), 0D));
+      }
+
+      return area.Value * 0.5;
+    }
+#endif
   }
 }
