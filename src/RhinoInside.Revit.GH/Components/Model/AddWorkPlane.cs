@@ -169,7 +169,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         doc.Value, _WorkPlane_, sketchPlane =>
         {
           // Input
-          if (!Params.GetData(DA, "Face", out Types.GeometryFace face, x => x.IsValid && x.Document.IsEquivalent(doc.Value))) return null;
+          if (!Params.GetData(DA, "Face", out Types.GeometryFace face, x => x.IsValid && x.ReferenceDocument.IsEquivalent(doc.Value))) return null;
 
           // Compute
           sketchPlane = Reconstruct(sketchPlane, doc.Value, face.GetReference());
