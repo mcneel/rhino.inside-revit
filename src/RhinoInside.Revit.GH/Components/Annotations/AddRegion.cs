@@ -176,7 +176,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           validStyles.Add(view.Document.OwnerFamily.FamilyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection).Id);
 
         if (!validStyles.Contains(linestyle.Id))
-          throw new Exceptions.RuntimeArgumentException("Line Style", $"'{linestyle.Name}' is not a valid Line Style for Filled Regions.");
+          throw new Exceptions.RuntimeArgumentException("Line Style", $"'{linestyle.Name}' is not a valid Line Style for Filled Regions.{{{region.Id}}}");
 
         using (var sketch = region.GetSketch())
         {

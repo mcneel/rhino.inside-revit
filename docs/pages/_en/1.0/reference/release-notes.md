@@ -13,6 +13,7 @@ group: Deployment & Configs
 ### RC
 
 - Fix on 'Add Region' component when 'Line Style' input is used.
+- Added 'Sketch Lines' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

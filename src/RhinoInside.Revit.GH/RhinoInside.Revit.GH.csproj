@@ -205,7 +205,7 @@
     <Compile Include="Components\Import\QueryCloudPoints.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
     <Compile Include="Components\Model\AddWorkPlane.cs" />
-    <Compile Include="Components\Model\SketchDeconstruct.cs" />
+    <Compile Include="Components\Model\SketchLines.cs" />
     <Compile Include="Components\ObjectStyles\AddSubCategory.cs" />
     <Compile Include="Components\ObjectStyles\CategoryGraphicsStyle.cs" />
     <Compile Include="Components\ObjectStyles\CategoryIdentity.cs" />

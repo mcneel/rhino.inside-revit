@@ -76,29 +76,33 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Element", out Types.CurveElement element, x => x.IsValid)) return;
-      else DA.SetData("Element", element);
+      if (!Params.GetData(DA, "Element", out Types.CurveElement curve, x => x.IsValid)) return;
+      else DA.SetData("Element", curve);
 
-      if (Params.GetData(DA, "Line Style", out Types.GraphicsStyle style))
+      if (Params.GetData(DA, "Line Style", out Types.GraphicsStyle linestyle))
         UpdateElement
         (
-          element.Value,
+          curve.Value,
           () =>
           {
-            if (!element.LineStyle.Equals(style))
+            if (!curve.LineStyle.Equals(linestyle))
             {
-              element.LineStyle = style;
+              var validStyles = curve.Value.GetLineStyleIds();
+              if (curve.Document.IsFamilyDocument)
+                validStyles.Add(curve.Document.OwnerFamily.FamilyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection).Id);
 
-              if (element.SketchPlane.Value is ARDB.SketchPlane sketchPlane)
-              {
-                if (sketchPlane.GetSketchId() != ElementIdExtension.Invalid)
-                  sketchPlanes.Add(sketchPlane);
-              }
+              if (!validStyles.Contains(linestyle.Id))
+                throw new Exceptions.RuntimeArgumentException("Line Style", $"'{linestyle.Nomen}' is not a valid Line Style for '{curve.Nomen}'. {{{curve.Id}}}");
+
+              curve.LineStyle = linestyle;
+
+              if (curve.SketchPlane.Value is ARDB.SketchPlane sketchPlane && sketchPlane.GetSketchId() != ElementIdExtension.Invalid)
+                sketchPlanes.Add(sketchPlane);
             }
           }
         );
 
-      Params.TrySetData(DA, "Line Style", () => element.LineStyle);
+      Params.TrySetData(DA, "Line Style", () => curve.LineStyle);
     }
 
     public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
