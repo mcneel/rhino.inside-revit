@@ -13,6 +13,7 @@ group: Deployment & Configs
 ### RC
 
 - Fix on 'Add Region' component when 'Line Style' input is used.
+- Fix on 'Add Work Plane (Face)' when used on linked model faces.
 - Added 'Sketch Lines' component.
 
 {% endcapture %}
