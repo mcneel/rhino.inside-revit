@@ -261,13 +261,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (guid != Guid.Empty)
       {
         // For performance reasons and also in case of conflict the ActiveDBDocument will have priority
-        if (activeDBDocument is object && ExportUtils.GetGBXMLDocumentId(activeDBDocument) == guid)
+        if (activeDBDocument is object && activeDBDocument.GetPersistentGUID() == guid)
         {
           document = activeDBDocument;
           return true;
         }
 
-        foreach (var doc in set.Where(x => ExportUtils.GetGBXMLDocumentId(x) == guid))
+        foreach (var doc in set.Where(x => x.GetPersistentGUID() == guid))
         {
           document = doc;
           return true;

@@ -316,14 +316,9 @@ namespace RhinoInside.Revit.GH
         case ARDB.StorageType.ElementId:
 
           var document = parameter.Element.Document;
-          var documentGUID = document.GetPersistentGUID();
           var elementId = parameter.AsElementId();
 
-          return elementId.IsBuiltInId() ?
-            ERDB.FullUniqueId.Format(documentGUID, ERDB.UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(document), elementId.ToValue())) :
-            document?.GetElement(elementId) is ARDB.Element element ?
-            ERDB.FullUniqueId.Format(documentGUID, element.UniqueId) :
-            ERDB.FullUniqueId.Format(Guid.Empty, ERDB.UniqueId.Format(Guid.Empty, ARDB.ElementId.InvalidElementId.ToValue()));
+          return ERDB.FullUniqueId.Format(document.GetPersistentGUID(), elementId.ToUniqueId(document, out var _));
 
         default:
           throw new NotImplementedException();

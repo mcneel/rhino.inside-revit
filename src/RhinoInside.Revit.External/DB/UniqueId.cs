@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.External.DB
       {
         return document is null ? RuntimeId.Format(id) :
           id < 0 ?
-          UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(document), id) :
+          UniqueId.Format(document.GetCreationGUID(), id) :
           document.GetElement(new ARDB.ElementId(id)).UniqueId;
       }
 
@@ -269,7 +269,7 @@ namespace RhinoInside.Revit.External.DB
           if (id > 0)
             return ARDB.Reference.ParseFromStableRepresentation(document, uniqueId).ElementId.ToValue();
 
-          if (episode != ARDB.ExportUtils.GetGBXMLDocumentId(document))
+          if (episode != document.GetCreationGUID())
             throw new FormatException($"{nameof(s)} is not in the correct format.");
 
           return id;
