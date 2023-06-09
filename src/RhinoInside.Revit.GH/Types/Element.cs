@@ -87,18 +87,9 @@ namespace RhinoInside.Revit.GH.Types
       if (Document is object)
       {
         ReferenceDocumentId = _ReferenceDocument.GetPersistentGUID();
+        ReferenceUniqueId = _Id.ToUniqueId(Document, out var value);
 
-        if (_Id.IsBuiltInId())
-        {
-          ReferenceUniqueId = ERDB.UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(Document), _Id.ToValue());
-          base.Value = null;
-        }
-        else
-        {
-          var element = Document.GetElement(_Id);
-          ReferenceUniqueId = element?.UniqueId ?? string.Empty;
-          base.Value = element;
-        }
+        base.Value = value;
       }
     }
 
