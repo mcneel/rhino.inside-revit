@@ -207,35 +207,6 @@ namespace RhinoInside.Revit.GH.Types
 
     protected virtual void SubInvalidateGraphics() { }
 
-    protected internal T GetElement<T>(ARDB.ElementId elementId) where T : Element
-    {
-      if (elementId.IsValid())
-      {
-        return (T)
-          (IsLinked?
-          Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, elementId)) :
-          Element.FromElementId(Document, elementId));
-      }
-
-      return null;
-    }
-
-    protected internal T GetElement<T>(ARDB.Element element) where T : Element
-    {
-      if (element.IsValid())
-      {
-        if (!Document.IsEquivalent(element.Document))
-          throw new Exceptions.RuntimeArgumentException($"Invalid {typeof(T)} Document", nameof(element));
-
-        return (T)
-          (IsLinked ?
-          Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, element.Id)) :
-          Element.FromElement(element));
-      }
-
-      return null;
-    }
-
     protected T SetElement<T>(Element element) where T : ARDB.Element
     {
       if (element?.IsValid is true)

@@ -188,6 +188,35 @@ namespace RhinoInside.Revit.GH.Types
       return reference;
     }
 
+    protected internal T GetElement<T>(ARDB.ElementId elementId) where T : Element
+    {
+      if (elementId.IsValid())
+      {
+        return (T)
+          (IsLinked ?
+          Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, elementId)) :
+          Element.FromElementId(Document, elementId));
+      }
+
+      return null;
+    }
+
+    protected internal T GetElement<T>(ARDB.Element element) where T : Element
+    {
+      if (element.IsValid())
+      {
+        if (!Document.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException($"Invalid {typeof(T)} Document", nameof(element));
+
+        return (T)
+          (IsLinked ?
+          Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, element.Id)) :
+          Element.FromElement(element));
+      }
+
+      return null;
+    }
+
     internal T GetElementFromReference<T>(ARDB.Reference reference) where T : Element
     {
       return Element.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
