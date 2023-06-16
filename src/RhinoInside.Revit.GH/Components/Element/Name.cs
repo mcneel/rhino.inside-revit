@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     : base
     (
       "Element Name",
-      "ElemName",
+      "E-Name",
       "Element Name Property. Get-Set accessor to Element Name property.",
       "Revit",
       "Element"

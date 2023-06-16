@@ -150,6 +150,7 @@
     <Compile Include="Components\Element\Select.cs" />
     <Compile Include="Components\Element\Type.cs" />
     <Compile Include="Components\Element\Version.cs" />
+    <Compile Include="Components\Element\View.cs" />
     <Compile Include="Components\Element\Visibility.cs" />
     <Compile Include="Components\Element\Wall\AnalyseStackedWall.cs" />
     <Compile Include="Components\Element\Wall\ByCurve.cs" />
