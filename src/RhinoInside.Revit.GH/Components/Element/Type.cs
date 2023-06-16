@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     : base
     (
       "Element Type",
-      "ElemType",
+      "E-Type",
       "Element Type Property. Get-Set access component to Element Type property.",
       "Revit",
       "Element"

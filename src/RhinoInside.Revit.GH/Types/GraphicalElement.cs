@@ -390,17 +390,6 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      if (typeof(Q).IsAssignableFrom(typeof(IGH_View)))
-      {
-        if (ViewSpecific is true)
-        {
-          target = (Q) (object) OwnerView;
-          return true;
-        }
-
-        return false;
-      }
-
       return base.CastTo(out target);
     }
 

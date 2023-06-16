@@ -556,6 +556,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
         default:  throw new NotSupportedException();
       }
     }
+
+    static ElementFilter GetViewportFilter(string viewportSheetNumber, string viewportViewName) => CompoundElementFilter.Intersect
+    (
+      new ElementIsElementTypeFilter(inverted: true),
+      new ElementClassFilter(typeof(Viewport)),
+      new ElementParameterFilter
+      (
+        CompoundElementFilter.FilterStringRule
+        (
+          new ParameterValueProvider(new ElementId(BuiltInParameter.VIEWPORT_SHEET_NUMBER)),
+          new FilterStringEquals(),
+          viewportSheetNumber
+        )
+      ),
+      new ElementParameterFilter
+      (
+        CompoundElementFilter.FilterStringRule
+        (
+          new ParameterValueProvider(new ElementId(BuiltInParameter.VIEWPORT_VIEW_NAME)),
+          new FilterStringEquals(),
+          viewportViewName
+        )
+      )
+    );
+
+    public static Viewport GetViewport(this View view)
+    {
+      var sheetNumber = view.get_Parameter(BuiltInParameter.VIEWPORT_SHEET_NUMBER).AsString();
+      if (sheetNumber is null) return null;
+
+      var viewName = view.get_Parameter(BuiltInParameter.VIEW_NAME).AsString();
+      if (viewName is null) return null;
+
+      var dependents = view.GetDependentElements(GetViewportFilter(sheetNumber, viewName));
+      switch (dependents.Count)
+      {
+        case 0: return null;
+        case 1: return view.Document.GetElement(dependents[0]) as Viewport;
+        default: throw new NotSupportedException();
+      }
+    }
     #endregion
 
     #region ViewSection

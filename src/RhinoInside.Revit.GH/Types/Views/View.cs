@@ -137,6 +137,20 @@ namespace RhinoInside.Revit.GH.Types
         return target is object;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(Viewport)))
+      {
+        target = (Q) (object) Viewport;
+
+        return target is object;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(ViewSheet)))
+      {
+        target = (Q) (object) Viewport?.Sheet;
+
+        return target is object;
+      }
+
       return false;
     }
 
@@ -535,6 +549,8 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public SketchPlane SketchPlane => SketchPlane.FromElement(Value?.SketchPlane) as SketchPlane;
+
+    public Viewport Viewport => Viewport.FromElement(Value?.GetViewport()) as Viewport;
 
     public Viewer Viewer => Viewer.FromElement(Value?.GetViewer()) as Viewer;
     #endregion

@@ -363,6 +363,10 @@ namespace RhinoInside.Revit.GH.Types
       return default;
     }
 
+    public GraphicsStyle GraphicsStyle => Value is ARDB.GeometryObject geometryObject ?
+      geometryObject.GraphicsStyleId.IsValid() ? GetElement<GraphicsStyle>(geometryObject.GraphicsStyleId) : new GraphicsStyle() :
+      null;
+
     /// <summary>
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
     /// </summary>
@@ -814,6 +818,34 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
+
+    public GeometryPoint StartPoint
+    {
+      get
+      {
+        if (GetReference() is ARDB.Reference reference)
+        {
+          var stableRepresentation = reference.ConvertToStableRepresentation(ReferenceDocument);
+          return new GeometryPoint(ReferenceDocument, ARDB.Reference.ParseFromStableRepresentation(ReferenceDocument, $"{stableRepresentation}/0"));
+        }
+
+        return default;
+      }
+    }
+
+    public GeometryPoint EndPoint
+    {
+      get
+      {
+        if (GetReference() is ARDB.Reference reference)
+        {
+          var stableRepresentation = reference.ConvertToStableRepresentation(ReferenceDocument);
+          return new GeometryPoint(ReferenceDocument, ARDB.Reference.ParseFromStableRepresentation(ReferenceDocument, $"{stableRepresentation}/1"));
+        }
+
+        return default;
+      }
+    }
     #endregion
 
     #region Casting
@@ -901,6 +933,20 @@ namespace RhinoInside.Revit.GH.Types
         new GeometryFace(document, reference) : null;
     }
 
+    public Material Material => Value is ARDB.Face face ?
+      face.MaterialElementId.IsValid() ? GetElement<Material>(face.MaterialElementId) : new Material() :
+      null;
+
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      return PolySurface is Brep brep ?
+      (
+        xform == Transform.Identity ?
+        brep.GetBoundingBox(true) :
+        brep.GetBoundingBox(xform)
+      ) : NaN.BoundingBox;
+    }
+
     public Brep PolySurface
     {
       get
@@ -913,16 +959,6 @@ namespace RhinoInside.Revit.GH.Types
 
         return null;
       }
-    }
-
-    public override BoundingBox GetBoundingBox(Transform xform)
-    {
-      return PolySurface is Brep brep ?
-      (
-        xform == Transform.Identity ?
-        brep.GetBoundingBox(true) :
-        brep.GetBoundingBox(xform)
-      ) : NaN.BoundingBox;
     }
 
     #region IGH_PreviewData

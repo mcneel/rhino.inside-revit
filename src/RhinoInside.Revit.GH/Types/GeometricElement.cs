@@ -76,11 +76,13 @@ namespace RhinoInside.Revit.GH.Types
       out ARDB.Material[] materials, out Mesh[] meshes, out Curve[] wires
     )
     {
+      bool voidGeometry = element is ARDB.GenericForm form && !form.IsSolid;
+
       using
       (
         var options = element.ViewSpecific ?
-        new ARDB.Options() { View = element.Document.GetElement(element.OwnerViewId) as ARDB.View } :
-        new ARDB.Options() { DetailLevel = detailLevel == ARDB.ViewDetailLevel.Undefined ? ARDB.ViewDetailLevel.Medium : detailLevel }
+        new ARDB.Options() { View = element.Document.GetElement(element.OwnerViewId) as ARDB.View, IncludeNonVisibleObjects = voidGeometry } :
+        new ARDB.Options() { DetailLevel = detailLevel == ARDB.ViewDetailLevel.Undefined ? ARDB.ViewDetailLevel.Medium : detailLevel, IncludeNonVisibleObjects = voidGeometry }
       )
       using (var geometry = element?.GetGeometry(options))
       {
@@ -96,8 +98,12 @@ namespace RhinoInside.Revit.GH.Types
           var elementMaterial = geometry.MaterialElement ?? categoryMaterial;
 
           wires = geometry.GetPreviewWires().Where(x => x is object).ToArray();
-          meshes = geometry.GetPreviewMeshes(element.Document, meshingParameters).ToArray();
-          materials = geometry.GetPreviewMaterials(element.Document, elementMaterial).ToArray();
+          meshes = geometry.Visibility == ARDB.Visibility.Visible ?
+                   geometry.GetPreviewMeshes(element.Document, meshingParameters).ToArray() :
+                   new Mesh[0];
+          materials = geometry.Visibility == ARDB.Visibility.Visible ?
+                      geometry.GetPreviewMaterials(element.Document, elementMaterial).ToArray() :
+                      new ARDB.Material[0];
 
           if (wires.Length == 0 && meshes.Length == 0 && element.get_BoundingBox(options.View) is ARDB.BoundingBoxXYZ)
           {
@@ -105,7 +111,7 @@ namespace RhinoInside.Revit.GH.Types
             var subWires = new List<Curve>();
             var subMaterials = new List<ARDB.Material>();
 
-            foreach (var dependent in element.GetDependentElements(null).Select(element.Document.GetElement))
+            foreach (var dependent in element.GetDependentElements(CompoundElementFilter.ElementHasBoundingBoxFilter).Select(element.Document.GetElement))
             {
               if (dependent.GetBoundingBoxXYZ(out var view) is null)
                 continue;
@@ -113,16 +119,19 @@ namespace RhinoInside.Revit.GH.Types
               using
               (
                 var dependentOptions = view is object ?
-                new ARDB.Options() { View = view } :
-                new ARDB.Options() { DetailLevel = detailLevel == ARDB.ViewDetailLevel.Undefined ? ARDB.ViewDetailLevel.Medium : detailLevel }
+                new ARDB.Options() { View = view, IncludeNonVisibleObjects = voidGeometry } :
+                new ARDB.Options() { DetailLevel = detailLevel == ARDB.ViewDetailLevel.Undefined ? ARDB.ViewDetailLevel.Medium : detailLevel, IncludeNonVisibleObjects = voidGeometry }
               )
               using (var dependentGeometry = dependent?.GetGeometry(dependentOptions))
               {
                 if (dependentGeometry is object)
                 {
                   subWires.AddRange(dependentGeometry.GetPreviewWires().Where(x => x is object));
-                  subMeshes.AddRange(dependentGeometry.GetPreviewMeshes(element.Document, meshingParameters));
-                  subMaterials.AddRange(dependentGeometry.GetPreviewMaterials(element.Document, elementMaterial));
+                  if (!voidGeometry)
+                  {
+                    subMeshes.AddRange(dependentGeometry.GetPreviewMeshes(element.Document, meshingParameters));
+                    subMaterials.AddRange(dependentGeometry.GetPreviewMaterials(element.Document, elementMaterial));
+                  }
                 }
               }
             }

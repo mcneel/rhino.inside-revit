@@ -29,18 +29,26 @@ namespace RhinoInside.Revit.GH.Types
       {
         switch (source)
         {
-          case GraphicsStyle style:     source = style.Value; break;
-          case Element element:         SetValue(element.Document, element.Category.Id); return element.IsValid;
           case CategoryId catId:        source = (ARDB.BuiltInCategory) catId.Value; break;
+          case GraphicsStyle style:     source = style.Value; break;
+          case GeometryObject geometry:
+            if (geometry.IsValid)
+            {
+              SetValue(geometry.Document, geometry.GraphicsStyle.Value?.GraphicsStyleCategory.Id ?? ElementIdExtension.Invalid);
+              return true;
+            }
+            return false;
+          case Element element:         SetValue(element.Document, element.Category?.Id ?? ElementIdExtension.Invalid); return element.IsValid;
           default:                      source = goo.ScriptVariable(); break;
         }
       }
 
       var document = Revit.ActiveDBDocument;
-      var categoryId = ARDB.ElementId.InvalidElementId;
+      var categoryId = ElementIdExtension.Invalid;
 
       switch (source)
       {
+        case null:                      return false;
         case int i:                     categoryId = ElementIdExtension.FromValue(i); break;
         case ARDB.BuiltInCategory bic:  categoryId = new ARDB.ElementId(bic); break;
         case ARDB.ElementId id:         categoryId = id; break;
@@ -653,6 +661,14 @@ namespace RhinoInside.Revit.GH.Types
         if (category.APIObject.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection) is ARDB.GraphicsStyle style)
         {
           SetValue(style.Document, style.Id);
+          return true;
+        }
+      }
+      else if (source is GeometryObject geometry)
+      {
+        if (geometry.Value is ARDB.GeometryObject geometryObject)
+        {
+          SetValue(geometry.Document, geometryObject.GraphicsStyleId);
           return true;
         }
       }
