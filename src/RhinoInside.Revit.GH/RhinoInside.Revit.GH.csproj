@@ -81,6 +81,7 @@
     <Compile Include="Components\Element\ElementSubcategory.cs" />
     <Compile Include="Components\Element\Flip.cs" />
     <Compile Include="Components\Element\Floor\AddFloor.cs" />
+    <Compile Include="Components\Element\GeometryReferences.cs" />
     <Compile Include="Components\Element\HostObject\SlabShape.cs" />
     <Compile Include="Components\Element\Name.cs" />
     <Compile Include="Components\Element\Opening\AddFaceOpening.cs" />

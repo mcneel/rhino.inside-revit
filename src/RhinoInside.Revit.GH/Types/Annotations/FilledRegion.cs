@@ -30,21 +30,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Location
-    public override Plane Location
-    {
-      get
-      {
-        if (Sketch is Sketch sketch)
-        {
-          var plane = sketch.ProfilesPlane;
-          plane.Origin = plane.ClosestPoint(BoundingBox.Center);
+    public override Plane Location => Sketch?.Location ?? NaN.Plane;
 
-          return plane;
-        }
-
-        return base.Location;
-      }
-    }
+    public override Brep TrimmedSurface => Sketch?.TrimmedSurface ?? default;
     #endregion
 
     /*

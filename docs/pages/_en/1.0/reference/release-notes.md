@@ -14,8 +14,9 @@ group: Deployment & Configs
 
 - Fix on 'Add Region' component when 'Line Style' input is used.
 - Fix on 'Add Work Plane (Face)' when used on linked model faces.
-- Added 'Sketch Lines' component.
 - Added 'Element View' component.
+- Added 'Sketch Lines' component.
+- Added 'Curve Point References' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

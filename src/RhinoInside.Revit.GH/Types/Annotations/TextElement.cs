@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.TextElement text)
         {
-          var scale = Revit.ModelUnits * OwnerView?.Scale ?? 1.0;
+          var scale = Revit.ModelUnits * OwnerView.Scale;
           var xSize = new Interval(0.5 * scale, 0.5 * scale);
           var ySize = new Interval(0.5 * scale, 0.5 * scale);
           var zSize = new Interval(-0.0, +0.0);
