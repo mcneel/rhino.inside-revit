@@ -88,21 +88,21 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.ElementType elementType:
           if (ArrowheadType.IsValidElement(elementType)) return new ArrowheadType(elementType);
           break;
-      }
 
-      if (element is ARDB.View view)
-      {
-        switch (view.ViewType)
-        {
-          case ARDB.ViewType.FloorPlan: return new FloorPlan(view as ARDB.ViewPlan);
-          case ARDB.ViewType.CeilingPlan: return new CeilingPlan(view as ARDB.ViewPlan);
-          case ARDB.ViewType.AreaPlan: return new AreaPlan(view as ARDB.ViewPlan);
-          case ARDB.ViewType.EngineeringPlan: return new StructuralPlan(view as ARDB.ViewPlan);
+        case ARDB.View view:
+          switch (view.ViewType)
+          {
+            case ARDB.ViewType.FloorPlan: return new FloorPlan(view as ARDB.ViewPlan);
+            case ARDB.ViewType.CeilingPlan: return new CeilingPlan(view as ARDB.ViewPlan);
+            case ARDB.ViewType.AreaPlan: return new AreaPlan(view as ARDB.ViewPlan);
+            case ARDB.ViewType.EngineeringPlan: return new StructuralPlan(view as ARDB.ViewPlan);
 
-          case ARDB.ViewType.Section: return new SectionView(view as ARDB.ViewSection);
-          case ARDB.ViewType.Elevation: return new ElevationView(view as ARDB.ViewSection);
-          case ARDB.ViewType.Detail: return new DetailView(view as ARDB.ViewSection);
-        }
+            case ARDB.ViewType.Section: return new SectionView(view as ARDB.ViewSection);
+            case ARDB.ViewType.Elevation: return new ElevationView(view as ARDB.ViewSection);
+            case ARDB.ViewType.Detail: return new DetailView(view as ARDB.ViewSection);
+          }
+
+          break;
       }
 
       // By Type
