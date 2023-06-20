@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
   public class SketchLines : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("F9BC3F5E-7415-485E-B74C-5CB855B818B8");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => string.Empty;
 
     public SketchLines() : base
@@ -121,15 +121,18 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
       (
         DA, "Boundary Condition", () =>
         {
+          var tol = GeometryTolerance.Model;
           var brep = sketch.TrimmedSurface;
 
-          return sketch?.Value?.GetProfileCurveElements().
-          Select
-          (x =>
+          return sketch?.Value?.GetProfileCurveElements().Select(x =>
           {
             var segment = x[0].GeometryCurve;
             var point = segment.Evaluate(segment.GetRawParameter(0.5), normalized: false).ToPoint3d();
-            var loop = brep.Loops.OrderBy(e => e.To3dCurve() is Curve loopCurve && loopCurve.ClosestPoint(point, out var t, GeometryTolerance.Model.VertexTolerance) ? loopCurve.PointAt(t).DistanceTo(point) : double.PositiveInfinity).FirstOrDefault();
+            var loop = brep.
+              Loops.
+              OrderBy(e => e.To3dCurve() is Curve lc && lc.ClosestPoint(point, out var t, tol.VertexTolerance) ? lc.PointAt(t).DistanceTo(point) : double.PositiveInfinity).
+              FirstOrDefault();
+
             switch (loop?.LoopType)
             {
               case BrepLoopType.Outer: return Enumerable.Repeat(+1, x.Count);

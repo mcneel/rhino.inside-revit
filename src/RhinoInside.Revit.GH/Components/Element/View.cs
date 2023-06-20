@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     public ElementPropertyView()
     : base
     (
-      "Element View",
+      "Element Owner View",
       "E-View",
       "Element Owner View Property. Get access component to Element Owner View property.",
       "Revit",

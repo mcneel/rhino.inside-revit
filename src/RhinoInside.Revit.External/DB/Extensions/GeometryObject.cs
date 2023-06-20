@@ -840,6 +840,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
       );
     }
 
+    public static IEnumerable<Reference> GetLineReferences(this GeometryElement geometry, Element element)
+    {
+      var document = element.Document;
+      var uniqueId = element.UniqueId;
+
+      return geometry.Select<Curve>
+      (
+        document, uniqueId,
+        s => new Reference[] { s.Reference }
+      );
+    }
+
     public static IEnumerable<Reference> GetEdgeEndPointReferences(this GeometryElement geometry, Element element)
     {
       var document = element.Document;
