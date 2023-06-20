@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       return scriptVariable as GeometryBase;
     }
 
-    internal static readonly IList<ARDB.GeometryObject> ShapeEmpty = new ARDB.GeometryObject[0];
+    internal static readonly IList<ARDB.GeometryObject> ShapeEmpty = Array.Empty<ARDB.GeometryObject>();
     protected IList<ARDB.GeometryObject> BuildShape
     (
       ARDB.Element element,

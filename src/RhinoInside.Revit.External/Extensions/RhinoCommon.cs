@@ -1262,7 +1262,7 @@ namespace Rhino.DocObjects
     public static Geometry.Point3d[] GetFramePlaneCorners(this ViewportInfo vport, double depth)
     {
       if (!vport.IsValidCamera || !vport.IsValidFrustum)
-        return new Geometry.Point3d[0];
+        return Array.Empty<Geometry.Point3d>();
 
       return GetFramePlaneCorners(vport, depth, vport.Extents(0), vport.Extents(1));
     }

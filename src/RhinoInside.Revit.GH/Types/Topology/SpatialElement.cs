@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Types
               ).ToArray();
             }
           }
-          else _Boundaries = new Curve[0];
+          else _Boundaries = Array.Empty<Curve>();
         }
 
         return _Boundaries;

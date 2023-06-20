@@ -154,10 +154,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       );
     }
 
-    static readonly ARDB.ElementId[] Empty = new ARDB.ElementId[0];
     static ICollection<ARDB.ElementId> GetVisibleElements(ARDB.View viewValue, ICollection<ARDB.ElementId> ids)
     {
-      ICollection<ARDB.ElementId> visibleIds = Empty;
+      ICollection<ARDB.ElementId> visibleIds = ElementIdExtension.EmptyCollection;
 
       if (ids.Count > 0 && !viewValue.IsTemplate) 
       {

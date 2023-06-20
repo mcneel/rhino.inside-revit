@@ -121,7 +121,7 @@ namespace RhinoInside.Revit.External.UI
         if (uiApplication.ActiveUIDocument is UIDocument uiDocument)
         {
           if (!previousSelections.TryGetValue(uiDocument.Document, out var previousSelection))
-            previousSelection = new ElementId[0];
+            previousSelection = ElementIdExtension.EmptyCollection;
 
           var currentSelection = uiDocument.Selection.GetElementIds();
 

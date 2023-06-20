@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Linq;
 using Rhino.Geometry;
@@ -62,7 +63,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           break;
       }
 
-      return new ARDB.GeometryObject[0];
+      return Array.Empty<ARDB.GeometryObject>();
     }
 
     static ARDB.Curve ToShape(this ARDB.Curve curve)

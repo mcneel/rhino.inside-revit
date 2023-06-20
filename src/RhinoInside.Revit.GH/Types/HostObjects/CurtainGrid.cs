@@ -265,8 +265,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    static readonly PolyCurve[] EmptyCurves = new PolyCurve[0];
-
     PolyCurve[] _PlanarizedCurveLoops;
     public PolyCurve[] PlanarizedCurveLoops
     {
@@ -280,11 +278,11 @@ namespace RhinoInside.Revit.GH.Types
               x =>
               {
                 try { return x.PlanarizedCurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
-                catch { return EmptyCurves; }
+                catch { return Array.Empty<PolyCurve>(); }
               }
             ).
             ToArray() :
-            EmptyCurves;
+            Array.Empty<PolyCurve>();
         }
 
         return _PlanarizedCurveLoops;
@@ -304,11 +302,11 @@ namespace RhinoInside.Revit.GH.Types
               x =>
               {
                 try { return x.CurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
-                catch { return EmptyCurves; }
+                catch { return Array.Empty<PolyCurve>(); }
               }
             ).
             ToArray():
-            EmptyCurves;
+            Array.Empty<PolyCurve>();
         }
 
         return _CurveLoops;

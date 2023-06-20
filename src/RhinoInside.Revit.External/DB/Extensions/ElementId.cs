@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
   {
     public static ElementId Default { get; } = FromValue(0);
     public static ElementId Invalid { get; } = ElementId.InvalidElementId;
-    public static ElementId[] EmptyCollection { get; } = new ElementId[0];
+    public static ElementId[] EmptyCollection => Array.Empty<ElementId>();
 
     public static bool IsValid(this ElementId id) => id is object && id != Invalid;
     public static bool IsBuiltInId(this ElementId id) => id is object && id <= Invalid;

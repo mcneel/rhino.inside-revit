@@ -12,8 +12,14 @@ group: Deployment & Configs
 
 ### RC
 
-- Fix on 'Add Region' component when 'Line Style' input is used.
-- Fix on 'Add Work Plane (Face)' when used on linked model faces.
+
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.15 RC2" version="v1.15.8571.17168" pre_release=true time="06/20/2023" %}
+
+- Fix on {% include ltr/comp.html uuid='ad88cf11' %} component when 'Line Style' input is used.
+- Fix on {% include ltr/comp.html uuid='91757ae0' %} when used on linked model faces.
 - Added 'Sketch Lines' component.
 - Added 'Lines' output to 'Element References' component.
 - Added 'Curve Point References' component.
@@ -21,9 +27,6 @@ group: Deployment & Configs
 - Added 'Element View' component to query for the owner view of an element.
 - Implemented casting for 'View' -> 'Sheet' & 'Viewport' (when placed on a sheet)
 - Implemented casting for 'Viewport' -> 'View' & 'Sheet'
-
-{% endcapture %}
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 {% include ltr/release-header.html title="v1.15 RC1" version="v1.15.8557.7999" pre_release=true time="06/07/2023" %}
 

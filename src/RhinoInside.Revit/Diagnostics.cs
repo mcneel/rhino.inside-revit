@@ -695,7 +695,7 @@ namespace RhinoInside.Revit
               foreach (var assembly in assemblies)
               {
                 var assemblyName = assembly.GetName();
-                var publicKeyToken = assemblyName.GetPublicKeyToken() ?? new byte[0];
+                var publicKeyToken = assemblyName.GetPublicKeyToken() ?? Array.Empty<byte>();
                 var token = string.Concat(Array.ConvertAll(publicKeyToken, x => x.ToString("X2")));
                 var location = assembly.IsDynamic ? string.Empty : assembly.Location;
 
