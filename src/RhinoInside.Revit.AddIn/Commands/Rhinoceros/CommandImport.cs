@@ -458,7 +458,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         }
       }
 
-      return new ARDB.GeometryObject[0];
+      return Array.Empty<ARDB.GeometryObject>();
     }
 
     static Result Import3DMFileToProject
@@ -509,7 +509,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                   }
                   else
                   {
-                    type.SetShape(new ARDB.GeometryObject[0]);
+                    type.SetShape(Array.Empty<ARDB.GeometryObject>());
                   }
                 }
               }

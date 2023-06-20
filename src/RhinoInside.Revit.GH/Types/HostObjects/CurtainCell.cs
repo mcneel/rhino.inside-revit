@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
@@ -71,7 +72,7 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
     {
-      foreach (var curve in PlanarizedCurveLoops ?? EmptyCurves)
+      foreach (var curve in PlanarizedCurveLoops ?? Array.Empty<PolyCurve>())
         args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
     }
 
@@ -117,8 +118,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    static readonly PolyCurve[] EmptyCurves = new PolyCurve[0];
-
     PolyCurve[] _PlanarizedCurveLoops;
     public PolyCurve[] PlanarizedCurveLoops
     {
@@ -127,7 +126,7 @@ namespace RhinoInside.Revit.GH.Types
         if (_PlanarizedCurveLoops is null && Value is ARDB.CurtainCell cell)
         {
           try { _PlanarizedCurveLoops = cell.PlanarizedCurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
-          catch { _PlanarizedCurveLoops = EmptyCurves; }
+          catch { _PlanarizedCurveLoops = Array.Empty<PolyCurve>(); }
         }
 
         return _PlanarizedCurveLoops;
@@ -142,7 +141,7 @@ namespace RhinoInside.Revit.GH.Types
         if (_CurveLoops is null && Value is ARDB.CurtainCell cell)
         {
           try { _CurveLoops = cell.CurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
-          catch { _CurveLoops = EmptyCurves; }
+          catch { _CurveLoops = Array.Empty<PolyCurve>(); }
         }
 
         return _CurveLoops;

@@ -100,10 +100,10 @@ namespace RhinoInside.Revit.GH.Types
           wires = geometry.GetPreviewWires().Where(x => x is object).ToArray();
           meshes = geometry.Visibility == ARDB.Visibility.Visible ?
                    geometry.GetPreviewMeshes(element.Document, meshingParameters).ToArray() :
-                   new Mesh[0];
+                   Array.Empty<Mesh>();
           materials = geometry.Visibility == ARDB.Visibility.Visible ?
                       geometry.GetPreviewMaterials(element.Document, elementMaterial).ToArray() :
-                      new ARDB.Material[0];
+                      Array.Empty<ARDB.Material>();
 
           if (wires.Length == 0 && meshes.Length == 0 && element.get_BoundingBox(options.View) is ARDB.BoundingBoxXYZ)
           {
@@ -153,11 +153,11 @@ namespace RhinoInside.Revit.GH.Types
       readonly BoundingBox clippingBox;
       public readonly MeshingParameters MeshingParameters;
       public Rhino.Display.DisplayMaterial[] materials;
-      static readonly Rhino.Display.DisplayMaterial[] empty_materials = new Rhino.Display.DisplayMaterial[0];
+      static readonly Rhino.Display.DisplayMaterial[] empty_materials = Array.Empty<Rhino.Display.DisplayMaterial>();
       public Mesh[] meshes;
-      static readonly Mesh[] empty_meshes = new Mesh[0];
+      static readonly Mesh[] empty_meshes = Array.Empty<Mesh>();
       public Curve[] wires;
-      static readonly Curve[] empty_wires = new Curve[0];
+      static readonly Curve[] empty_wires = Array.Empty<Curve>();
 
       static List<Preview> previewsQueue;
 
