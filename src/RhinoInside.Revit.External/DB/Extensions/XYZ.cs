@@ -330,7 +330,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Numerical.Sum meanX = default, meanY = default, meanZ = default;
       var numPoints = 0;
 
-      foreach(var point in points)
+      foreach (var point in points)
       {
         numPoints++;
         meanX.Add(point.X);

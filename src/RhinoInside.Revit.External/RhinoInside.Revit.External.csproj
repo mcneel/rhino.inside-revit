@@ -112,6 +112,7 @@
     <Compile Include="DB\SlabShapeEditCurvedEdgeCondition.cs" />
     <Compile Include="DB\Transaction.cs" />
     <Compile Include="DB\UniqueId.cs" />
+    <Compile Include="DB\UnitXYZ.cs" />
     <Compile Include="DB\WallWrapping.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions\AdWindows.cs" />
