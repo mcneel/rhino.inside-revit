@@ -18,6 +18,7 @@ using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit
 {
+  using Numerical;
   using Convert.Geometry;
   using Convert.Units;
   using External.ApplicationServices.Extensions;
@@ -543,7 +544,7 @@ namespace RhinoInside.Revit
 
                 case ARUI.TaskDialogResult.CommandLink3:
                   doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
-                  doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
+                  doc.ModelDistanceDisplayPrecision = (int) Arithmetic.Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
                   doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, GH.Guest.ModelUnitScale);
                   UnitScale.SetModelUnitScale(doc, GH.Guest.ModelUnitScale, scale: true);
                   AdjustViewConstructionPlanes(doc);

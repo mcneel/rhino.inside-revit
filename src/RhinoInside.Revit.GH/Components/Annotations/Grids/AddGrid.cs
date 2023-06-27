@@ -187,7 +187,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
         if (gridCurve is ARDB.Arc gridArc && newCurve is ARDB.Arc newArc)
         {
           // I do not found any way to update the radius ??
-          if (!tol.AlmostEqualLengths(gridArc.Radius, newArc.Radius))
+          if (!tol.DefaultTolerance.Equals(gridArc.Radius, newArc.Radius))
             return false;
         }
 
@@ -284,7 +284,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
       using (var outline = grid.GetExtents())
       {
         var tol = GeometryTolerance.Internal;
-        if (!tol.AlmostEqualLengths(extents.T0, outline.MinimumPoint.Z) || !tol.AlmostEqualLengths(extents.T1, outline.MaximumPoint.Z))
+        if (!tol.DefaultTolerance.Equals(extents.T0, outline.MinimumPoint.Z) || !tol.DefaultTolerance.Equals(extents.T1, outline.MaximumPoint.Z))
           grid.SetVerticalExtents(extents.T0, extents.T1);
       }
 

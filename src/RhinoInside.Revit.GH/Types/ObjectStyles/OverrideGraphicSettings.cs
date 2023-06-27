@@ -7,6 +7,7 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Numerical;
   using Convert.System.Drawing;
   using External.DB.Extensions;
 
@@ -130,7 +131,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (GH_Convert.ToDouble(source, out var transparency, GH_Conversion.Primary))
       {
-        base.Value = new ARDB.OverrideGraphicSettings().SetSurfaceTransparency((int) Rhino.RhinoMath.Clamp(Math.Round(transparency * 100.0), 0, 100));
+        base.Value = new ARDB.OverrideGraphicSettings().SetSurfaceTransparency((int) Math.Round(Arithmetic.Clamp(transparency, 0, 1) * 100.0));
         return true;
       }
 

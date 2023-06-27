@@ -16,6 +16,7 @@ using SD = System.Drawing;
 
 namespace RhinoInside.Revit.Convert.Render
 {
+  using Numerical;
   using Convert.System.Drawing;
   using Convert.Units;
   using External.DB.Extensions;
@@ -520,7 +521,7 @@ namespace RhinoInside.Revit.Convert.Render
         if (material.SetChild(texture, slotName))
         {
           material.SetChildSlotOn(slotName, true, RenderContent.ChangeContexts.Program);
-          material.SetChildSlotAmount(slotName, RhinoMath.Clamp(amount, 0.0, 1.0) * 100.0, RenderContent.ChangeContexts.Program);
+          material.SetChildSlotAmount(slotName, Arithmetic.Clamp(amount, 0.0, 1.0) * 100.0, RenderContent.ChangeContexts.Program);
         }
       }
     }
@@ -615,7 +616,7 @@ namespace RhinoInside.Revit.Convert.Render
         {
           if (asset.FindByName(Generic.GenericSelfIllumFilterMap) is AssetPropertyDoubleArray4d emission)
           {
-            var luminanceFactor = RhinoMath.Clamp(luminance.Value, 0.0, 2000.0) / 2000.0;
+            var luminanceFactor = Arithmetic.Clamp(luminance.Value, 0.0, 2000.0) / 2000.0;
             material.Emission = ToColor4f(emission, luminanceFactor);
           }
         }
@@ -1517,7 +1518,7 @@ namespace RhinoInside.Revit.Convert.Render
         {
           if (asset.FindByName(AdvancedOpaque.OpaqueLuminanceModifier) is AssetPropertyDoubleArray4d emission)
           {
-            var luminanceFactor = RhinoMath.Clamp(luminance.Value, 0.0, 2000.0) / 2000.0;
+            var luminanceFactor = Arithmetic.Clamp(luminance.Value, 0.0, 2000.0) / 2000.0;
             material.Emission = ToColor4f(emission, luminanceFactor);
           }
         }

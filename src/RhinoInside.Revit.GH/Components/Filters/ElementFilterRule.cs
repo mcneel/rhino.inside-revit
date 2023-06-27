@@ -281,7 +281,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
               }
 
               if (Condition == ConditionType.Equals || Condition == ConditionType.NotEquals)
-                tol = NumericTolerance.DefaultTolerance;
+                tol = Numerical.Constant.DefaultTolerance;
 
               rule = new ARDB.FilterDoubleRule(provider, ruleEvaluator, value, tol);
             }

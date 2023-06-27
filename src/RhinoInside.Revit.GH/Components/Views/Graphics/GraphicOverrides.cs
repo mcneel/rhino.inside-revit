@@ -7,6 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
+  using Numerical;
   using Convert.Geometry;
   using Convert.System.Drawing;
   using External.DB.Extensions;
@@ -272,7 +273,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       newOverrides.Value.SetSurfaceBackgroundPatternId(surfaceBackgroundPattern?.Id ?? overrides?.Value.SurfaceBackgroundPatternId() ?? ElementIdExtension.Invalid);
       newOverrides.Value.SetSurfaceBackgroundPatternColor(surfaceBackgroundPatternColor?.ToColor() ?? overrides?.Value.SurfaceBackgroundPatternColor() ?? ARDB.Color.InvalidColorValue);
 
-      newOverrides.Value.SetSurfaceTransparency(surfaceTransparency.HasValue ? Rhino.RhinoMath.Clamp((int) Math.Round(surfaceTransparency.Value * 100), 0, 100) : overrides?.Value.Transparency ?? 0);
+      newOverrides.Value.SetSurfaceTransparency(surfaceTransparency.HasValue ? (int) Math.Round(Arithmetic.Clamp(surfaceTransparency.Value, 0, 1) * 100) : overrides?.Value.Transparency ?? 0);
 
       cutLinePattern = doc.GetNamesakeElement(cutLinePattern) as Types.LinePatternElement;
       newOverrides.Value.SetCutLinePatternId(cutLinePattern?.Id ?? overrides?.Value.CutLinePatternId ?? ElementIdExtension.Invalid);

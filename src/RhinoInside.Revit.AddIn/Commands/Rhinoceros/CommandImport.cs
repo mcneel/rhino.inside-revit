@@ -848,7 +848,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         var model = File3dm.Read(filePath);
         scaleFactor = UnitScale.Convert(1.0, (UnitScale) model.Settings.ModelUnitSystem, UnitScale.Internal);
 
-        if (!(External.DB.NumericTolerance.Delta < scaleFactor && scaleFactor < double.PositiveInfinity))
+        if (!(Numerical.Constant.Delta < scaleFactor && scaleFactor < double.PositiveInfinity))
           throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.Settings.ModelUnitSystem}.");
 
         return model;

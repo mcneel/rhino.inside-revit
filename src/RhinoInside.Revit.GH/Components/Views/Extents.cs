@@ -1,15 +1,15 @@
 using System;
+using System.Linq;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
+using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  using System.Linq;
-  using External.DB;
+  using Numerical;
   using External.DB.Extensions;
-  using Grasshopper.Kernel.Parameters;
-  using Grasshopper.Kernel.Types;
-  using Rhino.Geometry;
 
   [ComponentVersion(introduced: "1.7")]
   public class ViewExtents : TransactionalChainComponent
@@ -237,17 +237,17 @@ namespace RhinoInside.Revit.GH.Components.Views
       {
         case ARDB.View3D view3D:
           if (view3D.IsPerspective)
-            frontOffset = NumericTolerance.MinNumber(frontOffset, view3D.CropBox.Max.Z);
+            frontOffset = Arithmetic.Min(frontOffset, view3D.CropBox.Max.Z);
         break;
 
         case ARDB.ViewPlan viewPlan:
           var interval = viewPlan.GetViewRangeInterval();
-          backOffset  = NumericTolerance.MaxNumber(backOffset,  interval.Left.Bound - view.Origin.Z);
-          frontOffset = NumericTolerance.MinNumber(frontOffset, interval.Right.Bound - view.Origin.Z);
+          backOffset  = Arithmetic.Max(backOffset,  interval.Left.Bound - view.Origin.Z);
+          frontOffset = Arithmetic.Min(frontOffset, interval.Right.Bound - view.Origin.Z);
         break;
 
         case ARDB.ViewSection viewSection:
-          frontOffset = NumericTolerance.MinNumber(frontOffset, viewSection.CropBox.Max.Z);
+          frontOffset = Arithmetic.Min(frontOffset, viewSection.CropBox.Max.Z);
           break;
       }
     }

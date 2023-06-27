@@ -10,6 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Numerical;
   using Convert.Geometry;
   using Convert.Units;
   using External.DB;
@@ -414,16 +415,16 @@ namespace RhinoInside.Revit.GH.Types
 
     public Point3d Min => new Point3d
     (
-      NumericTolerance.MinNumber( Value.FrustumLeft,   Bound[AxisX].T0),
-      NumericTolerance.MinNumber( Value.FrustumBottom, Bound[AxisY].T0),
-      NumericTolerance.MinNumber(-Value.FrustumFar,    Bound[AxisZ].T0)
+      Arithmetic.Min( Value.FrustumLeft,   Bound[AxisX].T0),
+      Arithmetic.Min( Value.FrustumBottom, Bound[AxisY].T0),
+      Arithmetic.Min(-Value.FrustumFar,    Bound[AxisZ].T0)
     );
 
     public Point3d Max => new Point3d
     (
-      NumericTolerance.MaxNumber( Value.FrustumRight,  Bound[AxisX].T1),
-      NumericTolerance.MaxNumber( Value.FrustumTop,    Bound[AxisY].T1),
-      NumericTolerance.MaxNumber(-Value.FrustumNear,   Bound[AxisZ].T1)
+      Arithmetic.Max( Value.FrustumRight,  Bound[AxisX].T1),
+      Arithmetic.Max( Value.FrustumTop,    Bound[AxisY].T1),
+      Arithmetic.Max(-Value.FrustumNear,   Bound[AxisZ].T1)
     );
 
     internal ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(bool ensurePositiveY = false)

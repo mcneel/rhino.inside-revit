@@ -39,8 +39,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (dimension == 0)
         return XYZExtension.ComputeMeanPoint(mesh.Vertices);
 
-      Sum weights = default;
-      Sum centroidX = default, centroidY = default, centroidZ = default;
+      Numerical.Sum weights = default;
+      Numerical.Sum centroidX = default, centroidY = default, centroidZ = default;
       var factor = dimension + 1.0;
 
       var numTriangles = mesh.NumTriangles;
@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var v1 = triangle.get_Vertex(1);
         var v2 = triangle.get_Vertex(2);
 
-        Sum vX = default, vY = default, vZ = default;
+        Numerical.Sum vX = default, vY = default, vZ = default;
         vX.Add(v0.X, v1.X, v2.X);
         vY.Add(v0.Y, v1.Y, v2.Y);
         vZ.Add(v0.Z, v1.Z, v2.Z);
@@ -110,7 +110,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (mesh.NumTriangles < 1)
         return XYZExtension.Zero;
 
-      Sum normalX = default, normalY = default, normalZ = default;
+      Numerical.Sum normalX = default, normalY = default, normalZ = default;
       var numTriangles = mesh.NumTriangles;
 
       for (int t = 0; t < numTriangles; ++t)
@@ -137,7 +137,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The sum of the areas of the constituent facets of the mesh.</returns>
     public static double ComputeSurfaceArea(this Mesh mesh)
     {
-      Sum area = default;
+      Numerical.Sum area = default;
 
       var numTriangles = mesh.NumTriangles;
       for (int t = 0; t < numTriangles; ++t)

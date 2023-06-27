@@ -1117,7 +1117,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       {
         if (arc.Radius * factor >= 30_000)
         {
-          var scale = (arc.Length * factor) / ((1.0 + NumericTolerance.Delta) * Tolerance.ShortCurveTolerance);
+          var scale = (arc.Length * factor) / ((1.0 + Numerical.Constant.Delta) * Tolerance.ShortCurveTolerance);
           factor /= scale;
           transform = ARDB.Transform.Identity.ScaleBasis(scale);
         }

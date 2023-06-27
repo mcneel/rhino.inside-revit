@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  using static NumericTolerance;
-
   public static class UVExtension
   {
     public static UV NaN { get; } = null; // new UV(double.NaN, double.NaN);

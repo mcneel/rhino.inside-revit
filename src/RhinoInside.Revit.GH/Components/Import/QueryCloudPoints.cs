@@ -7,8 +7,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Import
 {
+  using Numerical;
   using Convert.Geometry;
-  using External.DB;
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.13")]
@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Components.Import
     {
       if (!Params.GetData(DA, "Point Cloud", out Types.PointCloudInstance pointCloud, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Filter", out Types.PointCloudFilter filter)) return;
-      if (!Params.TryGetData(DA, "Average Distance", out double? averageDistance, x => NumericTolerance.IsFinite(x))) return;
+      if (!Params.TryGetData(DA, "Average Distance", out double? averageDistance, x => Arithmetic.IsFinite(x))) return;
       if (!Params.GetData(DA, "Limit", out int? numPoints, x => x >= 0)) return;
 
       if (numPoints < 1)

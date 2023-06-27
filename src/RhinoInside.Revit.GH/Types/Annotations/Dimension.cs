@@ -7,6 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Numerical;
   using Convert.Geometry;
   using External.DB.Extensions;
 
@@ -192,7 +193,7 @@ namespace RhinoInside.Revit.GH.Types
 
             var plane = new Plane(center, start, end);
             var ellipse = new Ellipse(plane, center.DistanceTo(start), center.DistanceTo(end));
-            return ellipse.ToNurbsCurve(new Interval(0.0, Math.PI * 0.5));
+            return ellipse.ToNurbsCurve(new Interval(0.0, Constant.Tau / 4));
           }
 
           return base.LeaderCurve;

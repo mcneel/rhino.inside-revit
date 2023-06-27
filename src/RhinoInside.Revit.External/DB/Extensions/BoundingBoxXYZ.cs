@@ -3,6 +3,8 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  using Numerical;
+
   public static class BoundingBoxXYZExtension
   {
     public const int AxisX = 0;
@@ -151,9 +153,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static bool IsZeroDiagonal(this BoundingBoxXYZ value, double tolerance = NumericTolerance.DefaultTolerance)
+    public static bool IsZeroDiagonal(this BoundingBoxXYZ value, double tolerance = Constant.DefaultTolerance)
     {
-      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
+      tolerance = Math.Max(tolerance, Constant.Upsilon);
 
       return Math.Abs(GetDiagonal(value)) < tolerance;
     }
@@ -165,8 +167,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var (x, y, z) = diagonal;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
-      if (x < 0.0 && y < 0.0 && z < 0.0) return -NumericTolerance.Norm(x, y, z);
-      if (x > 0.0 && y > 0.0 && z > 0.0) return +NumericTolerance.Norm(x, y, z);
+      if (x < 0.0 && y < 0.0 && z < 0.0) return -Arithmetic.Norm(x, y, z);
+      if (x > 0.0 && y > 0.0 && z > 0.0) return +Arithmetic.Norm(x, y, z);
 
       return double.NaN;
     }
@@ -174,9 +176,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static double GetLength(this BoundingBoxXYZ value)
     {
       var (X, Y, Z) = value;
-      var x = X.GetRadius();
-      var y = Y.GetRadius();
-      var z = Z.GetRadius();
+      var x = X.Deviation;
+      var y = Y.Deviation;
+      var z = Z.Deviation;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
       if (x < 0.0 && y < 0.0 && z < 0.0) return (x + y + z) * 8.0;
@@ -188,9 +190,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static double GetArea(this BoundingBoxXYZ value)
     {
       var (X, Y, Z) = value;
-      var x = X.GetRadius();
-      var y = Y.GetRadius();
-      var z = Z.GetRadius();
+      var x = X.Deviation;
+      var y = Y.Deviation;
+      var z = Z.Deviation;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
       if (x < 0.0 && y < 0.0 && z < 0.0) return ((x * y) + (y * z) + (z * x)) * 8.0;
@@ -202,9 +204,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static double GetVolume(this BoundingBoxXYZ value)
     {
       var (X, Y, Z) = value;
-      var x = X.GetRadius();
-      var y = Y.GetRadius();
-      var z = Z.GetRadius();
+      var x = X.Deviation;
+      var y = Y.Deviation;
+      var z = Z.Deviation;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
       if (x < 0.0 && y < 0.0 && z < 0.0) return (x * y * z) * 8.0;
@@ -257,9 +259,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return new XYZ
       (
-        min.X * (1.0 - x) + max.X * x,
-        min.Y * (1.0 - y) + max.Y * y,
-        min.Z * (1.0 - z) + max.Z * z
+        Arithmetic.Lerp(min.X, max.X, x),
+        Arithmetic.Lerp(min.Y, max.Y, y),
+        Arithmetic.Lerp(min.Z, max.Z, z)
       );
     }
 
@@ -297,9 +299,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
           for (int p = 0; p < xyz.Length; p++)
           {
             var (x, y, z) = inverse.OfPoint(xyz[p]);
-            minX = NumericTolerance.MinNumber(minX, x); maxX = NumericTolerance.MaxNumber(maxX, x);
-            minY = NumericTolerance.MinNumber(minY, y); maxY = NumericTolerance.MaxNumber(maxY, y);
-            minZ = NumericTolerance.MinNumber(minZ, z); maxZ = NumericTolerance.MaxNumber(maxZ, z);
+            minX = Arithmetic.Min(minX, x); maxX = Arithmetic.Max(maxX, x);
+            minY = Arithmetic.Min(minY, y); maxY = Arithmetic.Max(maxY, y);
+            minZ = Arithmetic.Min(minZ, z); maxZ = Arithmetic.Max(maxZ, z);
           }
 
           var (X, Y, Z) = value;
@@ -357,9 +359,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
           for (int p = 0; p < xyz.Length; p++)
           {
             var (x, y, z) = inverse.OfPoint(xyz[p]);
-            minX = NumericTolerance.MinNumber(minX, x); maxX = NumericTolerance.MaxNumber(maxX, x);
-            minY = NumericTolerance.MinNumber(minY, y); maxY = NumericTolerance.MaxNumber(maxY, y);
-            minZ = NumericTolerance.MinNumber(minZ, z); maxZ = NumericTolerance.MaxNumber(maxZ, z);
+            minX = Arithmetic.Min(minX, x); maxX = Arithmetic.Max(maxX, x);
+            minY = Arithmetic.Min(minY, y); maxY = Arithmetic.Max(maxY, y);
+            minZ = Arithmetic.Min(minZ, z); maxZ = Arithmetic.Max(maxZ, z);
           }
 
           var (X, Y, Z) = value;
@@ -393,8 +395,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       foreach (var point in points)
       {
         var (x, y, z) = point;
-        min = (NumericTolerance.MinNumber(min.X, x), NumericTolerance.MinNumber(min.Y, y), NumericTolerance.MinNumber(min.Z, z));
-        max = (NumericTolerance.MaxNumber(max.X, x), NumericTolerance.MaxNumber(max.Y, y), NumericTolerance.MaxNumber(max.Z, z));
+        min = (Arithmetic.Min(min.X, x), Arithmetic.Min(min.Y, y), Arithmetic.Min(min.Z, z));
+        max = (Arithmetic.Max(max.X, x), Arithmetic.Max(max.Y, y), Arithmetic.Max(max.Z, z));
       }
 
       return new Outline
@@ -528,7 +530,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ CenterPoint(this Outline outline)
     {
       var (min, max) = outline;
-      return min + ((max - min) * 0.5);
+      return (min * 0.5) + (max * 0.5);
     }
   }
 }

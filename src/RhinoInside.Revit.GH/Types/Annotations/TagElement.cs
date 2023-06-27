@@ -7,6 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Numerical;
   using Convert.Geometry;
   using External.DB.Extensions;
 
@@ -170,7 +171,7 @@ namespace RhinoInside.Revit.GH.Types
           else
             color = System.Drawing.Color.FromArgb(216, 255, 216);
 
-          var rotation = (float) -(Math.PI * 0.25);
+          var rotation = (float) -(Constant.Tau / 8.0);
           args.Pipeline.DrawPoint
           (
             head, PointStyle.Square,
