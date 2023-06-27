@@ -28,6 +28,7 @@
     <Compile Include="ApplicationServices\Extensions\Application.cs" />
     <Compile Include="ApplicationServices\HostServices.cs" />
     <Compile Include="DB\Application.cs" />
+    <Compile Include="DB\BoundingInterval.cs" />
     <Compile Include="DB\BuiltInLinePattern.cs" />
     <Compile Include="DB\BuiltInMullionPosition.cs" />
     <Compile Include="DB\BuiltInProfileType.cs" />
@@ -80,7 +81,6 @@
     <Compile Include="DB\Extensions\XYZ.cs" />
     <Compile Include="DB\ExternalFailures.cs" />
     <Compile Include="DB\FloorFunction.cs" />
-    <Compile Include="DB\NumericTolerance.cs" />
     <Compile Include="DB\ParameterClass.cs" />
     <Compile Include="DB\ParameterScope.cs" />
     <Compile Include="DB\Schemas\CategoryId.cs" />
