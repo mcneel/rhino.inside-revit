@@ -49,38 +49,45 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     public override bool AppendMenuItems(ToolStripDropDown menu)
     {
-      // Name
-      if (IconCapableUI && Attributes.IsTopLevel)
-        Menu_AppendObjectNameEx(menu);
-      else
-        Menu_AppendObjectName(menu);
-
-      // Preview
-      if (this is IGH_PreviewObject preview)
+      try
       {
-        if (Attributes.IsTopLevel && preview.IsPreviewCapable)
-          Menu_AppendPreviewItem(menu);
+        // Name
+        if (IconCapableUI && Attributes.IsTopLevel)
+          Menu_AppendObjectNameEx(menu);
+        else
+          Menu_AppendObjectName(menu);
+
+        // Preview
+        if (this is IGH_PreviewObject preview)
+        {
+          if (Attributes.IsTopLevel && preview.IsPreviewCapable)
+            Menu_AppendPreviewItem(menu);
+        }
+
+        // Enabled
+        if (Kind == GH_ParamKind.floating)
+          Menu_AppendEnableItem(menu);
+
+        // Bake
+        Menu_AppendBakeItem(menu);
+
+        // Runtime messages
+        Menu_AppendRuntimeMessages(menu);
+
+        // Custom items.
+        AppendAdditionalMenuItems(menu);
+        Menu_AppendSeparator(menu);
+
+        // Publish.
+        Menu_AppendPublish(menu);
+
+        // Help.
+        Menu_AppendObjectHelp(menu);
       }
-
-      // Enabled
-      if (Kind == GH_ParamKind.floating)
-        Menu_AppendEnableItem(menu);
-
-      // Bake
-      Menu_AppendBakeItem(menu);
-
-      // Runtime messages
-      Menu_AppendRuntimeMessages(menu);
-
-      // Custom items.
-      AppendAdditionalMenuItems(menu);
-      Menu_AppendSeparator(menu);
-
-      // Publish.
-      Menu_AppendPublish(menu);
-
-      // Help.
-      Menu_AppendObjectHelp(menu);
+      catch (Exception ex)
+      {
+        Grasshopper.Tracing.Assert(GetType().GUID, ex);
+      }
 
       return true;
     }
