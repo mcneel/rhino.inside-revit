@@ -155,7 +155,7 @@ namespace RhinoInside.Revit.GH.Components.Import
 
       var baseDirection = image.GetLocation(ARDB.BoxPlacement.BottomRight) - image.GetLocation(ARDB.BoxPlacement.BottomLeft);
       var currentRotation = baseDirection.AngleOnPlaneTo(view.RightDirection, view.ViewDirection);
-      if (!GeometryTolerance.Internal.AlmostEqualAngles(currentRotation, rotation))
+      if (!GeometryTolerance.Internal.AngleTolerance.Equals(currentRotation, rotation))
       {
         var pinned = image.Pinned;
         image.Pinned = false;

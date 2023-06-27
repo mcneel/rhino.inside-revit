@@ -172,7 +172,7 @@ namespace RhinoInside.Revit
             Host = new ARUI.UIApplication(app);
             Convert.Geometry.GeometryTolerance.Internal = new Convert.Geometry.GeometryTolerance
             (
-              ERDB.NumericTolerance.DefaultTolerance,
+              Numerical.Constant.DefaultTolerance,
               app.AngleTolerance,
               app.VertexTolerance,
               app.ShortCurveTolerance

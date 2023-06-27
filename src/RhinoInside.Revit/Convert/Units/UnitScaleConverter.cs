@@ -1,11 +1,11 @@
+using System;
 using System.Diagnostics;
-using static System.Math;
-using static Rhino.RhinoMath;
 using ARDB = Autodesk.Revit.DB;
 using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.Convert.Units
 {
+  using Numerical;
   using External.DB.Extensions;
 
   static class UnitScaleConverter
@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.Convert.Units
     public static UnitScale ToUnitScale(this ARDB.Units value, out int distanceDisplayPrecision)
     {
       var lengthFormatoptions = value.GetFormatOptions(DBXS.SpecType.Measurable.Length);
-      distanceDisplayPrecision = Clamp((int) -Log10(lengthFormatoptions.Accuracy), 0, 7);
+      distanceDisplayPrecision = (int) Arithmetic.Clamp(Math.Truncate(-Math.Log10(lengthFormatoptions.Accuracy)), 0, 7);
       return ToUnitScale(lengthFormatoptions.GetUnitTypeId());
     }
   }

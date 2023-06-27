@@ -4,8 +4,6 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  using static NumericTolerance;
-
   public static class TransformExtension
   {
     public static void Deconstruct
@@ -22,7 +20,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool TryGetInverse(this Transform transform, out Transform inverse)
     {
-      if (DefaultTolerance < transform.Determinant)
+      if (Numerical.Constant.DefaultTolerance < transform.Determinant)
       {
         try { inverse = transform.Inverse; return true; }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
@@ -96,9 +94,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     internal static void SetCovariance(this Transform transform, IEnumerable<XYZ> points, XYZ meanPoint = default)
     {
       var (x, y, z) = meanPoint ?? XYZExtension.ComputeMeanPoint(points);
-      Sum covXx = default, covXy = default, covXz = default;
-      Sum covYx = default, covYy = default, covYz = default;
-      Sum covZx = default, covZy = default, covZz = default;
+      Numerical.Sum covXx = default, covXy = default, covXz = default;
+      Numerical.Sum covYx = default, covYy = default, covYz = default;
+      Numerical.Sum covZx = default, covZy = default, covZz = default;
 
       foreach (var loc in points)
       {
@@ -130,9 +128,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="covarianceMatrix"></param>
     /// <param name="tolerance"></param>
     /// <returns></returns>
-    internal static UnitXYZ GetPrincipalComponent(this Transform covarianceMatrix, double tolerance = DefaultTolerance)
+    internal static UnitXYZ GetPrincipalComponent(this Transform covarianceMatrix, double tolerance = Numerical.Constant.DefaultTolerance)
     {
-      tolerance = Math.Max(Delta, tolerance);
+      tolerance = Math.Max(Numerical.Constant.Delta, tolerance);
 
       var previous  = XYZExtension.One.ToUnitXYZ();
       var principal = covarianceMatrix.OfVector(previous).ToUnitXYZ();

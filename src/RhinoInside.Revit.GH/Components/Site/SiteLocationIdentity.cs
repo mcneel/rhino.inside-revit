@@ -81,14 +81,14 @@ namespace RhinoInside.Revit.GH.Components.Site
         {
           if (Params.Input<Param_Number>("Latitude").UseDegrees)
           {
-            if (Math.Abs(latitude.Value) < 90.0)
+            if (Math.Abs(latitude.Value) < 360.0 / 4.0)
               location.Value.Latitude = ToRadians(latitude.Value);
             else
               throw new Exceptions.RuntimeArgumentException("Latitude", "Value is out of range. It must be between -90 and 90.");
           }
           else
           {
-            if (Math.Abs(latitude.Value) < Math.PI / 2.0)
+            if (Math.Abs(latitude.Value) < Tau / 4.0)
               location.Value.Latitude = latitude.Value;
             else
               throw new Exceptions.RuntimeArgumentException("Latitude", "Value is out of range. It must be between -PI/2 and PI/2.");
@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.GH.Components.Site
         if (longitude != null)
         {
           location.Value.Longitude = Params.Input<Param_Number>("Longitude").UseDegrees ?
-            ToRadians(longitude.Value) % (2.0 * Math.PI) :
+            Math.IEEERemainder(ToRadians(longitude.Value), Tau) :
             longitude.Value;
         }
       }

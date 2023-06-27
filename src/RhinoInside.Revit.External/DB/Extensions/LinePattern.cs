@@ -18,9 +18,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var count = segments.Count;
       if (count == lineSegs.Count)
       {
+        var tol = Numerical.Tolerance.Default;
         for (int s = 0; s < count && !update; ++s)
         {
-          if (segments[s].Type != lineSegs[s].Type || !NumericTolerance.AlmostEquals(segments[s].Length, lineSegs[s].Length))
+          if (segments[s].Type != lineSegs[s].Type || !tol.Equals(segments[s].Length, lineSegs[s].Length))
             update = true;
         }
       }

@@ -121,6 +121,7 @@
     <Compile Include="Extensions\System.Drawing.cs" />
     <Compile Include="Extensions\Win32.cs" />
     <Compile Include="Extensions\WinForms.cs" />
+    <Compile Include="Numerical.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\ProductInfo.cs">
       <AutoGen>True</AutoGen>

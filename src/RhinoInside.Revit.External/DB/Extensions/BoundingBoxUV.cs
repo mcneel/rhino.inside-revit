@@ -4,6 +4,8 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  using Numerical;
+
   public static class BoundingBoxUVExtension
   {
     public const int AxisU = 0;
@@ -55,8 +57,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return new UV
       (
-        min.U * (1.0 - u) + max.U * u,
-        min.V * (1.0 - v) + max.V * v
+        Arithmetic.Lerp(min.U, max.U, u),
+        Arithmetic.Lerp(min.V, max.V, v)
       );
     }
 

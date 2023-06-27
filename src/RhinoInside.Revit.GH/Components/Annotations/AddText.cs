@@ -218,7 +218,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         textNote.Coord = point;
 
       var currentRotation = view.RightDirection.AngleOnPlaneTo(textNote.BaseDirection, view.ViewDirection);
-      if (!GeometryTolerance.Internal.AlmostEqualAngles(currentRotation, rotation))
+      if (!GeometryTolerance.Internal.AngleTolerance.Equals(currentRotation, rotation))
       {
         var pinned = textNote.Pinned;
         textNote.Pinned = false;

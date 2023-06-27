@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Win32.SafeHandles;
-using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.Numerical;
 
 namespace Rhino.Geometry
 {
@@ -18,48 +18,28 @@ namespace Rhino.Geometry
     public static readonly Box Box = new Box(Plane, BoundingBox);
   }
 
-  readonly struct GeometryEqualityComparer :
+  readonly struct EpsilonEqualityComparer :
     IEqualityComparer<double>,
     IEqualityComparer<Point3d>,
     IEqualityComparer<Vector3d>
   {
     readonly double Tolerance;
-    readonly double ZeroTolerance;
 
-    GeometryEqualityComparer(double tolerance)
-    {
-      Tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
-      ZeroTolerance = Tolerance / 3.0;
-    }
+    EpsilonEqualityComparer(double tolerance) => Tolerance = Math.Max(tolerance, Constant.Delta);
 
     /// <summary>
-    /// IEqualityComparer for <see cref="{T}"/> that compares geometrically using <see cref="RhinoMath.SqrtEpsilon"/> value.
+    /// IEqualityComparer for <see cref="{T}"/> that compares geometrically using <see cref="RhinoMath.Epsilon"/> value.
     /// </summary>
     /// <param name="tolerance"></param>
     /// <returns>A geometry comparer.</returns>
-    public static readonly GeometryEqualityComparer Default = new GeometryEqualityComparer(RhinoMath.SqrtEpsilon);
+    public static readonly EpsilonEqualityComparer Default = new EpsilonEqualityComparer(RhinoMath.Epsilon);
 
     /// <summary>
     /// IEqualityComparer for <see cref="{T}"/> that compares geometrically using <paramref name="tolerance"/> value.
     /// </summary>
     /// <param name="tolerance"></param>
     /// <returns>A geometry comparer.</returns>
-    public static GeometryEqualityComparer Comparer(double tolerance) => new GeometryEqualityComparer(tolerance);
-
-    internal bool IsZeroLength(double x, double y, double z)
-    {
-      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
-
-      double u = x, v = y, w = z;
-      if (x > w) { u = y; v = z; w = x; }
-      if (y > w) { u = z; v = x; w = y; }
-      if (w < ZeroTolerance) return true;
-      if (w > Tolerance) return false;
-
-      u /= w; v /= w;
-
-      return Math.Sqrt(1.0 + (u * u + v * v)) * w < Tolerance;
-    }
+    public static EpsilonEqualityComparer Comparer(double tolerance) => new EpsilonEqualityComparer(tolerance);
 
     static int CombineHash(params int[] values)
     {
@@ -71,12 +51,16 @@ namespace Rhino.Geometry
     }
 
     #region Length
-    public bool Equals(double x, double y) => Math.Abs(x - y) < Tolerance;
-    public int GetHashCode(double value) => Math.Round(value / Tolerance).GetHashCode();
+    public bool Equals(double x, double y) => RhinoMath.EpsilonEquals(x, y, Tolerance);
+    public int GetHashCode(double value)
+    {
+      var hash = (0.1 * Math.Round(value / value));
+      return Math.Abs(hash) > int.MaxValue ? Math.Sign(hash) * int.MaxValue : (int) hash;
+    }
     #endregion
 
     #region Point3d
-    public bool Equals(Point3d left, Point3d right) => IsZeroLength(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+    public bool Equals(Point3d left, Point3d right) => left.EpsilonEquals(right, Tolerance);
 
     public int GetHashCode(Point3d xyz) => CombineHash
     (
@@ -87,7 +71,7 @@ namespace Rhino.Geometry
     #endregion
 
     #region Vector3d
-    public bool Equals(Vector3d left, Vector3d right) => IsZeroLength(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+    public bool Equals(Vector3d left, Vector3d right) => left.EpsilonEquals(right, Tolerance);
 
     public int GetHashCode(Vector3d xyz) => CombineHash
     (
@@ -123,12 +107,12 @@ namespace Rhino.Geometry
   {
     public static bool GeometryEquals(this Point3d left, Point3d right)
     {
-      return GeometryEqualityComparer.Default.Equals(left, right);
+      return GeometryEquals(left, right, RhinoMath.SqrtEpsilon);
     }
 
     public static bool GeometryEquals(this Point3d left, Point3d right, double tolerance)
     {
-      return GeometryEqualityComparer.Comparer(tolerance).Equals(left, right);
+      return Arithmetic.IsZero3(left.X - right.X, left.Y - right.Y, left.Z - right.Z, tolerance);
     }
   }
 
@@ -136,12 +120,12 @@ namespace Rhino.Geometry
   {
     public static bool GeometryEquals(this Vector3d left, Vector3d right)
     {
-      return GeometryEqualityComparer.Default.Equals(left, right);
+      return GeometryEquals(left, right, RhinoMath.SqrtEpsilon);
     }
 
     public static bool GeometryEquals(this Vector3d left, Vector3d right, double tolerance)
     {
-      return GeometryEqualityComparer.Comparer(tolerance).Equals(left, right);
+      return Arithmetic.IsZero3(left.X - right.X, left.Y - right.Y, left.Z - right.Z, tolerance);
     }
 
     public static Vector3d PerpVector(this Vector3d value, double tolerance = RhinoMath.SqrtEpsilon)
@@ -558,7 +542,7 @@ namespace Rhino.Geometry
       if (uv.Unitize())
       {
         t = Math.Atan2(uv.Y, uv.X);
-        if (t < 0.0) t += (2.0 * Math.PI);
+        if (t < 0.0) t += RhinoMath.Tau;
         return true;
       }
       else
@@ -605,9 +589,8 @@ namespace Rhino.Geometry
   {
     public static bool GeometryEquals(this Curve curve, Curve other, double tolerance)
     {
-      var comparer = GeometryEqualityComparer.Comparer(tolerance);
-      return comparer.Equals(curve.PointAtStart, other.PointAtStart) &&
-             comparer.Equals(curve.PointAtEnd, other.PointAtEnd) &&
+      return curve.PointAtStart.GeometryEquals(other.PointAtStart, tolerance) &&
+             curve.PointAtEnd.GeometryEquals(other.PointAtEnd, tolerance) &&
              Curve.GetDistancesBetweenCurves(curve, other, tolerance, out var max, out var _, out var _, out var _, out var _, out var _) &&
              max < tolerance;
     }
@@ -732,14 +715,14 @@ namespace Rhino.Geometry
 
         if (curve.IsClosed)
         {
-          domain = new Interval(0.0, 2.0 * Math.PI);
+          domain = new Interval(0.0, RhinoMath.Tau);
           return true;
         }
         else
         {
           ellipse.ClosestPoint(curve.PointAtStart, out var t0);
           ellipse.ClosestPoint(curve.PointAtEnd, out var t1);
-          domain = new Interval(t0, t1 < t0 ? t1 + Math.PI * 2.0 : t1);
+          domain = new Interval(t0, t1 < t0 ? t1 + RhinoMath.Tau : t1);
           return true;
         }
       }

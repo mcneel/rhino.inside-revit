@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         var curEquation = new Plane(line.Origin.ToPoint3d(), line.Direction.ToVector3d(), Vector3d.ZAxis).GetPlaneEquation();
         var newEquation = plane.GetPlaneEquation();
 
-        if (!GeometryTolerance.Model.AlmostEqualLengths(curEquation[3], newEquation[3])) return false;
+        if (!GeometryTolerance.Model.DefaultTolerance.Equals(curEquation[3], newEquation[3])) return false;
       }
       else return false;
 

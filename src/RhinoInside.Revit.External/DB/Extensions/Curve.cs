@@ -5,7 +5,7 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  using static NumericTolerance;
+  using Numerical;
 
   internal static class CurveEqualityComparer
   {
@@ -134,13 +134,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
             yield break;
 
           case Arc arc:
-            yield return arc.CreateBounded(0.0, Math.PI);
-            yield return arc.CreateBounded(Math.PI, 2.0 * Math.PI);
+            yield return arc.CreateBounded(0.0 * Constant.Tau, 0.5 * Constant.Tau);
+            yield return arc.CreateBounded(0.5 * Constant.Tau, 1.0 * Constant.Tau);
             yield break;
 
           case Ellipse ellipse:
-            yield return ellipse.CreateBounded(0.0, Math.PI);
-            yield return ellipse.CreateBounded(Math.PI, 2.0 * Math.PI);
+            yield return ellipse.CreateBounded(0.0 * Constant.Tau, 0.5 * Constant.Tau);
+            yield return ellipse.CreateBounded(0.5 * Constant.Tau, 1.0 * Constant.Tau);
             yield break;
 
           default:
