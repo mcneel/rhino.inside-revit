@@ -4,8 +4,8 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB
 {
-  using Extensions;
   using Numerical;
+  using Extensions;
 
   /// <summary>
   /// This class represents a unit length vector.

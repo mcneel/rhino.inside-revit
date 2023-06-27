@@ -1,11 +1,8 @@
-using System;
 using System.Diagnostics;
-using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB
 {
   using Numerical;
-  using Extensions;
 
   /// <summary>
   /// This class represents a bounding interval endpoint on the set of <see cref="System.Double"/> numbers.
