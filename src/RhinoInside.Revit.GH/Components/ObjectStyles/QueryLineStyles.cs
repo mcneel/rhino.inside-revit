@@ -18,15 +18,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
-
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.LineStyles);
-      Menu_AppendItem
-      (
-        menu, $"Open Line Styles…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.CanPostCommand(commandId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.LineStyles, "Open Line Styles…");
     }
     #endregion
 

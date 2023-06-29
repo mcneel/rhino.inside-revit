@@ -2,7 +2,6 @@ using System;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
-using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -20,13 +19,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var DraftingViewId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.DraftingView);
-      Menu_AppendItem
-      (
-        menu, $"Set new {TypeName}",
-        Menu_PromptNew(DraftingViewId),
-        Revit.ActiveUIApplication.CanPostCommand(DraftingViewId)
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.DraftingView);
     }
     #endregion
   }

@@ -2,7 +2,6 @@ using System;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
-using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -24,16 +23,8 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.Menu_AppendPromptNew(menu);
 
-      var activeApp = Revit.ActiveUIApplication;
-      {
-        var exist = activeApp.ActiveUIDocument.Document.GetDefault3DView() is object;
-        var commandId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.Default3DView);
-        Menu_AppendItem
-        (
-          menu, "Create Default 3D View…", Menu_PromptNew(commandId),
-          !exist && activeApp.CanPostCommand(commandId), false
-        );
-      }
+      if (Revit.ActiveUIApplication.ActiveUIDocument.Document.GetDefault3DView() is null)
+        menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.Default3DView, "Create Default 3D View…");
     }
     #endregion
   }

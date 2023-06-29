@@ -2,7 +2,6 @@ using System;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
-using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -25,14 +24,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var PointCloudId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.PointCloud);
-      Menu_AppendItem
-      (
-        menu, $"Set new {TypeName}",
-        Menu_PromptNew(PointCloudId),
-        Revit.ActiveUIApplication.CanPostCommand(PointCloudId),
-        false
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.PointCloud);
     }
     #endregion
   }

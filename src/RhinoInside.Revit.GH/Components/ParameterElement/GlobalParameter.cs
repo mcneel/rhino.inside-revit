@@ -22,18 +22,8 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     {
       base.AppendAdditionalComponentMenuItems(menu);
 
-      var activeApp = Revit.ActiveUIApplication;
-      var doc = activeApp.ActiveUIDocument?.Document;
-      if (doc is null) return;
-
 #if REVIT_2022
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.GlobalParameters);
-      Menu_AppendItem
-      (
-        menu, $"Open Global Parameters…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        !doc.IsFamilyDocument && activeApp.CanPostCommand(commandId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.GlobalParameters, "Open Global Parameters…");
 #endif
     }
     #endregion

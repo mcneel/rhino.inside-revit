@@ -394,16 +394,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
-
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.PurgeUnused);
-      Menu_AppendItem
-      (
-        menu, $"Open Purge Unused…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.CanPostCommand(commandId), false
-      );
-
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.PurgeUnused, "Open Purge Unused…");
       Menu_AppendItem(menu, "Simulated", Menu_SimulatedClicked, true, Simulated);
     }
 

@@ -23,14 +23,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var TextId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Text);
-      Menu_AppendItem
-      (
-        menu, $"Set new Text Note",
-        Menu_PromptNew(TextId),
-        Revit.ActiveUIApplication.CanPostCommand(TextId),
-        false
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.Text);
     }
     #endregion
   }

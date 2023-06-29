@@ -156,53 +156,20 @@ namespace RhinoInside.Revit.GH.Parameters
         var create = Menu_AppendItem(menu, "New");
 
 #if REVIT_2022
-        var NewProjectId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.NewProject);
+        create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.NewProject, "Project…");
+        create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.NewFamily, "Family…");
 #else
-        var NewProjectId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.NewRevitFile);
+        create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.NewRevitFile, "Project…");
+        create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.NewFamilyFile, "Family…");
 #endif
-        Menu_AppendItem
-        (
-          create.DropDown, "Project…",
-          Menu_PromptFile(NewProjectId),
-          activeApp.CanPostCommand(NewProjectId),
-          false
-        );
-
-#if REVIT_2022
-        var NewFamilyId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.NewFamily);
-#else
-        var NewFamilyId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.NewFamilyFile);
-#endif
-        Menu_AppendItem
-        (
-          create.DropDown, "Family…",
-          Menu_PromptFile(NewFamilyId),
-          activeApp.CanPostCommand(NewFamilyId),
-          false
-        );
-
-        var NewConceptualMassId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.NewConceptualMass);
-        Menu_AppendItem
-        (
-          create.DropDown, "Conceptual Mass…",
-          Menu_PromptFile(NewConceptualMassId),
-          activeApp.CanPostCommand(NewConceptualMassId),
-          false
-        );
+        create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.NewConceptualMass, "Conceptual Mass…");
       }
 #endif
       // Open
       {
         var open = Menu_AppendItem(menu, "Open");
 
-        var OpenRevitFileId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.OpenRevitFile);
-        Menu_AppendItem
-        (
-          open.DropDown, "Revit file…",
-          Menu_PromptFile(OpenRevitFileId),
-          activeApp.CanPostCommand(OpenRevitFileId),
-          false
-        );
+        open.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.OpenRevitFile, "Revit file…");
 
         var documents = PersistentData.OfType<Types.Document>().
           Where(x => x.IsReferencedData && !x.IsReferencedDataLoaded).

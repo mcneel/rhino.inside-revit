@@ -112,6 +112,7 @@ namespace RhinoInside.Revit.GH.Parameters
   using ElementTracking;
   using External.DB;
   using External.DB.Extensions;
+  using RhinoInside.Revit.External.UI.Extensions;
 
   public abstract class Element<T, R> : Reference<T>,
     IGH_TrackingParam
@@ -181,6 +182,21 @@ namespace RhinoInside.Revit.GH.Parameters
         if (ActiveTrackingMode(default) != TrackingMode.NotApplicable)
           Menu_AppendItem(menu, $"Release {GH_Convert.ToPlural(TypeName)}…", Menu_ReleaseElements, HasTrackedElements, false);
       }
+    }
+
+    protected ToolStripMenuItem Menu_AppendPromptNew(ToolStrip menu, ARUI.PostableCommand postableCommand, string text = default)
+    {
+      var activeApp = Revit.ActiveUIApplication;
+      var postable = activeApp.ActiveUIDocument.TryGetPostableCommandId(postableCommand, out var commandId);
+
+      return Menu_AppendItem
+      (
+        menu,
+        text ?? $"Set new ${TypeName}",
+        Menu_PromptNew(commandId),
+        postable,
+        false
+      );
     }
 
     protected EventHandler Menu_PromptNew(ARUI.RevitCommandId commandId) => async (sender, args) =>

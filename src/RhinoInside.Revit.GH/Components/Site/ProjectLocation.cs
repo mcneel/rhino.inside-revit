@@ -17,59 +17,56 @@ namespace RhinoInside.Revit.GH.Components.Site
       base.AppendAdditionalMenuItems(menu);
       Menu_AppendSeparator(menu);
 
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.Location, "Open Location…");
+
       var activeApp = Revit.ActiveUIApplication;
-      var LocationId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Location);
-      Menu_AppendItem
-      (
-        menu, "Location…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, LocationId),
-        activeApp.CanPostCommand(LocationId), false
-      );
+      if (activeApp?.ActiveUIDocument?.Document.IsFamilyDocument == false)
+      {
+        var online = Menu_AppendItem(menu, "Online");
+        Menu_AppendItem
+        (
+          online.DropDown, "Bing Maps…",
+          (sender, arg) =>
+          {
+            if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
+              using (System.Diagnostics.Process.Start($@"https://bing.com/maps/default.aspx?cp={Rhino.RhinoMath.ToDegrees(location.Latitude)}~{Rhino.RhinoMath.ToDegrees(location.Longitude)}&lvl=18")) { }
+          },
+          true, false
+        );
 
-      var online = Menu_AppendItem(menu, "Online");
-      Menu_AppendItem
-      (
-        online.DropDown, "Bing Maps…",
-        (sender, arg) =>
-        {
-          if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
-            using (System.Diagnostics.Process.Start($@"https://bing.com/maps/default.aspx?cp={Rhino.RhinoMath.ToDegrees(location.Latitude)}~{Rhino.RhinoMath.ToDegrees(location.Longitude)}&lvl=18")) { }
-        },
-        activeApp.ActiveUIDocument is object, false
-      );
+        Menu_AppendItem
+        (
+          online.DropDown, "DuckDuckGo…",
+          (sender, arg) =>
+          {
+            if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
+              using (System.Diagnostics.Process.Start($@"https://duckduckgo.com/?q={Rhino.RhinoMath.ToDegrees(location.Latitude)}%2C{Rhino.RhinoMath.ToDegrees(location.Longitude)}&iaxm=maps")) { }
+          },
+          true, false
+        );
 
-      Menu_AppendItem
-      (
-        online.DropDown, "DuckDuckGo…",
-        (sender, arg) =>
-        {
-          if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
-            using (System.Diagnostics.Process.Start($@"https://duckduckgo.com/?q={Rhino.RhinoMath.ToDegrees(location.Latitude)}%2C{Rhino.RhinoMath.ToDegrees(location.Longitude)}&iaxm=maps")) { }
-        },
-        activeApp.ActiveUIDocument is object, false
-      );
+        Menu_AppendItem
+        (
+          online.DropDown, "Google Maps…",
+          (sender, arg) =>
+          {
+            if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
+              using (System.Diagnostics.Process.Start($@"https://www.google.com/maps/@{Rhino.RhinoMath.ToDegrees(location.Latitude)},{Rhino.RhinoMath.ToDegrees(location.Longitude)},18z")) { }
+          },
+          true, false
+        );
 
-      Menu_AppendItem
-      (
-        online.DropDown, "Google Maps…",
-        (sender, arg) =>
-        {
-          if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
-            using (System.Diagnostics.Process.Start($@"https://www.google.com/maps/@{Rhino.RhinoMath.ToDegrees(location.Latitude)},{Rhino.RhinoMath.ToDegrees(location.Longitude)},18z")) { }
-        },
-        activeApp.ActiveUIDocument is object, false
-      );
-
-      Menu_AppendItem
-      (
-        online.DropDown, "OpenStreetMap…",
-        (sender, arg) =>
-        {
-          if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
-            using (System.Diagnostics.Process.Start($@"https://www.openstreetmap.org/?mlat={Rhino.RhinoMath.ToDegrees(location.Latitude)}&mlon={Rhino.RhinoMath.ToDegrees(location.Longitude)}")) { }
-        },
-        activeApp.ActiveUIDocument is object, false
-      );
+        Menu_AppendItem
+        (
+          online.DropDown, "OpenStreetMap…",
+          (sender, arg) =>
+          {
+            if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
+              using (System.Diagnostics.Process.Start($@"https://www.openstreetmap.org/?mlat={Rhino.RhinoMath.ToDegrees(location.Latitude)}&mlon={Rhino.RhinoMath.ToDegrees(location.Longitude)}")) { }
+          },
+          true, false
+        );
+      }
     }
     #endregion
 

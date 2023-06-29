@@ -19,15 +19,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
-
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.FillPatterns);
-      Menu_AppendItem
-      (
-        menu, $"Open Fill Patterns…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.CanPostCommand(commandId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.FillPatterns, "Open Fill Patterns…");
     }
     #endregion
 

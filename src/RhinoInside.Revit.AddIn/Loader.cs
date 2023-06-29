@@ -86,7 +86,12 @@ namespace RhinoInside.Revit.AddIn
         if (Commands.CommandStart.Start() == Result.Succeeded)
         {
           if (Core.StartupMode == CoreStartupMode.Scripting)
-            Core.Host.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit));
+          {
+            if (RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit) is RevitCommandId commandId)
+              Core.Host.PostCommand(commandId);
+            else
+              Revit.MainWindow.TryClose();
+          }
         }
       };
     }

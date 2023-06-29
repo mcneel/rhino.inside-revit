@@ -19,15 +19,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ObjectStyles);
-      Menu_AppendItem
-      (
-        menu, $"Open Object Styles…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.ActiveUIDocument is object && activeApp.CanPostCommand(commandId), false
-      );
-
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.ObjectStyles, "Open Object Styles…");
       base.Menu_AppendActions(menu);
     }
 

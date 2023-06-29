@@ -15,6 +15,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
   using External.UI.Selection;
+  using RhinoInside.Revit.External.UI.Extensions;
 
   public abstract class GraphicalElement<T, R> :
     Element<T, R>,
@@ -562,47 +563,49 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private async void Menu_ExternaliseData(object sender, EventArgs e)
     {
-      var commandId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.SaveSelection);
       var activeApp = Revit.ActiveUIApplication;
-      using (var scope = new External.UI.EditScope(activeApp))
+      if (activeApp.ActiveUIDocument.TryGetPostableCommandId(ARUI.PostableCommand.SaveSelection, out var commandId))
       {
-        var activeDoc = activeApp.ActiveUIDocument.Document;
-
-        var elementIds = ToElementIds(VolatileData).
-          Where(x => activeDoc.Equals(x.Document)).
-          Select(x => x.Id).
-          ToList();
-
-        var previous = activeApp.ActiveUIDocument.Selection.GetElementIds();
-        Rhinoceros.InvokeInHostContext(() => activeApp.ActiveUIDocument.Selection.SetElementIds(elementIds));
-
-        var changes = await scope.ExecuteCommandAsync(commandId);
-        if (changes.GetSummary(activeDoc, out var added, out var deleted, out var modified) > 0)
+        using (var scope = new External.UI.EditScope(activeApp))
         {
-          var selectionFilter = added.Select(x => activeDoc.GetElement(x)).OfType<ARDB.SelectionFilterElement>().FirstOrDefault();
-          if (selectionFilter is object)
+          var activeDoc = activeApp.ActiveUIDocument.Document;
+
+          var elementIds = ToElementIds(VolatileData).
+            Where(x => activeDoc.Equals(x.Document)).
+            Select(x => x.Id).
+            ToList();
+
+          var previous = activeApp.ActiveUIDocument.Selection.GetElementIds();
+          Rhinoceros.InvokeInHostContext(() => activeApp.ActiveUIDocument.Selection.SetElementIds(elementIds));
+
+          var changes = await scope.ExecuteCommandAsync(commandId);
+          if (changes.GetSummary(activeDoc, out var added, out var deleted, out var modified) > 0)
           {
-            RecordUndoEvent("Externalise data");
-
-            PersistentData.Clear();
-            OnObjectChanged(GH_ObjectEventType.PersistentData);
-
-            MutableNickName = false;
-            if (Kind == GH_ParamKind.floating)
+            var selectionFilter = added.Select(x => activeDoc.GetElement(x)).OfType<ARDB.SelectionFilterElement>().FirstOrDefault();
+            if (selectionFilter is object)
             {
-              IconDisplayMode = GH_IconDisplayMode.name;
-              Attributes?.ExpireLayout();
+              RecordUndoEvent("Externalise data");
+
+              PersistentData.Clear();
+              OnObjectChanged(GH_ObjectEventType.PersistentData);
+
+              MutableNickName = false;
+              if (Kind == GH_ParamKind.floating)
+              {
+                IconDisplayMode = GH_IconDisplayMode.name;
+                Attributes?.ExpireLayout();
+              }
+
+              NickName = selectionFilter.Name;
+              OnObjectChanged(GH_ObjectEventType.NickName);
+
+              RemoveAllSources();
+              ExpireSolution(true);
             }
-
-            NickName = selectionFilter.Name;
-            OnObjectChanged(GH_ObjectEventType.NickName);
-
-            RemoveAllSources();
-            ExpireSolution(true);
           }
-        }
 
-        Rhinoceros.InvokeInHostContext(() => activeApp.ActiveUIDocument.Selection.SetElementIds(previous));
+          Rhinoceros.InvokeInHostContext(() => activeApp.ActiveUIDocument.Selection.SetElementIds(previous));
+        }
       }
     }
     #endregion

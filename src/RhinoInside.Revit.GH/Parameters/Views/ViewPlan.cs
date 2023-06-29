@@ -2,7 +2,6 @@ using System;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
-using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -19,13 +18,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var FloorPlanId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.FloorPlan);
-      Menu_AppendItem
-      (
-        menu, $"Set new {TypeName}",
-        Menu_PromptNew(FloorPlanId),
-        Revit.ActiveUIApplication.CanPostCommand(FloorPlanId)
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.FloorPlan);
     }
     #endregion
   }
@@ -43,13 +36,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var CeilingPlanId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.ReflectedCeilingPlan);
-      Menu_AppendItem
-      (
-        menu, $"Set new {TypeName}",
-        Menu_PromptNew(CeilingPlanId),
-        Revit.ActiveUIApplication.CanPostCommand(CeilingPlanId)
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.ReflectedCeilingPlan);
     }
     #endregion
   }
@@ -67,13 +54,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var AreaPlanId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.AreaPlan);
-      Menu_AppendItem
-      (
-        menu, $"Set new {TypeName}",
-        Menu_PromptNew(AreaPlanId),
-        Revit.ActiveUIApplication.CanPostCommand(AreaPlanId)
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.AreaPlan);
     }
     #endregion
   }
@@ -91,13 +72,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var StructuralPlanId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.StructuralPlan);
-      Menu_AppendItem
-      (
-        menu, $"Set new {TypeName}",
-        Menu_PromptNew(StructuralPlanId),
-        Revit.ActiveUIApplication.CanPostCommand(StructuralPlanId)
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.StructuralPlan);
     }
     #endregion
   }

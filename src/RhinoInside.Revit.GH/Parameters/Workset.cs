@@ -25,15 +25,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalMenuItems(menu);
-
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Worksets);
-      Menu_AppendItem
-      (
-        menu, $"Open Worksets…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.CanPostCommand(commandId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.Worksets, "Open Worksets…");
     }
 
     protected override GH_GetterResult Prompt_Singular(ref Types.Workset value)
