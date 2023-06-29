@@ -37,6 +37,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         var listBox = new ListBox
         {
+          Sorted = false, // Sorted by Elevation
           BorderStyle = BorderStyle.FixedSingle,
           Width = (int) (250 * GH_GraphicsUtil.UiScale),
           Height = (int) (100 * GH_GraphicsUtil.UiScale),
@@ -59,6 +60,7 @@ namespace RhinoInside.Revit.GH.Parameters
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
       listBox.BeginUpdate();
       listBox.Items.Clear();
+      listBox.Items.Add(new Types.Level());
 
       using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.Level)))
       {
@@ -67,8 +69,6 @@ namespace RhinoInside.Revit.GH.Parameters
           OrderBy(x => x.Elevation).
           ThenBy(x => x.DisplayName, ElementNaming.NameComparer).
           ToList();
-
-        listBox.Items.Add(new Types.Level());
 
         foreach (var level in levels)
           listBox.Items.Add(level);

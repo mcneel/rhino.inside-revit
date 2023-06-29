@@ -76,6 +76,7 @@ namespace RhinoInside.Revit.GH.Components.Phasing
           "Phases",
           phases.
           Select(x => new Types.Phase(x)).
+          OrderBy(x => x.SequenceNumber).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

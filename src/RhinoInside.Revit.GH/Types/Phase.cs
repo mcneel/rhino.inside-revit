@@ -47,5 +47,7 @@ namespace RhinoInside.Revit.GH.Types
 
       return base.CastFrom(source);
     }
+
+    public int? SequenceNumber => Value?.get_Parameter(ARDB.BuiltInParameter.PHASE_SEQUENCE_NUMBER).AsInteger();
   }
 }
