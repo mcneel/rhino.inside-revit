@@ -77,7 +77,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
     {
       commandId = default;
       if (uiDocument is null) return false;
-      if (!System.Enum.IsDefined(typeof(RevitCommandId), postableCommand)) return false;
+      if (!System.Enum.IsDefined(typeof(PostableCommand), postableCommand)) return false;
 
       commandId = HostedApplication.Active?.InvokeInHostContext(() => RevitCommandId.LookupPostableCommandId(postableCommand));
       if (commandId is null) return false;
