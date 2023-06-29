@@ -66,11 +66,21 @@ namespace RhinoInside.Revit.External.UI.Extensions
       return uiView is object;
     }
 
-    public static bool TryGetPostableCommandId(this UIDocument uiDocument, PostableCommand postableCommand, out RevitCommandId commandId)
+    /// <summary>
+    /// Looks up and retrieves the Revit command id from the given built-in <see cref="Autodesk.Revit.UI.PostableCommand"/>.
+    /// </summary>
+    /// <param name="uiDocument">The UI document.</param>
+    /// <param name="postableCommand">The postable command.</param>
+    /// <param name="commandId"></param>
+    /// <returns>True on success; False otherwise.</returns>
+    public static bool TryGetRevitCommandId(this UIDocument uiDocument, PostableCommand postableCommand, out RevitCommandId commandId)
     {
-      commandId = RevitCommandId.LookupPostableCommandId(postableCommand);
-      if (commandId is null) return false;
+      commandId = default;
       if (uiDocument is null) return false;
+      if (!System.Enum.IsDefined(typeof(RevitCommandId), postableCommand)) return false;
+
+      commandId = HostedApplication.Active?.InvokeInHostContext(() => RevitCommandId.LookupPostableCommandId(postableCommand));
+      if (commandId is null) return false;
       if (!uiDocument.Application.CanPostCommand(commandId)) return false;
 
       if (uiDocument.Document.IsFamilyDocument)

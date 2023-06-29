@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH
     public static void AppendPostableCommand(this ToolStrip menu, ARUI.PostableCommand postableCommand, string text)
     {
       var activeApp = Revit.ActiveUIApplication;
-      var postable = activeApp.ActiveUIDocument.TryGetPostableCommandId(postableCommand, out var commandId);
+      var postable = activeApp.ActiveUIDocument.TryGetRevitCommandId(postableCommand, out var commandId);
       GH_DocumentObject.Menu_AppendItem
       (
         menu, text,
