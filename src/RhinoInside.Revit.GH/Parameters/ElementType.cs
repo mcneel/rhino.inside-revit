@@ -6,11 +6,13 @@ using GH_IO.Serialization;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
+using ARUI = Autodesk.Revit.UI;
 using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
+  using External.UI.Extensions;
 
   public abstract class ElementType<T, R> : Element<T, R>
     where T : class, Types.IGH_ElementType
@@ -299,18 +301,18 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      if (Revit.ActiveUIDocument?.Document is ARDB.Document doc)
+      if (Revit.ActiveUIDocument is ARUI.UIDocument ui)
       {
-        bool singular = ToElementIds(VolatileData).Where(x => doc.IsEquivalent(x.Document)).Take(2).Count() == 1;
+        bool singular = ToElementIds(VolatileData).Where(x => ui.Document.IsEquivalent(x.Document)).Take(2).Count() == 1;
         {
           var activeApp = Revit.ActiveUIApplication;
-          var TypePropertiesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.TypeProperties);
+          var postable = ui.TryGetPostableCommandId(ARUI.PostableCommand.TypeProperties, out var TypePropertiesId);
           Menu_AppendItem
           (
             menu, $"Edit {TypeName}…",
             async (sender, arg) =>
             {
-              var ids = ToElementIds(VolatileData).Where(x => doc.IsEquivalent(x.Document)).Select(x => x.Id).Take(1).ToList();
+              var ids = ToElementIds(VolatileData).Where(x => ui.Document.IsEquivalent(x.Document)).Select(x => x.Id).Take(1).ToList();
               if (ids.Any())
               {
                 using (var scope = new External.UI.EditScope(activeApp))
@@ -333,7 +335,7 @@ namespace RhinoInside.Revit.GH.Parameters
                 }
               }
             },
-            singular && activeApp.CanPostCommand(TypePropertiesId), false
+            singular && postable, false
           );
         }
       }

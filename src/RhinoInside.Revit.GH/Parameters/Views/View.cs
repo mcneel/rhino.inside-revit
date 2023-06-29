@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
-using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -33,17 +32,8 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.Menu_AppendActions(menu);
 
-      var activeApp = Revit.ActiveUIApplication;
 #if REVIT_2019
-      {
-        var commandId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.CloseInactiveViews);
-        Menu_AppendItem
-        (
-          menu, "Close Inactive Views…",
-          (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-          activeApp.CanPostCommand(commandId), false
-        );
-      }
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.CloseInactiveViews, "Close Inactive Views…");
 #endif
     }
 

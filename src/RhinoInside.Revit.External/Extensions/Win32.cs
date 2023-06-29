@@ -6,7 +6,6 @@ using System.Text;
 
 namespace Microsoft.Win32.SafeHandles
 {
-  using System.ComponentModel;
   using InteropServices;
 
   #region Kernel32
@@ -234,6 +233,8 @@ namespace Microsoft.Win32.SafeHandles
       set => User32.SetWindowLongPtr(this, -20 /*GWL_EXSTYLE*/, (IntPtr) value);
     }
 
+    public bool TryClose() => User32.CloseWindow(this);
+
     public void Flash()
     {
       var fInfo = new User32.FLASHWINFO();
@@ -455,19 +456,23 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     }
 
     [DllImport(USER32, SetLastError = true)]
-    public static extern bool IsWindow(HWND hWnd);
-
-    [DllImport(USER32, SetLastError = true)]
-    public static extern DWORD GetWindowThreadProcessId(HWND hWnd, IntPtr lpdwProcessId);
-
-    [DllImport(USER32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool DestroyWindow(IntPtr hWnd);
 
     public static bool DestroyWindow(SafeWindowHandle hWnd) => DestroyWindow(hWnd.Handle);
 
     [DllImport(USER32, SetLastError = true)]
+    public static extern DWORD GetWindowThreadProcessId(HWND hWnd, IntPtr lpdwProcessId);
+
+    [DllImport(USER32, SetLastError = true)]
     public static extern IntPtr SetWindowLongPtr(HWND hWnd, int nIndex, IntPtr dwNewLong);
+
+    [DllImport(USER32, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool CloseWindow(HWND hWnd);
+
+    [DllImport(USER32, SetLastError = true)]
+    public static extern bool IsWindow(HWND hWnd);
 
     [DllImport(USER32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]

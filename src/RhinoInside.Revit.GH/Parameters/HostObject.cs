@@ -42,14 +42,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var CurtainGrid = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.CurtainGrid);
-      Menu_AppendItem
-      (
-        menu, $"Set new {TypeName}",
-        Menu_PromptNew(CurtainGrid),
-        Revit.ActiveUIApplication.CanPostCommand(CurtainGrid),
-        false
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.CurtainGrid);
     }
     #endregion
   }
@@ -64,14 +57,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var CurtainSystemByFace = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.CurtainSystemByFace);
-      Menu_AppendItem
-      (
-        menu, $"Set new {TypeName}",
-        Menu_PromptNew(CurtainSystemByFace),
-        Revit.ActiveUIApplication.CanPostCommand(CurtainSystemByFace),
-        false
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.CurtainSystemByFace);
     }
     #endregion
   }
@@ -96,32 +82,9 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       var create = Menu_AppendItem(menu, $"Set new {TypeName}");
 
-      var ArchitecturalFloor = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ArchitecturalFloor);
-      Menu_AppendItem
-      (
-        create.DropDown, "Architectural",
-        Menu_PromptNew(ArchitecturalFloor),
-        Revit.ActiveUIApplication.CanPostCommand(ArchitecturalFloor),
-        false
-      );
-
-      var StructuralFloor = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.StructuralFloor);
-      Menu_AppendItem
-      (
-        create.DropDown, "Structural",
-        Menu_PromptNew(StructuralFloor),
-        Revit.ActiveUIApplication.CanPostCommand(StructuralFloor),
-        false
-      );
-
-      var FloorByFaceFloor = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.FloorByFaceFloor);
-      Menu_AppendItem
-      (
-        create.DropDown, "By Face",
-        Menu_PromptNew(FloorByFaceFloor),
-        Revit.ActiveUIApplication.CanPostCommand(FloorByFaceFloor),
-        false
-      );
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.ArchitecturalFloor, "Architectural");
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.StructuralFloor, "Structural");
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.FloorByFaceFloor, "By Face");
     }
     #endregion
   }
@@ -138,32 +101,9 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       var create = Menu_AppendItem(menu, $"Set new {TypeName}");
 
-      var RoofByFootprint = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.RoofByFootprint);
-      Menu_AppendItem
-      (
-        create.DropDown, "Footprint",
-        Menu_PromptNew(RoofByFootprint),
-        Revit.ActiveUIApplication.CanPostCommand(RoofByFootprint),
-        false
-      );
-
-      var RoofByExtrusion = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.RoofByExtrusion);
-      Menu_AppendItem
-      (
-        create.DropDown, "Extrusion",
-        Menu_PromptNew(RoofByExtrusion),
-        Revit.ActiveUIApplication.CanPostCommand(RoofByExtrusion),
-        false
-      );
-
-      var RoofByFace = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.RoofByFace);
-      Menu_AppendItem
-      (
-        create.DropDown, "By Face",
-        Menu_PromptNew(RoofByFace),
-        Revit.ActiveUIApplication.CanPostCommand(RoofByFace),
-        false
-      );
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.RoofByFootprint, "Footprint");
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.RoofByExtrusion, "Extrusion");
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.RoofByFace, "By Face");
     }
     #endregion
   }
@@ -185,32 +125,9 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       var create = Menu_AppendItem(menu, $"Set new {TypeName}");
 
-      var ArchitecturalWallId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ArchitecturalWall);
-      Menu_AppendItem
-      (
-        create.DropDown, "Architectural",
-        Menu_PromptNew(ArchitecturalWallId),
-        Revit.ActiveUIApplication.CanPostCommand(ArchitecturalWallId),
-        false
-      );
-
-      var StructuralWallId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.StructuralWall);
-      Menu_AppendItem
-      (
-        create.DropDown, "Structural",
-        Menu_PromptNew(StructuralWallId),
-        Revit.ActiveUIApplication.CanPostCommand(StructuralWallId),
-        false
-      );
-
-      var WallByFaceWall = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.WallByFaceWall);
-      Menu_AppendItem
-      (
-        create.DropDown, "By Face",
-        Menu_PromptNew(WallByFaceWall),
-        Revit.ActiveUIApplication.CanPostCommand(WallByFaceWall),
-        false
-      );
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.ArchitecturalWall, "Architecural");
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.StructuralWall, "Structural");
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.WallByFaceWall, "Structural");
     }
     #endregion
   }

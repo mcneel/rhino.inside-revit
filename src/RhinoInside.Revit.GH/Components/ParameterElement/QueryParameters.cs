@@ -27,20 +27,10 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       var doc = activeApp.ActiveUIDocument?.Document;
       if (doc is null) return;
 
-      var commandId = doc.IsFamilyDocument ?
-        Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.FamilyTypes) :
-        Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ProjectParameters);
-
-      var commandName = doc.IsFamilyDocument ?
-        "Open Family Parameters…" :
-        "Open Project Parameters…";
-
-      Menu_AppendItem
-      (
-        menu, commandName,
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.CanPostCommand(commandId), false
-      );
+      if (doc.IsFamilyDocument)
+        menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.FamilyTypes, "Open Family Parameters…");
+      else
+        menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.ProjectParameters, "Open Project Parameters…");
     }
     #endregion
 

@@ -19,16 +19,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
-
-      var hasInputDocument = Params.Input<Parameters.Document>("Document") is object;
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.DesignOptions);
-      Menu_AppendItem
-      (
-        menu, $"Open Design Options…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        !hasInputDocument && activeApp.CanPostCommand(commandId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.DesignOptions, "Open Design Options…");
     }
     #endregion
 
@@ -103,16 +94,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
-
-      var hasInputDocument = Params.Input<Parameters.Document>("Document") is object;
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.DesignOptions);
-      Menu_AppendItem
-      (
-        menu, $"Open Design Options…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        !hasInputDocument && activeApp.CanPostCommand(commandId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.DesignOptions, "Open Design Options…");
     }
     #endregion
 

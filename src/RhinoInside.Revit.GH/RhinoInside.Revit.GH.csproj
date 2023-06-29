@@ -410,6 +410,7 @@
     <Compile Include="Parameters\Views\ViewSection.cs" />
     <Compile Include="Parameters\Views\ViewSheet.cs" />
     <Compile Include="Parameters\Workset.cs" />
+    <Compile Include="PostableCommand.cs" />
     <Compile Include="Surface.cs" />
     <Compile Include="Types\Annotations\Annotation.cs" />
     <Compile Include="Types\Annotations\AnnotationSymbol.cs" />

@@ -35,23 +35,8 @@ namespace RhinoInside.Revit.GH.Parameters
     //{
     //  var create = Menu_AppendItem(menu, $"Set new {TypeName}");
 
-    //  var ToposurfaceId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Toposurface);
-    //  Menu_AppendItem
-    //  (
-    //    create.DropDown, "Toposurface",
-    //    Menu_PromptNew(ToposurfaceId),
-    //    Revit.ActiveUIApplication.CanPostCommand(ToposurfaceId),
-    //    false
-    //  );
-
-    //  var RegionId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Subregion);
-    //  Menu_AppendItem
-    //  (
-    //    create.DropDown, "Region",
-    //    Menu_PromptNew(RegionId),
-    //    Revit.ActiveUIApplication.CanPostCommand(RegionId),
-    //    false
-    //  );
+    //  Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.Toposurface, "Toposurface");
+    //  Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.Subregion, "Region");
     //}
     #endregion
   }

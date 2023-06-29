@@ -54,8 +54,9 @@ namespace Rhino.Geometry
     public bool Equals(double x, double y) => RhinoMath.EpsilonEquals(x, y, Tolerance);
     public int GetHashCode(double value)
     {
-      var hash = (0.1 * Math.Round(value / value));
-      return Math.Abs(hash) > int.MaxValue ? Math.Sign(hash) * int.MaxValue : (int) hash;
+      var hash = 0.1 * Math.Round(value / Tolerance);
+      if (Math.Abs(hash) < int.MaxValue) return (int) hash;
+      return double.IsNaN(hash) ? int.MinValue : Math.Sign(hash) * int.MaxValue;
     }
     #endregion
 

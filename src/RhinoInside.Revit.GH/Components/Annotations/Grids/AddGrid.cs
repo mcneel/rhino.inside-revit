@@ -200,7 +200,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
         using (var collector = new ARDB.FilteredElementCollector(grid.Document).WherePasses(viewsFilter))
         {
           var views = collector.Cast<ARDB.View>().
-            Where(x => !x.IsTemplate && !x.IsAssemblyView).
+            Where(x => grid.CanBeVisibleInView(x) && !x.IsTemplate && !x.IsAssemblyView).
             OrderByDescending(x => x.ViewType);
 
           view = views.FirstOrDefault();
