@@ -306,7 +306,7 @@ namespace RhinoInside.Revit.GH.Parameters
         bool singular = ToElementIds(VolatileData).Where(x => ui.Document.IsEquivalent(x.Document)).Take(2).Count() == 1;
         {
           var activeApp = Revit.ActiveUIApplication;
-          var postable = ui.TryGetPostableCommandId(ARUI.PostableCommand.TypeProperties, out var TypePropertiesId);
+          var postable = ui.TryGetRevitCommandId(ARUI.PostableCommand.TypeProperties, out var TypePropertiesId);
           Menu_AppendItem
           (
             menu, $"Edit {TypeName}…",

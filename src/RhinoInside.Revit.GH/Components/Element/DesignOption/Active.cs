@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
 
       {
         var activeApp = Revit.ActiveUIApplication;
-        var postable = activeApp.ActiveUIDocument.TryGetPostableCommandId(Autodesk.Revit.UI.PostableCommand.DesignOptions, out var commandId);
+        var postable = activeApp.ActiveUIDocument.TryGetRevitCommandId(Autodesk.Revit.UI.PostableCommand.DesignOptions, out var commandId);
         Menu_AppendItem
         (
           menu, $"Open Design Options…",

@@ -564,7 +564,7 @@ namespace RhinoInside.Revit.GH.Parameters
     private async void Menu_ExternaliseData(object sender, EventArgs e)
     {
       var activeApp = Revit.ActiveUIApplication;
-      if (activeApp.ActiveUIDocument.TryGetPostableCommandId(ARUI.PostableCommand.SaveSelection, out var commandId))
+      if (activeApp.ActiveUIDocument.TryGetRevitCommandId(ARUI.PostableCommand.SaveSelection, out var commandId))
       {
         using (var scope = new External.UI.EditScope(activeApp))
         {
