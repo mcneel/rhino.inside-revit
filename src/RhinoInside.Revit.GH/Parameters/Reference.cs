@@ -86,7 +86,8 @@ namespace RhinoInside.Revit.GH.Parameters
       }
       catch (Exception ex)
       {
-        Grasshopper.Tracing.Assert(GetType().GUID, ex);
+        Diagnostics.ErrorReport.TraceException(ex, Core.Host);
+        Diagnostics.ErrorReport.ReportException(ex, Core.Host);
       }
 
       return true;

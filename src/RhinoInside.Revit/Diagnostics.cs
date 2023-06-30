@@ -257,6 +257,7 @@ namespace RhinoInside.Revit
       (
         UIX.UIHostApplication app,
         string subject,
+        string body,
         bool includeAddinsList,
         IEnumerable<string> attachments
       )
@@ -281,12 +282,13 @@ namespace RhinoInside.Revit
 
         var revitVersion = $"{services.SubVersionNumber} ({services.VersionBuild})";
 
-        SendEmail(subject, reportFilePath, revitVersion, attachments);
+        SendEmail(subject, body, reportFilePath, revitVersion, attachments);
       }
 
       static void SendEmail
       (
         string subject,
+        string body,
         string ReportFilePath,
         string revitVersion,
         IEnumerable<string> attachments
@@ -301,9 +303,16 @@ namespace RhinoInside.Revit
         subject = Uri.EscapeUriString(subject);
         var mailtoURI = $"mailto:tech@mcneel.com?subject={subject}&body=";
 
-        var mailBody = @"Please give us any additional info you see fit here..." + Environment.NewLine + Environment.NewLine;
+        var mailBody = @"Give us any additional info you see fit here..." + Environment.NewLine + Environment.NewLine;
         if (File.Exists(ReportFilePath))
-          mailBody += $"!!! Please drag and drop the '{ReportFilePath}' file here to attach the error files !!!" + Environment.NewLine + Environment.NewLine;
+          mailBody += $"⚠ Please drag and drop the '{ReportFilePath}' file here to attach the report files ⚠" + Environment.NewLine + Environment.NewLine;
+
+        if (!string.IsNullOrEmpty(body))
+        {
+          mailBody += new string('-', 78) + Environment.NewLine;
+          mailBody += body + Environment.NewLine;
+          mailBody += new string('-', 78) + Environment.NewLine + Environment.NewLine;
+        }
 
         mailBody += $"OS: {Environment.OSVersion}" + Environment.NewLine;
         mailBody += $"CLR: {ErrorReport.CLRVersion}" + Environment.NewLine;
@@ -352,6 +361,7 @@ namespace RhinoInside.Revit
                 (
                   Core.Host,
                   subject: "Rhino.Inside Revit failed to load",
+                  body: null,
                   includeAddinsList: !taskDialog.WasVerificationChecked(),
                   attachments: new string[]
                   {
@@ -490,7 +500,7 @@ namespace RhinoInside.Revit
 
       public static void TraceException(Exception e, UIX.UIHostApplication app)
       {
-        var comment = $@"Managed exception caught from external API application '{e.Source}' in method '{e.TargetSite}' Exception type: '<{e.GetType().FullName}>,' Exception method: '<{e.Message}>,' Stack trace '   {e.StackTrace}";
+        var comment = $@"Managed exception caught from external API application '{e.Source}' in method '{e.TargetSite}'{Environment.NewLine}{e}";
         comment = comment.Replace(Environment.NewLine, $"{Environment.NewLine}'");
         app.Services.WriteJournalComment(comment, true);
       }
@@ -526,6 +536,7 @@ namespace RhinoInside.Revit
           (
             app,
             subject: $"{Core.Product}.{Core.Platform} - {e.GetType().FullName}",
+            body: e.ToString(),
             includeAddinsList: false,
             attachments: attachments.Prepend(app.Services.RecordingJournalFilename)
           );

@@ -434,6 +434,7 @@ namespace RhinoInside.Revit
                   (
                     app: Core.Host,
                     subject: $"{Core.Product}.{Core.Platform} - openNURBS Conflict",
+                    body: null,
                     includeAddinsList: true,
                     attachments: new string[]
                     {
