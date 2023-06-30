@@ -9,6 +9,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   using Numerical;
   using Convert.Geometry;
+  using External.DB;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Tag")]
@@ -86,7 +87,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           var references = References;
           var leaders = new AnnotationLeader[references.Length];
-          for(int r = 0; r < leaders.Length; ++r)
+          for (int r = 0; r < leaders.Length; ++r)
             leaders[r] = new MultiLeader(this, references[r]);
 
           return leaders;
@@ -110,8 +111,8 @@ namespace RhinoInside.Revit.GH.Types
         get => element.Value.IsLeaderVisible(target);
         set => element.Value.SetIsLeaderVisible(target, value);
 #else
-        get => true;
-        set { }
+        get => element.Value.get_Parameter(ARDB.BuiltInParameter.LEADER_LINE).AsBoolean();
+        set => element.Value.get_Parameter(ARDB.BuiltInParameter.LEADER_LINE).Update(value);
 #endif
       }
 
@@ -120,13 +121,34 @@ namespace RhinoInside.Revit.GH.Types
       {
         get => element.Value.HasLeaderElbow(target) ?
                element.Value.GetLeaderElbow(target).ToPoint3d() :
-               ((element.Value.TagHeadPosition + element.Value.GetLeaderEnd(target)) * 0.5).ToPoint3d() ;
+               (element.Value.TagHeadPosition.ToPoint3d() + EndPosition) * 0.5;
         set { if (Visible) element.Value.SetLeaderElbow(target, value.ToXYZ()); }
       }
 
       public override Point3d EndPosition
       {
-        get => Visible ? element.Value.GetLeaderEnd(target).ToPoint3d() : NaN.Point3d;
+        get
+        {
+          if (!Visible) return NaN.Point3d;
+
+          if (element.Value.LeaderEndCondition == ARDB.LeaderEndCondition.Attached)
+          {
+            return Rhinoceros.InvokeInHostContext
+            (
+              () =>
+              {
+                using (element.Document.RollBackScope())
+                using (element.Document.RollBackScope())
+                {
+                  element.Value.LeaderEndCondition = ARDB.LeaderEndCondition.Free;
+                  return element.Value.GetLeaderEnd(target).ToPoint3d();
+                }
+              }
+            );
+          }
+
+          return element.Value.GetLeaderEnd(target).ToPoint3d();
+        }
         set { if (Visible) element.Value.SetLeaderEnd(target, value.ToXYZ()); }
       }
 
@@ -139,6 +161,15 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    protected override void SubInvalidateGraphics()
+    {
+      _LeaderCurves = null;
+
+      base.SubInvalidateGraphics();
+    }
+
+    Curve[] _LeaderCurves;
+
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value?.TagHeadPosition is ARDB.XYZ headPosition)
@@ -149,10 +180,11 @@ namespace RhinoInside.Revit.GH.Types
         var dotPixels = 10.0 * args.Pipeline.DpiScale;
         var arrowSize = (int) Math.Round(2.0 * Grasshopper.CentralSettings.PreviewPointRadius * dpi);
 
-        foreach (var leader in Leaders)
+        if (_LeaderCurves is null)
+          _LeaderCurves = Leaders.Where(x => x.Visible).Select(x => x.LeaderCurve).ToArray();
+
+        foreach (var leaderCurve in _LeaderCurves)
         {
-          if (!leader.Visible) continue;
-          var leaderCurve = leader.LeaderCurve;
           args.Pipeline.DrawCurve(leaderCurve, args.Color, args.Thickness);
 
           if (!hasArrow) continue;
