@@ -111,8 +111,8 @@ namespace RhinoInside.Revit.GH.Types
         get => element.Value.IsLeaderVisible(target);
         set => element.Value.SetIsLeaderVisible(target, value);
 #else
-        get => true;
-        set { }
+        get => element.Value.get_Parameter(ARDB.BuiltInParameter.LEADER_LINE).AsBoolean();
+        set => element.Value.get_Parameter(ARDB.BuiltInParameter.LEADER_LINE).Update(value);
 #endif
       }
 
@@ -137,6 +137,7 @@ namespace RhinoInside.Revit.GH.Types
             (
               () =>
               {
+                using (element.Document.RollBackScope())
                 using (element.Document.RollBackScope())
                 {
                   element.Value.LeaderEndCondition = ARDB.LeaderEndCondition.Free;
