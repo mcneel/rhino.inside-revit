@@ -1,8 +1,8 @@
+using System;
 using System.Linq;
-using RhinoInside.Revit.External.DB.Extensions;
-
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.External.UI.Extensions
 {
@@ -79,9 +79,15 @@ namespace RhinoInside.Revit.External.UI.Extensions
       if (uiDocument is null) return false;
       if (!System.Enum.IsDefined(typeof(PostableCommand), postableCommand)) return false;
 
-      commandId = HostedApplication.Active?.InvokeInHostContext(() => RevitCommandId.LookupPostableCommandId(postableCommand));
-      if (commandId is null) return false;
-      if (!uiDocument.Application.CanPostCommand(commandId)) return false;
+      commandId = HostedApplication.Active?.InvokeInHostContext
+      (
+        () =>
+        {
+          var id = RevitCommandId.LookupPostableCommandId(postableCommand);
+          if (id is object && id.IsValidObject && uiDocument.Application.CanPostCommand(id)) return id;
+          return default;
+        }
+      );
 
       if (uiDocument.Document.IsFamilyDocument)
       {
@@ -118,7 +124,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
         }
       }
 
-      return true;
+      return commandId is object;
     }
   }
 }

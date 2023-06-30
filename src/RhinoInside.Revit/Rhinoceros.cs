@@ -361,6 +361,7 @@ namespace RhinoInside.Revit
               (
                 Core.Host,
                 subject: taskDialog.MainInstruction,
+                body: null,
                 includeAddinsList: false,
                 attachments: new string[]
                 {
