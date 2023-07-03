@@ -301,30 +301,29 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      if (Revit.ActiveUIDocument is ARUI.UIDocument ui)
+      if (Revit.ActiveUIDocument is ARUI.UIDocument uiDocument)
       {
-        bool singular = ToElementIds(VolatileData).Where(x => ui.Document.IsEquivalent(x.Document)).Take(2).Count() == 1;
+        var document = uiDocument.Document;
+        var ids = ToElementIds(VolatileData).Where(x => document.IsEquivalent(x.Document)).Take(2).Select(x => x.Id).ToList();
         {
-          var activeApp = Revit.ActiveUIApplication;
-          var postable = ui.TryGetRevitCommandId(ARUI.PostableCommand.TypeProperties, out var TypePropertiesId);
           Menu_AppendItem
           (
             menu, $"Edit {TypeName}…",
             async (sender, arg) =>
             {
-              var ids = ToElementIds(VolatileData).Where(x => ui.Document.IsEquivalent(x.Document)).Select(x => x.Id).Take(1).ToList();
-              if (ids.Any())
+              using (var scope = new External.UI.EditScope(uiDocument.Application))
               {
-                using (var scope = new External.UI.EditScope(activeApp))
+                await External.ActivationGate.Yield();
+
+                if (uiDocument.TryGetRevitCommandId(ARUI.PostableCommand.TypeProperties, out var TypePropertiesId))
                 {
-                  var activeDocument = activeApp.ActiveUIDocument;
-                  var selection = activeDocument.Selection;
+                  var selection = uiDocument.Selection;
                   var current = selection.GetElementIds();
                   selection.SetElementIds(ids);
                   var changes = await scope.ExecuteCommandAsync(TypePropertiesId);
                   selection.SetElementIds(current);
 
-                  if (changes.GetSummary(activeDocument.Document, out var _, out var _, out var modified) > 0)
+                  if (changes.GetSummary(document, out var _, out var _, out var modified) > 0)
                   {
                     if (modified.Contains(ids[0]))
                     {
@@ -335,7 +334,7 @@ namespace RhinoInside.Revit.GH.Parameters
                 }
               }
             },
-            singular && postable, false
+            ids.Count == 1, false
           );
         }
       }

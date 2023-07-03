@@ -297,7 +297,7 @@ namespace RhinoInside.Revit.AddIn.Commands
           }
         )
         {
-          if (RevitCommandId.LookupPostableCommandId(PostableCommand.KeyboardShortcuts) is RevitCommandId commandId)
+          if (Revit.ActiveUIApplication.LookupPostableCommandId(PostableCommand.KeyboardShortcuts) is RevitCommandId commandId)
           {
             taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Customize keyboard shortcuts…");
 

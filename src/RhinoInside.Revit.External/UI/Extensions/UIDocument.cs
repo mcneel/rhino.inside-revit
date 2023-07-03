@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -77,17 +76,9 @@ namespace RhinoInside.Revit.External.UI.Extensions
     {
       commandId = default;
       if (uiDocument is null) return false;
-      if (!System.Enum.IsDefined(typeof(PostableCommand), postableCommand)) return false;
 
-      commandId = HostedApplication.Active?.InvokeInHostContext
-      (
-        () =>
-        {
-          var id = RevitCommandId.LookupPostableCommandId(postableCommand);
-          if (id is object && id.IsValidObject && uiDocument.Application.CanPostCommand(id)) return id;
-          return default;
-        }
-      );
+      commandId = uiDocument.Application.LookupPostableCommandId(postableCommand);
+      if (commandId is null) return false;
 
       if (uiDocument.Document.IsFamilyDocument)
       {
