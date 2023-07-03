@@ -1,11 +1,11 @@
 using System;
 using Autodesk.Revit.UI;
 using static RhinoInside.Revit.Diagnostics;
-using UIX = RhinoInside.Revit.External.UI;
+using ERUI = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit.AddIn
 {
-  public class Loader : UIX.ExternalApplication, UIX.IHostedApplication
+  public class Loader : ERUI.ExternalApplication, ERUI.IHostedApplication
   {
     public Loader() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) => Instance = this;
 
@@ -30,9 +30,9 @@ namespace RhinoInside.Revit.AddIn
 
       // Initialize UI
       {
-        Commands.CommandStart.CreateUI(app);
-
         StartupOnApplicationInitialized();
+
+        Commands.CommandStart.CreateUI(app);
       }
 
       // Check For Updates
@@ -82,13 +82,14 @@ namespace RhinoInside.Revit.AddIn
       Core.Host.Services.ApplicationInitialized += applicationInitialized = (sender, args) =>
       {
         Core.Host.Services.ApplicationInitialized -= applicationInitialized;
+
         if (Core.CurrentStatus < Core.Status.Available) return;
         if (Commands.CommandStart.Start() == Result.Succeeded)
         {
           if (Core.StartupMode == CoreStartupMode.Scripting)
           {
-            if (RevitCommandId.LookupPostableCommandId(PostableCommand.ExitRevit) is RevitCommandId commandId)
-              Core.Host.PostCommand(commandId);
+            if (ERUI.Extensions.UIApplicationExtension.LookupPostableCommandId(null, PostableCommand.ExitRevit) is RevitCommandId cmdExitRevit)
+              Core.Host.PostCommand(cmdExitRevit);
             else
               Revit.MainWindow.TryClose();
           }
@@ -120,11 +121,11 @@ namespace RhinoInside.Revit.AddIn
     #endregion
 
     #region IHostedApplication
-    void UIX.IHostedApplication.InvokeInHostContext(Action action) => Rhinoceros.InvokeInHostContext(action);
-    T UIX.IHostedApplication.InvokeInHostContext<T>(Func<T> func) => Rhinoceros.InvokeInHostContext(func);
+    void ERUI.IHostedApplication.InvokeInHostContext(Action action) => Rhinoceros.InvokeInHostContext(action);
+    T ERUI.IHostedApplication.InvokeInHostContext<T>(Func<T> func) => Rhinoceros.InvokeInHostContext(func);
 
-    bool UIX.IHostedApplication.DoEvents() => Rhinoceros.Run();
-    Microsoft.Win32.SafeHandles.WindowHandle UIX.IHostedApplication.MainWindow => Rhinoceros.MainWindow;
+    bool ERUI.IHostedApplication.DoEvents() => Rhinoceros.Run();
+    Microsoft.Win32.SafeHandles.WindowHandle ERUI.IHostedApplication.MainWindow => Rhinoceros.MainWindow;
     #endregion
   }
 }
