@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.External.DB
       var (aX, aY, aZ) = this;
       var (bX, bY, bZ) = other;
 
-      return Arithmetic.IsZero3(aX - bX, aY - bY, aZ - bZ, tolerance);
+      return Euclidean.IsZero3(aX - bX, aY - bY, aZ - bZ, tolerance);
     }
 
     public static UnitXYZ operator -(UnitXYZ source) => new UnitXYZ(-source.Direction);
@@ -118,8 +118,8 @@ namespace RhinoInside.Revit.External.DB
 
       return 2.0 * Math.Atan2
       (
-        Arithmetic.Norm(uX - vX, uY - vY, uZ - vZ),
-        Arithmetic.Norm(uX + vX, uY + vY, uZ + vZ)
+        Euclidean.Norm(uX - vX, uY - vY, uZ - vZ),
+        Euclidean.Norm(uX + vX, uY + vY, uZ + vZ)
       );
     }
 
@@ -147,8 +147,8 @@ namespace RhinoInside.Revit.External.DB
       var (thisX, thisY, thisZ) = this;
       var (otherX, otherY, otherZ) = other;
 
-      return Arithmetic.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance) ||
-             Arithmetic.IsZero3(thisX + otherX, thisY + otherY, thisZ + otherZ, tolerance);
+      return Euclidean.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance) ||
+             Euclidean.IsZero3(thisX + otherX, thisY + otherY, thisZ + otherZ, tolerance);
     }
 
     /// <summary>
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.External.DB
       var (thisX, thisY, thisZ) = this;
       var (otherX, otherY, otherZ) = other;
 
-      return Arithmetic.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance);
+      return Euclidean.IsZero3(thisX - otherX, thisY - otherY, thisZ - otherZ, tolerance);
     }
 
     /// <summary>
@@ -186,12 +186,12 @@ namespace RhinoInside.Revit.External.DB
     {
       var (x, y, z) = Direction;
 
-      var normXY = Arithmetic.Norm(x, y);
+      var normXY = Euclidean.Norm(x, y);
       if (normXY < tolerance)
       {
         // To save CrossProduct and a Unitize3
         //return Unitize(CrossProduct(BasisY, this));
-        Arithmetic.Normalize2(ref z, ref x);
+        Euclidean.Normalize2(ref z, ref x);
         return new UnitXYZ(z, 0.0, -x);
       }
       else
@@ -216,10 +216,10 @@ namespace RhinoInside.Revit.External.DB
       var (thisX, thisY, thisZ) = Direction;
       var rightX = thisX; var rightY = thisY; var rightZ = thisZ;
 
-      var normXY = Arithmetic.Norm(rightX, rightY);
+      var normXY = Euclidean.Norm(rightX, rightY);
       if (normXY < tolerance)
       {
-        Arithmetic.Normalize2(ref rightZ, ref rightX);
+        Euclidean.Normalize2(ref rightZ, ref rightX);
 
         rightY = rightX;
         rightX = rightZ;
@@ -304,7 +304,7 @@ namespace RhinoInside.Revit.External.DB
     #region AlmostEquals
     public bool AlmostEquals(PlaneEquation other)
     {
-      return Arithmetic.IsZero4(A - other.A, B - other.B, C - other.C, D - other.D, Constant.DefaultTolerance);
+      return Euclidean.IsZero4(A - other.A, B - other.B, C - other.C, D - other.D, Constant.DefaultTolerance);
     }
     #endregion
 

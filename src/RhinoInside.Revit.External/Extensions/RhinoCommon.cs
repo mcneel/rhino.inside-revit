@@ -113,7 +113,7 @@ namespace Rhino.Geometry
 
     public static bool GeometryEquals(this Point3d left, Point3d right, double tolerance)
     {
-      return Arithmetic.IsZero3(left.X - right.X, left.Y - right.Y, left.Z - right.Z, tolerance);
+      return Euclidean.IsZero3(left.X - right.X, left.Y - right.Y, left.Z - right.Z, tolerance);
     }
   }
 
@@ -126,7 +126,7 @@ namespace Rhino.Geometry
 
     public static bool GeometryEquals(this Vector3d left, Vector3d right, double tolerance)
     {
-      return Arithmetic.IsZero3(left.X - right.X, left.Y - right.Y, left.Z - right.Z, tolerance);
+      return Euclidean.IsZero3(left.X - right.X, left.Y - right.Y, left.Z - right.Z, tolerance);
     }
 
     public static Vector3d PerpVector(this Vector3d value, double tolerance = RhinoMath.SqrtEpsilon)

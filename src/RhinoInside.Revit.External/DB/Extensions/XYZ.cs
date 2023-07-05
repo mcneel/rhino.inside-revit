@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The vector's length is 0.0 within the <paramref name="tolerance"/>.</returns>
     public static bool IsZeroVector(this XYZ xyz)
     {
-      return Arithmetic.IsZero3(xyz.X, xyz.Y, xyz.Z, Constant.DefaultTolerance);
+      return Euclidean.IsZero3(xyz.X, xyz.Y, xyz.Z, Constant.DefaultTolerance);
     }
 
     /// <summary>
@@ -60,19 +60,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The vector's length is 1.0 within the <paramref name="tolerance"/>.</returns>
     public static bool IsUnitVector(this XYZ xyz)
     {
-      return Arithmetic.IsUnit3(xyz.X, xyz.Y, xyz.Z, Constant.DefaultTolerance);
+      return Euclidean.IsUnit3(xyz.X, xyz.Y, xyz.Z, Constant.DefaultTolerance);
     }
 
     public static bool AlmostEqualVectors(this XYZ a, XYZ b)
     {
-      return Arithmetic.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, Constant.DefaultTolerance);
+      return Euclidean.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, Constant.DefaultTolerance);
     }
 
     public static bool AlmostEqualPoints(this XYZ a, XYZ b, double tolerance = Constant.DefaultTolerance * 100.0)
     {
       tolerance = Math.Max(tolerance, Constant.DefaultTolerance * 2.0);
 
-      return Arithmetic.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, tolerance);
+      return Euclidean.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, tolerance);
     }
 
     /// <summary>
@@ -89,7 +89,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       tolerance = Math.Max(tolerance, Constant.Upsilon);
 
-      var norm = Arithmetic.Norm(xyz.X, xyz.Y, xyz.Z);
+      var norm = Euclidean.Norm(xyz.X, xyz.Y, xyz.Z);
       return norm < tolerance ? 0.0 : norm;
     }
 
@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static UnitXYZ ToUnitXYZ(this XYZ xyz)
     {
       var (x, y, z) = xyz;
-      return Arithmetic.Normalize3(ref x, ref y, ref z) ? (UnitXYZ) new XYZ(x, y, z) : default;
+      return Euclidean.Normalize3(ref x, ref y, ref z) ? (UnitXYZ) new XYZ(x, y, z) : default;
     }
 
     /// <summary>
@@ -122,12 +122,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ CrossProduct(XYZ a, XYZ b)
     {
       var (aX, aY, aZ) = a;
-      var aLength = Arithmetic.Norm(aX, aY, aZ);
+      var aLength = Euclidean.Norm(aX, aY, aZ);
       if (aLength < Constant.Upsilon)
         return Zero;
 
       var (bX, bY, bZ) = b;
-      var bLength = Arithmetic.Norm(bX, bY, bZ);
+      var bLength = Euclidean.Norm(bX, bY, bZ);
       if (bLength < Constant.Upsilon)
         return Zero;
 
@@ -235,21 +235,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>X axis of the corresponding coordinate system</returns>
     public static XYZ PerpVector(this XYZ xyz, double tolerance = Constant.DefaultTolerance)
     {
-      tolerance = Math.Max(tolerance, Constant.Upsilon);
       var (x, y, z) = xyz;
 
-      var norm = Arithmetic.Norm(x, y, z);
-      if (norm == 0.0) return Zero;
+      var norm = Euclidean.Norm(x, y, z);
+      if (norm <= tolerance) return Zero;
       x /= norm; y /= norm; z /= norm;
 
-      if (Arithmetic.IsZero2(x, y, tolerance))
+      if (Euclidean.IsZero2(x, y, tolerance))
       {
-        Arithmetic.Normalize2(ref x, ref z);
+        Euclidean.Normalize2(ref x, ref z);
         return new XYZ(z * norm, 0.0, -x * norm);
       }
       else
       {
-        Arithmetic.Normalize2(ref x, ref y);
+        Euclidean.Normalize2(ref x, ref y);
         return new XYZ(-y * norm, x * norm, 0.0);
       }
     }
