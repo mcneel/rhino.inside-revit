@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.Numerical
       // IsPositive(value) --> +1.0
 
       if (double.IsNaN(value)) return value;
-      return ((ulong) BitConverter.DoubleToInt64Bits(value) & SignMask) == 0UL ? +1.0 : -1.0;
+      return (ToBits(value) & SignMask) == 0UL ? +1.0 : -1.0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -219,10 +219,16 @@ namespace RhinoInside.Revit.Numerical
       return value < min ? min : max < value ? max : value;
     }
     #endregion
+  }
 
+  /// <summary>
+  /// This class contais Euclidean space operations.
+  /// </summary>
+  static class Euclidean
+  {
     #region Norm
     /// <summary>
-    /// Magnitude of {<paramref name="x"/>}.
+    /// Norm of {<paramref name="x"/>}.
     /// </summary>
     /// <param name="x"></param>
     /// <returns>Distance from {0}.</returns>
@@ -237,7 +243,7 @@ namespace RhinoInside.Revit.Numerical
     }
 
     /// <summary>
-    /// Magnitude of {<paramref name="x"/>, <paramref name="y"/>} .
+    /// Norm of {<paramref name="x"/>, <paramref name="y"/>} .
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
@@ -257,7 +263,7 @@ namespace RhinoInside.Revit.Numerical
     }
 
     /// <summary>
-    /// Magnitude of {<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>}.
+    /// Norm of {<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>}.
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
@@ -280,14 +286,14 @@ namespace RhinoInside.Revit.Numerical
     #endregion
 
     #region IsZero
-    internal static bool IsZero1(double x, double tolerance = Constant.Upsilon)
+    internal static bool IsZero1(double x, double tolerance = 0.5 * Constant.Upsilon)
     {
       x = Math.Abs(x);
 
-      return x < tolerance;
+      return x <= tolerance;
     }
 
-    internal static bool IsZero2(double x, double y, double tolerance = Constant.Upsilon)
+    internal static bool IsZero2(double x, double y, double tolerance = 0.5 * Constant.Upsilon)
     {
       x = Math.Abs(x); y = Math.Abs(y);
 
@@ -298,10 +304,10 @@ namespace RhinoInside.Revit.Numerical
 
       u /= v;
 
-      return Math.Sqrt(1.0 + (u * u)) * v < tolerance;
+      return Math.Sqrt(1.0 + (u * u)) * v <= tolerance;
     }
 
-    internal static bool IsZero3(double x, double y, double z, double tolerance = Constant.Upsilon)
+    internal static bool IsZero3(double x, double y, double z, double tolerance = 0.5 * Constant.Upsilon)
     {
       x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
 
@@ -313,10 +319,10 @@ namespace RhinoInside.Revit.Numerical
 
       u /= w; v /= w;
 
-      return Math.Sqrt(1.0 + (u * u + v * v)) * w < tolerance;
+      return Math.Sqrt(1.0 + (u * u + v * v)) * w <= tolerance;
     }
 
-    internal static bool IsZero4(double x, double y, double z, double w, double tolerance = Constant.Upsilon)
+    internal static bool IsZero4(double x, double y, double z, double w, double tolerance = 0.5 * Constant.Upsilon)
     {
       x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z); w = Math.Abs(w);
 
@@ -334,14 +340,14 @@ namespace RhinoInside.Revit.Numerical
     #endregion
 
     #region IsUnit
-    internal static bool IsUnit1(double x, double tolerance = Constant.Delta)
+    internal static bool IsUnit1(double x, double tolerance = 0.5 * Constant.Delta)
     {
       x = Math.Abs(x);
 
-      return 1.0 - x < tolerance;
+      return 1.0 - x <= tolerance;
     }
 
-    internal static bool IsUnit2(double x, double y, double tolerance = Constant.Delta)
+    internal static bool IsUnit2(double x, double y, double tolerance = 0.5 * Constant.Delta)
     {
       x = Math.Abs(x); y = Math.Abs(y);
 
@@ -355,7 +361,7 @@ namespace RhinoInside.Revit.Numerical
       return 1.0 - (Math.Sqrt(1.0 + (u * u)) * v) < tolerance;
     }
 
-    internal static bool IsUnit3(double x, double y, double z, double tolerance = Constant.Delta)
+    internal static bool IsUnit3(double x, double y, double z, double tolerance = 0.5 * Constant.Delta)
     {
       x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
 
@@ -367,7 +373,7 @@ namespace RhinoInside.Revit.Numerical
 
       u /= w; v /= w;
 
-      return 1.0 - (Math.Sqrt(1.0 + (u * u + v * v)) * w) < tolerance;
+      return 1.0 - (Math.Sqrt(1.0 + (u * u + v * v)) * w) <= tolerance;
     }
     #endregion
 
