@@ -414,8 +414,9 @@ namespace RhinoInside.Revit.GH.Components
     {
       base.CollectData();
 
-      const double DesignLimits = 52_800.0; // feet.
-      var LengthLimit = GeometryDecoder.ToModelLength(DesignLimits); 
+      // What is the distance limit from internal origin point for imported geometry in Revit?
+      // https://www.autodesk.com/support/technical/article/caas/sfdcarticles/sfdcarticles/Revit-20-mile-origin-limit-for-imported-and-model-geometry.html
+      var DesignLimits = GeometryDecoder.ToModelLength(52_800.0 /* ft */);
 
       foreach (var input in Params.Input.Where(x => x is IGH_BakeAwareObject))
       {
@@ -429,13 +430,13 @@ namespace RhinoInside.Revit.GH.Components
             if (branch[i] is IGH_GeometricGoo goo)
             {
               var bbox = goo.Boundingbox;
-              if (bbox.Min.DistanceTo(Point3d.Origin) > LengthLimit || bbox.Max.DistanceTo(Point3d.Origin) > LengthLimit)
+              if (bbox.Min.DistanceTo(Point3d.Origin) > DesignLimits || bbox.Max.DistanceTo(Point3d.Origin) > DesignLimits)
               {
                 if (!reported) AddRuntimeMessage
                 (
                   GH_RuntimeMessageLevel.Warning,
                   $"The input {input.NickName} lies outside of Revit design limits." +
-                  $" Design limits are ±{GeometryDecoder.ToModelLength(DesignLimits):N0} {GH_Format.RhinoUnitSymbol()} around the origin.",
+                  $" Design limits are ±{DesignLimits:N0} {GH_Format.RhinoUnitSymbol()} around the origin.",
                   GH_Convert.ToGeometryBase(goo)
                 );
               }
