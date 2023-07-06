@@ -17,53 +17,73 @@ namespace RhinoInside.Revit.Convert.Geometry
     public static ARDB.GeometryObject[] ToShape(this GeometryBase geometry) => ToShape(geometry, GeometryEncoder.ModelScaleFactor);
     internal static ARDB.GeometryObject[] ToShape(this GeometryBase geometry, double factor)
     {
-      switch (geometry)
+      if (AuditGeometry(geometry))
       {
-        case Point point:
-          return new ARDB.Point[] { point.ToPoint(factor) };
+        switch (geometry)
+        {
+          case Point point:
+            return new ARDB.Point[] { point.ToPoint(factor) };
 
-        case PointCloud pointCloud:
-          return pointCloud.Select(x => x.ToPoint(factor)).ToArray();
+          case PointCloud pointCloud:
+            return pointCloud.Select(x => x.ToPoint(factor)).ToArray();
 
-        case Curve curve:
-          if (curve.SpanCount > 1 && curve.TryGetPolyline(out var polyline))
-            return new ARDB.PolyLine[] { polyline.ToPolyLine(factor) };
+          case Curve curve:
+            if (curve.SpanCount > 1 && curve.TryGetPolyline(out var polyline))
+              return new ARDB.PolyLine[] { polyline.ToPolyLine(factor) };
 
-          return curve.TryGetPolyCurve(out var polyCurve, GeometryTolerance.Internal.AngleTolerance) ?
-            polyCurve.ToCurveMany(factor).Select(ToShape).ToArray() :
-            new ARDB.Curve[] { curve.ToCurve(factor).ToShape() };
+            return curve.TryGetPolyCurve(out var polyCurve, GeometryTolerance.Internal.AngleTolerance) ?
+              polyCurve.ToCurveMany(factor).Select(ToShape).ToArray() :
+              new ARDB.Curve[] { curve.ToCurve(factor).ToShape() };
 
-        case Brep brep:
-          if (ToShape(brep, factor) is ARDB.GeometryObject brepShape)
-            return new ARDB.GeometryObject[] { brepShape };
-          break;
+          case Brep brep:
+            if (ToShape(brep, factor) is ARDB.GeometryObject brepShape)
+              return new ARDB.GeometryObject[] { brepShape };
+            break;
 
-        case Extrusion extrusion:
-          if (ToShape(extrusion, factor) is ARDB.GeometryObject extrusionShape)
-            return new ARDB.GeometryObject[] { extrusionShape };
-          break;
+          case Extrusion extrusion:
+            if (ToShape(extrusion, factor) is ARDB.GeometryObject extrusionShape)
+              return new ARDB.GeometryObject[] { extrusionShape };
+            break;
 
-        case SubD subD:
-          if (ToShape(subD, factor) is ARDB.GeometryObject subDShape)
-            return new ARDB.GeometryObject[] { subDShape };
-          break;
+          case SubD subD:
+            if (ToShape(subD, factor) is ARDB.GeometryObject subDShape)
+              return new ARDB.GeometryObject[] { subDShape };
+            break;
 
-        case Mesh mesh:
-          if (MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(mesh, factor)) is ARDB.GeometryObject meshShape)
-            return new ARDB.GeometryObject[] { meshShape };
-          break;
+          case Mesh mesh:
+            if (MeshEncoder.ToMesh(MeshEncoder.ToRawMesh(mesh, factor)) is ARDB.GeometryObject meshShape)
+              return new ARDB.GeometryObject[] { meshShape };
+            break;
 
-        default:
-          if (geometry.HasBrepForm)
-          {
-            var brepForm = Brep.TryConvertBrep(geometry);
-            if (brepForm is object && ToShape(brepForm, factor) is ARDB.GeometryObject geometryShape)
-              return new ARDB.GeometryObject[] { geometryShape };
-          }
-          break;
+          default:
+            if (geometry.HasBrepForm)
+            {
+              var brepForm = Brep.TryConvertBrep(geometry);
+              if (brepForm is object && ToShape(brepForm, factor) is ARDB.GeometryObject geometryShape)
+                return new ARDB.GeometryObject[] { geometryShape };
+            }
+            break;
+        }
       }
 
       return Array.Empty<ARDB.GeometryObject>();
+    }
+
+    static bool AuditGeometry(GeometryBase geometry)
+    {
+      var bbox = geometry.GetBoundingBox(false);
+      if (!bbox.IsValid)
+        return false;
+
+      var tol = GeometryTolerance.Model;
+      switch (geometry)
+      {
+        case Point _:
+          return true;
+
+        default:
+          return !bbox.Diagonal.EpsilonEquals(Vector3d.Zero, 2.0 * tol.VertexTolerance);
+      }
     }
 
     static ARDB.Curve ToShape(this ARDB.Curve curve)
