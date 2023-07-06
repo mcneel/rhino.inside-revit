@@ -33,14 +33,9 @@ namespace RhinoInside.Revit.Convert.Geometry
       if (scaleFactor != 1.0 && !brep.Scale(scaleFactor))
         return default;
 
-      var tol = GeometryTolerance.Internal;
-      var bbox = brep.GetBoundingBox(false);
-      if (!bbox.IsValid || bbox.Diagonal.Length < tol.ShortCurveTolerance)
-        return default;
-
       // Split and Shrink faces
       {
-        brep.Faces.SplitKinkyFaces(tol.AngleTolerance, true);
+        brep.Faces.SplitKinkyFaces(GeometryTolerance.Internal.AngleTolerance, true);
         brep.Faces.SplitClosedFaces(0);
         brep.Faces.ShrinkFaces();
       }
@@ -290,7 +285,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       {
         var tol = GeometryTolerance.Internal;
         var height = extrusion.PathStart.DistanceTo(extrusion.PathEnd);
-        if (height < Autodesk.Revit.ApplicationServices.Application.MinimumThickness / factor)
+        if (height < tol.VertexTolerance / factor)
         {
           var curves = new Curve[extrusion.ProfileCount];
           for (int p = 0; p < extrusion.ProfileCount; ++p)
