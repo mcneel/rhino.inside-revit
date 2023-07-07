@@ -172,7 +172,7 @@ namespace RhinoInside.Revit.GH.Components
       var componentParams = side == GH_ParameterSide.Input ? Params.Input : Params.Output;
 
       var t = IndexOf(templateParams, componentParams[index]);
-      return t >= 0 && templateParams[t].Relevance != ParamRelevance.Binding;
+      return t < 0 || templateParams[t].Relevance != ParamRelevance.Binding;
     }
 
     /// <summary>
