@@ -16,13 +16,13 @@ There are 3 stages to each of the examples below:
 
 1. Select Revit elements to import.
 1. Extract geometry, categories names or any other needed information about each of the Revit elements.
-1. Baking the geometry and information into Rhino.  In this each case a simple Python bake component is used to create geometry in Rhino on a layer names for the category the elements came from in Revit.
+2. Baking the geometry and information into Rhino.
 
 ![]({{ "/static/images/guides/revit-view-to-rhino.png" | prepend: site.baseurl }})
 
 The Element Geometry component has a hidden Category output that is useful.  Zoom in on the component and click on the "+" symbol under the Geometry Output to expose the Category output.
 
-For baking many plugins can be used to attach information to Rhino objects such as Layer, Object Name, Color, Material, or UserData (Key/Value) information. Popular ones include [Human](https://www.food4rhino.com/en/app/human), [LunchBox](https://www.food4rhino.com/en/app/lunchbox) and [Elefront](https://www.food4rhino.com/en/app/elefront).  Or, download the simple download the [Python Bake Component]().
+For baking many plugins can be used to attach information to Rhino objects such as Layer, Object Name, Color, Material, or UserData (Key/Value) information. Popular ones include [Human](https://www.food4rhino.com/en/app/human), [LunchBox](https://www.food4rhino.com/en/app/lunchbox) and [Elefront](https://www.food4rhino.com/en/app/elefront).
 
 {% include youtube_player.html id="DVzsSyxTQS0" %}
 
