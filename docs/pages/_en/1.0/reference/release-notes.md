@@ -16,6 +16,13 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.15" version="v1.15.8596.34075" time="07/15/2023" %}
+
+- Added {% include ltr/comp.html uuid='440b6beb' %}
+- Added {% include ltr/comp.html uuid='6388cfc0' %}
+- Added {% include ltr/comp.html uuid='f9bc3f5e' %}
+- Includes all changes under 1.15RC releases listed below
+
 {% include ltr/release-header.html title="v1.15 RC2" version="v1.15.8571.17168" pre_release=true time="06/20/2023" %}
 
 - Fix on {% include ltr/comp.html uuid='ad88cf11' %} component when 'Line Style' input is used.
