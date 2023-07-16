@@ -16,6 +16,10 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.16 RC1" version="v1.16.8596.34292" pre_release=true time="07/15/2023" %}
+
+- Misc fixes and improvements
+
 {% include ltr/release-header.html title="v1.15" version="v1.15.8596.34075" time="07/15/2023" %}
 
 - Added {% include ltr/comp.html uuid='440b6beb' %}
