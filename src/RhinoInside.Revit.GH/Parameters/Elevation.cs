@@ -172,6 +172,33 @@ namespace RhinoInside.Revit.External.DB
     #endregion
 
     #region Solve Base & Top
+    public static void SolveBase
+    (
+      ARDB.Document document,
+      double projectElevation, double defaultBaseElevation,
+      ref ElevationElementReference? baseElevation,
+      double defaultBaseOffset = 0.0
+    )
+    {
+      if (!baseElevation.HasValue || !baseElevation.Value.IsLevelConstraint(out var baseLevel, out var bottomOffset))
+      {
+        baseLevel = document.GetNearestLevel(projectElevation + defaultBaseElevation);
+
+        double elevation = projectElevation, offset = defaultBaseElevation;
+        if (baseElevation.HasValue)
+        {
+          if (baseElevation.Value.IsElevation(out elevation)) { offset = 0.0; }
+          else if (baseElevation.Value.IsOffset(out offset)) { elevation = projectElevation; }
+        }
+
+        baseElevation = new ElevationElementReference(baseLevel, elevation - baseLevel.ProjectElevation + offset);
+      }
+      else if (bottomOffset is null)
+      {
+        baseElevation = new ElevationElementReference(baseLevel, defaultBaseOffset);
+      }
+    }
+
     public static void SolveBaseAndTop
     (
       ARDB.Document document,
