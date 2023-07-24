@@ -7,7 +7,6 @@ using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 using ARUI = Autodesk.Revit.UI;
-using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -413,72 +412,6 @@ namespace RhinoInside.Revit.GH.Parameters
             if (!document.Value.IsEquivalent(goo.Document))
               throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(type)} from a diferent document.");
             break;
-        }
-      }
-    }
-
-    public static bool GetDataOrDefault<TOutput>
-    (
-      IGH_Component component,
-      IGH_DataAccess DA,
-      string name,
-      out TOutput type,
-      Types.Document document,
-      ARDB.BuiltInCategory categoryId
-    )
-      where TOutput : class
-    {
-      type = default;
-
-      try
-      {
-        if (!component.Params.TryGetData(DA, name, out type)) return false;
-        if (type is null)
-        {
-          var data = Types.ElementType.FromElementId(document.Value, document.Value.GetDefaultFamilyTypeId(new ARDB.ElementId(categoryId)));
-          if (data?.IsValid != true)
-            throw new Exceptions.RuntimeArgumentException(name, $"No suitable {((ERDB.Schemas.CategoryId) categoryId).Label} type has been found.");
-
-          if (data is Types.FamilySymbol symbol && !symbol.Value.IsActive)
-            symbol.Value.Activate();
-
-          type = data as TOutput;
-          if (type is null)
-            return data.CastTo(out type);
-        }
-
-        return true;
-      }
-      finally
-      {
-        // Validate type
-        switch (type)
-        {
-          case ARDB.Element element:
-          {
-            if (!document.Value.IsEquivalent(element.Document))
-              throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(type)} from a diferent document.");
-
-            if (element.Category.Id.ToBuiltInCategory() != categoryId)
-              throw new Exceptions.RuntimeArgumentException(name, $"Collected {nameof(type)} is not on category '{((ERDB.Schemas.CategoryId) categoryId).Label}'.");
-
-            if (element is ARDB.FamilySymbol symbol && !symbol.IsActive)
-              symbol.Activate();
-          }
-          break;
-
-          case Types.Element goo:
-          {
-            if (!document.Value.IsEquivalent(goo.Document))
-              throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(type)} from a diferent document.");
-
-            if (goo.Category.Id.ToBuiltInCategory() != categoryId)
-              throw new Exceptions.RuntimeArgumentException(name, $"Collected {nameof(type)} is not on category '{((ERDB.Schemas.CategoryId) categoryId).Label}'.");
-
-            if (goo is Types.FamilySymbol symbol && !symbol.Value.IsActive)
-              symbol.Value.Activate();
-          }
-          break;
         }
       }
     }
