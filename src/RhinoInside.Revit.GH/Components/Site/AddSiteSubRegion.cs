@@ -14,8 +14,11 @@ namespace RhinoInside.Revit.GH.Components.Site
   public class AddSiteSubRegion : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("0644989D-91B4-45F8-92BE-9FCDE38C5C76");
+#if REVIT_2024
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.hidden;
+#else
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
-    protected override string IconTag => string.Empty;
+#endif
 
     public AddSiteSubRegion() : base
     (
