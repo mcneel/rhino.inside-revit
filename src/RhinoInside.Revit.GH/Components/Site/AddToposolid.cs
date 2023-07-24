@@ -14,11 +14,11 @@ namespace RhinoInside.Revit.GH.Components.Site
   using RhinoInside.Revit.GH.Exceptions;
 
 #if REVIT_2024
-  [ComponentVersion(introduced: "1.16")]
+  [ComponentVersion(introduced: "1.16"), ComponentRevitAPIVersion(min: "2024.0")]
   public class AddToposolid : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("1A85EE3C-F045-462C-B6DA-E03F36C41E77");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.tertiary);
 
     public AddToposolid() : base
     (

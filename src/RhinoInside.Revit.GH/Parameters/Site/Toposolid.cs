@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Parameters
     (
       name: "Toposolid",
       nickname: "Toposolid",
-      description: "Contains a collection of Revit tToposolid elements",
+      description: "Contains a collection of Revit Toposolid elements",
       category: "Params",
       subcategory: "Revit"
     )
