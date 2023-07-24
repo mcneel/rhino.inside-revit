@@ -150,7 +150,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!view.Value.IsAnnotationView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
           if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
-          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.ElementType type, Types.Document.FromValue(view.Document), ARDB.BuiltInCategory.OST_IOSDetailGroups)) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.ElementType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.DetailGroupType)) return null;
 
           var viewPlane = view.Location;
           point = viewPlane.ClosestPoint(point.Value);

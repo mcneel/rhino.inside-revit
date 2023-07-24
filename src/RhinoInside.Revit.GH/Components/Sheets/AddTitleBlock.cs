@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
         {
           // Input
           if (!Params.TryGetData(DA, "Location", out Plane? location, x => x.IsValid)) return null;
-          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, Types.Document.FromValue(sheet.Document), ARDB.BuiltInCategory.OST_TitleBlocks)) return null;
+          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, Types.Document.FromValue(sheet.Document), ARDB.BuiltInCategory.OST_TitleBlocks)) return null;
 
           // Compute
           StartTransaction(sheet.Document);
