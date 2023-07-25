@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
               var deletedElementIds = updater?.DeletedElementIds ?? DeletedElementIds;
               if (deletedElementIds is object)
               {
-                deleted.AddRange
+                deleted?.AddRange
                 (
                   deletedElementIds.Select(x => new Types.Element(document, x)),
                   deletedElementIds.Count
@@ -171,7 +171,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
               var deletedElementIds = updater?.DeletedElementIds ?? DeletedElementIds;
               if (deletedElementIds is object)
               {
-                deleted.AddRange
+                deleted?.AddRange
                 (
                   deletedElementIds.Select(x => Types.Element.FromElementId(document, x)),
                   deletedElementIds.Count
@@ -181,7 +181,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
             if (updater?.ModifiedElementIds is object)
             {
-              modified.AddRange
+              modified?.AddRange
               (
                 updater.ModifiedElementIds.Select(x => Types.Element.FromElementId(document, x)),
                 updater.ModifiedElementIds.Count
