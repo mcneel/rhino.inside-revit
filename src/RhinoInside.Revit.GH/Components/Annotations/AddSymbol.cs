@@ -109,7 +109,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, Types.Document.FromValue(view.Document), ARDB.BuiltInCategory.OST_GenericAnnotation)) return null;
 
-          var viewPlane = view.Location;
+          var viewPlane = view.DetailPlane;
           if (view.Value.ViewType != ARDB.ViewType.ThreeD)
             point = viewPlane.ClosestPoint(point.Value);
 

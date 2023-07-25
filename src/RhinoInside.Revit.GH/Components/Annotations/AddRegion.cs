@@ -103,7 +103,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!Params.TryGetData(DA, "Line Style", out Types.GraphicsStyle linestyle, x => view.AssertValidDocument(x, "Line Style"))) return null;
 
           var tol = GeometryTolerance.Model;
-          var viewPlane = view.Location;
+          var viewPlane = view.DetailPlane;
           var loops = boundary.OfType<Brep>().SelectMany(x => x.Loops).Select(x => x.To3dCurve()).ToArray();
           foreach (var loop in loops)
           {

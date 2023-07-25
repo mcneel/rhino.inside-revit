@@ -109,8 +109,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
           type.AssertPlacementType(ARDB.FamilyPlacementType.ViewBased);
 
-          var tol = GeometryTolerance.Model;
-          var viewPlane = view.Location;
+          var viewPlane = view.DetailPlane;
           point = viewPlane.ClosestPoint(point.Value);
 
           if (rotation.HasValue && Params.Input<Param_Number>("Rotation")?.UseDegrees == true)
