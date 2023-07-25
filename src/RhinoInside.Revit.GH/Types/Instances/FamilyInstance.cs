@@ -286,6 +286,10 @@ namespace RhinoInside.Revit.GH.Types
     {
       return Value?.GetReferences(referenceType) ?? Array.Empty<ARDB.Reference>();
     }
+    public ARDB.Reference GetReference(string referenceName)
+    {
+      return Value?.GetReferenceByName(referenceName);
+    }
     #endregion
   }
 
