@@ -160,7 +160,7 @@ namespace RhinoInside.Revit.External.DB
       return Universe;
     }
 
-    public static ElementFilter ElementClassFilter(params Type[] types)
+    public static ElementFilter ElementClassFilter(IList<Type> types)
     {
       bool allTypesIncluded = false;
       bool specialTypesIncluded = false;
@@ -181,7 +181,7 @@ namespace RhinoInside.Revit.External.DB
         set.Where(x => !x.IsSubclassOf(typeof(ElementType))).ToArray() :
         set.ToArray();
 
-      switch (types.Length)
+      switch (types.Count)
       {
         case 0: break;
         case 1: filters.Add(new ElementClassFilter(types[0]));    break;
@@ -190,6 +190,9 @@ namespace RhinoInside.Revit.External.DB
 
       return Union(filters);
     }
+
+    public static ElementFilter ElementClassFilter(params Type[] types) => ElementClassFilter((IList<Type>) types);
+
 
     public static ElementFilter ElementKindFilter(ElementKind kind, bool? elementType, bool inverted = false)
     {
