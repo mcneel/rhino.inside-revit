@@ -238,6 +238,8 @@ namespace RhinoInside.Revit.GH.Types
       view.UpDirection.ToVector3d()
     ) : NaN.Plane;
 
+    public Plane DetailPlane => GenLevel?.Location ?? Location;
+
     public Point3d Position => Location.Origin;
 
     public Vector3d Direction => Location.ZAxis;

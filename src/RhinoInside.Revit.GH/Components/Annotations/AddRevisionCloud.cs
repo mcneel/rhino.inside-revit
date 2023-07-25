@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!Params.TryGetData(DA, "Revision", out ARDB.Revision revision, x => x.IsValid())) return null;
 
           var tol = GeometryTolerance.Model;
-          var viewPlane = view.Location;
+          var viewPlane = view.DetailPlane;
           var loops = boundary.OfType<Brep>().SelectMany(x => x.Loops).Select(x => { var c = x.To3dCurve(); c.Reverse(); return c; }).ToArray();
           foreach (var loop in loops)
           {

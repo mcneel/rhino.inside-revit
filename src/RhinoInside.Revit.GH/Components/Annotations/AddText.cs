@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             width = max;
           }
 
-          var viewPlane = view.Location;
+          var viewPlane = view.DetailPlane;
           if (view.Value.ViewType != ARDB.ViewType.ThreeD)
             point = viewPlane.ClosestPoint(point.Value);
 

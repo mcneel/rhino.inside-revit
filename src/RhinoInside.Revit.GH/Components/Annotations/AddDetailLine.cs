@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!view.Value.IsAnnotationView())
             throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
 
-          var viewPlane = view.Location;
+          var viewPlane = view.DetailPlane;
           var tol = GeometryTolerance.Model;
 
           if (curve.IsShort(tol.ShortCurveTolerance))

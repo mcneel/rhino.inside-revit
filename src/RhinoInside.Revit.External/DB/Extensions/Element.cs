@@ -966,7 +966,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
 #if REVIT_2018
         case FamilyInstance instance:
-          reference = instance.GetReferences(FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
+          reference = reference ?? instance.GetReferences(FamilyInstanceReferenceType.StrongReference).FirstOrDefault();
+          reference = reference ?? instance.GetReferences(FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
+          reference = reference ?? instance.GetReferences(FamilyInstanceReferenceType.CenterFrontBack).FirstOrDefault();
+          reference = reference ?? instance.GetReferences(FamilyInstanceReferenceType.CenterElevation).FirstOrDefault();
+          reference = reference ?? instance.GetReferences(FamilyInstanceReferenceType.WeakReference).FirstOrDefault();
           break;
 #endif
 

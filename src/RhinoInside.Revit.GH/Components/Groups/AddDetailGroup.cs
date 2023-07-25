@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.ElementType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.DetailGroupType)) return null;
 
-          var viewPlane = view.Location;
+          var viewPlane = view.DetailPlane;
           point = viewPlane.ClosestPoint(point.Value);
 
           if (rotation.HasValue && Params.Input<Param_Number>("Rotation")?.UseDegrees == true)
