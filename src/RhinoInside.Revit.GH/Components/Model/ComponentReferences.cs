@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Geometry
@@ -91,6 +92,69 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
       Params.TrySetDataList(DA, "Weak Reference", () =>
         component.GetReferences(ARDB.FamilyInstanceReferenceType.WeakReference).Select(component.GetGeometryObjectFromReference<Types.GeometryObject>));
+    }
+  }
+
+  [ComponentVersion(introduced: "1.16")]
+  public class ComponentReferencePlane : ZuiComponent
+  {
+    public override Guid ComponentGuid => new Guid("AAE738E5-88DF-4CDF-8DC9-6CDA11F334A0");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    protected override string IconTag => string.Empty;
+
+    public ComponentReferencePlane() : base
+    (
+      name: "Component Reference Plane",
+      nickname: "P-Reference",
+      description: "Retrieves references of given component.",
+      category: "Revit",
+      subCategory: "Model"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.FamilyInstance()
+        {
+          Name = "Component",
+          NickName = "C",
+          Description = "Component to query for references.",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_String()
+        {
+          Name = "Name",
+          NickName = "N",
+          Description = "Reference name.",
+        }
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GeometryFace()
+        {
+          Name = "Reference",
+          NickName = "R"
+        }
+      )
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.GetData(DA, "Component", out Types.FamilyInstance component)) return;
+      if (!Params.GetData(DA, "Name", out string name)) return;
+
+      Params.TrySetData(DA, "Reference", () =>
+        component.GetReference(name) is ARDB.Reference reference ? component.GetGeometryObjectFromReference<Types.GeometryFace>(reference) : null);
     }
   }
 }
