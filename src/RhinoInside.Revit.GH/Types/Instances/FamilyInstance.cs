@@ -280,6 +280,13 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
+
+    #region References
+    public IList<ARDB.Reference> GetReferences(ARDB.FamilyInstanceReferenceType referenceType)
+    {
+      return Value?.GetReferences(referenceType) ?? Array.Empty<ARDB.Reference>();
+    }
+    #endregion
   }
 
   [Kernel.Attributes.Name("Component Type")]
