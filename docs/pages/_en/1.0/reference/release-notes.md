@@ -14,6 +14,7 @@ group: Deployment & Configs
 
 - Added 'Add Toposolid' component.
 - Added 'Add Toposolid Sub-Division' component.
+- Added 'Component References' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

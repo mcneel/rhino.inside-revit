@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to deconstruct",
+          Description = "Element to query for references",
         }
       ),
       new ParamDefinition
@@ -189,7 +189,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     }
   }
 
-  [ComponentVersion(introduced: "1.15")]
+  [ComponentVersion(introduced: "1.16")]
   class GeometryReferenceElements : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("3EC6A941-9C34-4687-82E1-D7D9FE48064C");

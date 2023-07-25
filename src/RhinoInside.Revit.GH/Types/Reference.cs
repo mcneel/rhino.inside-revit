@@ -171,7 +171,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected internal ARDB.Reference GetAbsoluteReference(ARDB.Reference reference)
     {
-      if (reference.LinkedElementId == ARDB.ElementId.InvalidElementId)
+      if (reference.LinkedElementId == ElementIdExtension.Invalid)
       {
         if (reference.ElementId != Id)
           throw new ArgumentException("Invalid Reference", nameof(reference));
