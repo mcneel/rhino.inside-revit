@@ -17,6 +17,7 @@ group: Deployment & Configs
 - Added 'Component References' component.
 - Added 'Component Reference Plane' component.
 - Added 'Element Annotations' component.
+- Improved 'Host Shape' performance.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

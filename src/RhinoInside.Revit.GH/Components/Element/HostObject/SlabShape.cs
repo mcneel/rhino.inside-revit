@@ -16,19 +16,19 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   public class SlabShape : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("516B2771-0A9A-4F87-9DB1-E27FE0FA968B");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public SlabShape() : base
     (
-      name: "Slab Sub Elements",
-      nickname: "S-Sub Elements",
+      name: "Host Shape",
+      nickname: "H-Shape",
 #if REVIT_2024
       description: "Gives access to points and edges on a slab, roof, floor or toposolid.",
 #else
       description: "Gives access to points and edges on a slab, roof or floor.",
 #endif
       category: "Revit",
-      subCategory: "Model"
+      subCategory: "Architecture"
     )
     { }
 
