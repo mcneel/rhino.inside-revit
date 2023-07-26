@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         new Param_Point()
         {
           Name = "Shoulder Locations",
-          NickName = "HL",
+          NickName = "SL",
           Description = "Annotation shoulder locations",
           Access = GH_ParamAccess.list
         }, ParamRelevance.Primary
