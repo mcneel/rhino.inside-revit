@@ -323,8 +323,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
       if (VolatileData.DataCount == 1)
       {
-        var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
-          element.Location.IsValid;
+        // `Types.Group.Location` is too slow for this purpose.
+        //var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element && element.Location.IsValid;
+        var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element && element.IsValid;
 
         Menu_AppendItem(menu, $"Set CPlane", Menu_SetCPlane, cplane, false);
       }
@@ -515,20 +516,22 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private void Menu_SetCPlane(object sender, EventArgs e)
     {
-      if (VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element)
+      if
+      (
+        VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
+        Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc doc &&
+        (doc.Views.ActiveView ?? doc.Views.FirstOrDefault()) is RhinoView view &&
+        view.ActiveViewport is RhinoViewport vport
+      )
       {
-        if
-        (
-          Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc doc &&
-          (doc.Views.ActiveView ?? doc.Views.FirstOrDefault()) is RhinoView view &&
-          view.ActiveViewport is RhinoViewport vport
-        )
+        var location = element.Location;
+        if (location.IsValid)
         {
           view.BringToFront();
           doc.Views.ActiveView = view;
 
           var cplane = vport.GetConstructionPlane();
-          cplane.Plane = element.Location;
+          cplane.Plane = location;
           vport.PushConstructionPlane(cplane);
 
           view.Redraw();
