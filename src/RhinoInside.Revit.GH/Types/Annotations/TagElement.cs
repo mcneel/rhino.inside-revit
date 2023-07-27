@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Types
     public override GeometryObject[] References =>
       Value?.GetTaggedReferences().
       Cast<ARDB.Reference>().
-      Select(x => GeometryObject.FromReference(ReferenceDocument, x)).
+      Select(GetGeometryObjectFromReference<GeometryElement>).
       ToArray();
     #endregion
 

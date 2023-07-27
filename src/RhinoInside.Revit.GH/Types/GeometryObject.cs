@@ -363,6 +363,13 @@ namespace RhinoInside.Revit.GH.Types
       return default;
     }
 
+    public virtual ARDB.Reference GetDefaultReference() => _Reference;
+
+    public bool IsEquivalent(GeometryObject other) => other is object &&
+      Id.Equals(other.Id) &&
+      Document.IsEquivalent(other.Document) &&
+      Equals(GetType(), other.GetType());
+
     public GraphicsStyle GraphicsStyle => Value is ARDB.GeometryObject geometryObject ?
       geometryObject.GraphicsStyleId.IsValid() ? GetElement<GraphicsStyle>(geometryObject.GraphicsStyleId) : new GraphicsStyle() :
       null;
@@ -371,8 +378,6 @@ namespace RhinoInside.Revit.GH.Types
     /// Accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> for computation.
     /// </summary>
     public virtual BoundingBox BoundingBox => GetBoundingBox(Transform.Identity);
-
-    public virtual ARDB.Reference GetDefaultReference() => _Reference;
   }
 
   [Name("Element")]

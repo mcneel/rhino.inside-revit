@@ -16,7 +16,7 @@ group: Deployment & Configs
 - Added 'Add Toposolid Sub-Division' component.
 - Added 'Component References' component.
 - Added 'Component Reference Plane' component.
-- Added 'Element Annotations' component.
+- Added 'Reference Annotations' component.
 - Improved 'Host Shape' performance.
 
 {% endcapture %}

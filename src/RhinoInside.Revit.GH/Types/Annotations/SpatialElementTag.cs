@@ -182,7 +182,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.AreaTag tag && tag.Area is ARDB.Area area)
         {
           using (var reference = ARDB.Reference.ParseFromStableRepresentation(area.Document, area.UniqueId))
-            return new GeometryObject[] { GeometryElement.FromReference(area.Document, reference) };
+            return new GeometryObject[] { GetGeometryObjectFromReference<GeometryElement>(reference) };
         }
 
         return default;
@@ -214,7 +214,7 @@ namespace RhinoInside.Revit.GH.Types
           }
           else
           {
-            try { return new GeometryObject[] { GeometryObject.FromElementId(ReferenceDocument, tag.TaggedLocalRoomId) }; }
+            try { return new GeometryObject[] { GeometryObject.FromElementId(Document, tag.TaggedLocalRoomId) }; }
             catch { }
           }
         }
@@ -242,7 +242,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Mechanical.SpaceTag tag && tag.Space is ARDB.Mechanical.Space space)
         {
           using (var reference = ARDB.Reference.ParseFromStableRepresentation(space.Document, space.UniqueId))
-            return new GeometryObject[] { GeometryElement.FromReference(space.Document, reference) };
+            return new GeometryObject[] { GetGeometryObjectFromReference<GeometryElement>(reference) };
         }
 
         return default;
