@@ -107,13 +107,8 @@ namespace RhinoInside.Revit.GH.Types
 
       public override bool Visible
       {
-#if REVIT_2023
         get => element.Value.IsLeaderVisible(target);
         set => element.Value.SetIsLeaderVisible(target, value);
-#else
-        get => element.Value.get_Parameter(ARDB.BuiltInParameter.LEADER_LINE).AsBoolean();
-        set => element.Value.get_Parameter(ARDB.BuiltInParameter.LEADER_LINE).Update(value);
-#endif
       }
 
       public override bool HasElbow => Visible;

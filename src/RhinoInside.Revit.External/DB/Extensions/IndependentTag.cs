@@ -5,6 +5,38 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class IndependentTagExtension
   {
+#if !REVIT_2023
+    public static bool IsLeaderVisible(this IndependentTag tag, Reference referenceTagged)
+    {
+      if (referenceTagged is null)
+        throw new System.ArgumentNullException(nameof(referenceTagged));
+
+      foreach (var reference in tag.GetTaggedReferences())
+      {
+        if (tag.Document.AreEquivalentReferences(reference, referenceTagged))
+          return tag.HasLeader;
+      }
+
+      throw new System.ArgumentException(nameof(referenceTagged));
+    }
+
+    public static void SetIsLeaderVisible(this IndependentTag tag, Reference referenceTagged, bool visible)
+    {
+      if (referenceTagged is null)
+        throw new System.ArgumentNullException(nameof(referenceTagged));
+
+      foreach (var reference in tag.GetTaggedReferences())
+      {
+        if (tag.Document.AreEquivalentReferences(reference, referenceTagged))
+        {
+          tag.HasLeader = visible;
+          return;
+        }
+      }
+
+      throw new System.ArgumentException(nameof(referenceTagged));
+    }
+
 #if !REVIT_2022
     public static ISet<ElementId> GetTaggedLocalElementIds(this IndependentTag tag)
     {
@@ -113,6 +145,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       tag.LeaderEnd = pntEnd;
     }
+#endif
 #endif
   }
 }
