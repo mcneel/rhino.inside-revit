@@ -1,14 +1,15 @@
 using System;
+using System.Linq;
+using Grasshopper.Kernel;
 using Rhino.Display;
 using Rhino.Geometry;
-using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using Numerical;
   using Convert.Geometry;
   using External.DB.Extensions;
+  using Numerical;
 
   [Kernel.Attributes.Name("Spatial Element Tag")]
   public abstract class SpatialElementTag : TagElement
@@ -107,6 +108,9 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    public SpatialElement SpatialElement => IsValid ?
+      GetElementFromReference<SpatialElement>(References.FirstOrDefault()?.GetReference()) : null;
+
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value is ARDB.SpatialElementTag tag)
@@ -141,9 +145,9 @@ namespace RhinoInside.Revit.GH.Types
           var color = System.Drawing.Color.White;
           switch (Value)
           {
-            case ARDB.AreaTag _:              color = System.Drawing.Color.FromArgb(254, 251, 219); break;
+            case ARDB.AreaTag _: color = System.Drawing.Color.FromArgb(254, 251, 219); break;
             case ARDB.Architecture.RoomTag _: color = System.Drawing.Color.FromArgb(216, 238, 247); break;
-            case ARDB.Mechanical.SpaceTag _:  color = System.Drawing.Color.FromArgb(216, 255, 216); break;
+            case ARDB.Mechanical.SpaceTag _: color = System.Drawing.Color.FromArgb(216, 255, 216); break;
           }
 
           var rotation = (float) -(Constant.Tau / 4.0);
@@ -158,9 +162,16 @@ namespace RhinoInside.Revit.GH.Types
             autoScaleForDpi: false
           );
         }
-#if REVIT_2018
-        else args.Pipeline.DrawDot(head, tag.TagText, args.Color, System.Drawing.Color.White);
-#endif
+        else if (SpatialElement is SpatialElement spatialElement)
+        {
+          var name = spatialElement.Name;
+          var number = spatialElement.Number;
+
+          if (string.IsNullOrEmpty(name))
+            args.Pipeline.DrawDot(head, number, args.Color, System.Drawing.Color.White);
+          else
+            args.Pipeline.DrawDot(head, $"{name}{Environment.NewLine}{number}", args.Color, System.Drawing.Color.White);
+        }
       }
     }
   }
