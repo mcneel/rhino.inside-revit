@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Types
   interface IAnnotationReferencesAccess
   {
     /// <summary>
-    /// Returns an array of geometric references to which the dimension is attached.
+    /// Returns an array of geometric references to which the annotation is attached.
     /// </summary>
     GeometryObject[] References { get; }
   }

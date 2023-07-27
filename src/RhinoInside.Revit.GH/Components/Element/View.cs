@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           Name = "View Specific",
           NickName = "S",
           Description = "Wheter element is view specific or not",
-        }
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -63,8 +63,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "View",
           NickName = "V",
-          Description = "Element owner view",
-        }
+          Description = "The view that owns the Element.",
+        }, ParamRelevance.Primary
       ),
     };
 
@@ -73,8 +73,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
       else DA.SetData("Element", element);
 
-      DA.SetData("View Specific", element.ViewSpecific);
-      DA.SetData("View", element.OwnerView);
+      Params.TrySetData(DA, "View Specific", () => element.ViewSpecific);
+      Params.TrySetData(DA, "View", () => element.OwnerView);
     }
   }
 }

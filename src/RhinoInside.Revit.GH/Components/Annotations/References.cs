@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations
 {
   using External.DB;
+  using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.12")]
   public class AnnotationReferences : ZuiComponent
@@ -17,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AnnotationReferences() : base
     (
       name: "Annotation References",
-      nickname: "References",
+      nickname: "A-References",
       description: string.Empty,
       category: "Revit",
       subCategory: "Annotate"
@@ -70,16 +72,16 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   }
 
   [ComponentVersion(introduced: "1.16")]
-  public class ElementAnnotations : ZuiComponent
+  public class ReferenceAnnotations : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("2AB03AAF-98E4-4EF5-A84B-918B64E5908D");
     public override GH_Exposure Exposure => GH_Exposure.quinary;
     protected override string IconTag => string.Empty;
 
-    public ElementAnnotations() : base
+    public ReferenceAnnotations() : base
     (
-      name: "Element Annotations",
-      nickname: "E-Annotations",
+      name: "Reference Annotations",
+      nickname: "R-Annotations",
       description: string.Empty,
       category: "Revit",
       subCategory: "Annotate"
@@ -91,10 +93,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.GeometryObject()
         {
-          Name = "Element",
-          NickName = "E",
+          Name = "Reference",
+          NickName = "R",
         }
       ),
       new ParamDefinition
@@ -111,14 +113,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      new ParamDefinition
-      (
-        new Parameters.GraphicalElement()
-        {
-          Name = "Element",
-          NickName = "E",
-        }, ParamRelevance.Secondary
-      ),
       new ParamDefinition
       (
         new Parameters.Dimension()
@@ -143,8 +137,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
-      else Params.TrySetData(DA, "Element", () => element);
+      if (!Params.GetData(DA, "Reference", out Types.GeometryObject reference, x => x.IsValid)) return;
+      if (!reference.CastTo(out Types.GraphicalElement referenceElement)) return;
+      
       if (!Params.TryGetData(DA, "View", out Types.View view, x => x.IsValid)) return;
 
       var _Dimensions_ = Params.IndexOfOutputParam("Dimensions");
@@ -164,24 +159,51 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (typesList.Count == 0) return;
       var filter = CompoundElementFilter.ElementClassFilter(typesList);
 
+      IEnumerable<ARDB.Element> annotationElements = null;
+
       if (view is object)
-        filter = filter.Intersect(new ARDB.ElementOwnerViewFilter(view.Id));
-
-      var dimensions = new List<ARDB.Dimension>();
-      var tags = new List<ARDB.Element>();
-
-      foreach (var id in element.Value.GetDependentElements(filter.ThatExcludes(element.Id)))
       {
-        switch (element.Document.GetElement(id))
+        if (view.Document.IsEquivalent(reference.Document))
         {
-          case ARDB.IndependentTag independentTag:
-            tags.Add(independentTag); break;
+          filter = filter.Intersect(new ARDB.ElementOwnerViewFilter(view.Id, inverted: false));
+          annotationElements = referenceElement.Value.GetDependentElements(filter.ThatExcludes(reference.Id)).Select(reference.Document.GetElement);
+        }
+        else if (view.Document.IsEquivalent(reference.ReferenceDocument))
+        {
+          using (var collector = new ARDB.FilteredElementCollector(view.Document).WherePasses(filter))
+            annotationElements = collector.OwnedByView(view.Id).ToElements();
+        }
+      }
+      else
+      {
+        filter = filter.Intersect(new ARDB.ElementOwnerViewFilter(ElementIdExtension.Invalid, inverted: true));
+        annotationElements = referenceElement.Value.GetDependentElements(filter.ThatExcludes(reference.Id)).Select(reference.Document.GetElement);
+      }
 
-          case ARDB.SpatialElementTag spatialElementTag:
-            tags.Add(spatialElementTag); break;
+      var dimensions = new List<Types.Dimension>();
+      var tags = new List<Types.TagElement>();
 
-          case ARDB.Dimension dimension:
-            dimensions.Add(dimension); break;
+      foreach (var annotationElement in annotationElements)
+      {
+        var dependent = reference.GetElement<Types.GraphicalElement>(annotationElement);
+        if (dependent is Types.IAnnotationReferencesAccess annotation)
+        {
+          foreach (var annotationReference in annotation.References)
+          {
+            if (!annotationReference.IsEquivalent(reference))
+              continue;
+
+            switch (dependent)
+            {
+              case Types.Dimension dimension:
+                dimensions.Add(dimension); break;
+
+              case Types.TagElement tag:
+                tags.Add(tag); break;
+            }
+
+            break;
+          }
         }
       }
 

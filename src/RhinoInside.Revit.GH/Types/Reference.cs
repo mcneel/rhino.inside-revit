@@ -171,17 +171,12 @@ namespace RhinoInside.Revit.GH.Types
 
     protected internal ARDB.Reference GetAbsoluteReference(ARDB.Reference reference)
     {
-      if (reference.LinkedElementId == ElementIdExtension.Invalid)
+      if (IsLinked)
       {
-        if (reference.ElementId != Id)
-          throw new ArgumentException("Invalid Reference", nameof(reference));
-
-        if (IsLinked)
+        if (reference.LinkedElementId == ElementIdExtension.Invalid)
           return reference.CreateLinkReference(ReferenceDocument, ReferenceId, Document);
-      }
-      else
-      {
-        if (reference.ElementId != ReferenceId)
+
+        if (reference.LinkedElementId != ReferenceId)
           throw new ArgumentException("Invalid Reference", nameof(reference));
       }
 
@@ -205,13 +200,13 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (element.IsValid())
       {
-        if (!Document.IsEquivalent(element.Document))
-          throw new Exceptions.RuntimeArgumentException($"Invalid {typeof(T)} Document", nameof(element));
+        if (IsLinked && Document.IsEquivalent(element.Document))
+          return (T) Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, element.Id));
 
-        return (T)
-          (IsLinked ?
-          Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, element.Id)) :
-          Element.FromElement(element));
+        if (!ReferenceDocument.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid {typeof(T)} Document");
+
+        return (T) Element.FromElement(element);
       }
 
       return null;

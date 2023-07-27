@@ -122,7 +122,7 @@ namespace RhinoInside.Revit.GH.Types
     public GeometryObject[] References =>
       Value?.References.
       Cast<ARDB.Reference>().
-      Select(x => GeometryObject.FromReference(ReferenceDocument, x)).
+      Select(GetGeometryObjectFromReference<GeometryObject>).
       ToArray();
     #endregion
 
