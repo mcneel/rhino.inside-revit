@@ -1007,6 +1007,24 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </summary>
     public static IReadOnlyCollection<BuiltInCategory> BuiltInCategories => builtInCategories;
 
+    static Document _HiddenInUIBuiltInCategoriesDocument;
+    static BuiltInCategory[] _HiddenInUIBuiltInCategories;
+
+    /// <summary>
+    /// Set of hidden <see cref="Autodesk.Revit.DB.BuiltInCategory"/> enum values.
+    /// </summary>
+    /// <param name="document"></param>
+    public static IReadOnlyCollection<BuiltInCategory> GetHiddenInUIBuiltInCategories(Document document)
+    {
+      if (!document.IsEquivalent(_HiddenInUIBuiltInCategoriesDocument))
+      {
+        _HiddenInUIBuiltInCategories = BuiltInCategories.Where(x => document.GetCategory(x)?.IsHiddenInUI() != false).ToArray();
+        _HiddenInUIBuiltInCategoriesDocument = document;
+      }
+
+      return _HiddenInUIBuiltInCategories;
+    }
+
     /// <summary>
     /// Checks if a <see cref="Autodesk.Revit.DB.BuiltInCategory"/> is valid.
     /// </summary>
@@ -1024,12 +1042,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
   public static class CategoryExtension
   {
     /// <summary>
-    /// Check if <paramref name="category"/> is in the Document or in its parent CategoryNameMap
+    /// Identifies if the category is hidden to the user and should not be displayed in UI.
     /// </summary>
     /// <param name="category"></param>
-    /// <returns>true in case is not found</returns>
-    public static bool IsHidden(this Category category)
+    /// <returns>True if the category should not be displayed in UI.</returns>
+    public static bool IsHiddenInUI(this Category category)
     {
+#if REVIT_2020
+      return !category.IsVisibleInUI;
+#else
+
+      switch (category.Id.ToBuiltInCategory())
+      {
+        case BuiltInCategory.OST_Materials:
+        case BuiltInCategory.OST_RvtLinks:
+          return true;
+      }
+
       var map = (category.Parent is Category parent) ?
                  parent.SubCategories :
                  category.Document()?.Settings.Categories;
@@ -1037,7 +1066,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (map is null)
         return true;
 
-      return !map.Cast<Category>().Any(x => x.Id == category.Id);
+      // There are categories with a duplicate name so we also need to check is same Id.
+      if (map.Contains(category.Name) && map.get_Item(category.Name).Id == category.Id)
+        return false;
+
+      // There are built in categories that are not indexed by name so we look for BuiltInCategory.
+      if (map is Categories categories && category.Id.TryGetBuiltInCategory(out var bic))
+      {
+        try { return categories.get_Item(bic) is null; }
+        catch { }
+      }
+
+      return true;
+#endif
     }
 
     /// <summary>
