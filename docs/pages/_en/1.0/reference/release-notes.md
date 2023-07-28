@@ -18,6 +18,7 @@ group: Deployment & Configs
 - Added 'Component Reference Plane' component.
 - Added 'Reference Annotations' component.
 - Improved 'Host Shape' performance.
+- Now 'Query View Elements' filters out hidden on UI categories.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

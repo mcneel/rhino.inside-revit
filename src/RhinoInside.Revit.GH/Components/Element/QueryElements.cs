@@ -195,6 +195,15 @@ namespace RhinoInside.Revit.GH.Components.Elements
             ERDB.CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
           );
         }
+        else
+        {
+          // Default category filtering
+          var hiddenCategories = BuiltInCategoryExtension.GetHiddenInUIBuiltInCategories(view.Document) as ICollection<ARDB.BuiltInCategory>;
+          elementCollector = elementCollector.WherePasses
+          (
+            new ARDB.ElementMulticategoryFilter(hiddenCategories, inverted: true)
+          );
+        }
 
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
