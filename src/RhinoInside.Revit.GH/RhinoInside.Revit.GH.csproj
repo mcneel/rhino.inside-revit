@@ -239,6 +239,8 @@
     <Compile Include="Components\Sheets\AddViewport.cs" />
     <Compile Include="Components\Sheets\QueryRevisions.cs" />
     <Compile Include="Components\Sheets\QuerySheets.cs" />
+    <Compile Include="Components\Sheets\QueryTitleBlocks.cs" />
+    <Compile Include="Components\Sheets\QueryViewports.cs" />
     <Compile Include="Components\Sheets\SheetByNumber.cs" />
     <Compile Include="Components\Sheets\SheetByNumber_Assembly.cs" />
     <Compile Include="Components\Sheets\SheetByNumber_Placeholder.cs" />

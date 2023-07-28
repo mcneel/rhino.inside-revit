@@ -117,7 +117,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_GraphicalElement
     public bool? ViewSpecific => Value?.ViewSpecific;
-    public View OwnerView => View.FromElementId(Document, Value?.OwnerViewId) as View;
+    public View OwnerView => GetElement<View>(Value?.OwnerViewId);
     #endregion
 
     #region IGH_GeometricGoo

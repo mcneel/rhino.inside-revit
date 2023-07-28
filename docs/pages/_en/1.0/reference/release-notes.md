@@ -22,6 +22,8 @@ group: Deployment & Configs
 - Added 'Is Visible UI' to 'Query Categories' and 'Category Identity'.
 - Added 'Query View Owned Elements' component.
 - Renamed 'Query View Elements' to 'Query Visible Elements'.
+- Added 'Query Title Blocks' component.
+- Added 'Query Viewports' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

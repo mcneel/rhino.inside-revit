@@ -29,9 +29,9 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.View>("View", "V", "View", GH_ParamAccess.item),
+      ParamDefinition.Create<Parameters.View>("View", "V", "View"),
       ParamDefinition.Create<Parameters.Category>("Categories", "C", "Category", GH_ParamAccess.list, optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
