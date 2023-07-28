@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -72,6 +73,10 @@ namespace RhinoInside.Revit.GH.Types
           Value?.UpdateParameterValue(ARDB.BuiltInParameter.SHEET_SCHEDULED, value);
       }
     }
+    #endregion
+
+    #region Viewports
+    public Viewport[] Viewports => Value.GetAllViewports().Select(GetElement<Viewport>).ToArray();
     #endregion
   }
 }
