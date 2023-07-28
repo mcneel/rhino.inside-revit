@@ -19,6 +19,7 @@ group: Deployment & Configs
 - Added 'Reference Annotations' component.
 - Improved 'Host Shape' performance.
 - Now 'Query View Elements' filters out hidden on UI categories.
+- Added 'Is Visible UI' to 'Query Categories' and 'Category Identity'.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
