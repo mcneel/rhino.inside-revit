@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
@@ -11,13 +13,14 @@ namespace RhinoInside.Revit.GH.Components.Views
   {
     public override Guid ComponentGuid => new Guid("63C816D8-4A84-45B6-BCEC-C60E57FBC547");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
-    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.Viewport));
+    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter(inverted: true).
+      Intersect(new ARDB.ElementClassFilter(typeof(ARDB.Viewport)));
 
     public QueryViewports() : base
     (
       name: "Query Viewports",
-      nickname: "Q-Viewports",
-      description: "Get elements owned by a view",
+      nickname: "Vports",
+      description: "Get all viewports placed in a sheet",
       category: "Revit",
       subCategory: "View"
     )

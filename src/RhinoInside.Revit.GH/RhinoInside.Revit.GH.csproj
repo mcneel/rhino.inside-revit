@@ -294,6 +294,7 @@
     <Compile Include="Components\Views\Graphics\GraphicOverrides.cs" />
     <Compile Include="Components\Views\Graphics\WorksetVisibilityOverrides.cs" />
     <Compile Include="Components\Views\Identity.cs" />
+    <Compile Include="Components\Views\QueryTitleBlocks.cs" />
     <Compile Include="Components\Views\QueryViewElements.cs" />
     <Compile Include="Components\Views\QueryViewports.cs" />
     <Compile Include="Components\Views\QueryViews.cs" />
