@@ -264,10 +264,6 @@ namespace RhinoInside.Revit.External.DB
           transaction.Dispose();
           throw e;
         }
-        finally
-        {
-          HandlingOptions.TransactionNotification?.OnDone(result);
-        }
       }
 
       return result;

@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       Params.TrySetData(DA, "Line Style", () => curve.LineStyle);
     }
 
-    public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
+    protected override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
     {
       base.OnPrepare(documents);
 
