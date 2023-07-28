@@ -24,6 +24,7 @@ group: Deployment & Configs
 - Renamed 'Query View Elements' to 'Query Visible Elements'.
 - Added 'Query Title Blocks' component.
 - Added 'Query Viewports' component.
+- Fixed 'Element Name' when used to Rename Subcategories in Multiple families at once. #974
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
