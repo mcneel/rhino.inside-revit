@@ -745,24 +745,6 @@ namespace RhinoInside.Revit.GH.Components
       finally { element = (ARDB.Element) arguments[1]; }
     }
 
-    // Step 2.1
-    public override void OnStarted(ARDB.Document document)
-    {
-      base.OnStarted(document);
-    }
-
-    // Step 3.1
-    public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
-    {
-      base.OnPrepare(documents);
-    }
-
-    // Step 3.2
-    public override void OnDone(ARDB.TransactionStatus status)
-    {
-      base.OnDone(status);
-    }
-
     #region IGH_ElementIdBakeAwareObject
     IEnumerable<Types.IGH_GraphicalElement> GetElementsToBake(ARDB.Document document) =>
       Params.Output.Where(x => x is Kernel.IGH_ReferenceParam).

@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     )
     { }
 
-    public override void OnStarted(ARDB.Document document)
+    protected override void OnStarted(ARDB.Document document)
     {
       base.OnStarted(document);
 
@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     }
 
     List<ARDB.Wall> joinedWalls = new List<ARDB.Wall>();
-    public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
+    protected override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
     {
       base.OnPrepare(documents);
 

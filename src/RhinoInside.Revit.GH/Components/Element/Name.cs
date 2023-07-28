@@ -109,7 +109,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     }
 
     Dictionary<string, string> namesMap;
-    public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
+    protected override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
     {
       if (renames is object)
       {
@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       }
     }
 
-    public override void OnDone(ARDB.TransactionStatus status)
+    protected override void OnDone(ARDB.TransactionStatus status)
     {
       if (status == ARDB.TransactionStatus.Committed && namesMap is object)
       {
