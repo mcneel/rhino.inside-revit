@@ -144,16 +144,16 @@ namespace RhinoInside.Revit.GH.Components.Elements
     }
   }
 
-  public class QueryViewElements : ElementCollectorComponent
+  public class QueryVisibleElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("79DAEA3A-13A3-49BF-8BEB-AA28E3BE4515");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementIsElementTypeFilter(inverted: true);
 
-    public QueryViewElements() : base
+    public QueryVisibleElements() : base
     (
-      name: "Query View Elements",
-      nickname: "ViewEles",
+      name: "Query Visible Elements",
+      nickname: "VisEles",
       description: "Get elements visible in a view",
       category: "Revit",
       subCategory: "Element"
@@ -212,8 +212,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
         (
           "Elements",
           elementCollector.
-          Where(x => Types.GraphicalElement.IsValidElement(x)).
           Select(Types.GraphicalElement.FromElement).
+          OfType<Types.GraphicalElement>().
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

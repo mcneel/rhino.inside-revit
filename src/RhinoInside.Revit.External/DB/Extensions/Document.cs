@@ -709,12 +709,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (Category.GetCategory(doc, categoryId) is Category category)
           return category;
       }
-      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+      catch { }
 
       // 2. Try looking for any GraphicsStyle that points to the Category we are looking for.
       using (var collector = new FilteredElementCollector(doc).OfClass(typeof(GraphicsStyle)))
       {
-        foreach (var style in collector.Cast<GraphicsStyle>())
+        foreach (var style in collector.ToElements().Cast<GraphicsStyle>())
         {
           var category = style.GraphicsStyleCategory;
           if (category.Id.ToBuiltInCategory() == categoryId)
