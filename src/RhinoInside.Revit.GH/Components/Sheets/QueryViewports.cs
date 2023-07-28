@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Views
+namespace RhinoInside.Revit.GH.Components.Sheets
 {
   [ComponentVersion(introduced: "1.16")]
   public class QueryViewports : ElementCollectorComponent
