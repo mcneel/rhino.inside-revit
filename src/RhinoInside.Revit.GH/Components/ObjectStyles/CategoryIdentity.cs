@@ -1,11 +1,10 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
-  [ComponentVersion(introduced: "1.0", updated: "1.6")]
+  [ComponentVersion(introduced: "1.0", updated: "1.16")]
   public class CategoryIdentity : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("D794361E-DE8C-4D0A-BC77-52293F27D3AA");
@@ -33,10 +32,11 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Category name"),
       ParamDefinition.Create<Param_Boolean>("Is Subcategory", "ISC", "Is subcategory"),
-      ParamDefinition.Create<Param_Boolean>("Allows Subcategories", "ASC", "Category allows subcategories to be added", relevance: ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_Boolean>("Allows Parameters", "AP", "Category allows bound parameters", relevance: ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_Boolean>("Has Material Quantities", "HMQ", "Category has material quantities", relevance: ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_Boolean>("Cuttable", "C", "Category is cuttable", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_Boolean>("Is Visible UI", "VUI", "Category is exposed in UI", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Allows Subcategories", "ASC", "Category allows subcategories to be added", relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Param_Boolean>("Allows Parameters", "AP", "Category allows bound parameters", relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Param_Boolean>("Has Material Quantities", "HMQ", "Category has material quantities", relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Param_Boolean>("Cuttable", "C", "Category is cuttable", relevance: ParamRelevance.Secondary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -47,6 +47,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       Params.TrySetData(DA, "Parent", () => category.Parent);
       Params.TrySetData(DA, "Name", () => category.FullName);
       Params.TrySetData(DA, "Is Subcategory", () => category.IsSubcategory);
+      Params.TrySetData(DA, "Is Visible UI", () => category.IsVisibleInUI);
       Params.TrySetData(DA, "Allows Subcategories", () => category.CanAddSubcategory);
       Params.TrySetData(DA, "Allows Parameters", () => category.AllowsBoundParameters);
       Params.TrySetData(DA, "Has Material Quantities", () => category.HasMaterialQuantities);

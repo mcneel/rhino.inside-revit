@@ -204,6 +204,7 @@ namespace RhinoInside.Revit.GH.Types
       _CategoryType = default;
       _IsTagCategory = default;
       _IsSubcategory = default;
+      _IsVisibleInUI = default;
       _CanAddSubcategory = default;
       _AllowsBoundParameters = default;
       _HasMaterialQuantities = default;
@@ -235,6 +236,7 @@ namespace RhinoInside.Revit.GH.Types
       _CategoryType = value?.CategoryType;
       _IsTagCategory = value?.IsTagCategory;
       _IsSubcategory = value?.Parent is object;
+      _IsVisibleInUI = value?.IsVisibleInUI();
       _CanAddSubcategory = value?.CanAddSubcategory;
       _AllowsBoundParameters = value?.AllowsBoundParameters;
       _HasMaterialQuantities = value?.HasMaterialQuantities;
@@ -475,6 +477,9 @@ namespace RhinoInside.Revit.GH.Types
 
     bool? _IsSubcategory;
     public bool? IsSubcategory => _IsSubcategory ?? (_IsSubcategory = APIObject?.Parent is object);
+
+    bool? _IsVisibleInUI;
+    public bool? IsVisibleInUI => _IsVisibleInUI ?? (_IsVisibleInUI = APIObject?.IsVisibleInUI());
 
     bool? _CanAddSubcategory;
     public bool? CanAddSubcategory => _CanAddSubcategory ?? (_CanAddSubcategory = APIObject?.CanAddSubcategory);

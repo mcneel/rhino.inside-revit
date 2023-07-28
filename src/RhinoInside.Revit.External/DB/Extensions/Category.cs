@@ -1018,7 +1018,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (!document.IsEquivalent(_HiddenInUIBuiltInCategoriesDocument))
       {
-        _HiddenInUIBuiltInCategories = BuiltInCategories.Where(x => document.GetCategory(x)?.IsHiddenInUI() != false).ToArray();
+        _HiddenInUIBuiltInCategories = BuiltInCategories.Where(x => document.GetCategory(x)?.IsVisibleInUI() != true).ToArray();
         _HiddenInUIBuiltInCategoriesDocument = document;
       }
 
@@ -1042,21 +1042,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
   public static class CategoryExtension
   {
     /// <summary>
-    /// Identifies if the category is hidden to the user and should not be displayed in UI.
+    /// Identifies if the category is visible to the user and should be displayed in UI.
     /// </summary>
     /// <param name="category"></param>
-    /// <returns>True if the category should not be displayed in UI.</returns>
-    public static bool IsHiddenInUI(this Category category)
+    /// <returns>True if the category should be displayed in UI.</returns>
+    public static bool IsVisibleInUI(this Category category)
     {
 #if REVIT_2020
-      return !category.IsVisibleInUI;
+      return category.IsVisibleInUI;
 #else
-
       switch (category.Id.ToBuiltInCategory())
       {
         case BuiltInCategory.OST_Materials:
         case BuiltInCategory.OST_RvtLinks:
-          return true;
+          return false;
       }
 
       var map = (category.Parent is Category parent) ?
@@ -1064,20 +1063,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
                  category.Document()?.Settings.Categories;
 
       if (map is null)
-        return true;
+        return false;
 
       // There are categories with a duplicate name so we also need to check is same Id.
       if (map.Contains(category.Name) && map.get_Item(category.Name).Id == category.Id)
-        return false;
+        return true;
 
       // There are built in categories that are not indexed by name so we look for BuiltInCategory.
       if (map is Categories categories && category.Id.TryGetBuiltInCategory(out var bic))
       {
-        try { return categories.get_Item(bic) is null; }
+        try { return categories.get_Item(bic) is object; }
         catch { }
       }
 
-      return true;
+      return false;
 #endif
     }
 
