@@ -470,7 +470,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public Category Parent => _IsSubcategory == false ? null : FromCategory(APIObject?.Parent);
 
-    public IEnumerable<Category> SubCategories => APIObject?.SubCategories?.Cast<ARDB.Category>().Select(FromCategory);
+    public IEnumerable<Category> SubCategories => APIObject?.
+      SubCategories?.
+      Cast<ARDB.Category>().
+      Where(x => !x.AllowsBoundParameters).
+      OrderBy(x => x.Id.ToValue()).
+      Select(FromCategory);
 
     bool? _IsTagCategory;
     public bool? IsTagCategory => _IsTagCategory ?? (_IsTagCategory = APIObject?.IsTagCategory);
