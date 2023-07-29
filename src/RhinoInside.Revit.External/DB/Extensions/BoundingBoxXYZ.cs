@@ -418,6 +418,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
+    public static XYZ GetCenter(this BoundingBoxXYZ value)
+    {
+      using (var transform = value.Transform)
+      {
+        var (min, max) = value;
+        return (transform.OfPoint(min) * 0.5) + (transform.OfPoint(max) * 0.5);
+      }
+    }
+
     public static XYZ[] GetCorners(this BoundingBoxXYZ value)
     {
       using (var transform = value.Transform)
