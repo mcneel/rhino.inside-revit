@@ -192,7 +192,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return Menu_AppendItem
       (
         menu,
-        text ?? $"Set new ${TypeName}",
+        text ?? $"Set new {TypeName}",
         Menu_PromptNew(commandId),
         postable,
         false
