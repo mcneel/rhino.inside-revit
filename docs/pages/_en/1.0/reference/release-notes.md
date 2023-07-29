@@ -26,6 +26,10 @@ group: Deployment & Configs
 - Added 'Query Viewports' component.
 - Fixed 'Element Name' when used to rename _Subcategories_ in multiple families at once.
   [#898](https://github.com/mcneel/rhino.inside-revit/issues/898)
+- Fix on 'Query Categories' it should output ordered by id.
+- Fix on 'Query Visible Elements' when a `<None>` category is used.
+- 'Element Subcategory' compoennt now works on `GenericForm` elements.
+
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
