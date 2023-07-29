@@ -18,13 +18,18 @@ group: Deployment & Configs
 - Added 'Component Reference Plane' component.
 - Added 'Reference Annotations' component.
 - Improved 'Host Shape' performance.
-- Now 'Query View Elements' filters out hidden UI categories.
+- Now 'Query View Elements' filters out hidden UI _Categories_.
 - Added 'Is Visible UI' to 'Query Categories' and 'Category Identity'.
 - Added 'Query View Owned Elements' component.
-- Renamed 'Query View Elements' to 'Query Visible Elements'.
+- Renamed 'Query View Elements' -> 'Query Visible Elements'.
 - Added 'Query Title Blocks' component.
 - Added 'Query Viewports' component.
-- Fixed 'Element Name' when used to Rename Subcategories in Multiple families at once. #974
+- Fixed 'Element Name' when used to rename _Subcategories_ in multiple families at once.
+  [#898](https://github.com/mcneel/rhino.inside-revit/issues/898)
+- Fix on 'Query Categories' it should output ordered by id.
+- Fix on 'Query Visible Elements' when a `<None>` category is used.
+- 'Element Subcategory' compoennt now works on `GenericForm` elements.
+
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
@@ -37,7 +42,7 @@ group: Deployment & Configs
 
 - Added {% include ltr/comp.html uuid='440b6beb' %}
 - Added {% include ltr/comp.html uuid='6388cfc0' %}
-- Added {% include ltr/comp.html uuid='f9bc3f5e' %}
+- Exposed {% include ltr/comp.html uuid='f9bc3f5e' %}
 - Includes all changes under 1.15RC releases listed below
 
 {% include ltr/release-header.html title="v1.15 RC2" version="v1.15.8571.17168" pre_release=true time="06/20/2023" %}
@@ -116,7 +121,8 @@ group: Deployment & Configs
 - Moved Component Family related components to 'Component' panel.
 - Renamed 'Host Inserts' component to {% include ltr/comp.html uuid='70ccf7a6' %}.
 - Now {% include ltr/comp.html uuid='70ccf7a6' %} keep linked elements on linked documents.
-- Fixd a bug on {% include ltr/comp.html uuid='ad88cf11' %} component 'Line Style' input when used on a Family document. #788
+- Fixd a bug on {% include ltr/comp.html uuid='ad88cf11' %} component 'Line Style' input when used on a Family document.
+  [#788](https://github.com/mcneel/rhino.inside-revit/issues/788)
 - Fixed a bug on previews when there are Groups on the canvas.
 - Now {% include ltr/comp.html uuid='c2b9b045' %} treats relative paths as temporary.
 - Now {% include ltr/comp.html uuid='c2b9b045' %} has a 'Path' output to allow chaining with 'Load Component Family'.
@@ -168,10 +174,12 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.12 RC1" version="v1.12.8417.6530" pre_release=true time="01/17/2023" %}
 
-- Fixed {% include ltr/comp.html uuid='01e86d7c' %} name is getting an unexpected integer added in creation. [#754](https://github.com/mcneel/rhino.inside-revit/issues/754)
+- Fixed {% include ltr/comp.html uuid='01e86d7c' %} name is getting an unexpected integer added in creation.
+  [#754](https://github.com/mcneel/rhino.inside-revit/issues/754)
 - Added {% include ltr/comp.html uuid='e4e08f99' %} component.
 - Added {% include ltr/comp.html uuid='2922af4a' %} component.
-- Added {% include ltr/comp.html uuid='b062c96e' %} component. [#753](https://github.com/mcneel/rhino.inside-revit/issues/753)
+- Added {% include ltr/comp.html uuid='b062c96e' %} component.
+  [#753](https://github.com/mcneel/rhino.inside-revit/issues/753)
 
 
 {% include ltr/release-header.html title="v1.11" version="v1.11.8425.15605" time="01/10/2023" %}
@@ -361,7 +369,8 @@ group: Deployment & Configs
 - Fixed structural framing creation on a family document.
 - Fixed curved Beams when in a vertical plane.
 - Fixed dimensioning components, when working with Detail Lines and Reference Planes.
-- {% include ltr/comp.html uuid='8f1ee110' %} casting issue with enums [#613](https://github.com/mcneel/rhino.inside-revit/issues/613)
+- {% include ltr/comp.html uuid='8f1ee110' %} casting issue with enums
+  [#613](https://github.com/mcneel/rhino.inside-revit/issues/613)
 
 {% include ltr/release-header.html title="v1.8 RC2" version="v1.8.8207.14855" pre_release=true time="06/21/2022" %}
 
@@ -443,7 +452,8 @@ group: Deployment & Configs
 
 - Added support for Revit 2023
 - Fixed conversion from {% include ltr/comp.html uuid='15ad6bf9' %} to Surface when slant angle is negative
-- Fixed a bug on {% include ltr/comp.html uuid='0f251f87' %} [#507](https://github.com/mcneel/rhino.inside-revit/issues/507)
+- Fixed a bug on {% include ltr/comp.html uuid='0f251f87' %}
+  [#507](https://github.com/mcneel/rhino.inside-revit/issues/507)
 - Updated Revit download link when loaded in an unsupported version
 
 {% include ltr/release-header.html title="v1.6 RC4" version="v1.6.8124.18574" pre_release=true time="04/05/2022" %}
@@ -539,7 +549,8 @@ group: Deployment & Configs
 - Renamed 'Document Links' to {% include ltr/comp.html uuid='ebccfdd8-' %}.
 - Renamed 'Binding' to 'Scope' in parameter components.
 - Updated 'Element Dependents' to return original 'Elements' and also 'Referentials'.
-- Fixed {% include ltr/comp.html uuid='b3bcbf5b-' %} and {% include ltr/comp.html uuid='8b85b1fb-' %}: Now both have an option _Expand Dependents_ in the context menu to extract dependent elements geometry. Outputs are grafted accordingly. Closes #509.
+- Fixed {% include ltr/comp.html uuid='b3bcbf5b-' %} and {% include ltr/comp.html uuid='8b85b1fb-' %}: Now both have an option _Expand Dependents_ in the context menu to extract dependent elements geometry. Outputs are grafted accordingly.
+  [#509](https://github.com/mcneel/rhino.inside-revit/issues/509).
 - Updated some 'Query' component input parameters names to match Revit parameter name.
 
 {% include ltr/release-header.html title="v1.4 RC5" version="v1.4.8007.15883" pre_release=true time="12/07/2021" %}
@@ -612,7 +623,8 @@ group: Deployment & Configs
 
 - Issues
 
-  - Fixed Non-C2-BREP edge conversion when knots are below tolerance. RE [#382](https://github.com/mcneel/rhino.inside-revit/issues/382).
+  - Fixed Non-C2-BREP edge conversion when knots are below tolerance. 
+    [#382](https://github.com/mcneel/rhino.inside-revit/issues/382).
 
 - Minor Fixes and Improvements
 

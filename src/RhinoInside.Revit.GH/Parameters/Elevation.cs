@@ -489,7 +489,7 @@ namespace RhinoInside.Revit.GH.Parameters
   }
 }
 
-namespace RhinoInside.Revit.GH.Components.Input
+namespace RhinoInside.Revit.GH.Components.Site
 {
   [ComponentVersion(introduced: "1.0", updated: "1.14")]
   public class ConstructProjectElevation : ZuiComponent

@@ -160,9 +160,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
         }
       }
 
-      Params.TrySetData(DA, "Elevation", () => level is object ? new Types.LevelConstraint(level, offset ?? 0.0) : default);
+      Params.TrySetData(DA, "Elevation", () => level is object || offset is object ? new Types.LevelConstraint(level ?? new Types.Level(), offset ?? 0.0) : null);
       Params.TrySetData(DA, "Level", () => level);
-      Params.TrySetData(DA, "Offset", () => offset);
+      Params.TrySetData(DA, "Offset", () => offset ?? (level is null ? default(double?) : 0.0));
     }
   }
 }

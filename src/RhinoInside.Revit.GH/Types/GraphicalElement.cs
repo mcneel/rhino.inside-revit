@@ -397,7 +397,7 @@ namespace RhinoInside.Revit.GH.Types
     public virtual Category Subcategory
     {
       get => default;
-      set => throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Subcategory.");
+      set { if (value is object) throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Subcategory."); }
     }
 
     public virtual ARDB.ElementId LevelId => Value?.LevelId;

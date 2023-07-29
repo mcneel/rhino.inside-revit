@@ -28,6 +28,11 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IHostElementAccess
+    GraphicalElement IHostElementAccess.HostElement => Value is ARDB.Element element ?
+      element.ViewSpecific ? OwnerView?.Viewer :
+      HostElement :
+      default;
+
     public virtual GraphicalElement HostElement => Value is ARDB.Element element ?
       GetElement<GraphicalElement>(element.LevelId) :
       default;
