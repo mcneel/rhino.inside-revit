@@ -28,10 +28,10 @@ namespace RhinoInside.Revit.GH.Types
 
     public Viewer() { }
     public Viewer(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
-    public Viewer(ARDB_Viewer box) : base(box)
+    public Viewer(ARDB_Viewer element) : base(element)
     {
-      if (!IsValidElement(box))
-        throw new ArgumentException("Invalid Element", nameof(box));
+      if (!IsValidElement(element))
+        throw new ArgumentException("Invalid Element", nameof(element));
     }
 
     public override bool CastTo<Q>(out Q target)

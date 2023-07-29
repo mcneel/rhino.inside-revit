@@ -100,6 +100,9 @@ namespace RhinoInside.Revit.GH.Types
             case ARDB.ViewType.Section: return new SectionView(view as ARDB.ViewSection);
             case ARDB.ViewType.Elevation: return new ElevationView(view as ARDB.ViewSection);
             case ARDB.ViewType.Detail: return new DetailView(view as ARDB.ViewSection);
+
+            case ARDB.ViewType.Schedule: return new ViewSchedule(view as ARDB.ViewSchedule);
+            case ARDB.ViewType.PanelSchedule: return new PanelScheduleView(view as ARDB.Electrical.PanelScheduleView);
           }
 
           break;
@@ -267,14 +270,16 @@ namespace RhinoInside.Revit.GH.Types
 
       { typeof(ARDB.ViewFamilyType),                  (element)=> new ViewFamilyType        (element as ARDB.ViewFamilyType)    },
       { typeof(ARDB.View),                            (element)=> new View                  (element as ARDB.View)              },
-      { typeof(ARDB.Viewport),                        (element)=> new Viewport              (element as ARDB.Viewport)          },
-      { typeof(ARDB.ScheduleSheetInstance),           (element)=> new ScheduleSheetInstance (element as ARDB.ScheduleSheetInstance)},
       { typeof(ARDB.ViewSheet),                       (element)=> new ViewSheet             (element as ARDB.ViewSheet)         },
       { typeof(ARDB.View3D),                          (element)=> new View3D                (element as ARDB.View3D)            },
       { typeof(ARDB.ViewPlan),                        (element)=> new ViewPlan              (element as ARDB.ViewPlan)          },
       { typeof(ARDB.ViewSection),                     (element)=> new ViewSection           (element as ARDB.ViewSection)       },
       { typeof(ARDB.ViewDrafting),                    (element)=> new ViewDrafting          (element as ARDB.ViewDrafting)      },
       { typeof(ARDB.ElevationMarker),                 (element)=> new ElevationMarker       (element as ARDB.ElevationMarker)   },
+
+      { typeof(ARDB.Viewport),                        (element)=> new Viewport              (element as ARDB.Viewport)          },
+      { typeof(ARDB.ScheduleSheetInstance),           (element)=> new ScheduleSheetInstance (element as ARDB.ScheduleSheetInstance)},
+      { typeof(ARDB.Electrical.PanelScheduleSheetInstance), (element)=> new PanelScheduleSheetInstance (element as ARDB.Electrical.PanelScheduleSheetInstance)},
 
       { typeof(ARDB.Instance),                        (element)=> new Instance              (element as ARDB.Instance)          },
       { typeof(ARDB.ProjectLocation),                 (element)=> new ProjectLocation       (element as ARDB.ProjectLocation)   },

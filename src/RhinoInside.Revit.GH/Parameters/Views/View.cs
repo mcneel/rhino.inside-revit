@@ -72,8 +72,8 @@ namespace RhinoInside.Revit.GH.Parameters
       using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var views = collector.
-                    OfClass(typeof(ARDB.View)).
-                    Cast<R>().
+                    OfClass(typeof(R)).
+                    OfType<R>().
                     Where(PassFilter).
                     Where(x => viewFamily == ARDB.ViewFamily.Invalid || x.Document.GetElement<ARDB.ViewFamilyType>(x.GetTypeId())?.ViewFamily == viewFamily);
 
