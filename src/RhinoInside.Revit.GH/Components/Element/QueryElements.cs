@@ -189,7 +189,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           var ids = categories.
             Where(x => x is object && (x.IsEmpty || x.IsValid) && (x.Document is null || x.Document.Equals(view.Document))).
             Select(x => x.Id).
-            ToArray();
+            ToList();
 
           elementCollector = elementCollector.WherePasses
           (
@@ -199,7 +199,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
         else
         {
           // Default category filtering
-          var hiddenCategories = BuiltInCategoryExtension.GetHiddenInUIBuiltInCategories(view.Document) as ICollection<ARDB.BuiltInCategory>;
+          var hiddenCategories = BuiltInCategoryExtension.GetHiddenInUIBuiltInCategories(view.Document).
+            Append(ARDB.BuiltInCategory.INVALID). // `ScheduleSheetInstance` Viewer has no Category, so we filter here
+            ToList();
+
           elementCollector = elementCollector.WherePasses
           (
             new ARDB.ElementMulticategoryFilter(hiddenCategories, inverted: true)
