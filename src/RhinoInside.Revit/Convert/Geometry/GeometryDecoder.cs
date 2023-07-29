@@ -1392,7 +1392,7 @@ namespace RhinoInside.Revit.Convert.Geometry
         case ARDB.Mesh mesh:   return mesh.ToMesh(factor);
       }
 
-      throw new ConversionException($"Unable to convert {value} to ${nameof(GeometryBase)}");
+      throw new ConversionException($"Unable to convert {value} to {nameof(GeometryBase)}");
     }
     #endregion
 

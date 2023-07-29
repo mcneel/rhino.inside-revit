@@ -60,6 +60,8 @@ namespace RhinoInside.Revit.GH.Parameters
       Menu_AppendCustomItem(menu, listBox);
     }
 
+    protected virtual bool PassFilter(R view) => !view.IsTemplate;
+
     protected void RefreshViewsList(ListBox listBox, ARDB.ViewFamily viewFamily, string displayMember = nameof(Types.View.DisplayName))
     {
       var doc = Revit.ActiveUIDocument.Document;
@@ -70,9 +72,9 @@ namespace RhinoInside.Revit.GH.Parameters
       using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var views = collector.
-                    OfClass(typeof(ARDB.View)).
-                    Cast<ARDB.View>().
-                    Where(x => !x.IsTemplate).
+                    OfClass(typeof(R)).
+                    OfType<R>().
+                    Where(PassFilter).
                     Where(x => viewFamily == ARDB.ViewFamily.Invalid || x.Document.GetElement<ARDB.ViewFamilyType>(x.GetTypeId())?.ViewFamily == viewFamily);
 
         listBox.DisplayMember = displayMember;

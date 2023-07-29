@@ -29,7 +29,8 @@ group: Deployment & Configs
 - Fix on 'Query Categories' it should output ordered by id.
 - Fix on 'Query Visible Elements' when a `<None>` category is used.
 - 'Element Subcategory' compoennt now works on `GenericForm` elements.
-
+- Added 'Add Schedule Graphics' component.
+  [#871](https://github.com/mcneel/rhino.inside-revit/issues/871)
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
