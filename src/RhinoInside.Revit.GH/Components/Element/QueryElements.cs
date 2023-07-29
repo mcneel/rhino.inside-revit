@@ -187,8 +187,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
         if (categories is object)
         {
           var ids = categories.
-            Where(x => x?.IsValid == true && (x.Document is null || x.Document.Equals(view.Document))).
-            Select(x => x.Id).ToArray();
+            Where(x => x is object && (x.IsEmpty || x.IsValid) && (x.Document is null || x.Document.Equals(view.Document))).
+            Select(x => x.Id).
+            ToArray();
 
           elementCollector = elementCollector.WherePasses
           (
