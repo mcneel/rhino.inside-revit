@@ -268,6 +268,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.ViewFamilyType),                  (element)=> new ViewFamilyType        (element as ARDB.ViewFamilyType)    },
       { typeof(ARDB.View),                            (element)=> new View                  (element as ARDB.View)              },
       { typeof(ARDB.Viewport),                        (element)=> new Viewport              (element as ARDB.Viewport)          },
+      { typeof(ARDB.ScheduleSheetInstance),           (element)=> new ScheduleSheetInstance (element as ARDB.ScheduleSheetInstance)},
       { typeof(ARDB.ViewSheet),                       (element)=> new ViewSheet             (element as ARDB.ViewSheet)         },
       { typeof(ARDB.View3D),                          (element)=> new View3D                (element as ARDB.View3D)            },
       { typeof(ARDB.ViewPlan),                        (element)=> new ViewPlan              (element as ARDB.ViewPlan)          },

@@ -5,7 +5,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Combinable")]
-  public class CombinableElement : GeometricElement, IGH_InstanceElement
+  public class CombinableElement : GeometricElement
   {
     protected override Type ValueType => typeof(ARDB.CombinableElement);
     public new ARDB.CombinableElement Value => base.Value as ARDB.CombinableElement;
