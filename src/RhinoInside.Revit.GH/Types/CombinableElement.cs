@@ -1,11 +1,10 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  [Kernel.Attributes.Name("Form")]
+  [Kernel.Attributes.Name("Combinable")]
   public class CombinableElement : GeometricElement, IGH_InstanceElement
   {
     protected override Type ValueType => typeof(ARDB.CombinableElement);
@@ -13,6 +12,26 @@ namespace RhinoInside.Revit.GH.Types
 
     public CombinableElement() { }
     public CombinableElement(ARDB.CombinableElement element) : base(element) { }
+  }
+
+  [Kernel.Attributes.Name("Combination")]
+  public class GeomCombination : CombinableElement
+  {
+    protected override Type ValueType => typeof(ARDB.GeomCombination);
+    public new ARDB.GeomCombination Value => base.Value as ARDB.GeomCombination;
+
+    public GeomCombination() { }
+    public GeomCombination(ARDB.GeomCombination element) : base(element) { }
+  }
+
+  [Kernel.Attributes.Name("Form")]
+  public class GenericForm : CombinableElement
+  {
+    protected override Type ValueType => typeof(ARDB.GenericForm);
+    public new ARDB.GenericForm Value => base.Value as ARDB.GenericForm;
+
+    public GenericForm() { }
+    public GenericForm(ARDB.GenericForm element) : base(element) { }
 
     #region Category
     public override Category Subcategory

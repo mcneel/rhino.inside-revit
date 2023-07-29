@@ -289,6 +289,8 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.SketchPlane),                     (element)=> new SketchPlane           (element as ARDB.SketchPlane)       },
       { typeof(ARDB.CurveElement),                    (element)=> new CurveElement          (element as ARDB.CurveElement)      },
       { typeof(ARDB.CombinableElement),               (element)=> new CombinableElement     (element as ARDB.CombinableElement) },
+      { typeof(ARDB.GeomCombination),                 (element)=> new GeomCombination       (element as ARDB.GeomCombination)   },
+      { typeof(ARDB.GenericForm),                     (element)=> new GenericForm           (element as ARDB.GenericForm)       },
 
       { typeof(ARDB.DatumPlane),                      (element)=> new DatumPlane            (element as ARDB.DatumPlane)        },
       { typeof(ARDB.Level),                           (element)=> new Level                 (element as ARDB.Level)             },
