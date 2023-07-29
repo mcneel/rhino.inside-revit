@@ -466,8 +466,6 @@ namespace RhinoInside.Revit.GH.Types
         Category.FromCategory(category) :
         new Category() :
         default;
-
-      set => throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Category.");
     }
 
     public virtual ElementType Type

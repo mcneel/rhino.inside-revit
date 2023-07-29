@@ -15,22 +15,41 @@ namespace RhinoInside.Revit.GH.Types
     public CombinableElement(ARDB.CombinableElement element) : base(element) { }
 
     #region Category
-    public override Category Category
+    public override Category Subcategory
     {
+      get
+      {
+        var paramId = ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY;
+        if (paramId != ARDB.BuiltInParameter.INVALID && Value is ARDB.Element element)
+        {
+          using (var parameter = element.get_Parameter(paramId))
+          {
+            if (parameter?.AsElementId() is ARDB.ElementId categoryId)
+            {
+              var category = new Category(Document, categoryId);
+              return category.APIObject?.Parent is null ? new Category() : category;
+            }
+          }
+        }
+
+        return default;
+      }
+
       set
       {
+        var paramId = ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY;
         if (value is object && Value is ARDB.Element element)
         {
-          using (var parameter = element.get_Parameter(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY))
+          using (var parameter = element.get_Parameter(paramId))
           {
             if (parameter is null)
             {
               if (value.Id != ARDB.ElementId.InvalidElementId)
-                throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Category.");
+                throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Subcategory.");
             }
             else
             {
-              AssertValidDocument(value, nameof(Category));
+              AssertValidDocument(value, nameof(Subcategory));
               parameter.Update(value);
             }
           }
