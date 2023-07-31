@@ -436,7 +436,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static ElementFilter GetClipFilter(this View view, bool clipped = false)
     {
       var modelClipFilter = GetModelClipFilter(view, clipped);
-      var annotationClipFilter = new ElementOwnerViewFilter(view.Id, clipped);
+      var annotationClipFilter = CompoundElementFilter.Union
+      (
+        new ElementOwnerViewFilter(view.Id, clipped),
+        new ElementClassFilter(typeof(DatumPlane))
+      );
 
       return clipped ?
         CompoundElementFilter.Intersect(modelClipFilter, annotationClipFilter) :
