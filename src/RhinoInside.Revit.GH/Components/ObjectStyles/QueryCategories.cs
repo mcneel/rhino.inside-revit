@@ -58,12 +58,12 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", ARDB.CategoryType.Model, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", optional: true, relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Category name", optional: true),
+      ParamDefinition.Create<Param_Boolean>("Is Visible UI", "VUI", "Category is exposed in UI", defaultValue: true, optional: true, relevance: ParamRelevance.Secondary),
       ParamDefinition.Create<Param_Boolean>("Is Subcategory", "ISC", "Is subcategory", defaultValue: false, optional: true),
-      ParamDefinition.Create<Param_Boolean>("Is Visible UI", "VUI", "Category is exposed in UI", defaultValue: true, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Allows Subcategories", "ASC", "Category allows subcategories to be added", optional: true, relevance: ParamRelevance.Secondary),
-      ParamDefinition.Create<Param_Boolean>("Allows Parameters", "AP", "Category allows bound parameters", optional: true, relevance: ParamRelevance.Secondary),
-      ParamDefinition.Create<Param_Boolean>("Has Material Quantities", "HMQ", "Category has material quantities", optional: true, relevance: ParamRelevance.Secondary),
-      ParamDefinition.Create<Param_Boolean>("Cuttable", "C", "Category is cuttable", optional: true, relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Param_Boolean>("Allows Parameters", "AP", "Category allows bound parameters", defaultValue: true, optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Has Material Quantities", "HMQ", "Category has material quantities", defaultValue: true, optional: true, relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Param_Boolean>("Cuttable", "C", "Category is cuttable", defaultValue: true, optional: true, relevance: ParamRelevance.Secondary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
