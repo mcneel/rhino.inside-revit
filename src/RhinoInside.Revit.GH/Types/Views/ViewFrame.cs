@@ -36,6 +36,15 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool IsValid => Value is object;
 
+    public override string IsValidWhyNot
+    {
+      get
+      {
+        if (Value is null) return "Reference Viewport Info is null";
+        return Value.IsValidWithLog(out var log) ? default : log;
+      }
+    }
+
     public override string TypeName => "View Frame";
 
     public override string TypeDescription => "View frame";
@@ -148,6 +157,14 @@ namespace RhinoInside.Revit.GH.Types
       return "Unrecogized projection";
     }
 
+    static void SetScreenPort(ViewportInfo vport, int size)
+    {
+      if (vport.FrustumAspect > 1.0)
+        vport.SetScreenPort(0, size, 0, (int) Math.Round(size / vport.FrustumAspect), 0, 1);
+      else
+        vport.SetScreenPort(0, (int) Math.Round(size / vport.FrustumAspect), 0, size, 0, 1);
+    }
+
     public override bool CastFrom(object source)
     {
       switch (source)
@@ -177,6 +194,8 @@ namespace RhinoInside.Revit.GH.Types
 
           if (vport.SetFrustum(-radius, +radius, -radius, +radius, near, target))
           {
+            SetScreenPort(vport, 1000);
+
             BoundEnabled = BoundEnabledNone;
             Bound[AxisX] = new Interval(-radius, +radius);
             Bound[AxisY] = new Interval(-radius, +radius);
@@ -191,7 +210,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           var radius = line.Length / 3.0;
           var target = line.Length;
-          var near = double.Epsilon;
+          var near = 0.1;
 
           var vport = new ViewportInfo { IsParallelProjection = true };
           vport.SetCameraLocation(line.From);
@@ -201,6 +220,8 @@ namespace RhinoInside.Revit.GH.Types
 
           if (vport.SetFrustum(-radius, +radius, -radius * 3.0 / 4.0, +radius * 3.0 / 4.0, near, target))
           {
+            SetScreenPort(vport, 1000);
+
             BoundEnabled = BoundEnabledNone;
             Bound[AxisX] = new Interval(-radius, +radius);
             Bound[AxisY] = new Interval(-radius * 3.0 / 4.0, +radius * 3.0 / 4.0);
@@ -228,6 +249,8 @@ namespace RhinoInside.Revit.GH.Types
 
           if (vport.SetFrustum(-radius, +radius, -radius, +radius, near, target * 0.5))
           {
+            SetScreenPort(vport, 1000);
+
             BoundEnabled = BoundEnabledNone;
             Bound[AxisX] = new Interval(-radius, +radius);
             Bound[AxisY] = new Interval(-radius, +radius);
@@ -251,7 +274,7 @@ namespace RhinoInside.Revit.GH.Types
 
           if (vport.SetFrustum(box.X.T0, box.X.T1, box.Y.T0, box.Y.T1, near, far))
           {
-            vport.SetScreenPortFromFrustum((UnitScale.GetModelScale(RhinoDoc.ActiveDoc) / UnitScale.Inches).Ratio.Quotient);
+            SetScreenPort(vport, 1000);
 
             BoundEnabled = BoundEnabledBox;
             Bound[AxisX] = box.X;
