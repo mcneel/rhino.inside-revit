@@ -210,7 +210,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           var radius = line.Length / 3.0;
           var target = line.Length;
-          var near = 0.1;
+          var near = double.Epsilon;
 
           var vport = new ViewportInfo { IsParallelProjection = true };
           vport.SetCameraLocation(line.From);
