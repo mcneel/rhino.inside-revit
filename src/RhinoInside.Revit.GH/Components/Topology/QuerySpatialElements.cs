@@ -13,10 +13,6 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
   public abstract class QuerySpatialElements : ElementCollectorComponent
   {
-    protected internal static readonly ARDB.ElementFilter elementFilter =
-      new ARDB.ElementClassFilter(typeof(ARDB.SpatialElement));
-    protected override ARDB.ElementFilter ElementFilter => elementFilter;
-
     protected QuerySpatialElements(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
@@ -122,8 +118,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     public override Guid ComponentGuid => new Guid("D1940EB3-B81B-4E57-8F5A-94D045BFB509");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    static readonly ARDB.ElementFilter elementFilter =
-      QuerySpatialElements.elementFilter.Intersect(CompoundElementFilter.ElementClassFilter(typeof(ARDB.Area)));
+    static readonly ARDB.ElementFilter elementFilter = CompoundElementFilter.ElementClassFilter(typeof(ARDB.Area));
     protected override ARDB.ElementFilter ElementFilter => elementFilter;
       
     public QueryAreas() : base
@@ -426,8 +421,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     public override Guid ComponentGuid => new Guid("5DDCB816-61A3-480F-AC45-67F66BEB2E78");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
-    static new readonly ARDB.ElementFilter elementFilter =
-      QuerySpatialElements.elementFilter.Intersect(CompoundElementFilter.ElementClassFilter(typeof(ARDB.Architecture.Room)));
+    static readonly ARDB.ElementFilter elementFilter = CompoundElementFilter.ElementClassFilter(typeof(ARDB.Architecture.Room));
     protected override ARDB.ElementFilter ElementFilter => elementFilter;
 
     public QueryRooms() : base
@@ -528,8 +522,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     public override Guid ComponentGuid => new Guid("A1CCF034-AA1F-4731-9863-3C22E0644E2B");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    static new readonly ARDB.ElementFilter elementFilter =
-      QuerySpatialElements.elementFilter.Intersect(CompoundElementFilter.ElementClassFilter(typeof(ARDB.Mechanical.Space)));
+    static readonly ARDB.ElementFilter elementFilter = CompoundElementFilter.ElementClassFilter(typeof(ARDB.Mechanical.Space));
     protected override ARDB.ElementFilter ElementFilter => elementFilter;
 
     public QuerySpaces() : base

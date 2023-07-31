@@ -145,12 +145,12 @@ namespace RhinoInside.Revit.External.DB
     #region Generic Filters
     public static ElementFilter ElementClassFilter(Type type)
     {
-           if (typeof(Area).IsAssignableFrom(type))         return new AreaFilter();
-      else if (typeof(AreaTag).IsAssignableFrom(type))      return new AreaTagFilter();
-      else if (typeof(Room).IsAssignableFrom(type))         return new RoomFilter();
-      else if (typeof(RoomTag).IsAssignableFrom(type))      return new RoomTagFilter();
-      else if (typeof(Space).IsAssignableFrom(type))        return new SpaceFilter();
-      else if (typeof(SpaceTag).IsAssignableFrom(type))     return new SpaceTagFilter();
+           if (typeof(Area).IsAssignableFrom(type))         return new ElementClassFilter(typeof(SpatialElement)).Intersect(new AreaFilter());
+      else if (typeof(AreaTag).IsAssignableFrom(type))      return new ElementClassFilter(typeof(SpatialElementTag)).Intersect(new AreaTagFilter());
+      else if (typeof(Room).IsAssignableFrom(type))         return new ElementClassFilter(typeof(SpatialElement)).Intersect(new RoomFilter());
+      else if (typeof(RoomTag).IsAssignableFrom(type))      return new ElementClassFilter(typeof(SpatialElementTag)).Intersect(new RoomTagFilter());
+      else if (typeof(Space).IsAssignableFrom(type))        return new ElementClassFilter(typeof(SpatialElement)).Intersect(new SpaceFilter());
+      else if (typeof(SpaceTag).IsAssignableFrom(type))     return new ElementClassFilter(typeof(SpatialElementTag)).Intersect(new SpaceTagFilter());
       else if (typeof(Mullion) == type)                     return new ElementClassFilter(typeof(FamilyInstance)).Intersect(new ElementCategoryFilter(BuiltInCategory.OST_CurtainWallMullions));
       else if (typeof(Panel) == type)                       return new ElementClassFilter(typeof(FamilyInstance)).Intersect(new ElementCategoryFilter(BuiltInCategory.OST_CurtainWallPanels));
       else if (typeof(CurveElement).IsAssignableFrom(type)) return new ElementClassFilter(typeof(CurveElement));
