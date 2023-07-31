@@ -47,6 +47,9 @@ namespace RhinoInside.Revit
       if (pattern is null)
         return true;
 
+      if (pattern == source)
+        return true;
+
       bool not = false;
       switch (CompareMethodFromPattern(ref pattern, ref not))
       {
