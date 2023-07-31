@@ -148,90 +148,97 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
         using (var calculator = new ARDB.SpatialElementGeometryCalculator(document, boundaryOptions))
         {
-          using (var results = calculator.CalculateSpatialElementGeometry(spatialElement))
+          try
           {
-            if (results.GetGeometry() is ARDB.Solid shell)
+            using (var results = calculator.CalculateSpatialElementGeometry(spatialElement))
             {
-              Params.TrySetData(DA, "Geometry", () => shell.ToBrep());
-
-              var _TopFaces_        = Params.IndexOfOutputParam("Top Faces");
-              var _TopElements_     = Params.IndexOfOutputParam("Top Elements");
-              var _SideFaces_       = Params.IndexOfOutputParam("Side Faces");
-              var _SideElements_    = Params.IndexOfOutputParam("Side Elements");
-              var _BottomFaces_     = Params.IndexOfOutputParam("Bottom Faces");
-              var _BottomElements_  = Params.IndexOfOutputParam("Bottom Elements");
-
-              if (_BottomFaces_ >= 0 || _TopFaces_ >= 0 || _SideFaces_ >= 0 || _BottomElements_ >= 0 || _TopElements_ >= 0 || _SideElements_ >= 0)
+              if (results.GetGeometry() is ARDB.Solid shell)
               {
-                var topFacesPath = _TopFaces_ < 0 ? default : DA.ParameterTargetPath(_TopFaces_).AppendElement(DA.ParameterTargetIndex(_TopFaces_));
-                var topFaces = _TopFaces_ < 0 ? default : new GH_Structure<GH_Brep>();
-                var topElementsPath = _TopElements_ < 0 ? default : DA.ParameterTargetPath(_TopElements_).AppendElement(DA.ParameterTargetIndex(_TopElements_));
-                var topElements = _TopElements_ < 0 ? default : new GH_Structure<Types.GraphicalElement>();
+                Params.TrySetData(DA, "Geometry", () => shell.ToBrep());
 
-                var sideFacesPath = _SideFaces_ < 0 ? default : DA.ParameterTargetPath(_SideFaces_).AppendElement(DA.ParameterTargetIndex(_SideFaces_));
-                var sideFaces = _SideFaces_ < 0 ? default : new GH_Structure<GH_Brep>();
-                var sideElementsPath = _SideElements_ < 0 ? default : DA.ParameterTargetPath(_SideFaces_).AppendElement(DA.ParameterTargetIndex(_SideFaces_));
-                var sideElements = _SideElements_ < 0 ? default : new GH_Structure<Types.GraphicalElement>();
+                var _TopFaces_ = Params.IndexOfOutputParam("Top Faces");
+                var _TopElements_ = Params.IndexOfOutputParam("Top Elements");
+                var _SideFaces_ = Params.IndexOfOutputParam("Side Faces");
+                var _SideElements_ = Params.IndexOfOutputParam("Side Elements");
+                var _BottomFaces_ = Params.IndexOfOutputParam("Bottom Faces");
+                var _BottomElements_ = Params.IndexOfOutputParam("Bottom Elements");
 
-                var bottomFacesPath = _BottomFaces_ < 0 ? default : DA.ParameterTargetPath(_BottomFaces_).AppendElement(DA.ParameterTargetIndex(_BottomFaces_));
-                var bottomFaces = _BottomFaces_ < 0 ? default : new GH_Structure<GH_Brep>();
-                var bottomElementsPath = _BottomElements_ < 0 ? default : DA.ParameterTargetPath(_BottomElements_).AppendElement(DA.ParameterTargetIndex(_BottomElements_));
-                var bottomElements = _BottomElements_ < 0 ? default : new GH_Structure<Types.GraphicalElement>();
-
-                var index = 0;
-                foreach (var faces in shell.Faces.Cast<ARDB.Face>().Select(x => results.GetBoundaryFaceInfo(x)))
+                if (_BottomFaces_ >= 0 || _TopFaces_ >= 0 || _SideFaces_ >= 0 || _BottomElements_ >= 0 || _TopElements_ >= 0 || _SideElements_ >= 0)
                 {
-                  var topF = _TopFaces_ < 0 ? default : new List<GH_Brep>();
-                  var topE = _TopElements_ < 0 ? default : new List<Types.GraphicalElement>();
-                  var sideF = _SideFaces_ < 0 ? default : new List<GH_Brep>();
-                  var sideE = _SideElements_ < 0 ? default : new List<Types.GraphicalElement>();
-                  var bottomF = _BottomFaces_ < 0 ? default : new List<GH_Brep>();
-                  var bottomE = _BottomElements_ < 0 ? default : new List<Types.GraphicalElement>();
+                  var topFacesPath = _TopFaces_ < 0 ? default : DA.ParameterTargetPath(_TopFaces_).AppendElement(DA.ParameterTargetIndex(_TopFaces_));
+                  var topFaces = _TopFaces_ < 0 ? default : new GH_Structure<GH_Brep>();
+                  var topElementsPath = _TopElements_ < 0 ? default : DA.ParameterTargetPath(_TopElements_).AppendElement(DA.ParameterTargetIndex(_TopElements_));
+                  var topElements = _TopElements_ < 0 ? default : new GH_Structure<Types.GraphicalElement>();
 
-                  topFaces?.EnsurePath(topFacesPath.AppendElement(index));
-                  topElements?.EnsurePath(topElementsPath.AppendElement(index));
-                  sideFaces?.EnsurePath(sideFacesPath.AppendElement(index));
-                  sideElements?.EnsurePath(sideElementsPath.AppendElement(index));
-                  bottomFaces?.EnsurePath(bottomFacesPath.AppendElement(index));
-                  bottomElements?.EnsurePath(bottomElementsPath.AppendElement(index));
+                  var sideFacesPath = _SideFaces_ < 0 ? default : DA.ParameterTargetPath(_SideFaces_).AppendElement(DA.ParameterTargetIndex(_SideFaces_));
+                  var sideFaces = _SideFaces_ < 0 ? default : new GH_Structure<GH_Brep>();
+                  var sideElementsPath = _SideElements_ < 0 ? default : DA.ParameterTargetPath(_SideFaces_).AppendElement(DA.ParameterTargetIndex(_SideFaces_));
+                  var sideElements = _SideElements_ < 0 ? default : new GH_Structure<Types.GraphicalElement>();
 
-                  index++;
+                  var bottomFacesPath = _BottomFaces_ < 0 ? default : DA.ParameterTargetPath(_BottomFaces_).AppendElement(DA.ParameterTargetIndex(_BottomFaces_));
+                  var bottomFaces = _BottomFaces_ < 0 ? default : new GH_Structure<GH_Brep>();
+                  var bottomElementsPath = _BottomElements_ < 0 ? default : DA.ParameterTargetPath(_BottomElements_).AppendElement(DA.ParameterTargetIndex(_BottomElements_));
+                  var bottomElements = _BottomElements_ < 0 ? default : new GH_Structure<Types.GraphicalElement>();
 
-                  if (faces is null) continue;
-                  foreach (var face in faces)
+                  var index = 0;
+                  foreach (var faces in shell.Faces.Cast<ARDB.Face>().Select(x => results.GetBoundaryFaceInfo(x)))
                   {
-                    switch (face.SubfaceType)
+                    var topF = _TopFaces_ < 0 ? default : new List<GH_Brep>();
+                    var topE = _TopElements_ < 0 ? default : new List<Types.GraphicalElement>();
+                    var sideF = _SideFaces_ < 0 ? default : new List<GH_Brep>();
+                    var sideE = _SideElements_ < 0 ? default : new List<Types.GraphicalElement>();
+                    var bottomF = _BottomFaces_ < 0 ? default : new List<GH_Brep>();
+                    var bottomE = _BottomElements_ < 0 ? default : new List<Types.GraphicalElement>();
+
+                    topFaces?.EnsurePath(topFacesPath.AppendElement(index));
+                    topElements?.EnsurePath(topElementsPath.AppendElement(index));
+                    sideFaces?.EnsurePath(sideFacesPath.AppendElement(index));
+                    sideElements?.EnsurePath(sideElementsPath.AppendElement(index));
+                    bottomFaces?.EnsurePath(bottomFacesPath.AppendElement(index));
+                    bottomElements?.EnsurePath(bottomElementsPath.AppendElement(index));
+
+                    index++;
+
+                    if (faces is null) continue;
+                    foreach (var face in faces)
                     {
-                      case ARDB.SubfaceType.Bottom:
-                        bottomF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
-                        bottomE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
-                        break;
+                      switch (face.SubfaceType)
+                      {
+                        case ARDB.SubfaceType.Bottom:
+                          bottomF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
+                          bottomE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
+                          break;
 
-                      case ARDB.SubfaceType.Top:
-                        topF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
-                        topE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
-                        break;
+                        case ARDB.SubfaceType.Top:
+                          topF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
+                          topE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
+                          break;
 
-                      case ARDB.SubfaceType.Side:
-                        sideF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
-                        sideE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
-                        break;
+                        case ARDB.SubfaceType.Side:
+                          sideF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
+                          sideE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
+                          break;
+                      }
                     }
+
+                    bottomFaces?.AppendRange(bottomF); bottomElements?.AppendRange(bottomE);
+                    topFaces?.AppendRange(topF); topElements?.AppendRange(topE);
+                    sideFaces?.AppendRange(sideF); sideElements?.AppendRange(sideE);
                   }
 
-                  bottomFaces?.AppendRange(bottomF);  bottomElements?.AppendRange(bottomE);
-                  topFaces?.AppendRange(topF);        topElements?.AppendRange(topE);
-                  sideFaces?.AppendRange(sideF);      sideElements?.AppendRange(sideE);
+                  if (_TopFaces_ >= 0) DA.SetDataTree(_TopFaces_, topFaces);
+                  if (_TopElements_ >= 0) DA.SetDataTree(_TopElements_, topElements);
+                  if (_SideFaces_ >= 0) DA.SetDataTree(_SideFaces_, sideFaces);
+                  if (_SideElements_ >= 0) DA.SetDataTree(_SideElements_, sideElements);
+                  if (_BottomFaces_ >= 0) DA.SetDataTree(_BottomFaces_, bottomFaces);
+                  if (_BottomElements_ >= 0) DA.SetDataTree(_BottomElements_, bottomElements);
                 }
-
-                if (_TopFaces_ >= 0) DA.SetDataTree(_TopFaces_, topFaces);
-                if (_TopElements_ >= 0) DA.SetDataTree(_TopElements_, topElements);
-                if (_SideFaces_ >= 0) DA.SetDataTree(_SideFaces_, sideFaces);
-                if (_SideElements_ >= 0) DA.SetDataTree(_SideElements_, sideElements);
-                if (_BottomFaces_ >= 0) DA.SetDataTree(_BottomFaces_, bottomFaces);
-                if (_BottomElements_ >= 0) DA.SetDataTree(_BottomElements_, bottomElements);
               }
             }
+          }
+          catch (Exception e)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message} {{{spatialElement.Id}}}");
           }
         }
       }

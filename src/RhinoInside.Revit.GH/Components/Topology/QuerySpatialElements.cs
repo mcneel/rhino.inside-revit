@@ -278,18 +278,6 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.ROOM_NAME, ref name, out var nameFilter))
           elementsCollector = elementsCollector.WherePasses(nameFilter);
 
-        if (enclosed.HasValue)
-        {
-          var rule = new ARDB.FilterDoubleRule
-          (
-            new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.ROOM_PERIMETER)),
-            new ARDB.FilterNumericGreater(),
-            0.0, 0.0
-          );
-
-          elementsCollector = elementsCollector.WherePasses(new ARDB.ElementParameterFilter(rule, !enclosed.Value));
-        }
-
         if (level is object)
           elementsCollector = elementsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.ROOM_LEVEL_ID, level.Id);
 
@@ -297,6 +285,9 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
         if (placed.HasValue)
           areas = areas.Where(x => x.IsPlaced == placed.Value);
+
+        if (enclosed.HasValue)
+          areas = areas.Where(x => x.IsEnclosed == enclosed.Value);
 
         if (!string.IsNullOrEmpty(number))
           areas = areas.Where(x => x.Number.IsSymbolNameLike(number));
@@ -509,22 +500,13 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (phase is object)
           elementsCollector = elementsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.ROOM_PHASE, phase.Id);
 
-        if (enclosed.HasValue)
-        {
-          var rule = new ARDB.FilterDoubleRule
-          (
-            new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.ROOM_PERIMETER)),
-            new ARDB.FilterNumericGreater(),
-            0.0, 0.0
-          );
-
-          elementsCollector = elementsCollector.WherePasses(new ARDB.ElementParameterFilter(rule, !enclosed.Value));
-        }
-
         var rooms = collector.Select(x => new Types.RoomElement(x as ARDB.Architecture.Room));
 
         if (placed.HasValue)
           rooms = rooms.Where(x => x.IsPlaced == placed.Value);
+
+        if (enclosed.HasValue)
+          rooms = rooms.Where(x => x.IsEnclosed == enclosed.Value);
 
         if (!string.IsNullOrEmpty(number))
           rooms = rooms.Where(x => x.Number.IsSymbolNameLike(number));
@@ -620,22 +602,13 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (phase is object)
           elementsCollector = elementsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.ROOM_PHASE, phase.Id);
 
-        if (enclosed.HasValue)
-        {
-          var rule = new ARDB.FilterDoubleRule
-          (
-            new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.ROOM_PERIMETER)),
-            new ARDB.FilterNumericGreater(),
-            0.0, 0.0
-          );
-
-          elementsCollector = elementsCollector.WherePasses(new ARDB.ElementParameterFilter(rule, !enclosed.Value));
-        }
-
         var spaces = collector.Select(x => new Types.SpaceElement(x as ARDB.Mechanical.Space));
 
         if (placed.HasValue)
           spaces = spaces.Where(x => x.IsPlaced == placed.Value);
+
+        if (enclosed.HasValue)
+          spaces = spaces.Where(x => x.IsEnclosed == enclosed.Value);
 
         if (!string.IsNullOrEmpty(number))
           spaces = spaces.Where(x => x.Number.IsSymbolNameLike(number));
