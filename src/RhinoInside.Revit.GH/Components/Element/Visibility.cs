@@ -173,9 +173,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           var documentIsWorkshared = viewDocument.IsWorkshared;
           var modelClipBox = viewValue.GetModelClipBox();
-          var isModelClipped = modelClipBox.GetPlaneEquations(out var modelClipPlanes);
+          var isModelClipped = modelClipBox.GetPlaneEquations(out var modelClipPlanes, Numerical.Tolerance.Default);
           var annotationClipBox = viewValue.GetAnnotationClipBox();
-          var isAnnotationClipped = annotationClipBox.GetPlaneEquations(out var annotationClipPlanes);
+          var isAnnotationClipped = annotationClipBox.GetPlaneEquations(out var annotationClipPlanes, Numerical.Tolerance.Default);
           var areViewGraphicsOverridesAllowed = viewValue.AreGraphicsOverridesAllowed();
           var isCategoryTypeHidden = new bool[]
           {

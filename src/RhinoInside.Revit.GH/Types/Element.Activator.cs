@@ -260,7 +260,6 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.ElementType),                     (element)=> new ElementType           (element as ARDB.ElementType)       },
       { typeof(ARDB.FamilySymbol),                    (element)=> new FamilySymbol          (element as ARDB.FamilySymbol)      },
       { typeof(ARDB.HostObjAttributes),               (element)=> new HostObjectType        (element as ARDB.HostObjAttributes) },
-      { typeof(ARDB.MEPCurveType),                    (element)=> new MEPCurveType          (element as ARDB.MEPCurveType)      },
       { typeof(ARDB.ParameterElement),                (element)=> new ParameterKey          (element as ARDB.ParameterElement)  },
       { typeof(ARDB.Material),                        (element)=> new Material              (element as ARDB.Material)          },
       { typeof(ARDB.GraphicsStyle),                   (element)=> new GraphicsStyle         (element as ARDB.GraphicsStyle)     },
@@ -306,7 +305,6 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Group),                           (element)=> new Group                 (element as ARDB.Group)             },
       { typeof(ARDB.Opening),                         (element)=> new Opening               (element as ARDB.Opening)           },
       { typeof(ARDB.HostObject),                      (element)=> new HostObject            (element as ARDB.HostObject)        },
-      { typeof(ARDB.MEPCurve),                        (element)=> new MEPCurve              (element as ARDB.MEPCurve)          },
       { typeof(ARDB.CurtainSystem),                   (element)=> new CurtainSystem         (element as ARDB.CurtainSystem)     },
       { typeof(ARDB.CurtainGridLine),                 (element)=> new CurtainGridLine       (element as ARDB.CurtainGridLine)   },
       { typeof(ARDB.Floor),                           (element)=> new Floor                 (element as ARDB.Floor)             },
@@ -320,6 +318,11 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.PanelType),                       (element)=> new PanelType             (element as ARDB.PanelType)         },
       { typeof(ARDB.Mullion),                         (element)=> new Mullion               (element as ARDB.Mullion)           },
       { typeof(ARDB.MullionType),                     (element)=> new MullionType           (element as ARDB.MullionType)       },
+
+      { typeof(ARDB.MEPSystem),                       (element)=> new MEPSystem             (element as ARDB.MEPSystem)         },
+      { typeof(ARDB.MEPSystemType),                   (element)=> new MEPSystemType         (element as ARDB.MEPSystemType)     },
+      { typeof(ARDB.MEPCurve),                        (element)=> new MEPCurve              (element as ARDB.MEPCurve)          },
+      { typeof(ARDB.MEPCurveType),                    (element)=> new MEPCurveType          (element as ARDB.MEPCurveType)      },
 
       { typeof(ARDB.TextElement),                     (element)=> new TextElement           (element as ARDB.TextElement)       },
       { typeof(ARDB.TextElementType),                 (element)=> new TextElementType       (element as ARDB.TextElementType)   },

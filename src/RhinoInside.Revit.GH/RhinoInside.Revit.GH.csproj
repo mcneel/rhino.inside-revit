@@ -461,7 +461,6 @@
     <Compile Include="Types\HostObjects\CurtainSystem.cs" />
     <Compile Include="Types\HostObjects\Floor.cs" />
     <Compile Include="Types\HostObjects\HostObject.cs" />
-    <Compile Include="Types\HostObjects\MEPCurve.cs" />
     <Compile Include="Types\HostObjects\Mullion.cs" />
     <Compile Include="Types\HostObjects\Panel.cs" />
     <Compile Include="Types\HostObjects\Roof.cs" />
@@ -481,6 +480,8 @@
     <Compile Include="Types\Materials\StructuralAsset.cs" />
     <Compile Include="Types\Materials\TextureData.cs" />
     <Compile Include="Types\Materials\ThermalAsset.cs" />
+    <Compile Include="Types\MEP\MEPCurve.cs" />
+    <Compile Include="Types\MEP\MEPSystem.cs" />
     <Compile Include="Types\ObjectStyles\Category.cs" />
     <Compile Include="Types\ObjectStyles\FillPatternElement.cs" />
     <Compile Include="Types\ObjectStyles\LinePatternElement.cs" />
