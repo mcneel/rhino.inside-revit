@@ -200,7 +200,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           // Default category filtering
           var hiddenCategories = BuiltInCategoryExtension.GetHiddenInUIBuiltInCategories(view.Document).
-            Append(ARDB.BuiltInCategory.INVALID). // `ScheduleSheetInstance` Viewer has no Category, so we filter here
+            Append(ARDB.BuiltInCategory.OST_SectionBox).  // 'Section Boxes' has little sense here!?!?
+            Append(ARDB.BuiltInCategory.INVALID).         // `ScheduleSheetInstance` Viewer has no Category, so we filter here
             ToList();
 
           elementCollector = elementCollector.WherePasses
