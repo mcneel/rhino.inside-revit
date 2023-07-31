@@ -7,6 +7,7 @@ using GH_IO.Serialization;
 using Grasshopper;
 using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
+using Grasshopper.GUI.HTML;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
 using Grasshopper.Kernel.Parameters;
@@ -639,6 +640,46 @@ namespace RhinoInside.Revit.GH.Components
           OnDisplayExpired(false);
         }
       }
+    }
+    #endregion
+
+    #region Help
+    protected override string HtmlHelp_Source()
+    {
+      string text = HelpDescription + "<BR><BR><HR>" + Environment.NewLine;
+      text += GenerateParameterHelp();
+
+      var formatter = new GH_HtmlFormatter(this, Name, text);
+      formatter.AddRemark($"This component is a ZUI component. Zoom in on it to enable the parameters managment UI visible.");
+
+      return formatter.HtmlFormat();
+    }
+
+    protected new string GenerateParameterHelp()
+    {
+      string text = string.Empty;
+      if (Inputs.Length > 0)
+      {
+        text += $"Input parameters: <BR>{Environment.NewLine}<dl>{Environment.NewLine}";
+        foreach (var item in Inputs) text += GenerateParameterHelp(item.Param);
+        text += $"</dl> <BR>{Environment.NewLine}";
+      }
+
+      if (Outputs.Length > 0)
+      {
+        text += $"Output parameters: <BR>{Environment.NewLine}<dl>{Environment.NewLine}";
+        foreach (var item in Outputs) text += GenerateParameterHelp(item.Param);
+        text += $"</dl> <BR>{Environment.NewLine}";
+      }
+
+      return text;
+    }
+
+    private new string GenerateParameterHelp(IGH_Param param)
+    {
+      var description = $"<dt><b> {param.Name} </b><i> ({param.TypeName})</i></dt>{Environment.NewLine}";
+      description += $"<dd> {param.Description} </dd>{Environment.NewLine}";
+      return description;
     }
     #endregion
 
