@@ -351,7 +351,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       var selectedBuiltInCategory = string.Empty;
       if (reader.TryGetString("SelectedBuiltInCategory", ref selectedBuiltInCategory))
-        SelectedBuiltInCategory = new External.DB.Schemas.CategoryId(selectedBuiltInCategory);
+        SelectedBuiltInCategory = new ERDB.Schemas.CategoryId(selectedBuiltInCategory);
       else
         SelectedBuiltInCategory = ARDB.BuiltInCategory.INVALID;
 
@@ -364,7 +364,7 @@ namespace RhinoInside.Revit.GH.Parameters
         return false;
 
       if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
-        writer.SetString("SelectedBuiltInCategory", ((External.DB.Schemas.CategoryId) SelectedBuiltInCategory).FullName);
+        writer.SetString("SelectedBuiltInCategory", ((ERDB.Schemas.CategoryId) SelectedBuiltInCategory).FullName);
 
       return true;
     }

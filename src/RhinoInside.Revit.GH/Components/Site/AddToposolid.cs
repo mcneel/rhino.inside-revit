@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components.Site
           NickName = "T",
           Description = "Toposolid type",
           Optional = true,
-          //SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Toposolid
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Toposolid
         }, ParamRelevance.Primary
       ),
       new ParamDefinition

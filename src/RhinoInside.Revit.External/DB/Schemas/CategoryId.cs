@@ -12,12 +12,19 @@ namespace RhinoInside.Revit.External.DB.Schemas
     static readonly CategoryId empty = new CategoryId();
     public static new CategoryId Empty => empty;
 
-    public string LocalizedLabel =>
+    public string LocalizedLabel
+    {
+      get
+      {
+        if (IsNullOrEmpty(this)) return string.Empty;
+
 #if REVIT_2020
-      Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInCategory) this);
+        return Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInCategory) this);
 #else
-      Label;
+        return Label;
 #endif
+      }
+    }
 
     public CategoryId() { }
     public CategoryId(string id) : base(id)
@@ -28,7 +35,8 @@ namespace RhinoInside.Revit.External.DB.Schemas
 
     public static bool IsCategoryId(string id)
     {
-      return id.StartsWith("autodesk.revit.category");
+      return id == string.Empty || // '<None>'
+             id.StartsWith("autodesk.revit.category");
     }
 
     public static bool IsCategoryId(DataType value, out CategoryId categoryId)

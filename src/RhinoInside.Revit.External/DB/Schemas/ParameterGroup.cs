@@ -14,12 +14,13 @@ namespace RhinoInside.Revit.External.DB.Schemas
     {
       get
       {
+        if (IsNullOrEmpty(this)) return "Other";
+
 #if REVIT_2022
-        var label = Autodesk.Revit.DB.LabelUtils.GetLabelForGroup(this);
+        return Autodesk.Revit.DB.LabelUtils.GetLabelForGroup(this);
 #else
-        var label = Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInParameterGroup) this);
+        return Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInParameterGroup) this);
 #endif
-        return string.IsNullOrEmpty(label) ? "Other" : label;
       }
     }
 
