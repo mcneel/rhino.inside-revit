@@ -512,6 +512,35 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return clipped;
     }
 
+    internal static bool GetPlaneEquations
+    (
+      this BoundingBoxXYZ value,
+      out
+      (
+        (PlaneEquation? Min, PlaneEquation? Max) X,
+        (PlaneEquation? Min, PlaneEquation? Max) Y,
+        (PlaneEquation? Min, PlaneEquation? Max) Z
+      ) planes,
+      double offset
+    )
+    {
+      if (GetPlaneEquations(value, out planes))
+      {
+        if (planes.X.Min.HasValue) planes.X.Min = new PlaneEquation(planes.X.Min.Value.Normal, planes.X.Min.Value.Offset - offset);
+        if (planes.X.Max.HasValue) planes.X.Max = new PlaneEquation(planes.X.Max.Value.Normal, planes.X.Max.Value.Offset + offset);
+
+        if (planes.Y.Min.HasValue) planes.Y.Min = new PlaneEquation(planes.Y.Min.Value.Normal, planes.Y.Min.Value.Offset - offset);
+        if (planes.Y.Max.HasValue) planes.Y.Max = new PlaneEquation(planes.Y.Max.Value.Normal, planes.Y.Max.Value.Offset + offset);
+
+        if (planes.Z.Min.HasValue) planes.Z.Min = new PlaneEquation(planes.Z.Min.Value.Normal, planes.Z.Min.Value.Offset - offset);
+        if (planes.Z.Max.HasValue) planes.Z.Max = new PlaneEquation(planes.Z.Max.Value.Normal, planes.Z.Max.Value.Offset + offset);
+
+        return true;
+      }
+
+      return false;
+    }
+
     public static bool IsInside(this BoundingBoxXYZ value, XYZ point)
     {
       var (min, max, transform, bounded) = value;
