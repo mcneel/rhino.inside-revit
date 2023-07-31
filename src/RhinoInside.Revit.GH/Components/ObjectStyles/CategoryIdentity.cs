@@ -31,12 +31,12 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Category name"),
-      ParamDefinition.Create<Param_Boolean>("Is Visible UI", "VUI", "Category is exposed in UI", relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Param_Boolean>("Is Visible UI", "VUI", "Category is exposed in UI", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Is Subcategory", "ISC", "Is subcategory"),
-      ParamDefinition.Create<Param_Boolean>("Allows Subcategories", "ASC", "Category allows subcategories to be added", relevance: ParamRelevance.Secondary),
-      ParamDefinition.Create<Param_Boolean>("Allows Parameters", "AP", "Category allows bound parameters", relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Allows Subcategories", "ASC", "Category allows subcategories to be added", relevance: ParamRelevance.Tertiary),
+      ParamDefinition.Create<Param_Boolean>("Allows Parameters", "AP", "Category allows bound parameters", relevance: ParamRelevance.Secondary),
       ParamDefinition.Create<Param_Boolean>("Has Material Quantities", "HMQ", "Category has material quantities", relevance: ParamRelevance.Secondary),
-      ParamDefinition.Create<Param_Boolean>("Cuttable", "C", "Category is cuttable", relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Param_Boolean>("Cuttable", "C", "Category is cuttable", relevance: ParamRelevance.Tertiary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
