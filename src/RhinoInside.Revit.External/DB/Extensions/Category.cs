@@ -1098,5 +1098,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       return category.Parent is null ? category.Name : $"{category.Parent.Name}\\{category.Name}";
     }
+
+    /// <summary>
+    /// Gets the BuiltInCategory value for this category.
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns>BuiltInCategory value for the category or INVALID if the category is not a built-in category.</returns>
+    public static BuiltInCategory ToBuiltInCategory(this Category category)
+    {
+#if REVIT_2023
+      return category.BuiltInCategory;
+#else
+      return category.Id.ToBuiltInCategory();
+#endif
+    }
   }
 }
