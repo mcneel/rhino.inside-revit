@@ -138,7 +138,7 @@ If you only need the center line of the wall, an easier and more Grasshopper-lik
 
 ### Wall Profile
 
-Use the {% include ltr/comp.html uuid="9d2e9d8d-" %} component shown here to extract the profile curves for a *Basic* or *Stacked Wall* element. Note that these profile curves are extracted along the center plane of the wall:
+Use the {% include ltr/comp.html uuid="7ce0bd56-" %} component shown here to extract the profile curves for a *Basic* or *Stacked Wall* element. Note that these profile curves are extracted along the center plane of the wall:
 
 ![]({{ "/static/images/guides/revit-walls-profile.png" | prepend: site.baseurl }})
 
