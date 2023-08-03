@@ -52,34 +52,16 @@ namespace RhinoInside.Revit.External.DB
     /// <see cref="Autodesk.Revit.DB.ElementFilter"/> that returns no element on any Revit <see cref="Autodesk.Revit.DB.Document"/>.
     /// </summary>
 #if REVIT_2019
-    public static ElementFilter Empty => new LogicalAndFilter
+    public static ElementFilter Empty =>
 #else
-    public static ElementFilter Empty { get; } = new LogicalAndFilter
+    public static ElementFilter Empty { get; } =
 #endif
-    (
-      new ElementFilter[]
-      {
-        ElementIsElementTypeFilter(true),
-        ElementIsElementTypeFilter(false)
-      }
-    );
+    new ElementMulticategoryFilter(Array.Empty<BuiltInCategory>(), inverted: false);
 
     public static bool IsEmpty(this ElementFilter filter)
     {
 #if REVIT_2019
-      if (filter is LogicalAndFilter and)
-      {
-        bool hasFalse = false, hasTrue = false;
-        foreach (var type in and.GetFilters().OfType<ElementIsElementTypeFilter>())
-          if (type.Inverted)
-            hasTrue = true;
-          else
-            hasFalse = true;
-
-        return hasTrue && hasFalse;
-      }
-
-      return false;
+      return filter is ElementMulticategoryFilter mc && mc.Inverted == false && mc.GetCategoryIds().Count == 0;
 #else
       return ReferenceEquals(filter, Empty);
 #endif
@@ -89,34 +71,16 @@ namespace RhinoInside.Revit.External.DB
     /// <see cref="Autodesk.Revit.DB.ElementFilter"/> that returns all elements on any Revit <see cref="Autodesk.Revit.DB.Document"/>.
     /// </summary>
 #if REVIT_2019
-    public static ElementFilter Universe => new LogicalOrFilter
+    public static ElementFilter Universe =>
 #else
-    public static ElementFilter Universe { get; } = new LogicalOrFilter
+    public static ElementFilter Universe { get; } = 
 #endif
-    (
-      new ElementFilter[]
-      {
-        ElementIsElementTypeFilter(true),
-        ElementIsElementTypeFilter(false)
-      }
-    );
+    new ElementMulticategoryFilter (Array.Empty<BuiltInCategory>(), inverted: true);
 
     public static bool IsUniverse(this ElementFilter filter)
     {
 #if REVIT_2019
-      if (filter is LogicalOrFilter or)
-      {
-        bool hasFalse = false, hasTrue = false;
-        foreach (var type in or.GetFilters().OfType<ElementIsElementTypeFilter>())
-          if (type.Inverted)
-            hasTrue = true;
-          else
-            hasFalse = true;
-
-        return hasTrue && hasFalse;
-      }
-
-      return false;
+      return filter is ElementMulticategoryFilter mc && mc.Inverted == true && mc.GetCategoryIds().Count == 0;
 #else
       return ReferenceEquals(filter, Universe);
 #endif
@@ -234,7 +198,7 @@ namespace RhinoInside.Revit.External.DB
 
     public static ElementFilter ElementCategoryFilter(ICollection<ElementId> categoryIds, bool inverted = false, bool includeSubCategories = false)
     {
-      if (categoryIds.Count == 0) return Empty;
+      if (categoryIds.Count == 0) return inverted ? Universe : Empty;
       if (categoryIds.Count == 1 && !includeSubCategories) return new ElementCategoryFilter(categoryIds.First(), inverted);
 
       var filters = new List<ElementFilter>();
