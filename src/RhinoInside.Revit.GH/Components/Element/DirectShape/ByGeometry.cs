@@ -185,6 +185,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         element.SetShape(ReconstructDirectShapeComponent.ShapeEmpty);
         if (bbox.IsValid)
         {
+          element.Pinned = false;
           element.Location.Move(-bbox.Center.ToXYZ());
           element.SetShape(BuildShape(element, bbox.Center, geometry, material, out var paintIds));
           element.Location.Move(bbox.Center.ToXYZ());
