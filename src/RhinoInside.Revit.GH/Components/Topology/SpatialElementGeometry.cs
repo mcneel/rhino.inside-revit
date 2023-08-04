@@ -70,7 +70,8 @@ namespace RhinoInside.Revit.GH.Components.Topology
           Name = "Top Faces",
           NickName = "TF",
           Description = "Boundary top faces of the given spatial element",
-          Access = GH_ParamAccess.tree
+          Access = GH_ParamAccess.tree,
+          Hidden = true,
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -90,7 +91,8 @@ namespace RhinoInside.Revit.GH.Components.Topology
           Name = "Side Faces",
           NickName = "SF",
           Description = "Boundary side faces of the given spatial element",
-          Access = GH_ParamAccess.tree
+          Access = GH_ParamAccess.tree,
+          Hidden = true,
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -110,7 +112,8 @@ namespace RhinoInside.Revit.GH.Components.Topology
           Name = "Bottom Faces",
           NickName = "BF",
           Description = "Boundary bottom faces of the given spatial element",
-          Access = GH_ParamAccess.tree
+          Access = GH_ParamAccess.tree,
+          Hidden = true,
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
