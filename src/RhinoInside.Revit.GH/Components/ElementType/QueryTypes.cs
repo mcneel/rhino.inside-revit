@@ -67,8 +67,8 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
-        if (kind is object && CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true) is ARDB.ElementFilter kindFilter)
-          elementCollector = elementCollector.WherePasses(kindFilter);
+        if (kind is object)
+          elementCollector = elementCollector.WherePasses(CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true));
 
         if (category is object)
           elementCollector.WhereCategoryIdEqualsTo(category.Id);
