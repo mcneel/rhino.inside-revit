@@ -169,6 +169,8 @@ namespace RhinoInside.Revit.External.DB
                (kind.HasFlag(ElementKind.Direct) ?    ElementKind.None : ElementKind.Direct);
       }
 
+      if (kind == ElementKind.None) return Empty;
+
       if (kind.HasFlag(ElementKind.Component) != kind.HasFlag(ElementKind.System))
       {
         if (elementType != true)
@@ -187,10 +189,17 @@ namespace RhinoInside.Revit.External.DB
           filters.Add(new ElementClassFilter(typeof(DirectShapeType), kind.HasFlag(ElementKind.System)));
       }
 
-      return filters.Count == 0 ? default :
-        kind.HasFlag(ElementKind.System) ?
-        Intersect(filters) :
-        Union(filters);
+      if (filters.Count == 0)
+      {
+        switch (elementType)
+        {
+          case null:  return Universe;
+          case false: return new ElementIsElementTypeFilter(inverted: true);
+          case true:  return new ElementIsElementTypeFilter(inverted: false);
+        }
+      }
+
+      return kind.HasFlag(ElementKind.System) ? Intersect(filters) : Union(filters);
     }
 
     public static ElementFilter ElementIsElementTypeFilter(bool inverted = false) => inverted ?
