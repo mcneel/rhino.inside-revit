@@ -61,6 +61,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
           try
           {
             var shape = new ARDB.Point[] { ARDB.Point.Create(XYZExtension.Zero) };
+            element.Pinned = false;
             element.Location.Move(-point.ToXYZ());
             element.SetShape(shape);
             element.Location.Move(point.ToXYZ());

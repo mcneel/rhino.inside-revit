@@ -64,6 +64,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
           try
           {
             curve.Transform(inverse);
+            element.Pinned = false;
             element.Location.Move(-bbox.Center.ToXYZ());
             element.SetShape(curve.ToShape());
             element.Location.Move(bbox.Center.ToXYZ());
