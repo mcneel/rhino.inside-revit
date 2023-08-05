@@ -238,26 +238,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
-      // Hack to force `ParameterValue.CastTo` to be called.
-      if (source is ParameterValue)
-        return false;
-
       if (source is IGH_Goo goo)
-      {
-        if (source is IGH_Element element)
-        {
-          var document = element.Document;
-          var id = element.Id;
-
-          if (id.IsBuiltInId())
-          {
-            SetValue(document, id);
-            return true;
-          }
-          else source = document?.GetElement(id);
-        }
-        else source = goo.ScriptVariable();
-      }
+        source = goo.ScriptVariable();
 
       if (source is string uniqueid)
       {
@@ -271,10 +253,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      if (source is ARDB.Element value)
-        return SetValue(value);
-
-      return false;
+      return SetValue(source as ARDB.Element);
     }
 
     public override bool CastTo<Q>(out Q target)
