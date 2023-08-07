@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Panel is InstanceElement panel)
+        if (Panel is Panel panel)
         {
           var location = panel.Location;
           location = new Plane(location.Origin, location.XAxis, Vector3d.CrossProduct(location.XAxis, location.YAxis));

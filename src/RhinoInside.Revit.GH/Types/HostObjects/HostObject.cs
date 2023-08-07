@@ -9,10 +9,10 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Host")]
-  public interface IGH_HostObject : IGH_InstanceElement { }
+  public interface IGH_HostObject : IGH_GeometricElement { }
 
   [Kernel.Attributes.Name("Host")]
-  public class HostObject : InstanceElement, IGH_HostObject
+  public class HostObject : GeometricElement, IGH_HostObject
   {
     protected override Type ValueType => typeof(ARDB.HostObject);
     public new ARDB.HostObject Value => base.Value as ARDB.HostObject;

@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Types
   using RhinoInside.Revit.Convert.Geometry;
 
   [Kernel.Attributes.Name("Railing")]
-  public class Railing : InstanceElement, ISketchAccess
+  public class Railing : GeometricElement, ISketchAccess
   {
     protected override Type ValueType => typeof(ARDB.Architecture.Railing);
     public new ARDB.Architecture.Railing Value => base.Value as ARDB.Architecture.Railing;

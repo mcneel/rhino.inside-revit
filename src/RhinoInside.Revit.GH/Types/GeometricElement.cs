@@ -20,13 +20,20 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_GeometricElement : IGH_GraphicalElement { }
 
   [Kernel.Attributes.Name("Geometric Element")]
-  public class GeometricElement : GraphicalElement, IGH_GeometricElement, IGH_PreviewMeshData, Bake.IGH_BakeAwareElement
+  public class GeometricElement : GraphicalElement,
+    IGH_GeometricElement,
+    IHostElementAccess,
+    IGH_PreviewMeshData,
+    Bake.IGH_BakeAwareElement
   {
     public GeometricElement() { }
     public GeometricElement(ARDB.Element element) : base(element) { }
 
     public static new bool IsValidElement(ARDB.Element element)
     {
+      if (element.Category is null)
+        return false;
+
       if (!GraphicalElement.IsValidElement(element))
         return false;
 
@@ -250,7 +257,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         geometricElement = element;
         clippingBox = element.ClippingBox;
-        MeshingParameters = element.meshingParameters;
+        MeshingParameters = element._MeshingParameters;
       }
 
       public static Preview OrderNew(GeometricElement element)
@@ -286,7 +293,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    MeshingParameters meshingParameters;
+    MeshingParameters _MeshingParameters;
     Preview _GeometryPreview;
     Preview GeometryPreview
     {
@@ -301,12 +308,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public Mesh[] TryGetPreviewMeshes(MeshingParameters parameters)
     {
-      if (!ReferenceEquals(meshingParameters, parameters))
+      if (!ReferenceEquals(_MeshingParameters, parameters))
       {
-        meshingParameters = parameters;
+        _MeshingParameters = parameters;
         if (_GeometryPreview is object)
         {
-          if (_GeometryPreview.MeshingParameters?.RelativeTolerance != meshingParameters?.RelativeTolerance)
+          if (_GeometryPreview.MeshingParameters?.RelativeTolerance != _MeshingParameters?.RelativeTolerance)
             GeometryPreview = null;
         }
       }
@@ -724,6 +731,17 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
+    #endregion
+
+    #region IHostElementAccess
+    GraphicalElement IHostElementAccess.HostElement => Value is ARDB.Element element ?
+      element.ViewSpecific ? OwnerView?.Viewer :
+      HostElement :
+      default;
+
+    public virtual GraphicalElement HostElement => Value is ARDB.Element element ?
+      GetElement<GraphicalElement>(element.LevelId) :
+      default;
     #endregion
   }
 }

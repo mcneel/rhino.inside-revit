@@ -486,7 +486,12 @@ namespace RhinoInside.Revit.GH.Types
         {
           AssertValidDocument(value, nameof(CreatedPhase));
           if (element.CreatedPhaseId != value.Id)
+          {
+            if (!element.ArePhasesModifiable())
+              throw new Exceptions.RuntimeErrorException($"The element does not allow setting the property '{CreatedPhase}'.");
+
             element.CreatedPhaseId = value.Id;
+          }
         }
       }
     }
@@ -500,7 +505,12 @@ namespace RhinoInside.Revit.GH.Types
         {
           AssertValidDocument(value, nameof(DemolishedPhase));
           if (element.DemolishedPhaseId != value.Id)
+          {
+            if (!element.ArePhasesModifiable())
+              throw new Exceptions.RuntimeErrorException($"The element does not allow setting the property '{DemolishedPhase}'.");
+
             element.DemolishedPhaseId = value.Id;
+          }
         }
       }
     }

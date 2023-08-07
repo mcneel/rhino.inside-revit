@@ -12,10 +12,10 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Component")]
-  public interface IGH_FamilyInstance : IGH_InstanceElement { }
+  public interface IGH_FamilyInstance : IGH_GeometricElement { }
 
   [Kernel.Attributes.Name("Component")]
-  public class FamilyInstance : InstanceElement,
+  public class FamilyInstance : GeometricElement,
     IGH_FamilyInstance,
     Bake.IGH_BakeAwareElement
   {
