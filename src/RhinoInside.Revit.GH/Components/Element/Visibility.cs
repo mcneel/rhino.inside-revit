@@ -10,7 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
-  [ComponentVersion(introduced: "1.13")]
+  [ComponentVersion(introduced: "1.13", updated: "1.16")]
   public class ElementVisibility : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("8ED1490F-DA5D-40FA-8612-4F4B166ECE52");
@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       nickname: "Visibility",
       description: "Check element visibility on a given View",
       category: "Revit",
-      subCategory: "Element"
+      subCategory: "View"
     )
     { }
 
@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.Element()
         {
           Name = "Element",
           NickName = "E",
@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.Element()
         {
           Name = "Element",
           NickName = "E",
@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetDataList(DA, "Element", out IList<Types.GraphicalElement> elements)) return;
+      if (!Params.GetDataList(DA, "Element", out IList<Types.Element> elements)) return;
       else Params.TrySetDataList(DA, "Element", () => elements);
 
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;

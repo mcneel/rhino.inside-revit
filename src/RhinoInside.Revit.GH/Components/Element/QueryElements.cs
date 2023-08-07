@@ -144,17 +144,17 @@ namespace RhinoInside.Revit.GH.Components.Elements
     }
   }
 
-  public class QueryVisibleElements : ElementCollectorComponent
+  public class QueryGraphicalElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("79DAEA3A-13A3-49BF-8BEB-AA28E3BE4515");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementIsElementTypeFilter(inverted: true);
 
-    public QueryVisibleElements() : base
+    public QueryGraphicalElements() : base
     (
-      name: "Query Visible Elements",
-      nickname: "VisEles",
-      description: "Get elements visible in a view",
+      name: "Query Graphical Elements",
+      nickname: "G-Elements",
+      description: "Get graphical elements visible in a view",
       category: "Revit",
       subCategory: "Element"
     )
@@ -199,10 +199,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
         else
         {
           // Default category filtering
-          var hiddenCategories = BuiltInCategoryExtension.GetHiddenInUIBuiltInCategories(view.Document).
-            Append(ARDB.BuiltInCategory.OST_SectionBox).  // 'Section Boxes' has little sense here!?!?
-            Append(ARDB.BuiltInCategory.INVALID).         // `ScheduleSheetInstance` Viewer has no Category, so we filter here
-            ToList();
+          var hiddenCategories = BuiltInCategoryExtension.GetHiddenInUIBuiltInCategories(view.Document).ToList();
+          hiddenCategories.Add(ARDB.BuiltInCategory.OST_SectionBox);  // 'Section Boxes' has little sense here!?!?
+          hiddenCategories.Add(ARDB.BuiltInCategory.INVALID);         // `ScheduleSheetInstance` Viewer has no Category, so we filter here
 
           elementCollector = elementCollector.WherePasses
           (

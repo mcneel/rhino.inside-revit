@@ -18,16 +18,17 @@ group: Deployment & Configs
 - Added 'Component Reference Plane' component.
 - Added 'Reference Annotations' component.
 - Improved 'Host Shape' performance.
-- Now 'Query View Elements' filters out hidden UI _Categories_.
+- Renamed 'Query View Elements' -> 'Query Graphical Elements'.
+- Now 'Query Graphical Elements' filters out hidden UI _Categories_.
 - Added 'Is Visible UI' to 'Query Categories' and 'Category Identity'.
+- Added 'Query View Elements' component.
 - Added 'Query View Owned Elements' component.
-- Renamed 'Query View Elements' -> 'Query Visible Elements'.
 - Added 'Query Title Blocks' component.
 - Added 'Query Viewports' component.
 - Fixed 'Element Name' when used to rename _Subcategories_ in multiple families at once.
   [#898](https://github.com/mcneel/rhino.inside-revit/issues/898)
 - Fix on 'Query Categories' it should output ordered by id.
-- Fix on 'Query Visible Elements' when a `<None>` category is used.
+- Fix on 'Query Graphical Elements' when a `<None>` category is used.
 - 'Element Subcategory' compoennt now works on `GenericForm` elements.
 - Added 'Add Schedule Graphics' component.
   [#871](https://github.com/mcneel/rhino.inside-revit/issues/871)
