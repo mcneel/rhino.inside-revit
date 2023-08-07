@@ -353,8 +353,12 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Architecture.Railing),            (element)=> new Railing               (element as ARDB.Architecture.Railing) },
 #if REVIT_2023
       { typeof(ARDB.Structure.AnalyticalElement),     (element)=> new AnalyticalElement     (element as ARDB.Structure.AnalyticalElement) },
+      { typeof(ARDB.Structure.AnalyticalMember),      (element)=> new AnalyticalMember      (element as ARDB.Structure.AnalyticalMember) },
+      { typeof(ARDB.Structure.AnalyticalSurfaceBase), (element)=> new AnalyticalSurface     (element as ARDB.Structure.AnalyticalSurfaceBase) },
 #else
       { typeof(ARDB.Structure.AnalyticalModel),       (element)=> new AnalyticalElement     (element as ARDB.Structure.AnalyticalModel) },
+      { typeof(ARDB.Structure.AnalyticalModelStick),  (element)=> new AnalyticalMember      (element as ARDB.Structure.AnalyticalModelStick) },
+      { typeof(ARDB.Structure.AnalyticalModelSurface),(element)=> new AnalyticalSurface     (element as ARDB.Structure.AnalyticalModelSurface) },
 #endif
     };
   }

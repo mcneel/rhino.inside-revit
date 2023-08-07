@@ -331,6 +331,7 @@
     <Compile Include="Parameters\Site\BuildPad.cs" />
     <Compile Include="Parameters\Site\TopographySurface.cs" />
     <Compile Include="Parameters\Site\Toposolid.cs" />
+    <Compile Include="Parameters\Structure\AnalyticalElement.cs" />
     <Compile Include="Parameters\Structure\BeamSystem.cs" />
     <Compile Include="Parameters\Structure\Truss.cs" />
     <Compile Include="Parameters\Structure\WallFoundation.cs" />

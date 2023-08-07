@@ -1,7 +1,12 @@
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Structure;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+#if !REVIT_2023
+  using AnalyticalElement = AnalyticalModel;
+#endif
+
   public static class ElementLocation
   {
     #region Element
@@ -268,6 +273,28 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static void SetLocation(this ElevationMarker mark, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY)
     {
       ElementLocation.SetLocation(mark, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
+    }
+    #endregion
+
+    #region AnalyticalElement
+    public static void GetLocation(this AnalyticalElement element, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
+    {
+#if REVIT_2023
+      using (var transform = element.GetTransform())
+#else
+      using (var transform = element.GetLocalCoordinateSystem())
+#endif
+      {
+        // Default values
+        origin = transform.Origin;
+        basisX = transform.BasisX.ToUnitXYZ();
+        basisY = transform.BasisY.ToUnitXYZ();
+      }
+    }
+
+    public static void SetLocation(this AnalyticalElement element, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY)
+    {
+      ElementLocation.SetLocation(element, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
     }
     #endregion
   }
