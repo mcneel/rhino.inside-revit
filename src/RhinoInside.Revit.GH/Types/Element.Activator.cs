@@ -157,6 +157,12 @@ namespace RhinoInside.Revit.GH.Types
             break;
 #endif
 
+          case ARDB.BuiltInCategory.OST_IOSSketchGrid:
+            return new GeometricElement(element);
+
+          case ARDB.BuiltInCategory.OST_IOSArrays:
+            return new GraphicalElement(element);
+
 #if !REVIT_2020
           case ARDB.BuiltInCategory.OST_RasterImages:
             if (ImageInstance.IsValidElement(element)) return new ImageInstance(element);
@@ -168,9 +174,6 @@ namespace RhinoInside.Revit.GH.Types
       // By Features
       if (GraphicalElement.IsValidElement(element))
       {
-        if (InstanceElement.IsValidElement(element))
-          return new InstanceElement(element);
-
         if (GeometricElement.IsValidElement(element))
           return new GeometricElement(element);
 

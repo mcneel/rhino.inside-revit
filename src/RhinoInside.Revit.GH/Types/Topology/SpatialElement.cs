@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Spatial Element")]
-  public class SpatialElement : InstanceElement
+  public class SpatialElement : GeometricElement
   {
     protected override Type ValueType => typeof(ARDB.SpatialElement);
     public new ARDB.SpatialElement Value => base.Value as ARDB.SpatialElement;

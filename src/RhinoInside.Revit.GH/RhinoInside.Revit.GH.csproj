@@ -466,7 +466,6 @@
     <Compile Include="Types\HostObjects\Panel.cs" />
     <Compile Include="Types\HostObjects\Roof.cs" />
     <Compile Include="Types\HostObjects\Wall.cs" />
-    <Compile Include="Types\InstanceElement.cs" />
     <Compile Include="Types\Instances\FamilyInstance.cs" />
     <Compile Include="Types\Instances\ImageInstance.cs" />
     <Compile Include="Types\Instances\ImportInstance.cs" />
