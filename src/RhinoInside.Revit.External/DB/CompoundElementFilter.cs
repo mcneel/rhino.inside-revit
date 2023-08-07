@@ -31,6 +31,8 @@ namespace RhinoInside.Revit.External.DB
     public static ElementFilter ElementHasCategoryFilter { get; } = new ElementCategoryFilter(BuiltInCategory.INVALID, inverted: true);
     private static ElementFilter ElementIsElementTypeFilterInstance { get; } = new ElementIsElementTypeFilter(inverted: false);
     private static ElementFilter ElementIsNotElementTypeFilterInstance { get; } = new ElementIsElementTypeFilter(inverted: true);
+    private static ElementFilter ElementIsViewSpecific { get; } = new ElementOwnerViewFilter(ElementIdExtension.Invalid, inverted: true);
+    private static ElementFilter ElementIsNotViewSpecific { get; } = new ElementOwnerViewFilter(ElementIdExtension.Invalid, inverted: false);
     private static FilterNumericRuleEvaluator NumericEqualsEvaluator { get; } = new FilterNumericEquals();
     private static ParameterValueProvider SubCategoryParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.FAMILY_ELEM_SUBCATEGORY));
     private static ParameterValueProvider FamilyNameParamProvider { get; } = new ParameterValueProvider(new ElementId(BuiltInParameter.ALL_MODEL_FAMILY_NAME));
@@ -204,6 +206,9 @@ namespace RhinoInside.Revit.External.DB
 
     public static ElementFilter ElementIsElementTypeFilter(bool inverted = false) => inverted ?
       ElementIsNotElementTypeFilterInstance : ElementIsElementTypeFilterInstance;
+
+    public static ElementFilter ElementIsViewSpecificFilter(bool inverted = false) => inverted ?
+      ElementIsNotViewSpecific : ElementIsViewSpecific;
 
     public static ElementFilter ElementCategoryFilter(ICollection<ElementId> categoryIds, bool inverted = false, bool includeSubCategories = false)
     {

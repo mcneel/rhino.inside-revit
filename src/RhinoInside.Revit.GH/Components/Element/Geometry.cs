@@ -502,7 +502,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       nickname: "ViewGeom",
       description: "Get the geometry of the given Element on a view",
       category: "Revit",
-      subCategory: "Element"
+      subCategory: "View"
     )
     { }
 
