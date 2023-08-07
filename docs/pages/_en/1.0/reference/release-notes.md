@@ -31,6 +31,9 @@ group: Deployment & Configs
 - 'Element Subcategory' compoennt now works on `GenericForm` elements.
 - Added 'Add Schedule Graphics' component.
   [#871](https://github.com/mcneel/rhino.inside-revit/issues/871)
+- Fix on DirectShape components.
+- Renamed 'Analyze Instance Space' -> 'Component Neighbours'.
+- Updated Topological components to return linked elements.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

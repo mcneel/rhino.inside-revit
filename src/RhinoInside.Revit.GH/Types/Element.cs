@@ -477,6 +477,8 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public bool? HasPhases => Value?.HasPhases();
+
     public Phase CreatedPhase
     {
       get => Value is ARDB.Element element && element.HasPhases() ? new Phase(element.Document, element.CreatedPhaseId) : default;

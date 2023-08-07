@@ -6,11 +6,13 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Topology
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.7")]
   public class SpatialElementGeometry : ZuiComponent
   {
@@ -130,7 +132,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Spatial Element", out ARDB.SpatialElement spatialElement)) return;
+      if (!Params.GetData(DA, "Spatial Element", out Types.SpatialElement spatialElement)) return;
       if (!Params.TryGetData(DA, "Boundary Location", out ARDB.SpatialElementBoundaryLocation? boundaryLocation)) return;
 
       if (boundaryLocation == null) return;
@@ -140,7 +142,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         throw new Exceptions.RuntimeArgumentException("Boundary Location", "Only Finish and Center are allowed.", boundaryLocation);
       }
 
-      if (ARDB.SpatialElementGeometryCalculator.CanCalculateGeometry(spatialElement))
+      if (ARDB.SpatialElementGeometryCalculator.CanCalculateGeometry(spatialElement.Value))
       {
         var document = spatialElement.Document;
         var boundaryOptions = new ARDB.SpatialElementBoundaryOptions
@@ -153,7 +155,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         {
           try
           {
-            using (var results = calculator.CalculateSpatialElementGeometry(spatialElement))
+            using (var results = calculator.CalculateSpatialElementGeometry(spatialElement.Value))
             {
               if (results.GetGeometry() is ARDB.Solid shell)
               {
@@ -209,17 +211,17 @@ namespace RhinoInside.Revit.GH.Components.Topology
                       {
                         case ARDB.SubfaceType.Bottom:
                           bottomF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
-                          bottomE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
+                          bottomE?.Add(spatialElement.GetElement<Types.GraphicalElement>(face.SpatialBoundaryElement));
                           break;
 
                         case ARDB.SubfaceType.Top:
                           topF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
-                          topE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
+                          topE?.Add(spatialElement.GetElement<Types.GraphicalElement>(face.SpatialBoundaryElement));
                           break;
 
                         case ARDB.SubfaceType.Side:
                           sideF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
-                          sideE?.Add(Types.GraphicalElement.FromLinkElementId(document, face.SpatialBoundaryElement) as Types.GraphicalElement);
+                          sideE?.Add(spatialElement.GetElement<Types.GraphicalElement>(face.SpatialBoundaryElement));
                           break;
                       }
                     }
@@ -325,7 +327,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Spatial Element", out ARDB.SpatialElement spatialElement)) return;
+      if (!Params.GetData(DA, "Spatial Element", out Types.SpatialElement spatialElement)) return;
       if (!Params.TryGetData(DA, "Boundary Location", out ARDB.SpatialElementBoundaryLocation? boundaryLocation)) return;
 
       var boundaryOptions = new ARDB.SpatialElementBoundaryOptions
@@ -353,12 +355,12 @@ namespace RhinoInside.Revit.GH.Components.Topology
       if (_Elements_ >= 0) DA.SetDataTree(_Elements_, GetElements(DA.ParameterTargetPath(_Elements_).AppendElement(DA.ParameterTargetIndex(_Elements_)), spatialElement, boundaryOptions));
     }
 
-    GH_Structure<GH_Curve> GetSegments(GH_Path path, ARDB.SpatialElement se, ARDB.SpatialElementBoundaryOptions options)
+    GH_Structure<GH_Curve> GetSegments(GH_Path path, Types.SpatialElement se, ARDB.SpatialElementBoundaryOptions options)
     {
       var index = 0;
 
       var boundary = new GH_Structure<GH_Curve>();
-      foreach (var segments in se.GetBoundarySegments(options))
+      foreach (var segments in se.Value.GetBoundarySegments(options))
       {
         boundary.EnsurePath(path.AppendElement(index++));
 
@@ -369,21 +371,22 @@ namespace RhinoInside.Revit.GH.Components.Topology
       return boundary;
     }
 
-    GH_Structure<Types.GraphicalElement> GetElements(GH_Path path, ARDB.SpatialElement element, ARDB.SpatialElementBoundaryOptions options)
+    GH_Structure<Types.GraphicalElement> GetElements(GH_Path path, Types.SpatialElement element, ARDB.SpatialElementBoundaryOptions options)
     {
       var index = 0;
 
       var elements = new GH_Structure<Types.GraphicalElement>();
-      foreach (var segments in element.GetBoundarySegments(options))
+      foreach (var segments in element.Value.GetBoundarySegments(options))
       {
         elements.EnsurePath(path.AppendElement(index++));
 
         foreach (var segment in segments)
         {
-          if (element.Document.GetElement(segment.ElementId) is ARDB.RevitLinkInstance instance)
-            elements.Append(Types.GraphicalElement.FromElementId(instance.GetLinkDocument(), segment.LinkElementId) as Types.GraphicalElement);
-          else
-            elements.Append(Types.GraphicalElement.FromElementId(element.Document, segment.ElementId) as Types.GraphicalElement);
+          var id = segment.LinkElementId.IsValid() ?
+            new ARDB.LinkElementId(segment.ElementId, segment.LinkElementId) :
+            new ARDB.LinkElementId(segment.ElementId);
+
+          elements.Append(element.GetElement<Types.GraphicalElement>(id));
         }
       }
 
