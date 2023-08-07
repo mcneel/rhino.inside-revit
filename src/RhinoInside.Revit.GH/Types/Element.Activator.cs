@@ -351,6 +351,11 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Architecture.TopographySurface),  (element)=> new TopographySurface     (element as ARDB.Architecture.TopographySurface) },
       { typeof(ARDB.Architecture.BuildingPad),        (element)=> new BuildingPad           (element as ARDB.Architecture.BuildingPad) },
       { typeof(ARDB.Architecture.Railing),            (element)=> new Railing               (element as ARDB.Architecture.Railing) },
+#if REVIT_2023
+      { typeof(ARDB.Structure.AnalyticalElement),     (element)=> new AnalyticalElement     (element as ARDB.Structure.AnalyticalElement) },
+#else
+      { typeof(ARDB.Structure.AnalyticalModel),       (element)=> new AnalyticalElement     (element as ARDB.Structure.AnalyticalModel) },
+#endif
     };
   }
 }

@@ -497,6 +497,7 @@
     <Compile Include="Types\Site\Toposolid.cs" />
     <Compile Include="Types\Sketch.cs" />
     <Compile Include="Types\SketchPlane.cs" />
+    <Compile Include="Types\Structure\AnalyticalElement.cs" />
     <Compile Include="Types\Structure\BeamSystem.cs" />
     <Compile Include="Types\Structure\StructuralMember.cs" />
     <Compile Include="Types\Structure\Truss.cs" />
