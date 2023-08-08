@@ -12,32 +12,32 @@ group: Deployment & Configs
 
 ### RC
 
-- Added 'Add Toposolid' component.
-- Added 'Add Toposolid Sub-Division' component.
-- Added 'Component References' component.
-- Added 'Component Reference Plane' component.
-- Added 'Reference Annotations' component.
-- Improved 'Host Shape' performance.
-- Renamed 'Query View Elements' -> 'Query Graphical Elements'.
-- Now 'Query Graphical Elements' filters out hidden UI _Categories_.
-- Added 'Is Visible UI' to 'Query Categories' and 'Category Identity'.
-- Added 'Query View Elements' component.
-- Added 'Query View Owned Elements' component.
-- Added 'Query Title Blocks' component.
-- Added 'Query Viewports' component.
-- Fixed 'Element Name' when used to rename _Subcategories_ in multiple families at once.
-  [#898](https://github.com/mcneel/rhino.inside-revit/issues/898)
-- Fix on 'Query Categories' it should output ordered by id.
-- Fix on 'Query Graphical Elements' when a `<None>` category is used.
-- 'Element Subcategory' compoennt now works on `GenericForm` elements.
-- Added 'Add Schedule Graphics' component.
-  [#871](https://github.com/mcneel/rhino.inside-revit/issues/871)
-- Fix on DirectShape components.
-- Renamed 'Analyze Instance Space' -> 'Component Neighbours'.
-- Updated Topological components to return linked elements.
-
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.16" version="v1.16.8620.27325" time="08/08/2023" %}
+
+- Added {% include ltr/comp.html uuid='86d56bea' %} component.
+- Added {% include ltr/comp.html uuid='aae738e5' %} component.
+- Added {% include ltr/comp.html uuid='2ab03aaf' %} component.
+- Improved {% include ltr/comp.html uuid='516b2771' %} performance.
+- Renamed {% include ltr/comp.html uuid='ecc6fa17' %} -> {% include ltr/comp.html uuid='79daea3a' %}.
+- Now {% include ltr/comp.html uuid='79daea3a' %} filters out hidden UI _Categories_.
+- Added 'Is Visible UI' to {% include ltr/comp.html uuid='d150e40e' %} and {% include ltr/comp.html uuid='d794361e' %}.
+- Added {% include ltr/comp.html uuid='ecc6fa17' %} component.
+- Added {% include ltr/comp.html uuid='92b3f600' %} component.
+- Added {% include ltr/comp.html uuid='ec5cd3bb' %} component.
+- Added {% include ltr/comp.html uuid='63c816d8' %} component.
+- Fixed 'Element Name' when used to rename _Subcategories_ in multiple families at once.
+  [#898](https://github.com/mcneel/rhino.inside-revit/issues/898)
+- Fix on {% include ltr/comp.html uuid='d150e40e' %} it should output ordered by id.
+- Fix on {% include ltr/comp.html uuid='79daea3a' %} when a `<None>` category is used.
+- {% include ltr/comp.html uuid='495330db' %} compoennt now works on `GenericForm` elements.
+- Added {% include ltr/comp.html uuid='1caafc26' %} component.
+  [#871](https://github.com/mcneel/rhino.inside-revit/issues/871)
+- Fix on DirectShape components.
+- Renamed 'Analyze Instance Space' -> {% include ltr/comp.html uuid='6ac37380' %}.
+- Updated Topological components to return linked elements.
 
 {% include ltr/release-header.html title="v1.16 RC1" version="v1.16.8596.34292" pre_release=true time="07/15/2023" %}
 

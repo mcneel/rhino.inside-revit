@@ -240,6 +240,18 @@
     "uuid": "0700be5f-9b9c-4235-add5-787e42898114"
   }, 
   {
+    "desc": "Contains a collection of Revit analytical elements", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Revit Elements", 
+    "since": "1.16", 
+    "tab": "Params", 
+    "title": "Analytical Element", 
+    "typename": "AnalyticalElement", 
+    "until": null, 
+    "uuid": "cec912fa-c0d3-47c2-a3a6-52a8b8ea4476"
+  }, 
+  {
     "desc": "Contains a collection of Revit Beam System elements", 
     "iconsrc": "/static/images/GH/BeamSystem.png", 
     "icontag": null, 
@@ -334,6 +346,18 @@
     "typename": "SpatialElement", 
     "until": null, 
     "uuid": "8774acf3-7b77-474f-b12b-03d4cbbc3c15"
+  }, 
+  {
+    "desc": "Contains a collection of Revit schedule views", 
+    "iconsrc": "/static/images/GH/ViewSchedule.png", 
+    "icontag": null, 
+    "panel": "Revit", 
+    "since": "1.16", 
+    "tab": "Params", 
+    "title": "Schedule", 
+    "typename": "ViewSchedule", 
+    "until": null, 
+    "uuid": "1f65705e-4e32-473f-81bf-f7536bb62ff3"
   }, 
   {
     "desc": "Contains a collection of Revit dimension elements", 
@@ -1620,18 +1644,6 @@
     "uuid": "8621421d-b642-4c26-a88b-1760b9d97c91"
   }, 
   {
-    "desc": "Constructs a project elevation", 
-    "iconsrc": "/static/images/GH/ConstructProjectElevation.png", 
-    "icontag": null, 
-    "panel": "Site", 
-    "since": "1.0", 
-    "tab": "Revit", 
-    "title": "Project Elevation", 
-    "typename": "ConstructProjectElevation", 
-    "until": null, 
-    "uuid": "54c795d0-38f8-4703-8968-0336c9d9b066"
-  }, 
-  {
     "desc": "Gets the active workset", 
     "iconsrc": "/static/images/GH/WorksetActive.png", 
     "icontag": null, 
@@ -1788,13 +1800,13 @@
     "uuid": "dea31165-a184-466f-9119-d726472b226e"
   }, 
   {
-    "desc": "Analyze spatial elements surrounding the given instance", 
+    "desc": "Query spatial elements surrounding the given component", 
     "iconsrc": "/static/images/GH/AnalyzeInstanceSpace.png", 
     "icontag": null, 
     "panel": "Topology", 
-    "since": null, 
+    "since": "1.0", 
     "tab": "Revit", 
-    "title": "Analyze Instance Space", 
+    "title": "Component Neighbours", 
     "typename": "AnalyzeInstanceSpace", 
     "until": null, 
     "uuid": "6ac37380-d14f-46bf-835c-611db8c38e3b"
@@ -2076,6 +2088,18 @@
     "uuid": "6820c2dc-4be5-4a54-884f-5d402cf556b3"
   }, 
   {
+    "desc": "Constructs a project elevation", 
+    "iconsrc": "/static/images/GH/ConstructProjectElevation.png", 
+    "icontag": null, 
+    "panel": "Site", 
+    "since": "1.0", 
+    "tab": "Revit", 
+    "title": "Project Elevation", 
+    "typename": "ConstructProjectElevation", 
+    "until": null, 
+    "uuid": "54c795d0-38f8-4703-8968-0336c9d9b066"
+  }, 
+  {
     "desc": "Adds a revision at the end of the sequence of existing revisions into the active Revit document", 
     "iconsrc": "/static/images/GH/AddRevision.png", 
     "icontag": null, 
@@ -2086,6 +2110,18 @@
     "typename": "AddRevision", 
     "until": null, 
     "uuid": "221e53a6-54a2-45fb-82b1-220d6e5be884"
+  }, 
+  {
+    "desc": "Given a point and a view, it adds a schedule on a sheet", 
+    "iconsrc": "/static/images/GH/AddScheduleSheetInstance.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Add Schedule Graphics", 
+    "typename": "AddScheduleSheetInstance", 
+    "until": null, 
+    "uuid": "1caafc26-d456-4ea2-84a1-fd123b934b5f"
   }, 
   {
     "desc": "Create a Revit Title Block on a sheet view", 
@@ -2134,6 +2170,30 @@
     "typename": "QuerySheets", 
     "until": null, 
     "uuid": "97c8cb27-955f-44cf-948d-dfbde285cd7a"
+  }, 
+  {
+    "desc": "Get all title blocks placed in a sheet", 
+    "iconsrc": "/static/images/GH/QueryTitleBlocks.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Query Title Blocks", 
+    "typename": "QueryTitleBlocks", 
+    "until": null, 
+    "uuid": "ec5cd3bb-b8f3-40c0-be4c-35d8d8ee63cd"
+  }, 
+  {
+    "desc": "Get all viewports placed in a sheet", 
+    "iconsrc": "/static/images/GH/QueryViewports.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Query Viewports", 
+    "typename": "QueryViewports", 
+    "until": null, 
+    "uuid": "63c816d8-4a84-45b6-bcec-c60e57fbc547"
   }, 
   {
     "desc": "Create a new sheet in Revit with given number and name", 
@@ -3987,7 +4047,7 @@
     "desc": "Get the geometry of the given Element on a view", 
     "iconsrc": "/static/images/GH/ElementViewGeometry.png", 
     "icontag": null, 
-    "panel": "Element", 
+    "panel": "View", 
     "since": null, 
     "tab": "Revit", 
     "title": "Element View Geometry", 
@@ -4018,6 +4078,30 @@
     "typename": "ElementPreview", 
     "until": null, 
     "uuid": "a95c7b73-6f70-46ca-85fc-a4402a3b6971"
+  }, 
+  {
+    "desc": "Retrieves references of given component", 
+    "iconsrc": "/static/images/GH/ComponentReferences.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Component References", 
+    "typename": "ComponentReferences", 
+    "until": null, 
+    "uuid": "86d56bea-4064-4e79-80a4-12f6d2968dea"
+  }, 
+  {
+    "desc": "Retrieves references of given component", 
+    "iconsrc": "/static/images/GH/ComponentReferencePlane.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Component Reference Plane", 
+    "typename": "ComponentReferencePlane", 
+    "until": null, 
+    "uuid": "aae738e5-88df-4cdf-8dc9-6cda11f334a0"
   }, 
   {
     "desc": "Element Category Property Get access component to Element Category property", 
@@ -4260,14 +4344,14 @@
     "uuid": "0f7da57e-6c05-4dd0-aabf-69e42df38859"
   }, 
   {
-    "desc": "Get elements visible in a view", 
-    "iconsrc": "/static/images/GH/QueryViewElements.png", 
+    "desc": "Get graphical elements visible in a view", 
+    "iconsrc": "/static/images/GH/QueryGraphicalElements.png", 
     "icontag": null, 
     "panel": "Element", 
     "since": null, 
     "tab": "Revit", 
-    "title": "Query View Elements", 
-    "typename": "QueryViewElements", 
+    "title": "Query Graphical Elements", 
+    "typename": "QueryGraphicalElements", 
     "until": null, 
     "uuid": "79daea3a-13a3-49bf-8beb-aa28e3be4515"
   }, 
@@ -4323,7 +4407,7 @@
     "desc": "Check element visibility on a given View", 
     "iconsrc": "/static/images/GH/ElementVisibility.png", 
     "icontag": null, 
-    "panel": "Element", 
+    "panel": "View", 
     "since": "1.13", 
     "tab": "Revit", 
     "title": "Element Visibility", 
@@ -4896,6 +4980,30 @@
     "uuid": "b0440885-4af3-4890-8e84-3bc2a8342b9f"
   }, 
   {
+    "desc": "Get elements visible in a view", 
+    "iconsrc": "/static/images/GH/QueryViewElements.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Query View Elements", 
+    "typename": "QueryViewElements", 
+    "until": null, 
+    "uuid": "ecc6fa17-ed92-4166-b47d-a32d50fa8475"
+  }, 
+  {
+    "desc": "Get elements owned by a view", 
+    "iconsrc": "/static/images/GH/QueryViewOwnedElements.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Query View Owned Elements", 
+    "typename": "QueryViewOwnedElements", 
+    "until": null, 
+    "uuid": "92b3f600-40fb-4dd3-992b-68b68d284167"
+  }, 
+  {
     "desc": "Get all document views", 
     "iconsrc": "/static/images/GH/QueryViews.png", 
     "icontag": null, 
@@ -4992,7 +5100,7 @@
     "uuid": "6b32703e-a8b4-49c9-b855-133d3df925fe"
   }, 
   {
-    "desc": "Manipulates points and edges on a slab, roof or floor", 
+    "desc": "Gives access to points and edges on a slab, roof or floor", 
     "iconsrc": "/static/images/GH/SlabShape.png", 
     "icontag": null, 
     "panel": "Architecture", 
@@ -5530,6 +5638,18 @@
     "typename": "AnnotationReferences", 
     "until": null, 
     "uuid": "96d578c0-d8d4-40d7-a96c-fc4481567733"
+  }, 
+  {
+    "desc": "", 
+    "iconsrc": "/static/images/GH/ReferenceAnnotations.png", 
+    "icontag": null, 
+    "panel": "Annotate", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Reference Annotations", 
+    "typename": "ReferenceAnnotations", 
+    "until": null, 
+    "uuid": "2ab03aaf-98e4-4ef5-a84b-918b64e5908d"
   }, 
   {
     "desc": "Given its Location, it adds a detail group element to the active Revit document", 
