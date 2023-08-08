@@ -15,6 +15,12 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.17 RC1" version="v" pre_release=true time="08/08/2023" %}
+
+- Added 'Add Toposolid' component.
+- Added 'Add Toposolid Sub-Division' component.
+- Misc fixes and improvements
+
 {% include ltr/release-header.html title="v1.16" version="v1.16.8620.27325" time="08/08/2023" %}
 
 - Added {% include ltr/comp.html uuid='86d56bea' %} component.
