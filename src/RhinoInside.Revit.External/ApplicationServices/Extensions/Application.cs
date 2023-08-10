@@ -152,6 +152,8 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
       value = default;
       return false;
     }
+
+    public static ColorSettings GetColorSettings(this Application app) => new ColorSettings(app);
     #endregion
   }
 
@@ -185,5 +187,88 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
     static string InternalGetSubVersionNumber(ControlledApplication app) => $"{app.VersionNumber}.0";
 #endif
     #endregion
+  }
+
+  public class ColorSettings
+  {
+    internal ColorSettings(Application app)
+    {
+#if REVIT_2021
+      using (var colors = ColorOptions.GetColorOptions())
+      {
+        EditingColor = colors.EditingColor;
+        CalculatingColor = colors.CalculatingColor;
+        AlertColor = colors.AlertColor;
+        PreselectionColor = colors.PreselectionColor;
+        SelectionSemitransparent = colors.SelectionSemitransparent;
+        SelectionColor = colors.SelectionColor;
+        BackgroundColor = colors.BackgroundColor;
+      }
+#else
+      EditingColor = new Color(128, 255, 64);
+      if (app.TryGetProfileValue("Colors", "EditingColor", out var editingColor))
+      {
+        if (int.TryParse(editingColor, out var abgr))
+          EditingColor = ToColor(abgr);
+      }
+
+      CalculatingColor = new Color(0, 255, 255);
+      if (app.TryGetProfileValue("Colors", "TemporaryColor", out var calculatingColor))
+      {
+        if (int.TryParse(calculatingColor, out var abgr))
+          CalculatingColor = ToColor(abgr);
+      }
+
+      AlertColor = new Color(255, 128, 0);
+      if (app.TryGetProfileValue("Colors", "ErrorColor", out var errorColor))
+      {
+        if (int.TryParse(errorColor, out var abgr))
+          AlertColor = ToColor(abgr);
+      }
+
+      SelectionColor = new Color(0, 59, 189);
+      if (app.TryGetProfileValue("Colors", "PreHiliteColor", out var preHiliteColor))
+      {
+        if (int.TryParse(preHiliteColor, out var abgr))
+          PreselectionColor = ToColor(abgr);
+      }
+
+      SelectionSemitransparent = false;
+      if (app.TryGetProfileValue("Graphics", "SemiTransparent", out var semiTransparent))
+      {
+        if (int.TryParse(semiTransparent, out var _semiTransparent))
+          SelectionSemitransparent = _semiTransparent != 0;
+      }
+
+      SelectionColor = new Color(0, 59, 189);
+      if (app.TryGetProfileValue("Colors", "HiliteColor", out var hiliteColor))
+      {
+        if (int.TryParse(hiliteColor, out var abgr))
+          SelectionColor = ToColor(abgr);
+      }
+
+      BackgroundColor = new Color(255, 255, 255);
+      if (app.TryGetProfileValue("Colors", "BackgroundColor", out var backgroundColor))
+      {
+        if (int.TryParse(backgroundColor, out var abgr))
+          BackgroundColor = ToColor(abgr);
+      }
+#endif
+    }
+
+    static Color ToColor(int abgr) => new Color
+    (
+      (byte) ((abgr >> 0) & byte.MaxValue),
+      (byte) ((abgr >> 8) & byte.MaxValue),
+      (byte) ((abgr >> 16) & byte.MaxValue)
+    );
+
+    public Color EditingColor { get; private set; }
+    public Color CalculatingColor { get; private set; }
+    public Color AlertColor { get; private set; }
+    public Color PreselectionColor { get; private set; }
+    public bool SelectionSemitransparent { get; private set; }
+    public Color SelectionColor { get; private set; }
+    public Color BackgroundColor { get; private set; }
   }
 }
