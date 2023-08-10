@@ -514,6 +514,78 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
+    internal abstract class ExpireButtonAttributes : ZuiAttributes
+    {
+      Rectangle ButtonBounds { get; set; }
+
+      public bool Pressed { get; private set; } = false;
+
+      protected abstract string DisplayText { get; }
+      protected abstract bool Visible { get; }
+
+      public ExpireButtonAttributes(ZuiComponent owner) : base(owner) { }
+
+      protected override void Layout()
+      {
+        base.Layout();
+
+        if (Visible)
+        {
+          var newBounds = GH_Convert.ToRectangle(Bounds);
+          newBounds.Height += 22;
+
+          var buttonBounds = newBounds;
+          buttonBounds.Y = buttonBounds.Bottom - 22;
+          buttonBounds.Height = 22;
+          buttonBounds.Inflate(-2, -2);
+
+          Bounds = (RectangleF) newBounds;
+          ButtonBounds = buttonBounds;
+        }
+        else ButtonBounds = Rectangle.Empty;
+      }
+
+      protected override void Render(GH_Canvas canvas, Graphics graphics, GH_CanvasChannel channel)
+      {
+        base.Render(canvas, graphics, channel);
+
+        if (Visible && channel == GH_CanvasChannel.Objects)
+        {
+          using (var ghCapsule = Pressed ?
+            GH_Capsule.CreateTextCapsule(ButtonBounds, ButtonBounds, GH_Palette.Grey, DisplayText, 2, 0) :
+            GH_Capsule.CreateTextCapsule(ButtonBounds, ButtonBounds, GH_Palette.Black, DisplayText, 2, 0))
+            ghCapsule.Render(graphics, Selected, Owner.Locked, false);
+        }
+      }
+
+      public override GH_ObjectResponse RespondToMouseUp(GH_Canvas sender, GH_CanvasMouseEvent e)
+      {
+        if (Pressed)
+        {
+          if (((RectangleF) ButtonBounds).Contains(e.CanvasLocation))
+            Owner.ExpireSolution(true);
+
+          Pressed = false;
+          sender.Refresh();
+          return GH_ObjectResponse.Release;
+        }
+
+        return base.RespondToMouseUp(sender, e);
+      }
+
+      public override GH_ObjectResponse RespondToMouseDown(GH_Canvas sender, GH_CanvasMouseEvent e)
+      {
+        if (Visible && e.Button == MouseButtons.Left && ((RectangleF) ButtonBounds).Contains(e.CanvasLocation))
+        {
+          Pressed = true;
+          sender.Refresh();
+          return GH_ObjectResponse.Capture;
+        }
+
+        return base.RespondToMouseDown(sender, e);
+      }
+    }
+
     public override void CreateAttributes() => Attributes = new ZuiAttributes(this);
 
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)

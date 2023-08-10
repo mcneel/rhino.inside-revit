@@ -14,8 +14,8 @@ using ARUI = Autodesk.Revit.UI;
 namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
+  using External.UI.Extensions;
   using External.UI.Selection;
-  using RhinoInside.Revit.External.UI.Extensions;
 
   public abstract class GraphicalElement<T, R> :
     Element<T, R>,
@@ -289,13 +289,16 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (MutableNickName)
       {
-        using (var Documents = Revit.ActiveDBApplication.Documents)
+        if (Revit.ActiveUIDocument is ARUI.UIDocument uiDocument)
         {
-          if (Documents.Cast<ARDB.Document>().Any(x => x.IsLinked))
+          using (var collector = new ARDB.FilteredElementCollector(uiDocument.Document).OfClass(typeof(ARDB.RevitLinkInstance)))
           {
-            Menu_AppendSeparator(menu);
-            Menu_AppendItem(menu, $"Set one linked {TypeName}", Menu_PromptOneLinked, SourceCount == 0, false);
-            Menu_AppendItem(menu, $"Set Multiple linked {GH_Convert.ToPlural(TypeName)}", Menu_PromptPluralLinked, SourceCount == 0);
+            if (collector.Any())
+            {
+              Menu_AppendSeparator(menu);
+              Menu_AppendItem(menu, $"Set one linked {TypeName}", Menu_PromptOneLinked, SourceCount == 0, false);
+              Menu_AppendItem(menu, $"Set Multiple linked {GH_Convert.ToPlural(TypeName)}", Menu_PromptPluralLinked, SourceCount == 0);
+            }
           }
         }
 

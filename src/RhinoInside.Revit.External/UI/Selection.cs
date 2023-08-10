@@ -1,6 +1,6 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
@@ -8,6 +8,7 @@ using Autodesk.Revit.UI.Selection;
 namespace RhinoInside.Revit.External.UI.Selection
 {
   using External.ApplicationServices.Extensions;
+  using External.DB;
   using External.DB.Extensions;
 
   public static class Selection
@@ -47,36 +48,165 @@ namespace RhinoInside.Revit.External.UI.Selection
     #endregion
 
     #region PickObjects
-    public static Result PickObjects(this UIDocument doc, out IList<Reference> reference, ObjectType objectType)
+    public static Result PickObjects(this UIDocument doc, out IList<Reference> references, ObjectType objectType)
     {
-      return Pick(doc.Application, out reference, () => doc.Selection.PickObjects(objectType));
+      return Pick(doc.Application, out references, () => doc.Selection.PickObjects(objectType));
     }
 
-    public static Result PickObjects(this UIDocument doc, out IList<Reference> reference, ObjectType objectType, string statusPrompt)
+    public static Result PickObjects(this UIDocument doc, out IList<Reference> references, ObjectType objectType, string statusPrompt)
     {
-      return Pick(doc.Application, out reference, () => doc.Selection.PickObjects(objectType, statusPrompt));
+      return Pick(doc.Application, out references, () => doc.Selection.PickObjects(objectType, statusPrompt));
     }
 
-    public static Result PickObjects(this UIDocument doc, out IList<Reference> reference, ObjectType objectType, ISelectionFilter selectionFilter)
+    public static Result PickObjects(this UIDocument doc, out IList<Reference> references, ObjectType objectType, ISelectionFilter selectionFilter)
     {
-      return Pick(doc.Application, out reference, () => doc.Selection.PickObjects(objectType, selectionFilter));
+      return Pick(doc.Application, out references, () => doc.Selection.PickObjects(objectType, selectionFilter));
     }
 
-    public static Result PickObjects(this UIDocument doc, out IList<Reference> reference, ObjectType objectType, ISelectionFilter selectionFilter, string statusPrompt)
+    public static Result PickObjects(this UIDocument doc, out IList<Reference> references, ObjectType objectType, ISelectionFilter selectionFilter, string statusPrompt)
     {
-      return Pick(doc.Application, out reference, () => doc.Selection.PickObjects(objectType, selectionFilter, statusPrompt));
+      return Pick(doc.Application, out references, () => doc.Selection.PickObjects(objectType, selectionFilter, statusPrompt));
     }
 
-    public static Result PickObjects(this UIDocument doc, out IList<Reference> reference, ObjectType objectType, ISelectionFilter selectionFilter, string statusPrompt, IList<Reference> pPreSelected)
+    public static Result PickObjects(this UIDocument doc, out IList<Reference> references, ObjectType objectType, ISelectionFilter selectionFilter, string statusPrompt, IList<Reference> pPreSelected)
     {
-      return Pick(doc.Application, out reference, () => doc.Selection.PickObjects(objectType, selectionFilter, statusPrompt, pPreSelected));
+      return Pick(doc.Application, out references, () => doc.Selection.PickObjects(objectType, selectionFilter, statusPrompt, pPreSelected));
+    }
+
+    public static Result PickObjects(this UIDocument uiDocument, out IList<Reference> references, ISelectionFilter selectionFilter, string statusPrompt = null)
+    {
+      var uiResult = Result.Failed;
+      references = default;
+
+      (uiResult, references) = HostedApplication.Active.InvokeInHostContext(() =>
+      {
+        using (new EditScope(uiDocument.Application))
+        {
+          var views = uiDocument.GetOpenUIViews().
+            Select(x => uiDocument.Document.GetElement(x.ViewId) as View).
+            Where(x => x.AreGraphicsOverridesAllowed());
+
+          var _values = new List<Reference>();
+          var document = uiDocument.Document;
+          var listSelectionFilter = new SelectionSetFilter(selectionFilter);
+          using (var group = new TransactionGroup(document, "Pick Elements"))
+          {
+            group.Start();
+
+            using (var overrides = GetHighlightGraphicSettings(document))
+            {
+              try
+              {
+                while (true)
+                {
+                  if (_values.LastOrDefault() is Reference value)
+                  {
+                    foreach (var view in views)
+                    {
+                      using (var scope = document.CommitScope())
+                      {
+                        view.SetElementOverrides(value.ElementId, overrides);
+                        scope.Commit();
+                      }
+                    }
+                  }
+
+                  try
+                  {
+                    var reference = string.IsNullOrEmpty(statusPrompt) ?
+                      uiDocument.Selection.PickObject(ObjectType.Element, listSelectionFilter) :
+                      uiDocument.Selection.PickObject(ObjectType.Element, listSelectionFilter, statusPrompt);
+
+                    _values.Add(reference);
+                    listSelectionFilter.AddFilteredElementId(reference.ElementId);
+                  }
+                  catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                  {
+                    return (_values.Count > 0 ? Result.Succeeded : Result.Cancelled, _values);
+                  }
+                }
+              }
+              catch { return (Result.Failed, default(List<Reference>)); }
+              finally
+              {
+                try { group.RollBack(); }
+                catch { }
+              }
+            }
+          }
+        }
+      });
+
+      return uiResult;
+    }
+
+    static OverrideGraphicSettings GetHighlightGraphicSettings(Document document)
+    {
+      using (var collector = new FilteredElementCollector(document))
+      {
+        var colors = document.Application.GetColorSettings();
+        var highlight = colors.SelectionColor;
+        var transparency = colors.SelectionSemitransparent ? 50 : 0;
+
+        var patternId = collector.
+          OfClass(typeof(FillPatternElement)).
+          Cast<FillPatternElement>().
+          FirstOrDefault
+          (
+            x =>
+            {
+              using (var pattern = x.GetFillPattern())
+                return pattern.Target == FillPatternTarget.Drafting && pattern.IsSolidFill;
+            }
+          )?.
+          Id ?? ElementIdExtension.Invalid;
+
+        return new OverrideGraphicSettings().
+          SetProjectionLineColor(highlight).
+          SetSurfaceForegroundPatternId(patternId).
+          SetSurfaceForegroundPatternColor(highlight).
+          SetSurfaceTransparency(transparency).
+          SetCutForegroundPatternId(patternId).
+          SetCutForegroundPatternColor(highlight);
+      }
+    }
+
+    class SelectionSetFilter : ISelectionFilter
+    {
+      readonly HashSet<ElementId> ElementIds = new HashSet<ElementId>(default(ElementIdEqualityComparer));
+      readonly ISelectionFilter PreviousFilter;
+
+      public SelectionSetFilter(ISelectionFilter previousFilter) => PreviousFilter = previousFilter;
+
+      public bool AllowElement(Element elem)
+      {
+        return PreviousFilter.AllowElement(elem) && !ElementIds.Contains(elem.Id);
+      }
+
+      public bool AllowReference(Reference reference, XYZ position)
+      {
+        return PreviousFilter.AllowReference(reference, position) && !ElementIds.Contains(reference.ElementId);
+      }
+
+      public void AddFilteredElementId(ElementId elementId)
+      {
+        ElementIds.Add(elementId);
+      }
     }
     #endregion
 
-    public static Result PickElementsByRectangle(this UIDocument doc, out IList<Element> elements, ISelectionFilter selectionFilter, string statusPrompt)
+    #region Elements
+    public static Result PickElementsByRectangle(this UIDocument doc, out IList<Element> elements, ISelectionFilter selectionFilter, string statusPrompt = null)
     {
-      return Pick(doc.Application, out elements, () => doc.Selection.PickElementsByRectangle(selectionFilter, statusPrompt));
+      return Pick
+      (
+        doc.Application, out elements,
+        () => string.IsNullOrEmpty(statusPrompt) ?
+        doc.Selection.PickElementsByRectangle(selectionFilter) :
+        doc.Selection.PickElementsByRectangle(selectionFilter, statusPrompt)
+      );
     }
+    #endregion
 
     #region PickPoint
     public static Result PickPoint(this UIDocument doc, out XYZ point, string statusPrompt = null)
