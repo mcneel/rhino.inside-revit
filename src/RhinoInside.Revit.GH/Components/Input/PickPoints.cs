@@ -106,6 +106,8 @@ namespace RhinoInside.Revit.GH.Components.Input
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      bool setSketchGrid = Params.GetData(DA, "Plane", out GH_Plane plane);
+
       var _Plane_ = Params.IndexOfOutputParam("Plane");
       var _Points_ = Params.IndexOfOutputParam("Points");
 
@@ -122,7 +124,6 @@ namespace RhinoInside.Revit.GH.Components.Input
 
             using (var scope = uiDocument.Document.CommitScope())
             {
-              bool setSketchGrid = Params.GetData(DA, "Plane", out Plane? plane);
               if (setSketchGrid)
               {
                 uiDocument.ActiveGraphicalView.SketchPlane = ARDB.SketchPlane.Create(uiDocument.Document, plane.Value.ToPlane());
@@ -171,22 +172,21 @@ namespace RhinoInside.Revit.GH.Components.Input
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "There is no active Revit document");
       }
 
-      Params.TrySetData
-      (
-        DA, "Plane",
-        () =>
-        {
-          var index = DA.ParameterTargetIndex(_Plane_);
-          var list = Planes.get_Branch(pl_path) ?? Array.Empty<GH_Plane>();
-          return index < list.Count ? list[index] : default;
-        }
-      );
+      var index = DA.ParameterTargetIndex(_Plane_);
+      var list = Planes.get_Branch(pl_path) ?? Array.Empty<GH_Plane>();
+
+      var xform = (index < list.Count ? list[index] : default) is GH_Plane from && plane is object ?
+        Transform.PlaneToPlane(from.Value, plane.Value) :
+        default(Transform?);
+
+      Params.TrySetData(DA, "Plane", () => plane);
 
       Params.TrySetDataList
       (
         DA, "Points",
         () =>
-        (Points.get_Branch(pt_path)?.OfType<GH_Point>() ?? Array.Empty<GH_Point>())
+        (Points.get_Branch(pt_path)?.OfType<GH_Point>() ?? Array.Empty<GH_Point>()).
+        Select(x => xform.HasValue ? new GH_Point(xform.Value * x.Value) : default)
       );
     }
 
