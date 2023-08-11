@@ -255,7 +255,7 @@ namespace RhinoInside.Revit.GH.Components.Input
       if (!base.Read(reader)) return false;
 
       Planes.Clear();
-      if (reader.FindChunk(nameof(Views)) is GH_IReader planes)
+      if (reader.FindChunk(nameof(Planes)) is GH_IReader planes)
         Planes.Read(planes);
 
       Points.Clear();
