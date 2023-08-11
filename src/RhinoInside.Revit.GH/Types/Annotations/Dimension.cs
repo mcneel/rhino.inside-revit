@@ -74,49 +74,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Curve Curve
-    {
-      get
-      {
-        if (Value is ARDB.Dimension dimension)
-        {
-          if (dimension.Curve is ARDB.Curve curve)
-          {
-            try
-            {
-              if (!curve.IsBound)
-              {
-                var segments = dimension.Segments.Cast<ARDB.DimensionSegment>().Where(x => x.Value.HasValue).ToArray();
-                if (segments.Length > 0)
-                {
-                  var first = segments.First();
-                  var start = curve.Project(first.Origin);
-
-                  var last = segments.Last();
-                  var end = curve.Project(last.Origin);
-
-                  curve.MakeBound(start.Parameter - first.Value.Value * 0.5, end.Parameter + last.Value.Value * 0.5);
-                }
-                else if (dimension.Value.HasValue)
-                {
-                  if (dimension.Curve.Project(dimension.Origin) is ARDB.IntersectionResult result)
-                  {
-                    var startParameter = dimension.Value.Value * -0.5;
-                    var endParameter = dimension.Value.Value * +0.5;
-                    curve.MakeBound(result.Parameter + startParameter, result.Parameter + endParameter);
-                  }
-                }
-              }
-            }
-            catch { }
-
-            return curve.ToCurve();
-          }
-        }
-
-        return default;
-      }
-    }
+    public override Curve Curve => Value?.GetBoundedCurve().ToCurve();
 
     #region IAnnotationReferencesAcces
     public GeometryObject[] References =>

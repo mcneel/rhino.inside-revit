@@ -1004,7 +1004,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static GeometryObject GetGeometryObjectFromReference(this Element element, Reference reference, out Transform transform)
     {
-      if (element is object && reference is object && element.Id == reference.ElementId)
+      if (element is null)
+        throw new ArgumentNullException(nameof(element));
+
+      if (reference is null)
+        throw new ArgumentNullException(nameof(reference));
+
+      if (element.Id == reference.ElementId)
       {
         if (element is RevitLinkInstance link)
         {
@@ -1023,7 +1029,28 @@ namespace RhinoInside.Revit.External.DB.Extensions
         // `GetGeometryObjectFromReference` call below should rise the expected exception.
       }
 
-      return element?.GetGeometryObjectFromReference(reference);
+      switch (element.GetGeometryObjectFromReference(reference))
+      {
+        case GeometryObject geometryObject: return geometryObject;
+        default:
+
+          switch (element)
+          {
+            case Dimension dimension:
+              if (reference.ElementReferenceType == ElementReferenceType.REFERENCE_TYPE_LINEAR)
+              {
+                var stable = reference.ConvertToPersistentRepresentation(element.Document);
+                if (ReferenceId.TryParse(stable, out var id, element.Document))
+                {
+                  if (id.Symbol.Index.Length == 1 && id.Symbol.Index[0] == int.MaxValue)
+                    return dimension.GetBoundedCurve();
+                }
+              }
+              break;
+          }
+
+          return null;
+      }
     }
     #endregion
   }
