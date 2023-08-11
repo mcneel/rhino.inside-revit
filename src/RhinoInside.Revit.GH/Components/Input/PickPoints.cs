@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components.Input
     readonly GH_Structure<GH_Plane> Planes = new GH_Structure<GH_Plane>();
     readonly GH_Structure<GH_Point> Points = new GH_Structure<GH_Point>();
 
-    readonly SortedList<ARDB.Document, ARDB.TransactionGroup> TransactionGroups = new SortedList<ARDB.Document, ARDB.TransactionGroup>();
+    readonly Dictionary<ARDB.Document, ARDB.TransactionGroup> TransactionGroups = new Dictionary<ARDB.Document, ARDB.TransactionGroup>();
 
     private void StartTransactionGroup(ARDB.Document document)
     {
