@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Host", out Types.HostObject host, x => x.IsValid)) return;
-      if (Params.GetDataList(DA, "Profile", out IList<Curve> profiles))
+      if (Params.GetDataList(DA, "Profile", out IList<Curve> profiles) && profiles.OfType<Curve>().Any())
       {
 #if REVIT_2022
         // TODO: Compare with current profiles, maybe no transaction is necessary
@@ -138,7 +138,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
                   var sketchPlane = sketch.SketchPlane;
                   var projectionPlane = sketchPlane.GetPlane().ToPlane();
 
-                  foreach (var profile in profiles)
+                  foreach (var profile in profiles.OfType<Curve>())
                   {
                     var loop = Curve.ProjectToPlane(profile, projectionPlane);
 
