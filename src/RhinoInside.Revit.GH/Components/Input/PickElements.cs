@@ -158,7 +158,7 @@ namespace RhinoInside.Revit.GH.Components.Input
 
       if (Params.Output<Param_Point>("Points") is Param_Point points)
       {
-        if (args.DefaultCurveThickness > 1.0)
+        if (Attributes.Selected)
         {
           var xform = args.Display.Viewport.GetTransform(Rhino.DocObjects.CoordinateSystem.World, Rhino.DocObjects.CoordinateSystem.Screen);
           var data = points.VolatileData;

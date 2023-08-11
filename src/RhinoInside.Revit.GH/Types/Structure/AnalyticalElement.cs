@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB_Structure_AnalyticalElement element)
         {
-          element.GetLocation(out var origin, out var basisX, out var basisY);
+          var (origin, basisX, basisY) = element.GetLocation();
           return new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
         }
 

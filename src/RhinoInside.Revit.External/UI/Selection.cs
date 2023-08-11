@@ -232,11 +232,39 @@ namespace RhinoInside.Revit.External.UI.Selection
       (
         doc.Application, out points, () =>
         {
-          var values = new List<XYZ>();
-          while (true)
+          var ds = default(DirectShape);
+          using (var group = new TransactionGroup(doc.Document, "Pick Points"))
           {
-            try { values.Add(statusPrompt is object ? doc.Selection.PickPoint(objectSnapTypes, statusPrompt) : doc.Selection.PickPoint(objectSnapTypes)); }
-            catch (Autodesk.Revit.Exceptions.OperationCanceledException) { if (values.Count == 0) throw; else return values; }
+            group.Start();
+
+            try
+            {
+              var values = new List<XYZ>();
+              while (true)
+              {
+                try
+                {
+                  var xyz = statusPrompt is object ? doc.Selection.PickPoint(objectSnapTypes, statusPrompt) : doc.Selection.PickPoint(objectSnapTypes);
+                  using (var scope = doc.Document.CommitScope())
+                  {
+                    ds = ds ?? DirectShape.CreateElement(doc.Document, new ElementId(BuiltInCategory.OST_GenericModel));
+                    ds.AppendShape(new GeometryObject[] { Point.Create(xyz) });
+                    //if (values.LastOrDefault() is XYZ last)
+                    //{
+                    //  var line = Line.CreateBound(last, xyz);
+                    //  if (doc.Document.GetCategory(BuiltInCategory.OST_GenericModelHiddenLines) is Category category)
+                    //    line.SetGraphicsStyleId(category.GetGraphicsStyle(GraphicsStyleType.Projection).Id);
+
+                    //  ds.AppendShape(new GeometryObject[] { line });
+                    //}
+                    scope.Commit();
+                  }
+                  values.Add(xyz);
+                }
+                catch (Autodesk.Revit.Exceptions.OperationCanceledException) { if (values.Count == 0) throw; else return values; }
+              }
+            }
+            finally { group.RollBack(); }
           }
         }
      );

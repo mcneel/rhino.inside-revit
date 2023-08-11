@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.MEPSystem system && system.BaseEquipment is ARDB.Instance baseEquipment)
         {
-          baseEquipment.GetLocation(out var origin, out var basisX, out var basisY);
+          var(origin, basisX, basisY) = baseEquipment.GetLocation();
           return new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
         }
 

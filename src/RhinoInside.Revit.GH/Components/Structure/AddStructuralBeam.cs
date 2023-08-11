@@ -149,7 +149,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       if (beam is null) return false;
       if (type.Id != beam.GetTypeId()) beam.ChangeTypeId(type.Id);
 
-      beam.GetLocation(out var _, out var basisX, out var basisY);
+      var(_, basisX, basisY) = beam.GetLocation();
       ERDB.UnitXYZ.Orthonormal(basisX, basisY, out var basisZ);
 
       var wasVertical = basisZ.IsPerpendicularTo(ERDB.UnitXYZ.BasisZ);

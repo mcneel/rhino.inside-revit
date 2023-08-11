@@ -13,6 +13,7 @@ group: Deployment & Configs
 ### RC
 
 - Added 'Pick Elements' component.
+- Added 'Pick Points' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

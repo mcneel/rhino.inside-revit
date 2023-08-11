@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       var newOrigin = location.Origin.ToXYZ();
       var newBasisX = (ERDB.UnitXYZ) location.XAxis.ToXYZ();
       var newBasisY = (ERDB.UnitXYZ) location.YAxis.ToXYZ();
-      titleBlock.GetLocation(out var origin, out var basisX, out var basisY);
+      var (origin, basisX, basisY) = titleBlock.GetLocation();
 
       if
       (
