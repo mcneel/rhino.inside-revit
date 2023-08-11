@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Components.Input
       }
 
       var pass = (Elements.get_Branch(path)?.OfType<Types.GeometryElement>() ?? Array.Empty<Types.GeometryElement>()).
-        Select(x => filter?.Value.PassesFilter(x.Document, x.Id) ?? true).ToList();
+        Select(x => x.IsValid && (filter?.Value.PassesFilter(x.Document, x.Id) ?? true)).ToList();
 
       Params.TrySetDataList
       (
