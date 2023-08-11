@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.Instance instance)
         {
-          instance.GetLocation(out var origin, out var basisX, out var basisY);
+          var(origin, basisX, basisY) = instance.GetLocation();
           return new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
         }
 

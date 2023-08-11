@@ -546,12 +546,10 @@ namespace RhinoInside.Revit.GH.Types
       SetLocation(location.Origin.ToXYZ(), (ERDB.UnitXYZ) location.XAxis.ToXYZ(), (ERDB.UnitXYZ) location.YAxis.ToXYZ(), keepJoins);
     }
 
-    void GetLocation(out ARDB.XYZ origin, out ERDB.UnitXYZ basisX, out ERDB.UnitXYZ basisY)
+    (ARDB.XYZ Origin, ERDB.UnitXYZ BasisX, ERDB.UnitXYZ BasisY) GetLocation()
     {
       var plane = Location;
-      origin = plane.Origin.ToXYZ();
-      basisX = (ERDB.UnitXYZ) plane.XAxis.ToXYZ();
-      basisY = (ERDB.UnitXYZ) plane.YAxis.ToXYZ();
+      return (plane.Origin.ToXYZ(), (ERDB.UnitXYZ) plane.XAxis.ToXYZ(), (ERDB.UnitXYZ) plane.YAxis.ToXYZ());
     }
 
     protected void SetLocation(ARDB.XYZ newOrigin, ERDB.UnitXYZ newBasisX, ERDB.UnitXYZ newBasisY, bool? keepJoins)
@@ -562,7 +560,7 @@ namespace RhinoInside.Revit.GH.Types
 
         if (element.Location is ARDB.LocationCurve curveLocation)
         {
-          GetLocation(out var origin, out var basisX, out var basisY);
+          var (origin, basisX, basisY) = GetLocation();
           ERDB.UnitXYZ.Orthonormal(basisX, basisY, out var basisZ);
 
           if (!ERDB.UnitXYZ.Orthonormal(newBasisX, newBasisY, out var newBasisZ))
@@ -586,7 +584,7 @@ namespace RhinoInside.Revit.GH.Types
           newOrigin,
           newBasisX,
           newBasisY,
-          (ARDB.Element e, out ARDB.XYZ o, out ERDB.UnitXYZ x, out ERDB.UnitXYZ y) => GetLocation(out o, out x, out y),
+          e => GetLocation(),
           out modified
         );
 
@@ -618,7 +616,7 @@ namespace RhinoInside.Revit.GH.Types
       };
     }
 
-    public virtual Point3d Position => Curve is Curve curve ? curve.PointAtStart : Location.Origin;
+    public virtual Point3d Position => Curve is Curve curve ? curve.PointAtNormalizedLength(0.5) : Location.Origin;
     public virtual Vector3d Direction => Curve is Curve curve ? curve.PointAtEnd - curve.PointAtStart : WorkPlaneOrientation;
 
     public virtual Vector3d HandOrientation => Location.XAxis;

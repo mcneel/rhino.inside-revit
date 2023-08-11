@@ -206,6 +206,7 @@
     <Compile Include="Components\Import\ImageTypePath.cs" />
     <Compile Include="Components\Import\QueryCloudPoints.cs" />
     <Compile Include="Components\Input\PickElements.cs" />
+    <Compile Include="Components\Input\PickPoints.cs" />
     <Compile Include="Components\Model\AddModelLine.cs" />
     <Compile Include="Components\Model\AddWorkPlane.cs" />
     <Compile Include="Components\Model\ComponentReferences.cs" />
