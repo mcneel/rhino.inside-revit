@@ -19,18 +19,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
-
-      var activeApp = Revit.ActiveUIApplication;
-      var doc = activeApp.ActiveUIDocument?.Document;
-      if (doc is null) return;
-
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ProjectParameters);
-      Menu_AppendItem
-      (
-        menu, $"Open Project Parameters…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        !doc.IsFamilyDocument && activeApp.CanPostCommand(commandId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.ProjectParameters, "Open Project Parameters…");
     }
     #endregion
 

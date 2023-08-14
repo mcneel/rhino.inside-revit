@@ -5,6 +5,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.DesignOptions
 {
+  using External.UI.Extensions;
+
   public class DesignOptionActive : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("B6349DDA-4486-44EB-9AF7-3D13404A3F3E");
@@ -16,10 +18,9 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     {
       base.AppendAdditionalComponentMenuItems(menu);
 
-      var hasInputDocument = Params.Input<Parameters.Document>("Document") is object;
       {
         var activeApp = Revit.ActiveUIApplication;
-        var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.DesignOptions);
+        var postable = activeApp.ActiveUIDocument.TryGetRevitCommandId(Autodesk.Revit.UI.PostableCommand.DesignOptions, out var commandId);
         Menu_AppendItem
         (
           menu, $"Open Design Options…",
@@ -37,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
               }
             }
           },
-          !hasInputDocument && activeApp.CanPostCommand(commandId), false
+          postable, false
         );
       }
     }

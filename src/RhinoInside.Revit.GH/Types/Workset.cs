@@ -6,7 +6,6 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using System.Runtime.CompilerServices;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Workset")]
@@ -84,7 +83,7 @@ namespace RhinoInside.Revit.GH.Types
         doc = null;
 
       Document = doc;
-      ReferenceDocumentId = doc.GetFingerprintGUID();
+      ReferenceDocumentId = doc.GetPersistentGUID();
 
       Id = id;
       ReferenceUniqueId = doc?.GetWorksetTable()?.GetWorkset(id)?.UniqueId.ToString() ?? string.Empty;

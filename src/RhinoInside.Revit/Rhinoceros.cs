@@ -8,7 +8,6 @@ using Microsoft.Win32.SafeHandles;
 using Rhino;
 using Rhino.Commands;
 using Rhino.Display;
-using Rhino.DocObjects;
 using Rhino.Geometry;
 using Rhino.Input;
 using Rhino.PlugIns;
@@ -19,9 +18,11 @@ using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit
 {
+  using Numerical;
   using Convert.Geometry;
   using Convert.Units;
   using External.ApplicationServices.Extensions;
+  using RhinoWindows.Forms;
   using static Diagnostics;
 
   /// <summary>
@@ -44,6 +45,14 @@ namespace RhinoInside.Revit
 
     internal static bool InitRhinoCommon()
     {
+      // We should Init Eto before Rhino does it.
+      // This should force `AssemblyResolver` to call `InitEto`.
+      if (Eto.Forms.Application.Instance is null)
+      {
+        Logger.LogCritical("Eto failed to load", $"Assembly = {typeof(Eto.Forms.Application).Assembly.FullName}");
+        //return false;
+      }
+
       var hostMainWindow = new WindowHandle(Core.Host.MainWindowHandle);
 
       // Save Revit window status
@@ -109,6 +118,7 @@ namespace RhinoInside.Revit
         RhinoApp.CommandWindowCaptureEnabled = false;
       }
 
+      FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", "Rhino.Inside ");
       Rhino.Runtime.PythonScript.AddRuntimeAssembly(Assembly.GetExecutingAssembly());
 
       MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
@@ -351,6 +361,7 @@ namespace RhinoInside.Revit
               (
                 Core.Host,
                 subject: taskDialog.MainInstruction,
+                body: null,
                 includeAddinsList: false,
                 attachments: new string[]
                 {
@@ -534,7 +545,7 @@ namespace RhinoInside.Revit
 
                 case ARUI.TaskDialogResult.CommandLink3:
                   doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
-                  doc.ModelDistanceDisplayPrecision = Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
+                  doc.ModelDistanceDisplayPrecision = (int) Arithmetic.Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
                   doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, GH.Guest.ModelUnitScale);
                   UnitScale.SetModelUnitScale(doc, GH.Guest.ModelUnitScale, scale: true);
                   AdjustViewConstructionPlanes(doc);
@@ -844,8 +855,10 @@ namespace RhinoInside.Revit
               // If there is no floating viewport visible...
               if (!rhinoDoc.Views.Any(x => x.Floating))
               {
-                var cursorPosition = System.Windows.Forms.Cursor.Position;
-                if (OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300) is null)
+                var bounds = Revit.MainWindow.Bounds;
+                var x = bounds.X + bounds.Width / 2;
+                var y = bounds.Y + bounds.Height / 2;
+                if (OpenRevitViewport(x - 400, y - 300) is null)
                   Exposed = true;
               }
             }
@@ -945,7 +958,8 @@ namespace RhinoInside.Revit
     internal static async void RunCommandOpenViewportAsync
     (
       Rhino.DocObjects.ViewportInfo vport,
-      Rhino.DocObjects.ConstructionPlane cplane
+      Rhino.DocObjects.ConstructionPlane cplane,
+      bool setScreenPort
     )
     {
       var cursorPosition = System.Windows.Forms.Cursor.Position;
@@ -953,8 +967,11 @@ namespace RhinoInside.Revit
 
       if (OpenRevitViewport(cursorPosition.X + 50, cursorPosition.Y + 50) is RhinoView view)
       {
+        if (setScreenPort && view.Floating && !view.Maximized)
+          view.SetClientSize(vport.ScreenPort.Size);
+
         if (vport is object)
-          view.MainViewport.SetViewProjection(vport, updateScreenPort: true, updateTargetLocation: true);
+          view.MainViewport.SetViewportInfo(vport);
 
         if (cplane is object && view.MainViewport is RhinoViewport viewport)
         {

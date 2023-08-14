@@ -16,14 +16,19 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   public class SlabShape : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("516B2771-0A9A-4F87-9DB1-E27FE0FA968B");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public SlabShape() : base
     (
-      name: "Host Sub Elements",
-      nickname: "SubElems",
-      description: "Manipulates points and edges on a slab, roof or floor.",
+      name: "Host Shape",
+      nickname: "H-Shape",
+#if REVIT_2024
+      description: "Gives access to points and edges on a slab, roof, floor or toposolid.",
+#else
+      description: "Gives access to points and edges on a slab, roof or floor.",
+#endif
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 
@@ -36,7 +41,11 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         {
           Name = "Host",
           NickName = "H",
+#if REVIT_2024
+          Description = "Floor, Roof or Toposolid.",
+#else
           Description = "Floor or Roof.",
+#endif
         }
       ),
       new ParamDefinition
@@ -156,13 +165,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
     {
       if (!Params.GetData(DA, "Host", out Types.HostObject host, x => x.IsValid)) return;
 
-      var shape = default(ARDB.SlabShapeEditor);
-      switch (host)
-      {
-        case Types.Floor floor: shape = floor.Value.SlabShapeEditor; break;
-        case Types.Roof roof:   shape = roof.Value.SlabShapeEditor; break;
-      }
-
+      var shape = host.Value.GetSlabShapeEditor();
       if (shape is null)
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Only flat and horizontal slabs, floors or roofs are valid for '{Name}'.");
@@ -184,28 +187,37 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         var tol = GeometryTolerance.Model;
         var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>();
 
-        ARDB.SlabShapeVertex AddVertex(Point3d point)
-        {
-          if (!vertices.TryGetValue(point, out var vertex))
-          {
-            try
-            {
-              if ((vertex = shape.DrawPoint(point.ToXYZ())) is null)
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));
-              else
-                vertices.Add(point, vertex);
-            }
-            catch { AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, "Failed to add vertex.", new Point(point)); }
-          }
-
-          return vertex?.VertexType == ARDB.SlabShapeVertexType.Invalid ? null : vertex;
-        }
-
         StartTransaction(host.Document);
         host.InvalidateGraphics();
 
         shape.Enable();
         shape.ResetSlabShape();
+        host.Document.Regenerate();
+
+        var bbox = host.BoundingBox;
+        var elevation = GeometryEncoder.ToInternalLength(bbox.Max.Z);
+
+        ARDB.SlabShapeVertex AddVertex(Point3d point)
+        {
+          var x = GeometryEncoder.ToInternalLength(point.X);
+          var y = GeometryEncoder.ToInternalLength(point.Y);
+          var z = GeometryEncoder.ToInternalLength(point.Z);
+
+          var xyz = new Point3d(x, y, z);
+          if (!vertices.TryGetValue(xyz, out var vertex))
+          {
+            try
+            {
+              if ((vertex = shape.DrawPoint(new ARDB.XYZ(x, y, elevation))) is null)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));
+              else
+                vertices.Add(xyz, vertex);
+            }
+            catch { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to add vertex.", new Point(point)); }
+          }
+
+          return vertex?.VertexType == ARDB.SlabShapeVertexType.Invalid ? null : vertex;
+        }
 
         if (points is object)
         {
@@ -223,11 +235,15 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
               var from = AddVertex(edge.From);
               var to   = AddVertex(edge.To);
               if (from is null || to is null || shape.DrawSplitLine(from, to) is null)
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, "Some short-creases were skipped.", new LineCurve(edge));
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Some short-creases were skipped.", new LineCurve(edge));
             }
-            catch { AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, "Failed to add crease.", new LineCurve(edge)); }
+            catch { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to add crease.", new LineCurve(edge)); }
           }
         }
+
+        var bottomUpVertices = vertices.OrderBy(x => x.Key.Z);
+        foreach (var vertex in bottomUpVertices)
+          shape.ModifySubElement(vertex.Value, vertex.Key.Z - elevation);
       }
 
       if (!Params.GetData(DA, "Curved Edge Condition", out ERDB.SlabShapeEditCurvedEdgeCondition? curvedEdgeCondition))

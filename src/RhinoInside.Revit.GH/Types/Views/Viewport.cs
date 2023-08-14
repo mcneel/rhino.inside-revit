@@ -8,21 +8,11 @@ namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
 
-  [Kernel.Attributes.Name("Viewport")]
-  public class Viewport : GraphicalElement
+  public abstract class ViewInstance : GraphicalElement,
+    IHostElementAccess
   {
-    protected override Type ValueType => typeof(ARDB.Viewport);
-    public new ARDB.Viewport Value => base.Value as ARDB.Viewport;
-
-    public Viewport() { }
-    public Viewport(ARDB.Viewport element) : base(element) { }
-
-    protected override void ResetValue()
-    {
-      using (_Mesh) _Mesh = default;
-
-      base.ResetValue();
-    }
+    protected ViewInstance() { }
+    public ViewInstance(ARDB.Element element) : base(element) { }
 
     public override bool CastTo<Q>(out Q target)
     {
@@ -50,64 +40,38 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override Plane Location
-    {
-      get
-      {
-        if (Value is ARDB.Viewport viewport && viewport.SheetId != ARDB.ElementId.InvalidElementId)
-        {
-          var boxCenter = viewport.GetBoxCenter().ToPoint3d();
-          boxCenter.Z = 0.0;
-
-          switch (viewport.Rotation)
-          {
-            case ARDB.ViewportRotation.None:
-              return new Plane(boxCenter, Vector3d.XAxis, Vector3d.YAxis);
-
-            case ARDB.ViewportRotation.Clockwise:
-              return new Plane(boxCenter, -Vector3d.YAxis, Vector3d.XAxis);
-
-            case ARDB.ViewportRotation.Counterclockwise:
-              return new Plane(boxCenter, Vector3d.YAxis, -Vector3d.XAxis);
-          }
-        }
-
-        return NaN.Plane;
-      }
-    }
-
     public override Surface Surface
     {
       get
       {
         var surface = default(PlaneSurface);
-        var boxOutline = Value.GetBoxOutline().ToBoundingBox();
+        var boxOutline = DomainUV;
         if (boxOutline.IsValid)
         {
           var padding = 0.01 * Revit.ModelUnits;
           var location = Location;
-          switch (Value.Rotation)
+          switch (Rotation)
           {
             case ARDB.ViewportRotation.None:
             {
-              var outlineU = new Interval(boxOutline.Min.X - location.Origin.X + padding, boxOutline.Max.X - location.Origin.X - padding);
-              var outlineV = new Interval(boxOutline.Min.Y - location.Origin.Y + padding, boxOutline.Max.Y - location.Origin.Y - padding);
+              var outlineU = new Interval(boxOutline.U.Min - location.Origin.X + padding, boxOutline.U.Max - location.Origin.X - padding);
+              var outlineV = new Interval(boxOutline.V.Min - location.Origin.Y + padding, boxOutline.V.Max - location.Origin.Y - padding);
               surface = new PlaneSurface(location, outlineU, outlineV);
               break;
             }
 
             case ARDB.ViewportRotation.Clockwise:
             {
-              var outlineU = new Interval(boxOutline.Min.Y - location.Origin.Y + padding, boxOutline.Max.Y - location.Origin.Y - padding);
-              var outlineV = new Interval(boxOutline.Min.X - location.Origin.X + padding, boxOutline.Max.X - location.Origin.X - padding);
+              var outlineU = new Interval(boxOutline.V.Min - location.Origin.Y + padding, boxOutline.V.Max - location.Origin.Y - padding);
+              var outlineV = new Interval(boxOutline.U.Min - location.Origin.X + padding, boxOutline.U.Max - location.Origin.X - padding);
               surface = new PlaneSurface(location, outlineU, outlineV);
               break;
             }
 
             case ARDB.ViewportRotation.Counterclockwise:
             {
-              var outlineU = new Interval(boxOutline.Min.Y - location.Origin.Y + padding, boxOutline.Max.Y - location.Origin.Y - padding);
-              var outlineV = new Interval(boxOutline.Min.X - location.Origin.X + padding, boxOutline.Max.X - location.Origin.X - padding);
+              var outlineU = new Interval(boxOutline.V.Min - location.Origin.Y + padding, boxOutline.V.Max - location.Origin.Y - padding);
+              var outlineV = new Interval(boxOutline.U.Min - location.Origin.X + padding, boxOutline.U.Max - location.Origin.X - padding);
               surface = new PlaneSurface(location, outlineU, outlineV);
               break;
             }
@@ -123,78 +87,34 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     Mesh _Mesh;
-    public override Mesh Mesh
-    {
-      get
-      {
-        if (_Mesh is null)
-        {
-          var box = Box;
-          if (box.IsValid)
-          {
-            var padding = 0.01 * Revit.ModelUnits;
-            box.Inflate(-padding);
+    public override Mesh Mesh => _Mesh ?? (_Mesh = Mesh.CreateFromSurface(Surface));
 
-            _Mesh = new Mesh();
-            var vertices = _Mesh.Vertices;
-            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T0) + (box.Plane.YAxis * box.Y.T0));
-            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T1) + (box.Plane.YAxis * box.Y.T0));
-            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T1) + (box.Plane.YAxis * box.Y.T1));
-            vertices.Add(box.Plane.Origin + (box.Plane.XAxis * box.X.T0) + (box.Plane.YAxis * box.Y.T1));
-
-            var coordinates = _Mesh.TextureCoordinates;
-            coordinates.Add(0.0, 0.0);
-            coordinates.Add(1.0, 0.0);
-            coordinates.Add(1.0, 1.0);
-            coordinates.Add(0.0, 1.0);
-
-            _Mesh.Faces.AddFace(new MeshFace(0, 1, 2, 3));
-            _Mesh.Normals.ComputeNormals();
-          }
-        }
-        return _Mesh;
-      }
-    }
+    #region IHostElementAccess
+    GraphicalElement IHostElementAccess.HostElement => Sheet?.Viewer;
+    #endregion
 
     #region IGH_PreviewData
+    protected override void SubInvalidateGraphics()
+    {
+      _Mesh = default;
+
+      base.SubInvalidateGraphics();
+    }
+
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (Value is ARDB.Viewport viewport && viewport.SheetId != ARDB.ElementId.InvalidElementId)
+      if (Value is ARDB.Element viewport && viewport.OwnerViewId != ARDB.ElementId.InvalidElementId)
       {
-        using (var boxOutline = viewport.GetBoxOutline())
+        using (var boxOutline = BoundingBox.ToOutline())
         {
           if (!boxOutline.IsEmpty)
           {
             var points = new Point3d[]
             {
-            boxOutline.MinimumPoint.ToPoint3d(),
-            Point3d.Origin,
-            boxOutline.MaximumPoint.ToPoint3d(),
-            Point3d.Origin
-            };
-
-            points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
-            points[1] = new Point3d(points[2].X, points[0].Y, 0.0);
-            points[2] = new Point3d(points[2].X, points[2].Y, 0.0);
-            points[3] = new Point3d(points[0].X, points[2].Y, 0.0);
-
-            args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x00003333, args.Thickness, close: true);
-          }
-        }
-
-        var view = Document.GetElement(viewport.ViewId) as ARDB.View;
-        if (view is ARDB.ImageView) return;
-
-        using (var labelOutline = viewport.GetLabelOutline())
-        {
-          if (!labelOutline.IsEmpty)
-          {
-            var points = new Point3d[]
-            {
-            labelOutline.MinimumPoint.ToPoint3d(),
-            Point3d.Origin,
-            labelOutline.MaximumPoint.ToPoint3d(),
-            Point3d.Origin
+              boxOutline.MinimumPoint.ToPoint3d(),
+              Point3d.Origin,
+              boxOutline.MaximumPoint.ToPoint3d(),
+              Point3d.Origin
             };
 
             points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
@@ -217,8 +137,233 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public View View => View.FromElementId(Document, Value?.ViewId) as View;
-    public ViewSheet Sheet => ViewSheet.FromElementId(Document, Value?.SheetId) as ViewSheet;
+    public abstract View View { get; }
+    public virtual ViewSheet Sheet => ViewSheet.FromElementId(Document, Value?.OwnerViewId) as ViewSheet;
+
+    protected virtual ARDB.ViewportRotation Rotation => ARDB.ViewportRotation.None;
+    #endregion
+  }
+
+  [Kernel.Attributes.Name("Viewport")]
+  public class Viewport : ViewInstance
+  {
+    protected override Type ValueType => typeof(ARDB.Viewport);
+    public new ARDB.Viewport Value => base.Value as ARDB.Viewport;
+
+    public Viewport() { }
+    public Viewport(ARDB.Viewport element) : base(element) { }
+
+    public override Plane Location
+    {
+      get
+      {
+        if (Value is ARDB.Viewport viewport && viewport.SheetId != ARDB.ElementId.InvalidElementId)
+        {
+          var boxCenter = viewport.GetBoxCenter().ToPoint3d();
+          boxCenter.Z = 0.0;
+
+          switch (viewport.Rotation)
+          {
+            case ARDB.ViewportRotation.None:              return new Plane(boxCenter, Vector3d.XAxis, Vector3d.YAxis);
+            case ARDB.ViewportRotation.Clockwise:         return new Plane(boxCenter, -Vector3d.YAxis, Vector3d.XAxis);
+            case ARDB.ViewportRotation.Counterclockwise:  return new Plane(boxCenter, Vector3d.YAxis, -Vector3d.XAxis);
+          }
+        }
+
+        return NaN.Plane;
+      }
+    }
+
+    public override UVInterval DomainUV
+    {
+      get
+      {
+        if (Value?.GetBoxOutline() is ARDB.Outline outline)
+        {
+          return new UVInterval
+          (
+            new Interval(GeometryDecoder.ToModelLength(outline.MinimumPoint.X), GeometryDecoder.ToModelLength(outline.MaximumPoint.X)),
+            new Interval(GeometryDecoder.ToModelLength(outline.MinimumPoint.Y), GeometryDecoder.ToModelLength(outline.MaximumPoint.Y))
+          );
+        }
+
+        return new UVInterval(NaN.Interval, NaN.Interval);
+      }
+    }
+
+#if REVIT_2022
+    public override Curve Curve
+    {
+      get
+      {
+        if (Value is ARDB.Viewport viewport)
+        {
+          using (var labelOutline = viewport.GetLabelOutline())
+          {
+            if (!labelOutline.IsEmpty)
+            {
+              var box = new Box(viewport.GetBoxOutline().ToBoundingBox());
+              var corners = box.GetCorners();
+              var labelLineOffset = new Vector3d(viewport.LabelOffset.ToPoint3d());
+              var labelLineLength = GeometryDecoder.ToModelLength(viewport.LabelLineLength);
+
+              switch (viewport.Rotation)
+              {
+                case ARDB.ViewportRotation.None:
+                  return new LineCurve(new Line(corners[0] + labelLineOffset, Vector3d.XAxis * labelLineLength));
+
+                case ARDB.ViewportRotation.Clockwise:
+                  labelLineOffset = new Vector3d(labelLineOffset.Y, labelLineOffset.X, 0.0);
+                  return new LineCurve(new Line(corners[3] + labelLineOffset, -Vector3d.YAxis * labelLineLength));
+
+                case ARDB.ViewportRotation.Counterclockwise:
+                  labelLineOffset = new Vector3d(-labelLineOffset.Y, -labelLineOffset.X, 0.0);
+                  return new LineCurve(new Line(corners[1] + labelLineOffset, Vector3d.YAxis * labelLineLength));
+              }
+            }
+          }
+        }
+
+        return null;
+      }
+
+      set => base.Curve = value;
+    }
+#endif
+
+    #region IGH_PreviewData
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (Value is ARDB.Viewport viewport && viewport.SheetId != ARDB.ElementId.InvalidElementId)
+      {
+        using (var boxOutline = viewport.GetBoxOutline())
+        {
+          if (!boxOutline.IsEmpty)
+          {
+            var points = new Point3d[]
+            {
+              boxOutline.MinimumPoint.ToPoint3d(),
+              Point3d.Origin,
+              boxOutline.MaximumPoint.ToPoint3d(),
+              Point3d.Origin
+            };
+
+            points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
+            points[1] = new Point3d(points[2].X, points[0].Y, 0.0);
+            points[2] = new Point3d(points[2].X, points[2].Y, 0.0);
+            points[3] = new Point3d(points[0].X, points[2].Y, 0.0);
+
+            args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x00003333, args.Thickness, close: true);
+          }
+        }
+
+        var view = Document.GetElement(viewport.ViewId) as ARDB.View;
+        if (view is ARDB.ImageView) return;
+
+        using (var labelOutline = viewport.GetLabelOutline())
+        {
+          if (!labelOutline.IsEmpty)
+          {
+            var points = new Point3d[]
+            {
+              labelOutline.MinimumPoint.ToPoint3d(),
+              Point3d.Origin,
+              labelOutline.MaximumPoint.ToPoint3d(),
+              Point3d.Origin
+            };
+
+            points[0] = new Point3d(points[0].X, points[0].Y, 0.0);
+            points[1] = new Point3d(points[2].X, points[0].Y, 0.0);
+            points[2] = new Point3d(points[2].X, points[2].Y, 0.0);
+            points[3] = new Point3d(points[0].X, points[2].Y, 0.0);
+
+            args.Pipeline.DrawPatternedPolyline(points, args.Color, 0x00003333, args.Thickness, close: true);
+            args.Pipeline.DrawDot(Position, Value.get_Parameter(ARDB.BuiltInParameter.VIEWPORT_DETAIL_NUMBER)?.AsString() ?? string.Empty, args.Color, System.Drawing.Color.White);
+            args.Pipeline.DrawCurve(Curve, args.Color, args.Thickness);
+          }
+        }
+      }
+      else base.DrawViewportWires(args);
+    }
+    #endregion
+
+    #region Properties
+    public override View View => View.FromElementId(Document, Value?.ViewId) as View;
+    public override ViewSheet Sheet => ViewSheet.FromElementId(Document, Value?.SheetId) as ViewSheet;
+
+    protected override ARDB.ViewportRotation Rotation => Value?.Rotation ?? ARDB.ViewportRotation.None;
+    #endregion
+  }
+
+  [Kernel.Attributes.Name("Schedule Graphics")]
+  public class ScheduleSheetInstance : ViewInstance
+  {
+    protected override Type ValueType => typeof(ARDB.ScheduleSheetInstance);
+    public new ARDB.ScheduleSheetInstance Value => base.Value as ARDB.ScheduleSheetInstance;
+
+    public ScheduleSheetInstance() { }
+    public ScheduleSheetInstance(ARDB.ScheduleSheetInstance element) : base(element) { }
+
+    public override Plane Location
+    {
+      get
+      {
+        if (Value is ARDB.ScheduleSheetInstance viewport && viewport.OwnerViewId != ARDB.ElementId.InvalidElementId)
+        {
+          var boxCenter = base.Location.Origin;
+          boxCenter.Z = 0.0;
+
+          switch (viewport.Rotation)
+          {
+            case ARDB.ViewportRotation.None: return new Plane(boxCenter, Vector3d.XAxis, Vector3d.YAxis);
+            case ARDB.ViewportRotation.Clockwise: return new Plane(boxCenter, -Vector3d.YAxis, Vector3d.XAxis);
+            case ARDB.ViewportRotation.Counterclockwise: return new Plane(boxCenter, Vector3d.YAxis, -Vector3d.XAxis);
+          }
+        }
+
+        return NaN.Plane;
+      }
+    }
+
+    #region Properties
+    public override View View => View.FromElementId(Document, Value?.ScheduleId) as View;
+
+    protected override ARDB.ViewportRotation Rotation => Value?.Rotation ?? ARDB.ViewportRotation.None;
+    #endregion
+  }
+
+  [Kernel.Attributes.Name("Schedule Graphics")]
+  public class PanelScheduleSheetInstance : ViewInstance
+  {
+    protected override Type ValueType => typeof(ARDB.Electrical.PanelScheduleSheetInstance);
+    public new ARDB.Electrical.PanelScheduleSheetInstance Value => base.Value as ARDB.Electrical.PanelScheduleSheetInstance;
+
+    public PanelScheduleSheetInstance() { }
+    public PanelScheduleSheetInstance(ARDB.Electrical.PanelScheduleSheetInstance element) : base(element) { }
+
+    public override Plane Location
+    {
+      get
+      {
+        if (Value is ARDB.Electrical.PanelScheduleSheetInstance viewport && viewport.OwnerViewId != ARDB.ElementId.InvalidElementId)
+        {
+          var boxCenter = base.Location.Origin;
+          boxCenter.Z = 0.0;
+
+          switch (Rotation)
+          {
+            case ARDB.ViewportRotation.None: return new Plane(boxCenter, Vector3d.XAxis, Vector3d.YAxis);
+            case ARDB.ViewportRotation.Clockwise: return new Plane(boxCenter, -Vector3d.YAxis, Vector3d.XAxis);
+            case ARDB.ViewportRotation.Counterclockwise: return new Plane(boxCenter, Vector3d.YAxis, -Vector3d.XAxis);
+          }
+        }
+
+        return NaN.Plane;
+      }
+    }
+
+    #region Properties
+    public override View View => View.FromElementId(Document, Value?.ScheduleId) as View;
     #endregion
   }
 }

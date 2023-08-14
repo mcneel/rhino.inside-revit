@@ -1,15 +1,14 @@
 using System;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Architecture;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.7")]
   public class AddSpaceTag : ElementTrackerComponent
   {
@@ -20,10 +19,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddSpaceTag() : base
     (
       name: "Tag Space",
-      nickname: "TagSpace",
+      nickname: "S-Tag",
       description: "Given a point, it adds an space tag to the given view",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -37,8 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           Name = "View",
           NickName = "V",
           Description = "The view where the tag will be added.",
-          Optional = true
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -140,7 +138,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (spaceTag.Location is ARDB.LocationPoint areaTagLocation)
       {
         var position = areaTagLocation.Point;
-        if (!target.IsAlmostEqualTo(position))
+        if (!target.AlmostEqualPoints(position))
         {
           var pinned = spaceTag.Pinned;
           spaceTag.Pinned = false;
@@ -173,7 +171,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         spaceTag.ChangeTypeId(type.Id);
       }
 
-      if (!spaceTag.TagHeadPosition.IsAlmostEqualTo(head))
+      if (!spaceTag.TagHeadPosition.AlmostEqualPoints(head))
       {
         var pinned = spaceTag.Pinned;
         spaceTag.Pinned = false;

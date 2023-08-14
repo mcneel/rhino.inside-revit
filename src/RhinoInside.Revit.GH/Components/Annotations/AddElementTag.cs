@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             element.GetReference(),
             headPosition,
             leaderEnd,
-            !headPosition.IsAlmostEqualTo(leaderEnd),
+            !headPosition.AlmostEqualPoints(leaderEnd, view.Document.Application.ShortCurveTolerance),
             ARDB.TagOrientation.Horizontal
           );
 
@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       {
         var target = point;
         var position = independentTagLocation.Point;
-        if (!target.IsAlmostEqualTo(position))
+        if (!target.AlmostEqualPoints(position))
         {
           var pinned = independetTag.Pinned;
           independetTag.Pinned = false;
@@ -184,12 +184,12 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           independentTag.get_Parameter(ARDB.BuiltInParameter.TAG_LEADER_TYPE).Update(1);
           if (independentTag.GetTaggedReferences().FirstOrDefault() is ARDB.Reference referenceTagged)
           {
-            if (!independentTag.GetLeaderEnd(referenceTagged).IsAlmostEqualTo(leaderEnd))
+            if (!independentTag.GetLeaderEnd(referenceTagged).AlmostEqualPoints(leaderEnd))
               independentTag.SetLeaderEnd(referenceTagged, leaderEnd);
           }
         }
 
-        if (!independentTag.TagHeadPosition.IsAlmostEqualTo(headPosition))
+        if (!independentTag.TagHeadPosition.AlmostEqualPoints(headPosition))
         {
           var pinned = independentTag.Pinned;
           independentTag.Pinned = false;
@@ -214,10 +214,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddElementTagByCategory() : base
     (
       name: "Tag By Category",
-      nickname: "TagCategory",
+      nickname: "C-Tag",
       description: "Given a point, it adds an category tag to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
   }
@@ -234,10 +234,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddElementTagByMutliCategory() : base
     (
       name: "Multi-Category Tag",
-      nickname: "TagMultiCat",
+      nickname: "MC-Tag",
       description: "Given a point, it adds an multi-category tag to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
   }
@@ -249,15 +249,15 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => string.Empty;
 
-    protected override ARDB.TagMode TagMode => ARDB.TagMode.TM_ADDBY_MULTICATEGORY;
+    protected override ARDB.TagMode TagMode => ARDB.TagMode.TM_ADDBY_MATERIAL;
 
     public AddElementTagByMaterial() : base
     (
       name: "Material Tag",
-      nickname: "TagMaterial",
+      nickname: "M-Tag",
       description: "Given a point, it adds an material tag to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
   }

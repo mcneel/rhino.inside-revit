@@ -111,8 +111,8 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { Measurable.Speed, +1 },
       { Measurable.MassDensity, -3 },
       { Measurable.CostPerArea, -2 },
-      { Measurable.SheetLength, -1 },
-      { Measurable.DecimalSheetLength, -1 },
+      { Measurable.SheetLength, +1 },
+      { Measurable.DecimalSheetLength, +1 },
       #endregion
 
       #region Structural

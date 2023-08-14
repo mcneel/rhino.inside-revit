@@ -16,6 +16,7 @@ using SD = System.Drawing;
 
 namespace RhinoInside.Revit.Convert.Render
 {
+  using Numerical;
   using Convert.System.Drawing;
   using Convert.Units;
   using External.DB.Extensions;
@@ -238,6 +239,7 @@ namespace RhinoInside.Revit.Convert.Render
         return default;
 
       if (asset.Name == "UnifiedBitmapSchema") return GetUnifiedBitmapSchemaTexture(asset);
+      if (asset.Name == "BumpMapSchema") return GetBumpMapSchemaTexture(asset);
       else Debug.WriteLine($"Unimplemented Texture Schema: {asset.Name}");
 
       return default;
@@ -245,9 +247,23 @@ namespace RhinoInside.Revit.Convert.Render
 
     static SimulatedProceduralTexture GetUnifiedBitmapSchemaTexture(Asset asset)
     {
-      //bool filtered = true;
-      //if (asset.FindByName("unifiedbitmap_Filtering") is AssetPropertyInteger bitmapFilter)
-      //  filtered = bitmapFilter.Value != 0;
+      var activeModelScale = UnitScale.GetModelScale(RhinoDoc.ActiveDoc);
+
+      var offset = Rhino.Geometry.Vector2d.Zero;
+      if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetX) is AssetPropertyDistance offsetX)
+        offset.X = ARDB.UnitUtils.Convert(offsetX.Value, offsetX.GetUnitTypeId(), DBXS.UnitType.Meters) /
+                   activeModelScale;
+      if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetY) is AssetPropertyDistance offsetY)
+        offset.Y = ARDB.UnitUtils.Convert(offsetY.Value, offsetY.GetUnitTypeId(), DBXS.UnitType.Meters) /
+                   activeModelScale;
+
+      var repeat = new Rhino.Geometry.Vector2d(1.0, 1.0);
+      if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleX) is AssetPropertyDistance scaleX)
+        repeat.X = activeModelScale /
+                   ARDB.UnitUtils.Convert(scaleX.Value, scaleX.GetUnitTypeId(), DBXS.UnitType.Meters);
+      if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleY) is AssetPropertyDistance scaleY)
+        repeat.Y = activeModelScale /
+                   ARDB.UnitUtils.Convert(scaleY.Value, scaleY.GetUnitTypeId(), DBXS.UnitType.Meters);
 
       bool inverted = false;
       if (asset.FindByName(UnifiedBitmap.UnifiedbitmapInvert) is AssetPropertyBoolean bitmapInverted)
@@ -260,7 +276,6 @@ namespace RhinoInside.Revit.Convert.Render
       var texture = new SimulatedProceduralTexture(ContentUuids.BitmapTextureType)
       {
         ProjectionMode = SimulatedTexture.ProjectionModes.WcsBox,
-        //Filtered = filtered,
         Fields =
         {
           { "rdk-texture-adjust-invert", inverted },
@@ -298,27 +313,94 @@ namespace RhinoInside.Revit.Convert.Render
       if (asset.FindByName(UnifiedBitmap.TextureWAngle) is AssetPropertyDouble angle)
         texture.Rotation = RhinoMath.ToRadians(angle.Value);
 
-      var activeModelScale = UnitScale.GetModelScale(RhinoDoc.ActiveDoc);
-
-      var offset = Rhino.Geometry.Vector2d.Zero;
-      if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetX) is AssetPropertyDistance offsetX)
-        offset.X = ARDB.UnitUtils.Convert(offsetX.Value, offsetX.GetUnitTypeId(), DBXS.UnitType.Meters) /
-                   activeModelScale;
-      if (asset.FindByName(UnifiedBitmap.TextureRealWorldOffsetY) is AssetPropertyDistance offsetY)
-        offset.Y = ARDB.UnitUtils.Convert(offsetY.Value, offsetY.GetUnitTypeId(), DBXS.UnitType.Meters) /
-                   activeModelScale;
       texture.Offset = offset;
-
-      var repeat = new Rhino.Geometry.Vector2d(1.0, 1.0);
-      if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleX) is AssetPropertyDistance scaleX)
-        repeat.X = activeModelScale /
-                   ARDB.UnitUtils.Convert(scaleX.Value, scaleX.GetUnitTypeId(), DBXS.UnitType.Meters);
-      if (asset.FindByName(UnifiedBitmap.TextureRealWorldScaleY) is AssetPropertyDistance scaleY)
-        repeat.Y = activeModelScale /
-                   ARDB.UnitUtils.Convert(scaleY.Value, scaleY.GetUnitTypeId(), DBXS.UnitType.Meters);
       texture.Repeat = repeat;
 
       return texture;
+    }
+
+    static SimulatedProceduralTexture GetBumpMapSchemaTexture(Asset asset)
+    {
+      if (asset.FindByName(BumpMap.BumpmapType) is AssetPropertyInteger bumpmapType)
+      {
+        switch ((BumpmapType) bumpmapType.Value)
+        {
+          case BumpmapType.HeightMap:
+
+            var activeModelScale = UnitScale.GetModelScale(RhinoDoc.ActiveDoc);
+
+            var offset = Rhino.Geometry.Vector2d.Zero;
+            if (asset.FindByName(BumpMap.TextureRealWorldOffsetX) is AssetPropertyDistance offsetX)
+              offset.X = ARDB.UnitUtils.Convert(offsetX.Value, offsetX.GetUnitTypeId(), DBXS.UnitType.Meters) / activeModelScale;
+            if (asset.FindByName(BumpMap.TextureRealWorldOffsetY) is AssetPropertyDistance offsetY)
+              offset.Y = ARDB.UnitUtils.Convert(offsetY.Value, offsetY.GetUnitTypeId(), DBXS.UnitType.Meters) / activeModelScale;
+
+            var repeat = new Rhino.Geometry.Vector2d(1.0, 1.0);
+            if (asset.FindByName(BumpMap.TextureRealWorldScaleX) is AssetPropertyDistance scaleX)
+              repeat.X = activeModelScale / ARDB.UnitUtils.Convert(scaleX.Value, scaleX.GetUnitTypeId(), DBXS.UnitType.Meters);
+            if (asset.FindByName(BumpMap.TextureRealWorldScaleY) is AssetPropertyDistance scaleY)
+              repeat.Y = activeModelScale / ARDB.UnitUtils.Convert(scaleY.Value, scaleY.GetUnitTypeId(), DBXS.UnitType.Meters);
+
+            bool inverted = false;
+            double multiplier = 1.0;
+            if (asset.FindByName(BumpMap.BumpmapDepth) is AssetPropertyDistance bumpmapDepth)
+            {
+              var depth = ARDB.UnitUtils.Convert(bumpmapDepth.Value, bumpmapDepth.GetUnitTypeId(), DBXS.UnitType.Meters) / activeModelScale;
+              multiplier = depth / ((repeat.X + repeat.Y) * 0.5);
+            }
+
+            var texture = new SimulatedProceduralTexture(ContentUuids.BitmapTextureType)
+            {
+              ProjectionMode = SimulatedTexture.ProjectionModes.WcsBox,
+              Fields =
+              {
+                { "rdk-texture-adjust-invert", inverted },
+                { "rdk-texture-adjust-multiplier", multiplier }
+              }
+            };
+
+            if (asset.FindByName(BumpMap.BumpmapBitmap) is AssetPropertyString source)
+            {
+              var entries = source.Value.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+
+              // Add the first entry without validation to have something in case we don't found a valid one.
+              texture.Filename = entries.FirstOrDefault() ?? string.Empty;
+
+              foreach (var entry in entries)
+              {
+                try
+                {
+                  if (Path.IsPathRooted(entry) ?
+                      File.Exists(entry) :
+                      Rhino.ApplicationSettings.FileSettings.FindFile(entry) is string)
+                  {
+                    texture.Filename = entry;
+                    break;
+                  }
+                }
+                catch { }
+              }
+            }
+
+            if (asset.FindByName(BumpMap.TextureURepeat) is AssetPropertyBoolean uRepeat &&
+              asset.FindByName(BumpMap.TextureVRepeat) is AssetPropertyBoolean vRepeat)
+              texture.Repeating = uRepeat.Value | vRepeat.Value;
+
+            if (asset.FindByName(BumpMap.TextureWAngle) is AssetPropertyDouble angle)
+              texture.Rotation = RhinoMath.ToRadians(angle.Value);
+
+            texture.Offset = offset;
+            texture.Repeat = repeat;
+
+            return texture;
+
+          default:
+            Debug.WriteLine($"Unimplemented {nameof(BumpmapType)}: {(BumpmapType) bumpmapType.Value}");
+            break;
+        }
+      }
+
+      return null;
     }
 
     static SimulatedTexture ToSimulatedTexture(string path)
@@ -439,7 +521,7 @@ namespace RhinoInside.Revit.Convert.Render
         if (material.SetChild(texture, slotName))
         {
           material.SetChildSlotOn(slotName, true, RenderContent.ChangeContexts.Program);
-          material.SetChildSlotAmount(slotName, RhinoMath.Clamp(amount, 0.0, 1.0) * 100.0, RenderContent.ChangeContexts.Program);
+          material.SetChildSlotAmount(slotName, Arithmetic.Clamp(amount, 0.0, 1.0) * 100.0, RenderContent.ChangeContexts.Program);
         }
       }
     }
@@ -462,6 +544,13 @@ namespace RhinoInside.Revit.Convert.Render
       else if (asset.Name == "WaterSchema") GetWaterSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "MirrorSchema") GetMirrorSchemaParameters(asset, ref materialParams);
       else if (asset.Name == "MasonryCMUSchema") GetMasonryCMUSchemaParameters(asset, ref materialParams);
+
+      else if (asset.Name == "PrismOpaqueSchema") GetPrismOpaqueSchemaParameters(asset, ref materialParams);
+      else if (asset.Name == "PrismTransparentSchema") GetPrismTransparentSchemaParameters(asset, ref materialParams);
+      else if (asset.Name == "PrismMetalSchema") GetPrismMetalSchemaParameters(asset, ref materialParams);
+#if REVIT_2020
+      else if (asset.Name == "PrismGlazingSchema") GetPrismGlazingSchemaParameters(asset, ref materialParams);
+#endif
       else return false;
 
       return true;
@@ -497,20 +586,28 @@ namespace RhinoInside.Revit.Convert.Render
           material.BumpTextureAmount = bumpAmount.Value;
       }
 
+      if (asset.FindByName(Generic.GenericCutoutOpacity) is AssetPropertyDouble opacity)
+      {
+        material.OpacityTextureAmount = opacity.Value;
+        material.OpacityTexture = ToSimulatedTexture(opacity.GetSingleConnectedAsset());
+      }
+
       if (asset.FindByName(Generic.GenericTransparency) is AssetPropertyDouble transparency)
       {
         material.Transparency = transparency.Value;
-        material.OpacityTexture = ToSimulatedTexture(transparency.GetSingleConnectedAsset());
 
-        if (asset.FindByName(Generic.GenericTransparencyImageFade) is AssetPropertyDouble transparencyAmount)
-          material.OpacityTextureAmount = transparencyAmount.Value;
+        // TODO : Build a Transparency Texture.
+        //material.OpacityTexture = ToSimulatedTexture(transparency.GetSingleConnectedAsset());
+
+        //if (asset.FindByName(Generic.GenericTransparencyImageFade) is AssetPropertyDouble transparencyAmount)
+        //  material.OpacityTextureAmount = transparencyAmount.Value;
       }
 
       if (asset.FindByName(Generic.GenericRefractionIndex) is AssetPropertyDouble ior)
         material.Ior = ior.Value;
 
-      if (asset.FindByName(Generic.GenericReflectivityAt0deg) is AssetPropertyDouble refelectivity0)
-        material.Reflectivity = refelectivity0.Value;
+      if (asset.FindByName(Generic.GenericGlossiness) is AssetPropertyDouble glossiness)
+        material.Reflectivity = glossiness.Value;
 
       if (asset.FindByName(Generic.GenericSelfIllumLuminance) is AssetPropertyDouble luminance)
       {
@@ -519,17 +616,20 @@ namespace RhinoInside.Revit.Convert.Render
         {
           if (asset.FindByName(Generic.GenericSelfIllumFilterMap) is AssetPropertyDoubleArray4d emission)
           {
-            var luminanceFactor = RhinoMath.Clamp(luminance.Value, 0.0, 2000.0) / 2000.0;
+            var luminanceFactor = Arithmetic.Clamp(luminance.Value, 0.0, 2000.0) / 2000.0;
             material.Emission = ToColor4f(emission, luminanceFactor);
           }
         }
       }
 
-      if (asset.FindByName(Generic.GenericGlossiness) is AssetPropertyDouble glossiness)
-      {
-        material.PolishAmount = glossiness.Value;
-        material.ClarityAmount = glossiness.Value;
-      }
+      if (asset.FindByName(Generic.GenericReflectivityAt0deg) is AssetPropertyDouble refelectivity0)
+        material.PolishAmount = refelectivity0.Value;
+
+      if (asset.FindByName(Generic.GenericReflectivityAt90deg) is AssetPropertyDouble reflectivity90)
+        material.Shine = reflectivity90.Value;
+
+      if (asset.FindByName(Generic.GenericRefractionTranslucencyWeight) is AssetPropertyDouble refractionTranslucencyWeight)
+        material.ClarityAmount = refractionTranslucencyWeight.Value;
     }
 
     static void GetGlazingSchemaParameters(Asset asset, ref BasicMaterialParameters material)
@@ -1400,6 +1500,170 @@ namespace RhinoInside.Revit.Convert.Render
       material.PolishAmount = polish;
       material.ClarityAmount = 1.0;
     }
+
+    static void GetPrismOpaqueSchemaParameters(Asset asset, ref BasicMaterialParameters material)
+    {
+      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Cube;
+
+      if (asset.FindByName(AdvancedOpaque.OpaqueAlbedo) is AssetPropertyDoubleArray4d diffuse)
+      {
+        material.Diffuse = ToColor4f(diffuse);
+        material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedOpaque.OpaqueLuminance) is AssetPropertyDouble luminance)
+      {
+        material.DisableLighting = luminance.Value > 0.0;
+        if (material.DisableLighting)
+        {
+          if (asset.FindByName(AdvancedOpaque.OpaqueLuminanceModifier) is AssetPropertyDoubleArray4d emission)
+          {
+            var luminanceFactor = Arithmetic.Clamp(luminance.Value, 0.0, 2000.0) / 2000.0;
+            material.Emission = ToColor4f(emission, luminanceFactor);
+          }
+        }
+      }
+
+      if (asset.FindByName(AdvancedOpaque.SurfaceRoughness) is AssetPropertyDouble roughness)
+      {
+        material.Shine = 1.0 - roughness.Value;
+        material.PolishAmount = 1.0 - roughness.Value;
+      }
+
+      if (asset.FindByName(AdvancedOpaque.SurfaceNormal) is AssetPropertyReference normal)
+      {
+        material.BumpTexture = ToSimulatedTexture(normal.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedOpaque.SurfaceCutout) is AssetPropertyReference cutout)
+      {
+        material.OpacityTexture = ToSimulatedTexture(cutout.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedOpaque.SurfaceAlbedo) is AssetPropertyDoubleArray4d specular)
+      {
+        material.Reflectivity = 1.0;
+        material.ReflectivityColor = ToColor4f(specular);
+      }
+    }
+
+    static void GetPrismTransparentSchemaParameters(Asset asset, ref BasicMaterialParameters material)
+    {
+      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Plane;
+
+      if (asset.FindByName(AdvancedTransparent.TransparentColor) is AssetPropertyDoubleArray4d transparency)
+      {
+        material.TransparencyColor = ToColor4f(transparency);
+      }
+
+      if (asset.FindByName(AdvancedTransparent.TransparentIor) is AssetPropertyDouble ior)
+      {
+        material.Transparency = 0.92;
+        material.Ior = ior.Value;
+        material.FresnelEnabled = true;
+      }
+
+      if (asset.FindByName(AdvancedTransparent.SurfaceRoughness) is AssetPropertyDouble roughness)
+      {
+        material.Shine = 1.0 - roughness.Value;
+        material.PolishAmount = 1.0 - roughness.Value;
+      }
+
+      if (asset.FindByName(AdvancedTransparent.SurfaceNormal) is AssetPropertyReference normal)
+      {
+        material.BumpTexture = ToSimulatedTexture(normal.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedTransparent.SurfaceCutout) is AssetPropertyReference cutout)
+      {
+        material.OpacityTexture = ToSimulatedTexture(cutout.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedTransparent.SurfaceAlbedo) is AssetPropertyDoubleArray4d diffuse)
+      {
+        material.Diffuse = ToColor4f(diffuse);
+        material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+      }
+    }
+
+    static void GetPrismMetalSchemaParameters(Asset asset, ref BasicMaterialParameters material)
+    {
+      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Cube;
+
+      if (asset.FindByName(AdvancedMetal.MetalF0) is AssetPropertyDoubleArray4d diffuse)
+      {
+        material.Diffuse = ToColor4f(diffuse);
+        material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedMetal.SurfaceRoughness) is AssetPropertyDouble roughness)
+      {
+        material.Shine = 1.0 - roughness.Value;
+        material.PolishAmount = 1.0 - roughness.Value;
+      }
+
+      if (asset.FindByName(AdvancedMetal.SurfaceNormal) is AssetPropertyReference normal)
+      {
+        material.BumpTexture = ToSimulatedTexture(normal.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedMetal.SurfaceCutout) is AssetPropertyReference cutout)
+      {
+        material.OpacityTexture = ToSimulatedTexture(cutout.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedMetal.SurfaceAlbedo) is AssetPropertyDoubleArray4d albeldo)
+      {
+        material.Reflectivity = 0.25;
+        material.ReflectivityColor = ToColor4f(albeldo);
+      }
+    }
+
+#if REVIT_2020
+    static void GetPrismGlazingSchemaParameters(Asset asset, ref BasicMaterialParameters material)
+    {
+      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Plane;
+
+      material.Transparency = 0.92;
+      material.Ior = 1.52;
+      material.FresnelEnabled = true;
+
+      if (asset.FindByName(AdvancedGlazing.GlazingTransmissionColor) is AssetPropertyDoubleArray4d diffuse)
+      {
+        material.TransparencyColor = ToColor4f(diffuse);
+        material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedGlazing.GlazingTransmissionRoughness) is AssetPropertyDouble clarity)
+        material.ClarityAmount = 1.0 - clarity.Value;
+
+      if (asset.FindByName(AdvancedGlazing.GlazingF0) is AssetPropertyDoubleArray4d emission)
+        material.Emission = ToColor4f(emission);
+
+      if (asset.FindByName(AdvancedGlazing.SurfaceRoughness) is AssetPropertyDouble roughness)
+      {
+        material.Shine = 1.0 - roughness.Value;
+        material.Reflectivity = 1.0 - roughness.Value;
+        material.PolishAmount = 1.0 - roughness.Value;
+      }
+
+      if (asset.FindByName(AdvancedGlazing.SurfaceNormal) is AssetPropertyReference normal)
+      {
+        material.BumpTexture = ToSimulatedTexture(normal.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedGlazing.SurfaceCutout) is AssetPropertyReference cutout)
+      {
+        material.OpacityTexture = ToSimulatedTexture(cutout.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedGlazing.SurfaceAlbedo) is AssetPropertyDoubleArray4d albeldo)
+      {
+        material.Reflectivity = 1.0;
+        material.ReflectivityColor = ToColor4f(albeldo);
+      }
+    }
+#endif
 #endif
   }
 }

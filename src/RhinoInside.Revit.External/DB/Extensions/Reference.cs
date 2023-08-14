@@ -140,8 +140,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static Reference ParseFromPersistentRepresentation(Document document, string persistent)
     {
-      return Reference.ParseFromStableRepresentation(document, ReferenceId.Parse(persistent, document).ToStableRepresentation(document));
+      if (document is null)   throw new ArgumentNullException(nameof(document));
+      if (persistent is null) throw new ArgumentNullException(nameof(persistent));
 
+      try { return Reference.ParseFromStableRepresentation(document, ReferenceId.Parse(persistent, document).ToStableRepresentation(document)); }
+      catch (Autodesk.Revit.Exceptions.ArgumentNullException e) { throw new ArgumentNullException(e.Message, e); }
+      catch (Autodesk.Revit.Exceptions.ArgumentException e)     { throw new FormatException(e.Message, e); }
     }
   }
 }

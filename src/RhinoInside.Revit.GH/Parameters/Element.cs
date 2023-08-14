@@ -112,6 +112,7 @@ namespace RhinoInside.Revit.GH.Parameters
   using ElementTracking;
   using External.DB;
   using External.DB.Extensions;
+  using RhinoInside.Revit.External.UI.Extensions;
 
   public abstract class Element<T, R> : Reference<T>,
     IGH_TrackingParam
@@ -183,6 +184,21 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
+    protected ToolStripMenuItem Menu_AppendPromptNew(ToolStrip menu, ARUI.PostableCommand postableCommand, string text = default)
+    {
+      var activeApp = Revit.ActiveUIApplication;
+      var postable = activeApp.ActiveUIDocument.TryGetRevitCommandId(postableCommand, out var commandId);
+
+      return Menu_AppendItem
+      (
+        menu,
+        text ?? $"Set new {TypeName}",
+        Menu_PromptNew(commandId),
+        postable,
+        false
+      );
+    }
+
     protected EventHandler Menu_PromptNew(ARUI.RevitCommandId commandId) => async (sender, args) =>
     {
       var activeApp = Revit.ActiveUIApplication;
@@ -217,38 +233,45 @@ namespace RhinoInside.Revit.GH.Parameters
       var committed = false;
       var messages = new List<string>();
 
-      foreach (var document in ToElementIds(VolatileData).GroupBy(x => x.Document))
+      if (Attributes.Parent.DocObject is IGH_Component component && component is IGH_TrackingComponent)
       {
-        using (var tx = new ARDB.Transaction(document.Key, "Release Elements"))
+        var trackedElements = component.Params.Output.
+          Where(x => x is IGH_TrackingParam).
+          SelectMany(x => x.VolatileData.AllData(skipNulls: true).OfType<Types.IGH_Element>().Where(e => e.IsValid));
+
+        foreach (var document in trackedElements.GroupBy(x => x.Document))
         {
-          if (tx.Start() == ARDB.TransactionStatus.Started)
+          using (var tx = new ARDB.Transaction(document.Key, "Release Elements"))
           {
-            var list = new List<ARDB.ElementId>();
-
-            foreach (var element in document.Select(x => x.Value).OfType<ARDB.Element>())
+            if (tx.Start() == ARDB.TransactionStatus.Started)
             {
-              if (ElementStream.ReleaseElement(element))
-              {
-                element.Pinned = false;
-                list.Add(element.Id);
-              }
-            }
+              var list = new List<ARDB.ElementId>();
 
-            // Show feedback on Revit
-            if (list.Count > 0)
-            {
-              if (list.Count == 1)
-                messages.Add($"An element was released at '{document.Key.Title.TripleDot(16)}' document and is no longer synchronized.");
-              else
-                messages.Add($"{list.Count} elements were released at '{document.Key.Title.TripleDot(16)}' document and are no longer synchronized.");
-
-              using (var message = new ARDB.FailureMessage(ExternalFailures.ElementFailures.TrackedElementReleased))
+              foreach (var element in document.Select(x => x.Value).OfType<ARDB.Element>())
               {
-                message.SetFailingElements(list);
-                document.Key.PostFailure(message);
+                if (ElementStream.ReleaseElement(element))
+                {
+                  element.Pinned = false;
+                  list.Add(element.Id);
+                }
               }
 
-              committed |= await tx.CommitAsync() == ARDB.TransactionStatus.Committed;
+              // Show feedback on Revit
+              if (list.Count > 0)
+              {
+                if (list.Count == 1)
+                  messages.Add($"An element was released at '{document.Key.Title.TripleDot(16)}' document and is no longer synchronized.");
+                else
+                  messages.Add($"{list.Count} elements were released at '{document.Key.Title.TripleDot(16)}' document and are no longer synchronized.");
+
+                using (var message = new ARDB.FailureMessage(ExternalFailures.ElementFailures.TrackedElementReleased))
+                {
+                  message.SetFailingElements(list);
+                  document.Key.PostFailure(message);
+                }
+
+                committed |= await tx.CommitAsync() == ARDB.TransactionStatus.Committed;
+              }
             }
           }
         }

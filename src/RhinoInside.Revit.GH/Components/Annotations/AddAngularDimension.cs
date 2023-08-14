@@ -20,10 +20,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddAngularDimension() : base
     (
       name: "Add Angular Dimension",
-      nickname: "AngleDim",
+      nickname: "A-Dim",
       description: "Given an arc, it adds an angular dimension to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -103,7 +103,13 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
           // Compute
           var references = geometries.Where(x => x.ReferenceDocument.IsEquivalent(view.Document)).Select(x => x?.GetDefaultReference()).OfType<ARDB.Reference>().ToArray();
-          dimension = Reconstruct(dimension, view, arc.Value.ToArc(), references, type);
+
+          if (references.Length > 1) dimension = Reconstruct(dimension, view, arc.Value.ToArc(), references, type);
+          else
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid number of references.");
+            dimension = null;
+          }
 
           DA.SetData(_Output_, dimension);
           return dimension;

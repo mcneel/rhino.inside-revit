@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -115,7 +116,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       var path = new GH_Path(0);
       if (SelectedItems.Count == 0)
-        m_data.AppendRange(new IGH_Goo[0], path);
+        m_data.AppendRange(Array.Empty<IGH_Goo>(), path);
       else foreach (var item in SelectedItems)
         m_data.Append(item.Value, path);
     });

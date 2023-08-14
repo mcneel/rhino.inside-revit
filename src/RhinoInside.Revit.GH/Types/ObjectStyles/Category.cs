@@ -29,19 +29,27 @@ namespace RhinoInside.Revit.GH.Types
       {
         switch (source)
         {
-          case GraphicsStyle style:     source = style.Value; break;
-          case Element element:         SetValue(element.Document, element.Category.Id); return element.IsValid;
           case CategoryId catId:        source = (ARDB.BuiltInCategory) catId.Value; break;
+          case GraphicsStyle style:     source = style.Value; break;
+          case GeometryObject geometry:
+            if (geometry.IsValid)
+            {
+              SetValue(geometry.Document, geometry.GraphicsStyle.Value?.GraphicsStyleCategory.Id ?? ElementIdExtension.Invalid);
+              return true;
+            }
+            return false;
+          case Element element:         SetValue(element.Document, element.Category?.Id ?? ElementIdExtension.Invalid); return element.IsValid;
           default:                      source = goo.ScriptVariable(); break;
         }
       }
 
       var document = Revit.ActiveDBDocument;
-      var categoryId = ARDB.ElementId.InvalidElementId;
+      var categoryId = ElementIdExtension.Invalid;
 
       switch (source)
       {
-        case int i:                     categoryId = new ARDB.ElementId(i); break;
+        case null:                      return false;
+        case int i:                     categoryId = ElementIdExtension.FromValue(i); break;
         case ARDB.BuiltInCategory bic:  categoryId = new ARDB.ElementId(bic); break;
         case ARDB.ElementId id:         categoryId = id; break;
         case ARDB.Category c:           SetValue(c.Document(), c.Id); return true;
@@ -196,6 +204,7 @@ namespace RhinoInside.Revit.GH.Types
       _CategoryType = default;
       _IsTagCategory = default;
       _IsSubcategory = default;
+      _IsVisibleInUI = default;
       _CanAddSubcategory = default;
       _AllowsBoundParameters = default;
       _HasMaterialQuantities = default;
@@ -227,6 +236,7 @@ namespace RhinoInside.Revit.GH.Types
       _CategoryType = value?.CategoryType;
       _IsTagCategory = value?.IsTagCategory;
       _IsSubcategory = value?.Parent is object;
+      _IsVisibleInUI = value?.IsVisibleInUI();
       _CanAddSubcategory = value?.CanAddSubcategory;
       _AllowsBoundParameters = value?.AllowsBoundParameters;
       _HasMaterialQuantities = value?.HasMaterialQuantities;
@@ -460,13 +470,21 @@ namespace RhinoInside.Revit.GH.Types
 
     public Category Parent => _IsSubcategory == false ? null : FromCategory(APIObject?.Parent);
 
-    public IEnumerable<Category> SubCategories => APIObject?.SubCategories?.Cast<ARDB.Category>().Select(FromCategory);
+    public IEnumerable<Category> SubCategories => APIObject?.
+      SubCategories?.
+      Cast<ARDB.Category>().
+      Where(x => !x.AllowsBoundParameters).
+      OrderBy(x => x.Id.ToValue()).
+      Select(FromCategory);
 
     bool? _IsTagCategory;
     public bool? IsTagCategory => _IsTagCategory ?? (_IsTagCategory = APIObject?.IsTagCategory);
 
     bool? _IsSubcategory;
     public bool? IsSubcategory => _IsSubcategory ?? (_IsSubcategory = APIObject?.Parent is object);
+
+    bool? _IsVisibleInUI;
+    public bool? IsVisibleInUI => _IsVisibleInUI ?? (_IsVisibleInUI = APIObject?.IsVisibleInUI());
 
     bool? _CanAddSubcategory;
     public bool? CanAddSubcategory => _CanAddSubcategory ?? (_CanAddSubcategory = APIObject?.CanAddSubcategory);
@@ -653,6 +671,14 @@ namespace RhinoInside.Revit.GH.Types
         if (category.APIObject.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection) is ARDB.GraphicsStyle style)
         {
           SetValue(style.Document, style.Id);
+          return true;
+        }
+      }
+      else if (source is GeometryObject geometry)
+      {
+        if (geometry.Value is ARDB.GeometryObject geometryObject)
+        {
+          SetValue(geometry.Document, geometryObject.GraphicsStyleId);
           return true;
         }
       }

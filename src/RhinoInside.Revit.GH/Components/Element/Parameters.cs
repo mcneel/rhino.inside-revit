@@ -48,9 +48,9 @@ namespace RhinoInside.Revit.GH
             if (dataType == ERDB.Schemas.SpecType.Boolean.YesNo)
               return new GH_Boolean(integer != 0);
 
-            if (parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
+            if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
             {
-              switch (builtInInteger)
+              switch (builtInParameter)
               {
                 case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) integer);
                 case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) integer);
@@ -70,8 +70,7 @@ namespace RhinoInside.Revit.GH
                 case ARDB.BuiltInParameter.HOST_SSE_CURVED_EDGE_CONDITION_PARAM: return new Types.SlabShapeEditCurvedEdgeCondition((ERDB.SlabShapeEditCurvedEdgeCondition) integer);
               }
 
-              var builtInIntegerName = builtInInteger.ToString();
-              if (builtInIntegerName.EndsWith("_COLOR"))
+              if (builtInParameter.IsColor())
               {
                 // integer is in BGR format
                 var color = System.Drawing.Color.FromArgb
@@ -106,8 +105,8 @@ namespace RhinoInside.Revit.GH
           {
             switch (builtInElementId)
             {
-              case ARDB.BuiltInParameter.ID_PARAM:          return new GH_Integer(elementId.IntegerValue);
-              case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:   return new GH_Integer(elementId.IntegerValue);
+              case ARDB.BuiltInParameter.ID_PARAM:          return new GH_String(elementId.ToString("D"));
+              case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:   return new GH_String(elementId.ToString("D"));
               case ARDB.BuiltInParameter.MULLION_POSITION:  return new Types.MullionPosition(parameter.Element.Document, elementId);
               case ARDB.BuiltInParameter.MULLION_PROFILE:   return new Types.ProfileType(parameter.Element.Document, elementId);
             }
@@ -141,8 +140,7 @@ namespace RhinoInside.Revit.GH
             }
             else if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
             {
-              var builtInParameterName = builtInParameter.ToString();
-              if (builtInParameterName.EndsWith("_COLOR"))
+              if (builtInParameter.IsColor())
               {
                 if (!GH_Convert.ToColor(value, out var color, GH_Conversion.Both))
                   throw new InvalidCastException();
@@ -226,16 +224,11 @@ namespace RhinoInside.Revit.GH
             }
           case int parameterId:
             {
-              var elementId = new ARDB.ElementId(parameterId);
+              var elementId = ElementIdExtension.FromValue(parameterId);
               if (elementId.TryGetBuiltInParameter(out var builtInParameter))
               {
                 parameter = element.get_Parameter(builtInParameter);
                 if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' is not defined in 'Element' {{{element.Id.ToValue()}}}");
-              }
-              else if (element.Document.GetElement(new ARDB.ElementId(parameterId)) is ARDB.ParameterElement parameterElement)
-              {
-                parameter = element.get_Parameter(parameterElement.GetDefinition());
-                if (parameter is null) obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterElement.Name}' is not defined in 'Element'. {{{element.Id.ToValue()}}}");
               }
               else obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Data conversion failed from {goo.TypeName} to Revit Parameter element");
               break;
@@ -292,10 +285,9 @@ namespace RhinoInside.Revit.GH
             if (dataType == ERDB.Schemas.SpecType.Boolean.YesNo)
               return integer != 0;
 
-            if (parameter.Id.TryGetBuiltInParameter(out var builtInInteger))
+            if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
             {
-              var builtInIntegerName = builtInInteger.ToString();
-              if (builtInIntegerName.EndsWith("_COLOR"))
+              if (builtInParameter.IsColor())
               {
                 // integer is in BGR format
                 var color = System.Drawing.Color.FromArgb
@@ -324,14 +316,9 @@ namespace RhinoInside.Revit.GH
         case ARDB.StorageType.ElementId:
 
           var document = parameter.Element.Document;
-          var documentGUID = document.GetFingerprintGUID();
           var elementId = parameter.AsElementId();
 
-          return elementId.IsBuiltInId() ?
-            ERDB.FullUniqueId.Format(documentGUID, ERDB.UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(document), elementId.ToValue())) :
-            document?.GetElement(elementId) is ARDB.Element element ?
-            ERDB.FullUniqueId.Format(documentGUID, element.UniqueId) :
-            ERDB.FullUniqueId.Format(Guid.Empty, ERDB.UniqueId.Format(Guid.Empty, ARDB.ElementId.InvalidElementId.ToValue()));
+          return ERDB.FullUniqueId.Format(document.GetPersistentGUID(), elementId.ToUniqueId(document, out var _));
 
         default:
           throw new NotImplementedException();
@@ -493,6 +480,10 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
 
           throw new Exceptions.RuntimeArgumentException("Parameter", message);
         }
+
+        // A Regenerate is needed when the parameter is a family parameter.
+        if (parameter.Id.ToBuiltInParameter() == ARDB.BuiltInParameter.INVALID && Params.IndexOfOutputParam("Value") >= 0)
+          element.Document.Regenerate();
 
         element.InvalidateGraphics();
       }

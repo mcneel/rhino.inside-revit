@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components
   public class RailingByCurve : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("601AC666-E369-464E-AE6F-34E01B9DBA3B");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
 
     public RailingByCurve() : base
     (
@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components
       nickname: "Railing",
       description: "Given a curve, it adds a Railing element to the active Revit document",
       category: "Revit",
-      subCategory: "Build"
+      subCategory: "Architecture"
     )
     { }
 

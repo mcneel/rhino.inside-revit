@@ -19,15 +19,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ObjectStyles);
-      Menu_AppendItem
-      (
-        menu, $"Open Object Styles…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.ActiveUIDocument is object && activeApp.CanPostCommand(commandId), false
-      );
-
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.ObjectStyles, "Open Object Styles…");
       base.Menu_AppendActions(menu);
     }
 
@@ -150,7 +142,7 @@ namespace RhinoInside.Revit.GH.Parameters
           Width = (int) (250 * GH_GraphicsUtil.UiScale),
           Height = (int) (100 * GH_GraphicsUtil.UiScale),
           SelectionMode = SelectionMode.MultiExtended,
-          DisplayMember = nameof(Types.Element.Nomen)
+          DisplayMember = nameof(Types.Element.DisplayName)
         };
         listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
 
@@ -171,13 +163,18 @@ namespace RhinoInside.Revit.GH.Parameters
 
       {
         var items = default(IList<Types.GraphicsStyle>);
+        listBox.Items.Add(new Types.GraphicsStyle());
 
         if (doc.IsFamilyDocument && doc.OwnerFamily.FamilyCategory is ARDB.Category familyCategory)
         {
           var invisibleLines = doc.GetCategory(ARDB.BuiltInCategory.OST_InvisibleLines);
-          listBox.Items.Add(new Types.GraphicsStyle(invisibleLines.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection)));
-          listBox.Items.Add(new Types.GraphicsStyle(familyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection)));
-          listBox.Items.Add(new Types.GraphicsStyle(familyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut)));
+          if (new Types.GraphicsStyle(invisibleLines.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection)) is Types.GraphicsStyle invisible && invisible.IsValid)
+            listBox.Items.Add(invisible);
+
+          if (new Types.GraphicsStyle(familyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection)) is Types.GraphicsStyle projectionStyle && projectionStyle.IsValid)
+            listBox.Items.Add(projectionStyle);
+          if (new Types.GraphicsStyle(familyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut)) is Types.GraphicsStyle cutStyle && cutStyle.IsValid)
+            listBox.Items.Add(cutStyle);
 
           var categories = familyCategory.SubCategories.Cast<ARDB.Category>();
           var projection = categories.Select(x => x.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection));

@@ -3,6 +3,8 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  using Numerical;
+
   public static class BoundingBoxXYZExtension
   {
     public const int AxisX = 0;
@@ -151,12 +153,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static bool IsZeroDiagonal(this BoundingBoxXYZ value, double tolerance = NumericTolerance.DefaultTolerance)
+    public static bool IsZeroDiagonal(this BoundingBoxXYZ value, double tolerance = Constant.DefaultTolerance)
     {
-      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
+      tolerance = Math.Max(tolerance, Constant.Upsilon);
 
-      var (x, y, z) = value.Max - value.Min;
-      return XYZExtension.IsZeroLength(x, y, z, tolerance);
+      return Math.Abs(GetDiagonal(value)) < tolerance;
     }
 
     public static double GetDiagonal(this BoundingBoxXYZ value)
@@ -166,8 +167,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var (x, y, z) = diagonal;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
-      if (x < 0.0 && y < 0.0 && z < 0.0) return -NumericTolerance.Norm(x, y, z);
-      if (x > 0.0 && y > 0.0 && z > 0.0) return +NumericTolerance.Norm(x, y, z);
+      if (x < 0.0 && y < 0.0 && z < 0.0) return -Euclidean.Norm(x, y, z);
+      if (x > 0.0 && y > 0.0 && z > 0.0) return +Euclidean.Norm(x, y, z);
 
       return double.NaN;
     }
@@ -175,9 +176,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static double GetLength(this BoundingBoxXYZ value)
     {
       var (X, Y, Z) = value;
-      var x = X.GetRadius();
-      var y = Y.GetRadius();
-      var z = Z.GetRadius();
+      var x = X.Deviation;
+      var y = Y.Deviation;
+      var z = Z.Deviation;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
       if (x < 0.0 && y < 0.0 && z < 0.0) return (x + y + z) * 8.0;
@@ -189,9 +190,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static double GetArea(this BoundingBoxXYZ value)
     {
       var (X, Y, Z) = value;
-      var x = X.GetRadius();
-      var y = Y.GetRadius();
-      var z = Z.GetRadius();
+      var x = X.Deviation;
+      var y = Y.Deviation;
+      var z = Z.Deviation;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
       if (x < 0.0 && y < 0.0 && z < 0.0) return ((x * y) + (y * z) + (z * x)) * 8.0;
@@ -203,9 +204,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static double GetVolume(this BoundingBoxXYZ value)
     {
       var (X, Y, Z) = value;
-      var x = X.GetRadius();
-      var y = Y.GetRadius();
-      var z = Z.GetRadius();
+      var x = X.Deviation;
+      var y = Y.Deviation;
+      var z = Z.Deviation;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
       if (x < 0.0 && y < 0.0 && z < 0.0) return (x * y * z) * 8.0;
@@ -249,18 +250,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
-    public static XYZ Evaluate(this BoundingBoxXYZ value, XYZ xyz)
+    public static XYZ Evaluate(this BoundingBoxXYZ value, UnitXYZ xyz)
     {
-      if (xyz is null) return default;
+      if (!xyz) return default;
 
-      var (x, y, z) = xyz.Normalize(0D);
+      var (x, y, z) = xyz;
       var (min, max) = value;
 
       return new XYZ
       (
-        min.X * (1.0 - x) + max.X * x,
-        min.Y * (1.0 - y) + max.Y * y,
-        min.Z * (1.0 - z) + max.Z * z
+        Arithmetic.Lerp(min.X, max.X, x),
+        Arithmetic.Lerp(min.Y, max.Y, y),
+        Arithmetic.Lerp(min.Z, max.Z, z)
       );
     }
 
@@ -298,9 +299,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
           for (int p = 0; p < xyz.Length; p++)
           {
             var (x, y, z) = inverse.OfPoint(xyz[p]);
-            minX = NumericTolerance.MinNumber(minX, x); maxX = NumericTolerance.MaxNumber(maxX, x);
-            minY = NumericTolerance.MinNumber(minY, y); maxY = NumericTolerance.MaxNumber(maxY, y);
-            minZ = NumericTolerance.MinNumber(minZ, z); maxZ = NumericTolerance.MaxNumber(maxZ, z);
+            minX = Arithmetic.Min(minX, x); maxX = Arithmetic.Max(maxX, x);
+            minY = Arithmetic.Min(minY, y); maxY = Arithmetic.Max(maxY, y);
+            minZ = Arithmetic.Min(minZ, z); maxZ = Arithmetic.Max(maxZ, z);
           }
 
           var (X, Y, Z) = value;
@@ -358,9 +359,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
           for (int p = 0; p < xyz.Length; p++)
           {
             var (x, y, z) = inverse.OfPoint(xyz[p]);
-            minX = NumericTolerance.MinNumber(minX, x); maxX = NumericTolerance.MaxNumber(maxX, x);
-            minY = NumericTolerance.MinNumber(minY, y); maxY = NumericTolerance.MaxNumber(maxY, y);
-            minZ = NumericTolerance.MinNumber(minZ, z); maxZ = NumericTolerance.MaxNumber(maxZ, z);
+            minX = Arithmetic.Min(minX, x); maxX = Arithmetic.Max(maxX, x);
+            minY = Arithmetic.Min(minY, y); maxY = Arithmetic.Max(maxY, y);
+            minZ = Arithmetic.Min(minZ, z); maxZ = Arithmetic.Max(maxZ, z);
           }
 
           var (X, Y, Z) = value;
@@ -394,8 +395,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       foreach (var point in points)
       {
         var (x, y, z) = point;
-        min = (NumericTolerance.MinNumber(min.X, x), NumericTolerance.MinNumber(min.Y, y), NumericTolerance.MinNumber(min.Z, z));
-        max = (NumericTolerance.MaxNumber(max.X, x), NumericTolerance.MaxNumber(max.Y, y), NumericTolerance.MaxNumber(max.Z, z));
+        min = (Arithmetic.Min(min.X, x), Arithmetic.Min(min.Y, y), Arithmetic.Min(min.Z, z));
+        max = (Arithmetic.Max(max.X, x), Arithmetic.Max(max.Y, y), Arithmetic.Max(max.Z, z));
       }
 
       return new Outline
@@ -403,6 +404,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
         new XYZ(min.X, min.Y, min.Z),
         new XYZ(max.X, max.Y, max.Z)
       );
+    }
+
+    public static BoundingBoxUV ToBoundingBoxUV(this BoundingBoxXYZ value, int axis = AxisZ)
+    {
+      var (min, max) = value;
+      switch (axis)
+      {
+        case AxisX: return new BoundingBoxUV(min.Y, min.Z, max.Y, max.Z);
+        case AxisY: return new BoundingBoxUV(min.Z, min.X, max.Z, max.X);
+        case AxisZ: return new BoundingBoxUV(min.X, min.Y, max.X, max.Y);
+        default: throw new ArgumentOutOfRangeException(nameof(axis));
+      }
+    }
+
+    public static XYZ GetCenter(this BoundingBoxXYZ value)
+    {
+      using (var transform = value.Transform)
+      {
+        var (min, max) = value;
+        return (transform.OfPoint(min) * 0.5) + (transform.OfPoint(max) * 0.5);
+      }
     }
 
     public static XYZ[] GetCorners(this BoundingBoxXYZ value)
@@ -443,48 +465,95 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         using (var transform = value.Transform)
         {
+          if (!transform.IsConformal)
+            throw new ArgumentException("Transform is not conformal", nameof(value));
+
           var (origin, basisX, basisY, basisZ) = transform;
           var (min, max) = value;
 
           if (value.get_BoundEnabled(BoundsMin, AxisX))
           {
             clipped = true;
-            planes.X.Min = new PlaneEquation(origin + min.X * basisX, basisX);
+            planes.X.Min = new PlaneEquation(origin + min.X * basisX, (UnitXYZ) basisX);
           }
 
           if (value.get_BoundEnabled(BoundsMax, AxisX))
           {
             clipped = true;
-            planes.X.Max = new PlaneEquation(origin + max.X * basisX, -basisX);
+            planes.X.Max = new PlaneEquation(origin + max.X * basisX, (UnitXYZ) (-basisX));
           }
 
           if (value.get_BoundEnabled(BoundsMin, AxisY))
           {
             clipped = true;
-            planes.Y.Min = new PlaneEquation(origin + min.Y * basisY, basisY);
+            planes.Y.Min = new PlaneEquation(origin + min.Y * basisY, (UnitXYZ) basisY);
           }
 
           if (value.get_BoundEnabled(BoundsMax, AxisY))
           {
             clipped = true;
-            planes.Y.Max = new PlaneEquation(origin + max.Y * basisY, -basisY);
+            planes.Y.Max = new PlaneEquation(origin + max.Y * basisY, (UnitXYZ) (-basisY));
           }
 
           if (value.get_BoundEnabled(BoundsMin, AxisZ))
           {
             clipped = true;
-            planes.Z.Min = new PlaneEquation(origin + min.Z * basisZ, basisZ);
+            planes.Z.Min = new PlaneEquation(origin + min.Z * basisZ, (UnitXYZ) basisZ);
           }
 
           if (value.get_BoundEnabled(BoundsMax, AxisZ))
           {
             clipped = true;
-            planes.Z.Max = new PlaneEquation(origin + max.Z * basisZ, -basisZ);
+            planes.Z.Max = new PlaneEquation(origin + max.Z * basisZ, (UnitXYZ) (-basisZ));
           }
         }
       }
 
       return clipped;
+    }
+
+    internal static bool GetPlaneEquations
+    (
+      this BoundingBoxXYZ value,
+      out
+      (
+        (PlaneEquation? Min, PlaneEquation? Max) X,
+        (PlaneEquation? Min, PlaneEquation? Max) Y,
+        (PlaneEquation? Min, PlaneEquation? Max) Z
+      ) planes,
+      double offset
+    )
+    {
+      if (GetPlaneEquations(value, out planes))
+      {
+        if (planes.X.Min.HasValue) planes.X.Min = new PlaneEquation(planes.X.Min.Value.Normal, planes.X.Min.Value.Offset - offset);
+        if (planes.X.Max.HasValue) planes.X.Max = new PlaneEquation(planes.X.Max.Value.Normal, planes.X.Max.Value.Offset + offset);
+
+        if (planes.Y.Min.HasValue) planes.Y.Min = new PlaneEquation(planes.Y.Min.Value.Normal, planes.Y.Min.Value.Offset - offset);
+        if (planes.Y.Max.HasValue) planes.Y.Max = new PlaneEquation(planes.Y.Max.Value.Normal, planes.Y.Max.Value.Offset + offset);
+
+        if (planes.Z.Min.HasValue) planes.Z.Min = new PlaneEquation(planes.Z.Min.Value.Normal, planes.Z.Min.Value.Offset - offset);
+        if (planes.Z.Max.HasValue) planes.Z.Max = new PlaneEquation(planes.Z.Max.Value.Normal, planes.Z.Max.Value.Offset + offset);
+
+        return true;
+      }
+
+      return false;
+    }
+
+    public static bool IsInside(this BoundingBoxXYZ value, XYZ point)
+    {
+      var (min, max, transform, bounded) = value;
+      var (x, y, z) = transform.Inverse.OfPoint(point);
+
+      if (bounded[BoundsMin, AxisX] && x < min.X) return false;
+      if (bounded[BoundsMax, AxisX] && x > max.X) return false;
+      if (bounded[BoundsMin, AxisY] && y < min.X) return false;
+      if (bounded[BoundsMax, AxisY] && y > max.X) return false;
+      if (bounded[BoundsMin, AxisZ] && z < min.X) return false;
+      if (bounded[BoundsMax, AxisZ] && z > max.X) return false;
+
+      return true;
     }
   }
 
@@ -499,7 +568,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ CenterPoint(this Outline outline)
     {
       var (min, max) = outline;
-      return min + ((max - min) * 0.5);
+      return (min * 0.5) + (max * 0.5);
     }
   }
 }

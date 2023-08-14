@@ -13,8 +13,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
     : base
     (
       "Element Category",
-      "ElemCat",
-      "Element Category Property. Get-Set access component to Element Category property.",
+      "E-Category",
+      "Element Category Property. Get access component to Element Category property.",
       "Revit",
       "Element"
     )

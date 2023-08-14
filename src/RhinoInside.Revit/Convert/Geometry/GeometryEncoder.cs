@@ -7,6 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.Convert.Geometry
 {
+  using External.DB;
   using External.DB.Extensions;
   using Convert.System.Collections.Generic;
 
@@ -632,6 +633,60 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     /// <summary>
+    /// Converts the specified <see cref="Rhino.Geometry.Plane" /> to an equivalent <see cref="ARDB.Frame" />.
+    /// </summary>
+    /// <example>
+    /// 
+    /// Using <see cref="ToFrame(Rhino.Geometry.Plane)" /> as extension method:
+    ///
+    /// <code language="csharp">
+    /// using DB = Autodesk.Revit.DB;
+    /// using RhinoInside.Revit.Convert.Geometry;
+    ///
+    /// DB.Frame revitFrame = rhinoPlane.ToFrame();
+    /// </code>
+    /// 
+    /// <code language="Python">
+    /// import clr
+    /// clr.AddReference("RevitAPI")
+    /// clr.AddReference("RhinoInside.Revit")
+    /// import Autodesk.Revit.DB as DB
+    /// import RhinoInside.Revit.Convert.Geometry
+    /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
+    ///
+    /// revit_frame = rhino_plane.ToFrame()	# type: DB.Frame
+    /// </code>
+    /// 
+    /// Using <see cref="ToFrame(Rhino.Geometry.Plane)" /> as static method:
+    ///
+    /// <code language="csharp">
+    /// using DB = Autodesk.Revit.DB;
+    /// using RhinoInside.Revit.Convert.Geometry;
+    ///
+    /// DB.Frame revitPlane = GeometryEncoder.ToFrame(rhinoPlane);
+    /// </code>
+    /// 
+    /// <code language="Python">
+    /// import clr
+    /// clr.AddReference("RevitAPI")
+    /// clr.AddReference("RhinoInside.Revit")
+    /// import Autodesk.Revit.DB as DB
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryEncoder as GE
+    ///
+    /// revit_frame = GE.ToFrame(rhino_plane)	# type: DB.Frame
+    /// </code>
+    ///
+    /// </example>
+    /// <param name="plane">Rhino plane to convert.</param>
+    /// <returns>Revit Frame that is equivalent to the provided Rhino plane.</returns>
+    /// <since>1.13</since>
+    public static ARDB.Frame ToFrame(this Plane plane) => ToFrame(plane, ModelScaleFactor);
+    internal static ARDB.Frame ToFrame(this Plane plane, double factor)
+    {
+      return new ARDB.Frame(plane.Origin.ToXYZ(factor), plane.XAxis.ToXYZ(), plane.YAxis.ToXYZ(), plane.ZAxis.ToXYZ());
+    }
+
+    /// <summary>
     /// Converts the specified <see cref="Transform" /> to an equivalent <see cref="ARDB.Transform" />.
     /// </summary>
     /// <example>
@@ -747,7 +802,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       return new ARDB.BoundingBoxXYZ
       {
         Min = boundingBox.Min.ToXYZ(factor),
-        Max = boundingBox.Min.ToXYZ(factor),
+        Max = boundingBox.Max.ToXYZ(factor),
         Enabled = boundingBox.IsValid
       };
     }
@@ -1060,14 +1115,14 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       var transform = default(ARDB.Transform);
       {
-        var scale = arc.Radius;
-        if (scale > 30_000 / factor)
+        if (arc.Radius * factor >= 30_000)
         {
+          var scale = (arc.Length * factor) / ((1.0 + Numerical.Constant.Delta) * Tolerance.ShortCurveTolerance);
           factor /= scale;
           transform = ARDB.Transform.Identity.ScaleBasis(scale);
         }
 
-        if (Point3d.Origin.DistanceTo(arc.Plane.Origin) > 30_000 / factor)
+        if (Point3d.Origin.DistanceTo(arc.Plane.Origin) * factor >= 30_000)
         {
           transform = (transform ?? ARDB.Transform.Identity) * ARDB.Transform.CreateTranslation(arc.Plane.Origin.ToXYZ());
           arc.Plane = new Plane(Point3d.Origin, arc.Plane.XAxis, arc.Plane.YAxis);
@@ -1580,7 +1635,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       {
         // ARDB.NurbSpline can't be periodic.
         nurbsCurve = isDuplicate ? nurbsCurve : nurbsCurve.DuplicateCurve() as NurbsCurve;
-        nurbsCurve.Knots.ClampEnd(CurveEnd.Both);
+        nurbsCurve.Knots.ClampEnd(Rhino.Geometry.CurveEnd.Both);
       }
 
       return NurbsSplineEncoder.ToNurbsSpline(nurbsCurve, factor);

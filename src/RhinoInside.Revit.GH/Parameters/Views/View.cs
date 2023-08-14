@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
-using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -26,24 +25,15 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
     (
-      new string[] { "Transform", "Plane", "Box", "Surface", "Shader", "Work Plane" }
+      new string[] { "Transform", "Plane", "Line", "Box", "Rectangle", "Surface", "Shader", "Work Plane" }
     );
 
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
       base.Menu_AppendActions(menu);
 
-      var activeApp = Revit.ActiveUIApplication;
 #if REVIT_2019
-      {
-        var commandId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.CloseInactiveViews);
-        Menu_AppendItem
-        (
-          menu, "Close Inactive Views…",
-          (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-          activeApp.CanPostCommand(commandId), false
-        );
-      }
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.CloseInactiveViews, "Close Inactive Views…");
 #endif
     }
 
@@ -59,6 +49,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var listBox = new ListBox
       {
         Sorted = true,
+        DisplayMember = nameof(Types.View.FullName),
         BorderStyle = BorderStyle.FixedSingle,
         Width = (int) (200 * GH_GraphicsUtil.UiScale),
         Height = (int) (100 * GH_GraphicsUtil.UiScale)
@@ -70,24 +61,33 @@ namespace RhinoInside.Revit.GH.Parameters
       Menu_AppendCustomItem(menu, listBox);
     }
 
-    protected void RefreshViewsList(ListBox listBox, ARDB.ViewFamily viewFamily, string displayMember = nameof(Types.View.DisplayName))
+    protected virtual bool PassFilter(R view) => !view.IsTemplate;
+
+    protected void RefreshViewsList(ListBox listBox, ARDB.ViewFamily viewFamily)
     {
       var doc = Revit.ActiveUIDocument.Document;
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
       listBox.Items.Clear();
+      listBox.DisplayMember = viewFamily == ARDB.ViewFamily.Invalid ?
+        nameof(Types.View.FullName) :
+        nameof(Types.View.DisplayName);
 
       using (var collector = new ARDB.FilteredElementCollector(doc))
       {
         var views = collector.
-                    OfClass(typeof(ARDB.View)).
-                    Cast<ARDB.View>().
-                    Where(x => !x.IsTemplate).
+                    OfClass(typeof(R)).
+                    OfType<R>().
+                    Where(PassFilter).
                     Where(x => viewFamily == ARDB.ViewFamily.Invalid || x.Document.GetElement<ARDB.ViewFamilyType>(x.GetTypeId())?.ViewFamily == viewFamily);
 
-        listBox.DisplayMember = displayMember;
         foreach (var view in views)
+        {
+          if (view is ARDB.ViewSchedule scheduleView && (scheduleView.IsInternalKeynoteSchedule || scheduleView.IsTitleblockRevisionSchedule))
+            continue;
+
           listBox.Items.Add(Types.View.FromElement(view));
+        }
       }
 
       listBox.SelectedIndex = listBox.Items.OfType<Types.IGH_View>().IndexOf(PersistentValue, 0).FirstOr(-1);
@@ -130,9 +130,12 @@ namespace RhinoInside.Revit.GH.Parameters
       if (SourceCount != 0) return;
       if (Revit.ActiveUIDocument?.Document is null) return;
 
+      Menu_AppendPromptNew(menu);
+
       var listBox = new ListBox
       {
         Sorted = true,
+        DisplayMember = nameof(Types.View.FullName),
         BorderStyle = BorderStyle.FixedSingle,
         Width = (int) (200 * GH_GraphicsUtil.UiScale),
         Height = (int) (100 * GH_GraphicsUtil.UiScale)
@@ -147,7 +150,7 @@ namespace RhinoInside.Revit.GH.Parameters
         Tag = listBox
       };
       viewTypeBox.SelectedIndexChanged += ViewTypeBox_SelectedIndexChanged;
-      viewTypeBox.SetCueBanner("View type filter…");
+      viewTypeBox.SetCueBanner("Family filter…");
 
       using (var collector = new ARDB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
       {
@@ -182,7 +185,10 @@ namespace RhinoInside.Revit.GH.Parameters
             familyIndex++;
           }
         }
-        else RefreshViewsList(listBox, ARDB.ViewFamily.Invalid, nameof(Types.View.FullName));
+        else if (Revit.ActiveUIDocument.ActiveGraphicalView is ARDB.View activeView)
+        {
+          listBox.Items.Add(Types.View.FromElement(activeView));
+        }
       }
 
       Menu_AppendCustomItem(menu, viewTypeBox);
@@ -194,7 +200,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (sender is ComboBox comboBox)
       {
         if (comboBox.Tag is ListBox listBox)
-          RefreshViewsList(listBox, ((Types.ViewFamily) comboBox.SelectedItem)?.Value ?? ARDB.ViewFamily.Invalid, nameof(Types.View.FullName));
+          RefreshViewsList(listBox, ((Types.ViewFamily) comboBox.SelectedItem)?.Value ?? ARDB.ViewFamily.Invalid);
       }
     }
     #endregion
@@ -233,7 +239,7 @@ namespace RhinoInside.Revit.GH.Parameters
         Tag = listBox
       };
       viewTypeBox.SelectedIndexChanged += ViewTypeBox_SelectedIndexChanged;
-      viewTypeBox.SetCueBanner("View type filter…");
+      viewTypeBox.SetCueBanner("Family filter…");
 
       using (var collector = new ARDB.FilteredElementCollector(Revit.ActiveUIDocument.Document))
       {

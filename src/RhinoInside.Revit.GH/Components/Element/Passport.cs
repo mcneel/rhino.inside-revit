@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "DocumentGUID", "GUID", "A unique identifier for the document the Element resides", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.Document(), "Document", "Document", "The document that contains this element", GH_ParamAccess.item);
-      manager.AddTextParameter("UniqueID", "UUID", "A stable across upgrades and workset operations unique identifier for the Element", GH_ParamAccess.item);
+      manager.AddTextParameter("UniqueID", "UID", "A stable across upgrades and workset operations unique identifier for the Element", GH_ParamAccess.item);
       manager.AddTextParameter("Id", "ID", "A unique identifier for an Element within the document that contains it", GH_ParamAccess.item);
     }
 
@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!DA.GetData("Element", ref element))
         return;
 
-      DA.SetData("DocumentGUID", element?.Document.GetFingerprintGUID());
+      DA.SetData("DocumentGUID", element?.Document.GetPersistentGUID());
       DA.SetData("Document", element?.Document);
       DA.SetData("UniqueID", element?.UniqueId);
       DA.SetData("Id", element?.Id);

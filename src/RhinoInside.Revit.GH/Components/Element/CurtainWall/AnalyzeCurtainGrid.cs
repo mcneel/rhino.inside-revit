@@ -1,16 +1,18 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
   using Convert.Geometry;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.12")]
   public class AnalyzeCurtainGrid : Component
   {
     public override Guid ComponentGuid => new Guid("D7B5C58E-8EDC-40C5-9BF8-078642090264");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => "DCG";
 
     public AnalyzeCurtainGrid() : base
@@ -19,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "D-CG",
       description: "Deconstruct given curtain grid",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 
@@ -78,8 +80,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
       );
 
       // U grid properties
-      manager.AddNumberParameter
+      manager.AddParameter
       (
+        new Param_Angle(),
         name: "Vertical Angle",
         nickname: "VA",
         description: "The angle for the U grid line pattern of the given curtain grid",
@@ -114,8 +117,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
       );
 
       // V grid properties
-      manager.AddNumberParameter
+      manager.AddParameter
       (
+        new Param_Angle(),
         name: "Horizontal Angle",
         nickname: "HA",
         description: "The angle for the V grid line pattern of the given curtain grid",
@@ -153,13 +157,13 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
         // GetVGridLineIds returns grid lines perpendicular to V
         DA.SetDataList("Vertical Lines", grid.VGridLines);
-        DA.SetData("Vertical Angle", cgrid.Grid1Angle);
+        DA.SetData("Vertical Angle", Params.Output<Param_Angle>("Vertical Angle").UseDegrees ? Rhino.RhinoMath.ToDegrees(cgrid.Grid1Angle) : cgrid.Grid1Angle);
         DA.SetData("Vertical Justification", cgrid.Grid1Justification);
         DA.SetData("Vertical Offset", cgrid.Grid1Offset * GeometryDecoder.ModelScaleFactor);
 
         // GetUGridLineIds returns grid lines perpendicular to U
         DA.SetDataList("Horizontal Lines", grid.UGridLines);
-        DA.SetData("Horizontal Angle", cgrid.Grid2Angle);
+        DA.SetData("Horizontal Angle", Params.Output<Param_Angle>("Horizontal Angle").UseDegrees ? Rhino.RhinoMath.ToDegrees(cgrid.Grid2Angle) : cgrid.Grid2Angle);
         DA.SetData("Horizontal Justification", cgrid.Grid2Justification);
         DA.SetData("Horizontal Offset", cgrid.Grid2Offset * GeometryDecoder.ModelScaleFactor);
       }

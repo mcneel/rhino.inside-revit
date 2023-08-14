@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.Families
     protected override string IconTag => "O";
 
     public FamilyGeometryOpeningByCurve()
-    : base("Component Family Opening", "FamOp", string.Empty, "Revit", "Family")
+    : base("Component Family Opening", "FamOp", string.Empty, "Revit", "Component")
     { }
 
     protected override void RegisterInputParams(GH_InputParamManager manager)

@@ -2,7 +2,6 @@ using System;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
-using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -19,59 +18,12 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       var create = Menu_AppendItem(menu, $"Set new {TypeName}");
 
-      //var OpeningId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.Opening);
-      //Menu_AppendItem
-      //(
-      //  create.DropDown, "Opening",
-      //  Menu_PromptNew(OpeningId),
-      //  Revit.ActiveUIApplication.CanPostCommand(OpeningId),
-      //  false
-      //);
-
-      var OpeningByFaceId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.OpeningByFace);
-      Menu_AppendItem
-      (
-        create.DropDown, "Opening by Face",
-        Menu_PromptNew(OpeningByFaceId),
-        Revit.ActiveUIApplication.CanPostCommand(OpeningByFaceId),
-        false
-      );
-
-      var ShaftOpeningId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.ShaftOpening);
-      Menu_AppendItem
-      (
-        create.DropDown, "Shaft Opening",
-        Menu_PromptNew(ShaftOpeningId),
-        Revit.ActiveUIApplication.CanPostCommand(ShaftOpeningId),
-        false
-      );
-
-      var WallOpeningId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.WallOpening);
-      Menu_AppendItem
-      (
-        create.DropDown, "Wall Opening",
-        Menu_PromptNew(WallOpeningId),
-        Revit.ActiveUIApplication.CanPostCommand(WallOpeningId),
-        false
-      );
-
-      var VerticalOpeningId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.VerticalOpening);
-      Menu_AppendItem
-      (
-        create.DropDown, "Vertical Opening",
-        Menu_PromptNew(VerticalOpeningId),
-        Revit.ActiveUIApplication.CanPostCommand(VerticalOpeningId),
-        false
-      );
-
-      var DormerOpeningId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.DormerOpening);
-      Menu_AppendItem
-      (
-        create.DropDown, "Dormer Opening",
-        Menu_PromptNew(DormerOpeningId),
-        Revit.ActiveUIApplication.CanPostCommand(DormerOpeningId),
-        false
-      );
+      //Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.Opening, "Opening");
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.OpeningByFace, "Opening by Face");
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.ShaftOpening, "Shaft Opening");
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.WallOpening, "Wall Opening");
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.VerticalOpening, "Vertical Opening");
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.DormerOpening, "Dormer Opening");
     }
     #endregion
   }

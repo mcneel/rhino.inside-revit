@@ -27,11 +27,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "WallPrfl",
       description: "Given a base curve and profile curves, it adds a Wall element to the active Revit document",
       category: "Revit",
-      subCategory: "Wall"
+      subCategory: "Architecture"
     )
     { }
 
-    public override void OnStarted(ARDB.Document document)
+    protected override void OnStarted(ARDB.Document document)
     {
       base.OnStarted(document);
 
@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     }
 
     List<ARDB.Wall> joinedWalls = new List<ARDB.Wall>();
-    public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
+    protected override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
     {
       base.OnPrepare(documents);
 
@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         var curEquation = new Plane(line.Origin.ToPoint3d(), line.Direction.ToVector3d(), Vector3d.ZAxis).GetPlaneEquation();
         var newEquation = plane.GetPlaneEquation();
 
-        if (!GeometryTolerance.Model.AlmostEqualLengths(curEquation[3], newEquation[3])) return false;
+        if (!GeometryTolerance.Model.DefaultTolerance.Equals(curEquation[3], newEquation[3])) return false;
       }
       else return false;
 
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
         loops[index] = loop.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
 
-        using (var properties = AreaMassProperties.Compute(loop))
+        using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
         {
           if (properties is null)
             ThrowArgumentException(nameof(loops), "Failed to compute Boundary Area", loop);

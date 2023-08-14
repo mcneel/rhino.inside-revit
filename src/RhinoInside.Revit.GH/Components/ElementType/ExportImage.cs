@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
   public class ElementTypeExportImage : Component
   {
     public override Guid ComponentGuid => new Guid("3A5F6AF7-5449-406F-B47E-8A55800D0BEE");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
     protected override string IconTag => "IMG";
 
     public ElementTypeExportImage() : base
@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
       DA.GetData("Folder", ref folder);
 
       if (string.IsNullOrEmpty(folder))
-        folder = Path.Combine(Core.SwapFolder, elementType.Document.GetFingerprintGUID().ToString(), InstanceGuid.ToString());
+        folder = Path.Combine(Core.SwapFolder, elementType.Document.GetPersistentGUID().ToString(), InstanceGuid.ToString());
 
       Directory.CreateDirectory(folder);
 

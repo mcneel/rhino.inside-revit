@@ -10,12 +10,19 @@ namespace RhinoInside.Revit.External.DB.Schemas
     static readonly ParameterGroup empty = new ParameterGroup();
     public static new ParameterGroup Empty => empty;
 
-    public string LocalizedLabel =>
+    public string LocalizedLabel
+    {
+      get
+      {
+        if (IsNullOrEmpty(this)) return "Other";
+
 #if REVIT_2022
-      Autodesk.Revit.DB.LabelUtils.GetLabelForGroup(this);
+        return Autodesk.Revit.DB.LabelUtils.GetLabelForGroup(this);
 #else
-      Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInParameterGroup) this);
+        return Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInParameterGroup) this);
 #endif
+      }
+    }
 
     public ParameterGroup() { }
     public ParameterGroup(string id) : base(id)
@@ -26,7 +33,9 @@ namespace RhinoInside.Revit.External.DB.Schemas
 
     public static bool IsParameterGroup(string id)
     {
-      return id.StartsWith("autodesk.parameter.group") || id.StartsWith("autodesk.revit.group");
+      return id == string.Empty || // 'Other'
+             id.StartsWith("autodesk.parameter.group") ||
+             id.StartsWith("autodesk.revit.group");
     }
 
 #if REVIT_2021
@@ -50,7 +59,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
   {
     public static Schemas.ParameterGroup GetGroupType(this Autodesk.Revit.DB.Definition self)
     {
-#if REVIT_2022
+#if REVIT_2024
+      return self.GetGroupTypeId();
+#elif REVIT_2022
       // Revit 2022 has Definition.GetGroupTypeId defined,
       // but it throws an exception when ParameterGroup is BuiltInParameterGroup.INVALID
       // By now to improve speed we use our implementation even on Revit 2022
@@ -70,6 +81,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #endif
     }
 
+#if !REVIT_2024
     internal static Schemas.ParameterGroup ToParameterGroup(this Autodesk.Revit.DB.BuiltInParameterGroup value)
     {
       foreach (var item in Schemas.ParameterGroup.map)
@@ -88,5 +100,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return Autodesk.Revit.DB.BuiltInParameterGroup.INVALID;
     }
+#endif
   }
 }

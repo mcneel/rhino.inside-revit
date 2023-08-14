@@ -3,11 +3,12 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  using External.DB.Extensions;
+
   public class BasePoint : GraphicalElement<Types.IGH_BasePoint, ARDB.Element>
   {
     public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.obscure;

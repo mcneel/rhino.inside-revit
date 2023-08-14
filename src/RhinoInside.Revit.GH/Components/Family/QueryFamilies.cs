@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       nickname: "Families",
       description: "Get document families list",
       category: "Revit",
-      subCategory: "Family"
+      subCategory: "Type"
     )
     { }
 
@@ -90,8 +90,8 @@ namespace RhinoInside.Revit.GH.Components.Families
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
-        if (kind is object && CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true) is ARDB.ElementFilter kindFilter)
-          elementCollector = elementCollector.WherePasses(kindFilter);
+        if (kind is object)
+          elementCollector = elementCollector.WherePasses(CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true));
 
         if (category is object)
           elementCollector = elementCollector.WhereCategoryIdEqualsTo(category.Id);

@@ -4,14 +4,18 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
   using External.DB.Extensions;
+  using RhinoInside.Revit.External.DB;
 
   [Kernel.Attributes.Name("Wall")]
-  public class Wall : HostObject, ISketchAccess, ICurtainGridsAccess
+  public class Wall : HostObject,
+    ISketchAccess,
+    ICurtainGridsAccess
   {
     protected override Type ValueType => typeof(ARDB.Wall);
     public new ARDB.Wall Value => base.Value as ARDB.Wall;
@@ -30,7 +34,7 @@ namespace RhinoInside.Revit.GH.Types
           var end = curveLocation.Curve.Evaluate(1.0, normalized: true).ToPoint3d();
           var axis = end - start;
           var origin = start + (axis * 0.5);
-          var perp = axis.PerpVector();
+          var perp = axis.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance);
           return new Plane(origin, axis, perp);
         }
 
@@ -147,8 +151,8 @@ namespace RhinoInside.Revit.GH.Types
               // We need to use `ARDB.Curve.CreateOffset` to obtain same kind of "offset"
               // else the resulting surface is not parameterized like Revit.
               // This is important to evaluate rectangular Opening and WallSweep on that surface.
-              var o0 = axis0.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset0), XYZExtension.BasisZ);
-              var o1 = axis1.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset1), XYZExtension.BasisZ);
+              var o0 = axis0.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset0), ERDB.UnitXYZ.BasisZ);
+              var o1 = axis1.ToCurve().CreateOffset(GeometryEncoder.ToInternalLength(offset1), ERDB.UnitXYZ.BasisZ);
 
               axis0 = o0.ToCurve();
               axis1 = o1.ToCurve();
@@ -181,6 +185,60 @@ namespace RhinoInside.Revit.GH.Types
     //    return base.PolySurface;
     //  }
     //}
+    #endregion
+
+    #region IHostElementAccess
+    public override GraphicalElement HostElement
+    {
+      get
+      {
+        if (Value is ARDB.Wall wall)
+        {
+          if (wall.IsStackedWallMember) return GetElement<GraphicalElement>(wall.StackedWallOwnerId);
+
+          // Search geometrically for an `ARDB.HostObject`
+          if (wall.GetOutline() is ARDB.Outline outline)
+          {
+            using (var collector = new ARDB.FilteredElementCollector(Document))
+            {
+              // The wall may be a panel on any `HostObject` that support curtain grids.
+              var elementCollector = collector.OfClass(typeof(ARDB.HostObject));
+
+              // Element should be at the same Design Option
+              if (wall.DesignOption is ARDB.DesignOption designOption)
+                elementCollector = elementCollector.WherePasses(new ARDB.ElementDesignOptionFilter(designOption.Id));
+              else
+                elementCollector = elementCollector.WherePasses(new ARDB.ElementDesignOptionFilter(ARDB.ElementId.InvalidElementId));
+
+              if (wall.Category?.Parent is ARDB.Category hostCategory)
+                elementCollector = elementCollector.OfCategoryId(hostCategory.Id);
+
+              var bboxFilter = new ARDB.BoundingBoxIntersectsFilter(outline, wall.Document.Application.VertexTolerance);
+              elementCollector = elementCollector.WherePasses(bboxFilter);
+
+              using (var includesFilter = CompoundElementFilter.InclusionFilter(wall))
+              {
+                foreach (ARDB.HostObject hostObject in elementCollector)
+                {
+                  if (hostObject.Id == wall.Id)
+                    continue;
+
+                  // Necessary to found Panel walls in a Curtain Wall
+                  if (hostObject.GetDependentElements(includesFilter).Count > 0)
+                    return GetElement<GraphicalElement>(hostObject);
+
+                  // Necessary to found Walls embeded in an other Wall
+                  if (hostObject.FindInserts(true, false, true, false).Contains(wall.Id))
+                    return GetElement<GraphicalElement>(hostObject);
+                }
+              }
+            }
+          }
+        }
+
+        return base.HostElement;
+      }
+    }
     #endregion
 
     #region ISketchAccess
@@ -240,14 +298,10 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Wall Sweep")]
-  public class WallSweep : HostObject, IHostObjectAccess
+  public class WallSweep : HostObject, IHostElementAccess
   {
     protected override Type ValueType => typeof(ARDB.WallSweep);
     public new ARDB.WallSweep Value => base.Value as ARDB.WallSweep;
-
-    public HostObject Host => Value is ARDB.WallSweep wallSweep ?
-      HostObject.FromElementId(Document, wallSweep.GetHostIds().FirstOrDefault() ?? ElementIdExtension.InvalidElementId) as HostObject :
-      default;
 
     public WallSweep() { }
     public WallSweep(ARDB.WallSweep wallSweep) : base(wallSweep) { }
@@ -448,19 +502,13 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
-  }
 
-  [Kernel.Attributes.Name("Wall Foundation")]
-  public class WallFoundation : HostObject, IHostObjectAccess
-  {
-    protected override Type ValueType => typeof(ARDB.WallFoundation);
-    public new ARDB.WallFoundation Value => base.Value as ARDB.WallFoundation;
-
-    public HostObject Host => Value is ARDB.WallFoundation wallFoundation?
-      HostObject.FromElementId(Document, wallFoundation.WallId) as HostObject:
+    #region IHostElementAccess
+    public override GraphicalElement HostElement => Value is ARDB.WallSweep wallSweep ?
+      wallSweep.GetWallSweepInfo().IsFixed ?
+      GetElement<GraphicalElement>(wallSweep.GetHostIds().FirstOrDefault() ?? ElementIdExtension.Invalid) :
+      base.HostElement :
       default;
-
-    public WallFoundation() { }
-    public WallFoundation(ARDB.WallFoundation wallFoundation) : base(wallFoundation) { }
+    #endregion
   }
 }

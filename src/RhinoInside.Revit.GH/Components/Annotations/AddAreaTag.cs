@@ -1,15 +1,15 @@
 using System;
 using System.Linq;
-using Autodesk.Revit.DB.Architecture;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.7", updated: "1.8")]
   public class AddAreaTag : ElementTrackerComponent
   {
@@ -20,10 +20,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddAreaTag() : base
     (
       name: "Tag Area",
-      nickname: "TagArea",
+      nickname: "A-Tag",
       description: "Given a point, it adds an area tag to the given Area Plan",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -37,8 +37,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           Name = "Area Plan",
           NickName = "AP",
           Description = "The Area Plan where the tag will be added.",
-          Optional = true,
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -161,7 +160,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (areaTag.Location is ARDB.LocationPoint areaTagLocation)
       {
         var position = areaTagLocation.Point;
-        if (!target.IsAlmostEqualTo(position))
+        if (!target.AlmostEqualPoints(position))
         {
           var pinned = areaTag.Pinned;
           areaTag.Pinned = false;
@@ -189,7 +188,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         areaTag.ChangeTypeId(type.Id);
       }
 
-      if (!areaTag.TagHeadPosition.IsAlmostEqualTo(head))
+      if (!areaTag.TagHeadPosition.AlmostEqualPoints(head))
       {
         var pinned = areaTag.Pinned;
         areaTag.Pinned = false;

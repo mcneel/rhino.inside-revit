@@ -89,7 +89,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       {
         if (scope is object)
         {
-          if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? ElementIdExtension.InvalidElementId)).Count > 0)
+          if (doc.Delete(exclude.ConvertAll(x => x?.Id ?? ElementIdExtension.Invalid)).Count > 0)
             doc.Regenerate();
         }
 
@@ -502,7 +502,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       nickname: "ViewGeom",
       description: "Get the geometry of the given Element on a view",
       category: "Revit",
-      subCategory: "Element"
+      subCategory: "View"
     )
     { }
 

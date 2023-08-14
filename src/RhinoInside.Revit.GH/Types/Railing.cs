@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Types
   using RhinoInside.Revit.Convert.Geometry;
 
   [Kernel.Attributes.Name("Railing")]
-  public class Railing : InstanceElement, ISketchAccess
+  public class Railing : GeometricElement, ISketchAccess
   {
     protected override Type ValueType => typeof(ARDB.Architecture.Railing);
     public new ARDB.Architecture.Railing Value => base.Value as ARDB.Architecture.Railing;
@@ -40,10 +40,11 @@ namespace RhinoInside.Revit.GH.Types
       new Sketch(railing.GetSketch()) : default;
     #endregion
 
-    //#region IHostAccess
-    //public InstanceElement Host => Value is ARDB.Architecture.Railing railing ?
-    //  FromElementId(railing.Document, railing.HasHost ? railing.HostId : ARDB.ElementId.InvalidElementId) as InstanceElement :
-    //  default;
-    //#endregion
+    #region IHostElementAccess
+    public override GraphicalElement HostElement =>
+      Value is ARDB.Architecture.Railing railing && railing.HasHost ?
+      GetElement<GraphicalElement>(railing.HostId) :
+      base.HostElement;
+    #endregion
   }
 }

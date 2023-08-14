@@ -8,13 +8,13 @@ namespace RhinoInside.Revit.GH.Components.Views
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.12")]
-  public class AddDetalView : ElementTrackerComponent
+  public class AddDetailView : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("8484E108-408A-4835-AC21-537D4FB121C8");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => string.Empty;
 
-    public AddDetalView() : base
+    public AddDetailView() : base
     (
       name: "Add Detail View",
       nickname: "DetailView",
@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         {
           Name = "Frame",
           NickName = "F",
-          Description = $"Section view camera frame.{Environment.NewLine}Plane, Rectangle and Box is also accepted.",
+          Description = $"View camera frame.{Environment.NewLine}Line, Plane, Rectangle and Box are also accepted.",
         }
       ),
       new ParamDefinition
@@ -99,6 +99,8 @@ namespace RhinoInside.Revit.GH.Components.Views
       ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
 
       ARDB.BuiltInParameter.VIEW_NAME,
+      ARDB.BuiltInParameter.VIEWER_CROP_REGION,
+      ARDB.BuiltInParameter.VIEWER_CROP_REGION_VISIBLE,
 
       ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_NEAR,
       ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR,
@@ -113,6 +115,8 @@ namespace RhinoInside.Revit.GH.Components.Views
       ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_TOP,
       ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_LEFT,
       ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_RIGHT,
+
+      ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -129,10 +133,17 @@ namespace RhinoInside.Revit.GH.Components.Views
           if (!Parameters.ViewFamilyType.GetDataOrDefault(this, DA, "Type", out Types.ViewFamilyType type, doc, ARDB.ElementTypeGroup.ViewTypeDetailView)) return null;
           Params.TryGetData(DA, "Template", out ARDB.ViewSection template);
 
+          if (frame?.Value is Rhino.DocObjects.ViewportInfo vport && !vport.IsParallelProjection)
+          {
+            frame = new Types.ViewFrame(new Rhino.DocObjects.ViewportInfo(vport));
+            frame.Value.ChangeToParallelProjection(true);
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Detail views do not support perspective 'Projection Mode'.");
+          }
+
           // Compute
           StartTransaction(doc.Value);
-          if (CanReconstruct(_View_, out var untracked, ref viewSection, doc.Value, name, ARDB.ViewType.DraftingView.ToString()))
-            viewSection = Reconstruct(viewSection, frame.ToBoundingBoxXYZ(), type.Value, name, template);
+          if (CanReconstruct(_View_, out var untracked, ref viewSection, doc.Value, name, ARDB.ViewType.Detail.ToString()))
+            viewSection = Reconstruct(viewSection, frame.ToBoundingBoxXYZ(true), type.Value, name, template);
 
           DA.SetData(_View_, viewSection);
           return untracked ? null : viewSection;
@@ -144,6 +155,13 @@ namespace RhinoInside.Revit.GH.Components.Views
     {
       if (view is null) return false;
       if (type.Id != view.GetTypeId()) view.ChangeTypeId(type.Id);
+
+      // TODO: Scale the shape accoding the box UV to avoid destroing the Model Lines
+      using (var shape = view.GetCropRegionShapeManager())
+      {
+        if (shape.CanHaveShape && shape.ShapeSet)
+          shape.RemoveCropRegionShape();
+      }
 
       return true;
     }
@@ -192,17 +210,9 @@ namespace RhinoInside.Revit.GH.Components.Views
 
         view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(bounds[BoundingBoxXYZExtension.AxisZ, BoundingBoxXYZExtension.BoundsMin] ? 1 : 0);
 
-        if (max.Z - min.Z < 0.02)
-        {
-          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(1);
-          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR).Update(-Math.Min(0.0, view.CropBox.Max.Z - 0.02));
-          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(0);
-        }
-        else
-        {
-          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(1);
-          view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR).Update(-min.Z);
-        }
+        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(1);
+        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR).Update(-min.Z);
+        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(bounds[BoundingBoxXYZExtension.AxisZ, BoundingBoxXYZExtension.BoundsMin] ? 1 : 0);
 
         view.CopyParametersFrom(template, ExcludeUniqueProperties);
         if (name is object) view?.get_Parameter(ARDB.BuiltInParameter.VIEW_NAME).Update(name);

@@ -40,12 +40,16 @@ namespace RhinoInside.Revit.External.DB
     {
       episodeId = Guid.Empty;
       id = -1;
-      if (s.Length != NumHexDigits.EpisodeId + 1 + NumHexDigits.ElementId)
+      if
+      (
+        NumHexDigits.EpisodeId + 1 >= s.Length ||
+        s.Length > NumHexDigits.EpisodeId + 1 + NumHexDigits.ElementId
+      )
         return false;
 
       return Guid.TryParseExact(s.Substring(0, NumHexDigits.EpisodeId), "D", out episodeId) &&
              s[NumHexDigits.EpisodeId] == '-' &&
-             IntId.TryParse(s.Substring(NumHexDigits.EpisodeId + 1, NumHexDigits.ElementId), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out id);
+             IntId.TryParse(s.Substring(NumHexDigits.EpisodeId + 1, s.Length - (NumHexDigits.EpisodeId + 1)), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out id);
     }
   }
 
@@ -56,7 +60,12 @@ namespace RhinoInside.Revit.External.DB
     {
       documentId = Guid.Empty;
       stableId = string.Empty;
-      if (s.Length < NumHexDigits.DocumentId + 1 + NumHexDigits.EpisodeId + 1 + NumHexDigits.ElementId)
+
+      if
+      (
+        NumHexDigits.DocumentId + 1 + NumHexDigits.EpisodeId + 1 >= s.Length ||
+        s.Length > NumHexDigits.DocumentId + 1 + NumHexDigits.EpisodeId + 1 + NumHexDigits.ElementId
+      )
         return false;
 
       if (Guid.TryParseExact(s.Substring(0, NumHexDigits.DocumentId), "D", out documentId) && s[NumHexDigits.DocumentId] == ':')
@@ -99,7 +108,7 @@ namespace RhinoInside.Revit.External.DB
       return hashCode;
     }
 
-    public override bool Equals(object obj) => obj is GlobalReferenceId other && Equals(other);
+    public override bool Equals(object obj) => obj is GeometryObjectId other && Equals(other);
     public bool Equals(GeometryObjectId other) => this == other;
 
     public static bool operator ==(GeometryObjectId left, GeometryObjectId right)
@@ -126,7 +135,7 @@ namespace RhinoInside.Revit.External.DB
       {
         return document is null ? RuntimeId.Format(id) :
           id < 0 ?
-          UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(document), id) :
+          UniqueId.Format(document.GetCreationGUID(), id) :
           document.GetElement(new ARDB.ElementId(id)).UniqueId;
       }
 
@@ -260,7 +269,7 @@ namespace RhinoInside.Revit.External.DB
           if (id > 0)
             return ARDB.Reference.ParseFromStableRepresentation(document, uniqueId).ElementId.ToValue();
 
-          if (episode != ARDB.ExportUtils.GetGBXMLDocumentId(document))
+          if (episode != document.GetCreationGUID())
             throw new FormatException($"{nameof(s)} is not in the correct format.");
 
           return id;
@@ -350,16 +359,5 @@ namespace RhinoInside.Revit.External.DB
       return false;
     }
     #endregion
-  }
-
-  readonly struct GlobalReferenceId : IEquatable<GlobalReferenceId>
-  {
-    public readonly string Id;
-    public GlobalReferenceId(string id) => Id = id;
-
-    public override string ToString() => Id;
-    public override int GetHashCode() => Id.GetHashCode();
-    public override bool Equals(object obj) => obj is GlobalReferenceId other && Equals(other);
-    public bool Equals(GlobalReferenceId other) => Id == other.Id;
   }
 }

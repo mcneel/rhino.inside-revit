@@ -137,14 +137,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
         }
         else
         {
-          var ids = ARDB.ElementTransformUtils.CopyElements
-          (
-            template.Document,
-            new ARDB.ElementId[] { template.Id },
-            doc, default, default
-          );
-
-          material = ids.Select(x => doc.GetElement(x)).OfType<ARDB.Material>().FirstOrDefault();
+          material = template.CloneElement(doc);
           material.Name = name;
         }
       }

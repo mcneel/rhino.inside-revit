@@ -1,4 +1,6 @@
 using System.Linq;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.External.UI.Extensions
@@ -11,7 +13,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
     /// <param name="document"></param>
     /// <param name="uiDocument"></param>
     /// <returns>true on succes.</returns>
-    public static bool TryGetOpenUIDocument(this Autodesk.Revit.DB.Document document, out Autodesk.Revit.UI.UIDocument uiDocument)
+    public static bool TryGetOpenUIDocument(this Document document, out UIDocument uiDocument)
     {
       uiDocument = new Autodesk.Revit.UI.UIDocument(document);
       if(uiDocument.GetOpenUIViews().Count == 0)
@@ -29,7 +31,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
     /// </summary>
     /// <param name="doc"></param>
     /// <returns>The active graphical <see cref="Autodesk.Revit.DB.View"/></returns>
-    public static bool TryGetActiveGraphicalView(this Autodesk.Revit.UI.UIDocument uiDocument, out Autodesk.Revit.UI.UIView uiView)
+    public static bool TryGetActiveGraphicalView(this UIDocument uiDocument, out UIView uiView)
     {
       uiView = HostedApplication.Active.InvokeInHostContext(() =>
       {
@@ -61,6 +63,59 @@ namespace RhinoInside.Revit.External.UI.Extensions
       });
 
       return uiView is object;
+    }
+
+    /// <summary>
+    /// Looks up and retrieves the Revit command id from the given built-in <see cref="Autodesk.Revit.UI.PostableCommand"/>.
+    /// </summary>
+    /// <param name="uiDocument">The UI document.</param>
+    /// <param name="postableCommand">The postable command.</param>
+    /// <param name="commandId"></param>
+    /// <returns>True on success; False otherwise.</returns>
+    public static bool TryGetRevitCommandId(this UIDocument uiDocument, PostableCommand postableCommand, out RevitCommandId commandId)
+    {
+      commandId = default;
+      if (uiDocument is null) return false;
+
+      commandId = uiDocument.Application.LookupPostableCommandId(postableCommand);
+      if (commandId is null) return false;
+
+      if (uiDocument.Document.IsFamilyDocument)
+      {
+        switch (postableCommand)
+        {
+#if REVIT_2022
+          case PostableCommand.GlobalParameters: return false;
+#endif
+          case PostableCommand.ProjectParameters: return false;
+          case PostableCommand.DesignOptions: return false;
+          case PostableCommand.Worksets: return false;
+          case PostableCommand.Phases: return false;
+          case PostableCommand.ProjectInformation: return false;
+          case PostableCommand.Location: return false;
+          case PostableCommand.ManageLinks: return false;
+          case PostableCommand.ReviewWarnings: return false;
+          case PostableCommand.NewSheet: return false;
+          case PostableCommand.SheetIssuesOrRevisions: return false;
+          case PostableCommand.Filters: return false;
+          case PostableCommand.EditSelection: return false;
+          case PostableCommand.SaveSelection: return false;
+
+          case PostableCommand.Area: return false;
+          case PostableCommand.Room: return false;
+          case PostableCommand.Space: return false;
+        }
+      }
+      else
+      {
+        switch (postableCommand)
+        {
+          case PostableCommand.FamilyCategoryAndParameters: return false;
+          case PostableCommand.FamilyTypes: return false;
+        }
+      }
+
+      return commandId is object;
     }
   }
 }

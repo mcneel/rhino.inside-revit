@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using Grasshopper.Kernel;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.8")]
   public class CurveLineStyle : TransactionalChainComponent
   {
@@ -41,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
           NickName = "LS",
           Description = "Curve linestyle",
           Optional = true
-        },ParamRelevance.Secondary
+        },ParamRelevance.Primary
       ),
     };
 
@@ -68,15 +72,58 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       ),
     };
 
+    readonly HashSet<ARDB.SketchPlane> sketchPlanes = new HashSet<ARDB.SketchPlane>(ElementEqualityComparer.InterDocument);
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Element", out Types.CurveElement element, x => x.IsValid)) return;
-      else DA.SetData("Element", element);
+      if (!Params.GetData(DA, "Element", out Types.CurveElement curve, x => x.IsValid)) return;
+      else DA.SetData("Element", curve);
 
-      if (Params.GetData(DA, "Line Style", out Types.GraphicsStyle style))
-        UpdateElement(element.Value, () => element.LineStyle = style);
+      if (Params.GetData(DA, "Line Style", out Types.GraphicsStyle linestyle))
+        UpdateElement
+        (
+          curve.Value,
+          () =>
+          {
+            if (!curve.LineStyle.Equals(linestyle))
+            {
+              var validStyles = curve.Value.GetLineStyleIds();
+              if (curve.Document.IsFamilyDocument)
+                validStyles.Add(curve.Document.OwnerFamily.FamilyCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection).Id);
 
-      Params.TrySetData(DA, "Line Style", () => element.LineStyle);
+              if (!validStyles.Contains(linestyle.Id))
+                throw new Exceptions.RuntimeArgumentException("Line Style", $"'{linestyle.Nomen}' is not a valid Line Style for '{curve.Nomen}'. {{{curve.Id}}}");
+
+              curve.LineStyle = linestyle;
+
+              if (curve.SketchPlane.Value is ARDB.SketchPlane sketchPlane && sketchPlane.GetSketchId() != ElementIdExtension.Invalid)
+                sketchPlanes.Add(sketchPlane);
+            }
+          }
+        );
+
+      Params.TrySetData(DA, "Line Style", () => curve.LineStyle);
+    }
+
+    protected override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
+    {
+      base.OnPrepare(documents);
+
+      // This forces a graphic refresh
+      foreach (var sketckPlane in sketchPlanes)
+      {
+        var pinned = sketckPlane.Pinned;
+        sketckPlane.Pinned = false;
+        sketckPlane.Location.Move( ARDB.XYZ.BasisZ);
+        sketckPlane.Location.Move(-ARDB.XYZ.BasisZ);
+        sketckPlane.Pinned = pinned;
+      }
+    }
+
+    protected override void AfterSolveInstance()
+    {
+      base.AfterSolveInstance();
+      sketchPlanes.Clear();
     }
   }
 }

@@ -205,6 +205,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
+    public bool IsEmpty => !IsReferencedData;
+
     public override object Value
     {
       get

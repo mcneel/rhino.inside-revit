@@ -20,10 +20,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddLinearDimension() : base
     (
       name: "Add Linear Dimension",
-      nickname: "LineDim",
+      nickname: "L-Dim",
       description: "Given a line, it adds a linear dimension to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -114,7 +114,12 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             };
           }
 
-          dimension = Reconstruct(dimension, view.Value, line.Value.ToLine(), references, type);
+          if (references.Length > 1) dimension = Reconstruct(dimension, view.Value, line.Value.ToLine(), references, type);
+          else
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid number of references.");
+            dimension = null;
+          }
 
           DA.SetData(_Output_, dimension);
           return dimension;

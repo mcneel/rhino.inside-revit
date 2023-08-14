@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -21,7 +18,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Element")]
-  public class Element : Reference, IGH_Element
+  public partial class Element : Reference, IGH_Element
   {
     #region IGH_Goo
     public override bool IsValid => base.IsValid && Value is object;
@@ -89,19 +86,10 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Document is object)
       {
-        ReferenceDocumentId = _ReferenceDocument.GetFingerprintGUID();
+        ReferenceDocumentId = _ReferenceDocument.GetPersistentGUID();
+        ReferenceUniqueId = _Id.ToUniqueId(Document, out var value);
 
-        if (_Id.IsBuiltInId())
-        {
-          ReferenceUniqueId = ERDB.UniqueId.Format(ARDB.ExportUtils.GetGBXMLDocumentId(Document), _Id.ToValue());
-          base.Value = null;
-        }
-        else
-        {
-          var element = Document.GetElement(_Id);
-          ReferenceUniqueId = element?.UniqueId ?? string.Empty;
-          base.Value = element;
-        }
+        base.Value = value;
       }
     }
 
@@ -112,7 +100,7 @@ namespace RhinoInside.Revit.GH.Types
         _ReferenceDocument = Document = element.Document;
         _ReferenceId = _Id = element.Id;
 
-        ReferenceDocumentId = _ReferenceDocument.GetFingerprintGUID();
+        ReferenceDocumentId = _ReferenceDocument.GetPersistentGUID();
         ReferenceUniqueId = element.UniqueId;
 
         base.Value = element;
@@ -136,9 +124,14 @@ namespace RhinoInside.Revit.GH.Types
 
     public override ARDB.Reference GetReference()
     {
-      try { return ReferenceExtension.ParseFromPersistentRepresentation(ReferenceDocument, ReferenceUniqueId); }
-      catch (Autodesk.Revit.Exceptions.ArgumentNullException) { return null; }
-      catch (Autodesk.Revit.Exceptions.ArgumentException) { return null; }
+      if (ReferenceDocument is object)
+      {
+        try { return ReferenceExtension.ParseFromPersistentRepresentation(ReferenceDocument, ReferenceUniqueId); }
+        catch (FormatException) { return null; }
+      }
+
+      Debug.Assert(string.IsNullOrEmpty(ReferenceUniqueId));
+      return null;
     }
 
     static readonly ARDB.Transform IdentityTransform = ARDB.Transform.Identity;
@@ -214,317 +207,17 @@ namespace RhinoInside.Revit.GH.Types
 
     protected virtual void SubInvalidateGraphics() { }
 
-    public static readonly Dictionary<Type, Func<ARDB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<ARDB.Element, Element>>()
+    protected T SetElement<T>(Element element) where T : ARDB.Element
     {
-#if REVIT_2021
-      { typeof(ARDB.InternalOrigin),                  (element)=> new InternalOrigin        (element as ARDB.InternalOrigin)    },
-      { typeof(ARDB.BasePoint),                       (element)=> new BasePoint             (element as ARDB.BasePoint)         },
-#endif
-#if REVIT_2020
-      { typeof(ARDB.ImageInstance),                   (element)=> new ImageInstance         (element as ARDB.ImageInstance)     },
-#endif
-      { typeof(ARDB.ImageType),                       (element)=> new ImageType             (element as ARDB.ImageType)         },
-
-      { typeof(ARDB.DesignOption),                    (element)=> new DesignOption          (element as ARDB.DesignOption)      },
-      { typeof(ARDB.Phase),                           (element)=> new Phase                 (element as ARDB.Phase)             },
-      { typeof(ARDB.SelectionFilterElement),          (element)=> new SelectionFilterElement(element as ARDB.SelectionFilterElement)},
-      { typeof(ARDB.ParameterFilterElement),          (element)=> new ParameterFilterElement(element as ARDB.ParameterFilterElement)},
-      { typeof(ARDB.Family),                          (element)=> new Family                (element as ARDB.Family)            },
-      { typeof(ARDB.ElementType),                     (element)=> new ElementType           (element as ARDB.ElementType)       },
-      { typeof(ARDB.FamilySymbol),                    (element)=> new FamilySymbol          (element as ARDB.FamilySymbol)      },
-      { typeof(ARDB.HostObjAttributes),               (element)=> new HostObjectType        (element as ARDB.HostObjAttributes) },
-      { typeof(ARDB.MEPCurveType),                    (element)=> new MEPCurveType          (element as ARDB.MEPCurveType)      },
-      { typeof(ARDB.ParameterElement),                (element)=> new ParameterKey          (element as ARDB.ParameterElement)  },
-      { typeof(ARDB.Material),                        (element)=> new Material              (element as ARDB.Material)          },
-      { typeof(ARDB.GraphicsStyle),                   (element)=> new GraphicsStyle         (element as ARDB.GraphicsStyle)     },
-      { typeof(ARDB.LinePatternElement),              (element)=> new LinePatternElement    (element as ARDB.LinePatternElement)},
-      { typeof(ARDB.FillPatternElement),              (element)=> new FillPatternElement    (element as ARDB.FillPatternElement)},
-      { typeof(ARDB.AppearanceAssetElement),          (element)=> new AppearanceAssetElement(element as ARDB.AppearanceAssetElement)},
-
-      { typeof(ARDB.ViewFamilyType),                  (element)=> new ViewFamilyType        (element as ARDB.ViewFamilyType)    },
-      { typeof(ARDB.View),                            (element)=> new View                  (element as ARDB.View)              },
-      { typeof(ARDB.Viewport),                        (element)=> new Viewport              (element as ARDB.Viewport)          },
-      { typeof(ARDB.ViewSheet),                       (element)=> new ViewSheet             (element as ARDB.ViewSheet)         },
-      { typeof(ARDB.View3D),                          (element)=> new View3D                (element as ARDB.View3D)            },
-      { typeof(ARDB.ViewPlan),                        (element)=> new ViewPlan              (element as ARDB.ViewPlan)          },
-      { typeof(ARDB.ViewSection),                     (element)=> new ViewSection           (element as ARDB.ViewSection)       },
-      { typeof(ARDB.ViewDrafting),                    (element)=> new ViewDrafting          (element as ARDB.ViewDrafting)      },
-
-      { typeof(ARDB.Instance),                        (element)=> new Instance              (element as ARDB.Instance)          },
-      { typeof(ARDB.ProjectLocation),                 (element)=> new ProjectLocation       (element as ARDB.ProjectLocation)   },
-      { typeof(ARDB.SiteLocation),                    (element)=> new SiteLocation          (element as ARDB.SiteLocation)      },
-      { typeof(ARDB.RevitLinkInstance),               (element)=> new RevitLinkInstance     (element as ARDB.RevitLinkInstance) },
-      { typeof(ARDB.ImportInstance),                  (element)=> new ImportInstance        (element as ARDB.ImportInstance)    },
-      { typeof(ARDB.PointCloudInstance),              (element)=> new PointCloudInstance    (element as ARDB.PointCloudInstance)},
-
-      { typeof(ARDB.DirectShape),                     (element)=> new DirectShape           (element as ARDB.DirectShape)       },
-      { typeof(ARDB.DirectShapeType),                 (element)=> new DirectShapeType       (element as ARDB.DirectShapeType)   },
-
-      { typeof(ARDB.Sketch),                          (element)=> new Sketch                (element as ARDB.Sketch)            },
-      { typeof(ARDB.SketchPlane),                     (element)=> new SketchPlane           (element as ARDB.SketchPlane)       },
-      { typeof(ARDB.CurveElement),                    (element)=> new CurveElement          (element as ARDB.CurveElement)      },
-      { typeof(ARDB.CombinableElement),               (element)=> new CombinableElement     (element as ARDB.CombinableElement) },
-
-      { typeof(ARDB.DatumPlane),                      (element)=> new DatumPlane            (element as ARDB.DatumPlane)        },
-      { typeof(ARDB.Level),                           (element)=> new Level                 (element as ARDB.Level)             },
-      { typeof(ARDB.Grid),                            (element)=> new Grid                  (element as ARDB.Grid)              },
-      { typeof(ARDB.ReferencePlane),                  (element)=> new ReferencePlane        (element as ARDB.ReferencePlane)    },
-      { typeof(ARDB.ReferencePoint),                  (element)=> new ReferencePoint        (element as ARDB.ReferencePoint)    },
-      { typeof(ARDB.Group),                           (element)=> new Group                 (element as ARDB.Group)             },
-      { typeof(ARDB.Opening),                         (element)=> new Opening               (element as ARDB.Opening)           },
-      { typeof(ARDB.HostObject),                      (element)=> new HostObject            (element as ARDB.HostObject)        },
-      { typeof(ARDB.MEPCurve),                        (element)=> new MEPCurve              (element as ARDB.MEPCurve)          },
-      { typeof(ARDB.CurtainSystem),                   (element)=> new CurtainSystem         (element as ARDB.CurtainSystem)     },
-      { typeof(ARDB.CurtainGridLine),                 (element)=> new CurtainGridLine       (element as ARDB.CurtainGridLine)   },
-      { typeof(ARDB.Floor),                           (element)=> new Floor                 (element as ARDB.Floor)             },
-      { typeof(ARDB.Ceiling),                         (element)=> new Ceiling               (element as ARDB.Ceiling)           },
-      { typeof(ARDB.RoofBase),                        (element)=> new Roof                  (element as ARDB.RoofBase)          },
-      { typeof(ARDB.Wall),                            (element)=> new Wall                  (element as ARDB.Wall)              },
-      { typeof(ARDB.WallSweep),                       (element)=> new WallSweep             (element as ARDB.WallSweep)         },
-      { typeof(ARDB.WallFoundation),                  (element)=> new WallFoundation        (element as ARDB.WallFoundation)    },
-      { typeof(ARDB.FamilyInstance),                  (element)=> new FamilyInstance        (element as ARDB.FamilyInstance)    },
-      { typeof(ARDB.Panel),                           (element)=> new Panel                 (element as ARDB.Panel)             },
-      { typeof(ARDB.PanelType),                       (element)=> new PanelType             (element as ARDB.PanelType)         },
-      { typeof(ARDB.Mullion),                         (element)=> new Mullion               (element as ARDB.Mullion)           },
-      { typeof(ARDB.MullionType),                     (element)=> new MullionType           (element as ARDB.MullionType)       },
-
-      { typeof(ARDB.TextElement),                     (element)=> new TextElement           (element as ARDB.TextElement)       },
-      { typeof(ARDB.Dimension),                       (element)=> new Dimension             (element as ARDB.Dimension)         },
-      { typeof(ARDB.DimensionType),                   (element)=> new DimensionType         (element as ARDB.DimensionType)     },
-      { typeof(ARDB.SpotDimension),                   (element)=> new SpotDimension         (element as ARDB.SpotDimension)     },
-      { typeof(ARDB.FilledRegion),                    (element)=> new FilledRegion          (element as ARDB.FilledRegion)      },
-      { typeof(ARDB.Revision),                        (element)=> new Revision              (element as ARDB.Revision)          },
-      { typeof(ARDB.RevisionCloud),                   (element)=> new RevisionCloud         (element as ARDB.RevisionCloud)     },
-      { typeof(ARDB.AnnotationSymbol),                (element)=> new AnnotationSymbol      (element as ARDB.AnnotationSymbol)  },
-      { typeof(ARDB.IndependentTag),                  (element)=> new IndependentTag        (element as ARDB.IndependentTag)    },
-      
-      { typeof(ARDB.AssemblyInstance),                (element)=> new AssemblyInstance      (element as ARDB.AssemblyInstance)  },
-
-      { typeof(ARDB.SpatialElement),                  (element)=> new SpatialElement        (element as ARDB.SpatialElement)    },
-      { typeof(ARDB.Area),                            (element)=> new AreaElement           (element as ARDB.Area)              },
-      { typeof(ARDB.Architecture.Room),               (element)=> new RoomElement           (element as ARDB.Architecture.Room) },
-      { typeof(ARDB.Mechanical.Space),                (element)=> new SpaceElement          (element as ARDB.Mechanical.Space)  },
-
-      { typeof(ARDB.SpatialElementTag),               (element)=> new SpatialElementTag     (element as ARDB.SpatialElementTag)    },
-      { typeof(ARDB.AreaTag),                         (element)=> new AreaElementTag        (element as ARDB.AreaTag)              },
-      { typeof(ARDB.Architecture.RoomTag),            (element)=> new RoomElementTag        (element as ARDB.Architecture.RoomTag) },
-      { typeof(ARDB.Mechanical.SpaceTag),             (element)=> new SpaceElementTag       (element as ARDB.Mechanical.SpaceTag)  },
-
-      { typeof(ARDB.Architecture.TopographySurface),  (element)=> new TopographySurface     (element as ARDB.Architecture.TopographySurface) },
-      { typeof(ARDB.Architecture.BuildingPad),        (element)=> new BuildingPad           (element as ARDB.Architecture.BuildingPad) },
-      { typeof(ARDB.Architecture.Railing),            (element)=> new Railing               (element as ARDB.Architecture.Railing) },
-    };
-
-    public static Element FromValue(ARDB.Document doc, object data)
-    {
-      try
+      if (element?.IsValid is true)
       {
-        switch (data)
-        {
-          case string s:
+        if (!Document.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException($"Invalid {typeof(T)} Document", nameof(element));
 
-            if (ERDB.FullUniqueId.TryParse(s, out var documentId, out var stableId))
-            {
-              if (documentId != doc.GetFingerprintGUID()) return null;
-              s = stableId;
-            }
-
-            if (doc.TryGetLinkElementId(s, out var linkElementId))
-              return FromLinkElementId(doc, linkElementId);
-
-            return default;
-
-          case ARDB.BuiltInCategory c:    return FromElementId(doc, new ARDB.ElementId(c));
-          case ARDB.BuiltInParameter p:   return FromElementId(doc, new ARDB.ElementId(p));
-          case ARDB.ElementId id:         return FromElementId(doc, id);
-          case ARDB.LinkElementId id:     return FromLinkElementId(doc, id);
-          case ARDB.Reference r:          return FromReference(doc, r);
-          case ARDB.Element element:      return doc.IsEquivalent(element.Document) ? FromElement(element) : null;
-          case ARDB.Category category:    return doc.IsEquivalent(category.Document()) ? new Category(category) : null;
-#if REVIT_2024
-          case Int64 id:                  return FromElementId(doc, new ARDB.ElementId(id));
-          case IConvertible convertible:  return FromElementId(doc, new ARDB.ElementId(System.Convert.ToInt64(convertible)));
-#else
-          case Int32 id:                  return FromElementId(doc, new ARDB.ElementId(id));
-          case IConvertible convertible:  return FromElementId(doc, new ARDB.ElementId(System.Convert.ToInt32(convertible)));
-#endif
-        }
-      }
-      catch { }
-
-      return null;
-    }
-
-    public static Element FromValue(object data)
-    {
-      switch (data)
-      {
-        case ARDB.Category category: return new Category(category);
-        case ARDB.Element element: return Element.FromElement(element);
+        return (T) element.Value;
       }
 
       return null;
-    }
-
-    public static Element FromElement(ARDB.Element element)
-    {
-      if (!element.IsValid())
-        return null;
-
-      // Overrides
-      switch(element)
-      {
-        case ARDB.FamilyInstance familyInstance:
-          if (StructuralBeam.IsValidElement(familyInstance)) return new StructuralBeam(familyInstance);
-          if (StructuralBrace.IsValidElement(familyInstance)) return new StructuralBrace(familyInstance);
-          if (StructuralColumn.IsValidElement(familyInstance)) return new StructuralColumn(familyInstance);
-          if (Panel.IsValidElement(element)) return new Panel(familyInstance);
-          break;
-
-        case ARDB.FamilySymbol familySymbol:
-          if (PanelType.IsValidElement(element)) return new PanelType(familySymbol);
-          if (ProfileType.IsValidElement(element)) return new ProfileType(familySymbol);
-          break;
-      }
-
-      if (element is ARDB.View view)
-      {
-        switch (view.ViewType)
-        {
-          case ARDB.ViewType.FloorPlan:       return new FloorPlan(view as ARDB.ViewPlan);
-          case ARDB.ViewType.CeilingPlan:     return new CeilingPlan(view as ARDB.ViewPlan);
-          case ARDB.ViewType.AreaPlan:        return new AreaPlan(view as ARDB.ViewPlan);
-          case ARDB.ViewType.EngineeringPlan: return new StructuralPlan(view as ARDB.ViewPlan);
-
-          case ARDB.ViewType.Section:         return new SectionView(view as ARDB.ViewSection);
-          case ARDB.ViewType.Elevation:       return new ElevationView(view as ARDB.ViewSection);
-          case ARDB.ViewType.Detail:          return new DetailView(view as ARDB.ViewSection);
-        }
-      }
-
-      // By Type
-      for (var type = element.GetType(); type != typeof(ARDB.Element); type = type.BaseType)
-      {
-        if (ActivatorDictionary.TryGetValue(type, out var activator))
-          return activator(element);
-      }
-
-      // By Category
-      if (element.Category is null)
-      {
-        if (DocumentExtension.AsCategory(element) is ARDB.Category category)
-          return new Category(category);
-      }
-      else if (element.Category.Id.TryGetBuiltInCategory(out var bic))
-      {
-        switch (bic)
-        {
-          case ARDB.BuiltInCategory.OST_DesignOptionSets:
-            if (DesignOptionSet.IsValidElement(element)) return new DesignOptionSet(element);
-            break;
-
-          case ARDB.BuiltInCategory.OST_PropertySet:
-            if (element is ARDB.PropertySetElement pset)
-            {
-              if (StructuralAssetElement.IsValidElement(element)) return new StructuralAssetElement(pset);
-              if (ThermalAssetElement.IsValidElement(element)) return new ThermalAssetElement(pset);
-            }
-            break;
-
-          case ARDB.BuiltInCategory.OST_VolumeOfInterest:
-            if (ScopeBox.IsValidElement(element)) return new ScopeBox(element);
-            break;
-
-          case ARDB.BuiltInCategory.OST_SectionBox:
-            if (SectionBox.IsValidElement(element)) return new SectionBox(element);
-            break;
-
-#if !REVIT_2021
-          case ARDB.BuiltInCategory.OST_IOS_GeoSite:
-            if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element);
-            if (BasePoint.IsValidElement(element)) return new BasePoint(element as ARDB.BasePoint);
-            break;
-#endif
-
-#if !REVIT_2020
-          case ARDB.BuiltInCategory.OST_RasterImages:
-            if (ImageInstance.IsValidElement(element)) return new ImageInstance(element);
-            break;
-#endif
-        }
-      }
-
-      // By Features
-      if (GraphicalElement.IsValidElement(element))
-      {
-        if (InstanceElement.IsValidElement(element))
-          return new InstanceElement(element);
-
-        if (GeometricElement.IsValidElement(element))
-          return new GeometricElement(element);
-
-        return new GraphicalElement(element);
-      }
-
-      return new Element(element);
-    }
-
-    public static Element FromElementId(ARDB.Document doc, ARDB.ElementId id)
-    {
-      if (doc is null || id is null)
-        return default;
-
-      if (Category.FromElementId(doc, id) is Category c)
-        return c;
-
-      if (ParameterKey.FromElementId(doc, id) is ParameterKey p)
-        return p;
-
-      if (LinePatternElement.FromElementId(doc, id) is LinePatternElement l)
-        return l;
-
-      if (FromElement(doc.GetElement(id)) is Element e)
-        return e;
-
-      return new Element(doc, id);
-    }
-
-    public static Element FromLinkElementId(ARDB.Document doc, ARDB.LinkElementId id)
-    {
-      if (id.HostElementId != ARDB.ElementId.InvalidElementId)
-        return FromElementId(doc, id.HostElementId);
-
-      if (doc.GetElement(id.LinkInstanceId) is ARDB.RevitLinkInstance link)
-      {
-        if (FromElement(link.GetLinkDocument()?.GetElement(id.LinkedElementId)) is Element element)
-        {
-          using (var linkedElementReference = ARDB.Reference.ParseFromStableRepresentation(element.Document, element.ReferenceUniqueId))
-          {
-            using (var elementReference = linkedElementReference.CreateLinkReference(link))
-            {
-              element.ReferenceDocumentId = doc.GetFingerprintGUID();
-              element.ReferenceUniqueId = elementReference.ConvertToPersistentRepresentation(doc);
-              element._ReferenceDocument = doc;
-              element._ReferenceId = link.Id;
-              return element;
-            }
-          }
-        }
-      }
-
-      return default;
-    }
-
-    public static Element FromReference(ARDB.Document doc, ARDB.Reference reference)
-    {
-      // We call FromLinkElementId to truncate the geometry part of the reference and create a persistent UniqueId if is linked.
-      return FromLinkElementId
-      (
-          doc,
-          reference.LinkedElementId != ARDB.ElementId.InvalidElementId ?
-          new ARDB.LinkElementId(reference.ElementId, reference.LinkedElementId) :
-          new ARDB.LinkElementId(reference.ElementId)
-      );
     }
 
     public Element() { }
@@ -536,7 +229,7 @@ namespace RhinoInside.Revit.GH.Types
         _ReferenceDocument  = Document;
         _ReferenceId        = _Id       = element.Id;
 
-        ReferenceDocumentId = Document.GetFingerprintGUID();
+        ReferenceDocumentId = Document.GetPersistentGUID();
         ReferenceUniqueId   = element.UniqueId;
 
         Debug.Assert(ReferenceEquals(base.Value, element));
@@ -545,26 +238,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
-      // Hack to force `ParameterValue.CastTo` to be called.
-      if (source is ParameterValue)
-        return false;
-
       if (source is IGH_Goo goo)
-      {
-        if (source is IGH_Element element)
-        {
-          var document = element.Document;
-          var id = element.Id;
-
-          if (id.IsBuiltInId())
-          {
-            SetValue(document, id);
-            return true;
-          }
-          else source = document?.GetElement(id);
-        }
-        else source = goo.ScriptVariable();
-      }
+        source = goo.ScriptVariable();
 
       if (source is string uniqueid)
       {
@@ -578,10 +253,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      if (source is ARDB.Element value)
-        return SetValue(value);
-
-      return false;
+      return SetValue(source as ARDB.Element);
     }
 
     public override bool CastTo<Q>(out Q target)
@@ -638,137 +310,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    [TypeConverter(typeof(Proxy.ObjectConverter))]
-    protected new class Proxy : Reference.Proxy
-    {
-      protected new Element owner => base.owner as Element;
-
-      public Proxy(Element e) : base(e) { (this as IGH_GooProxy).UserString = FormatInstance(); }
-
-      public override string FormatInstance()
-      {
-        return owner.DisplayName;
-      }
-
-      protected virtual bool IsValidId(ARDB.Document doc, ARDB.ElementId id) =>
-        owner.GetType() == Element.FromElementId(doc, id).GetType();
-
-      [DisplayName("Document"), Description("The document that references this element."), Category("Reference")]
-      public string ReferenceDocument => owner.ReferenceDocument?.GetTitle();
-
-      [DisplayName("Built In"), Description("Element is built in Revit."), Category("Object")]
-      public bool IsBuiltIn => owner.IsReferencedData && owner.Id.IsBuiltInId();
-
-      [DisplayName("Element ID"), Description("The element identifier in this session."), Category("Object")]
-      //[RefreshProperties(RefreshProperties.All)]
-      public virtual int? Id => owner.Id?.ToValue();
-
-      [DisplayName("Unique ID"),Description("A stable unique identifier for an element within the model."), Category("Object")]
-      public virtual string UniqueId => owner.UniqueId;
-
-      [Description("A human readable name for the Element."), Category("Object")]
-      public string Name => owner.Nomen;
-
-      class ObjectConverter : ExpandableObjectConverter
-      {
-        public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
-        {
-          var properties = base.GetProperties(context, value, attributes);
-          if (value is Proxy proxy && proxy.Valid)
-          {
-            var element = proxy.owner.Document?.GetElement(proxy.owner.Id);
-            if (element is object)
-            {
-              var parameters = element.GetParameters(External.DB.ParameterClass.Any).
-                Select(p => new ParameterPropertyDescriptor(p)).
-                ToArray();
-
-              var descriptors = new PropertyDescriptor[properties.Count + parameters.Length];
-              properties.CopyTo(descriptors, 0);
-              parameters.CopyTo(descriptors, properties.Count);
-
-              return new PropertyDescriptorCollection(descriptors, true);
-            }
-          }
-
-          return properties;
-        }
-      }
-
-      private class ParameterPropertyDescriptor : PropertyDescriptor
-      {
-        readonly ARDB.Parameter parameter;
-        public ParameterPropertyDescriptor(ARDB.Parameter p) : base(p.Definition?.Name ?? p.Id.ToValue().ToString(), null) { parameter = p; }
-        public override Type ComponentType => typeof(Proxy);
-        public override bool IsReadOnly => true;
-        public override string Name => parameter.Definition?.Name ?? string.Empty;
-        public override string Category => parameter.Definition is null ? string.Empty : ARDB.LabelUtils.GetLabelFor(parameter.Definition.ParameterGroup);
-        public override string Description
-        {
-          get
-          {
-            var description = string.Empty;
-            if (parameter.Definition is ARDB.Definition definition)
-            {
-              External.DB.Schemas.DataType dataType = definition.GetDataType();
-              description = dataType.Label.ToLower();
-
-              if (string.IsNullOrEmpty(description))
-                description = parameter.StorageType.ToString();
-            }
-
-            string parameterClass = "Unknown";
-            if (parameter.Id.IsBuiltInId()) parameterClass = "Built-in";
-            else if (parameter.IsShared) parameterClass = "Shared";
-            else parameterClass = "Project";
-
-            if (parameter.IsReadOnly)
-              description = "read only " + description;
-
-            description = $"{parameterClass} {description} parameter.{Environment.NewLine}{Environment.NewLine}";
-            description += $"ParameterId : {((External.DB.Schemas.ParameterId) parameter.GetTypeId()).FullName}";
-
-            if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
-              description += $"{Environment.NewLine}BuiltInParameter : {builtInParameter.ToStringGeneric()}";
-
-            return description;
-          }
-        }
-        public override bool Equals(object obj)
-        {
-          if (obj is ParameterPropertyDescriptor other)
-            return other.parameter.Id == parameter.Id;
-
-          return false;
-        }
-        public override int GetHashCode() => parameter.Id.GetHashCode();
-        public override bool ShouldSerializeValue(object component) { return false; }
-        public override void ResetValue(object component) { }
-        public override bool CanResetValue(object component) { return false; }
-        public override void SetValue(object component, object value) { }
-        public override Type PropertyType => typeof(string);
-        public override object GetValue(object component)
-        {
-          if (parameter.Element is object && parameter.Definition is object)
-          {
-            if (parameter.StorageType == ARDB.StorageType.String)
-              return parameter.AsString();
-
-            return parameter.Element.GetParameterFormatOptions(parameter.Id) is ARDB.FormatOptions options ?
-              parameter.AsValueString(options) :
-              parameter.AsValueString();
-          }
-
-          return null;
-        }
-      }
-    }
-
-    public override IGH_GooProxy EmitProxy() => new Proxy(this);
-
-#region Version
-    public Guid? ExportID => Document?.GetExportID(Id);
-
+    #region Version
     public (Guid? Created, Guid? Updated) Version
     {
       get
@@ -789,9 +331,9 @@ namespace RhinoInside.Revit.GH.Types
         return (created, updated);
       }
     }
-#endregion
+    #endregion
 
-#region Properties
+    #region Properties
     public bool CanDelete => IsValid && ARDB.DocumentValidation.CanDeleteElement(Document, Id);
 
     public bool? Pinned
@@ -896,7 +438,8 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-#region Category
+    internal ARDB.BuiltInCategory? BuiltInCategory => Value?.Category?.ToBuiltInCategory();
+
     public virtual Category Category
     {
       get => Value is object ?
@@ -904,10 +447,7 @@ namespace RhinoInside.Revit.GH.Types
         Category.FromCategory(category) :
         new Category() :
         default;
-
-      set => throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Category.");
     }
-#endregion
 
     public virtual ElementType Type
     {
@@ -937,6 +477,8 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public bool? HasPhases => Value?.HasPhases();
+
     public Phase CreatedPhase
     {
       get => Value is ARDB.Element element && element.HasPhases() ? new Phase(element.Document, element.CreatedPhaseId) : default;
@@ -946,7 +488,12 @@ namespace RhinoInside.Revit.GH.Types
         {
           AssertValidDocument(value, nameof(CreatedPhase));
           if (element.CreatedPhaseId != value.Id)
+          {
+            if (!element.ArePhasesModifiable())
+              throw new Exceptions.RuntimeErrorException($"The element does not allow setting the property '{CreatedPhase}'.");
+
             element.CreatedPhaseId = value.Id;
+          }
         }
       }
     }
@@ -960,13 +507,18 @@ namespace RhinoInside.Revit.GH.Types
         {
           AssertValidDocument(value, nameof(DemolishedPhase));
           if (element.DemolishedPhaseId != value.Id)
+          {
+            if (!element.ArePhasesModifiable())
+              throw new Exceptions.RuntimeErrorException($"The element does not allow setting the property '{DemolishedPhase}'.");
+
             element.DemolishedPhaseId = value.Id;
+          }
         }
       }
     }
-#endregion
+    #endregion
 
-#region Identity Data
+    #region Identity Data
     public virtual string Description
     {
       get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
@@ -1050,6 +602,6 @@ namespace RhinoInside.Revit.GH.Types
           Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.Update(value);
       }
     }
-#endregion
+    #endregion
   }
 }

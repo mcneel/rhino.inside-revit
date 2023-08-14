@@ -20,15 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Phasing
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
-
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Phases);
-      Menu_AppendItem
-      (
-        menu, $"Open Phases…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.CanPostCommand(commandId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.Phases, "Open Phases…");
     }
     #endregion
 
@@ -84,6 +76,7 @@ namespace RhinoInside.Revit.GH.Components.Phasing
           "Phases",
           phases.
           Select(x => new Types.Phase(x)).
+          OrderBy(x => x.SequenceNumber).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

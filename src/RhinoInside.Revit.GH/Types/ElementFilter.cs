@@ -9,10 +9,7 @@ namespace RhinoInside.Revit.GH.Types
   using Grasshopper.Special;
 
   [Kernel.Attributes.Name("View Filter")]
-  public interface IGH_FilterElement : IGH_Element
-  {
-    ElementFilter GetElementFilter();
-  }
+  public interface IGH_FilterElement : IGH_Element { }
 
   [Kernel.Attributes.Name("Filter")]
   public class FilterElement : Element, IGH_FilterElement, IGH_ItemDescription
@@ -40,15 +37,13 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (typeof(Q).IsAssignableFrom(typeof(ElementFilter)))
         {
-          target = (Q) (object) GetElementFilter();
+          target = (Q) (object) new ElementFilter(Value.ToElementFilter());
           return true;
         }
       }
 
       return false;
     }
-
-    public virtual ElementFilter GetElementFilter() => new ElementFilter(CompoundElementFilter.Empty);
   }
 
   [Kernel.Attributes.Name("Selection Filter")]
@@ -60,9 +55,6 @@ namespace RhinoInside.Revit.GH.Types
     public SelectionFilterElement() { }
     public SelectionFilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public SelectionFilterElement(ARDB.SelectionFilterElement value) : base(value) { }
-
-    public override ElementFilter GetElementFilter() => Value is ARDB.SelectionFilterElement filter ?
-      new ElementFilter(CompoundElementFilter.ExclusionFilter(filter.GetElementIds(), inverted: true)) : null;
   }
 
   [Kernel.Attributes.Name("Rule-based Filter")]
@@ -74,9 +66,6 @@ namespace RhinoInside.Revit.GH.Types
     public ParameterFilterElement() { }
     public ParameterFilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public ParameterFilterElement(ARDB.ParameterFilterElement value) : base(value) { }
-
-    public override ElementFilter GetElementFilter() => Value is ARDB.ParameterFilterElement filter ?
-      new ElementFilter(filter.GetElementFilter()) : null;
   }
 
   public class ElementFilter : GH_Goo<ARDB.ElementFilter>

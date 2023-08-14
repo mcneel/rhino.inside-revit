@@ -2,7 +2,6 @@ using System;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
-using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -19,13 +18,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var SectionId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.Section);
-      Menu_AppendItem
-      (
-        menu, $"Set new {TypeName}",
-        Menu_PromptNew(SectionId),
-        Revit.ActiveUIApplication.CanPostCommand(SectionId)
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.Section);
     }
     #endregion
   }
@@ -43,13 +36,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var SectionId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.BuildingElevation);
-      Menu_AppendItem
-      (
-        menu, $"Set new {TypeName}",
-        Menu_PromptNew(SectionId),
-        Revit.ActiveUIApplication.CanPostCommand(SectionId)
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.BuildingElevation);
     }
     #endregion
   }

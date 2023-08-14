@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
-using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -19,13 +18,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var NewSheetId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.NewSheet);
-      Menu_AppendItem
-      (
-        menu, $"Set new {TypeName}",
-        Menu_PromptNew(NewSheetId),
-        Revit.ActiveUIApplication.CanPostCommand(NewSheetId)
-      );
+      Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.NewSheet);
     }
 
     static readonly (string Text, Predicate<ARDB.ViewSheet> Qualifier)[] SheetTypeQualifiers =

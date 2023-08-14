@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "WallTypes",
       description: "Get document wall types list",
       category: "Revit",
-      subCategory: "Wall"
+      subCategory: "Architecture"
     )
     { }
 

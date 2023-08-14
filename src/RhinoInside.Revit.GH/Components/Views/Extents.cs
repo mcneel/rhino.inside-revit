@@ -1,13 +1,15 @@
 using System;
+using System.Linq;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
+using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
+  using Numerical;
   using External.DB.Extensions;
-  using Grasshopper.Kernel.Parameters;
-  using Grasshopper.Kernel.Types;
-  using Rhino.Geometry;
 
   [ComponentVersion(introduced: "1.7")]
   public class ViewExtents : TransactionalChainComponent
@@ -112,6 +114,16 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
+
+      if (!view.Value.GetOrderedParameters().Any(x => x.Id.ToBuiltInParameter() == ARDB.BuiltInParameter.VIEWER_CROP_REGION))
+      {
+        AddRuntimeMessage
+        (
+          GH_RuntimeMessageLevel.Error,
+          $"View '{view.Value.Title}' can't be cropped."
+        );
+        return;
+      }
       else Params.TrySetData(DA, "View", () => view);
 
       if (Params.GetData(DA, "Crop View", out bool? cropView))
@@ -208,7 +220,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       });
     }
 
-    internal static void GetFrontAndBackClipOffsets(ARDB.View view, out double backOffset, out double frontOffset)
+    static void GetFrontAndBackClipOffsets(ARDB.View view, out double backOffset, out double frontOffset)
     {
       backOffset = -(view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR)?.AsInteger() == 1 ?
                     (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR)?.AsDouble() ?? double.PositiveInfinity) : double.PositiveInfinity);
@@ -217,35 +229,25 @@ namespace RhinoInside.Revit.GH.Components.Views
                      (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_NEAR)?.AsDouble() ?? double.PositiveInfinity) : double.PositiveInfinity);
     }
 
-    internal static void GetViewRangeOffsets(ARDB.View view, out double backOffset, out double frontOffset)
+    static void GetViewRangeOffsets(ARDB.View view, out double backOffset, out double frontOffset)
     {
       GetFrontAndBackClipOffsets(view, out backOffset, out frontOffset);
 
       switch (view)
       {
         case ARDB.View3D view3D:
-        {
-          // `FilteredElementCollector` does not check near-plane on 3D-views. (Tested on Revit 2023.0)
-          //if (view3D.IsPerspective)
-          //  frontOffset = Math.Min(frontOffset, 0.0);
-        }
+          if (view3D.IsPerspective)
+            frontOffset = Arithmetic.Min(frontOffset, view3D.CropBox.Max.Z);
         break;
 
         case ARDB.ViewPlan viewPlan:
-          using (var viewRange = viewPlan.GetViewRange())
-          {
-            if (view.Document.GetElement(viewRange.GetLevelId(ARDB.PlanViewPlane.ViewDepthPlane)) is ARDB.Level bottomLevel)
-              backOffset = Math.Max(backOffset, bottomLevel.ProjectElevation + viewRange.GetOffset(ARDB.PlanViewPlane.ViewDepthPlane));
-
-            if (view.Document.GetElement(viewRange.GetLevelId(ARDB.PlanViewPlane.TopClipPlane)) is ARDB.Level topLevel)
-              frontOffset = Math.Min(frontOffset, topLevel.ProjectElevation + viewRange.GetOffset(ARDB.PlanViewPlane.TopClipPlane));
-          }
-          break;
+          var interval = viewPlan.GetViewRangeInterval();
+          backOffset  = Arithmetic.Max(backOffset,  interval.Left.Bound - view.Origin.Z);
+          frontOffset = Arithmetic.Min(frontOffset, interval.Right.Bound - view.Origin.Z);
+        break;
 
         case ARDB.ViewSection viewSection:
-          if (double.IsInfinity(frontOffset) || double.IsNaN(frontOffset))
-            frontOffset = view.CropBox.Max.Z;
-
+          frontOffset = Arithmetic.Min(frontOffset, viewSection.CropBox.Max.Z);
           break;
       }
     }

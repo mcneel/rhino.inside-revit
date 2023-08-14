@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Opening")]
 
-  public class Opening : InstanceElement, ISketchAccess, IHostObjectAccess
+  public class Opening : GeometricElement, ISketchAccess
   {
     protected override Type ValueType => typeof(ARDB.Opening);
     public new ARDB.Opening Value => base.Value as ARDB.Opening;
@@ -104,11 +104,11 @@ namespace RhinoInside.Revit.GH.Types
         {
           if (opening.IsRectBoundary)
           {
-            if (Host?.Surface is Surface surface)
+            if (HostElement?.Surface is Surface surface)
             {
               var p0 = opening.BoundaryRect[0].ToPoint3d();
               var p1 = opening.BoundaryRect[1].ToPoint3d();
-              var location = surface.IsoCurve(0, Host.Location.Origin.Z);
+              var location = surface.IsoCurve(0, HostElement.Location.Origin.Z);
 
               if
               (
@@ -161,7 +161,7 @@ namespace RhinoInside.Revit.GH.Types
             return sketch.TrimmedSurface;
         }
 
-        return Host?.Surface?.CreateTrimmedSurface(Boundaries, GeometryTolerance.Model.VertexTolerance);
+        return HostElement?.Surface?.CreateTrimmedSurface(Boundaries, GeometryTolerance.Model.VertexTolerance);
       }
     }
     #endregion
@@ -170,9 +170,10 @@ namespace RhinoInside.Revit.GH.Types
     public Sketch Sketch => Value is ARDB.Opening opening ? new Sketch(opening.GetSketch()) : default;
     #endregion
 
-    #region IHostObjectAccess
-    public HostObject Host => Value is ARDB.Opening opening ?
-      HostObject.FromElement(opening.Host) as HostObject : default;
+    #region IHostElementAccess
+    public override GraphicalElement HostElement => Value is ARDB.Opening opening ?
+      GetElement<GraphicalElement>(opening.Host) :
+      default;
     #endregion
   }
 }

@@ -49,38 +49,46 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     public override bool AppendMenuItems(ToolStripDropDown menu)
     {
-      // Name
-      if (IconCapableUI && Attributes.IsTopLevel)
-        Menu_AppendObjectNameEx(menu);
-      else
-        Menu_AppendObjectName(menu);
-
-      // Preview
-      if (this is IGH_PreviewObject preview)
+      try
       {
-        if (Attributes.IsTopLevel && preview.IsPreviewCapable)
-          Menu_AppendPreviewItem(menu);
+        // Name
+        if (IconCapableUI && Attributes.IsTopLevel)
+          Menu_AppendObjectNameEx(menu);
+        else
+          Menu_AppendObjectName(menu);
+
+        // Preview
+        if (this is IGH_PreviewObject preview)
+        {
+          if (Attributes.IsTopLevel && preview.IsPreviewCapable)
+            Menu_AppendPreviewItem(menu);
+        }
+
+        // Enabled
+        if (Kind == GH_ParamKind.floating)
+          Menu_AppendEnableItem(menu);
+
+        // Bake
+        Menu_AppendBakeItem(menu);
+
+        // Runtime messages
+        Menu_AppendRuntimeMessages(menu);
+
+        // Custom items.
+        AppendAdditionalMenuItems(menu);
+        Menu_AppendSeparator(menu);
+
+        // Publish.
+        Menu_AppendPublish(menu);
+
+        // Help.
+        Menu_AppendObjectHelp(menu);
       }
-
-      // Enabled
-      if (Kind == GH_ParamKind.floating)
-        Menu_AppendEnableItem(menu);
-
-      // Bake
-      Menu_AppendBakeItem(menu);
-
-      // Runtime messages
-      Menu_AppendRuntimeMessages(menu);
-
-      // Custom items.
-      AppendAdditionalMenuItems(menu);
-      Menu_AppendSeparator(menu);
-
-      // Publish.
-      Menu_AppendPublish(menu);
-
-      // Help.
-      Menu_AppendObjectHelp(menu);
+      catch (Exception ex)
+      {
+        Diagnostics.ErrorReport.TraceException(ex, Core.Host);
+        Diagnostics.ErrorReport.ReportException(ex, Core.Host);
+      }
 
       return true;
     }
@@ -138,8 +146,37 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    protected override void PrepareForPrompt() { }
-    protected override void RecoverFromPrompt() { }
+    static System.Drawing.Rectangle? _EditorBounds;
+    protected override void PrepareForPrompt()
+    {
+      if (Grasshopper.Instances.DocumentEditor is Form editor)
+      {
+        if (editor.Visible)
+        {
+          _EditorBounds = editor.Bounds;
+          editor.Hide();
+        }
+      }
+    }
+
+    protected override void RecoverFromPrompt()
+    {
+      if (Grasshopper.Instances.DocumentEditor is Form editor)
+      {
+        if (_EditorBounds.HasValue)
+        {
+          editor.Bounds = _EditorBounds.Value;
+
+          if (!editor.Visible)
+          {
+            editor.Show();
+            editor.Select();
+          }
+        }
+      }
+
+      _EditorBounds = default;
+    }
     #endregion
 
     #region IGH_ReferenceParam

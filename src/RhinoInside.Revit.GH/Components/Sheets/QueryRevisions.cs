@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Views
+namespace RhinoInside.Revit.GH.Components.Sheets
 {
   using System.Windows.Forms;
   using External.DB.Extensions;
@@ -21,15 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
-
-      var activeApp = Revit.ActiveUIApplication;
-      var SheetIssuesOrRevisionsId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SheetIssuesOrRevisions);
-      Menu_AppendItem
-      (
-        menu, "Open Sheet Issues/Revisions…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, SheetIssuesOrRevisionsId),
-        activeApp.CanPostCommand(SheetIssuesOrRevisionsId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.SheetIssuesOrRevisions, "Open Sheet Issues/Revisions…");
     }
     #endregion
 

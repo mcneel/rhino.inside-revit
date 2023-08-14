@@ -254,12 +254,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static GeometryElement GetGeometry(this Element element, Options options)
     {
-      if (!element.IsValid())
-        return default;
+      var geometry = element?.get_Geometry(options);
 
-      var geometry = element.get_Geometry(options);
-
-      if (!(geometry?.Any() ?? false) && element is GenericForm form && !form.Combinations.IsEmpty)
+      if (geometry?.Any() is false && element is CombinableElement combinable && !combinable.Combinations.IsEmpty)
       {
         geometry.Dispose();
 
@@ -578,19 +575,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool SwapElementNomenWith(this Element element, Element other, out BuiltInParameter nomenParameter)
     {
-      if (element.GetType() != other.GetType())
-        throw new InvalidOperationException($"{nameof(element)} type and {nameof(other)} type should match");
+      if (!element.Document.IsEquivalent(other.Document))
+        throw new InvalidOperationException($"{nameof(element)} document '{element.Document.Title}' doesn't match with {nameof(other)} document '{element.Document.Title}'");
 
       var elementNomen = element.GetElementNomen(out var elementParameter);
       if (elementParameter != BuiltInParameter.INVALID)
       {
-        var otherNomen = other.GetElementNomen(out var otherParameter);
-        if (elementParameter != otherParameter)
-          throw new InvalidOperationException($"{nameof(element)} nomen parameter {elementParameter} doesn't match with {nameof(other)} nomen parameter {otherParameter}");
+        if (!element.Id.Equals(other.Id))
+        {
+          if (element.GetType() != other.GetType())
+            throw new InvalidOperationException($"{nameof(element)} type {element.GetType()} doesn't match with {nameof(other)} type {other.GetType()}");
 
-        other.SetElementNomen(otherParameter, Guid.NewGuid().ToString());
-        element.SetElementNomen(elementParameter, otherNomen);
-        other.SetElementNomen(otherParameter, elementNomen);
+          var otherNomen = other.GetElementNomen(out var otherParameter);
+          if (elementParameter != otherParameter)
+            throw new InvalidOperationException($"{nameof(element)} nomen parameter {elementParameter} doesn't match with {nameof(other)} nomen parameter {otherParameter}");
+
+          other.SetElementNomen(otherParameter, Guid.NewGuid().ToString());
+          element.SetElementNomen(elementParameter, otherNomen);
+          other.SetElementNomen(otherParameter, elementNomen);
+        }
+
         nomenParameter = elementParameter;
         return true;
       }
@@ -911,42 +915,39 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var sourceDocument = template.Document;
         destinationDocument = destinationDocument ?? sourceDocument;
 
-        var ids = default(ICollection<ElementId>);
-        if (template.ViewSpecific)
+        using (var options = new CopyPasteOptions())
         {
-          var sourceView = sourceDocument.GetElement(template.OwnerViewId) as View;
-          destinationView = destinationView ?? sourceView;
+          options.SetDuplicateTypeNamesAction(DuplicateTypeAction.UseDestinationTypes);
 
-          if (!destinationDocument.Equals(destinationView.Document))
+          var ids = default(ICollection<ElementId>);
+          if (template.ViewSpecific)
           {
-            var bic = BuiltInCategory.INVALID;
-            sourceView.Category?.Id.TryGetBuiltInCategory(out bic);
-            destinationView = destinationDocument.
-              GetNamesakeElements(sourceView.GetElementNomen(), sourceView.GetType(), parentName: sourceView.ViewType.ToString(), categoryId: bic).
-              Cast<View>().FirstOrDefault();
-          }
+            var sourceView = sourceDocument.GetElement(template.OwnerViewId) as View;
+            destinationView = destinationView ?? sourceView;
 
-          if (destinationView is object)
+            if (!destinationDocument.IsEquivalent(destinationView.Document))
+              destinationView = destinationDocument.GetElement(destinationDocument.LookupElement(sourceDocument, sourceView.Id)) as View;
+
+            if (destinationView is object)
+            {
+              ids = ElementTransformUtils.CopyElements
+              (
+                sourceView, new ElementId[] { template.Id },
+                destinationView, default, options
+              );
+            }
+          }
+          else
           {
             ids = ElementTransformUtils.CopyElements
             (
-              sourceView,
-              new ElementId[] { template.Id },
-              destinationView, default, default
+              sourceDocument, new ElementId[] { template.Id },
+              destinationDocument, default, options
             );
           }
-        }
-        else
-        {
-          ids = ElementTransformUtils.CopyElements
-          (
-            sourceDocument,
-            new ElementId[] { template.Id },
-            destinationDocument, default, default
-          );
-        }
 
-        return ids?.Select(destinationDocument.GetElement).OfType<T>().FirstOrDefault();
+          return ids?.Select(destinationDocument.GetElement).OfType<T>().FirstOrDefault();
+        }
       }
       catch (Autodesk.Revit.Exceptions.ApplicationException) { }
 
@@ -954,7 +955,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
     #endregion
 
-    #region References
+    #region Geometry References
     public static Reference GetDefaultReference(this Element element)
     {
       var reference = default(Reference);
@@ -965,7 +966,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
 #if REVIT_2018
         case FamilyInstance instance:
-          reference = instance.GetReferences(FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
+          reference = reference ?? instance.GetReferences(FamilyInstanceReferenceType.StrongReference).FirstOrDefault();
+          reference = reference ?? instance.GetReferences(FamilyInstanceReferenceType.CenterLeftRight).FirstOrDefault();
+          reference = reference ?? instance.GetReferences(FamilyInstanceReferenceType.CenterFrontBack).FirstOrDefault();
+          reference = reference ?? instance.GetReferences(FamilyInstanceReferenceType.CenterElevation).FirstOrDefault();
+          reference = reference ?? instance.GetReferences(FamilyInstanceReferenceType.WeakReference).FirstOrDefault();
           break;
 #endif
 
@@ -973,8 +978,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
           reference = modelLine.GeometryCurve.Reference;
           break;
 
-        case Level level:
-          reference = level.GetPlaneReference();
+        case DatumPlane datum:
+          reference = Reference.ParseFromStableRepresentation(datum.Document, $"{datum.UniqueId}:0:SURFACE");
           break;
 
         case SketchPlane sketchPlane:
@@ -999,14 +1004,53 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static GeometryObject GetGeometryObjectFromReference(this Element element, Reference reference, out Transform transform)
     {
-      if (element.GetGeometryObjectFromReference(reference) is GeometryObject geometryObject)
+      if (element is null)
+        throw new ArgumentNullException(nameof(element));
+
+      if (reference is null)
+        throw new ArgumentNullException(nameof(reference));
+
+      if (element.Id == reference.ElementId)
       {
-        transform = (element as Instance)?.GetTransform() ?? Transform.Identity;
-        return geometryObject;
+        if (element is RevitLinkInstance link)
+        {
+          transform = link.GetTransform();
+          reference = reference.CreateReferenceInLink(link);
+          element = link.GetLinkDocument()?.GetElement(reference.LinkedElementId);
+        }
+        else transform = Transform.Identity;
+
+        if (reference.ElementReferenceType != ElementReferenceType.REFERENCE_TYPE_NONE && element is Instance instance)
+          transform *= instance.GetTransform();
+      }
+      else
+      {
+        transform = null;
+        // `GetGeometryObjectFromReference` call below should rise the expected exception.
       }
 
-      transform = null;
-      return null;
+      switch (element.GetGeometryObjectFromReference(reference))
+      {
+        case GeometryObject geometryObject: return geometryObject;
+        default:
+
+          switch (element)
+          {
+            case Dimension dimension:
+              if (reference.ElementReferenceType == ElementReferenceType.REFERENCE_TYPE_LINEAR)
+              {
+                var stable = reference.ConvertToPersistentRepresentation(element.Document);
+                if (ReferenceId.TryParse(stable, out var id, element.Document))
+                {
+                  if (id.Symbol.Index.Length == 1 && id.Symbol.Index[0] == int.MaxValue)
+                    return dimension.GetBoundedCurve();
+                }
+              }
+              break;
+          }
+
+          return null;
+      }
     }
     #endregion
   }

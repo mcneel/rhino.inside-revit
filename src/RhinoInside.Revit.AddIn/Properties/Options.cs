@@ -220,7 +220,7 @@ namespace RhinoInside.Revit.AddIn.Properties
             // settings set by admin are readonly
             usingAdminOptions = File.Exists(AdminOptionsFilePath);
             string targetOptionFile =
-              usingAdminOptions ? AdminDataDirectory :
+              usingAdminOptions ? AdminOptionsFilePath :
                 File.Exists(UserOptionsFilePath) ? UserOptionsFilePath : null;
 
             if (targetOptionFile != null)
@@ -228,7 +228,7 @@ namespace RhinoInside.Revit.AddIn.Properties
               try
               {
                 // read settings
-                using (var optsFile = File.OpenRead(UserOptionsFilePath))
+                using (var optsFile = File.OpenRead(targetOptionFile))
                   _currentInstance = (AddInOptions) _xml.Deserialize(optsFile);
               }
               catch (Exception)
@@ -265,6 +265,9 @@ namespace RhinoInside.Revit.AddIn.Properties
 
     public static void Save()
     {
+      if (usingAdminOptions)
+        return;
+
       // ensure directory exists
       // clear previous contents, or create empty file
       Directory.CreateDirectory(UserDataDirectory);

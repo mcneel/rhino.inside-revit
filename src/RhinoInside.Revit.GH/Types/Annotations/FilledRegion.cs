@@ -22,27 +22,17 @@ namespace RhinoInside.Revit.GH.Types
     public FilledRegion() { }
     public FilledRegion(ARDB.FilledRegion element) : base(element) { }
 
+    public new FilledRegionType Type => base.Type as FilledRegionType;
+
     #region ISketchAccess
     public Sketch Sketch => Value is ARDB.FilledRegion region ?
       new Sketch(region.GetSketch()) : default;
     #endregion
 
     #region Location
-    public override Plane Location
-    {
-      get
-      {
-        if (Sketch is Sketch sketch)
-        {
-          var plane = sketch.ProfilesPlane;
-          plane.Origin = plane.ClosestPoint(BoundingBox.Center);
+    public override Plane Location => Sketch?.Location ?? NaN.Plane;
 
-          return plane;
-        }
-
-        return base.Location;
-      }
-    }
+    public override Brep TrimmedSurface => Sketch?.TrimmedSurface ?? default;
     #endregion
 
     /*
@@ -247,5 +237,15 @@ namespace RhinoInside.Revit.GH.Types
     }
 #endregion
     */
+  }
+
+  [Kernel.Attributes.Name("Filled Region Type")]
+  public class FilledRegionType : LineAndTextAttrSymbol
+  {
+    protected override Type ValueType => typeof(ARDB.FilledRegionType);
+    public new ARDB.FilledRegionType Value => base.Value as ARDB.FilledRegionType;
+
+    public FilledRegionType() { }
+    protected internal FilledRegionType(ARDB.FilledRegionType type) : base(type) { }
   }
 }

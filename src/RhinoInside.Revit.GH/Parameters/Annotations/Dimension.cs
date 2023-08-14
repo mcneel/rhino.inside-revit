@@ -34,86 +34,15 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       var create = Menu_AppendItem(menu, $"Set new {TypeName}");
 
-      var AlignedDimensionId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.AlignedDimension);
-      Menu_AppendItem
-      (
-        create.DropDown, "Aligned",
-        Menu_PromptNew(AlignedDimensionId),
-        Revit.ActiveUIApplication.CanPostCommand(AlignedDimensionId),
-        false
-      );
-
-      var LinearDimensionId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.LinearDimension);
-      Menu_AppendItem
-      (
-        create.DropDown, "Linear",
-        Menu_PromptNew(LinearDimensionId),
-        Revit.ActiveUIApplication.CanPostCommand(LinearDimensionId),
-        false
-      );
-
-      var AngularDimensionId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.AngularDimension);
-      Menu_AppendItem
-      (
-        create.DropDown, "Angular",
-        Menu_PromptNew(AngularDimensionId),
-        Revit.ActiveUIApplication.CanPostCommand(AngularDimensionId),
-        false
-      );
-
-      var RadialDimensionId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.RadialDimension);
-      Menu_AppendItem
-      (
-        create.DropDown, "Radial",
-        Menu_PromptNew(RadialDimensionId),
-        Revit.ActiveUIApplication.CanPostCommand(RadialDimensionId),
-        false
-      );
-
-      var DiameterDimensionId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.DiameterDimension);
-      Menu_AppendItem
-      (
-        create.DropDown, "Diamenter",
-        Menu_PromptNew(DiameterDimensionId),
-        Revit.ActiveUIApplication.CanPostCommand(DiameterDimensionId),
-        false
-      );
-
-      var ArcLengthDimensionId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ArcLengthDimension);
-      Menu_AppendItem
-      (
-        create.DropDown, "Arc Length",
-        Menu_PromptNew(ArcLengthDimensionId),
-        Revit.ActiveUIApplication.CanPostCommand(ArcLengthDimensionId),
-        false
-      );
-
-      var SpotElevationId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SpotElevation);
-      Menu_AppendItem
-      (
-        create.DropDown, "Spot Elevation",
-        Menu_PromptNew(SpotElevationId),
-        Revit.ActiveUIApplication.CanPostCommand(SpotElevationId),
-        false
-      );
-
-      var SpotCoordinateId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SpotCoordinate);
-      Menu_AppendItem
-      (
-        create.DropDown, "Spot Coordinate",
-        Menu_PromptNew(SpotCoordinateId),
-        Revit.ActiveUIApplication.CanPostCommand(SpotCoordinateId),
-        false
-      );
-
-      var SpotSlopeId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SpotSlope);
-      Menu_AppendItem
-      (
-        create.DropDown, "Spot Slope",
-        Menu_PromptNew(SpotSlopeId),
-        Revit.ActiveUIApplication.CanPostCommand(SpotSlopeId),
-        false
-      );
+      create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.AlignedDimension, "Aligned");
+      create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.LinearDimension, "Linear");
+      create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.AngularDimension, "Angular");
+      create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.RadialDimension, "Radial");
+      create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.DiameterDimension, "Diameter");
+      create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.ArcLengthDimension, "Arc Length");
+      create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.SpotElevation, "Spot Elevation");
+      create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.SpotCoordinate, "Spot Coordinate");
+      create.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.SpotSlope, "Spot Slope");
     }
     #endregion
   }
@@ -138,66 +67,14 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.Menu_AppendActions(menu);
 
-      var activeApp = Revit.ActiveUIApplication;
-      if (activeApp.ActiveUIDocument is null) return;
-
       var open = Menu_AppendItem(menu, $"Open");
-
-      var LinearDimensionTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.LinearDimensionTypes);
-      Menu_AppendItem
-      (
-        open.DropDown, "Linear types…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, LinearDimensionTypesId),
-        activeApp.CanPostCommand(LinearDimensionTypesId), false
-      );
-
-      var AngularDimensionTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.AngularDimensionTypes);
-      Menu_AppendItem
-      (
-        open.DropDown, "Angular types…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, AngularDimensionTypesId),
-        activeApp.CanPostCommand(AngularDimensionTypesId), false
-      );
-
-      var RadialDimensionTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.RadialDimensionTypes);
-      Menu_AppendItem
-      (
-        open.DropDown, "Radial types…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, RadialDimensionTypesId),
-        activeApp.CanPostCommand(RadialDimensionTypesId), false
-      );
-
-      var DiameterDimensionTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.DiameterDimensionTypes);
-      Menu_AppendItem
-      (
-        open.DropDown, "Diameter types…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, DiameterDimensionTypesId),
-        activeApp.CanPostCommand(DiameterDimensionTypesId), false
-      );
-
-      var SpotElevationTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SpotElevationTypes);
-      Menu_AppendItem
-      (
-        open.DropDown, "Spot elevation types…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, SpotElevationTypesId),
-        activeApp.CanPostCommand(SpotElevationTypesId), false
-      );
-
-      var SpotCoordinateTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SpotCoordinateTypes);
-      Menu_AppendItem
-      (
-        open.DropDown, "Spot coordinate types…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, SpotCoordinateTypesId),
-        activeApp.CanPostCommand(SpotCoordinateTypesId), false
-      );
-
-      var SpotSlopeTypesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.SpotSlopeTypes);
-      Menu_AppendItem
-      (
-        open.DropDown, "Spot slope types…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, SpotSlopeTypesId),
-        activeApp.CanPostCommand(SpotSlopeTypesId), false
-      );
+      open.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.LinearDimensionTypes, "Linear types…");
+      open.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.AngularDimensionTypes, "Angular types…");
+      open.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.RadialDimensionTypes, "Radial types…");
+      open.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.DiameterDimensionTypes, "Diameter types…");
+      open.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.SpotElevationTypes, "Spot elevation types…");
+      open.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.SpotCoordinateTypes, "Spot coordinate types…");
+      open.DropDown.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.SpotSlopeTypes, "Spot slope types…");
     }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu) => Rhinoceros.InvokeInHostContext(() =>

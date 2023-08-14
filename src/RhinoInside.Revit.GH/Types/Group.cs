@@ -51,15 +51,16 @@ namespace RhinoInside.Revit.GH.Types
               using (var create = doc.Create())
               {
                 var curve = default(ARDB.CurveElement);
-                if (OwnerView is View ownerView)
+                if (group.ViewSpecific)
                 {
-                  var plane = ARDB.Plane.CreateByOriginAndBasis(ownerView.Value.Origin, ownerView.Value.RightDirection, ownerView.Value.UpDirection);
+                  var ownerView = doc.GetElement(group.OwnerViewId) as ARDB.View;
+                  var plane = ARDB.Plane.CreateByOriginAndBasis(ownerView.Origin, ownerView.RightDirection, ownerView.UpDirection);
                   var circle = ARDB.Arc.Create(plane, 1.0, 0.0, 2.0 * Math.PI);
-                  curve = create.NewDetailCurve(ownerView.Value, circle);
+                  curve = create.NewDetailCurve(ownerView, circle);
                 }
                 else
                 {
-                  var plane = ARDB.Plane.CreateByOriginAndBasis(XYZExtension.Zero, XYZExtension.BasisX, XYZExtension.BasisY);
+                  var plane = ARDB.Plane.CreateByOriginAndBasis(XYZExtension.Zero, UnitXYZ.BasisX, UnitXYZ.BasisY);
                   var circle = ARDB.Arc.Create(plane, 1.0, 0.0, 2.0 * Math.PI);
                   curve = create.NewModelCurve(circle, ARDB.SketchPlane.Create(doc, plane));
                 }

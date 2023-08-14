@@ -11,6 +11,11 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using External.DB.Extensions;
 
+  interface ISketchAccess
+  {
+    Sketch Sketch { get; }
+  }
+
   [Kernel.Attributes.Name("Sketch")]
   public class Sketch : GraphicalElement
   {
@@ -49,17 +54,16 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region Location
+    #region GraphicalElement
     protected override void SubInvalidateGraphics()
     {
-      profiles = default;
-      trimmedSurface = default;
+      _Profiles = default;
+      _TrimmedSurface = default;
 
       base.SubInvalidateGraphics();
     }
 
-    public override Plane Location =>
-      Value?.SketchPlane.GetPlane().ToPlane() ?? NaN.Plane;
+    public override Plane Location => Value?.SketchPlane.GetPlane().ToPlane() ?? NaN.Plane;
 
     public Plane ProfilesPlane
     {
@@ -81,19 +85,19 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    (bool HasValue, Curve[] Value) profiles;
+    (bool HasValue, Curve[] Value) _Profiles;
     public Curve[] Profiles
     {
       get
       {
-        if (!profiles.HasValue && Value is ARDB.Sketch sketch)
+        if (!_Profiles.HasValue && Value is ARDB.Sketch sketch)
         {
           try
           {
-            profiles.Value = sketch.Profile.Cast<ARDB.CurveArray>().SelectMany(GeometryDecoder.ToCurves).ToArray();
+            _Profiles.Value = sketch.Profile.Cast<ARDB.CurveArray>().SelectMany(GeometryDecoder.ToCurves).ToArray();
             var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
-            foreach (var profile in profiles.Value)
+            foreach (var profile in _Profiles.Value)
             {
               if (!profile.IsClosed) continue;
               if (profile.ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
@@ -102,19 +106,19 @@ namespace RhinoInside.Revit.GH.Types
           }
           catch { }
 
-          profiles.HasValue = true;
+          _Profiles.HasValue = true;
         }
 
-        return profiles.Value;
+        return _Profiles.Value;
       }
     }
 
-    (bool HasValue, Brep Value) trimmedSurface;
+    (bool HasValue, Brep Value) _TrimmedSurface;
     public override Brep TrimmedSurface
     {
       get
       {
-        if (!trimmedSurface.HasValue && Value is ARDB.Sketch sketch)
+        if (!_TrimmedSurface.HasValue && Value is ARDB.Sketch sketch)
         {
           var loops = sketch.Profile.ToCurveMany().Where(x => x.IsClosed).ToArray();
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
@@ -137,13 +141,13 @@ namespace RhinoInside.Revit.GH.Types
               new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
             );
 
-            trimmedSurface.Value = planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
+            _TrimmedSurface.Value = planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
           }
 
-          trimmedSurface.HasValue = true;
+          _TrimmedSurface.HasValue = true;
         }
 
-        return trimmedSurface.Value;
+        return _TrimmedSurface.Value;
       }
     }
     #endregion
@@ -175,7 +179,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
-
 
     internal static bool SetProfile(ARDB.Sketch sketch, IList<Curve> boundaries, Vector3d normal)
     {

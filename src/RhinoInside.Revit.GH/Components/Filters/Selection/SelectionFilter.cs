@@ -20,15 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
-
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.EditSelection);
-      Menu_AppendItem
-      (
-        menu, $"Edit Selection…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.CanPostCommand(commandId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.EditSelection, "Edit Selection…");
     }
     #endregion
 
@@ -150,14 +142,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       // Try to duplicate template
       if (template is object)
       {
-        var ids = ARDB.ElementTransformUtils.CopyElements
-        (
-          template.Document,
-          new ARDB.ElementId[] { template.Id },
-          doc, default, default
-        );
-
-        selection = ids.Select(x => doc.GetElement(x)).OfType<ARDB.SelectionFilterElement>().FirstOrDefault();
+        selection = template.CloneElement(doc);
         selection.Name = name;
       }
 

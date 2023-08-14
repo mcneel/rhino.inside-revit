@@ -601,13 +601,24 @@ namespace RhinoInside.Revit.GH.Components
     EventHandler<DialogBoxShowingEventArgs> dialogBoxShowing = null;
 
     // Step 2.1
-    public virtual bool OnStart(ARDB.Document document) => true;
+    bool ERDB.ITransactionNotification.OnStart(ARDB.Document document)
+    {
+      Status = ARDB.TransactionStatus.Uninitialized;
+      return OnStart(document);
+    }
+
+    protected virtual bool OnStart(ARDB.Document document) => true;
 
     // Step 2.2
-    public virtual void OnStarted(ARDB.Document document) { }
+    void ERDB.ITransactionNotification.OnStarted(ARDB.Document document)
+    {
+      Status = ARDB.TransactionStatus.Started;
+      OnStarted(document);
+    }
+    protected virtual void OnStarted(ARDB.Document document) { }
 
     // Step 3.1
-    public virtual void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
+    void ERDB.ITransactionNotification.OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
     {
       // Disable Rhino UI in case any warning-error dialog popups
       var activeApplication = Revit.ActiveUIApplication;
@@ -616,21 +627,32 @@ namespace RhinoInside.Revit.GH.Components
         if (editScope is null)
           editScope = new External.UI.EditScope(activeApplication);
       };
+
+      OnPrepare(documents);
     }
+    protected virtual void OnPrepare(IReadOnlyCollection<ARDB.Document> documents) { }
 
     // Step 3.2
-    public virtual void OnDone(ARDB.TransactionStatus status)
+    void ERDB.ITransactionNotification.OnDone(ARDB.TransactionStatus status)
     {
       Status = status;
 
-      // Restore Rhino UI in case any warning-error dialog popups
-      if(dialogBoxShowing != default)
+      try
       {
-        Revit.ActiveUIApplication.DialogBoxShowing -= dialogBoxShowing;
-        dialogBoxShowing = null;
-        using (editScope) editScope = default;
+        OnDone(status);
+      }
+      finally
+      {
+        // Restore Rhino UI in case any warning-error dialog popups
+        if (dialogBoxShowing is object)
+        {
+          Revit.ActiveUIApplication.DialogBoxShowing -= dialogBoxShowing;
+          dialogBoxShowing = null;
+          using (editScope) editScope = default;
+        }
       }
     }
+    protected virtual void OnDone(ARDB.TransactionStatus status) { }
     #endregion
 
     #region UI
@@ -766,7 +788,7 @@ namespace RhinoInside.Revit.GH.Components
                 }
               }
 
-              AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, message, mesh);
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, message, mesh);
             }
 
             output = input;
@@ -806,7 +828,7 @@ namespace RhinoInside.Revit.GH.Components
               }
             }
 
-            // In case element is crated on this iteratrion we pin it here by default
+            // In case element is crated on this iteration we pin it here by default
             if (!output.Pinned)
             {
               try { output.Pinned = true; }

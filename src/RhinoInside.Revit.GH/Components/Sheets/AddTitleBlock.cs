@@ -3,19 +3,20 @@ using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
-namespace RhinoInside.Revit.GH.Components.TitleBlocks
+namespace RhinoInside.Revit.GH.Components.Sheets
 {
   using Convert.Geometry;
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.2.4", updated: "1.5")]
-  public class TitleBlockByType : ElementTrackerComponent
+  public class AddTitleBlock : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("F2F3D866-5A62-40C0-A85B-C417183E0A52");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public TitleBlockByType() : base
+    public AddTitleBlock() : base
     (
       name: "Add Title Block",
       nickname: "Title Block",
@@ -89,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.TitleBlocks
         {
           // Input
           if (!Params.TryGetData(DA, "Location", out Plane? location, x => x.IsValid)) return null;
-          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, Types.Document.FromValue(sheet.Document), ARDB.BuiltInCategory.OST_TitleBlocks)) return null;
+          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, Types.Document.FromValue(sheet.Document), ARDB.BuiltInCategory.OST_TitleBlocks)) return null;
 
           // Compute
           StartTransaction(sheet.Document);
@@ -133,15 +134,15 @@ namespace RhinoInside.Revit.GH.Components.TitleBlocks
       }
 
       var newOrigin = location.Origin.ToXYZ();
-      var newBasisX = location.XAxis.ToXYZ();
-      var newBasisY = location.YAxis.ToXYZ();
-      titleBlock.GetLocation(out var origin, out var basisX, out var basisY);
+      var newBasisX = (ERDB.UnitXYZ) location.XAxis.ToXYZ();
+      var newBasisY = (ERDB.UnitXYZ) location.YAxis.ToXYZ();
+      var (origin, basisX, basisY) = titleBlock.GetLocation();
 
       if
       (
-        !origin.IsAlmostEqualTo(newOrigin) ||
-        !basisX.IsAlmostEqualTo(newBasisX) ||
-        !basisY.IsAlmostEqualTo(newBasisY)
+        !origin.AlmostEqualPoints(newOrigin) ||
+        !basisX.AlmostEquals(newBasisX) ||
+        !basisY.AlmostEquals(newBasisY)
       )
       {
         var pinned = titleBlock.Pinned;

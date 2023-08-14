@@ -117,7 +117,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI methods
     protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
     (
-      new string[] { "Box", "Point" }
+      new string[] { "Box", "Point", "Line Style", "Category" }
     );
 
     //protected override GH_GetterResult Prompt_Plural(ref List<Types.IGH_PointGeometry> value)
@@ -218,7 +218,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI methods
     protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
     (
-      new string[] { "Box", "Curve" }
+      new string[] { "Box", "Curve", "Line Style", "Category" }
     );
 
     protected override GH_GetterResult Prompt_Plural(ref List<Types.GeometryCurve> value)
@@ -279,7 +279,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI methods
     protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
     (
-      new string[] { "Box", "Surface", "Brep", "Mesh" }
+      new string[] { "Box", "Surface", "Brep", "Mesh", "Line Style", "Category", "Material" }
     );
 
     static ARDB.Reference FixReference(ARDB.Document document, ARDB.Reference reference)

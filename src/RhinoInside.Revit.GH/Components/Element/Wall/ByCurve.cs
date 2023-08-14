@@ -23,11 +23,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
       nickname: "WallCrv",
       description: "Given a curve, it adds a Wall element to the active Revit document",
       category: "Revit",
-      subCategory: "Wall"
+      subCategory: "Architecture"
     )
     { }
 
-    public override void OnStarted(ARDB.Document document)
+    protected override void OnStarted(ARDB.Document document)
     {
       base.OnStarted(document);
 
@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     }
 
     List<ARDB.Wall> joinedWalls = new List<ARDB.Wall>();
-    public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
+    protected override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
     {
       base.OnPrepare(documents);
 

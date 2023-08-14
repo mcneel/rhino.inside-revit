@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
           foreach (var elementType in elementTypes)
           {
-            var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), elementType.UniqueId);
+            var referenceId = FullUniqueId.Format(doc.GetPersistentGUID(), elementType.UniqueId);
             var item = new GH_ValueListItem($"{elementType.FamilyName} : {elementType.Name}", $"\"{referenceId}\"");
             item.Selected = selectedItems.Contains(item.Expression);
             ListItems.Add(item);
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
           foreach (var typeGroup in Enum.GetValues(typeof(ARDB.ElementTypeGroup)).Cast<ARDB.ElementTypeGroup>())
           {
             if (doc.GetElement(doc.GetDefaultElementTypeId(typeGroup)) is ARDB.ElementType type)
-              defaultElementTypeIds.Add(FullUniqueId.Format(doc.GetFingerprintGUID(), type.UniqueId));
+              defaultElementTypeIds.Add(FullUniqueId.Format(doc.GetPersistentGUID(), type.UniqueId));
           }
 
           foreach (var item in ListItems)
@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
                     if (elementType.GetFamilyName() != family.Name)
                       continue;
 
-                    var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), elementType.UniqueId);
+                    var referenceId = FullUniqueId.Format(doc.GetPersistentGUID(), elementType.UniqueId);
                     var item = new GH_ValueListItem($"{elementType.GetFamilyName()} : {elementType.Name}", $"\"{referenceId}\"");
                     item.Selected = selectedItems.Contains(item.Expression);
                     ListItems.Add(item);
@@ -118,7 +118,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
                   break;
                 case ARDB.ElementType elementType:
                 {
-                  var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), elementType.UniqueId);
+                  var referenceId = FullUniqueId.Format(doc.GetPersistentGUID(), elementType.UniqueId);
                   var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, $"\"{referenceId}\"");
                   item.Selected = selectedItems.Contains(item.Expression);
                   ListItems.Add(item);
@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
                 case ARDB.Element element:
                 {
                   var type = doc.GetElement(element.GetTypeId()) as ARDB.ElementType;
-                  var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), type.UniqueId);
+                  var referenceId = FullUniqueId.Format(doc.GetPersistentGUID(), type.UniqueId);
                   var item = new GH_ValueListItem(type.GetFamilyName() + " : " + type.Name, $"\"{referenceId}\"");
                   item.Selected = selectedItems.Contains(item.Expression);
                   ListItems.Add(item);
@@ -146,7 +146,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
               {
                 foreach (var elementType in elementTypeCollector.WhereCategoryIdEqualsTo(c.Id).Cast<ARDB.ElementType>())
                 {
-                  var referenceId = FullUniqueId.Format(doc.GetFingerprintGUID(), elementType.UniqueId);
+                  var referenceId = FullUniqueId.Format(doc.GetPersistentGUID(), elementType.UniqueId);
                   var item = new GH_ValueListItem(elementType.GetFamilyName() + " : " + elementType.Name, $"\"{referenceId}\"");
                   item.Selected = selectedItems.Contains(item.Expression);
                   ListItems.Add(item);
@@ -169,7 +169,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
           foreach (var typeGroup in Enum.GetValues(typeof(ARDB.ElementTypeGroup)).Cast<ARDB.ElementTypeGroup>())
           {
             if (doc.GetElement(doc.GetDefaultElementTypeId(typeGroup)) is ARDB.ElementType type)
-              defaultElementTypeIds.Add(FullUniqueId.Format(doc.GetFingerprintGUID(), type.UniqueId));
+              defaultElementTypeIds.Add(FullUniqueId.Format(doc.GetPersistentGUID(), type.UniqueId));
           }
 
           foreach (var item in ListItems)

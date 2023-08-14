@@ -244,13 +244,13 @@ namespace RhinoInside.Revit.GH
     private void DocumentServer_DocumentAdded(GH_DocumentServer sender, GH_Document doc)
     {
       doc.ObjectsDeleted += Doc_ObjectsDeleted;
-      if (!External.ActivationGate.IsOpen)
+
+      // If we don't disable the solutions Grasshopper will
+      // evaluate doc before notifiy us the document is being active.
+      if (GH_Document.EnableSolutions)
       {
-        if (GH_Document.EnableSolutions)
-        {
-          GH_Document.EnableSolutions = false;
-          EnableSolutions = true;
-        }
+        GH_Document.EnableSolutions = false;
+        EnableSolutions = true;
       }
     }
 
@@ -284,8 +284,10 @@ namespace RhinoInside.Revit.GH
       {
         if (!Rhinoceros.Exposed && !RhinoDoc.ActiveDoc.Views.Any(x => x.Floating))
         {
-          var cursorPosition = System.Windows.Forms.Cursor.Position;
-          if (Rhinoceros.OpenRevitViewport(cursorPosition.X - 400, cursorPosition.Y - 300) is null)
+          var bounds = Revit.MainWindow.Bounds;
+          var x = bounds.X + bounds.Width / 2;
+          var y = bounds.Y + bounds.Height / 2;
+          if (Rhinoceros.OpenRevitViewport(x - 400, y - 300) is null)
             Rhinoceros.Exposed = true;
         }
       }
@@ -537,6 +539,12 @@ namespace RhinoInside.Revit.GH
       {
         e.NewDocument.SolutionStart += ActiveDefinition_SolutionStart;
         e.NewDocument.SolutionEnd += ActiveDefinition_SolutionEnd;
+      }
+
+      if (EnableSolutions.HasValue)
+      {
+        GH_Document.EnableSolutions = EnableSolutions.Value;
+        EnableSolutions = null;
       }
     }
     #endregion

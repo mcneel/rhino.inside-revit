@@ -19,10 +19,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddDetailItem() : base
     (
       name: "Add Detail Item",
-      nickname: "DetItem",
+      nickname: "D-Item",
       description: "Given its Location, it adds a detail item element to the active Revit document",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -101,15 +101,15 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       (
         view.Document, _DetailItem_, detail =>
         {
-          var tol = GeometryTolerance.Model;
-
           // Input
           if (!view.Value.IsAnnotationView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
           if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, Types.Document.FromValue(view.Document), ARDB.BuiltInCategory.OST_DetailComponents)) return null;
 
-          var viewPlane = view.Location;
+          type.AssertPlacementType(ARDB.FamilyPlacementType.ViewBased);
+
+          var viewPlane = view.DetailPlane;
           point = viewPlane.ClosestPoint(point.Value);
 
           if (rotation.HasValue && Params.Input<Param_Number>("Rotation")?.UseDegrees == true)

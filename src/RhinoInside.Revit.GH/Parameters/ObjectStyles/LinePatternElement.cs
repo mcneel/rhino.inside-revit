@@ -27,15 +27,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
       base.Menu_AppendActions(menu);
-
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.LinePatterns);
-      Menu_AppendItem
-      (
-        menu, $"Open Line Patterns…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.ActiveUIDocument is object && activeApp.CanPostCommand(commandId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.LinePatterns, "Open Line Patterns…");
     }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
@@ -65,7 +57,7 @@ namespace RhinoInside.Revit.GH.Parameters
       listBox.BeginUpdate();
       listBox.Items.Clear();
       listBox.Items.Add(new Types.LinePatternElement());
-      listBox.Items.Add(new Types.LinePatternElement(doc, new ARDB.ElementId((int) External.DB.BuiltInLinePattern.Solid)));
+      listBox.Items.Add(new Types.LinePatternElement(doc, Types.LinePatternElement.SolidId));
 
       using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.LinePatternElement)))
       {

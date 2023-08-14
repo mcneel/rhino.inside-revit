@@ -670,12 +670,12 @@ namespace RhinoInside.Revit.GH.Parameters
 
             if (current is Types.IGH_Flags currentF && tag is Types.IGH_Flags tagF)
             {
-              var item = Menu_AppendItem(menu, tag.Text, Menu_NamedValueClicked, SourceCount == 0, currentF.HasFlag(tagF));
+              var item = Menu_AppendItem(menu, tag.Text, Menu_NamedValueClicked, SourceCount == 0, !PersistentData.IsEmpty && currentF.HasFlag(tagF));
               item.Tag = tag;
             }
             else
             {
-              var item = Menu_AppendItem(menu, tag.Text, Menu_NamedValueClicked, SourceCount == 0, tag.Equals(current));
+              var item = Menu_AppendItem(menu, tag.Text, Menu_NamedValueClicked, SourceCount == 0, !PersistentData.IsEmpty && tag.Equals(current));
               item.Tag = tag;
             }
           }

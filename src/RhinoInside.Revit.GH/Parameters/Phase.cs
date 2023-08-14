@@ -20,15 +20,7 @@ namespace RhinoInside.Revit.GH.Parameters
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
       base.Menu_AppendActions(menu);
-
-      var activeApp = Revit.ActiveUIApplication;
-      var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Phases);
-      Menu_AppendItem
-      (
-        menu, $"Open Phases…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-        activeApp.ActiveUIDocument is object && activeApp.CanPostCommand(commandId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.Phases, "Open Phases…");
     }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
@@ -38,11 +30,12 @@ namespace RhinoInside.Revit.GH.Parameters
 
       var listBox = new ListBox
       {
-        Sorted = true,
+        Sorted = false, // Sorted by SequenceNumber
         BorderStyle = BorderStyle.FixedSingle,
         Width = (int) (200 * GH_GraphicsUtil.UiScale),
         Height = (int) (100 * GH_GraphicsUtil.UiScale),
-        DisplayMember = nameof(Types.Element.DisplayName)
+        SelectionMode = SelectionMode.MultiExtended,
+        DisplayMember = nameof(Types.Phase.DisplayName)
       };
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
 
@@ -61,13 +54,20 @@ namespace RhinoInside.Revit.GH.Parameters
       listBox.Items.Add(new Types.Phase());
 
       {
-        var phases = doc.Phases.Cast<ARDB.Phase>();
+        var phases = doc.Phases.
+          Cast<ARDB.Phase>().
+          Select(x => new Types.Phase(x)).
+          ToList();
 
         foreach (var phase in phases)
-          listBox.Items.Add(new Types.Phase(phase));
+          listBox.Items.Add(phase);
+
+        var selectedItems = phases.Intersect(PersistentData.OfType<Types.Phase>());
+
+        foreach (var item in selectedItems)
+          listBox.SelectedItems.Add(item);
       }
 
-      listBox.SelectedIndex = listBox.Items.Cast<Types.Phase>().IndexOf(PersistentValue, 0).FirstOr(-1);
       listBox.EndUpdate();
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
@@ -76,16 +76,10 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (sender is ListBox listBox)
       {
-        if (listBox.SelectedIndex != -1)
-        {
-          if (listBox.Items[listBox.SelectedIndex] is Types.Phase value)
-          {
-            RecordPersistentDataEvent($"Set: {value}");
-            PersistentData.Clear();
-            PersistentData.Append(value);
-            OnObjectChanged(GH_ObjectEventType.PersistentData);
-          }
-        }
+        RecordPersistentDataEvent($"Set: {NickName}");
+        PersistentData.Clear();
+        PersistentData.AppendRange(listBox.SelectedItems.OfType<Types.Phase>());
+        OnObjectChanged(GH_ObjectEventType.PersistentData);
 
         ExpireSolution(true);
       }

@@ -20,10 +20,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     public AddRevisionCloud() : base
     (
       name: "Add Revision Cloud",
-      nickname: "RevisionCloud",
+      nickname: "R-Cloud",
       description: "Given a profile, it adds a revision cloud to the given View",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!Params.TryGetData(DA, "Revision", out ARDB.Revision revision, x => x.IsValid())) return null;
 
           var tol = GeometryTolerance.Model;
-          var viewPlane = view.Location;
+          var viewPlane = view.DetailPlane;
           var loops = boundary.OfType<Brep>().SelectMany(x => x.Loops).Select(x => { var c = x.To3dCurve(); c.Reverse(); return c; }).ToArray();
           foreach (var loop in loops)
           {

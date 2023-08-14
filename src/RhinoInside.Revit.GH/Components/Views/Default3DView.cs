@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Views
   public class Default3DView : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("F2277265-8845-403B-83A9-EF670FA036C8");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "3D";
 
     public Default3DView() : base
@@ -48,23 +48,10 @@ namespace RhinoInside.Revit.GH.Components.Views
     {
       base.AppendAdditionalComponentMenuItems(menu);
 
-      var activeApp = Revit.ActiveUIApplication;
-      var Default3DViewId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.Default3DView);
-      Menu_AppendItem
-      (
-        menu, "Open Default 3D View…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, Default3DViewId, () => ExpireSolution(true)),
-        activeApp.CanPostCommand(Default3DViewId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.Default3DView, "Open Default 3D View…");
 
 #if REVIT_2019
-      var CloseInactiveViewsId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.CloseInactiveViews);
-      Menu_AppendItem
-      (
-        menu, "Close Inactive Views…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, CloseInactiveViewsId),
-        activeApp.CanPostCommand(CloseInactiveViewsId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.CloseInactiveViews, "Close Inactive Views…");
 #endif
     }
     #endregion

@@ -3,19 +3,16 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Topology
 {
+  using Convert.Geometry;
+  using External.DB;
+  using External.DB.Extensions;
+
   public abstract class QuerySpatialElements : ElementCollectorComponent
   {
-    protected internal static readonly ARDB.ElementFilter elementFilter =
-      new ARDB.ElementClassFilter(typeof(ARDB.SpatialElement));
-    protected override ARDB.ElementFilter ElementFilter => elementFilter;
-
     protected QuerySpatialElements(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
@@ -115,14 +112,13 @@ namespace RhinoInside.Revit.GH.Components.Topology
     };
   }
 
-  [ComponentVersion(introduced: "1.7", updated: "1.9")]
+  [ComponentVersion(introduced: "1.7", updated: "1.12")]
   public class QueryAreas : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D1940EB3-B81B-4E57-8F5A-94D045BFB509");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    static readonly ARDB.ElementFilter elementFilter =
-      QuerySpatialElements.elementFilter.Intersect(CompoundElementFilter.ElementClassFilter(typeof(ARDB.Area)));
+    static readonly ARDB.ElementFilter elementFilter = CompoundElementFilter.ElementClassFilter(typeof(ARDB.Area));
     protected override ARDB.ElementFilter ElementFilter => elementFilter;
       
     public QueryAreas() : base
@@ -200,11 +196,21 @@ namespace RhinoInside.Revit.GH.Components.Topology
       ),
       new ParamDefinition
       (
+        new Parameters.AreaScheme()
+        {
+          Name = "Area Scheme",
+          NickName = "AS",
+          Description = "Only areas on a specific Area Scheme.",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
         new Param_Boolean()
         {
           Name = "Enclosed",
           NickName = "ED",
-          Description = "Wheter element is on a properly enclosed region or not.",
+          Description = "Wheter area defines a properly enclosed region or not.",
           Optional = true
         }.SetDefaultVale(true), ParamRelevance.Secondary
       ),
@@ -242,9 +248,16 @@ namespace RhinoInside.Revit.GH.Components.Topology
       if (!Params.TryGetData(DA, "Placed", out bool? placed)) return;
       if (!Params.TryGetData(DA, "Number", out string number)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
-      if (!Parameters.Level.TryGetDataOrDefault(this, DA, "Level", out Types.Level level, doc, point.HasValue ? point.Value.Z : double.NaN) && point.HasValue) return;
+      if (!Params.TryGetData(DA, "Level", out Types.Level level)) return;
+      if (!Params.TryGetData(DA, "Area Scheme", out ARDB.AreaScheme scheme)) return;
       if (!Params.TryGetData(DA, "Enclosed", out bool? enclosed)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
+
+      if (point.HasValue)
+      {
+        placed = true;
+        enclosed = true;
+      }
 
       var tol = GeometryTolerance.Model;
       using (var collector = new ARDB.FilteredElementCollector(doc.Value))
@@ -260,18 +273,6 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.ROOM_NAME, ref name, out var nameFilter))
           elementsCollector = elementsCollector.WherePasses(nameFilter);
 
-        if (enclosed.HasValue)
-        {
-          var rule = new ARDB.FilterDoubleRule
-          (
-            new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.ROOM_PERIMETER)),
-            new ARDB.FilterNumericGreater(),
-            0.0, 0.0
-          );
-
-          elementsCollector = elementsCollector.WherePasses(new ARDB.ElementParameterFilter(rule, !enclosed.Value));
-        }
-
         if (level is object)
           elementsCollector = elementsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.ROOM_LEVEL_ID, level.Id);
 
@@ -280,11 +281,17 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (placed.HasValue)
           areas = areas.Where(x => x.IsPlaced == placed.Value);
 
+        if (enclosed.HasValue)
+          areas = areas.Where(x => x.IsEnclosed == enclosed.Value);
+
         if (!string.IsNullOrEmpty(number))
           areas = areas.Where(x => x.Number.IsSymbolNameLike(number));
 
         if (!string.IsNullOrEmpty(name))
           areas = areas.Where(x => x.Name.IsSymbolNameLike(name));
+
+        if (scheme is object)
+          areas = areas.Where(x => x.Value.AreaScheme.IsEquivalent(scheme));
 
         if (point.HasValue)
         {
@@ -293,23 +300,117 @@ namespace RhinoInside.Revit.GH.Components.Topology
           (
             area =>
             {
-              if (level is object)
+              var plane = area.Location;
+              var count = 0;
+              foreach (var boundary in area.Boundaries)
               {
-                var plane = area.Location;
-                foreach (var boundary in area.Boundaries)
-                {
-                  var containment = boundary.Contains(point.Value, plane, NumericTolerance.DefaultTolerance);
-                  if (containment == PointContainment.Inside)
-                    return true;
-                }
+                var containment = boundary.Contains(point.Value, plane, GeometryTolerance.Model.VertexTolerance);
+                if (containment == PointContainment.Inside)
+                  count++;
               }
 
-              return false;
+              return count % 2 != 0;
             }
           );
         }
 
         DA.SetDataList("Areas", areas.TakeWhileIsNotEscapeKeyDown(this));
+      }
+    }
+  }
+
+  [ComponentVersion(introduced: "1.12")]
+  public class QueryAreaSchemes : ElementCollectorComponent
+  {
+    public override Guid ComponentGuid => new Guid("3E2A753B-6321-4C4C-B697-022D1F04F213");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+
+    static readonly ARDB.ElementFilter elementFilter = CompoundElementFilter.ElementClassFilter(typeof(ARDB.AreaScheme));
+    protected override ARDB.ElementFilter ElementFilter => elementFilter;
+
+    public QueryAreaSchemes() : base
+    (
+      name: "Query Area Schemes",
+      nickname: "AreaSchemes",
+      description: "Get document area shemes list",
+      category: "Revit",
+      subCategory: "Topology"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.Document()
+        {
+          Name = "Document",
+          NickName = "DOC",
+          Description = "Document",
+          Optional = true
+        }, ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Param_String()
+        {
+          Name = "Name",
+          NickName = "N",
+          Description = "Element Name.",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean()
+        {
+          Name = "Gross Building",
+          NickName = "GB",
+          Description = "Only Gross Building Area schemes.",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.AreaScheme()
+        {
+          Name = "Area Schemes",
+          NickName = "AS",
+          Description = "Area Schemes list",
+          Access = GH_ParamAccess.list
+        }
+      )
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Name", out string name)) return;
+      if (!Params.TryGetData(DA, "Gross Building", out bool? gross)) return;
+
+      var tol = GeometryTolerance.Model;
+      using (var collector = new ARDB.FilteredElementCollector(doc.Value))
+      {
+        var elementsCollector = collector.WherePasses(ElementFilter);
+
+        if (TryGetFilterStringParam(ARDB.BuiltInParameter.AREA_SCHEME_NAME, ref name, out var nameFilter))
+          elementsCollector = elementsCollector.WherePasses(nameFilter);
+
+        var areas = collector.Select(x => Types.Element.FromElement(x as ARDB.AreaScheme));
+
+        if (gross.HasValue)
+          areas = areas.Where(x => (x.Value as ARDB.AreaScheme).IsGrossBuildingArea == gross);
+
+        if (!string.IsNullOrEmpty(name))
+          areas = areas.Where(x => x.Nomen.IsSymbolNameLike(name));
+
+        DA.SetDataList("Area Schemes", areas.TakeWhileIsNotEscapeKeyDown(this));
       }
     }
   }
@@ -320,8 +421,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     public override Guid ComponentGuid => new Guid("5DDCB816-61A3-480F-AC45-67F66BEB2E78");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
-    static new readonly ARDB.ElementFilter elementFilter =
-      QuerySpatialElements.elementFilter.Intersect(CompoundElementFilter.ElementClassFilter(typeof(ARDB.Architecture.Room)));
+    static readonly ARDB.ElementFilter elementFilter = CompoundElementFilter.ElementClassFilter(typeof(ARDB.Architecture.Room));
     protected override ARDB.ElementFilter ElementFilter => elementFilter;
 
     public QueryRooms() : base
@@ -365,6 +465,12 @@ namespace RhinoInside.Revit.GH.Components.Topology
       if (!Params.TryGetData(DA, "Enclosed", out bool? enclosed)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
+      if (point.HasValue)
+      {
+        placed = true;
+        enclosed = true;
+      }
+
       var tol = GeometryTolerance.Model;
       using (var collector = new ARDB.FilteredElementCollector(doc.Value))
       {
@@ -388,22 +494,13 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (phase is object)
           elementsCollector = elementsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.ROOM_PHASE, phase.Id);
 
-        if (enclosed.HasValue)
-        {
-          var rule = new ARDB.FilterDoubleRule
-          (
-            new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.ROOM_PERIMETER)),
-            new ARDB.FilterNumericGreater(),
-            0.0, 0.0
-          );
-
-          elementsCollector = elementsCollector.WherePasses(new ARDB.ElementParameterFilter(rule, !enclosed.Value));
-        }
-
         var rooms = collector.Select(x => new Types.RoomElement(x as ARDB.Architecture.Room));
 
         if (placed.HasValue)
           rooms = rooms.Where(x => x.IsPlaced == placed.Value);
+
+        if (enclosed.HasValue)
+          rooms = rooms.Where(x => x.IsEnclosed == enclosed.Value);
 
         if (!string.IsNullOrEmpty(number))
           rooms = rooms.Where(x => x.Number.IsSymbolNameLike(number));
@@ -425,8 +522,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     public override Guid ComponentGuid => new Guid("A1CCF034-AA1F-4731-9863-3C22E0644E2B");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    static new readonly ARDB.ElementFilter elementFilter =
-      QuerySpatialElements.elementFilter.Intersect(CompoundElementFilter.ElementClassFilter(typeof(ARDB.Mechanical.Space)));
+    static readonly ARDB.ElementFilter elementFilter = CompoundElementFilter.ElementClassFilter(typeof(ARDB.Mechanical.Space));
     protected override ARDB.ElementFilter ElementFilter => elementFilter;
 
     public QuerySpaces() : base
@@ -470,6 +566,12 @@ namespace RhinoInside.Revit.GH.Components.Topology
       if (!Params.TryGetData(DA, "Enclosed", out bool? enclosed)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
+      if (point.HasValue)
+      {
+        placed = true;
+        enclosed = true;
+      }
+
       var tol = GeometryTolerance.Model;
       using (var collector = new ARDB.FilteredElementCollector(doc.Value))
       {
@@ -493,22 +595,13 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (phase is object)
           elementsCollector = elementsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.ROOM_PHASE, phase.Id);
 
-        if (enclosed.HasValue)
-        {
-          var rule = new ARDB.FilterDoubleRule
-          (
-            new ARDB.ParameterValueProvider(new ARDB.ElementId(ARDB.BuiltInParameter.ROOM_PERIMETER)),
-            new ARDB.FilterNumericGreater(),
-            0.0, 0.0
-          );
-
-          elementsCollector = elementsCollector.WherePasses(new ARDB.ElementParameterFilter(rule, !enclosed.Value));
-        }
-
         var spaces = collector.Select(x => new Types.SpaceElement(x as ARDB.Mechanical.Space));
 
         if (placed.HasValue)
           spaces = spaces.Where(x => x.IsPlaced == placed.Value);
+
+        if (enclosed.HasValue)
+          spaces = spaces.Where(x => x.IsEnclosed == enclosed.Value);
 
         if (!string.IsNullOrEmpty(number))
           spaces = spaces.Where(x => x.Number.IsSymbolNameLike(number));

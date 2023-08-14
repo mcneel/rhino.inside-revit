@@ -10,6 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using System.Diagnostics;
   using Convert.Geometry;
   using Convert.Units;
   using ElementTracking;
@@ -630,6 +631,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       var type = GetType();
       var ReconstructInfo = type.GetMethod($"Reconstruct{type.Name}", BindingFlags.Instance | BindingFlags.NonPublic);
+      Debug.Assert( ReconstructInfo is object);
       GetParams(ReconstructInfo, out var ins, out var outs);
 
       inputs = ins.Select
@@ -741,24 +743,6 @@ namespace RhinoInside.Revit.GH.Components
       }
       catch (TargetInvocationException e) { throw e.InnerException; }
       finally { element = (ARDB.Element) arguments[1]; }
-    }
-
-    // Step 2.1
-    public override void OnStarted(ARDB.Document document)
-    {
-      base.OnStarted(document);
-    }
-
-    // Step 3.1
-    public override void OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
-    {
-      base.OnPrepare(documents);
-    }
-
-    // Step 3.2
-    public override void OnDone(ARDB.TransactionStatus status)
-    {
-      base.OnDone(status);
     }
 
     #region IGH_ElementIdBakeAwareObject

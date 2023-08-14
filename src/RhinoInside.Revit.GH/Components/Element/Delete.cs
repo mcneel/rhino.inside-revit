@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       var result = 0;
       if (elementIds.Count > 0)
       {
-        using (var updater = deleted is object && modified is object ? new Updater(document) : default)
+        using (var updater = modified is object ? new Updater(document) : default)
         {
           if (!document.CanDeleteElements(elementIds))
           {
@@ -154,12 +154,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
             {
               result = DeletedElementIds.Count;
 
-              if (updater?.DeletedElementIds is object)
+              var deletedElementIds = updater?.DeletedElementIds ?? DeletedElementIds;
+              if (deletedElementIds is object)
               {
-                deleted.AddRange
+                deleted?.AddRange
                 (
-                  updater.DeletedElementIds.Select(x => new Types.Element(document, x)),
-                  updater.DeletedElementIds.Count
+                  deletedElementIds.Select(x => new Types.Element(document, x)),
+                  deletedElementIds.Count
                 );
               }
             }
@@ -167,19 +168,20 @@ namespace RhinoInside.Revit.GH.Components.Elements
             {
               result = -1;
 
-              if (updater?.DeletedElementIds is object)
+              var deletedElementIds = updater?.DeletedElementIds ?? DeletedElementIds;
+              if (deletedElementIds is object)
               {
-                deleted.AddRange
+                deleted?.AddRange
                 (
-                  updater.DeletedElementIds.Select(x => Types.Element.FromElementId(document, x)),
-                  updater.DeletedElementIds.Count
+                  deletedElementIds.Select(x => Types.Element.FromElementId(document, x)),
+                  deletedElementIds.Count
                 );
               }
             }
 
             if (updater?.ModifiedElementIds is object)
             {
-              modified.AddRange
+              modified?.AddRange
               (
                 updater.ModifiedElementIds.Select(x => Types.Element.FromElementId(document, x)),
                 updater.ModifiedElementIds.Count

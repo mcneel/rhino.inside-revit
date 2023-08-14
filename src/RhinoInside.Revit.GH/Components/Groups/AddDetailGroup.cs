@@ -6,7 +6,7 @@ using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Groups
+namespace RhinoInside.Revit.GH.Components.Annotations
 {
   using Convert.Geometry;
   using External.DB.Extensions;
@@ -21,10 +21,10 @@ namespace RhinoInside.Revit.GH.Components.Groups
     public AddDetailGroup() : base
     (
       name: "Add Detail Group",
-      nickname: "DetGroup",
+      nickname: "D-Group",
       description: "Given its Location, it adds a detail group element to the active Revit document",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -150,9 +150,9 @@ namespace RhinoInside.Revit.GH.Components.Groups
           if (!view.Value.IsAnnotationView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
           if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
-          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.ElementType type, Types.Document.FromValue(view.Document), ARDB.BuiltInCategory.OST_IOSDetailGroups)) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.ElementType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.DetailGroupType)) return null;
 
-          var viewPlane = view.Location;
+          var viewPlane = view.DetailPlane;
           point = viewPlane.ClosestPoint(point.Value);
 
           if (rotation.HasValue && Params.Input<Param_Number>("Rotation")?.UseDegrees == true)
@@ -221,7 +221,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
 
       // Set Location and Rotation
       {
-        var goo = Types.Group.FromValue(group) as Types.Group;
+        var goo = Types.Group.FromElement(group) as Types.Group;
         var location = new Plane
         (
           origin.ToPoint3d(),

@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
   public class AddVerticalOpening : AddOpening
   {
     public override Guid ComponentGuid => new Guid("C9C0F4D2-B75E-42C8-A98F-909DF4AB4A1A");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public AddVerticalOpening() : base
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
       nickname: "VerticalOpen",
       description: "Given its outline boundary and a host element, it adds a vertical opening to the active Revit document",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

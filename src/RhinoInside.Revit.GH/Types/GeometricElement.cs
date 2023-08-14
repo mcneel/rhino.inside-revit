@@ -20,13 +20,20 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_GeometricElement : IGH_GraphicalElement { }
 
   [Kernel.Attributes.Name("Geometric Element")]
-  public class GeometricElement : GraphicalElement, IGH_GeometricElement, IGH_PreviewMeshData, Bake.IGH_BakeAwareElement
+  public class GeometricElement : GraphicalElement,
+    IGH_GeometricElement,
+    IHostElementAccess,
+    IGH_PreviewMeshData,
+    Bake.IGH_BakeAwareElement
   {
     public GeometricElement() { }
     public GeometricElement(ARDB.Element element) : base(element) { }
 
     public static new bool IsValidElement(ARDB.Element element)
     {
+      if (element.Category is null)
+        return false;
+
       if (!GraphicalElement.IsValidElement(element))
         return false;
 
@@ -76,11 +83,13 @@ namespace RhinoInside.Revit.GH.Types
       out ARDB.Material[] materials, out Mesh[] meshes, out Curve[] wires
     )
     {
+      bool voidGeometry = element is ARDB.GenericForm form && !form.IsSolid;
+
       using
       (
         var options = element.ViewSpecific ?
-        new ARDB.Options() { View = element.Document.GetElement(element.OwnerViewId) as ARDB.View } :
-        new ARDB.Options() { DetailLevel = detailLevel == ARDB.ViewDetailLevel.Undefined ? ARDB.ViewDetailLevel.Medium : detailLevel }
+        new ARDB.Options() { View = element.Document.GetElement(element.OwnerViewId) as ARDB.View, IncludeNonVisibleObjects = voidGeometry } :
+        new ARDB.Options() { DetailLevel = detailLevel == ARDB.ViewDetailLevel.Undefined ? ARDB.ViewDetailLevel.Medium : detailLevel, IncludeNonVisibleObjects = voidGeometry }
       )
       using (var geometry = element?.GetGeometry(options))
       {
@@ -96,8 +105,12 @@ namespace RhinoInside.Revit.GH.Types
           var elementMaterial = geometry.MaterialElement ?? categoryMaterial;
 
           wires = geometry.GetPreviewWires().Where(x => x is object).ToArray();
-          meshes = geometry.GetPreviewMeshes(element.Document, meshingParameters).ToArray();
-          materials = geometry.GetPreviewMaterials(element.Document, elementMaterial).ToArray();
+          meshes = geometry.Visibility == ARDB.Visibility.Visible ?
+                   geometry.GetPreviewMeshes(element.Document, meshingParameters).ToArray() :
+                   Array.Empty<Mesh>();
+          materials = geometry.Visibility == ARDB.Visibility.Visible ?
+                      geometry.GetPreviewMaterials(element.Document, elementMaterial).ToArray() :
+                      Array.Empty<ARDB.Material>();
 
           if (wires.Length == 0 && meshes.Length == 0 && element.get_BoundingBox(options.View) is ARDB.BoundingBoxXYZ)
           {
@@ -105,7 +118,7 @@ namespace RhinoInside.Revit.GH.Types
             var subWires = new List<Curve>();
             var subMaterials = new List<ARDB.Material>();
 
-            foreach (var dependent in element.GetDependentElements(null).Select(element.Document.GetElement))
+            foreach (var dependent in element.GetDependentElements(CompoundElementFilter.ElementHasBoundingBoxFilter).Select(element.Document.GetElement))
             {
               if (dependent.GetBoundingBoxXYZ(out var view) is null)
                 continue;
@@ -113,16 +126,19 @@ namespace RhinoInside.Revit.GH.Types
               using
               (
                 var dependentOptions = view is object ?
-                new ARDB.Options() { View = view } :
-                new ARDB.Options() { DetailLevel = detailLevel == ARDB.ViewDetailLevel.Undefined ? ARDB.ViewDetailLevel.Medium : detailLevel }
+                new ARDB.Options() { View = view, IncludeNonVisibleObjects = voidGeometry } :
+                new ARDB.Options() { DetailLevel = detailLevel == ARDB.ViewDetailLevel.Undefined ? ARDB.ViewDetailLevel.Medium : detailLevel, IncludeNonVisibleObjects = voidGeometry }
               )
               using (var dependentGeometry = dependent?.GetGeometry(dependentOptions))
               {
                 if (dependentGeometry is object)
                 {
                   subWires.AddRange(dependentGeometry.GetPreviewWires().Where(x => x is object));
-                  subMeshes.AddRange(dependentGeometry.GetPreviewMeshes(element.Document, meshingParameters));
-                  subMaterials.AddRange(dependentGeometry.GetPreviewMaterials(element.Document, elementMaterial));
+                  if (!voidGeometry)
+                  {
+                    subMeshes.AddRange(dependentGeometry.GetPreviewMeshes(element.Document, meshingParameters));
+                    subMaterials.AddRange(dependentGeometry.GetPreviewMaterials(element.Document, elementMaterial));
+                  }
                 }
               }
             }
@@ -144,11 +160,11 @@ namespace RhinoInside.Revit.GH.Types
       readonly BoundingBox clippingBox;
       public readonly MeshingParameters MeshingParameters;
       public Rhino.Display.DisplayMaterial[] materials;
-      static readonly Rhino.Display.DisplayMaterial[] empty_materials = new Rhino.Display.DisplayMaterial[0];
+      static readonly Rhino.Display.DisplayMaterial[] empty_materials = Array.Empty<Rhino.Display.DisplayMaterial>();
       public Mesh[] meshes;
-      static readonly Mesh[] empty_meshes = new Mesh[0];
+      static readonly Mesh[] empty_meshes = Array.Empty<Mesh>();
       public Curve[] wires;
-      static readonly Curve[] empty_wires = new Curve[0];
+      static readonly Curve[] empty_wires = Array.Empty<Curve>();
 
       static List<Preview> previewsQueue;
 
@@ -241,7 +257,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         geometricElement = element;
         clippingBox = element.ClippingBox;
-        MeshingParameters = element.meshingParameters;
+        MeshingParameters = element._MeshingParameters;
       }
 
       public static Preview OrderNew(GeometricElement element)
@@ -277,7 +293,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    MeshingParameters meshingParameters;
+    MeshingParameters _MeshingParameters;
     Preview _GeometryPreview;
     Preview GeometryPreview
     {
@@ -292,12 +308,12 @@ namespace RhinoInside.Revit.GH.Types
 
     public Mesh[] TryGetPreviewMeshes(MeshingParameters parameters)
     {
-      if (!ReferenceEquals(meshingParameters, parameters))
+      if (!ReferenceEquals(_MeshingParameters, parameters))
       {
-        meshingParameters = parameters;
+        _MeshingParameters = parameters;
         if (_GeometryPreview is object)
         {
-          if (_GeometryPreview.MeshingParameters?.RelativeTolerance != meshingParameters?.RelativeTolerance)
+          if (_GeometryPreview.MeshingParameters?.RelativeTolerance != _MeshingParameters?.RelativeTolerance)
             GeometryPreview = null;
         }
       }
@@ -456,7 +472,7 @@ namespace RhinoInside.Revit.GH.Types
     protected static string GetBakeInstanceDefinitionName(ARDB.Element element, out string description)
     {
       const string NS = "::";
-      var name = FullUniqueId.Format(element.Document.GetFingerprintGUID(), element.UniqueId);
+      var name = FullUniqueId.Format(element.Document.GetPersistentGUID(), element.UniqueId);
       description = string.Empty;
 
       if (element is ARDB.ElementType type)
@@ -715,6 +731,17 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
+    #endregion
+
+    #region IHostElementAccess
+    GraphicalElement IHostElementAccess.HostElement => Value is ARDB.Element element ?
+      element.ViewSpecific ? OwnerView?.Viewer :
+      HostElement :
+      default;
+
+    public virtual GraphicalElement HostElement => Value is ARDB.Element element ?
+      GetElement<GraphicalElement>(element.LevelId) :
+      default;
     #endregion
   }
 }

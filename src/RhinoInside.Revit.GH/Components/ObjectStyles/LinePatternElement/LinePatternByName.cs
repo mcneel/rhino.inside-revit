@@ -138,17 +138,8 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
       // Try to duplicate template
       if (template is object)
       {
-        {
-          var ids = ARDB.ElementTransformUtils.CopyElements
-          (
-            template.Document,
-            new ARDB.ElementId[] { template.Id },
-            doc, default, default
-          );
-
-          pattern = ids.Select(x => doc.GetElement(x)).OfType<ARDB.LinePatternElement>().FirstOrDefault();
-          pattern.Name = name;
-        }
+        pattern = template.CloneElement(doc);
+        pattern.Name = name;
       }
 
       if (pattern is null)

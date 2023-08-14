@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -10,25 +9,10 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Host")]
-  public interface IGH_HostObject : IGH_InstanceElement { }
-
-  interface IHostObjectAccess
-  {
-    HostObject Host { get; }
-  }
-
-  interface ISketchAccess
-  {
-    Sketch Sketch { get; }
-  }
-
-  interface ICurtainGridsAccess
-  {
-    IList<CurtainGrid> CurtainGrids { get; }
-  }
+  public interface IGH_HostObject : IGH_GeometricElement { }
 
   [Kernel.Attributes.Name("Host")]
-  public class HostObject : InstanceElement, IGH_HostObject
+  public class HostObject : GeometricElement, IGH_HostObject
   {
     protected override Type ValueType => typeof(ARDB.HostObject);
     public new ARDB.HostObject Value => base.Value as ARDB.HostObject;

@@ -13,6 +13,7 @@ using SD = System.Drawing;
 
 namespace RhinoInside.Revit.GH.Components
 {
+  using System.Reflection;
   using Convert.Geometry;
   using External.DB.Extensions;
 
@@ -74,8 +75,19 @@ namespace RhinoInside.Revit.GH.Components
       ComponentVersion = CurrentVersion;
 
       ComponentVersionAttribute.GetVersionHistory(GetType(), out var _, out var _, out var deprecated);
-      _Obsolete = Obsolete || deprecated is object;
+      if (Obsolete || deprecated is object) VersioningStatus |= VersioningIssues.Obsolete;
+      if (!SDKCompliancy(Rhino.RhinoApp.ExeVersion, Rhino.RhinoApp.ExeServiceRelease)) VersioningStatus |= VersioningIssues.NotCompliant;
     }
+
+    [Flags]
+    enum VersioningIssues
+    {
+      None = 0,
+      Obsolete = 1,
+      NotCompliant = 2
+    }
+
+    readonly VersioningIssues VersioningStatus = default;
 
     #if DEBUG
     public override string InstanceDescription =>
@@ -110,8 +122,46 @@ namespace RhinoInside.Revit.GH.Components
     #endif
 
     #region Obsolete
-    readonly bool? _Obsolete;
-    public override bool Obsolete => _Obsolete.GetValueOrDefault(base.Obsolete);
+    public override bool Obsolete => VersioningStatus.HasFlag(VersioningIssues.Obsolete) || base.Obsolete;
+    #endregion
+
+    #region SDKCompliancy
+    static readonly Version VersionZero = new Version(0, 0, 0, 0);
+    public override bool SDKCompliancy(int exeVersion, int exeServiceRelease)
+    {
+      if (GetType().GetCustomAttribute<ComponentRevitAPIVersionAttribute>() is ComponentRevitAPIVersionAttribute componentAPIVersion)
+      {
+        var revitAPIVersion = new Version(Core.Host.Services.SubVersionNumber);
+        return componentAPIVersion.Min <= revitAPIVersion && (componentAPIVersion.Max ?? VersionZero) <= revitAPIVersion;
+      }
+
+      return true;
+    }
+
+    bool AssertCompliancy()
+    {
+      if (VersioningStatus.HasFlag(VersioningIssues.NotCompliant))
+      {
+        if (GetType().GetCustomAttribute<ComponentRevitAPIVersionAttribute>() is ComponentRevitAPIVersionAttribute componentAPIVersion)
+        {
+          var revitAPIVersion = new Version(Core.Host.Services.SubVersionNumber);
+          if (componentAPIVersion.Min > revitAPIVersion)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is not supported before Revit {componentAPIVersion.Min}.");
+
+          if (componentAPIVersion.Max is Version max && max < revitAPIVersion)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is not supported after Revit {componentAPIVersion.Max}.");
+        }
+        else
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{Name}' component is not compliant on the current setup.");
+
+        return false;
+      }
+
+      return true;
+    }
+
+    protected GH_Exposure SDKCompliancy(GH_Exposure exposure) =>
+      VersioningStatus == VersioningIssues.None ? exposure : exposure | GH_Exposure.hidden;
     #endregion
 
     static readonly string[] _Keywords = new string[] { "Revit" };
@@ -188,6 +238,9 @@ namespace RhinoInside.Revit.GH.Components
     static Component ComputingComponent;
     public sealed override void ComputeData()
     {
+      if (!AssertCompliancy())
+        return;
+
       var current = ComputingComponent;
       ComputingComponent = this;
       try
@@ -264,7 +317,7 @@ namespace RhinoInside.Revit.GH.Components
                   var inch = Revit.ModelUnits / 12.0;
                   var box = ge.Box; box.Inflate(inch, inch, inch);
                   var mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
-                  AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
+                  AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
                 }
                 else
                 {
@@ -277,11 +330,11 @@ namespace RhinoInside.Revit.GH.Components
                 var inch = Revit.ModelUnits / 12.0;
                 var box = graphicalElement.Box; box.Inflate(inch, inch, inch);
                 var mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
                 break;
               }
               case Rhino.Geometry.GeometryBase geometry:
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, geometry);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, geometry);
                 break;
 
               case BoundingBox bbox:
@@ -289,19 +342,19 @@ namespace RhinoInside.Revit.GH.Components
                 var inch = Revit.ModelUnits / 12.0;
                 var box = new Box(bbox); box.Inflate(inch, inch, inch);
                 var mesh = Rhino.Geometry.Mesh.CreateFromBox(box, 1, 1, 1);
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
                 break;
               }
 
               default:
-                AddGeometryRuntimeError(GH_RuntimeMessageLevel.Warning, argument.Message, default);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, default);
                 break;
             }
 
             return true;
           }
 
-          AddGeometryRuntimeError(GH_RuntimeMessageLevel.Error, argument.Message, argument.Value as Rhino.Geometry.GeometryBase);
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, argument.Message, argument.Value as Rhino.Geometry.GeometryBase);
           break;
 
         case Exceptions.RuntimeException _:
@@ -361,8 +414,9 @@ namespace RhinoInside.Revit.GH.Components
     {
       base.CollectData();
 
-      const double DesignLimits = 52_800.0; // feet.
-      var LengthLimit = GeometryDecoder.ToModelLength(DesignLimits); 
+      // What is the distance limit from internal origin point for imported geometry in Revit?
+      // https://www.autodesk.com/support/technical/article/caas/sfdcarticles/sfdcarticles/Revit-20-mile-origin-limit-for-imported-and-model-geometry.html
+      var DesignLimits = GeometryDecoder.ToModelLength(52_800.0 /* ft */);
 
       foreach (var input in Params.Input.Where(x => x is IGH_BakeAwareObject))
       {
@@ -376,13 +430,13 @@ namespace RhinoInside.Revit.GH.Components
             if (branch[i] is IGH_GeometricGoo goo)
             {
               var bbox = goo.Boundingbox;
-              if (bbox.Min.DistanceTo(Point3d.Origin) > LengthLimit || bbox.Max.DistanceTo(Point3d.Origin) > LengthLimit)
+              if (bbox.Min.DistanceTo(Point3d.Origin) > DesignLimits || bbox.Max.DistanceTo(Point3d.Origin) > DesignLimits)
               {
-                if (!reported) AddGeometryRuntimeError
+                if (!reported) AddRuntimeMessage
                 (
                   GH_RuntimeMessageLevel.Warning,
                   $"The input {input.NickName} lies outside of Revit design limits." +
-                  $" Design limits are ±{GeometryDecoder.ToModelLength(DesignLimits):N0} {GH_Format.RhinoUnitSymbol()} around the origin.",
+                  $" Design limits are ±{DesignLimits:N0} {GH_Format.RhinoUnitSymbol()} around the origin.",
                   GH_Convert.ToGeometryBase(goo)
                 );
               }
@@ -394,12 +448,12 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region AddGeometryRuntimeError
-    readonly List<(GeometryBase Geometry, BoundingBox BoundingBox)> RuntimeErrorGeometry = new List<(GeometryBase, BoundingBox)>();
+    readonly List<(GH_RuntimeMessageLevel Level, GeometryBase Geometry, BoundingBox BoundingBox)> RuntimeGeometry = new List<(GH_RuntimeMessageLevel, GeometryBase, BoundingBox)>();
 
     public override void ClearData()
     {
       base.ClearData();
-      RuntimeErrorGeometry.Clear();
+      RuntimeGeometry.Clear();
     }
 
     public void AddGeometryConversionError(GH_RuntimeMessageLevel level, string text, GeometryBase geometry)
@@ -411,7 +465,7 @@ namespace RhinoInside.Revit.GH.Components
           text = $"* {text}{Environment.NewLine}Vertex Index = {vertex.VertexIndex} Location = {vertex.Location * Revit.ModelUnits}.";
           break;
         case Rhino.Geometry.BrepEdge edge:
-          text = $"◉ {text}{Environment.NewLine}Edge Index = {edge.EdgeIndex} Tolerance {edge.Tolerance * Revit.ModelUnits} Length = {edge.GetLength(edge.Domain) * Revit.ModelUnits}.";
+          text = $"◉ {text}{Environment.NewLine}Edge Index = {edge.EdgeIndex} Tolerance = {edge.Tolerance * Revit.ModelUnits} Length = {edge.GetLength(edge.Domain) * Revit.ModelUnits}.";
           break;
         case Rhino.Geometry.BrepFace face:
           var mass = Rhino.Geometry.AreaMassProperties.Compute(face);
@@ -419,13 +473,13 @@ namespace RhinoInside.Revit.GH.Components
           break;
       }
 #endif
-      AddGeometryRuntimeError(level, text, geometry?.InRhinoUnits());
+      AddRuntimeMessage(level, text, geometry?.InRhinoUnits());
     }
 
-    public void AddGeometryRuntimeError(GH_RuntimeMessageLevel level, string text, GeometryBase geometry)
+    public void AddRuntimeMessage(GH_RuntimeMessageLevel level, string text, GeometryBase geometry)
     {
       if (text is object) AddRuntimeMessage(level, text);
-      if (geometry is object) RuntimeErrorGeometry.Add((geometry, geometry.GetBoundingBox(false)));
+      if (geometry is object) RuntimeGeometry.Add((level, geometry, geometry.GetBoundingBox(false)));
     }
 
     public override void DrawViewportWires(IGH_PreviewArgs args)
@@ -443,7 +497,7 @@ namespace RhinoInside.Revit.GH.Components
       var pointRadius = 2.0f * args.Display.DisplayPipelineAttributes.PointRadius * dpi;
       var curveThickness = (int) Math.Round(1.5f * args.DefaultCurveThickness * dpi, MidpointRounding.AwayFromZero);
 
-      foreach (var error in RuntimeErrorGeometry)
+      foreach (var error in RuntimeGeometry)
       {
         // Skip geometry outside the viewport
         if (!viewport.IsVisible(error.BoundingBox))
@@ -452,25 +506,35 @@ namespace RhinoInside.Revit.GH.Components
         var center = error.BoundingBox.Center;
         if (viewport.GetWorldToScreenScale(center, out var pixelsPerUnits))
         {
+          var color = Attributes.Selected ? args.WireColour_Selected : args.WireColour;
+          switch (error.Level)
+          {
+            case GH_RuntimeMessageLevel.Blank:    color = SD.Color.Black; break;
+            case GH_RuntimeMessageLevel.Remark:   color = Attributes.Selected ? args.WireColour_Selected : args.WireColour; break;
+            case GH_RuntimeMessageLevel.Warning:  color = SD.Color.Orange; break;
+            case GH_RuntimeMessageLevel.Error:    color = SD.Color.HotPink; break;
+          }
+
           // If geometry is smaller than a point diameter we show it as a point
           if (error.BoundingBox.Diagonal.Length * pixelsPerUnits < pointRadius * 2.0)
           {
-            args.Display.DrawPoint(center, Rhino.Display.PointStyle.RoundControlPoint, SD.Color.Orange, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
+            args.Display.DrawPoint(center, Rhino.Display.PointStyle.RoundControlPoint, color, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
           }
-          else
+          else switch (error.Geometry)
           {
-            switch (error.Geometry)
-            {
-              case Point point:     args.Display.DrawPoint(point.Location, Rhino.Display.PointStyle.X, SD.Color.Orange, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false); break;
-              case Curve curve:     args.Display.DrawCurve(curve, SD.Color.Orange, curveThickness); break;
-              case Surface surface: args.Display.DrawSurface(surface, SD.Color.Orange, curveThickness); break;
-              case Brep brep:       args.Display.DrawBrepWires(brep, SD.Color.Orange, curveThickness); break;
-              case Mesh mesh:       args.Display.DrawMeshWires(mesh, SD.Color.Orange, curveThickness); break;
-            }
+            case Point point:               args.Display.DrawPoint(point.Location, Rhino.Display.PointStyle.X, color, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false); break;
+            case Curve curve:               args.Display.DrawCurve(curve, color, curveThickness); break;
+            case Surface surface:           args.Display.DrawSurface(surface, color, curveThickness); break;
+            case Brep brep:                 args.Display.DrawBrepWires(brep, color, curveThickness); break;
+            case Mesh mesh:                 args.Display.DrawMeshWires(mesh, color, curveThickness); break;
+            case AnnotationBase annotation: args.Display.DrawAnnotation(annotation, color); break;
           }
         }
       }
     }
+
+    public override bool IsPreviewCapable => RuntimeGeometry.Count > 0 || base.IsPreviewCapable;
+    public override BoundingBox ClippingBox => base.ClippingBox;
     #endregion
 
     #region IGH_ReferenceComponent

@@ -113,13 +113,11 @@ namespace RhinoInside.Revit.External.DB.Schemas
 #endif
 
 #if !REVIT_2022
-#pragma warning disable CS0618 // Type or member is obsolete
     public static implicit operator DataType(Autodesk.Revit.DB.ParameterType value) =>
       Extensions.DataTypeExtension.ToDataType(value);
 
     public static implicit operator Autodesk.Revit.DB.ParameterType(DataType value) =>
       Extensions.DataTypeExtension.ToParameterType(value);
-#pragma warning restore CS0618 // Type or member is obsolete
 #endif
   }
 }

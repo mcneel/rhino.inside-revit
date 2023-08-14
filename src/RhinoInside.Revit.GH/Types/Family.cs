@@ -12,7 +12,6 @@ namespace RhinoInside.Revit.GH.Types
   public class Family : Element, IGH_Family
   {
     protected override Type ValueType => typeof(ARDB.Family);
-    public static explicit operator ARDB.Family(Family value) => value?.Value;
     public new ARDB.Family Value => base.Value as ARDB.Family;
 
     public Family() { }

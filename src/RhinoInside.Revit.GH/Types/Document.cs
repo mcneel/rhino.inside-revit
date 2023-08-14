@@ -307,7 +307,7 @@ namespace RhinoInside.Revit.GH.Types
       SwapFolder = new TemporaryDirectory(Path.Combine(Core.SwapFolder, $"{Id:X8}"), default(ElementsObjectIDGenerator));
 
       _Document = value;
-      DocumentId = value.GetFingerprintGUID();
+      DocumentId = value.GetPersistentGUID();
       RefreshReferenceData();
     }
 
@@ -376,10 +376,10 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (document is null) return;
 
-      if (DocumentsRegistry.TryGetValue(document.GetFingerprintGUID(), out var twins))
+      if (DocumentsRegistry.TryGetValue(document.GetPersistentGUID(), out var twins))
         twins.Add(document);
       else
-        DocumentsRegistry.Add(document.GetFingerprintGUID(), new List<ARDB.Document>() { document });
+        DocumentsRegistry.Add(document.GetPersistentGUID(), new List<ARDB.Document>() { document });
 
       // Add document to DocumentsDictionary
       Document.FromValue(document);
@@ -389,7 +389,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (document is null) return;
 
-      if (DocumentsRegistry.TryGetValue(document.GetFingerprintGUID(), out var twins))
+      if (DocumentsRegistry.TryGetValue(document.GetPersistentGUID(), out var twins))
       {
         {
           var index = twins.IndexOf(document);
@@ -398,7 +398,7 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         if (twins.Count == 0)
-          DocumentsRegistry.Remove(document.GetFingerprintGUID());
+          DocumentsRegistry.Remove(document.GetPersistentGUID());
       }
 
       DocumentsDictionary.Remove(document);
@@ -429,7 +429,13 @@ namespace RhinoInside.Revit.GH.Types
     public static Document FromValue(object value)
     {
       if (value is IGH_Goo goo)
-        value = goo.ScriptVariable();
+      {
+        switch (value)
+        {
+          case IGH_Reference reference: value = reference.Document; break;
+          default:                      value = goo.ScriptVariable(); break;
+        }
+      }
 
       switch (value)
       {
@@ -628,7 +634,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Version
-    public Guid? ExportID => Value?.GetExportID();
+    public Guid? CreationGUID => Value?.GetCreationGUID();
 
     public bool? IsModified => Value?.IsModified;
 

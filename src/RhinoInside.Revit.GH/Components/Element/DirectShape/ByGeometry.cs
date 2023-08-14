@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
@@ -11,30 +12,30 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   using Convert.Geometry;
   using External.DB.Extensions;
   using Kernel.Attributes;
-  using Rhino.Geometry;
 
   public abstract class ReconstructDirectShapeComponent : ReconstructElementComponent
   {
     protected ReconstructDirectShapeComponent(string name, string nickname, string description, string category, string subCategory) :
     base(name, nickname, description, category, subCategory) { }
 
-    protected static Rhino.Geometry.GeometryBase AsGeometryBase(IGH_GeometricGoo obj)
+    protected static GeometryBase AsGeometryBase(IGH_GeometricGoo obj)
     {
       var scriptVariable = obj.ScriptVariable();
       switch (scriptVariable)
       {
-        case Point3d point: return new Rhino.Geometry.Point(point);
-        case Line line: return new Rhino.Geometry.LineCurve(line);
+        case Point3d point: return new Point(point);
+        case Line line: return new LineCurve(line);
         case Rectangle3d rect: return rect.ToNurbsCurve();
-        case Arc arc: return new Rhino.Geometry.ArcCurve(arc);
-        case Circle circle: return new Rhino.Geometry.ArcCurve(circle);
+        case Arc arc: return new ArcCurve(arc);
+        case Circle circle: return new ArcCurve(circle);
         case Ellipse ellipse: return ellipse.ToNurbsCurve();
         case Box box: return box.ToBrep();
       }
 
-      return scriptVariable as Rhino.Geometry.GeometryBase;
+      return scriptVariable as GeometryBase;
     }
 
+    internal static readonly IList<ARDB.GeometryObject> ShapeEmpty = Array.Empty<ARDB.GeometryObject>();
     protected IList<ARDB.GeometryObject> BuildShape
     (
       ARDB.Element element,
@@ -52,7 +53,8 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
         {
-          invalidGeometry?.Transform(inverse);
+          invalidGeometry = invalidGeometry?.Duplicate();
+          invalidGeometry?.Transform(transform);
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
         };
 
@@ -76,10 +78,10 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
                         ARDB.ElementId.InvalidElementId;
                       }
 
-                      transform = Transform.Translation(Point3d.Origin - center);
-                      inverse = Transform.Translation(center / Revit.ModelUnits - Point3d.Origin);
+                      transform = Transform.Translation(center / Revit.ModelUnits - Point3d.Origin);
+                      inverse = Transform.Translation(Point3d.Origin - center);
 
-                      x.Transform(transform);
+                      x.Transform(inverse);
                       var subShape = x.ToShape();
                       materialIds?.AddRange(Enumerable.Repeat(ctx.MaterialId, subShape.Length));
                       if (!hasSolids) hasSolids = subShape.Any(s => s is ARDB.Solid);
@@ -128,21 +130,24 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     public static bool IsValidCategoryId(ARDB.ElementId categoryId, ARDB.Document doc)
     {
+#if REVIT_2018
       // For some unknown reason Revit dislikes 'Coordination Model' category (Tested in Revit 2023).
-      return categoryId.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_Coordination_Model &&
-        ARDB.DirectShape.IsValidCategoryId(categoryId, doc);
+      if (categoryId.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Coordination_Model)
+        return false;
+#endif
+      return ARDB.DirectShape.IsValidCategoryId(categoryId, doc);
     }
   }
 
   public class DirectShapeByGeometry : ReconstructDirectShapeComponent
   {
     public override Guid ComponentGuid => new Guid("0BFBDA45-49CC-4AC6-8D6D-ECD2CFED062A");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeByGeometry() : base
     (
       name: "Add Geometry DirectShape",
-      nickname: "GeoDShape",
+      nickname: "G-Shape",
       description: "Given its Geometry, it adds a DirectShape element to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"
@@ -154,8 +159,8 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [Optional, NickName("DOC")]
       ARDB.Document document,
 
-      [ParamType(typeof(Parameters.GraphicalElement)), NickName("DS"), Description("New DirectShape")]
-      ref ARDB.DirectShape directShape,
+      [ParamType(typeof(Parameters.GraphicalElement)), Name("DirectShape"), NickName("DS"), Description("New DirectShape")]
+      ref ARDB.DirectShape element,
 
       [Optional] string name,
       Optional<ARDB.Category> category,
@@ -173,22 +178,24 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
         var bbox = BoundingBox.Empty;
         foreach (var g in geometry) bbox.Union(g.Boundingbox);
 
-        if (directShape is object && directShape.Category.Id == category.Value.Id)
+        if (element is object && element.Category.Id == category.Value.Id) element.Pinned = false;
+        else ReplaceElement(ref element, ARDB.DirectShape.CreateElement(document, category.Value.Id));
+
+        element.Name = name ?? string.Empty;
+        element.SetShape(ReconstructDirectShapeComponent.ShapeEmpty);
+        if (bbox.IsValid)
         {
-          directShape.Pinned = false;
-          directShape.Location.Move(-directShape.GetOutline().CenterPoint());
+          element.Pinned = false;
+          element.Location.Move(-bbox.Center.ToXYZ());
+          element.SetShape(BuildShape(element, bbox.Center, geometry, material, out var paintIds));
+          element.Location.Move(bbox.Center.ToXYZ());
+          PaintElementSolids(element, paintIds);
         }
-        else ReplaceElement(ref directShape, ARDB.DirectShape.CreateElement(document, category.Value.Id));
-
-        directShape.Name = name ?? string.Empty;
-        directShape.SetShape(BuildShape(directShape, bbox.Center, geometry, material, out var paintIds));
-        directShape.Location.Move(bbox.Center.ToXYZ());
-
-        PaintElementSolids(directShape, paintIds);
+        else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"DirectShape geometry is empty. {{{element.Id.ToString("D")}}}");
       }
       else
       {
-        directShape = null;
+        element = null;
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{category.Value.Name}' category may not be used as a DirectShape category.");
       }
     }
@@ -197,12 +204,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   public class DirectShapeTypeByGeometry : ReconstructDirectShapeComponent
   {
     public override Guid ComponentGuid => new Guid("25DCFE8E-5BE9-460C-80E8-51B7041D8FED");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeTypeByGeometry() : base
     (
       name: "Add DirectShape Type",
-      nickname: "DShapeTyp",
+      nickname: "D-ShapeType",
       description: "Given its Geometry, it reconstructs a DirectShape Type to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"
@@ -256,12 +263,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   public class DirectShapeByLocation : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("A811EFA4-8DE2-46F3-9F88-3D4F13FE40BE");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public DirectShapeByLocation() : base
     (
       name: "Add DirectShape",
-      nickname: "DShape",
+      nickname: "D-Shape",
       description: "Given its location, it reconstructs a DirectShape into the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"

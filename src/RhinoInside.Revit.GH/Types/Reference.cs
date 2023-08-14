@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Types
         if (IsReferencedData)
         {
           if (IsReferencedDataLoaded)
-            Invalid = Id.IsBuiltInId() ? "⚠ Unknown" : "❌ Deleted ";
+            Invalid = Id.IsBuiltInId() ? "⚠ Unknown " : "❌ Deleted ";
           else
             Invalid = "⚠ Unresolved ";
         }
@@ -110,11 +110,13 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+#if !REVIT_2024
       if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))
       {
         target = (Q) (object) new GH_Integer(Id.IntegerValue);
         return true;
       }
+#endif
 
       target = default;
       return false;
@@ -167,36 +169,73 @@ namespace RhinoInside.Revit.GH.Types
 
     protected Reference(ARDB.Document doc, object value) : base(doc, value) { }
 
-    protected ARDB.Reference GetReference(ARDB.Reference reference)
+    protected internal ARDB.Reference GetAbsoluteReference(ARDB.Reference reference)
     {
-      if (reference.LinkedElementId == ARDB.ElementId.InvalidElementId)
+      if (IsLinked)
       {
-        if (reference.ElementId != Id)
-          throw new ArgumentException("Invalid Reference", nameof(reference));
-
-        if (IsLinked)
+        if (reference.LinkedElementId == ElementIdExtension.Invalid)
           return reference.CreateLinkReference(ReferenceDocument, ReferenceId, Document);
-      }
-      else
-      {
-        if (reference.ElementId != ReferenceId || reference.LinkedElementId != Id)
+
+        if (reference.LinkedElementId != ReferenceId)
           throw new ArgumentException("Invalid Reference", nameof(reference));
       }
 
       return reference;
     }
 
+    protected internal T GetElement<T>(ARDB.ElementId id) where T : Element
+    {
+      if (id.IsValid())
+      {
+        return (T)
+          (IsLinked ?
+          Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, id)) :
+          Element.FromElementId(Document, id));
+      }
+
+      return null;
+    }
+
+    protected internal T GetElement<T>(ARDB.LinkElementId id) where T : Element
+    {
+      if (id is object)
+      {
+        if (id.HostElementId != ElementIdExtension.Invalid)
+          return GetElement<T>(id.HostElementId);
+
+        if (IsLinked && id.LinkInstanceId.IsValid() && id.LinkInstanceId != ReferenceId)
+          throw new Exceptions.RuntimeArgumentException(nameof(id), $"Invalid Document");
+
+        return (T) Element.FromLinkElementId(ReferenceDocument, id);
+      }
+
+      return null;
+    }
+
+    protected internal T GetElement<T>(ARDB.Element element) where T : Element
+    {
+      if (element.IsValid())
+      {
+        if (IsLinked && Document.IsEquivalent(element.Document))
+          return (T) Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, element.Id));
+
+        if (!ReferenceDocument.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid Document");
+
+        return (T) Element.FromElement(element);
+      }
+
+      return null;
+    }
+
     internal T GetElementFromReference<T>(ARDB.Reference reference) where T : Element
     {
-      if (reference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
-        throw new ArgumentException("Invalid ElementReferenceType", nameof(reference));
-
-      return Element.FromReference(ReferenceDocument, GetReference(reference)) as T;
+      return Element.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
     }
 
     internal T GetGeometryObjectFromReference<T>(ARDB.Reference reference) where T : GeometryObject
     {
-      return GeometryObject.FromReference(ReferenceDocument, GetReference(reference)) as T;
+      return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
     }
   }
 }

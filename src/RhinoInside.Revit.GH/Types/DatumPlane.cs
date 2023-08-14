@@ -267,7 +267,7 @@ namespace RhinoInside.Revit.GH.Types
 
         if (BoundaryPoints is IList<Point3d> boundary && boundary.Count > 0)
         {
-          args.Pipeline.DrawPatternedPolyline(boundary, args.Color, 0x0007E30, args.Thickness, true);
+          args.Pipeline.DrawPatternedPolyline(boundary, args.Color, 0x00001C47, args.Thickness, true);
 
           if
           (
@@ -396,7 +396,7 @@ namespace RhinoInside.Revit.GH.Types
           var end = curve.PointAtEnd;
           axis = end - start;
           origin = start + (axis * 0.5);
-          perp = axis.PerpVector();
+          perp = axis.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance);
         }
 
         return new Plane(origin, axis, perp);

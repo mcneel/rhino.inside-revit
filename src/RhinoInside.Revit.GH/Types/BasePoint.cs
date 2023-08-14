@@ -145,9 +145,9 @@ namespace RhinoInside.Revit.GH.Types
 
           if (point.IsShared)
           {
-            point.Document.ActiveProjectLocation.GetLocation(out var _, out var basisX, out var basisY);
-            axisX = basisX.ToVector3d();
-            axisY = basisY.ToVector3d();
+            var (_, basisX, basisY) = point.Document.ActiveProjectLocation.GetLocation();
+            axisX = basisX.Direction.ToVector3d();
+            axisY = basisY.Direction.ToVector3d();
           }
 
           return new Plane(origin, axisX, axisY);

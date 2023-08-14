@@ -18,24 +18,35 @@ namespace RhinoInside.Revit.Convert.Geometry
     {
       if (scale == UnitScale.None)
       {
+        DefaultTolerance = Internal.DefaultTolerance;
         AngleTolerance = Internal.AngleTolerance;
         VertexTolerance = Internal.VertexTolerance;
         ShortCurveTolerance = Internal.ShortCurveTolerance;
       }
       else
       {
+        DefaultTolerance = UnitScale.Convert(Internal.DefaultTolerance, UnitScale.Internal, scale);
         AngleTolerance = Internal.AngleTolerance;
         VertexTolerance = UnitScale.Convert(Internal.VertexTolerance, UnitScale.Internal, scale);
         ShortCurveTolerance = UnitScale.Convert(Internal.ShortCurveTolerance, UnitScale.Internal, scale);
       }
     }
 
-    internal GeometryTolerance(double angle, double vertex, double curve)
+    internal GeometryTolerance(double tol, double angle, double vertex, double curve)
     {
+      DefaultTolerance = tol;
       AngleTolerance = angle;
       VertexTolerance = vertex;
       ShortCurveTolerance = curve;
     }
+
+    /// <summary>
+    /// Default tolerance.
+    /// </summary>
+    /// <remarks>
+    /// Two vectors within this distance are considered coincident.
+    /// </remarks>
+    public readonly Numerical.Tolerance DefaultTolerance;
 
     /// <summary>
     /// Angle tolerance.
@@ -43,7 +54,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <remarks>
     /// Two angle measurements closer than this value are considered identical. Value is in radians.
     /// </remarks>
-    public readonly double AngleTolerance;
+    public readonly Numerical.Tolerance AngleTolerance;
 
     /// <summary>
     /// Vertex tolerance.
@@ -51,7 +62,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <remarks>
     /// Two points within this distance are considered coincident.
     /// </remarks>
-    public readonly double VertexTolerance;
+    public readonly Numerical.Tolerance VertexTolerance;
 
     /// <summary>
     /// Curve length tolerance
@@ -59,7 +70,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <remarks>
     /// A curve shorter than this distance is considered degenerated.
     /// </remarks>
-    public readonly double ShortCurveTolerance;
+    public readonly Numerical.Tolerance ShortCurveTolerance;
 
     // Initialized to NaN to notice if Internal is used before is assigned.
     //
@@ -74,7 +85,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <summary>
     /// Default <see cref="GeometryTolerance"/> to be used on <see cref="ARDB.GeometryObject"/> instances.
     /// </summary>
-    public static GeometryTolerance Internal { get; internal set; } = new GeometryTolerance(double.NaN, double.NaN, double.NaN);
+    public static GeometryTolerance Internal { get; internal set; } = new GeometryTolerance(double.NaN, double.NaN, double.NaN, double.NaN);
 
     /// <summary>
     /// Default <see cref="GeometryTolerance"/> expresed in Rhino model unit system.
@@ -85,10 +96,5 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// Default <see cref="GeometryTolerance"/> expresed in Rhino page unit system.
     /// </summary>
     public static GeometryTolerance Page => new GeometryTolerance(UnitConverter.Page.UnitScale);
-
-    #region AlmostEquals
-    public bool AlmostEqualAngles(double x, double y) => ERDB.NumericTolerance.AlmostEquals(x, y, AngleTolerance);
-    public bool AlmostEqualLengths(double x, double y) => ERDB.NumericTolerance.AlmostEquals(x, y, VertexTolerance);
-    #endregion
   }
 }

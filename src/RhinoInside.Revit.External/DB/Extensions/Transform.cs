@@ -4,8 +4,6 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  using static NumericTolerance;
-
   public static class TransformExtension
   {
     public static void Deconstruct
@@ -22,7 +20,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool TryGetInverse(this Transform transform, out Transform inverse)
     {
-      if (DefaultTolerance < transform.Determinant)
+      if (Numerical.Constant.DefaultTolerance < transform.Determinant)
       {
         try { inverse = transform.Inverse; return true; }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
@@ -35,19 +33,22 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static void GetCoordSystem
     (
       this Transform transform,
-      out XYZ origin, out XYZ basisX, out XYZ basisY, out XYZ basisZ
+      out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY, out UnitXYZ basisZ
     )
     {
+      if (!transform.IsConformal)
+        throw new ArgumentException("Transform is not conformal", nameof(transform));
+
       origin = transform.Origin;
-      basisX = transform.BasisX;
-      basisY = transform.BasisY;
-      basisZ = transform.BasisZ;
+      basisX = (UnitXYZ) transform.BasisX;
+      basisY = (UnitXYZ) transform.BasisY;
+      basisZ = (UnitXYZ) transform.BasisZ;
     }
 
     public static void SetCoordSystem
     (
       this Transform transform,
-      XYZ origin, XYZ basisX, XYZ basisY, XYZ basisZ
+      XYZ origin, UnitXYZ basisX, UnitXYZ basisY, UnitXYZ basisZ
     )
     {
       transform.Origin = origin;
@@ -59,14 +60,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static void SetAlignCoordSystem
     (
       this Transform transform,
-      XYZ origin0, XYZ basisX0, XYZ basisY0, XYZ basisZ0,
-      XYZ origin1, XYZ basisX1, XYZ basisY1, XYZ basisZ1
+      XYZ origin0, UnitXYZ basisX0, UnitXYZ basisY0, UnitXYZ basisZ0,
+      XYZ origin1, UnitXYZ basisX1, UnitXYZ basisY1, UnitXYZ basisZ1
     )
     {
       var from = Transform.Identity;
-      from.BasisX = new XYZ(basisX0.X, basisY0.X, basisZ0.X);
-      from.BasisY = new XYZ(basisX0.Y, basisY0.Y, basisZ0.Y);
-      from.BasisZ = new XYZ(basisX0.Z, basisY0.Z, basisZ0.Z);
+
+      from.BasisX = new XYZ(basisX0.Direction.X, basisY0.Direction.X, basisZ0.Direction.X);
+      from.BasisY = new XYZ(basisX0.Direction.Y, basisY0.Direction.Y, basisZ0.Direction.Y);
+      from.BasisZ = new XYZ(basisX0.Direction.Z, basisY0.Direction.Z, basisZ0.Direction.Z);
       from.Origin = from.OfPoint(-origin0);
 
       var to = Transform.Identity;
@@ -92,9 +94,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     internal static void SetCovariance(this Transform transform, IEnumerable<XYZ> points, XYZ meanPoint = default)
     {
       var (x, y, z) = meanPoint ?? XYZExtension.ComputeMeanPoint(points);
-      Sum covXx = default, covXy = default, covXz = default;
-      Sum covYx = default, covYy = default, covYz = default;
-      Sum covZx = default, covZy = default, covZz = default;
+      Numerical.Sum covXx = default, covXy = default, covXz = default;
+      Numerical.Sum covYx = default, covYy = default, covYz = default;
+      Numerical.Sum covZx = default, covZy = default, covZz = default;
 
       foreach (var loc in points)
       {
@@ -126,18 +128,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="covarianceMatrix"></param>
     /// <param name="tolerance"></param>
     /// <returns></returns>
-    internal static XYZ GetPrincipalComponent(this Transform covarianceMatrix, double tolerance = DefaultTolerance)
+    internal static UnitXYZ GetPrincipalComponent(this Transform covarianceMatrix, double tolerance = Numerical.Constant.DefaultTolerance)
     {
-      tolerance = Math.Max(Delta, tolerance);
+      tolerance = Math.Max(Numerical.Constant.Delta, tolerance);
 
-      var previous = new XYZ(1.0, 1.0, 1.0);
-      var principal = covarianceMatrix.OfVector(previous).Normalize(Upsilon);
+      var previous  = XYZExtension.One.ToUnitXYZ();
+      var principal = covarianceMatrix.OfVector(previous).ToUnitXYZ();
 
       var iterations = 50;
-      while (--iterations > 0 && !previous.AlmostEquals(principal, tolerance))
+      while (--iterations > 0 && principal && !previous.AlmostEquals(principal, tolerance))
       {
         previous = principal;
-        principal = covarianceMatrix.OfVector(previous).Normalize(Upsilon);
+        principal = covarianceMatrix.OfVector(previous).ToUnitXYZ();
       }
 
       return principal;

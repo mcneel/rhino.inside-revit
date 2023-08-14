@@ -117,8 +117,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
           Name = "Kind", NickName = "K",
           Description = "Kind to match",
           Optional = true
-        }.
-        SetDefaultVale(ElementKind.System | ElementKind.Component)
+        }
       );
 
       manager[manager.AddTextParameter("Family Name", "FN", "Family Name to match", GH_ParamAccess.item)].Optional = true;
@@ -139,13 +138,9 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
       if (familyName is object)
         filters.Add(CompoundElementFilter.ElementFamilyNameFilter(familyName, inverted.Value));
-      //else
-      //  filters.Add(CompoundElementFilter.ElementFamilyNameFilter(string.Empty, inverted: true));
 
       if (typeName is object)
         filters.Add(CompoundElementFilter.ElementTypeNameFilter(typeName, inverted.Value));
-      else if (familyName is null)
-        filters.Add(CompoundElementFilter.ElementTypeNameFilter(string.Empty, inverted: true));
 
       var filter = inverted.Value ? CompoundElementFilter.Union(filters) : CompoundElementFilter.Intersect(filters);
       DA.SetData("Filter", filter);

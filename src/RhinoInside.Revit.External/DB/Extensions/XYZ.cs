@@ -5,15 +5,13 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  using static NumericTolerance;
+  using Numerical;
 
   public static class XYZExtension
   {
-    public static XYZ NaN { get; } = null; // new XYZ(double.NaN, double.NaN, double.NaN);
-    public static XYZ Zero { get; } = XYZ.Zero;
-    public static XYZ BasisX { get; } = XYZ.BasisX;
-    public static XYZ BasisY { get; } = XYZ.BasisY;
-    public static XYZ BasisZ { get; } = XYZ.BasisZ;
+    public static XYZ NaN    { get; } = null; // new XYZ(double.NaN, double.NaN, double.NaN);
+    public static XYZ Zero   { get; } = XYZ.Zero;
+    public static XYZ One    { get; } = new XYZ(1.0, 1.0, 1.0);
 
     //public static XYZ NegativeInfinity { get; } = new XYZ(double.NegativeInfinity, double.NegativeInfinity, double.NegativeInfinity);
     //public static XYZ PositiveInfinity { get; } = new XYZ(double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity);
@@ -27,43 +25,58 @@ namespace RhinoInside.Revit.External.DB.Extensions
       out double x, out double y, out double z
     )
     {
-      x = value.X;
-      y = value.Y;
-      z = value.Z;
-    }
-
-    internal static bool IsZeroLength(double x, double y, double z, double tolerance)
-    {
-      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
-
-      double u = x, v = y, w = z;
-      if (x > w) { u = y; v = z; w = x; }
-      if (y > w) { u = z; v = x; w = y; }
-      if (w < (0.0 + tolerance) / 3.0) return true;
-      if (w > (0.0 + tolerance)      ) return false;
-
-      u /= w; v /= w;
-
-      return Math.Sqrt(1.0 + (u * u + v * v)) * w < tolerance;
-    }
-
-    internal static bool IsUnitLength(double x, double y, double z, double tolerance)
-    {
-      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
-
-      double u = x, v = y, w = z;
-      if (x > w) { u = y; v = z; w = x; }
-      if (y > w) { u = z; v = x; w = y; }
-      if (w < (1.0 - tolerance) / 3.0) return false;
-      if (w > (1.0 + tolerance)      ) return false;
-
-      u /= w; v /= w;
-
-      return Math.Sqrt(1.0 + (u * u + v * v)) * w - 1.0 < tolerance;
+      if (value is null)
+      {
+        x = double.NaN;
+        y = double.NaN;
+        z = double.NaN;
+      }
+      else
+      {
+        x = value.X;
+        y = value.Y;
+        z = value.Z;
+      }
     }
 
     /// <summary>
-    /// Gets the length of this vector.
+    /// The boolean value that indicates whether this vector is a zero vector.
+    /// </summary>
+    /// <param name="xyz"></param>
+    /// <returns>The vector's length is 0.0 within the <paramref name="tolerance"/>.</returns>
+    public static bool IsZeroVector(this XYZ xyz)
+    {
+      return Euclidean.IsZero3(xyz.X, xyz.Y, xyz.Z, Constant.DefaultTolerance);
+    }
+
+    /// <summary>
+    /// The boolean value that indicates whether this vector is of unit length.
+    /// </summary>
+    /// <remarks>
+    /// A unit length vector has a length of 1.0 and is considered normalized.
+    /// </remarks>
+    /// <param name="xyz"></param>
+    /// <param name="tolerance"></param>
+    /// <returns>The vector's length is 1.0 within the <paramref name="tolerance"/>.</returns>
+    public static bool IsUnitVector(this XYZ xyz)
+    {
+      return Euclidean.IsUnit3(xyz.X, xyz.Y, xyz.Z, Constant.DefaultTolerance);
+    }
+
+    public static bool AlmostEqualVectors(this XYZ a, XYZ b)
+    {
+      return Euclidean.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, Constant.DefaultTolerance);
+    }
+
+    public static bool AlmostEqualPoints(this XYZ a, XYZ b, double tolerance = Constant.DefaultTolerance * 100.0)
+    {
+      tolerance = Math.Max(tolerance, Constant.DefaultTolerance * 2.0);
+
+      return Euclidean.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, tolerance);
+    }
+
+    /// <summary>
+    /// Gets the distance form the origin or the length if this is a vector.
     /// </summary>
     /// <remarks>
     /// In 3-D Euclidean space, the length of the vector is the square root of the sum
@@ -72,40 +85,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="xyz"></param>
     /// <param name="tolerance"></param>
     /// <returns></returns>
-    public static double GetLength(this XYZ xyz, double tolerance = DefaultTolerance)
+    public static double Norm(this XYZ xyz, double tolerance = Constant.DefaultTolerance)
     {
-      tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
+      tolerance = Math.Max(tolerance, Constant.Upsilon);
 
-      var length = NumericTolerance.Norm(xyz.X, xyz.Y, xyz.Z);
-      return length < tolerance ? 0.0 : length;
-    }
-
-    public static bool AlmostEquals(this XYZ a, XYZ b, double tolerance)
-    {
-      tolerance = Math.Max(tolerance, Upsilon);
-
-      return NumericTolerance.Norm(a.X - b.X, a.Y - b.Y, a.Z - b.Z) < tolerance;
+      var norm = Euclidean.Norm(xyz.X, xyz.Y, xyz.Z);
+      return norm < tolerance ? 0.0 : norm;
     }
 
     /// <summary>
-    /// Returns a new XYZ whose coordinates are the normalized values from this vector.
+    /// Returns a new <see cref="UnitXYZ"/> whose coordinates are the normalized values from this vector.
     /// </summary>
     /// <remarks>
     /// Normalized indicates that the length of this vector equals one (a unit vector).
     /// </remarks>
     /// <param name="xyz"></param>
-    /// <param name="tolerance"></param>
-    /// <returns>The normalized XYZ or zero if the vector is almost Zero.</returns>
-    public static XYZ Normalize(this XYZ xyz, double tolerance = DefaultTolerance)
+    /// <returns>The normalized UnitXYZ or UnitXYZ.NaN if the vector is {0, 0, 0}.</returns>
+    public static UnitXYZ ToUnitXYZ(this XYZ xyz)
     {
-      tolerance = Math.Max(tolerance, Upsilon);
-
       var (x, y, z) = xyz;
-      var length = NumericTolerance.Norm(x, y, z);
-      if (length < tolerance)
-        return Zero;
-
-      return new XYZ(x / length, y / length, z / length);
+      return Euclidean.Normalize3(ref x, ref y, ref z) ? (UnitXYZ) new XYZ(x, y, z) : default;
     }
 
     /// <summary>
@@ -118,34 +117,67 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </remarks>
     /// <param name="a"></param>
     /// <param name="b"></param>
-    /// <param name="tolerance">Tolerance value to check if input vectors are zero length.</param>
-    /// <returns>The vector equal to the cross product.</returns>
-    public static XYZ CrossProduct(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
+    /// <returns>The vector equal to a ⨯ b.</returns>
+    /// <seealso cref="https://en.wikipedia.org/wiki/Cross_product"/>
+    public static XYZ CrossProduct(XYZ a, XYZ b)
     {
-      tolerance = Math.Max(tolerance, Upsilon);
-
       var (aX, aY, aZ) = a;
-      var lengthA = NumericTolerance.Norm(aX, aY, aZ);
-      if (lengthA < tolerance)
+      var aLength = Euclidean.Norm(aX, aY, aZ);
+      if (aLength < Constant.Upsilon)
         return Zero;
 
       var (bX, bY, bZ) = b;
-      var lengthB = NumericTolerance.Norm(bX, bY, bZ);
-      if (lengthB < tolerance)
+      var bLength = Euclidean.Norm(bX, bY, bZ);
+      if (bLength < Constant.Upsilon)
         return Zero;
 
       // Normalize a and b
-      aX /= lengthA; aY /= lengthA; aZ /= lengthA;
-      bX /= lengthB; bY /= lengthB; bZ /= lengthB;
+      aX /= aLength; aY /= aLength; aZ /= aLength;
+      bX /= bLength; bY /= bLength; bZ /= bLength;
 
       // Compute CrossProduct of normalized vectors
-      var x = aY * bZ - aZ * bY;
-      var y = aZ * bX - aX * bZ;
-      var z = aX * bY - aY * bX;
+      var zX = aY * bZ - aZ * bY;
+      var zY = aZ * bX - aX * bZ;
+      var zZ = aX * bY - aY * bX;
 
-      // Scale result back to be lengthA * lengthB * sin(𝛼) in magnitude
-      var lengthAB = lengthA * lengthB;
-      return new XYZ(x * lengthAB, y * lengthAB, z * lengthAB);
+      // Scale result back to be aLength * bLength * sin(𝛼) in magnitude
+      var abLength = aLength * bLength;
+      return new XYZ(zX * abLength, zY * abLength, zZ * abLength);
+    }
+
+    /// <summary>
+    /// The dot product of of vector <paramref name="a"/> and vector <paramref name="b"/>.
+    /// </summary>
+    /// <remarks>
+    /// Geometrically equal to the cosinus of the angle span between a and b times |a| ⋅ |b|.
+    /// </remarks>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <param name="tolerance"></param>
+    /// <returns>The scalar equal to a ⋅ b.</returns>
+    /// <seealso cref="https://en.wikipedia.org/wiki/Dot_product"/>
+    public static double DotProduct(XYZ a, XYZ b)
+    {
+      var (aX, aY, aZ) = a;
+      var (bX, bY, bZ) = b;
+
+      return aX * bX + aY * bY + aZ * bZ;
+    }
+
+    /// <summary>
+    /// The triple product of of vector <paramref name="a"/>, vector <paramref name="b"/> and vector <paramref name="c"/>.
+    /// </summary>
+    /// <remarks>
+    /// Geometrically equal to the signed volume of the parallelepiped formed by the three vectors.
+    /// </remarks>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <param name="c"></param>
+    /// <returns>The scalar equal to (a ⨯ b) ⋅ c.</returns>
+    /// <seealso cref="https://en.wikipedia.org/wiki/Triple_product"/>
+    public static double TripleProduct(XYZ a, XYZ b, XYZ c)
+    {
+      return DotProduct(CrossProduct(a, b), c);
     }
 
     /// <summary>
@@ -155,12 +187,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="b"></param>
     /// <param name="tolerance"></param>
     /// <returns>true if <paramref name="a"/> and <paramref name="b"/> are parallel</returns>
-    public static bool IsParallelTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
+    public static bool IsParallelTo(this XYZ a, XYZ b, double tolerance = Constant.DefaultTolerance)
     {
-      var A = a.Normalize(tolerance);
-      var B = b.Normalize(tolerance);
+      var A = a.ToUnitXYZ();
+      var B = b.ToUnitXYZ();
 
-      return AlmostEquals(A, A.DotProduct(B) < 0.0 ? -B : B, tolerance);
+      return A.IsParallelTo(B, tolerance);
     }
 
     /// <summary>
@@ -170,12 +202,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="b"></param>
     /// <param name="tolerance"></param>
     /// <returns>true if <paramref name="a"/> and <paramref name="b"/> are codirectional</returns>
-    public static bool IsCodirectionalTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
+    public static bool IsCodirectionalTo(this XYZ a, XYZ b, double tolerance = Constant.DefaultTolerance)
     {
-      var A = a.Normalize(tolerance);
-      var B = b.Normalize(tolerance);
+      var A = a.ToUnitXYZ();
+      var B = b.ToUnitXYZ();
 
-      return AlmostEquals(A, B, tolerance);
+      return A.IsCodirectionalTo(B, tolerance);
     }
 
     /// <summary>
@@ -185,13 +217,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="b"></param>
     /// <param name="tolerance"></param>
     /// <returns>true if <paramref name="a"/> and <paramref name="b"/> are perpendicular</returns>
-    public static bool IsPerpendicularTo(this XYZ a, XYZ b, double tolerance = DefaultTolerance)
+    public static bool IsPerpendicularTo(this XYZ a, XYZ b, double tolerance = Constant.DefaultTolerance)
     {
-      var A = a.Normalize(tolerance);
-      var B = b.Normalize(tolerance);
+      var A = a.ToUnitXYZ();
+      var B = b.ToUnitXYZ();
 
-      tolerance = Math.Max(tolerance, Upsilon);
-      return NumericTolerance.Norm(A.DotProduct(B)) < tolerance;
+      return A.IsPerpendicularTo(B, tolerance);
     }
 
     /// <summary>
@@ -199,21 +230,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <para>Given a vector to be used as the Z axis of a coordinate system, this algorithm generates a corresponding X axis for the coordinate system.</para>
     /// <para>The Y axis follows by application of the right-hand rule.</para>
     /// </summary>
-    /// <param name="value"></param>
+    /// <param name="xyz"></param>
     /// <param name="tolerance"></param>
     /// <returns>X axis of the corresponding coordinate system</returns>
-    public static XYZ PerpVector(this XYZ value, double tolerance = DefaultTolerance)
+    public static XYZ PerpVector(this XYZ xyz, double tolerance = Constant.DefaultTolerance)
     {
-      tolerance = Math.Max(tolerance, Upsilon);
+      var (x, y, z) = xyz;
 
-      var (x, y, z) = value;
-      var length = NumericTolerance.Norm(x, y, z);
-      if (length < tolerance)
-        return Zero;
+      var norm = Euclidean.Norm(x, y, z);
+      if (norm <= tolerance) return Zero;
+      x /= norm; y /= norm; z /= norm;
 
-      return NumericTolerance.Norm(x / length, y / length) < tolerance ?
-        new XYZ(z, 0.0, -x) :
-        new XYZ(-y, x, 0.0);
+      if (Euclidean.IsZero2(x, y, tolerance))
+      {
+        Euclidean.Normalize2(ref x, ref z);
+        return new XYZ(z * norm, 0.0, -x * norm);
+      }
+      else
+      {
+        Euclidean.Normalize2(ref x, ref y);
+        return new XYZ(-y * norm, x * norm, 0.0);
+      }
     }
 
     /// <summary>
@@ -289,10 +326,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static XYZ ComputeMeanPoint(IEnumerable<XYZ> points)
     {
-      Sum meanX = default, meanY = default, meanZ = default;
+      Numerical.Sum meanX = default, meanY = default, meanZ = default;
       var numPoints = 0;
 
-      foreach(var point in points)
+      foreach (var point in points)
       {
         numPoints++;
         meanX.Add(point.X);

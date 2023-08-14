@@ -88,6 +88,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
+    internal static bool IsColor(this BuiltInParameter value)
+    {
+      var name = value.ToString();
+      return name.EndsWith("_COLOR") || name.EndsWith("_COLOR_PARAM");
+    }
+
     /// <summary>
     /// Internal Dictionary that maps <see cref="BuiltInParameter"/> by name.
     /// Results are implicitly orderd by value in the <see cref="BuiltInParameter"/> enum.
@@ -151,9 +157,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (parameter.StorageType != StorageType.Integer)
         throw new InvalidCastException();
 
-      if (parameter.Definition?.GetDataType() != SpecType.Int.Integer)
-        throw new InvalidCastException();
-
       return (T) (object) parameter.AsInteger();
     }
 
@@ -162,7 +165,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (parameter.StorageType != StorageType.Integer)
         throw new InvalidCastException();
 
-      if (parameter.Definition?.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().ToString().EndsWith("_COLOR"))
+      if (parameter.Definition?.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().IsColor())
         throw new InvalidCastException();
 
       var abgr = parameter.AsInteger();
@@ -177,16 +180,70 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return parameter.Element.Document.GetElement(parameter.AsElementId());
     }
 
+    public static bool Set(this Parameter parameter, bool value)
+    {
+      if (parameter.StorageType != StorageType.Integer)
+        throw new InvalidCastException();
+
+      if (parameter.Definition.GetDataType() != SpecType.Boolean.YesNo)
+        throw new InvalidCastException();
+
+      return parameter.Set(value ? 1 : 0);
+    }
+
+    public static bool Set<T>(this Parameter parameter, T value) where T : Enum
+    {
+      if (parameter.StorageType != StorageType.Integer)
+        throw new InvalidCastException();
+
+      return parameter.Set((int) (object) value);
+    }
+
+    public static bool Set(this Parameter parameter, Color value)
+    {
+      if (parameter.StorageType != StorageType.Integer)
+        throw new InvalidCastException();
+
+      if (!parameter.Id.ToBuiltInParameter().IsColor())
+        throw new InvalidCastException();
+
+      return parameter.Set(value.ToBGR());
+    }
+
+    private static bool Set(Parameter parameter, ElementId value)
+    {
+      if (parameter.StorageType != StorageType.ElementId)
+        throw new InvalidCastException();
+
+      // `DB.Parameter.Set` does not validate `value` is a valid type for `parameter.Element`.
+      // Revit editor crashes when that element with a wrong type is selected.
+      if (parameter.GetTypeId() == ParameterId.ElemTypeParam)
+      {
+        if (!parameter.Element.GetValidTypes().Contains(value)) return false;
+        return parameter.Element.ChangeTypeId(value) == ElementId.InvalidElementId;
+      }
+
+      return parameter.Set(value ?? ElementIdExtension.Invalid);
+    }
+
+    public static bool Set(this Parameter parameter, Element value)
+    {
+      if (value is object && !parameter.Element.Document.IsEquivalent(value.Document))
+        throw new InvalidCastException();
+
+      return Set(parameter, value?.Id ?? ElementIdExtension.Invalid);
+    }
+
     public static bool Update(this Parameter parameter, bool value)
     {
       if (parameter.HasValue && parameter.AsInteger() == (value ? 1 : 0)) return true;
-      return parameter.Set(value ? 1 : 0);
+      return parameter.Set(value);
     }
 
     public static bool Update<T>(this Parameter parameter, T value) where T : Enum
     {
       if (parameter.HasValue && parameter.AsInteger() == (int) (object) value) return true;
-      return parameter.Set((int) (object) value);
+      return parameter.Set(value);
     }
 
     public static bool Update(this Parameter parameter, int value)
@@ -197,12 +254,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool Update(this Parameter parameter, Color value)
     {
-      if (parameter.Definition.GetDataType() != SpecType.Int.Integer || !parameter.Id.ToBuiltInParameter().ToString().EndsWith("_COLOR"))
-        throw new InvalidCastException();
-
-      var abgr = (value.Blue << 16) | (value.Green << 8) | (value.Red << 0);
-      if (parameter.HasValue && parameter.AsInteger() == abgr) return true;
-      return parameter.Set(abgr);
+      if (parameter.HasValue && parameter.AsInteger() == value.ToBGR()) return true;
+      return parameter.Set(value);
     }
 
     public static bool Update(this Parameter parameter, double value)
@@ -221,24 +274,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (parameter.HasValue && parameter.AsElementId() == value) return true;
 
-      // `DB.Parameter.Set` does not validate `value` is a valid type for `parameter.Element`.
-      // Revit editor crashes when that element with a wrong type is selected.
-      if (parameter.GetTypeId() == ParameterId.ElemTypeParam)
-      {
-        if (!parameter.Element.GetValidTypes().Contains(value))
-          return false;
-
-        if
-        (
-          parameter.Element.Document.GetElement(parameter.Element.GetTypeId()).GetType() !=
-          parameter.Element.Document.GetElement(value).GetType()
-        )
-          return false;
-
-        return parameter.Element.ChangeTypeId(value) == ElementId.InvalidElementId;
-      }
-
-      return parameter.Set(value);
+      return Set(parameter, value ?? ElementIdExtension.Invalid);
     }
 
     public static bool Update(this Parameter parameter, Element value)
@@ -246,7 +282,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (value is object && !parameter.Element.Document.IsEquivalent(value.Document))
         throw new InvalidCastException();
 
-      return Update(parameter, value?.Id ?? ElementIdExtension.InvalidElementId);
+      return Update(parameter, value?.Id ?? ElementIdExtension.Invalid);
     }
 
     public static bool ResetValue(this Parameter parameter)

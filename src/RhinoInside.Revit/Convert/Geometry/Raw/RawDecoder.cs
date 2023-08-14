@@ -110,6 +110,11 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
     {
       return new Plane(AsPoint3d(plane.Origin), AsVector3d(plane.XVec), AsVector3d(plane.YVec));
     }
+
+    public static Plane AsPlane(ARDB.Frame frame)
+    {
+      return new Plane(AsPoint3d(frame.Origin), AsVector3d(frame.BasisX), AsVector3d(frame.BasisY));
+    }
     #endregion
 
     #region Point
@@ -461,10 +466,14 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
         AsVector3d(xDir),
         AsVector3d(yDir)
       );
-      var axisDir = AsVector3d(zDir);
 
-      using (var ECStoWCS = new ARDB.Transform(ARDB.Transform.Identity) { Origin = origin, BasisX = xDir.Normalize(), BasisY = yDir.Normalize(), BasisZ = zDir.Normalize() })
+      using (var ECStoWCS = ARDB.Transform.Identity)
       {
+        ECStoWCS.Origin = origin;
+        ECStoWCS.BasisX = xDir.Normalize();
+        ECStoWCS.BasisY = yDir.Normalize();
+        ECStoWCS.BasisZ = zDir.Normalize();
+
         var c = ToRhino(curve.CreateTransformed(ECStoWCS));
         c = ctol == 0.0 ? c : c.Extend(CurveEnd.Both, ctol, CurveExtensionStyle.Smooth);
 

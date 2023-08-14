@@ -30,8 +30,8 @@ namespace RhinoInside.Revit.GH.Types
       if (value is ARDB.CurveElement curveElement)
         return SetValue(curveElement.SketchPlane);
 
-      if (value is ARDB.Level level)
-        return SetValue(level.GetSketchPlane());
+      if (value is ARDB.DatumPlane datum)
+        return SetValue(datum.GetSketchPlane());
 
       return base.CastFrom(source);
     }

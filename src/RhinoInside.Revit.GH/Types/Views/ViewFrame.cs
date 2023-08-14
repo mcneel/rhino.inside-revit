@@ -6,12 +6,17 @@ using Rhino;
 using Rhino.Display;
 using Rhino.DocObjects;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Numerical;
+  using Convert.Geometry;
+  using Convert.Units;
+  using External.DB;
+  using External.DB.Extensions;
+  using static External.DB.Extensions.BoundingBoxXYZExtension;
+
   public class ViewFrame : GH_GeometricGoo<ViewportInfo>, IGH_PreviewData
   {
     public ViewFrame() { }
@@ -25,9 +30,20 @@ namespace RhinoInside.Revit.GH.Types
       ReferenceID = other.ReferenceID;
       if (other.Value is object) Value = new ViewportInfo(other.Value);
       Title = other.Title;
+      BoundEnabled = (bool[,]) other.BoundEnabled.Clone();
+      Bound = (Interval[]) other.Bound.Clone();
     }
 
     public override bool IsValid => Value is object;
+
+    public override string IsValidWhyNot
+    {
+      get
+      {
+        if (Value is null) return "Reference Viewport Info is null";
+        return Value.IsValidWithLog(out var log) ? default : log;
+      }
+    }
 
     public override string TypeName => "View Frame";
 
@@ -36,28 +52,66 @@ namespace RhinoInside.Revit.GH.Types
     public string Title { get; set; } = string.Empty;
 
     [Flags]
-    enum ClippingPlanes
+    enum BoundPlane
     {
-      None      = 0,
-      Left      = 1 << 0,
-      Right     = 1 << 1,
-      Bottom    = 1 << 2,
-      Top       = 1 << 3,
-      Far       = 1 << 4,
-      Near      = 1 << 5,
-      Default   = Left | Right | Bottom | Top,
+      None = 0,
+      Left = 1 << 0,
+      Right = 1 << 1,
+      Bottom = 1 << 2,
+      Top = 1 << 3,
+      Far = 1 << 4,
+      Near = 1 << 5,
     }
 
-    ClippingPlanes EnabledClipPlanes = ClippingPlanes.Default;
+    BoundPlane PlaneEnabled
+    {
+      get => (BoundEnabled[AxisX, BoundsMin] ? BoundPlane.Left   : default) |
+             (BoundEnabled[AxisX, BoundsMax] ? BoundPlane.Right  : default) |
+             (BoundEnabled[AxisY, BoundsMin] ? BoundPlane.Bottom : default) |
+             (BoundEnabled[AxisY, BoundsMax] ? BoundPlane.Top    : default) |
+             (BoundEnabled[AxisZ, BoundsMin] ? BoundPlane.Far    : default) |
+             (BoundEnabled[AxisZ, BoundsMax] ? BoundPlane.Near   : default);
 
-    public bool ClipLeft { get => EnabledClipPlanes.HasFlag(ClippingPlanes.Left); set => EnabledClipPlanes = EnabledClipPlanes.WithFlag(ClippingPlanes.Left, value); }
-    public bool ClipRight { get => EnabledClipPlanes.HasFlag(ClippingPlanes.Right); set => EnabledClipPlanes = EnabledClipPlanes.WithFlag(ClippingPlanes.Right, value); }
-    public bool ClipBottom { get => EnabledClipPlanes.HasFlag(ClippingPlanes.Bottom); set => EnabledClipPlanes = EnabledClipPlanes.WithFlag(ClippingPlanes.Bottom, value); }
-    public bool ClipTop { get => EnabledClipPlanes.HasFlag(ClippingPlanes.Top); set => EnabledClipPlanes = EnabledClipPlanes.WithFlag(ClippingPlanes.Top, value); }
-    public bool ClipFar { get => EnabledClipPlanes.HasFlag(ClippingPlanes.Far); set => EnabledClipPlanes = EnabledClipPlanes.WithFlag(ClippingPlanes.Far, value); }
-    public bool ClipNear { get => EnabledClipPlanes.HasFlag(ClippingPlanes.Near); set => EnabledClipPlanes = EnabledClipPlanes.WithFlag(ClippingPlanes.Near, value); }
+      set
+      {
+        BoundEnabled[AxisX, BoundsMin] = value.HasFlag(BoundPlane.Left);
+        BoundEnabled[AxisX, BoundsMax] = value.HasFlag(BoundPlane.Right);
+        BoundEnabled[AxisY, BoundsMin] = value.HasFlag(BoundPlane.Bottom);
+        BoundEnabled[AxisY, BoundsMax] = value.HasFlag(BoundPlane.Top);
+        BoundEnabled[AxisZ, BoundsMin] = value.HasFlag(BoundPlane.Far);
+        BoundEnabled[AxisZ, BoundsMax] = value.HasFlag(BoundPlane.Near);
+      }
+    }
 
-    public override object ScriptVariable() => Value is null ? null : new ViewportInfo(Value);
+    public bool[,] BoundEnabled { get; set; } = BoundEnabledNone;
+    static bool[,] BoundEnabledNone => new bool[,]
+    {
+      { false, false },
+      { false, false },
+      { false, false },
+    };
+    static bool[,] BoundEnabledPlanar => new bool[,]
+    {
+      { true, true },
+      { true, true },
+      { false, false },
+    };
+    static bool[,] BoundEnabledBox => new bool[,]
+    {
+      { true, true },
+      { true, true },
+      { true, true },
+    };
+
+    public Interval[] Bound { get; set; } = BoundDefault;
+    static Interval[] BoundDefault => new Interval[]
+    {
+      new Interval(double.NaN, double.NaN),
+      new Interval(double.NaN, double.NaN),
+      new Interval(double.NaN, double.NaN),
+    };
+
+    public override object ScriptVariable() => ToBoundingBoxXYZ();
 
     public override string ToString()
     {
@@ -103,61 +157,104 @@ namespace RhinoInside.Revit.GH.Types
       return "Unrecogized projection";
     }
 
+    static void SetScreenPort(ViewportInfo vport, int size)
+    {
+      if (vport.FrustumAspect > 1.0)
+        vport.SetScreenPort(0, size, 0, (int) Math.Round(size / vport.FrustumAspect), 0, 1);
+      else
+        vport.SetScreenPort(0, (int) Math.Round(size / vport.FrustumAspect), 0, size, 0, 1);
+    }
+
     public override bool CastFrom(object source)
     {
-      if (source is ViewportInfo view)
+      switch (source)
       {
-        Value = new ViewportInfo(view);
-        return true;
+        case GH_Goo<ViewportInfo> info: source = info.Value; break;
+        case IGH_Goo goo: source = goo.ScriptVariable(); break;
       }
-      else if (source is GH_Goo<ViewportInfo> info)
-      {
-        Value = info.Value is null ? null : new ViewportInfo(info.Value);
-        return true;
-      }
-
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
 
       switch (source)
       {
-        case Plane plane:
-        {
-          var vport = new ViewportInfo { IsParallelProjection = true };
-          vport.SetCameraLocation(plane.Origin);
-          vport.SetCameraDirection(-plane.ZAxis);
-          vport.SetCameraUp(plane.YAxis);
-          var radius = Grasshopper.CentralSettings.PreviewPlaneRadius;
-          var width = radius * 2;
-          var height = radius * 2;
+        case Point3d point: source = new Plane(point, Vector3d.XAxis, Vector3d.YAxis);  break;
+      }
 
-          var target = Math.Sqrt(width * width + height * height);
+      switch (source)
+      {
+        case Vector3d vector:
+        {
+          var radius = vector.Length;
+          var target = vector.Length;
           var near = double.Epsilon;
 
-          if (vport.SetFrustum(-radius, +radius, -radius, +radius, near, near + target))
+          var vport = new ViewportInfo { IsParallelProjection = true };
+          vport.SetCameraLocation(Point3d.Origin);
+          vport.SetCameraDirection(-vector);
+          vport.SetCameraUp(Vector3d.CrossProduct(vector, vector.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance)));
+          vport.TargetPoint = Point3d.Origin - vector;
+
+          if (vport.SetFrustum(-radius, +radius, -radius, +radius, near, target))
           {
-            EnabledClipPlanes = ClippingPlanes.None;
+            SetScreenPort(vport, 1000);
+
+            BoundEnabled = BoundEnabledNone;
+            Bound[AxisX] = new Interval(-radius, +radius);
+            Bound[AxisY] = new Interval(-radius, +radius);
+            Bound[AxisZ] = new Interval(-target, +target);
             Value = vport;
             return true;
           }
           else return false;
         }
 
-        case Rectangle3d rect:
+        case Line line:
         {
-          var target = Math.Sqrt(rect.Width * rect.Width + rect.Height * rect.Height);
-          var near = 0.5 * Math.Sqrt(3.0) * rect.Width;
-          var nearPlane = rect.Plane;
+          var radius = line.Length / 3.0;
+          var target = line.Length;
+          var near = double.Epsilon;
 
           var vport = new ViewportInfo { IsParallelProjection = true };
-          vport.SetCameraLocation(nearPlane.Origin + nearPlane.ZAxis * near);
-          vport.SetCameraDirection(nearPlane.ZAxis * -(near + target));
-          vport.SetCameraUp(nearPlane.YAxis);
-          vport.TargetPoint = nearPlane.Origin - nearPlane.ZAxis * (target * 0.5);
+          vport.SetCameraLocation(line.From);
+          vport.SetCameraDirection(line.Direction);
+          vport.SetCameraUp(Vector3d.CrossProduct(-line.Direction, -line.Direction.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance)));
+          vport.TargetPoint = line.To;
 
-          if (vport.SetFrustum(rect.X.T0, rect.X.T1, rect.Y.T0, rect.Y.T1, near, near + target))
+          if (vport.SetFrustum(-radius, +radius, -radius * 3.0 / 4.0, +radius * 3.0 / 4.0, near, target))
           {
-            EnabledClipPlanes = ClippingPlanes.None;
+            SetScreenPort(vport, 1000);
+
+            BoundEnabled = BoundEnabledNone;
+            Bound[AxisX] = new Interval(-radius, +radius);
+            Bound[AxisY] = new Interval(-radius * 3.0 / 4.0, +radius * 3.0 / 4.0);
+            Bound[AxisZ] = new Interval(-target, 0.0);
+            Value = vport;
+            return true;
+          }
+          else return false;
+        }
+
+        case Plane plane:
+        {
+          var radius = 30 * Revit.ModelUnits;
+          var width = radius * 2;
+          var height = radius * 2;
+
+          var target = Math.Sqrt(width * width + height * height);
+          var near = double.Epsilon;
+
+          var vport = new ViewportInfo { IsParallelProjection = true };
+          vport.SetCameraLocation(plane.Origin);
+          vport.SetCameraDirection(-plane.ZAxis);
+          vport.SetCameraUp(plane.YAxis);
+          vport.TargetPoint = plane.Origin - plane.ZAxis * (target * 0.5);
+
+          if (vport.SetFrustum(-radius, +radius, -radius, +radius, near, target * 0.5))
+          {
+            SetScreenPort(vport, 1000);
+
+            BoundEnabled = BoundEnabledNone;
+            Bound[AxisX] = new Interval(-radius, +radius);
+            Bound[AxisY] = new Interval(-radius, +radius);
+            Bound[AxisZ] = new Interval(target * -0.5, target * +0.5);
             Value = vport;
             return true;
           }
@@ -171,14 +268,94 @@ namespace RhinoInside.Revit.GH.Types
           vport.SetCameraDirection(-box.Plane.ZAxis);
           vport.SetCameraUp(box.Plane.YAxis);
 
-          if (vport.SetFrustum(box.X.T0, box.X.T1, box.Y.T0, box.Y.T1, -box.Z.T0, -box.Z.T1))
+          var near = Math.Max(double.Epsilon, -box.Z.T0);
+          var far  = Math.Max(near + double.Epsilon, -box.Z.T1);
+          if (far == near) far += 0.001;// double.Epsilon;
+
+          if (vport.SetFrustum(box.X.T0, box.X.T1, box.Y.T0, box.Y.T1, near, far))
           {
-            EnabledClipPlanes = ClippingPlanes.Default | ClippingPlanes.Far | ClippingPlanes.Near;
+            SetScreenPort(vport, 1000);
+
+            BoundEnabled = BoundEnabledBox;
+            Bound[AxisX] = box.X;
+            Bound[AxisY] = box.Y;
+            Bound[AxisZ] = box.Z;
+
             Value = vport;
             return true;
           }
           else return false;
         }
+
+        case Rectangle3d rect:
+        {
+          var width = rect.Width;
+          var height = rect.Height;
+
+          var target = Math.Sqrt(width * width + height * height);
+          //var near = 0.5 * Math.Sqrt(3.0) * rect.Width;
+          var near = double.Epsilon;
+          var plane = rect.Plane;
+
+          var vport = new ViewportInfo { IsParallelProjection = true };
+          vport.SetCameraLocation(plane.Origin /*+ nearPlane.ZAxis * near*/);
+          vport.SetCameraDirection(-plane.ZAxis /** -(near + target)*/);
+          vport.SetCameraUp(plane.YAxis);
+          vport.TargetPoint = plane.Origin - plane.ZAxis * (target * 0.5);
+
+          if (vport.SetFrustum(rect.X.T0, rect.X.T1, rect.Y.T0, rect.Y.T1, near, near + target))
+          {
+            BoundEnabled = BoundEnabledPlanar;
+            Bound[AxisX] = rect.X;
+            Bound[AxisY] = rect.Y;
+            Bound[AxisZ] = new Interval(target * -0.5, 0.0);
+            Value = vport;
+            return true;
+          }
+          else return false;
+        }
+
+        case Circle circle:
+        {
+          var plane = circle.Plane;
+          var radius = circle.Radius;
+          var width = radius * 2.0;
+          var height = radius * 2.0;
+
+          var target = Math.Sqrt(width * width + height * height);
+          var near = double.Epsilon;
+
+          var vport = new ViewportInfo { IsParallelProjection = true };
+          vport.SetCameraLocation(plane.Origin);
+          vport.SetCameraDirection(-plane.ZAxis);
+          vport.SetCameraUp(plane.YAxis);
+          vport.TargetPoint = plane.Origin - plane.ZAxis * (target * 0.5);
+
+          if (vport.SetFrustum(-radius, +radius, -radius, +radius, near, target))
+          {
+            BoundEnabled = BoundEnabledPlanar;
+            Bound[AxisX] = new Interval(-radius, +radius);
+            Bound[AxisY] = new Interval(-radius, +radius);
+            Bound[AxisZ] = new Interval(target * -0.5, 0.0);
+            Value = vport;
+            return true;
+          }
+          else return false;
+        }
+
+        case ViewportInfo vport:
+
+          Value = new ViewportInfo(vport);
+          if (!Value.IsParallelProjection)
+          {
+            var near = 0.1 * Revit.ModelUnits;
+            var rect = Value.GetFrustumRectangle(near);
+            Value.SetFrustum(rect.X.T0, rect.X.T1, rect.Y.T0, rect.Y.T1, near, Value.FrustumFar);
+          }
+
+          BoundEnabled = BoundEnabledNone;
+          Bound = BoundDefault;
+          return true;
       }
 
       return false;
@@ -259,31 +436,53 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    internal ARDB.BoundingBoxXYZ ToBoundingBoxXYZ()
+    public Point3d Min => new Point3d
+    (
+      Arithmetic.Min( Value.FrustumLeft,   Bound[AxisX].T0),
+      Arithmetic.Min( Value.FrustumBottom, Bound[AxisY].T0),
+      Arithmetic.Min(-Value.FrustumFar,    Bound[AxisZ].T0)
+    );
+
+    public Point3d Max => new Point3d
+    (
+      Arithmetic.Max( Value.FrustumRight,  Bound[AxisX].T1),
+      Arithmetic.Max( Value.FrustumTop,    Bound[AxisY].T1),
+      Arithmetic.Max(-Value.FrustumNear,   Bound[AxisZ].T1)
+    );
+
+    internal ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(bool ensurePositiveY = false)
     {
       if (Value is null) return null;
 
+      var vport = Value;
+
+      if (ensurePositiveY && vport.CameraY.Z < 0.0)
+      {
+        var positiveY = new ViewFrame(this);
+        if (positiveY.Transform(Rhino.Geometry.Transform.Rotation(-Math.PI, vport.CameraZ, vport.CameraLocation)) is ViewFrame transformed)
+          return transformed.ToBoundingBoxXYZ();
+
+        return null;
+      }
+
       var transform = ARDB.Transform.Identity;
       {
-        transform.Origin = Value.CameraLocation.ToXYZ();
-        transform.BasisX = Value.CameraX.ToXYZ();
-        transform.BasisY = Value.CameraY.ToXYZ();
-        transform.BasisZ = Value.CameraZ.ToXYZ();
+        transform.Origin = vport.CameraLocation.ToXYZ();
+        transform.BasisX = vport.CameraX.ToXYZ();
+        transform.BasisY = vport.CameraY.ToXYZ();
+        transform.BasisZ = vport.CameraZ.ToXYZ();
       }
 
       var box = new ARDB.BoundingBoxXYZ()
       {
         Transform = transform,
-        Min = new Point3d(Value.FrustumLeft, Value.FrustumBottom, -Value.FrustumFar).ToXYZ(),
-        Max = new Point3d(Value.FrustumRight, Value.FrustumTop, -Value.FrustumNear).ToXYZ(),
+        Min = Min.ToXYZ(),
+        Max = Max.ToXYZ(),
       };
 
-      box.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisX, ClipLeft);
-      box.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisX, ClipRight);
-      box.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisY, ClipBottom);
-      box.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisY, ClipTop);
-      box.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMin, BoundingBoxXYZExtension.AxisZ, ClipFar);
-      box.set_BoundEnabled(BoundingBoxXYZExtension.BoundsMax, BoundingBoxXYZExtension.AxisZ, ClipNear);
+      for(int axis = AxisX; axis <= AxisZ; ++axis)
+      for(int bound = BoundsMin; bound <= BoundsMax; ++bound)
+          box.set_BoundEnabled(bound, axis, BoundEnabled[axis, bound]);
 
       return box;
     }
@@ -294,13 +493,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (IsValid)
-        {
-          var clippingBox = Boundingbox;
-          if (Value.TargetPoint.IsValid)
-            clippingBox.Union(Value.TargetPoint);
-
-          return clippingBox;
-        }
+          return new BoundingBox(Value.GetFramePlaneCorners(Value.TargetDistance(true)));
 
         return BoundingBox.Empty;
       }
@@ -309,49 +502,157 @@ namespace RhinoInside.Revit.GH.Types
     void IGH_PreviewData.DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (Value == null)
-        return;
-
-      var pN = Value.GetNearPlaneCorners();
-      var pF = Value.GetFarPlaneCorners();
-
-      args.Pipeline.DrawPoint(Value.CameraLocation, PointStyle.RoundSimple, 4, args.Color);
-      var cameraDirection = new Line(Value.CameraLocation, Value.CameraDirection);
-      args.Pipeline.DrawArrow(cameraDirection, args.Color, args.Pipeline.DpiScale * 15, 0);
-
-      if (Value.TargetPoint.IsValid)
-        args.Pipeline.DrawPoint(Value.TargetPoint, PointStyle.X, 8, args.Color);
-
-      if (pN?.Length == 4 && pF?.Length == 4)
+      if (Value?.IsValidCamera is true)
       {
-        args.Pipeline.DrawPoints(pN, PointStyle.RoundSimple, 4, args.Color);
+        args.Pipeline.DrawDirectionArrow(Value.CameraLocation, Value.CameraX, System.Drawing.Color.Red);
+        args.Pipeline.DrawDirectionArrow(Value.CameraLocation, Value.CameraY, System.Drawing.Color.Green);
+        args.Pipeline.DrawDirectionArrow(Value.CameraLocation, Value.CameraZ, System.Drawing.Color.Blue);
+      }
 
-        args.Pipeline.DrawLine(Value.CameraLocation, pN[0], args.Color);
-        args.Pipeline.DrawLine(Value.CameraLocation, pN[1], args.Color);
-        args.Pipeline.DrawLine(Value.CameraLocation, pN[2], args.Color);
-        args.Pipeline.DrawLine(Value.CameraLocation, pN[3], args.Color);
+      if (Value?.IsValidFrustum is true)
+      {
+        var targetDistance = Value.TargetDistance(true);
+        if (targetDistance == RhinoMath.UnsetValue) return;
 
-        args.Pipeline.DrawDottedLine(pN[0], pN[1], args.Color);
-        args.Pipeline.DrawDottedLine(pN[1], pN[3], args.Color);
-        args.Pipeline.DrawDottedLine(pN[3], pN[2], args.Color);
-        args.Pipeline.DrawDottedLine(pN[2], pN[0], args.Color);
+        int NoClipPattern = 0x0007FF0;
+        var pN = Value.GetNearPlaneCorners();
+        var pF = Value.GetFarPlaneCorners();
+        var pC   = Value.GetFramePlaneCorners(Value.FrustumNear, Bound[AxisX], Bound[AxisY]);
+        var pMin = Value.GetFramePlaneCorners(-Bound[AxisZ].T0,  Bound[AxisX], Bound[AxisY]);
+        var pMax = Value.GetFramePlaneCorners(-Bound[AxisZ].T1,  Bound[AxisX], Bound[AxisY]);
 
-        args.Pipeline.DrawDottedLine(pF[0], pF[1], args.Color);
-        args.Pipeline.DrawDottedLine(pF[1], pF[3], args.Color);
-        args.Pipeline.DrawDottedLine(pF[3], pF[2], args.Color);
-        args.Pipeline.DrawDottedLine(pF[2], pF[0], args.Color);
+        // Direction
+        var cameraDirection = new Line(Value.CameraLocation, -Value.CameraZ * targetDistance);
+        {
+          args.Pipeline.DrawLineNoClip(cameraDirection.From, cameraDirection.To, args.Color, args.Thickness);
+          args.Pipeline.DrawArrow(cameraDirection, args.Color, args.Pipeline.DpiScale * 15, 0);
+        }
 
-        args.Pipeline.DrawDottedLine(pN[0], pF[0], args.Color);
-        args.Pipeline.DrawDottedLine(pN[1], pF[1], args.Color);
-        args.Pipeline.DrawDottedLine(pN[2], pF[2], args.Color);
-        args.Pipeline.DrawDottedLine(pN[3], pF[3], args.Color);
+        // Near Plane
+        {
+          args.Pipeline.DrawDottedLine(pN[0], pN[1], args.Color);
+          args.Pipeline.DrawDottedLine(pN[1], pN[3], args.Color);
+          args.Pipeline.DrawDottedLine(pN[3], pN[2], args.Color);
+          args.Pipeline.DrawDottedLine(pN[2], pN[0], args.Color);
+        }
 
-        var near = Value.FrustumNearPlane;
-        var lineUp = new Line(near.Origin, near.YAxis, 0.5 * pN[2].DistanceTo(pN[0]));
-        //var lineIn = new Line(near.Origin, -near.ZAxis, 1.0 * pN[2].DistanceTo(pN[0]));
+        // Far Plane
+        {
+          args.Pipeline.DrawDottedLine(pF[0], pF[1], args.Color);
+          args.Pipeline.DrawDottedLine(pF[1], pF[3], args.Color);
+          args.Pipeline.DrawDottedLine(pF[3], pF[2], args.Color);
+          args.Pipeline.DrawDottedLine(pF[2], pF[0], args.Color);
+        }
 
-        args.Pipeline.DrawArrow(lineUp, args.Color, args.Pipeline.DpiScale * 15, 0);
-        //args.Pipeline.DrawArrow(lineIn, args.Color, 15, 0);
+        // Frustum Near - Far
+        {
+          args.Pipeline.DrawDottedLine(pN[0], pF[0], args.Color);
+          args.Pipeline.DrawDottedLine(pN[1], pF[1], args.Color);
+          args.Pipeline.DrawDottedLine(pN[2], pF[2], args.Color);
+          args.Pipeline.DrawDottedLine(pN[3], pF[3], args.Color);
+        }
+
+        // Crop Far Plane
+        {
+          if (BoundEnabled[AxisZ, BoundsMin]) args.Pipeline.DrawLineNoClip(pMin[0], pMin[1], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[0], pMin[1], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisZ, BoundsMin]) args.Pipeline.DrawLineNoClip(pMin[1], pMin[3], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[1], pMin[3], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisZ, BoundsMin]) args.Pipeline.DrawLineNoClip(pMin[3], pMin[2], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[3], pMin[2], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisZ, BoundsMin]) args.Pipeline.DrawLineNoClip(pMin[2], pMin[0], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[2], pMin[0], args.Color, NoClipPattern, args.Thickness);
+        }
+
+
+        // Crop Near Plane
+        {
+          if (BoundEnabled[AxisZ, BoundsMax]) args.Pipeline.DrawLineNoClip(pMax[0], pMax[1], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMax[0], pMax[1], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisZ, BoundsMax]) args.Pipeline.DrawLineNoClip(pMax[1], pMax[3], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMax[1], pMax[3], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisZ, BoundsMax]) args.Pipeline.DrawLineNoClip(pMax[3], pMax[2], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMax[3], pMax[2], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisZ, BoundsMax]) args.Pipeline.DrawLineNoClip(pMax[2], pMax[0], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMax[2], pMax[0], args.Color, NoClipPattern, args.Thickness);
+        }
+
+        // Crop Far - Near
+        {
+          args.Pipeline.DrawDottedLine(pC[0], pMax[0], args.Color);
+          args.Pipeline.DrawDottedLine(pC[1], pMax[1], args.Color);
+          args.Pipeline.DrawDottedLine(pC[2], pMax[2], args.Color);
+          args.Pipeline.DrawDottedLine(pC[3], pMax[3], args.Color);
+
+          if (BoundEnabled[AxisX, BoundsMin] || BoundEnabled[AxisY, BoundsMin])
+            args.Pipeline.DrawLineNoClip(pMin[0], pMax[0], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[0], pMax[0], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisX, BoundsMin] || BoundEnabled[AxisY, BoundsMin])
+            args.Pipeline.DrawLineNoClip(pMin[1], pMax[1], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[1], pMax[1], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisX, BoundsMin] || BoundEnabled[AxisY, BoundsMax])
+            args.Pipeline.DrawLineNoClip(pMin[2], pMax[2], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[2], pMax[2], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisX, BoundsMax] || BoundEnabled[AxisY, BoundsMax])
+            args.Pipeline.DrawLineNoClip(pMin[3], pMax[3], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pMin[3], pMax[3], args.Color, NoClipPattern, args.Thickness);
+        }
+
+        // Crop Box - View Plane
+        {
+          if (BoundEnabled[AxisX, BoundsMin]) args.Pipeline.DrawLineNoClip(pC[2], pC[0], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pC[2], pC[0], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisX, BoundsMax]) args.Pipeline.DrawLineNoClip(pC[1], pC[3], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pC[1], pC[3], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisY, BoundsMin]) args.Pipeline.DrawLineNoClip(pC[0], pC[1], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pC[0], pC[1], args.Color, NoClipPattern, args.Thickness);
+
+          if (BoundEnabled[AxisY, BoundsMax]) args.Pipeline.DrawLineNoClip(pC[3], pC[2], args.Color, args.Thickness);
+          else args.Pipeline.DrawPatternedLine(pC[3], pC[2], args.Color, NoClipPattern, args.Thickness);
+        }
+
+        // Crop Box - Far Plane
+        if (BoundEnabled[AxisZ, BoundsMin])
+        {
+          if (BoundEnabled[AxisX, BoundsMin]) args.Pipeline.DrawLineNoClip(pMin[2], pMin[0], args.Color, args.Thickness);
+          else args.Pipeline.DrawDottedLine(pMin[2], pMin[0], args.Color);
+
+          if (BoundEnabled[AxisX, BoundsMax]) args.Pipeline.DrawLineNoClip(pMin[1], pMin[3], args.Color, args.Thickness);
+          else args.Pipeline.DrawDottedLine(pMin[1], pMin[3], args.Color);
+
+          if (BoundEnabled[AxisY, BoundsMin]) args.Pipeline.DrawLineNoClip(pMin[0], pMin[1], args.Color, args.Thickness);
+          else args.Pipeline.DrawDottedLine(pMin[0], pMin[1], args.Color);
+
+          if (BoundEnabled[AxisY, BoundsMax]) args.Pipeline.DrawLineNoClip(pMin[3], pMin[2], args.Color, args.Thickness);
+          else args.Pipeline.DrawDottedLine(pMin[3], pMin[2], args.Color);
+        }
+
+        // Crop Box - Near Plane
+        if (BoundEnabled[AxisZ, BoundsMax])
+        {
+          if (BoundEnabled[AxisX, BoundsMin]) args.Pipeline.DrawLineNoClip(pMax[2], pMax[0], args.Color, args.Thickness);
+          else args.Pipeline.DrawDottedLine(pMax[2], pMax[0], args.Color);
+
+          if (BoundEnabled[AxisX, BoundsMax]) args.Pipeline.DrawLineNoClip(pMax[1], pMax[3], args.Color, args.Thickness);
+          else args.Pipeline.DrawDottedLine(pMax[1], pMax[3], args.Color);
+
+          if (BoundEnabled[AxisY, BoundsMin]) args.Pipeline.DrawLineNoClip(pMax[0], pMax[1], args.Color, args.Thickness);
+          else args.Pipeline.DrawDottedLine(pMax[0], pMax[1], args.Color);
+
+          if (BoundEnabled[AxisY, BoundsMax]) args.Pipeline.DrawLineNoClip(pMax[3], pMax[2], args.Color, args.Thickness);
+          else args.Pipeline.DrawDottedLine(pMax[3], pMax[2], args.Color);
+        }
       }
     }
     #endregion
@@ -364,8 +665,8 @@ namespace RhinoInside.Revit.GH.Types
       if (IsReferencedGeometry)
       {
         Title = string.Empty;
-        ClipLeft = ClipRight = ClipBottom = ClipTop = true;
-        ClipFar = ClipNear = false;
+        BoundEnabled = BoundEnabledNone;
+        Bound = BoundDefault;
       }
 
       base.ClearCaches();
@@ -388,7 +689,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override IGH_GeometricGoo DuplicateGeometry() => Value is null ? null : new ViewFrame(this);
+    public override IGH_GeometricGoo DuplicateGeometry() => new ViewFrame(this);
 
     public override BoundingBox Boundingbox
     {
@@ -428,11 +729,11 @@ namespace RhinoInside.Revit.GH.Types
           bbox.Union(point);
         }
 
-        {
-          var point = Value.CameraLocation;
-          point.Transform(xform);
-          bbox.Union(point);
-        }
+        //{
+        //  var point = Value.CameraLocation;
+        //  point.Transform(xform);
+        //  bbox.Union(point);
+        //}
 
         return bbox;
       }
@@ -456,7 +757,11 @@ namespace RhinoInside.Revit.GH.Types
     {
       writer.SetGuid("RefID", ReferenceID);
       if (!string.IsNullOrWhiteSpace(Title)) writer.SetString("Title", Title);
-      if (EnabledClipPlanes != ClippingPlanes.Default) writer.SetInt32("EnabledClipPlanes", (int) EnabledClipPlanes);
+
+      if (PlaneEnabled != BoundPlane.None) writer.SetInt32("PlaneEnabled", (int) PlaneEnabled);
+      writer.SetInterval1D("Bound", AxisX, new GH_IO.Types.GH_Interval1D(Bound[AxisX].T0, Bound[AxisX].T1));
+      writer.SetInterval1D("Bound", AxisY, new GH_IO.Types.GH_Interval1D(Bound[AxisY].T0, Bound[AxisY].T1));
+      writer.SetInterval1D("Bound", AxisZ, new GH_IO.Types.GH_Interval1D(Bound[AxisZ].T0, Bound[AxisZ].T1));
 
       if (ReferenceID == Guid.Empty && m_value is object)
       {
@@ -474,16 +779,19 @@ namespace RhinoInside.Revit.GH.Types
       ReferenceID = Guid.Empty;
       Value = null;
 
-      ReferenceID = reader.GetGuid("RefID");
-
       var title = string.Empty;
       reader.TryGetString("Title", ref title);
       Title = title;
 
-      var enabledClipPlanes = (int) ClippingPlanes.Default;
-      reader.TryGetInt32("EnabledClipPlanes", ref enabledClipPlanes);
-      EnabledClipPlanes = (ClippingPlanes) enabledClipPlanes;
+      var planeEnabled = (int) BoundPlane.None;
+      reader.TryGetInt32("PlaneEnabled", ref planeEnabled);
+      PlaneEnabled = (BoundPlane) planeEnabled;
 
+      var boundX = reader.GetInterval1D("Bound", AxisX); Bound[AxisX] = new Interval(boundX.a, boundX.b);
+      var boundY = reader.GetInterval1D("Bound", AxisY); Bound[AxisY] = new Interval(boundY.a, boundY.b);
+      var boundZ = reader.GetInterval1D("Bound", AxisZ); Bound[AxisZ] = new Interval(boundZ.a, boundZ.b);
+
+      ReferenceID = reader.GetGuid("RefID");
       if (reader.ItemExists("ON_Data"))
       {
         var data = reader.GetByteArray("ON_Data");

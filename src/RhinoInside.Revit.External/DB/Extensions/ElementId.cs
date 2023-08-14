@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Autodesk.Revit.DB;
@@ -52,17 +53,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class ElementIdExtension
   {
-    public static ElementId InvalidElementId { get; } = ElementId.InvalidElementId;
-    public static ElementId[] EmptyCollection { get; } = new ElementId[0];
+    public static ElementId Default { get; } = FromValue(0);
+    public static ElementId Invalid { get; } = ElementId.InvalidElementId;
+    public static ElementId[] EmptyCollection => Array.Empty<ElementId>();
 
-    public static bool IsValid(this ElementId id) => id is object && id != InvalidElementId;
-    public static bool IsBuiltInId(this ElementId id) => id is object && id <= InvalidElementId;
+    public static bool IsValid(this ElementId id) => id is object && id != Invalid;
+    public static bool IsBuiltInId(this ElementId id) => id is object && id <= Invalid;
 
 #if REVIT_2024
     public static long ToValue(this ElementId id) => id.Value;
 #else
     public static int ToValue(this ElementId id) => id.IntegerValue;
 #endif
+
+    public static ElementId FromValue(int value)
+    {
+#if REVIT_2024
+      return new ElementId((long) value);
+#else
+      return new ElementId(value);
+#endif
+    }
 
     static readonly string LowerHexFormat = $"x{NumHexDigits.IntId}";
     static readonly string UpperHexFormat = $"X{NumHexDigits.IntId}";
@@ -78,7 +89,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return id.ToValue().ToString(format, CultureInfo.InvariantCulture);
     }
 
-#region Parameters
+    internal static string ToUniqueId(this ElementId id, Document doc, out Element element)
+    {
+      if (id.IsBuiltInId())
+      {
+        element = default;
+        return UniqueId.Format(doc.GetCreationGUID(), id.ToValue());
+      }
+
+      element = doc.GetElement(id);
+      return element?.UniqueId ?? UniqueId.Format(Guid.Empty, Default.ToValue());
+    }
+
+    #region Parameters
     public static BuiltInParameter ToBuiltInParameter(this ElementId id) => TryGetBuiltInParameter(id, out var value) ? value : BuiltInParameter.INVALID;
 
     /// <summary>
@@ -89,14 +112,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static bool IsParameterId(this ElementId id, Document doc)
     {
-      // Check if is not a BuiltIn Parameter
-      if (id.ToValue() > InvalidElementId.ToValue())
-      {
-        try { return doc.GetElement(id) is ParameterElement; }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-      }
+      if (id.IsBuiltInId())
+        return ((BuiltInParameter) id.ToValue()).IsValid();
 
-      return ((BuiltInParameter) id.ToValue()).IsValid();
+      try { return doc.GetElement(id) is ParameterElement; }
+      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
     }
 
     /// <summary>
@@ -116,7 +136,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 #endregion
 
-#region Categories
+    #region Categories
     public static BuiltInCategory ToBuiltInCategory(this ElementId id) => TryGetBuiltInCategory(id, out var value) ? value : BuiltInCategory.INVALID;
 
     /// <summary>
@@ -127,22 +147,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static bool IsCategoryId(this ElementId id, Document doc)
     {
-      // Check if is not a BuiltIn Category
-      if (id.ToValue() > InvalidElementId.ToValue())
-      {
-        // 1. We try with the regular way calling Category.GetCategory
-        try { return Category.GetCategory(doc, id) is object; }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+      if (id.IsBuiltInId())
+        return ((BuiltInCategory) id.ToValue()).IsValid();
 
-        // 2. Try looking for any GraphicsStyle that points to the Category we are looking for.
-        if (doc.GetElement(id) is Element element && element.GetType() == typeof(Element))
-        {
-          if (element.GetFirstDependent<GraphicsStyle>() is GraphicsStyle style)
-            return style.GraphicsStyleCategory.Id == id;
-        }
+      // 1. We try with the regular way calling Category.GetCategory
+      try { return Category.GetCategory(doc, id) is object; }
+      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
+
+      // 2. Try looking for any GraphicsStyle that points to the Category we are looking for.
+      if (doc.GetElement(id) is Element element && element.GetType() == typeof(Element))
+      {
+        if (element.GetFirstDependent<GraphicsStyle>() is GraphicsStyle style)
+          return style.GraphicsStyleCategory.Id == id;
       }
 
-      return ((BuiltInCategory) id.ToValue()).IsValid();
+      return false;
     }
 
     /// <summary>
@@ -160,9 +179,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       builtInCategory = BuiltInCategory.INVALID;
       return false;
     }
-#endregion
+    #endregion
 
-#region LinePattern
+    #region LinePattern
     public static BuiltInLinePattern ToBuiltInLinePattern(this ElementId id) => TryGetBuiltInLinePattern(id, out var value) ? value : BuiltInLinePattern.Invalid;
 
     /// <summary>
@@ -174,13 +193,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsLinePatternId(this ElementId id, Document doc)
     {
       // Check if is not a BuiltIn Line Pattern
-      if (id.ToValue() > InvalidElementId.ToValue())
-      {
-        try { return doc.GetElement(id) is LinePatternElement; }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
-      }
+      if (id.IsBuiltInId())
+        return ((BuiltInLinePattern) id.ToValue()).IsValid();
 
-      return ((BuiltInLinePattern) id.ToValue()).IsValid();
+      try { return doc.GetElement(id) is LinePatternElement; }
+      catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
     }
 
     /// <summary>
@@ -198,7 +215,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       builtInPattern = BuiltInLinePattern.Invalid;
       return false;
     }
-#endregion
+    #endregion
 
     /// <summary>
     /// Checks if <paramref name="id"/> corresponds to an <see cref="Autodesk.Revit.DB.ElementType"/> in <paramref name="doc"/>.

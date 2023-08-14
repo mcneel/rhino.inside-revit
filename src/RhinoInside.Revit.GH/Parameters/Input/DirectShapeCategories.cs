@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public class DirectShapeCategories : Grasshopper.Special.ValueSet<Types.CategoryId>
   {
     public override Guid ComponentGuid => new Guid("7BAFE137-332B-481A-BE22-09E8BD4C86FC");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     protected override System.Drawing.Bitmap Icon =>
       ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??

@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     #region IGH_ReferenceParam
     public virtual bool PassesFilter(ARDB.Document document, ARDB.ElementId id)
     {
-      return id.IsCategoryId(document);
+      return document.GetElement(id) is ARDB.GraphicsStyle || id.IsCategoryId(document);
     }
 
     bool Kernel.IGH_ReferenceParam.NeedsToBeExpired
@@ -76,33 +76,51 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       ICollection<ARDB.ElementId> modified
     )
     {
+      // Since casting from `ARDB.BuiltInCategory` to `Types.Category` assumes current document…
+      if (!doc.IsEquivalent(Revit.ActiveDBDocument))
+        return false;
+
       // If anything of that type is added we need to update ListItems
       if (added.Any(id => PassesFilter(doc, id)))
         return true;
 
       // If selected items are modified we need to expire dependant components
-      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_Element>())
+      foreach (var data in VolatileData.AllData(true).OfType<GH_Integer>())
       {
-        if (!data.IsValid)
-          continue;
-
-        if (modified.Contains(data.Id))
+        var categoryId = ElementIdExtension.FromValue(data.Value);
+        if (modified.Contains(categoryId))
           return true;
+
+        if (doc.GetCategory(categoryId) is ARDB.Category category)
+        {
+          if (modified.Contains(category.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection).Id))
+            return true;
+
+          if (modified.Contains(category.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut).Id))
+            return true;
+        }
       }
 
       // If an item in ListItems is deleted we need to update ListItems
-      foreach (var item in ListItems.Select(x => x.Value).OfType<Grasshopper.Kernel.Types.GH_Integer>())
+      foreach (var item in ListItems.Select(x => x.Value).OfType<GH_Integer>())
       {
-        var id = new ARDB.ElementId(item.Value);
-
-        if (deleted.Contains(id))
+        var categoryId = ElementIdExtension.FromValue(item.Value);
+        if (deleted.Contains(categoryId))
           return true;
+
+        if (doc.GetCategory(categoryId) is ARDB.Category category)
+        {
+          if (modified.Contains(category.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection).Id))
+            return true;
+
+          if (modified.Contains(category.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut).Id))
+            return true;
+        }
       }
 
       return false;
     }
     #endregion
-
   }
 
   [Obsolete("Since 2021-06-10. Please use 'Built-In Categories'")]
@@ -180,7 +198,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
     )
     {
       // If selected items are modified we need to expire dependant components
-      foreach (var data in VolatileData.AllData(true).OfType<Types.IGH_Element>())
+      foreach (var data in VolatileData.AllData(true).OfType<Types.Element>())
       {
         if (!doc.IsEquivalent(data.Document))
           continue;
@@ -197,7 +215,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
         if (!updateListItems)
         {
           // If an item in ListItems is deleted we need to update ListItems
-          foreach (var item in ListItems.Select(x => x.Value).OfType<Types.IGH_Element>())
+          foreach (var item in ListItems.Select(x => x.Value).OfType<Types.Element>())
           {
             if (!doc.IsEquivalent(item.Document))
               continue;

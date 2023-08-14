@@ -6,11 +6,13 @@ using GH_IO.Serialization;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
+using ARUI = Autodesk.Revit.UI;
 using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
+  using External.UI.Extensions;
 
   public abstract class ElementType<T, R> : Element<T, R>
     where T : class, Types.IGH_ElementType
@@ -299,30 +301,29 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
-      if (Revit.ActiveUIDocument?.Document is ARDB.Document doc)
+      if (Revit.ActiveUIDocument is ARUI.UIDocument uiDocument)
       {
-        bool singular = ToElementIds(VolatileData).Where(x => doc.IsEquivalent(x.Document)).Take(2).Count() == 1;
+        var document = uiDocument.Document;
+        var ids = ToElementIds(VolatileData).Where(x => document.IsEquivalent(x.Document)).Take(2).Select(x => x.Id).ToList();
         {
-          var activeApp = Revit.ActiveUIApplication;
-          var TypePropertiesId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.TypeProperties);
           Menu_AppendItem
           (
             menu, $"Edit {TypeName}…",
             async (sender, arg) =>
             {
-              var ids = ToElementIds(VolatileData).Where(x => doc.IsEquivalent(x.Document)).Select(x => x.Id).Take(1).ToList();
-              if (ids.Any())
+              using (var scope = new External.UI.EditScope(uiDocument.Application))
               {
-                using (var scope = new External.UI.EditScope(activeApp))
+                await External.ActivationGate.Yield();
+
+                if (uiDocument.TryGetRevitCommandId(ARUI.PostableCommand.TypeProperties, out var TypePropertiesId))
                 {
-                  var activeDocument = activeApp.ActiveUIDocument;
-                  var selection = activeDocument.Selection;
+                  var selection = uiDocument.Selection;
                   var current = selection.GetElementIds();
                   selection.SetElementIds(ids);
                   var changes = await scope.ExecuteCommandAsync(TypePropertiesId);
                   selection.SetElementIds(current);
 
-                  if (changes.GetSummary(activeDocument.Document, out var _, out var _, out var modified) > 0)
+                  if (changes.GetSummary(document, out var _, out var _, out var modified) > 0)
                   {
                     if (modified.Contains(ids[0]))
                     {
@@ -333,7 +334,7 @@ namespace RhinoInside.Revit.GH.Parameters
                 }
               }
             },
-            singular && activeApp.CanPostCommand(TypePropertiesId), false
+            ids.Count == 1, false
           );
         }
       }
@@ -350,7 +351,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
       var selectedBuiltInCategory = string.Empty;
       if (reader.TryGetString("SelectedBuiltInCategory", ref selectedBuiltInCategory))
-        SelectedBuiltInCategory = new External.DB.Schemas.CategoryId(selectedBuiltInCategory);
+        SelectedBuiltInCategory = new ERDB.Schemas.CategoryId(selectedBuiltInCategory);
       else
         SelectedBuiltInCategory = ARDB.BuiltInCategory.INVALID;
 
@@ -363,7 +364,7 @@ namespace RhinoInside.Revit.GH.Parameters
         return false;
 
       if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
-        writer.SetString("SelectedBuiltInCategory", ((External.DB.Schemas.CategoryId) SelectedBuiltInCategory).FullName);
+        writer.SetString("SelectedBuiltInCategory", ((ERDB.Schemas.CategoryId) SelectedBuiltInCategory).FullName);
 
       return true;
     }
@@ -434,7 +435,13 @@ namespace RhinoInside.Revit.GH.Parameters
         if (!component.Params.TryGetData(DA, name, out type)) return false;
         if (type is null)
         {
-          var data = Types.ElementType.FromElementId(document.Value, document.Value.GetDefaultFamilyTypeId(new ARDB.ElementId(categoryId)));
+          var defaultTypeId = ElementIdExtension.Invalid;
+          using (var collector = new ARDB.FilteredElementCollector(document.Value))
+          {
+            defaultTypeId = collector.WhereElementIsElementType().WhereCategoryIdEqualsTo(categoryId).FirstElementId();
+          }
+
+          var data = Types.ElementType.FromElementId(document.Value, defaultTypeId);
           if (data?.IsValid != true)
             throw new Exceptions.RuntimeArgumentException(name, $"No suitable {((ERDB.Schemas.CategoryId) categoryId).Label} type has been found.");
 

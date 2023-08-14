@@ -370,14 +370,15 @@ namespace Grasshopper.Kernel
       if (source is null) throw new ArgumentNullException(nameof(source));
       if (documentObject is null) throw new ArgumentNullException(nameof(documentObject));
 
-      foreach (TSource element in source)
+      var document = documentObject.OnPingDocument();
+      foreach (var item in source)
       {
         if (GH_Document.IsEscapeKeyDown())
         {
-          documentObject.OnPingDocument()?.RequestAbortSolution();
+          document?.RequestAbortSolution();
           break;
         }
-        yield return element;
+        yield return item;
       }
     }
   }

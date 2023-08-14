@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddSymbol : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("2BEB60BA-F32C-469D-829F-5EC2B80492D9");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => string.Empty;
 
     public AddSymbol() : base
@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       nickname: "Symbol",
       description: "Given its Location, it adds a symbol element to the active Revit document",
       category: "Revit",
-      subCategory: "Annotation"
+      subCategory: "Annotate"
     )
     { }
 
@@ -109,7 +109,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, Types.Document.FromValue(view.Document), ARDB.BuiltInCategory.OST_GenericAnnotation)) return null;
 
-          var viewPlane = view.Location;
+          var viewPlane = view.DetailPlane;
           if (view.Value.ViewType != ARDB.ViewType.ThreeD)
             point = viewPlane.ClosestPoint(point.Value);
 

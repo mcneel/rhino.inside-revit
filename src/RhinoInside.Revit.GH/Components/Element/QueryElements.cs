@@ -144,17 +144,17 @@ namespace RhinoInside.Revit.GH.Components.Elements
     }
   }
 
-  public class QueryViewElements : ElementCollectorComponent
+  public class QueryGraphicalElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("79DAEA3A-13A3-49BF-8BEB-AA28E3BE4515");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementIsElementTypeFilter(inverted: true);
 
-    public QueryViewElements() : base
+    public QueryGraphicalElements() : base
     (
-      name: "Query View Elements",
-      nickname: "ViewEles",
-      description: "Get elements visible in a view",
+      name: "Query Graphical Elements",
+      nickname: "G-Elements",
+      description: "Get graphical elements visible in a view",
       category: "Revit",
       subCategory: "Element"
     )
@@ -187,12 +187,25 @@ namespace RhinoInside.Revit.GH.Components.Elements
         if (categories is object)
         {
           var ids = categories.
-            Where(x => x?.IsValid == true && (x.Document is null || x.Document.Equals(view.Document))).
-            Select(x => x.Id).ToArray();
+            Where(x => x is object && (x.IsEmpty || x.IsValid) && (x.Document is null || x.Document.Equals(view.Document))).
+            Select(x => x.Id).
+            ToList();
 
           elementCollector = elementCollector.WherePasses
           (
             ERDB.CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
+          );
+        }
+        else
+        {
+          // Default category filtering
+          var hiddenCategories = BuiltInCategoryExtension.GetHiddenInUIBuiltInCategories(view.Document).ToList();
+          hiddenCategories.Add(ARDB.BuiltInCategory.OST_SectionBox);  // 'Section Boxes' has little sense here!?!?
+          hiddenCategories.Add(ARDB.BuiltInCategory.INVALID);         // `ScheduleSheetInstance` Viewer has no Category, so we filter here
+
+          elementCollector = elementCollector.WherePasses
+          (
+            new ARDB.ElementMulticategoryFilter(hiddenCategories, inverted: true)
           );
         }
 
@@ -203,8 +216,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
         (
           "Elements",
           elementCollector.
-          Where(x => Types.GraphicalElement.IsValidElement(x)).
           Select(Types.GraphicalElement.FromElement).
+          OfType<Types.GraphicalElement>().
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

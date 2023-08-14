@@ -48,13 +48,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
       var activeApp = Revit.ActiveUIApplication;
 #if REVIT_2019
-      var CloseInactiveViewsId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.CloseInactiveViews);
-      Menu_AppendItem
-      (
-        menu, "Close Inactive Views…",
-        (sender, arg) => External.UI.EditScope.PostCommand(activeApp, CloseInactiveViewsId),
-        activeApp.CanPostCommand(CloseInactiveViewsId), false
-      );
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.CloseInactiveViews, "Close Inactive Views…");
 #endif
     }
     #endregion

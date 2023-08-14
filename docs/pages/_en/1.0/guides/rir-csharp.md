@@ -135,7 +135,7 @@ Because baking objects to Revit can take a long time and many times only should 
 First, let's create a bake method:
 
 {% highlight csharp %}
-  private void CreateGeometry(DB.Document doc) {
+  private DB.DirectShape CreateGeometry(DB.Document doc) {
     // convert the sphere into Brep
     var brep = _sphere.ToBrep();
 
@@ -147,66 +147,78 @@ First, let's create a bake method:
     // inside the Revit document and add the sphere mesh
     // to the DirectShape
     var ds = DB.DirectShape.CreateElement(doc, revitCategory);
+
     // we will use .ToBrep() method to convert the
     // Rhino brep to Revit DB.Solid because that is what
     // the AppendShape() method expects
     var shapeList = new List<DB.GeometryObject>() { brep.ToSolid() };
     ds.AppendShape(shapeList);
+
+    return ds;
   }
 {% endhighlight %}
 
-Notice that there is a reference to `_sphere` on the third line of the script above. Since Revit requires Transactions when making changes to the model, and since {{ site.terms.rir }} manages the Transactions required by all the components to make changes to the Revit model, we will not handle the Transaction inside our script and will need to ask {{ site.terms.rir }} to run the new method for us:
+Since Revit requires Transactions when making changes to the model, we will create and start a new one here like this.
 
 {% highlight csharp %}
-  RIR.Revit.EnqueueAction(CreateGeometry);
+using (var t = new DB.Transaction(doc, Component.NickName))
+{
+  t.Start();
+  CreateGeometry();
+  t.Commit();
+}
 {% endhighlight %}
 
-But the `RIR.Revit.EnqueueAction` only accepts an `Action<DB.Document>` so we will need to store the created sphere on a private field first, so `CreateGeometry` can later access and bake this sphere. Hence we will need to define this private property:
-
-{% highlight csharp %}
-  private Rhino.Geometry.Sphere _sphere;
-{% endhighlight %}
-
-Once we are done creating this function and the private property, we can modify the `RunScript` method to listen for the trigger and call this function. Notice that we are now storing the new sphere into `_sphere` first so the `CreateGeometry` can access that bake this sphere:
+Once we are done creating this function and the private property, we can modify the `RunScript` method to listen for the trigger and call this function.
 
 {% highlight csharp %}
   private void RunScript(object Radius, object Trigger, ref object Sphere)
   {
     // make the sphere
-    _sphere = new Rhino.Geometry.Sphere(Rhino.Geometry.Point3d.Origin, (double) Radius);
-    // if requested, ask {{ site.terms.rir }} to run bake method
-    if ((bool) Trigger) {
-      RIR.Revit.EnqueueAction(CreateGeometry);
-    }
+    var _sphere = new Rhino.Geometry.Sphere(Rhino.Geometry.Point3d.Origin, (double) Radius);
 
-    // pass the sphere to output
-    Sphere = _sphere;
+    // if requested, ask {{ site.terms.rir }} to run bake method
+    if ((bool) Trigger)
+    {
+      var doc = RIR.Revit.ActiveDBDocument;
+      using (var t = new DB.Transaction(doc, Component.NickName))
+      {
+        t.Start();
+        Sphere = CreateGeometry(doc);
+        t.Commit();
+      }
+    }
   }
 {% endhighlight %}
 
 And here is the complete sample code:
 
 {% highlight csharp %}
-  private Rhino.Geometry.Sphere _sphere;
-
   private void RunScript(object Radius, object Trigger, ref object Sphere)
   {
-    _sphere = new Rhino.Geometry.Sphere(Rhino.Geometry.Point3d.Origin, (double) Radius);
-    if ((bool) Trigger) {
-      RIR.Revit.EnqueueAction(CreateGeometry);
+    var _sphere = new Rhino.Geometry.Sphere(Rhino.Geometry.Point3d.Origin, (double) Radius);
+    if ((bool) Trigger)
+    {
+      var doc = RIR.Revit.ActiveDBDocument;
+      using (var t = new DB.Transaction(doc, Component.NickName))
+      {
+        t.Start();
+        Sphere = CreateGeometry(doc);
+        t.Commit();
+      }
     }
-
-    Sphere = _sphere;
   }
 
-  private void CreateGeometry(DB.Document doc) {
+  private DB.DirectShape CreateGeometry(DB.Document doc)
+  {
     var brep = _sphere.ToBrep();
-
     var revitCategory = new DB.ElementId((int) DB.BuiltInCategory.OST_GenericModel);
 
     var ds = DB.DirectShape.CreateElement(doc, revitCategory);
     var shapeList = new List<DB.GeometryObject>() { brep.ToSolid() };
     ds.AppendShape(shapeList);
+
+    return ds;
   }
 }
 {% endhighlight %}

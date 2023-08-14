@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
+using Microsoft.Win32.SafeHandles;
 using Rhino.Display;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -13,6 +14,7 @@ using ARUI = Autodesk.Revit.UI;
 namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
+  using External.UI.Extensions;
   using External.UI.Selection;
 
   public abstract class GraphicalElement<T, R> :
@@ -195,7 +197,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       var uiDocument = Revit.ActiveUIDocument;
       var doc = uiDocument.Document;
-      var docGUID = doc.GetFingerprintGUID();
+      var docGUID = doc.GetPersistentGUID();
 
       var documents = value.AllData(true).OfType<T>().GroupBy(x => x.ReferenceDocumentId);
       var activeElements = (
@@ -264,6 +266,7 @@ namespace RhinoInside.Revit.GH.Parameters
         comboBox.Width = (int) (250 * GH_GraphicsUtil.UiScale);
         comboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
         comboBox.Tag = menu;
+        menu.Tag = WindowHandle.ActiveWindow;
 
         Menu_AppendCustomItem(menu, comboBox);
         Menu_AppendPromptNew(menu);
@@ -286,13 +289,16 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (MutableNickName)
       {
-        using (var Documents = Revit.ActiveDBApplication.Documents)
+        if (Revit.ActiveUIDocument is ARUI.UIDocument uiDocument)
         {
-          if (Documents.Cast<ARDB.Document>().Any(x => x.IsLinked))
+          using (var collector = new ARDB.FilteredElementCollector(uiDocument.Document).OfClass(typeof(ARDB.RevitLinkInstance)))
           {
-            Menu_AppendSeparator(menu);
-            Menu_AppendItem(menu, $"Set one linked {TypeName}", Menu_PromptOneLinked, SourceCount == 0, false);
-            Menu_AppendItem(menu, $"Set Multiple linked {GH_Convert.ToPlural(TypeName)}", Menu_PromptPluralLinked, SourceCount == 0);
+            if (collector.Any())
+            {
+              Menu_AppendSeparator(menu);
+              Menu_AppendItem(menu, $"Set one linked {TypeName}", Menu_PromptOneLinked, SourceCount == 0, false);
+              Menu_AppendItem(menu, $"Set Multiple linked {GH_Convert.ToPlural(TypeName)}", Menu_PromptPluralLinked, SourceCount == 0);
+            }
           }
         }
 
@@ -320,8 +326,9 @@ namespace RhinoInside.Revit.GH.Parameters
 
       if (VolatileData.DataCount == 1)
       {
-        var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
-          element.Location.IsValid;
+        // `Types.Group.Location` is too slow for this purpose.
+        //var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element && element.Location.IsValid;
+        var cplane = VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element && element.IsValid;
 
         Menu_AppendItem(menu, $"Set CPlane", Menu_SetCPlane, cplane, false);
       }
@@ -512,20 +519,22 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private void Menu_SetCPlane(object sender, EventArgs e)
     {
-      if (VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element)
+      if
+      (
+        VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
+        Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc doc &&
+        (doc.Views.ActiveView ?? doc.Views.FirstOrDefault()) is RhinoView view &&
+        view.ActiveViewport is RhinoViewport vport
+      )
       {
-        if
-        (
-          Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc doc &&
-          (doc.Views.ActiveView ?? doc.Views.FirstOrDefault()) is RhinoView view &&
-          view.ActiveViewport is RhinoViewport vport
-        )
+        var location = element.Location;
+        if (location.IsValid)
         {
           view.BringToFront();
           doc.Views.ActiveView = view;
 
           var cplane = vport.GetConstructionPlane();
-          cplane.Plane = element.Location;
+          cplane.Plane = location;
           vport.PushConstructionPlane(cplane);
 
           view.Redraw();
@@ -560,47 +569,49 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private async void Menu_ExternaliseData(object sender, EventArgs e)
     {
-      var commandId = ARUI.RevitCommandId.LookupPostableCommandId(ARUI.PostableCommand.SaveSelection);
       var activeApp = Revit.ActiveUIApplication;
-      using (var scope = new External.UI.EditScope(activeApp))
+      if (activeApp.ActiveUIDocument.TryGetRevitCommandId(ARUI.PostableCommand.SaveSelection, out var commandId))
       {
-        var activeDoc = activeApp.ActiveUIDocument.Document;
-
-        var elementIds = ToElementIds(VolatileData).
-          Where(x => activeDoc.Equals(x.Document)).
-          Select(x => x.Id).
-          ToList();
-
-        var previous = activeApp.ActiveUIDocument.Selection.GetElementIds();
-        Rhinoceros.InvokeInHostContext(() => activeApp.ActiveUIDocument.Selection.SetElementIds(elementIds));
-
-        var changes = await scope.ExecuteCommandAsync(commandId);
-        if (changes.GetSummary(activeDoc, out var added, out var deleted, out var modified) > 0)
+        using (var scope = new External.UI.EditScope(activeApp))
         {
-          var selectionFilter = added.Select(x => activeDoc.GetElement(x)).OfType<ARDB.SelectionFilterElement>().FirstOrDefault();
-          if (selectionFilter is object)
+          var activeDoc = activeApp.ActiveUIDocument.Document;
+
+          var elementIds = ToElementIds(VolatileData).
+            Where(x => activeDoc.Equals(x.Document)).
+            Select(x => x.Id).
+            ToList();
+
+          var previous = activeApp.ActiveUIDocument.Selection.GetElementIds();
+          Rhinoceros.InvokeInHostContext(() => activeApp.ActiveUIDocument.Selection.SetElementIds(elementIds));
+
+          var changes = await scope.ExecuteCommandAsync(commandId);
+          if (changes.GetSummary(activeDoc, out var added, out var deleted, out var modified) > 0)
           {
-            RecordUndoEvent("Externalise data");
-
-            PersistentData.Clear();
-            OnObjectChanged(GH_ObjectEventType.PersistentData);
-
-            MutableNickName = false;
-            if (Kind == GH_ParamKind.floating)
+            var selectionFilter = added.Select(x => activeDoc.GetElement(x)).OfType<ARDB.SelectionFilterElement>().FirstOrDefault();
+            if (selectionFilter is object)
             {
-              IconDisplayMode = GH_IconDisplayMode.name;
-              Attributes?.ExpireLayout();
+              RecordUndoEvent("Externalise data");
+
+              PersistentData.Clear();
+              OnObjectChanged(GH_ObjectEventType.PersistentData);
+
+              MutableNickName = false;
+              if (Kind == GH_ParamKind.floating)
+              {
+                IconDisplayMode = GH_IconDisplayMode.name;
+                Attributes?.ExpireLayout();
+              }
+
+              NickName = selectionFilter.Name;
+              OnObjectChanged(GH_ObjectEventType.NickName);
+
+              RemoveAllSources();
+              ExpireSolution(true);
             }
-
-            NickName = selectionFilter.Name;
-            OnObjectChanged(GH_ObjectEventType.NickName);
-
-            RemoveAllSources();
-            ExpireSolution(true);
           }
-        }
 
-        Rhinoceros.InvokeInHostContext(() => activeApp.ActiveUIDocument.Selection.SetElementIds(previous));
+          Rhinoceros.InvokeInHostContext(() => activeApp.ActiveUIDocument.Selection.SetElementIds(previous));
+        }
       }
     }
     #endregion
@@ -658,7 +669,10 @@ namespace RhinoInside.Revit.GH.Parameters
           if (comboBox.Items[comboBox.SelectedIndex] is string value)
           {
             if (comboBox.Tag is ToolStripDropDown menu)
+            {
               menu.Close();
+              WindowHandle.ActiveWindow = menu.Tag as WindowHandle;
+            }
 
             RecordUndoEvent("Set: NickName");
             MutableNickName = comboBox.SelectedIndex == 0;
@@ -679,7 +693,7 @@ namespace RhinoInside.Revit.GH.Parameters
             {
               NickName = value;
               OnObjectChanged(GH_ObjectEventType.NickName);
-              ExpireSolution(true);
+              Rhino.RhinoApp.Idle += ExpireIdle;
             }
             else
             {
@@ -689,6 +703,12 @@ namespace RhinoInside.Revit.GH.Parameters
           }
         }
       }
+    }
+
+    private void ExpireIdle(object sender, EventArgs e)
+    {
+      Rhino.RhinoApp.Idle -= ExpireIdle;
+      ExpireSolution(true);
     }
 
     private void OnObjectChanged(IGH_DocumentObject sender, GH_ObjectChangedEventArgs e)
@@ -743,7 +763,7 @@ namespace RhinoInside.Revit.GH.Parameters
                 }
                 else if (filter is ARDB.ParameterFilterElement parameter)
                 {
-                  if (parameter.GetElementFilter() is ARDB.ElementFilter parameterFilter)
+                  if (parameter.ToElementFilter() is ARDB.ElementFilter parameterFilter)
                   {
                     using (var elements = new ARDB.FilteredElementCollector(doc))
                     {
@@ -783,22 +803,30 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public override void AddedToDocument(GH_Document document)
     {
-      if (ActiveSelection)
+      if (ActiveSelection && Core.Host is object)
         Core.Host.SelectionChanged += Host_SelectionChanged;
 
       base.AddedToDocument(document);
     }
+
     public override void RemovedFromDocument(GH_Document document)
     {
       base.RemovedFromDocument(document);
 
-      if (ActiveSelection)
+      if (ActiveSelection && Core.Host is object)
         Core.Host.SelectionChanged -= Host_SelectionChanged;
     }
 
-    private void Host_SelectionChanged(object sender, ARUI.Events.SelectionChangedEventArgs e)
+    private async void Host_SelectionChanged(object sender, ARUI.Events.SelectionChangedEventArgs e)
     {
-      ExpireSolution(true);
+      if (OnPingDocument() is GH_Document document)
+      {
+        document.ScheduleSolution(int.MaxValue, doc => ExpireSolution(false));
+        await External.ActivationGate.Yield();
+
+        if (document.ScheduleDelay >= GH_Document.ScheduleRecursive)
+          document.NewSolution(false);
+      }
     }
     #endregion
   }

@@ -6,6 +6,7 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.DB;
 using static RhinoInside.Revit.Diagnostics;
+using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -296,11 +297,14 @@ namespace RhinoInside.Revit.AddIn.Commands
           }
         )
         {
-          taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Customize keyboard shortcuts…");
-          if (taskDialog.Show() == TaskDialogResult.CommandLink1)
+          if (Revit.ActiveUIApplication.LookupPostableCommandId(PostableCommand.KeyboardShortcuts) is RevitCommandId commandId)
           {
-            Revit.ActiveUIApplication.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.KeyboardShortcuts));
+            taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Customize keyboard shortcuts…");
+
+            if (taskDialog.Show() == TaskDialogResult.CommandLink1)
+              Revit.ActiveUIApplication.PostCommand(commandId);
           }
+          else taskDialog.Show();
         }
       }
     }

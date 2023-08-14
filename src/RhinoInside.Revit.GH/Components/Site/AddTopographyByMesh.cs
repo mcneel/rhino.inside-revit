@@ -17,7 +17,11 @@ namespace RhinoInside.Revit.GH.Components.Site
   public class TopographyByMesh : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("E6EA0A85-E118-4BFD-B01E-86BA22155938");
+#if REVIT_2024
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.hidden;
+#else
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
+#endif
 
     public TopographyByMesh() : base
     (

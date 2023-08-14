@@ -301,25 +301,15 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (room.Location is ARDB.LocationPoint roomLocation)
         {
           var position = roomLocation.Point;
-          var target = new ARDB.XYZ(location.X, location.Y, position.Z);
-          if (!target.IsAlmostEqualTo(position))
+          if (!location.AlmostEqualPoints(position))
           {
             var pinned = room.Pinned;
             room.Pinned = false;
-            roomLocation.Move(target - position);
+            roomLocation.Move(location - position);
             room.Pinned = pinned;
           }
-
-          baseOffset = Math.Min
-          (
-            baseOffset.Value,
-            room.Level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble()
-          );
         }
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{room.Name}' is not in a properly enclosed region on Phase '{phase.Name}'. {{{room.Id}}}");
-
-        if (room.BaseOffset != baseOffset.Value)
-          room.BaseOffset = baseOffset.Value;
 
         if (topElevation.IsLevelConstraint(out var topLevel, out var topOffset))
         {
@@ -336,6 +326,17 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
           if (room.LimitOffset != topElevation.Offset)
             room.LimitOffset = topElevation.Offset;
+        }
+
+        if (room.BaseOffset != baseOffset.Value)
+        {
+          var computationHeight = room.Level.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).AsDouble();
+          if (baseOffset.Value > computationHeight)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"'{room.Name}' lower offset is above the Computation Height. {{{room.Id}}}");
+
+          baseOffset = Math.Min(baseOffset.Value, computationHeight);
+          if (room.BaseOffset != baseOffset.Value)
+            room.BaseOffset = baseOffset.Value;
         }
       }
       else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"'{room.Name}' is unplaced. {{{room.Id}}}");

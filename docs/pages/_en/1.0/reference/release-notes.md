@@ -12,25 +12,191 @@ group: Deployment & Configs
 
 ### RC
 
-- Added 'View Crop Region' component.
-- Added 'Add Section View' component.
-- Added 'Add Detail View' component.
-
+- Added 'Pick Elements' component.
+- Added 'Pick Points' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-![]({{ "/static/images/release_notes/happy2023.png" | prepend: site.baseurl }})
+{% include ltr/release-header.html title="v1.17 RC1" version="v1.17.8620.27747" pre_release=true time="08/08/2023" %}
+
+- Misc fixes and improvements
+
+{% include ltr/release-header.html title="v1.16" version="v1.16.8620.27325" time="08/08/2023" %}
+
+- Added 'Add Toposolid' component. ({{ site.terms.revit }} 2024)
+- Added 'Add Toposolid Sub-Division' component. ({{ site.terms.revit }} 2024)
+- Added {% include ltr/comp.html uuid='86d56bea' %} component.
+- Added {% include ltr/comp.html uuid='aae738e5' %} component.
+- Added {% include ltr/comp.html uuid='2ab03aaf' %} component.
+- Improved {% include ltr/comp.html uuid='516b2771' %} performance.
+- Renamed {% include ltr/comp.html uuid='ecc6fa17' %} -> {% include ltr/comp.html uuid='79daea3a' %}.
+- Now {% include ltr/comp.html uuid='79daea3a' %} filters out hidden UI _Categories_.
+- Added 'Is Visible UI' to {% include ltr/comp.html uuid='d150e40e' %} and {% include ltr/comp.html uuid='d794361e' %}.
+- Added {% include ltr/comp.html uuid='ecc6fa17' %} component.
+- Added {% include ltr/comp.html uuid='92b3f600' %} component.
+- Added {% include ltr/comp.html uuid='ec5cd3bb' %} component.
+- Added {% include ltr/comp.html uuid='63c816d8' %} component.
+- Fixed 'Element Name' when used to rename _Subcategories_ in multiple families at once.
+  [#898](https://github.com/mcneel/rhino.inside-revit/issues/898)
+- Fix on {% include ltr/comp.html uuid='d150e40e' %} it should output ordered by id.
+- Fix on {% include ltr/comp.html uuid='79daea3a' %} when a `<None>` category is used.
+- {% include ltr/comp.html uuid='495330db' %} compoennt now works on `GenericForm` elements.
+- Added {% include ltr/comp.html uuid='1caafc26' %} component.
+  [#871](https://github.com/mcneel/rhino.inside-revit/issues/871)
+- Fix on DirectShape components.
+- Renamed 'Analyze Instance Space' -> {% include ltr/comp.html uuid='6ac37380' %}.
+- Updated Topological components to return linked elements.
+
+{% include ltr/release-header.html title="v1.16 RC1" version="v1.16.8596.34292" pre_release=true time="07/15/2023" %}
+
+- Misc fixes and improvements
+
+{% include ltr/release-header.html title="v1.15" version="v1.15.8596.34075" time="07/15/2023" %}
+
+- Added {% include ltr/comp.html uuid='440b6beb' %}
+- Added {% include ltr/comp.html uuid='6388cfc0' %}
+- Exposed {% include ltr/comp.html uuid='f9bc3f5e' %}
+- Includes all changes under 1.15RC releases listed below
+
+{% include ltr/release-header.html title="v1.15 RC2" version="v1.15.8571.17168" pre_release=true time="06/20/2023" %}
+
+- Fix on {% include ltr/comp.html uuid='ad88cf11' %} component when 'Line Style' input is used.
+- Fix on {% include ltr/comp.html uuid='91757ae0' %} when used on linked model faces.
+- Added 'Sketch Lines' component.
+- Added 'Lines' output to 'Element References' component.
+- Added 'Curve Point References' component.
+- Implemented casting for 'Face' -> 'Category' & 'Material'
+- Added 'Element View' component to query for the owner view of an element.
+- Implemented casting for 'View' -> 'Sheet' & 'Viewport' (when placed on a sheet)
+- Implemented casting for 'Viewport' -> 'View' & 'Sheet'
+
+{% include ltr/release-header.html title="v1.15 RC1" version="v1.15.8557.7999" pre_release=true time="06/07/2023" %}
+
+- Misc fixes and improvements
+
+{% include ltr/release-header.html title="v1.14" version="v1.14.8557.24642" time="06/07/2023" %}
+
+- Includes all changes under 1.14RC releases listed below
+- Misc fixes and improvements
+
+{% include ltr/release-header.html title="v1.14 RC4" version="v1.14.8543.20042" pre_release=true time="05/23/2023" %}
+
+- Now Area, Room and Space Tag components require a View.
+- Added 'Area Scheme' parameter.
+- Made {% include ltr/comp.html uuid='2101fff6' %} component hidden.
+
+{% include ltr/release-header.html title="v1.14 RC3" version="v1.14.8536.14258" pre_release=true time="05/19/2023" %}
+
+- Added {% include ltr/comp.html uuid='bbd8187b' %} component.
+- Added {% include ltr/comp.html uuid='8ed1490f' %} component.
+- Added {% include ltr/comp.html uuid='dda08563' %} component.
+
+
+{% include ltr/release-header.html title="v1.14 RC2" version="v1.14.8529.14229" pre_release=true time="05/09/2023" %}
+
+- Added 'Add Beam System' component.
+- Added 'Add Truss' component.
+- Renamed component 'Add Structural Foundation' to 'Add Foundation (Isolated)'.
+- Added 'Add Foundation (Slab)' component.
+- Added 'Add Foundation (Wall)' component.
+
+{% include ltr/release-header.html title="v1.14 RC1" version="v1.14.8510.35994" pre_release=true time="04/20/2023" %}
+
+- Minimum Rhino version is now 7.28.
+- Added support for '{{ site.terms.revit }} 2024'
+- Added 'View Range Elevations' component.
+
+{% include ltr/release-header.html title="v1.13" version="v1.13.8511.13600" time="04/20/2023" %}
+
+- Includes all changes under 1.13RC releases listed below
+- Added {% include ltr/comp.html uuid='e2435930' %} parameter
+- Added {% include ltr/comp.html uuid='4326c4aa' %} parameter
+- Misc fixes and improvements
+
+{% include ltr/release-header.html title="v1.13 RC6" version="v1.13.8494.18380" pre_release=true time="04/04/2023" %}
+
+- Improved {% include ltr/comp.html uuid='6723beb1' %} component, now identifies more types.
+- Fixed {% include ltr/comp.html uuid='d1940eb3' %} on areas that have internal loops.
+- Fixed {% include ltr/comp.html uuid='0ea8d61a' %} when cloning named elements.
+- {% include ltr/comp.html uuid='a5c63076' %} and *Bounding Box* components can now correctly provide location and bounds info for a Revit Scope Box .
+- Fixed issue with not reading Admin configuration file correctly
+
+{% include ltr/release-header.html title="v1.13 RC5" version="v1.13.8486.7511" pre_release=true time="03/28/2023" %}
+
+- Fixed {% include ltr/comp.html uuid='96d578c0' %} component when the referenced element is a Rebar
+- Fixed AssemblyResolver. Now first call to RhinoCommon fully loads it
+
+{% include ltr/release-header.html title="v1.13 RC4" version="v1.13.8480.18315" pre_release=true time="03/21/2023" %}
+
+- Renamed 'Annotation' panel to 'Annotate'.
+- Merged 'Build', 'Host' and 'Wall' panel under a new 'Architecture' panel.
+- Moved structural element creation components to 'Structure' panel.
+- Moved Component Family related components to 'Component' panel.
+- Renamed 'Host Inserts' component to {% include ltr/comp.html uuid='70ccf7a6' %}.
+- Now {% include ltr/comp.html uuid='70ccf7a6' %} keep linked elements on linked documents.
+- Fixd a bug on {% include ltr/comp.html uuid='ad88cf11' %} component 'Line Style' input when used on a Family document.
+  [#788](https://github.com/mcneel/rhino.inside-revit/issues/788)
+- Fixed a bug on previews when there are Groups on the canvas.
+- Now {% include ltr/comp.html uuid='c2b9b045' %} treats relative paths as temporary.
+- Now {% include ltr/comp.html uuid='c2b9b045' %} has a 'Path' output to allow chaining with 'Load Component Family'.
+- Now {% include ltr/comp.html uuid='82523911' %} creates a Work Plane-Based family when no template is provided.
+- Added 'Offset from Host' parameters to work plane-based components.
+
+{% include ltr/release-header.html title="v1.13 RC3" version="v1.13.8474.22250" pre_release=true time="03/15/2023" %}
+
+- Added {% include ltr/comp.html uuid='5a6d9a20' %} component.
+- Added {% include ltr/comp.html uuid='be2c26c7' %} component.
+- Added {% include ltr/comp.html uuid='72b92e6a' %} component.
+
+{% include ltr/release-header.html title="v1.13 RC2" version="v1.13.8466.15699" pre_release=true time="03/07/2023" %}
+
+- Improved how components recognize verticality in Revit
+- Now the Grasshopper Editor window stays at same position after picking from Revit.
+
+{% include ltr/release-header.html title="v1.13 RC1" version="v1.13.8458.21732" pre_release=true time="02/28/2023" %}
+
+- Added {% include ltr/comp.html uuid='2101fff6' %} component.
+- Added {% include ltr/comp.html uuid='08586f77' %}.
+
+{% include ltr/release-header.html title="v1.12" version="v1.12.8449.6358" time="02/28/2023" %}
+
+- Added {% include ltr/comp.html uuid='71f014de' %} component.
+- Added {% include ltr/comp.html uuid='3e2a753b' %} component.
+- Added {% include ltr/comp.html uuid='91757ae0' %} component.
+
+{% include ltr/release-header.html title="v1.12 RC4" version="v1.12.8438.12884" pre_release=true time="02/07/2023" %}
+
+- Added {% include ltr/comp.html uuid='96d578c0' %} component.
+- Added {% include ltr/comp.html uuid='d4873f18' %} component.
+- Added **Horizontal Align** and **Vertical Align** inputs to {% include ltr/comp.html uuid='49acc84c' %} component.
+
+{% include ltr/release-header.html title="v1.12 RC3" version="v1.12.8431.23288" pre_release=true time="01/31/2023" %}
+
+- Updated `MeshEncoder` to produce Meshes whithout internal wires. (Revit 2023)
+
+{% include ltr/release-header.html title="v1.12 RC2" version="v1.12.8425.21537" pre_release=true time="01/24/2023" %}
+
+- Added {% include ltr/comp.html uuid='3ae4fa67' %} component.
+- Added {% include ltr/comp.html uuid='369b6109' %} component.
+- Added {% include ltr/comp.html uuid='8484e108' %} component.
+- Updated {% include ltr/comp.html uuid='f7b775c9' %} component, now it takes a Frame as input.
+- Now 'View' bake creates a named View in Rhino.
+- Now 'Open Viewport` grabs Revit active view settings.
+    * If CTRL is pressed grabs orientation.
+    * If SHIFT is also pressed zoom is also applied.
 
 {% include ltr/release-header.html title="v1.12 RC1" version="v1.12.8417.6530" pre_release=true time="01/17/2023" %}
 
-- Fixed {% include ltr/comp.html uuid='01e86d7c' %} name is getting an unexpected integer added in creation. [#754](https://github.com/mcneel/rhino.inside-revit/issues/754)
+- Fixed {% include ltr/comp.html uuid='01e86d7c' %} name is getting an unexpected integer added in creation.
+  [#754](https://github.com/mcneel/rhino.inside-revit/issues/754)
 - Added {% include ltr/comp.html uuid='e4e08f99' %} component.
 - Added {% include ltr/comp.html uuid='2922af4a' %} component.
-- Added {% include ltr/comp.html uuid='b062c96e' %} component. [#753](https://github.com/mcneel/rhino.inside-revit/issues/753)
+- Added {% include ltr/comp.html uuid='b062c96e' %} component.
+  [#753](https://github.com/mcneel/rhino.inside-revit/issues/753)
 
 
-{% include ltr/release-header.html title="v1.11" version="v1.11.8410.29937" time="01/10/2023" %}
+{% include ltr/release-header.html title="v1.11" version="v1.11.8425.15605" time="01/10/2023" %}
 
 - Fix for "Comments" parameter `DataType`.
 - Improved `Types.CurtainGridLine` previews.
@@ -217,7 +383,8 @@ group: Deployment & Configs
 - Fixed structural framing creation on a family document.
 - Fixed curved Beams when in a vertical plane.
 - Fixed dimensioning components, when working with Detail Lines and Reference Planes.
-- {% include ltr/comp.html uuid='8f1ee110' %} casting issue with enums [#613](https://github.com/mcneel/rhino.inside-revit/issues/613)
+- {% include ltr/comp.html uuid='8f1ee110' %} casting issue with enums
+  [#613](https://github.com/mcneel/rhino.inside-revit/issues/613)
 
 {% include ltr/release-header.html title="v1.8 RC2" version="v1.8.8207.14855" pre_release=true time="06/21/2022" %}
 
@@ -299,7 +466,8 @@ group: Deployment & Configs
 
 - Added support for Revit 2023
 - Fixed conversion from {% include ltr/comp.html uuid='15ad6bf9' %} to Surface when slant angle is negative
-- Fixed a bug on {% include ltr/comp.html uuid='0f251f87' %} [#507](https://github.com/mcneel/rhino.inside-revit/issues/507)
+- Fixed a bug on {% include ltr/comp.html uuid='0f251f87' %}
+  [#507](https://github.com/mcneel/rhino.inside-revit/issues/507)
 - Updated Revit download link when loaded in an unsupported version
 
 {% include ltr/release-header.html title="v1.6 RC4" version="v1.6.8124.18574" pre_release=true time="04/05/2022" %}
@@ -395,7 +563,8 @@ group: Deployment & Configs
 - Renamed 'Document Links' to {% include ltr/comp.html uuid='ebccfdd8-' %}.
 - Renamed 'Binding' to 'Scope' in parameter components.
 - Updated 'Element Dependents' to return original 'Elements' and also 'Referentials'.
-- Fixed {% include ltr/comp.html uuid='b3bcbf5b-' %} and {% include ltr/comp.html uuid='8b85b1fb-' %}: Now both have an option _Expand Dependents_ in the context menu to extract dependent elements geometry. Outputs are grafted accordingly. Closes #509.
+- Fixed {% include ltr/comp.html uuid='b3bcbf5b-' %} and {% include ltr/comp.html uuid='8b85b1fb-' %}: Now both have an option _Expand Dependents_ in the context menu to extract dependent elements geometry. Outputs are grafted accordingly.
+  [#509](https://github.com/mcneel/rhino.inside-revit/issues/509).
 - Updated some 'Query' component input parameters names to match Revit parameter name.
 
 {% include ltr/release-header.html title="v1.4 RC5" version="v1.4.8007.15883" pre_release=true time="12/07/2021" %}
@@ -468,7 +637,8 @@ group: Deployment & Configs
 
 - Issues
 
-  - Fixed Non-C2-BREP edge conversion when knots are below tolerance. RE [#382](https://github.com/mcneel/rhino.inside-revit/issues/382).
+  - Fixed Non-C2-BREP edge conversion when knots are below tolerance. 
+    [#382](https://github.com/mcneel/rhino.inside-revit/issues/382).
 
 - Minor Fixes and Improvements
 

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Win32.SafeHandles;
-using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.Numerical;
 
 namespace Rhino.Geometry
 {
@@ -18,48 +18,28 @@ namespace Rhino.Geometry
     public static readonly Box Box = new Box(Plane, BoundingBox);
   }
 
-  readonly struct GeometryEqualityComparer :
+  readonly struct EpsilonEqualityComparer :
     IEqualityComparer<double>,
     IEqualityComparer<Point3d>,
     IEqualityComparer<Vector3d>
   {
     readonly double Tolerance;
-    readonly double ZeroTolerance;
 
-    GeometryEqualityComparer(double tolerance)
-    {
-      Tolerance = Math.Max(tolerance, NumericTolerance.Upsilon);
-      ZeroTolerance = Tolerance / 3.0;
-    }
+    EpsilonEqualityComparer(double tolerance) => Tolerance = Math.Max(tolerance, Constant.Delta);
 
     /// <summary>
-    /// IEqualityComparer for <see cref="{T}"/> that compares geometrically using <see cref="RhinoMath.SqrtEpsilon"/> value.
+    /// IEqualityComparer for <see cref="{T}"/> that compares geometrically using <see cref="RhinoMath.Epsilon"/> value.
     /// </summary>
     /// <param name="tolerance"></param>
     /// <returns>A geometry comparer.</returns>
-    public static readonly GeometryEqualityComparer Default = new GeometryEqualityComparer(RhinoMath.SqrtEpsilon);
+    public static readonly EpsilonEqualityComparer Default = new EpsilonEqualityComparer(RhinoMath.Epsilon);
 
     /// <summary>
     /// IEqualityComparer for <see cref="{T}"/> that compares geometrically using <paramref name="tolerance"/> value.
     /// </summary>
     /// <param name="tolerance"></param>
     /// <returns>A geometry comparer.</returns>
-    public static GeometryEqualityComparer Comparer(double tolerance) => new GeometryEqualityComparer(tolerance);
-
-    internal bool IsZeroLength(double x, double y, double z)
-    {
-      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z);
-
-      double u = x, v = y, w = z;
-      if (x > w) { u = y; v = z; w = x; }
-      if (y > w) { u = z; v = x; w = y; }
-      if (w < ZeroTolerance) return true;
-      if (w > Tolerance) return false;
-
-      u /= w; v /= w;
-
-      return Math.Sqrt(1.0 + (u * u + v * v)) * w < Tolerance;
-    }
+    public static EpsilonEqualityComparer Comparer(double tolerance) => new EpsilonEqualityComparer(tolerance);
 
     static int CombineHash(params int[] values)
     {
@@ -71,12 +51,17 @@ namespace Rhino.Geometry
     }
 
     #region Length
-    public bool Equals(double x, double y) => Math.Abs(x - y) < Tolerance;
-    public int GetHashCode(double value) => Math.Round(value / Tolerance).GetHashCode();
+    public bool Equals(double x, double y) => RhinoMath.EpsilonEquals(x, y, Tolerance);
+    public int GetHashCode(double value)
+    {
+      var hash = 0.1 * Math.Round(value / Tolerance);
+      if (Math.Abs(hash) < int.MaxValue) return (int) hash;
+      return double.IsNaN(hash) ? int.MinValue : Math.Sign(hash) * int.MaxValue;
+    }
     #endregion
 
     #region Point3d
-    public bool Equals(Point3d left, Point3d right) => IsZeroLength(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+    public bool Equals(Point3d left, Point3d right) => left.EpsilonEquals(right, Tolerance);
 
     public int GetHashCode(Point3d xyz) => CombineHash
     (
@@ -87,7 +72,7 @@ namespace Rhino.Geometry
     #endregion
 
     #region Vector3d
-    public bool Equals(Vector3d left, Vector3d right) => IsZeroLength(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+    public bool Equals(Vector3d left, Vector3d right) => left.EpsilonEquals(right, Tolerance);
 
     public int GetHashCode(Vector3d xyz) => CombineHash
     (
@@ -123,12 +108,12 @@ namespace Rhino.Geometry
   {
     public static bool GeometryEquals(this Point3d left, Point3d right)
     {
-      return GeometryEqualityComparer.Default.Equals(left, right);
+      return GeometryEquals(left, right, RhinoMath.SqrtEpsilon);
     }
 
     public static bool GeometryEquals(this Point3d left, Point3d right, double tolerance)
     {
-      return GeometryEqualityComparer.Comparer(tolerance).Equals(left, right);
+      return Euclidean.IsZero3(left.X - right.X, left.Y - right.Y, left.Z - right.Z, tolerance);
     }
   }
 
@@ -136,12 +121,27 @@ namespace Rhino.Geometry
   {
     public static bool GeometryEquals(this Vector3d left, Vector3d right)
     {
-      return GeometryEqualityComparer.Default.Equals(left, right);
+      return GeometryEquals(left, right, RhinoMath.SqrtEpsilon);
     }
 
     public static bool GeometryEquals(this Vector3d left, Vector3d right, double tolerance)
     {
-      return GeometryEqualityComparer.Comparer(tolerance).Equals(left, right);
+      return Euclidean.IsZero3(left.X - right.X, left.Y - right.Y, left.Z - right.Z, tolerance);
+    }
+
+    public static Vector3d PerpVector(this Vector3d value, double tolerance = RhinoMath.SqrtEpsilon)
+    {
+      var length = value.Length;
+      if (length < tolerance)
+        return Vector3d.Zero;
+
+      var normal = value / length;
+      var perp = new Vector3d(normal.X, normal.Y, 0.0).Length <= tolerance ?
+        new Vector3d(normal.Z, 0.0, -normal.X) :
+        new Vector3d(-normal.Y, normal.X, 0.0);
+
+      perp.Unitize();
+      return perp * length;
     }
 
     /// <summary>
@@ -150,20 +150,19 @@ namespace Rhino.Geometry
     /// <para>The Y axis follows by application of the right-hand rule.</para>
     /// </summary>
     /// <param name="value"></param>
-    /// <param name="tolerance"></param>
+    /// <param name="tolerance">Tolerance used to classify <paramref name="value"/> as vertical. Use <see cref="GeometryDecoder.Tolerance.VectorTolerance"/> in case of doubt.</param>
     /// <returns>X axis of the corresponding coordinate system</returns>
-    public static Vector3d PerpVector(this Vector3d value, double tolerance = 1e-9)
+    public static Vector3d RightDirection(this Vector3d value, double tolerance)
     {
-      var length = value.Length;
-      if (length < tolerance)
+      if (!value.Unitize())
         return Vector3d.Zero;
 
-      var normal = value / length;
+      var perp = new Vector3d(value.X, value.Y, 0.0).Length <= tolerance ?
+        new Vector3d(value.Z, 0.0, -value.X) :
+        new Vector3d(-value.Y, value.X, 0.0);
 
-      if (Vector3d.Zero.EpsilonEquals(new Vector3d(normal.X, normal.Y, 0.0), tolerance))
-        return new Vector3d(value.Z, 0.0, -value.X);
-      else
-        return new Vector3d(-value.Y, value.X, 0.0);
+      perp.Unitize();
+      return perp;
     }
   }
 
@@ -544,7 +543,7 @@ namespace Rhino.Geometry
       if (uv.Unitize())
       {
         t = Math.Atan2(uv.Y, uv.X);
-        if (t < 0.0) t += (2.0 * Math.PI);
+        if (t < 0.0) t += RhinoMath.Tau;
         return true;
       }
       else
@@ -568,15 +567,31 @@ namespace Rhino.Geometry
         ellipse.Radius2 * Math.Sin(t)
       );
     }
+
+    public static NurbsCurve ToNurbsCurve(this Ellipse ellipse, Interval domain)
+    {
+      if (ellipse.ToNurbsCurve() is NurbsCurve nurbsCurve)
+      {
+        nurbsCurve.ClosestPoint(ellipse.PointAt(domain.T0), out var param0);
+        if (!nurbsCurve.ChangeClosedCurveSeam(param0))
+          nurbsCurve.Domain = new Interval(param0, param0 + nurbsCurve.Domain.Length);
+
+        nurbsCurve.ClosestPoint(ellipse.PointAt(domain.T1), out var param1);
+        nurbsCurve = nurbsCurve.Trim(param0, param1) as NurbsCurve;
+        nurbsCurve.Domain = domain;
+        return nurbsCurve;
+      }
+
+      return null;
+    }
   }
 
   static class CurveExtension
   {
     public static bool GeometryEquals(this Curve curve, Curve other, double tolerance)
     {
-      var comparer = GeometryEqualityComparer.Comparer(tolerance);
-      return comparer.Equals(curve.PointAtStart, other.PointAtStart) &&
-             comparer.Equals(curve.PointAtEnd, other.PointAtEnd) &&
+      return curve.PointAtStart.GeometryEquals(other.PointAtStart, tolerance) &&
+             curve.PointAtEnd.GeometryEquals(other.PointAtEnd, tolerance) &&
              Curve.GetDistancesBetweenCurves(curve, other, tolerance, out var max, out var _, out var _, out var _, out var _, out var _) &&
              max < tolerance;
     }
@@ -701,14 +716,14 @@ namespace Rhino.Geometry
 
         if (curve.IsClosed)
         {
-          domain = new Interval(0.0, 2.0 * Math.PI);
+          domain = new Interval(0.0, RhinoMath.Tau);
           return true;
         }
         else
         {
           ellipse.ClosestPoint(curve.PointAtStart, out var t0);
           ellipse.ClosestPoint(curve.PointAtEnd, out var t1);
-          domain = new Interval(t0, t1 < t0 ? t1 + Math.PI * 2.0 : t1);
+          domain = new Interval(t0, t1 < t0 ? t1 + RhinoMath.Tau : t1);
           return true;
         }
       }
@@ -885,6 +900,10 @@ namespace Rhino.Geometry
           nurbs.KnotsV.InsertKnot(surface.Domain(1).Mid);
           surface = nurbs;
         }
+
+        // Duplicate Loops
+        for(var l = 0; l < loops.Length; ++l)
+          loops[l] = loops[l].DuplicateCurve();
 
         // Classify Loops
         var nesting = new int[loops.Length];
@@ -1147,11 +1166,19 @@ namespace Rhino.Geometry
 
     public static bool TryGetUserString(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def)
     {
+#if REVIT_2024
+      if (geometry.TryGetUserString(key, out long id, def.ToValue()))
+      {
+        value = new Autodesk.Revit.DB.ElementId(id);
+        return true;
+      }
+#else
       if (geometry.TryGetUserString(key, out int id, def.ToValue()))
       {
         value = new Autodesk.Revit.DB.ElementId(id);
         return true;
       }
+#endif
 
       value = def;
       return false;
@@ -1162,6 +1189,104 @@ namespace Rhino.Geometry
 
     public static bool TrySetUserString(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def) =>
       geometry.TrySetUserString(key, value.ToValue(), def.ToValue());
+  }
+}
+
+namespace Rhino.DocObjects
+{
+  static class ViewportInfoExtension
+  {
+    public static void SetScreenPortFromFrustum(this ViewportInfo vport, double unitsPerInch, double scale = 0.01, int DPI = 72)
+    {
+      scale *= unitsPerInch;
+
+      int width  = (int) Math.Round(vport.FrustumWidth * scale * DPI);
+      int height = (int) Math.Round(vport.FrustumHeight * scale * DPI);
+
+      vport.ScreenPort = new System.Drawing.Rectangle(0, 0, Math.Max(1, width), Math.Max(1, height));
+    }
+
+    public static Geometry.Interval Extents(this ViewportInfo vport, int direction)
+    {
+      switch (direction)
+      {
+        case 0: return new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
+        case 1: return new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
+        case 2: return new Geometry.Interval(vport.FrustumNear, vport.FrustumFar);
+      }
+
+      return Geometry.NaN.Interval;
+    }
+
+    public static bool SetExtents(this ViewportInfo vport, int direction, Geometry.Interval extents)
+    {
+      if (vport.GetFrustum(out var left, out var right, out var bottom, out var top, out var near, out var far))
+      {
+        switch (direction)
+        {
+          case 0: return vport.SetFrustum(extents.T0, extents.T1, bottom, top, near, far);
+          case 1: return vport.SetFrustum(left, right, extents.T0, extents.T1, near, far);
+          case 2: return vport.SetFrustumNearFar(extents.T0, extents.T1);
+        }
+      }
+
+      return false;
+    }
+
+    public static Geometry.Plane GetCameraFrameAt(this ViewportInfo vport, double depth = 0.0) =>
+      new Geometry.Plane(vport.CameraLocation - vport.CameraZ * depth, vport.CameraX, vport.CameraY);
+
+#if !RHINO8_OR_GREATER
+    public static double[] GetViewScale(this ViewportInfo vport)
+    {
+      var scale = vport.ViewScale;
+      return new double[] { scale.Width, scale.Height, 1.0 };
+    }
+
+    public static Geometry.Point3d[] GetFramePlaneCorners(this ViewportInfo vport, double depth)
+    {
+      if (!vport.IsValidCamera || !vport.IsValidFrustum)
+        return Array.Empty<Geometry.Point3d>();
+
+      return GetFramePlaneCorners(vport, depth, vport.Extents(0), vport.Extents(1));
+    }
+#endif
+
+    internal static Geometry.Point3d[] GetFramePlaneCorners(this ViewportInfo vport, double depth, Geometry.Interval width, Geometry.Interval height)
+    {
+      var plane = GetCameraFrameAt(vport, depth);
+      var s = vport.IsPerspectiveProjection ? depth / vport.FrustumNear : 1.0;
+
+      var scale = vport.GetViewScale();
+      var x = 1.0 / scale[0];
+      var y = 1.0 / scale[1];
+
+      return new Geometry.Point3d[]
+      {
+        plane.PointAt(s * x * width.T0, s * y * height.T0),
+        plane.PointAt(s * x * width.T1, s * y * height.T0),
+        plane.PointAt(s * x * width.T0, s * y * height.T1),
+        plane.PointAt(s * x * width.T1, s * y * height.T1),
+      };
+    }
+
+    public static Geometry.Rectangle3d GetFrustumRectangle(this ViewportInfo vport, double depth)
+    {
+      var width = new Geometry.Interval(vport.FrustumLeft, vport.FrustumRight);
+      var height = new Geometry.Interval(vport.FrustumBottom, vport.FrustumTop);
+      var s = vport.IsPerspectiveProjection ? depth / vport.FrustumNear : 1.0;
+
+      var scale = vport.GetViewScale();
+      var x = 1.0 / scale[0];
+      var y = 1.0 / scale[1];
+
+      return new Geometry.Rectangle3d
+      (
+        vport.GetCameraFrameAt(depth),
+        new Geometry.Interval(s * x * width.T0, s * y * width.T1),
+        new Geometry.Interval(s * x * height.T0, s * y * height.T1)
+      );
+    }
   }
 }
 
@@ -1250,38 +1375,41 @@ namespace Rhino.Display
 
       return false;
     }
+
+    public static bool SetClientSize(this RhinoView view, System.Drawing.Size clientSize)
+    {
+      var viewWindow = new WindowHandle(view.Handle);
+      if (!viewWindow.IsZero)
+      {
+        if (view.Floating)
+          viewWindow.Parent.ClientSize = clientSize;
+        else
+          viewWindow.ClientSize = clientSize;
+
+        return true;
+      }
+
+      return false;
+    }
   }
 
   static class RhinoViewportExtension
   {
-    public static bool SetViewProjection(this RhinoViewport viewport, DocObjects.ViewportInfo camera, bool updateTargetLocation, bool updateScreenPort)
+    internal static bool SetViewportInfo(this RhinoViewport viewport, DocObjects.ViewportInfo vport)
     {
-      var vportInfo = camera;
+      var vportInfo = vport;
 
-      if (updateScreenPort)
+      if (vport.ScreenPortAspect < RhinoMath.SqrtEpsilon)
       {
         viewport.GetScreenPort(out var left, out var right, out var top, out var bottom, out var _, out var _);
-        vportInfo = new DocObjects.ViewportInfo(camera)
+        vportInfo = new DocObjects.ViewportInfo(vport)
         {
           FrustumAspect = viewport.FrustumAspect,
           ScreenPort = new System.Drawing.Rectangle(left, top, right - left, top - bottom)
         };
       }
 
-      if (viewport.SetViewProjection(vportInfo, updateTargetLocation))
-      {
-        if (updateTargetLocation)
-        {
-          if (camera.TargetPoint.IsValid)
-            viewport.SetCameraTarget(camera.TargetPoint, false);
-          else
-            viewport.SetCameraTarget(vportInfo.CameraLocation + vportInfo.CameraDirection, false);
-        }
-
-        return true;
-      }
-
-      return false;
+      return viewport.SetViewProjection(vportInfo, !vportInfo.TargetPoint.IsValid);
     }
 
     public static Geometry.Vector2d PixelsPerUnit(this RhinoViewport viewport, Geometry.Point3d point)

@@ -95,33 +95,13 @@ namespace RhinoInside.Revit.GH.Parameters
       var doc = activeApp.ActiveUIDocument?.Document;
       if (doc is object)
       {
-        {
-          var commandId = doc.IsFamilyDocument ?
-            Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.FamilyTypes) :
-            Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.ProjectParameters);
-
-          var commandName = doc.IsFamilyDocument ?
-            "Open Family Parameters…" :
-            "Open Project Parameters…";
-
-          Menu_AppendItem
-          (
-            menu, commandName,
-            (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-            activeApp.CanPostCommand(commandId), false
-          );
-        }
+        if (doc.IsFamilyDocument)
+          menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.FamilyTypes, "Open Family Parameters…");
+        else
+          menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.ProjectParameters, "Open Project Parameters…");
 
 #if REVIT_2022
-        {
-          var commandId = Autodesk.Revit.UI.RevitCommandId.LookupPostableCommandId(Autodesk.Revit.UI.PostableCommand.GlobalParameters);
-          Menu_AppendItem
-          (
-            menu, "Open Global Parameters…",
-            (sender, arg) => External.UI.EditScope.PostCommand(activeApp, commandId),
-            !doc.IsFamilyDocument && activeApp.CanPostCommand(commandId), false
-          );
-        }
+        menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.GlobalParameters, "Open Global Parameters…");
 #endif
       }
 
@@ -476,7 +456,9 @@ namespace RhinoInside.Revit.GH.Parameters
       ParameterGroup = EDBS.ParameterGroup.Empty;
       switch (GetValue("ParameterGroup"))
       {
+#if !REVIT_2024
         case int enumerate: ParameterGroup = ((ARDB.BuiltInParameterGroup) enumerate).ToParameterGroup(); break;
+#endif
         case string schema: ParameterGroup = new EDBS.ParameterGroup(schema); break;
       }
 

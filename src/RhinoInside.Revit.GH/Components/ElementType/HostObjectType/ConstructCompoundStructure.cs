@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   public class ConstructCompoundStructure : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("92BA430E-196F-42B6-BAF1-2FE864EF4F89");
-    public override GH_Exposure Exposure => GH_Exposure.senary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "CS";
 
     public ConstructCompoundStructure() : base
@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       nickname: "CStruct",
       description: "Construct compound structure",
       category: "Revit",
-      subCategory: "Host"
+      subCategory: "Architecture"
     )
     { }
 

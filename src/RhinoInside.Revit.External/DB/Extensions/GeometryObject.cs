@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  using static NumericTolerance;
-
+	using Numerical;
   struct GeometryObjectEqualityComparer :
     IEqualityComparer<double>,
     IEqualityComparer<UV>,
@@ -32,15 +32,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     readonly double Tolerance;
 
-    GeometryObjectEqualityComparer(double tolerance) => Tolerance = Math.Max(tolerance, Upsilon);
+    GeometryObjectEqualityComparer(double tolerance) => Tolerance = Math.Max(tolerance, Constant.Upsilon);
 
     struct ParamComparer : IEqualityComparer<double>, IEqualityComparer<IList<double>>, IEqualityComparer<DoubleArray>
     {
-      public const double ParamTolerance = DefaultTolerance;
-      const double ReciprocalParamTolerance = 1.0 / DefaultTolerance;
-
-      public bool Equals(double x, double y) => AlmostEquals(x, y, ParamTolerance);
-      public int GetHashCode(double value) => (int) Math.Round(value * ReciprocalParamTolerance);
+      public bool Equals(double x, double y) => Numerical.Tolerance.Default.Equals(x, y);
+      public int GetHashCode(double value) => Numerical.Tolerance.Default.GetHashCode(value);
 
       public bool Equals(IList<double> left, IList<double> right)
       {
@@ -81,16 +78,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
-    public static IEqualityComparer<double>         Parameter = default(ParamComparer);
-    public static IEqualityComparer<IList<double>>  Parameters = default(ParamComparer);
-    public static IEqualityComparer<DoubleArray>    DoubleArray = default(ParamComparer);
+    public static IEqualityComparer<double> Parameter = default(ParamComparer);
+    public static IEqualityComparer<IList<double>> Parameters = default(ParamComparer);
+    public static IEqualityComparer<DoubleArray> DoubleArray = default(ParamComparer);
 
     /// <summary>
     /// IEqualityComparer for <see cref="{T}"/> that compares geometrically using <see cref="DefaultTolerance"/> value.
     /// </summary>
     /// <param name="tolerance"></param>
     /// <returns>A geometry comparer.</returns>
-    public static readonly GeometryObjectEqualityComparer Default = new GeometryObjectEqualityComparer(DefaultTolerance);
+    public static readonly GeometryObjectEqualityComparer Default = new GeometryObjectEqualityComparer(Constant.DefaultTolerance);
 
     /// <summary>
     /// IEqualityComparer for <see cref="{T}"/> that compares geometrically.
@@ -100,12 +97,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static GeometryObjectEqualityComparer Comparer(double tolerance) => new GeometryObjectEqualityComparer(tolerance);
 
     #region Length
-    public bool Equals(double x, double y) => Norm(x - y) < Tolerance;
+    public bool Equals(double x, double y) => Euclidean.IsZero1(x - y, Tolerance);
     public int GetHashCode(double value) => Math.Round(value / Tolerance).GetHashCode();
     #endregion
 
     #region UV
-    public bool Equals(UV x, UV y) => Norm(x.U - y.U, x.V - y.V) < Tolerance;
+    public bool Equals(UV x, UV y) => Euclidean.IsZero2(x.U - y.U, x.V - y.V, Tolerance);
     public int GetHashCode(UV obj) => CombineHash
     (
       GetHashCode(obj.U),
@@ -127,7 +124,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region XYZ
-    public bool Equals(XYZ left, XYZ right) => Norm(left.X - right.X, left.Y - right.Y, left.Z - right.Z) < Tolerance;
+    public bool Equals(XYZ left, XYZ right) => Euclidean.IsZero3(left.X - right.X, left.Y - right.Y, left.Z - right.Z, Tolerance);
     public int GetHashCode(XYZ obj) => CombineHash
     (
       GetHashCode(obj.X),
@@ -244,8 +241,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
         left.IsBound ?
         (
           Equals(left.GetEndPoint(CurveEnd.Start), right.GetEndPoint(CurveEnd.Start)) &&
-          Equals(left.GetEndPoint(CurveEnd.End),   right.GetEndPoint(CurveEnd.End))
-        ):
+          Equals(left.GetEndPoint(CurveEnd.End), right.GetEndPoint(CurveEnd.End))
+        ) :
         (
           Equals(left.Origin, right.Origin) &&
           Equals(left.Direction, right.Direction)
@@ -257,7 +254,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       value.GetType().GetHashCode(),
       value.IsBound.GetHashCode(),
       GetHashCode(value.IsBound ? value.GetEndPoint(CurveEnd.Start) : value.Origin),
-      GetHashCode(value.IsBound ? value.GetEndPoint(CurveEnd.End)   : value.Direction)
+      GetHashCode(value.IsBound ? value.GetEndPoint(CurveEnd.End) : value.Direction)
     );
     #endregion
 
@@ -420,7 +417,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region Curve
-    public bool Equals(Curve left, Curve right) => Equals((GeometryObject)left, right);
+    public bool Equals(Curve left, Curve right) => Equals((GeometryObject) left, right);
     public int GetHashCode(Curve value) => GetHashCode((GeometryObject) value);
     #endregion
 
@@ -474,7 +471,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var faceCoumt = leftFaces.Size;
       if (faceCoumt != rightFaces.Size) return false;
 
-      for(int f = 0; f < faceCoumt; ++f)
+      for (int f = 0; f < faceCoumt; ++f)
         if (!Equals(leftFaces.get_Item(f), rightFaces.get_Item(f))) return false;
 
       return true;
@@ -491,22 +488,22 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region GeometryObject
     public bool Equals(GeometryObject left, GeometryObject right)
     {
-      if (ReferenceEquals(left, right))       return true;
-      if (left is null || right is null)      return false;
-      if (left.GetType() != right.GetType())  return false;
+      if (ReferenceEquals(left, right)) return true;
+      if (left is null || right is null) return false;
+      if (left.GetType() != right.GetType()) return false;
 
       switch (left)
       {
-        case Point point:             return Equals(point,    (Point)             right);
-        case PolyLine polyLine:       return Equals(polyLine, (PolyLine)          right);
-        case Line line:               return Equals(line,     (Line)              right);
-        case Arc arc:                 return Equals(arc,      (Arc)               right);
-        case Ellipse ellipse:         return Equals(ellipse,  (Ellipse)           right);
-        case HermiteSpline hermite:   return Equals(hermite,  (HermiteSpline)     right);
-        case NurbSpline spline:       return Equals(spline,   (NurbSpline)        right);
-        case CylindricalHelix helix:  return Equals(helix,    (CylindricalHelix)  right);
-        case Solid solid:             return Equals(solid,    (Solid)             right);
-        case Face face:               return Equals(face,     (Face)              right);
+        case Point point: return Equals(point, (Point) right);
+        case PolyLine polyLine: return Equals(polyLine, (PolyLine) right);
+        case Line line: return Equals(line, (Line) right);
+        case Arc arc: return Equals(arc, (Arc) right);
+        case Ellipse ellipse: return Equals(ellipse, (Ellipse) right);
+        case HermiteSpline hermite: return Equals(hermite, (HermiteSpline) right);
+        case NurbSpline spline: return Equals(spline, (NurbSpline) right);
+        case CylindricalHelix helix: return Equals(helix, (CylindricalHelix) right);
+        case Solid solid: return Equals(solid, (Solid) right);
+        case Face face: return Equals(face, (Face) right);
       }
 
       throw new NotImplementedException($"{nameof(GeometryObjectEqualityComparer)} is not implemented for {left.GetType()}.");
@@ -515,15 +512,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       switch (value)
       {
-        case null:                    return 0;
-        case Line line:               return GetHashCode(line);
-        case Arc arc:                 return GetHashCode(arc);
-        case Ellipse ellipse:         return GetHashCode(ellipse);
-        case HermiteSpline hermite:   return GetHashCode(hermite);
-        case NurbSpline spline:       return GetHashCode(spline);
-        case CylindricalHelix helix:  return GetHashCode(helix);
-        case Solid solid:             return GetHashCode(solid);
-        case Face face:               return GetHashCode(face);
+        case null: return 0;
+        case Line line: return GetHashCode(line);
+        case Arc arc: return GetHashCode(arc);
+        case Ellipse ellipse: return GetHashCode(ellipse);
+        case HermiteSpline hermite: return GetHashCode(hermite);
+        case NurbSpline spline: return GetHashCode(spline);
+        case CylindricalHelix helix: return GetHashCode(helix);
+        case Solid solid: return GetHashCode(solid);
+        case Face face: return GetHashCode(face);
       }
 
       throw new NotImplementedException($"{nameof(GeometryObjectEqualityComparer)} is not implemented for {value.GetType()}.");
@@ -579,8 +576,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="origin"></param>
     /// <param name="basisX"></param>
     /// <param name="basisY"></param>
-    /// <returns></returns>
-    public static bool TryGetLocation(this GeometryObject geometry, out XYZ origin, out XYZ basisX, out XYZ basisY)
+    /// <returns>True on success, False on fail.</returns>
+    public static bool TryGetLocation(this GeometryObject geometry, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       switch (geometry)
       {
@@ -591,14 +588,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case GeometryInstance instance:
           origin = instance.Transform.Origin;
-          basisX = instance.Transform.BasisX;
-          basisY = instance.Transform.BasisY;
+          basisX = instance.Transform.BasisX.ToUnitXYZ();
+          basisY = instance.Transform.BasisY.ToUnitXYZ();
           return true;
 
         case Point point:
           origin = point.Coord;
-          basisX = XYZExtension.BasisX;
-          basisY = XYZExtension.BasisY;
+          basisX = UnitXYZ.BasisX;
+          basisY = UnitXYZ.BasisY;
           return true;
 
         case PolyLine polyline:
@@ -614,15 +611,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
           using (var derivatives = face.ComputeDerivatives(new UV(0.5, 0.5), normalized: true))
           {
             origin = derivatives.Origin;
-            basisX = derivatives.BasisX;
-            basisY = derivatives.BasisY;
 
             // Make sure is orthonormal.
-            var basisZ = basisX.CrossProduct(basisY).Normalize(0D);
-            basisX = basisX.Normalize(0D);
-            basisY = basisZ.CrossProduct(basisX);
+            return UnitXYZ.Orthonormalize(derivatives.BasisX, derivatives.BasisY, out basisX, out basisY, out _);
           }
-          return true;
 
         case Solid solid:
           if (!solid.Faces.IsEmpty)
@@ -642,7 +634,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// Retrieves a box that encloses the geometry object.
     /// </summary>
     /// <param name="geometry"></param>
-    /// <returns>The bounding box</returns>
+    /// <returns>The geometry bounding box.</returns>
     public static BoundingBoxXYZ GetBoundingBox(this GeometryObject geometry)
     {
       switch (geometry)
@@ -654,57 +646,57 @@ namespace RhinoInside.Revit.External.DB.Extensions
           return element.GetBoundingBox();
 
         case GeometryInstance instance:
-          {
-            var bbox = instance.SymbolGeometry.GetBoundingBox();
-            bbox.Transform = instance.Transform;
-            return bbox;
-          }
+        {
+          var bbox = instance.SymbolGeometry.GetBoundingBox();
+          bbox.Transform = instance.Transform;
+          return bbox;
+        }
 
         case Point point:
           return new BoundingBoxXYZ() { Min = point.Coord, Max = point.Coord };
 
         case PolyLine polyline:
-          {
-            if (XYZExtension.TryGetBoundingBox(polyline.GetCoordinates(), out var bbox))
-              return bbox;
-          }
-          break;
+        {
+          if (XYZExtension.TryGetBoundingBox(polyline.GetCoordinates(), out var bbox))
+            return bbox;
+        }
+        break;
 
         case Curve curve:
-          {
-            if (XYZExtension.TryGetBoundingBox(curve.Tessellate(), out var bbox))
-              return bbox;
-          }
-          break;
+        {
+          if (XYZExtension.TryGetBoundingBox(curve.Tessellate(), out var bbox))
+            return bbox;
+        }
+        break;
 
         case Edge edge:
-          {
-            if (XYZExtension.TryGetBoundingBox(edge.Tessellate(), out var bbox))
-              return bbox;
-          }
-          break;
+        {
+          if (XYZExtension.TryGetBoundingBox(edge.Tessellate(), out var bbox))
+            return bbox;
+        }
+        break;
 
         case Face face:
-          {
-            using (var mesh = face.Triangulate())
-              if (XYZExtension.TryGetBoundingBox(mesh.Vertices, out var bbox))
-                return bbox;
-          }
-          break;
-
-        case Solid solid:
-          {
-            if (!solid.Faces.IsEmpty)
-              return solid.GetBoundingBox();
-          }
-          break;
-
-        case Mesh mesh:
-          {
+        {
+          using (var mesh = face.Triangulate())
             if (XYZExtension.TryGetBoundingBox(mesh.Vertices, out var bbox))
               return bbox;
-          }
-          break;
+        }
+        break;
+
+        case Solid solid:
+        {
+          if (!solid.Faces.IsEmpty)
+            return solid.GetBoundingBox();
+        }
+        break;
+
+        case Mesh mesh:
+        {
+          if (XYZExtension.TryGetBoundingBox(mesh.Vertices, out var bbox))
+            return bbox;
+        }
+        break;
 
         default:
           throw new NotImplementedException($"{nameof(GetBoundingBox)} is not implemented for {geometry.GetType()}.");
@@ -713,6 +705,255 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return BoundingBoxXYZExtension.Empty;
     }
 
+    #region Select
+    internal static IEnumerable<Reference> Select<TSource>
+    (
+      this GeometryObject geometry,
+      Document document, string uniqueId,
+      Func<TSource, IEnumerable<Reference>> selector
+    )
+    {
+      switch (geometry)
+      {
+        case GeometryElement element:
+          foreach (var item in element.SelectMany(x => Select(x, document, uniqueId, selector)))
+          {
+            if (item is null) continue;
+            yield return item;
+          }
+          yield break;
+
+        case GeometryInstance instance:
+          foreach (var item in Select(instance.GetSymbolGeometry(), document, uniqueId, selector))
+          {
+            if (item is null) continue;
+            yield return item;
+          }
+
+          yield break;
+
+        case TSource geometryObject:
+          foreach (var item in selector(geometryObject))
+          {
+            if (item is null) continue;
+            yield return item;
+          }
+          yield break;
+      }
+    }
+
+    internal static IEnumerable<(Transform Transform, TTarget Item)> Select<TSource, TTarget>
+    (
+      this GeometryObject geometry, Transform transform,
+      Document document, string uniqueId,
+      Func<Transform, TSource, IEnumerable<TTarget>> selector
+    )
+    {
+      switch (geometry)
+      {
+        case GeometryElement element:
+          foreach (var item in element.SelectMany(x => Select(x, transform, document, uniqueId, selector)))
+            yield return item;
+          yield break;
+
+        case GeometryInstance instance:
+          foreach (var item in Select(instance.GetSymbolGeometry(), transform * instance.Transform, document, uniqueId, selector))
+            yield return item;
+
+          yield break;
+
+        case TSource geometryObject:
+          foreach (var item in selector(transform, geometryObject))
+            yield return (transform, item);
+          yield break;
+      }
+    }
+
+    internal static IEnumerable<(Transform Transform, TTarget Item, Reference Reference)> Select<TSource, TTarget>
+    (
+      this GeometryObject geometry, Transform transform,
+      Document document, string uniqueId,
+      Func<Transform, TSource, IEnumerable<(TTarget Item, Reference Reference)>> selector
+    )
+    {
+      switch (geometry)
+      {
+        case GeometryElement element:
+          foreach (var item in element.SelectMany(x => Select(x, transform, document, uniqueId, selector)))
+            yield return item;
+          yield break;
+
+        case GeometryInstance instance:
+          foreach (var item in Select(instance.GetSymbolGeometry(), transform * instance.Transform, document, uniqueId, selector))
+            yield return
+            (
+              item.Transform,
+              item.Item,
+              item.Reference
+            );
+
+          yield break;
+
+        case TSource geometryObject:
+          foreach (var item in selector(transform, geometryObject))
+            yield return (transform, item.Item, item.Reference);
+          yield break;
+      }
+    }
+    #endregion
+  }
+
+  public static class GeometryElementExtension
+  {
+    #region References
+    public static IEnumerable<Reference> GetFaceReferences(this GeometryElement geometry, Element element)
+    {
+      var document = element.Document;
+      var uniqueId = element.UniqueId;
+
+      return geometry.Select<Solid>
+      (
+        document, uniqueId,
+        s =>
+        s.Faces.Cast<Face>().
+        Where(x => x.Reference?.ElementReferenceType == ElementReferenceType.REFERENCE_TYPE_SURFACE).
+        Select(x => x.Reference)
+      );
+    }
+
+    public static IEnumerable<Reference> GetEdgeReferences(this GeometryElement geometry, Element element)
+    {
+      var document = element.Document;
+      var uniqueId = element.UniqueId;
+
+      return geometry.Select<Solid>
+      (
+        document, uniqueId,
+        s =>
+        s.Edges.Cast<Edge>().
+        Where(x => x.Reference?.ElementReferenceType == ElementReferenceType.REFERENCE_TYPE_LINEAR).
+        Select(x => x.Reference)
+      );
+    }
+
+    public static IEnumerable<Reference> GetLineReferences(this GeometryElement geometry, Element element)
+    {
+      var document = element.Document;
+      var uniqueId = element.UniqueId;
+
+      return geometry.Select<Curve>
+      (
+        document, uniqueId,
+        s => new Reference[] { s.Reference }
+      );
+    }
+
+    public static IEnumerable<Reference> GetEdgeEndPointReferences(this GeometryElement geometry, Element element)
+    {
+      var document = element.Document;
+      foreach (var reference in GetEdgeReferences(geometry, element))
+      {
+        var stableRepresentation = reference.ConvertToStableRepresentation(document);
+        yield return Reference.ParseFromStableRepresentation(document, $"{stableRepresentation}/0");
+        yield return Reference.ParseFromStableRepresentation(document, $"{stableRepresentation}/1");
+      }
+    }
+    #endregion
+
+    #region Project
+    internal static IntersectionResult Project(this GeometryElement geometry, Element element, XYZ point, out Transform transform, out Face face, out Reference faceReference)
+    {
+      var intersection = default(IntersectionResult);
+      (transform, (intersection, face), faceReference) = geometry.
+      Select<Solid, (IntersectionResult Intersection, Face Face)>
+      (
+        Transform.Identity, element.Document, element.UniqueId,
+        (xform, solid) =>
+        {
+          if (solid.Faces.IsEmpty) return new ((IntersectionResult, Face), Reference)[0];
+
+          var projected = solid.Project(xform.Inverse.OfPoint(point), out Face f);
+          projected.SetXYZPoint(xform.OfPoint(projected.XYZPoint));
+          projected.SetDistance(projected.XYZPoint.DistanceTo(point));
+
+          return new[] { ((projected, f), f.Reference) };
+        }
+      ).
+      OrderBy(x => x.Item.Intersection.Distance).
+      FirstOrDefault();
+
+      return intersection;
+    }
+
+    internal static IntersectionResult Project(this GeometryElement geometry, Element element, XYZ point, out Transform transform, out Edge edge, out Reference edgeReference)
+    {
+      var intersection = default(IntersectionResult);
+      (transform, (intersection, edge), edgeReference) = geometry.
+      Select<Solid, (IntersectionResult Intersection, Edge Edge)>
+      (
+        Transform.Identity, element.Document, element.UniqueId,
+        (xform, solid) =>
+        {
+          if (solid.Edges.IsEmpty) return new ((IntersectionResult, Edge), Reference)[0];
+
+          var projected = solid.Project(xform.Inverse.OfPoint(point), out Edge e);
+          projected.SetXYZPoint(xform.OfPoint(projected.XYZPoint));
+          projected.SetDistance(projected.XYZPoint.DistanceTo(point));
+
+          return new[] { ((projected, e), e.Reference) };
+        }
+      ).
+      OrderBy(x => x.Item.Intersection.Distance).
+      FirstOrDefault();
+
+      return intersection;
+    }
+
+    internal static IntersectionResult Project(this GeometryElement geometry, Element element, XYZ point, out Transform transform)
+    {
+      var intersection = default(IntersectionResult);
+      (transform, intersection) = geometry.
+      Select<Solid, IntersectionResult>
+      (
+        Transform.Identity, element.Document, element.UniqueId,
+        (xform, solid) =>
+        {
+          if (solid.Faces.IsEmpty && solid.Edges.IsEmpty) return new IntersectionResult[0];
+
+          var projected = solid.Project(xform.Inverse.OfPoint(point));
+          projected.SetXYZPoint(xform.OfPoint(projected.XYZPoint));
+          projected.SetDistance(projected.XYZPoint.DistanceTo(point));
+
+          return new[] { projected };
+        }
+      ).
+      OrderBy(x => x.Item.Distance).
+      FirstOrDefault();
+
+      return intersection;
+    }
+    #endregion
+  }
+
+  public static class GeometryInstanceExtension
+  {
+#if !REVIT_2023
+    /// <summary>
+    /// Gets the document that contains the symbol of this instance.
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <returns>Returns the document that contains the symbol of this instance.</returns>
+    public static Document GetDocument(this GeometryInstance instance)
+    {
+      return instance.Symbol.Document;
+    }
+#endif
+
+    /// <summary>
+    /// Retrieves the symbol element that this instance is referring to.
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <returns>The Symbol element.</returns>
     public static Element GetSymbol(this GeometryInstance instance)
     {
 #if REVIT_2023
