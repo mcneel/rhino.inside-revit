@@ -126,12 +126,12 @@ You can also pass the **Generic Model** template to the {% include ltr/comp.html
 
 There are a series of components under the *Revit > Family* panel that will help you generate geometry for Revit families:
 
+- {% include ltr/comp.html uuid='8a51d5a1' %}
 - {% include ltr/comp.html uuid='f0887ad5' %}
 - {% include ltr/comp.html uuid='6fbb9200' %}
 - {% include ltr/comp.html uuid='72fdc627' %}
-- {% include ltr/comp.html uuid='f0887ad5' %}
 
-The Component Family components above can set the visibility, subcategory, and material of elements that will make up the new Family. For further details see the [Rhino Objects as Loadable Families guide]({{ site.baseurl }}{% link _en/1.0/guides/rhino-to-revit.md%}#rhino-objects-as-loadable-families).
+The Component Family components above can be edited in Revit, set the visibility, subcategory, and material of elements. For further details see the [Rhino Objects as Loadable Families guide]({{ site.baseurl }}{% link _en/1.0/guides/rhino-to-revit.md%}#rhino-objects-as-loadable-families).
 
 ![Creating subcategory]({{ "/static/images/guides/subcategory-rhino-revit-gh.png" | prepend: site.baseurl }})
 
