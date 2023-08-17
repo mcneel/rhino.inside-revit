@@ -403,6 +403,16 @@ namespace RhinoInside.Revit.GH.Types
           box.BoundingBox :
           box.GetBoundingBox(xform);
       }
+      else if(ReferenceDocument.GetElement(GetReference()) is ARDB.Element element)
+      {
+        if (element.GetBoundingBoxXYZ()?.ToBox() is Box bbox)
+        {
+          if (HasTransform) bbox.Transform(GeometryToWorldTransform);
+          return xform == Transform.Identity ?
+            bbox.BoundingBox :
+            bbox.GetBoundingBox(xform);
+        }
+      }
 
       return NaN.BoundingBox;
     }
