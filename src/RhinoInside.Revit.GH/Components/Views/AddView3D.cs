@@ -173,9 +173,12 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     ARDB.View3D Create(ARDB.ViewFamilyType type, bool perspective)
     {
-      return perspective ?
+      var view = perspective ?
         ARDB.View3D.CreatePerspective(type.Document, type.Id) :
         ARDB.View3D.CreateIsometric(type.Document, type.Id);
+
+      view.SetDefaultPhaseFilter();
+      return view;
     }
 
     ARDB.View3D Reconstruct(ARDB.View3D view, ARDB.BoundingBoxXYZ box, bool perspective, ARDB.ViewFamilyType type, string name, ARDB.View3D template)

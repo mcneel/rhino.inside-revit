@@ -61,7 +61,9 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     ARDB.ViewPlan Create(ARDB.Level level, ARDB.ViewFamilyType type)
     {
-      return ARDB.ViewPlan.Create(level.Document, type.Id, level.Id);
+      var view = ARDB.ViewPlan.Create(level.Document, type.Id, level.Id);
+      view.SetDefaultPhaseFilter();
+      return view;
     }
 
     ARDB.ViewPlan Reconstruct(ARDB.ViewPlan viewPlan, ARDB.Level level, ARDB.ViewFamilyType type, string name, ARDB.ViewPlan template)

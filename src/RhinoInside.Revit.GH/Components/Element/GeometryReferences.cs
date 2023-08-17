@@ -7,6 +7,8 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Geometry
 {
   using External.DB.Extensions;
+  using Convert.Geometry;
+  using External.DB;
 
   [ComponentVersion(introduced: "1.14", updated: "1.15")]
   public class ElementGeometryReferences : ZuiComponent
@@ -189,7 +191,6 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     }
   }
 
-  [ComponentVersion(introduced: "1.16")]
   class GeometryReferenceElements : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("3EC6A941-9C34-4687-82E1-D7D9FE48064C");
@@ -244,6 +245,89 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         var element = Types.Element.FromReference(geometry.ReferenceDocument, geometry.GetReference());
         return element.Value.GetGeneratingElementIds(geometry.Value).Select(x => element.GetElement<Types.Element>(x));
       });
+    }
+  }
+
+  class ReferenceIntersector : ZuiComponent
+  {
+    public override Guid ComponentGuid => new Guid("60F89F09-9391-4AE6-B9C6-75AB9F4879FE");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    protected override string IconTag => string.Empty;
+
+    public ReferenceIntersector() : base
+    (
+      name: "Reference Intersector",
+      nickname: "R-Intersector",
+      description: "Get the elements that intersect to the input ray reference.",
+      category: "Revit",
+      subCategory: "Model"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.View3D()
+        {
+          Name = "View",
+          NickName = "V",
+          Description = "View where perform the test.",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_Line()
+        {
+          Name = "Ray",
+          NickName = "R",
+          Description = "Ray to test with.",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ElementFilter()
+        {
+          Name = "Filter",
+          NickName = "F",
+          Description = "Element Filter.",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GeometryObject()
+        {
+          Name = "Elements",
+          NickName = "E",
+          Description = "Element references",
+          Access = GH_ParamAccess.list
+        }
+      ),
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.GetData(DA, "View", out Types.View3D view)) return;
+      if (!Params.GetData(DA, "Ray", out Rhino.Geometry.Line? line)) return;
+      if (!Params.TryGetData(DA, "Filter", out Types.ElementFilter filter)) return;
+
+      using (var isector = new ARDB.ReferenceIntersector(filter?.Value ?? CompoundElementFilter.ElementHasBoundingBoxFilter, ARDB.FindReferenceTarget.Element, view.Value))
+      {
+        var result = isector.Find(line.Value.From.ToXYZ(), line.Value.Direction.ToXYZ());
+        Params.TrySetDataList
+        (
+          DA, "Elements",
+          () => result.OrderBy(x => x.Proximity).
+          Select(x => view.GetGeometryObjectFromReference<Types.GeometryElement>(x.GetReference()))
+        );
+      }
     }
   }
 }

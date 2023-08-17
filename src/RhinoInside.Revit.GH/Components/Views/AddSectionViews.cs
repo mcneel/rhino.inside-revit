@@ -182,6 +182,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       };
 
       var view = ARDB.ViewSection.CreateSection(type.Document, type.Id, box);
+      view.SetDefaultPhaseFilter();
       view.Document.Regenerate();
 
       box.Min = new ARDB.XYZ(-100.0, -100.0, -1.0);

@@ -630,6 +630,36 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
     #endregion
+
+    #region Phasing
+    public static void SetDefaultPhaseFilter(this View view, bool lastPhase = true)
+    {
+      if (!view.Document.IsFamilyDocument)
+      {
+        if (view.get_Parameter(BuiltInParameter.VIEW_PHASE_FILTER) is Parameter viewPhaseFilter && !viewPhaseFilter.IsReadOnly)
+        {
+          if (!((viewPhaseFilter.AsElement() as PhaseFilter)?.IsDefault is true))
+          {
+            using (var collector = new FilteredElementCollector(view.Document).OfClass(typeof(PhaseFilter)))
+            {
+              if (collector.Cast<PhaseFilter>().Where(x => x.IsDefault).FirstOrDefault() is PhaseFilter phaseFilter)
+                viewPhaseFilter.Update(phaseFilter.Id);
+            }
+          }
+        }
+
+        if (lastPhase)
+        {
+          if
+          (
+            view.get_Parameter(BuiltInParameter.VIEW_PHASE) is Parameter viewPhase && !viewPhase.IsReadOnly &&
+            view.Document.Phases.Cast<Phase>().LastOrDefault() is Phase phase
+          )
+            viewPhase.Update(phase.Id);
+        }
+      }
+    }
+    #endregion
   }
 
   public static class ViewPlanExtension
