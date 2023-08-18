@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+# Versioning
+
+`AssemblyInformationalVersion` follows [Semantic Versioning](https://semver.org).
+
+"MajorVersion.MinorVersion.BuildVersion[-ReleaseVersion][+MetaVersion]"
+
+If `ReleaseVersion` contains "wip" the product expires.
+
+-->
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProductName>Rhino.Inside</ProductName>
+    <ProductCompany>Robert McNeel &amp; Associates</ProductCompany>
+    <ProductCopyright>2019-2023 Robert McNeel &amp; Associates.</ProductCopyright>
+    <ProductReleaseVersion></ProductReleaseVersion>
+    <ProductMetaVersion></ProductMetaVersion>
+    <ProductMajorVersion>1</ProductMajorVersion>
+    <ProductMinorVersion>17</ProductMinorVersion>
+    <!--
+    <ProductBuildVersion></ProductBuildVersion>
+    <ProductRevisionVersion></ProductRevisionVersion>
+    -->
+  </PropertyGroup>
+</Project>

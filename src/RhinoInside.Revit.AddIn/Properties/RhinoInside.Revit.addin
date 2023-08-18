@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RevitAddIns>
   <AddIn Type="Application">
-    <Name>Rhino.Inside</Name>
-    <Assembly>RhinoInside.Revit\RhinoInside.Revit.AddIn.dll</Assembly>
-    <FullClassName>RhinoInside.Revit.AddIn.Loader</FullClassName>
+    <Name>Rhino.Inside (v1)</Name>
+    <Assembly>Rhino.Inside.Revit\V1\RhinoInside.Revit.AddIn.dll</Assembly>
+    <FullClassName>RhinoInside.Revit.AddIn.Selector</FullClassName>
     <AddInId>02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74</AddInId>
     <VendorId>com.mcneel</VendorId>
     <!--<VendorDescription>Robert McNeel &amp; Associates</VendorDescription>-->

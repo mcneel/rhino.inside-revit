@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- product info -->
+    <Import Project="Product.targets"/>
+  
     <!-- known paths -->
     <PropertyGroup>
         <RIRSourceDir>$(MSBuildThisFileDirectory)</RIRSourceDir>
@@ -107,7 +110,9 @@
 
     <!-- revit install dir based on revit version -->
     <PropertyGroup>
-        <RevitInstallPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\</RevitInstallPath>
+      <RevitInstallPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\</RevitInstallPath>
+      <RevitAddinsPath>$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\</RevitAddinsPath>
+      <RiROutputPath>$(RevitAddinsPath)Rhino.Inside.Revit\V$(ProductMajorVersion)\</RiROutputPath>
     </PropertyGroup>
 
     <!-- dbg vs release build configurations -->
