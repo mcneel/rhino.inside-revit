@@ -1,4 +1,4 @@
-﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ template debug="false" hostspecific="true" language="C#" #>
 <#@ assembly name="System.Core" #>
 <#@ assembly name="System.Xml" #>
 <#@ import namespace="System.IO" #>
@@ -16,7 +16,7 @@ ushort Revision = 0;
 string Release = "";
 string Metadata = "";
 
-var product = ProductInfo.LoadFrom(this.Host.ResolvePath("../../src/Product.targets"));
+var product = ProductInfo.LoadFrom(this.Host.ResolvePath("../../Product.targets"));
 {
   Major = product.MajorVersion;
   Minor = product.MinorVersion;
