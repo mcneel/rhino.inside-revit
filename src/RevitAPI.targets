@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Condition="$(Platform.Contains('2017'))">
+    <RevitVersion>2017</RevitVersion>
+    <RevitApiVersion>2017.0.2</RevitApiVersion>
+    <DefineConstants>$(DefineConstants);REVIT_2017</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Platform.Contains('2018'))">
+    <RevitVersion>2018</RevitVersion>
+    <RevitApiVersion>2018.0.2</RevitApiVersion>
+    <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Platform.Contains('2019'))">
+    <RevitVersion>2019</RevitVersion>
+    <RevitApiVersion>2019.0.1</RevitApiVersion>
+    <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018;REVIT_2019</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Platform.Contains('2020'))">
+    <RevitVersion>2020</RevitVersion>
+    <RevitApiVersion>2020.0.0</RevitApiVersion>
+    <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Platform.Contains('2021'))">
+    <RevitVersion>2021</RevitVersion>
+    <RevitApiVersion>2021.1.0</RevitApiVersion>
+    <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Platform.Contains('2022'))">
+    <RevitVersion>2022</RevitVersion>
+    <RevitApiVersion>2022.1.0</RevitApiVersion>
+    <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Platform.Contains('2023'))">
+    <RevitVersion>2023</RevitVersion>
+    <RevitApiVersion>2023.0.0</RevitApiVersion>
+    <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022;REVIT_2023</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Platform.Contains('2024'))">
+    <RevitVersion>2024</RevitVersion>
+    <RevitApiVersion>2024.0.0</RevitApiVersion>
+    <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022;REVIT_2023;REVIT_2024</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RevitInstallPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\</RevitInstallPath>
+    <RevitAddinsPath>$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\</RevitAddinsPath>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(RevitApiVersion) != '' AND $(Configuration.Contains('Debug')) AND '$(MSBuildProjectExtension)'=='.csproj'">
+    <Reference Include="RevitAPI" HintPath="$(RevitInstallPath)RevitAPI.dll" Private="False" />
+    <Reference Include="RevitAPIUI" HintPath="$(RevitInstallPath)RevitAPIUI.dll" Private="False" />
+    <Reference Include="AdWindows" HintPath="$(RevitInstallPath)AdWindows.dll" Private="False" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(RevitApiVersion) != '' AND $(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)'=='.csproj'">
+    <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="compile; build" />
+  </ItemGroup>
+
+</Project>

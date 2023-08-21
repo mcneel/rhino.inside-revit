@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Condition="$(Configuration.Contains('R7'))">
+    <RhinoVersion>7</RhinoVersion>
+    <RhinoApiVersion>7.28.23058.3001</RhinoApiVersion>
+    <DefineConstants>$(DefineConstants);RHINO_7</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.Contains('R8'))">
+    <RhinoVersion>8</RhinoVersion>
+    <RhinoApiVersion>8.0.0.0</RhinoApiVersion>
+    <DefineConstants>$(DefineConstants);RHINO_8</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- system -->
+    <RhinoDefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\$(RhinoVersion).0\Install', 'Path', null, RegistryView.Registry64))</RhinoDefaultInstallDir>
+    <RhinoDebugInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\$(RhinoVersion).0-WIP-Developer-Debug-trunk\Install', 'Path', null, RegistryView.Registry64))</RhinoDebugInstallDir>
+    <!-- plugins -->
+    <RhinoDefaultPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\$(RhinoVersion).0\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</RhinoDefaultPluginsDir>
+    <RhinoDebugPluginsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\$(RhinoVersion).0-WIP-Developer-Debug-trunk\Install', 'Default Plug-ins Folder', null, RegistryView.Registry64))</RhinoDebugPluginsDir>
+    <!-- USE THESE -->
+    <RhinoInstallDir>$([MSBuild]::ValueOrDefault('$(RhinoDebugInstallDir)', '$(RhinoDefaultInstallDir)'))</RhinoInstallDir>
+    <RhinoPluginsDir>$([MSBuild]::ValueOrDefault('$(RhinoDebugPluginsDir)', '$(RhinoDefaultPluginsDir)'))</RhinoPluginsDir>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(RhinoApiVersion) != '' AND $(Configuration.Contains('Debug')) AND '$(MSBuildProjectExtension)'=='.csproj'">
+    <Reference Include="Eto" HintPath="$(Rhino7InstallDir)Eto.dll" Private="False" />
+    <Reference Include="Eto.Wpf" HintPath="$(Rhino7InstallDir)Eto.Wpf.dll" Private="False" />
+    <Reference Include="RhinoCommon" HintPath="$(Rhino7InstallDir)RhinoCommon.dll" Private="False" />
+    <Reference Include="RhinoWindows" HintPath="$(Rhino7InstallDir)RhinoWindows.dll" Private="False" />
+    <Reference Include="Rhino.UI" HintPath="$(Rhino7InstallDir)Rhino.UI.dll" Private="False" />
+    <Reference Include="GH_IO" HintPath="$(Rhino7PluginsDir)Grasshopper\GH_IO.dll" Private="False" />
+    <Reference Include="Grasshopper" HintPath="$(Rhino7PluginsDir)Grasshopper\Grasshopper.dll" Private="False" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(RhinoApiVersion) != '' AND $(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)'=='.csproj'">
+    <PackageReference Include="RhinoCommon" Version="$(RhinoApiVersion)" IncludeAssets="compile; build" />
+    <PackageReference Include="RhinoWindows" Version="$(RhinoApiVersion)" IncludeAssets="compile; build" />
+    <PackageReference Include="Grasshopper" Version="$(RhinoApiVersion)" IncludeAssets="compile; build" />
+  </ItemGroup>
+  
+</Project>

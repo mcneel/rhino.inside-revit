@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?define ProductName='Rhino.Inside® for Autodesk Revit' ?>
+  <?define ApplicationFolderName='RhinoInside.Revit' ?>
 
   <!-- ExpirationPeriod is expressed in days. 0 means never expires. -->
   <?define ExpirationPeriod = 0 ?>
@@ -74,6 +75,7 @@
     <Property Id="ApplicationFolderName" Value="RhinoInside.Revit" />
     <Property Id="WixAppFolder" Value="WixPerMachine" />
     <WixVariable Id="WixUISupportPerUser" Value="0" />
+    <WixVariable Id="WixUISupportPerMachine" Value="0" /> 
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
     <WixVariable Id="WixUIDialogBmp" Value="Dialog.png" />
     <WixVariable Id="WixUIBannerBmp" Value="Banner.png" />

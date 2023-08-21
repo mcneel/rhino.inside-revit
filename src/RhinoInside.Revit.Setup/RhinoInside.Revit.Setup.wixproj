@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="../Product.targets"/>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -58,7 +59,7 @@
   </Target>
   <Target Name="BeforeBuild">
     <!-- Read the version from the RhinoInside.Revit.dll -->
-    <GetAssemblyIdentity AssemblyFiles="..\RhinoInside.Revit\bin\$(Platform)\$(Configuration) 2022\RhinoInside.Revit.dll">
+    <GetAssemblyIdentity AssemblyFiles="..\RhinoInside.Revit\bin\2024\Release R7\RhinoInside.Revit.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
     </GetAssemblyIdentity>
     <!-- Create the MSBuild properties -->
@@ -71,19 +72,35 @@
     <CreateProperty Value="$([System.Version]::Parse(%(AsmInfo.Version)).Build)">
       <Output TaskParameter="Value" PropertyName="BuildVersion" />
     </CreateProperty>
+    <Message Text="ProductName = $(ProductName)" Importance="high" />
     <Message Text="ProductVersion = $(ProductVersion)" Importance="high" />
+    <Message Text="ProductMajorVersion = $(ProductMajorVersion)" Importance="high" />
+    <Message Text="ProductMinorVersion = $(ProductMinorVersion)" Importance="high" />
     <Message Text="MajorMinorVersion = $(MajorMinorVersion)" Importance="high" />
     <Message Text="BuildVersion = $(BuildVersion)" Importance="high" />
+    <Message Text="RiRHexaShortVersion = $(RiRHexaShortVersion)" Importance="high" />
     <!-- Set teamcity build number -->
     <Message Text="##teamcity[buildNumber '$(ProductVersion)']" Importance="high" Condition="$(CI)==true" />
     <!-- Create the WiX preprocessor variables -->
     <CreateProperty Value="$(DefineConstants);ProductVersion=$(ProductVersion)">
       <Output TaskParameter="Value" PropertyName="DefineConstants" />
     </CreateProperty>
+    <CreateProperty Value="$(DefineConstants);ProductMajorVersion=$(ProductMajorVersion)">
+      <Output TaskParameter="Value" PropertyName="DefineConstants" />
+    </CreateProperty>
+    <CreateProperty Value="$(DefineConstants);ProductMinorVersion=$(ProductMinorVersion)">
+      <Output TaskParameter="Value" PropertyName="DefineConstants" />
+    </CreateProperty>
     <CreateProperty Value="$(DefineConstants);MajorMinorVersion=$(MajorMinorVersion)">
       <Output TaskParameter="Value" PropertyName="DefineConstants" />
     </CreateProperty>
     <CreateProperty Value="$(DefineConstants);BuildVersion=$(BuildVersion)">
+      <Output TaskParameter="Value" PropertyName="DefineConstants" />
+    </CreateProperty>
+    <CreateProperty Value="$(DefineConstants);RiRHexaShortVersion=$(RiRHexaShortVersion)">
+      <Output TaskParameter="Value" PropertyName="DefineConstants" />
+    </CreateProperty>
+    <CreateProperty Value="$(DefineConstants);RiRAddinFileName=$(RiRAddinFileName)">
       <Output TaskParameter="Value" PropertyName="DefineConstants" />
     </CreateProperty>
     <!-- Update the MSBuild properties $(TargetName), etc. -->

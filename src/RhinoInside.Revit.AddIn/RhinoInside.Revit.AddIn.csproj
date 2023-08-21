@@ -59,18 +59,26 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <None Include="Properties\RhinoInside.Revit.addin" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Properties\ProductInfo.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ProductInfo.cs</LastGenOutput>
     </Content>
+    <Content Include="Properties\RhinoInside.Revit.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>RhinoInside.Revit.addin</LastGenOutput>
+    </Content>
+    <None Include="Properties\RhinoInside.Revit.addin">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>RhinoInside.Revit.tt</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Resources\About-icon.png" />
     <EmbeddedResource Include="Resources\ChannelDaily-icon.png" />
     <EmbeddedResource Include="Resources\ChannelRC-icon.png" />
@@ -128,11 +136,6 @@
   </PropertyGroup>
   <PropertyGroup>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
-  </PropertyGroup>
-  <PropertyGroup>
-    <RiRBitwiseVersion>$([MSBuild]::BitwiseNot($([MSBuild]::BitwiseOr($([MSBuild]::Multiply($(ProductMajorVersion), 256)), $(ProductMinorVersion)))))</RiRBitwiseVersion>
-    <RiRHexaShortVersion>$([System.Convert]::ToInt16($(RiRBitwiseVersion)).ToString("X"))</RiRHexaShortVersion>
-    <RiRAddinFileName>Rhino.Inside.Revit~$(RiRHexaShortVersion).addin</RiRAddinFileName>
   </PropertyGroup>
   <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb" DestinationFolder="$(RiROutputPath)" />

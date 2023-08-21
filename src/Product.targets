@@ -23,4 +23,16 @@ If `ReleaseVersion` contains "wip" the product expires.
     <ProductRevisionVersion></ProductRevisionVersion>
     -->
   </PropertyGroup>
+  <PropertyGroup>
+    <!-- RiRHexaVersion = $"({~(ProductMajorVersion << 8 | ProductMinorVersion):X}" -->
+    <RiRBitwiseVersion>$([MSBuild]::BitwiseNot($([MSBuild]::BitwiseOr($([MSBuild]::Multiply($(ProductMajorVersion), 256)), $(ProductMinorVersion)))))</RiRBitwiseVersion>
+    <RiRHexaVersion>$([System.Convert]::ToInt16($(RiRBitwiseVersion)).ToString("X"))</RiRHexaVersion>
+
+    <!-- RiRHexaShortVersion = $"{~(ProductMajorVersion):X}" -->
+    <RiRBitwiseShortVersion>$([MSBuild]::BitwiseNot($([MSBuild]::BitwiseOr($([MSBuild]::Multiply($(ProductMajorVersion), 256)), 0))))</RiRBitwiseShortVersion>
+    <RiRHexaShortVersion>$([System.Convert]::ToInt16($(RiRBitwiseShortVersion)).ToString("X").SubString(0, 2))</RiRHexaShortVersion>
+
+    <RiRAddinFileName>RhinoInside.Revit.addin</RiRAddinFileName>
+  </PropertyGroup>
+
 </Project>
