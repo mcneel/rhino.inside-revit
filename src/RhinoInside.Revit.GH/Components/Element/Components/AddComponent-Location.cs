@@ -6,6 +6,7 @@ using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -116,7 +117,7 @@ namespace RhinoInside.Revit.GH.Components
             AddRuntimeMessage
             (
               GH_RuntimeMessageLevel.Warning,
-              $"Host input on non Hosted family types does not support tracking mode 'Update' a new element will be created on each solution.{Environment.NewLine}" +
+              $"Host input on non Hosted family types does not support tracking mode 'Update' a new element will be created on each solution.{OS.NewLine}" +
               $"Consider using a Hosted family or enable 'Work Plane-Based' on '{type.FamilyName}' family instead."
             );
           return;
@@ -147,13 +148,13 @@ namespace RhinoInside.Revit.GH.Components
           return;
 
         case ARDB.FamilyPlacementType.ViewBased:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a view-based type.{Environment.NewLine}Consider use 'Add Detail Item' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a view-based type.{OS.NewLine}Consider use 'Add Detail Item' component.");
 
         case ARDB.FamilyPlacementType.CurveBased:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a curve based type.{Environment.NewLine}Consider use 'Add Component (Curve)' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a curve based type.{OS.NewLine}Consider use 'Add Component (Curve)' component.");
 
         case ARDB.FamilyPlacementType.CurveDrivenStructural:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a structural curve based type.{Environment.NewLine}Consider use 'Add Structural Beam' or 'Add Structural Brace' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is a structural curve based type.{OS.NewLine}Consider use 'Add Structural Beam' or 'Add Structural Brace' component.");
 
         case ARDB.FamilyPlacementType.WorkPlaneBased:
           if (!(host is null || host is ARDB.SketchPlane || host is ARDB.DatumPlane))
@@ -162,12 +163,12 @@ namespace RhinoInside.Revit.GH.Components
           AddRuntimeMessage
           (
             GH_RuntimeMessageLevel.Warning,
-            $"Type '{type.FamilyName} : {type.Name}' is a work plane-based type.{Environment.NewLine}Consider use 'Add Component (Work Plane)' component."
+            $"Type '{type.FamilyName} : {type.Name}' is a work plane-based type.{OS.NewLine}Consider use 'Add Component (Work Plane)' component."
           );
           return;
 
         case ARDB.FamilyPlacementType.Adaptive:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is an adaptive family type.{Environment.NewLine}Consider use 'Add Component (Adaptive)' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is an adaptive family type.{OS.NewLine}Consider use 'Add Component (Adaptive)' component.");
       }
 
       throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.FamilyName} : {type.Name}' is not a valid one-level or work-plane based type.");

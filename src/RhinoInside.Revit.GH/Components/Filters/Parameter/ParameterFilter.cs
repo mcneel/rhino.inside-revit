@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
@@ -122,10 +123,10 @@ namespace RhinoInside.Revit.GH.Components.Filters
             catch (Exception e)
             {
               if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
-                throw new Exceptions.RuntimeException(e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0]);
+                throw new Exceptions.RuntimeException(e.Message.Split(new string[] { OS.NewLine }, StringSplitOptions.None)[0]);
               else if (FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit)
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0]);
-              else throw new Exceptions.RuntimeErrorException(e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0]);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message.Split(new string[] { OS.NewLine }, StringSplitOptions.None)[0]);
+              else throw new Exceptions.RuntimeErrorException(e.Message.Split(new string[] { OS.NewLine }, StringSplitOptions.None)[0]);
             }
           }
 

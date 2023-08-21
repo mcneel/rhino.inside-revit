@@ -4,6 +4,7 @@ using Rhino.Display;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -340,7 +341,7 @@ namespace RhinoInside.Revit.GH.Types
           return $"{GeometryDecoder.ToModelLength(dimension.Origin.Z).ToString($"N{precision}", provider)} {GH_Format.RhinoUnitSymbol()}";
 
         case ARDB.DimensionStyleType.SpotCoordinate:
-          return $"X {GeometryDecoder.ToModelLength(dimension.Origin.X).ToString($"N{precision}", provider)}{Environment.NewLine}Y {GeometryDecoder.ToModelLength(dimension.Origin.Y).ToString($"N{precision}", provider)}";
+          return $"X {GeometryDecoder.ToModelLength(dimension.Origin.X).ToString($"N{precision}", provider)}{OS.NewLine}Y {GeometryDecoder.ToModelLength(dimension.Origin.Y).ToString($"N{precision}", provider)}";
 
         case ARDB.DimensionStyleType.SpotSlope:
           return $"⌳ {Rhino.RhinoMath.ToDegrees(dimension.get_Parameter(ARDB.BuiltInParameter.DIM_VALUE_ANGLE).AsDouble()):N1}°";

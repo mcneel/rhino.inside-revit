@@ -10,6 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 using SD = System.Drawing;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -91,7 +92,7 @@ namespace RhinoInside.Revit.GH.Components
 
     #if DEBUG
     public override string InstanceDescription =>
-      $"{base.InstanceDescription}{Environment.NewLine}{VersionDescription}";
+      $"{base.InstanceDescription}{OS.NewLine}{VersionDescription}";
 
     string VersionDescription
     {
@@ -102,17 +103,17 @@ namespace RhinoInside.Revit.GH.Components
         var versionDescription = string.Empty;
 
         if (introduced is object)
-          versionDescription += $"Introduced in v{introduced}" + Environment.NewLine;
+          versionDescription += $"Introduced in v{introduced}" + OS.NewLine;
 
         if (Obsolete)
         {
           if (deprecated is object)
-            versionDescription += $"Obsolete since v{deprecated}" + Environment.NewLine;
+            versionDescription += $"Obsolete since v{deprecated}" + OS.NewLine;
 
           foreach (var attribute in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
           {
             if (!string.IsNullOrWhiteSpace(attribute.Message))
-              versionDescription += attribute.Message + Environment.NewLine;
+              versionDescription += attribute.Message + OS.NewLine;
           }
         }
 
@@ -209,8 +210,8 @@ namespace RhinoInside.Revit.GH.Components
         var assemblyName = new AssemblyInfo().Name;
         reader.AddMessage
         (
-          $"Component '{Name}' was saved with a newer version." + Environment.NewLine +
-          "Some information may be lost" + Environment.NewLine +
+          $"Component '{Name}' was saved with a newer version." + OS.NewLine +
+          "Some information may be lost" + OS.NewLine +
           $"Please update '{assemblyName}' to version {ComponentVersion} or above.",
           GH_Message_Type.warning
         );
@@ -377,13 +378,13 @@ namespace RhinoInside.Revit.GH.Components
 
         case Autodesk.Revit.Exceptions.ArgumentOutOfRangeException _:
           if (e.Source == System.Reflection.Assembly.GetExecutingAssembly().GetName().Name)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0]);
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message.Split(new string[] { OS.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0]);
           else
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message.Split(new string[] { Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)[0]}");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message.Split(new string[] { OS.NewLine}, StringSplitOptions.RemoveEmptyEntries)[0]}");
           break;
 
         case Autodesk.Revit.Exceptions.ArgumentException _:
-          var message = e.Message.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0];
+          var message = e.Message.Split(new string[] { OS.NewLine }, StringSplitOptions.None)[0];
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {message}");
           break;
 
@@ -393,7 +394,7 @@ namespace RhinoInside.Revit.GH.Components
 
         case System.MissingMemberException _:
           if (e.Message.Contains("Autodesk.Revit.DB."))
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Please consider update Revit to the latest revision.{Environment.NewLine}{e.Message.TripleDot(128)}");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Please consider update Revit to the latest revision.{OS.NewLine}{e.Message.TripleDot(128)}");
           else
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
           break;
@@ -462,14 +463,14 @@ namespace RhinoInside.Revit.GH.Components
       switch (geometry)
       {
         case Rhino.Geometry.BrepVertex vertex:
-          text = $"* {text}{Environment.NewLine}Vertex Index = {vertex.VertexIndex} Location = {vertex.Location * Revit.ModelUnits}.";
+          text = $"* {text}{OS.NewLine}Vertex Index = {vertex.VertexIndex} Location = {vertex.Location * Revit.ModelUnits}.";
           break;
         case Rhino.Geometry.BrepEdge edge:
-          text = $"◉ {text}{Environment.NewLine}Edge Index = {edge.EdgeIndex} Tolerance = {edge.Tolerance * Revit.ModelUnits} Length = {edge.GetLength(edge.Domain) * Revit.ModelUnits}.";
+          text = $"◉ {text}{OS.NewLine}Edge Index = {edge.EdgeIndex} Tolerance = {edge.Tolerance * Revit.ModelUnits} Length = {edge.GetLength(edge.Domain) * Revit.ModelUnits}.";
           break;
         case Rhino.Geometry.BrepFace face:
           var mass = Rhino.Geometry.AreaMassProperties.Compute(face);
-          text = $"◼ {text}{Environment.NewLine}Face Index = {face.FaceIndex} Surface Area = {mass?.Area * Revit.ModelUnits * Revit.ModelUnits}.";
+          text = $"◼ {text}{OS.NewLine}Face Index = {face.FaceIndex} Surface Area = {mass?.Area * Revit.ModelUnits * Revit.ModelUnits}.";
           break;
       }
 #endif
@@ -581,14 +582,14 @@ namespace RhinoInside.Revit.GH.Components
         {
           // If we have no message try to get a more accurate reason
           if (!geometry.IsValidWithLog(out message))
-            failureMessage += Environment.NewLine + message;
+            failureMessage += OS.NewLine + message;
         }
-        else failureMessage += Environment.NewLine + message;
+        else failureMessage += OS.NewLine + message;
       }
       else
       {
         if (!string.IsNullOrWhiteSpace(message))
-          failureMessage += Environment.NewLine + message;
+          failureMessage += OS.NewLine + message;
       }
 
       throw new Exceptions.RuntimeArgumentException(Params.Input[index].Name, failureMessage, value);
@@ -687,7 +688,7 @@ namespace RhinoInside.Revit.GH.Components
       component.AddRuntimeMessage
       (
         GH_RuntimeMessageLevel.Error,
-        "This component is Obsolete." + Environment.NewLine +
+        "This component is Obsolete." + OS.NewLine +
         "Please use 'Solution > Upgrade Components…' from Grasshopper menu."
       );
 

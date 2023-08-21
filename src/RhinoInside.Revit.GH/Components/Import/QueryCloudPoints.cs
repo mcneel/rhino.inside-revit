@@ -4,6 +4,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Import
 {
@@ -46,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Import
         {
           Name = "Filter",
           NickName = "F",
-          Description = $"Convex shape to be used as a volume filter.{Environment.NewLine}Plane, Box and Mesh are accepted.",
+          Description = $"Convex shape to be used as a volume filter.{OS.NewLine}Plane, Box and Mesh are accepted.",
           Optional = true
         }, ParamRelevance.Primary
       ),

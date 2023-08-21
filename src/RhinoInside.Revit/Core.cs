@@ -81,7 +81,22 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Constructor
-    internal static readonly string RegistryPath = @"SOFTWARE\McNeel\Rhinoceros\7.0";
+    static Version _MinimumRhinoVersion;
+    static Version MinimumRhinoVersion
+    {
+      get
+      {
+        if (_MinimumRhinoVersion is null)
+        {
+          var referencedRhinoCommonVersion = Assembly.GetExecutingAssembly().GetReferencedAssemblies().Where(x => x.Name == "RhinoCommon").FirstOrDefault().Version;
+          _MinimumRhinoVersion = new Version(referencedRhinoCommonVersion.Major, referencedRhinoCommonVersion.Minor, 0);
+        }
+
+        return _MinimumRhinoVersion;
+      }
+    }
+    internal static readonly string RegistryPath = $@"SOFTWARE\McNeel\Rhinoceros\{MinimumRhinoVersion.Major}.0";
+
     static readonly string SystemDir =
 #if DEBUG
       Microsoft.Win32.Registry.GetValue($@"HKEY_CURRENT_USER\{RegistryPath}-WIP-Developer-Debug-trunk\Install", "Path", null) as string ??
@@ -98,14 +113,6 @@ namespace RhinoInside.Revit
       RhinoVersionInfo?.FileBuildPart ?? 0,
       RhinoVersionInfo?.FilePrivatePart ?? 0
     );
-    static Version MinimumRhinoVersion
-    {
-      get
-      {
-        var assemblyVersion = Assembly.GetExecutingAssembly().GetReferencedAssemblies().Where(x => x.Name == "RhinoCommon").FirstOrDefault().Version;
-        return new Version(assemblyVersion.Major, assemblyVersion.Minor, 0);
-      }
-    }
 
     static Core()
     {

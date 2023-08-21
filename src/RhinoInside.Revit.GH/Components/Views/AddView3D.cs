@@ -1,6 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
@@ -44,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         {
           Name = "Frame",
           NickName = "F",
-          Description = $"View camera frame.{Environment.NewLine}Line, Plane, Rectangle and Box are also accepted.",
+          Description = $"View camera frame.{OS.NewLine}Line, Plane, Rectangle and Box are also accepted.",
         }
       ),
       new ParamDefinition

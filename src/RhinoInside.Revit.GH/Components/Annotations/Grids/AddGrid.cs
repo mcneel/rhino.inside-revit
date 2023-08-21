@@ -5,6 +5,7 @@ using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Annotations.Grids
 {
@@ -47,7 +48,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
         {
           Name = "Base",
           NickName = "BA",
-          Description = $"Base of the grid.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'.",
+          Description = $"Base of the grid.{OS.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'.",
           Optional = true,
         }, ParamRelevance.Secondary
       ),
@@ -57,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
         {
           Name = "Top",
           NickName = "TO",
-          Description = $"Top of the grid.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'",
+          Description = $"Top of the grid.{OS.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'",
           Optional = true,
         }, ParamRelevance.Primary
       ),

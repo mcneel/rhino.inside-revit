@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -55,7 +56,7 @@ namespace RhinoInside.Revit.GH.Types
           if (settings.CutBackgroundPatternColor().IsValid)       description.Add($"Cut Patterns : Background Color = {GH_Format.FormatColour(settings.CutBackgroundPatternColor().ToColor())}");
 #endif
           if (description.Count > 0)
-            return Environment.NewLine + string.Join(Environment.NewLine, description.Select(x => $"  {x}"));
+            return OS.NewLine + string.Join(OS.NewLine, description.Select(x => $"  {x}"));
 
           return "<Default>";
         }

@@ -7,6 +7,7 @@ using Rhino;
 using Rhino.DocObjects;
 using ARDB = Autodesk.Revit.DB;
 using DBXS = RhinoInside.Revit.External.DB.Schemas;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Types
 {

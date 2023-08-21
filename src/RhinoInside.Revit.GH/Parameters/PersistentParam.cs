@@ -8,6 +8,7 @@ using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -57,7 +58,7 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach (var obsolete in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
         {
           if (!string.IsNullOrEmpty(obsolete.Message))
-            Description = obsolete.Message + Environment.NewLine + Description;
+            Description = obsolete.Message + OS.NewLine + Description;
         }
       }
     }
@@ -81,8 +82,8 @@ namespace RhinoInside.Revit.GH.Parameters
         var assemblyName = new AssemblyInfo().Name;
         reader.AddMessage
         (
-          $"Parameter '{Name}' was saved with a newer version." + Environment.NewLine +
-          "Some information may be lost" + Environment.NewLine +
+          $"Parameter '{Name}' was saved with a newer version." + OS.NewLine +
+          "Some information may be lost" + OS.NewLine +
           $"Please update '{assemblyName}' to version {ComponentVersion} or above.",
           GH_Message_Type.warning
         );
@@ -120,7 +121,7 @@ namespace RhinoInside.Revit.GH.Parameters
         var gooType = goo.GetType();
         if (gooType.GetConstructor(Type.EmptyTypes) is null)
         {
-          var error = $"'{gooType.FullName}' has no public empty constructor.{Environment.NewLine}Parameterless constructor is mandatory for serialization.";
+          var error = $"'{gooType.FullName}' has no public empty constructor.{OS.NewLine}Parameterless constructor is mandatory for serialization.";
           if (set.Add(error)) errors.Add(error);
         }
       }

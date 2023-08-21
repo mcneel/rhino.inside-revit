@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -258,9 +259,9 @@ namespace RhinoInside.Revit.GH.Parameters
           MessageBox.Show
           (
             Form.ActiveForm,
-            $"The model '{document.Title}' is not currently open on Revit{Environment.NewLine}" +
-            $"Do you want to open it from:{Environment.NewLine}" +
-            Environment.NewLine +
+            $"The model '{document.Title}' is not currently open on Revit{OS.NewLine}" +
+            $"Do you want to open it from:{OS.NewLine}" +
+            OS.NewLine +
             $"{document.PathName}",
             "Open Model",
             MessageBoxButtons.YesNo,

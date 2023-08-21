@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
@@ -91,14 +92,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item),
-      ParamDefinition.Create<Param_Integer>("Limit", "L", $"Max number of Elements to query for.{Environment.NewLine}For an unlimited query remove this parameter.", defaultValue: 100, GH_ParamAccess.item, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Integer>("Limit", "L", $"Max number of Elements to query for.{OS.NewLine}For an unlimited query remove this parameter.", defaultValue: 100, GH_ParamAccess.item, relevance: ParamRelevance.Primary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
       ParamDefinition.Create<Parameters.Element>("Elements", "E", "Elements list", GH_ParamAccess.list, relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Param_Integer>("Count", "C", $"Elements count.{Environment.NewLine}For a more performant way of knowing how many elements this query returns remove the Elements output.", GH_ParamAccess.item, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Integer>("Count", "C", $"Elements count.{OS.NewLine}For a more performant way of knowing how many elements this query returns remove the Elements output.", GH_ParamAccess.item, relevance: ParamRelevance.Primary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -128,7 +129,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           limit <= (Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_))?.Count ?? 0)
         )
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"'{Params.Output[_Elements_].NickName}' output is limited to {limit.Value} elements.{Environment.NewLine}Increase or remove 'Limit' input parameter to retreive more elements.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"'{Params.Output[_Elements_].NickName}' output is limited to {limit.Value} elements.{OS.NewLine}Increase or remove 'Limit' input parameter to retreive more elements.");
         }
 
         Params.TrySetData

@@ -6,6 +6,7 @@ using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -32,7 +33,7 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach (var obsolete in GetType().GetCustomAttributes(typeof(ObsoleteAttribute), false).Cast<ObsoleteAttribute>())
         {
           if (!string.IsNullOrEmpty(obsolete.Message))
-            Description = obsolete.Message + Environment.NewLine + Description;
+            Description = obsolete.Message + OS.NewLine + Description;
         }
       }
     }
@@ -56,8 +57,8 @@ namespace RhinoInside.Revit.GH.Parameters
         var assemblyName = new AssemblyInfo().Name;
         reader.AddMessage
         (
-          $"Parameter '{Name}' was saved with a newer version." + Environment.NewLine +
-          "Some information may be lost" + Environment.NewLine +
+          $"Parameter '{Name}' was saved with a newer version." + OS.NewLine +
+          "Some information may be lost" + OS.NewLine +
           $"Please update '{assemblyName}' to version {ComponentVersion} or above.",
           GH_Message_Type.warning
         );

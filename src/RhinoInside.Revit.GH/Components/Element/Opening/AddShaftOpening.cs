@@ -8,6 +8,7 @@ using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Openings
 {
@@ -57,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
         {
           Name = "Base",
           NickName = "BA",
-          Description = $"Base of the opening.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'.",
+          Description = $"Base of the opening.{OS.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'.",
           Optional = true,
         }, ParamRelevance.Primary
       ),
@@ -67,7 +68,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
         {
           Name = "Top",
           NickName = "TO",
-          Description = $"Top of the opening.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'",
+          Description = $"Top of the opening.{OS.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'",
           Optional = true,
         }, ParamRelevance.Primary
       ),
