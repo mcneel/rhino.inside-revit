@@ -6,7 +6,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Xml.Serialization" #>
-<#@ output extension=".addin" encoding="utf8" #>
+<#@ output extension=".addin" encoding="utf-8" #>
 <#
 ushort Major = 0;
 ushort Minor = 0;
