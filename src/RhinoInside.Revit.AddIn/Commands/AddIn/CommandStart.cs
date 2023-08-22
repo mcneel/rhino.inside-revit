@@ -237,6 +237,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       CommandRhino.CreateUI(rhinoPanel);
       CommandRhinoOpenViewport.CreateUI(rhinoPanel);
       CommandToggleRhinoPreview.CreateUI(rhinoPanel);
+      CommandScriptEditor.CreateUI(rhinoPanel);
       CommandPython.CreateUI(rhinoPanel);
 
       rhinoPanel.AddSlideOut();
