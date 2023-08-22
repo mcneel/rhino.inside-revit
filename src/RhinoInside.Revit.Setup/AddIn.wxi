@@ -43,7 +43,7 @@
         <Directory Id="APPLICATIONFOLDER2024" Name="2024">
           <Directory Id="INSTALLFOLDER_2024" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2024_R7" Name="R7" />
-            <Directory Id="INSTALLFOLDER_2024_R8" Name="R7" />
+            <Directory Id="INSTALLFOLDER_2024_R8" Name="R8" />
           </Directory>
         </Directory>
       </Directory>
