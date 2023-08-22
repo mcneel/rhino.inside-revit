@@ -6,7 +6,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Xml.Serialization" #>
-<#@ output extension=".cs" #>
+<#@ output extension=".cs" encoding="utf-8" #>
 <#
 
 ushort Major = 0;

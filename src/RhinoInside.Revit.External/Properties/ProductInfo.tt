@@ -1,4 +1,4 @@
-﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ template debug="false" hostspecific="true" language="C#" #>
 <#@ assembly name="System.Core" #>
 <#@ assembly name="System.Xml" #>
 <#@ import namespace="System.IO" #>
@@ -6,7 +6,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Xml.Serialization" #>
-<#@ output extension=".cs" #>
+<#@ output extension=".cs" encoding="utf-8" #>
 <#
 ushort Major = 0;
 ushort Minor = 0;
