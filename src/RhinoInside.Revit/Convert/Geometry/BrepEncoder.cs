@@ -839,6 +839,29 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         rhinoDoc.Objects.Add(geometry);
 
+//#if RHINO_8
+//        var options = new Rhino.FileIO.FileDwgWriteOptions
+//        {
+//          Version = Rhino.FileIO.FileDwgWriteOptions.AutocadVersion.Acad2018,
+//          ColorMethod = Rhino.FileIO.FileDwgWriteOptions.eColorMethod.RGB,
+//          FullLayerPath = true,
+
+//          ExportMeshesAs = Rhino.FileIO.FileDwgWriteOptions.ExportMeshMode.Meshes,
+//          ExportSurfacesAs = Rhino.FileIO.FileDwgWriteOptions.ExportSurfaceMode.Solids,
+//          ExportLinesAs = Rhino.FileIO.FileDwgWriteOptions.ExportLineMode.Lines,
+//          ExportArcsAs = Rhino.FileIO.FileDwgWriteOptions.ExportArcMode.Arcs,
+//          ExportSplinesAs = Rhino.FileIO.FileDwgWriteOptions.ExportSplineMode.Splines,
+//          ExportPolylinesAs = Rhino.FileIO.FileDwgWriteOptions.ExportPolylineMode.ThreeDPolylines,
+//          ExportPolycurvesAs = Rhino.FileIO.FileDwgWriteOptions.ExportPolycurveMode.Splines,
+
+//          Flatten = Rhino.FileIO.FileDwgWriteOptions.FlattenMode.None,
+//          SplitPolycurves = true,
+//          UseLWPolylines = false,
+//          Simplify = false,
+//        };
+
+//        return rhinoDoc.Export(fileName, options.ToDictionary());
+//#else
         using
         (
           var options = new Rhino.FileIO.FileWriteOptions()
@@ -855,7 +878,10 @@ namespace RhinoInside.Revit.Convert.Geometry
             IncludePreviewImage = false
           }
         )
+        {
           return rhinoDoc.WriteFile(fileName, options);
+        }
+//#endif
       }
     }
 
@@ -888,7 +914,7 @@ namespace RhinoInside.Revit.Convert.Geometry
       solid = default;
       return false;
     }
-    #endregion
+#endregion
 
     #region SAT
     internal static ARDB.Solid ToSAT(/*const*/ Brep brep, double factor)
