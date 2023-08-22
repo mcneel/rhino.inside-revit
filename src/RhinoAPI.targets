@@ -9,11 +9,11 @@
 
   <PropertyGroup Condition="$(Configuration.Contains('R8'))">
     <RhinoVersion>8</RhinoVersion>
-    <RhinoApiVersion>8.*</RhinoApiVersion>
-    <DefineConstants>$(DefineConstants);RHINO_8</DefineConstants>
+    <RhinoApiVersion>8.0.23227.12305-wip</RhinoApiVersion>
+    <DefineConstants>$(DefineConstants);RHINO_7;RHINO_8</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="$(RhinoApiVersion) != ''">
     <!-- system -->
     <RhinoDefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\$(RhinoVersion).0\Install', 'Path', null, RegistryView.Registry64))</RhinoDefaultInstallDir>
     <RhinoDebugInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_CURRENT_USER\Software\McNeel\Rhinoceros\$(RhinoVersion).0-WIP-Developer-Debug-trunk\Install', 'Path', null, RegistryView.Registry64))</RhinoDebugInstallDir>
@@ -25,7 +25,7 @@
     <RhinoPluginsDir>$([MSBuild]::ValueOrDefault('$(RhinoDebugPluginsDir)', '$(RhinoDefaultPluginsDir)'))</RhinoPluginsDir>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(RhinoApiVersion) != '' AND $(Configuration.Contains('Debug')) AND '$(MSBuildProjectExtension)'=='.csproj'">
+  <ItemGroup Condition="$(RhinoApiVersion) != '' AND $(Configuration.Contains('Debug')) AND '$(MSBuildProjectExtension)' == '.csproj'">
     <Reference Include="Eto" HintPath="$(RhinoInstallDir)Eto.dll" Private="False" />
     <Reference Include="Eto.Wpf" HintPath="$(RhinoInstallDir)Eto.Wpf.dll" Private="False" />
     <Reference Include="RhinoCommon" HintPath="$(RhinoInstallDir)RhinoCommon.dll" Private="False" />
@@ -35,7 +35,7 @@
     <Reference Include="Grasshopper" HintPath="$(RhinoPluginsDir)Grasshopper\Grasshopper.dll" Private="False" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(RhinoApiVersion) != '' AND $(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)'=='.csproj'">
+  <ItemGroup Condition="$(RhinoApiVersion) != '' AND $(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)' == '.csproj'">
     <PackageReference Include="RhinoCommon" Version="$(RhinoApiVersion)" IncludeAssets="compile; build" />
     <PackageReference Include="RhinoWindows" Version="$(RhinoApiVersion)" IncludeAssets="compile; build" />
     <PackageReference Include="Grasshopper" Version="$(RhinoApiVersion)" IncludeAssets="compile; build" />

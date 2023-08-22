@@ -42,18 +42,18 @@
     <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022;REVIT_2023;REVIT_2024</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="$(RevitApiVersion) != ''">
     <RevitInstallPath>C:\Program Files\Autodesk\Revit $(RevitVersion)\</RevitInstallPath>
     <RevitAddinsPath>$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\</RevitAddinsPath>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(RevitApiVersion) != '' AND $(Configuration.Contains('Debug')) AND '$(MSBuildProjectExtension)'=='.csproj'">
+  <ItemGroup Condition="$(RevitApiVersion) != '' AND $(Configuration.Contains('Debug')) AND '$(MSBuildProjectExtension)' == '.csproj'">
     <Reference Include="RevitAPI" HintPath="$(RevitInstallPath)RevitAPI.dll" Private="False" />
     <Reference Include="RevitAPIUI" HintPath="$(RevitInstallPath)RevitAPIUI.dll" Private="False" />
     <Reference Include="AdWindows" HintPath="$(RevitInstallPath)AdWindows.dll" Private="False" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(RevitApiVersion) != '' AND $(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)'=='.csproj'">
+  <ItemGroup Condition="$(RevitApiVersion) != '' AND $(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)' == '.csproj'">
     <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitApiVersion)" IncludeAssets="compile; build" />
   </ItemGroup>
 

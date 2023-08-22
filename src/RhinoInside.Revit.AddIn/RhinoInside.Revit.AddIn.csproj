@@ -5,6 +5,8 @@
     <OutputType>Library</OutputType>
     <RootNamespace>RhinoInside.Revit.AddIn</RootNamespace>
     <AssemblyName>RhinoInside.Revit.AddIn</AssemblyName>
+    <TransformOnBuild>true</TransformOnBuild>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Commands\AddIn\CommandAbout.cs" />
@@ -64,19 +66,13 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
     <Content Include="Properties\ProductInfo.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ProductInfo.cs</LastGenOutput>
     </Content>
-    <Content Include="Properties\RhinoInside.Revit.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>RhinoInside.Revit.addin</LastGenOutput>
-    </Content>
-    <None Include="Properties\RhinoInside.Revit.addin">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>RhinoInside.Revit.tt</DependentUpon>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\About-icon.png" />
@@ -115,7 +111,6 @@
     <EmbeddedResource Include="Resources\RIR-logo.ico" />
     <EmbeddedResource Include="Resources\RIR-logo.png" />
     <EmbeddedResource Include="Resources\RIR-WIP-logo.png" />
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj">
@@ -131,21 +126,18 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TextTemplating\Microsoft.TextTemplating.targets" />
+  <Import Project="../RevitAPI.targets" />
+  <Import Project="../RhinoAPI.targets" />
   <PropertyGroup>
-    <TransformOnBuild>true</TransformOnBuild>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    <RiROutputPath>$(RevitAddinsPath)RhinoInside.Revit\R$(RhinoVersion)\</RiROutputPath>
   </PropertyGroup>
   <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb" DestinationFolder="$(RiROutputPath)" />
-    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)Properties\RhinoInside.Revit.addin" DestinationFiles="$(RevitAddinsPath)$(RiRAddinFileName)" />
   </Target>
   <Target Name="BeforeClean" Condition="$(Configuration.Contains('Debug'))">
     <ItemGroup>
       <ThisProjectFiles Include="$(RiROutputPath)\$(TargetName).dll;$(RiROutputPath)$(TargetName).pdb;$(RiROutputPath)$(TargetName).xml" />
     </ItemGroup>
-    <Delete Files="$(RevitAddinsPath)$(RiRAddinFileName)" />
     <Delete Files="@(ThisProjectFiles)" />
   </Target>
 </Project>

@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{4F3E6B0F-C644-4A00-8785-11CFBE0C0F94}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>RhinoInside.Revit.GH</RootNamespace>
     <AssemblyName>RhinoInside.Revit.GH</AssemblyName>
+    <TransformOnBuild>true</TransformOnBuild>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj">
@@ -561,14 +563,12 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TextTemplating\Microsoft.TextTemplating.targets" />
+  <Import Project="../RevitAPI.targets" />
+  <Import Project="../RhinoAPI.targets" />
   <PropertyGroup>
-    <TransformOnBuild>true</TransformOnBuild>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    <RiROutputPath>$(RevitAddinsPath)RhinoInside.Revit\R$(RhinoVersion)\</RiROutputPath>
   </PropertyGroup>
   <Target Name="AfterBuild">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetName).dll" DestinationFiles="$(ProjectDir)$(OutDir)$(TargetName).gha" />

@@ -6,13 +6,6 @@
   <!-- known paths -->
   <PropertyGroup>
     <RIRSourceDir>$(MSBuildThisFileDirectory)</RIRSourceDir>
-    <RIRDocsDir>$(MSBuildThisFileDirectory)..\docs</RIRDocsDir>
-  </PropertyGroup>
-
-  <!-- sandcastle root dir -->
-  <PropertyGroup>
-    <PackagesDir>$(RIRSourceDir)..\packages\</PackagesDir>
-    <SHFBROOT>$(PackagesDir)EWSoftware.SHFB.2022.2.6\tools\</SHFBROOT>
   </PropertyGroup>
 
   <!-- global build configurations -->
@@ -36,6 +29,23 @@
   </PropertyGroup>
 
   <!-- build configurations for each revit -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2017'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2017'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2018'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2018'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2019'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2019'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2020'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2020'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2021'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2021'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2022'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2022'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2023'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2023'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2024'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2024'"></PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R7|2017'"></PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R7|2017'"></PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R7|2018'"></PropertyGroup>
@@ -88,32 +98,19 @@
   </PropertyGroup>
 
   <!-- shared references -->
-  <!-- only for csproj projects -->
   <ItemGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" RequiredTargetFramework="4.0" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Management.Automation" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
-
-  <!-- rhino-specific -->
-  <Import Project="RhinoAPI.targets"/>
-
-  <!-- revit-specific -->
-  <Import Project="RevitAPI.targets"/>
-
-  <!-- revit install dir based on revit-rhino version -->
-  <PropertyGroup>
-    <RiROutputPath>$(RevitAddinsPath)RhinoInside.Revit\R$(RhinoVersion)</RiROutputPath>
-  </PropertyGroup>
 
 </Project>

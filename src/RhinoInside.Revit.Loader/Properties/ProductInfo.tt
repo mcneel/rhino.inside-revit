@@ -1,4 +1,4 @@
-<#@ template language="C#" debug="false" hostspecific="true" #>
+<#@ template debug="false" hostspecific="true" language="C#" #>
 <#@ assembly name="System.Core" #>
 <#@ assembly name="System.Xml" #>
 <#@ import namespace="System.IO" #>
@@ -6,7 +6,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Xml.Serialization" #>
-<#@ output extension=".addin" encoding="utf-8" #>
+<#@ output extension=".cs" encoding="utf-8" #>
 <#
 ushort Major = 0;
 ushort Minor = 0;
@@ -36,21 +36,16 @@ var product = ProductInfo.LoadFrom(this.Host.ResolvePath("../../Product.targets"
              (ushort)(now.TimeOfDay.TotalSeconds / 2);
 }
 #>
-<?xml version="1.0" encoding="utf-8"?>
-<RevitAddIns>
-  <AddIn Type="Application">
-    <Name>Rhino.Inside</Name>
-    <Assembly>RhinoInside.Revit\R7\RhinoInside.Revit.AddIn.dll</Assembly>
-    <FullClassName>RhinoInside.Revit.AddIn.Loader</FullClassName>
-    <AddInId>02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74</AddInId>
-    <VendorId>com.mcneel</VendorId>
-    <!--<VendorDescription>Robert McNeel &amp; Associates</VendorDescription>-->
-    <VendorDescription>
-      <![CDATA[https://www.rhino3d.com/inside/revit/<#= Major #>.0/]]>
-    </VendorDescription>
-    <AllowLoadingIntoExistingSession>false</AllowLoadingIntoExistingSession>
-  </AddIn>
-</RevitAddIns>
+using System.Reflection;
+
+[assembly: AssemblyCompany("<#= product.Company #>")]
+[assembly: AssemblyProduct("<#= product.Name #>")]
+[assembly: AssemblyCopyright("© <#= product.Copyright #>")]
+[assembly: AssemblyTrademark("<#= product.Trademark #>")]
+[assembly: AssemblyVersion("<#= Major #>.<#= Minor #>.<#= Build #>.<#= Revision #>")]
+[assembly: AssemblyFileVersion("<#= Major #>.<#= Minor #>.<#= Build #>.<#= Revision #>")]
+[assembly: AssemblyInformationalVersion("<#= Major #>.<#= Minor #>.<#= Build #><#= Release #><#= Metadata #>")]
+
 <#+
 public class ProductInfo
 {
