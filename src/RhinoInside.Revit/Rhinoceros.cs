@@ -85,6 +85,9 @@ namespace RhinoInside.Revit
         }
 
         args.Add("/nosplash");
+#if RHINO_8
+        args.Add("/netfx");
+#endif
         //args.Add("/notemplate");
 
         if (DebugLogging.Current.Enabled)
