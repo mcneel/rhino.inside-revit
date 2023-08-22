@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -97,11 +98,11 @@ namespace RhinoInside.Revit.GH.Types
             if (parameter.IsReadOnly)
               description = "read only " + description;
 
-            description = $"{parameterClass} {description} parameter.{Environment.NewLine}{Environment.NewLine}";
+            description = $"{parameterClass} {description} parameter.{OS.NewLine}{OS.NewLine}";
             description += $"ParameterId : {((External.DB.Schemas.ParameterId) parameter.GetTypeId()).FullName}";
 
             if (parameter.Id.TryGetBuiltInParameter(out var builtInParameter))
-              description += $"{Environment.NewLine}BuiltInParameter : {builtInParameter.ToStringGeneric()}";
+              description += $"{OS.NewLine}BuiltInParameter : {builtInParameter.ToStringGeneric()}";
 
             return description;
           }

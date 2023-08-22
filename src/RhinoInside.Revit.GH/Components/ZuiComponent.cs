@@ -11,6 +11,7 @@ using Grasshopper.GUI.HTML;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
 using Grasshopper.Kernel.Parameters;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -718,7 +719,7 @@ namespace RhinoInside.Revit.GH.Components
     #region Help
     protected override string HtmlHelp_Source()
     {
-      string text = HelpDescription + "<BR><BR><HR>" + Environment.NewLine;
+      string text = HelpDescription + "<BR><BR><HR>" + OS.NewLine;
       text += GenerateParameterHelp();
 
       var formatter = new GH_HtmlFormatter(this, Name, text);
@@ -732,16 +733,16 @@ namespace RhinoInside.Revit.GH.Components
       string text = string.Empty;
       if (Inputs.Length > 0)
       {
-        text += $"Input parameters: <BR>{Environment.NewLine}<dl>{Environment.NewLine}";
+        text += $"Input parameters: <BR>{OS.NewLine}<dl>{OS.NewLine}";
         foreach (var item in Inputs) text += GenerateParameterHelp(item.Param);
-        text += $"</dl> <BR>{Environment.NewLine}";
+        text += $"</dl> <BR>{OS.NewLine}";
       }
 
       if (Outputs.Length > 0)
       {
-        text += $"Output parameters: <BR>{Environment.NewLine}<dl>{Environment.NewLine}";
+        text += $"Output parameters: <BR>{OS.NewLine}<dl>{OS.NewLine}";
         foreach (var item in Outputs) text += GenerateParameterHelp(item.Param);
-        text += $"</dl> <BR>{Environment.NewLine}";
+        text += $"</dl> <BR>{OS.NewLine}";
       }
 
       return text;
@@ -749,8 +750,8 @@ namespace RhinoInside.Revit.GH.Components
 
     private new string GenerateParameterHelp(IGH_Param param)
     {
-      var description = $"<dt><b> {param.Name} </b><i> ({param.TypeName})</i></dt>{Environment.NewLine}";
-      description += $"<dd> {param.Description} </dd>{Environment.NewLine}";
+      var description = $"<dt><b> {param.Name} </b><i> ({param.TypeName})</i></dt>{OS.NewLine}";
+      description += $"<dd> {param.Description} </dd>{OS.NewLine}";
       return description;
     }
     #endregion

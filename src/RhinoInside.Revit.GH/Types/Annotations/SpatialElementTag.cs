@@ -4,6 +4,7 @@ using Grasshopper.Kernel;
 using Rhino.Display;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -170,7 +171,7 @@ namespace RhinoInside.Revit.GH.Types
           if (string.IsNullOrEmpty(name))
             args.Pipeline.DrawDot(head, number, args.Color, System.Drawing.Color.White);
           else
-            args.Pipeline.DrawDot(head, $"{name}{Environment.NewLine}{number}", args.Color, System.Drawing.Color.White);
+            args.Pipeline.DrawDot(head, $"{name}{OS.NewLine}{number}", args.Color, System.Drawing.Color.White);
         }
       }
     }

@@ -5,6 +5,7 @@ using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
@@ -70,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Site
         {
           Name = "Base",
           NickName = "BA",
-          Description = $"Base of the {_Toposolid_.ToLowerInvariant()}.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Boundary'.",
+          Description = $"Base of the {_Toposolid_.ToLowerInvariant()}.{OS.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Boundary'.",
           Optional = true
         }, ParamRelevance.Primary
       ),

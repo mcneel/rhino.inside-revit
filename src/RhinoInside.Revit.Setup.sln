@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29806.167
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34009.444
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "RhinoInside.Revit.Setup", "RhinoInside.Revit.Setup\RhinoInside.Revit.Setup.wixproj", "{25D80B8C-F993-445C-993F-A39C8772F40B}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhinoInside.Revit.External"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhinoInside.Revit.AddIn", "RhinoInside.Revit.AddIn\RhinoInside.Revit.AddIn.csproj", "{FE5652EC-6C45-46AE-88DD-395DE072AA02}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhinoInside.Revit.Loader", "RhinoInside.Revit.Loader\RhinoInside.Revit.Loader.csproj", "{B126F51D-B440-4992-AF92-9936EA3D2B4D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -43,6 +45,8 @@ Global
 		{1DF04E19-3270-4CA3-A6C0-692C52FA5853}.Release|x64.ActiveCfg = Release 2022|x64
 		{FE5652EC-6C45-46AE-88DD-395DE072AA02}.Debug|x64.ActiveCfg = Debug 2022|x64
 		{FE5652EC-6C45-46AE-88DD-395DE072AA02}.Release|x64.ActiveCfg = Release 2022|x64
+		{B126F51D-B440-4992-AF92-9936EA3D2B4D}.Debug|x64.ActiveCfg = Debug|2017
+		{B126F51D-B440-4992-AF92-9936EA3D2B4D}.Release|x64.ActiveCfg = Release|2017
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

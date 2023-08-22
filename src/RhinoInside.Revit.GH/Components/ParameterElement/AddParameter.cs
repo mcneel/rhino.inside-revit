@@ -3,6 +3,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
@@ -384,7 +385,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
             }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException e)
             {
-              throw new InvalidOperationException($"{e.Message}{Environment.NewLine}Parameter: {key.Nomen}", e);
+              throw new InvalidOperationException($"{e.Message}{OS.NewLine}Parameter: {key.Nomen}", e);
             }
           }
         }

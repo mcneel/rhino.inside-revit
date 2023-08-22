@@ -4,6 +4,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
@@ -170,7 +171,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           if (!(type.Value is ARDB.FloorType floorType))
             throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid foundation slab type.");
           else if (!floorType.IsFoundationSlab)
-            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid foundation slab type.{Environment.NewLine}Consider use 'Add Floor' component.");
+            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid foundation slab type.{OS.NewLine}Consider use 'Add Floor' component.");
 
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Level", out Types.Level level, doc, bbox.IsValid ? bbox.Min.Z : double.NaN)) return null;
           if (!Params.TryGetData(DA, "Structural", out bool? structural)) return null;

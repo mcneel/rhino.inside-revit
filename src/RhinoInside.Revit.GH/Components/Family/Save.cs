@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Families
 {
@@ -44,7 +45,7 @@ namespace RhinoInside.Revit.GH.Components.Families
         {
           Name = "Path",
           NickName = "P",
-          Description = $"Path where to save the Family.{Environment.NewLine}If relative or missing a temporary location will be used.",
+          Description = $"Path where to save the Family.{OS.NewLine}If relative or missing a temporary location will be used.",
           FileFilter = "Family Files (*.rfa)|*.rfa"
         }, ParamRelevance.Primary
       ),

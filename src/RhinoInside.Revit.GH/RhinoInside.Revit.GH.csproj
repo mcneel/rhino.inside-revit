@@ -5,6 +5,8 @@
     <OutputType>Library</OutputType>
     <RootNamespace>RhinoInside.Revit.GH</RootNamespace>
     <AssemblyName>RhinoInside.Revit.GH</AssemblyName>
+    <TransformOnBuild>true</TransformOnBuild>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj">
@@ -561,22 +563,20 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TextTemplating\Microsoft.TextTemplating.targets" />
+  <Import Project="../RevitAPI.targets" />
+  <Import Project="../RhinoAPI.targets" />
   <PropertyGroup>
-    <TransformOnBuild>true</TransformOnBuild>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    <RiROutputPath>$(RevitAddinsPath)RhinoInside.Revit\R$(RhinoVersion)\</RiROutputPath>
   </PropertyGroup>
   <Target Name="AfterBuild">
     <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetName).dll" DestinationFiles="$(ProjectDir)$(OutDir)$(TargetName).gha" />
-    <Copy Condition="$(Configuration.Contains('Debug'))" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetName).gha;$(ProjectDir)$(OutDir)$(TargetName).pdb" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit" />
+    <Copy Condition="$(Configuration.Contains('Debug'))" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetName).gha;$(ProjectDir)$(OutDir)$(TargetName).pdb" DestinationFolder="$(RiROutputPath)" />
   </Target>
   <Target Name="BeforeClean" Condition="$(Configuration.Contains('Debug'))">
     <ItemGroup>
-      <ThisProjectFiles Include="$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).gha;$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).pdb;$(APPDATA)\Autodesk\Revit\Addins\$(RevitVersion)\RhinoInside.Revit\$(TargetName).xml" />
+      <ThisProjectFiles Include="$(RiROutputPath)$(TargetName).gha;$(RiROutputPath)$(TargetName).pdb;$(RiROutputPath)$(TargetName).xml" />
     </ItemGroup>
     <Delete Files="@(ThisProjectFiles)" />
   </Target>

@@ -118,7 +118,7 @@ namespace RhinoInside.Revit
         RhinoApp.CommandWindowCaptureEnabled = false;
       }
 
-      FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", "Rhino.Inside ");
+      FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", $"Rhino.Inside R{RhinoApp.ExeVersion} ");
       Rhino.Runtime.PythonScript.AddRuntimeAssembly(Assembly.GetExecutingAssembly());
 
       MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());

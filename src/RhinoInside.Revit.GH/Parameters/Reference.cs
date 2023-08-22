@@ -7,6 +7,7 @@ using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Bake
 {
@@ -114,7 +115,7 @@ namespace RhinoInside.Revit.GH.Parameters
           MessageBox.Show
           (
             Form.ActiveForm,
-            $"We're sorry but Baking is only possible{Environment.NewLine}" +
+            $"We're sorry but Baking is only possible{OS.NewLine}" +
             "when no other Commands are running.",
             "Bake failure",
             MessageBoxButtons.OK,

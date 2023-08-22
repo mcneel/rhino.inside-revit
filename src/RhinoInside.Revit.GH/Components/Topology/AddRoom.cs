@@ -7,6 +7,7 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Topology
 {
@@ -74,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         {
           Name = "Base",
           NickName = "BA",
-          Description = $"Base of the {_Room_.ToLowerInvariant()}.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Location'.",
+          Description = $"Base of the {_Room_.ToLowerInvariant()}.{OS.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Location'.",
           Optional = true,
         }, ParamRelevance.Primary
       ),
@@ -84,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         {
           Name = "Top",
           NickName = "TO",
-          Description = $"Top of the {_Room_.ToLowerInvariant()}.{Environment.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Location'.",
+          Description = $"Top of the {_Room_.ToLowerInvariant()}.{OS.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Location'.",
           Optional = true,
         }, ParamRelevance.Primary
       ),
@@ -94,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         {
           Name = "Phase",
           NickName = "P",
-          Description = $"Project phase to which the room belongs.{Environment.NewLine}Room will be placed in the 'View' phase if this parameter is not set.",
+          Description = $"Project phase to which the room belongs.{OS.NewLine}Room will be placed in the 'View' phase if this parameter is not set.",
           Optional = true
         }, ParamRelevance.Secondary
       )

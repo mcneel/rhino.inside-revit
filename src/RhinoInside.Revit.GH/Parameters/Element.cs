@@ -7,6 +7,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using ARDB = Autodesk.Revit.DB;
 using ARUI = Autodesk.Revit.UI;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.ElementTracking
 {
@@ -430,7 +431,7 @@ namespace RhinoInside.Revit.GH.Parameters
         messages.Add
         (
           new GH_RuntimeMessage(e.Message.Split
-          (new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0],
+          (new string[] { OS.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0],
           GH_RuntimeMessageLevel.Error, Attributes.GetTopLevel.DocObject.Name)
         );
       }

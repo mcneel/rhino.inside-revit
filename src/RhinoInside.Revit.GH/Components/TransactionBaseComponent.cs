@@ -7,6 +7,7 @@ using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -446,7 +447,7 @@ namespace RhinoInside.Revit.GH.Components
 
         var description = string.Empty;
         foreach (var descriptionAttribute in parameter.GetCustomAttributes(typeof(DescriptionAttribute), false).Cast<DescriptionAttribute>())
-          description = (description.Length > 0) ? $"{description}{Environment.NewLine}{descriptionAttribute.Description}" : descriptionAttribute.Description;
+          description = (description.Length > 0) ? $"{description}{OS.NewLine}{descriptionAttribute.Description}" : descriptionAttribute.Description;
 
         var paramType = (parameter.GetCustomAttributes(typeof(ParamTypeAttribute), false).FirstOrDefault() as ParamTypeAttribute)?.Type;
 
@@ -591,7 +592,7 @@ namespace RhinoInside.Revit.GH.Components
       if (description is null)
         description = "Input value is not valid.";
 
-      description = description.TrimEnd(Environment.NewLine.ToCharArray());
+      description = description.TrimEnd(OS.NewLine.ToCharArray());
 
       throw new RuntimeArgumentException(FirstCharUpper(paramName), description, value);
     }
@@ -610,7 +611,7 @@ namespace RhinoInside.Revit.GH.Components
         ThrowArgumentException
         (
           paramName,
-          $"Input geometry is not valid.{Environment.NewLine}{log}",
+          $"Input geometry is not valid.{OS.NewLine}{log}",
           value
         );
       }

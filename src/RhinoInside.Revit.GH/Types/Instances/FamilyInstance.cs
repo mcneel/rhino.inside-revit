@@ -5,6 +5,7 @@ using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -373,31 +374,31 @@ namespace RhinoInside.Revit.GH.Types
           throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is not a valid type.");
 
         case ARDB.FamilyPlacementType.OneLevelBased:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a level-based type.{Environment.NewLine}Consider use 'Add Component (Location)' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a level-based type.{OS.NewLine}Consider use 'Add Component (Location)' component.");
 
         case ARDB.FamilyPlacementType.OneLevelBasedHosted:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{Environment.NewLine}Consider use 'Add Component (Location)' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{OS.NewLine}Consider use 'Add Component (Location)' component.");
 
         case ARDB.FamilyPlacementType.TwoLevelsBased:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{Environment.NewLine}Consider use 'Add Column' or 'Add Structural Column' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a host-based type.{OS.NewLine}Consider use 'Add Column' or 'Add Structural Column' component.");
 
         case ARDB.FamilyPlacementType.ViewBased:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a view-based type.{Environment.NewLine}Consider use 'Add Detail Item (Location)' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a view-based type.{OS.NewLine}Consider use 'Add Detail Item (Location)' component.");
 
         case ARDB.FamilyPlacementType.WorkPlaneBased:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a work plane-based type.{Environment.NewLine}Consider use 'Add Component (Work Plane)' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a work plane-based type.{OS.NewLine}Consider use 'Add Component (Work Plane)' component.");
 
         case ARDB.FamilyPlacementType.CurveBased:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a curve based type.{Environment.NewLine}Consider use 'Add Component (Curve)' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a curve based type.{OS.NewLine}Consider use 'Add Component (Curve)' component.");
 
         case ARDB.FamilyPlacementType.CurveBasedDetail:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a curve based type.{Environment.NewLine}Consider use 'Add Detail Item (Curve)' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a curve based type.{OS.NewLine}Consider use 'Add Detail Item (Curve)' component.");
 
         case ARDB.FamilyPlacementType.CurveDrivenStructural:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a structural curve based type.{Environment.NewLine}Consider use 'Add Structural Beam' or 'Add Structural Brace' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is a structural curve based type.{OS.NewLine}Consider use 'Add Structural Beam' or 'Add Structural Brace' component.");
 
         case ARDB.FamilyPlacementType.Adaptive:
-          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is an adaptive family type.{Environment.NewLine}Consider use 'Add Component (Adaptive)' component.");
+          throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is an adaptive family type.{OS.NewLine}Consider use 'Add Component (Adaptive)' component.");
       }
 
       throw new Exceptions.RuntimeArgumentException("Type", $"Type '{DisplayName}' is not a valid {placementType} type.");

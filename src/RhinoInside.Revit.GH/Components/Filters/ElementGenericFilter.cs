@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
@@ -61,7 +62,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       }
       catch (Autodesk.Revit.Exceptions.ArgumentException e)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message.Replace(". ", $".{Environment.NewLine}"));
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message.Replace(". ", $".{OS.NewLine}"));
       }
     }
   }

@@ -12,6 +12,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using OS = System.Environment;
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
@@ -329,7 +330,7 @@ namespace Grasshopper.Special
 
         if (name is object)
         {
-          var lines = name.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+          var lines = name.Split(new string[] { OS.NewLine }, StringSplitOptions.RemoveEmptyEntries);
           switch (lines.Length)
           {
             case 0: Name = string.Empty; break;

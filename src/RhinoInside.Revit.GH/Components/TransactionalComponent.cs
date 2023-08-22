@@ -11,6 +11,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -665,16 +666,16 @@ namespace RhinoInside.Revit.GH.Components
         var failures = Menu_AppendItem(menu, "Error Mode");
 
         var skip = Menu_AppendItem(failures.DropDown, "⏭ Skip", (s, a) => { FailureProcessingMode = ARDB.FailureProcessingResult.Continue; ExpireSolution(true); }, true, FailureProcessingMode == ARDB.FailureProcessingResult.Continue);
-        skip.ToolTipText = $"Any failing element will be skipped.{Environment.NewLine}A null will be returned in its place.";
+        skip.ToolTipText = $"Any failing element will be skipped.{OS.NewLine}A null will be returned in its place.";
 
         var @continue = Menu_AppendItem(failures.DropDown, "⏯ Continue", (s, a) => { FailureProcessingMode = ARDB.FailureProcessingResult.ProceedWithCommit; ExpireSolution(true); }, true, FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit);
-        @continue.ToolTipText = $"If suitable, a default resolution will be applied.{Environment.NewLine}Otherwise, a null will be returned.";
+        @continue.ToolTipText = $"If suitable, a default resolution will be applied.{OS.NewLine}Otherwise, a null will be returned.";
 
         var cancel = Menu_AppendItem(failures.DropDown, "⏪ Cancel", (s, a) => { FailureProcessingMode = ARDB.FailureProcessingResult.ProceedWithRollBack; ExpireSolution(true); }, true, FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithRollBack);
-        cancel.ToolTipText = $"A failing element will cancel the whole '{Name}' operation.{Environment.NewLine}Nothing will be returned in this case.";
+        cancel.ToolTipText = $"A failing element will cancel the whole '{Name}' operation.{OS.NewLine}Nothing will be returned in this case.";
 
         var custom = Menu_AppendItem(failures.DropDown, "⏸ Pause…", (s, a) => { FailureProcessingMode = ARDB.FailureProcessingResult.WaitForUserInput; ExpireSolution(true); }, true, FailureProcessingMode == ARDB.FailureProcessingResult.WaitForUserInput);
-        custom.ToolTipText = $"Do a pause and let me decide.{Environment.NewLine}Shows Revit failures report dialog.";
+        custom.ToolTipText = $"Do a pause and let me decide.{OS.NewLine}Shows Revit failures report dialog.";
       }
     }
     #endregion
@@ -1027,15 +1028,15 @@ namespace RhinoInside.Revit.GH.Components
           var tracking = Menu_AppendItem(menu, "Tracking Mode");
 
           var append = Menu_AppendItem(tracking.DropDown, "Disabled", (s, a) => { TrackingMode = TrackingMode.Disabled; ExpireSolution(true); }, true, TrackingMode == TrackingMode.Disabled);
-          append.ToolTipText = $"No element tracking takes part in this mode, each solution will append a new {output.TypeName}." + Environment.NewLine +
+          append.ToolTipText = $"No element tracking takes part in this mode, each solution will append a new {output.TypeName}." + OS.NewLine +
                                $"The operation may fail if a {output.TypeName} with same name already exists.";
 
           var supersede = Menu_AppendItem(tracking.DropDown, "Enabled : Replace", (s, a) => { TrackingMode = TrackingMode.Supersede; ExpireSolution(true); }, true, TrackingMode == TrackingMode.Supersede);
-          supersede.ToolTipText = $"A brand new {output.TypeName} will be created for each solution." + Environment.NewLine +
+          supersede.ToolTipText = $"A brand new {output.TypeName} will be created for each solution." + OS.NewLine +
                                   $"{GH_Convert.ToPlural(output.TypeName)} created on previous iterations are deleted.";
 
           var reconstruct = Menu_AppendItem(tracking.DropDown, "Enabled : Update", (s, a) => { TrackingMode = TrackingMode.Reconstruct; ExpireSolution(true); }, true, TrackingMode == TrackingMode.Reconstruct);
-          reconstruct.ToolTipText = $"If suitable, the previous solution {output.TypeName} will be updated from the input values;" + Environment.NewLine +
+          reconstruct.ToolTipText = $"If suitable, the previous solution {output.TypeName} will be updated from the input values;" + OS.NewLine +
                                     "otherwise, a new one will be created.";
         }
       }

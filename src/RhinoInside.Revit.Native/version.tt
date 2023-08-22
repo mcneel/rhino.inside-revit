@@ -8,7 +8,6 @@
 <#@ import namespace="System.Xml.Serialization" #>
 <#@ output extension=".h" #>
 <#
-ProductInfo product;
 ushort Major = 0;
 ushort Minor = 0;
 ushort Build = 0;
@@ -16,12 +15,8 @@ ushort Revision = 0;
 string Release = "";
 string Metadata = "";
 
-using (var reader = new StreamReader(this.Host.ResolvePath($"../ProductInfo.xml")))
+var product = ProductInfo.LoadFrom(this.Host.ResolvePath("../Product.targets"));
 {
-  var serializer = new XmlSerializer(typeof(ProductInfo));
-  product = serializer.Deserialize(reader) as ProductInfo;
-  reader.Close();
-
   Major = product.MajorVersion;
   Minor = product.MinorVersion;
   if (!string.IsNullOrWhiteSpace(product.ReleaseVersion))
@@ -64,5 +59,49 @@ public class ProductInfo
   public ushort MinorVersion = 0;
   public ushort? BuildVersion;
   public ushort? RevisionVersion;
+
+  [Serializable()]
+  public class PropertyGroup
+  {
+    public string ProductName;
+    public string ProductCompany;
+    public string ProductCopyright;
+    public string ProductTrademark;
+    public string ProductReleaseVersion;
+    public string ProductMetaVersion;
+    public ushort? ProductMajorVersion;
+    public ushort? ProductMinorVersion;
+    public ushort? ProductBuildVersion;
+    public ushort? ProductRevisionVersion;
+  }
+
+  [Serializable(), XmlRoot("Project", Namespace = "http://schemas.microsoft.com/developer/msbuild/2003")]
+  public class Project : List<PropertyGroup> { }
+
+  public static ProductInfo LoadFrom(string filePath)
+  {
+    var productInfo = new ProductInfo();
+    using (var reader = new StreamReader(filePath))
+    {
+      var serializer = new XmlSerializer(typeof(Project));
+      {
+        foreach (var propertyGroup in serializer.Deserialize(reader) as Project)
+        {
+          if (propertyGroup.ProductName is object) productInfo.Name = propertyGroup.ProductName;
+          if (propertyGroup.ProductCompany is object) productInfo.Company = propertyGroup.ProductCompany;
+          if (propertyGroup.ProductCopyright is object) productInfo.Copyright = propertyGroup.ProductCopyright;
+          if (propertyGroup.ProductTrademark is object) productInfo.Trademark = propertyGroup.ProductTrademark;
+          if (propertyGroup.ProductReleaseVersion is object) productInfo.ReleaseVersion = propertyGroup.ProductReleaseVersion;
+          if (propertyGroup.ProductMetaVersion is object) productInfo.MetaVersion = propertyGroup.ProductMetaVersion;
+          if (propertyGroup.ProductMajorVersion is object) productInfo.MajorVersion = propertyGroup.ProductMajorVersion.Value;
+          if (propertyGroup.ProductMinorVersion is object) productInfo.MinorVersion = propertyGroup.ProductMinorVersion.Value;
+          if (propertyGroup.ProductBuildVersion is object) productInfo.BuildVersion = propertyGroup.ProductBuildVersion.Value;
+          if (propertyGroup.ProductRevisionVersion is object) productInfo.RevisionVersion = propertyGroup.ProductRevisionVersion.Value;
+        }
+      }
+    }
+
+    return productInfo;
+  }
 }
 #>
