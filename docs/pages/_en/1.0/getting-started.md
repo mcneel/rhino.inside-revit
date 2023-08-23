@@ -16,7 +16,7 @@ layout: ltr/page-h2-toc
 
 ## Installation
 
-Download {{ site.terms.rir }} and {{ site.terms.rhino }} from the links below
+Download {{ site.terms.rir }} and {{ site.terms.rhino }} {{ site.terms.rhino_versions }} from the links below
 
 <!-- download links -->
 {% include ltr/download_buttons.html version=site.versions.one %}
@@ -61,7 +61,7 @@ Click on the *Start* button to start loading {{ site.terms.rir }}. The addon, at
 The new toolbar contains many new buttons that give you access to
 
 - {{ site.terms.rhino }} itself
-- Python IDE (with access to Revit API)
+- Script Editor (with access to Revit API)
 - Grasshopper (with custom Revit components)
 
 See [{{ site.terms.rir }} Interface]({{ site.baseurl }}{% link _en/1.0/reference/rir-interface.md %}) for a complete list of buttons in the *Rhinoceros* tab
