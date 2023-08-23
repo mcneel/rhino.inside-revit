@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       (
         name: CommandName,
         iconName: "Ribbon.Rhinoceros.Import-3DM.png",
-        tooltip: "Imports geometry from 3DM file to a Revit model or family",
+        tooltip: "Imports geometry from 3DM file into active Revit model or family",
         url : "reference/rir-interface#rhinoceros-panel"
       );
 
