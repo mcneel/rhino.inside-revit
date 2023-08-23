@@ -312,9 +312,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
       // Try using ARDB.ShapeImporter | ARDB.Document.Import
       {
-        GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using SAT…", default);
-
-        if (ToSAT(brep, factor) is ARDB.Solid imported)
+        if (ToFile(brep, factor) is ARDB.Solid imported)
         {
           solid = imported;
           return true;
@@ -839,49 +837,63 @@ namespace RhinoInside.Revit.Convert.Geometry
 
         rhinoDoc.Objects.Add(geometry);
 
-//#if RHINO_8
-//        var options = new Rhino.FileIO.FileDwgWriteOptions
-//        {
-//          Version = Rhino.FileIO.FileDwgWriteOptions.AutocadVersion.Acad2018,
-//          ColorMethod = Rhino.FileIO.FileDwgWriteOptions.eColorMethod.RGB,
-//          FullLayerPath = true,
-
-//          ExportMeshesAs = Rhino.FileIO.FileDwgWriteOptions.ExportMeshMode.Meshes,
-//          ExportSurfacesAs = Rhino.FileIO.FileDwgWriteOptions.ExportSurfaceMode.Solids,
-//          ExportLinesAs = Rhino.FileIO.FileDwgWriteOptions.ExportLineMode.Lines,
-//          ExportArcsAs = Rhino.FileIO.FileDwgWriteOptions.ExportArcMode.Arcs,
-//          ExportSplinesAs = Rhino.FileIO.FileDwgWriteOptions.ExportSplineMode.Splines,
-//          ExportPolylinesAs = Rhino.FileIO.FileDwgWriteOptions.ExportPolylineMode.ThreeDPolylines,
-//          ExportPolycurvesAs = Rhino.FileIO.FileDwgWriteOptions.ExportPolycurveMode.Splines,
-
-//          Flatten = Rhino.FileIO.FileDwgWriteOptions.FlattenMode.None,
-//          SplitPolycurves = true,
-//          UseLWPolylines = false,
-//          Simplify = false,
-//        };
-
-//        return rhinoDoc.Export(fileName, options.ToDictionary());
-//#else
-        using
-        (
-          var options = new Rhino.FileIO.FileWriteOptions()
-          {
-            FileVersion = 6,
-            UpdateDocumentPath = false,
-            WriteUserData = false,
-            WriteGeometryOnly = false,
-            SuppressAllInput = true,
-            SuppressDialogBoxes = true,
-            IncludeHistory = false,
-            IncludeBitmapTable = false,
-            IncludeRenderMeshes = false,
-            IncludePreviewImage = false
-          }
-        )
+#if RHINO_8
+        if (extension.ToLower() == ".sat")
         {
-          return rhinoDoc.WriteFile(fileName, options);
+          var options = new Rhino.FileIO.FileSatWriteOptions
+          {
+            Type = Rhino.FileIO.FileSatWriteOptions.SatTypes.ACIS40,
+          };
+
+          return rhinoDoc.Export(fileName, options.ToDictionary());
         }
-//#endif
+        else if (extension.ToLower() == ".dwg")
+        {
+          var options = new Rhino.FileIO.FileDwgWriteOptions
+          {
+            Version = Rhino.FileIO.FileDwgWriteOptions.AutocadVersion.Acad2007,
+            ColorMethod = Rhino.FileIO.FileDwgWriteOptions.eColorMethod.RGB,
+            FullLayerPath = true,
+
+            ExportMeshesAs = Rhino.FileIO.FileDwgWriteOptions.ExportMeshMode.Meshes,
+            ExportSurfacesAs = Rhino.FileIO.FileDwgWriteOptions.ExportSurfaceMode.Solids,
+            ExportLinesAs = Rhino.FileIO.FileDwgWriteOptions.ExportLineMode.Lines,
+            ExportArcsAs = Rhino.FileIO.FileDwgWriteOptions.ExportArcMode.Arcs,
+            ExportSplinesAs = Rhino.FileIO.FileDwgWriteOptions.ExportSplineMode.Splines,
+            ExportPolylinesAs = Rhino.FileIO.FileDwgWriteOptions.ExportPolylineMode.ThreeDPolylines,
+            ExportPolycurvesAs = Rhino.FileIO.FileDwgWriteOptions.ExportPolycurveMode.Splines,
+
+            Flatten = Rhino.FileIO.FileDwgWriteOptions.FlattenMode.None,
+            SplitPolycurves = true,
+            UseLWPolylines = false,
+            Simplify = false,
+          };
+
+          return rhinoDoc.Export(fileName, options.ToDictionary());
+        }
+        else
+#endif
+        {
+          using
+          (
+            var options = new Rhino.FileIO.FileWriteOptions()
+            {
+              FileVersion = 6,
+              UpdateDocumentPath = false,
+              WriteUserData = false,
+              WriteGeometryOnly = false,
+              SuppressAllInput = true,
+              SuppressDialogBoxes = true,
+              IncludeHistory = false,
+              IncludeBitmapTable = false,
+              IncludeRenderMeshes = false,
+              IncludePreviewImage = false
+            }
+          )
+          {
+            return rhinoDoc.WriteFile(fileName, options);
+          }
+        }
       }
     }
 
@@ -914,7 +926,15 @@ namespace RhinoInside.Revit.Convert.Geometry
       solid = default;
       return false;
     }
-#endregion
+    #endregion
+
+    #region File
+    internal static ARDB.Solid ToFile(/*const*/ Brep brep, double factor)
+    {
+      GeometryEncoder.Context.Peek.RuntimeMessage(255, "Using SAT…", default);
+      return ToSAT(brep, factor);
+    }
+    #endregion
 
     #region SAT
     internal static ARDB.Solid ToSAT(/*const*/ Brep brep, double factor)
@@ -930,11 +950,15 @@ namespace RhinoInside.Revit.Convert.Geometry
           {
             using (var importer = new ARDB.ShapeImporter())
             {
-              var list = importer.Convert(doc, FileSAT.FullName);
-              if (list.OfType<ARDB.Solid>().FirstOrDefault() is ARDB.Solid shape)
-                return shape;
+              try
+              {
+                var list = importer.Convert(doc, FileSAT.FullName);
+                if (list.OfType<ARDB.Solid>().FirstOrDefault() is ARDB.Solid shape)
+                  return shape;
 
-              GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit Data conversion service failed to import geometry", default);
+                GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit Data conversion service failed to import geometry", default);
+              }
+              catch { }
 
               // Looks like ARDB.Document.Import do more cleaning while importing, let's try it.
               //return null;
@@ -1015,9 +1039,13 @@ namespace RhinoInside.Revit.Convert.Geometry
           {
             using (var importer = new ARDB.ShapeImporter())
             {
-              var list = importer.Convert(doc, FileDWG.FullName);
-              if (list.OfType<ARDB.Solid>().FirstOrDefault() is ARDB.Solid shape)
-                return shape;
+              try
+              {
+                var list = importer.Convert(doc, FileDWG.FullName);
+                if (list.OfType<ARDB.Solid>().FirstOrDefault() is ARDB.Solid shape)
+                  return shape;
+              }
+              catch { }
 
               GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit Data conversion service failed to import geometry", default);
 
@@ -1051,7 +1079,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                   }
                 )
                 {
-                  // Create a 3D view to import the SAT file
+                  // Create a 3D view to import the DWG file
                   var typeId = doc.GetDefaultElementTypeId(ARDB.ElementTypeGroup.ViewType3D);
                   var view = ARDB.View3D.CreatePerspective(doc, typeId);
 
@@ -1102,11 +1130,15 @@ namespace RhinoInside.Revit.Convert.Geometry
           {
             using (var importer = new ARDB.ShapeImporter())
             {
-              var list = importer.Convert(doc, File3DM.FullName);
-              if (list.OfType<ARDB.Solid>().FirstOrDefault() is ARDB.Solid shape)
-                return shape;
+              try
+              {
+                var list = importer.Convert(doc, File3DM.FullName);
+                if (list.OfType<ARDB.Solid>().FirstOrDefault() is ARDB.Solid shape)
+                  return shape;
 
-              GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit Data conversion service failed to import geometry", default);
+                GeometryEncoder.Context.Peek.RuntimeMessage(10, "Revit Data conversion service failed to import geometry", default);
+              }
+              catch { }
 
               // Looks like DB.Document.Import do more cleaning while importing, let's try it.
               //return null;
