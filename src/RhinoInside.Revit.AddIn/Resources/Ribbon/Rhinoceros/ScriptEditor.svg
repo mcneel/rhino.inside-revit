@@ -1,0 +1,25 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!--Generator: Xara Designer (www.xara.com), SVG filter version: 6.7.0.0-->
+<svg fill="none" fill-rule="evenodd" stroke="black" stroke-width="0.501" stroke-linejoin="bevel" stroke-miterlimit="10" font-family="Times New Roman" font-size="16" style="font-variant-ligatures:none" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" overflow="visible" width="36pt" height="36pt" viewBox="0 -36 36 36">
+ <defs>
+  <linearGradient id="LinearGradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="-32.579" y2="1.231" gradientTransform="matrix(0 -1 1 0 -0.897 -16.823)">
+   <stop offset="0" stop-color="#b2b2b2"/>
+   <stop offset="1" stop-color="#4c4c4c"/>
+  </linearGradient>
+ </defs>
+ <g id="Layer 1" transform="scale(1 -1)">
+  <g id="Group" stroke="none">
+   <rect x="-2.25" y="-15.755" width="4.501" height="31.511" transform="translate(18 31.581) rotate(90)" stroke-linejoin="miter" fill="url(#LinearGradient)"/>
+   <path d="M 1.499,28.585 L 1.499,34.575 L 34.499,34.575 L 34.499,28.585 L 1.499,28.585 Z M 33.01,30.074 L 33.01,33.086 L 2.988,33.086 L 2.988,30.074 L 33.01,30.074 Z" stroke-width="0.5" fill="#000000" fill-rule="evenodd" marker-start="none" marker-end="none" fill-opacity="1.000000"/>
+  </g>
+  <g id="Group_1" stroke="none">
+   <rect x="2.246" y="2.301" width="31.511" height="27.029" stroke-linejoin="miter" fill="#ffffff"/>
+   <path d="M 1.5,1.555 L 1.5,30.073 L 34.5,30.073 L 34.5,1.555 L 1.5,1.555 Z M 33.011,3.044 L 33.011,28.584 L 2.989,28.584 L 2.989,3.044 L 33.011,3.044 Z" stroke-width="0.5" fill="#000000" fill-rule="evenodd" marker-start="none" marker-end="none" fill-opacity="1.000000"/>
+  </g>
+  <rect x="-1.5" y="-15.005" width="3" height="30.011" transform="translate(18 4.387) rotate(90)" stroke-linejoin="miter" stroke="none" fill="#c5c5c5" stroke-width="1.489"/>
+  <path d="M 24.752,23.325 L 30.803,16.652 L 24.709,9.944" fill="none" stroke="#231f20" stroke-width="1.741" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 11.159,23.325 L 5.049,16.652 L 11.203,9.944" fill="none" stroke="#231f20" stroke-width="1.741" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 14.514,9.435 L 21.488,23.834" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#231f20" stroke-width="1.741"/>
+ </g>
+</svg>
