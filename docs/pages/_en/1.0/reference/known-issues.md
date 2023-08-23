@@ -105,9 +105,9 @@ Please follow the instructions on [Submitting Debug Info]({{ site.baseurl }}{% l
 Saving the project, then restarting Revit is usually the fastest workaround. If {{ site.terms.rir }} is loaded first, then everything should work with no issues.
 
 Some plugins may need to be updated.  Common conflicts are seen with older versions of:
-1. [Conveyer](https://provingground.io/tools/conveyor/)
+1. [Conveyor](https://provingground.io/tools/conveyor/)
 2. [Avail](https://getavail.com/avail-adds-integration-with-mcneel-rhino-modeler/)
-3. [{{ site.terms.pyrevit }} ](https://www.notion.so/pyRevit-bd907d6292ed4ce997c46e84b6ef67a0) 
+3. [{{ site.terms.pyrevit }} ](https://pyrevitlabs.notion.site/) 
 
 We continue to work with all our partners on this error. Information gathered from the Error Reporting enables us to actively target these conflicts.
 

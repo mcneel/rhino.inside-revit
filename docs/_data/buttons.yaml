@@ -5,19 +5,19 @@
       iconsrc: /static/images/ribbon/Rhino.png
       icontag: 
 
-    - title: Import 3dm
+    - title: Import 3DM
       desc: Import Rhino 3dm files into Revit
       iconsrc: /static/images/ribbon/Import-3DM.png
+      icontag: 
+
+    - title: Open Viewport
+      desc: Opens a floating Rhino viewport.
+      iconsrc: /static/images/ribbon/OpenViewport.png
       icontag: 
 
     - title: Toggle Preview
       desc: Previews geometry that is open in Rhino, inside Revit
       iconsrc: /static/images/GH/Toolbar/Preview_Off.png
-      icontag: 
-
-    - title: Python
-      desc: Run the Rhino.Python editor that can be used to write Python scripts that combine both the Rhino and Revit API in the same script. See <a href="Autodesk/Revit/src/RhinoInside.Revit/Samples/Sample7.py">Sample 7</a> for a detailed look at the Python code
-      iconsrc: /static/images/ribbon/Python.png
       icontag: 
 
 - title: Grasshopper

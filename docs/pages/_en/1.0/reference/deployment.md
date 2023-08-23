@@ -7,7 +7,7 @@ group: Deployment & Configs
 ## Required installers
 
 1. [Autodesk Revit {{ site.terms.revit_versions }}](https://www.autodesk.com/products/revit/free-trial)
-2. [{{ site.terms.rhino }}]({{ site.versions.one.rhino_download }})
+2. [{{ site.terms.rhino }} {{ site.terms.rhino_versions }}]({{ site.versions.one.rhino_download }})
 3. [{{ site.terms.rir }}]({{ site.versions.one.rir_download }}) 
 
 ## Automated installer for *All Users* in Windows
