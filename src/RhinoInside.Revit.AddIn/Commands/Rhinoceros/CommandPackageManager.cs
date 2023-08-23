@@ -5,7 +5,7 @@ using Autodesk.Revit.UI;
 namespace RhinoInside.Revit.AddIn.Commands
 {
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
-  class CommandPackageManager : RhinoCommand
+  class CommandPackageManager : RhinoBuiltInCommand
   {
     public static string CommandName => "Package\nManager";
 
@@ -20,8 +20,9 @@ namespace RhinoInside.Revit.AddIn.Commands
         url: "https://www.food4rhino.com/"
       );
 
-      if (ribbonPanel.AddItem(buttonData) is PushButton)
+      if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
+        StoreButton(CommandName, pushButton);
       }
     }
 
