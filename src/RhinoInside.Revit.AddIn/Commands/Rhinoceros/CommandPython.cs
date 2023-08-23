@@ -48,7 +48,6 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.LongDescription = $"Use CTRL key to open only Python editor window without restoring other tool windows";
         StoreButton(CommandName, pushButton);
       }
 #endif
