@@ -13,32 +13,29 @@ namespace RhinoInside.Revit.AddIn.Commands
   public abstract class RhinoCodeCommand : RhinoCommand
   {
     protected static readonly Guid PlugInId = new Guid("C9CBA87A-23CE-4F15-A918-97645C05CDE7");
+    static bool _Loaded = false;
     public RhinoCodeCommand()
     {
-      if (!PlugIn.LoadPlugIn(PlugInId, true, true))
+      if (!_Loaded && !PlugIn.LoadPlugIn(PlugInId, true, true))
         throw new Exception("Failed to startup RhinoCode");
+
+      _Loaded = true;
     }
 
     /// <summary>
-    /// Available when IronPython Plugin is available in Rhino.
+    /// Available when RhinoCode Plugin is available in Rhino.
     /// </summary>
     protected new class Availability : RhinoCommand.Availability
     {
       protected override bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories) =>
         base.IsCommandAvailable(applicationData, selectedCategories) &&
-        (PlugIn.PlugInExists(PlugInId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected));
+        (_Loaded || (PlugIn.PlugInExists(PlugInId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected)));
     }
   }
 
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandScriptEditor : RhinoCodeCommand
   {
-    public CommandScriptEditor()
-    {
-      if (!PlugIn.LoadPlugIn(PlugInId, true, true))
-        throw new Exception("Failed to startup Script Editor");
-    }
-
     public static string CommandName => "Script\nEditor";
 
     public static void CreateUI(RibbonPanel ribbonPanel)
