@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{FE5652EC-6C45-46AE-88DD-395DE072AA02}</ProjectGuid>
@@ -88,8 +88,6 @@
     <EmbeddedResource Include="Resources\Link-icon.png" />
     <EmbeddedResource Include="Resources\NewRelease.png" />
     <EmbeddedResource Include="Resources\Options.png" />
-    <EmbeddedResource Include="Resources\PackageManager-icon.png" />
-    <EmbeddedResource Include="Resources\Python.png" />
     <EmbeddedResource Include="Resources\Rhino-logo.ico" />
     <EmbeddedResource Include="Resources\Rhino.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Bake.png" />
@@ -109,7 +107,9 @@
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\OpenViewport.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Off.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Shaded.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\PackageManager.png" />
     <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\ScriptEditor.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Python.png" />
     <EmbeddedResource Include="Resources\RIR-logo.ico" />
     <EmbeddedResource Include="Resources\RIR-logo.png" />
     <EmbeddedResource Include="Resources\RIR-WIP-logo.png" />
