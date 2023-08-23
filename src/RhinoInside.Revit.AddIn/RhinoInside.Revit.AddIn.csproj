@@ -28,7 +28,6 @@
     <Compile Include="Commands\Grasshopper\CommandGrasshopperFolders.cs" />
     <Compile Include="Commands\Grasshopper\CommandGrasshopperRecompute.cs" />
     <Compile Include="Commands\Grasshopper\CommandGrasshopperReleaseElements.cs" />
-    <Compile Include="Commands\Grasshopper\CommandPackageManager.cs" />
     <Compile Include="Commands\Grasshopper\CommandPreviewToggleGroup.cs" />
     <Compile Include="Commands\Grasshopper\CommandSolverToggle.cs" />
     <Compile Include="Commands\Grasshopper\GrasshopperPlayerCommand.cs" />
@@ -38,6 +37,7 @@
     <Compile Include="Commands\Grasshopper\LinkedScripts\Models.cs" />
     <Compile Include="Commands\Rhinoceros\BaseRhinoCommand.cs" />
     <Compile Include="Commands\Rhinoceros\CommandImport.cs" />
+    <Compile Include="Commands\Rhinoceros\CommandPackageManager.cs" />
     <Compile Include="Commands\Rhinoceros\CommandPython.cs" />
     <Compile Include="Commands\Rhinoceros\CommandScriptEditor.cs" />
     <Compile Include="Commands\Rhinoceros\CommandRhino.cs" />

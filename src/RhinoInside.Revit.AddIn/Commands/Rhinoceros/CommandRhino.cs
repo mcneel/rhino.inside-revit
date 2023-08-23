@@ -1,3 +1,4 @@
+using System.Windows.Input;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -21,13 +22,17 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        pushButton.LongDescription = $"Use CTRL key to open only Rhino window without restoring other tool windows";
+        pushButton.LongDescription = $"Use CTRL key to open a Rhino model";
       }
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      Rhinoceros.ShowAsync();
+      if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+        Rhinoceros.RunCommandAbout();
+      else
+        Rhinoceros.ShowAsync();
+
       return Result.Succeeded;
     }
   }

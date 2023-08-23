@@ -72,9 +72,6 @@ namespace RhinoInside.Revit.AddIn.Commands
       switch (Core.CurrentStatus)
       {
         case Core.Status.Ready:
-          if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
-            return Rhinoceros.RunCommandAbout();
-
           if
           (
             Rhinoceros.MainWindow.Visible ||
@@ -114,7 +111,6 @@ namespace RhinoInside.Revit.AddIn.Commands
         case Result.Succeeded:
           // Update Rhino button Tooltip
           button.ToolTip = $"Restores previously visible Rhino windows on top of Revit window";
-          button.LongDescription = $"Use CTRL key to open a Rhino model";
           button.ShowText(false);
 
           if (Properties.AddInOptions.Session.CompactTab)
@@ -235,13 +231,14 @@ namespace RhinoInside.Revit.AddIn.Commands
       rhinoPanel = Core.Host.CreateRibbonPanel(TabName, Core.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
 
       CommandRhino.CreateUI(rhinoPanel);
+      CommandImport.CreateUI(rhinoPanel);
       CommandRhinoOpenViewport.CreateUI(rhinoPanel);
       CommandToggleRhinoPreview.CreateUI(rhinoPanel);
-      CommandScriptEditor.CreateUI(rhinoPanel);
-      CommandPython.CreateUI(rhinoPanel);
 
       rhinoPanel.AddSlideOut();
-      CommandImport.CreateUI(rhinoPanel);
+      CommandPackageManager.CreateUI(rhinoPanel);
+      CommandScriptEditor.CreateUI(rhinoPanel);
+      CommandPython.CreateUI(rhinoPanel);
       CommandRhinoOptions.CreateUI(rhinoPanel);
 
       return true;
@@ -262,7 +259,6 @@ namespace RhinoInside.Revit.AddIn.Commands
       grasshopperPanel.AddSeparator();
       CommandGrasshopperPlayer.CreateUI(grasshopperPanel);
       grasshopperPanel.AddSlideOut();
-      CommandGrasshopperPackageManager.CreateUI(grasshopperPanel);
       CommandGrasshopperFolders.CreateUI(grasshopperPanel);
       CommandGrasshopperBake.CreateUI(grasshopperPanel);
     }

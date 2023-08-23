@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 using Autodesk.Revit.UI;
 
@@ -108,12 +108,55 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     private static HashSet<ScriptPkg> _lastState = new HashSet<ScriptPkg>();
 
+    public static List<ScriptPkg> GetInstalledScriptPackages()
+    {
+      var pkgs = new List<ScriptPkg>();
+      var pkgLocations = new List<DirectoryInfo>();
+      {
+        pkgLocations.AddRange(Rhino.Runtime.HostUtils.GetActivePlugInVersionFolders(false));
+        pkgLocations.AddRange(Rhino.Runtime.HostUtils.GetActivePlugInVersionFolders(true));
+      }
+
+      foreach (var dirInfo in pkgLocations)
+      {
+        if (GetInstalledScriptPackage(dirInfo.FullName) is ScriptPkg pkg)
+          pkgs.Add(pkg);
+      }
+
+      return pkgs;
+    }
+
+    /// <summary>
+    /// Get script package on given location if exists
+    /// </summary>
+    public static ScriptPkg GetInstalledScriptPackage(string location)
+    {
+      // grab the name from the package directory
+      var pkgName = Path.GetFileName(Path.GetDirectoryName(location));
+
+      // Looks for Rhino.Inside/Revit/ or Rhino.Inside/Revit/x.x insdie the package
+      var pkgAddinContents = Path.Combine(location, Core.Product, Core.Platform);
+      var pkgAddinSpecificContents = Path.Combine(pkgAddinContents, $"{Core.Version.Major}.0");
+
+      // load specific scripts if available, otherwise load for any Rhino.Inside.Revit
+      if
+      (
+        new string[] { pkgAddinSpecificContents, pkgAddinContents }.
+        FirstOrDefault(d => Directory.Exists(d)) is string pkgContentsDir
+      )
+      {
+        return new ScriptPkg { Name = pkgName, Location = pkgContentsDir };
+      }
+
+      return null;
+    }
+
     internal static void UpdateScriptPkgUI(RibbonHandler ribbon)
     {
       // determine which packages need to be loaded
       var curState = new HashSet<ScriptPkg>();
       if (Properties.AddInOptions.Current.LoadInstalledScriptPackages)
-        curState.UnionWith(CommandGrasshopperPackageManager.GetInstalledScriptPackages());
+        curState.UnionWith(GetInstalledScriptPackages());
 
       if (Properties.AddInOptions.Current.LoadUserScriptPackages)
         curState.UnionWith(ScriptPkg.GetUserScriptPackages());
