@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       var buttonData = NewPushButtonData<CommandScriptEditor, Availability>
       (
         name: CommandName,
-        iconName: "ScriptEditor.png",
+        iconName: "Ribbon.Rhinoceros.ScriptEditor.png",
         tooltip: "Shows script editor window",
         url: "https://developer.rhino3d.com/"
       );

@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       var buttonData = NewPushButtonData<CommandPython, Availability>
       (
         name: CommandName,
-        iconName: "Python.png",
+        iconName: "Ribbon.Rhinoceros.Python.png",
         tooltip: "Shows Python editor window",
         url: "https://developer.rhino3d.com/guides/rhinopython/"
       );

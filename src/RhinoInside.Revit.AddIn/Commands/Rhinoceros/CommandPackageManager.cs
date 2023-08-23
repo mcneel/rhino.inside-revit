@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       var buttonData = NewPushButtonData<CommandPackageManager, Availability>
       (
         name: CommandName,
-        iconName: "PackageManager-icon.png",
+        iconName: "Ribbon.Rhinoceros.PackageManager.png",
         tooltip: "Shows Rhino Package Manager",
         url: "https://www.food4rhino.com/"
       );
