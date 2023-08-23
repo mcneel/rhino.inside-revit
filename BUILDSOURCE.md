@@ -11,9 +11,9 @@ local machine for development and testing purposes.
   ([download](https://visualstudio.microsoft.com/downloads/))
 * .NET Framework Developer Pack (4.6.1, 4.6.2, 4.7, 4.8)
   ([download](https://www.microsoft.com/net/download/visual-studio-sdks))
-* Rhino 7
-  ([download](https://www.rhino3d.com/download/rhino/7.0))
-* Autodesk Revit 2018-2023
+* Rhino 7-8
+  ([download](https://www.rhino3d.com/download/rhino/))
+* Autodesk Revit 2018-2024
   ([download](https://www.autodesk.com/products/revit/free-trial))
 * Add this link to your bookmarks 😉
   ([API docs](https://apidocs.co/))

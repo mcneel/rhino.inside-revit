@@ -10,6 +10,8 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added support for Rhino 8.0
+
 ### RC
 
 - Added 'Pick Elements' component.
