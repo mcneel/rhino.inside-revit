@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
         }, ParamRelevance.Primary
       ),
       ParamDefinition.Create<Parameters.Element>("Failing Element", "FE", "Element that caused the failure.", optional: true, relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Parameters.Element>("Additional Elements", "AE", "List of additional reference elements for the failure.", access: GH_ParamAccess.list, relevance: ParamRelevance.Secondary),
+      ParamDefinition.Create<Parameters.Element>("Additional Elements", "AE", "List of additional reference elements for the failure.", optional: true, access: GH_ParamAccess.list, relevance: ParamRelevance.Secondary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
