@@ -72,7 +72,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
           Access = GH_ParamAccess.list,
           DataMapping = GH_DataMapping.Graft,
           Hidden = true,
-        }, ParamRelevance.Primary
+        }
       ),
       new ParamDefinition
       (
@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
         }, ParamRelevance.Occasional
       ),
       ParamDefinition.Create<Parameters.Element>("Failing Elements", "FE", "List of elements that caused the failure.", access: GH_ParamAccess.tree, relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Parameters.Element>("Additional Elements", "AE", "List of additional reference elements for the failure.", access: GH_ParamAccess.tree, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.Element>("Additional Elements", "AE", "List of additional reference elements for the failure.", access: GH_ParamAccess.tree, relevance: ParamRelevance.Secondary),
     };
 
     public override void AddedToDocument(GH_Document document)
