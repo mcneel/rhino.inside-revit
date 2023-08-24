@@ -90,8 +90,8 @@ namespace RhinoInside.Revit.AddIn
     {
       var distributions = new RhinocerosDistribution[]
       {
-        new RhinocerosDistribution(8),
         new RhinocerosDistribution(7),
+        new RhinocerosDistribution(8),
       };
 
       var available = distributions.Where(x => x.Available).ToArray();
