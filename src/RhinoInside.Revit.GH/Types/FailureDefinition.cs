@@ -1,56 +1,34 @@
 using System;
 using System.Drawing;
+using System.Linq;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Special;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Types
 {
   public class FailureDefinition : GH_Goo<Guid>,
     IEquatable<FailureDefinition>,
     IGH_ItemDescription,
-    IGH_QuickCast
+    IGH_QuickCast,
+    IGH_Goo
   {
     public override bool IsValid => Value != Guid.Empty;
 
-    public override string TypeName => "Failure Message";
+    public override string TypeName => "Failure Definition";
 
-    public override string TypeDescription => "Revit Failure Message";
+    public override string TypeDescription => "Revit Failure Definition";
 
     public FailureDefinition() { }
     public FailureDefinition(Guid guid) : base(guid) { }
 
     public override IGH_Goo Duplicate() => (FailureDefinition) MemberwiseClone();
 
-    static string ToString(ARDB.FailureSeverity severity)
-    {
-      switch (severity)
-      {
-        case ARDB.FailureSeverity.None: return "None";
-        case ARDB.FailureSeverity.Warning: return "Warning";
-        case ARDB.FailureSeverity.Error: return "Error";
-        case ARDB.FailureSeverity.DocumentCorruption: return "Document Corruption";
-      }
-
-      return severity.ToString();
-    }
-
-    public override string ToString()
-    {
-      var id = new ARDB.FailureDefinitionId(Value);
-      var accessor = Autodesk.Revit.ApplicationServices.Application.GetFailureDefinitionRegistry()?.FindFailureDefinition(id);
-      var descriptionText = accessor?.GetDescriptionText() ?? Value.ToString("B");
-      descriptionText = descriptionText.Replace("\r\n", " ");
-      var descriptionLines = descriptionText.Split(new char[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
-      var description = (descriptionLines.Length > 0 ? descriptionLines[0] : descriptionText);
-      description = description.Trim();
-      description = description.Length > 0 ? char.ToUpper(description[0]) + description.Substring(1) : string.Empty;
-
-      return $"Revit {ToString(accessor.GetSeverity())} : {description}.";
-    }
+    public override string ToString() => $"Revit {SeverityDescription} : {Name}";
 
     public override bool CastTo<Q>(ref Q target)
     {
@@ -127,13 +105,93 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ItemDescription
-    public string Name => ToString();
+    string IGH_ItemDescription.Name => Name;
 
-    public string Identity => Value.ToString("B");
+    string IGH_ItemDescription.Identity => Value.ToString("B");
 
-    public string Description => TypeDescription;
+    string IGH_ItemDescription.Description => $"Revit {SeverityDescription}";
 
-    public Bitmap GetTypeIcon(Size size) => Properties.Resources.DocumentWarnings;
+    Bitmap IGH_ItemDescription.GetTypeIcon(Size size) => Properties.Resources.DocumentWarnings;
+    #endregion
+
+    #region Properties
+    public string Name
+    {
+      get
+      {
+        if (Description is string descriptionText)
+        {
+          var descriptionLines = descriptionText.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+          var description = (descriptionLines.Length > 0 ? descriptionLines[0] : descriptionText);
+          description = description.Trim();
+
+          if (description.Length > 0)
+          {
+            // The Name is searchable so the user should be able to type ... to search
+            description = description.Replace("…", "...");
+            return char.ToUpper(description[0]) + description.Substring(1);
+          }
+        }
+
+        return Value.ToString("B");
+      }
+    }
+
+    public string Description
+    {
+      get
+      {
+        var id = new ARDB.FailureDefinitionId(Value);
+        var accessor = Autodesk.Revit.ApplicationServices.Application.GetFailureDefinitionRegistry()?.FindFailureDefinition(id);
+        if (accessor?.GetDescriptionText() is string description)
+        {
+          if (description != string.Empty)
+          {
+            description = description.Trim();
+            description = description.Replace("...", "…");
+            var lines = description.Split(new string[] { ". ", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            description = string.Join
+            (
+              OS.NewLine,
+              lines.Select
+              (
+                x =>
+                {
+                  var line = x.Trim();
+                  if (line != string.Empty && !char.IsPunctuation(line[line.Length - 1]))
+                    line += '.';
+
+                  return line;
+                }
+              )
+            );
+          }
+
+          return description;
+        }
+
+        return null;
+      }
+    }
+
+    string SeverityDescription
+    {
+      get
+      {
+        var id = new ARDB.FailureDefinitionId(Value);
+        var accessor = Autodesk.Revit.ApplicationServices.Application.GetFailureDefinitionRegistry()?.FindFailureDefinition(id);
+        var severity = accessor.GetSeverity();
+        switch (severity)
+        {
+          case ARDB.FailureSeverity.None: return "None";
+          case ARDB.FailureSeverity.Warning: return "Warning";
+          case ARDB.FailureSeverity.Error: return "Error";
+          case ARDB.FailureSeverity.DocumentCorruption: return "Document Corruption";
+        }
+
+        return severity.ToString();
+      }
+    }
     #endregion
   }
 }

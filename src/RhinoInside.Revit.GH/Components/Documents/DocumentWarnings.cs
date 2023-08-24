@@ -1,13 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
+using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Documents
 {
-  [ComponentVersion(introduced: "1.10"), ComponentRevitAPIVersion(min: "2018.0")]
+  using External.DB.Extensions;
+
+  [ComponentVersion(introduced: "1.10", updated: "1.17"), ComponentRevitAPIVersion(min: "2018.0")]
   public class DocumentWarnings : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("3917ADB2-706E-49A2-A3AF-6B5F610C4B78");
@@ -25,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     public DocumentWarnings() : base
     (
-      name: "Document Warnings",
+      name: "Query Warnings",
       nickname: "Warnings",
       description: "Gets a list of failure messages generated from persistent (reviewable) warnings accumulated in the document.",
       category: "Revit",
@@ -37,6 +42,20 @@ namespace RhinoInside.Revit.GH.Components.Documents
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition
+      (
+        new Param_GenericObject()
+        {
+          Name = "Failure Definitions",
+          NickName = "FD",
+          Description = "Set of failure definitions to query.",
+          Access = GH_ParamAccess.list,
+          Hidden = true,
+          Optional = true,
+        }, ParamRelevance.Primary
+      ),
+      ParamDefinition.Create<Parameters.Element>("Failing Element", "FE", "Element that caused the failure.", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.Element>("Additional Elements", "AE", "List of additional reference elements for the failure.", optional: true, access: GH_ParamAccess.list, relevance: ParamRelevance.Secondary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -47,7 +66,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
       (
         new Param_GenericObject()
         {
-          Name = "Failure Definition",
+          Name = "Failure Definitions",
           NickName = "FD",
           Description = "Failure definition.",
           Access = GH_ParamAccess.list,
@@ -59,27 +78,92 @@ namespace RhinoInside.Revit.GH.Components.Documents
       (
         new Param_String()
         {
-          Name = "Description",
+          Name = "Descriptions",
           NickName = "D",
           Description = "Failure definition description.",
           Access = GH_ParamAccess.list,
           DataMapping = GH_DataMapping.Graft
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Occasional
       ),
       ParamDefinition.Create<Parameters.Element>("Failing Elements", "FE", "List of elements that caused the failure.", access: GH_ParamAccess.tree, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Element>("Additional Elements", "AE", "List of additional reference elements for the failure.", access: GH_ParamAccess.tree, relevance: ParamRelevance.Primary),
     };
+
+    public override void AddedToDocument(GH_Document document)
+    {
+      if (Params.Output<IGH_Param>("Failure Definition") is IGH_Param failureDefinition)
+        failureDefinition.Name = "Failure Definitions";
+
+      if (Params.Output<IGH_Param>("Description") is IGH_Param description)
+        description.Name = "Descriptions";
+
+      base.AddedToDocument(document);
+    }
+
+    static string GetDescriptionText(ARDB.FailureMessage message)
+    {
+      if (message?.GetDescriptionText() is string description)
+      {
+        if (description != string.Empty)
+        {
+          description = description.Trim();
+          description = description.Replace("...", "…");
+          var lines = description.Split(new string[] { ". ", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+          description = string.Join
+          (
+            OS.NewLine,
+            lines.Select
+            (
+              x =>
+              {
+                var line = x.Trim();
+                if (line != string.Empty && !char.IsPunctuation(line[line.Length - 1]))
+                  line += '.';
+
+                return line;
+              }
+            )
+          );
+        }
+
+        return description;
+      }
+
+      return null;
+    }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       else Params.TrySetData(DA, "Document", () => doc);
 
+      if (!Params.TryGetDataList(DA, "Failure Definitions", out IList<Types.FailureDefinition> failureDefinitions)) return;
+      if (!Params.TryGetData(DA, "Failing Element", out Types.Element element)) return;
+      if (!Params.TryGetData(DA, "Additional Elements", out IList<Types.Element> additionals)) return;
+
 #if REVIT_2018
       var warnings = doc.Value.GetWarnings();
 
-      Params.TrySetDataList(DA, "Failure Definition", () => warnings.Select(x => new Types.FailureDefinition(x.GetFailureDefinitionId().Guid)));
-      Params.TrySetDataList(DA, "Description", () => warnings.Select(x => x.GetDescriptionText()));
+      if (failureDefinitions is object)
+      {
+        var definitions = new HashSet<Guid>(failureDefinitions.Select(x => x.Value));
+        warnings = warnings.Where(x => definitions.Contains(x.GetFailureDefinitionId().Guid)).ToArray();
+      }
+
+      if (element is object)
+      {
+        var elementId = element.Id;
+        warnings = warnings.Where(x => x.GetFailingElements().ToReadOnlyElementIdCollection().Contains(elementId)).ToArray();
+      }
+
+      if (additionals is object && additionals.Count > 0)
+      {
+        var additional = new HashSet<ARDB.ElementId>(additionals.Where(x => doc.Value.IsEquivalent(x?.Document)).Select(x => x.Id));
+        warnings = warnings.Where(x => additional.Overlaps(x.GetAdditionalElements())).ToArray();
+      }
+
+      Params.TrySetDataList(DA, "Failure Definitions", () => warnings.Select(x => new Types.FailureDefinition(x.GetFailureDefinitionId().Guid)));
+      Params.TrySetDataList(DA, "Descriptions", () => warnings.Select(GetDescriptionText));
 
       var _FailingElements_ = Params.IndexOfOutputParam("Failing Elements");
       if (_FailingElements_ != -1)

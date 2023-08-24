@@ -7,6 +7,26 @@ namespace RhinoInside.Revit.GH.Types
   using Kernel.Attributes;
 
   [
+    ComponentVersion(introduced: "1.17"),
+    ComponentGuid("128BC177-9A7F-43D5-8BF9-5432F357270A"),
+    Name("Failure Severity"),
+    Description("Contains a collection of Revit failure severity values"),
+  ]
+  public class FailureSeverity : GH_Flags<ARDB.FailureSeverity>
+  {
+    public override bool IsEmpty => Value == ARDB.FailureSeverity.None;
+    public static new ReadOnlyDictionary<int, string> NamedValues { get; } = new ReadOnlyDictionary<int, string>
+    (
+      new Dictionary<int, string>
+      {
+        { (int) ARDB.FailureSeverity.Warning,             "Warning"    },
+        { (int) ARDB.FailureSeverity.Error,               "Error"      },
+        { (int) ARDB.FailureSeverity.DocumentCorruption,  "Corruption" },
+      }
+    );
+  }
+
+  [
     ComponentGuid("4615F47E-A20E-448A-A5DB-AF3473867E3D"),
     Name("Element Kind"),
     Description("Contains a collection of Revit element kind values"),
