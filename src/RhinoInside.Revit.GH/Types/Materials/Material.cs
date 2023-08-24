@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.GH.Types
             {
               if (Rhino.Render.RenderContent.FromId(doc, renderMaterialId) is Rhino.Render.RenderMaterial renderMaterial)
               {
-                renderMaterial.SimulateMaterial(ref mat, false);
+                renderMaterial.SimulateMaterial(ref mat, Rhino.Render.RenderTexture.TextureGeneration.Allow);
 
                 if (mat.Name != material.Name)
                 {
