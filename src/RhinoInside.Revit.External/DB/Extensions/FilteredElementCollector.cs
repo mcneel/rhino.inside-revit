@@ -52,6 +52,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class FilteredElementCollectorExtension
   {
+    internal static ICollection<ElementId> ToReadOnlyElementIdCollection(this ICollection<ElementId> collection)
+    {
+      return new ReadOnlySortedElementIdCollection(collection);
+    }
+
     public static ICollection<ElementId> ToReadOnlyElementIdCollection(this FilteredElementCollector collector)
     {
       return new ReadOnlySortedElementIdCollection(collector.ToElementIds());
