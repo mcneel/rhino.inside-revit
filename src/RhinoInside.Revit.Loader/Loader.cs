@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.AddIn
 
     public string DisplayBuildType => BuildType?.ToUpperInvariant() == "COMMERCIAL" ? string.Empty : BuildType;
 
-    string RhinoExePath => Path.Combine(SystemDir, "Rhino.exe");
+    string RhinoExePath => string.IsNullOrEmpty(SystemDir) ? null : Path.Combine(SystemDir, "Rhino.exe");
 
     public Version GetRhinoVersionInfo()
     {
@@ -96,6 +96,7 @@ namespace RhinoInside.Revit.AddIn
 
       var available = distributions.Where(x => x.Available).ToArray();
       if (available.Length == 0) return distributions[0];
+      if (available.Length == 1) return available[0];
 
       using
       (
