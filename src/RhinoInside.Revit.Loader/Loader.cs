@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.AddIn
       var assembly = Assembly.GetExecutingAssembly();
       var directory = Path.GetDirectoryName(assembly.Location);
 
-      if (PickDistribution(7, 8) is Distribution distribution)
+      if (PickDistribution() is Distribution distribution)
       {
         try
         {
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.AddIn
       return _ExternalApplication?.OnShutdown(controlledApplication) ?? Result.Failed;
     }
 
-    static Distribution PickDistribution(int min, int max)
+    static Distribution PickDistribution()
     {
       var distributions = new Distribution[]
       {
