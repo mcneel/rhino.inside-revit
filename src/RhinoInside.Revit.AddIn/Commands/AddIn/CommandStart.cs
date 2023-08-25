@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     public static string CommandName => "Start";
 
     // determine which RIR icon to use
-    public static string CommandIcon => Distribution.Updater.ActiveChannel?.IsStable == false ?
+    public static string CommandIcon => Deployment.Updater.ActiveChannel?.IsStable == false ?
       "RIR-WIP-logo.png" :
       "RIR-logo.png";
 
@@ -334,7 +334,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    public static void NotifyUpdateAvailable(Distribution.ReleaseInfo releaseInfo)
+    public static void NotifyUpdateAvailable(Deployment.ReleaseInfo releaseInfo)
     {
       // button gets deactivated if options are readonly
       if (!Properties.AddInOptions.IsReadOnly)

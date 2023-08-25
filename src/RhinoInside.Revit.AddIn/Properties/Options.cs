@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.AddIn.Properties
         UpdateChannelChanged?.Invoke(this, null);
       }
     }
-    internal string _updateChannel = Distribution.Updater.DefaultChannel.Id.ToString();
+    internal string _updateChannel = Deployment.Updater.DefaultChannel.Id.ToString();
     public static event EventHandler<EventArgs> UpdateChannelChanged;
     #endregion
 

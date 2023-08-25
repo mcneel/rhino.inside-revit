@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     public static string CommandName = "Options";
     public static string CommandTooltip = "Open Rhino.Inside.Revit Options Window";
 
-    static Distribution.ReleaseInfo LatestReleaseInfo = null;
+    static Deployment.ReleaseInfo LatestReleaseInfo = null;
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     /// <summary>
     /// Mark button with highlighter dot using Autodesk.Windows api
     /// </summary>
-    public static void NotifyUpdateAvailable(Distribution.ReleaseInfo releaseInfo)
+    public static void NotifyUpdateAvailable(Deployment.ReleaseInfo releaseInfo)
     {
       // button gets deactivated if options are readonly
       if (!Properties.AddInOptions.IsReadOnly)

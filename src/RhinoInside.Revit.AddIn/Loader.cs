@@ -99,11 +99,11 @@ namespace RhinoInside.Revit.AddIn
 
     static async void CheckForUpdates()
     {
-      var releaseInfo = await Distribution.Updater.GetReleaseInfoAsync();
+      var releaseInfo = await Deployment.Updater.GetReleaseInfoAsync();
 
       // if release info is received, and
       // if current version on the active update channel is newer
-      if (releaseInfo is Distribution.ReleaseInfo && releaseInfo.Version > Core.Version)
+      if (releaseInfo is Deployment.ReleaseInfo && releaseInfo.Version > Core.Version)
       {
         // ask UI to notify user of updates
         if (!Properties.AddInOptions.Session.CompactTab)

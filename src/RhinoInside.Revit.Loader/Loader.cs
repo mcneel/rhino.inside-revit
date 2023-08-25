@@ -9,9 +9,9 @@ using Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.AddIn
 {
-  class RhinocerosDistribution
+  class Distribution
   {
-    public RhinocerosDistribution(int majorVersion) => MajorVersion = majorVersion;
+    public Distribution(int majorVersion) => MajorVersion = majorVersion;
 
     public readonly int MajorVersion;
     public bool Available => GetRhinoVersionInfo()?.Major == MajorVersion;
@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.AddIn
       var assembly = Assembly.GetExecutingAssembly();
       var directory = Path.GetDirectoryName(assembly.Location);
 
-      if (GetDistribution() is RhinocerosDistribution distribution)
+      if (GetDistribution() is Distribution distribution)
       {
         try
         {
@@ -86,12 +86,12 @@ namespace RhinoInside.Revit.AddIn
       return _ExternalApplication?.OnShutdown(controlledApplication) ?? Result.Failed;
     }
 
-    RhinocerosDistribution GetDistribution()
+    Distribution GetDistribution()
     {
-      var distributions = new RhinocerosDistribution[]
+      var distributions = new Distribution[]
       {
-        new RhinocerosDistribution(7),
-        new RhinocerosDistribution(8),
+        new Distribution(7),
+        new Distribution(8),
       };
 
       var available = distributions.Where(x => x.Available).ToArray();
