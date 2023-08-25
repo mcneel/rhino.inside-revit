@@ -82,8 +82,6 @@ namespace RhinoInside.Revit
       };
 
       var currentKey = CurrentKey;
-      CurrentKey = null;
-
       var available = distributions.Where(x => x.Available && (currentKey is null || x.RegistryKey == currentKey)).ToArray();
 
       switch (available.Length)

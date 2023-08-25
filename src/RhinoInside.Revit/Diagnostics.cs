@@ -381,18 +381,17 @@ namespace RhinoInside.Revit
         var SafeModeFolder = Path.Combine(Core.Host.Services.CurrentUserAddinsLocation, "RhinoInside.Revit", "SafeMode");
         Directory.CreateDirectory(SafeModeFolder);
 
-        Settings.AddIns.GetInstalledAddins(Core.Host.Services.VersionNumber, out var AddinFiles);
-        if (AddinFiles.FirstOrDefault(x => Path.GetFileName(x) == "RhinoInside.Revit.addin") is string RhinoInsideRevitAddinFile)
+        Settings.AddIns.GetInstalledAddins(Core.Host.Services.VersionNumber, out var manifests);
+        if (manifests.FirstOrDefault(x => Path.GetFileName(x) == "RhinoInside.Revit.addin") is string manifestFile)
         {
-          var SafeModeAddinFile = Path.Combine(SafeModeFolder, Path.GetFileName(RhinoInsideRevitAddinFile));
-          File.Copy(RhinoInsideRevitAddinFile, SafeModeAddinFile, true);
-
-          if (Settings.AddIns.LoadFrom(SafeModeAddinFile, out var SafeModeAddin))
+          if (Settings.AddIns.LoadFrom(manifestFile, out var safeManifest))
           {
-            var addin = SafeModeAddin.First();
-            var assembly = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(addin.Assembly));
-            SafeModeAddin.First().Assembly = assembly;
-            Settings.AddIns.SaveAs(SafeModeAddin, SafeModeAddinFile);
+            // Make all paths absolute
+            foreach(var addin in safeManifest)
+              addin.Assembly = safeManifest.ToFileInfo(addin.Assembly).FullName;
+
+            var safeManifestFile = Path.Combine(SafeModeFolder, Path.GetFileName(manifestFile));
+            Settings.AddIns.SaveAs(safeManifest, safeManifestFile);
           }
 
           var journalFile = Path.Combine(SafeModeFolder, "RhinoInside.Revit-SafeMode.txt");
@@ -418,6 +417,7 @@ namespace RhinoInside.Revit
             FileName = Process.GetCurrentProcess().MainModule.FileName,
             Arguments = $"\"{journalFile}\""
           };
+
           using (var RevitApp = Process.Start(si)) RevitApp.WaitForExit();
         }
       }

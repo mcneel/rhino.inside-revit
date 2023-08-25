@@ -54,7 +54,8 @@ namespace RhinoInside.Revit.AddIn
 #endif
       };
 
-      var available = distributions.Where(x => x.Available).ToArray();
+      var currentKey = Distribution.CurrentKey;
+      var available = distributions.Where(x => x.Available && (currentKey is null || x.RegistryKey == currentKey)).ToArray();
       if (available.Length == 0) return distributions[0];
       if (available.Length == 1) return available[0];
 
