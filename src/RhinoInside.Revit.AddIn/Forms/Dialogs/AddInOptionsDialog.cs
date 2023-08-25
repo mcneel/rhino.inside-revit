@@ -9,7 +9,7 @@ using Eto.Forms;
 
 namespace RhinoInside.Revit.AddIn.Forms
 {
-  using Distribution;
+  using Deployment;
   using Properties;
 
   class AddInOptionsDialog : ModalDialog

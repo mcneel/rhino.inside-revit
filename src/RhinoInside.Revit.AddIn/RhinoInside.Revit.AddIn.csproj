@@ -15,8 +15,7 @@
     <Compile Include="Commands\AddIn\CommandGuides.cs" />
     <Compile Include="Commands\AddIn\CommandHelpLinks.cs" />
     <Compile Include="Commands\AddIn\CommandStart.cs" />
-    <Compile Include="Properties\Options.cs" />
-    <Compile Include="Distribution.cs" />
+    <Compile Include="Deployment.cs" />
     <Compile Include="Loader.cs" />
     <Compile Include="Commands\BaseCommand.cs" />
     <Compile Include="Forms\BaseForm.cs" />
@@ -52,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Options.cs" />
     <Compile Include="Properties\ProductInfo.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

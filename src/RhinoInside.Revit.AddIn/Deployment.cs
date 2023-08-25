@@ -7,7 +7,7 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace RhinoInside.Revit.AddIn.Distribution
+namespace RhinoInside.Revit.AddIn.Deployment
 {
   public class ReleaseVersion : IXmlSerializable
   {
