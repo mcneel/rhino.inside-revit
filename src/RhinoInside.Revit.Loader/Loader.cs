@@ -49,12 +49,6 @@ namespace RhinoInside.Revit.AddIn
 
   public class Loader : IExternalApplication
   {
-    class OwnerWindow : IWin32Window
-    {
-      public OwnerWindow(IntPtr hWnd) => Handle = hWnd;
-      public IntPtr Handle { get; private set; }
-    }
-
     internal static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
     internal static readonly Guid AddInId = new Guid($"02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74");
     IExternalApplication _ExternalApplication;
