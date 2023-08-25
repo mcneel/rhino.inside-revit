@@ -10,7 +10,7 @@ namespace RhinoInside.Revit
       {
         get
         {
-          using (var data = Registry.CurrentUser.OpenSubKey($@"{Core.RegistryPath}\Global Options\Debug Logging", true))
+          using (var data = Registry.CurrentUser.OpenSubKey($@"{Core.Distribution.ProductKey}\Global Options\Debug Logging", true))
           {
             return new DebugLogging()
             {
@@ -21,7 +21,7 @@ namespace RhinoInside.Revit
         }
         set
         {
-          using (var data = Registry.CurrentUser.OpenSubKey($@"{Core.RegistryPath}\Global Options\Debug Logging", true))
+          using (var data = Registry.CurrentUser.OpenSubKey($@"{Core.Distribution.ProductKey}\Global Options\Debug Logging", true))
           {
             data?.SetValue("Enabled", value.Enabled ? 1 : 0);
             data?.SetValue("SaveToFile", value.SaveToFile ? 1 : 0);

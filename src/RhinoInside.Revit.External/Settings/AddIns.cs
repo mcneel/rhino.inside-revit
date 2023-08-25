@@ -35,25 +35,27 @@ namespace RhinoInside.Revit.Settings
     public class RevitAddIns : List<AddIn>
     {
       [NonSerialized]
-      public Environment.SpecialFolder Folder;
-      [NonSerialized]
-      public string AddinFilePath;
+      public string ManifestPath;
+
+      public FileInfo ToFileInfo(string path)
+      {
+        path = path.Trim(Path.DirectorySeparatorChar);
+        if (!Path.IsPathRooted(path))
+          path = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ManifestPath), path));
+
+        return new FileInfo(path);
+      }
     }
 
-    internal static bool LoadFrom(string addinManifestPath, out RevitAddIns addins)
+    internal static bool LoadFrom(string manifestPath, out RevitAddIns addins)
     {
       try
       {
-        using (var ReadFileStream = new FileStream(addinManifestPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+        using (var ReadFileStream = new FileStream(manifestPath, FileMode.Open, FileAccess.Read, FileShare.Read))
         {
           var serializer = new XmlSerializer(typeof(RevitAddIns));
           addins = serializer.Deserialize(ReadFileStream) as RevitAddIns;
-          foreach (var addin in addins)
-          {
-            addin.Assembly = addin.Assembly.Trim(Path.DirectorySeparatorChar);
-            if (!Path.IsPathRooted(addin.Assembly))
-              addin.Assembly = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(addinManifestPath), addin.Assembly));
-          }
+          addins.ManifestPath = manifestPath;
           return true;
         }
       }
@@ -63,11 +65,11 @@ namespace RhinoInside.Revit.Settings
         return false;
       }
     }
-    internal static bool SaveAs(RevitAddIns revitAddIns, string addinManifestPath)
+    internal static bool SaveAs(RevitAddIns revitAddIns, string manifestPath)
     {
       try
       {
-        using (var WriteFileStream = new StreamWriter(addinManifestPath))
+        using (var WriteFileStream = new StreamWriter(manifestPath))
         {
           var ns = new XmlSerializerNamespaces();
           ns.Add(string.Empty, string.Empty);
