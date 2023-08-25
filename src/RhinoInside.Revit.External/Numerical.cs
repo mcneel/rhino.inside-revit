@@ -168,8 +168,9 @@ namespace RhinoInside.Revit.Numerical
       var X = Math.Abs(x);
       var Y = Math.Abs(y);
 
-      if (X <= double.MaxValue / 2 && Y <= double.MaxValue / 2)
-        return (x + y) * 0.5;
+      //// Avoids oveflow
+      //if (X <= double.MaxValue / 2 && Y <= double.MaxValue / 2)
+      //  return (x + y) * 0.5;
 
       if (X < Constant.Upsilon)
         return x + (y * 0.5);
@@ -202,9 +203,20 @@ namespace RhinoInside.Revit.Numerical
     {
       if (x == y) return x;
 
-      return t <= 0.5 ?
-        (x * (1.0 - t)) + (y * (t - 0.0)):
-        (x * (0.0 - t)) + (y * (t - 1.0));
+      var X = Math.Abs(x);
+      var Y = Math.Abs(y);
+
+      //// Avoids oveflow
+      //if (X <= double.MaxValue / 2 && Y <= double.MaxValue / 2)
+      //  return x + ((y - x) * t);
+
+      if (X < Constant.Upsilon)
+        return x + (y * t);
+
+      if (Y < Constant.Upsilon)
+        return (x * (1.0 - t)) + y;
+
+      return (x * (1.0 - t)) + (y * t);
     }
 
     /// <summary>
