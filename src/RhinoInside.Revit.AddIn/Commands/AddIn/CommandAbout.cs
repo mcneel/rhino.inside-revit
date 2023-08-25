@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     {
       var details = new StringBuilder();
 
-      var rhino = Core.RhinoVersionInfo;
+      var rhino = Core.Distribution.VersionInfo;
       details.AppendLine($"Rhino: {rhino?.ProductVersion} ({rhino?.FileDescription ?? "not found"})");
 
       var revit = data.Application.Application;

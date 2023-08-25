@@ -74,6 +74,12 @@ namespace RhinoInside.Revit
 
         var args = new List<string>();
 
+        if (DebugLogging.Current.Enabled)
+        {
+          args.Add("/captureprintcalls");
+          args.Add("/stopwatch");
+        }
+
         if (Core.IsolateSettings)
         {
           args.Add($"/scheme={SchemeName}");
@@ -84,17 +90,12 @@ namespace RhinoInside.Revit
           args.Add($"/language={Core.Host.Services.Language.ToLCID()}");
         }
 
-        args.Add("/nosplash");
 #if RHINO_8
         args.Add("/netfx");
 #endif
+        args.Add("/nosplash");
+        //args.Add("/safemode");
         //args.Add("/notemplate");
-
-        if (DebugLogging.Current.Enabled)
-        {
-          args.Add("/captureprintcalls");
-          args.Add("/stopwatch");
-        }
 
         var hostWnd = Core.KeepUIOnTop ? hostMainWindow.Handle : IntPtr.Zero;
         core = new RhinoCore(args.ToArray(), WindowStyle.Hidden, hostWnd);
@@ -121,7 +122,7 @@ namespace RhinoInside.Revit
         RhinoApp.CommandWindowCaptureEnabled = false;
       }
 
-      FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", $"Rhino.Inside R{RhinoApp.ExeVersion} ");
+      FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", "Rhino.Inside ");
       Rhino.Runtime.PythonScript.AddRuntimeAssembly(Assembly.GetExecutingAssembly());
 
       MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());

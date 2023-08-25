@@ -45,7 +45,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     static void SetupButton(PushButton pushButton)
     {
-      if (Core.RhinoVersionInfo is FileVersionInfo rhInfo)
+      if (Core.Distribution.VersionInfo is FileVersionInfo rhInfo)
       {
         pushButton.ToolTip = $"Loads {rhInfo.ProductName} inside this Revit session";
         pushButton.LongDescription =
@@ -228,7 +228,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       if (!AssemblyResolver.References.ContainsKey("RhinoCommon"))
         return false;
 
-      rhinoPanel = Core.Host.CreateRibbonPanel(TabName, Core.RhinoVersionInfo?.ProductName ?? "Rhinoceros");
+      rhinoPanel = Core.Host.CreateRibbonPanel(TabName, Core.Distribution.VersionInfo?.ProductName ?? "Rhinoceros");
 
       CommandRhino.CreateUI(rhinoPanel);
       CommandImport.CreateUI(rhinoPanel);

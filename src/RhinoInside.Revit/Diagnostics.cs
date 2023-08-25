@@ -116,7 +116,7 @@ namespace RhinoInside.Revit
                 writer.WriteLine($"  - ProductType: {revitProduct}");
                 writer.WriteLine($"  - Language: {revitLanguage}");
 
-                var rhino = Core.RhinoVersionInfo;
+                var rhino = Core.Distribution.VersionInfo;
                 writer.WriteLine($"- Rhino: {rhino.ProductVersion} ({rhino.FileDescription})");
                 writer.WriteLine($"- Rhino.Inside Revit: {Core.DisplayVersion}");
 
@@ -318,7 +318,7 @@ namespace RhinoInside.Revit
         mailBody += $"CLR: {ErrorReport.CLRVersion}" + Environment.NewLine;
         mailBody += $"Revit: {revitVersion}" + Environment.NewLine;
 
-        var rhino = Core.RhinoVersionInfo;
+        var rhino = Core.Distribution.VersionInfo;
         mailBody += $"Rhino: {rhino.ProductVersion} ({rhino.FileDescription})" + Environment.NewLine;
         mailBody += $"Rhino.Inside Revit: {Core.DisplayVersion}" + Environment.NewLine;
 

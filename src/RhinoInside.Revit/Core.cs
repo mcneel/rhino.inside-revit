@@ -95,24 +95,9 @@ namespace RhinoInside.Revit
         return _MinimumRhinoVersion;
       }
     }
-    internal static readonly string RegistryPath = $@"SOFTWARE\McNeel\Rhinoceros\{MinimumRhinoVersion.Major}.0";
 
-    static readonly string SystemDir =
-#if DEBUG
-      Microsoft.Win32.Registry.GetValue($@"HKEY_CURRENT_USER\{RegistryPath}-WIP-Developer-Debug-trunk\Install", "Path", null) as string ??
-#endif
-      Microsoft.Win32.Registry.GetValue($@"HKEY_LOCAL_MACHINE\{RegistryPath}\Install", "Path", null) as string ??
-      Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP", "System");
-
-    internal static readonly string RhinoExePath = Path.Combine(SystemDir, "Rhino.exe");
-    internal static readonly FileVersionInfo RhinoVersionInfo = File.Exists(RhinoExePath) ? FileVersionInfo.GetVersionInfo(RhinoExePath) : null;
-    static readonly Version RhinoVersion = new Version
-    (
-      RhinoVersionInfo?.FileMajorPart ?? 0,
-      RhinoVersionInfo?.FileMinorPart ?? 0,
-      RhinoVersionInfo?.FileBuildPart ?? 0,
-      RhinoVersionInfo?.FilePrivatePart ?? 0
-    );
+    internal static readonly Distribution Distribution = Distribution.Default(MinimumRhinoVersion.Major);
+    static readonly Version RhinoVersion = Distribution.ExeVersion();
 
     static Core()
     {
@@ -257,10 +242,10 @@ namespace RhinoInside.Revit
             MainInstruction = "Unsupported Revit version",
             MainContent = $"Please update Revit to version {MinimumRevitVersion} or higher.",
             ExpandedContent =
-            (RhinoVersionInfo is null ? "Rhino\n" :
-            $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n") +
+            (Distribution.VersionInfo is null ? "Rhino\n" :
+            $"{Distribution.VersionInfo.ProductName} {Distribution.VersionInfo.ProductMajorPart}\n") +
             $"• Version: {RhinoVersion}\n" +
-            $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
+            $"• Path: '{Distribution.Path}'" + (!File.Exists(Distribution.ExePath) ? " (not found)" : string.Empty) + "\n" +
             $"\n{app.Services.VersionName}\n" +
             $"• Version: {RevitVersion} ({app.Services.VersionBuild})\n" +
             $"• Path: {Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\n" +
@@ -320,10 +305,10 @@ namespace RhinoInside.Revit
             MainInstruction = "Unsupported Rhino version",
             MainContent = $"Expected Rhino version is ({MinimumRhinoVersion}) or above.",
             ExpandedContent =
-            (RhinoVersionInfo is null ? "Rhino\n" :
-            $"{RhinoVersionInfo.ProductName} {RhinoVersionInfo.ProductMajorPart}\n") +
+            (Distribution.VersionInfo is null ? "Rhino\n" :
+            $"{Distribution.VersionInfo.ProductName} {Distribution.VersionInfo.ProductMajorPart}\n") +
             $"• Version: {RhinoVersion}\n" +
-            $"• Path: '{SystemDir}'" + (!File.Exists(RhinoExePath) ? " (not found)" : string.Empty) + "\n" +
+            $"• Path: '{Distribution.Path}'" + (!File.Exists(Distribution.ExePath) ? " (not found)" : string.Empty) + "\n" +
             $"\n{services.VersionName}\n" +
             $"• Version: {services.SubVersionNumber} ({services.VersionBuild})\n" +
             $"• Path: {Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)}\n" +

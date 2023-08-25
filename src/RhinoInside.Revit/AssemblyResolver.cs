@@ -13,12 +13,7 @@ namespace RhinoInside.Revit
 {
   static class AssemblyResolver
   {
-    static readonly string InstallPath =
-#if DEBUG
-      Registry.GetValue($@"HKEY_CURRENT_USER\{Core.RegistryPath}-WIP-Developer-Debug-trunk\Install", "InstallPath", null) as string ??
-#endif
-      Registry.GetValue($@"HKEY_LOCAL_MACHINE\{Core.RegistryPath}\Install", "InstallPath", null) as string ??
-      Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Rhino WIP");
+    static readonly string InstallPath = Core.Distribution.InstallPath;
 
     #region AssemblyReference
 
@@ -145,10 +140,10 @@ namespace RhinoInside.Revit
             var installFolders = new DirectoryInfo[]
             {
               new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)),
-              new DirectoryInfo(InstallPath)
+              new DirectoryInfo(InstallPath ?? string.Empty)
             };
 
-            foreach (var installFolder in installFolders)
+            foreach (var installFolder in installFolders.Where(x => x.Exists))
             {
               foreach (var dll in installFolder.EnumerateFiles("*.dll", SearchOption.AllDirectories))
               {
