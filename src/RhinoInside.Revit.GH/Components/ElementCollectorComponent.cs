@@ -17,9 +17,9 @@ namespace RhinoInside.Revit.GH.Components
     public override bool NeedsToBeExpired
     (
       ARDB.Document document,
-      ICollection<ARDB.ElementId> added,
-      ICollection<ARDB.ElementId> deleted,
-      ICollection<ARDB.ElementId> modified
+      ISet<ARDB.ElementId> added,
+      ISet<ARDB.ElementId> deleted,
+      ISet<ARDB.ElementId> modified
     )
     {
       // Check if the change is on a document this component is querying.
@@ -48,9 +48,9 @@ namespace RhinoInside.Revit.GH.Components
     protected virtual bool MayNeedToBeExpired
     (
       ARDB.Document document,
-      ICollection<ARDB.ElementId> added,
-      ICollection<ARDB.ElementId> deleted,
-      ICollection<ARDB.ElementId> modified
+      ISet<ARDB.ElementId> added,
+      ISet<ARDB.ElementId> deleted,
+      ISet<ARDB.ElementId> modified
     )
     {
       var elementFilter = ElementFilter;

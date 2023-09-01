@@ -18,9 +18,9 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
     protected override bool MayNeedToBeExpired
     (
       ARDB.Document document,
-      ICollection<ARDB.ElementId> added,
-      ICollection<ARDB.ElementId> deleted,
-      ICollection<ARDB.ElementId> modified
+      ISet<ARDB.ElementId> added,
+      ISet<ARDB.ElementId> deleted,
+      ISet<ARDB.ElementId> modified
     )
     {
       if (added.Any(x => x.IsCategoryId(document)))

@@ -12,9 +12,9 @@ namespace RhinoInside.Revit.GH.Kernel
     bool NeedsToBeExpired
     (
       ARDB.Document doc,
-      ICollection<ARDB.ElementId> added,
-      ICollection<ARDB.ElementId> deleted,
-      ICollection<ARDB.ElementId> modified
+      ISet<ARDB.ElementId> added,
+      ISet<ARDB.ElementId> deleted,
+      ISet<ARDB.ElementId> modified
     );
   }
 
@@ -26,9 +26,9 @@ namespace RhinoInside.Revit.GH.Kernel
     bool NeedsToBeExpired
     (
       ARDB.Document doc,
-      ICollection<ARDB.ElementId> added,
-      ICollection<ARDB.ElementId> deleted,
-      ICollection<ARDB.ElementId> modified
+      ISet<ARDB.ElementId> added,
+      ISet<ARDB.ElementId> deleted,
+      ISet<ARDB.ElementId> modified
     );
   }
 }

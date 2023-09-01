@@ -184,9 +184,9 @@ namespace RhinoInside.Revit.GH.Parameters
     bool Kernel.IGH_ReferenceParam.NeedsToBeExpired
     (
       ARDB.Document doc,
-      ICollection<ARDB.ElementId> added,
-      ICollection<ARDB.ElementId> deleted,
-      ICollection<ARDB.ElementId> modified
+      ISet<ARDB.ElementId> added,
+      ISet<ARDB.ElementId> deleted,
+      ISet<ARDB.ElementId> modified
     )
     {
       if (Kind != GH_ParamKind.output)

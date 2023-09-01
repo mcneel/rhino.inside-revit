@@ -590,34 +590,38 @@ namespace RhinoInside.Revit.GH
             if (obj.Phase == GH_SolutionPhase.Computing)
               continue;
 
-            if (obj is Kernel.IGH_ReferenceParam persistentParam)
+            // In case of exception just skip the obj
+            try
             {
-              if (persistentParam.NeedsToBeExpired(document, added, deleted, modified))
-                change.ExpiredObjects.Add(persistentParam);
-            }
-            else if (obj is Kernel.IGH_ReferenceComponent persistentComponent)
-            {
-              if (persistentComponent.NeedsToBeExpired(document, added, deleted, modified))
+              if (obj is Kernel.IGH_ReferenceParam persistentParam)
               {
-                change.ExpiredObjects.Add(persistentComponent);
+                if (persistentParam.NeedsToBeExpired(document, added, deleted, modified))
+                  change.ExpiredObjects.Add(persistentParam);
               }
-              else
+              else if (obj is Kernel.IGH_ReferenceComponent persistentComponent)
               {
-                foreach (var output in persistentComponent.Params.Output.OfType<Kernel.IGH_ReferenceParam>())
+                if (persistentComponent.NeedsToBeExpired(document, added, deleted, modified))
                 {
-                  if (output.Recipients.Count > 0 && output.NeedsToBeExpired(document, added, deleted, modified))
+                  change.ExpiredObjects.Add(persistentComponent);
+                }
+                else
+                {
+                  foreach (var output in persistentComponent.Params.Output.OfType<Kernel.IGH_ReferenceParam>())
                   {
-                    foreach (var recipient in output.Recipients)
+                    if (output.Recipients.Count > 0 && output.NeedsToBeExpired(document, added, deleted, modified))
                     {
-                      if (activeDefinition && recipient.Phase == GH_SolutionPhase.Blank)
-                        continue;
+                      foreach (var recipient in output.Recipients)
+                      {
+                        if (activeDefinition && recipient.Phase == GH_SolutionPhase.Blank)
+                          continue;
 
-                      change.ExpiredObjects.Add(recipient.Attributes.GetTopLevel.DocObject as IGH_ActiveObject);
+                        change.ExpiredObjects.Add(recipient.Attributes.GetTopLevel.DocObject as IGH_ActiveObject);
+                      }
                     }
                   }
                 }
               }
-            }
+            } catch { }
           }
 
           if (change.ExpiredObjects.Count > 0)
