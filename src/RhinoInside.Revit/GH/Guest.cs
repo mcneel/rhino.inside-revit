@@ -556,9 +556,9 @@ namespace RhinoInside.Revit.GH
       var transactions = e.GetTransactionNames();
 #endif
       var document = e.GetDocument();
-      var added    = new ReadOnlySortedElementIdCollection(e.GetAddedElementIds());
-      var deleted  = new ReadOnlySortedElementIdCollection(e.GetDeletedElementIds());
-      var modified = new ReadOnlySortedElementIdCollection(e.GetModifiedElementIds());
+      var added    = e.GetAddedElementIds().AsReadOnlyElementIdSet();
+      var deleted  = e.GetDeletedElementIds().AsReadOnlyElementIdSet();
+      var modified = e.GetModifiedElementIds().AsReadOnlyElementIdSet();
 
       if (added.Count > 0 || deleted.Count > 0 || modified.Count > 0)
       {
@@ -881,7 +881,7 @@ namespace RhinoInside.Revit.GH
           if (allowModelessHandling)
           {
             try { deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, CompoundElementFilter.ElementIsNotInternalFilter(revitDocument)); }
-            catch (Autodesk.Revit.Exceptions.ArgumentException) { deletedIds = elementIds; modifiedIds = ElementIdExtension.EmptyCollection; }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { deletedIds = elementIds; modifiedIds = ElementIdExtension.EmptySet; }
           }
 
           using (var tx = new ARDB.Transaction(revitDocument, "Release Elements"))

@@ -558,7 +558,7 @@ namespace RhinoInside.Revit.GH.Components
         // Check inputs
         foreach (var param in persistentInputs)
         {
-          if (param.NeedsToBeExpired(document, ElementIdExtension.EmptyCollection, deleted, modified))
+          if (param.NeedsToBeExpired(document, ElementIdExtension.EmptySet, deleted, modified))
             return true;
         }
       }

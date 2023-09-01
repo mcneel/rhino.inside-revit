@@ -154,11 +154,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       );
     }
 
-    static ICollection<ARDB.ElementId> GetVisibleElements(ARDB.View viewValue, ICollection<ARDB.ElementId> ids)
+    static ISet<ARDB.ElementId> GetVisibleElements(ARDB.View viewValue, ICollection<ARDB.ElementId> ids)
     {
-      ICollection<ARDB.ElementId> visibleIds = ElementIdExtension.EmptyCollection;
-
-      if (ids.Count > 0 && !viewValue.IsTemplate) 
+      if (ids.Count > 0 && !viewValue.IsTemplate)
       {
         var viewDocument = viewValue.Document;
         var viewId = viewValue.Id;
@@ -166,7 +164,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         if (viewValue.GetClipFilter(clipped: false) is ARDB.ElementFilter viewFilter)
         {
           using (var collector = new ARDB.FilteredElementCollector(viewDocument, ids))
-            ids = collector.WherePasses(viewFilter).ToReadOnlyElementIdCollection();
+            ids = collector.WherePasses(viewFilter).ToElementIds();
         }
 
         if (ids.Count > 0)
@@ -189,7 +187,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
             viewValue.ArePointCloudsHidden
           };
 
-          visibleIds = new List<ARDB.ElementId>(ids.Count);
+          var visibleIds = new List<ARDB.ElementId>(ids.Count);
           var viewPhaseFilter = ((viewValue.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE_FILTER)?.AsElement()) as ARDB.PhaseFilter);
           var viewPhase = viewValue.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ElementIdExtension.Invalid;
 
@@ -278,13 +276,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
             using (var filter = CompoundElementFilter.ExclusionFilter(visibleIds, inverted: true))
             using (var collector = new ARDB.FilteredElementCollector(viewDocument, viewId).WherePasses(filter))
             {
-              visibleIds = collector.ToReadOnlyElementIdCollection();
+              return collector.ToReadOnlyElementIdSet();
             }
           }
         }
       }
 
-      return visibleIds;
+      return ElementIdExtension.EmptySet;
     }
 
     static ARDB.ElementFilter GetElementVisibilityFilter(ARDB.View view, bool hidden)

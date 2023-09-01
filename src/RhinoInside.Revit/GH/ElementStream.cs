@@ -176,8 +176,8 @@ namespace RhinoInside.Revit.GH.ElementTracking
           var viewsToDelete = new HashSet<ARDB.ElementId>(elements.OfType<ARDB.View>().Select(x => x.Id));
           using (var uiDocument = new ARUI.UIDocument(document))
           {
-            var openViews = new HashSet<ARDB.ElementId>(uiDocument.GetOpenUIViews().Select(x => x.ViewId));
-            var viewsToClose = new List<ARDB.ElementId>(openViews.Count);
+            var openViews = uiDocument.GetOpenUIViews().Select(x => x.ViewId).ToArray();
+            var viewsToClose = new List<ARDB.ElementId>(openViews.Length);
 
             foreach (var viewToDelete in openViews.Where(viewsToDelete.Contains))
             {

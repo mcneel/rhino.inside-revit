@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       {
         foreach (var param in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
         {
-          if (param.NeedsToBeExpired(document, ElementIdExtension.EmptyCollection, deleted, ElementIdExtension.EmptyCollection))
+          if (param.NeedsToBeExpired(document, ElementIdExtension.EmptySet, deleted, ElementIdExtension.EmptySet))
             return true;
         }
       }

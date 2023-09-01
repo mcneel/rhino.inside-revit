@@ -328,7 +328,7 @@ namespace RhinoInside.Revit.External.UI.Selection
     {
       UIDocument = new UIDocument(document);
       ElementIds = UIDocument.Selection.GetElementIds();
-      if (ElementIds.Count > 0) UIDocument.Selection.SetElementIds(ElementIdExtension.EmptyCollection);
+      if (ElementIds.Count > 0) UIDocument.Selection.SetElementIds(ElementIdExtension.EmptySet);
 
       _Documents.Add(document);
     });

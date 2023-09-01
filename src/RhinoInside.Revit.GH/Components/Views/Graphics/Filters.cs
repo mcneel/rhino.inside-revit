@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       {
         StartTransaction(view.Document);
 
-        var viewFilters = new ReadOnlySortedElementIdCollection(view.Value.GetFilters());
+        var viewFilters = view.Value.GetFilters().AsReadOnlyElementIdSet();
         var filtersToAdd = new HashSet<ARDB.ElementId>(filters.Count);
         
         foreach (var filter in filters.OfType<Types.FilterElement>())
