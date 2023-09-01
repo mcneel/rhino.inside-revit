@@ -12,6 +12,7 @@ namespace RhinoInside.Revit.External.DB
     {
       TransactionFailures.CreateFailureDefinitions();
       ElementFailures.CreateFailureDefinitions();
+      ViewFailures.CreateFailureDefinitions();
     }
 
     /// <summary>
@@ -81,6 +82,59 @@ namespace RhinoInside.Revit.External.DB
         (
           FailureResolutionType.DeleteElements,
           "Delete All…",
+          typeof(DeleteElements)
+        ).
+        SetDefaultResolutionType
+        (
+          FailureResolutionType.DeleteElements
+        );
+      }
+    }
+
+    /// <summary>
+    /// Failures about Views.
+    /// </summary>
+    public static class ViewFailures
+    {
+      /// <summary>
+      /// Deleting of active view is not allowed.
+      /// </summary>
+      public static readonly FailureDefinitionId CanNotDeleteActiveView = new FailureDefinitionId(new Guid("F8A2BC66-77D6-4205-92B0-23A486F9D640"));
+
+      /// <summary>
+      /// There are open views in process of deleting.
+      /// These views must be closed to continue.
+      /// </summary>
+      public static readonly FailureDefinitionId CanNotDeleteOpenViews = new FailureDefinitionId(new Guid("8637F100-38B7-46FA-BB12-8FBC79A60346"));
+
+      internal static void CreateFailureDefinitions()
+      {
+        FailureDefinition.CreateFailureDefinition
+        (
+          id: CanNotDeleteActiveView,
+          severity: FailureSeverity.Error,
+          messageString: "Deleting of active view is not allowed."
+        ).
+        AddResolutionType
+        (
+          FailureResolutionType.DeleteElements,
+          "Close and Delete…",
+          typeof(DeleteElements)
+        ).
+        SetDefaultResolutionType
+        (
+          FailureResolutionType.DeleteElements
+        );
+        FailureDefinition.CreateFailureDefinition
+        (
+          id: CanNotDeleteOpenViews,
+          severity: FailureSeverity.Error,
+          messageString: "There are open views in process of deleting. These views must be closed to continue."
+        ).
+        AddResolutionType
+        (
+          FailureResolutionType.DeleteElements,
+          "Close and Delete…",
           typeof(DeleteElements)
         ).
         SetDefaultResolutionType

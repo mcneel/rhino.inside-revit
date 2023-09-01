@@ -5,6 +5,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 using ARDBES = Autodesk.Revit.DB.ExtensibleStorage;
+using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.GH.ElementTracking
 {
@@ -165,6 +166,55 @@ namespace RhinoInside.Revit.GH.ElementTracking
     {
       return element is null ? false : TrackedElementsDictionary.ContainsKey(element);
     }
+
+    public static ICollection<ARDB.ElementId> DeleteElements<E>(ARDB.Document document, ICollection<E> elements) where E : ARDB.Element
+    {
+      if (!document.IsLinked)
+      {
+        if (typeof(E).IsAssignableFrom(typeof(ARDB.View)))
+        {
+          var viewsToDelete = new HashSet<ARDB.ElementId>(elements.OfType<ARDB.View>().Select(x => x.Id));
+          using (var uiDocument = new ARUI.UIDocument(document))
+          {
+            var openViews = new HashSet<ARDB.ElementId>(uiDocument.GetOpenUIViews().Select(x => x.ViewId));
+            var viewsToClose = new List<ARDB.ElementId>(openViews.Count);
+
+            foreach (var viewToDelete in openViews.Where(viewsToDelete.Contains))
+            {
+              var view = document.GetElement(viewToDelete) as ARDB.View;
+              var viewNomen = view.GetElementNomen(out var nomenParameter);
+              view.SetElementNomen(nomenParameter, ElementNaming.MakeValidName($"{viewNomen} <Deleting…>"));
+
+              // It's almost deleted, we don't want the ElementStream found it anymore.
+              ReleaseElement(view);
+
+              viewsToClose.Add(view.Id);
+            }
+
+            if (viewsToClose.Count > 0)
+            {
+              using (var message = new ARDB.FailureMessage(ExternalFailures.ViewFailures.CanNotDeleteOpenViews))
+              {
+                var resolution = ARDB.DeleteElements.Create(document, viewsToClose);
+                message.AddResolution(ARDB.FailureResolutionType.DeleteElements, resolution);
+                message.SetFailingElements(viewsToClose);
+                document.PostFailure(message);
+              }
+
+              // Filter out those non deletable views.
+              elements = elements.Where(x => !viewsToClose.Contains(x.Id)).ToArray();
+            }
+          }
+        }
+      }
+
+      return document.DeleteElements(elements);
+    }
+
+    public static ICollection<ARDB.ElementId> DeleteElement<E>(ARDB.Document document, E element) where E : ARDB.Element
+    {
+      return document.DeleteElements(new E[] { element });
+    }
   }
 
   internal class ElementStream<T> : ElementStream, IEnumerable<T>, IDisposable
@@ -194,7 +244,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
           if (stepOnSet) MoveNext();
 
           if (current?.IsValidObject == true && value?.Id != current.Id)
-            current.Document.Delete(current.Id);
+            ElementStream.DeleteElement(current.Document, current);
 
           current = value;
           stepOnSet = true;
@@ -208,18 +258,12 @@ namespace RhinoInside.Revit.GH.ElementTracking
         Reset();
       }
 
-      public ARDB.ElementId[] Excess
+      internal E[] Excess
       {
         get
         {
-          var excess = new ARDB.ElementId[count];
           var values = data.Values;
-
-          int e = 0;
-          foreach (var id in values.Skip(values.Count - count).Where(x => x.IsValidObject).Select(x => x.Id))
-            excess[e++] = id;
-
-          return excess;
+          return values.Skip(values.Count - count).Where(x => x.IsValidObject).ToArray();
         }
       }
 
@@ -274,7 +318,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
         using (var scope = document.CommitScope())
         {
           var conflicts = TrackedElementsDictionary.Keys(document, streamId, streamFilter);
-          document.Delete(conflicts.Select(x => x.Id).ToList());
+          ElementStream.DeleteElements(document, conflicts);
           scope.Commit();
         }
       }
@@ -297,7 +341,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
       {
         using (var scope = Document.CommitScope())
         {
-          Document.Delete(excess);
+          ElementStream.DeleteElements(Document, excess);
           scope.Commit();
         }
       }
@@ -343,7 +387,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
       if (!TrackedElementsDictionary.TryGetValue(element, out var _, out var authority, out var _, out var index))
         return false;
 
-      return index > Enumerator.Position && default(AuthorityComparer).Equals(authority, Id.Authority);
+      return index > Enumerator.Position && AuthorityComparer.Default.Equals(authority, Id.Authority);
     }
 
     #region IEnumerable
@@ -352,9 +396,11 @@ namespace RhinoInside.Revit.GH.ElementTracking
     #endregion
   }
 
-  struct AuthorityComparer : IEqualityComparer<IList<Guid>>
+  readonly struct AuthorityComparer : IEqualityComparer<IList<Guid>>
   {
-    public bool Equals(IList<Guid> x, IList<Guid> y)
+    internal static readonly IEqualityComparer<IList<Guid>> Default = default(AuthorityComparer);
+
+    bool IEqualityComparer<IList<Guid>>.Equals(IList<Guid> x, IList<Guid> y)
     {
       if (ReferenceEquals(x, y)) return true;
       if (x is null || y is null) return false;
@@ -368,24 +414,22 @@ namespace RhinoInside.Revit.GH.ElementTracking
       return true;
     }
 
-    public int GetHashCode(IList<Guid> obj)
+    int IEqualityComparer<IList<Guid>>.GetHashCode(IList<Guid> obj)
     {
       int hash = 0;
 
       if (obj is object)
       {
-        foreach (var guid in obj)
-        {
-          var value = guid.GetHashCode();
-          hash ^= (value << 5) + value;
-        }
+        hash = 1007790837;
+        for (int g = 0; g < obj.Count; ++g)
+          hash = hash * -1521134295 + obj[g].GetHashCode();
       }
 
       return hash;
     }
   }
 
-  internal struct ElementStreamId
+  internal readonly struct ElementStreamId
   {
     public readonly IList<Guid> Authority;
     public readonly string Name;
@@ -522,7 +566,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
     // TODO: Implement an Updater that cleans entities from copied Elements.
 
     internal static ICollection<IList<Guid>> NewAuthorityCollection() =>
-      new HashSet<IList<Guid>>(default(AuthorityComparer));
+      new HashSet<IList<Guid>>(AuthorityComparer.Default);
 
     static class Fields
     {
@@ -609,7 +653,6 @@ namespace RhinoInside.Revit.GH.ElementTracking
         if (filter != default)
           elementCollector = elementCollector.WherePasses(filter);
 
-        var authorityComparer = default(AuthorityComparer);
         var keys = new List<ARDB.Element>();
         foreach (var element in elementCollector)
         {
@@ -618,7 +661,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
             if (id.Name != default && id.Name != name)
               continue;
 
-            if (!authorityComparer.Equals(authority, id.Authority))
+            if (!AuthorityComparer.Default.Equals(authority, id.Authority))
               continue;
 
             keys.Add(element);
@@ -670,13 +713,12 @@ namespace RhinoInside.Revit.GH.ElementTracking
         if (filter != default)
           elementCollector = elementCollector.WherePasses(filter);
 
-        var authorityComparer = default(AuthorityComparer);
         var keys = new SortedList<int, T>();
         foreach (var element in elementCollector.OfType<T>())
         {
           if (TryGetValue(element, out var _, out var authority, out var name, out var index))
           {
-            if (name == id.Name && authorityComparer.Equals(authority, id.Authority))
+            if (name == id.Name && AuthorityComparer.Default.Equals(authority, id.Authority))
             {
               keys.Add(index, element);
             }
@@ -712,8 +754,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
           entity.Set<string>(Fields.UniqueId, elementUniqueId);
         }
 
-        var authorityComparer = default(AuthorityComparer);
-        if (!authorityComparer.Equals(entity.Get<IList<Guid>>(Fields.Authority), authority))
+        if (!AuthorityComparer.Default.Equals(entity.Get<IList<Guid>>(Fields.Authority), authority))
         {
           modified = true;
           entity.Set<IList<Guid>>(Fields.Authority, authority);
