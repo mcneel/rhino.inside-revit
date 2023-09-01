@@ -56,9 +56,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (collection is ISet<ElementId> set)
         return set.IsSubsetOf(other);
 
-      if (other is ISet<ElementId> otherSet)
-        return otherSet.IsSupersetOf(collection);
-
       var (unique, mising) = CompareItems(other, breakOnMissing: false);
       return unique == Count && mising >= 0;
     }
@@ -74,9 +71,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (collection is ISet<ElementId> set)
         return set.IsSupersetOf(other);
 
-      if (other is ISet<ElementId> otherSet)
-        return otherSet.IsSubsetOf(collection);
-
       return other.All(Contains);
     }
 
@@ -90,9 +84,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (collection is ISet<ElementId> set)
         return set.IsProperSubsetOf(other);
-
-      if (other is ISet<ElementId> otherSet)
-        return otherSet.IsProperSupersetOf(collection);
 
       var (unique, mising) = CompareItems(other, breakOnMissing: false);
       return unique == Count && mising > 0;
@@ -109,9 +100,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (collection is ISet<ElementId> set)
         return set.IsProperSupersetOf(other);
 
-      if (other is ISet<ElementId> otherSet)
-        return otherSet.IsProperSubsetOf(collection);
-
       var (unique, mising) = CompareItems(other, breakOnMissing: true);
       return unique < Count && mising == 0;
     }
@@ -127,9 +115,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (collection is ISet<ElementId> set)
         return set.Overlaps(other);
 
-      if (other is ISet<ElementId> otherSet)
-        return otherSet.Overlaps(collection);
-
       return other.Any(Contains);
     }
 
@@ -138,14 +123,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (other is null)
         throw new ArgumentNullException(nameof(other));
 
+      // If both are a sorted IList then each element should match on the same position.
+      if (other is ReadOnlyElementIdSet otherSet && otherSet.collection is IList<ElementId> otherList && collection is IList<ElementId> thisList)
+      {
+        if (thisList.Count != otherList.Count) return false;
+
+        var count = thisList.Count;
+        for (int i = 0; i < count; ++i)
+        {
+          if (thisList[i] != otherList[i])
+            return false;
+        }
+
+        return true;
+      }
+
       if (other is ICollection<ElementId> otherCollection && otherCollection.Count != Count)
         return false;
 
       if (collection is ISet<ElementId> set)
         return set.SetEquals(other);
-
-      if (other is ISet<ElementId> otherSet)
-        return otherSet.SetEquals(collection);
 
       var (unique, mising) = CompareItems(other, breakOnMissing: true);
       return unique == Count && mising == 0;
@@ -212,7 +209,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         new ReadOnlyElementIdSet(collection);
     }
 
-    public static ISet<ElementId> ToReadOnlyElementIdSet(this IEnumerable<ElementId> source)
+    internal static ISet<ElementId> ToReadOnlyElementIdSet(this IEnumerable<ElementId> source)
     {
       return source is ReadOnlyElementIdSet set ? set :
         new ReadOnlyElementIdSet(source as ISet<ElementId> ?? new HashSet<ElementId>(source));

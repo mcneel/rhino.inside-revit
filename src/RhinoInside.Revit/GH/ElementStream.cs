@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
       return element is null ? false : TrackedElementsDictionary.ContainsKey(element);
     }
 
-    public static ICollection<ARDB.ElementId> DeleteElements<E>(ARDB.Document document, ICollection<E> elements) where E : ARDB.Element
+    internal static ReadOnlyElementIdSet DeleteElements<E>(ARDB.Document document, ICollection<E> elements) where E : ARDB.Element
     {
       if (!document.IsLinked)
       {
@@ -211,9 +211,9 @@ namespace RhinoInside.Revit.GH.ElementTracking
       return document.DeleteElements(elements);
     }
 
-    public static ICollection<ARDB.ElementId> DeleteElement<E>(ARDB.Document document, E element) where E : ARDB.Element
+    internal static ReadOnlyElementIdSet DeleteElement<E>(ARDB.Document document, E element) where E : ARDB.Element
     {
-      return document.DeleteElements(new E[] { element });
+      return DeleteElements(document, new E[] { element });
     }
   }
 

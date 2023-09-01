@@ -1217,12 +1217,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return true;
     }
 
-    public static ICollection<ElementId> DeleteElements<T>(this Document doc, ICollection<T> elements) where T : Element
+    internal static ReadOnlyElementIdSet DeleteElements<T>(this Document doc, ICollection<T> elements) where T : Element
     {
       if (!doc.IsModifiable || elements.Count == 0)
       {
         // This should quickly return or throw the appropiate exception.
-        return doc.Delete(Array.Empty<ElementId>());
+        return doc.Delete(Array.Empty<ElementId>()).AsReadOnlyElementIdSet();
       }
 
       var elementIds = new List<ElementId>(elements.Count);
@@ -1270,12 +1270,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
       }
 
-      return doc.Delete(elementIds);
+      return doc.Delete(elementIds).AsReadOnlyElementIdSet();
     }
 
-    public static ICollection<ElementId> DeleteElement<T>(this Document doc, T elements) where T : Element
+    internal static ReadOnlyElementIdSet DeleteElement<T>(this Document doc, T elements) where T : Element
     {
-      return DeleteElements<T>(doc, new T[] { elements });
+      return DeleteElements(doc, new T[] { elements });
     }
     #endregion
 
