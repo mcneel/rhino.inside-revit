@@ -613,6 +613,24 @@ namespace RhinoInside.Revit.External.DB
           failuresAccessor.DeleteAllWarnings();
           return FailureProcessingResult.Continue;
         }
+        else if (failuresAccessor.IsFailureResolutionPermitted())
+        {
+          var fixCount = 0;
+          var failures = failuresAccessor.GetFailureMessages(FailureSeverity.Error);
+          foreach (var failure in failures)
+          {
+            if (!failuresAccessor.IsFailureResolutionPermitted(failure)) continue;
+            if (!failure.HasResolutions()) continue;
+            if (failuresAccessor.GetAttemptedResolutionTypes(failure).Any()) continue;
+
+            failure.SetCurrentResolutionType(FailureResolutionType.Default);
+            failuresAccessor.ResolveFailure(failure);
+            fixCount++;
+          }
+
+          if(fixCount > 0)
+            return FailureProcessingResult.ProceedWithCommit;
+        }
 
         return FailureProcessingResult.ProceedWithRollBack;
       }
