@@ -210,9 +210,9 @@ namespace RhinoInside.Revit.GH.Components.Views
           bounds[BoundingBoxXYZExtension.AxisY, BoundingBoxXYZExtension.BoundsMin] ||
           bounds[BoundingBoxXYZExtension.AxisY, BoundingBoxXYZExtension.BoundsMax];
 
-        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(1);
-        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR).Update(-min.Z);
-        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).Update(bounds[BoundingBoxXYZExtension.AxisZ, BoundingBoxXYZExtension.BoundsMin] ? 1 : 0);
+        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).TryUpdate(1);
+        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_OFFSET_FAR).TryUpdate(-min.Z);
+        view.get_Parameter(ARDB.BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING).TryUpdate(bounds[BoundingBoxXYZExtension.AxisZ, BoundingBoxXYZExtension.BoundsMin] ? 1 : 0);
 
         view.CopyParametersFrom(template, ExcludeUniqueProperties);
         if (name is object) view?.get_Parameter(ARDB.BuiltInParameter.VIEW_NAME).Update(name);

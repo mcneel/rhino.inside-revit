@@ -141,6 +141,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   static class ParameterExtension
   {
+    #region As
     public static bool AsBoolean(this Parameter parameter)
     {
       if (parameter.StorageType != StorageType.Integer)
@@ -179,7 +180,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return parameter.Element.Document.GetElement(parameter.AsElementId());
     }
+    #endregion
 
+    #region Set
     public static bool Set(this Parameter parameter, bool value)
     {
       if (parameter.StorageType != StorageType.Integer)
@@ -233,7 +236,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return Set(parameter, value?.Id ?? ElementIdExtension.Invalid);
     }
+    #endregion
 
+    #region Update
     public static bool Update(this Parameter parameter, bool value)
     {
       if (parameter.HasValue && parameter.AsInteger() == (value ? 1 : 0)) return true;
@@ -284,6 +289,49 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return Update(parameter, value?.Id ?? ElementIdExtension.Invalid);
     }
+    #endregion
+
+    #region TryUpdate
+    public static bool TryUpdate(this Parameter parameter, bool value)
+    {
+      return parameter?.IsReadOnly is false && parameter.Update(value);
+    }
+
+    public static bool TryUpdate<T>(this Parameter parameter, T value) where T : Enum
+    {
+      return parameter?.IsReadOnly is false && parameter.Update(value);
+    }
+
+    public static bool TryUpdate(this Parameter parameter, int value)
+    {
+      return parameter?.IsReadOnly is false && parameter.Update(value);
+    }
+
+    public static bool TryUpdate(this Parameter parameter, Color value)
+    {
+      return parameter?.IsReadOnly is false && parameter.Update(value);
+    }
+
+    public static bool TryUpdate(this Parameter parameter, double value)
+    {
+      return parameter?.IsReadOnly is false && parameter.Update(value);
+    }
+
+    public static bool TryUpdate(this Parameter parameter, string value)
+    {
+      return parameter?.IsReadOnly is false && parameter.Update(value);
+    }
+
+    public static bool TryUpdate(this Parameter parameter, ElementId value)
+    {
+      return parameter?.IsReadOnly is false && parameter.Update(value);
+    }
+
+    public static bool TryUpdate(this Parameter parameter, Element value)
+    {
+      return parameter?.IsReadOnly is false && parameter.Update(value);
+    }
+    #endregion
 
     public static bool ResetValue(this Parameter parameter)
     {
