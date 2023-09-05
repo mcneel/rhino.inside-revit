@@ -18,6 +18,7 @@ group: Deployment & Configs
 - Added 'Pick Points' component.
 - Renamed 'Document Warnings' -> 'Query Warnings'.
 - Added context menu to 'Built-In Failure Definitions' to filter by severity.
+- Improved element-tracking on views.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

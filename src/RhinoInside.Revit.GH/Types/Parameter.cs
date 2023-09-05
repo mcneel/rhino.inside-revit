@@ -515,7 +515,7 @@ namespace RhinoInside.Revit.GH.Types
 
                   var categoriesWhereDefined = doc.GetBuiltInCategoriesWithParameters().
                     Select(bic => new ARDB.ElementId(bic)).
-                    Where(cid => new ReadOnlySortedElementIdCollection(ARDB.TableView.GetAvailableParameters(doc, cid)).Contains(Id)).
+                    Where(cid => ARDB.TableView.GetAvailableParameters(doc, cid).AsReadOnlyElementIdSet().Contains(Id)).
                     ToArray();
 
                   // Look into a Schedule table

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Autodesk.Revit.DB;
@@ -1214,6 +1215,67 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return true;
+    }
+
+    internal static ReadOnlyElementIdSet DeleteElements<T>(this Document doc, ICollection<T> elements) where T : Element
+    {
+      if (!doc.IsModifiable || elements.Count == 0)
+      {
+        // This should quickly return or throw the appropiate exception.
+        return doc.Delete(Array.Empty<ElementId>()).AsReadOnlyElementIdSet();
+      }
+
+      var elementIds = new List<ElementId>(elements.Count);
+
+      // Linked Document should have ActiveView to null, so no need to check here.
+      if (typeof(T).IsAssignableFrom(typeof(View)) && doc.ActiveView is View activeView)
+      {
+        // May fail because of Active View.
+
+        var activeViewId = activeView.Id;
+        var activeViewFound = false;
+        foreach (var element in elements)
+        {
+          if (element is null) continue;
+
+          Debug.Assert(element.Document.Equals(doc));
+          if (activeViewId == element.Id)
+          {
+            activeViewFound = true;
+          }
+          else
+          {
+            elementIds.Add(element.Id);
+          }
+        }
+
+        if (activeViewFound)
+        {
+          using (var message = new FailureMessage(ExternalFailures.ViewFailures.CanNotDeleteActiveView))
+          {
+            var resolution = Autodesk.Revit.DB.DeleteElements.Create(doc, activeViewId);
+            message.AddResolution(FailureResolutionType.DeleteElements, resolution);
+            message.SetFailingElement(activeViewId);
+            doc.PostFailure(message);
+          }
+        }
+      }
+      else
+      {
+        foreach (var element in elements)
+        {
+          if (element is null) continue;
+          Debug.Assert(element.Document.Equals(doc));
+          elementIds.Add(element.Id);
+        }
+      }
+
+      return doc.Delete(elementIds).AsReadOnlyElementIdSet();
+    }
+
+    internal static ReadOnlyElementIdSet DeleteElement<T>(this Document doc, T elements) where T : Element
+    {
+      return DeleteElements(doc, new T[] { elements });
     }
     #endregion
 

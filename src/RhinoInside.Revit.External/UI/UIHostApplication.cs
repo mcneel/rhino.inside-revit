@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.External.UI
       }
     }
 
-    static readonly Dictionary<Document, ICollection<ElementId>> previousSelections = new Dictionary<Document, ICollection<ElementId>>();
+    static readonly Dictionary<Document, ISet<ElementId>> previousSelections = new Dictionary<Document, ISet<ElementId>>();
     private void Services_DocumentClosing(object sender, Autodesk.Revit.DB.Events.DocumentClosingEventArgs e)
     {
       previousSelections.Remove(e.Document);
@@ -121,11 +121,10 @@ namespace RhinoInside.Revit.External.UI
         if (uiApplication.ActiveUIDocument is UIDocument uiDocument)
         {
           if (!previousSelections.TryGetValue(uiDocument.Document, out var previousSelection))
-            previousSelection = ElementIdExtension.EmptyCollection;
+            previousSelection = ElementIdExtension.EmptySet;
 
-          var currentSelection = uiDocument.Selection.GetElementIds();
-
-          if (previousSelection.Count != currentSelection.Count || previousSelection.Zip(currentSelection, (prev, cur) => prev == cur).Any(x => x == false))
+          var currentSelection = uiDocument.Selection.GetElementIds().AsReadOnlyElementIdSet();
+          if(!previousSelection.SetEquals(currentSelection))
           {
             if (currentSelection.Count > 0)
               previousSelections[uiDocument.Document] = currentSelection;

@@ -153,7 +153,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
       if (element is object)
       {
         var elementId = element.Id;
-        warnings = warnings.Where(x => x.GetFailingElements().ToReadOnlyElementIdCollection().Contains(elementId)).ToArray();
+        warnings = warnings.Where(x => x.GetFailingElements().AsReadOnlyElementIdSet().Contains(elementId)).ToArray();
       }
 
       if (additionals is object && additionals.Count > 0)

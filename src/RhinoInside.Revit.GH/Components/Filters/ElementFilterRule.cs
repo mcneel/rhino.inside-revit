@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
           var categoriesWhereDefined = doc.GetBuiltInCategoriesWithParameters().
             Select(bic => new ARDB.ElementId(bic)).
-            Where(cid => new ReadOnlySortedElementIdCollection(ARDB.TableView.GetAvailableParameters(doc, cid)).Contains(id)).
+            Where(cid => ARDB.TableView.GetAvailableParameters(doc, cid).AsReadOnlyElementIdSet().Contains(id)).
             ToArray();
 
           if (categoriesWhereDefined.Length > 0)

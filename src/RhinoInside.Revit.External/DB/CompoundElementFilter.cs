@@ -474,8 +474,8 @@ namespace Autodesk.Revit.DB
   {
     readonly Document Document;
     readonly ElementId ViewId;
-    readonly ICollection<ElementId> VisibleElementIds;
-    readonly ICollection<ElementId> VisibleCategoryIds;
+    readonly ISet<ElementId> VisibleElementIds;
+    readonly ISet<ElementId> VisibleCategoryIds;
 
     public VisibleInViewFilter(Document document, ElementId viewId) : this(document, viewId, inverted: false) { }
 
@@ -490,12 +490,12 @@ namespace Autodesk.Revit.DB
 
       using (var collector = new FilteredElementCollector(document, viewId))
       {
-        VisibleElementIds = collector.ToReadOnlyElementIdCollection();
-        VisibleCategoryIds = new HashSet<ElementId>(collector.Select(x => x.Category).OfType<Category>().Select(x => x.Id));
+        VisibleElementIds = collector.ToReadOnlyElementIdSet();
+        VisibleCategoryIds = new HashSet<ElementId>(collector.Select(x => x.Category?.Id ?? ElementId.InvalidElementId));
       }
 
 #if DEBUG
-      foreach (var element in VisibleElementIds.Select(x => Document.GetElement(x)))
+      foreach (var element in VisibleElementIds.Select(Document.GetElement))
       {
         Debug.Assert(!(element is ElementType), $"Casting operator may need to be adjusted to accept {element}");
         Debug.Assert
@@ -533,20 +533,21 @@ namespace Autodesk.Revit.DB
     static readonly ElementCategoryFilter CamerasCategoryFilter = new ElementCategoryFilter(BuiltInCategory.OST_Cameras);
 
     public static implicit operator ElementFilter(VisibleInViewFilter filter) => filter.Inverted ?
-    CompoundElementFilter.ExclusionFilter(filter.VisibleElementIds, inverted: false):
+    CompoundElementFilter.ExclusionFilter(filter.VisibleElementIds, inverted: false) :
     CompoundElementFilter.Intersect
     (
     #region Quick exclusion
-      // Types are never visible on views.
+      // should not be a type.
       CompoundElementFilter.ElementIsElementTypeFilter(inverted: true),
+      // and be on one of those categories
+      CompoundElementFilter.ElementCategoryFilter(filter.VisibleCategoryIds),
+      // and
       CompoundElementFilter.Union
       (
-        // Elements should have a bbox
+        // have a bbox
         CompoundElementFilter.ElementHasBoundingBoxFilter,
         // or be owned by this view
-        new ElementOwnerViewFilter(filter.ViewId),
-        // or be on one of those categories
-        new ElementMulticategoryFilter(filter.VisibleCategoryIds)
+        new ElementOwnerViewFilter(filter.ViewId)
       ),
     #endregion
     #region Slow inclusion

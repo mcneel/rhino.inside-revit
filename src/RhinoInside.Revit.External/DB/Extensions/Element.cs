@@ -297,8 +297,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       public UpdaterId GetUpdaterId() => UpdaterId;
       readonly UpdaterId UpdaterId;
 
-      public ICollection<ElementId> DeletedElementIds { get; private set; } = ElementIdExtension.EmptyCollection;
-      public ICollection<ElementId> ModifiedElementIds { get; private set; } = ElementIdExtension.EmptyCollection;
+      public ICollection<ElementId> DeletedElementIds { get; private set; } = ElementIdExtension.EmptySet;
+      public ICollection<ElementId> ModifiedElementIds { get; private set; } = ElementIdExtension.EmptySet;
 
       public DeleteUpdater(Document document, ElementFilter filter)
       {
