@@ -171,7 +171,7 @@ namespace RhinoInside.Revit.GH.ElementTracking
     {
       if (!document.IsLinked)
       {
-        if (typeof(E).IsAssignableFrom(typeof(ARDB.View)))
+        if (typeof(E).IsAssignableFrom(typeof(ARDB.View)) || typeof(ARDB.View).IsAssignableFrom(typeof(E)))
         {
           var viewsToDelete = new HashSet<ARDB.ElementId>(elements.OfType<ARDB.View>().Select(x => x.Id));
           using (var uiDocument = new ARUI.UIDocument(document))
