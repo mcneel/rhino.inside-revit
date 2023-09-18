@@ -118,6 +118,20 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public override Plane Location
+    {
+      get
+      {
+        if (Value is ARDB.FamilyInstance instance)
+        {
+          var (origin, basisX, basisY) = instance.GetLocation();
+          return new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
+        }
+
+        return NaN.Plane;
+      }
+    }
+
     public override Vector3d HandOrientation => WorkPlaneFlipped == true ? -base.HandOrientation : base.HandOrientation;
     public override Vector3d FacingOrientation => Value?.HandFlipped != Value?.FacingFlipped ? -base.FacingOrientation : base.FacingOrientation;
     public override Vector3d WorkPlaneOrientation => base.WorkPlaneOrientation;
