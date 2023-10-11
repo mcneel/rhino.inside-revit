@@ -57,8 +57,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return new UV
       (
-        Arithmetic.Lerp(min.U, max.U, u),
-        Arithmetic.Lerp(min.V, max.V, v)
+        Arithmetic.Mix(min.U, max.U, u),
+        Arithmetic.Mix(min.V, max.V, v)
       );
     }
 

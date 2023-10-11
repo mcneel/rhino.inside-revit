@@ -259,9 +259,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return new XYZ
       (
-        Arithmetic.Lerp(min.X, max.X, x),
-        Arithmetic.Lerp(min.Y, max.Y, y),
-        Arithmetic.Lerp(min.Z, max.Z, z)
+        Arithmetic.Mix(min.X, max.X, x),
+        Arithmetic.Mix(min.Y, max.Y, y),
+        Arithmetic.Mix(min.Z, max.Z, z)
       );
     }
 
