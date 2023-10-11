@@ -199,7 +199,8 @@ namespace RhinoInside.Revit.Numerical
     /// <param name="y"></param>
     /// <param name="t"></param>
     /// <returns>The interpolated value at <paramref name="t"/>.</returns>
-    public static double Lerp(double x, double y, double t)
+    /// <remarks>Also known as lerp.</remarks>
+    public static double Mix(double x, double y, double t)
     {
       if (x == y) return x;
 
