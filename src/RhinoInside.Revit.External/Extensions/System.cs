@@ -76,6 +76,31 @@ namespace System
         sourceString.Substring(0, maxLength - 1) + '…' :
         sourceString;
     }
+  }
+}
+
+namespace System.IO
+{
+  static class PathExtension
+  {
+    public static bool IsFullyQualifiedPath(this string path)
+    {
+      if (path == null) return false;
+      if (path.Length < 2) return false;
+      if (IsDirectorySeparator(path[0]))
+        return path[1] == '?' || IsDirectorySeparator(path[1]);
+
+      return
+      (
+        (path.Length >= 3) &&
+        (path[1] == Path.VolumeSeparatorChar) &&
+        IsDirectorySeparator(path[2]) &&
+        IsValidDriveChar(path[0])
+      );
+
+      bool IsValidDriveChar(char value) => ('A' <= value && value <= 'Z') || ('a' <= value && value <= 'z');
+      bool IsDirectorySeparator(char c) => c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar;
+    }
 
     [DllImport("SHLWAPI", CharSet = CharSet.Unicode)]
     static extern bool PathCompactPathExW([Out] Text.StringBuilder pszOut, string szPath, int cchMax, int dwFlags);
@@ -87,10 +112,7 @@ namespace System
       return builder.ToString();
     }
   }
-}
 
-namespace System.IO
-{
   internal static class FileInfoExtension
   {
     public static void MoveTo(this FileInfo source, string destFileName, bool overwrite)

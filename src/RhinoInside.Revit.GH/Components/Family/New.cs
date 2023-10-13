@@ -597,7 +597,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     static bool FindTemplatePath(ARDB.Document doc, ref string templatePath, out bool pathWasRelative)
     {
-      pathWasRelative = !Path.IsPathRooted(templatePath);
+      pathWasRelative = !templatePath.IsFullyQualifiedPath();
 
       // Validate input
       foreach (var invalid in Path.GetInvalidPathChars())
