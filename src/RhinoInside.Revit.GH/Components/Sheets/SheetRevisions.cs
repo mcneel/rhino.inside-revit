@@ -49,11 +49,11 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       if (update)
       {
         StartTransaction(sheet.Document);
-        sheet.Value.SetAdditionalRevisionIds(revisions.Select(x => x.Id).ToArray());
+        sheet.Value.SetAdditionalRevisionIds(revisions.OfType<Types.Revision>().Select(x => x.Id).ToArray());
         sheet.Document.Regenerate();
       }
 
-      Params.TrySetData(DA, "Current Revision", () => Types.Element.FromElementId(sheet.Document, sheet.Value.GetCurrentRevision()));
+      Params.TrySetData(DA, "Current Revision", () => Types.Element.FromElementId(sheet.Document, sheet.Value.GetCurrentRevision()) as Types.Revision);
       Params.TrySetDataList(DA, "Revisions on Sheet", () => sheet.Value.GetAdditionalRevisionIds().Select(x => Types.Element.FromElementId(sheet.Document, x)));
       Params.TrySetDataList(DA, "Scheduled Revisions", () => sheet.Value.GetAllRevisionIds().Select(x => Types.Element.FromElementId(sheet.Document, x)));
     }

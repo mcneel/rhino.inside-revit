@@ -39,8 +39,7 @@ namespace RhinoInside.Revit.Settings
 
       public FileInfo ToFileInfo(string path)
       {
-        path = path.Trim(Path.DirectorySeparatorChar);
-        if (!Path.IsPathRooted(path))
+        if (!path.IsFullyQualifiedPath())
           path = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ManifestPath), path));
 
         return new FileInfo(path);

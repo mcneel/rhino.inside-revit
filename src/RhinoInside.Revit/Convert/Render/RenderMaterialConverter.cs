@@ -17,10 +17,10 @@ using SD = System.Drawing;
 namespace RhinoInside.Revit.Convert.Render
 {
   using Numerical;
+  using Convert.Geometry;
   using Convert.System.Drawing;
   using Convert.Units;
   using External.DB.Extensions;
-  using RhinoInside.Revit.Convert.Geometry;
   using DBXS = External.DB.Schemas;
 
   /// <summary>
@@ -294,7 +294,7 @@ namespace RhinoInside.Revit.Convert.Render
         {
           try
           {
-            if (Path.IsPathRooted(entry) ?
+            if (entry.IsFullyQualifiedPath() ?
                 File.Exists(entry) :
                 Rhino.ApplicationSettings.FileSettings.FindFile(entry) is string)
             {
@@ -370,7 +370,7 @@ namespace RhinoInside.Revit.Convert.Render
               {
                 try
                 {
-                  if (Path.IsPathRooted(entry) ?
+                  if (entry.IsFullyQualifiedPath() ?
                       File.Exists(entry) :
                       Rhino.ApplicationSettings.FileSettings.FindFile(entry) is string)
                   {

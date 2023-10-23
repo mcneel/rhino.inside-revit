@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
           if (filePath.Last() == Path.DirectorySeparatorChar)
             filePath = Path.Combine(filePath, doc.Title);
 
-          if (Path.IsPathRooted(filePath) && filePath.Contains(Path.DirectorySeparatorChar))
+          if (filePath.IsFullyQualifiedPath())
           {
             if (!Path.HasExtension(filePath))
             {
