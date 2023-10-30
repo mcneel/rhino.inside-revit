@@ -852,7 +852,7 @@ namespace RhinoInside.Revit.Convert.Geometry
           var options = new Rhino.FileIO.FileDwgWriteOptions
           {
             Version = Rhino.FileIO.FileDwgWriteOptions.AutocadVersion.Acad2007,
-            ColorMethod = Rhino.FileIO.FileDwgWriteOptions.eColorMethod.RGB,
+            ColorMethod = Rhino.FileIO.FileDwgWriteOptions.ColorMethodType.RGB,
             FullLayerPath = true,
 
             ExportMeshesAs = Rhino.FileIO.FileDwgWriteOptions.ExportMeshMode.Meshes,
