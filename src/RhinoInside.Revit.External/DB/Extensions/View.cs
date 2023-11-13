@@ -24,6 +24,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
+    public static bool IsOpen(this View view)
+    {
+      if (view is null)
+        throw new ArgumentNullException(nameof(view));
+
+      using (var uiDoc = new UIDocument(view.Document))
+        return uiDoc.GetOpenUIViews().Any(x => x.ViewId == view.Id);
+    }
+
 #if REVIT_2021
     const ViewType   ViewType_SystemsAnalysisReport   = ViewType.SystemsAnalysisReport;
     const ViewFamily ViewFamily_SystemsAnalysisReport = ViewFamily.SystemsAnalysisReport;

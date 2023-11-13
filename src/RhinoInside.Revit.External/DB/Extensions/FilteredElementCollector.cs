@@ -10,6 +10,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     readonly ICollection<ElementId> collection;
     internal ReadOnlyElementIdSet(ICollection<ElementId> source) => collection = source;
 
+    public static readonly ReadOnlyElementIdSet Empty = new ReadOnlyElementIdSet(Array.Empty<ElementId>());
+
     #region IEnumerable
     public IEnumerator<ElementId> GetEnumerator() => collection.GetEnumerator();
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => collection.GetEnumerator();

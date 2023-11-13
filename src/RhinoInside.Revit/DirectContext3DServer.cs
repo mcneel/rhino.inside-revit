@@ -679,19 +679,23 @@ namespace RhinoInside.Revit
              displayStyle == ARDB.DisplayStyle.RealisticWithEdges;
     }
 
+    private static bool ShowsPreviews(ARDB.DisplayStyle displayStyle)
+    {
+      return displayStyle == ARDB.DisplayStyle.Wireframe ||
+             displayStyle == ARDB.DisplayStyle.HLR ||
+             displayStyle == ARDB.DisplayStyle.Shading ||
+             displayStyle == ARDB.DisplayStyle.ShadingWithEdges ||
+             displayStyle == ARDB.DisplayStyle.FlatColors;
+    }
+
     public static bool IsAvailable(ARDB.View view)
     {
       if (view is null) return false;
       if (view.Document.IsFamilyDocument) return false;
       if (!IsModelView(view)) return false;
+      if (!ShowsPreviews(view.DisplayStyle)) return false;
 
-      var displayStyle = view.DisplayStyle;
-      return
-       displayStyle == ARDB.DisplayStyle.Wireframe ||
-       displayStyle == ARDB.DisplayStyle.HLR ||
-       displayStyle == ARDB.DisplayStyle.Shading ||
-       displayStyle == ARDB.DisplayStyle.ShadingWithEdges ||
-       displayStyle == ARDB.DisplayStyle.FlatColors;
+      return Core.Host.IsViewOpen(view);
     }
 
     public static bool HasVertexNormals(ARDB3D.VertexFormatBits vertexFormatBits) => (((int) vertexFormatBits) & 2) != 0;

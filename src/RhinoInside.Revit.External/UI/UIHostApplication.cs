@@ -1,22 +1,18 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.External.UI.Extensions;
 
 namespace RhinoInside.Revit.External.UI
 {
-  #region UIHostApplication
   public abstract class UIHostApplication : IDisposable
   {
     protected internal UIHostApplication() { }
     public abstract void Dispose();
 
-    public static implicit operator UIHostApplication(UIApplication value) => new UIHostApplicationU(value);
-    public static implicit operator UIHostApplication(UIControlledApplication value) => new UIHostApplicationC(value);
+    public static implicit operator UIHostApplication(UIApplication value) => new UIHostApplicationUnconstrained(value);
+    public static implicit operator UIHostApplication(UIControlledApplication value) => new UIHostApplicationConstrained(value);
 
     public abstract object Value { get; }
     public abstract bool IsValid { get; }
@@ -26,6 +22,8 @@ namespace RhinoInside.Revit.External.UI
 
     #region UI
     public abstract IntPtr MainWindowHandle { get; }
+
+    internal abstract bool IsViewOpen(View view);
     #endregion
 
     #region Ribbon
@@ -140,170 +138,6 @@ namespace RhinoInside.Revit.External.UI
 #endif
     #endregion
   }
-
-  sealed class UIHostApplicationC : UIHostApplication
-  {
-    readonly UIControlledApplication _app;
-    public UIHostApplicationC(UIControlledApplication app)
-    {
-      _app = app;
-
-#if REVIT_2023
-      _app.SelectionChanged += SelectionChangedHandler;
-#endif
-    }
-    public override void Dispose()
-    {
-#if REVIT_2023
-      _app.SelectionChanged -= SelectionChangedHandler;
-#endif
-    }
-    public override object Value => _app;
-    public override bool IsValid => true;
-
-    public override ApplicationServices.HostServices Services => new ApplicationServices.HostServicesC(_app.ControlledApplication);
-    public override UIDocument ActiveUIDocument { get => default; set => throw new InvalidOperationException(); }
-
-    #region UI
-    public override IntPtr MainWindowHandle
-    {
-#if REVIT_2019
-      get => _app.MainWindowHandle;
-#else
-      get => System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
-#endif
-    }
-    #endregion
-
-    #region Ribbon
-    public override void CreateRibbonTab(string tabName) =>
-      _app.CreateRibbonTab(tabName);
-
-    public override RibbonPanel CreateRibbonPanel(Tab tab, string panelName) =>
-      _app.CreateRibbonPanel(tab, panelName);
-
-    public override RibbonPanel CreateRibbonPanel(string tabName, string panelName) =>
-      _app.CreateRibbonPanel(tabName, panelName);
-
-    public override IReadOnlyList<RibbonPanel> GetRibbonPanels(Tab tab) =>
-      _app.GetRibbonPanels(tab);
-
-    public override IReadOnlyList<RibbonPanel> GetRibbonPanels(string tabName) =>
-      _app.GetRibbonPanels(tabName);
-    #endregion
-
-    #region Addins
-    public override AddInId ActiveAddInId => _app.ActiveAddInId;
-    public override void LoadAddIn(string fileName) => _app.LoadAddIn(fileName);
-    public override ExternalApplicationArray LoadedApplications => _app.LoadedApplications;
-    #endregion
-
-    #region Commands
-    public override bool CanPostCommand(RevitCommandId commandId) => false;
-    public override void PostCommand(RevitCommandId commandId) => throw new InvalidOperationException();
-    #endregion
-
-    #region Events
-    public override event EventHandler<IdlingEventArgs> Idling
-    {
-      add    => _app.Idling += ActivationGate.AddEventHandler(value);
-      remove => _app.Idling -= ActivationGate.RemoveEventHandler(value);
-    }
-    public override event EventHandler<ViewActivatingEventArgs> ViewActivating { add => _app.ViewActivating += value; remove => _app.ViewActivating -= value; }
-    public override event EventHandler<ViewActivatedEventArgs> ViewActivated { add => _app.ViewActivated += value; remove => _app.ViewActivated -= value; }
-    #endregion
-  }
-
-  sealed class UIHostApplicationU : UIHostApplication
-  {
-    readonly UIApplication _app;
-    public UIHostApplicationU(UIApplication app)
-    {
-      _app = app;
-
-#if REVIT_2023
-      _app.SelectionChanged += SelectionChangedHandler;
-#endif
-    }
-
-    public override void Dispose()
-    {
-#if REVIT_2023
-      _app.SelectionChanged -= SelectionChangedHandler;
-#endif
-      _app.Dispose();
-    }
-    
-    public override object Value => _app.IsValidObject ? _app : default;
-    public override bool IsValid => _app.IsValidObject;
-
-    public override ApplicationServices.HostServices Services => new ApplicationServices.HostServicesU(_app.Application);
-    public override UIDocument ActiveUIDocument
-    {
-      get => _app.ActiveUIDocument;
-      set
-      {
-        if (value is null) throw new ArgumentNullException();
-        if (value.Document.IsEquivalent(_app.ActiveUIDocument.Document)) return;
-
-        if (value.TryGetActiveGraphicalView(out var uiView))
-        {
-          HostedApplication.Active.InvokeInHostContext
-          (() => value.Document.SetActiveGraphicalView(value.Document.GetElement(uiView.ViewId) as View));
-        }
-      }
-    }
-
-    #region UI
-    public override IntPtr MainWindowHandle
-    {
-#if REVIT_2019
-      get => _app.MainWindowHandle;
-#else
-      get => System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
-#endif
-    }
-    #endregion
-
-    #region Ribbon
-    public override void CreateRibbonTab(string tabName) =>
-      _app.CreateRibbonTab(tabName);
-
-    public override RibbonPanel CreateRibbonPanel(Tab tab, string panelName) =>
-      _app.CreateRibbonPanel(tab, panelName);
-
-    public override RibbonPanel CreateRibbonPanel(string tabName, string panelName) =>
-      _app.CreateRibbonPanel(tabName, panelName);
-
-    public override IReadOnlyList<RibbonPanel> GetRibbonPanels(Tab tab) =>
-      _app.GetRibbonPanels(tab);
-
-    public override IReadOnlyList<RibbonPanel> GetRibbonPanels(string tabName) =>
-      _app.GetRibbonPanels(tabName);
-    #endregion
-
-    #region AddIns
-    public override AddInId ActiveAddInId => _app.ActiveAddInId;
-    public override void LoadAddIn(string fileName) => _app.LoadAddIn(fileName);
-    public override ExternalApplicationArray LoadedApplications => _app.LoadedApplications;
-    #endregion
-
-    #region Commands
-    public override bool CanPostCommand(RevitCommandId commandId) => _app.CanPostCommand(commandId);
-    public override void PostCommand(RevitCommandId commandId) => _app.PostCommand(commandId);
-    #endregion
-
-    #region Events
-    public override event EventHandler<IdlingEventArgs> Idling
-    {
-      add    => _app.Idling += ActivationGate.AddEventHandler(value);
-      remove => _app.Idling -= ActivationGate.RemoveEventHandler(value);
-    }
-    public override event EventHandler<ViewActivatingEventArgs> ViewActivating { add => _app.ViewActivating += value; remove => _app.ViewActivating -= value; }
-    public override event EventHandler<ViewActivatedEventArgs> ViewActivated { add => _app.ViewActivated += value; remove => _app.ViewActivated -= value; }
-    #endregion
-  }
-  #endregion
 }
 
 namespace System.Windows.Interop

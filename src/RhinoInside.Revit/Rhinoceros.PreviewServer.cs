@@ -204,7 +204,7 @@ namespace RhinoInside.Revit
         if (!rhinoObject.Visible)
           return false;
 
-        return IsModelView(dBView);
+        return IsAvailable(dBView);
       }
 
       public override ARDB.Outline GetBoundingBox(ARDB.View dBView) => rhinoObject.Geometry.GetBoundingBox(false).ToOutline();
