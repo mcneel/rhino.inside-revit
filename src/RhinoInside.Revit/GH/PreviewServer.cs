@@ -17,7 +17,7 @@ using Grasshopper.GUI.Canvas;
 namespace RhinoInside.Revit.GH
 {
   using Convert.Geometry;
-  
+
   internal class PreviewServer : DirectContext3DServer
   {
     static GH_Document ActiveDefinition => Instances.ActiveCanvas?.Document;
@@ -134,7 +134,7 @@ namespace RhinoInside.Revit.GH
       !IsBusy &&
       PreviewMode != GH_PreviewMode.Disabled &&
       ActiveDefinition is object &&
-      IsModelView(dBView);
+      IsAvailable(dBView);
 
     List<IGH_DocumentObject> lastSelection;
 

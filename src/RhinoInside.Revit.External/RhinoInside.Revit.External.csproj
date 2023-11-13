@@ -126,6 +126,8 @@
     <Compile Include="UI\Selection.cs" />
     <Compile Include="UI\TaskDialogIcons.cs" />
     <Compile Include="UI\UIHostApplication.cs" />
+    <Compile Include="UI\UIHostApplicationConstrained.cs" />
+    <Compile Include="UI\UIHostApplicationUnconstrained.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Settings\KeyboardShortcuts.cs" />

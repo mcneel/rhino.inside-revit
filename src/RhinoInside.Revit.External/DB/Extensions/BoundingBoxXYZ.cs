@@ -559,6 +559,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class OutlineExtension
   {
+    public static Outline Empty => new Outline(XYZExtension.MaxValue, XYZExtension.MinValue);
+
     public static void Deconstruct(this Outline outline, out XYZ min, out XYZ max)
     {
       min = outline.MinimumPoint;
