@@ -6,6 +6,8 @@ using Autodesk.Revit.UI.Events;
 
 namespace RhinoInside.Revit.External.UI
 {
+  using External.DB.Extensions;
+
   public abstract class UIHostApplication : IDisposable
   {
     protected internal UIHostApplication() { }
