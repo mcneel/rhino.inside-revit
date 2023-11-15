@@ -79,7 +79,11 @@ namespace RhinoInside.Revit.GH.Types
     public bool? HasLeader
     {
       get => Value is ARDB.TextNote note && note.LeaderCount > 0;
-      set { }
+      set
+      {
+        if (Value is ARDB.TextNote note && value is false)
+          note.RemoveLeaders();
+      }
     }
 
     public AnnotationLeader[] Leaders

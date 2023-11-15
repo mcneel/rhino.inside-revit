@@ -100,6 +100,15 @@ namespace RhinoInside.Revit.GH.Components.Sheets
         if (!nofilterIsPlaceholder)
           sheets = sheets.Where((x) => x.IsPlaceholder == IsPlaceholder);
 
+        if (!string.IsNullOrEmpty(number))
+          sheets = sheets.Where(x => x.SheetNumber.IsSymbolNameLike(number));
+
+        if (!string.IsNullOrEmpty(name))
+          sheets = sheets.Where(x => x.Name.IsSymbolNameLike(name));
+
+        if (!string.IsNullOrEmpty(date))
+          sheets = sheets.Where(x => x.get_Parameter(ARDB.BuiltInParameter.SHEET_ISSUE_DATE).AsString().IsSymbolNameLike(date));
+
         DA.SetDataList
         (
           "Sheets",
