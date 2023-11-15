@@ -159,21 +159,57 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
       if (annotation is Types.IAnnotationLeadersAccess leaderElement)
       {
-        var leaders = leaderElement.Leaders;
-
         if (Params.GetData(DA, "Leader", out bool? hasLeader))
         {
           StartTransaction(annotation.Document);
           leaderElement.HasLeader = hasLeader;
         }
-        Params.TrySetData(DA, "Leader", () => leaderElement.HasLeader);
 
-        if (leaderElement.HasLeader is true)
+        if (!(hasLeader is false))
         {
+          if (Params.GetDataList(DA, "End Locations", out IList<Point3d?> endPositions))
+          {
+            StartTransaction(annotation.Document);
+
+            if (annotation.Value is Autodesk.Revit.DB.TextNote note)
+            {
+              var location = annotation.Location;
+              note.RemoveLeaders();
+              foreach (var point in endPositions)
+              {
+                if (!point.HasValue) continue;
+                location.ClosestParameter(point.Value, out var u, out var v);
+
+                if (note.get_Parameter(Autodesk.Revit.DB.BuiltInParameter.ARC_LEADER_PARAM).AsBoolean())
+                {
+                  if (u < 0.0)
+                    note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_ARC_L);
+                  else
+                    note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_ARC_R);
+                }
+                else
+                {
+                  if (u < 0.0)
+                    note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_STRAIGHT_L);
+                  else
+                    note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_STRAIGHT_R);
+                }
+              }
+            }
+
+            foreach (var (leader, end) in leaderElement.Leaders.ZipOrLast(endPositions))
+            {
+              if (end is null) continue;
+              if (leader is null) continue;
+              leaderElement.HasLeader = true;
+              leader.EndPosition = end.Value;
+            }
+          }
+
           if (Params.GetDataList(DA, "Shoulder Locations", out IList<Point3d?> shoulderPositions))
           {
             StartTransaction(annotation.Document);
-            foreach (var (leader, shoulder) in leaders.ZipOrLast(shoulderPositions))
+            foreach (var (leader, shoulder) in leaderElement.Leaders.ZipOrLast(shoulderPositions))
             {
               if (shoulder is null) continue;
               if (leader is null) continue;
@@ -181,16 +217,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             }
           }
 
-          if (Params.GetDataList(DA, "End Locations", out IList<Point3d?> endPositions))
-          {
-            StartTransaction(annotation.Document);
-            foreach (var (leader, end) in leaders.ZipOrLast(endPositions))
-            {
-              if (end is null) continue;
-              if (leader is null) continue;
-              leader.EndPosition = end.Value;
-            }
-          }
+          Params.TrySetData(DA, "Leader", () => leaderElement.HasLeader);
         }
 
         if (Params.GetDataList(DA, "Text Locations", out IList<Point3d?> textPositions))
@@ -206,6 +233,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
               AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"´Text Position can´t be adjusted. {{{annotation.Id.ToString("D")}}}");
           }
         }
+
+        // Regenerate is necessary here to obtain correct elbow positions.
+        annotation.Document.Regenerate();
+        var leaders = leaderElement.Leaders;
 
         Params.TrySetDataList
         (
