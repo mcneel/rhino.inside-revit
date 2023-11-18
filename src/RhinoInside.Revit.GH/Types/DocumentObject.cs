@@ -192,7 +192,7 @@ namespace RhinoInside.Revit.GH.Types
   public abstract class ReferenceObject : DocumentObject,
     IEquatable<ReferenceObject>,
     IGH_ReferenceObject,
-    IGH_ReferenceData,
+    IGH_ReferencedData,
     IGH_QuickCast
   {
     #region System.Object

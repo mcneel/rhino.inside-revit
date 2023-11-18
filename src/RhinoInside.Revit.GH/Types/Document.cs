@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Types
 
   [Kernel.Attributes.Name("Document"), AssemblyPriority]
   [DebuggerDisplay("{this.ToString()}: id {Id}")]
-  public class Document : IGH_Document, IGH_ReferenceData, IGH_ItemDescription, ICloneable
+  public class Document : IGH_Document, IGH_ReferencedData, IGH_ItemDescription, ICloneable
   {
     #region System.Object
     public bool Equals(IGH_Document other)
