@@ -10,7 +10,8 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using OS = System.Environment;
 
-namespace RhinoInside.Revit.GH.Types
+#if !RHINO_8
+namespace Grasshopper.Kernel.Types
 {
   /// <summary>
   /// Implement this interface into your Goo type if you are referencing external resources.
@@ -18,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
   /// <remarks>
   /// <see cref="Parameters.PersistentParam{T}"/> uses it to load-unload external resources.
   /// </remarks>
-  interface IGH_ReferenceData
+  interface IGH_ReferencedData
   {
     bool IsReferencedData { get; }
     bool IsReferencedDataLoaded { get; }
@@ -26,6 +27,7 @@ namespace RhinoInside.Revit.GH.Types
     void UnloadReferencedData();
   }
 }
+#endif
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -179,7 +181,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (PersistentData.IsEmpty)
         return;
 
-      foreach (var reference in PersistentData.OfType<Types.IGH_ReferenceData>())
+      foreach (var reference in PersistentData.OfType<IGH_ReferencedData>())
         reference.UnloadReferencedData();
     }
 
@@ -197,7 +199,7 @@ namespace RhinoInside.Revit.GH.Parameters
       {
         for (int i = 0; i < branch.Count; i++)
         {
-          if (branch[i] is Types.IGH_ReferenceData reference)
+          if (branch[i] is IGH_ReferencedData reference)
           {
             if (reference.IsReferencedData && !reference.LoadReferencedData())
             {
@@ -263,7 +265,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
         value = (T) value?.Duplicate();
 
-        if (value is Types.IGH_ReferenceData data)
+        if (value is IGH_ReferencedData data)
           data.LoadReferencedData();
 
         return value?.IsValid is true ? value : default;
@@ -361,7 +363,7 @@ namespace RhinoInside.Revit.GH.Parameters
         if (item.IsValid)
           continue;
 
-        if (item is Types.IGH_ReferenceData reference)
+        if (item is IGH_ReferencedData reference)
         {
           if (reference.IsReferencedData)
             reference.LoadReferencedData();

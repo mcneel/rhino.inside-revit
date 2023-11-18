@@ -165,7 +165,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           leaderElement.HasLeader = hasLeader;
         }
 
-        if (!(hasLeader is false))
+        if (leaderElement.HasLeader is true || hasLeader is true)
         {
           if (Params.GetDataList(DA, "End Locations", out IList<Point3d?> endPositions))
           {
@@ -173,8 +173,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
             if (annotation.Value is Autodesk.Revit.DB.TextNote note)
             {
-              var location = annotation.Location;
               note.RemoveLeaders();
+
+              var location = annotation.Location;
               foreach (var point in endPositions)
               {
                 if (!point.HasValue) continue;
@@ -182,17 +183,13 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
                 if (note.get_Parameter(Autodesk.Revit.DB.BuiltInParameter.ARC_LEADER_PARAM).AsBoolean())
                 {
-                  if (u < 0.0)
-                    note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_ARC_L);
-                  else
-                    note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_ARC_R);
+                  if (u < 0.0) note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_ARC_L);
+                  else         note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_ARC_R);
                 }
                 else
                 {
-                  if (u < 0.0)
-                    note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_STRAIGHT_L);
-                  else
-                    note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_STRAIGHT_R);
+                  if (u < 0.0) note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_STRAIGHT_L);
+                  else         note.AddLeader(Autodesk.Revit.DB.TextNoteLeaderTypes.TNLT_STRAIGHT_R);
                 }
               }
             }
@@ -217,8 +214,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             }
           }
 
-          Params.TrySetData(DA, "Leader", () => leaderElement.HasLeader);
+          // Regenerate is necessary here to obtain correct elbow positions.
+          annotation.Document.Regenerate();
         }
+        Params.TrySetData(DA, "Leader", () => leaderElement.HasLeader);
 
         if (Params.GetDataList(DA, "Text Locations", out IList<Point3d?> textPositions))
         {
@@ -234,8 +233,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           }
         }
 
-        // Regenerate is necessary here to obtain correct elbow positions.
-        annotation.Document.Regenerate();
         var leaders = leaderElement.Leaders;
 
         Params.TrySetDataList

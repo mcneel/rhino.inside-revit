@@ -1172,7 +1172,7 @@ namespace Grasshopper.Special
 
       foreach (var goo in PersistentData)
       {
-        if (goo is RhinoInside.Revit.GH.Types.IGH_ReferenceData id) id.UnloadReferencedData();
+        if (goo is IGH_ReferencedData id) id.UnloadReferencedData();
         else if (goo is IGH_GeometricGoo geo) geo.ClearCaches();
       }
 
@@ -1203,7 +1203,7 @@ namespace Grasshopper.Special
         {
           var goo = branch[i];
 
-          if (goo is RhinoInside.Revit.GH.Types.IGH_ReferenceData id && id.IsReferencedData && !id.IsReferencedDataLoaded && !id.LoadReferencedData())
+          if (goo is IGH_ReferencedData id && id.IsReferencedData && !id.IsReferencedDataLoaded && !id.LoadReferencedData())
           {
             AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"A referenced {goo.TypeName} could not be found.");
           }

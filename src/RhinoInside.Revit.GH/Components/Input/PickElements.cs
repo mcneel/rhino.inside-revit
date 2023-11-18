@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Input
       }
       else
       {
-        foreach (var element in Elements.OfType<Types.IGH_ReferenceData>())
+        foreach (var element in Elements.OfType<IGH_ReferencedData>())
           element.LoadReferencedData();
       }
     }
