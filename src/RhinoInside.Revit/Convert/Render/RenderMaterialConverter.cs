@@ -501,18 +501,15 @@ namespace RhinoInside.Revit.Convert.Render
         if (simulated is SimulatedProceduralTexture procedural && procedural.ContentType != ContentUuids.SimpleBitmapTextureType)
         {
           if (procedural.ContentType == ContentUuids.BitmapTextureType)
-          {
             texture = RenderTexture.NewBitmapTexture(simulated, doc);
-          }
           else
-          {
             texture = RenderContentType.NewContentFromTypeId(procedural.ContentType, doc) as RenderTexture;
-            texture.SetProjectionMode((TextureProjectionMode) (int) simulated.ProjectionMode, RenderContent.ChangeContexts.Program);
-            texture.SetMappingChannel(simulated.MappingChannel, RenderContent.ChangeContexts.Program);
-            texture.SetOffset(new Rhino.Geometry.Vector3d(simulated.Offset.X, simulated.Offset.Y, 0.0), RenderContent.ChangeContexts.Program);
-            texture.SetRepeat(new Rhino.Geometry.Vector3d(simulated.Repeat.X, simulated.Repeat.Y, 1.0), RenderContent.ChangeContexts.Program);
-            texture.SetRotation(new Rhino.Geometry.Vector3d(0.0, 0.0, simulated.Rotation), RenderContent.ChangeContexts.Program);
-          }
+
+          texture.SetProjectionMode((TextureProjectionMode) (int) simulated.ProjectionMode, RenderContent.ChangeContexts.Program);
+          texture.SetMappingChannel(simulated.MappingChannel, RenderContent.ChangeContexts.Program);
+          texture.SetOffset(new Rhino.Geometry.Vector3d(simulated.Offset.X, simulated.Offset.Y, 0.0), RenderContent.ChangeContexts.Program);
+          texture.SetRepeat(new Rhino.Geometry.Vector3d(simulated.Repeat.X, simulated.Repeat.Y, 1.0), RenderContent.ChangeContexts.Program);
+          texture.SetRotation(new Rhino.Geometry.Vector3d(0.0, 0.0, simulated.Rotation), RenderContent.ChangeContexts.Program);
 
           SetFieldValues(texture.Fields, procedural.Fields);
         }
