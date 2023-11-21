@@ -40,15 +40,15 @@ namespace RhinoInside.Revit.GH.Types
       if (base.CastTo(out target))
         return true;
 
-      // `Viewer` is the Geometric representation of a `View`.
+      // `ViewFrame` is the Geometric representation of a `View`.
       // This casting should be the first to enable components that handle `IGH_GeometricGoo` values.
       //
       // - 'Bounding Box' to extract the View `BoundingBox`.
-      // - 'Custom Preview' to display a textured surface of the view.
+      // - 'Custom Preview' to display the view envelope.
 
-      if (typeof(Q).IsAssignableFrom(typeof(Viewer)))
+      if (typeof(Q).IsAssignableFrom(typeof(ViewFrame)))
       {
-        target = (Q) (object) Viewer;
+        target = (Q) (object) GetViewFrame();
 
         return target is object;
       }
@@ -130,9 +130,9 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      if (typeof(Q).IsAssignableFrom(typeof(ViewFrame)))
+      if (typeof(Q).IsAssignableFrom(typeof(Viewer)))
       {
-        target = (Q) (object) GetViewFrame();
+        target = (Q) (object) Viewer;
 
         return target is object;
       }

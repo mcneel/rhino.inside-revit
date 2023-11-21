@@ -1,11 +1,16 @@
 using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using OS = System.Environment;
+#if RHINO_8
+using Grasshopper.Rhinoceros;
+using Grasshopper.Rhinoceros.Model;
+#endif
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -92,6 +97,54 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
+    #endregion
+
+    #region ModelContent
+#if RHINO_8
+    internal override ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
+    {
+      if (idMap.TryGetValue(Id, out var modelContent))
+        return modelContent;
+
+      if (Value is ARDB.FamilyInstance element)
+      {
+        using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Fine })
+        {
+          using (var context = GeometryDecoder.Context.Push())
+          {
+            context.Element = element;
+            context.Category = element.Category;
+            context.Material = element.Category?.Material;
+
+            using (var geometry = element.GetGeometry(options))
+            {
+              if (geometry is ARDB.GeometryElement geometryElement)
+              {
+                var transform = element.GetTransform();
+                var location = new Plane(transform.Origin.ToPoint3d(), transform.BasisX.ToVector3d(), transform.BasisY.ToVector3d());
+                var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
+
+                if (ToModelInstanceDefinition(idMap, worldToElement, element, geometry) is ModelInstanceDefinition definition)
+                {
+                  var elementToWorld = Transform.PlaneToPlane(Plane.WorldXY, location);
+                  var attributes = ModelObject.Cast(new GH_InstanceReference(new InstanceReferenceGeometry(Guid.Empty, elementToWorld), definition)).ToAttributes();
+                  attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
+                  attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
+                  attributes.Layer = Category?.ToModelContent(idMap) as ModelLayer;
+
+                  modelContent = attributes.ToModelData() as ModelContent;
+                  //idMap.Add(Id, modelContent);
+                  return modelContent;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return null;
+    }
+#endif
     #endregion
 
     #region Location
@@ -325,6 +378,21 @@ namespace RhinoInside.Revit.GH.Types
     protected FamilySymbol(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public FamilySymbol(ARDB.FamilySymbol elementType) : base(elementType) { }
 
+    #region IGH_Goo
+    public override bool CastTo<Q>(out Q target)
+    {
+#if RHINO_8
+      if (typeof(Q).IsAssignableFrom(typeof(ModelInstanceDefinition)))
+      {
+        target = (Q) (object) ToModelContent(new Dictionary<ARDB.ElementId, ModelContent>());
+        return true;
+      }
+#endif
+
+      return base.CastTo(out target);
+    }
+    #endregion
+
     #region IGH_BakeAwareElement
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
       BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
@@ -373,6 +441,38 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
+    #endregion
+
+    #region ModelContent
+#if RHINO_8
+    internal ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out var modelContent))
+        return modelContent;
+
+      if (Value is ARDB.FamilySymbol element)
+      {
+        using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Fine })
+        {
+          using (var context = GeometryDecoder.Context.Push())
+          {
+            context.Element = element;
+            context.Category = element.Category;
+            context.Material = element.Category?.Material;
+
+            using (var geometry = element.GetGeometry(options))
+            {
+              if (geometry is ARDB.GeometryElement geometryElement)
+                return GeometricElement.ToModelInstanceDefinition(idMap, Transform.Identity, element, geometryElement);
+            }
+          }
+        }
+      }
+
+      return null;
+    }
+#endif
     #endregion
 
     public Family Family => Value is ARDB.FamilySymbol symbol ? new Family(symbol.Family) : default;

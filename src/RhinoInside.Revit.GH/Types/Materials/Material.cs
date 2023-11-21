@@ -4,6 +4,10 @@ using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
 using ARDB = Autodesk.Revit.DB;
+#if RHINO_8
+using Grasshopper.Rhinoceros;
+using Grasshopper.Rhinoceros.Render;
+#endif
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -59,6 +63,14 @@ namespace RhinoInside.Revit.GH.Types
           return true;
         }
       }
+
+#if RHINO_8
+      if (typeof(Q).IsAssignableFrom(typeof(ModelRenderMaterial)))
+      {
+        target = (Q) (object) ToModelContent(new Dictionary<ARDB.ElementId, ModelContent>());
+        return true;
+      }
+#endif
 
       return false;
     }
@@ -147,6 +159,30 @@ namespace RhinoInside.Revit.GH.Types
         return System.Drawing.Color.Empty;
       }
     }
+    #endregion
+
+    #region ModelContent
+#if RHINO_8
+    internal ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
+    {
+      if (idMap.TryGetValue(Id, out var modelContent))
+        return modelContent;
+
+      if (Value is ARDB.Material material)
+      {
+        var attributes = new ModelRenderMaterial.Attributes()
+        {
+          Path = material.Name,
+          RenderMaterial = material.ToRenderMaterial(Grasshopper.Instances.ActiveRhinoDoc)
+        };
+
+        idMap.Add(Id, modelContent = attributes.ToModelData() as ModelContent);
+        return modelContent;
+      }
+
+      return null;
+    }
+#endif
     #endregion
 
     #region Identity

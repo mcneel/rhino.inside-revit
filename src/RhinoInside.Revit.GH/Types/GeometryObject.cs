@@ -393,6 +393,10 @@ namespace RhinoInside.Revit.GH.Types
 
     public GeometryElement() { }
     public GeometryElement(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
+    public GeometryElement(GraphicalElement element) : base(element.ReferenceDocument, element.GetReference())
+    {
+      _Element = element;
+    }
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
@@ -418,15 +422,40 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IGH_PreviewData
+    Element _Element;
+    private Element Element => _Element ?? (_Element = Element.FromReference(ReferenceDocument, GetReference()));
+
     void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (!IsValid) return;
+      if (Element is IGH_PreviewData preview)
+      {
+        var hasTransform = HasTransform;
+        try
+        {
+          if (hasTransform) args.Pipeline.PushModelTransform(args.Pipeline.ModelTransform * GeometryToWorldTransform);
+          preview.DrawViewportWires(args);
+        }
+        finally { if (hasTransform) args.Pipeline.PopModelTransform(); }
+      }
+      else if (IsValid)
+      {
+        var bbox = ClippingBox;
+        if (bbox.IsValid) args.Pipeline.DrawBoxCorners(bbox, args.Color);
+      }
+    }
 
-      var bbox = ClippingBox;
-      if (!bbox.IsValid)
-        return;
-
-      args.Pipeline.DrawBoxCorners(bbox, args.Color);
+    void IGH_PreviewData.DrawViewportMeshes(GH_PreviewMeshArgs args)
+    {
+      if (Element is IGH_PreviewData preview)
+      {
+        var hasTransform = HasTransform;
+        try
+        {
+          if (hasTransform) args.Pipeline.PushModelTransform(args.Pipeline.ModelTransform * GeometryToWorldTransform);
+          preview.DrawViewportMeshes(args);
+        }
+        finally { if (hasTransform) args.Pipeline.PopModelTransform(); }
+      }
     }
     #endregion
 

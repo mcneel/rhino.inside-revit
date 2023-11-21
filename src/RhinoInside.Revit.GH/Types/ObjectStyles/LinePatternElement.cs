@@ -7,6 +7,11 @@ using Rhino;
 using Rhino.DocObjects;
 using ARDB = Autodesk.Revit.DB;
 
+#if RHINO_8
+using Grasshopper.Rhinoceros;
+using Grasshopper.Rhinoceros.Drafting;
+#endif
+
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
@@ -58,6 +63,19 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return false;
+    }
+
+    public override bool CastTo<Q>(out Q target)
+    {
+#if RHINO_8
+      if (typeof(Q).IsAssignableFrom(typeof(ModelLinetype)))
+      {
+        target = (Q) (object) ToModelContent(new Dictionary<ARDB.ElementId, ModelContent>());
+        return true;
+      }
+#endif
+
+      return base.CastTo(out target);
     }
     #endregion
 
@@ -136,6 +154,43 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
+    #endregion
+
+    #region ModelContent
+#if RHINO_8
+    internal ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
+    {
+      if (idMap.TryGetValue(Id, out var modelContent))
+        return modelContent;
+
+      if (Value is ARDB.LinePatternElement linePattern)
+      {
+        var attributes = new ModelLinetype.Attributes() { Path = linePattern.Name };
+
+        using (var pattern = linePattern.GetLinePattern())
+        {
+          attributes.Segments = pattern.GetSegments().Select
+          (
+            x =>
+            {
+              switch (x.Type)
+              {
+                case ARDB.LinePatternSegmentType.Dash: return UnitScale.Convert(+x.Length, UnitScale.Internal, UnitScale.Millimeters);
+                case ARDB.LinePatternSegmentType.Space: return UnitScale.Convert(-x.Length, UnitScale.Internal, UnitScale.Millimeters);
+                case ARDB.LinePatternSegmentType.Dot: return 0.0;
+                default: throw new ArgumentOutOfRangeException();
+              }
+            }
+          ).ToArray();
+        }
+
+        idMap.Add(Id, modelContent = attributes.ToModelData() as ModelContent);
+        return modelContent;
+      }
+
+      return null;
+    }
+#endif
     #endregion
 
     #region Properties

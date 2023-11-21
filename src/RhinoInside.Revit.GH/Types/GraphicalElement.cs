@@ -7,6 +7,9 @@ using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
+#if RHINO_8
+using Grasshopper.Rhinoceros;
+#endif
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -35,7 +38,6 @@ namespace RhinoInside.Revit.GH.Types
   public class GraphicalElement :
     Element,
     IGH_GraphicalElement,
-    IGH_GeometricGoo,
     IGH_PreviewData
   {
     public GraphicalElement() { }
@@ -121,17 +123,23 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_GeometricGoo
-    BoundingBox IGH_GeometricGoo.Boundingbox => BoundingBox;
-    Guid IGH_GeometricGoo.ReferenceID
-    {
-      get => Guid.Empty;
-      set { if (value != Guid.Empty) throw new InvalidOperationException(); }
-    }
-    bool IGH_GeometricGoo.IsReferencedGeometry => false;
-    bool IGH_GeometricGoo.IsGeometryLoaded => IsReferencedDataLoaded;
+    //BoundingBox IGH_GeometricGoo.Boundingbox => BoundingBox;
+    //Guid IGH_GeometricGoo.ReferenceID
+    //{
+    //  get => Guid.Empty;
+    //  set { if (value != Guid.Empty) throw new InvalidOperationException(); }
+    //}
+    //bool IGH_GeometricGoo.IsReferencedGeometry => false;
+    //bool IGH_GeometricGoo.IsGeometryLoaded => IsReferencedDataLoaded;
 
-    void IGH_GeometricGoo.ClearCaches() => UnloadReferencedData();
-    IGH_GeometricGoo IGH_GeometricGoo.DuplicateGeometry() => (IGH_GeometricGoo) MemberwiseClone();
+    //void IGH_GeometricGoo.ClearCaches() => UnloadReferencedData();
+    //IGH_GeometricGoo IGH_GeometricGoo.DuplicateGeometry() => (IGH_GeometricGoo) MemberwiseClone();
+
+    //bool IGH_GeometricGoo.LoadGeometry() => IsReferencedDataLoaded || LoadReferencedData();
+    //bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsReferencedDataLoaded || LoadReferencedData();
+    //IGH_GeometricGoo IGH_GeometricGoo.Transform(Transform xform) => null;
+    //IGH_GeometricGoo IGH_GeometricGoo.Morph(SpaceMorph xmorph) => null;
+
     public virtual BoundingBox GetBoundingBox(Transform xform)
     {
       if (Value is ARDB.Element element)
@@ -139,11 +147,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return NaN.BoundingBox;
     }
-
-    bool IGH_GeometricGoo.LoadGeometry() => IsReferencedDataLoaded || LoadReferencedData();
-    bool IGH_GeometricGoo.LoadGeometry(Rhino.RhinoDoc doc) => IsReferencedDataLoaded || LoadReferencedData();
-    IGH_GeometricGoo IGH_GeometricGoo.Transform(Transform xform) => null;
-    IGH_GeometricGoo IGH_GeometricGoo.Morph(SpaceMorph xmorph) => null;
     #endregion
 
     #region IGH_PreviewData
@@ -252,7 +255,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GeometryObject)))
       {
-        target = (Q) (object) GeometryObject.FromReference(ReferenceDocument, GetReference());
+        target = (Q) (object) new GeometryElement(this);
         return true;
       }
 
@@ -390,8 +393,25 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+#if RHINO_8
+      if (typeof(Q).IsAssignableFrom(typeof(ModelContent)))
+      {
+        target = (Q) (object) ToModelContent(new Dictionary<ARDB.ElementId, ModelContent>());
+        return true;
+      }
+#endif
+
       return base.CastTo(out target);
     }
+
+    #region ModelContent
+#if RHINO_8
+    internal virtual ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
+    {
+      return idMap.TryGetValue(Id, out var modelContent) ? modelContent : null;
+    }
+#endif
+    #endregion
 
     #region Properties
     public virtual Category Subcategory
