@@ -80,6 +80,11 @@
     <Compile Include="Components\Element\Components\AddComponent-Curve.cs" />
     <Compile Include="Components\Element\Components\AddComponent-Location.cs" />
     <Compile Include="Components\Element\Components\AddComponent-WorkPlane.cs" />
+    <Compile Include="Components\Element\DirectShape\AddDirectShape-Brep.cs" />
+    <Compile Include="Components\Element\DirectShape\AddDirectShape-Curve.cs" />
+    <Compile Include="Components\Element\DirectShape\AddDirectShape-Mesh.cs" />
+    <Compile Include="Components\Element\DirectShape\AddDirectShape-Point.cs" />
+    <Compile Include="Components\Element\DirectShape\AddDirectShape.cs" />
     <Compile Include="Components\Element\ElementSubcategory.cs" />
     <Compile Include="Components\Element\Flip.cs" />
     <Compile Include="Components\Element\Floor\AddFloor.cs" />
@@ -114,11 +119,6 @@
     <Compile Include="Components\Element\Location.cs" />
     <Compile Include="Components\Element\MaterialQuantities.cs" />
     <Compile Include="Components\Element\Materials.cs" />
-    <Compile Include="Components\Element\DirectShape\ByBrep.cs" />
-    <Compile Include="Components\Element\DirectShape\ByCurve.cs" />
-    <Compile Include="Components\Element\DirectShape\ByGeometry.cs" />
-    <Compile Include="Components\Element\DirectShape\ByMesh.cs" />
-    <Compile Include="Components\Element\DirectShape\ByPoint.cs" />
     <Compile Include="Components\Element\Identity.cs" />
     <Compile Include="Components\Element\Material\Graphics.cs" />
     <Compile Include="Components\Element\Material\AnalyzeAppearanceAssets.cs" />

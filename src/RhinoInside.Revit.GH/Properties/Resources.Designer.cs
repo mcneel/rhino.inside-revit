@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -256,6 +256,76 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap AddDetailView {
             get {
                 object obj = ResourceManager.GetObject("AddDetailView", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddDirectShapeBrep {
+            get {
+                object obj = ResourceManager.GetObject("AddDirectShapeBrep", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddDirectShapeCurve {
+            get {
+                object obj = ResourceManager.GetObject("AddDirectShapeCurve", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddDirectShapeGeometry {
+            get {
+                object obj = ResourceManager.GetObject("AddDirectShapeGeometry", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddDirectShapeInstance {
+            get {
+                object obj = ResourceManager.GetObject("AddDirectShapeInstance", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddDirectShapeMesh {
+            get {
+                object obj = ResourceManager.GetObject("AddDirectShapeMesh", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddDirectShapePoint {
+            get {
+                object obj = ResourceManager.GetObject("AddDirectShapePoint", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AddDirectShapeType {
+            get {
+                object obj = ResourceManager.GetObject("AddDirectShapeType", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1893,79 +1963,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap DirectShapeByBrep {
-            get {
-                object obj = ResourceManager.GetObject("DirectShapeByBrep", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap DirectShapeByCurve {
-            get {
-                object obj = ResourceManager.GetObject("DirectShapeByCurve", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap DirectShapeByGeometry {
-            get {
-                object obj = ResourceManager.GetObject("DirectShapeByGeometry", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap DirectShapeByLocation {
-            get {
-                object obj = ResourceManager.GetObject("DirectShapeByLocation", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap DirectShapeByMesh {
-            get {
-                object obj = ResourceManager.GetObject("DirectShapeByMesh", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap DirectShapeByPoint {
-            get {
-                object obj = ResourceManager.GetObject("DirectShapeByPoint", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap DirectShapeCategories {
             get {
                 object obj = ResourceManager.GetObject("DirectShapeCategories", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap DirectShapeTypeByGeometry {
-            get {
-                object obj = ResourceManager.GetObject("DirectShapeTypeByGeometry", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
