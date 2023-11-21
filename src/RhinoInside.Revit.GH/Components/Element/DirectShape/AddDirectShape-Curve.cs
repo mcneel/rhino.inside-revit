@@ -11,36 +11,36 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   using Kernel.Attributes;
   using External.DB.Extensions;
 
-  public class DirectShapeByMesh : ReconstructElementComponent
+  public class AddDirectShapeCurve : ReconstructElementComponent
   {
-    public override Guid ComponentGuid => new Guid("5542506A-A09E-4EC9-92B4-F2B52417511C");
+    public override Guid ComponentGuid => new Guid("77F4FBDD-8A05-44A3-AC54-E52A79CF3E5A");
     public override GH_Exposure Exposure => GH_Exposure.primary;
 
-    public DirectShapeByMesh() : base
+    public AddDirectShapeCurve() : base
     (
-      name: "Add Mesh DirectShape",
-      nickname: "M-Shape",
-      description: "Given a Mesh, it adds a Mesh shape to the active Revit document",
+      name: "Add DirectShape (Curve)",
+      nickname: "C-Shape",
+      description: "Given a Curve, it adds a Curve shape to the active Revit document",
       category: "Revit",
       subCategory: "DirectShape"
     )
     { }
 
-    void ReconstructDirectShapeByMesh
+    void ReconstructAddDirectShapeCurve
     (
       [Optional, NickName("DOC")]
       ARDB.Document document,
 
-      [ParamType(typeof(Parameters.GraphicalElement)), Name("Mesh"), NickName("M"), Description("New Mesh Shape")]
+      [ParamType(typeof(Parameters.GraphicalElement)), Name("Curve"), NickName("C"), Description("New Curve Shape")]
       ref ARDB.DirectShape element,
 
-      Mesh mesh
+      Curve curve
     )
     {
-      if (!ThrowIfNotValid(nameof(mesh), mesh))
+      if (!ThrowIfNotValid(nameof(curve), curve))
         return;
 
-      var bbox = mesh.GetBoundingBox(accurate: false);
+      var bbox = curve.GetBoundingBox(accurate: false);
 
       var genericModel = new ARDB.ElementId(ARDB.BuiltInCategory.OST_GenericModel);
       if (element is object && element.Category.Id == genericModel) element.Pinned = false;
@@ -58,33 +58,30 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
         };
 
+        element.SetShape(ReconstructDirectShapeComponent.ShapeEmpty);
         if (bbox.IsValid)
         {
           try
           {
-            mesh.Transform(inverse);
+            curve.Transform(inverse);
             element.Pinned = false;
             element.Location.Move(-bbox.Center.ToXYZ());
-            element.SetShape(mesh.ToShape());
+            element.SetShape(curve.ToShape());
             element.Location.Move(bbox.Center.ToXYZ());
           }
           catch (ConversionException e)
           {
-            ThrowArgumentException(nameof(mesh), e.Message, bbox);
+            ThrowArgumentException(nameof(curve), e.Message, bbox);
           }
           catch (Autodesk.Revit.Exceptions.ArgumentException e)
           {
             if (e.GetType() == typeof(Autodesk.Revit.Exceptions.ArgumentException))
-              ThrowArgumentException(nameof(mesh), "Input geometry does not satisfy DirectShape validation criteria.", bbox);
+              ThrowArgumentException(nameof(curve), "Input geometry does not satisfy DirectShape validation criteria.", bbox);
 
             throw e;
           }
         }
-        else
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"DirectShape geometry is empty. {{{element.Id.ToString("D")}}}");
-          element.SetShape(ReconstructDirectShapeComponent.ShapeEmpty);
-        }
+        else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"DirectShape geometry is empty. {{{element.Id.ToString("D")}}}");
       }
     }
   }

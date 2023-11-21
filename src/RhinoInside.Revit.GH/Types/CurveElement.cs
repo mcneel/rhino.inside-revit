@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+#if RHINO_8
+using Grasshopper.Rhinoceros;
+using Grasshopper.Rhinoceros.Model;
+#endif
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -74,6 +79,29 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
+    #endregion
+
+    #region ModelContent
+#if RHINO_8
+    internal override ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
+    {
+      if (idMap.TryGetValue(Id, out var modelContent))
+        return modelContent;
+
+      if (Value is ARDB.CurveElement curve)
+      {
+        var attributes = ModelObject.Cast(new GH_Curve(curve.GeometryCurve.ToCurve())).ToAttributes();
+        //attributes.Name = DisplayName;
+        attributes.Layer = Category.ToModelContent(idMap) as ModelLayer;
+
+        modelContent = attributes.ToModelData() as ModelContent;
+        //idMap.Add(Id, modelContent);
+        return modelContent;
+      }
+
+      return null;
+    }
+#endif
     #endregion
 
     #region IHostElementAccess

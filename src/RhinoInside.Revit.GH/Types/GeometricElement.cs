@@ -3,10 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+#if RHINO_8
+using Grasshopper.Rhinoceros;
+using Grasshopper.Rhinoceros.Model;
+using Grasshopper.Rhinoceros.Render;
+#endif
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -471,30 +477,42 @@ namespace RhinoInside.Revit.GH.Types
     /// <returns></returns>
     protected static string GetBakeInstanceDefinitionName(ARDB.Element element, out string description)
     {
-      const string NS = "::";
-      var name = FullUniqueId.Format(element.Document.GetPersistentGUID(), element.UniqueId);
-      description = string.Empty;
+      const string PS = "::";
+      var uniqueId = FullUniqueId.Format(element.Document.GetPersistentGUID(), element.UniqueId);
+
+      var hidden = true;
+      var modelName = element.Document.GetTitle();
+      var familyName = "~";
+      var typeName = "~";
+      var categoryName = element.Category?.FullName();
+      if (string.IsNullOrWhiteSpace(categoryName)) categoryName = "~";
 
       if (element is ARDB.ElementType type)
       {
-        name = $"Revit{NS}{type.Category?.FullName()}{NS}{type.FamilyName}{NS}{type.Name} {{{name}}}";
-        description = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(type.FamilyName)) familyName = type.FamilyName;
+        if (!string.IsNullOrWhiteSpace(type.Name)) typeName = type.Name;
 
-        if (type.Category?.CategoryType != ARDB.CategoryType.Model)
-          name = "*" + name;
+        description = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
+        hidden = type.Category?.CategoryType != ARDB.CategoryType.Model;
       }
       else if (element.Document.GetElement(element.GetTypeId()) is ARDB.ElementType elementType)
       {
-        name = $"Revit{NS}{elementType.Category?.FullName()}{NS}{elementType.FamilyName}{NS}{elementType.Name} {{{name}}}";
-        description = elementType.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(elementType.FamilyName)) familyName = elementType.FamilyName;
+        if (!string.IsNullOrWhiteSpace(elementType.Name)) typeName = elementType.Name;
 
-        if (elementType.Category?.CategoryType != ARDB.CategoryType.Model)
-          name = "*" + name;
+        description = elementType.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
+        hidden = elementType.Category?.CategoryType != ARDB.CategoryType.Model;
       }
       else
       {
-        name = $"*Revit{NS}{element.Category?.FullName()}{NS} {{{name}}}";
+        description = string.Empty;
       }
+
+      var name = $"{(hidden ? "*" : "")}{modelName}{PS}{categoryName}{PS}{familyName}{PS}{typeName} {{{uniqueId}}}";
+
+      name = name.Replace(System.Environment.NewLine, "\\r\\n");
+      name = name.Replace("\r", "\\r");
+      name = name.Replace("\n", "\\n");
 
       return name;
     }
@@ -531,7 +549,7 @@ namespace RhinoInside.Revit.GH.Types
         geometryInstance.GetSymbol() is ARDB.ElementType symbol
       )
       {
-        // Special case to simplify DB.FamilyInstance elements.
+        // Special case to simplify ARDB.FamilyInstance elements.
         var instanceTransform = geometryInstance.Transform.ToTransform();
         return BakeGeometryElement(idMap, false, doc, att, instanceTransform * transform, symbol, geometryInstance.SymbolGeometry, out index);
       }
@@ -574,87 +592,84 @@ namespace RhinoInside.Revit.GH.Types
                 break;
             }
 
-            if (!(geo is null))
+            if (geo is null) continue;
+            if (!identity) geo.Transform(transform);
+
+            var geoAtt = PeekAttributes(idMap, doc, att, element.Document);
+
+            // In case geo is a Brep and has different materials per face.
+            var context = GeometryDecoder.Context.Peek;
+            if (context.FaceMaterialId?.Length > 0)
             {
-              if (!identity)
-                geo.Transform(transform);
-
-              var geoAtt = PeekAttributes(idMap, doc, att, element.Document);
-
-              // In case geo is a Brep and has different materials per face.
-              var context = GeometryDecoder.Context.Peek;
-              if (context.FaceMaterialId?.Length > 0)
+              bool hasPerFaceMaterials = false;
               {
-                bool hasPerFaceMaterials = false;
-                {
-                  for (int f = 1; f < context.FaceMaterialId.Length && !hasPerFaceMaterials; ++f)
-                    hasPerFaceMaterials |= context.FaceMaterialId[f] != context.FaceMaterialId[f - 1];
-                }
-
-                if (hasPerFaceMaterials && geo is Brep brep)
-                {
-                  // Solve baseMaterial
-                  var baseMaterial = Rhino.DocObjects.Material.DefaultMaterial;
-                  if (geoAtt.MaterialSource == ObjectMaterialSource.MaterialFromLayer)
-                    baseMaterial = doc.Materials[doc.Layers[geoAtt.LayerIndex].RenderMaterialIndex];
-                  else if (geoAtt.MaterialSource == ObjectMaterialSource.MaterialFromObject)
-                    baseMaterial = doc.Materials[geoAtt.MaterialIndex];
-
-                  // Create a new material for this brep
-                  var brepMaterial = new Rhino.DocObjects.Material(baseMaterial);
-
-                  foreach (var face in brep.Faces)
-                  {
-                    var faceMaterialId = context.FaceMaterialId[face.SurfaceIndex];
-                    if (faceMaterialId != (context.Material?.Id ?? ARDB.ElementId.InvalidElementId))
-                    {
-                      var faceMaterial = new Material(element.Document, faceMaterialId);
-                      if (faceMaterial.BakeElement(idMap, false, doc, att, out var materialGuid))
-                      {
-                        face.MaterialChannelIndex = brepMaterial.MaterialChannelIndexFromId(materialGuid, true);
-                        face.PerFaceColor = faceMaterial.ObjectColor;
-                      }
-                    }
-                    else
-                    {
-                      face.ClearMaterialChannelIndex();
-                      face.PerFaceColor = System.Drawing.Color.Empty;
-                    }
-                  }
-
-                  geoAtt.MaterialIndex = doc.Materials.Add(brepMaterial);
-                  geoAtt.MaterialSource = ObjectMaterialSource.MaterialFromObject;
-                }
-                else if (context.FaceMaterialId[0].IsValid())
-                {
-                  var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
-
-                  if (faceMaterial.BakeElement(idMap, false, doc, att, out var materialGuid))
-                  {
-                    geoAtt.MaterialIndex = doc.Materials.FindId(materialGuid).Index;
-                    geoAtt.MaterialSource = ObjectMaterialSource.MaterialFromObject;
-
-                    if (geo is Brep b)
-                    {
-                      foreach (var face in b.Faces)
-                        face.PerFaceColor = faceMaterial.ObjectColor;
-                    }
-                    else if (geo is Mesh m)
-                    {
-                      m.VertexColors.SetColors(Enumerable.Repeat(faceMaterial.ObjectColor, m.Vertices.Count).ToArray());
-                    }
-                  }
-                }
-                else
-                {
-                  if (geo is Brep brepFrom && brepFrom.TryGetExtrusion(out var extrusion))
-                    geo = extrusion;
-                }
+                for (int f = 1; f < context.FaceMaterialId.Length && !hasPerFaceMaterials; ++f)
+                  hasPerFaceMaterials |= context.FaceMaterialId[f] != context.FaceMaterialId[f - 1];
               }
 
-              geometry.Add(geo);
-              attributes.Add(geoAtt);
+              if (hasPerFaceMaterials && geo is Brep brep)
+              {
+                // Solve baseMaterial
+                var baseMaterial = Rhino.DocObjects.Material.DefaultMaterial;
+                if (geoAtt.MaterialSource == ObjectMaterialSource.MaterialFromLayer)
+                  baseMaterial = doc.Materials[doc.Layers[geoAtt.LayerIndex].RenderMaterialIndex];
+                else if (geoAtt.MaterialSource == ObjectMaterialSource.MaterialFromObject)
+                  baseMaterial = doc.Materials[geoAtt.MaterialIndex];
+
+                // Create a new material for this brep
+                var brepMaterial = new Rhino.DocObjects.Material(baseMaterial);
+
+                foreach (var face in brep.Faces)
+                {
+                  var faceMaterialId = context.FaceMaterialId[face.SurfaceIndex];
+                  if (faceMaterialId != (context.Material?.Id ?? ARDB.ElementId.InvalidElementId))
+                  {
+                    var faceMaterial = new Material(element.Document, faceMaterialId);
+                    if (faceMaterial.BakeElement(idMap, false, doc, att, out var materialGuid))
+                    {
+                      face.MaterialChannelIndex = brepMaterial.MaterialChannelIndexFromId(materialGuid, true);
+                      face.PerFaceColor = faceMaterial.ObjectColor;
+                    }
+                  }
+                  else
+                  {
+                    face.ClearMaterialChannelIndex();
+                    face.PerFaceColor = System.Drawing.Color.Empty;
+                  }
+                }
+
+                geoAtt.MaterialIndex = doc.Materials.Add(brepMaterial);
+                geoAtt.MaterialSource = ObjectMaterialSource.MaterialFromObject;
+              }
+              else if (context.FaceMaterialId[0].IsValid())
+              {
+                var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
+
+                if (faceMaterial.BakeElement(idMap, false, doc, att, out var materialGuid))
+                {
+                  geoAtt.MaterialIndex = doc.Materials.FindId(materialGuid).Index;
+                  geoAtt.MaterialSource = ObjectMaterialSource.MaterialFromObject;
+
+                  if (geo is Brep b)
+                  {
+                    foreach (var face in b.Faces)
+                      face.PerFaceColor = faceMaterial.ObjectColor;
+                  }
+                  else if (geo is Mesh m)
+                  {
+                    m.VertexColors.SetColors(Enumerable.Repeat(faceMaterial.ObjectColor, m.Vertices.Count).ToArray());
+                  }
+                }
+              }
+              else
+              {
+                if (geo is Brep brepFrom && brepFrom.TryGetExtrusion(out var extrusion))
+                  geo = extrusion;
+              }
             }
+
+            geometry.Add(geo);
+            attributes.Add(geoAtt);
           }
         }
 
@@ -731,6 +746,199 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
+    #endregion
+
+    #region ModelContent
+#if RHINO_8
+
+    static void PeekModelAttributes(IDictionary<ARDB.ElementId, ModelContent> idMap, ModelObject.Attributes attributes, ARDB.Document document)
+    {
+      var context = GeometryDecoder.Context.Peek;
+
+      if (context.Category is ARDB.Category category)
+      {
+        attributes.Layer = new Category(category).ToModelContent(idMap) as ModelLayer;
+      }
+
+      if (context.Material is ARDB.Material material)
+      {
+        if (new Material(material).ToModelContent(idMap) is ModelRenderMaterial renderMaterial)
+          attributes.Render = new ObjectRender.Attributes() { Material = renderMaterial };
+      }
+    }
+
+    internal static ModelInstanceDefinition ToModelInstanceDefinition
+    (
+      IDictionary<ARDB.ElementId, ModelContent> idMap,
+      Transform transform,
+      ARDB.Element element,
+      ARDB.GeometryElement geometryElement
+    )
+    {
+      if (idMap.TryGetValue(element.Id, out var modelContent))
+        return modelContent as ModelInstanceDefinition;
+
+      var geometryElementContent = geometryElement.ToArray();
+      if (geometryElementContent.Length < 1)
+        return null;
+
+      if
+      (
+        geometryElementContent.Length == 1 &&
+        geometryElementContent[0] is ARDB.GeometryInstance geometryInstance &&
+        geometryInstance.GetSymbol() is ARDB.ElementType symbol
+      )
+      {
+        // Special case to simplify ARDB.FamilyInstance elements.
+        var instanceTransform = geometryInstance.Transform.ToTransform();
+        return ToModelInstanceDefinition(idMap, instanceTransform * transform, symbol, geometryInstance.SymbolGeometry);
+      }
+
+      var attributes = new ModelInstanceDefinition.Attributes()
+      {
+        Path = GetBakeInstanceDefinitionName(element, out var description),
+        Notes = description
+      };
+
+      GeometryDecoder.UpdateGraphicAttributes(geometryElement);
+
+      bool identity = transform.IsIdentity;
+      var objects = new List<ModelObject.Attributes>(geometryElementContent.Length);
+      foreach (var g in geometryElementContent)
+      {
+        using (GeometryDecoder.Context.Push())
+        {
+          GeometryDecoder.UpdateGraphicAttributes(g);
+
+          var geo = default(IGH_GeometricGoo);
+          switch (g)
+          {
+            case ARDB.Point point:
+              var pointGeometry = point.Coord.ToPoint3d();
+              if (!identity) pointGeometry.Transform(transform);
+              geo = new GH_Point(pointGeometry);
+              break;
+
+            case ARDB.Mesh mesh:
+              if (mesh.NumTriangles == 0) continue;
+              var meshGeometry = mesh.ToMesh();
+              if (!identity) meshGeometry.Transform(transform);
+              geo = new GH_Mesh(meshGeometry);
+              break;
+
+            case ARDB.Solid solid:
+              if (solid.Faces.IsEmpty) continue;
+              var solidGeometry = solid.ToBrep();
+              if (!identity) solidGeometry.Transform(transform);
+              if (solidGeometry.TryGetExtrusion(out var extrusion)) geo = new GH_Extrusion(extrusion);
+              else if (solidGeometry.Faces.Count == 1)              geo = new GH_Surface(solidGeometry);
+              else                                                  geo = new GH_Brep(solidGeometry);
+              break;
+
+            case ARDB.Curve curve:
+              var curveGeometry = curve.ToCurve();
+              if (!identity) curveGeometry.Transform(transform);
+              geo = new GH_Curve(curveGeometry);
+              break;
+
+            case ARDB.PolyLine pline:
+              if (pline.NumberOfCoordinates == 0) continue;
+              var plineGeometry = pline.ToPolylineCurve();
+              if (!identity) plineGeometry.Transform(transform);
+              geo = new GH_Curve(plineGeometry);
+              break;
+
+            case ARDB.GeometryInstance instance:
+              using (GeometryDecoder.Context.Push())
+              {
+                if (ToModelInstanceDefinition(idMap, Transform.Identity, instance.GetSymbol(), instance.SymbolGeometry) is ModelInstanceDefinition definition)
+                  geo = new GH_InstanceReference(new InstanceReferenceGeometry(Guid.Empty, transform * instance.Transform.ToTransform()), definition);
+              }
+              break;
+          }
+
+          if (geo is null) continue;
+
+          var objectAttributes = ModelObject.Cast(geo).ToAttributes();
+          PeekModelAttributes(idMap, objectAttributes, element.Document);
+
+          var context = GeometryDecoder.Context.Peek;
+          if (context.FaceMaterialId?.Length > 0)
+          {
+            if (context.FaceMaterialId[0].IsValid())
+            {
+              var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
+              var faceModelMaterial = faceMaterial.ToModelContent(idMap) as ModelRenderMaterial;
+              objectAttributes.Render = new ObjectRender.Attributes() { Material = faceModelMaterial };
+
+            //  if (geo is Brep b)
+            //  {
+            //    foreach (var face in b.Faces)
+            //      face.PerFaceColor = faceMaterial.ObjectColor;
+            //  }
+            //  else if (geo is Mesh m)
+            //  {
+            //    m.VertexColors.SetColors(Enumerable.Repeat(faceMaterial.ObjectColor, m.Vertices.Count).ToArray());
+            //  }
+            }
+          }
+
+          objects.Add(objectAttributes);
+        }
+      }
+
+      attributes.Objects = objects.Select(x => x.ToModelData() as ModelObject).ToArray();
+
+      var modelInstanceDefinition = attributes.ToModelData() as ModelInstanceDefinition;
+      idMap.Add(element.Id, modelInstanceDefinition);
+      return modelInstanceDefinition;
+    }
+
+    internal override ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
+    {
+      if (idMap.TryGetValue(Id, out var modelContent))
+        return modelContent;
+
+      if (Value is ARDB.Element element)
+      {
+        using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Fine })
+        {
+          using (var geometry = element.GetGeometry(options))
+          {
+            if (geometry is object)
+            {
+              using (var context = GeometryDecoder.Context.Push())
+              {
+                context.Element = element;
+                context.Category = element.Category;
+                context.Material = element.Category?.Material;
+
+                var location = element.Category is null || element.Category.Parent is object ?
+                  Plane.WorldXY :
+                  Location;
+
+                var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
+                if (ToModelInstanceDefinition(idMap, worldToElement, element, geometry) is ModelInstanceDefinition definition)
+                {
+                  var elementToWorld = Transform.PlaneToPlane(Plane.WorldXY, location);
+                  var attributes = ModelObject.Cast(new GH_InstanceReference(new InstanceReferenceGeometry(Guid.Empty, elementToWorld), definition)).ToAttributes();
+                  attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
+                  attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
+                  attributes.Layer = Category.ToModelContent(idMap) as ModelLayer;
+
+                  modelContent = attributes.ToModelData() as ModelContent;
+                  //idMap.Add(Id, modelContent);
+                  return modelContent;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return null;
+    }
+#endif
     #endregion
 
     #region IHostElementAccess

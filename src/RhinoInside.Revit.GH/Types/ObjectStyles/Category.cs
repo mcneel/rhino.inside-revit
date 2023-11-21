@@ -8,6 +8,12 @@ using Rhino.DocObjects;
 using ARDB = Autodesk.Revit.DB;
 using DBXS = RhinoInside.Revit.External.DB.Schemas;
 using OS = System.Environment;
+#if RHINO_8
+using Grasshopper.Rhinoceros;
+using Grasshopper.Rhinoceros.Model;
+using Grasshopper.Rhinoceros.Drafting;
+using Grasshopper.Rhinoceros.Render;
+#endif
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -105,6 +111,14 @@ namespace RhinoInside.Revit.GH.Types
           return false;
         }
       }
+
+#if RHINO_8
+      if (typeof(Q).IsAssignableFrom(typeof(ModelLayer)))
+      {
+        target = (Q) (object) ToModelContent(new Dictionary<ARDB.ElementId, ModelContent>());
+        return true;
+      }
+#endif
 
       return base.CastTo(out target);
     }
@@ -260,13 +274,10 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    #region IGH_BakeAwareElement
-    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
-      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
-
+    #region LineWeight
     // Weights in mm.
     // Almost equal to Model at 1:100, Perspective and Annotation default line weights.
-    static readonly double[] PlotWeights = new double[]
+    static readonly double[] LineWeights = new double[]
     {
       0.0,
       0.1,
@@ -287,15 +298,20 @@ namespace RhinoInside.Revit.GH.Types
       10.0
     };
 
-    static double ToPlotWeight(int? value)
+    static double ToLineWeight(int? value)
     {
       if (!value.HasValue) return -1.0;
 
-      if (0 < value.Value && value.Value < PlotWeights.Length)
-        return PlotWeights[value.Value];
+      if (0 < value.Value && value.Value < LineWeights.Length)
+        return LineWeights[value.Value];
 
       return 0.0;
     }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
     public bool BakeElement
     (
@@ -377,7 +393,7 @@ namespace RhinoInside.Revit.GH.Types
           {
             layer.PlotWeight = category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_InvisibleLines ?
               -1.0 : // No Plot
-              ToPlotWeight(ProjectionLineWeight);
+              ToLineWeight(ProjectionLineWeight);
           }
 
           // Material
@@ -433,6 +449,75 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
     }
+    #endregion
+
+    #region ModelContent
+#if RHINO_8
+    internal ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
+    {
+      if (idMap.TryGetValue(Id, out var modelContent))
+        return modelContent;
+
+      if (APIObject is ARDB.Category category)
+      {
+        var attributes = new ModelLayer.Attributes();
+
+        // Path
+        {
+          attributes.Path = category.Parent is object ?
+            ModelContentName.Combine(Document.GetTitle(), category.CategoryType.ToString(), category.Parent?.Name, category.Name) :
+            ModelContentName.Combine(Document.GetTitle(), category.CategoryType.ToString(), category.Name);
+        };
+
+        // Color
+        {
+          var lineColor = category.LineColor.ToColor();
+          attributes.DisplayColor = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
+        }
+
+        // Linetype
+        {
+          attributes.Linetype = ProjectionLinePattern?.ToModelContent(idMap) as ModelLinetype ?? ModelLinetype.Unset;
+        }
+
+        // LineWeight
+        {
+          attributes.LineWeight = category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_InvisibleLines ?
+            -1.0 : // No Plot
+            ToLineWeight(ProjectionLineWeight);
+        }
+
+        // Material
+        {
+          attributes.Material = Material?.ToModelContent(idMap) as ModelRenderMaterial ?? ModelRenderMaterial.Unset;
+        }
+
+        // Some hardcoded tweaks…
+        switch (Id.ToBuiltInCategory())
+        {
+          case ARDB.BuiltInCategory.OST_Views:
+            attributes.Locked = true;
+            break;
+
+          case ARDB.BuiltInCategory.OST_Levels:
+          case ARDB.BuiltInCategory.OST_Grids:
+            attributes.DisplayColor = System.Drawing.Color.FromArgb(35, attributes.DisplayColor.Value);
+            attributes.Locked = true;
+            break;
+
+          case ARDB.BuiltInCategory.OST_LightingFixtureSource:
+            attributes.DisplayColor = System.Drawing.Color.FromArgb(35, attributes.DisplayColor.Value);
+            attributes.Hidden = true;
+            break;
+        }
+
+        idMap.Add(Id, modelContent = attributes.ToModelData() as ModelContent);
+        return modelContent;
+      }
+
+      return null;
+    }
+#endif
     #endregion
 
     #region Properties
@@ -695,7 +780,27 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+#if RHINO_8
+      if (typeof(Q).IsAssignableFrom(typeof(ModelLayer)))
+      {
+        target = (Q) (object) ToModelContent(new Dictionary<ARDB.ElementId, ModelContent>());
+        return true;
+      }
+#endif
+
       return base.CastTo(out target);
     }
+
+    #region ModelContent
+#if RHINO_8
+    internal ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
+    {
+      if (Value is ARDB.GraphicsStyle style && style.GraphicsStyleType == ARDB.GraphicsStyleType.Projection)
+        return new Category(style.GraphicsStyleCategory).ToModelContent(new Dictionary<ARDB.ElementId, ModelContent>());
+
+      return null;
+    }
+#endif
+    #endregion
   }
 }

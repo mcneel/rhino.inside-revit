@@ -11,14 +11,14 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
   using Kernel.Attributes;
   using External.DB.Extensions;
 
-  public class DirectShapeByBrep : ReconstructElementComponent
+  public class AddDirectShapeBrep : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("5ADE9AE3-588C-4285-ABC5-09DEB92C6660");
     public override GH_Exposure Exposure => GH_Exposure.primary;
 
-    public DirectShapeByBrep() : base
+    public AddDirectShapeBrep() : base
     (
-      name: "Add Brep DirectShape",
+      name: "Add DirectShape (Brep)",
       nickname: "B-Shape",
       description: "Given a Brep, it adds a Brep shape to the active Revit document",
       category: "Revit",
@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     )
     { }
 
-    void ReconstructDirectShapeByBrep
+    void ReconstructAddDirectShapeBrep
     (
       [Optional, NickName("DOC")]
       ARDB.Document document,

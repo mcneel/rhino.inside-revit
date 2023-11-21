@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
@@ -12,9 +13,6 @@ namespace RhinoInside.Revit.GH.Types
 {
   using Numerical;
   using Convert.Geometry;
-  using Convert.Units;
-  using External.DB;
-  using External.DB.Extensions;
   using static External.DB.Extensions.BoundingBoxXYZExtension;
 
   public class ViewFrame : GH_GeometricGoo<ViewportInfo>, IGH_PreviewData
@@ -122,39 +120,39 @@ namespace RhinoInside.Revit.GH.Types
         return "Invalid View Frame";
 
       if (!string.IsNullOrWhiteSpace(Title))
-        return Title;
+        return $"View Frame : {Title}";
 
       if (Value.IsTwoPointPerspectiveProjection)
-        return "Two-point perspective";
+        return "View Frame : Two-point perspective";
 
       if (Value.IsPerspectiveProjection)
       {
         Value.GetCameraAngles(out var _, out var _, out var h);
-        return $"Perspective ({Math.Round(Value.Camera35mmLensLength, 0)}mm. | {Math.Round(h * 2.0 * 180.0 / Math.PI, 0)}°)";
+        return $"View Frame : Perspective ({Math.Round(Value.Camera35mmLensLength, 0)}mm. | {Math.Round(h * 2.0 * 180.0 / Math.PI, 0)}°)";
       }
 
       if (Value.IsParallelProjection)
       {
         switch (Value.CameraDirection.IsParallelTo(Vector3d.ZAxis))
         {
-          case -1: return "Top view";
-          case +1: return "Bottom view";
+          case -1: return "View Frame : Top";
+          case +1: return "View Frame : Bottom";
         }
         switch (Value.CameraDirection.IsParallelTo(Vector3d.YAxis))
         {
-          case -1: return "Back view";
-          case +1: return "Front view";
+          case -1: return "View Frame : Back";
+          case +1: return "View Frame : Front";
         }
         switch (Value.CameraDirection.IsParallelTo(Vector3d.XAxis))
         {
-          case -1: return "Right view";
-          case +1: return "Left view";
+          case -1: return "View Frame : Right";
+          case +1: return "View Frame : Left";
         }
 
-        return "Parallel";
+        return "View Frame : Parallel";
       }
 
-      return "Unrecogized projection";
+      return "View Frame : Unrecogized projection";
     }
 
     static void SetScreenPort(ViewportInfo vport, int size)
@@ -678,7 +676,13 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (ReferenceID != Guid.Empty)
       {
-        if (doc.Views.Find(ReferenceID) is RhinoView rhinoView)
+        if (doc.NamedViews.FirstOrDefault(x => x.NamedViewId == ReferenceID) is ViewInfo viewInfo)
+        {
+          Value = new ViewportInfo(viewInfo.Viewport);
+          Title = viewInfo.Name;
+          return true;
+        }
+        else if (doc.Views.Find(ReferenceID) is RhinoView rhinoView)
         {
           Value = new ViewportInfo(rhinoView.MainViewport);
           Title = rhinoView.MainViewport.Name;
@@ -744,7 +748,10 @@ namespace RhinoInside.Revit.GH.Types
     public override IGH_GeometricGoo Transform(Transform xform)
     {
       if (Value.IsValid && Value.TransformCamera(xform))
+      {
+        Title = string.Empty;
         return this;
+      }
 
       return default;
     }

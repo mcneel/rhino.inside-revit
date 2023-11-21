@@ -11,6 +11,12 @@ group: Deployment & Configs
 ### WIP
 
 - Added support for Rhino 8.0
+- Implemented conversion from 'Element' to 'Model Content' on some types.
+- Fix on 'Annotation Leaders' component when used on an `ARDB.TextNote`.
+- Fix on 'Material' conversion on Rhino 8.
+- Fix on 'Query Sheets' when wildcard is used as input.
+- Fixed a bug that makes Grasshopper previews visible on Revit type preview dialog.
+- Fix on `PersistentParam` context menu when it contains deleted elements.
 
 ### RC
 
