@@ -55,6 +55,11 @@ namespace RhinoInside.Revit.Convert.Geometry
               return new ARDB.GeometryObject[] { meshShape };
             break;
 
+          case InstanceReferenceGeometry iref:
+            if (GeometryEncoder.Context.Peek.Document is ARDB.Document document)
+              return ARDB.DirectShape.CreateGeometryInstance(document, iref.ParentIdefId.ToString(), iref.Xform.ToTransform(factor)).ToArray();
+            break;
+
           default:
             if (geometry.HasBrepForm)
             {
@@ -71,17 +76,20 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     static bool AuditGeometry(GeometryBase geometry)
     {
-      var bbox = geometry.GetBoundingBox(false);
-      if (!bbox.IsValid)
-        return false;
-
-      var tol = GeometryTolerance.Model;
       switch (geometry)
       {
         case Point _:
           return true;
 
+        case InstanceReferenceGeometry _:
+          return true;
+
         default:
+          var bbox = geometry.GetBoundingBox(false);
+          if (!bbox.IsValid)
+            return false;
+
+          var tol = GeometryTolerance.Model;
           return !bbox.Diagonal.EpsilonEquals(Vector3d.Zero, 2.0 * tol.VertexTolerance);
       }
     }

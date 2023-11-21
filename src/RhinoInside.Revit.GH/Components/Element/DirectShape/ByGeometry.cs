@@ -6,6 +6,9 @@ using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
+#if RHINO_8
+using Grasshopper.Rhinoceros.Model;
+#endif
 
 namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
@@ -20,12 +23,37 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     protected static GeometryBase AsGeometryBase(IGH_GeometricGoo obj)
     {
+#if RHINO_8
+      if (obj is GH_InstanceReference iref)
+      {
+        if (iref.InstanceDefinition is ModelInstanceDefinition idef && GeometryEncoder.Context.Peek.Document is ARDB.Document document)
+        {
+          var definitionId = Guid.NewGuid();
+          var library = ARDB.DirectShapeLibrary.GetDirectShapeLibrary(document);
+          if (!library.Contains(definitionId.ToString()))
+          {
+            var shape = idef.Objects.SelectMany(x =>
+            {
+              if (x.CastTo(out IGH_GeometricGoo geo))
+                return AsGeometryBase(geo).ToShape();
+
+              return null;
+            }).OfType<ARDB.GeometryObject>();
+
+            library.AddDefinition(definitionId.ToString(), shape.ToList());
+          }
+          return new InstanceReferenceGeometry(definitionId, iref.Value.Xform);
+        }
+        else return null;
+      }
+#endif
+
       var scriptVariable = obj.ScriptVariable();
       switch (scriptVariable)
       {
         case Point3d point: return new Point(point);
         case Line line: return new LineCurve(line);
-        case Rectangle3d rect: return rect.ToNurbsCurve();
+        case Rectangle3d rect: return new PolylineCurve(rect.ToPolyline());
         case Arc arc: return new ArcCurve(arc);
         case Circle circle: return new ArcCurve(circle);
         case Ellipse ellipse: return ellipse.ToNurbsCurve();
@@ -139,14 +167,14 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     }
   }
 
-  public class DirectShapeByGeometry : ReconstructDirectShapeComponent
+  public class AddDirectShapeGeometry : ReconstructDirectShapeComponent
   {
     public override Guid ComponentGuid => new Guid("0BFBDA45-49CC-4AC6-8D6D-ECD2CFED062A");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    public DirectShapeByGeometry() : base
+    public AddDirectShapeGeometry() : base
     (
-      name: "Add Geometry DirectShape",
+      name: "Add DirectShape (Geometry)",
       nickname: "G-Shape",
       description: "Given its Geometry, it adds a DirectShape element to the active Revit document",
       category: "Revit",
@@ -154,7 +182,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     )
     { }
 
-    void ReconstructDirectShapeByGeometry
+    void ReconstructAddDirectShapeGeometry
     (
       [Optional, NickName("DOC")]
       ARDB.Document document,
@@ -201,12 +229,12 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     }
   }
 
-  public class DirectShapeTypeByGeometry : ReconstructDirectShapeComponent
+  public class AddDirectShapeType : ReconstructDirectShapeComponent
   {
     public override Guid ComponentGuid => new Guid("25DCFE8E-5BE9-460C-80E8-51B7041D8FED");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    public DirectShapeTypeByGeometry() : base
+    public AddDirectShapeType() : base
     (
       name: "Add DirectShape Type",
       nickname: "D-ShapeType",
@@ -216,7 +244,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     )
     { }
 
-    void ReconstructDirectShapeTypeByGeometry
+    void ReconstructAddDirectShapeType
     (
       [Optional, NickName("DOC")]
       ARDB.Document document,
@@ -260,14 +288,14 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     }
   }
 
-  public class DirectShapeByLocation : ReconstructElementComponent
+  public class AddDirectShapeInstance : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("A811EFA4-8DE2-46F3-9F88-3D4F13FE40BE");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 
-    public DirectShapeByLocation() : base
+    public AddDirectShapeInstance() : base
     (
-      name: "Add DirectShape",
+      name: "Add DirectShape Instance",
       nickname: "D-Shape",
       description: "Given its location, it reconstructs a DirectShape into the active Revit document",
       category: "Revit",
@@ -275,7 +303,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     )
     { }
 
-    void ReconstructDirectShapeByLocation
+    void ReconstructAddDirectShapeInstance
     (
       [Optional, NickName("DOC")]
       ARDB.Document document,
