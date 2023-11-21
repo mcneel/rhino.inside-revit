@@ -9,6 +9,7 @@ using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 #if RHINO_8
 using Grasshopper.Rhinoceros;
+using Grasshopper.Rhinoceros.Model;
 #endif
 
 namespace RhinoInside.Revit.GH.Types
@@ -394,9 +395,9 @@ namespace RhinoInside.Revit.GH.Types
       }
 
 #if RHINO_8
-      if (typeof(Q).IsAssignableFrom(typeof(ModelContent)))
+      if (typeof(Q).IsAssignableFrom(typeof(ModelObject)))
       {
-        target = (Q) (object) ToModelContent(new Dictionary<ARDB.ElementId, ModelContent>());
+        target = (Q) (object) (ToModelContent(new Dictionary<ARDB.ElementId, ModelContent>()) as ModelObject);
         return true;
       }
 #endif
