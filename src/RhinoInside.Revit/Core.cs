@@ -303,7 +303,7 @@ namespace RhinoInside.Revit
             MainIcon = ERUI.TaskDialogIcons.IconError,
             AllowCancellation = true,
             MainInstruction = "Unsupported Rhino version",
-            MainContent = $"Expected Rhino version is ({MinimumRhinoVersion}) or above.",
+            MainContent = $"Expected Rhino version is ({MinimumRhinoVersion.Major}.{MinimumRhinoVersion.Minor}) or above.",
             ExpandedContent =
             (Distribution.VersionInfo is null ? "Rhino\n" :
             $"{Distribution.VersionInfo.ProductName} {Distribution.VersionInfo.ProductMajorPart}\n") +

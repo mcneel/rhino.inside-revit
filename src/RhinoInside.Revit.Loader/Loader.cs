@@ -46,11 +46,11 @@ namespace RhinoInside.Revit.AddIn
     {
       var distributions = new Distribution[]
       {
-        new Distribution(7),
         new Distribution(8),
+        new Distribution(7),
 #if DEBUG
-        new Distribution(7, dev: true),
         new Distribution(8, dev: true),
+        new Distribution(7, dev: true),
 #endif
       };
 
@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.AddIn
           TitleAutoPrefix = true,
           AllowCancellation = false,
           MainInstruction = "Looks like you have many supported Rhino versions installed.",
-          MainContent = "Please pick which one you want to use.",
+          MainContent = "Please pick which one you want to use in this Revit session.",
           //VerificationText = "Do not show again"
         }
       )
