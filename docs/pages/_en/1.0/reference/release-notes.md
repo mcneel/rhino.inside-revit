@@ -18,6 +18,8 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.18 RC1" version="v1.18.8732.18986" pre_release=true time="11/28/2023" %}
 
+- Added {% include ltr/comp.html uuid='f795d14c' %} component.
+- Added {% include ltr/comp.html uuid='7d45ec0d' %} component.
 - Implemented conversion from 'Element' to 'Model Content' on some types.
 - Fix on {% include ltr/comp.html uuid='71f014de' %} component when used on an `ARDB.TextNote`.
 - Fix on {% include ltr/comp.html uuid='b18ef2cc' %} conversion on Rhino 8.
@@ -33,8 +35,6 @@ group: Deployment & Configs
 <p style="color: darkgray;">[ v8.1 and above ]</p>
 </div>
 
-- Added {% include ltr/comp.html uuid='f795d14c' %} component.
-- Added {% include ltr/comp.html uuid='7d45ec0d' %} component.
 - Renamed 'Document Warnings' -> {% include ltr/comp.html uuid='3917adb2' %}.
 - Added context menu to {% include ltr/comp.html uuid='73e14fbb' %} to filter by severity.
 - Improved element-tracking on views.
