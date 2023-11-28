@@ -20,14 +20,23 @@ group: Deployment & Configs
 
 ### RC
 
+
+{% endcapture %}
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.17" version="v1.17.8732.17721" time="08/08/2023" %}
+
+<div style="text-align: center;">
+<img src="/rhino.inside-revit/static/images/release_notes/rhino8.png" alt="" style="width: 256px;">
+<p style="margin: 0;">{{ site.terms.rir }} now supports Rhino 8!</p>
+<p style="color: darkgray;">[ v8.1 and above ]</p>
+</div>
+
 - Added 'Pick Elements' component.
 - Added 'Pick Points' component.
 - Renamed 'Document Warnings' -> 'Query Warnings'.
 - Added context menu to 'Built-In Failure Definitions' to filter by severity.
 - Improved element-tracking on views.
-
-{% endcapture %}
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 {% include ltr/release-header.html title="v1.17 RC1" version="v1.17.8620.27747" pre_release=true time="08/08/2023" %}
 
