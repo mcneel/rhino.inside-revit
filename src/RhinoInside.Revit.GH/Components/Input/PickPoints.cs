@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Input
   public class PickPoints : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("7D45EC0D-F531-478E-B2A0-657678C0C6FD");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
     protected override string IconTag => string.Empty;
 
     public PickPoints() : base
