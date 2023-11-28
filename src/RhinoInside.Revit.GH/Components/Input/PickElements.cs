@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Input
   public class PickElements : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("F795D14C-E7AF-438B-9C57-332D0D8C4402");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
     protected override string IconTag => string.Empty;
 
     public PickElements() : base
