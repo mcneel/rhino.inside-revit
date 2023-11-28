@@ -61,17 +61,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
     internal static XYZ GetBasePointLocation(this Document doc, ElevationBase elevationBase)
     {
       var position = XYZExtension.Zero;
-      switch (elevationBase)
+      if (!doc.IsFamilyDocument)
       {
-        //case ElevationBase.InternalOrigin:
-        //  position = BasePointExtension.GetInternalOriginPoint(doc).GetPosition();
-        //  break;
-        case ElevationBase.ProjectBasePoint:
-          position = BasePointExtension.GetProjectBasePoint(doc).GetPosition();
-          break;
-        case ElevationBase.SurveyPoint:
-          position = BasePointExtension.GetSurveyPoint(doc).GetPosition() - BasePointExtension.GetSurveyPoint(doc).GetSharedPosition();
-          break;
+        switch (elevationBase)
+        {
+          //case ElevationBase.InternalOrigin:
+          //  position = BasePointExtension.GetInternalOriginPoint(doc).GetPosition();
+          //  break;
+          case ElevationBase.ProjectBasePoint:
+            position = BasePointExtension.GetProjectBasePoint(doc).GetPosition();
+            break;
+          case ElevationBase.SurveyPoint:
+            position = BasePointExtension.GetSurveyPoint(doc).GetPosition() - BasePointExtension.GetSurveyPoint(doc).GetSharedPosition();
+            break;
+        }
       }
 
       return position;
