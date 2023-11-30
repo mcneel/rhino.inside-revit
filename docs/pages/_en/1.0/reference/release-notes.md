@@ -10,24 +10,34 @@ group: Deployment & Configs
 
 ### WIP
 
-- Added support for Rhino 8.0
-- Implemented conversion from 'Element' to 'Model Content' on some types.
-- Fix on 'Annotation Leaders' component when used on an `ARDB.TextNote`.
-- Fix on 'Material' conversion on Rhino 8.
-- Fix on 'Query Sheets' when wildcard is used as input.
-- Fixed a bug that makes Grasshopper previews visible on Revit type preview dialog.
-- Fix on `PersistentParam` context menu when it contains deleted elements.
-
 ### RC
 
-- Added 'Pick Elements' component.
-- Added 'Pick Points' component.
-- Renamed 'Document Warnings' -> 'Query Warnings'.
-- Added context menu to 'Built-In Failure Definitions' to filter by severity.
-- Improved element-tracking on views.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.18 RC1" version="v1.18.8732.18986" pre_release=true time="11/28/2023" %}
+
+- Added {% include ltr/comp.html uuid='f795d14c' %} component.
+- Added {% include ltr/comp.html uuid='7d45ec0d' %} component.
+- Implemented conversion from 'Element' to 'Model Content' on some types.
+- Fix on {% include ltr/comp.html uuid='71f014de' %} component when used on an `ARDB.TextNote`.
+- Fix on {% include ltr/comp.html uuid='b18ef2cc' %} conversion on Rhino 8.
+- Fix on {% include ltr/comp.html uuid='97c8cb27' %} when wildcard is used as input.
+- Fixed a bug that makes Grasshopper previews visible on Revit type preview dialog.
+- Fix on `PersistentParam` context menu when it contains deleted elements.
+
+{% include ltr/release-header.html title="v1.17" version="v1.17.8732.18736" time="11/28/2023" %}
+
+<div style="text-align: center;">
+<img src="/rhino.inside-revit/static/images/release_notes/rhino8.png" alt="" style="width: 256px;">
+<p style="margin: 0;">{{ site.terms.rir }} now supports Rhino 8!</p>
+<p style="color: darkgray;">[ v8.1 and above ]</p>
+</div>
+
+- Renamed 'Document Warnings' -> {% include ltr/comp.html uuid='3917adb2' %}.
+- Added context menu to {% include ltr/comp.html uuid='73e14fbb' %} to filter by severity.
+- Improved element-tracking on views.
 
 {% include ltr/release-header.html title="v1.17 RC1" version="v1.17.8620.27747" pre_release=true time="08/08/2023" %}
 
