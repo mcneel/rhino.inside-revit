@@ -31,15 +31,12 @@ namespace RhinoInside.Revit.External.UI.Extensions
       }
     );
 
-    internal static IList<UIDocument> GetOpenUIDocuments(this UIApplication app) => HostedApplication.Active.InvokeInHostContext
-    (
-      () =>
+    internal static IList<UIDocument> GetOpenUIDocuments(this UIApplication app) =>
       app.Application.Documents.Cast<Document>().
       Where(x => !x.IsLinked).
       Select(x => new UIDocument(x)).
       Where(x => x.GetOpenUIViews().Count > 0).
-      ToArray()
-    );
+      ToArray();
 
     public static bool TryGetDocument(this UIApplication app, Guid guid, out Document document) =>
       app.Application.Documents.Cast<Document>().TryGetDocument(guid, out document, app.ActiveUIDocument?.Document);
