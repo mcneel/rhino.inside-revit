@@ -25,8 +25,6 @@ The {{ site.terms.rir }} installer is also available on [Food4Rhino Website]({{ 
 
 Revit {{ site.terms.revit_versions }} is required to install  {{ site.terms.rir }}.
 
-- [Revit 2018.2](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2018-product-updates.html)
-- [Revit 2019.1](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2019-product-updates.html)
 - [Revit 2020.0](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2020-product-updates.html)
 - [Revit 2021.1](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2021-product-updates.html)
 - [Revit 2022.1](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2022-product-updates.html)

@@ -158,14 +158,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (collection is ElementId[] array)
         return Array.BinarySearch(array, item, ElementIdComparer.NoNullsAscending);
 
-      var index = int.MinValue;
+      var index = 0;
       foreach (var id in collection)
       {
+        if (id == item) return index;
         index++;
-        if (id == item) break;
       }
 
-      return index;
+      return int.MinValue;
     }
 
     private (int Unique, int Missing) CompareItems(IEnumerable<ElementId> other, bool breakOnMissing)
