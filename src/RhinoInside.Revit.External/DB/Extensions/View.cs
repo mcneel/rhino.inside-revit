@@ -161,6 +161,34 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
+    /// <summary>
+    /// Indicates if the view is a callout view.
+    /// </summary>
+    /// <param name="view"></param>
+    /// <returns>true if <paramref name="view"/> is a callout view.</returns>
+    public static bool IsCallout(this View view)
+    {
+#if REVIT_2022
+      return view.IsCallout;
+#else
+      return view.get_Parameter(BuiltInParameter.SECTION_PARENT_VIEW_NAME)?.HasValue is true;
+#endif
+    }
+
+    /// <summary>
+    /// Gets ID of the callout parent view.
+    /// </summary>
+    /// <param name="view"></param>
+    /// <returns>ID of a view in which this callout was created or InvalidElementId if there is no parent.</returns>
+    public static ElementId GetCalloutParentId(this View view)
+    {
+#if REVIT_2022
+      return view.GetCalloutParentId();
+#else
+      return view.get_Parameter(BuiltInParameter.SECTION_PARENT_VIEW_NAME)?.AsElementId() ?? ElementIdExtension.Invalid;
+#endif
+    }
+
     #region SketchGrid
     static readonly ElementFilter OST_IOSSketchGridFilter = new ElementCategoryFilter(BuiltInCategory.OST_IOSSketchGrid);
     internal static ElementId GetSketchGridId(this View view) => view.GetDependentElements(OST_IOSSketchGridFilter).FirstOrDefault();

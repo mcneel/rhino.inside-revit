@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       {
         if (view.Value.IsTemplate && open is true)
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Can't open view template '{view.DisplayName}'");
-        else if (view.Value.IsCallout && open is true)
+        else if (view.Value.IsCallout() && open is true)
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Can't open callout view'{view.DisplayName}'");
         else
           ViewStates[view] = open.Value;
