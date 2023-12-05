@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.External.UI
         if (value.TryGetActiveGraphicalView(out var uiView))
         {
           HostedApplication.Active.InvokeInHostContext
-          (() => value.Document.SetActiveGraphicalView(value.Document.GetElement(uiView.ViewId) as View));
+          (() => value.Document.SetActiveGraphicalView(value.Document.GetElement(uiView.ViewId) as View, out var _));
         }
       }
     }

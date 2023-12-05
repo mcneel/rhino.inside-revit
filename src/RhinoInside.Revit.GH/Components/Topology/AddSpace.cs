@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     {
       base.AfterSolveInstance();
 
-      ActiveView?.Document.SetActiveGraphicalView(ActiveView);
+      ActiveView?.Document.SetActiveView(ActiveView);
       ActiveView = default;
 
       foreach (var view in (ViewsToClose as IEnumerable<ARDB.View>).Reverse())
