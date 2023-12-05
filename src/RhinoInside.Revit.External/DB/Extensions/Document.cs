@@ -998,12 +998,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Sets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
+    /// Sets the active <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
     /// </summary>
     /// <param name="doc"></param>
     /// <param name="view">View to be activated</param>
-    public static bool SetActiveGraphicalView(this Document document, View view) =>
-      SetActiveGraphicalView(document, view, out var _);
+    public static bool SetActiveView(this Document document, View view)
+    {
+      if (view is null)
+        throw new ArgumentNullException(nameof(view));
+
+      return SetActiveView(document, view, out var _);
+    }
 
     /// <summary>
     /// Sets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
@@ -1018,6 +1023,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (!view.IsGraphicalView())
         throw new ArgumentException("Input view is not a graphical view.", nameof(view));
 
+      return SetActiveView(document, view, out wasOpened);
+    }
+
+    /// <summary>
+    /// Sets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="view">View to be activated</param>
+    private static bool SetActiveView(this Document document, View view, out bool wasOpened)
+    {
       if (!document.Equals(view.Document))
         throw new ArgumentException("View does not belong to the specified document", nameof(view));
 

@@ -111,7 +111,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       base.AfterSolveInstance();
 
-      ActiveView?.Document.SetActiveGraphicalView(ActiveView);
+      ActiveView?.Document.SetActiveView(ActiveView);
       ActiveView = default;
 
       if (ViewsToClose.Count > 0)
