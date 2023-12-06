@@ -320,7 +320,7 @@ namespace RhinoInside.Revit.GH.Types
       (
         Value is ARDB.View view &&
         view.CanBePrinted &&
-        (view.IsGraphicalView() /*|| (view is ARDB.ViewSchedule schedule && !schedule.IsInternalKeynoteSchedule && !schedule.IsTitleblockRevisionSchedule)*/)
+        (view.IsModelView() /*|| (view is ARDB.ViewSchedule schedule && !schedule.IsInternalKeynoteSchedule && !schedule.IsTitleblockRevisionSchedule)*/)
       )
       {
         var viewId = view.Id;

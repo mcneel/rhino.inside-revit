@@ -13,9 +13,9 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     public ViewActive() : base
     (
-      name: "Active Graphical View",
+      name: "Active View",
       nickname: "Active",
-      description: "Gets the active graphical view",
+      description: "Gets the active view",
       category: "Revit",
       subCategory: "View"
     )
@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.View>("Active View", "V", "Active graphical view", GH_ParamAccess.item)
+      ParamDefinition.Create<Parameters.View>("Active View", "V", "Active view", GH_ParamAccess.item)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -49,6 +49,8 @@ namespace RhinoInside.Revit.GH.Components.Views
       var activeApp = Revit.ActiveUIApplication;
 #if REVIT_2019
       menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.CloseInactiveViews, "Close Inactive Views…");
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.TabViews, "Tab Views…");
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.TileViews, "Tile Views…");
 #endif
     }
     #endregion

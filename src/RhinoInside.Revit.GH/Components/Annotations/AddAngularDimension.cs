@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         view.Document, _Output_, dimension =>
         {
           // Input
-          if (!view.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
+          if (!view.IsAnnotationView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Name}' does not support detail items creation", view);
           if (!Params.GetDataList(DA, "References", out IList<Types.GeometryObject> geometries)) return null;
           if (!Params.GetData(DA, "Arc", out Arc? arc)) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out ARDB.DimensionType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.AngularDimensionType)) return null;

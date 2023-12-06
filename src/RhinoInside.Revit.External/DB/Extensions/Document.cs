@@ -998,19 +998,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Sets the active <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
-    /// </summary>
-    /// <param name="doc"></param>
-    /// <param name="view">View to be activated</param>
-    public static bool SetActiveView(this Document document, View view)
-    {
-      if (view is null)
-        throw new ArgumentNullException(nameof(view));
-
-      return SetActiveView(document, view, out var _);
-    }
-
-    /// <summary>
     /// Sets the active Graphical <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
     /// </summary>
     /// <param name="doc"></param>
@@ -1024,6 +1011,48 @@ namespace RhinoInside.Revit.External.DB.Extensions
         throw new ArgumentException("Input view is not a graphical view.", nameof(view));
 
       return SetActiveView(document, view, out wasOpened);
+    }
+
+    /// <summary>
+    /// Gets the active <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <returns>The active <see cref="Autodesk.Revit.DB.View"/> or null if no view is considered active.</returns>
+    /// <remarks>
+    /// The active view is the last view of the provided document that had the focus in the UI.
+    /// </remarks>
+    public static View GetActiveView(this Document doc)
+    {
+      var active = doc.ActiveView;
+      if (active is object)
+        return active;
+
+      return HostedApplication.Active.InvokeInHostContext(() =>
+      {
+        using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+        {
+          var activeView = uiDocument.ActiveView ??
+              uiDocument.
+              GetOpenUIViews().
+              Select(x => doc.GetElement(x.ViewId) as View).
+              FirstOrDefault();
+
+          return activeView;
+        }
+      });
+    }
+
+    /// <summary>
+    /// Sets the active <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
+    /// </summary>
+    /// <param name="doc"></param>
+    /// <param name="view">View to be activated</param>
+    public static bool SetActiveView(this Document document, View view)
+    {
+      if (view is null)
+        throw new ArgumentNullException(nameof(view));
+
+      return SetActiveView(document, view, out var _);
     }
 
     /// <summary>
@@ -1135,36 +1164,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         return true;
       }
-    }
-
-    /// <summary>
-    /// Gets the active <see cref="Autodesk.Revit.DB.View"/> of the provided <see cref="Autodesk.Revit.DB.Document"/>.
-    /// </summary>
-    /// <param name="doc"></param>
-    /// <returns>The active <see cref="Autodesk.Revit.DB.View"/></returns>
-    public static View GetActiveView(this Document doc)
-    {
-      var active = doc.ActiveView;
-      if (active is object)
-        return active;
-
-      return HostedApplication.Active.InvokeInHostContext(() =>
-      {
-        using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
-        {
-          var activeView = uiDocument.ActiveView;
-
-          if (activeView is null)
-          {
-            var openViews = uiDocument.GetOpenUIViews().
-                Select(x => doc.GetElement(x.ViewId) as View);
-
-            activeView = openViews.FirstOrDefault();
-          }
-
-          return activeView;
-        }
-      });
     }
     #endregion
 
