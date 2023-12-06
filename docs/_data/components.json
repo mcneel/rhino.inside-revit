@@ -240,6 +240,18 @@
     "uuid": "0700be5f-9b9c-4235-add5-787e42898114"
   }, 
   {
+    "desc": "Contains a collection of Revit Toposolid elements", 
+    "iconsrc": "/static/images/GH/Toposolid.png", 
+    "icontag": null, 
+    "panel": "Revit", 
+    "since": "1.14", 
+    "tab": "Params", 
+    "title": "Toposolid", 
+    "typename": "Toposolid", 
+    "until": null, 
+    "uuid": "e45ee288-b07f-4c87-a73d-65c6313d19b2"
+  }, 
+  {
     "desc": "Contains a collection of Revit analytical elements", 
     "iconsrc": null, 
     "icontag": "A", 
@@ -2038,6 +2050,30 @@
     "typename": "TopographyByPoints", 
     "until": null, 
     "uuid": "e8d8d05a-8703-4f75-b106-12b40ec9df7b"
+  }, 
+  {
+    "desc": "Given its outline curve, it adds a Toposolid element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddToposolid.png", 
+    "icontag": null, 
+    "panel": "Site", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Add Toposolid", 
+    "typename": "AddToposolid", 
+    "until": null, 
+    "uuid": "1a85ee3c-f045-462c-b6da-e03f36c41e77"
+  }, 
+  {
+    "desc": "Given its outline curve, it adds a Toposolid subdivision element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddToposolidSubDivision.png", 
+    "icontag": null, 
+    "panel": "Site", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Add Toposolid Sub-Division", 
+    "typename": "AddToposolidSubDivision", 
+    "until": null, 
+    "uuid": "1c148123-7e04-42eb-8b51-a6c2b731ad21"
   }, 
   {
     "desc": "Project location", 
@@ -5004,6 +5040,18 @@
     "uuid": "b0440885-4af3-4890-8e84-3bc2a8342b9f"
   }, 
   {
+    "desc": "Open-Close a Revit view", 
+    "iconsrc": null, 
+    "icontag": "V", 
+    "panel": "View", 
+    "since": "1.18", 
+    "tab": "Revit", 
+    "title": "Open View", 
+    "typename": "ViewOpen", 
+    "until": null, 
+    "uuid": "e13fc388-d607-4a62-bebc-498a9445f91a"
+  }, 
+  {
     "desc": "Get elements visible in a view", 
     "iconsrc": "/static/images/GH/QueryViewElements.png", 
     "icontag": null, 
@@ -5124,7 +5172,7 @@
     "uuid": "6b32703e-a8b4-49c9-b855-133d3df925fe"
   }, 
   {
-    "desc": "Gives access to points and edges on a slab, roof or floor", 
+    "desc": "Gives access to points and edges on a slab, roof, floor or toposolid", 
     "iconsrc": "/static/images/GH/SlabShape.png", 
     "icontag": null, 
     "panel": "Architecture", 
