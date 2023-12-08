@@ -232,6 +232,42 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region IGH_ActiveObject
+    IEnumerable<IGH_ActiveObject> TopLevelObjects
+    {
+      get
+      {
+        IGH_ActiveObject documentObject = this;
+        do
+        {
+          yield return documentObject;
+          documentObject = documentObject.OnPingDocument()?.Owner as IGH_ActiveObject;
+
+        } while (documentObject is object);
+      }
+    }
+
+    protected IGH_ActiveObject TopLevelObject => TopLevelObjects.Last();
+
+    protected void ExpireTopDisplay(bool redraw) => TopLevelObject.OnDisplayExpired(redraw);
+    protected void ExpireTopSolution(bool recompute)
+    {
+      var topLevelObject = TopLevelObject;
+      if (topLevelObject == this) ExpireSolution(recompute);
+      else
+      {
+        ExpireSolution(false);
+        topLevelObject.ExpireSolution(recompute);
+      }
+    }
+
+    public override void AddRuntimeMessage(GH_RuntimeMessageLevel level, string text)
+    {
+      base.AddRuntimeMessage(level, text);
+
+      foreach (var top in TopLevelObjects.Skip(1))
+        top.AddRuntimeMessage(level, text);
+    }
+
     Exception UnhandledException;
     protected bool IsAborted => UnhandledException is object;
     protected virtual bool AbortOnContinuableException => false;
