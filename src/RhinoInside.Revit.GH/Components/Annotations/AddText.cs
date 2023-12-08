@@ -134,7 +134,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         view.Document, _Output_, textNote =>
         {
           // Input
-          if (!view.Value.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support text notes creation", view);
+          if (!view.Value.IsAnnotationView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support text notes creation", view);
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
           if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
           if (!Params.GetData(DA, "Content", out string text)) return null;

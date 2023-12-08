@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         view.Document, _Spot_, spot =>
         {
           // Input
-          if (!view.IsGraphicalView()) throw new Exceptions.RuntimeArgumentException("View", "This view does not support detail items creation", view);
+          if (!view.IsAnnotationView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Name}' does not support detail items creation", view);
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
           if (!Params.GetData(DA, "Reference", out Types.GeometryObject geometry)) return null;
           if (!Params.TryGetData(DA, "Head Location", out Point3d? headLocation)) return null;

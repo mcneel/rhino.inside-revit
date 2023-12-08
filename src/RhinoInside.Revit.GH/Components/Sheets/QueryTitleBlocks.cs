@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.Intersect
     (
-      CompoundElementFilter.ElementIsElementTypeFilter(inverted: true),
+      CompoundElementFilter.ElementIsViewSpecificFilter(),
       new ARDB.ElementClassFilter(typeof(ARDB.FamilyInstance)),
       new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_TitleBlocks)
     );

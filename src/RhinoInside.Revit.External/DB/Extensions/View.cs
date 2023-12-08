@@ -84,6 +84,38 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       switch (viewType)
       {
+        case ViewType.Internal:
+        case ViewType.ProjectBrowser:
+        case ViewType.SystemBrowser:
+          return false;
+      }
+
+      return true;
+    }
+
+    /// <summary>
+    /// Checks if the provided <see cref="Autodesk.Revit.DB.View"/> represents a graphical view.
+    /// </summary>
+    /// <param name="view"></param>
+    /// <returns>true if <paramref name="view"/> is a graphical view.</returns>
+    public static bool IsGraphicalView(this View view)
+    {
+      if (view is null) return false;
+      if (view.IsTemplate) return false;
+      if (view.IsCallout()) return false;
+
+      return IsGraphicalViewType(view.ViewType);
+    }
+
+    /// <summary>
+    /// Checks if the provided <see cref="Autodesk.Revit.DB.ViewType"/> represents a model view.
+    /// </summary>
+    /// <param name="viewType"></param>
+    /// <returns>true if <paramref name="viewType"/> represents a model view type.</returns>
+    public static bool IsModelViewType(this ViewType viewType)
+    {
+      switch (viewType)
+      {
         // ViewSheet
         case ViewType.DrawingSheet:
 
@@ -118,23 +150,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Checks if the provided <see cref="Autodesk.Revit.DB.View"/> represents a graphical view.
+    /// Checks if the provided <see cref="Autodesk.Revit.DB.View"/> represents a model view.
     /// </summary>
     /// <param name="view"></param>
-    /// <returns>true if <paramref name="view"/> is a graphical view.</returns>
-    public static bool IsGraphicalView(this View view)
+    /// <returns>true if <paramref name="view"/> is a model view.</returns>
+    public static bool IsModelView(this View view)
     {
       if (view is null) return false;
       if (view.IsTemplate) return false;
 
-      return IsGraphicalViewType(view.ViewType);
+      return IsModelViewType(view.ViewType);
     }
 
     /// <summary>
     /// Checks if the provided <see cref="Autodesk.Revit.DB.View"/> supports annotative elements.
     /// </summary>
     /// <param name="view"></param>
-    /// <returns>true if <paramref name="view"/> is a graphical view.</returns>
+    /// <returns>true if <paramref name="view"/> is an annotation view.</returns>
     public static bool IsAnnotationView(this View view)
     {
       if (view is null) return false;
@@ -146,8 +178,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case ViewType.FloorPlan:
         case ViewType.CeilingPlan:
-        case ViewType.AreaPlan:
         case ViewType.EngineeringPlan:
+        case ViewType.AreaPlan:
 
         case ViewType.Elevation:
         case ViewType.Section:
@@ -175,6 +207,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #endif
     }
 
+#if !REVIT_2022
     /// <summary>
     /// Gets ID of the callout parent view.
     /// </summary>
@@ -182,12 +215,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>ID of a view in which this callout was created or InvalidElementId if there is no parent.</returns>
     public static ElementId GetCalloutParentId(this View view)
     {
-#if REVIT_2022
-      return view.GetCalloutParentId();
-#else
       return view.get_Parameter(BuiltInParameter.SECTION_PARENT_VIEW_NAME)?.AsElementId() ?? ElementIdExtension.Invalid;
-#endif
     }
+#endif
 
     #region SketchGrid
     static readonly ElementFilter OST_IOSSketchGridFilter = new ElementCategoryFilter(BuiltInCategory.OST_IOSSketchGrid);
@@ -342,7 +372,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (view is null || view.IsTemplate)
         return BoundingBoxXYZExtension.Empty;
 
-      if (!view.ViewType.IsGraphicalViewType())
+      if (!view.ViewType.IsModelViewType())
         return BoundingBoxXYZExtension.Universe;
 
       switch (view.CropBox)
@@ -421,7 +451,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       var filter = default(ElementFilter);
 
-      if (view.IsGraphicalView())
+      if (view.IsModelView())
       {
         if (view is ViewSheet || view is ViewDrafting || view.ViewType == ViewType.Legend)
           return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty; // No model elements here
