@@ -26,6 +26,7 @@ namespace RhinoInside.Revit.GH.Components
     : base(name, nickname, description, category, subCategory)
     {
       variableParameterScheme = VariableParameterScheme;
+      Params.ParameterSourcesChanged += ParameterSourcesChanged;
     }
 
     protected enum ParamRelevance
@@ -108,6 +109,18 @@ namespace RhinoInside.Revit.GH.Components
     {
       foreach (var definition in Outputs.Where(x => x.Relevance >= ParamRelevance.Primary))
         manager.AddParameter(definition.Param.CreateTwin());
+    }
+
+    private void ParameterSourcesChanged(object sender, GH_ParamServerEventArgs e)
+    {
+      if (e.ParameterSide != GH_ParameterSide.Input) return;
+      var t = IndexOf(Inputs, e.Parameter); if (t < 0) return;
+
+      if (Inputs[t].Relevance == ParamRelevance.Binding && Inputs[t].Param.Optional)
+      {
+        // Optional parameters enable gap logic and provoke undesired nulls at the output.
+        e.Parameter.Optional = e.Parameter.SourceCount == 0;
+      }
     }
 
     #region UI
@@ -564,7 +577,18 @@ namespace RhinoInside.Revit.GH.Components
         if (Pressed)
         {
           if (((RectangleF) ButtonBounds).Contains(e.CanvasLocation))
+          {
+            if (Owner.OnPingDocument() is GH_Document document)
+            {
+              GH_Document.SolutionEndEventHandler SolutionEnd = null;
+              document.SolutionEnd += SolutionEnd = (object s, GH_SolutionEventArgs args) =>
+              {
+                (s as GH_Document).SolutionEnd -= SolutionEnd;
+                Pressed = false;
+              };
+            }
             Owner.ExpireSolution(true);
+          }
 
           Pressed = false;
           sender.Refresh();
@@ -593,9 +617,12 @@ namespace RhinoInside.Revit.GH.Components
     {
       base.AppendAdditionalMenuItems(menu);
 
-      Menu_AppendSeparator(menu);
-      Menu_AppendItem(menu, "Hide unused parameters", Menu_HideUnconnectedParameters, !AreAllParametersConnected(), false);
-      Menu_AppendItem(menu, "Show all parameters", Menu_ShowAllParameters, !AreAllParametersVisible(), false);
+      if (Inputs.Any(x => x.Relevance != ParamRelevance.Binding) || Outputs.Any(x => x.Relevance != ParamRelevance.Binding))
+      {
+        Menu_AppendSeparator(menu);
+        Menu_AppendItem(menu, "Hide unused parameters", Menu_HideUnconnectedParameters, !AreAllParametersConnected(), false);
+        Menu_AppendItem(menu, "Show all parameters", Menu_ShowAllParameters, !AreAllParametersVisible(), false);
+      }
     }
 
     bool AreAllParametersVisible()
@@ -637,8 +664,7 @@ namespace RhinoInside.Revit.GH.Components
             while (CanInsertParameter(GH_ParameterSide.Input, index))
             {
               var param = CreateParameter(GH_ParameterSide.Input, index);
-              if (Params.RegisterInputParam(param, index))
-                inputAdded |= !param.Optional;
+              inputAdded |= Params.RegisterInputParam(param, index);
             }
           }
         }
@@ -657,14 +683,12 @@ namespace RhinoInside.Revit.GH.Components
 
         Params.OnParametersChanged();
 
-        if (inputAdded) ExpireSolution(true);
-        else
+        if (inputAdded || outputAdded)
         {
-          OnDisplayExpired(false);
-
-          if (outputAdded)
-            Phase = GH_SolutionPhase.Blank;
+          VariableParameterMaintenance();
+          ExpireSolution(true);
         }
+        else OnDisplayExpired(false);
       }
     }
 
@@ -707,11 +731,12 @@ namespace RhinoInside.Revit.GH.Components
 
         Params.OnParametersChanged();
 
-        if (inputRemoved) ExpireSolution(true);
-        else
+        if (inputRemoved)
         {
-          OnDisplayExpired(false);
+          VariableParameterMaintenance();
+          ExpireSolution(true);
         }
+        else OnDisplayExpired(false);
       }
     }
     #endregion
