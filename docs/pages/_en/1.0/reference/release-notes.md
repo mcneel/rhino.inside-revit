@@ -15,10 +15,14 @@ group: Deployment & Configs
 
 ### RC
 
-- Added 'Open View' component.
+
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.18 RC3" version="v1.18.8746.17424" pre_release=true time="12/12/2023" %}
+
+- Misc Fixes and Improvements
 
 {% include ltr/release-header.html title="v1.18 RC2" version="v1.18.8739.18374" pre_release=true time="12/05/2023" %}
 
