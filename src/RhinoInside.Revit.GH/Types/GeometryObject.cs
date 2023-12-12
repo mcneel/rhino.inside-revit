@@ -10,11 +10,13 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using System.Collections.Generic;
   using Convert.Display;
   using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
   using GH.Kernel.Attributes;
+  using Rhino;
 
   [Name("Geometry")]
   public interface IGH_GeometryObject : IGH_Reference { }
@@ -381,7 +383,9 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Name("Element")]
-  public class GeometryElement : GeometryObject, IGH_PreviewData
+  public class GeometryElement : GeometryObject,
+    IGH_PreviewData,
+    Bake.IGH_BakeAwareElement
   {
     public override object ScriptVariable() => base.Value;
 
@@ -456,6 +460,20 @@ namespace RhinoInside.Revit.GH.Types
         }
         finally { if (hasTransform) args.Pipeline.PopModelTransform(); }
       }
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, Rhino.DocObjects.ObjectAttributes att, out Guid guid)
+    {
+      guid = Guid.Empty;
+      return (Element as IGH_BakeAwareData)?.BakeGeometry(doc, att, out guid) ?? false;
+    }
+
+    bool Bake.IGH_BakeAwareElement.BakeElement(IDictionary<ARDB.ElementId, Guid> idMap, bool overwrite, RhinoDoc doc, Rhino.DocObjects.ObjectAttributes att, out Guid guid)
+    {
+      guid = Guid.Empty;
+      return (Element as Bake.IGH_BakeAwareElement)?.BakeElement(idMap, overwrite, doc, att, out guid) ?? false;
     }
     #endregion
 
