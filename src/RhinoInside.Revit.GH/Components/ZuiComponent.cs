@@ -564,7 +564,18 @@ namespace RhinoInside.Revit.GH.Components
         if (Pressed)
         {
           if (((RectangleF) ButtonBounds).Contains(e.CanvasLocation))
+          {
+            if (Owner.OnPingDocument() is GH_Document document)
+            {
+              GH_Document.SolutionEndEventHandler SolutionEnd = null;
+              document.SolutionEnd += SolutionEnd = (object s, GH_SolutionEventArgs args) =>
+              {
+                (s as GH_Document).SolutionEnd -= SolutionEnd;
+                Pressed = false;
+              };
+            }
             Owner.ExpireSolution(true);
+          }
 
           Pressed = false;
           sender.Refresh();
