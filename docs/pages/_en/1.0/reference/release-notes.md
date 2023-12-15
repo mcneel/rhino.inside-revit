@@ -15,6 +15,7 @@ group: Deployment & Configs
 
 ### RC
 
+- Improved 'Add Wall (Profile)' component to accept non vertical profiles. 
 
 
 {% endcapture %}

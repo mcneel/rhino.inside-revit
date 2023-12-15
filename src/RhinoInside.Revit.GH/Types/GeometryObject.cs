@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Rhino;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
@@ -10,13 +12,11 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using System.Collections.Generic;
   using Convert.Display;
   using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
   using GH.Kernel.Attributes;
-  using Rhino;
 
   [Name("Geometry")]
   public interface IGH_GeometryObject : IGH_Reference { }

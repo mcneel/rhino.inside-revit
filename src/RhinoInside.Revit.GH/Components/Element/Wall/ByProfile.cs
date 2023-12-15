@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
+using Rhino.Geometry.Intersect;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
   using Convert.Geometry;
+  using External.DB;
   using External.DB.Extensions;
   using ElementTracking;
   using Kernel.Attributes;
-  using Grasshopper.Kernel.Parameters;
-  using GH_IO.Serialization;
 
   [ComponentVersion(introduced: "1.0", updated: "1.8")]
   public class WallByProfile : ReconstructElementComponent
@@ -77,22 +78,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
     };
     protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix;
 
-    bool Reuse(ref ARDB.Wall element, IList<Curve> boundaries, Plane plane, ARDB.WallType type)
+    bool Reuse(ref ARDB.Wall element, IList<Curve> boundaries, Plane plane, Line line, double slantAngle, ARDB.WallType type)
     {
       if (element is null) return false;
-
-      // TODO : Move & Orient the Wall instead of recreate it.
-      if (element.Location is ARDB.LocationCurve location && location.Curve is ARDB.Line line)
-      {
-        var curEquation = new Plane(line.Origin.ToPoint3d(), line.Direction.ToVector3d(), Vector3d.ZAxis).GetPlaneEquation();
-        var newEquation = plane.GetPlaneEquation();
-
-        if (!GeometryTolerance.Model.DefaultTolerance.Equals(curEquation[3], newEquation[3])) return false;
-      }
-      else return false;
-
-      if (!(element.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, plane.Normal)))
-        return false;
 
       if (element.GetTypeId() != type.Id)
       {
@@ -103,6 +91,48 @@ namespace RhinoInside.Revit.GH.Components.Walls
         }
         else return false;
       }
+
+#if REVIT_2021
+      if (Math.Abs(slantAngle) < element.Document.Application.AngleTolerance)
+      {
+        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(1 /*ARDB.WallCrossSection.Vertical*/);
+      }
+      else
+      {
+        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(0 /*ARDB.WallCrossSection.SingleSlanted*/);
+        element.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(slantAngle);
+      }
+#endif
+
+      if (element.Location is ARDB.LocationCurve location && location.Curve is ARDB.Line locationLine)
+      {
+        var pinned = element.Pinned;
+        var mid0 = locationLine.Evaluate(0.5, normalized: true);
+        var mid1 = line.ClosestPoint(mid0.ToPoint3d(), false).ToXYZ();
+        var distance = mid1 - mid0;
+        if (!distance.IsZeroLength())
+        {
+          element.Pinned = false;
+          location.Move(distance);
+        }
+
+        var angle0 = Vector3d.VectorAngle(Vector3d.XAxis, locationLine.Direction.ToVector3d(), Vector3d.ZAxis);
+        var angle1 = Vector3d.VectorAngle(Vector3d.XAxis, line.Direction, Vector3d.ZAxis);
+        var angle = angle1 - angle0;
+        if (Math.Abs(angle) > GeometryTolerance.Internal.DefaultTolerance)
+        {
+          element.Pinned = false;
+          using (var axis = ARDB.Line.CreateUnbound(mid1, UnitXYZ.BasisZ))
+            location.Rotate(axis, angle);
+        }
+
+        if (element.Pinned != pinned)
+          element.Pinned = pinned;
+      }
+      else return false;
+
+      if (!(element.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, plane.Normal)))
+        return false;
 
       return true;
     }
@@ -118,7 +148,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
       ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT,
       ARDB.BuiltInParameter.WALL_BASE_OFFSET,
       ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT,
-      ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM
+      ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM,
+#if REVIT_2021
+      ARDB.BuiltInParameter.WALL_CROSS_SECTION,
+      ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL,
+#endif
     };
 
     void ReconstructWallByProfile
@@ -155,39 +189,51 @@ namespace RhinoInside.Revit.GH.Components.Walls
            loop is null ||
            loop.IsShort(tol.ShortCurveTolerance) ||
           !loop.IsClosed ||
-          !loop.TryGetPlane(out plane, tol.VertexTolerance) ||
-          !plane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance)
+          !loop.TryGetPlane(out plane, tol.VertexTolerance)
         )
-          ThrowArgumentException(nameof(loops), "Boundary profile should be a valid vertical planar closed curve.", loop);
+          ThrowArgumentException(nameof(profile), "Profile should be a list of planar surfaces.", loop);
+
+#if !REVIT_2021
+        if (!plane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance))
+          ThrowArgumentException(nameof(profile), "Profile should be a list of coplanar vertical surfaces.", loop);
+#endif
 
         loops[index] = loop.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
 
         using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
         {
           if (properties is null)
-            ThrowArgumentException(nameof(loops), "Failed to compute Boundary Area", loop);
+            ThrowArgumentException(nameof(profile), "Failed to compute Boundary Area.", loop);
 
           if (properties.Area > maxArea)
           {
             maxArea = properties.Area;
             var orientation = loop.ClosedCurveOrientation(plane);
 
-            boundaryPlane = new Plane
-            (
-              plane.Origin,
-              Vector3d.CrossProduct
-              (
-                Vector3d.ZAxis,
-                orientation == CurveOrientation.CounterClockwise ? -plane.Normal : plane.Normal
-              ),
-              Vector3d.ZAxis
-            );
+            if (orientation == CurveOrientation.CounterClockwise)
+              plane.Flip();
+
+            boundaryPlane = plane;
+          }
+          else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0)
+          {
+            ThrowArgumentException(nameof(profile), "Profile should be a list of coplanar surfaces.", loops);
           }
         }
       }
 
       SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.WallType, nameof(type));
       SolveOptionalLevel(document, loops, ref level, out var bbox);
+
+      var levelPlane = Plane.WorldXY; levelPlane.Translate(new Vector3d(0.0, 0.0, level.Value.GetElevation() * Revit.ModelUnits));
+      if (!Intersection.PlanePlane(boundaryPlane, levelPlane, out var line) || Vector3d.VectorAngle(boundaryPlane.Normal, Vector3d.ZAxis) < 3.0 * document.Application.AngleTolerance)
+        ThrowArgumentException(nameof(profile), "Profile can't be horizontal.");
+
+      var normal = boundaryPlane.Normal;
+      var flat = new Vector3d(normal.X, normal.Y, 0.0);
+      flat.Unitize();
+      var angle = Vector3d.VectorAngle(flat, normal, line.Direction);
+      if (angle > Math.PI) angle -= 2.0 * Math.PI;
 
       // LocationLine
       if (locationLine != ARDB.WallLocationLine.WallCenterline)
@@ -220,51 +266,69 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
         if (offsetDist != 0.0)
         {
-          offsetDist *= Revit.ModelUnits;
-          var translation = Transform.Translation(boundaryPlane.Normal * (flipped ? -offsetDist : offsetDist));
-          boundaryPlane.Transform(translation);
+          offsetDist *= Revit.ModelUnits / Math.Cos(angle);
+          var translation = flat * ((wall?.Flipped ?? flipped) ? -offsetDist : offsetDist);
 
-          var newLoops = new Curve[loops.Length];
-          for (int p = 0; p < loops.Length; ++p)
-          {
-            newLoops[p] = loops[p].DuplicateCurve();
-            newLoops[p].Transform(translation);
-          }
-
-          loops = newLoops;
+          line = new Line(line.From + translation, line.To + translation);
+          boundaryPlane.Translate(translation);
+          for (int l = 0; l < loops.Length; ++l)
+            loops[l].Translate(translation);
         }
       }
 
-      if (!Reuse(ref wall, loops, boundaryPlane, type.Value))
+      if (!Reuse(ref wall, loops, boundaryPlane, line, angle, type.Value))
       {
+        for (int l = 0; l < loops.Length; ++l)
+          loops[l].Rotate(-angle, line.Direction, line.From);
+
         var boundaries = loops.
-          SelectMany(x => GeometryEncoder.ToCurveMany(Curve.ProjectToPlane(x, boundaryPlane))).
+          SelectMany(x => GeometryEncoder.ToCurveMany(x)).
           SelectMany(CurveExtension.ToBoundedCurves).
           ToList();
 
-        var newWall = ARDB.Wall.Create
-        (
-          document,
-          boundaries,
-          type.Value.Id,
-          level.Value.Id,
-          structural: structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing,
-          boundaryPlane.Normal.ToXYZ()
-        );
-
-        // Wait to join at the end of the Transaction
+        try
         {
-          ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 0);
-          ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 1);
+          var newWall = ARDB.Wall.Create
+          (
+            document,
+            boundaries,
+            type.Value.Id,
+            level.Value.Id,
+            structural: structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing,
+            flat.ToXYZ()
+          );
+
+          // Wait to join at the end of the Transaction
+          {
+            ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 0);
+            ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 1);
+          }
+
+          // Walls are created with the last LocationLine used in the Revit editor!!
+          //newWall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(ARDB.WallLocationLine.WallCenterline);
+
+          // We turn off analytical model off by default
+          newWall.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+
+#if REVIT_2021
+          if (Math.Abs(angle) < newWall.Document.Application.AngleTolerance)
+          {
+            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(1 /*ARDB.WallCrossSection.Vertical*/);
+          }
+          else
+          {
+            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(0 /*ARDB.WallCrossSection.SingleSlanted*/);
+            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(angle);
+          }
+#endif
+
+          ReplaceElement(ref wall, newWall, ExcludeUniqueProperties);
         }
-
-        // Walls are created with the last LocationLine used in the Revit editor!!
-        //newWall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(ARDB.WallLocationLine.WallCenterline);
-
-        // We turn off analytical model off by default
-        newWall.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
-
-        ReplaceElement(ref wall, newWall, ExcludeUniqueProperties);
+        catch (Exception ex)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
+          return;
+        }
       }
 
       if (wall is object)
