@@ -191,7 +191,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           !loop.IsClosed ||
           !loop.TryGetPlane(out plane, tol.VertexTolerance)
         )
-          ThrowArgumentException(nameof(profile), "Profile should be a list of coplanar surfaces.", loop);
+          ThrowArgumentException(nameof(profile), "Profile should be a list of planar surfaces.", loop);
 
 #if !REVIT_2021
         if (!plane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance))
