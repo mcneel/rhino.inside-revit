@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       }
 
 #if REVIT_2021
-      if (Math.Abs(slantAngle) < element.Document.Application.AngleTolerance)
+      if (slantAngle != 0.0)
       {
         element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(1 /*ARDB.WallCrossSection.Vertical*/);
       }
@@ -195,7 +195,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
 #if !REVIT_2021
         if (!plane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance))
-          ThrowArgumentException(nameof(profile), "Profile should be a list of coplanar vertical surfaces.", loop);
+          ThrowArgumentException(nameof(profile), "Profile should be a list of planar vertical surfaces.", loop);
 #endif
 
         loops[index] = loop.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
@@ -203,7 +203,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
         {
           if (properties is null)
-            ThrowArgumentException(nameof(profile), "Failed to compute Boundary Area.", loop);
+            ThrowArgumentException(nameof(profile), "Failed to compute Profile Area.", loop);
 
           if (properties.Area > maxArea)
           {
@@ -215,7 +215,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
             boundaryPlane = plane;
           }
-          else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0)
+          else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0 || Math.Abs(plane.DistanceTo(boundaryPlane.Origin)) > GeometryTolerance.Internal.DefaultTolerance)
           {
             ThrowArgumentException(nameof(profile), "Profile should be a list of coplanar surfaces.", loops);
           }
@@ -234,6 +234,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       flat.Unitize();
       var angle = Vector3d.VectorAngle(flat, normal, line.Direction);
       if (angle > Math.PI) angle -= 2.0 * Math.PI;
+      if (Math.Abs(angle) < document.Application.AngleTolerance) angle = 0.0;
 
       // LocationLine
       if (locationLine != ARDB.WallLocationLine.WallCenterline)
@@ -267,7 +268,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         if (offsetDist != 0.0)
         {
           offsetDist *= Revit.ModelUnits / Math.Cos(angle);
-          var translation = flat * ((wall?.Flipped ?? flipped) ? -offsetDist : offsetDist);
+          var translation = flat * ((wall?.Flipped is true) ? -offsetDist : offsetDist);
 
           line = new Line(line.From + translation, line.To + translation);
           boundaryPlane.Translate(translation);
@@ -278,8 +279,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
       if (!Reuse(ref wall, loops, boundaryPlane, line, angle, type.Value))
       {
-        for (int l = 0; l < loops.Length; ++l)
-          loops[l].Rotate(-angle, line.Direction, line.From);
+        if (angle != 0.0)
+        {
+          for (int l = 0; l < loops.Length; ++l)
+            loops[l].Rotate(-angle, line.Direction, line.From);
+        }
 
         var boundaries = loops.
           SelectMany(x => GeometryEncoder.ToCurveMany(x)).
@@ -298,7 +302,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
             flat.ToXYZ()
           );
 
-          // Wait to join at the end of the Transaction
+          // Delay join at the end of the Transaction
           {
             ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 0);
             ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 1);
@@ -311,7 +315,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           newWall.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
 
 #if REVIT_2021
-          if (Math.Abs(angle) < newWall.Document.Application.AngleTolerance)
+          if (angle != 0.0)
           {
             newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(1 /*ARDB.WallCrossSection.Vertical*/);
           }
