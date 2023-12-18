@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -726,6 +727,91 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
       }
     }
+    #endregion
+
+    #region FilteredElementCollector
+    public static FilteredElementCollector GetVisibleElementsCollector(this View view, ElementId linkId = default)
+    {
+      if (!linkId.IsValid())
+        return new FilteredElementCollector(view.Document, view.Id);
+
+#if REVIT_2024
+      return new FilteredElementCollector(view.Document, view.Id, linkId);
+#else
+      if (view.Document.GetElement(linkId) is RevitLinkInstance link && link.GetLinkDocument() is Document linkDocument)
+      {
+        var linkedElementIds = default(ICollection<ElementId>);
+        using (linkDocument.RollBackScope())
+        {
+          link.GetTransform().TryGetInverse(out var inverse);
+          var offset = inverse.OfPoint(XYZExtension.Zero);
+
+          var elementsToCopy = new HashSet<ElementId>(default(ElementIdEqualityComparer)) { view.Id };
+          if (view.GenLevel?.Id is ElementId genLevelId && genLevelId.IsValid()) elementsToCopy.Add(genLevelId);
+          if (view is ViewPlan viewPlanSource)
+          {
+            using (var viewRange = viewPlanSource.GetViewRange())
+            {
+              for (var plane = PlanViewPlane.CutPlane; plane <= PlanViewPlane.UnderlayBottom; ++plane)
+              {
+                var levelId = viewRange.GetLevelId(plane);
+                if (levelId.IsBuiltInId()) continue;
+                elementsToCopy.Add(levelId);
+              }
+            }
+
+            var underlayBaseLevelId = viewPlanSource.GetUnderlayBaseLevel();
+            if (!underlayBaseLevelId.IsBuiltInId()) elementsToCopy.Add(underlayBaseLevelId);
+            var underlayTopLevelId = viewPlanSource.GetUnderlayTopLevel();
+            if (!underlayTopLevelId.IsBuiltInId()) elementsToCopy.Add(underlayTopLevelId);
+          }
+
+          // Inverse transform copied elements.
+          var copiedElementIds = view.Document.CopyElements(elementsToCopy, linkDocument);
+          foreach (var copiedElement in copiedElementIds.Values.Select(x => linkDocument.GetElement(x)))
+          {
+            switch (copiedElement)
+            {
+              case View copiedView:
+
+                copiedView.SetLocation
+                (
+                  inverse.OfPoint(copiedView.Origin),
+                  inverse.OfVector(copiedView.RightDirection).ToUnitXYZ(),
+                  inverse.OfVector(copiedView.UpDirection).ToUnitXYZ()
+                );
+
+                if (copiedView is View3D view3D && view3D.IsSectionBoxActive)
+                {
+                  var source = (copiedView as View3D).GetSectionBox();
+
+                  var target = view3D.GetSectionBox();
+                  var result = inverse.OfBoundingBoxXYZ(target);
+                  view3D.SetSectionBox(result);
+                  target = view3D.GetSectionBox();
+                }
+                break;
+
+              case Level copiedLevel:
+                copiedLevel.Elevation += offset.Z;
+                break;
+            }
+          }
+
+          linkDocument.Regenerate();
+
+          using (var collector = new FilteredElementCollector(linkDocument, copiedElementIds[view.Id]))
+            linkedElementIds = collector.ToElementIds();
+        }
+
+        return new FilteredElementCollector(linkDocument, linkedElementIds);
+      }
+
+      // This is here to fire an Autodesk.Revit.Exceptions.ArgumentException.
+      return new FilteredElementCollector(view.Document, ElementIdExtension.Invalid);
+#endif
+    }
+
     #endregion
   }
 
