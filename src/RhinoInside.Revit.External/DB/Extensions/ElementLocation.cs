@@ -12,18 +12,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Element
     internal delegate (XYZ Origin, UnitXYZ BasisX, UnitXYZ BasisY) LocationGetter<T>(T element) where T : Element;
 
-    internal static void SetLocation<T>(this T element, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY, LocationGetter<T> GetLocation, out bool modified)
-      where T : Element
+    internal static void SetLocation<TTarget, TSource>(this TTarget target, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY, TSource source, LocationGetter<TSource> GetLocation, out bool modified)
+      where TTarget : Element
+      where TSource : Element
     {
       if (!UnitXYZ.Orthonormal(newBasisX, newBasisY, out var newBasisZ))
         throw new System.ArgumentException("Location basis is not Orthonormal");
 
       modified = false;
-      var pinned = element.Pinned;
+      var pinned = target.Pinned;
 
       try
       {
-        var (origin, basisX, basisY) = GetLocation(element);
+        var (origin, basisX, basisY) = GetLocation(source);
         UnitXYZ.Orthonormal(basisX, basisY, out var basisZ);
 
         if (!basisZ.IsCodirectionalTo(newBasisZ))
@@ -31,39 +32,45 @@ namespace RhinoInside.Revit.External.DB.Extensions
           var axisDirection = basisZ.CrossProduct(newBasisZ);
           if (axisDirection.IsZeroLength()) axisDirection = basisY;
 
-          if (element.Pinned) element.Pinned = false;
+          if (target.Pinned) target.Pinned = false;
           using (var axis = Line.CreateUnbound(origin, axisDirection))
-            ElementTransformUtils.RotateElement(element.Document, element.Id, axis, basisZ.AngleTo(newBasisZ));
+            ElementTransformUtils.RotateElement(target.Document, target.Id, axis, basisZ.AngleTo(newBasisZ));
           modified = true;
 
-          (origin, basisX, basisY) = GetLocation(element);
+          (origin, basisX, basisY) = GetLocation(source);
         }
 
         if (!basisX.AlmostEquals(newBasisX))
         {
-          if(element.Pinned) element.Pinned = false;
+          if(target.Pinned) target.Pinned = false;
           using (var axis = Line.CreateUnbound(origin, newBasisZ))
-            ElementTransformUtils.RotateElement(element.Document, element.Id, axis, basisX.AngleOnPlaneTo(newBasisX, newBasisZ));
+            ElementTransformUtils.RotateElement(target.Document, target.Id, axis, basisX.AngleOnPlaneTo(newBasisX, newBasisZ));
           modified = true;
 
-          (origin, basisX, basisY) = GetLocation(element);
+          (origin, basisX, basisY) = GetLocation(source);
         }
 
         {
           var trans = newOrigin - origin;
           if (!trans.IsZeroLength())
           {
-            if (element.Pinned) element.Pinned = false;
-            ElementTransformUtils.MoveElement(element.Document, element.Id, trans);
+            if (target.Pinned) target.Pinned = false;
+            ElementTransformUtils.MoveElement(target.Document, target.Id, trans);
             modified = true;
           }
         }
       }
       finally
       {
-        if (element.Pinned != pinned)
-          element.Pinned = pinned;
+        if (target.Pinned != pinned)
+          target.Pinned = pinned;
       }
+    }
+
+    internal static void SetLocation<T>(this T element, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY, LocationGetter<T> GetLocation, out bool modified)
+      where T : Element
+    {
+      SetLocation(element, newOrigin, newBasisX, newBasisY, element, GetLocation, out modified);
     }
 
     internal static void SetLocation<T>(this T element, XYZ newOrigin, UnitXYZ newBasisX, LocationGetter<T> GetLocation, out bool modified)
@@ -145,6 +152,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (modified)
           element.Pinned = pinned;
       }
+    }
+    #endregion
+
+    #region View
+    public static (XYZ Origin, UnitXYZ BasisX, UnitXYZ BasisY) GetLocation(this View view)
+    {
+      return (view.Origin, (UnitXYZ) view.RightDirection, (UnitXYZ) view.UpDirection);
+    }
+
+    public static void SetLocation(this View view, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY)
+    {
+      ElementLocation.SetLocation(view.GetViewer(), newOrigin, newBasisX, newBasisY, view, GetLocation, out var _);
     }
     #endregion
 
