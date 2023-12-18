@@ -9,6 +9,7 @@ using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
+  using External.DB;
   using External.DB.Extensions;
 
   public class QueryElement : ZuiComponent
@@ -149,7 +150,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   {
     public override Guid ComponentGuid => new Guid("79DAEA3A-13A3-49BF-8BEB-AA28E3BE4515");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementIsElementTypeFilter(inverted: true);
+    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.GraphicalElementFilter;
 
     public QueryGraphicalElements() : base
     (
@@ -165,6 +166,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     static readonly ParamDefinition[] inputs =
     {
       ParamDefinition.Create<Parameters.View>("View", "V", "View", GH_ParamAccess.item),
+      //ParamDefinition.Create<Parameters.GraphicalElement>("Link", "L", "Linked Model", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Secondary),
       ParamDefinition.Create<Parameters.Category>("Categories", "C", "Category", GH_ParamAccess.list, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
     };
@@ -178,12 +180,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
+      if (!Params.TryGetData(DA, "Link", out Types.RevitLinkInstance link, x => x.IsValid)) return;
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(view.Document, view.Id))
+      using (var collector = view.Value.GetVisibleElementsCollector(link?.Id))
       {
-        var elementCollector = collector.WherePasses(ElementFilter);
+        var elementCollector = collector;
 
         if (categories is object)
         {
@@ -194,7 +197,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
           elementCollector = elementCollector.WherePasses
           (
-            ERDB.CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
+            CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
           );
         }
         else
@@ -213,14 +216,28 @@ namespace RhinoInside.Revit.GH.Components.Elements
         if (filter is object)
           elementCollector = elementCollector.WherePasses(filter);
 
-        DA.SetDataList
-        (
-          "Elements",
-          elementCollector.
-          Select(Types.GraphicalElement.FromElement).
-          OfType<Types.GraphicalElement>().
-          TakeWhileIsNotEscapeKeyDown(this)
-        );
+        if (link is object)
+        {
+          DA.SetDataList
+          (
+            "Elements",
+            elementCollector.
+            Select(x => Types.GraphicalElement.FromLinkElement(link, Types.GraphicalElement.FromElement(x))).
+            OfType<Types.GraphicalElement>().
+            TakeWhileIsNotEscapeKeyDown(this)
+          );
+        }
+        else
+        {
+          DA.SetDataList
+          (
+            "Elements",
+            elementCollector.
+            Select(Types.GraphicalElement.FromElement).
+            OfType<Types.GraphicalElement>().
+            TakeWhileIsNotEscapeKeyDown(this)
+          );
+        }
       }
     }
   }
