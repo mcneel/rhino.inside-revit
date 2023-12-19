@@ -1316,7 +1316,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           idsToCopy,
           destinationDocument ?? sourceDocument,
           transform,
-          options
+          copyOptions
         ).AsReadOnlyElementIdList();
 
         var copiedElements = new SortedList<ElementId, ElementId>(idsToCopy.Length, ElementIdComparer.Ascending);

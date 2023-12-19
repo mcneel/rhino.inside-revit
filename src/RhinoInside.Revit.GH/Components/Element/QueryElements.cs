@@ -184,9 +184,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = view.Value.GetVisibleElementsCollector(link?.Id))
       {
-        var elementCollector = collector;
+        var elementCollector = view.Value.CollectElements(link?.Id);
 
         if (categories is object)
         {
@@ -195,7 +194,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
             Select(x => x.Id).
             ToList();
 
-          elementCollector = elementCollector.WherePasses
+          elementCollector = elementCollector.WherePassFilter
           (
             CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
           );
@@ -207,14 +206,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
           hiddenCategories.Add(ARDB.BuiltInCategory.OST_SectionBox);  // 'Section Boxes' has little sense here!?!?
           hiddenCategories.Add(ARDB.BuiltInCategory.INVALID);         // `ScheduleSheetInstance` Viewer has no Category, so we filter here
 
-          elementCollector = elementCollector.WherePasses
+          elementCollector = elementCollector.WherePassFilter
           (
             new ARDB.ElementMulticategoryFilter(hiddenCategories, inverted: true)
           );
         }
 
         if (filter is object)
-          elementCollector = elementCollector.WherePasses(filter);
+          elementCollector = elementCollector.WherePassFilter(filter);
 
         if (link is object)
         {

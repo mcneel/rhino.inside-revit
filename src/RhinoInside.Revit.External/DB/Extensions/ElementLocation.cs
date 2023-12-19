@@ -163,7 +163,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static void SetLocation(this View view, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY)
     {
-      ElementLocation.SetLocation(view.GetViewer(), newOrigin, newBasisX, newBasisY, view, GetLocation, out var _);
+      if (view is View3D view3D)
+      {
+        using(var orientation = new ViewOrientation3D(newOrigin, newBasisY, -newBasisX.CrossProduct(newBasisY)))
+          view3D.SetOrientation(orientation);
+      }
+      else ElementLocation.SetLocation(view.GetViewer(), newOrigin, newBasisX, newBasisY, view, GetLocation, out var _);
     }
     #endregion
 

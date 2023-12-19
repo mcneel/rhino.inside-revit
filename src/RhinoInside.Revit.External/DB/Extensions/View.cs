@@ -809,7 +809,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if REVIT_2024
       return new FilteredElementCollector(view.Document, view.Id, linkId);
 #else
-      if (view.Document.GetElement(linkId) is RevitLinkInstance link && link.GetLinkDocument() is Document linkDocument)
+      if
+      (
+        FilteredElementCollector.IsViewValidForElementIteration(view.Document, view.Id) &&
+        view.Document.GetElement(linkId) is RevitLinkInstance link &&
+        link.GetLinkDocument() is Document linkDocument
+      )
       {
         var linkedElementIds = default(ICollection<ElementId>);
         using (linkDocument.RollBackScope())
@@ -845,6 +850,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
             {
               case View copiedView:
 
+                if (copiedView is View3D view3D)
+                {
+                  if (view3D.IsLocked) view3D.Unlock();
+                  if (view3D.IsSectionBoxActive) view3D.SetSectionBox(inverse.OfBoundingBoxXYZ(view3D.GetSectionBox()));
+                }
+
                 copiedView.SetLocation
                 (
                   inverse.OfPoint(copiedView.Origin),
@@ -852,15 +863,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
                   inverse.OfVector(copiedView.UpDirection).ToUnitXYZ()
                 );
 
-                if (copiedView is View3D view3D && view3D.IsSectionBoxActive)
-                {
-                  var source = (copiedView as View3D).GetSectionBox();
-
-                  var target = view3D.GetSectionBox();
-                  var result = inverse.OfBoundingBoxXYZ(target);
-                  view3D.SetSectionBox(result);
-                  target = view3D.GetSectionBox();
-                }
                 break;
 
               case Level copiedLevel:
@@ -882,7 +884,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return new FilteredElementCollector(view.Document, ElementIdExtension.Invalid);
 #endif
     }
-
     #endregion
   }
 

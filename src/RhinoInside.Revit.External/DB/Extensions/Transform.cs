@@ -160,5 +160,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
       other.Transform = transform * value.Transform;
       return other;
     }
+
+    /// <summary>
+    /// Applies the transformation to the plane equation and returns the result.
+    /// </summary>
+    /// <param name="transform">The transform to apply.</param>
+    /// <param name="value">The box to transform.</param>
+    /// <returns>The transformed bounding box</returns>
+    /// <remarks>
+    /// Transformation of a bounding box is affected by the translational part of the transformation.
+    /// </remarks>
+    internal static PlaneEquation OfPlaneEquation(this Transform transform, PlaneEquation equation)
+    {
+      return new PlaneEquation
+      (
+        transform.OfPoint(equation.Point),
+        transform.OfVector(equation.Normal).ToUnitXYZ()
+      );
+    }
   }
 }
