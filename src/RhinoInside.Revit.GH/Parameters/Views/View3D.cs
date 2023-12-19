@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       base.Menu_AppendPromptNew(menu);
 
-      if (Revit.ActiveUIApplication.ActiveUIDocument.Document.GetDefault3DView() is null)
+      if (Revit.ActiveUIDocument?.Document is ARDB.Document activeDocument && activeDocument.GetDefault3DView() is null)
         menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.Default3DView, "Create Default 3D View…");
     }
     #endregion

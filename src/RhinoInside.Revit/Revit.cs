@@ -108,8 +108,8 @@ namespace RhinoInside.Revit
           var RefreshTime = new Stopwatch();
           RefreshTime.Start();
 
-          if (DirectContext3DServer.IsAvailable(ActiveUIApplication.ActiveUIDocument.ActiveGraphicalView))
-            ActiveUIApplication.ActiveUIDocument.RefreshActiveView();
+          if (ActiveUIDocument?.ActiveGraphicalView is ARDB.View activeGraphicalView && DirectContext3DServer.IsAvailable(activeGraphicalView))
+            ActiveUIDocument.RefreshActiveView();
 
           RefreshTime.Stop();
           DirectContext3DServer.RegenThreshold = Math.Max(RefreshTime.ElapsedMilliseconds / 3, 100);
