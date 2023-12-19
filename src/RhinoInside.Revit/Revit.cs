@@ -108,8 +108,8 @@ namespace RhinoInside.Revit
           var RefreshTime = new Stopwatch();
           RefreshTime.Start();
 
-          if (DirectContext3DServer.IsAvailable(ActiveUIApplication.ActiveUIDocument.ActiveGraphicalView))
-            ActiveUIApplication.ActiveUIDocument.RefreshActiveView();
+          if (ActiveUIDocument?.ActiveGraphicalView is ARDB.View activeGraphicalView && DirectContext3DServer.IsAvailable(activeGraphicalView))
+            ActiveUIDocument.RefreshActiveView();
 
           RefreshTime.Stop();
           DirectContext3DServer.RegenThreshold = Math.Max(RefreshTime.ElapsedMilliseconds / 3, 100);
@@ -169,6 +169,7 @@ namespace RhinoInside.Revit
 
     #region Public Properties
     internal static WindowHandle MainWindow { get; private set; } = WindowHandle.Zero;
+    static ARUI.UIApplication HostApplication => Core.Host.Value as ARUI.UIApplication;
 
     /// <summary>
     /// Gets the active <see cref="ARUI.UIApplication"/> in the current UI session.
@@ -177,7 +178,7 @@ namespace RhinoInside.Revit
     /// Provides access to windows, documents, events used at UI level.
     /// </remarks>
     /// <since>1.0</since>
-    public static ARUI.UIApplication ActiveUIApplication => Core.Host.Value as ARUI.UIApplication;
+    public static ARUI.UIApplication ActiveUIApplication => new ARUI.UIApplication(HostApplication.Application);
 
     /// <summary>
     /// Gets the active <see cref="ARAS.Application"/> in the current DB session.
@@ -186,13 +187,13 @@ namespace RhinoInside.Revit
     /// Provides access to tolerances, documents, events used at databse level.
     /// </remarks>
     /// <since>1.0</since>
-    public static ARAS.Application ActiveDBApplication => ActiveUIApplication?.Application;
+    public static ARAS.Application ActiveDBApplication => HostApplication.Application;
 
     /// <summary>
     /// Gets the active <see cref="ARUI.UIDocument"/> in the Revit UI.
     /// </summary>
     /// <since>1.0</since>
-    public static ARUI.UIDocument ActiveUIDocument => ActiveUIApplication?.ActiveUIDocument;
+    public static ARUI.UIDocument ActiveUIDocument => HostApplication.ActiveUIDocument;
 
     /// <summary>
     /// Gets the active <see cref="ARDB.Document"/> in the Revit UI.
