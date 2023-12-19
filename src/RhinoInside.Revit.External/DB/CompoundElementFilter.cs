@@ -420,6 +420,13 @@ namespace RhinoInside.Revit.External.DB
     #endregion
 
     #region Geometry
+    public static ElementFilter GraphicalElementFilter { get; } = Intersect
+    (
+      ElementIsNotElementTypeFilterInstance,
+      ElementHasCategoryFilter,
+      ElementHasBoundingBoxFilter.Union(ElementClassFilter(typeof(DatumPlane)))
+    );
+
     public static ElementFilter BoundingBoxIntersectsFilter(Outline outline, double tolerance, bool inverted)
     {
       if (outline.IsEmpty)

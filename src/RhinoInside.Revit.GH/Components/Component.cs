@@ -370,8 +370,14 @@ namespace RhinoInside.Revit.GH.Components
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, mesh);
                 break;
               }
+
               case Rhino.Geometry.GeometryBase geometry:
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, geometry);
+                break;
+
+              case IEnumerable<Rhino.Geometry.GeometryBase> geometries:
+                foreach(var g in geometries)
+                  AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, argument.Message, g);
                 break;
 
               case BoundingBox bbox:

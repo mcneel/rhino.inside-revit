@@ -199,6 +199,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class FilteredElementCollectorExtension
   {
+    internal static IReadOnlyList<ElementId> AsReadOnlyElementIdList(this ICollection<ElementId> source)
+    {
+      return source is IReadOnlyList<ElementId> list ? list : source.ToArray();
+    }
+
     /// <summary>
     /// Used internally to wrap an <see cref="ICollection{ElementId}"/> into an <see cref="ISet{Elementd}"/>.
     /// </summary>

@@ -165,6 +165,33 @@ namespace RhinoInside.Revit.GH.Types
     public bool IsLinked => ReferenceDocument is object && !ReferenceDocument.IsEquivalent(Document);
     #endregion
 
+    #region Reference Transform
+    class ModelTransform
+    {
+      public static readonly ModelTransform Identity = new ModelTransform(Rhino.Geometry.Transform.Identity);
+      public ModelTransform(Rhino.Geometry.Transform xform) => Value = xform;
+      public readonly Rhino.Geometry.Transform Value;
+      public Rhino.Geometry.Transform? _Inverse = default;
+      public Rhino.Geometry.Transform Inverse => _Inverse ??
+      (
+        Value.TryGetInverse(out var inverse) ?
+        (_Inverse = inverse).Value :
+        throw new InvalidOperationException("Transform is not invertible")
+      );
+    }
+
+    ModelTransform _ReferenceTransform = ModelTransform.Identity;
+    protected bool HasReferenceTransform => _ReferenceTransform != ModelTransform.Identity;
+    protected void ResetReferenceTransform() => _ReferenceTransform = ModelTransform.Identity;
+
+    public Rhino.Geometry.Transform ReferenceTransform
+    {
+      get => _ReferenceTransform.Value;
+      protected set => _ReferenceTransform = new ModelTransform(value);
+    }
+    public Rhino.Geometry.Transform ElementTransform => _ReferenceTransform.Inverse;
+    #endregion
+
     public Reference() { }
 
     protected Reference(ARDB.Document doc, object value) : base(doc, value) { }

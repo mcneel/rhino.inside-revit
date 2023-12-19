@@ -136,9 +136,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.AreaTagType type, Types.Document.FromValue(area.ReferenceDocument), ARDB.BuiltInCategory.OST_AreaTags)) return null;
 
           // Snap Point to the 'Area' 'Elevation'
-          var target = (area.Value.Location as ARDB.LocationPoint).Point;
-          target = area.GetReferenceTransform().OfPoint(target);
-
+          var target = (area.ReferenceTransform * area.Position).ToXYZ();
           var head = headLocation?.ToXYZ();
           head = new ARDB.XYZ(head?.X ?? target.X, head?.Y ?? target.Y, target.Z);
 

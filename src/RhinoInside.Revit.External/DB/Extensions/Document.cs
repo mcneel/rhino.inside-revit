@@ -1293,6 +1293,41 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
     #endregion
 
+    #region Copy
+    internal static IReadOnlyDictionary<ElementId, ElementId> CopyElements
+    (
+      this Document sourceDocument,
+      IEnumerable<ElementId> elementsToCopy,
+      Document destinationDocument = default,
+      CopyPasteOptions options = default,
+      Transform transform = default
+    )
+    {
+      using (var copyOptions = options ?? new CopyPasteOptions())
+      {
+        if (options is null) copyOptions.SetDuplicateTypeNamesAction(DuplicateTypeAction.UseDestinationTypes);
+
+        var idsToCopy = new HashSet<ElementId>(elementsToCopy, default(ElementIdEqualityComparer)).ToArray();
+        Array.Sort(idsToCopy, ElementIdComparer.Ascending);
+
+        var idsCopied = ElementTransformUtils.CopyElements
+        (
+          sourceDocument,
+          idsToCopy,
+          destinationDocument ?? sourceDocument,
+          transform,
+          options
+        ).AsReadOnlyElementIdList();
+
+        var copiedElements = new SortedList<ElementId, ElementId>(idsToCopy.Length, ElementIdComparer.Ascending);
+        for(var i = 0; i < Math.Min(idsToCopy.Length, idsCopied.Count); ++i)
+          copiedElements.Add(idsToCopy[i], idsCopied[i]);
+
+        return copiedElements;
+      }
+    }
+    #endregion
+
     #region Resources
     static readonly Dictionary<string, Document> Resources = new Dictionary<string, Document>();
 

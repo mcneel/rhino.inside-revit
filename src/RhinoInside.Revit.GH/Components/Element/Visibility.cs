@@ -161,10 +161,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
         var viewDocument = viewValue.Document;
         var viewId = viewValue.Id;
 
-        if (viewValue.GetClipFilter(clipped: false) is ARDB.ElementFilter viewFilter)
+        if (viewValue.GetClipFilter(clipped: false) is ARDB.ElementFilter clipFilter)
         {
           using (var collector = new ARDB.FilteredElementCollector(viewDocument, ids))
-            ids = collector.WherePasses(viewFilter).ToElementIds();
+            ids = collector.WherePasses(clipFilter).ToElementIds();
         }
 
         if (ids.Count > 0)
@@ -191,7 +191,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           var viewPhaseFilter = ((viewValue.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE_FILTER)?.AsElement()) as ARDB.PhaseFilter);
           var viewPhase = viewValue.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ElementIdExtension.Invalid;
 
-          using (var viewVisibilityFilter = GetElementVisibilityFilter(viewValue, hidden: true))
+          using (var elementVisibilityFilter = viewValue.GetElementVisibilityFilter(viewDocument, hidden: true))
           {
             foreach (var elementValue in ids.Select(viewDocument.GetElement))
             {
@@ -264,7 +264,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
               {
                 if (viewValue.GetCategoryHidden(elementCategory.Id)) continue;
                 if (elementValue.IsHidden(viewValue)) continue;
-                if (viewVisibilityFilter?.PassesFilter(elementValue) == true) continue;
+                if (elementVisibilityFilter?.PassesFilter(elementValue) is true) continue;
               }
 
               visibleIds.Add(elementValue.Id);
@@ -283,34 +283,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
       }
 
       return ElementIdExtension.EmptySet;
-    }
-
-    static ARDB.ElementFilter GetElementVisibilityFilter(ARDB.View view, bool hidden)
-    {
-      var filters = new List<ARDB.ElementFilter>();
-
-      var viewDocument = view.Document;
-      if (!viewDocument.IsFamilyDocument && view.AreGraphicsOverridesAllowed())
-      {
-        foreach (var filterId in view.GetFilters())
-        {
-          // Skip filters that do not hide elements
-          if (hidden == view.GetFilterVisibility(filterId)) continue;
-
-          switch (viewDocument.GetElement(filterId))
-          {
-            case ARDB.SelectionFilterElement selectionFilterElement:
-              filters.Add(CompoundElementFilter.ExclusionFilter(selectionFilterElement.GetElementIds(), inverted: true));
-              break;
-
-            case ARDB.ParameterFilterElement parameterFilterElement:
-              filters.Add(parameterFilterElement.ToElementFilter());
-              break;
-          }
-        }
-      }
-
-      return filters.Count > 0 ? CompoundElementFilter.Union(filters) : default;
     }
   }
 }

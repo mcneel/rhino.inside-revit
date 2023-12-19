@@ -114,9 +114,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.Mechanical.SpaceTagType type, Types.Document.FromValue(space.ReferenceDocument), ARDB.BuiltInCategory.OST_MEPSpaceTags)) return null;
 
           // Snap Point to the 'Space' 'Elevation'
-          var target = (space.Value.Location as ARDB.LocationPoint).Point;
-          target = space.GetReferenceTransform().OfPoint(target);
-
+          var target = (space.ReferenceTransform * space.Position).ToXYZ();
           var head = headLocation?.ToXYZ();
           head = new ARDB.XYZ(head?.X ?? target.X, head?.Y ?? target.Y, target.Z);
 

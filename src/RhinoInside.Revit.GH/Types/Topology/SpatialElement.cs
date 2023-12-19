@@ -20,6 +20,10 @@ namespace RhinoInside.Revit.GH.Types
       $"{Name} {Number}{(element.Location is null ? " (Unplaced)" : string.Empty)}" : base.DisplayName;
 
     #region Location
+    public override Point3d Position => Value?.Location is ARDB.LocationPoint point ?
+        point.Point.ToPoint3d() :
+        NaN.Point3d;
+
     public override Plane Location => Value?.Location is ARDB.LocationPoint point ?
         new Plane(point.Point.ToPoint3d(), Vector3d.XAxis, Vector3d.YAxis) :
         NaN.Plane;

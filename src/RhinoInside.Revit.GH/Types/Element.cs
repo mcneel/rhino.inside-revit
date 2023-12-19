@@ -8,6 +8,7 @@ using ERDB = RhinoInside.Revit.External.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Display;
+  using Convert.Geometry;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Element")]
@@ -134,15 +135,6 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    static readonly ARDB.Transform IdentityTransform = ARDB.Transform.Identity;
-    internal ARDB.Transform GetReferenceTransform()
-    {
-      // TODO : Keep the transform for preview and other purposes.
-      return IsLinked ?
-        (ReferenceDocument.GetElement(ReferenceId) as ARDB.RevitLinkInstance).GetTransform() :
-        IdentityTransform;
-    }
-
     ARDB.ElementId _ReferenceId = ARDB.ElementId.InvalidElementId;
     public override ARDB.ElementId ReferenceId => _ReferenceId;
 
@@ -171,7 +163,11 @@ namespace RhinoInside.Revit.GH.Types
               {
                 _ReferenceId = linkElementId.LinkInstanceId;
                 _Id = linkElementId.LinkedElementId;
-                Document = (_ReferenceDocument.GetElement(_ReferenceId) as ARDB.RevitLinkInstance).GetLinkDocument();
+                using (var link = _ReferenceDocument.GetElement(_ReferenceId) as ARDB.RevitLinkInstance)
+                {
+                  ReferenceTransform = link.GetTransform().ToTransform();
+                  Document = link.GetLinkDocument();
+                }
               }
               else Document = _ReferenceDocument;
             }
@@ -192,6 +188,7 @@ namespace RhinoInside.Revit.GH.Types
         _ReferenceDocument = default;
         _ReferenceId = default;
         _Id = default;
+        ResetReferenceTransform();
       }
 
       base.UnloadReferencedData();

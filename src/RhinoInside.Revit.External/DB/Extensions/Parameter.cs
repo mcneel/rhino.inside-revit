@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           catch { return false; }
         }
       ).
-      GroupBy(x => LabelUtils.GetLabelFor(x)).
+      GroupBy(LabelUtils.GetLabelFor).
       ToDictionary(x => x.Key, x => (IReadOnlyList<BuiltInParameter>) x.ToArray());
 
     /// <summary>
@@ -232,7 +232,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool Set(this Parameter parameter, Element value)
     {
       if (value is object && !parameter.Element.Document.IsEquivalent(value.Document))
-        throw new InvalidCastException();
+        throw new ArgumentException("Invalid document");
 
       return Set(parameter, value?.Id ?? ElementIdExtension.Invalid);
     }

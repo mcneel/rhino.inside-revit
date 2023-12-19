@@ -106,9 +106,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out ARDB.Architecture.RoomTagType type, Types.Document.FromValue(room.ReferenceDocument), ARDB.BuiltInCategory.OST_RoomTags)) return null;
 
           // Snap Point to the 'Room' 'Elevation'
-          var target = (room.Value.Location as ARDB.LocationPoint).Point;
-          target = room.GetReferenceTransform().OfPoint(target);
-
+          var target = (room.ReferenceTransform * room.Position).ToXYZ();
           var head = headLocation?.ToXYZ();
           head = new ARDB.XYZ(head?.X ?? target.X, head?.Y ?? target.Y, target.Z);
 
