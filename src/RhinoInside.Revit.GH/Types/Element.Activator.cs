@@ -5,6 +5,7 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
   using External.DB.Extensions;
 
   public partial class Element
@@ -183,6 +184,23 @@ namespace RhinoInside.Revit.GH.Types
       return new Element(element);
     }
 
+    internal static Element FromLinkElement(RevitLinkInstance link, Element element)
+    {
+      using (var linkedElementReference = ARDB.Reference.ParseFromStableRepresentation(element.Document, element.ReferenceUniqueId))
+      {
+        using (var elementReference = linkedElementReference.CreateLinkReference(link.Value))
+        {
+          var doc = link.Document;
+          element.ReferenceDocumentId = doc.GetPersistentGUID();
+          element.ReferenceUniqueId = elementReference.ConvertToPersistentRepresentation(doc);
+          element._ReferenceDocument = doc;
+          element._ReferenceId = link.Id;
+          element.ReferenceTransform = link.Value.GetTransform().ToTransform();
+          return element;
+        }
+      }
+    }
+
     public static Element FromElementId(ARDB.Document doc, ARDB.ElementId id)
     {
       if (doc is null || id is null)
@@ -220,6 +238,7 @@ namespace RhinoInside.Revit.GH.Types
               element.ReferenceUniqueId = elementReference.ConvertToPersistentRepresentation(doc);
               element._ReferenceDocument = doc;
               element._ReferenceId = link.Id;
+              element.ReferenceTransform = link.GetTransform().ToTransform();
               return element;
             }
           }

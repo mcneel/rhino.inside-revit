@@ -448,22 +448,29 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return default;
     }
 
+    public static ElementFilter GetModelFilter(this View view, bool clipped = false)
+    {
+      if (view is ViewSheet || view is ViewDrafting || view.ViewType == ViewType.Legend)
+        return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty; // No model elements here
+
+      var filter = clipped ?
+      CompoundElementFilter.Intersect(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped)) :
+      CompoundElementFilter.Union(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped));
+
+      var modelClipBox = view.GetModelClipBox();
+      if (modelClipBox.Enabled)
+        filter = CompoundElementFilter.Intersect(filter, CompoundElementFilter.BoundingBoxIntersectsFilter(modelClipBox.ToOutLine(), view.Document.Application.VertexTolerance, clipped));
+
+      return filter;
+    }
+
     public static ElementFilter GetModelClipFilter(this View view, bool clipped = false)
     {
       var filter = default(ElementFilter);
 
       if (view.IsModelView())
       {
-        if (view is ViewSheet || view is ViewDrafting || view.ViewType == ViewType.Legend)
-          return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty; // No model elements here
-
-        filter = clipped ?
-        CompoundElementFilter.Intersect(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped)) :
-        CompoundElementFilter.Union(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped));
-
-        var modelClipBox = view.GetModelClipBox();
-        if (modelClipBox.Enabled)
-          filter = CompoundElementFilter.Intersect(filter, CompoundElementFilter.BoundingBoxIntersectsFilter(modelClipBox.ToOutLine(), view.Document.Application.VertexTolerance, clipped));
+        filter = GetModelFilter(view, clipped);
       }
       else if (view is TableView table)
       {
@@ -514,6 +521,70 @@ namespace RhinoInside.Revit.External.DB.Extensions
         CompoundElementFilter.Intersect(modelClipFilter, annotationClipFilter) :
         CompoundElementFilter.Union    (modelClipFilter, annotationClipFilter);
     }
+
+    public static ElementFilter GetElementCategoryFilter(this View view, CategoryType categoryType)
+    {
+      var categories = view.Document.Settings.Categories.Cast<Category>().Where
+      (
+        x =>
+        {
+          if (x.CategoryType != categoryType) return false;
+          switch (categoryType)
+          {
+            case CategoryType.Model:
+              switch (x.Id.ToBuiltInCategory())
+              {
+                case BuiltInCategory.OST_ImportObjectStyles: if (view.AreImportCategoriesHidden) return false; break;
+                case BuiltInCategory.OST_PointClouds: if (view.ArePointCloudsHidden) return false; break;
+              }
+              break;
+
+            case CategoryType.Annotation:
+              if (view.AreAnnotationCategoriesHidden) return false; break;
+
+            case CategoryType.AnalyticalModel:
+              if (view.AreAnalyticalModelCategoriesHidden) return false; break;
+          }
+          if (!view.CanCategoryBeHidden(x.Id) || view.GetCategoryHidden(x.Id)) return false;
+          return true;
+        }
+      ).
+      Select(x => x.Id).
+      ToArray();
+
+      return new ElementMulticategoryFilter(categories);
+    }
+
+    public static ElementFilter GetElementVisibilityFilter(this View view, Document document = null, bool hidden = false)
+    {
+      var filters = new List<ElementFilter>();
+
+      var viewDocument = view.Document;
+      if (!viewDocument.IsFamilyDocument && view.AreGraphicsOverridesAllowed())
+      {
+        var linked = document is object && !document.Equals(viewDocument);
+        foreach (var filterId in view.GetFilters())
+        {
+          // Skip filters that do not hide elements
+          if (hidden == view.GetFilterVisibility(filterId)) continue;
+
+          switch (viewDocument.GetElement(filterId))
+          {
+            case SelectionFilterElement selectionFilterElement:
+              if (!linked)
+                filters.Add(CompoundElementFilter.ExclusionFilter(selectionFilterElement.GetElementIds(), inverted: true));
+              break;
+
+            case ParameterFilterElement parameterFilterElement:
+              filters.Add(parameterFilterElement.ToElementFilter());
+              break;
+          }
+        }
+      }
+
+      return filters.Count > 0 ? CompoundElementFilter.Union(filters) : default;
+    }
+
 
     #region Viewer
     public static ViewOrientation3D GetSavedOrientation(this View view)

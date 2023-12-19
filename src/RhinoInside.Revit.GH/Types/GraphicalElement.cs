@@ -219,16 +219,28 @@ namespace RhinoInside.Revit.GH.Types
       return true;
     }
 
+    BoundingBox IGH_PreviewData.ClippingBox => HasReferenceTransform ?
+      ReferenceTransform.TransformBoundingBox(ClippingBox) :
+      ClippingBox;
+
     void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (args.Thickness <= 0 || args.Color.A == 0)
         return;
 
-      if (!IsVisible(args.Pipeline))
-        return;
+      var hasTransform = HasReferenceTransform;
+      try
+      {
+        if (hasTransform)
+          args.Pipeline.PushModelTransform(args.Pipeline.ModelTransform * ReferenceTransform);
 
-      try { DrawViewportWires(args); }
+        if (!IsVisible(args.Pipeline))
+          return;
+
+        DrawViewportWires(args);
+      }
       catch { _ClippingBox = BoundingBox.Empty; }
+      finally { if (hasTransform) args.Pipeline.PopModelTransform(); }
     }
     protected virtual void DrawViewportWires(GH_PreviewWireArgs args)
     {
@@ -241,11 +253,19 @@ namespace RhinoInside.Revit.GH.Types
       if (args.MeshingParameters is null)
         return;
 
-      if (!IsVisible(args.Pipeline))
-        return;
+      var hasTransform = HasReferenceTransform;
+      try
+      {
+        if (hasTransform)
+          args.Pipeline.PushModelTransform(args.Pipeline.ModelTransform * ReferenceTransform);
 
-      try { DrawViewportMeshes(args); }
+        if (!IsVisible(args.Pipeline))
+          return;
+
+        DrawViewportMeshes(args);
+      }
       catch { _ClippingBox = BoundingBox.Empty; }
+      finally { if (hasTransform) args.Pipeline.PopModelTransform(); }
     }
     protected virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion

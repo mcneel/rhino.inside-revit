@@ -201,7 +201,7 @@ namespace RhinoInside.Revit.GH.Components
                   geometry.Project
                   (
                     graphicalElement.Value,
-                    workPlane.WorldToGeometryTransform.ToTransform().OfPoint(origin),
+                    workPlane.ElementTransform.ToTransform().OfPoint(origin),
                     out var faceTransform,
                     out ARDB.Face face,
                     out reference
