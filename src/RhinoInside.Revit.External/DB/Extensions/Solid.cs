@@ -382,7 +382,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var vector = (point - intersection.XYZPoint).ToUnitXYZ();
 
         var faces = new Face[] { edge.GetFace(0), edge.GetFace(1) };
-        if (vector)
+        if (!vector.IsNaN)
         {
           var dot0 = double.PositiveInfinity;
           if (faces[0] is object)

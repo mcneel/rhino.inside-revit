@@ -252,7 +252,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static XYZ Evaluate(this BoundingBoxXYZ value, UnitXYZ xyz)
     {
-      if (!xyz) return default;
+      if (xyz.IsNaN) return XYZExtension.NaN;
 
       var (x, y, z) = xyz;
       var (min, max) = value;

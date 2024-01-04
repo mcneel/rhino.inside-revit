@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.External.DB
     public static UnitXYZ BasisY { get; } = new UnitXYZ(XYZ.BasisY);
     public static UnitXYZ BasisZ { get; } = new UnitXYZ(XYZ.BasisZ);
 
-    public static implicit operator bool(UnitXYZ unit) => unit.Direction is object;
+    public bool IsNaN => Direction is null;
     public static XYZ operator *(UnitXYZ unit, double magnitude) => unit.Direction * magnitude;
     public static XYZ operator *(double magnitude, UnitXYZ unit) => magnitude * unit.Direction;
 
@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.External.DB
       x = u.ToUnitXYZ();
       y = v.ToUnitXYZ();
       z = CrossProduct(x, y).ToUnitXYZ();
-      if (!z) return false;
+      if (z.IsNaN) return false;
 
       y = (UnitXYZ) CrossProduct(z, x);
       return true;

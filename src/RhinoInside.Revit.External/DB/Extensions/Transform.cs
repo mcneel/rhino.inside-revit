@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var principal = covarianceMatrix.OfVector(previous).ToUnitXYZ();
 
       var iterations = 50;
-      while (--iterations > 0 && principal && !previous.AlmostEquals(principal, tolerance))
+      while (--iterations > 0 && !principal.IsNaN && !previous.AlmostEquals(principal, tolerance))
       {
         previous = principal;
         principal = covarianceMatrix.OfVector(previous).ToUnitXYZ();
