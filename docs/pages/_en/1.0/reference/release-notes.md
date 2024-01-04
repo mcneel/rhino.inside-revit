@@ -15,11 +15,13 @@ group: Deployment & Configs
 
 ### RC
 
-- Improved 'Add Wall (Profile)' component to accept non vertical profiles. 
-
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.18 RC4" version="v1.18.8753.16182" pre_release=true time="12/19/2023" %}
+
+- Improved 'Add Wall (Profile)' component to accept non vertical profiles. 
 
 {% include ltr/release-header.html title="v1.18 RC3" version="v1.18.8746.17424" pre_release=true time="12/12/2023" %}
 
