@@ -9,7 +9,7 @@ local machine for development and testing purposes.
   [📥](https://git-scm.com/downloads)
 * Visual Studio 2019 (16.0 or above)
   [📥](https://visualstudio.microsoft.com/downloads/)
-* .NET Framework Developer Pack (4.6.1, 4.6.2, 4.7, 4.8)
+* .NET Framework Developer Pack (4.8)
   [📥](https://www.microsoft.com/net/download/visual-studio-sdks)
 * Rhino 7-8
   [📥](https://www.rhino3d.com/download/rhino/)
