@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         UnitXYZ.Orthonormal(basisX, basisY, out var basisZ);
 
         newBasisX = (new PlaneEquation(origin, basisZ).Project(origin + newBasisX) - origin).ToUnitXYZ();
-        if (newBasisX && !basisX.AlmostEquals(newBasisX))
+        if (!newBasisX.IsNaN && !basisX.AlmostEquals(newBasisX))
         {
           if (element.Pinned) element.Pinned = false;
           using (var axis = Line.CreateUnbound(origin, basisZ))

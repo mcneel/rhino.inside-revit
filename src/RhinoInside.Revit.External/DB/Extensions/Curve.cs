@@ -273,7 +273,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           cov.SetCovariance(ctrlPoints, plane.Project(cov.Origin));
           basisY = cov.GetPrincipalComponent(0D);
 
-          if (!basisY)
+          if (basisY.IsNaN)
             basisY = basisX.Right();
         }
       }
@@ -296,7 +296,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           cov.SetCovariance(ctrlPoints.Skip(closed), plane.Project(cov.Origin));
           basisY = cov.GetPrincipalComponent(0D);
 
-          if (!basisY)
+          if (basisY.IsNaN)
             basisY = basisX.Right();
         }
       }

@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class XYZExtension
   {
-    public static XYZ NaN    { get; } = null; // new XYZ(double.NaN, double.NaN, double.NaN);
+    public static XYZ NaN    { get; } = default;
     public static XYZ Zero   { get; } = XYZ.Zero;
     public static XYZ One    { get; } = new XYZ(1.0, 1.0, 1.0);
 
@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static UnitXYZ ToUnitXYZ(this XYZ xyz)
     {
       var (x, y, z) = xyz;
-      return Euclidean.Normalize3(ref x, ref y, ref z) ? (UnitXYZ) new XYZ(x, y, z) : default;
+      return Euclidean.Normalize3(ref x, ref y, ref z) ? (UnitXYZ) new XYZ(x, y, z) : UnitXYZ.NaN;
     }
 
     /// <summary>
