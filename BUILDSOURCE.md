@@ -5,17 +5,17 @@ local machine for development and testing purposes.
 
 ## Prerequisites
 
-* Git
-  ([download](https://git-scm.com/downloads))
+* Git 
+  [📥](https://git-scm.com/downloads)
 * Visual Studio 2019 (16.0 or above)
-  ([download](https://visualstudio.microsoft.com/downloads/))
-* .NET Framework Developer Pack (4.6.1, 4.6.2, 4.7, 4.8)
-  ([download](https://www.microsoft.com/net/download/visual-studio-sdks))
+  [📥](https://visualstudio.microsoft.com/downloads/)
+* .NET Framework Developer Pack (4.8)
+  [📥](https://www.microsoft.com/net/download/visual-studio-sdks)
 * Rhino 7-8
-  ([download](https://www.rhino3d.com/download/rhino/))
+  [📥](https://www.rhino3d.com/download/rhino/)
 * Autodesk Revit 2018-2024
-  ([download](https://www.autodesk.com/products/revit/free-trial))
-* Add this link to your bookmarks 😉
+  [📥](https://www.autodesk.com/products/revit/free-trial)
+* Add this link to your bookmarks
   ([API docs](https://apidocs.co/))
 
 ## Getting Source & Build
@@ -27,9 +27,10 @@ local machine for development and testing purposes.
     ```
 
 2. In Visual Studio, open `rhino.inside-revit\src\RhinoInside.Revit.sln`.
-3. Set the Solution Configuration drop-down to the **Debug <revit_version>**,
-   with Revit version you have installed or want to test. This will properly link
-   the correct Revit API libraries to the project.
+3. Set the _Solution Configuration_ drop-down to the **Debug <rhino_version>** and
+   the _Solution Platform_ to the desired **<revit_version>**.
+   Use a Rhino and Revit version you have installed and want to test.
+   This will set up the appropriate referenced assemblies on the project.
 4. Navigate to _Build_ > _Build Solution_ to begin your build.
 
 ## Installing & Uninstalling
