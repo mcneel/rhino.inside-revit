@@ -10,14 +10,19 @@ group: Deployment & Configs
 
 ### WIP
 
-- Added {% include ltr/comp.html uuid='f795d14c' %} component.
-- Added {% include ltr/comp.html uuid='7d45ec0d' %} component.
-
 ### RC
 
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.19 RC1" version="v1.19.8780.17135" pre_release=true time="01/15/2024" %}
+
+- Misc Fixes and Improvements
+
+{% include ltr/release-header.html title="v1.18" version="v1.18.8780.17023" time="01/15/2024" %}
+
+- Includes all changes under 1.18 RC releases listed below
 
 {% include ltr/release-header.html title="v1.18 RC4" version="v1.18.8753.16182" pre_release=true time="12/19/2023" %}
 
