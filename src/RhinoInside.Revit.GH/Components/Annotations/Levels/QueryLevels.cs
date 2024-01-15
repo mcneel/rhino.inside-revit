@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
           levels = levels.Where(x => x.Name.IsSymbolNameLike(name));
 
         if (elevation.HasValue)
-          levels = levels.Where(x => elevation.Value.IncludesParameter(x.GetElevation(), false));
+          levels = levels.Where(x => elevation.Value.IncludesParameter(x.GetElevation() * Revit.ModelUnits, false));
 
         DA.SetDataList
         (
