@@ -1,4 +1,5 @@
 using System;
+using OS = System.Environment;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino;
@@ -40,6 +41,23 @@ namespace RhinoInside.Revit.GH.Types
       return NaN.BoundingBox;
     }
 
+    public SiteLocation SiteLocation => SiteLocation.FromElement(Value?.GetSiteLocation()) as SiteLocation;
+
+    internal bool GetEarthAnchor(EarthAnchorPoint anchorPoint)
+    {
+      if (Value is ARDB.ProjectLocation)
+      {
+        var location = Location;
+        anchorPoint.ModelBasePoint = location.Origin;
+        anchorPoint.ModelEast = location.XAxis;
+        anchorPoint.ModelNorth = location.YAxis;
+
+        return true;
+      }
+
+      return false;
+    }
+
     #region IGH_PreviewData
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
@@ -69,39 +87,17 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      if (Value is ARDB.ProjectLocation projectLocation)
+      if (Value is ARDB.ProjectLocation)
       {
-        var name = $"Revit::{projectLocation.Name}";
-
-        // 2. Check if already exist
-        var index = doc.NamedConstructionPlanes.Find(name);
-
         // 3. Update if necessary
-        if (index < 0 || overwrite)
+        if (overwrite)
         {
-          if (projectLocation.GetSiteLocation() is ARDB.SiteLocation siteLocation)
-          {
-            var location = Location;
-            var anchorPoint = new EarthAnchorPoint()
-            {
-              Name = projectLocation.Name,
-              Description = siteLocation.PlaceName,
-              ModelBasePoint = location.Origin,
-              ModelEast = location.XAxis,
-              ModelNorth = location.YAxis,
-              EarthBasepointElevationZero = BasepointZero.MeanSeaLevel,
-              EarthBasepointElevation = UnitScale.Convert(siteLocation.Elevation, UnitScale.Internal, UnitScale.Meters),
-              EarthBasepointLatitude = RhinoMath.ToDegrees(siteLocation.Latitude),
-              EarthBasepointLongitude = RhinoMath.ToDegrees(siteLocation.Longitude),
-            };
+          var anchorPoint = doc.EarthAnchorPoint;
 
-            doc.EarthAnchorPoint = anchorPoint;
-          }
+          GetEarthAnchor(anchorPoint);              // Location on the model
+          SiteLocation.GetEarthAnchor(anchorPoint); // Location on earth
 
-          var cplane = CreateConstructionPlane(name, Location, doc);
-
-          if (index < 0) index = doc.NamedConstructionPlanes.Add(cplane);
-          else if (overwrite) doc.NamedConstructionPlanes.Modify(cplane, index, true);
+          doc.EarthAnchorPoint = anchorPoint;
         }
 
         // TODO: Create a V5 Uuid out of the name
@@ -117,7 +113,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Site Location")]
-  public class SiteLocation : ElementType
+  public class SiteLocation : ElementType, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.SiteLocation);
     public new ARDB.SiteLocation Value => base.Value as ARDB.SiteLocation;
@@ -128,5 +124,65 @@ namespace RhinoInside.Revit.GH.Types
     public override string DisplayName =>
       Value?.PlaceName is string placeName && placeName.Length > 0?
       placeName : base.DisplayName;
+
+    internal bool GetEarthAnchor(EarthAnchorPoint anchorPoint)
+    {
+      if (Value is ARDB.SiteLocation siteLocation)
+      {
+        anchorPoint.Name = siteLocation.PlaceName;
+        //anchorPoint.Description =
+        //"{" +
+        //$"\"geo-coordinate-system-id\": \"{siteLocation.GeoCoordinateSystemId}\", " +
+        //$"\"geo-coordinate-system-definition\": \"{siteLocation.GeoCoordinateSystemDefinition}\", " +
+        //$"\"time-zone\": {siteLocation.TimeZone}, " +
+        //$"\"weather-station-name\": \"{siteLocation.WeatherStationName}\"" +
+        //"}";
+        anchorPoint.EarthBasepointElevation = UnitScale.Convert(siteLocation.Elevation, UnitScale.Internal, UnitScale.Meters);
+        anchorPoint.EarthBasepointLatitude = RhinoMath.ToDegrees(siteLocation.Latitude);
+        anchorPoint.EarthBasepointLongitude = RhinoMath.ToDegrees(siteLocation.Longitude);
+
+        return true;
+      }
+
+      return false;
+    }
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is ARDB.SiteLocation)
+      {
+        // 3. Update if necessary
+        if (overwrite)
+        {
+          var anchorPoint = doc.EarthAnchorPoint;
+          GetEarthAnchor(anchorPoint);
+          doc.EarthAnchorPoint = anchorPoint;
+        }
+
+        // TODO: Create a V5 Uuid out of the name
+        //guid = new Guid(0, 0, 0, BitConverter.GetBytes((long) index));
+        //idMap.Add(Id, guid);
+
+        return true;
+      }
+
+      return false;
+    }
+    #endregion
   }
 }
