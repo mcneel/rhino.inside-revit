@@ -3,6 +3,8 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Families
 {
+  using ERDB = External.DB;
+
   public class FamilyElementVisibilityConstruct : Component
   {
     public override Guid ComponentGuid => new Guid("10EA29D4-16AF-4060-89CE-F467F0069675");
@@ -14,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Families
     (
       name: "Construct Visibility",
       nickname: "Visibility",
-      description: string.Empty,
+      description: "Construct Visibility/Graphics Overrides value",
       category: "Revit",
       subCategory: "Component"
     )
@@ -22,11 +24,11 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddBooleanParameter("ViewSpecific", "V", string.Empty, GH_ParamAccess.item, false);
+      manager.AddBooleanParameter("Model", "M", string.Empty, GH_ParamAccess.item, false);
       manager.AddBooleanParameter("PlanRCPCut", "RCP", string.Empty, GH_ParamAccess.item, true);
-      manager.AddBooleanParameter("TopBottom", "Z", string.Empty, GH_ParamAccess.item, true);
-      manager.AddBooleanParameter("FrontBack", "Y", string.Empty, GH_ParamAccess.item, true);
-      manager.AddBooleanParameter("LeftRight", "X", string.Empty, GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("TopBottom", "XY", string.Empty, GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("FrontBack", "YZ", string.Empty, GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("LeftRight", "XZ", string.Empty, GH_ParamAccess.item, true);
       manager.AddBooleanParameter("OnlyWhenCut", "CUT", string.Empty, GH_ParamAccess.item, false);
 
       manager.AddBooleanParameter("Coarse", "C", string.Empty, GH_ParamAccess.item, true);
@@ -36,37 +38,33 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddIntegerParameter("Visibility", "V", string.Empty, GH_ParamAccess.item);
+      manager.AddIntegerParameter("Visibility", "Vs", "Visibility/Graphics Overrides", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var viewSpecific = false; if (!DA.GetData("ViewSpecific", ref viewSpecific)) return;
-
+      var model = false; if (!DA.GetData(0, ref model)) return;
       var planRCPCut = false; if (!DA.GetData("PlanRCPCut", ref planRCPCut)) return;
       var topBottom = false; if (!DA.GetData("TopBottom", ref topBottom)) return;
       var frontBack = false; if (!DA.GetData("FrontBack", ref frontBack)) return;
       var leftRight = false; if (!DA.GetData("LeftRight", ref leftRight)) return;
       var onlyWhenCut = false; if (!DA.GetData("OnlyWhenCut", ref onlyWhenCut)) return;
-
       var coarse = false; if (!DA.GetData("Coarse", ref coarse)) return;
       var medium = false; if (!DA.GetData("Medium", ref medium)) return;
       var fine = false; if (!DA.GetData("Fine", ref fine)) return;
 
-      int value = 0;
-      if (viewSpecific) value |= 1 << 1;
+      var value = default(ERDB.FamilyElementVisibility);
+      if (model) value |= ERDB.FamilyElementVisibility.Model;
+      if (planRCPCut)   value |= ERDB.FamilyElementVisibility.PlanRCPCut;
+      if (topBottom)    value |= ERDB.FamilyElementVisibility.TopBottom;
+      if (frontBack)    value |= ERDB.FamilyElementVisibility.FrontBack;
+      if (leftRight)    value |= ERDB.FamilyElementVisibility.LeftRight;
+      if (onlyWhenCut)  value |= ERDB.FamilyElementVisibility.OnlyWhenCut;
+      if (coarse) value |= ERDB.FamilyElementVisibility.Coarse;
+      if (medium) value |= ERDB.FamilyElementVisibility.Medium;
+      if (fine)   value |= ERDB.FamilyElementVisibility.FrontBack;
 
-      if (planRCPCut) value |= 1 << 2;
-      if (topBottom) value |= 1 << 3;
-      if (frontBack) value |= 1 << 4;
-      if (leftRight) value |= 1 << 5;
-      if (onlyWhenCut) value |= 1 << 6;
-
-      if (coarse) value |= 1 << 13;
-      if (medium) value |= 1 << 14;
-      if (fine) value |= 1 << 15;
-
-      DA.SetData("Visibility", value);
+      DA.SetData(0, value);
     }
   }
 }
