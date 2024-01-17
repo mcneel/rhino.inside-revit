@@ -379,8 +379,8 @@ namespace RhinoInside.Revit.GH.Types
     public GeometryElement(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
     public GeometryElement(GraphicalElement element) : base(element.ReferenceDocument, element.GetReference())
     {
-      ReferenceTransform = _Element.ReferenceTransform;
       _Element = element;
+      ReferenceTransform = _Element.ReferenceTransform;
     }
 
     public override BoundingBox GetBoundingBox(Transform xform)
