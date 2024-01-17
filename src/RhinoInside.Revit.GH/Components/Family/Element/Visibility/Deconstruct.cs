@@ -3,6 +3,8 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Families
 {
+  using ERDB = External.DB;
+
   public class FamilyElementVisibilityDeconstruct : Component
   {
     public override Guid ComponentGuid => new Guid("8065268E-1417-4C1B-8495-122E67721F4D");
@@ -14,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Families
     (
       name: "Deconstruct Visibility",
       nickname: "Deconstruct Visibility",
-      description: string.Empty,
+      description: "Deconstruct Visibility/Graphics Overrides value",
       category: "Revit",
       subCategory: "Component"
     )
@@ -22,18 +24,17 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddIntegerParameter("Visibility", "V", string.Empty, GH_ParamAccess.item);
+      manager.AddIntegerParameter("Visibility", "Vs", "Visibility/Graphics Overrides", GH_ParamAccess.item);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddBooleanParameter("ViewSpecific", "V", string.Empty, GH_ParamAccess.item);
+      manager.AddBooleanParameter("Model", "M", string.Empty, GH_ParamAccess.item);
       manager.AddBooleanParameter("PlanRCPCut", "RCP", string.Empty, GH_ParamAccess.item);
-      manager.AddBooleanParameter("TopBottom", "Z", string.Empty, GH_ParamAccess.item);
-      manager.AddBooleanParameter("FrontBack", "Y", string.Empty, GH_ParamAccess.item);
-      manager.AddBooleanParameter("LeftRight", "X", string.Empty, GH_ParamAccess.item);
+      manager.AddBooleanParameter("TopBottom", "XY", string.Empty, GH_ParamAccess.item);
+      manager.AddBooleanParameter("FrontBack", "YZ", string.Empty, GH_ParamAccess.item);
+      manager.AddBooleanParameter("LeftRight", "XZ", string.Empty, GH_ParamAccess.item);
       manager.AddBooleanParameter("OnlyWhenCut", "CUT", string.Empty, GH_ParamAccess.item);
-
       manager.AddBooleanParameter("Coarse", "C", string.Empty, GH_ParamAccess.item);
       manager.AddBooleanParameter("Medium", "M", string.Empty, GH_ParamAccess.item);
       manager.AddBooleanParameter("Fine", "F", string.Empty, GH_ParamAccess.item);
@@ -41,33 +42,21 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      int value = 0;
-      if (!DA.GetData("Visibility", ref value))
+      var value = 0;
+      if (!DA.GetData(0, ref value))
         return;
 
-      var viewSpecific = (value & 1 << 1) != 0;
+      var visibility = (ERDB.FamilyElementVisibility) value;
 
-      var planRCPCut =  (value & 1 << 2) != 0;
-      var topBottom = (value & 1 << 3) != 0;
-      var frontBack = (value & 1 << 4) != 0;
-      var leftRight = (value & 1 << 5) != 0;
-      var onlyWhenCut = (value & 1 << 6) != 0;
-
-      var coarse = (value & 1 << 13) != 0;
-      var medium = (value & 1 << 14) != 0;
-      var fine = (value & 1 << 15) != 0;
-
-      DA.SetData("ViewSpecific", viewSpecific);
-
-      DA.SetData("PlanRCPCut", planRCPCut);
-      DA.SetData("TopBottom", topBottom);
-      DA.SetData("FrontBack", frontBack);
-      DA.SetData("LeftRight", leftRight);
-      DA.SetData("OnlyWhenCut", onlyWhenCut);
-
-      DA.SetData("Coarse", coarse);
-      DA.SetData("Medium", medium);
-      DA.SetData("Fine", fine);
+      DA.SetData(0, visibility.HasFlag(ERDB.FamilyElementVisibility.Model));
+      DA.SetData("PlanRCPCut", visibility.HasFlag(ERDB.FamilyElementVisibility.PlanRCPCut));
+      DA.SetData("TopBottom", visibility.HasFlag(ERDB.FamilyElementVisibility.TopBottom));
+      DA.SetData("FrontBack", visibility.HasFlag(ERDB.FamilyElementVisibility.FrontBack));
+      DA.SetData("LeftRight", visibility.HasFlag(ERDB.FamilyElementVisibility.LeftRight));
+      DA.SetData("OnlyWhenCut", visibility.HasFlag(ERDB.FamilyElementVisibility.OnlyWhenCut));
+      DA.SetData("Coarse", visibility.HasFlag(ERDB.FamilyElementVisibility.Coarse));
+      DA.SetData("Medium", visibility.HasFlag(ERDB.FamilyElementVisibility.Medium));
+      DA.SetData("Fine", visibility.HasFlag(ERDB.FamilyElementVisibility.Fine));
     }
   }
 }

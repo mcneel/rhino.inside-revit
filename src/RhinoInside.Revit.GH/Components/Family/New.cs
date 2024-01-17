@@ -13,6 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 {
   using Convert.Geometry;
   using External.DB.Extensions;
+  using ERDB = External.DB;
 
   public class FamilyNew : TransactionalComponent
   {
@@ -321,7 +322,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           brep.TryGetUserString(ARDB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
           freeForm.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
 
-          brep.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
+          brep.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, ERDB.FamilyElementVisibility.DefaultModel);
           freeForm.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
 
           brep.TryGetUserString(ARDB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out ARDB.ElementId materialId);
@@ -383,7 +384,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
         curve.TryGetUserString(ARDB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out bool symbolic, true);
         curve.TryGetUserString(ARDB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
-        curve.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, 57406);
+        curve.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, ERDB.FamilyElementVisibility.DefaultModel);
 
         if (familyDoc.OwnerFamily.FamilyCategory.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_DetailComponents)
         {
@@ -402,7 +403,7 @@ namespace RhinoInside.Revit.GH.Components.Families
               else detailCurve = familyDoc.FamilyCreate.NewDetailCurve(view, c);
 
               detailCurve.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
-              detailCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
+              detailCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility & ERDB.FamilyElementVisibility.DefaultDetail);
 
               if (familyGraphicsStyle is object)
                 detailCurve.LineStyle = familyGraphicsStyle;
@@ -438,7 +439,7 @@ namespace RhinoInside.Revit.GH.Components.Families
               else symbolicCurve = familyDoc.FamilyCreate.NewSymbolicCurve(c, sketchPlane);
 
               symbolicCurve.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
-              symbolicCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
+              symbolicCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility & ERDB.FamilyElementVisibility.DefaultSymbolic);
 
               if (familyGraphicsStyle is object)
                 symbolicCurve.Subcategory = familyGraphicsStyle;
@@ -453,7 +454,7 @@ namespace RhinoInside.Revit.GH.Components.Families
               else modelCurve = familyDoc.FamilyCreate.NewModelCurve(c, sketchPlane);
 
               modelCurve.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
-              modelCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
+              modelCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility & ERDB.FamilyElementVisibility.DefaultModel);
 
               if (familyGraphicsStyle is object)
                 modelCurve.Subcategory = familyGraphicsStyle;

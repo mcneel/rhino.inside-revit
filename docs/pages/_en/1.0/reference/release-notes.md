@@ -12,6 +12,7 @@ group: Deployment & Configs
 
 ### RC
 
+- Fixed 'Symbolic' input on 'Component Family Curve' component.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

@@ -66,6 +66,7 @@
     <Compile Include="DB\Extensions\Wall.cs" />
     <Compile Include="DB\Extensions\XYZ.cs" />
     <Compile Include="DB\ExternalFailures.cs" />
+    <Compile Include="DB\FamilyElementVisibility.cs" />
     <Compile Include="DB\FloorFunction.cs" />
     <Compile Include="DB\ParameterClass.cs" />
     <Compile Include="DB\ParameterScope.cs" />

@@ -20,8 +20,8 @@ namespace RhinoInside.Revit.GH.Components.Families
     {
       manager.AddBrepParameter("Brep", "B", string.Empty, GH_ParamAccess.item);
       manager[manager.AddBooleanParameter("Visible", "V", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.Category(), "Subcategory", "S", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddIntegerParameter("Visibility", "S", string.Empty, GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddIntegerParameter("Visibility", "Vs", "Visibility/Graphics Overrides", GH_ParamAccess.item)].Optional = true;
+      manager[manager.AddParameter(new Parameters.Category(), "Subcategory", "Sc", string.Empty, GH_ParamAccess.item)].Optional = true;
       manager[manager.AddParameter(new Parameters.Material(), "Material", "M", string.Empty, GH_ParamAccess.item)].Optional = true;
     }
 
@@ -42,13 +42,13 @@ namespace RhinoInside.Revit.GH.Components.Families
       if (DA.GetData("Visible", ref visible))
         brep.TrySetUserString(ARDB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), visible, true);
 
-      var subCategoryId = default(ARDB.ElementId);
-      if (DA.GetData("Subcategory", ref subCategoryId))
-        brep.TrySetUserString(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), subCategoryId);
-
       var visibility = default(int);
       if (DA.GetData("Visibility", ref visibility))
         brep.TrySetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), visibility, 57406);
+
+      var subCategoryId = default(ARDB.ElementId);
+      if (DA.GetData("Subcategory", ref subCategoryId))
+        brep.TrySetUserString(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), subCategoryId);
 
       var materialId = default(ARDB.ElementId);
       if (DA.GetData("Material", ref materialId))
