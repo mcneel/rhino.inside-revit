@@ -301,7 +301,8 @@ namespace RhinoInside.Revit.GH.Components.Families
             ARDB.Category.GetCategory(doc, subCategoryId) is ARDB.Category subCategory
           )
           {
-            if (subCategory.Parent.Id == familyDoc.OwnerFamily.FamilyCategory.Id)
+            var familyCategoryId = familyDoc.OwnerFamily.FamilyCategory.Id;
+            if (subCategory.Id == familyCategoryId || subCategory.Parent?.Id == familyCategoryId)
             {
               familySubCategory = MapCategory(doc, familyDoc, subCategoryId, true);
             }
@@ -314,7 +315,7 @@ namespace RhinoInside.Revit.GH.Components.Families
             }
           }
 
-          if (familySubCategory is null)
+          if (familySubCategory is null || familySubCategory.Parent is null)
             freeForm.get_Parameter(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Update(ARDB.ElementId.InvalidElementId);
           else
             freeForm.Subcategory = familySubCategory;
