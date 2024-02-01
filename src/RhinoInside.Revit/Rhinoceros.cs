@@ -599,18 +599,6 @@ namespace RhinoInside.Revit
           rhinoDoc.ModelSpaceHatchScale = 100.0 * (UnitScale.GetPageScale(rhinoDoc) / UnitScale.GetModelScale(rhinoDoc));
           rhinoDoc.Linetypes.LinetypeScale = 100.0;
 
-          //switch (rhinoDoc.ModelUnitSystem)
-          //{
-          //  case UnitSystem.None: break;
-          //  case UnitSystem.Feet:
-          //  case UnitSystem.Inches:
-          //    newDoc.ModelAbsoluteTolerance = UnitConverter.Convert(1.0 / 160.0, UnitSystem.Inches, newDoc.ModelUnitSystem);
-          //    break;
-          //  default:
-          //    newDoc.ModelAbsoluteTolerance = UnitConverter.Convert(0.1, UnitSystem.Millimeters, newDoc.ModelUnitSystem);
-          //    break;
-          //}
-
           AdjustViewConstructionPlanes(rhinoDoc);
         }
       }
