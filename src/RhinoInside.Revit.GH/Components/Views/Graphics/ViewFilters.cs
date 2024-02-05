@@ -1,11 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  using System.Collections.Generic;
-  using System.Linq;
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.11")]
@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
         var viewFilters = view.Value.GetFilters().AsReadOnlyElementIdSet();
         var filtersToAdd = new HashSet<ARDB.ElementId>(filters.Count);
-        
+
         foreach (var filter in filters.OfType<Types.FilterElement>())
         {
           if (!filter.Document.IsEquivalent(view.Document)) continue;
@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         }
       }
 
-      Params.TrySetDataList(DA, "Filters", () => view.Value.GetFilters().Select(x => Types.FilterElement.FromElement(view.Document.GetElement(x))));
+      Params.TrySetDataList(DA, "Filters", () => view.Value.GetFilters().Select(x => Types.FilterElement.FromElementId(view.Document, x)));
     }
   }
 }
