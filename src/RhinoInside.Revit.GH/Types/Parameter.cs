@@ -1136,7 +1136,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    public new ARDB.Parameter Value => base.Value as ARDB.Parameter;
+    public new ARDB.Parameter Value => base.Value is ARDB.Parameter parameter && parameter.Element is object ? parameter : null;
 
     public override string DisplayName
     {

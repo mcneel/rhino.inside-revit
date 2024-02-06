@@ -297,8 +297,8 @@
     <Compile Include="Components\Views\Graphics\CategoryGraphicOverrides.cs" />
     <Compile Include="Components\Views\Graphics\ElementGraphicOverrides.cs" />
     <Compile Include="Components\Views\Graphics\FilterGraphicOverrides.cs" />
-    <Compile Include="Components\Views\Graphics\Filters.cs" />
     <Compile Include="Components\Views\Graphics\GraphicOverrides.cs" />
+    <Compile Include="Components\Views\Graphics\ViewFilters.cs" />
     <Compile Include="Components\Views\Graphics\WorksetVisibilityOverrides.cs" />
     <Compile Include="Components\Views\Identity.cs" />
     <Compile Include="Components\Views\Open.cs" />

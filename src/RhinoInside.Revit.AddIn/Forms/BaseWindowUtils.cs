@@ -10,14 +10,20 @@ namespace RhinoInside.Revit.AddIn.Forms
   /// </summary>
   static class BaseWindowUtils
   {
+    public static Window ToEtoWindow(this UIApplication uiApp)
+    {
+#if REVIT_2019
+      return Eto.Forms.WpfHelpers.ToEtoWindow(uiApp.MainWindowHandle);
+#else
+      return Eto.Forms.WpfHelpers.ToEtoWindow(Autodesk.Windows.ComponentManager.ApplicationWindow);
+#endif
+    }
+
     public static void SetupWindow(Window wnd, UIApplication uiApp, Size initialSize)
     {
       // set Revit window as parent
-#if REVIT_2019
-      wnd.Owner = Eto.Forms.WpfHelpers.ToEtoWindow(uiApp.MainWindowHandle);
-#else
-      wnd.Owner = Eto.Forms.WpfHelpers.ToEtoWindow(Autodesk.Windows.ComponentManager.ApplicationWindow);
-#endif
+      wnd.Owner = uiApp.ToEtoWindow();
+
       // set the default Rhino icon
       wnd.Icon = Icon.FromResource($"{typeof(Loader).Namespace}.Resources.RIR-logo.ico", typeof(Loader).Assembly);
 
