@@ -20,10 +20,17 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.20 RC1" version="v1.20.8816.29607" pre_release=true time="02/20/2024" %}
+
+- Misc Fixes and Improvements
+
+{% include ltr/release-header.html title="v1.19" version="v1.19.8816.24975" time="02/20/2024" %}
+
+- Includes all changes under 1.19 RC releases listed below
+
 {% include ltr/release-header.html title="v1.19 RC2" version="v1.19.8797.16328" pre_release=true time="01/02/2024" %}
 
 - Re-Released with newly signed libraries and installer
-
 
 {% include ltr/release-header.html title="v1.18" version="v1.18.8797.15011" time="01/02/2024" %}
 
