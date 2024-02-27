@@ -56,8 +56,8 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
     static readonly ARDB.ElementFilter ElementHasGeometryFilter = CompoundElementFilter.Intersect
     (
-      // Not 100% sure but looks like only elements with category have geometry.
-      CompoundElementFilter.ElementHasCategoryFilter,
+      // Not 100% sure but looks like only elements with category or `CombinableElement` have geometry.
+      CompoundElementFilter.ElementHasCategoryFilter.Union(CompoundElementFilter.ElementClassFilter(typeof(ARDB.CombinableElement))),
       CompoundElementFilter.ElementHasBoundingBoxFilter.Union(CompoundElementFilter.ElementClassFilter(typeof(ARDB.FamilySymbol))),
       // Types below return no geometry.
       new ARDB.ElementMulticlassFilter
@@ -227,8 +227,12 @@ namespace RhinoInside.Revit.GH.Components.Geometry
             ToGeometryBaseMany
             (
               x =>
-              options.View is null ||
-              !options.View.GetCategoryHidden(GeometryDecoder.Context.Peek.Category.Id)
+              {
+                if (options.View is null) return true;
+                if (GeometryDecoder.Context.Peek.Category is null) return true;
+                if (!options.View.GetCategoryHidden(GeometryDecoder.Context.Peek.Category?.Id ?? element.Category.Id)) return true;
+                return false;
+              }
             ).
             Where(x => !x.IsNullOrEmpty())
           );
