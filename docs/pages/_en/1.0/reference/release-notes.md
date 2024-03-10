@@ -20,6 +20,10 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.20 RC2" version="v1.20.8823.22283" pre_release=true time="03/09/2024" %}
+
+- Misc Fixes and Improvements
+
 {% include ltr/release-header.html title="v1.20 RC1" version="v1.20.8816.29607" pre_release=true time="02/20/2024" %}
 
 - Misc Fixes and Improvements
