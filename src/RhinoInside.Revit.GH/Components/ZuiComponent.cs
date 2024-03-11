@@ -252,35 +252,36 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region Display
-    private enum ZuiIcon
+    private struct UpdateParamsButton
     {
-      None,
-      Remove,
-      Insert,
-      Cross,
-      Collapse,
-      Expand
-    }
-    
-    private class UpdateParamsRegion
-    {
+      public enum Icon
+      {
+        None,
+        Remove,
+        Insert,
+        Cross,
+        Collapse,
+        Expand
+      }
+
+      public const int ZoomLevel = 5;
       public const float RadiusMin = 1.5F;
       public const float RadiusMax = 3.0F;
 
       private readonly ZuiAttributes m_attributes;
-      private readonly ZuiIcon m_icon = ZuiIcon.None;
+      private readonly Icon m_icon;
       public RectangleF Bounds;
 
-      public UpdateParamsRegion(ZuiAttributes attributes, ZuiIcon icon, PointF center)
+      public UpdateParamsButton(ZuiAttributes attributes, Icon icon, PointF center)
       {
         m_attributes = attributes;
         m_icon = icon;
         Bounds = new RectangleF(center.X - RadiusMax, center.Y - RadiusMax, 2 * RadiusMax, 2 * RadiusMax);
       }
 
-      public virtual bool Contains(PointF pt)
+      public bool Contains(PointF pt)
       {
-        if (!(Bounds.Contains(pt)))
+        if (!Bounds.Contains(pt))
           return false;
 
         float xm = 0.5F * (Bounds.Left + Bounds.Right);
@@ -288,8 +289,8 @@ namespace RhinoInside.Revit.GH.Components
 
         return GH_GraphicsUtil.Distance(pt, new PointF(xm, ym)) <= RadiusMax;
       }
-      
-      public GH_PaletteStyle CreateButtonStyle(GH_PaletteStyle parent, int alpha)
+
+      GH_PaletteStyle CreateButtonStyle(GH_PaletteStyle parent, int alpha)
       {
         Color fill = Color.Black;
         Color edge = Color.Black;
@@ -297,16 +298,16 @@ namespace RhinoInside.Revit.GH.Components
 
         switch (m_icon)
         {
-          case ZuiIcon.Collapse:
-          case ZuiIcon.Remove:
-          case ZuiIcon.Cross:
+          case Icon.Collapse:
+          case Icon.Remove:
+          case Icon.Cross:
             fill = Color.White;
             edge = Color.Black;
             text = Color.Black;
             break;
 
-          case ZuiIcon.Expand:
-          case ZuiIcon.Insert:
+          case Icon.Expand:
+          case Icon.Insert:
             fill = Color.Black;
             edge = Color.Black;
             text = Color.White;
@@ -315,7 +316,7 @@ namespace RhinoInside.Revit.GH.Components
         return new GH_PaletteStyle(Color.FromArgb(alpha, fill), Color.FromArgb(alpha, edge), Color.FromArgb(alpha, text));
       }
 
-      public virtual void Render(Graphics graphics, PointF cursor, int alpha)
+      public void Render(Graphics graphics, PointF cursor, int alpha)
       {
         var xm = Bounds.X + 0.5F * Bounds.Width;
         var ym = Bounds.Y + 0.5F * Bounds.Height;
@@ -335,47 +336,40 @@ namespace RhinoInside.Revit.GH.Components
         var capsuleStyle = GH_CapsuleRenderEngine.GetImpliedStyle(palette, m_attributes);
         var buttonStyle = CreateButtonStyle(capsuleStyle, alpha);
 
-        var edgeColor = buttonStyle.Edge;
-        var fillColor = buttonStyle.Fill;
-        var symbolColor = buttonStyle.Text;
-
-        using (var fill = new SolidBrush(fillColor))
+        using (var fill = new SolidBrush(buttonStyle.Fill))
           graphics.FillEllipse(fill, Bounds);
 
-        using (var edge = new Pen(edgeColor, 0.5F))
+        using (var edge = new Pen(buttonStyle.Edge, 0.5F))
           graphics.DrawEllipse(edge, Bounds);
 
         var sz = 0.5F * r;
         var sw = 0.25F * r;
         var sf = (sz + 0.25f) * 0.75f;
-        using (var symbol = new Pen(symbolColor, sw))
+        using (var symbol = new Pen(buttonStyle.Text, sw))
         {
           switch (m_icon)
           {
-            case ZuiIcon.None:
+            case Icon.None:
               // don't draw the icon
               break;
-
-            case ZuiIcon.Insert:
+            case Icon.Insert:
               graphics.DrawLine(symbol, xm - sz, ym, xm + sz, ym);
               graphics.DrawLine(symbol, xm, ym - sz, xm, ym + sz);
               break;
-
-            case ZuiIcon.Remove:
+            case Icon.Remove:
               graphics.DrawLine(symbol, xm - sz, ym, xm + sz, ym);
               break;
-
-            case ZuiIcon.Cross:
+            case Icon.Cross:
               sz -= 0.25F;
               graphics.DrawLine(symbol, xm - sz, ym - sz, xm + sz, ym + sz);
               graphics.DrawLine(symbol, xm - sz, ym + sz, xm + sz, ym - sz);
               break;
-
-            case ZuiIcon.Collapse:
+            case Icon.Collapse:
               sz += 0.25f;
               graphics.DrawLines
               (
-                symbol, new PointF[]
+                symbol,
+                new PointF[]
                 {
                   new PointF(xm - sf, ym + sz * 0.4f),
                   new PointF(xm, ym - sz * 0.4f),
@@ -383,12 +377,12 @@ namespace RhinoInside.Revit.GH.Components
                 }
               );
               break;
-
-            case ZuiIcon.Expand:
+            case Icon.Expand:
               sz += 0.25f;
               graphics.DrawLines
               (
-                symbol, new PointF[]
+                symbol,
+                new PointF[]
                 {
                   new PointF(xm - sf, ym - sz * 0.4f),
                   new PointF(xm, ym + sz * 0.4f),
@@ -401,15 +395,15 @@ namespace RhinoInside.Revit.GH.Components
         }
       }
     }
-      
+
     internal class ZuiAttributes : GH_ComponentAttributes
     {
       public ZuiAttributes(ZuiComponent owner) : base(owner) { }
 
       bool CanvasFullNames = CentralSettings.CanvasFullNames;
 
-      UpdateParamsRegion ShowParamsButton { get; set; }
-      UpdateParamsRegion HideParamsButton { get; set; }
+      UpdateParamsButton ShowParamsButton;
+      UpdateParamsButton HideParamsButton;
 
       public override void ExpireLayout()
       {
@@ -421,8 +415,8 @@ namespace RhinoInside.Revit.GH.Components
           CanvasFullNames = CentralSettings.CanvasFullNames;
         }
 
-        ShowParamsButton = null;
-        HideParamsButton = null;
+        ShowParamsButton = default;
+        HideParamsButton = default;
 
         base.ExpireLayout();
       }
@@ -432,30 +426,28 @@ namespace RhinoInside.Revit.GH.Components
         base.Layout();
 
         var midX = ContentBox.X + (ContentBox.Width * 0.5f);
-        HideParamsButton = new UpdateParamsRegion(this, ZuiIcon.Collapse, new PointF(midX, ContentBox.Y));
-        ShowParamsButton = new UpdateParamsRegion(this, ZuiIcon.Expand, new PointF(midX, ContentBox.Y + ContentBox.Height));
+        HideParamsButton = new UpdateParamsButton(this, UpdateParamsButton.Icon.Collapse, new PointF(midX, ContentBox.Y));
+        ShowParamsButton = new UpdateParamsButton(this, UpdateParamsButton.Icon.Expand, new PointF(midX, ContentBox.Y + ContentBox.Height));
       }
 
       protected override void Render(GH_Canvas canvas, Graphics graphics, GH_CanvasChannel channel)
       {
         base.Render(canvas, graphics, channel);
+
         if (channel == GH_CanvasChannel.Objects && Owner is ZuiComponent component)
         {
-          if(ShowParamsButton == null || HideParamsButton == null)
-            Layout();
-
           int alpha = GH_Canvas.ZoomFadeHigh;
-          if (alpha < 5)
-            return;
+          if (alpha >= UpdateParamsButton.ZoomLevel)
+          {
+            PointF cursor = canvas.PointToClient(Cursor.Position);
+            cursor = canvas.Viewport.UnprojectPoint(cursor);
 
-          PointF cursor = canvas.PointToClient(System.Windows.Forms.Cursor.Position);
-          cursor = canvas.Viewport.UnprojectPoint(cursor);
+            if (!component.AreAllParametersVisible())
+              ShowParamsButton.Render(graphics, cursor, alpha);
 
-          if (!component.AreAllParametersVisible())
-            ShowParamsButton.Render(graphics, cursor, alpha);
-
-          if (!component.AreAllParametersConnected())
-            HideParamsButton.Render(graphics, cursor, alpha);
+            if (!component.AreAllParametersConnected())
+              HideParamsButton.Render(graphics, cursor, alpha);
+          }
         }
       }
 
@@ -463,17 +455,17 @@ namespace RhinoInside.Revit.GH.Components
       {
         if (Owner is ZuiComponent zuiComponent && e.Button == MouseButtons.Left)
         {
-          if (GH_Canvas.ZoomFadeHigh > 5)
+          if (GH_Canvas.ZoomFadeHigh >= UpdateParamsButton.ZoomLevel)
           {
             if (ShowParamsButton.Contains(e.CanvasLocation))
             {
-              zuiComponent.Menu_ShowAllParameters(sender, e);
+              zuiComponent.ShowAllParameters(sender, e);
               return GH_ObjectResponse.Handled;
             }
 
             if (HideParamsButton.Contains(e.CanvasLocation))
             {
-              zuiComponent.Menu_HideUnconnectedParameters(sender, e);
+              zuiComponent.HideUnconnectedParameters(sender, e);
               return GH_ObjectResponse.Handled;
             }
           }
@@ -494,8 +486,8 @@ namespace RhinoInside.Revit.GH.Components
             if (Owner is ZuiComponent zuiComponent)
             {
               sender.ActiveInteraction = null;
-              if (ctrl) zuiComponent.Menu_HideUnconnectedParameters(sender, e);
-              else if (shift) zuiComponent.Menu_ShowAllParameters(sender, e);
+              if (ctrl) zuiComponent.HideUnconnectedParameters(sender, e);
+              else if (shift) zuiComponent.ShowAllParameters(sender, e);
 
               return GH_ObjectResponse.Handled;
             }
@@ -505,23 +497,25 @@ namespace RhinoInside.Revit.GH.Components
         return base.RespondToMouseDoubleClick(sender, e);
       }
 
-
       public override void SetupTooltip(PointF canvasPoint, GH_TooltipDisplayEventArgs e)
       {
-        if (HideParamsButton != null && GH_Canvas.ZoomFadeHigh > 5 && HideParamsButton.Contains(canvasPoint))
+        if (GH_Canvas.ZoomFadeHigh >= UpdateParamsButton.ZoomLevel)
         {
-          e.Icon = Properties.Resources.RemoveParameter;
-          e.Title = "Hide Parameters";
-          e.Text = "Hide all unused parameters.\nCtrl + Dbl Click";
-          return;
-        }
+          if (HideParamsButton.Contains(canvasPoint))
+          {
+            e.Icon = Properties.Resources.RemoveParameter;
+            e.Title = "Hide Parameters";
+            e.Text = "Hide all unused parameters.\nCtrl + Dbl Click";
+            return;
+          }
 
-        if (ShowParamsButton != null && GH_Canvas.ZoomFadeHigh > 5 && ShowParamsButton.Contains(canvasPoint))
-        {
-          e.Icon = Properties.Resources.InsertParameter;
-          e.Title = "Show Parameters";
-          e.Text = "Show all available parameters.\nShift + Dbl Click";
-          return;
+          if (ShowParamsButton.Contains(canvasPoint))
+          {
+            e.Icon = Properties.Resources.InsertParameter;
+            e.Title = "Show Parameters";
+            e.Text = "Show all available parameters.\nShift + Dbl Click";
+            return;
+          }
         }
 
         base.SetupTooltip(canvasPoint, e);
@@ -620,8 +614,8 @@ namespace RhinoInside.Revit.GH.Components
       if (Inputs.Any(x => x.Relevance != ParamRelevance.Binding) || Outputs.Any(x => x.Relevance != ParamRelevance.Binding))
       {
         Menu_AppendSeparator(menu);
-        Menu_AppendItem(menu, "Hide unused parameters", Menu_HideUnconnectedParameters, !AreAllParametersConnected(), false);
-        Menu_AppendItem(menu, "Show all parameters", Menu_ShowAllParameters, !AreAllParametersVisible(), false);
+        Menu_AppendItem(menu, "Hide unused parameters", HideUnconnectedParameters, !AreAllParametersConnected(), false);
+        Menu_AppendItem(menu, "Show all parameters", ShowAllParameters, !AreAllParametersVisible(), false);
       }
     }
 
@@ -643,7 +637,7 @@ namespace RhinoInside.Revit.GH.Components
       for (int o = 0; o < Params.Output.Count; ++o)
       {
         var param = Params.Output[o];
-        if (param.DataType > GH_ParamData.@void) continue;
+        if (param.Recipients.Count > 0) continue;
         if (CanRemoveParameter(GH_ParameterSide.Output, o))
           return false;
       }
@@ -651,7 +645,7 @@ namespace RhinoInside.Revit.GH.Components
       return true;
     }
 
-    void Menu_ShowAllParameters(object sender, EventArgs e)
+    void ShowAllParameters(object sender, EventArgs e)
     {
       if (OnPingDocument() is GH_Document document)
       {
@@ -692,7 +686,7 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    void Menu_HideUnconnectedParameters(object sender, EventArgs e)
+    void HideUnconnectedParameters(object sender, EventArgs e)
     {
       if (OnPingDocument() is GH_Document document)
       {
