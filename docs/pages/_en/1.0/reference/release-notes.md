@@ -12,10 +12,6 @@ group: Deployment & Configs
 
 ### RC
 
-- Fixed 'Symbolic' input on 'Component Family Curve' component.
-  [#1061](https://github.com/mcneel/rhino.inside-revit/issues/1061)
-- Fixed 'Revit geometry is not accepted into New Component Family component'
-  [#1051](https://github.com/mcneel/rhino.inside-revit/issues/1051)
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
@@ -26,6 +22,10 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.20" version="v1.20.8836.21283" time="03/17/2024" %}
 
+- Fixed 'Symbolic' input on 'Component Family Curve' component.
+  [#1061](https://github.com/mcneel/rhino.inside-revit/issues/1061)
+- Fixed 'Revit geometry is not accepted into New Component Family component'
+  [#1051](https://github.com/mcneel/rhino.inside-revit/issues/1051)
 - Includes all changes under 1.20 RC releases listed below
 
 {% include ltr/release-header.html title="v1.20 RC2" version="v1.20.8823.22283" pre_release=true time="03/09/2024" %}
