@@ -719,7 +719,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static Parameter GetParameter(this Element element, string name, ParameterClass set)
     {
       return element.GetParameters(name, set).
-        OrderByDescending(x => x.Id.IsBuiltInId()). // Ordered by IsBuiltInId to give priority to built-in parameters.
+        OrderByDescending(x => x.HasValue).         // Order descending by HasValue to give priority to parameters that do have a value.
+        ThenByDescending(x => x.Id.IsBuiltInId()).  // Then by IsBuiltInId to give priority to built-in parameters.
         ThenBy(x => x.IsReadOnly).                  // Then by IsReadOnly to give priority non read-only parameters.
         ThenByDescending                            // Then by storage-type to give priority ElementId parameters over String ones.
         (
