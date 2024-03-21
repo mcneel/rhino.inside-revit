@@ -12,6 +12,8 @@ group: Deployment & Configs
 
 ### RC
 
+- Improved 'Element Parameter' when dealing with element that do have several parameters with the same name.
+
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
