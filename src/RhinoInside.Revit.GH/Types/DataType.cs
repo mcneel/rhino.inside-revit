@@ -13,6 +13,7 @@ using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using External.DB.Extensions;
   using Kernel.Attributes;
 
   public abstract class DataType<T> : IGH_Goo,
@@ -127,7 +128,8 @@ namespace RhinoInside.Revit.GH.Types
       return Properties.Resources.UnknownIcon;
     }
 
-    string IGH_ItemDescription.Name => Value?.Label;
+    internal virtual string ItemDescription_Name => Value.Label;
+    string IGH_ItemDescription.Name => ItemDescription_Name;
     string IGH_ItemDescription.Identity => Value?.Name;
     string IGH_ItemDescription.Description => Value?.Namespace;
     #endregion
@@ -524,5 +526,13 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public static Type PickerObjectType => typeof(Parameters.Input.BuiltInCategories);
+
+    #region Properties
+    private ARDB.BuiltInCategory BuiltInCategory => (ARDB.BuiltInCategory) Value;
+
+    internal override string ItemDescription_Name => BuiltInCategory.FullName();
+    public ARDB.CategoryType CategoryType => BuiltInCategory.CategoryType();
+    public bool IsTagCategory => BuiltInCategory.IsTagCategory();
+    #endregion
   }
 }

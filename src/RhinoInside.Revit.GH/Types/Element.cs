@@ -435,8 +435,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    internal ARDB.BuiltInCategory? BuiltInCategory => Value?.Category?.ToBuiltInCategory();
-
     public virtual Category Category
     {
       get => Value is object ?

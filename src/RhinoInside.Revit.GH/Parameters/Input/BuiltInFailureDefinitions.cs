@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       ((System.Drawing.Bitmap) Properties.Resources.ResourceManager.GetObject(GetType().Name)) ??
       base.Icon;
 
-    public ARDB.FailureSeverity FailureSeverity = ARDB.FailureSeverity.Warning;
+    ARDB.FailureSeverity FailureSeverity = ARDB.FailureSeverity.Warning;
 
     public BuiltInFailureDefinitions() : base
     (
@@ -60,9 +60,9 @@ namespace RhinoInside.Revit.GH.Parameters.Input
       {
         MutableNickName = true;
       }
-
-      base.LoadVolatileData();
     }
+
+    protected override void Menu_AppendManageCollection(ToolStripDropDown menu) { }
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
