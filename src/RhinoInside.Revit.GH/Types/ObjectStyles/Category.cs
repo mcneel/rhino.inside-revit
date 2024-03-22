@@ -548,41 +548,50 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    private ARDB.BuiltInCategory? BuiltInCategory => Id?.ToBuiltInCategory();
+
     string _FullName;
-    public string FullName => _FullName ?? (Id.IsBuiltInId() ? _FullName = APIObject?.FullName() : APIObject?.FullName());
+    public string FullName => _FullName ?? (APIObject?.FullName() ?? BuiltInCategory?.FullName());
 
     ARDB.CategoryType? _CategoryType;
-    public ARDB.CategoryType CategoryType => _CategoryType ?? (_CategoryType = (APIObject?.CategoryType ?? ARDB.CategoryType.Invalid)).Value;
+    public ARDB.CategoryType CategoryType => _CategoryType ?? (_CategoryType = APIObject?.CategoryType ?? BuiltInCategory?.CategoryType()) ?? ARDB.CategoryType.Invalid;
 
-    public Category Parent => _IsSubcategory == false ? null : FromCategory(APIObject?.Parent);
+    public Category Parent => _IsSubcategory == false ? null :
+      APIObject is object ? FromCategory(APIObject.Parent) :
+      BuiltInCategory is object ? FromElementId(null, new ARDB.ElementId(BuiltInCategory.Value.Parent())) :
+      null;
 
     public IEnumerable<Category> SubCategories => APIObject?.
       SubCategories?.
       Cast<ARDB.Category>().
-      Where(x => !x.AllowsBoundParameters).
       OrderBy(x => x.Id.ToValue()).
       Select(FromCategory);
 
     bool? _IsTagCategory;
-    public bool? IsTagCategory => _IsTagCategory ?? (_IsTagCategory = APIObject?.IsTagCategory);
+    public bool? IsTagCategory => _IsTagCategory ?? (_IsTagCategory = APIObject?.IsTagCategory ?? BuiltInCategory?.IsTagCategory());
 
     bool? _IsSubcategory;
-    public bool? IsSubcategory => _IsSubcategory ?? (_IsSubcategory = APIObject?.Parent is object);
+    public bool? IsSubcategory => _IsSubcategory ?? (_IsSubcategory =
+    (
+      APIObject is object ? APIObject.Parent is object :
+      BuiltInCategory is object ? BuiltInCategory.Value.Parent() != ARDB.BuiltInCategory.INVALID :
+      default(bool?)
+    ));
 
     bool? _IsVisibleInUI;
-    public bool? IsVisibleInUI => _IsVisibleInUI ?? (_IsVisibleInUI = APIObject?.IsVisibleInUI());
+    public bool? IsVisibleInUI => _IsVisibleInUI ?? (_IsVisibleInUI = APIObject?.IsVisibleInUI() ?? BuiltInCategory?.IsVisibleInUI());
 
     bool? _CanAddSubcategory;
-    public bool? CanAddSubcategory => _CanAddSubcategory ?? (_CanAddSubcategory = APIObject?.CanAddSubcategory);
+    public bool? CanAddSubcategory => _CanAddSubcategory ?? (_CanAddSubcategory = APIObject?.CanAddSubcategory ?? BuiltInCategory?.CanAddSubcategory());
 
     bool? _AllowsBoundParameters;
-    public bool? AllowsBoundParameters => _AllowsBoundParameters ?? (_AllowsBoundParameters = APIObject?.AllowsBoundParameters);
+    public bool? AllowsBoundParameters => _AllowsBoundParameters ?? (_AllowsBoundParameters = APIObject?.AllowsBoundParameters ?? BuiltInCategory?.AllowsBoundParameters());
 
     bool? _HasMaterialQuantities;
-    public bool? HasMaterialQuantities => _HasMaterialQuantities ?? (_HasMaterialQuantities = APIObject?.HasMaterialQuantities);
+    public bool? HasMaterialQuantities => _HasMaterialQuantities ?? (_HasMaterialQuantities = APIObject?.HasMaterialQuantities ?? BuiltInCategory?.HasMaterialQuantities());
 
     bool? _IsCuttable;
-    public bool? IsCuttable => _IsCuttable ?? (_IsCuttable = APIObject?.IsCuttable);
+    public bool? IsCuttable => _IsCuttable ?? (_IsCuttable = APIObject?.IsCuttable ?? BuiltInCategory?.IsCuttable());
     #endregion
 
     #region Object Style

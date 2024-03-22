@@ -13,6 +13,8 @@ group: Deployment & Configs
 ### RC
 
 - Improved 'Element Parameter' when dealing with element that do have several parameters with the same name.
+- Now 'Category Identity' works with Built in Categories.
+- Now 'Built-In Categories' has a right click options to filter by Category Type.
 
 
 {% endcapture %}

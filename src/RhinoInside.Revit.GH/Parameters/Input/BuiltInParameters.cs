@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Parameters.Input
@@ -35,5 +36,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
 
       base.LoadVolatileData();
     }
+
+    protected override void Menu_AppendManageCollection(ToolStripDropDown menu) { }
   }
 }
