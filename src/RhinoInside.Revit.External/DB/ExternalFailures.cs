@@ -8,11 +8,16 @@ namespace RhinoInside.Revit.External.DB
   /// </summary>
   public static class ExternalFailures
   {
+    private static bool FailureDefinitionsCreated = false;
     internal static void CreateFailureDefinitions()
     {
+      if (FailureDefinitionsCreated) return;
+
       TransactionFailures.CreateFailureDefinitions();
       ElementFailures.CreateFailureDefinitions();
       ViewFailures.CreateFailureDefinitions();
+
+      FailureDefinitionsCreated = true;
     }
 
     /// <summary>
