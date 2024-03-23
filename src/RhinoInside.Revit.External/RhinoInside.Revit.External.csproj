@@ -30,7 +30,6 @@
     <Compile Include="DB\Extensions\BoundingBoxUV.cs" />
     <Compile Include="DB\Extensions\BoundingBoxXYZ.cs" />
     <Compile Include="DB\Extensions\BuiltInCategory.cs" />
-    <Compile Include="DB\Extensions\$(RevitVersion)\BuiltInCategory.cs" />
     <Compile Include="DB\Extensions\Category.cs" />
     <Compile Include="DB\Extensions\Color.cs" />
     <Compile Include="DB\Extensions\Curve.cs" />
@@ -72,6 +71,7 @@
     <Compile Include="DB\FloorFunction.cs" />
     <Compile Include="DB\ParameterClass.cs" />
     <Compile Include="DB\ParameterScope.cs" />
+    <Compile Include="DB\Schemas\$(RevitVersion)\BuiltInCategory.cs" />
     <Compile Include="DB\Schemas\CategoryId.cs" />
     <Compile Include="DB\Schemas\CategoryId.Enum.cs" />
     <Compile Include="DB\Schemas\CategoryId.Values.cs" />
