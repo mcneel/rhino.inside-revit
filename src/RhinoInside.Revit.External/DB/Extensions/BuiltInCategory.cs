@@ -1098,7 +1098,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
           ThenBy(x => x.Id.ToString()).
           ToList();
 
-        using (var writer = new System.CodeDom.Compiler.IndentedTextWriter(File.CreateText(Path.Combine(SourceCodePath, document.Application.VersionNumber, "BuiltInCategory.cs")), "  "))
+        var path = Path.Combine
+        (
+          SourceCodePath,
+          "..",
+          "Schemas",
+          document.Application.VersionNumber,
+          "BuiltInCategory.cs"
+        );
+
+        using (var writer = new System.CodeDom.Compiler.IndentedTextWriter(File.CreateText(path), "  "))
         {
           writer.WriteLine("using System.Collections.Generic;");
           writer.WriteLine("using System.Linq;");
@@ -1127,12 +1136,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
             {
               writer.Write($"new Definition(");
               if (d.Parent.IsValid()) writer.Write("  ");
-              writer.Write($"{$"\"{d.Name}\", ", -64}");
+              writer.Write($"{$"\"{d.Name}\", ",-64}");
               if (!d.Parent.IsValid()) writer.Write("  ");
-              writer.Write($"{$"CT.{d.CategoryType}, ", -20}");
-              writer.Write($"{$"{d.IsTagCategory.ToString().ToLower()}, ", -7}");
-              writer.Write($"{$"/*{(int) d.Parent, 9}*/ BIC.{d.Parent}, ", -50}");
-              writer.Write($"{$"/*{(int) d.Id, 9}*/ BIC.{d.Id}, ", -67}");
+              writer.Write($"{$"CT.{d.CategoryType}, ",-20}");
+              writer.Write($"{$"{d.IsTagCategory.ToString().ToLower()}, ",-7}");
+              writer.Write($"{$"/*{(int) d.Parent,9}*/ BIC.{d.Parent}, ",-50}");
+              writer.Write($"{$"/*{(int) d.Id,9}*/ BIC.{d.Id}, ",-67}");
               writer.Write($"{$"{d.CanAddSubcategory.ToString().ToLower()}, ",-7}");
               writer.Write($"{$"{d.AllowsBoundParameters.ToString().ToLower()}, ",-7}");
               writer.Write($"{$"{d.HasMaterialQuantities.ToString().ToLower()}, ",-7}");
