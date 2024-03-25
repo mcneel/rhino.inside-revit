@@ -8,16 +8,14 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// </summary>
   public partial class ParameterId : DataType
   {
-    static readonly ParameterId empty = new ParameterId();
-    public static new ParameterId Empty => empty;
+    public static new ParameterId Empty { get; } = new ParameterId();
 
-    public string LocalizedLabel =>
+    public override string LocalizedLabel => IsNullOrEmpty(this) ? string.Empty :
 #if REVIT_2022
       Autodesk.Revit.DB.LabelUtils.GetLabelForBuiltInParameter(this);
 #else
       Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInParameter) this);
 #endif
-
 
     public ParameterId() { }
     public ParameterId(string id) : base(id)

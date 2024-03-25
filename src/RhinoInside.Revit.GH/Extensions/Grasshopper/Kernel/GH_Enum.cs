@@ -29,15 +29,15 @@ namespace RhinoInside.Revit.GH.Types
 
   public static class GH_Enumerate
   {
-    public static IReadOnlyCollection<T> GetValues<T>() where T : new()
+    public static IEnumerable<T> GetValues<T>() where T : new()
     {
       var enumType = typeof(T);
       if (!typeof(IGH_Enumerate).IsAssignableFrom(typeof(T)))
         throw new ArgumentException($"{enumType} does not implement interface {typeof(IGH_Enumerate)}", nameof(T));
 
-      var _EnumValues_ = enumType.GetProperty("EnumValues", BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static, null, typeof(IReadOnlyCollection<T>), Type.EmptyTypes, null);
+      var _EnumValues_ = enumType.GetProperty("EnumValues", BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static, null, typeof(IEnumerable<T>), Type.EmptyTypes, null);
       if (_EnumValues_ != null)
-        return (IReadOnlyCollection<T>) _EnumValues_?.GetValue(null);
+        return (IEnumerable<T>) _EnumValues_?.GetValue(null);
 
       if (typeof(GH_Enum).IsAssignableFrom(typeof(T)))
       {
@@ -178,13 +178,13 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public static ReadOnlyDictionary<int, string> GetNamedValues(Type enumType)
+    public static IReadOnlyDictionary<int, string> GetNamedValues(Type enumType)
     {
       if (!enumType.IsSubclassOf(typeof(GH_Enum)))
         throw new ArgumentException($"{nameof(enumType)} must be a subclass of {typeof(GH_Enum).FullName}", nameof(enumType));
 
-      var _NamedValues_ = enumType.GetProperty("NamedValues", BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static, null, typeof(ReadOnlyDictionary<int, string>), Type.EmptyTypes, null);
-      return _NamedValues_.GetValue(null) as ReadOnlyDictionary<int, string>;
+      var _NamedValues_ = enumType.GetProperty("NamedValues", BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static, null, typeof(IReadOnlyDictionary<int, string>), Type.EmptyTypes, null);
+      return _NamedValues_.GetValue(null) as IReadOnlyDictionary<int, string>;
     }
 
     public static GH_Enum FromString(Type enumType, string name)
@@ -499,27 +499,19 @@ namespace RhinoInside.Revit.GH.Types
 
     public override object ScriptVariable() => Value;
 
-    static GH_Enum<T>[] enumValues;
-    public static GH_Enum<T>[] EnumValues 
+    public static IEnumerable<GH_Enum<T>> EnumValues 
     {
       get
       {
-        if (enumValues is null)
-        {
-          var names = Enum.GetNames(typeof(T));
-          var values = Enum.GetValues(typeof(T)) as T[];
-          var goos = values.Select(x => { var value = Activator.CreateInstance<GH_Enum<T>>(); value.Value = x; return value; });
-          var set = new SortedSet<GH_Enum<T>>(goos);
-
-          enumValues = set.ToArray();
-        }
-
-        return enumValues;
+        var values = Enum.GetValues(typeof(T)) as T[];
+        var goos = values.Select(x => { var value = Activator.CreateInstance<GH_Enum<T>>(); value.Value = x; return value; });
+        var set = new SortedSet<GH_Enum<T>>(goos);
+        return set;
       }
     }
 
     static ReadOnlyDictionary<int, string> namedValues;
-    public static ReadOnlyDictionary<int, string> NamedValues
+    public static IReadOnlyDictionary<int, string> NamedValues
     {
       get
       {
@@ -658,9 +650,9 @@ namespace RhinoInside.Revit.GH.Parameters
           current = firstValue.Duplicate() as T;
       }
 
-      if (Types.GH_Enumerate.GetValues<T>() is T[] values)
+      if (Types.GH_Enumerate.GetValues<T>() is IEnumerable<T> values)
       {
-        if (values.Length < 7 || (Optional && typeof(Types.IGH_Flags).IsAssignableFrom(typeof(T))))
+        if ((values as ICollection<T>)?.Count < 7 || (Optional && typeof(Types.IGH_Flags).IsAssignableFrom(typeof(T))))
         {
           Menu_AppendSeparator(menu);
           foreach (var e in values)

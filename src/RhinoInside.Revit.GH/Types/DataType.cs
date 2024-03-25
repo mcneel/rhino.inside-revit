@@ -9,6 +9,7 @@ using Grasshopper.Kernel.Types;
 using Grasshopper.Special;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Types
@@ -22,7 +23,7 @@ namespace RhinoInside.Revit.GH.Types
     IComparable,
     IGH_QuickCast,
     IGH_ItemDescription
-    where T : EDBS.DataType, new()
+    where T : EDBS.DataType
   {
     protected DataType() { }
     protected DataType(T value) => Value = value;
@@ -33,7 +34,11 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (!IsValid) return "<invalid>";
         if (IsEmpty) return "<empty>";
+#if REVIT_2022
+        return Value.LocalizedLabel;
+#else
         return Value.Label;
+#endif
       }
     }
 
@@ -50,18 +55,11 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var name = GetType().GetTypeInfo().GetCustomAttribute<NameAttribute>();
-        return name?.Name ?? typeof(T).Name;
+        return $"Revit {name?.Name ?? typeof(T).Name}";
       }
     }
 
-    public virtual string TypeDescription
-    {
-      get
-      {
-        var name = GetType().GetTypeInfo().GetCustomAttribute<DescriptionAttribute>();
-        return name?.Description ?? typeof(T).Name;
-      }
-    }
+    public virtual string TypeDescription => TypeName;
 
     public IGH_Goo Duplicate() => (IGH_Goo) MemberwiseClone();
 
@@ -102,7 +100,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       string typeId = default;
       if (reader.TryGetString("string", ref typeId))
-        Value = (T) Activator.CreateInstance(typeof(T), typeId);
+        Value = (T) Activator.CreateInstance(typeof(T), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.CreateInstance, null, new object[] { typeId }, null, null);
       else
         Value = default;
 
@@ -128,8 +126,14 @@ namespace RhinoInside.Revit.GH.Types
       return Properties.Resources.UnknownIcon;
     }
 
-    internal virtual string ItemDescription_Name => Value.Label;
-    string IGH_ItemDescription.Name => ItemDescription_Name;
+    internal virtual string Label => Value.Label;
+    internal virtual string LocalizedLabel => Value.LocalizedLabel;
+
+#if REVIT_2022
+    string IGH_ItemDescription.Name => LocalizedLabel;
+#else
+    string IGH_ItemDescription.Name => Label;
+#endif
     string IGH_ItemDescription.Identity => Value?.Name;
     string IGH_ItemDescription.Description => Value?.Namespace;
     #endregion
@@ -201,24 +205,11 @@ namespace RhinoInside.Revit.GH.Types
     public UnitType() { }
     public UnitType(EDBS.UnitType value) : base(value) { }
 
-    static UnitType[] enumValues;
-    public static IReadOnlyCollection<UnitType> EnumValues
-    {
-      get
-      {
-        if (enumValues is null)
-        {
-          enumValues = typeof(EDBS.UnitType).
-            GetProperties(BindingFlags.Public | BindingFlags.Static).
-            Where(x => x.PropertyType == typeof(EDBS.UnitType)).
-            Select(x => new UnitType((EDBS.UnitType) x.GetValue(null))).
-            OrderBy(x => x.Value.Label).
-            ToArray();
-        }
-
-        return enumValues;
-      }
-    }
+    public static IEnumerable<UnitType> EnumValues => typeof(EDBS.UnitType).
+      GetProperties(BindingFlags.Public | BindingFlags.Static).
+      Where(x => x.PropertyType == typeof(EDBS.UnitType)).
+      Select(x => new UnitType((EDBS.UnitType) x.GetValue(null))).
+      OrderBy(x => x.Text);
 
     public override bool CastFrom(object source)
     {
@@ -275,34 +266,27 @@ namespace RhinoInside.Revit.GH.Types
     }
 
 
-    static ParameterType[] enumValues;
-    public static IReadOnlyCollection<ParameterType> EnumValues
+    public static IEnumerable<ParameterType> EnumValues
     {
       get
       {
-        if (enumValues is null)
+        var types = new Type[]
         {
-          var types = new Type[]
-          {
-            typeof(EDBS.SpecType.Boolean),
-            typeof(EDBS.SpecType.Int),
-            typeof(EDBS.SpecType.String),
-            typeof(EDBS.SpecType.Measurable),
-            typeof(EDBS.SpecType.Reference)
-          };
+          typeof(EDBS.SpecType.Boolean),
+          typeof(EDBS.SpecType.Int),
+          typeof(EDBS.SpecType.String),
+          typeof(EDBS.SpecType.Measurable),
+          typeof(EDBS.SpecType.Reference)
+        };
 
-          enumValues = types.SelectMany
-          (
-            type => type.
-            GetProperties(BindingFlags.Public | BindingFlags.Static).
-            Where(x => x.PropertyType == typeof(EDBS.SpecType)).
-            Select(x => new ParameterType((EDBS.DataType) x.GetValue(null))).
-            OrderBy(x => x.Value.FullName)
-          ).
-          ToArray();
-        }
-
-        return enumValues;
+        return types.SelectMany
+        (
+          type => type.
+          GetProperties(BindingFlags.Public | BindingFlags.Static).
+          Where(x => x.PropertyType == typeof(EDBS.SpecType)).
+          Select(x => new ParameterType((EDBS.DataType) x.GetValue(null))).
+          OrderBy(x => x.Value.FullName)
+        );
       }
     }
 
@@ -328,13 +312,13 @@ namespace RhinoInside.Revit.GH.Types
             break;
 
           case string t:
-            if (string.IsNullOrEmpty(t))          { Value = EDBS.DataType.Empty; return true; }
-            if (EDBS.SpecType.IsSpecType(t))      { Value = new EDBS.SpecType(t); return true; }
-            if (EDBS.CategoryId.IsCategoryId(t))  { Value = new EDBS.CategoryId(t); return true; }
-            break;            
+            if (string.IsNullOrEmpty(t))                      { Value = EDBS.DataType.Empty; return true; }
+            if (EDBS.SpecType.IsSpecType(t))                  { Value = new EDBS.SpecType(t); return true; }
+            if (EDBS.CategoryId.TryParse(t, null,out var v))  { Value = v; return true; }
+            break;
         }
       }
-      catch (ArgumentException) { return false; }
+      catch { return false; }
 
       return base.CastFrom(source);
     }
@@ -352,24 +336,11 @@ namespace RhinoInside.Revit.GH.Types
     public ParameterGroup() { }
     public ParameterGroup(EDBS.ParameterGroup value) : base(value) { }
 
-    static ParameterGroup[] enumValues;
-    public static IReadOnlyCollection<ParameterGroup> EnumValues
-    {
-      get
-      {
-        if (enumValues is null)
-        {
-          enumValues = typeof(EDBS.ParameterGroup).
-            GetProperties(BindingFlags.Public | BindingFlags.Static).
-            Where(x => x.PropertyType == typeof(EDBS.ParameterGroup)).
-            Select(x => new ParameterGroup((EDBS.ParameterGroup) x.GetValue(null))).
-            OrderBy(x => x.Value.Label).
-            ToArray();
-        }
-
-        return enumValues;
-      }
-    }
+    public static IEnumerable<ParameterGroup> EnumValues => typeof(EDBS.ParameterGroup).
+      GetProperties(BindingFlags.Public | BindingFlags.Static).
+      Where(x => x.PropertyType == typeof(EDBS.ParameterGroup)).
+      Select(x => new ParameterGroup((EDBS.ParameterGroup) x.GetValue(null))).
+      OrderBy(x => x.Value.Label);
 
     public override bool CastFrom(object source)
     {
@@ -414,24 +385,11 @@ namespace RhinoInside.Revit.GH.Types
     public ParameterId() { }
     public ParameterId(EDBS.ParameterId value) : base(value) { }
 
-    static ParameterId[] enumValues;
-    public static IReadOnlyCollection<ParameterId> EnumValues
-    {
-      get
-      {
-        if (enumValues is null)
-        {
-          enumValues = typeof(EDBS.ParameterId).
-            GetProperties(BindingFlags.Public | BindingFlags.Static).
-            Where(x => x.PropertyType == typeof(EDBS.ParameterId)).
-            Select(x => new ParameterId((EDBS.ParameterId) x.GetValue(null))).
-            OrderBy(x => x.Value.Label).
-            ToArray();
-        }
-
-        return enumValues;
-      }
-    }
+    public static IEnumerable<ParameterId> EnumValues => typeof(EDBS.ParameterId).
+      GetProperties(BindingFlags.Public | BindingFlags.Static).
+      Where(x => x.PropertyType == typeof(EDBS.ParameterId)).
+      Select(x => new ParameterId((EDBS.ParameterId) x.GetValue(null))).
+      OrderBy(x => x.Text);
 
     public override bool CastFrom(object source)
     {
@@ -476,24 +434,7 @@ namespace RhinoInside.Revit.GH.Types
     public CategoryId() { }
     public CategoryId(EDBS.CategoryId value) : base(value) { }
 
-    static CategoryId[] enumValues;
-    public static IReadOnlyCollection<CategoryId> EnumValues
-    {
-      get
-      {
-        if (enumValues is null)
-        {
-          enumValues = typeof(EDBS.CategoryId).
-            GetProperties(BindingFlags.Public | BindingFlags.Static).
-            Where(x => x.PropertyType == typeof(EDBS.CategoryId)).
-            Select(x => new CategoryId((EDBS.CategoryId) x.GetValue(null))).
-            OrderBy(x => x.Value.Label).
-            ToArray();
-        }
-
-        return enumValues;
-      }
-    }
+    public static IEnumerable<CategoryId> EnumValues => EDBS.CategoryId.BuiltIn.Values.Select(x => new CategoryId(x));
 
     public override bool CastFrom(object source)
     {
@@ -512,15 +453,15 @@ namespace RhinoInside.Revit.GH.Types
 #endif
           case EDBS.CategoryId v: Value = v; return true;
           case EDBS.DataType s:
-            if (!EDBS.CategoryId.IsCategoryId(s, out var id)) break;
-            Value = id; return true;
+            Value = EDBS.CategoryId.Parse(s.TypeId, null);
+            return true;
 
           case string t:
-            if (!EDBS.CategoryId.IsCategoryId(t)) break;
-            Value = new EDBS.CategoryId(t); return true;
+            Value = EDBS.CategoryId.Parse(t, null);
+            return true;
         }
       }
-      catch (ArgumentException) { return false; }
+      catch { return false; }
 
       return base.CastFrom(source);
     }
@@ -530,9 +471,16 @@ namespace RhinoInside.Revit.GH.Types
     #region Properties
     private ARDB.BuiltInCategory BuiltInCategory => (ARDB.BuiltInCategory) Value;
 
-    internal override string ItemDescription_Name => BuiltInCategory.FullName();
+    public ARDB.ElementId Id => new ARDB.ElementId(BuiltInCategory);
+
+    internal override string Label => BuiltInCategory.FullName(localized: false);
+    internal override string LocalizedLabel => BuiltInCategory.FullName(localized: true);
+
     public ARDB.CategoryType CategoryType => BuiltInCategory.CategoryType();
     public bool IsTagCategory => BuiltInCategory.IsTagCategory();
+    public bool IsSubCategory => BuiltInCategory.Parent() != ARDB.BuiltInCategory.INVALID;
+    public bool IsVisibleInUI => BuiltInCategory.IsVisibleInUI();
+    public ERDB.CategoryDiscipline CategoryDiscipline => BuiltInCategory.CategoryDiscipline();
     #endregion
   }
 }

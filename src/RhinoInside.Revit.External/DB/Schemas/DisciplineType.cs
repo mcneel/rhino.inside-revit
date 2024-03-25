@@ -3,14 +3,13 @@ using System;
 namespace RhinoInside.Revit.External.DB.Schemas
 {
   /// <summary>
-  /// Represents a Revit Discipline
+  /// Represents a Revit parameter discipline
   /// </summary>
   public partial class DisciplineType : DataType
   {
-    static readonly DisciplineType empty = new DisciplineType();
-    public static new DisciplineType Empty => empty;
+    public static new DisciplineType Empty { get; } = new DisciplineType();
 
-    public string LocalizedLabel =>
+    public override string LocalizedLabel => IsNullOrEmpty(this) ? string.Empty :
 #if REVIT_2022
       Autodesk.Revit.DB.LabelUtils.GetLabelForDiscipline(this);
 #else

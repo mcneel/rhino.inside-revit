@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     #region UI
 
-    protected ARDB.BuiltInCategory SelectedBuiltInCategory = ARDB.BuiltInCategory.INVALID;
+    protected EDBS.CategoryId SelectedBuiltInCategory { get; set; } = EDBS.CategoryId.Empty;
 
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
@@ -128,7 +128,7 @@ namespace RhinoInside.Revit.GH.Parameters
         Sorted = true,
         DropDownStyle = ComboBoxStyle.DropDownList,
         Width = (int) (200 * GH_GraphicsUtil.UiScale),
-        DisplayMember = nameof(Types.Element.DisplayName),
+        DisplayMember = nameof(Types.CategoryId.Text),
         Tag = listBox
       };
       categoriesBox.DropDownHeight = categoriesBox.ItemHeight * 15;
@@ -160,14 +160,14 @@ namespace RhinoInside.Revit.GH.Parameters
     private void RefreshCategoryList(ComboBox categoriesBox, ARDB.CategoryType categoryType)
     {
       var doc = Revit.ActiveUIDocument.Document;
-      var categories = doc.GetBuiltInCategoriesWithParameters().Select(x => doc.GetCategory(x));
+      var categories = BuiltInCategoryExtension.BuiltInCategories.Where(x => x.AllowsBoundParameters());
 
       if (categoryType != ARDB.CategoryType.Invalid)
       {
         if (categoryType == (ARDB.CategoryType) 3)
-          categories = categories.Where(x => x.IsTagCategory);
+          categories = categories.Where(x => x.IsTagCategory());
         else
-          categories = categories.Where(x => x.CategoryType == categoryType && !x.IsTagCategory);
+          categories = categories.Where(x => x.CategoryType() == categoryType && !x.IsTagCategory());
       }
 
       categoriesBox.BeginUpdate();
@@ -175,12 +175,12 @@ namespace RhinoInside.Revit.GH.Parameters
       categoriesBox.Items.Clear();
 
       foreach (var category in categories)
-        categoriesBox.Items.Add(Types.Category.FromCategory(category));
+        categoriesBox.Items.Add(new Types.CategoryId(category));
 
       if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
       {
-        var currentCategory = new Types.Category(doc, new ARDB.ElementId(SelectedBuiltInCategory));
-        categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.Category>().IndexOf(currentCategory, 0).FirstOr(-1);
+        var currentCategory = new Types.CategoryId(SelectedBuiltInCategory);
+        categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.CategoryId>().IndexOf(currentCategory, 0).FirstOr(-1);
       }
 
       categoriesBox.EndUpdate();
@@ -190,25 +190,20 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       var doc = Revit.ActiveUIDocument.Document;
 
-      var current = default(Types.ParameterKey);
-      if (SourceCount == 0 && PersistentDataCount == 1)
-      {
-        if (PersistentData.get_FirstItem(true) is Types.ParameterKey firstValue)
-          current = firstValue as Types.ParameterKey;
-      }
+      var current = SourceCount == 0 && PersistentDataCount == 1 ? PersistentData.get_FirstItem(true) : null;
 
       var parameters = default(IEnumerable<ARDB.ElementId>);
       if (categoriesBox.SelectedIndex == -1)
       {
         parameters = categoriesBox.Items.
-                      Cast<Types.Category>().
+                      Cast<Types.CategoryId>().
                       SelectMany(x => ARDB.TableView.GetAvailableParameters(doc, x.Id)).
                       GroupBy(x => x.ToValue()).
                       Select(x => x.First());
       }
       else
       {
-        parameters = ARDB.TableView.GetAvailableParameters(doc, (categoriesBox.Items[categoriesBox.SelectedIndex] as Types.Category).Id);
+        parameters = ARDB.TableView.GetAvailableParameters(doc, (categoriesBox.Items[categoriesBox.SelectedIndex] as Types.CategoryId).Id);
       }
 
       listBox.SelectedIndexChanged -= ListBox_SelectedIndexChanged;
@@ -236,9 +231,9 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       if (sender is ComboBox categoriesBox && categoriesBox.Tag is ListBox parametersListBox)
       {
-        SelectedBuiltInCategory = ARDB.BuiltInCategory.INVALID;
-        if (categoriesBox.SelectedItem is Types.Category category)
-          category.Id.TryGetBuiltInCategory(out SelectedBuiltInCategory);
+        SelectedBuiltInCategory = categoriesBox.SelectedItem is Types.CategoryId category ?
+          category.Value :
+          EDBS.CategoryId.Empty;
 
         RefreshParametersList(parametersListBox, categoriesBox);
       }
@@ -271,10 +266,10 @@ namespace RhinoInside.Revit.GH.Parameters
         return false;
 
       var selectedBuiltInCategory = string.Empty;
-      if (reader.TryGetString("SelectedBuiltInCategory", ref selectedBuiltInCategory))
-        SelectedBuiltInCategory = new EDBS.CategoryId(selectedBuiltInCategory);
+      if (reader.TryGetString("SelectedBuiltInCategory", ref selectedBuiltInCategory) && EDBS.CategoryId.TryParse(selectedBuiltInCategory, null, out var categoryId))
+        SelectedBuiltInCategory = categoryId;
       else
-        SelectedBuiltInCategory = ARDB.BuiltInCategory.INVALID;
+        SelectedBuiltInCategory = EDBS.CategoryId.Empty;
 
       return true;
     }
@@ -284,8 +279,8 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Write(writer))
         return false;
 
-      if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
-        writer.SetString("SelectedBuiltInCategory", ((EDBS.CategoryId) SelectedBuiltInCategory).FullName);
+      if (!EDBS.CategoryId.IsNullOrEmpty(SelectedBuiltInCategory))
+        writer.SetString("SelectedBuiltInCategory", SelectedBuiltInCategory.FullName);
 
       return true;
     }

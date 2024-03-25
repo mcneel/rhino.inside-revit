@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RhinoInside.Revit.External.DB.Extensions;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Schemas
 {
@@ -9,35 +11,44 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// </summary>
   public partial class CategoryId : DataType
   {
-    static readonly CategoryId empty = new CategoryId();
-    public static new CategoryId Empty => empty;
+    public static new CategoryId Empty { get; } = new CategoryId(ARDB.BuiltInCategory.INVALID, string.Empty);
 
-    public string LocalizedLabel
-    {
-      get
-      {
-        if (IsNullOrEmpty(this)) return string.Empty;
-
+    public override string LocalizedLabel => IsNullOrEmpty(this) ? string.Empty :
 #if REVIT_2020
-        return Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInCategory) this);
+        ARDB.LabelUtils.GetLabelFor((ARDB.BuiltInCategory) this);
 #else
-        return Label;
+        Label;
 #endif
-      }
-    }
 
-    public CategoryId() { }
-    public CategoryId(string id) : base(id)
+    CategoryId(string id) : base(id) { }
+
+    internal CategoryId(ARDB.BuiltInCategory bic, string id) : base(id) => BuiltInCategory = bic;
+
+    #region IParsable
+    public static bool TryParse(string s, IFormatProvider provider, out CategoryId result)
     {
-      if (!IsCategoryId(id))
-        throw new ArgumentException("Invalid argument value", nameof(id));
+      if (IsCategoryId(s))
+      {
+        result = new CategoryId(s);
+        return true;
+      }
+
+      result = default;
+      return false;
     }
 
-    public static bool IsCategoryId(string id)
+    public static CategoryId Parse(string s, IFormatProvider provider)
+    {
+      if (!TryParse(s, provider, out var result)) throw new FormatException($"{nameof(s)} is not in the correct format.");
+      return result;
+    }
+
+    static bool IsCategoryId(string id)
     {
       return id == string.Empty || // '<None>'
              id.StartsWith("autodesk.revit.category");
     }
+    #endregion
 
     public static bool IsCategoryId(DataType value, out CategoryId categoryId)
     {
@@ -52,28 +63,24 @@ namespace RhinoInside.Revit.External.DB.Schemas
       return false;
     }
 
+    private static readonly HashSet<CategoryId> Values = new HashSet<CategoryId>
+    (
+      typeof(CategoryId).
+      GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).
+      Where(x => x.PropertyType == typeof(CategoryId)).
+      Select(x => (CategoryId) x.GetValue(null))
+    );
+
+    internal static readonly IReadOnlyDictionary<ARDB.BuiltInCategory, CategoryId> BuiltIn = Values.ToDictionary(k => k.BuiltInCategory);
+    public static implicit operator CategoryId(ARDB.BuiltInCategory value) => BuiltIn.TryGetValue(value, out var id) ? id : Empty;
+
+    private ARDB.BuiltInCategory BuiltInCategory = default;
+    public static implicit operator ARDB.BuiltInCategory(CategoryId value) => value.BuiltInCategory != default ? value.BuiltInCategory :
+      (value.BuiltInCategory = Values.TryGetValue(value, out var bi) ? bi.BuiltInCategory : ARDB.BuiltInCategory.INVALID);
+
 #if REVIT_2021
-    public static implicit operator CategoryId(Autodesk.Revit.DB.ForgeTypeId value) => value is null ? null : new CategoryId(value.TypeId);
-    public static implicit operator Autodesk.Revit.DB.ForgeTypeId(CategoryId value) => value is null ? null : new Autodesk.Revit.DB.ForgeTypeId(value.TypeId);
+    public static implicit operator CategoryId(ARDB.ForgeTypeId value) => value is null ? null : IsCategoryId(value.TypeId) ? new CategoryId(value.TypeId) : throw new InvalidCastException();
+    public static implicit operator ARDB.ForgeTypeId(CategoryId value) => value is null ? null : new ARDB.ForgeTypeId(value.TypeId);
 #endif
-
-    public static implicit operator CategoryId(Autodesk.Revit.DB.BuiltInCategory value)
-    {
-      foreach (var item in map)
-      {
-        if (item.Value == (int) value)
-          return item.Key;
-      }
-
-      return Empty;
-    }
-
-    public static implicit operator Autodesk.Revit.DB.BuiltInCategory(CategoryId value)
-    {
-      if (map.TryGetValue(value, out var ut))
-        return (Autodesk.Revit.DB.BuiltInCategory) ut;
-
-      return Autodesk.Revit.DB.BuiltInCategory.INVALID;
-    }
   }
 }

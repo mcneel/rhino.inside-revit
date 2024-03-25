@@ -8,6 +8,7 @@ using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 using ARUI = Autodesk.Revit.UI;
 using ERDB = RhinoInside.Revit.External.DB;
+using EDBS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
@@ -23,7 +24,7 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
 
     #region UI
-    public ARDB.BuiltInCategory SelectedBuiltInCategory { get; set; } = ARDB.BuiltInCategory.INVALID;
+    public EDBS.CategoryId SelectedBuiltInCategory { get; set; } = EDBS.CategoryId.Empty;
 
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
@@ -350,10 +351,10 @@ namespace RhinoInside.Revit.GH.Parameters
         return false;
 
       var selectedBuiltInCategory = string.Empty;
-      if (reader.TryGetString("SelectedBuiltInCategory", ref selectedBuiltInCategory))
-        SelectedBuiltInCategory = new ERDB.Schemas.CategoryId(selectedBuiltInCategory);
+      if (reader.TryGetString("SelectedBuiltInCategory", ref selectedBuiltInCategory) && EDBS.CategoryId.TryParse(selectedBuiltInCategory, null, out var categoryId))
+        SelectedBuiltInCategory = categoryId;
       else
-        SelectedBuiltInCategory = ARDB.BuiltInCategory.INVALID;
+        SelectedBuiltInCategory = EDBS.CategoryId.Empty;
 
       return true;
     }
@@ -363,8 +364,8 @@ namespace RhinoInside.Revit.GH.Parameters
       if (!base.Write(writer))
         return false;
 
-      if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
-        writer.SetString("SelectedBuiltInCategory", ((ERDB.Schemas.CategoryId) SelectedBuiltInCategory).FullName);
+      if (!EDBS.CategoryId.IsNullOrEmpty(SelectedBuiltInCategory))
+        writer.SetString("SelectedBuiltInCategory", SelectedBuiltInCategory.FullName);
 
       return true;
     }

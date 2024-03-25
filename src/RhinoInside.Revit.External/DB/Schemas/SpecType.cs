@@ -8,11 +8,10 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// </summary>
   public partial class SpecType : DataType
   {
-    static readonly SpecType empty = new SpecType();
-    public static new SpecType Empty => empty;
-    public static SpecType Custom => new SpecType("autodesk.spec:custom-1.0.0");
+    public static new SpecType Empty { get; } = new SpecType();
+    public static SpecType Custom { get; } = new SpecType("autodesk.spec:custom-1.0.0");
 
-    public string LocalizedLabel =>
+    public override string LocalizedLabel => IsNullOrEmpty(this) ? string.Empty :
 #if REVIT_2021
       Autodesk.Revit.DB.LabelUtils.GetLabelForSpec(this);
 #else

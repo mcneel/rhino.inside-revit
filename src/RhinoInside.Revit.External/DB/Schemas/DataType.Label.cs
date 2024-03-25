@@ -4,6 +4,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
 {
   public partial class DataType
   {
+    public virtual string LocalizedLabel => Label;
     public string Label => labels.TryGetValue(FullName, out var label) ? label : string.Empty;
     
     static readonly Dictionary<string, string> labels = new Dictionary<string, string>()
@@ -27,7 +28,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { "autodesk.parameter.group:fireProtection", "Fire Protection" },
       { "autodesk.parameter.group:forces", "Forces" },
       { "autodesk.parameter.group:general", "General" },
-      { ParameterGroup.Geometry.FullName, "Dimensions" },
+      { ParameterGroup.Dimensions.FullName, "Dimensions" },
       { "autodesk.parameter.group:graphics", "Graphics" },
       { "autodesk.parameter.group:greenBuilding", "Green Building Properties" },
       { "autodesk.parameter.group:identityData", "Identity Data" },
