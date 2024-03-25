@@ -15,6 +15,8 @@ group: Deployment & Configs
 - Now 'Category Identity' works with Built in Categories.
 - Now 'Built-In Categories' has a right click options to filter by Category Type.
 - Now ‘Built-In Categories’ has a right click options to filter by Category Discipline.
+- Added 'Discipline' input to 'Query Categories' component.
+- Added 'Discipline' output to 'Category Identity' component.
 - Improved 'Element Parameter' when dealing with element that do have several parameters with the same name.
 - Fix on 'Add Wall (Profile)' when using slanted profiles.
 

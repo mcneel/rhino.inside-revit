@@ -4,12 +4,13 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.16")]
+  [ComponentVersion(introduced: "1.0", updated: "1.21")]
   public class QueryCategories : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
@@ -55,6 +56,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryDiscipline>>("Discipline", "D", "Category discipline", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", ARDB.CategoryType.Model, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", optional: true, relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Category name", optional: true),
@@ -77,6 +79,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
         return;
 
+      if (!Params.TryGetData(DA, "Discipline", out ERDB.CategoryDiscipline? discipline)) return;
       if (!Params.TryGetData(DA, "Type", out ARDB.CategoryType? type)) return;
       if (!Params.TryGetData(DA, "Parent", out Types.Category parent)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
@@ -91,6 +94,9 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
         throw new System.ArgumentException("Wrong Document.", nameof(parent));
 
       IEnumerable<ARDB.Category> categories = doc.GetCategories(parent?.Id);
+
+      if (discipline.HasValue)
+        categories = categories.Where(x => (x.CategoryDiscipline() & discipline) != ERDB.CategoryDiscipline.None);
 
       if (type.HasValue)
         categories = categories.Where(x => x.CategoryType == type);

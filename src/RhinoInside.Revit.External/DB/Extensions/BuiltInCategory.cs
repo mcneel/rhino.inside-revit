@@ -313,7 +313,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             (
               var categoryId in definitions.
               Where(x => x.CategoryType == ct).
-              Select(x => new CategoryId(x.Id, Category.GetBuiltInCategoryTypeId(x.Id).TypeId)).
+              Select(x => new Schemas.CategoryId(x.Id, Category.GetBuiltInCategoryTypeId(x.Id).TypeId)).
               OrderBy(x => x.Name)
             )
             {

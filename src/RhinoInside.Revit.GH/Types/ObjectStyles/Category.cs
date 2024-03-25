@@ -6,6 +6,7 @@ using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.DocObjects;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 using DBXS = RhinoInside.Revit.External.DB.Schemas;
 using OS = System.Environment;
 #if RHINO_8
@@ -549,6 +550,9 @@ namespace RhinoInside.Revit.GH.Types
 
     string _FullName;
     public string FullName => _FullName ?? (APIObject?.FullName() ?? BuiltInCategory?.FullName(localized: true));
+
+    ERDB.CategoryDiscipline? _CategoryDiscipline;
+    public ERDB.CategoryDiscipline CategoryDiscipline => _CategoryDiscipline ?? (_CategoryDiscipline = APIObject?.CategoryDiscipline() ?? BuiltInCategory?.CategoryDiscipline()) ?? ERDB.CategoryDiscipline.None;
 
     ARDB.CategoryType? _CategoryType;
     public ARDB.CategoryType CategoryType => _CategoryType ?? (_CategoryType = APIObject?.CategoryType ?? BuiltInCategory?.CategoryType()) ?? ARDB.CategoryType.Invalid;
