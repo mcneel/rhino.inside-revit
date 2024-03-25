@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { Materials, -5000105 }, // PG_MATERIALS
       { Graphics, -5000104 }, // PG_GRAPHICS
       { Construction, -5000103 }, // PG_CONSTRUCTION
-      { Geometry, -5000101 }, // PG_GEOMETRY
+      { Dimensions, -5000101 }, // PG_GEOMETRY
       { IdentityData, -5000100 }, // PG_IDENTITY_DATA
     };
   }
