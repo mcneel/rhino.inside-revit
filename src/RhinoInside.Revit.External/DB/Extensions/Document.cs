@@ -329,7 +329,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (element?.GetGeometryObjectFromReference(reference) is GeometryObject geometryObject)
       {
         if (element is Instance instance)
-          transform = transform is object ? transform * instance.GetTransform() : transform;
+          transform = transform is object ? transform * instance.GetTransform() : instance.GetTransform();
         else
           transform = Transform.Identity;
 
