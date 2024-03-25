@@ -7,11 +7,10 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// </summary>
   public partial class UnitSymbol : DataType
   {
-    static readonly UnitSymbol empty = new UnitSymbol();
-    public static new UnitSymbol Empty => empty;
-    public static UnitSymbol Custom => new UnitSymbol("autodesk.unit.symbol:custom-1.0.0");
+    public static new UnitSymbol Empty { get; } = new UnitSymbol();
+    public static UnitSymbol Custom { get; } = new UnitSymbol("autodesk.unit.symbol:custom-1.0.0");
 
-    public string LocalizedLabel =>
+    public override string LocalizedLabel => IsNullOrEmpty(this) ? string.Empty :
 #if REVIT_2021
       Autodesk.Revit.DB.LabelUtils.GetLabelForSymbol(this);
 #else

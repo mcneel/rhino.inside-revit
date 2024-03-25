@@ -7,22 +7,14 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// </summary>
   public partial class ParameterGroup : DataType
   {
-    static readonly ParameterGroup empty = new ParameterGroup();
-    public static new ParameterGroup Empty => empty;
+    public static new ParameterGroup Empty { get; } = new ParameterGroup();
 
-    public string LocalizedLabel
-    {
-      get
-      {
-        if (IsNullOrEmpty(this)) return "Other";
-
+    public override string LocalizedLabel => IsNullOrEmpty(this) ? "Other" :
 #if REVIT_2022
-        return Autodesk.Revit.DB.LabelUtils.GetLabelForGroup(this);
+      Autodesk.Revit.DB.LabelUtils.GetLabelForGroup(this);
 #else
-        return Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInParameterGroup) this);
+      Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInParameterGroup) this);
 #endif
-      }
-    }
 
     public ParameterGroup() { }
     public ParameterGroup(string id) : base(id)

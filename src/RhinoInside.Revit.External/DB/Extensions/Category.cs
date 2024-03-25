@@ -105,16 +105,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Return the <paramref name="category"/> full name. If it is a subCategory this will be "{ParentName}\{SubcategoryName}"
-    /// </summary>
-    /// <param name="category"></param>
-    /// <returns></returns>
-    public static string FullName(this Category category)
-    {
-      return category.Parent is null ? category.Name : $"{category.Parent.Name}\\{category.Name}";
-    }
-
-    /// <summary>
     /// Gets the BuiltInCategory value for this category.
     /// </summary>
     /// <param name="category"></param>
@@ -126,6 +116,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #else
       return category.Id.ToBuiltInCategory();
 #endif
+    }
+
+    /// <summary>
+    /// Return the <paramref name="category"/> full name. If it is a subCategory this will be "{ParentName}\{SubcategoryName}"
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns></returns>
+    public static string FullName(this Category category)
+    {
+      return category.Parent is null ? category.Name : $"{category.Parent.Name}\\{category.Name}";
+    }
+
+    /// <summary>
+    /// Return the <paramref name="category"/> discipline. If it is a subCategory this will be the parent discipline"
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns></returns>
+    public static CategoryDiscipline CategoryDiscipline(this Category category)
+    {
+      return category.Parent?.CategoryDiscipline() ?? category.ToBuiltInCategory().CategoryDiscipline();
     }
   }
 }

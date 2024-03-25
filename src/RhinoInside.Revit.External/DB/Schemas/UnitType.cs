@@ -7,11 +7,10 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// </summary>
   public partial class UnitType : DataType
   {
-    static readonly UnitType empty = new UnitType();
-    public static new UnitType Empty => empty;
-    public static UnitType Custom => new UnitType("autodesk.unit.unit:custom-1.0.0");
+    public static new UnitType Empty { get; } = new UnitType();
+    public static UnitType Custom { get; } = new UnitType("autodesk.unit.unit:custom-1.0.0");
 
-    public string LocalizedLabel =>
+    public override string LocalizedLabel => IsNullOrEmpty(this) ? string.Empty :
 #if REVIT_2021
       Autodesk.Revit.DB.LabelUtils.GetLabelForUnit(this);
 #else

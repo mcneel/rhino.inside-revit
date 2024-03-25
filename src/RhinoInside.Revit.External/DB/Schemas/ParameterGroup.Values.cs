@@ -52,9 +52,9 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static ParameterGroup General => new ParameterGroup("autodesk.parameter.group:general-1.0.0");
     public static ParameterGroup GeoLocation => new ParameterGroup("autodesk.revit.group:geoLocation-1.0.0");
 #if REVIT_2023
-    public static ParameterGroup Geometry => new ParameterGroup("autodesk.parameter.group:dimensions-1.0.0");
+    public static ParameterGroup Dimensions => new ParameterGroup("autodesk.parameter.group:dimensions-1.0.0");
 #else
-    public static ParameterGroup Geometry => new ParameterGroup("autodesk.parameter.group:geometry-1.0.0");
+    public static ParameterGroup Dimensions => new ParameterGroup("autodesk.parameter.group:geometry-1.0.0");
 #endif
     public static ParameterGroup GeometryPositioning => new ParameterGroup("autodesk.revit.group:geometryPositioning-1.0.0");
     public static ParameterGroup Graphics => new ParameterGroup("autodesk.parameter.group:graphics-1.0.0");

@@ -75,8 +75,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       }
     }
 
-    static readonly DataType empty = new DataType();
-    public static DataType Empty => empty;
+    public static DataType Empty { get; } = new DataType();
     public static bool IsNullOrEmpty(DataType value) => string.IsNullOrEmpty(value?.id);
 
     public DataType() => id = string.Empty;
@@ -301,10 +300,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       { Schemas.SpecType.Measurable.Stationing, 232}, // ParameterType.Stationing
     };
 
+    static readonly Schemas.CategoryId FamilyType = new Schemas.CategoryId(Autodesk.Revit.DB.BuiltInCategory.INVALID, "autodesk.revit.category.family");
+
     internal static Schemas.DataType ToDataType(this Autodesk.Revit.DB.ParameterType value)
     {
-      if (value is Autodesk.Revit.DB.ParameterType.FamilyType)
-        return new Schemas.CategoryId("autodesk.revit.category.family");
+      if (value == Autodesk.Revit.DB.ParameterType.FamilyType)
+        return FamilyType;
 
       foreach (var item in parameterTypeMap)
       {

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{1DF04E19-3270-4CA3-A6C0-692C52FA5853}</ProjectGuid>
@@ -17,6 +17,7 @@
     <Compile Include="DB\BuiltInLinePattern.cs" />
     <Compile Include="DB\BuiltInMullionPosition.cs" />
     <Compile Include="DB\BuiltInProfileType.cs" />
+    <Compile Include="DB\CategoryDiscipline.cs" />
     <Compile Include="DB\CompoundElementFilter.cs" />
     <Compile Include="DB\CurtainGridJoinCondition.cs" />
     <Compile Include="DB\CurtainGridLayout.cs" />
@@ -29,6 +30,7 @@
     <Compile Include="DB\Extensions\BasePoint.cs" />
     <Compile Include="DB\Extensions\BoundingBoxUV.cs" />
     <Compile Include="DB\Extensions\BoundingBoxXYZ.cs" />
+    <Compile Include="DB\Extensions\BuiltInCategories.cs" />
     <Compile Include="DB\Extensions\BuiltInCategory.cs" />
     <Compile Include="DB\Extensions\Category.cs" />
     <Compile Include="DB\Extensions\Color.cs" />
@@ -72,9 +74,8 @@
     <Compile Include="DB\ParameterClass.cs" />
     <Compile Include="DB\ParameterScope.cs" />
     <Compile Include="DB\Schemas\$(RevitVersion)\BuiltInCategory.cs" />
+    <Compile Include="DB\Schemas\$(RevitVersion)\CategoryId.cs" />
     <Compile Include="DB\Schemas\CategoryId.cs" />
-    <Compile Include="DB\Schemas\CategoryId.Enum.cs" />
-    <Compile Include="DB\Schemas\CategoryId.Values.cs" />
     <Compile Include="DB\Schemas\DataType.cs" />
     <Compile Include="DB\Schemas\DataType.Label.cs" />
     <Compile Include="DB\Schemas\DisciplineType.cs" />

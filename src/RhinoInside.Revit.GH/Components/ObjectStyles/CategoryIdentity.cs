@@ -4,7 +4,7 @@ using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
-  [ComponentVersion(introduced: "1.0", updated: "1.16")]
+  [ComponentVersion(introduced: "1.0", updated: "1.21")]
   public class CategoryIdentity : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("D794361E-DE8C-4D0A-BC77-52293F27D3AA");
@@ -28,6 +28,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
+      ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryDiscipline>>("Discipline", "D", "Category discipline", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Category name"),
@@ -43,6 +44,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
     {
       if (!Params.GetData(DA, "Category", out Types.Category category)) return;
 
+      Params.TrySetData(DA, "Discipline", () => category.CategoryDiscipline);
       Params.TrySetData(DA, "Type", () => category.CategoryType);
       Params.TrySetData(DA, "Parent", () => category.Parent);
       Params.TrySetData(DA, "Name", () => category.FullName);
