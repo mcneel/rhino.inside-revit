@@ -215,7 +215,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     (
       name: "Tag By Category",
       nickname: "C-Tag",
-      description: "Given a point, it adds an category tag to the given View",
+      description: "Given a point, it adds a category tag to the given View",
       category: "Revit",
       subCategory: "Annotate"
     )
@@ -235,7 +235,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     (
       name: "Multi-Category Tag",
       nickname: "MC-Tag",
-      description: "Given a point, it adds an multi-category tag to the given View",
+      description: "Given a point, it adds a multi-category tag to the given View",
       category: "Revit",
       subCategory: "Annotate"
     )
@@ -255,7 +255,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     (
       name: "Material Tag",
       nickname: "M-Tag",
-      description: "Given a point, it adds an material tag to the given View",
+      description: "Given a point, it adds a material tag to the given View",
       category: "Revit",
       subCategory: "Annotate"
     )
