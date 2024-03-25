@@ -15,7 +15,7 @@ group: Deployment & Configs
 - Improved 'Element Parameter' when dealing with element that do have several parameters with the same name.
 - Now 'Category Identity' works with Built in Categories.
 - Now 'Built-In Categories' has a right click options to filter by Category Type.
-
+- Fix on 'Add Wall (Profile)' when using slanted profiles.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
