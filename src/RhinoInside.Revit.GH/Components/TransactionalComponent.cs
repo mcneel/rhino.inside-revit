@@ -62,7 +62,10 @@ namespace RhinoInside.Revit.GH.Components
 
     void AddRuntimeMessage(ARDB.FailureMessageAccessor error, bool? solved = null)
     {
-      if (error.GetFailureDefinitionId() == ERDB.ExternalFailures.TransactionFailures.SimulatedTransaction)
+      var severity = error.GetSeverity();
+      var failureId = error.GetFailureDefinitionId();
+
+      if (failureId == ERDB.ExternalFailures.TransactionFailures.SimulatedTransaction)
       {
         // Simulation signal is already reflected in the canvas changing the component color,
         // So it's up to the component show relevant information about what 'simulation' means.
@@ -72,8 +75,11 @@ namespace RhinoInside.Revit.GH.Components
         return;
       }
 
+      if (severity == ARDB.FailureSeverity.Warning && FailureDefinitionIdsToFix.Contains(failureId))
+        return;
+
       var level = GH_RuntimeMessageLevel.Remark;
-      switch (error.GetSeverity())
+      switch (severity)
       {
         case ARDB.FailureSeverity.None:               level = GH_RuntimeMessageLevel.Remark;  break;
         case ARDB.FailureSeverity.Warning:            level = GH_RuntimeMessageLevel.Warning; break;
