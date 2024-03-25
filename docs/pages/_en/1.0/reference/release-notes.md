@@ -12,6 +12,7 @@ group: Deployment & Configs
 
 ### RC
 
+- Added 'Add Multi-Grid' component.
 - Now 'Category Identity' works with Built in Categories.
 - Now 'Built-In Categories' has a right click options to filter by Category Type.
 - Now ‘Built-In Categories’ has a right click options to filter by Category Discipline.

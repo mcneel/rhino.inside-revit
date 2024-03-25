@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Types
         return $"Revit {name?.Name ?? type.Name}";
       }
     }
-    string IGH_Goo.TypeDescription => $"Represents a {((IGH_Goo) this).TypeName.ToLowerInvariant()}";
+    string IGH_Goo.TypeDescription => ((IGH_Goo) this).TypeName;
     public virtual bool IsValid => _Document.IsValid();
     public virtual string IsValidWhyNot => _Document.IsValidWithLog(out var log) ? default : log;
     IGH_Goo IGH_Goo.Duplicate() => (IGH_Goo) (this as ICloneable)?.Clone();

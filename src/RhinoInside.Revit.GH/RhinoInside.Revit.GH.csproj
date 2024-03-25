@@ -37,6 +37,7 @@
     <Compile Include="Components\Annotations\AddDetailItem.cs" />
     <Compile Include="Components\Annotations\AddText.cs" />
     <Compile Include="Components\Annotations\Grids\AddGrid.cs" />
+    <Compile Include="Components\Annotations\Grids\AddMultiSegmentGrid.cs" />
     <Compile Include="Components\Annotations\Grids\QueryGrids.cs" />
     <Compile Include="Components\Annotations\Leaders.cs" />
     <Compile Include="Components\Annotations\Levels\AddLevel.cs" />
