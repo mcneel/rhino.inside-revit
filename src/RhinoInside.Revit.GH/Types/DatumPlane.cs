@@ -253,8 +253,9 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is ARDB.Grid grid)
       {
         var cameraDirection = args.Viewport.CameraDirection;
-        var start = grid.Curve.GetEndPoint(0).ToPoint3d();
-        var end = grid.Curve.GetEndPoint(1).ToPoint3d();
+        var curve = grid.Curve;
+        var start = curve.GetEndPoint(0).ToPoint3d();
+        var end = curve.GetEndPoint(1).ToPoint3d();
         var direction = end - start;
 
         if (args.Viewport.IsParallelProjection && cameraDirection.IsPerpendicularTo(Vector3d.ZAxis))
@@ -519,33 +520,34 @@ namespace RhinoInside.Revit.GH.Types
           {
             args.Pipeline.DrawPatternedPolyline(boundary, args.Color, 0x00001C47, args.Thickness, true);
 
-            if
-            (
-              args.Viewport.IsParallelProjection &&
-              (cameraDirection.IsPerpendicularTo(Vector3d.ZAxis) || cameraDirection.IsParallelTo(Vector3d.ZAxis) != 0)
-            )
-            {
-              args.Viewport.GetFrustumNearPlane(out var near);
-              args.Viewport.GetFrustumCenter(out var center);
-              center = near.ClosestPoint(center);
+            // TODO :
+            //if
+            //(
+            //  args.Viewport.IsParallelProjection &&
+            //  (cameraDirection.IsPerpendicularTo(Vector3d.ZAxis) || cameraDirection.IsParallelTo(Vector3d.ZAxis) != 0)
+            //)
+            //{
+            //  args.Viewport.GetFrustumNearPlane(out var near);
+            //  args.Viewport.GetFrustumCenter(out var center);
+            //  center = near.ClosestPoint(center);
 
-              Point3d tagA, tagB;
-              if (cameraDirection.IsPerpendicularTo(Vector3d.ZAxis))
-              {
-                tagA = boundary.First();
-                tagB = boundary.Last();
-              }
-              else
-              {
-                tagA = start;
-                tagB = end;
-              }
+            //  Point3d tagA, tagB;
+            //  if (cameraDirection.IsPerpendicularTo(Vector3d.ZAxis))
+            //  {
+            //    tagA = boundary.First();
+            //    tagB = boundary.Last();
+            //  }
+            //  else
+            //  {
+            //    tagA = start;
+            //    tagB = end;
+            //  }
 
-              if (center.DistanceTo(near.ClosestPoint(tagA)) > center.DistanceTo(near.ClosestPoint(tagB)))
-                args.Pipeline.DrawDot(tagA, grid.Value.Name, args.Color, System.Drawing.Color.White);
-              else
-                args.Pipeline.DrawDot(tagB, grid.Value.Name, args.Color, System.Drawing.Color.White);
-            }
+            //  if (center.DistanceTo(near.ClosestPoint(tagA)) > center.DistanceTo(near.ClosestPoint(tagB)))
+            //    args.Pipeline.DrawDot(tagA, grid.Value.Name, args.Color, System.Drawing.Color.White);
+            //  else
+            //    args.Pipeline.DrawDot(tagB, grid.Value.Name, args.Color, System.Drawing.Color.White);
+            //}
           }
         }
       }
