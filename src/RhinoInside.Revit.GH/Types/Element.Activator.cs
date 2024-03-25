@@ -322,6 +322,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.DatumPlane),                      (element)=> new DatumPlane            (element as ARDB.DatumPlane)        },
       { typeof(ARDB.Level),                           (element)=> new Level                 (element as ARDB.Level)             },
       { typeof(ARDB.Grid),                            (element)=> new Grid                  (element as ARDB.Grid)              },
+      { typeof(ARDB.MultiSegmentGrid),                (element)=> new MultiSegmentGrid      (element as ARDB.MultiSegmentGrid)  },
       { typeof(ARDB.ReferencePlane),                  (element)=> new ReferencePlane        (element as ARDB.ReferencePlane)    },
       { typeof(ARDB.ReferencePoint),                  (element)=> new ReferencePoint        (element as ARDB.ReferencePoint)    },
       { typeof(ARDB.Group),                           (element)=> new Group                 (element as ARDB.Group)             },

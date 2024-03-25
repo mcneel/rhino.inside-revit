@@ -213,13 +213,12 @@ namespace RhinoInside.Revit.GH.Types
   {
     protected override Type ValueType => typeof(ARDB.Grid);
     public new ARDB.Grid Value => base.Value as ARDB.Grid;
-    public static explicit operator ARDB.Grid(Grid value) => value?.Value;
 
     public Grid() { }
     public Grid(ARDB.Grid grid) : base(grid) { }
 
     #region IGH_PreviewData
-    IList<Point3d> BoundaryPoints
+    internal IList<Point3d> BoundaryPoints
     {
       get
       {
@@ -254,8 +253,9 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is ARDB.Grid grid)
       {
         var cameraDirection = args.Viewport.CameraDirection;
-        var start = grid.Curve.GetEndPoint(0).ToPoint3d();
-        var end = grid.Curve.GetEndPoint(1).ToPoint3d();
+        var curve = grid.Curve;
+        var start = curve.GetEndPoint(0).ToPoint3d();
+        var end = curve.GetEndPoint(1).ToPoint3d();
         var direction = end - start;
 
         if (args.Viewport.IsParallelProjection && cameraDirection.IsPerpendicularTo(Vector3d.ZAxis))
@@ -444,6 +444,112 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return default;
+      }
+    }
+    #endregion
+  }
+
+  [Kernel.Attributes.Name("Multi-Grid")]
+  public class MultiSegmentGrid : GraphicalElement
+  {
+    protected override Type ValueType => typeof(ARDB.MultiSegmentGrid);
+    public new ARDB.MultiSegmentGrid Value => base.Value as ARDB.MultiSegmentGrid;
+
+    public MultiSegmentGrid() { }
+    public MultiSegmentGrid(ARDB.MultiSegmentGrid grid) : base(grid) { }
+
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      var bbox = NaN.BoundingBox;
+
+      if (Value is ARDB.MultiSegmentGrid grids)
+      {
+        foreach (var grid in grids.GetGridIds().Select(x => Grid.FromElementId(Document, x) as Grid))
+          bbox.Union(grid.GetBoundingBox(xform));
+      }
+
+      return bbox;
+    }
+
+    #region IGH_PreviewData
+    static IList<Point3d> BoundaryPoints(ARDB.Grid grid)
+    {
+      var points = grid.Curve?.Tessellate().ConvertAll(GeometryDecoder.ToPoint3d);
+      if (points is object)
+      {
+        var bbox = grid.GetBoundingBoxXYZ().ToBoundingBox();
+        var polyline = new List<Point3d>(points.Length * 2);
+
+        for (int p = 0; p < points.Length; ++p)
+          points[p] = new Point3d(points[p].X, points[p].Y, bbox.Min.Z);
+
+        polyline.AddRange(points);
+
+        for (int p = 0; p < points.Length; ++p)
+          points[p] = new Point3d(points[p].X, points[p].Y, bbox.Max.Z);
+
+        polyline.AddRange(points.Reverse());
+
+        return polyline;
+      }
+
+      return Array.Empty<Point3d>();
+    }
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (Value is ARDB.MultiSegmentGrid grids)
+      {
+        var ends = new List<Point3d>();
+        foreach (var grid in grids.GetGridIds().Select(x => Grid.FromElementId(Document, x) as Grid))
+        {
+          var cameraDirection = args.Viewport.CameraDirection;
+          var curve = grid.Value.Curve;
+          var start = curve.GetEndPoint(0).ToPoint3d();
+          var end = curve.GetEndPoint(1).ToPoint3d();
+          var direction = end - start;
+
+          if (args.Viewport.IsParallelProjection && cameraDirection.IsPerpendicularTo(Vector3d.ZAxis))
+          {
+            if (grid.Value.IsCurved) return;
+            if (cameraDirection.IsParallelTo(direction) == 0)
+              return;
+          }
+
+          if (grid.BoundaryPoints is IList<Point3d> boundary && boundary.Count > 0)
+          {
+            args.Pipeline.DrawPatternedPolyline(boundary, args.Color, 0x00001C47, args.Thickness, true);
+
+            // TODO :
+            //if
+            //(
+            //  args.Viewport.IsParallelProjection &&
+            //  (cameraDirection.IsPerpendicularTo(Vector3d.ZAxis) || cameraDirection.IsParallelTo(Vector3d.ZAxis) != 0)
+            //)
+            //{
+            //  args.Viewport.GetFrustumNearPlane(out var near);
+            //  args.Viewport.GetFrustumCenter(out var center);
+            //  center = near.ClosestPoint(center);
+
+            //  Point3d tagA, tagB;
+            //  if (cameraDirection.IsPerpendicularTo(Vector3d.ZAxis))
+            //  {
+            //    tagA = boundary.First();
+            //    tagB = boundary.Last();
+            //  }
+            //  else
+            //  {
+            //    tagA = start;
+            //    tagB = end;
+            //  }
+
+            //  if (center.DistanceTo(near.ClosestPoint(tagA)) > center.DistanceTo(near.ClosestPoint(tagB)))
+            //    args.Pipeline.DrawDot(tagA, grid.Value.Name, args.Color, System.Drawing.Color.White);
+            //  else
+            //    args.Pipeline.DrawDot(tagB, grid.Value.Name, args.Color, System.Drawing.Color.White);
+            //}
+          }
+        }
       }
     }
     #endregion
