@@ -77,13 +77,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       ARDB.BuiltInFailures.JoinElementsFailures.CannotJoinElementsError,
       ARDB.BuiltInFailures.WallFailures.ParameterChangeNotAffectingGeometry,
     };
-    protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => //failureDefinitionIdsToFix;
-      new ARDB.FailureDefinitionId[]
-      {
-        ARDB.BuiltInFailures.CreationFailures.CannotDrawWallsError,
-        ARDB.BuiltInFailures.JoinElementsFailures.CannotJoinElementsError,
-        ARDB.BuiltInFailures.WallFailures.ParameterChangeNotAffectingGeometry,
-      };
+    protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix;
 
     bool Reuse(ref ARDB.Wall element, IList<Curve> boundaries, Plane plane, Line line, double slantAngle, ARDB.WallType type)
     {
