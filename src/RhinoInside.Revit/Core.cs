@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using ARDB = Autodesk.Revit.DB;
 using ARUI = Autodesk.Revit.UI;
-using ERDB = RhinoInside.Revit.External.DB;
 using ERUI = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit
@@ -151,9 +150,6 @@ namespace RhinoInside.Revit
 
         // Initialize DB
         {
-          // Register Revit Failures
-          External.DB.ExternalFailures.CreateFailureDefinitions();
-
           EventHandler<ARDB.Events.ApplicationInitializedEventArgs> applicationInitialized = null;
           Host.Services.ApplicationInitialized += applicationInitialized = (sender, args) =>
           {

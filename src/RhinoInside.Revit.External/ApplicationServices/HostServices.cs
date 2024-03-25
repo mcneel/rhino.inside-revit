@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Autodesk.Revit.ApplicationServices;
 
 namespace RhinoInside.Revit.External.ApplicationServices
@@ -41,6 +40,34 @@ namespace RhinoInside.Revit.External.ApplicationServices
     public abstract event EventHandler<Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs> ApplicationInitialized;
     public abstract event EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs> DocumentChanged;
     public abstract event EventHandler<Autodesk.Revit.DB.Events.DocumentClosingEventArgs> DocumentClosing;
+    #endregion
+
+    #region Runtime
+    static Application Application;
+
+    internal static bool StartUp(ControlledApplication app)
+    {
+      // Register Revit Failures
+      DB.ExternalFailures.CreateFailureDefinitions();
+
+      app.ApplicationInitialized += Initialized;
+      return true;
+    }
+
+    private static void Initialized(object sender, Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs e)
+    {
+      Application = sender as Application;
+      Application.ApplicationInitialized -= Initialized;
+
+      // From now on DB is available
+      //
+    }
+
+    internal static bool Shutdown(ControlledApplication app)
+    {
+      using (Application) Application = null;
+      return true;
+    }
     #endregion
   }
 
@@ -102,7 +129,7 @@ namespace RhinoInside.Revit.External.ApplicationServices
     #endregion
 }
 
-class HostServicesU : HostServices
+  class HostServicesU : HostServices
   {
     readonly Application _app;
     public HostServicesU(Application app) => _app = app;

@@ -75,6 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     {
       ARDB.BuiltInFailures.CreationFailures.CannotDrawWallsError,
       ARDB.BuiltInFailures.JoinElementsFailures.CannotJoinElementsError,
+      ARDB.BuiltInFailures.WallFailures.ParameterChangeNotAffectingGeometry,
     };
     protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix;
 
@@ -93,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       }
 
 #if REVIT_2021
-      if (slantAngle != 0.0)
+      if (slantAngle == 0.0)
       {
         element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(1 /*ARDB.WallCrossSection.Vertical*/);
       }
@@ -315,7 +316,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           newWall.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
 
 #if REVIT_2021
-          if (angle != 0.0)
+          if (angle == 0.0)
           {
             newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(1 /*ARDB.WallCrossSection.Vertical*/);
           }
