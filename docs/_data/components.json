@@ -240,6 +240,18 @@
     "uuid": "0700be5f-9b9c-4235-add5-787e42898114"
   }, 
   {
+    "desc": "Contains a collection of Revit Toposolid elements", 
+    "iconsrc": "/static/images/GH/Toposolid.png", 
+    "icontag": null, 
+    "panel": "Revit", 
+    "since": "1.14", 
+    "tab": "Params", 
+    "title": "Toposolid", 
+    "typename": "Toposolid", 
+    "until": null, 
+    "uuid": "e45ee288-b07f-4c87-a73d-65c6313d19b2"
+  }, 
+  {
     "desc": "Contains a collection of Revit analytical elements", 
     "iconsrc": null, 
     "icontag": "A", 
@@ -2040,6 +2052,30 @@
     "uuid": "e8d8d05a-8703-4f75-b106-12b40ec9df7b"
   }, 
   {
+    "desc": "Given its outline curve, it adds a Toposolid element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddToposolid.png", 
+    "icontag": null, 
+    "panel": "Site", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Add Toposolid", 
+    "typename": "AddToposolid", 
+    "until": null, 
+    "uuid": "1a85ee3c-f045-462c-b6da-e03f36c41e77"
+  }, 
+  {
+    "desc": "Given its outline curve, it adds a Toposolid subdivision element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddToposolidSubDivision.png", 
+    "icontag": null, 
+    "panel": "Site", 
+    "since": "1.16", 
+    "tab": "Revit", 
+    "title": "Add Toposolid Sub-Division", 
+    "typename": "AddToposolidSubDivision", 
+    "until": null, 
+    "uuid": "1c148123-7e04-42eb-8b51-a6c2b731ad21"
+  }, 
+  {
     "desc": "Project location", 
     "iconsrc": "/static/images/GH/ActiveProjectLocation.png", 
     "icontag": null, 
@@ -3240,7 +3276,7 @@
     "uuid": "d2fdf2a0-1e48-4075-814a-685d91a6cd94"
   }, 
   {
-    "desc": "", 
+    "desc": "Construct Visibility/Graphics Overrides value", 
     "iconsrc": "/static/images/GH/FamilyElementVisibilityConstruct.png", 
     "icontag": null, 
     "panel": "Component", 
@@ -3252,7 +3288,7 @@
     "uuid": "10ea29d4-16af-4060-89ce-f467f0069675"
   }, 
   {
-    "desc": "", 
+    "desc": "Deconstruct Visibility/Graphics Overrides value", 
     "iconsrc": "/static/images/GH/FamilyElementVisibilityDeconstruct.png", 
     "icontag": null, 
     "panel": "Component", 
@@ -5136,7 +5172,7 @@
     "uuid": "6b32703e-a8b4-49c9-b855-133d3df925fe"
   }, 
   {
-    "desc": "Gives access to points and edges on a slab, roof or floor", 
+    "desc": "Gives access to points and edges on a slab, roof, floor or toposolid", 
     "iconsrc": "/static/images/GH/SlabShape.png", 
     "icontag": null, 
     "panel": "Architecture", 
@@ -5496,7 +5532,7 @@
     "uuid": "2beb60ba-f32c-469d-829f-5ec2b80492d9"
   }, 
   {
-    "desc": "Given a point, it adds an category tag to the given View", 
+    "desc": "Given a point, it adds a category tag to the given View", 
     "iconsrc": "/static/images/GH/AddElementTagByCategory.png", 
     "icontag": null, 
     "panel": "Annotate", 
@@ -5508,7 +5544,7 @@
     "uuid": "689d4059-7371-424b-91e5-298732c5e387"
   }, 
   {
-    "desc": "Given a point, it adds an multi-category tag to the given View", 
+    "desc": "Given a point, it adds a multi-category tag to the given View", 
     "iconsrc": "/static/images/GH/AddElementTagByMutliCategory.png", 
     "icontag": null, 
     "panel": "Annotate", 
@@ -5520,7 +5556,7 @@
     "uuid": "e6e4a2ee-e48e-4630-91fd-d268ead1fddf"
   }, 
   {
-    "desc": "Given a point, it adds an material tag to the given View", 
+    "desc": "Given a point, it adds a material tag to the given View", 
     "iconsrc": "/static/images/GH/AddElementTagByMaterial.png", 
     "icontag": null, 
     "panel": "Annotate", 
@@ -5580,7 +5616,7 @@
     "uuid": "ad88cf11-1946-4429-8f4d-172e3f9b866f"
   }, 
   {
-    "desc": "Given a point, it adds an room tag to the given view", 
+    "desc": "Given a point, it adds a room tag to the given view", 
     "iconsrc": "/static/images/GH/AddRoomTag.png", 
     "icontag": null, 
     "panel": "Annotate", 
@@ -5592,7 +5628,7 @@
     "uuid": "3b95eff0-6bb7-413d-8fbe-ab8895e804e2"
   }, 
   {
-    "desc": "Given a point, it adds an space tag to the given view", 
+    "desc": "Given a point, it adds a space tag to the given view", 
     "iconsrc": "/static/images/GH/AddSpaceTag.png", 
     "icontag": null, 
     "panel": "Annotate", 
@@ -5782,6 +5818,18 @@
     "typename": "AddGrid", 
     "until": null, 
     "uuid": "cec2b3df-c6ba-414f-bece-e3daee2a3f2c"
+  }, 
+  {
+    "desc": "Given its Axis, it adds a Multi-Segment Grid element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddMultiSegmentGrid.png", 
+    "icontag": null, 
+    "panel": "Model", 
+    "since": "1.21", 
+    "tab": "Revit", 
+    "title": "Add Multi-Grid", 
+    "typename": "AddMultiSegmentGrid", 
+    "until": null, 
+    "uuid": "03eb988d-9aa9-49e8-bd38-4ed5172e6340"
   }, 
   {
     "desc": "Get all document grids", 
