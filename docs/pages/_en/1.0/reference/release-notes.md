@@ -13,6 +13,7 @@ group: Deployment & Configs
 ### RC
 
 - Added 'Add Multi-Grid' component.
+- Added 'Component Family Mesh' component.
 - Now 'Category Identity' works with Built in Categories.
 - Now 'Built-In Categories' has a right click options to filter by Category Type.
 - Now ‘Built-In Categories’ has a right click options to filter by Category Discipline.
