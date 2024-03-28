@@ -324,26 +324,30 @@ namespace Grasshopper.Special
 
     public class ListItem
     {
-      public ListItem(T goo, string name, bool selected = false)
+      public ListItem(T goo, string name, string identity, bool selected = false)
       {
         Value = goo;
-
-        if (name is object)
-        {
-          var lines = name.Split(new string[] { OS.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-          switch (lines.Length)
-          {
-            case 0: Name = string.Empty; break;
-            case 1: Name = name; break;
-            default: Name = $"{lines[0]} ⤶"; break; // Alternatives ⏎⮐
-          }
-        }
-
+        Name = ToSingleLine(name);
+        Identity = ToSingleLine(identity);
         Selected = selected;
+      }
+
+      private static string ToSingleLine(string value)
+      {
+        if (value is null) return null;
+
+        var lines = value.Split(new string[] { OS.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+        switch (lines.Length)
+        {
+          case 0: return string.Empty;
+          case 1: return value;
+          default: return $"{lines[0]} ⤶"; // Alternatives ⏎⮐
+        }
       }
 
       public readonly T Value;
       public readonly string Name;
+      public readonly string Identity;
       public bool Selected;
       public RectangleF BoxName;
     }
@@ -746,7 +750,7 @@ namespace Grasshopper.Special
                             secondaryInfoBounds.Width -= 2;
                             secondaryInfoBounds.Height /= layoutLevel;
 
-                            if (Owner.GetItemIdentity(item.Value) is string identity && identity != string.Empty)
+                            if (item.Identity is string identity && identity != string.Empty)
                             {
                               graphics.DrawString(identity, GH_FontServer.StandardAdjusted, secondaryBrush, secondaryInfoBounds, secondaryFormat);
                             }
@@ -1245,7 +1249,7 @@ namespace Grasshopper.Special
         new GooEqualityComparer()
       );
 
-      var items = volatileData.Select(goo => new ListItem(goo, GetItemName(goo), persistentData.Contains(goo)));
+      var items = volatileData.Select(goo => new ListItem(goo, GetItemName(goo), GetItemIdentity(goo), persistentData.Contains(goo)));
 
       if (RhinoInside.Revit.Operator.CompareMethodFromPattern(SearchPattern) != RhinoInside.Revit.Operator.CompareMethod.Equals)
         items = items.Where(x => string.IsNullOrEmpty(SearchPattern) || RhinoInside.Revit.Operator.IsSymbolNameLike(x.Name, SearchPattern));
@@ -1358,7 +1362,7 @@ namespace Grasshopper.Special
     protected virtual void SortItems()
     {
       // Show elements sorted Alphabetically.
-      ListItems.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
+      ListItems = ListItems.OrderBy(x => x.Name).ThenBy(x => x.Identity).ToList();
     }
 
     public sealed override void PostProcessData()
@@ -1373,7 +1377,7 @@ namespace Grasshopper.Special
 
       // Order by fuzzy token if suits.
       if (!string.IsNullOrEmpty(SearchPattern) && RhinoInside.Revit.Operator.CompareMethodFromPattern(SearchPattern) == RhinoInside.Revit.Operator.CompareMethod.Equals)
-        ListItems = ListItems.OrderByDescending(x => FuzzyTokenMatchRatio(SearchPattern, x.Name, false)).ToList();
+        ListItems = ListItems.OrderByDescending(x => FuzzyTokenMatchRatio(SearchPattern, x.Name ?? string.Empty, false)).ThenBy(x => x.Identity).ToList();
 
       PostProcessVolatileData();
     }
