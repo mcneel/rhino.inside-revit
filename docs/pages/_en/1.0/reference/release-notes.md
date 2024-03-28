@@ -12,18 +12,22 @@ group: Deployment & Configs
 
 ### RC
 
-- Added 'Add Multi-Grid' component.
 - Added 'Component Family Mesh' component.
-- Now 'Category Identity' works with Built in Categories.
-- Now 'Built-In Categories' has a right click options to filter by Category Type.
-- Now ‘Built-In Categories’ has a right click options to filter by Category Discipline.
-- Added 'Discipline' input to 'Query Categories' component.
-- Added 'Discipline' output to 'Category Identity' component.
-- Improved 'Element Parameter' when dealing with element that do have several parameters with the same name.
-- Fix on 'Add Wall (Profile)' when using slanted profiles.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.21 RC2" version="v1.21.8851.16232 " pre_release=true time="03/27/2024" %}
+
+- Added {% include ltr/comp.html uuid='03eb988d' %} component.
+- Now 'Category Identity' works with built-in Categories.
+- Now 'Built-In Categories' has a right click options to filter by **Category Type**.
+- Now 'Built-In Categories' has a right click options to filter by **Category Discipline**.
+- Added **Discipline** input to {% include ltr/comp.html uuid='d150e40e' %} component.
+- Added **Discipline** output to {% include ltr/comp.html uuid='d794361e' %} component.
+- Improved {% include ltr/comp.html uuid='f568d3e7' %} when dealing with elements that have several parameters with the same name.
+- Fix on {% include ltr/comp.html uuid='78b02ae8' %} when using slanted profiles.
+
 
 {% include ltr/release-header.html title="v1.21 RC1" version="v1.21.8836.21811" pre_release=true time="03/17/2024" %}
 
