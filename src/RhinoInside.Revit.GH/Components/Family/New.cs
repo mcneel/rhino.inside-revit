@@ -275,6 +275,57 @@ namespace RhinoInside.Revit.GH.Components.Families
     (
       ARDB.Document doc,
       ARDB.Document familyDoc,
+      Mesh mesh,
+      DeleteElementEnumerator<ARDB.DirectShape> shapes
+    )
+    {
+      shapes.MoveNext();
+
+      using (GeometryEncoder.Context.Push())
+      {
+        mesh.TryGetUserString(ARDB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out ARDB.ElementId materialId);
+        GeometryEncoder.Context.Peek.MaterialId = MapMaterial(doc, familyDoc, materialId, true);
+
+        var family = familyDoc.OwnerFamily;
+        ARDB.Category familySubCategory = null;
+        if
+        (
+          mesh.TryGetUserString(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out ARDB.ElementId subCategoryId) &&
+          ARDB.Category.GetCategory(doc, subCategoryId) is ARDB.Category subCategory
+        )
+        {
+          var familyCategoryId = family.FamilyCategory.Id;
+          if (subCategory.Id == familyCategoryId || subCategory.Parent?.Id == familyCategoryId)
+          {
+            familySubCategory = MapCategory(doc, familyDoc, subCategoryId, true);
+          }
+          else
+          {
+            if (subCategory.Parent is null)
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{subCategory.Name}' is not subcategory of '{family.FamilyCategory.Name}'");
+            else
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{subCategory.Parent.Name} : {subCategory.Name}' is not subcategory of '{family.FamilyCategory.Name}'");
+          }
+        }
+        GeometryEncoder.Context.Peek.GraphicsStyleId = familySubCategory?.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection).Id ?? ElementIdExtension.Invalid;
+
+        if (mesh.ToMesh() is ARDB.Mesh meshShape)
+        {
+          if (shapes.Current is ARDB.DirectShape directShape) shapes.DeleteCurrent = false;
+          else directShape = ARDB.DirectShape.CreateElement(familyDoc, new ARDB.ElementId(ARDB.BuiltInCategory.OST_GenericModel));
+
+          directShape.SetShape(new ARDB.GeometryObject[] { meshShape });
+          return false;
+        }
+      }
+
+      return false;
+    }
+
+    bool Add
+    (
+      ARDB.Document doc,
+      ARDB.Document familyDoc,
       Brep brep,
       DeleteElementEnumerator<ARDB.GenericForm> forms
     )
@@ -663,6 +714,63 @@ namespace RhinoInside.Revit.GH.Components.Families
       return false;
     }
 
+    static void ConstraintParameters(ARDB.Document doc, BoundingBox bbox)
+    {
+      using (var familyManager = doc.FamilyManager)
+      {
+        switch (doc.OwnerFamily.FamilyCategoryId.ToBuiltInCategory())
+        {
+          case ARDB.BuiltInCategory.OST_Planting:
+            //using (var vertical = doc.OwnerFamily.get_Parameter(ARDB.BuiltInParameter.FAMILY_ALWAYS_VERTICAL))
+            //{
+            //  if (vertical is object && !vertical.IsReadOnly)
+            //    vertical.Update(true);
+            //}
+            using (var height = familyManager.get_Parameter(ARDB.BuiltInParameter.RENDER_PLANT_HEIGHT))
+            {
+              if (height is object && familyManager.IsParameterLockable(height))
+              {
+                familyManager.SetFormula(height, $"{GeometryEncoder.ToInternalLength(bbox.Max.Z)}ft");
+                familyManager.SetParameterLocked(height, true);
+              }
+            }
+            break;
+
+          default:
+            //using (var vertical = doc.OwnerFamily.get_Parameter(ARDB.BuiltInParameter.FAMILY_ALWAYS_VERTICAL))
+            //{
+            //  if (vertical is object && !vertical.IsReadOnly)
+            //    vertical.Update(false);
+            //}
+            using (var width = familyManager.get_Parameter(ARDB.BuiltInParameter.GENERIC_WIDTH))
+            {
+              if (width is object && familyManager.IsParameterLockable(width))
+              {
+                familyManager.SetFormula(width, $"{GeometryEncoder.ToInternalLength(bbox.Min.X - bbox.Max.X)}ft");
+                familyManager.SetParameterLocked(width, true);
+              }
+            }
+            using (var depth = familyManager.get_Parameter(ARDB.BuiltInParameter.GENERIC_DEPTH))
+            {
+              if (depth is object && familyManager.IsParameterLockable(depth))
+              {
+                familyManager.SetFormula(depth, $"{GeometryEncoder.ToInternalLength(bbox.Min.Y - bbox.Max.Y)}ft");
+                familyManager.SetParameterLocked(depth, true);
+              }
+            }
+            using (var height = familyManager.get_Parameter(ARDB.BuiltInParameter.GENERIC_HEIGHT))
+            {
+              if (height is object && familyManager.IsParameterLockable(height))
+              {
+                familyManager.SetFormula(height, $"{GeometryEncoder.ToInternalLength(bbox.Max.Z)}ft");
+                familyManager.SetParameterLocked(height, true);
+              }
+            }
+            break;
+        }
+      }
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
@@ -746,6 +854,8 @@ namespace RhinoInside.Revit.GH.Components.Families
 
                 if (updateGeometry)
                 {
+                  var bbox = BoundingBox.Empty;
+                  using (var meshes = new DeleteElementEnumerator<ARDB.DirectShape>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.DirectShape)).OfCategory(ARDB.BuiltInCategory.OST_GenericModel).Cast<ARDB.DirectShape>().ToArray()))
                   using (var forms = new DeleteElementEnumerator<ARDB.GenericForm>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.GenericForm)).Cast<ARDB.GenericForm>().ToArray()))
                   using (var curves = new DeleteElementEnumerator<ARDB.CurveElement>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.CurveElement)).Cast<ARDB.CurveElement>().Where(x => x.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_SketchLines).ToArray()))
                   using (var openings = new DeleteElementEnumerator<ARDB.Opening>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.Opening)).Cast<ARDB.Opening>().ToArray()))
@@ -761,6 +871,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
                     foreach (var geo in geometry.Select(x => AsGeometryBase(x)))
                     {
+                      bbox.Union(geo.GetBoundingBox(accurate: true));
                       try
                       {
                         if (geo is Rhino.Geometry.Curve loop && geo.TryGetUserString("IS_OPENING_PARAM", out bool opening, false) && opening)
@@ -771,6 +882,7 @@ namespace RhinoInside.Revit.GH.Components.Families
                         {
                           switch (geo)
                           {
+                            case Rhino.Geometry.Mesh mesh: hasVoids |= Add(doc, familyDoc, mesh, meshes); break;
                             case Rhino.Geometry.Brep brep: hasVoids |= Add(doc, familyDoc, brep, forms); break;
                             case Rhino.Geometry.Curve curve: Add(doc, familyDoc, curve, planesSet, curves); break;
                             default:
@@ -799,6 +911,8 @@ namespace RhinoInside.Revit.GH.Components.Families
 
                     familyDoc.OwnerFamily.get_Parameter(ARDB.BuiltInParameter.FAMILY_ALLOW_CUT_WITH_VOIDS).Update(hasVoids ? 1 : 0);
                   }
+
+                  ConstraintParameters(familyDoc, bbox);
                 }
 
                 CommitTransaction(familyDoc, transaction);
