@@ -347,6 +347,8 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.MEPCurve),                        (element)=> new MEPCurve              (element as ARDB.MEPCurve)          },
       { typeof(ARDB.MEPCurveType),                    (element)=> new MEPCurveType          (element as ARDB.MEPCurveType)      },
 
+      { typeof(ARDB.BeamSystem),                      (element)=> new BeamSystem            (element as ARDB.BeamSystem)        },
+
       { typeof(ARDB.TextElement),                     (element)=> new TextElement           (element as ARDB.TextElement)       },
       { typeof(ARDB.TextElementType),                 (element)=> new TextElementType       (element as ARDB.TextElementType)   },
       { typeof(ARDB.Dimension),                       (element)=> new Dimension             (element as ARDB.Dimension)         },
