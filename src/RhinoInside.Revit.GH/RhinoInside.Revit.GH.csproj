@@ -307,7 +307,7 @@
     <Compile Include="Components\Views\QueryViewElements.cs" />
     <Compile Include="Components\Views\QueryViews.cs" />
     <Compile Include="Components\Views\SectionBox.cs" />
-    <Compile Include="Components\Views\ViewRangeElevations.cs" />
+    <Compile Include="Components\Views\ViewRange.cs" />
     <Compile Include="Components\Workset\Active.cs" />
     <Compile Include="Components\Workset\CreateWorkset.cs" />
     <Compile Include="Components\Workset\ElementWorkset.cs" />
