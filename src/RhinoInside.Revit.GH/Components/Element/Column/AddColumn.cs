@@ -160,7 +160,7 @@ namespace RhinoInside.Revit.GH.Components
           if (!Rhino.Geometry.Intersect.Intersection.LinePlane(axis, basePlane, out var t0) || ! Rhino.Geometry.Intersect.Intersection.LinePlane(axis, topPlane, out var t1))
             throw new RuntimeArgumentException("Location", $"Location can't be a vertical plane.", location.Value);
 
-          var line = ARDB.Line.CreateBound(axis.PointAt(t0).ToXYZ(), axis.PointAt(t1).ToXYZ());
+          var line = new Line(axis.PointAt(t0), axis.PointAt(t1)).ToLine();
 
           // Compute
           column = Reconstruct(column, doc.Value, line, (ERDB.UnitXYZ) location.Value.XAxis.ToXYZ(), type.Value, baseLevel ?? topLevel, topLevel ?? baseLevel);
