@@ -4,6 +4,7 @@ using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -14,7 +15,7 @@ namespace RhinoInside.Revit.GH.Types
     public LevelConstraint(External.DB.ElevationElementReference height) : base(height) { }
     public LevelConstraint(double offset) : base(offset) { }
     public LevelConstraint(Level level, double? offset) :
-      base(new External.DB.ElevationElementReference(level.Value, offset / Revit.ModelUnits))
+      base(new External.DB.ElevationElementReference(level?.Value, offset / Revit.ModelUnits))
     { }
 
     public override bool IsValid => Value != default;
@@ -43,8 +44,11 @@ namespace RhinoInside.Revit.GH.Types
 
     public override bool CastFrom(object source)
     {
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
+      switch (source)
+      {
+        case Level l: Value = new External.DB.ElevationElementReference(l.Value, default); return true;
+        case IGH_Goo goo: source = goo.ScriptVariable(); break;
+      }
 
       switch (source)
       {
@@ -147,22 +151,43 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
       if (!Params.TryGetData(DA, "Level", out Types.Level level)) return;
       if (!Params.TryGetData(DA, "Offset", out double? offset)) return;
 
-      if (elevation is object)
+      if (level is object || offset is object)
       {
-        if (elevation.IsLevelConstraint(out var l, out var o))
+        if (elevation is object)
         {
-          level = level ?? l;
-          offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
+          if (elevation.IsLevelConstraint(out var l, out var o))
+          {
+            level = level ?? l;
+            offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
+          }
+          else if (elevation.IsOffset(out o))
+          {
+            offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
+          }
+          else if (elevation.IsElevation(out var e) && level is null)
+          {
+            offset = e + offset ?? 0.0;
+          }
         }
-        else if (elevation.IsOffset(out o))
+          
+        if (level?.Id == ElementIdExtension.Invalid)
         {
-          offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
+          offset = default;
         }
+
+        elevation = new Types.LevelConstraint(level, offset);
       }
 
-      Params.TrySetData(DA, "Elevation", () => level is object || offset is object ? new Types.LevelConstraint(level ?? new Types.Level(), offset ?? 0.0) : null);
-      Params.TrySetData(DA, "Level", () => level);
-      Params.TrySetData(DA, "Offset", () => offset ?? (level is null ? default(double?) : 0.0));
+      Params.TrySetData(DA, "Elevation", () => elevation);
+      if (elevation?.IsLevelConstraint(out var elevationLevel, out var elevationOffset) is true)
+      {
+        Params.TrySetData(DA, "Level", () => elevationLevel);
+        Params.TrySetData(DA, "Offset", () => elevationOffset);
+      }
+      else if (elevation?.IsOffset(out elevationOffset) is true)
+      {
+        Params.TrySetData(DA, "Offset", () => elevationOffset);
+      }
     }
   }
 }

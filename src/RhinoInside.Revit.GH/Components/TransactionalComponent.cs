@@ -937,13 +937,13 @@ namespace RhinoInside.Revit.GH.Components
 
         if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, message);
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{message}\nSet 'Error Mode' to 'Continue' to use the existing one.");
           return null;
         }
 
         if (FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit)
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{message} Using existing.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{message}\nUsing existing.");
           return existing;
         }
 

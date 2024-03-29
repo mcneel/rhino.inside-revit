@@ -156,7 +156,7 @@ namespace RhinoInside.Revit.GH.Components
       if (!curve.IsLinear(tol.VertexTolerance))
         throw new RuntimeArgumentException("Curve", $"Curve should be a line like curve.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
-      var line = ARDB.Line.CreateBound(curve.PointAtStart.ToXYZ(), curve.PointAtEnd.ToXYZ());
+      var line = new Line(curve.PointAtStart, curve.PointAtEnd).ToLine();
       line.TryGetLocation(out var origin, out var basisX, out var basisY);
 
       var reference = default(ARDB.Reference);
@@ -257,9 +257,9 @@ namespace RhinoInside.Revit.GH.Components
                     brep.Surfaces[0].TryGetPlane(out var facePlane/*, tol.VertexTolerance*/)
                   )
                   {
-                    var start = facePlane.ClosestPoint(line.GetEndPoint(0).ToPoint3d()).ToXYZ();
-                    var end = facePlane.ClosestPoint(line.GetEndPoint(1).ToPoint3d()).ToXYZ();
-                    line = ARDB.Line.CreateBound(start, end);
+                    var start = facePlane.ClosestPoint(line.GetEndPoint(0).ToPoint3d());
+                    var end = facePlane.ClosestPoint(line.GetEndPoint(1).ToPoint3d());
+                    line = new Line(start, end).ToLine();
                   }
                   else throw new RuntimeArgumentException("Work Plane", $"'Work Plane' face should be planar.\nTolerance is {/*tol.VertexTolerance*/0.0} {GH_Format.RhinoUnitSymbol()}", brep);
                 }
