@@ -13,6 +13,7 @@ group: Deployment & Configs
 ### RC
 
 - Added 'Component Family Mesh' component.
+- Updated 'View Range' to be also a setter.
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

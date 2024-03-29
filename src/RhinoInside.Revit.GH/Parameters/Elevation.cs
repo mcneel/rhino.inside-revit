@@ -440,6 +440,8 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
+    public bool IsUnlimited() => Value.IsUnlimited;
+
     #region IGH_QuickCast
     GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
     private double QC_Value => IsElevation(out var elevation) ? elevation : double.NaN;
