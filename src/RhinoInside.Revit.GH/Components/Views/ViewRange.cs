@@ -7,14 +7,14 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  [ComponentVersion(introduced: "1.14")]
-  public class ViewRangeElevations : TransactionalChainComponent
+  [ComponentVersion(introduced: "1.14", updated: "1.21")]
+  public class ViewRange : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("02234E1D-062E-49F0-BAEE-8917589C2533");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => string.Empty;
 
-    public ViewRangeElevations() : base
+    public ViewRange() : base
     (
       name: "View Range",
       nickname: "V-Range",
