@@ -17,6 +17,7 @@ using Grasshopper.GUI.Canvas;
 namespace RhinoInside.Revit.GH
 {
   using Convert.Geometry;
+  using External.UI.Selection;
 
   internal class PreviewServer : DirectContext3DServer
   {
@@ -195,11 +196,7 @@ namespace RhinoInside.Revit.GH
       Monitor.Enter(PreviewNodesToken, ref PreviewNodesWasTaken);
 
       // Magic trick to force Revit update the Outline.
-      if (Revit.ActiveDBDocument is ARDB.Document activeDocument)
-      {
-        using (var uiDocument = new ARUI.UIDocument(activeDocument))
-          uiDocument.Selection.SetElementIds(uiDocument.Selection.GetElementIds());
-      }
+      Revit.ActiveUIDocument?.ResetSelection();
 
       var expireAllObjects = !e.Document.Objects.OfType<IGH_ActiveObject>().Any(x => x.Phase != GH_SolutionPhase.Computed);
       foreach (var node in PreviewNodes)

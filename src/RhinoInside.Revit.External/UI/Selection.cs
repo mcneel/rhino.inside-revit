@@ -25,6 +25,33 @@ namespace RhinoInside.Revit.External.UI.Selection
       }
     }
 
+    public static void ResetSelection(this UIDocument doc)
+    {
+      try
+      {
+        using (var selection = doc.Selection)
+#if REVIT_2023
+          selection.SetReferences(selection.GetReferences());
+#else
+          selection.SetElementIds(selection.GetElementIds());
+#endif
+      }
+      catch { }
+    }
+
+    public static IList<Reference> GetSelection(this UIDocument doc)
+    {
+      using (var selection = doc.Selection)
+      {
+#if REVIT_2023
+        return selection.GetReferences();
+#else
+        using (var document = doc.Document)
+          return selection.GetElementIds().Select(x => new Reference(document.GetElement(x))).ToArray();
+#endif
+      }
+    }
+
     #region PickObject
     public static Result PickObject(this UIDocument doc, out Reference reference, ObjectType objectType)
     {
