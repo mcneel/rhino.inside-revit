@@ -117,15 +117,15 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       // By Category
-      if (element.Category is null)
+      using (var category = element.Category)
       {
-        if (Viewer.IsValidElement(element)) return new Viewer(element);
-        if (DocumentExtension.AsCategory(element) is ARDB.Category category) return new Category(category);
-      }
-      else
-      {
-        switch (element.Category.ToBuiltInCategory())
+        switch (category?.ToBuiltInCategory())
         {
+          case null:
+            if (Viewer.IsValidElement(element)) return new Viewer(element);
+            if (DocumentExtension.AsCategory(element) is ARDB.Category categoryElement) return new Category(categoryElement);
+            break;
+
           case ARDB.BuiltInCategory.OST_DesignOptionSets:
             if (DesignOptionSet.IsValidElement(element)) return new DesignOptionSet(element);
             break;
