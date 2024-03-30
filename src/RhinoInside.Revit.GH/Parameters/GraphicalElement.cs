@@ -738,9 +738,9 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           if (NickName == _ActiveSelection_)
           {
-            var selection = Revit.ActiveUIDocument.Selection.GetElementIds();
             var path = new GH_Path(0);
-            m_data.AppendRange(selection.Select(x => PreferredCast(doc.GetElement(x))), path);
+            var selection = Revit.ActiveUIDocument.GetSelection();
+            m_data.AppendRange(selection.Select(x => Types.GraphicalElement.FromReference(doc, x)).Where(x => AllowElement(x.Value)).Cast<T>(), path);
           }
           else
           {
