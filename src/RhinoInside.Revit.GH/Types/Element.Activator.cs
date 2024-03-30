@@ -122,9 +122,9 @@ namespace RhinoInside.Revit.GH.Types
         if (Viewer.IsValidElement(element)) return new Viewer(element);
         if (DocumentExtension.AsCategory(element) is ARDB.Category category) return new Category(category);
       }
-      else if (element.Category.Id.TryGetBuiltInCategory(out var bic))
+      else
       {
-        switch (bic)
+        switch (element.Category.ToBuiltInCategory())
         {
           case ARDB.BuiltInCategory.OST_DesignOptionSets:
             if (DesignOptionSet.IsValidElement(element)) return new DesignOptionSet(element);
