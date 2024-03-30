@@ -4,7 +4,6 @@ using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -12,10 +11,12 @@ namespace RhinoInside.Revit.GH.Types
   public class LevelConstraint : ProjectElevation
   {
     public LevelConstraint() { }
-    public LevelConstraint(External.DB.ElevationElementReference height) : base(height) { }
-    public LevelConstraint(double offset) : base(offset) { }
-    public LevelConstraint(Level level, double? offset) :
-      base(new External.DB.ElevationElementReference(level?.Value, offset / Revit.ModelUnits))
+    internal LevelConstraint(External.DB.ElevationElementReference value) : base(value) { }
+    public LevelConstraint(double? value) :
+      base(new External.DB.ElevationElementReference(value / Revit.ModelUnits))
+    { }
+    public LevelConstraint(double? value, Level level) :
+      base(new External.DB.ElevationElementReference(value / Revit.ModelUnits, level?.Value))
     { }
 
     public override bool IsValid => Value != default;
@@ -46,20 +47,39 @@ namespace RhinoInside.Revit.GH.Types
     {
       switch (source)
       {
-        case Level l: Value = new External.DB.ElevationElementReference(l.Value, default); return true;
+        case Level l: Value = new External.DB.ElevationElementReference(default, l.Value); return true;
         case IGH_Goo goo: source = goo.ScriptVariable(); break;
       }
 
       switch (source)
       {
-        case int offset: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset)); return true;
-        case double offset: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset)); return true;
-        case ARDB.View view: Value = new External.DB.ElevationElementReference(view.GenLevel, default); return true;
-        case ARDB.Level level: Value = new External.DB.ElevationElementReference(level, default); return true;
+        case int offset: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset), null); return true;
+        case double offset: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset), null); return true;
+        case ARDB.View view: Value = new External.DB.ElevationElementReference(default, view.GenLevel); return true;
+        case ARDB.Level level: Value = new External.DB.ElevationElementReference(default, level); return true;
         case External.DB.ElevationElementReference elevation: Value = elevation; return true;
       }
 
       return false;
+    }
+
+    public static LevelConstraint operator %(LevelConstraint constraint, Level level)
+    {
+      if (level is null) return constraint;
+      if (constraint?.IsElevation(out var elevation) is true) return new LevelConstraint(elevation - level.Elevation, level);
+      if (constraint?.IsOffset(out var offset) is true) return new LevelConstraint(offset, level);
+      if (constraint?.IsUnlimited() is true) return new LevelConstraint(default, default);
+      return new LevelConstraint(null, level);
+    }
+
+    public static LevelConstraint operator +(LevelConstraint constraint, double? value)
+    {
+      if (value is null) return constraint;
+      if (constraint?.IsLevelConstraint(out var level, out var elevation) is true) return new LevelConstraint(elevation + value, level);
+      if (constraint?.IsElevation(out elevation) is true) return new LevelConstraint(elevation + value);
+      if (constraint?.IsOffset(out var offset) is true) return new LevelConstraint(offset + value, null);
+      if (constraint?.IsUnlimited() is true) return new LevelConstraint(default, default);
+      return new LevelConstraint(value, null);
     }
 
     public bool IsLevelConstraint(out Level level, out double offset)
@@ -75,7 +95,7 @@ namespace RhinoInside.Revit.GH.Types
       offset = double.NaN;
       return false;
     }
-  }
+ }
 }
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -151,32 +171,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
       if (!Params.TryGetData(DA, "Level", out Types.Level level)) return;
       if (!Params.TryGetData(DA, "Offset", out double? offset)) return;
 
-      if (level is object || offset is object)
-      {
-        if (elevation is object)
-        {
-          if (elevation.IsLevelConstraint(out var l, out var o))
-          {
-            level = level ?? l;
-            offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
-          }
-          else if (elevation.IsOffset(out o))
-          {
-            offset = offset ?? (level is object ? elevation.Elevation - level.Elevation : o);
-          }
-          else if (elevation.IsElevation(out var e) && level is null)
-          {
-            offset = e + offset ?? 0.0;
-          }
-        }
-          
-        if (level?.Id == ElementIdExtension.Invalid)
-        {
-          offset = default;
-        }
-
-        elevation = new Types.LevelConstraint(level, offset);
-      }
+      if (level is object) elevation %= level;
+      if (offset is object) elevation += offset;
 
       Params.TrySetData(DA, "Elevation", () => elevation);
       if (elevation?.IsLevelConstraint(out var elevationLevel, out var elevationOffset) is true)

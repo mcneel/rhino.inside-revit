@@ -146,8 +146,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!Params.GetData(DA, "Inverted", out bool? inverted)) return;
 
       var limits = CompoundElementFilter.BoundingBoxLimits;
-      var zMin = GeometryEncoder.ToInternalLength(baseElevation?.Elevation ?? -limits);
-      var zMax = GeometryEncoder.ToInternalLength(topElevation?.Elevation  ?? +limits);
+      var zMin = baseElevation?.Value.IsElevation(out var be) is true ? be : -limits;
+      var zMax = topElevation ?.Value.IsElevation(out var te) is true ? te : +limits;
       var min = new ARDB.XYZ(-limits, -limits, zMin);
       var max = new ARDB.XYZ(+limits, +limits, zMax);
 

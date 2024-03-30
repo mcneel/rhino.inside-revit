@@ -158,12 +158,12 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
             if (!baseElevation.HasValue) extents.T0 -= 12.0;
             else if (baseElevation.Value.IsOffset(out var baseOffset)) extents.T0 += baseOffset;
             else if (baseElevation.Value.IsElevation(out var elevation)) extents.T0 = elevation;
-            else if (baseElevation.Value.IsUnlimited)  extents.T0 = double.NegativeInfinity;
+            else if (baseElevation.Value.IsUnlimited()) extents.T0 = double.NegativeInfinity;
 
             if (!topElevation.HasValue) extents.T1 += 12.0;
             else if (topElevation.Value.IsOffset(out var topOffset)) extents.T1 += topOffset;
             else if (topElevation.Value.IsElevation(out var elevation)) extents.T1 = elevation;
-            else if (topElevation.Value.IsUnlimited) extents.T1 = double.PositiveInfinity;
+            else if (topElevation.Value.IsUnlimited()) extents.T1 = double.PositiveInfinity;
           }
 
           // Compute

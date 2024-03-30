@@ -10,7 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB
 {
-  public struct ElevationElementReference : IEquatable<ElevationElementReference>
+  public readonly struct ElevationElementReference : IEquatable<ElevationElementReference>
   {
     readonly ARDB.Document Document;
     readonly ARDB.ElementId BaseId;
@@ -18,18 +18,31 @@ namespace RhinoInside.Revit.External.DB
 
     ARDB.Element Base => Document?.GetElement(BaseId);
 
-    public ElevationElementReference(double offset)
+    public ElevationElementReference(double? value)
     {
       Document = default;
-      BaseId = ARDB.ElementId.InvalidElementId;
-      Value = offset;
+      BaseId = default;
+      Value = value;
     }
 
-    public ElevationElementReference(double height, ARDB.BasePoint basePoint)
+    public ElevationElementReference(double? value, ARDB.Element baseElement)
     {
-      Document = basePoint?.Document;
-      BaseId = basePoint?.Id;
-      Value = height;
+      if (baseElement is object)
+      {
+        switch (baseElement)
+        {
+          case ARDB.Level _:          break;
+          case ARDB.BasePoint _:      break;
+          case ARDB.Element e:
+          if (e.Category?.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_IOS_GeoSite)
+            throw new ArgumentException("Invalid element", nameof(baseElement));
+          break;
+        }
+      }
+
+      Document = baseElement?.Document;
+      BaseId = baseElement?.Id ?? ElementIdExtension.Invalid;
+      Value = value;
     }
 
     public ElevationElementReference(ARDB.Level level)
@@ -38,9 +51,9 @@ namespace RhinoInside.Revit.External.DB
       var elevationBase = level?.Document.GetElement(level.GetTypeId()).GetParameterValue<ElevationBase>(ARDB.BuiltInParameter.LEVEL_RELATIVE_BASE_TYPE);
       switch (elevationBase)
       {
-        case ElevationBase.InternalOrigin: basePoint = InternalOriginExtension.Get(level.Document); break;
-        case ElevationBase.ProjectBasePoint: basePoint = BasePointExtension.GetProjectBasePoint(level.Document); break;
-        case ElevationBase.SurveyPoint: basePoint = BasePointExtension.GetSurveyPoint(level.Document); break;
+        case ElevationBase.InternalOrigin:    basePoint = InternalOriginExtension.Get(level.Document); break;
+        case ElevationBase.ProjectBasePoint:  basePoint = BasePointExtension.GetProjectBasePoint(level.Document); break;
+        case ElevationBase.SurveyPoint:       basePoint = BasePointExtension.GetSurveyPoint(level.Document); break;
       }
 
       Document = basePoint?.Document;
@@ -48,15 +61,21 @@ namespace RhinoInside.Revit.External.DB
       Value = elevationBase == ElevationBase.InternalOrigin ? level?.ProjectElevation : level?.Elevation;
     }
 
-    public ElevationElementReference(ARDB.Level level, double? offset)
-    {
-      Document = level?.Document;
-      BaseId = level?.Id ?? ElementIdExtension.Invalid;
-      Value = offset;
-    }
+    public bool IsUnlimited() => !BaseId.IsValid() && (!Value.HasValue || (double.IsInfinity(Value.Value) || double.IsNaN(Value.Value)));
 
     public bool IsAbsolute => BaseId is null && Value is object;
-    public bool IsUnlimited => BaseId == ARDB.ElementId.InvalidElementId && Value is null;
+
+    public bool IsRelative(out double offset, out ARDB.Element baseElement)
+    {
+      if ((baseElement = Base) is object)
+      {
+        offset = Value ?? 0.0;
+        return true;
+      }
+
+      offset = default;
+      return false;
+    }
 
     public bool IsOffset(out double offset)
     {
@@ -72,25 +91,13 @@ namespace RhinoInside.Revit.External.DB
 
     public bool IsElevation(out double elevation)
     {
-      if (BaseId != ARDB.ElementId.InvalidElementId)
+      if (BaseId != ElementIdExtension.Invalid)
       {
         elevation = Elevation;
         return true;
       }
 
       elevation = double.NaN;
-      return false;
-    }
-
-    public bool IsRelative(out double offset, out ARDB.Element baseElement)
-    {
-      if ((baseElement = Base) is object)
-      {
-        offset = Value ?? 0.0;
-        return true;
-      }
-
-      offset = default;
       return false;
     }
 
@@ -108,6 +115,43 @@ namespace RhinoInside.Revit.External.DB
       return false;
     }
 
+    public bool IsProjectElevation(out ARDB.Element basePoint, out double offset)
+    {
+      if (IsRelative(out var o, out var e))
+      {
+        switch (e)
+        {
+          case ARDB.Level l:
+            if (new ElevationElementReference(l).IsRelative(out var le, out e))
+            {
+              basePoint = e;
+              offset = le + o;
+              return true;
+            }
+            break;
+
+          case ARDB.BasePoint bp: basePoint = bp; offset = o; return true;
+
+#if REVIT_2021
+          case ARDB.InternalOrigin io: basePoint = io; offset = o; return true;
+#else
+          case ARDB.Element element:
+            if (InternalOriginExtension.Get(element.Document).Id == element.Id)
+            {
+              basePoint = element;
+              offset = o;
+              return true;
+            }
+            break;
+#endif
+        }
+      }
+
+      basePoint = default;
+      offset = double.NaN;
+      return false;
+    }
+
     public double? BaseElevation
     {
       get
@@ -116,6 +160,12 @@ namespace RhinoInside.Revit.External.DB
         {
           case ARDB.Level level: return level.ProjectElevation;
           case ARDB.BasePoint basePoint: return basePoint.GetPosition().Z;
+#if REVIT_2021
+          case ARDB.InternalOrigin internalOrigin: return internalOrigin.GetPosition().Z;
+#else
+          case ARDB.Element element: if (InternalOriginExtension.Get(element.Document).Id == element.Id) return 0.0;
+            break;
+#endif
         }
 
         return default;
@@ -154,7 +204,7 @@ namespace RhinoInside.Revit.External.DB
       {
         return $"{elevation} ft";
       }
-      else if (IsUnlimited)
+      else if (IsUnlimited())
       {
         return "Unlimited";
       }
@@ -196,11 +246,11 @@ namespace RhinoInside.Revit.External.DB
           else if (baseElevation.Value.IsOffset(out offset)) { elevation = projectElevation; }
         }
 
-        baseElevation = new ElevationElementReference(baseLevel, elevation - baseLevel.ProjectElevation + offset);
+        baseElevation = new ElevationElementReference(elevation - baseLevel.ProjectElevation + offset, baseLevel);
       }
       else if (bottomOffset is null)
       {
-        baseElevation = new ElevationElementReference(baseLevel, defaultBaseOffset);
+        baseElevation = new ElevationElementReference(defaultBaseOffset, baseLevel);
       }
     }
 
@@ -219,7 +269,7 @@ namespace RhinoInside.Revit.External.DB
         double elevation = projectElevation, offset = defaultBaseElevation;
         if (baseElevation.HasValue)
         {
-          if (baseElevation.Value.IsUnlimited)
+          if (baseElevation.Value.IsUnlimited())
           {
             baseLevel = document.GetNearestBaseLevel(projectElevation + defaultBaseElevation, out var t);
             if (baseLevel is null)
@@ -234,11 +284,11 @@ namespace RhinoInside.Revit.External.DB
           else if (baseElevation.Value.IsOffset(out offset)) { elevation = projectElevation; }
         }
 
-        baseElevation = new ElevationElementReference(baseLevel, elevation - (baseLevel?.ProjectElevation ?? 0.0) + offset);
+        baseElevation = new ElevationElementReference(elevation - (baseLevel?.ProjectElevation ?? 0.0) + offset, baseLevel);
       }
       else if (bottomOffset is null)
       {
-        baseElevation = new ElevationElementReference(baseLevel, defaultBaseOffset);
+        baseElevation = new ElevationElementReference(defaultBaseOffset, baseLevel);
       }
 
       if (!topElevation.HasValue || !topElevation.Value.IsLevelConstraint(out var topLevel, out var topOffset))
@@ -248,7 +298,7 @@ namespace RhinoInside.Revit.External.DB
         double elevation = projectElevation, offset = defaultTopElevation;
         if (topElevation.HasValue)
         {
-          if (topElevation.Value.IsUnlimited)
+          if (topElevation.Value.IsUnlimited())
           {
             topLevel = document.GetNearestTopLevel(projectElevation + defaultBaseElevation, out var b);
             elevation = topLevel?.ProjectElevation ?? defaultTopElevation;
@@ -258,11 +308,11 @@ namespace RhinoInside.Revit.External.DB
           else if (topElevation.Value.IsOffset(out offset)) { elevation = projectElevation; }
         }
 
-        topElevation = new ElevationElementReference(topLevel, elevation - (topLevel?.ProjectElevation ?? 0.0) + offset);
+        topElevation = new ElevationElementReference(elevation - (topLevel?.ProjectElevation ?? 0.0) + offset, topLevel);
       }
       else if (topOffset is null)
       {
-        topElevation = new ElevationElementReference(topLevel, defaultTopOffset);
+        topElevation = new ElevationElementReference(defaultTopOffset, topLevel);
       }
     }
     #endregion
@@ -274,19 +324,15 @@ namespace RhinoInside.Revit.GH.Types
   public class ProjectElevation : GH_Goo<External.DB.ElevationElementReference>, IGH_QuickCast
   {
     public ProjectElevation() { }
-    public ProjectElevation(External.DB.ElevationElementReference height) :
-      base(height)
-    { }
-    public ProjectElevation(double offset) :
-      base(new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset)))
-    { }
-    public ProjectElevation(double elevation, BasePoint basePoint) :
-      base(new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation), basePoint?.Value))
+    internal ProjectElevation(External.DB.ElevationElementReference value) :
+      base(value) { }
+
+    public ProjectElevation(double? value) :
+      base(new External.DB.ElevationElementReference(value / Revit.ModelUnits))
     { }
 
-    public ProjectElevation(double elevation, IGH_BasePoint basePoint) :
-      base(new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation), basePoint?.Value as ARDB.BasePoint))
-    { }
+    public ProjectElevation(double? elevation, IGH_BasePoint basePoint = null) :
+      base(new External.DB.ElevationElementReference(elevation / Revit.ModelUnits, basePoint?.Value as ARDB.Element)) { }
 
     public override bool IsValid => Value != default;
 
@@ -298,12 +344,22 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string ToString()
     {
-      if (Value.IsLevelConstraint(out var level, out var levelOffset))
+      if (Value.IsUnlimited())
+      {
+        return "Unlimited";
+      }
+      else if (Value.IsLevelConstraint(out var level, out var levelOffset))
       {
         var name = level.Name;
         var token = $"'{name ?? "Invalid Level"}'";
         if (levelOffset.HasValue && Math.Abs(levelOffset.Value) > 1e-9)
-          token += $" {(levelOffset.Value < 0.0 ? "-" : "+")} {GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(levelOffset.Value)))} {GH_Format.RhinoUnitSymbol()}";
+        {
+          token += $" {(levelOffset.Value < 0.0 ? "-" : "+")} ";
+          if (double.IsInfinity(levelOffset.Value))
+            token += $"{Math.Abs(levelOffset.Value)} {GH_Format.RhinoUnitSymbol()}";
+          else
+            token += $"{GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(levelOffset.Value)))} {GH_Format.RhinoUnitSymbol()}";
+        }
 
         return token;
       }
@@ -323,10 +379,6 @@ namespace RhinoInside.Revit.GH.Types
       else if (Value.IsElevation(out var elevation))
       {
         return $"{(elevation < 0.0 ? "-" : "+")} {GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(elevation)))} {GH_Format.RhinoUnitSymbol()}";
-      }
-      else if (Value.IsUnlimited)
-      {
-        return "Unlimited";
       }
 
       return string.Empty;
@@ -366,17 +418,10 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
       {
-        if (IsProjectElevation(out var basePoint, out var offset))
-        {
-          var location = basePoint.Location;
-          location.Translate(Vector3d.ZAxis * offset);
-          target = (Q) (object) new GH_Plane(location);
-          return true;
-        }
-        else if (IsElevation(out offset))
+        if (IsElevation(out var elevation))
         {
           var location = Plane.WorldXY;
-          location.Translate(Vector3d.ZAxis * offset);
+          location.Translate(Vector3d.ZAxis * elevation);
           target = (Q) (object) new GH_Plane(location);
           return true;
         }
@@ -392,8 +437,8 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (source)
       {
-        case int elevation: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation), null); return true;
-        case double elevation: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation), null); return true;
+        case int elevation: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation)); return true;
+        case double elevation: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation)); return true;
         case ARDB.Level level: Value = new External.DB.ElevationElementReference(level); return true;
         case ARDB.BasePoint basePoint: Value = new External.DB.ElevationElementReference(default, basePoint); return true;
         case External.DB.ElevationElementReference elevation: Value = elevation; return true;
@@ -402,11 +447,30 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
-    public bool IsProjectElevation(out BasePoint basePoint, out double offset)
+    public static ProjectElevation operator %(ProjectElevation constraint, IGH_BasePoint basePoint)
     {
-      if (Value.IsRelative(out var o, out var e))
+      if (basePoint is null) return constraint;
+      if (constraint?.IsElevation(out var elevation) is true) return new ProjectElevation(elevation - basePoint.Location.Origin.Z, basePoint);
+      if (constraint?.IsOffset(out var offset) is true) return new ProjectElevation(offset, basePoint);
+      if (constraint?.IsUnlimited() is true) return new ProjectElevation(default, default);
+      return new ProjectElevation(null, basePoint);
+    }
+
+    public static ProjectElevation operator +(ProjectElevation constraint, double? value)
+    {
+      if (value is null) return constraint;
+      if (constraint?.IsProjectElevation(out var basePoint, out var elevation) is true) return new ProjectElevation(elevation + value, basePoint);
+      if (constraint?.IsElevation(out elevation) is true) return new ProjectElevation(elevation + value);
+      if (constraint?.IsOffset(out var offset) is true) return new ProjectElevation(offset + value, null);
+      if (constraint?.IsUnlimited() is true) return new ProjectElevation(default, default);
+      return new ProjectElevation(value, null);
+    }
+
+    public bool IsProjectElevation(out IGH_BasePoint basePoint, out double offset)
+    {
+      if (Value.IsProjectElevation(out var b, out var o))
       {
-        basePoint = BasePoint.FromElement(e) as BasePoint;
+        basePoint = GraphicalElement.FromValue(b) as IGH_BasePoint;
         offset = o * Revit.ModelUnits;
         return true;
       }
@@ -440,7 +504,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public bool IsUnlimited() => Value.IsUnlimited;
+    public bool IsUnlimited() => Value.IsUnlimited();
 
     #region IGH_QuickCast
     GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
@@ -558,42 +622,19 @@ namespace RhinoInside.Revit.GH.Components.Site
       if (!Params.TryGetData(DA, "Base Point", out Types.IGH_BasePoint basePoint)) return;
       if (!Params.TryGetData(DA, "Offset", out double? offset)) return;
 
-      switch (elevation)
+      if (basePoint is object) elevation %= basePoint;
+      if (offset is object) elevation += offset;
+
+      Params.TrySetData(DA, "Elevation",  () => elevation);
+      if (elevation?.IsProjectElevation(out var elevationBase, out var elevationOffset) is true)
       {
-        case Types.LevelConstraint levelOffset:
-          if (levelOffset.IsLevelConstraint(out var l, out var _))
-          {
-            basePoint = basePoint ?? new Types.InternalOrigin(InternalOriginExtension.Get(l.Document));
-            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : elevation.Elevation);
-          }
-          else if (elevation.IsOffset(out var _))
-          {
-            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : elevation.Elevation);
-          }
-          break;
-
-        case object _:
-        {
-          if (elevation.IsProjectElevation(out var bp, out var o))
-          {
-            basePoint = basePoint ?? bp;
-            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
-          }
-          else if (elevation.IsOffset(out o))
-          {
-            offset = offset ?? (basePoint is object ? elevation.Elevation - basePoint.Location.OriginZ : o);
-          }
-          else if (elevation.IsElevation(out o))
-          {
-            offset = o;
-          }
-        }
-        break;
+        Params.TrySetData(DA, "Base Point", () => elevationBase);
+        Params.TrySetData(DA, "Offset", () => elevationOffset);
       }
-
-      Params.TrySetData(DA, "Elevation",  () => basePoint is object || offset is object ? new Types.ProjectElevation(offset ?? 0.0, basePoint) : null);
-      Params.TrySetData(DA, "Base Point", () => basePoint);
-      Params.TrySetData(DA, "Offset",     () => offset ?? (basePoint is null ? default(double?) : 0.0));
+      else if (elevation?.IsOffset(out elevationOffset) is true)
+      {
+        Params.TrySetData(DA, "Offset", () => elevationOffset);
+      }
     }
   }
 }
