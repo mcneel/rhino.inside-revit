@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.AddIn.Forms
         foreach (var category in group.OrderBy(x => x.Name))
         {
           _categorySelector.Items.Add(new ListItem { Key = category.Name, Text = category.Name });
-          if (category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_GenericModel)
+          if (category.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_GenericModel)
             _categorySelector.SelectedKey = category.Name;
         }
 

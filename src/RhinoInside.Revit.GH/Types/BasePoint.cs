@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB.BasePoint &&
-             element.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_IOS_GeoSite;
+             element.Category?.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_IOS_GeoSite;
     }
 
     public BasePoint() { }
@@ -182,7 +182,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB_InternalOrigin &&
-             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_IOS_GeoSite;
+             element.Category?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_IOS_GeoSite;
     }
 
     public InternalOrigin() { }

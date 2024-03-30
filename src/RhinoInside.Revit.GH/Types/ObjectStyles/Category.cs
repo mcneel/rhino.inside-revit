@@ -389,7 +389,7 @@ namespace RhinoInside.Revit.GH.Types
 
           // Print Width
           {
-            layer.PlotWeight = category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_InvisibleLines ?
+            layer.PlotWeight = category.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_InvisibleLines ?
               -1.0 : // No Plot
               ToLineWeight(ProjectionLineWeight);
           }
@@ -484,7 +484,7 @@ namespace RhinoInside.Revit.GH.Types
 
         // LineWeight
         {
-          attributes.LineWeight = category.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_InvisibleLines ?
+          attributes.LineWeight = category.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_InvisibleLines ?
             -1.0 : // No Plot
             ToLineWeight(ProjectionLineWeight);
         }

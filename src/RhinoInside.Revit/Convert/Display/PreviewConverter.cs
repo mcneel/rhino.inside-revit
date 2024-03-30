@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.Convert.Display
         return true;
 
       if (doc?.GetElement(geometryObject.GraphicsStyleId) is ARDB.GraphicsStyle style)
-        return style.GraphicsStyleCategory.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_LightingFixtureSource;
+        return style.GraphicsStyleCategory.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_LightingFixtureSource;
 
       return false;
     }

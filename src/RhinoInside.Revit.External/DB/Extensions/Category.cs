@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if REVIT_2020
       return category.IsVisibleInUI;
 #else
-      switch (category.Id.ToBuiltInCategory())
+      switch (category.ToBuiltInCategory())
       {
         case BuiltInCategory.OST_Materials:
         case BuiltInCategory.OST_RvtLinks:

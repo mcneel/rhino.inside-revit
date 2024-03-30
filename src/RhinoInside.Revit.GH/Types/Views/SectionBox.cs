@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB_SectionBox element)
     {
       return element.GetType() == typeof(ARDB_SectionBox) &&
-             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_SectionBox;
+             element.Category?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_SectionBox;
     }
 
     public SectionBox() { }

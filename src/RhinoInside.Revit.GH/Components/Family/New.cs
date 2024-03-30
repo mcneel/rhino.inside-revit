@@ -438,7 +438,7 @@ namespace RhinoInside.Revit.GH.Components.Families
         curve.TryGetUserString(ARDB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
         curve.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, ERDB.FamilyElementVisibility.DefaultModel);
 
-        if (familyDoc.OwnerFamily.FamilyCategory.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_DetailComponents)
+        if (familyDoc.OwnerFamily.FamilyCategory.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_DetailComponents)
         {
           using (var collector = new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.View)))
           {
@@ -857,7 +857,7 @@ namespace RhinoInside.Revit.GH.Components.Families
                   var bbox = BoundingBox.Empty;
                   using (var meshes = new DeleteElementEnumerator<ARDB.DirectShape>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.DirectShape)).OfCategory(ARDB.BuiltInCategory.OST_GenericModel).Cast<ARDB.DirectShape>().ToArray()))
                   using (var forms = new DeleteElementEnumerator<ARDB.GenericForm>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.GenericForm)).Cast<ARDB.GenericForm>().ToArray()))
-                  using (var curves = new DeleteElementEnumerator<ARDB.CurveElement>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.CurveElement)).Cast<ARDB.CurveElement>().Where(x => x.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_SketchLines).ToArray()))
+                  using (var curves = new DeleteElementEnumerator<ARDB.CurveElement>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.CurveElement)).Cast<ARDB.CurveElement>().Where(x => x.Category.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_SketchLines).ToArray()))
                   using (var openings = new DeleteElementEnumerator<ARDB.Opening>(new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.Opening)).Cast<ARDB.Opening>().ToArray()))
                   using (var ctx = GeometryEncoder.Context.Push(familyDoc))
                   {

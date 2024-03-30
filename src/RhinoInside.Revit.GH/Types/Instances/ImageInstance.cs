@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element.GetType() == typeof(ARDB_ImageInstance) &&
-             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_RasterImages;
+             element.Category?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_RasterImages;
     }
 
     public ImageInstance() { }
