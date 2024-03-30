@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           case ARDB.FamilySymbol finst:
             // make sure family symbol belongs to a Panel Family
             // finst.Family.IsCurtainPanelFamily returns FALSE !!!
-            var isCurtainPanelFamily = finst.Family.FamilyCategory.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_CurtainWallPanels;
+            var isCurtainPanelFamily = finst.Family.FamilyCategory.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_CurtainWallPanels;
             // can not extract Offset and Thickness since they are not builtin for curtain panel custom families
             // TODO: maybe extract other info for Panel Families?!
             break;

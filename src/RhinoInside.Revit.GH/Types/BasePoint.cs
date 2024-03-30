@@ -25,7 +25,8 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB.BasePoint &&
-             element.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_IOS_GeoSite;
+             element.Category?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_ProjectBasePoint ||
+             element.Category?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_SharedBasePoint;
     }
 
     public BasePoint() { }
@@ -58,12 +59,11 @@ namespace RhinoInside.Revit.GH.Types
       if (Value is ARDB.BasePoint point)
       {
         var location = Location;
-        point.Category.Id.TryGetBuiltInCategory(out var builtInCategory);
         var pointStyle = default(Rhino.Display.PointStyle);
         var angle = default(float);
         var radius = 6.0f;
         var secondarySize = 3.5f;
-        switch (builtInCategory)
+        switch (point.Category.ToBuiltInCategory())
         {
           case ARDB.BuiltInCategory.OST_IOS_GeoSite:
             pointStyle = Rhino.Display.PointStyle.ActivePoint;
@@ -182,7 +182,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB_InternalOrigin &&
-             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_IOS_GeoSite;
+             element.Category?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_IOS_GeoSite;
     }
 
     public InternalOrigin() { }

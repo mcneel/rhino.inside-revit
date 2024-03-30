@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
     public static bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB_ProfileType &&
-             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_ProfileFamilies;
+             element.Category?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_ProfileFamilies;
     }
 
     public ProfileType() { }

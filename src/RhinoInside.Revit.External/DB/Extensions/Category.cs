@@ -66,7 +66,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if REVIT_2020
       return category.IsVisibleInUI;
 #else
-      switch (category.Id.ToBuiltInCategory())
+      var bic = category.ToBuiltInCategory();
+      switch (bic)
       {
         case BuiltInCategory.OST_Materials:
         case BuiltInCategory.OST_RvtLinks:
@@ -85,7 +86,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return true;
 
       // There are built in categories that are not indexed by name so we look for BuiltInCategory.
-      if (map is Categories categories && category.Id.TryGetBuiltInCategory(out var bic))
+      if (map is Categories categories && bic != BuiltInCategory.INVALID)
       {
         try { return categories.get_Item(bic) is object; }
         catch { }

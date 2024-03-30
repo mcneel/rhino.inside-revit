@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
       if (!location.IsValid)
         ThrowArgumentException(nameof(location), "Should be a valid plane.");
 
-      if (!type.Category.Id.TryGetBuiltInCategory(out var bic) || bic != ARDB.BuiltInCategory.OST_IOSModelGroups)
+      if (type.Category.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_IOSModelGroups)
         ThrowArgumentException(nameof(type), $"'{type.Name}' is not a Model Group Type.");
 
       SolveOptionalLevel(document, location.Origin, ref level, out var bbox);

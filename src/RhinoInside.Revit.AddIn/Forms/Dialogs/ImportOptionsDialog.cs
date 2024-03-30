@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.AddIn.Forms
       {
         var category = Document.OwnerFamily.FamilyCategory;
         categorySelector.Enabled = false;
-        categorySelector.Items.Add(new ListItem { Key = category.Id.ToBuiltInCategory().ToString(), Text = category.Name, Tag = category });
+        categorySelector.Items.Add(new ListItem { Key = category.ToBuiltInCategory().ToString(), Text = category.Name, Tag = category });
         categorySelector.SelectedIndex = 0;
       }
 
@@ -146,7 +146,7 @@ namespace RhinoInside.Revit.AddIn.Forms
         foreach (var group in DirectShapeCategories.GroupBy(x => x.CategoryType).OrderBy(x => x.Key.ToString()))
         {
           foreach (var category in group.OrderBy(x => x.Name))
-            categorySelector.Items.Add(new ListItem { Key = category.Id.ToBuiltInCategory().ToString(), Text = category.Name });
+            categorySelector.Items.Add(new ListItem { Key = category.ToBuiltInCategory().ToString(), Text = category.Name });
         }
 
         categorySelector.SelectedKey = ARDB.BuiltInCategory.OST_GenericModel.ToString();

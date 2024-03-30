@@ -164,11 +164,13 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
 
             if (!baseElevation.HasValue) extents.T0 -= 12.0;
             else if (baseElevation.Value.IsOffset(out var baseOffset)) extents.T0 += baseOffset;
-            else extents.T0 = baseElevation.Value.Elevation;
+            else if (baseElevation.Value.IsElevation(out var elevation)) extents.T0 = elevation;
+            else if (baseElevation.Value.IsUnlimited()) extents.T0 = double.NegativeInfinity;
 
             if (!topElevation.HasValue) extents.T1 += 12.0;
             else if (topElevation.Value.IsOffset(out var topOffset)) extents.T1 += topOffset;
-            else extents.T1 = topElevation.Value.Elevation;
+            else if (topElevation.Value.IsElevation(out var elevation)) extents.T1 = elevation;
+            else if (topElevation.Value.IsUnlimited()) extents.T1 = double.PositiveInfinity;
           }
 
           // Compute
@@ -225,13 +227,19 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
       if (name is object && grid.Name != name)
         grid.Name = name;
 
+      var tol = GeometryTolerance.Internal;
       foreach (var child in grid.GetGridIds().Select(x => grid.Document.GetElement(x) as ARDB.Grid))
       {
         using (var outline = child.GetExtents())
         {
-          var tol = GeometryTolerance.Internal;
           if (!tol.DefaultTolerance.Equals(extents.T0, outline.MinimumPoint.Z) || !tol.DefaultTolerance.Equals(extents.T1, outline.MaximumPoint.Z))
-            child.SetVerticalExtents(extents.T0, extents.T1);
+          {
+            child.SetVerticalExtents
+            (
+              double.IsInfinity(extents.T0) ? outline.MinimumPoint.Z : extents.T0,
+              double.IsInfinity(extents.T1) ? outline.MaximumPoint.Z : extents.T1
+            );
+          }
         }
       }
 

@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Types
     public static new bool IsValidElement(ARDB_ScopeBox element)
     {
       return element.GetType() == typeof(ARDB_ScopeBox) &&
-             element.Category?.Id.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_VolumeOfInterest;
+             element.Category?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_VolumeOfInterest;
     }
 
     public ScopeBox() { }

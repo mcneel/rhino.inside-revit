@@ -110,7 +110,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     static void AssertValidType(ARDB.FamilySymbol type, ARDB.Element host)
     {
-      if (type.Category.Id.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_StructuralFoundation)
+      if (type.Category.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_StructuralFoundation)
         throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' is not a valid structural foundation type.");
 
       var family = type.Family;

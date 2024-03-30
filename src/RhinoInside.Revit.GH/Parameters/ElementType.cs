@@ -466,7 +466,7 @@ namespace RhinoInside.Revit.GH.Parameters
             if (!document.Value.IsEquivalent(element.Document))
               throw new Exceptions.RuntimeArgumentException(name, $"Failed to assign a {nameof(type)} from a diferent document.");
 
-            if (element.Category.Id.ToBuiltInCategory() != categoryId)
+            if (element.Category.ToBuiltInCategory() != categoryId)
               throw new Exceptions.RuntimeArgumentException(name, $"Collected {nameof(type)} is not on category '{((ERDB.Schemas.CategoryId) categoryId).Label}'.");
 
             if (element is ARDB.FamilySymbol symbol && !symbol.IsActive)
