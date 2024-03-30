@@ -152,9 +152,13 @@ namespace RhinoInside.Revit.GH.Types
             break;
 
 #if !REVIT_2021
+          case ARDB.BuiltInCategory.OST_ProjectBasePoint:
+          case ARDB.BuiltInCategory.OST_SharedBasePoint:
+            if (BasePoint.IsValidElement(element)) return new BasePoint(element as ARDB.BasePoint);
+            break;
+
           case ARDB.BuiltInCategory.OST_IOS_GeoSite:
             if (InternalOrigin.IsValidElement(element)) return new InternalOrigin(element);
-            if (BasePoint.IsValidElement(element)) return new BasePoint(element as ARDB.BasePoint);
             break;
 #endif
 
