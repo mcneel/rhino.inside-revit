@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.External.DB
 
     public bool IsOffset(out double offset)
     {
-      if (BaseId == ARDB.ElementId.InvalidElementId && Value.HasValue)
+      if (BaseId == ARDB.ElementId.InvalidElementId && !IsUnlimited())
       {
         offset = Value.Value;
         return true;

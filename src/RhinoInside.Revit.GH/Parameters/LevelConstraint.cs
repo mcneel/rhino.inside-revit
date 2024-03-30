@@ -53,6 +53,9 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (source)
       {
+        case string text: if (!GH_Convert.ToDouble(text, out var number, GH_Conversion.Secondary)) return false;
+            Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(number), null);
+            return true;
         case int offset: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset), null); return true;
         case double offset: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(offset), null); return true;
         case ARDB.View view: Value = new External.DB.ElevationElementReference(default, view.GenLevel); return true;
