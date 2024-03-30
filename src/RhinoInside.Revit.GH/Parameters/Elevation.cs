@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.External.DB
       Value = elevationBase == ElevationBase.InternalOrigin ? level?.ProjectElevation : level?.Elevation;
     }
 
-    public bool IsUnlimited() => !BaseId.IsValid() && (!Value.HasValue || (double.IsInfinity(Value.Value) || double.IsNaN(Value.Value)));
+    public bool IsUnlimited() => Value.HasValue ? (double.IsInfinity(Value.Value) || double.IsNaN(Value.Value)) : !BaseId.IsValid();
 
     public bool IsAbsolute => BaseId is null && Value is object;
 
@@ -344,11 +344,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string ToString()
     {
-      if (Value.IsUnlimited())
-      {
-        return "Unlimited";
-      }
-      else if (Value.IsLevelConstraint(out var level, out var levelOffset))
+      if (Value.IsLevelConstraint(out var level, out var levelOffset))
       {
         var name = level.Name;
         var token = $"'{name ?? "Invalid Level"}'";
@@ -379,6 +375,10 @@ namespace RhinoInside.Revit.GH.Types
       else if (Value.IsElevation(out var elevation))
       {
         return $"{(elevation < 0.0 ? "-" : "+")} {GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(elevation)))} {GH_Format.RhinoUnitSymbol()}";
+      }
+      else if (Value.IsUnlimited())
+      {
+        return "Unlimited";
       }
 
       return string.Empty;
@@ -437,6 +437,10 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (source)
       {
+        case string text:
+          if (!GH_Convert.ToDouble(text, out var number, GH_Conversion.Secondary)) return false;
+          Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(number));
+          return true;
         case int elevation: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation)); return true;
         case double elevation: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(elevation)); return true;
         case ARDB.Level level: Value = new External.DB.ElevationElementReference(level); return true;
