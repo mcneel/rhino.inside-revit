@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </summary>
     public static IEqualityComparer<Reference> SameDocument(Document document) => new EqualityComparer(document);
 
-    struct EqualityComparer : IEqualityComparer<Reference>
+    readonly struct EqualityComparer : IEqualityComparer<Reference>
     {
       readonly Document Document;
       public EqualityComparer(Document doc) => Document = doc;
@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       int IEqualityComparer<Reference>.GetHashCode(Reference obj)
       {
         int hashCode = 2022825623;
-        hashCode = hashCode * -1521134295 + (int) obj.ElementReferenceType;
+        hashCode = hashCode * -1521134295 + obj.ElementReferenceType.GetHashCode();
         hashCode = hashCode * -1521134295 + obj.ElementId.GetHashCode();
         hashCode = hashCode * -1521134295 + obj.LinkedElementId.GetHashCode();
         return hashCode;
@@ -44,30 +44,72 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (ReferenceEquals(left, right)) return true;
       if (left is null || right is null) return false;
 
+#if REVIT_2018
+      return left.EqualTo(right);
+#else
       if (left.ElementReferenceType != right.ElementReferenceType) return false;
       if (left.ElementId != right.ElementId) return false;
       if (left.LinkedElementId != right.LinkedElementId) return false;
 
-      // TODO: Test if EqualTo validates the document and is faster than ConvertToStableRepresentation.
-//#if REVIT_2018
-//      return left.EqualTo(right);
-//#else
       var stableLeft = left?.ConvertToStableRepresentation(document);
       var stableRight = right?.ConvertToStableRepresentation(document);
 
       return stableLeft == stableRight;
-//#endif
+#endif
     }
   }
 
   internal static class ReferenceExtension
   {
+    public static ElementId ToElementId(this Reference reference)
+    {
+      if (reference is null) throw new ArgumentNullException(nameof(reference));
+      return reference.ElementId;
+    }
+
+    public static Reference ToReference(this ElementId id, Document document)
+    {
+      if (id is null) throw new ArgumentNullException(nameof(id));
+
+      var referenceId = new ReferenceId
+      (
+        new GeometryObjectId(id.ToValue())
+      );
+      var stable = referenceId.ToStableRepresentation(document);
+      return Reference.ParseFromStableRepresentation(document, stable);
+    }
+
     public static LinkElementId ToLinkElementId(this Reference reference)
     {
       if (reference is null) throw new ArgumentNullException(nameof(reference));
       return reference.LinkedElementId == ElementId.InvalidElementId ?
         new LinkElementId(reference.ElementId) :
         new LinkElementId(reference.ElementId, reference.LinkedElementId);
+    }
+
+    public static Reference ToReference(this LinkElementId id, Document document)
+    {
+      if (id is null) throw new ArgumentNullException(nameof(id));
+
+      if (id.LinkedElementId == ElementIdExtension.Invalid)
+      {
+        var referenceId = new ReferenceId
+        (
+          new GeometryObjectId(id.HostElementId.ToValue())
+        );
+        var stable = referenceId.ToStableRepresentation(document);
+        return Reference.ParseFromStableRepresentation(document, stable);
+      }
+      else
+      {
+        var referenceId = new ReferenceId
+        (
+          new GeometryObjectId(id.LinkInstanceId.ToValue(), new int[] { 0 }, GeometryObjectType.RVTLINK),
+          new GeometryObjectId(id.LinkedElementId.ToValue())
+        );
+        var stable = referenceId.ToStableRepresentation(document);
+        return Reference.ParseFromStableRepresentation(document, stable);
+      }
     }
 
     public static Reference CreateLinkReference(this Reference reference, Document document, ElementId linkInstanceId, Document linkedDocument)
@@ -125,7 +167,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           new ReferenceId(new GeometryObjectId(reference.ElementId.ToValue())) :
           new ReferenceId
           (
-            new GeometryObjectId(reference.ElementId.ToValue(), default, GeometryObjectType.RVTLINK, document.GetElement(reference.ElementId).GetTypeId().ToValue()),
+            new GeometryObjectId(reference.ElementId.ToValue(), new int[] { 0 }, GeometryObjectType.RVTLINK, document.GetElement(reference.ElementId).GetTypeId().ToValue()),
             new GeometryObjectId(reference.LinkedElementId.ToValue())
           );
 

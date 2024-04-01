@@ -25,6 +25,7 @@ namespace RhinoInside.Revit.External.UI.Selection
       }
     }
 
+    #region Selection
     public static void ResetSelection(this UIDocument doc)
     {
       try
@@ -51,6 +52,26 @@ namespace RhinoInside.Revit.External.UI.Selection
 #endif
       }
     }
+
+    public static void SetSelection(this UIDocument doc, IList<Reference> references)
+    {
+      using (var selection = doc.Selection)
+      {
+#if REVIT_2023
+        selection.SetReferences(references);
+#else
+        using (var document = doc.Document)
+          selection.SetElementIds
+          (
+            references.
+            Where(x => x.LinkedElementId == ElementIdExtension.Invalid && x.ElementReferenceType == ElementReferenceType.REFERENCE_TYPE_NONE).
+            Select(x => x.ElementId).
+            ToArray()
+          );
+#endif
+      }
+    }
+    #endregion
 
     #region PickObject
     public static Result PickObject(this UIDocument doc, out Reference reference, ObjectType objectType)

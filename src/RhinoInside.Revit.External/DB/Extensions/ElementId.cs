@@ -51,6 +51,29 @@ namespace RhinoInside.Revit.External.DB.Extensions
     int IEqualityComparer<ElementId>.GetHashCode(ElementId obj) => obj?.GetHashCode() ?? 0;
   }
 
+  internal struct LinkElementIdEqualityComparer : IEqualityComparer<LinkElementId>
+  {
+    bool IEqualityComparer<LinkElementId>.Equals(LinkElementId x, LinkElementId y)
+    {
+      if (ReferenceEquals(x, y)) return true;
+      if (x is null || y is null) return false;
+      if (x.HostElementId != y.HostElementId) return false;
+      if (x.LinkedElementId != y.LinkedElementId) return false;
+      if (x.LinkInstanceId != y.LinkInstanceId) return false;
+      return true;
+
+    }
+    int IEqualityComparer<LinkElementId>.GetHashCode(LinkElementId obj)
+    {
+      if (obj is null) return 0;
+      int hashCode = 2022825623;
+      hashCode = hashCode * -1521134295 + obj.HostElementId.GetHashCode();
+      hashCode = hashCode * -1521134295 + obj.LinkInstanceId.GetHashCode();
+      hashCode = hashCode * -1521134295 + obj.LinkedElementId.GetHashCode();
+      return hashCode;
+    }
+  }
+
   public static class ElementIdExtension
   {
     public static ElementId Default { get; } = FromValue(0);

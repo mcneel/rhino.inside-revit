@@ -9,6 +9,8 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Elements
 {
   using External.ApplicationServices.Extensions;
+  using External.UI.Selection;
+  using External.DB.Extensions;
 
   public class ElementSelect : ZuiComponent
   {
@@ -75,7 +77,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ),
     };
 
-    readonly Dictionary<ARDB.Document, HashSet<ARDB.ElementId>> Selection = new Dictionary<ARDB.Document, HashSet<ARDB.ElementId>>();
+    readonly Dictionary<ARDB.Document, HashSet<ARDB.Reference>> Selection = new Dictionary<ARDB.Document, HashSet<ARDB.Reference>>();
     protected override void BeforeSolveInstance()
     {
       base.BeforeSolveInstance();
@@ -85,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       foreach (var doc in projects.Concat(families))
       {
         var uiDoc = new Autodesk.Revit.UI.UIDocument(doc);
-        Selection.Add(uiDoc.Document, new HashSet<ARDB.ElementId>(uiDoc.Selection.GetElementIds()));
+        Selection.Add(uiDoc.Document, new HashSet<ARDB.Reference>(uiDoc.GetSelection(), ReferenceEqualityComparer.SameDocument(doc)));
       }
     }
 
@@ -96,18 +98,18 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       if (Params.GetData(DA, "Selected", out bool? selected))
       {
-        if (Selection.TryGetValue(element.Document, out var selection))
+        if (Selection.TryGetValue(element.ReferenceDocument, out var selection))
         {
-          if (selected.Value) selection.Add(element.Id);
-          else selection.Remove(element.Id);
+          if (selected.Value) selection.Add(element.GetReference());
+          else selection.Remove(element.GetReference());
         }
       }
       else
       {
         Params.TrySetData(DA, "Selected", () =>
         {
-          if (Selection.TryGetValue(element.Document, out var selection))
-            selected = selection.Contains(element.Id);
+          if (Selection.TryGetValue(element.ReferenceDocument, out var selection))
+            selected = selection.Contains(element.GetReference());
 
           return selected;
         });
@@ -119,7 +121,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       try
       {
         var input = Params.Input<IGH_Param>("Selected");
-        if (input is object)
+        if (input is object && input.DataType != GH_ParamData.@void)
         {
           var output = Params.Output<IGH_Param>("Selected");
           if (output is object)
@@ -130,7 +132,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           {
             using (var uiDocument = new Autodesk.Revit.UI.UIDocument(selection.Key))
             {
-              uiDocument.Selection.SetElementIds(selection.Value);
+              uiDocument.SetSelection(selection.Value.ToArray());
             }
           }
 
@@ -140,7 +142,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
             output.AddVolatileDataTree
             (
               element.VolatileData,
-              (Types.Element x) => x is object && Selection.TryGetValue(x?.Document, out var sel) ? new GH_Boolean(sel.Contains(x.Id)) : null
+              (Types.Element x) => x is object && Selection.TryGetValue(x?.ReferenceDocument, out var sel) ? new GH_Boolean(sel.Contains(x.GetReference())) : null
             );
           }
         }
