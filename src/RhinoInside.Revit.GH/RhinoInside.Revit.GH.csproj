@@ -42,6 +42,7 @@
     <Compile Include="Components\Annotations\Leaders.cs" />
     <Compile Include="Components\Annotations\Levels\AddLevel.cs" />
     <Compile Include="Components\Annotations\Levels\LevelIdentity.cs" />
+    <Compile Include="Components\Annotations\Levels\LevelsAdjacency.cs" />
     <Compile Include="Components\Annotations\Levels\QueryLevels.cs" />
     <Compile Include="Components\Annotations\ReferenceElements\AddReferenceLine.cs" />
     <Compile Include="Components\Annotations\ReferenceElements\AddReferencePlane.cs" />

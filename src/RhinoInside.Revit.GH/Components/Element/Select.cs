@@ -8,7 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
-  using External.ApplicationServices.Extensions;
+  using External.UI.Extensions;
   using External.UI.Selection;
   using External.DB.Extensions;
 
@@ -82,12 +82,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       base.BeforeSolveInstance();
 
-      Revit.ActiveDBApplication.GetOpenDocuments(out var projects, out var families);
-
-      foreach (var doc in projects.Concat(families))
+      foreach (var uiDocument in Revit.ActiveUIApplication.GetOpenUIDocuments())
       {
-        var uiDoc = new Autodesk.Revit.UI.UIDocument(doc);
-        Selection.Add(uiDoc.Document, new HashSet<ARDB.Reference>(uiDoc.GetSelection(), ReferenceEqualityComparer.SameDocument(doc)));
+        var document = uiDocument.Document;
+        Selection.Add(document, new HashSet<ARDB.Reference>(uiDocument.GetSelection(), ReferenceEqualityComparer.SameDocument(document)));
       }
     }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
+using RhinoInside.Revit.External.ApplicationServices.Extensions;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.UI.Extensions;
 
@@ -66,11 +67,7 @@ namespace RhinoInside.Revit.External.UI
     private ISet<View> OpenViews = new HashSet<View>(ElementEqualityComparer.InterDocument);
     private void UpdateOpenViewsList(object sender, ViewActivatedEventArgs e)
     {
-      OpenViews = new HashSet<View>
-      (
-        _app.GetOpenUIDocuments().SelectMany(x => x.GetOpenUIViews().Select(v => x.Document.GetElement(v.ViewId) as View)),
-        ElementEqualityComparer.InterDocument
-      );
+      OpenViews = new HashSet<View>(_app.Application.GetOpenViews(), ElementEqualityComparer.InterDocument);
     }
     #endregion
 
