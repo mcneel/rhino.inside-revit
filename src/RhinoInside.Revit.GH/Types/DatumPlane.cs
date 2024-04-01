@@ -175,6 +175,23 @@ namespace RhinoInside.Revit.GH.Types
       Elevation = Document.GetBasePointLocation(elevationBase).Z * Revit.ModelUnits + value;
     }
 
+    public ProjectElevation ProjectElevation
+    {
+      get => new ProjectElevation(this);
+      set
+      {
+        if (value is null) return;
+        if (value.IsElevation(out var elevation))
+        {
+          Value?.SetElevation(elevation / Revit.ModelUnits);
+        }
+        else if (value.Value.IsOffset(out var offset) && ProjectElevation.Value.IsRelative(out var _, out var baseElement))
+        {
+          Value?.SetElevation(new External.DB.ElevationElementReference(offset, baseElement).Elevation);
+        }
+      }
+    }
+
     public bool? IsStructural
     {
       get => Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_IS_STRUCTURAL).AsInteger() != 0;
@@ -195,15 +212,14 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public double ComputationHeight
+    public double? ComputationHeight
     {
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() * Revit.ModelUnits ?? double.NaN;
-      set => Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.Update(value / Revit.ModelUnits);
-    }
-    public double ComputationElevation
-    {
-      get => Elevation + ComputationHeight;
-      set => ComputationHeight = value - Elevation;
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() * Revit.ModelUnits;
+      set
+      {
+        if (value is null || ComputationHeight == value) return;
+        Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).Update(value.Value);
+      }
     }
     #endregion
   }

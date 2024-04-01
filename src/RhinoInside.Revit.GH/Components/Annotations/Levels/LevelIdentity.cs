@@ -1,12 +1,9 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 {
-  using External.DB.Extensions;
-
   [ComponentVersion(introduced: "1.0", updated: "1.9")]
   public class LevelIdentity : TransactionalChainComponent
   {
@@ -49,7 +46,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 
       if
       (
-        Params.GetData(DA, "Elevation", out double? elevation) |
+        Params.GetData(DA, "Elevation", out Types.ProjectElevation elevation) |
         Params.GetData(DA, "Computation Height", out double? computationHeight) |
         Params.GetData(DA, "Structural", out bool? structural) |
         Params.GetData(DA, "Building Story", out bool? buildingStory)
@@ -59,18 +56,15 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
         (
           level.Value, () =>
           {
-            if (elevation.HasValue)
-              level.Elevation = elevation.Value;
-            if (computationHeight.HasValue)
-              level.ComputationHeight = computationHeight.Value;
-
+            level.ProjectElevation = elevation;
+            level.ComputationHeight = computationHeight;
             level.IsStructural = structural;
             level.IsBuildingStory = buildingStory;
           }
         );
       }
 
-      Params.TrySetData(DA, "Elevation", () => new ERDB.ElevationElementReference(level.Value));
+      Params.TrySetData(DA, "Elevation", () => level.ProjectElevation);
       Params.TrySetData(DA, "Computation Height", () => level.ComputationHeight);
       Params.TrySetData(DA, "Structural", () => level.IsStructural);
       Params.TrySetData(DA, "Building Story", () => level.IsBuildingStory);

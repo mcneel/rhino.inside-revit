@@ -334,6 +334,10 @@ namespace RhinoInside.Revit.GH.Types
     public ProjectElevation(double? elevation, IGH_BasePoint basePoint = null) :
       base(new External.DB.ElevationElementReference(elevation / Revit.ModelUnits, basePoint?.Value as ARDB.Element)) { }
 
+    public ProjectElevation(Level level) :
+      base(new External.DB.ElevationElementReference(level?.Value))
+    { }
+
     public override bool IsValid => Value != default;
 
     public override string TypeName => "Project Elevation";
@@ -446,6 +450,7 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.Level level: Value = new External.DB.ElevationElementReference(level); return true;
         case ARDB.BasePoint basePoint: Value = new External.DB.ElevationElementReference(default, basePoint); return true;
         case External.DB.ElevationElementReference elevation: Value = elevation; return true;
+        case Point3d point: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(point.Z)); return true;
       }
 
       return base.CastFrom(source);
