@@ -8,6 +8,7 @@ using Microsoft.Win32.SafeHandles.InteropServices;
 namespace RhinoInside.Revit.External.ApplicationServices.Extensions
 {
   using DB.Extensions;
+  using External.UI;
 
   public static class ApplicationExtension
   {
@@ -104,6 +105,34 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
             families.Add(doc);
           else
             projects.Add(doc);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Queries for all open <see cref="Autodesk.Revit.DB.View"/> in Revit UI.
+    /// </summary>
+    /// <param name="app"></param>
+    public static IEnumerable<View> GetOpenViews(this Application app)
+    {
+      using (var documents = app.Documents)
+      {
+        foreach (var doc in documents.Cast<Document>())
+        {
+          if (doc.IsLinked)
+            continue;
+
+          var openViewIds = HostedApplication.Active.InvokeInHostContext(() =>
+          {
+            using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+              return uiDocument.GetOpenUIViews().Select(x => x.ViewId).ToList();
+          });
+
+          using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
+          {
+            foreach (var viewId in openViewIds)
+              yield return doc.GetElement(viewId) as View;
+          }
         }
       }
     }
