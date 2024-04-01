@@ -14,7 +14,8 @@ group: Deployment & Configs
 
 - Added 'Component Family Mesh' component.
 - Updated 'View Range' to be also a setter.
-- Now 'Graphical Element' is able to grab selected linked elements when in 'Active Selection'.
+- Now 'Graphical Element' is able to grab selected linked elements when in 'Active Selection'. (Revit 2023)
+- Now 'Select Element' is able to work with linked elements. (Revit 2023)
 
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
