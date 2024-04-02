@@ -150,6 +150,14 @@ namespace RhinoInside.Revit.AddIn.Commands
     }
 
     /// <summary>
+    /// Availability for commands that are available when there is an active document open.
+    /// </summary>
+    public struct NeedsActiveDocument : IExternalCommandAvailability
+    {
+      bool IExternalCommandAvailability.IsCommandAvailable(UIApplication app, CategorySet selectedCategories) => app.ActiveUIDocument is object;
+    }
+
+    /// <summary>
     /// Available when an active Revit document is loaded on Revit UI.
     /// </summary>
     public class NeedsActiveDocument<T> : External.UI.CommandAvailability

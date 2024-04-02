@@ -207,14 +207,16 @@ namespace RhinoInside.Revit.AddIn.Commands
         CreateStartButton(TabName);
       }
 
-      // add slideout and the rest of the buttons
+      // About and help links
       ribbonPanel.AddSlideOut();
-
-      // about and help links
       CommandAbout.CreateUI(ribbonPanel);
       CommandGuides.CreateUI(ribbonPanel);
       CommandForums.CreateUI(ribbonPanel);
       CommandHelpLinks.CreateUI(ribbonPanel);
+
+#if DEBUG
+      CommandDebug.CreateUI(uiCtrlApp.CreateRibbonPanel(TabName, "Debug"));
+#endif
 
       if (!Properties.AddInOptions.Session.CompactTab)
       {
