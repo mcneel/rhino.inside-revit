@@ -14,6 +14,7 @@
     <Compile Include="Commands\AddIn\CommandForums.cs" />
     <Compile Include="Commands\AddIn\CommandGuides.cs" />
     <Compile Include="Commands\AddIn\CommandHelpLinks.cs" />
+    <Compile Include="Commands\AddIn\CommandDebug.cs" />
     <Compile Include="Commands\AddIn\CommandStart.cs" />
     <Compile Include="Deployment.cs" />
     <Compile Include="Loader.cs" />
