@@ -82,9 +82,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 
               if (index > 0 && z - levels[index - 1].Elevation < levels[index].Elevation - z) index--;
 
-              above?.Add(z < levels[index].Elevation ? levels[index] : index < levels.Count - 1 ? levels[index + 1] : null);
+              above?.Add(z < levels[index].Elevation ? levels[index] : index < levels.Count - 1 ? levels[index + 1] : new Types.Level());
               closest?.Add(levels[index]);
-              below?.Add(z > levels[index].Elevation ? levels[index] : index > 0 ? levels[index - 1] : null);
+              below?.Add(z > levels[index].Elevation ? levels[index] : index > 0 ? levels[index - 1] : new Types.Level());
             }
           }
 
