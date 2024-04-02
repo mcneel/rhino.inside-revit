@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
     protected override string IconTag => string.Empty;
 
     public LevelsAdjacency()
-    : base("Levels Adjacency", "L-Adjacency", "Query closest levels to input elevation", "Revit", "Model")
+    : base("Levels Adjacency", "L-Adjacency", "Compute closest levels to input elevation", "Revit", "Model")
     { }
 
     protected override ParamDefinition[] Inputs => inputs;
@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Level>("Levels", "L", "Levels sorted by elevation", access: GH_ParamAccess.list, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.Level>("Levels", "L", "Levels sorted by elevation", access: GH_ParamAccess.list, relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Level>("Above", "+1", access: GH_ParamAccess.list, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Level>("Closest", "C", access: GH_ParamAccess.list, relevance: ParamRelevance.Secondary),
       ParamDefinition.Create<Parameters.Level>("Below", "-1", access: GH_ParamAccess.list, relevance: ParamRelevance.Primary),
