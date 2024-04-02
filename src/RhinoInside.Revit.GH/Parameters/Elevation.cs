@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.External.DB
 
     public bool IsElevation(out double elevation)
     {
-      if (BaseId != ElementIdExtension.Invalid)
+      if (BaseId != ElementIdExtension.Invalid && !IsUnlimited())
       {
         elevation = Elevation;
         return true;

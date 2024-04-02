@@ -165,16 +165,6 @@ namespace RhinoInside.Revit.GH.Types
       set => Value?.SetElevation(value / Revit.ModelUnits);
     }
 
-    public double GetElevationFrom(External.DB.ElevationBase elevationBase)
-    {
-      return Elevation - Document.GetBasePointLocation(elevationBase).Z * Revit.ModelUnits;
-    }
-
-    public void SetElevationFrom(External.DB.ElevationBase elevationBase, double value)
-    {
-      Elevation = Document.GetBasePointLocation(elevationBase).Z * Revit.ModelUnits + value;
-    }
-
     public ProjectElevation ProjectElevation
     {
       get => new ProjectElevation(this);
