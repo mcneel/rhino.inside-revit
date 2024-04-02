@@ -3324,6 +3324,18 @@
     "uuid": "6fbb9200-d725-4a0d-9360-89acbe5b4d9f"
   }, 
   {
+    "desc": "", 
+    "iconsrc": null, 
+    "icontag": "F", 
+    "panel": "Component", 
+    "since": "1.21", 
+    "tab": "Revit", 
+    "title": "Component Family Mesh", 
+    "typename": "FamilyGeometryByMesh", 
+    "until": null, 
+    "uuid": "8c8cec75-9a9c-4796-a96b-fd0635fe0371"
+  }, 
+  {
     "desc": "Queries family identity information", 
     "iconsrc": "/static/images/GH/FamilyIdentity.png", 
     "icontag": null, 
@@ -5100,14 +5112,14 @@
     "uuid": "45e7e88c-76cf-45f8-a31b-ac07accb6dbd"
   }, 
   {
-    "desc": "Query view range elevations", 
-    "iconsrc": "/static/images/GH/ViewRangeElevations.png", 
+    "desc": "Get-Set view range", 
+    "iconsrc": "/static/images/GH/ViewRange.png", 
     "icontag": null, 
     "panel": "View", 
     "since": "1.14", 
     "tab": "Revit", 
-    "title": "View Range Elevations", 
-    "typename": "ViewRangeElevations", 
+    "title": "View Range", 
+    "typename": "ViewRange", 
     "until": null, 
     "uuid": "02234e1d-062e-49f0-baee-8917589c2533"
   }, 
@@ -5782,6 +5794,18 @@
     "typename": "LevelIdentity", 
     "until": null, 
     "uuid": "e996b34d-2c86-4496-8e02-c879228c329e"
+  }, 
+  {
+    "desc": "Compute closest levels to input elevation", 
+    "iconsrc": null, 
+    "icontag": "L", 
+    "panel": "Model", 
+    "since": "1.21", 
+    "tab": "Revit", 
+    "title": "Levels Adjacency", 
+    "typename": "LevelsAdjacency", 
+    "until": null, 
+    "uuid": "ee672a3f-cf9f-4680-88dd-07fd58cca8a5"
   }, 
   {
     "desc": "Get all document levels", 
