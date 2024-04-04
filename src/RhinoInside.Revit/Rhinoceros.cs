@@ -90,7 +90,9 @@ namespace RhinoInside.Revit
           args.Add($"/language={Core.Host.Services.Language.ToLCID()}");
         }
 
-#if RHINO_8
+#if NET
+        args.Add("/netcore");
+#else
         args.Add("/netfx");
 #endif
         args.Add("/nosplash");

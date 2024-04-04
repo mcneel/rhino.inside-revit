@@ -33,8 +33,10 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       var create = Menu_AppendItem(menu, $"Set new {TypeName}");
 
+#if !REVIT_2025
       Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.Toposurface, "Toposurface");
       Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.Subregion, "Region");
+#endif
     }
     #endregion
   }

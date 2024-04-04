@@ -15,7 +15,9 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
+#if !REVIT_2025
       Menu_AppendPromptNew(menu, Autodesk.Revit.UI.PostableCommand.BuildingPad);
+#endif
     }
     #endregion
   }

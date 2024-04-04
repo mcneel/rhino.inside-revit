@@ -380,7 +380,7 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     [DllImport(KERNEL32, SetLastError = true)]
     public static extern SafeProcessHandle GetCurrentProcess();
 
-    [DllImport(KERNEL32, SetLastError = true)]
+    [DllImport(KERNEL32, SetLastError = true, CharSet = CharSet.Unicode)]
     public static extern SafeLibraryHandle LoadLibraryEx(string lpLibFileName, IntPtr hFile, DWORD dwFlags);
 
     [DllImport(KERNEL32, SetLastError = true)]
@@ -388,10 +388,10 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     private static extern bool FreeLibrary(IntPtr hLibModule);
     public static bool FreeLibrary(SafeLibraryHandle hLibModule) => FreeLibrary(hLibModule.DangerousGetHandle());
 
-    [DllImport(KERNEL32, SetLastError = true)]
+    [DllImport(KERNEL32, SetLastError = true, CharSet = CharSet.Unicode)]
     public static extern DWORD GetModuleFileName(HINSTANCE hInstance, StringBuilder lpFilename, DWORD nSize);
 
-    [DllImport(KERNEL32, SetLastError = true)]
+    [DllImport(KERNEL32, SetLastError = true, CharSet = CharSet.Unicode)]
     public static extern HMODULE GetModuleHandle(string lpModuleName);
 
     [DllImport(KERNEL32, CharSet = CharSet.Unicode)]

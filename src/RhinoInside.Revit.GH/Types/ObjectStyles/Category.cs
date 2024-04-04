@@ -550,7 +550,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    private ARDB.BuiltInCategory? BuiltInCategory => Id?.ToBuiltInCategory();
+    private new ARDB.BuiltInCategory? BuiltInCategory => Id?.ToBuiltInCategory();
 
     string _FullName;
     public string FullName => _FullName ?? (APIObject?.FullName() ?? BuiltInCategory?.FullName(localized: true));

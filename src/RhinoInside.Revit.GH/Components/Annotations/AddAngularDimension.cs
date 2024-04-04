@@ -130,7 +130,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       var currentReferences = dimension.References;
       if (currentReferences.Size != references.Count) return false;
 
-      var referenceEqualityComparer = ReferenceEqualityComparer.SameDocument(dimension.Document);
+      var referenceEqualityComparer = External.DB.Extensions.ReferenceEqualityComparer.SameDocument(dimension.Document);
       foreach (var reference in references)
       {
         if (!currentReferences.Cast<ARDB.Reference>().Contains(reference, referenceEqualityComparer))

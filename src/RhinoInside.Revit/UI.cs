@@ -1,15 +1,15 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Selection;
 
 namespace RhinoInside.Revit.UI
 {
-  using System.Collections.Generic;
-  using System.Linq;
-  using Autodesk.Revit.DB;
-  using Autodesk.Revit.UI;
-  using Autodesk.Revit.UI.Selection;
   using External.UI.Selection;
 
-  public static class RevitEditor
+  static class RevitEditor
   {
     public static Result PickObject(out Reference reference, ObjectType objectType)
     {
@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.UI
 
   }
 
-  public enum GetResult
+  enum GetResult
   {
     Fail = int.MinValue,
     Cancel  = -1,
@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.UI
     Succeed =  1,
   }
 
-  public class GetElement : ISelectionFilter
+  class GetElement : ISelectionFilter
   {
     public GetElement() { }
 

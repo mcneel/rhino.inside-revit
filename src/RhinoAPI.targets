@@ -36,9 +36,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="$(RhinoApiVersion) != '' AND $(Configuration.Contains('Release')) AND '$(MSBuildProjectExtension)' == '.csproj'">
-    <PackageReference Include="RhinoCommon" Version="$(RhinoApiVersion)" IncludeAssets="compile; build" />
-    <PackageReference Include="RhinoWindows" Version="$(RhinoApiVersion)" IncludeAssets="compile; build" />
-    <PackageReference Include="Grasshopper" Version="$(RhinoApiVersion)" IncludeAssets="compile; build" />
+    <PackageReference Include="RhinoCommon" Version="$(RhinoApiVersion)" IncludeAssets="compile;build"/>
+    <PackageReference Include="RhinoWindows" Version="$(RhinoApiVersion)" IncludeAssets="compile;build"/>
+    <PackageReference Include="Grasshopper" Version="$(RhinoApiVersion)" IncludeAssets="compile;build"/>
   </ItemGroup>
   
 </Project>
