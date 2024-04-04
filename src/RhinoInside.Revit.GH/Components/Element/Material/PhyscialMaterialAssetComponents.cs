@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
         {
           _compInfo = _assetData.GetGHComponentInfo();
           if (_compInfo is null)
-            throw new Exception("Data type does not have component info");
+            throw new InvalidOperationException("Data type does not have component info");
         }
         return _compInfo;
       }

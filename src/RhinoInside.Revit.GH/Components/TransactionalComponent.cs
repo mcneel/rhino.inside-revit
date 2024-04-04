@@ -801,12 +801,12 @@ namespace RhinoInside.Revit.GH.Components
             output = input;
           }
         }
-        catch(Exception e)
+        catch
         {
           if (FailureProcessingMode <= ARDB.FailureProcessingResult.ProceedWithCommit)
             output = input;
 
-          throw e;
+          throw;
         }
         finally
         {

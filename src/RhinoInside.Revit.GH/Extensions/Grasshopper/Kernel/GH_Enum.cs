@@ -588,7 +588,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     static readonly Guid? componentGuid = typeof(T).GetCustomAttribute<ComponentGuidAttribute>()?.Value;
     public override Guid ComponentGuid => componentGuid ??
-      throw new NotImplementedException($"{typeof(T)} has no {nameof(ComponentGuid)}, please use {typeof(ComponentGuidAttribute)}");
+      throw new NotSupportedException($"{typeof(T)} has no {nameof(ComponentGuid)}, please use {typeof(ComponentGuidAttribute)}");
 
     static readonly GH_Exposure exposure = typeof(T).GetCustomAttribute<ExposureAttribute>()?.Value ?? GH_Exposure.hidden;
     public override GH_Exposure Exposure => exposure;

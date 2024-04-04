@@ -259,10 +259,10 @@ namespace RhinoInside.Revit.External.DB
 
           transactionChain.Add(doc, transaction);
         }
-        catch (Exception e)
+        catch
         {
           transaction.Dispose();
-          throw e;
+          throw;
         }
       }
 
