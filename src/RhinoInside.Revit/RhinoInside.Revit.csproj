@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj" />
+    <ProjectReference Include="..\RhinoInside.Revit.Native\RhinoInside.Revit.Native.vcxproj" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -23,7 +24,7 @@
 
   <Target Name="DeployResults" AfterTargets="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
     <Copy SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Setup\opennurbs_private.manifest;" DestinationFolder="$(RiROutputPath)" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.dll;$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.pdb" DestinationFolder="$(RiROutputPath)" UseHardlinksIfPossible="true" SkipUnchangedFiles="true"/>
+    <Copy SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.dll;$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.pdb" DestinationFolder="$(RiROutputPath)" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb;$(ProjectDir)$(OutDir)$(TargetName).xml" DestinationFolder="$(RiROutputPath)" />
   </Target>
 
