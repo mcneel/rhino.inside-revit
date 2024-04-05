@@ -16,9 +16,7 @@ namespace RhinoInside.Revit
     static readonly string PluginsPath = Path.Combine(Core.Distribution.InstallPath, "Plug-ins");
 
     #region AssemblyReference
-
-    delegate bool InitAssembly();
-    static readonly Dictionary<string, InitAssembly> InternalAssemblies = new Dictionary<string, InitAssembly>()
+    static readonly Dictionary<string, Predicate<Assembly>> InternalAssemblies = new Dictionary<string, Predicate<Assembly>>()
     {
       { "Eto",          Rhinoceros.InitEto },
       { "RhinoCommon",  Rhinoceros.InitRhinoCommon },
@@ -60,7 +58,7 @@ namespace RhinoInside.Revit
 
         bool failed = false;
         if (InternalAssemblies.TryGetValue(assemblyName.Name, out var InitAssembly))
-          failed = !InitAssembly();
+          failed = !InitAssembly(Assembly);
 
         if (failed)
           throw new InvalidOperationException($"Failed to activate {assembly.FullName}");
@@ -115,7 +113,7 @@ namespace RhinoInside.Revit
     private static IntPtr AssemblyResolvingUnmanagedDll(Assembly assembly, string dll)
     {
       var assemblyName = assembly.GetName();
-      if (references.TryGetValue(assemblyName.Name, out var assemblyReference) && assemblyReference.Name.CodeBase == assembly.CodeBase)
+      if (references.TryGetValue(assemblyName.Name, out var assemblyReference) && assemblyReference.assemblyName.CodeBase == assembly.CodeBase)
       {
         var lib = System.Runtime.InteropServices.NativeLibrary.Load
         (
@@ -194,14 +192,15 @@ namespace RhinoInside.Revit
         {
           try
           {
+            // List of assembly folders in priority order.
             var installFolders = new DirectoryInfo[]
             {
               new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)),
 #if NET
-              new DirectoryInfo(Path.Combine(SystemPath, "netcore") ?? string.Empty),
+              new DirectoryInfo(Path.Combine(SystemPath, "netcore")),
 #endif
-              new DirectoryInfo(SystemPath ?? string.Empty),
-              new DirectoryInfo(PluginsPath ?? string.Empty),
+              new DirectoryInfo(SystemPath),
+              new DirectoryInfo(PluginsPath),
             };
 
             foreach (var installFolder in installFolders.Where(x => x.Exists))
@@ -214,22 +213,15 @@ namespace RhinoInside.Revit
                   // If the specified extension is exactly three characters long,
                   // the method returns files with extensions that begin with the specified extension.
                   // For example, "*.xls" returns both "book.xls" and "book.xlsx"
-                  if (dll.Extension.ToLower() != ".dll") continue;
+                  if (!dll.Extension.Equals(".dll", StringComparison.OrdinalIgnoreCase)) continue;
 
                   var assemblyName = AssemblyName.GetAssemblyName(dll.FullName);
 #if NET
                   assemblyName.CodeBase = new Uri(dll.FullName).ToString();
 #endif
-                  var assemblyReference = new AssemblyReference(assemblyName);
 
-                  if (references.TryGetValue(assemblyName.Name, out var location))
-                  {
-                    continue;
-                    //if (location.assemblyName.Version >= assemblyName.Version) continue;
-                    //references.Remove(assemblyName.Name);
-                  }
-
-                  references.Add(assemblyName.Name, assemblyReference);
+                  if (references.ContainsKey(assemblyName.Name)) continue;
+                  references.Add(assemblyName.Name, new AssemblyReference(assemblyName));
                 }
                 catch { }
               }
