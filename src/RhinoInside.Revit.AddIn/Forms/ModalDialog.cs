@@ -10,13 +10,10 @@ namespace RhinoInside.Revit.AddIn.Forms
   /// </summary>
   abstract class ModalDialog : Dialog
   {
-    private Autodesk.Revit.UI.UIApplication _uiApp = null;
-
     public ModalDialog(Autodesk.Revit.UI.UIApplication uiApp, Size initialSize)
     {
       BaseWindowUtils.SetupWindow(this, uiApp, initialSize);
 
-      _uiApp = uiApp;
       SizeChanged += ModalDialog_SizeChanged;
 
       DefaultButton = new Button { Text = "OK" };
