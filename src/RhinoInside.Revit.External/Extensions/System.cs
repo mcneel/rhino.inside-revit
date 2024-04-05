@@ -81,6 +81,7 @@ namespace System
 
 namespace System.IO
 {
+#pragma warning disable CA1060 // Move pinvokes to native methods class
   static class PathExtension
   {
     public static bool IsFullyQualifiedPath(this string path)
@@ -112,6 +113,7 @@ namespace System.IO
       return builder.ToString();
     }
   }
+#pragma warning restore CA1060 // Move pinvokes to native methods class
 
   internal static class FileInfoExtension
   {

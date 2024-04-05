@@ -12,11 +12,10 @@ namespace Microsoft.Win32.SafeHandles
   internal class LibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
   {
     internal LibraryHandle() : base(false) { }
-    protected LibraryHandle(bool ownsHandle) : base(ownsHandle) { }
     public LibraryHandle(IntPtr hInstance) : base(false) => SetHandle(hInstance);
 
     [System.Security.SecurityCritical]
-    protected override bool ReleaseHandle() => true;
+    protected override bool ReleaseHandle() => Kernel32.FreeLibrary(this);
 
     public static bool operator ==(LibraryHandle x, LibraryHandle y) => x.handle == y.handle;
     public static bool operator !=(LibraryHandle x, LibraryHandle y) => x.handle != y.handle;
@@ -46,13 +45,6 @@ namespace Microsoft.Win32.SafeHandles
         return builder.ToString();
       }
     }
-  }
-
-  internal class SafeLibraryHandle : LibraryHandle
-  {
-    internal SafeLibraryHandle() : base(true) { }
-    [System.Security.SecurityCritical]
-    protected override bool ReleaseHandle() => Kernel32.FreeLibrary(this);
   }
 
   internal class ThreadHandle
@@ -127,18 +119,16 @@ namespace Microsoft.Win32.SafeHandles
     public override int GetHashCode() => (int) handle;
     public override string ToString() => IsInvalid ? "Zero" : $"0x{(ulong)handle:x16}, \"{Name}\"";
 
-    private WindowHandle() : this(false) { }
-    protected WindowHandle(bool ownsHandle) : base(IntPtr.Zero, ownsHandle) { }
-
+    private WindowHandle() : base(IntPtr.Zero, false) { }
     public WindowHandle(IntPtr hWnd) : base(IntPtr.Zero, false) => SetHandle(hWnd);
 
     #region SafeHandle
-    protected override bool ReleaseHandle() => true;
+    protected override bool ReleaseHandle() => User32.DestroyWindow(this);
     public override bool IsInvalid => !User32.IsWindow(this);
     public bool IsZero => handle == IntPtr.Zero;
     #endregion
 
-    public static WindowHandle Zero => new WindowHandle();
+    public static WindowHandle Zero { get; } = new WindowHandle();
     public IntPtr Handle => handle;
     public string Name
     {
@@ -306,17 +296,11 @@ namespace Microsoft.Win32.SafeHandles
     }
   }
 
-  internal class SafeWindowHandle : WindowHandle
-  {
-    private SafeWindowHandle() : base(true) { }
-    protected override bool ReleaseHandle() => User32.DestroyWindow(this);
-  }
-
   internal class SafeHookHandle : SafeHandle
   {
     public override bool IsInvalid => handle == IntPtr.Zero;
 
-    private SafeHookHandle() : base(IntPtr.Zero, true) { }
+    private SafeHookHandle() : base(IntPtr.Zero, false) { }
 
     protected sealed override bool ReleaseHandle() => User32.UnhookWindowsHookEx(this);
   }
@@ -355,6 +339,8 @@ namespace Microsoft.Win32.SafeHandles
 
 namespace Microsoft.Win32.SafeHandles.InteropServices
 {
+#pragma warning disable CA1060 // Move pinvokes to native methods class
+
   using LONG      = Int32;
   using DWORD     = UInt32;
   using UINT      = UInt32;
@@ -365,6 +351,17 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
   using HWND      = WindowHandle;
   using HHOOK     = SafeHookHandle;
   using HMENU     = IntPtr;
+
+  internal static class Kernel
+  {
+    internal static class NativeMethods
+    {
+      internal const string KERNEL32 = "KERNEL32";
+
+      [DllImport(KERNEL32, SetLastError = true)]
+      public static extern DWORD GetCurrentThreadId();
+    }
+  }
 
   [SuppressUnmanagedCodeSecurity]
   internal static class Kernel32
@@ -381,12 +378,11 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     public static extern SafeProcessHandle GetCurrentProcess();
 
     [DllImport(KERNEL32, SetLastError = true, CharSet = CharSet.Unicode)]
-    public static extern SafeLibraryHandle LoadLibraryEx(string lpLibFileName, IntPtr hFile, DWORD dwFlags);
+    public static extern HINSTANCE LoadLibraryEx(string lpLibFileName, IntPtr hFile, DWORD dwFlags);
 
     [DllImport(KERNEL32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool FreeLibrary(IntPtr hLibModule);
-    public static bool FreeLibrary(SafeLibraryHandle hLibModule) => FreeLibrary(hLibModule.DangerousGetHandle());
+    public static extern bool FreeLibrary(HINSTANCE hLibModule);
 
     [DllImport(KERNEL32, SetLastError = true, CharSet = CharSet.Unicode)]
     public static extern DWORD GetModuleFileName(HINSTANCE hInstance, StringBuilder lpFilename, DWORD nSize);
@@ -457,9 +453,7 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
 
     [DllImport(USER32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool DestroyWindow(IntPtr hWnd);
-
-    public static bool DestroyWindow(SafeWindowHandle hWnd) => DestroyWindow(hWnd.Handle);
+    public static extern bool DestroyWindow(HWND hWnd);
 
     [DllImport(USER32, SetLastError = true)]
     public static extern DWORD GetWindowThreadProcessId(HWND hWnd, IntPtr lpdwProcessId);
@@ -657,4 +651,5 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
 
   }
 
+#pragma warning restore CA1060 // Move pinvokes to native methods class
 }
