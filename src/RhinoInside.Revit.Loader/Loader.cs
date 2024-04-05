@@ -8,7 +8,7 @@ using Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.AddIn
 {
-  public class Loader : IExternalApplication
+  public sealed class Loader : IExternalApplication
   {
     internal static readonly Guid AddInId = new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74");
     IExternalApplication _ExternalApplication;
@@ -47,10 +47,14 @@ namespace RhinoInside.Revit.AddIn
       var distributions = new Distribution[]
       {
         new Distribution(8),
+#if NETFRAMEWORK
         new Distribution(7),
+#endif
 #if DEBUG
         new Distribution(8, dev: true),
+#if NETFRAMEWORK
         new Distribution(7, dev: true),
+#endif
 #endif
       };
 
