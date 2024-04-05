@@ -218,8 +218,17 @@ namespace RhinoInside.Revit.External.DB.Schemas
     #endregion
 
 #if REVIT_2021
-    public static implicit operator SpecType(Autodesk.Revit.DB.ForgeTypeId value) => value is null ? null : new SpecType(value.TypeId);
     public static implicit operator Autodesk.Revit.DB.ForgeTypeId(SpecType value) => value is null ? null : new Autodesk.Revit.DB.ForgeTypeId(value.TypeId);
+    public static implicit operator SpecType(Autodesk.Revit.DB.ForgeTypeId value)
+    {
+      if (value is null) return null;
+      var typeId = value.TypeId;
+#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
+      return IsSpecType(typeId) ?
+        new SpecType(typeId) :
+        throw new InvalidCastException($"'{typeId}' is not a valid {typeof(SpecType)}");
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
+    }
 #endif
 
 #if !REVIT_2021

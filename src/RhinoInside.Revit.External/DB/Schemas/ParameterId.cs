@@ -43,8 +43,17 @@ namespace RhinoInside.Revit.External.DB.Schemas
     }
 
 #if REVIT_2021
-    public static implicit operator ParameterId(Autodesk.Revit.DB.ForgeTypeId value) => value is null ? null : new ParameterId(value.TypeId);
     public static implicit operator Autodesk.Revit.DB.ForgeTypeId(ParameterId value) => value is null ? null : new Autodesk.Revit.DB.ForgeTypeId(value.TypeId);
+    public static implicit operator ParameterId(Autodesk.Revit.DB.ForgeTypeId value)
+    {
+      if (value is null) return null;
+      var typeId = value.TypeId;
+#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
+      return IsParameterId(typeId) ?
+        new ParameterId(typeId) :
+        throw new InvalidCastException($"'{typeId}' is not a valid {typeof(ParameterId)}");
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
+    }
 #endif
 
     public static implicit operator ParameterId(Autodesk.Revit.DB.BuiltInParameter value)

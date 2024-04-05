@@ -79,8 +79,17 @@ namespace RhinoInside.Revit.External.DB.Schemas
       (value.BuiltInCategory = Values.TryGetValue(value, out var bi) ? bi.BuiltInCategory : ARDB.BuiltInCategory.INVALID);
 
 #if REVIT_2021
-    public static implicit operator CategoryId(ARDB.ForgeTypeId value) => value is null ? null : IsCategoryId(value.TypeId) ? new CategoryId(value.TypeId) : throw new InvalidCastException();
     public static implicit operator ARDB.ForgeTypeId(CategoryId value) => value is null ? null : new ARDB.ForgeTypeId(value.TypeId);
+    public static implicit operator CategoryId(ARDB.ForgeTypeId value)
+    {
+      if (value is null) return null;
+      var typeId = value.TypeId;
+#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
+      return IsCategoryId(typeId) ?
+        new CategoryId(typeId) :
+        throw new InvalidCastException($"'{typeId}' is not a valid {typeof(CategoryId)}");
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
+    }
 #endif
   }
 }

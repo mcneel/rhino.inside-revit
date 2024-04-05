@@ -43,8 +43,17 @@ namespace RhinoInside.Revit.External.DB.Schemas
     }
 
 #if REVIT_2021
-    public static implicit operator UnitSymbol(Autodesk.Revit.DB.ForgeTypeId value) => value is null ? null : new UnitSymbol(value.TypeId);
     public static implicit operator Autodesk.Revit.DB.ForgeTypeId(UnitSymbol value) => value is null ? null : new Autodesk.Revit.DB.ForgeTypeId(value.TypeId);
+    public static implicit operator UnitSymbol(Autodesk.Revit.DB.ForgeTypeId value)
+    {
+      if (value is null) return null;
+      var typeId = value.TypeId;
+#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
+      return IsUnitSymbol(typeId) ?
+        new UnitSymbol(typeId) :
+        throw new InvalidCastException($"'{typeId}' is not a valid {typeof(UnitSymbol)}");
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
+    }
 #endif
 
 #if !REVIT_2022
