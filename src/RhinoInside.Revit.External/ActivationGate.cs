@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.External
     static event EventHandler exit;
 
     [ThreadStatic]
-    static WindowHandle windowToActivate = default;
+    static WindowHandle windowToActivate;
 
     class Gate
     {

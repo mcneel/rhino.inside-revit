@@ -300,7 +300,7 @@ namespace RhinoInside.Revit
           catch (IOException) { }
         }
 
-        subject = Uri.EscapeUriString(subject);
+        subject = Uri.EscapeDataString(subject);
         var mailtoURI = $"mailto:tech@mcneel.com?subject={subject}&body=";
 
         var mailBody = @"Give us any additional info you see fit here..." + Environment.NewLine + Environment.NewLine;
