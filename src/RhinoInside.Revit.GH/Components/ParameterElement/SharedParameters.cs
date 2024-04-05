@@ -8,6 +8,7 @@ using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
+using ERAS = RhinoInside.Revit.External.ApplicationServices;
 
 namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
@@ -110,22 +111,22 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (Core.Host.Services.Value is Autodesk.Revit.ApplicationServices.Application app)
+      if (Core.Host.Services is ERAS.HostServices services)
       {
         // Input
         if (!Params.TryGetData(DA, "File", out string file, x => File.Exists(x))) return;
         if (!Params.TryGetData(DA, "Group", out string group, x => !string.IsNullOrEmpty(x))) return;
         if (!Params.TryGetData(DA, "Name", out string name, x => !string.IsNullOrEmpty(x))) return;
 
-        var UserSharedParametersFilename = app.SharedParametersFilename;
+        var UserSharedParametersFilename = services.SharedParametersFilename;
         try
         {
           if (file is object)
-            app.SharedParametersFilename = file;
+            services.SharedParametersFilename = file;
 
-          DA.SetData("File", app.SharedParametersFilename);
+          DA.SetData("File", services.SharedParametersFilename);
 
-          using (var parametersFile = app.OpenSharedParameterFile())
+          using (var parametersFile = services.OpenSharedParameterFile())
           {
             if (parametersFile is object)
             {
@@ -170,7 +171,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         }
         finally
         {
-          app.SharedParametersFilename = UserSharedParametersFilename;
+          services.SharedParametersFilename = UserSharedParametersFilename;
         }
       }
     }

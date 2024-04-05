@@ -42,15 +42,11 @@ namespace RhinoInside.Revit.External.UI
 
       if (Instances.Count == 0)
       {
-        if (!ApplicationServices.HostServices.StartUp(app.ControlledApplication))
+        if (!UIHostApplication.StartUp(app))
           return Result.Failed;
 
         uiControlledApplication = app;
-#if REVIT_2019
-        HostMainWindow = new WindowHandle(app.MainWindowHandle);
-#else
-        HostMainWindow = new WindowHandle(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle);
-#endif
+        HostMainWindow = new WindowHandle(UIHostApplication.Current.MainWindowHandle);
       }
 
       Instances.Add(addInId, this);
@@ -71,7 +67,7 @@ namespace RhinoInside.Revit.External.UI
             uiControlledApplication = default;
             HostMainWindow = WindowHandle.Zero;
 
-            ApplicationServices.HostServices.Shutdown(app.ControlledApplication);
+            UIHostApplication.Shutdown(app);
           }
         }
       }
@@ -100,7 +96,7 @@ namespace RhinoInside.Revit.External.UI
           uiControlledApplication = default;
           HostMainWindow = WindowHandle.Zero;
 
-          ApplicationServices.HostServices.Shutdown(app.ControlledApplication);
+          UIHostApplication.Shutdown(app);
         }
       }
     }

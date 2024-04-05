@@ -1,5 +1,6 @@
 using System;
 using Autodesk.Revit.ApplicationServices;
+using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.ApplicationServices
 {
@@ -8,13 +9,54 @@ namespace RhinoInside.Revit.External.ApplicationServices
   #region HostServices
   public abstract class HostServices : IDisposable
   {
-    protected HostServices() { }
-    public abstract void Dispose();
+    protected internal HostServices(bool disposable) => Disposable = disposable;
 
-    public static implicit operator HostServices(Application value) => new HostServicesU(value);
-    public static implicit operator HostServices(ControlledApplication value) => new HostServicesC(value);
+    #region IDisposable
+#pragma warning disable CA1063 // Implement IDisposable Correctly
+    readonly bool Disposable;
+    protected abstract void Dispose(bool disposing);
+    void IDisposable.Dispose()
+    {
+      if (!Disposable) return;
 
-    public abstract object Value { get; }
+      Dispose(disposing: true);
+      GC.SuppressFinalize(this);
+    }
+#pragma warning restore CA1063 // Implement IDisposable Correctly
+    #endregion
+
+    public static implicit operator HostServices(Application value) => new HostServicesU(value, disposable: true);
+    public static implicit operator HostServices(ControlledApplication value) => new HostServicesC(value, disposable: true);
+
+    #region Runtime
+    internal static HostServices Current;
+
+    internal static bool StartUp(ControlledApplication app)
+    {
+      // Register Revit Failures
+      DB.ExternalFailures.CreateFailureDefinitions();
+
+      Current = new HostServicesC(app, disposable: false);
+      Current.ApplicationInitialized += Initialized;
+      return true;
+    }
+
+    private static void Initialized(object sender, Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs e)
+    {
+      Current.ApplicationInitialized -= Initialized;
+      Current = new HostServicesU(sender as Application, disposable: false);
+
+      // From now on DB is available
+      //
+    }
+
+    internal static bool Shutdown(ControlledApplication app)
+    {
+      Current?.Dispose(true);
+      Current = null;
+      return true;
+    }
+    #endregion
 
     #region Version
     public abstract string VersionName { get; }
@@ -36,48 +78,71 @@ namespace RhinoInside.Revit.External.ApplicationServices
     public abstract string CurrentUserAddinsLocation { get; }
     #endregion
 
+    #region SharedParameters
+    public abstract string SharedParametersFilename { get; set; }
+    public abstract DefinitionFile OpenSharedParameterFile();
+
+    public DefinitionFile CreateSharedParameterFile()
+    {
+      string sharedParametersFilename = SharedParametersFilename;
+      string tempParametersFilename = System.IO.Path.GetTempFileName() + ".txt";
+      try
+      {
+        // Create Temp Shared Parameters File
+        using (System.IO.File.CreateText(tempParametersFilename)) { }
+        SharedParametersFilename = tempParametersFilename;
+        return OpenSharedParameterFile();
+      }
+      finally
+      {
+        // Restore User Shared Parameters File
+        SharedParametersFilename = sharedParametersFilename;
+        try { System.IO.File.Delete(tempParametersFilename); }
+        catch { }
+      }
+    }
+    public DefinitionFile LoadSharedParameterFile(string fileName = null)
+    {
+      if (!System.IO.File.Exists(fileName)) return null;
+
+      string sharedParametersFilename = SharedParametersFilename;
+      try
+      {
+        // Set Temp Shared Parameters Name
+        SharedParametersFilename = fileName;
+        return OpenSharedParameterFile();
+      }
+      finally
+      {
+        // Restore User Shared Parameters File
+        SharedParametersFilename = sharedParametersFilename;
+      }
+    }
+    #endregion
+
     #region Events
     public abstract event EventHandler<Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs> ApplicationInitialized;
     public abstract event EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs> DocumentChanged;
     public abstract event EventHandler<Autodesk.Revit.DB.Events.DocumentClosingEventArgs> DocumentClosing;
     #endregion
-
-    #region Runtime
-    static Application Application;
-
-    internal static bool StartUp(ControlledApplication app)
-    {
-      // Register Revit Failures
-      DB.ExternalFailures.CreateFailureDefinitions();
-
-      app.ApplicationInitialized += Initialized;
-      return true;
-    }
-
-    private static void Initialized(object sender, Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs e)
-    {
-      Application = sender as Application;
-      Application.ApplicationInitialized -= Initialized;
-
-      // From now on DB is available
-      //
-    }
-
-    internal static bool Shutdown(ControlledApplication app)
-    {
-      using (Application) Application = null;
-      return true;
-    }
-    #endregion
   }
 
-  class HostServicesC : HostServices
+  sealed class HostServicesC : HostServices
   {
-    readonly ControlledApplication _app;
-    public HostServicesC(ControlledApplication app) => _app = app;
-    public override void Dispose() { }
+    ControlledApplication _app;
+    public HostServicesC(ControlledApplication app, bool disposable) : base(disposable) => _app = app;
+    protected override void Dispose(bool disposing)
+    {
+      if (_app is object)
+      {
+        if (disposing)
+        {
+          //_app.Dispose();
+        }
 
-    public override object Value => _app;
+        _app = null;
+      }
+    }
 
     #region Version
     public override string VersionName => _app.VersionName;
@@ -108,6 +173,16 @@ namespace RhinoInside.Revit.External.ApplicationServices
       );
 #endif
     public override string CurrentUserAddinsLocation => _app.CurrentUserAddinsLocation;
+    #endregion
+
+    #region SharedParameters
+    public override string SharedParametersFilename
+    {
+      get => _app.SharedParametersFilename;
+      set => _app.SharedParametersFilename = value;
+    }
+
+    public override DefinitionFile OpenSharedParameterFile() => _app.OpenSharedParameterFile();
     #endregion
 
     #region Events
@@ -127,15 +202,26 @@ namespace RhinoInside.Revit.External.ApplicationServices
       remove => _app.DocumentClosing -= ActivationGate.RemoveEventHandler(value);
     }
     #endregion
-}
+  }
 
-  class HostServicesU : HostServices
+  sealed class HostServicesU : HostServices
   {
-    readonly Application _app;
-    public HostServicesU(Application app) => _app = app;
-    public override void Dispose() => _app.Dispose();
-    public override object Value => _app;
+    Application _app;
+    public HostServicesU(Application app, bool disposable) : base(disposable) => _app = app;
 
+    protected override void Dispose(bool disposing)
+    {
+      if (_app is object)
+      {
+        if (disposing)
+        {
+          _app.Dispose();
+        }
+
+        _app = null;
+      }
+    }
+    
     #region Version
     public override string VersionName => _app.VersionName;
     public override string VersionNumber => _app.VersionNumber;
@@ -165,6 +251,16 @@ namespace RhinoInside.Revit.External.ApplicationServices
       );
 #endif
     public override string CurrentUserAddinsLocation => _app.CurrentUserAddinsLocation;
+    #endregion
+
+    #region SharedParameters
+    public override string SharedParametersFilename
+    {
+      get => _app.SharedParametersFilename;
+      set => _app.SharedParametersFilename = value;
+    }
+
+    public override DefinitionFile OpenSharedParameterFile() => _app.OpenSharedParameterFile();
     #endregion
 
     #region Events

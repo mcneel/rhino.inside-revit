@@ -149,7 +149,7 @@ namespace RhinoInside.Revit.External.DB
   /// A TransactionChain behaves like a <see cref="Autodesk.Revit.DB.Transaction"/> but on several documents
   /// at the same time.
   /// </remarks>
-  public class TransactionChain : IFailuresPreprocessor, ITransactionFinalizer, IDisposable
+  public sealed class TransactionChain : IFailuresPreprocessor, ITransactionFinalizer, IDisposable
   {
     readonly Dictionary<Document, Transaction> transactionChain = new Dictionary<Document, Transaction>();
     IEnumerator<Transaction> transactionLinks;
@@ -385,7 +385,7 @@ namespace RhinoInside.Revit.External.DB
   /// <see cref="Autodesk.Revit.DB.Document"/> has no active Transaction running on it, otherwise
   /// as a <see cref="Autodesk.Revit.DB.SubTransaction"/>.
   /// </remarks>
-  public class AdaptiveTransaction : IDisposable
+  public sealed class AdaptiveTransaction : IDisposable
   {
     readonly string name;
     readonly Document document;

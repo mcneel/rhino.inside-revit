@@ -10,7 +10,6 @@ using ERUI = RhinoInside.Revit.External.UI;
 namespace RhinoInside.Revit
 {
   using static Diagnostics;
-  using External.ApplicationServices.Extensions;
 
   enum CoreStartupMode
   {
@@ -118,12 +117,7 @@ namespace RhinoInside.Revit
     #endregion
 
     #region IExternalApplication
-    static ERUI.UIHostApplication host;
-    internal static ERUI.UIHostApplication Host
-    {
-      get => host;
-      private set { if (!ReferenceEquals(host, value)) { host?.Dispose(); host = value; } }
-    }
+    internal static ERUI.UIHostApplication Host => ERUI.UIHostApplication.Current;
 
     internal static ARUI.Result OnStartup(ARUI.UIControlledApplication uiCtrlApp)
     {
@@ -145,7 +139,6 @@ namespace RhinoInside.Revit
         ErrorReport.OnLoadStackTraceFilePath =
           Path.ChangeExtension(uiCtrlApp.ControlledApplication.RecordingJournalFilename, "log.md");
 
-        External.ActivationGate.SetHostWindow(Host.MainWindowHandle);
         AssemblyResolver.Enabled = true;
 
         // Initialize DB
@@ -157,7 +150,6 @@ namespace RhinoInside.Revit
             if (CurrentStatus < Status.Available) return;
 
             var app = sender as Autodesk.Revit.ApplicationServices.Application;
-            Host = new ARUI.UIApplication(app);
             Convert.Geometry.GeometryTolerance.Internal = new Convert.Geometry.GeometryTolerance
             (
               Numerical.Constant.DefaultTolerance,
@@ -187,8 +179,6 @@ namespace RhinoInside.Revit
         finally
         {
           AssemblyResolver.Enabled = false;
-          External.ActivationGate.SetHostWindow(IntPtr.Zero);
-          Host = null;
         }
       }
     }
@@ -278,7 +268,6 @@ namespace RhinoInside.Revit
           return ARUI.Result.Failed;
       }
 
-      Host = app;
       return ARUI.Result.Succeeded;
     }
 

@@ -3,12 +3,11 @@ using Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
-  class RibbonHandler : IDisposable
+  class RibbonHandler
   {
     readonly External.UI.UIHostApplication _app;
 
     public RibbonHandler(External.UI.UIHostApplication app) => _app= app;
-    public void Dispose() => _app.Dispose();
 
     /// <summary>
     /// Get Revit tab as underlying Autodesk.Windows.RibbonTab instance

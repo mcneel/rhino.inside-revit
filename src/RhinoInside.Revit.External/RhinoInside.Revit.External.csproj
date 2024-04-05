@@ -23,10 +23,7 @@
   </PropertyGroup>
 
   <Target Name="DeployResults" AfterTargets="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
-    <Copy SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb"
-          DestinationFolder="$(RiROutputPath)"
-          UseHardlinksIfPossible="true"
-          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb" DestinationFolder="$(RiROutputPath)" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="CleanResults" BeforeTargets="BeforeClean" Condition="$(Configuration.Contains('Debug'))">

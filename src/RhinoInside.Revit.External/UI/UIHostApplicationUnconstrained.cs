@@ -12,8 +12,8 @@ namespace RhinoInside.Revit.External.UI
 {
   sealed class UIHostApplicationUnconstrained : UIHostApplication
   {
-    readonly UIApplication _app;
-    public UIHostApplicationUnconstrained(UIApplication app)
+    UIApplication _app;
+    public UIHostApplicationUnconstrained(UIApplication app, bool disposable) : base(disposable)
     {
       _app = app;
       _app.ViewActivated += UpdateOpenViewsList;
@@ -23,19 +23,27 @@ namespace RhinoInside.Revit.External.UI
 #endif
     }
 
-    public override void Dispose()
+    protected override void Dispose(bool disposing)
     {
+      if (_app is object)
+      {
+        if (disposing)
+        {
 #if REVIT_2023
-      _app.SelectionChanged -= SelectionChangedHandler;
+          _app.SelectionChanged -= SelectionChangedHandler;
 #endif
-      _app.ViewActivated -= UpdateOpenViewsList;
-      _app.Dispose();
+          _app.ViewActivated -= UpdateOpenViewsList;
+          _app.Dispose();
+        }
+
+        _app = null;
+      }
     }
     
     public override object Value => _app.IsValidObject ? _app : default;
     public override bool IsValid => _app.IsValidObject;
 
-    public override ApplicationServices.HostServices Services => new ApplicationServices.HostServicesU(_app.Application);
+    public override ApplicationServices.HostServices Services => ApplicationServices.HostServices.Current ??= _app.Application;
     public override UIDocument ActiveUIDocument
     {
       get => _app.ActiveUIDocument;
