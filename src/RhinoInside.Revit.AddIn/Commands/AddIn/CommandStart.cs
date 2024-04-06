@@ -271,7 +271,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         return;
 
       // Script Packages UI
-      LinkedScripts.CreateUI(new RibbonHandler(Core.Host));
+      LinkedScripts.CreateUI(Core.Host);
     }
     #endregion
 

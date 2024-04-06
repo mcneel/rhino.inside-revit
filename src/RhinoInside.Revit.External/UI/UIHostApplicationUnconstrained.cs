@@ -89,11 +89,11 @@ namespace RhinoInside.Revit.External.UI
     public override RibbonPanel CreateRibbonPanel(string tabName, string panelName) =>
       _app.CreateRibbonPanel(tabName, panelName);
 
-    public override IReadOnlyList<RibbonPanel> GetRibbonPanels(Tab tab) =>
-      _app.GetRibbonPanels(tab);
+    public override IReadOnlyDictionary<string, RibbonPanel> GetRibbonPanels(Tab tab) =>
+      _app.GetRibbonPanels(tab).ToDictionary(x => x.Name);
 
-    public override IReadOnlyList<RibbonPanel> GetRibbonPanels(string tabName) =>
-      _app.GetRibbonPanels(tabName);
+    public override IReadOnlyDictionary<string, RibbonPanel> GetRibbonPanels(string tabName) =>
+      _app.GetRibbonPanels(tabName).ToDictionary(x => x.Name);
     #endregion
 
     #region AddIns

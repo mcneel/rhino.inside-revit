@@ -95,8 +95,8 @@ namespace RhinoInside.Revit.External.UI
 
     public abstract RibbonPanel CreateRibbonPanel(Tab tab, string panelName);
     public abstract RibbonPanel CreateRibbonPanel(string tabName, string panelName);
-    public abstract IReadOnlyList<RibbonPanel> GetRibbonPanels(Tab tab);
-    public abstract IReadOnlyList<RibbonPanel> GetRibbonPanels(string tabName);
+    public abstract IReadOnlyDictionary<string, RibbonPanel> GetRibbonPanels(Tab tab);
+    public abstract IReadOnlyDictionary<string, RibbonPanel> GetRibbonPanels(string tabName);
     #endregion
 
     #region AddIns
