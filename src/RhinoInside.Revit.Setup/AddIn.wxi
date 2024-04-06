@@ -358,15 +358,15 @@
         <File Id="Revit.2025.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
-      <Component Id="Addins.2025.RhinoInsideRevit.addin" Guid="{603EA728-90F3-4D58-B0C4-73DDB0985D52}" Directory="APPLICATIONFOLDER2024">
+      <Component Id="Addins.2025.RhinoInsideRevit.addin" Guid="{603EA728-90F3-4D58-B0C4-73DDB0985D52}" Directory="APPLICATIONFOLDER2025">
         <File Id="Addins.2025.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
       </Component>
 
-      <Component Id="Addins.2025.RhinoInsideRevit" Guid="{AFBF523D-2EDA-430E-AB7A-4F8668A46FC8}" Directory="INSTALLFOLDER_2024">
+      <Component Id="Addins.2025.RhinoInsideRevit" Guid="{AFBF523D-2EDA-430E-AB7A-4F8668A46FC8}" Directory="INSTALLFOLDER_2025">
         <File Id="Addins.2025.RhinoInside.Revit.Loader.dll" Source="..\RhinoInside.Revit.Loader\bin\$(var.Configuration)-2025\net8.0-windows\RhinoInside.Revit.Loader.dll"/>
       </Component>
 
-      <Component Id="Addins.2025.R8.RhinoInsideRevit" Guid="{7477655E-CB83-4619-A1E1-2FF948663267}" Directory="INSTALLFOLDER_2024_R8">
+      <Component Id="Addins.2025.R8.RhinoInsideRevit" Guid="{7477655E-CB83-4619-A1E1-2FF948663267}" Directory="INSTALLFOLDER_2025_R8">
         <File Id="Addins.2025.R8.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\$(var.Configuration)-2025-R8\net8.0-windows\RhinoInside.Revit.dll"/>
         <File Id="Addins.2025.R8.RhinoInside.Revit.xml" Source="..\RhinoInside.Revit\bin\$(var.Configuration)-2025-R8\net8.0-windows\RhinoInside.Revit.xml"/>
         <File Id="Addins.2025.R8.RhinoInside.Revit.External.dll" Source="..\RhinoInside.Revit.External\bin\$(var.Configuration)-2025-R8\net8.0-windows\RhinoInside.Revit.External.dll"/>
