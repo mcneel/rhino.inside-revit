@@ -84,13 +84,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
     /// <summary>
     /// Updater to collect changes on the Delete operation
     /// </summary>
-    class Updater : ARDB.IUpdater, IDisposable
+    sealed class Updater : ARDB.IUpdater, IDisposable
     {
       public string GetUpdaterName() => "Delete Updater";
       public string GetAdditionalInformation() => "N/A";
       public ARDB.ChangePriority GetChangePriority() => ARDB.ChangePriority.Annotations;
-      public ARDB.UpdaterId GetUpdaterId() => updaterId;
-      readonly ARDB.UpdaterId updaterId;
+      public ARDB.UpdaterId GetUpdaterId() => UpdaterId;
+      readonly ARDB.UpdaterId UpdaterId;
 
       public ICollection<ARDB.ElementId> AddedElementIds { get; private set; }
       public ICollection<ARDB.ElementId> DeletedElementIds { get; private set; }
@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       public Updater(ARDB.Document doc)
       {
-        updaterId = new ARDB.UpdaterId
+        UpdaterId = new ARDB.UpdaterId
         (
           doc.Application.ActiveAddInId,
           new Guid("9536C7C9-C58B-4D48-9103-5C8EBAA6F6C8")
@@ -107,14 +107,16 @@ namespace RhinoInside.Revit.GH.Components.Elements
         ARDB.UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
         var filter = ERDB.CompoundElementFilter.ElementIsNotInternalFilter(doc);
-        ARDB.UpdaterRegistry.AddTrigger(updaterId, filter, ARDB.Element.GetChangeTypeAny());
-        ARDB.UpdaterRegistry.AddTrigger(updaterId, filter, ARDB.Element.GetChangeTypeElementDeletion());
+        ARDB.UpdaterRegistry.AddTrigger(UpdaterId, filter, ARDB.Element.GetChangeTypeAny());
+        ARDB.UpdaterRegistry.AddTrigger(UpdaterId, filter, ARDB.Element.GetChangeTypeElementDeletion());
       }
 
-      void IDisposable.Dispose()
+      public void Dispose()
       {
-        ARDB.UpdaterRegistry.RemoveAllTriggers(updaterId);
-        ARDB.UpdaterRegistry.UnregisterUpdater(updaterId);
+        ARDB.UpdaterRegistry.RemoveAllTriggers(UpdaterId);
+        ARDB.UpdaterRegistry.UnregisterUpdater(UpdaterId);
+        UpdaterId.Dispose();
+        GC.SuppressFinalize(this);
       }
 
       public void Execute(ARDB.UpdaterData data)
