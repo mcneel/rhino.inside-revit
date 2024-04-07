@@ -249,7 +249,6 @@ namespace RhinoInside.Revit.GH
       public ParamPrimitive(PreviewNode node, Rhino.Geometry.Mesh m) : base(m) => Node = node;
       public ParamPrimitive(PreviewNode node, Rhino.Geometry.Mesh m, Part p) : base(m, p) => Node = node;
 
-      // Since ScriptVariable returns a copy, we can Dispose it.
       protected override bool IsGeometryDisposable => true;
 
       public override ARDB3D.EffectInstance EffectInstance(ARDB.DisplayStyle displayStyle, bool IsShadingPass)
