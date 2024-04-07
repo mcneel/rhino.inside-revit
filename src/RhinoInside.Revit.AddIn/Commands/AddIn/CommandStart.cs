@@ -17,6 +17,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     static RibbonPanel grasshopperPanel;
 
     public static string CommandName => "Start";
+    static PushButton Button;
 
     // determine which RIR icon to use
     public static string CommandIcon => Deployment.Updater.ActiveChannel?.IsStable == false ?
@@ -43,20 +44,23 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    static void SetupButton(PushButton pushButton)
+    static void SetupButton()
     {
-      if (Core.Distribution.VersionInfo is FileVersionInfo rhInfo)
+      if (Button is PushButton pushButton)
       {
-        pushButton.ToolTip = $"Loads {rhInfo.ProductName} inside this Revit session";
-        pushButton.LongDescription =
-          $"Rhino: {rhInfo.ProductVersion} ({rhInfo.FileDescription}){Environment.NewLine}" +
-          $"Rhino.Inside: {Core.DisplayVersion}{Environment.NewLine}{rhInfo.LegalCopyright}";
-      }
+        if (Core.Distribution.VersionInfo is FileVersionInfo rhInfo)
+        {
+          pushButton.ToolTip = $"Loads {rhInfo.ProductName} inside this Revit session";
+          pushButton.LongDescription =
+            $"Rhino: {rhInfo.ProductVersion} ({rhInfo.FileDescription}){Environment.NewLine}" +
+            $"Rhino.Inside: {Core.DisplayVersion}{Environment.NewLine}{rhInfo.LegalCopyright}";
+        }
 
-      if (Core.StartupMode == CoreStartupMode.Disabled)
-      {
-        pushButton.Enabled = false;
-        pushButton.ToolTip = "Add-In is disabled";
+        if (Core.StartupMode == CoreStartupMode.Disabled)
+        {
+          pushButton.Enabled = false;
+          pushButton.ToolTip = "Add-In is disabled";
+        }
       }
     }
 
@@ -104,7 +108,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     internal static Result Start()
     {
       var result = Result.Failed;
-      var button = RestoreButton(CommandName);
+      var button = Button;
 
       switch (result = Revit.OnStartup())
       {
@@ -159,8 +163,8 @@ namespace RhinoInside.Revit.AddIn.Commands
         var buttonData = NewPushButtonData<CommandStart, AvailableEvenObsolete>(CommandName, CommandIcon, "");
         if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
         {
-          StoreButton(CommandName, pushButton);
-          SetupButton(pushButton);
+          Button = pushButton;
+          SetupButton();
 
           if (Core.CurrentStatus >= Core.Status.Available && Core.StartupMode != CoreStartupMode.Disabled)
           {
@@ -329,7 +333,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     private static void AddinOptions_UpdateChannelChanged(object sender, EventArgs e)
     {
-      if (RestoreButton(CommandName) is PushButton button)
+      if (Button is PushButton button)
       {
         button.Image = LoadRibbonButtonImage(CommandIcon, true);
         button.LargeImage = LoadRibbonButtonImage(CommandIcon);
@@ -341,7 +345,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       // button gets deactivated if options are readonly
       if (!Properties.AddInOptions.IsReadOnly)
       {
-        if (RestoreButton(CommandName) is PushButton button)
+        if (Button is PushButton button)
         {
           ClearUpdateNotifiy();
           button.Highlight();
@@ -354,12 +358,9 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     public static void ClearUpdateNotifiy()
     {
-      if (RestoreButton(CommandName) is PushButton button)
-      {
-        button.ClearHighlight();
-        // init resets the tooltip to default
-        SetupButton(button);
-      }
+      Button?.ClearHighlight();
+      // init resets the tooltip to default
+      SetupButton();
     }
     #endregion
   }

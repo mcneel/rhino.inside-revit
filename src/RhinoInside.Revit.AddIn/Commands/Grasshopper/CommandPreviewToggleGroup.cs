@@ -10,18 +10,21 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     public static string CommandName => "GrasshopperPreview";
 
+    static RadioButtonGroup ButtonGroup;
+    static ToggleButton Off;
+    static ToggleButton Wireframe;
+    static ToggleButton Shaded;
+
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
 #if REVIT_2018
       var radioData = new RadioButtonGroupData(CommandName);
 
-      if (ribbonPanel.AddItem(radioData) is RadioButtonGroup radioButton)
+      ButtonGroup = ribbonPanel.AddItem(radioData) as RadioButtonGroup;
       {
-        CommandGrasshopperPreviewOff.CreateUI(radioButton);
-        CommandGrasshopperPreviewWireframe.CreateUI(radioButton);
-        CommandGrasshopperPreviewShaded.CreateUI(radioButton);
-
-        StoreButton(CommandName, radioButton);
+        Off = CommandGrasshopperPreviewOff.CreateUI(ButtonGroup);
+        Wireframe = CommandGrasshopperPreviewWireframe.CreateUI(ButtonGroup);
+        Shaded = CommandGrasshopperPreviewShaded.CreateUI(ButtonGroup);
       }
 
       AssemblyResolver.References["Grasshopper"].Activated += Grasshopper_AssemblyActivated;
@@ -31,24 +34,24 @@ namespace RhinoInside.Revit.AddIn.Commands
 #if REVIT_2018
     private static void Grasshopper_AssemblyActivated(object sender, AssemblyLoadEventArgs args)
     {
-      if (RestoreButton(CommandName) is RadioButtonGroup radioButton)
+      if (ButtonGroup is object)
       {
-        var options = Properties.AddInOptions.Current;
+        if (Enum.TryParse(Properties.AddInOptions.Current.CustomOptions.Get("Grasshopper", "PreviewMode"), out GH_PreviewMode previewMode))
+          GH.PreviewServer.PreviewMode = previewMode;
+
         GH.PreviewServer.PreviewModeChanged += (_, previous) =>
         {
           var mode = GH.PreviewServer.PreviewMode;
-          options.CustomOptions.Set("Grasshopper", "PreviewMode", mode.ToString());
 
           switch (mode)
           {
-            case GH_PreviewMode.Disabled:  radioButton.Current = RestoreButton(CommandGrasshopperPreviewOff.CommandName) as ToggleButton;       break;
-            case GH_PreviewMode.Wireframe: radioButton.Current = RestoreButton(CommandGrasshopperPreviewWireframe.CommandName) as ToggleButton; break;
-            case GH_PreviewMode.Shaded:    radioButton.Current = RestoreButton(CommandGrasshopperPreviewShaded.CommandName) as ToggleButton;    break;
+            case GH_PreviewMode.Disabled: ButtonGroup.Current = Off; break;
+            case GH_PreviewMode.Wireframe: ButtonGroup.Current = Wireframe; break;
+            case GH_PreviewMode.Shaded: ButtonGroup.Current = Shaded; break;
           }
-        };
 
-        if (Enum.TryParse(options.CustomOptions.Get("Grasshopper", "PreviewMode"), out GH_PreviewMode previewMode))
-          GH.PreviewServer.PreviewMode = previewMode;
+          Properties.AddInOptions.Current.CustomOptions.Set("Grasshopper", "PreviewMode", mode.ToString());
+        };
       }
     }
 
@@ -70,7 +73,7 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     public static new string CommandName => "Off";
 
-    public static void CreateUI(RadioButtonGroup radioButtonGroup)
+    public static ToggleButton CreateUI(RadioButtonGroup radioButtonGroup)
     {
       var buttonData = NewToggleButtonData<CommandGrasshopperPreviewOff, Availability>
       (
@@ -83,8 +86,10 @@ namespace RhinoInside.Revit.AddIn.Commands
       {
         // add spacing to title to get it to be a consistent width
         pushButton.SetText("   Off    ");
-        StoreButton(CommandName, pushButton);
+        return pushButton;
       }
+
+      return null;
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
@@ -100,7 +105,7 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     public static new string CommandName => "Wire";
 
-    public static void CreateUI(RadioButtonGroup radioButtonGroup)
+    public static ToggleButton CreateUI(RadioButtonGroup radioButtonGroup)
     {
       var buttonData = NewToggleButtonData<CommandGrasshopperPreviewWireframe, Availability>
       (
@@ -113,8 +118,10 @@ namespace RhinoInside.Revit.AddIn.Commands
       {
         // add spacing to title to get it to be a consistent width
         pushButton.SetText("  Wire   ");
-        StoreButton(CommandName, pushButton);
+        return pushButton;
       }
+
+      return null;
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
@@ -130,7 +137,7 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     public static new string CommandName => "Shaded";
 
-    public static void CreateUI(RadioButtonGroup radioButtonGroup)
+    public static ToggleButton CreateUI(RadioButtonGroup radioButtonGroup)
     {
       var buttonData = NewToggleButtonData<CommandGrasshopperPreviewShaded, Availability>
       (
@@ -139,10 +146,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         tooltip: "Draw shaded preview geometry"
       );
 
-      if (radioButtonGroup.AddItem(buttonData) is ToggleButton pushButton)
-      {
-        StoreButton(CommandName, pushButton);
-      }
+      return radioButtonGroup.AddItem(buttonData);
     }
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)

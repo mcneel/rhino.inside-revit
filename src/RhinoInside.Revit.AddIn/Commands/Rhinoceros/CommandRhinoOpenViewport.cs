@@ -31,7 +31,6 @@ namespace RhinoInside.Revit.AddIn.Commands
         pushButton.LongDescription =
           $"Use CTRL key to open the viewport synchronizing camera and workplane.{Environment.NewLine}" +
           "Use CTRL + SHIFT to also synchronize Zoom level.";
-        StoreButton(CommandName, pushButton);
       }
     }
 

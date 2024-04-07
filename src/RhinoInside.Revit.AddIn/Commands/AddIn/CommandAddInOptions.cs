@@ -9,6 +9,7 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     public static string CommandName = "Options";
     public static string CommandTooltip = "Open Rhino.Inside.Revit Options Window";
+    static PushButton Button;
 
     static Deployment.ReleaseInfo LatestReleaseInfo = null;
 
@@ -24,8 +25,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        // setup button
-        StoreButton(CommandName, pushButton);
+        Button = pushButton;
 
         // disable the button if options are readonly
         pushButton.Enabled = !Properties.AddInOptions.IsReadOnly && AssemblyResolver.References.ContainsKey("Eto");
@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       // button gets deactivated if options are readonly
       if (!Properties.AddInOptions.IsReadOnly)
       {
-        if (RestoreButton(CommandName) is PushButton button)
+        if (Button is PushButton button)
         {
           ClearUpdateNotifiy();
           button.Highlight();
@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     public static void ClearUpdateNotifiy()
     {
-      if (RestoreButton(CommandName) is PushButton button)
+      if (Button is PushButton button)
       {
         button.ClearHighlight();
         button.ToolTip = CommandTooltip;
