@@ -420,6 +420,8 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static CID RebarLines                                         { get; } = new CID(BIC.OST_RebarLines                                    , "autodesk.revit.category.local:rebarLines-1.0.0");
     public static CID RebarShape                                         { get; } = new CID(BIC.OST_RebarShape                                    , "autodesk.revit.category.family:rebarShape-1.0.0");
     public static CID RebarSketchLines                                   { get; } = new CID(BIC.OST_RebarSketchLines                              , "autodesk.revit.category.local:rebarSketchLines-1.0.0");
+    public static CID RebarSpliceLines                                   { get; } = new CID(BIC.OST_RebarSpliceLines                              , "autodesk.revit.category.local:rebarSpliceLines-1.0.0");
+    public static CID RebarSpliceType                                    { get; } = new CID(BIC.OST_RebarSpliceType                               , "autodesk.revit.category.local:rebarSpliceType-1.0.0");
     public static CID Reveals                                            { get; } = new CID(BIC.OST_Reveals                                       , "autodesk.revit.category.local:reveals-1.0.0");
     public static CID RiseDropSymbols                                    { get; } = new CID(BIC.OST_RiseDropSymbols                               , "autodesk.revit.category.family:riseDropSymbols-1.0.0");
     public static CID Roads                                              { get; } = new CID(BIC.OST_Roads                                         , "autodesk.revit.category.family:roads-1.0.0");
@@ -456,6 +458,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static CID ShaftOpening                                       { get; } = new CID(BIC.OST_ShaftOpening                                  , "autodesk.revit.category.local:shaftOpening-1.0.0");
     public static CID ShaftOpeningHiddenLines                            { get; } = new CID(BIC.OST_ShaftOpeningHiddenLines                       , "autodesk.revit.category.local:shaftOpeningHiddenLines-1.0.0");
     public static CID SharedBasePoint                                    { get; } = new CID(BIC.OST_SharedBasePoint                               , "autodesk.revit.category.local:sharedBasePoint-1.0.0");
+    public static CID SheetCollections                                   { get; } = new CID(BIC.OST_SheetCollections                              , "autodesk.revit.category.local:sheetCollections-1.0.0");
     public static CID Sheets                                             { get; } = new CID(BIC.OST_Sheets                                        , "autodesk.revit.category.local:sheets-1.0.0");
     public static CID Signage                                            { get; } = new CID(BIC.OST_Signage                                       , "autodesk.revit.category.family:signage-1.0.0");
     public static CID SignageHiddenLines                                 { get; } = new CID(BIC.OST_SignageHiddenLines                            , "autodesk.revit.category.local:signageHiddenLines-1.0.0");
@@ -680,6 +683,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static CID DisplacementPath                                   { get; } = new CID(BIC.OST_DisplacementPath                              , "autodesk.revit.category.local:displacementPath-1.0.0");
     public static CID DoorTags                                           { get; } = new CID(BIC.OST_DoorTags                                      , "autodesk.revit.category.family:doorTags-1.0.0");
     public static CID DuctAccessoryTags                                  { get; } = new CID(BIC.OST_DuctAccessoryTags                             , "autodesk.revit.category.family:ductAccessoryTags-1.0.0");
+    public static CID DuctAnalyticalSegmentTags                          { get; } = new CID(BIC.OST_DuctAnalyticalSegmentTags                     , "autodesk.revit.category.family:ductAnalyticalSegmentTags-1.0.0");
     public static CID DuctColorFillLegends                               { get; } = new CID(BIC.OST_DuctColorFillLegends                          , "autodesk.revit.category.local:ductColorFillLegends-1.0.0");
     public static CID DuctColorFills                                     { get; } = new CID(BIC.OST_DuctColorFills                                , "autodesk.revit.category.local:ductColorFills-1.0.0");
     public static CID DuctFittingTags                                    { get; } = new CID(BIC.OST_DuctFittingTags                               , "autodesk.revit.category.family:ductFittingTags-1.0.0");
@@ -766,6 +770,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static CID PierPileTags                                       { get; } = new CID(BIC.OST_PierPileTags                                  , "autodesk.revit.category.family:pierPileTags-1.0.0");
     public static CID PierWallTags                                       { get; } = new CID(BIC.OST_PierWallTags                                  , "autodesk.revit.category.family:pierWallTags-1.0.0");
     public static CID PipeAccessoryTags                                  { get; } = new CID(BIC.OST_PipeAccessoryTags                             , "autodesk.revit.category.family:pipeAccessoryTags-1.0.0");
+    public static CID PipeAnalyticalSegmentTags                          { get; } = new CID(BIC.OST_PipeAnalyticalSegmentTags                     , "autodesk.revit.category.family:pipeAnalyticalSegmentTags-1.0.0");
     public static CID PipeColorFillLegends                               { get; } = new CID(BIC.OST_PipeColorFillLegends                          , "autodesk.revit.category.local:pipeColorFillLegends-1.0.0");
     public static CID PipeColorFills                                     { get; } = new CID(BIC.OST_PipeColorFills                                , "autodesk.revit.category.local:pipeColorFills-1.0.0");
     public static CID PipeFittingTags                                    { get; } = new CID(BIC.OST_PipeFittingTags                               , "autodesk.revit.category.family:pipeFittingTags-1.0.0");
@@ -1014,6 +1019,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static CID ColumnEndSegment                                   { get; } = new CID(BIC.OST_ColumnEndSegment                              , "autodesk.revit.category.local:columnEndSegment-1.0.0");
     public static CID ColumnLocalCoordSys                                { get; } = new CID(BIC.OST_ColumnLocalCoordSys                           , "autodesk.revit.category.local:columnLocalCoordSys-1.0.0");
     public static CID ColumnStartSegment                                 { get; } = new CID(BIC.OST_ColumnStartSegment                            , "autodesk.revit.category.local:columnStartSegment-1.0.0");
+    public static CID DuctAnalyticalSegments                             { get; } = new CID(BIC.OST_DuctAnalyticalSegments                        , "autodesk.revit.category.local:ductAnalyticalSegments-1.0.0");
     public static CID Electrical_AreaBasedLoads_Boundary                 { get; } = new CID(BIC.OST_ELECTRICAL_AreaBasedLoads_Boundary            , "autodesk.revit.category.local:electrical_AreaBasedLoads_Boundary-1.0.0");
     public static CID Electrical_AreaBasedLoads_InteriorFill             { get; } = new CID(BIC.OST_ELECTRICAL_AreaBasedLoads_InteriorFill        , "autodesk.revit.category.local:electrical_AreaBasedLoads_InteriorFill-1.0.0");
     public static CID Electrical_AreaBasedLoads_InteriorFill_Visibility  { get; } = new CID(BIC.OST_ELECTRICAL_AreaBasedLoads_InteriorFill_Visibility, "autodesk.revit.category.local:electrical_AreaBasedLoads_InteriorFill_Visibility-1.0.0");
@@ -1073,6 +1079,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static CID MepLoadAreaReferenceVisibility                     { get; } = new CID(BIC.OST_MEPLoadAreaReferenceVisibility                , "autodesk.revit.category.local:mepLoadAreaReferenceVisibility-1.0.0");
     public static CID MepLoadAreas                                       { get; } = new CID(BIC.OST_MEPLoadAreas                                  , "autodesk.revit.category.local:mepLoadAreas-1.0.0");
     public static CID MepSystemZone                                      { get; } = new CID(BIC.OST_MEPSystemZone                                 , "autodesk.revit.category.local:mepSystemZone-1.0.0");
+    public static CID PipeAnalyticalSegments                             { get; } = new CID(BIC.OST_PipeAnalyticalSegments                        , "autodesk.revit.category.local:pipeAnalyticalSegments-1.0.0");
     public static CID PointLoads                                         { get; } = new CID(BIC.OST_PointLoads                                    , "autodesk.revit.category.local:pointLoads-1.0.0");
     public static CID RigidLinksAnalytical                               { get; } = new CID(BIC.OST_RigidLinksAnalytical                          , "autodesk.revit.category.local:rigidLinksAnalytical-1.0.0");
     public static CID WallAnalytical                                     { get; } = new CID(BIC.OST_WallAnalytical                                , "autodesk.revit.category.local:wallAnalytical-1.0.0");
