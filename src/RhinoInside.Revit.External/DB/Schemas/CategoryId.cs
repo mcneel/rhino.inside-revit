@@ -63,7 +63,8 @@ namespace RhinoInside.Revit.External.DB.Schemas
       return false;
     }
 
-    private static readonly HashSet<CategoryId> Values = new HashSet<CategoryId>
+    static HashSet<CategoryId> _Values;
+    private static HashSet<CategoryId> Values => _Values ??= new HashSet<CategoryId>
     (
       typeof(CategoryId).
       GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).
@@ -71,7 +72,8 @@ namespace RhinoInside.Revit.External.DB.Schemas
       Select(x => (CategoryId) x.GetValue(null))
     );
 
-    internal static readonly IReadOnlyDictionary<ARDB.BuiltInCategory, CategoryId> BuiltIn = Values.ToDictionary(k => k.BuiltInCategory);
+    private static IReadOnlyDictionary<ARDB.BuiltInCategory, CategoryId> _BuiltIn;
+    internal static IReadOnlyDictionary<ARDB.BuiltInCategory, CategoryId> BuiltIn => _BuiltIn ??= Values.ToDictionary(k => k.BuiltInCategory);
     public static implicit operator CategoryId(ARDB.BuiltInCategory value) => BuiltIn.TryGetValue(value, out var id) ? id : Empty;
 
     private ARDB.BuiltInCategory BuiltInCategory = default;
