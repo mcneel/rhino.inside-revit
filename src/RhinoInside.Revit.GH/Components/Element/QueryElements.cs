@@ -221,7 +221,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           (
             "Elements",
             elementCollector.
-            Select(x => Types.GraphicalElement.FromLinkElement(link, Types.GraphicalElement.FromElement(x))).
+            Select(x => Types.GraphicalElement.FromLinkElement(link.Value, Types.GraphicalElement.FromElement(x))).
             OfType<Types.GraphicalElement>().
             TakeWhileIsNotEscapeKeyDown(this)
           );

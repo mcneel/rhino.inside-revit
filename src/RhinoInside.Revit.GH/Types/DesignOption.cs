@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Value is ARDB.Element set)
-          return set.GetDependents<ARDB.DesignOption>().ConvertAll(x => new DesignOption(x));
+          return set.GetDependents<ARDB.DesignOption>().ConvertAll(x => GetElement(new DesignOption(x)));
 
         return default;
       }
@@ -116,7 +116,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Value is ARDB.DesignOption option)
-          return new DesignOptionSet(Document, option.get_Parameter(ARDB.BuiltInParameter.OPTION_SET_ID).AsElementId());
+          return GetElement(new DesignOptionSet(Document, option.get_Parameter(ARDB.BuiltInParameter.OPTION_SET_ID).AsElementId()));
         else if (Document is null && Id == ARDB.ElementId.InvalidElementId)
           return new DesignOptionSet();
 

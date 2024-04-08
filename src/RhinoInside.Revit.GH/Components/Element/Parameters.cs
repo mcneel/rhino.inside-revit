@@ -105,10 +105,13 @@ namespace RhinoInside.Revit.GH
           {
             switch (builtInElementId)
             {
-              case ARDB.BuiltInParameter.ID_PARAM:          return new GH_String(elementId.ToString("D"));
-              case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:   return new GH_String(elementId.ToString("D"));
-              case ARDB.BuiltInParameter.MULLION_POSITION:  return new Types.MullionPosition(parameter.Element.Document, elementId);
-              case ARDB.BuiltInParameter.MULLION_PROFILE:   return new Types.ProfileType(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.ID_PARAM:                return new GH_String(elementId.ToString("D"));
+              case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:         return new GH_String(elementId.ToString("D"));
+              case ARDB.BuiltInParameter.MULLION_POSITION:        return new Types.MullionPosition(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.MULLION_PROFILE:         return new Types.ProfileType(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.VIEW_UNDERLAY_BOTTOM_ID: return new Types.Level(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.VIEW_UNDERLAY_TOP_ID:    return new Types.Level(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.VIEW_TEMPLATE:           return Types.View.FromElementId(parameter.Element.Document, elementId);
             }
           }
 

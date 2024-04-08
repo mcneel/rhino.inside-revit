@@ -223,12 +223,13 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region ISketchAccess
-    public Sketch Sketch => Value is ARDB_Viewer viewer ? new Sketch(viewer.GetSketch()) : default;
+    Sketch _Sketch;
+    public Sketch Sketch => _Sketch ??= GetElement<Sketch>(Value?.GetSketchId());
     #endregion
 
     #region Properties
     View _View;
-    public View View => _View ?? (_View = View.FromElement(Value?.GetFirstDependent<ARDB.View>()) as View);
+    public View View => _View ??= GetElement<View>(Value?.GetFirstDependent<ARDB.View>());
     #endregion
   }
 }

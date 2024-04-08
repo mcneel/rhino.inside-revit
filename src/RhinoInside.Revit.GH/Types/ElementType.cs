@@ -23,32 +23,20 @@ namespace RhinoInside.Revit.GH.Types
 
     public ElementType(ARDB.ElementType elementType) : base(elementType) { }
 
-    public override string DisplayName
-    {
-      get
-      {
-        if (Value is ARDB.ElementType type && type.GetFamilyName() is string familyName && familyName.Length > 0)
-          return $"{familyName} : {Nomen}";
+    #region DocumentObject
+    public override string DisplayName => Value is ARDB.ElementType type && type.GetFamilyName() is string familyName && familyName.Length > 0 ?
+      $"{familyName} : {base.DisplayName}" :
+      base.DisplayName;
+    #endregion
 
-        return base.DisplayName;
-      }
-    }
+    #region ModelContent
+    protected override string ElementPath => FamilyName is string familyName && familyName.Length > 0 ?
+      $"{familyName} : {base.ElementPath}" :
+      base.ElementPath;
+    #endregion
 
+    #region Properties
     public string FamilyName => Value?.GetFamilyName();
-
-    #region Identity Data
-    public override string Mark
-    {
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_TYPE_MARK) is ARDB.Parameter parameter &&
-        parameter.HasValue ?
-        parameter.AsString() :
-        default;
-      set
-      {
-        if (value is object)
-          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_TYPE_MARK)?.Update(value);
-      }
-    }
     #endregion
   }
 }

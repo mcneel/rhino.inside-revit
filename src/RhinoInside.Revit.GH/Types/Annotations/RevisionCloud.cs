@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region ISketchAccess
-    public Sketch Sketch => Value is ARDB.RevisionCloud revision ? new Sketch(revision.GetSketch()) : default;
+    public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());
     #endregion
 
     #region Properties

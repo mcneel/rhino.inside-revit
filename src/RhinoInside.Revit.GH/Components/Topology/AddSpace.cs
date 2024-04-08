@@ -185,7 +185,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
           StartTransaction(view.Document);
           try
           {
-            temporaryView = Types.View.FromElementId(view.Document, view.Value.Duplicate(ARDB.ViewDuplicateOption.Duplicate)) as Types.View;
+            temporaryView = view.GetElement<Types.View>(view.Value.Duplicate(ARDB.ViewDuplicateOption.Duplicate));
             temporaryView.Phase = phase;
             CommitTransaction();
 

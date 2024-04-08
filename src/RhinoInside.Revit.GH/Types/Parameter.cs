@@ -476,7 +476,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     string description;
-    public override string Description
+    public string Description
     {
       get => description;
       set
@@ -971,7 +971,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Parameter Value")]
-  public class ParameterValue : DocumentObject,
+  public sealed class ParameterValue : DocumentObject,
     IEquatable<ParameterValue>,
     IGH_Goo,
     IGH_QuickCast,
@@ -1072,7 +1072,24 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return goo.CastTo(out target);
+      if (goo.CastTo(out target))
+      {
+        return true;
+      }
+
+      if (typeof(IGH_Goo).IsAssignableFrom(typeof(Q)))
+      {
+        if (target is null)
+        {
+          try { target = Activator.CreateInstance<Q>(); }
+          catch { return false; }
+        }
+
+        if (target is IGH_Goo t)
+          return t.CastFrom(goo);
+      }
+
+      return false;
     }
 
     object IGH_Goo.ScriptVariable() => Value.AsGoo() is IGH_Goo goo ? goo.ScriptVariable() : default;

@@ -36,8 +36,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region ISketchAccess
-    public Sketch Sketch => Value is ARDB.Architecture.Railing railing ?
-      new Sketch(railing.GetSketch()) : default;
+    public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());
     #endregion
 
     #region IHostElementAccess

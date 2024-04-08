@@ -777,7 +777,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         if (view.get_Parameter(BuiltInParameter.VIEW_PHASE_FILTER) is Parameter viewPhaseFilter && !viewPhaseFilter.IsReadOnly)
         {
-          if (!((viewPhaseFilter.AsElement() as PhaseFilter)?.IsDefault is true))
+          if (!(viewPhaseFilter.AsElement() is PhaseFilter { IsDefault: true }))
           {
             using (var collector = new FilteredElementCollector(view.Document).OfClass(typeof(PhaseFilter)))
             {

@@ -25,8 +25,7 @@ namespace RhinoInside.Revit.GH.Types
     public new FilledRegionType Type => base.Type as FilledRegionType;
 
     #region ISketchAccess
-    public Sketch Sketch => Value is ARDB.FilledRegion region ?
-      new Sketch(region.GetSketch()) : default;
+    public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());
     #endregion
 
     #region Location

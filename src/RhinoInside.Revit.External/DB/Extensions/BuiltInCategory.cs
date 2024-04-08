@@ -47,12 +47,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #endif
       if (Definitions.TryGetValue(value, out var definition)) return definition.Name;
 
-      return string.Empty;
+      return null;
     }
 
     public static string FullName(this BuiltInCategory value, bool localized = false)
     {
-      if (!Definitions.TryGetValue(value, out var definition)) return string.Empty;
+      if (!Definitions.TryGetValue(value, out var definition)) return null;
       if (!definition.Parent.IsValid()) return definition.Id.Name(localized);
       return $"{definition.Parent.FullName(localized)}\\{definition.Id.Name(localized)}";
     }

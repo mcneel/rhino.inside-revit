@@ -22,10 +22,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Value is ARDB.ViewSheet sheet)
-        {
-          FormattableString formatable = $"{sheet.SheetNumber} - {sheet.Name}";
-          return formatable.ToString(CultureInfo.CurrentUICulture);
-        }
+          return $"{sheet.SheetNumber} - {sheet.Name}";
 
         return base.DisplayName;
       }
