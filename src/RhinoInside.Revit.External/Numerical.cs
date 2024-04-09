@@ -186,11 +186,11 @@ namespace RhinoInside.Revit.Numerical
     /// </summary>
     /// <param name="x">Value <paramref name="x"/>.</param>
     /// <param name="y">Value <paramref name="y"/>.</param>
-    /// <returns>(<paramref name="x"/> - <paramref name="y"/>) / 2.0</returns>
+    /// <returns>(<paramref name="y"/> - <paramref name="x"/>) / 2.0</returns>
     /// <remarks>
     /// This requires no overflow occurs.
     /// </remarks>
-    public static double Deviation(double x, double y) => Mean(x, -y);
+    public static double Deviation(double x, double y) => Mean(y, -x);
 
     /// <summary>
     /// Performs a linear interpolation on the interval [<paramref name="x"/>, <paramref name="y"/>] based on the given parameter <paramref name="t"/>.
