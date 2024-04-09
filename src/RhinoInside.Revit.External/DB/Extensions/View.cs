@@ -384,7 +384,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             case View3D view3D:
               if (view3D.IsSectionBoxActive)
-                clipBox.Intersection(view3D.GetSectionBox());
+                clipBox = BoundingBoxXYZExtension.MinIntersection(clipBox, view3D.GetSectionBox());
               break;
 
             case ViewSection _:

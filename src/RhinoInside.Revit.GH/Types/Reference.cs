@@ -193,6 +193,10 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     public Reference() { }
+    protected Reference(Reference reference)
+    {
+      _ReferenceTransform = reference._ReferenceTransform;
+    }
 
     protected Reference(ARDB.Document doc, object value) : base(doc, value) { }
 

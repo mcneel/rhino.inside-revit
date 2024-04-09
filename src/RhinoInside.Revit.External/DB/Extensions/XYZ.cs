@@ -294,7 +294,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns></returns>
     public static bool TryGetBoundingBox(IEnumerable<XYZ> points, out BoundingBoxXYZ bbox, Transform coordSystem)
     {
-      if (coordSystem is null || coordSystem.IsIdentity)
+      if (coordSystem is null)
         return TryGetBoundingBox(points, out bbox);
 
       if (!coordSystem.IsConformal)
