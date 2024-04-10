@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     (
       name: "Add Wall (Profile)",
       nickname: "P-Wall",
-      description: "Given a base curve and profile curves, it adds a Wall element to the active Revit document",
+      description: "Given a profile, it adds a Wall element to the active Revit document",
       category: "Revit",
       subCategory: "Architecture"
     )
