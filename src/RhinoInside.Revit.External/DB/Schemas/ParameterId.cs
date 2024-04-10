@@ -20,26 +20,56 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public ParameterId() { }
     public ParameterId(string id) : base(id)
     {
-      if (!IsParameterId(id))
+      if (!IsParameterId(id, empty: true))
         throw new ArgumentException("Invalid argument value", nameof(id));
     }
 
-    public static bool IsParameterId(string id)
+    #region IParsable
+    public static bool TryParse(string s, IFormatProvider provider, out ParameterId result)
     {
-      return id.StartsWith("autodesk.parameter.aec") || id.StartsWith("autodesk.revit.parameter");
-    }
-
-    public static bool IsParameterId(DataType value, out ParameterId parameterId)
-    {
-      var typeId = value.TypeId;
-      if (IsParameterId(typeId))
+      if (IsParameterId(s, empty: true))
       {
-        parameterId = new ParameterId(typeId);
+        result = new ParameterId(s);
         return true;
       }
 
-      parameterId = default;
+      result = default;
       return false;
+    }
+
+    public static ParameterId Parse(string s, IFormatProvider provider)
+    {
+      if (!TryParse(s, provider, out var result)) throw new FormatException($"{nameof(s)} is not in the correct format.");
+      return result;
+    }
+
+    static bool IsParameterId(string id, bool empty)
+    {
+      return (empty && id == string.Empty) || // 'Other'
+             id.StartsWith("autodesk.parameter.aec") ||
+             id.StartsWith("autodesk.revit.parameter");
+    }
+    #endregion
+
+    public static bool IsParameterId(DataType value, out ParameterId parameterId)
+    {
+      {
+        switch (value)
+        {
+          case ParameterId pid: parameterId = pid; return true;
+          default:
+
+            var typeId = value.TypeId;
+            if (IsParameterId(typeId, empty: false))
+            {
+              parameterId = new ParameterId(typeId);
+              return true;
+            }
+
+            parameterId = default;
+            return false;
+        }
+      }
     }
 
 #if REVIT_2021
@@ -49,7 +79,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       if (value is null) return null;
       var typeId = value.TypeId;
 #pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
-      return IsParameterId(typeId) ?
+      return IsParameterId(typeId, empty: true) ?
         new ParameterId(typeId) :
         throw new InvalidCastException($"'{typeId}' is not a valid {typeof(ParameterId)}");
 #pragma warning restore CA1065 // Do not raise exceptions in unexpected locations

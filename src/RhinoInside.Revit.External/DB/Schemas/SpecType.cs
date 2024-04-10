@@ -21,26 +21,53 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public SpecType() { }
     public SpecType(string id) : base(id)
     {
-      if (!IsSpecType(id))
+      if (!IsSpecType(id, empty: true))
         throw new ArgumentException("Invalid argument value", nameof(id));
     }
 
-    public static bool IsSpecType(string id)
+    #region IParsable
+    public static bool TryParse(string s, IFormatProvider provider, out SpecType result)
     {
-      return id.StartsWith("autodesk.spec");
-    }
-
-    public static bool IsSpecType(DataType value, out SpecType specType)
-    {
-      var typeId = value.TypeId;
-      if (IsSpecType(typeId))
+      if (IsSpecType(s, empty: true))
       {
-        specType = new SpecType(typeId);
+        result = new SpecType(s);
         return true;
       }
 
-      specType = default;
+      result = default;
       return false;
+    }
+
+    public static SpecType Parse(string s, IFormatProvider provider)
+    {
+      if (!TryParse(s, provider, out var result)) throw new FormatException($"{nameof(s)} is not in the correct format.");
+      return result;
+    }
+
+    static bool IsSpecType(string id, bool empty)
+    {
+      return (empty && id == string.Empty) || // 'Other'
+             id.StartsWith("autodesk.spec");
+    }
+    #endregion
+
+    public static bool IsSpecType(DataType value, out SpecType specType)
+    {
+      switch (value)
+      {
+        case SpecType st: specType = st;return true;
+        default:
+
+          var typeId = value.TypeId;
+          if (IsSpecType(typeId, empty: false))
+          {
+            specType = new SpecType(typeId);
+            return true;
+          }
+
+          specType = default;
+          return false;
+      }
     }
 
     public static bool IsMeasurableSpec(DataType value, out SpecType specType)
@@ -224,7 +251,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       if (value is null) return null;
       var typeId = value.TypeId;
 #pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
-      return IsSpecType(typeId) ?
+      return IsSpecType(typeId, empty: true) ?
         new SpecType(typeId) :
         throw new InvalidCastException($"'{typeId}' is not a valid {typeof(SpecType)}");
 #pragma warning restore CA1065 // Do not raise exceptions in unexpected locations

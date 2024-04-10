@@ -19,13 +19,53 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public DisciplineType() { }
     public DisciplineType(string id) : base(id)
     {
-      if (!IsDisciplineType(id))
+      if (!IsDisciplineType(id, empty: true))
         throw new ArgumentException("Invalid argument value", nameof(id));
     }
 
-    public static bool IsDisciplineType(string id)
+    #region IParsable
+    public static bool TryParse(string s, IFormatProvider provider, out DisciplineType result)
     {
-      return id.StartsWith("autodesk.spec:discipline") || id.StartsWith("autodesk.spec.discipline");
+      if (IsDisciplineType(s, empty: true))
+      {
+        result = new DisciplineType(s);
+        return true;
+      }
+
+      result = default;
+      return false;
+    }
+
+    public static DisciplineType Parse(string s, IFormatProvider provider)
+    {
+      if (!TryParse(s, provider, out var result)) throw new FormatException($"{nameof(s)} is not in the correct format.");
+      return result;
+    }
+
+    static bool IsDisciplineType(string id, bool empty)
+    {
+      return (empty && id == string.Empty) || // '<None>'
+             id.StartsWith("autodesk.spec:discipline") || id.StartsWith("autodesk.spec.discipline");
+    }
+    #endregion
+
+    public static bool IsDisciplineType(DataType value, out DisciplineType disciplineType)
+    {
+      switch (value)
+      {
+        case DisciplineType dt: disciplineType = dt; return true;
+        default:
+
+          var typeId = value.TypeId;
+          if (IsDisciplineType(typeId, empty: false))
+          {
+            disciplineType = new DisciplineType(typeId);
+            return true;
+          }
+
+          disciplineType = default;
+          return false;
+      }
     }
 
 #if REVIT_2021
@@ -35,7 +75,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       if (value is null) return null;
       var typeId = value.TypeId;
 #pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
-      return IsDisciplineType(typeId) ?
+      return IsDisciplineType(typeId, empty: true) ?
         new DisciplineType(typeId) :
         throw new InvalidCastException($"'{typeId}' is not a valid {typeof(DisciplineType)}");
 #pragma warning restore CA1065 // Do not raise exceptions in unexpected locations

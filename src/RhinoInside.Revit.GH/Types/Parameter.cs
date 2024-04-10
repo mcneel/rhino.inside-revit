@@ -175,9 +175,9 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.ElementId id: parameterId = id; break;
         case ARDB.Parameter parameter: return SetParameter(parameter);
         case string n:
-          if (ERDB.Schemas.ParameterId.IsParameterId(n))
+          if (ERDB.Schemas.ParameterId.TryParse(n, null, out var pid))
           {
-            parameterId = new ARDB.ElementId(new ERDB.Schemas.ParameterId(n));
+            parameterId = new ARDB.ElementId(pid);
             break;
           }
 

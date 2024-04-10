@@ -20,26 +20,53 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public UnitType() { }
     public UnitType(string id) : base(id)
     {
-      if (!IsUnitType(id))
+      if (!IsUnitType(id, empty: true))
         throw new ArgumentException("Invalid argument value", nameof(id));
     }
 
-    public static bool IsUnitType(string id)
+    #region IParsable
+    public static bool TryParse(string s, IFormatProvider provider, out UnitType result)
     {
-      return id.StartsWith("autodesk.unit.unit");
-    }
-
-    public static bool IsUnitType(DataType value, out UnitType unitType)
-    {
-      var typeId = value.TypeId;
-      if (IsUnitType(typeId))
+      if (IsUnitType(s, empty: true))
       {
-        unitType = new UnitType(typeId);
+        result = new UnitType(s);
         return true;
       }
 
-      unitType = default;
+      result = default;
       return false;
+    }
+
+    public static UnitType Parse(string s, IFormatProvider provider)
+    {
+      if (!TryParse(s, provider, out var result)) throw new FormatException($"{nameof(s)} is not in the correct format.");
+      return result;
+    }
+
+    static bool IsUnitType(string id, bool empty)
+    {
+      return (empty && id == string.Empty) || // 'Other'
+             id.StartsWith("autodesk.unit.unit");
+    }
+    #endregion
+
+    public static bool IsUnitType(DataType value, out UnitType unitType)
+    {
+      switch (value)
+      {
+        case UnitType ut: unitType = ut; return true;
+        default:
+
+          var typeId = value.TypeId;
+          if (IsUnitType(typeId, empty: false))
+          {
+            unitType = new UnitType(typeId);
+            return true;
+          }
+
+          unitType = default;
+          return false;
+      }
     }
 
 #if REVIT_2021
@@ -49,7 +76,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       if (value is null) return null;
       var typeId = value.TypeId;
 #pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
-      return IsUnitType(typeId) ?
+      return IsUnitType(typeId, empty: true) ?
         new UnitType(typeId) :
         throw new InvalidCastException($"'{typeId}' is not a valid {typeof(UnitType)}");
 #pragma warning restore CA1065 // Do not raise exceptions in unexpected locations

@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
     #region IParsable
     public static bool TryParse(string s, IFormatProvider provider, out CategoryId result)
     {
-      if (IsCategoryId(s))
+      if (IsCategoryId(s, empty: true))
       {
         result = new CategoryId(s);
         return true;
@@ -43,24 +43,30 @@ namespace RhinoInside.Revit.External.DB.Schemas
       return result;
     }
 
-    static bool IsCategoryId(string id)
+    static bool IsCategoryId(string id, bool empty)
     {
-      return id == string.Empty || // '<None>'
+      return (empty && id == string.Empty) || // '<None>'
              id.StartsWith("autodesk.revit.category");
     }
     #endregion
 
     public static bool IsCategoryId(DataType value, out CategoryId categoryId)
     {
-      var typeId = value.TypeId;
-      if (IsCategoryId(typeId))
+      switch (value)
       {
-        categoryId = new CategoryId(typeId);
-        return true;
-      }
+        case CategoryId c: categoryId = c; return true;
+        default:
 
-      categoryId = default;
-      return false;
+          var typeId = value.TypeId;
+          if (IsCategoryId(typeId, empty: false))
+          {
+            categoryId = new CategoryId(typeId);
+            return true;
+          }
+
+          categoryId = default;
+          return false;
+      }
     }
 
     static HashSet<CategoryId> _Values;
@@ -87,7 +93,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       if (value is null) return null;
       var typeId = value.TypeId;
 #pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
-      return IsCategoryId(typeId) ?
+      return IsCategoryId(typeId, empty: true) ?
         new CategoryId(typeId) :
         throw new InvalidCastException($"'{typeId}' is not a valid {typeof(CategoryId)}");
 #pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
