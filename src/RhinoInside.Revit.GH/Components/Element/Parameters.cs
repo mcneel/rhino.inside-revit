@@ -112,6 +112,9 @@ namespace RhinoInside.Revit.GH
               case ARDB.BuiltInParameter.VIEW_UNDERLAY_BOTTOM_ID: return new Types.Level(parameter.Element.Document, elementId);
               case ARDB.BuiltInParameter.VIEW_UNDERLAY_TOP_ID:    return new Types.Level(parameter.Element.Document, elementId);
               case ARDB.BuiltInParameter.VIEW_TEMPLATE:           return Types.View.FromElementId(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.WALL_HEIGHT_TYPE:        return new Types.Level(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.PHASE_CREATED:           return new Types.Phase(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.PHASE_DEMOLISHED:        return new Types.Phase(parameter.Element.Document, elementId);
             }
           }
 

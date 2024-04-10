@@ -167,42 +167,39 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // grab input wall type
-      ARDB.Wall wall = default;
-      if (!DA.GetData("Wall", ref wall))
-        return;
+      if (!Params.GetData(DA, "Wall", out Types.Wall wall, x => x.IsValid)) return;
 
-      DA.SetData("Wall System Family", new Types.WallSystemFamily(wall.WallType.Kind));
-      DA.SetData("Wall Type", Types.ElementType.FromElement(wall.WallType));
-      if (wall.IsStackedWallMember)
-        DA.SetData("Parent Stacked Wall", Types.Element.FromElement(wall.Document.GetElement(wall.StackedWallOwnerId)));
+      DA.SetData("Wall System Family", new Types.WallSystemFamily(wall.Value.WallType.Kind));
+      DA.SetData("Wall Type", wall.Type);
+      if (wall.Value.IsStackedWallMember)
+        DA.SetData("Parent Stacked Wall", wall.GetElement<Types.Wall>(wall.Value.StackedWallOwnerId));
 
-      DA.SetData("Base Level", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).AsGoo());
-      DA.SetData("Base Level Offset", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).AsGoo());
-      DA.SetData("Bottom Is Attached", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_BOTTOM_IS_ATTACHED).AsGoo());
+      DA.SetData("Base Level", wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).AsGoo());
+      DA.SetData("Base Level Offset", wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).AsGoo());
+      DA.SetData("Bottom Is Attached", wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_BOTTOM_IS_ATTACHED).AsGoo());
 
-      DA.SetData("Top Level", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).AsGoo());
-      DA.SetData("Top Level Offset", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_TOP_OFFSET).AsGoo());
-      DA.SetData("Top Is Attached", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_TOP_IS_ATTACHED).AsGoo());
+      DA.SetData("Top Level", wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).AsGoo());
+      DA.SetData("Top Level Offset", wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_TOP_OFFSET).AsGoo());
+      DA.SetData("Top Is Attached", wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_TOP_IS_ATTACHED).AsGoo());
 
 #if REVIT_2021
-      DA.SetData("Angle From Vertical", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).AsGoo());
+      DA.SetData("Angle From Vertical", wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).AsGoo());
 #else
       DA.SetData("Angle From Vertical", 0.0);
 #endif
-      DA.SetData("Height", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsGoo());
-      DA.SetData("Length", wall?.get_Parameter(ARDB.BuiltInParameter.CURVE_ELEM_LENGTH).AsGoo());
-      DA.SetData("Width", wall.GetWidth() * GeometryDecoder.ModelScaleFactor);
+      DA.SetData("Height", wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsGoo());
+      DA.SetData("Length", wall.Value.get_Parameter(ARDB.BuiltInParameter.CURVE_ELEM_LENGTH).AsGoo());
+      DA.SetData("Width", wall.Value.GetWidth() * GeometryDecoder.ModelScaleFactor);
 
-      DA.SetData("Area", wall?.get_Parameter(ARDB.BuiltInParameter.HOST_AREA_COMPUTED).AsGoo());
-      DA.SetData("Volume", wall?.get_Parameter(ARDB.BuiltInParameter.HOST_VOLUME_COMPUTED).AsGoo());
+      DA.SetData("Area", wall.Value.get_Parameter(ARDB.BuiltInParameter.HOST_AREA_COMPUTED).AsGoo());
+      DA.SetData("Volume", wall.Value.get_Parameter(ARDB.BuiltInParameter.HOST_VOLUME_COMPUTED).AsGoo());
 
-      DA.SetData("Is Room Bounding", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_ATTR_ROOM_BOUNDING).AsGoo());
+      DA.SetData("Is Room Bounding", wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_ATTR_ROOM_BOUNDING).AsGoo());
 
-      DA.SetData("Structural", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).AsGoo());
-      DA.SetData("Structural Usage", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).AsGoo());
+      DA.SetData("Structural", wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).AsGoo());
+      DA.SetData("Structural Usage", wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).AsGoo());
 
-      DA.SetData("Orientation", wall.GetOrientationVector().ToVector3d());
+      DA.SetData("Orientation", wall.Location.YAxis);
     }
   }
 }

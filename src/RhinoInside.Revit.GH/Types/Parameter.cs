@@ -606,7 +606,7 @@ namespace RhinoInside.Revit.GH.Types
     ERDB.Schemas.ParameterGroup group;
     public ERDB.Schemas.ParameterGroup Group
     {
-      get => group ?? (group = Value?.GetDefinition()?.GetGroupType());
+      get => group ??= Value?.GetDefinition()?.GetGroupType();
       set
       {
         if (IsReferencedData)
@@ -622,7 +622,7 @@ namespace RhinoInside.Revit.GH.Types
     bool? visible;
     public bool? Visible
     {
-      get => visible ?? (visible = Value?.GetDefinition()?.Visible);
+      get => visible ??= Value?.GetDefinition()?.Visible;
       set
       {
         if (IsReferencedData) throw new InvalidOperationException();
