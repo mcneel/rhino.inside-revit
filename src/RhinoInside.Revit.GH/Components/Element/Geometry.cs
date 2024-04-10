@@ -468,7 +468,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       }
 
       using (scope)
-      using (var options = new ARDB.Options() { DetailLevel = detailLevel ?? ARDB.ViewDetailLevel.Medium, ComputeReferences = true })
+      using (var options = new ARDB.Options() { DetailLevel = detailLevel ?? ARDB.ViewDetailLevel.Medium })
       {
         var _Elements_ = Params.IndexOfOutputParam("Elements");
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
