@@ -454,7 +454,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var doc)) return;
 
       var scope = default(IDisposable);
-      if (elements.Any(x => (x?.Value as ARDB.FamilySymbol)?.IsActive is false))
+      if (elements.Any(x => x?.Value is ARDB.FamilySymbol { IsActive: false }))
       {
         scope = doc.RollBackScope();
         try

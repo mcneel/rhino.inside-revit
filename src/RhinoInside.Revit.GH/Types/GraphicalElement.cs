@@ -442,7 +442,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     public virtual ARDB.ElementId LevelId => Value?.LevelId;
-    public Level Level => LevelId is ARDB.ElementId levelId ? new Level(Document, levelId) : default;
+    public Level Level => GetElement<Level>(LevelId);
     #endregion
 
     #region Location

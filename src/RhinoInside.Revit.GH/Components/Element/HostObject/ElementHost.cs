@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       else hostId = element.Value.get_Parameter(ARDB.BuiltInParameter.HOST_ID_PARAM)?.AsElementId();
 
       // Default to Level if hostId is null
-      DA.SetData("Host", element.GetElement<Types.GraphicalElement>(hostId ?? element.Level?.Id));
+      DA.SetData("Host", element.GetElement<Types.GraphicalElement>(hostId ?? element.LevelId));
     }
   }
 }
