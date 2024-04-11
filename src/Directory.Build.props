@@ -41,7 +41,7 @@
   </PropertyGroup>
 
   <!-- Build configurations for each combination Revit-Rhino -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
     <Configurations>
       Debug-2017-R7;
       Debug-2018-R7;
@@ -124,5 +124,9 @@
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
+
+  <Target Name="Remove-ProjectExtensions" AfterTargets="Clean" Condition="'$(MSBuildProjectExtension)'=='.csproj'">
+    <RemoveDir Directories="$(MSBuildProjectExtensionsPath)" />
+  </Target>
 
 </Project>
