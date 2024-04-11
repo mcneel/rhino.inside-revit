@@ -97,7 +97,7 @@ namespace RhinoInside.Revit.External.DB
     public GeometryObjectType Type;
     public IntId TypeId; // May be 0 or 1 for LINEAR or an ElementType Id for RVTLINK
 
-    public override int GetHashCode()
+    public override readonly int GetHashCode()
     {
       int hashCode = 942107248;
       hashCode = hashCode * -1521134295 + Id.GetHashCode();
@@ -108,8 +108,8 @@ namespace RhinoInside.Revit.External.DB
       return hashCode;
     }
 
-    public override bool Equals(object obj) => obj is GeometryObjectId other && Equals(other);
-    public bool Equals(GeometryObjectId other) => this == other;
+    public override readonly bool Equals(object obj) => obj is GeometryObjectId other && Equals(other);
+    public readonly bool Equals(GeometryObjectId other) => this == other;
 
     public static bool operator ==(GeometryObjectId left, GeometryObjectId right)
     {
@@ -128,8 +128,8 @@ namespace RhinoInside.Revit.External.DB
       TypeId = parameter;
     }
 
-    public override string ToString() => ToString(null);
-    internal string ToString(ARDB.Document document)
+    public override readonly string ToString() => ToString(null);
+    internal readonly string ToString(ARDB.Document document)
     {
       string FormatId(IntId id)
       {
@@ -236,8 +236,8 @@ namespace RhinoInside.Revit.External.DB
       }
     }
 
-    public override string ToString() => ToString(null);
-    public string ToString(ARDB.Document document)
+    public override readonly string ToString() => ToString(null);
+    public readonly string ToString(ARDB.Document document)
     {
       if (IsLinked)
       {
@@ -251,7 +251,7 @@ namespace RhinoInside.Revit.External.DB
              Element.ToString(document);
     }
 
-    public string ToStableRepresentation(ARDB.Document document)
+    public readonly string ToStableRepresentation(ARDB.Document document)
     {
       if (IsLinked)
         return IsInstance ? $"{Record.ToString(document)}:{Element}:{Symbol}" : $"{Record.ToString(document)}:{Element}";
