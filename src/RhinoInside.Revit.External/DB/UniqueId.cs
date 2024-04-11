@@ -113,11 +113,11 @@ namespace RhinoInside.Revit.External.DB
 
     public static bool operator ==(GeometryObjectId left, GeometryObjectId right)
     {
-      return left.Id == right.Id && left.Index.ItemsEqual(right.Index) && left.Type == right.Type && left.TypeId == right.TypeId;
+      return left.Id == right.Id && left.Type == right.Type && left.TypeId == right.TypeId && left.Index.SequenceEquivalent(right.Index);
     }
     public static bool operator !=(GeometryObjectId left, GeometryObjectId right)
     {
-      return left.Id != right.Id || !left.Index.ItemsEqual(right.Index) || left.Type != right.Type || left.TypeId != right.TypeId;
+      return left.Id != right.Id || left.Type != right.Type || left.TypeId != right.TypeId || !left.Index.SequenceEquivalent(right.Index);
     }
 
     public GeometryObjectId(IntId id, int[] index = default, GeometryObjectType type = GeometryObjectType.ELEMENT, IntId parameter = -1)

@@ -47,16 +47,28 @@ namespace System
 
   static class ArrayExtension
   {
-    public static bool ItemsEqual<T>(this T[] left, T[] right)
+    /// <summary>
+    /// Determines whether two sequences are equivalent by comparing the elements using <see cref="System.Collections.Generic.EqualityComparer{T}.Default"/> comparer.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns>true if the two sequences are equivalent; otherwise, false.</returns>
+    /// <remarks>Empty arrays and null array references are considered equivalent sequences.</remarks>
+    public static bool SequenceEquivalent<T>(this T[] left, T[] right)
     {
-      if (ReferenceEquals(left, right)) return true;
-      if (left is null || right is null) return false;
-      if (left.Length != right.Length) return false;
+#if NET
+      return ((ReadOnlySpan<T>) left).SequenceEqual(right, null);
+#else
+      var leftLength = left?.Length ?? 0;
+      var rightLength = right?.Length ?? 0;
+      if (leftLength != rightLength) return false;
 
-      for(int i=0; i < left.Length; ++i)
-        if (!left[i].Equals(right[i])) return false;
+      for (int i=0; i < leftLength; ++i)
+        if (!Collections.Generic.EqualityComparer<T>.Default.Equals(left[i], right[i])) return false;
 
       return true;
+#endif
     }
   }
 
