@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH
         if (!Script.IsEditorLoaded())
           throw new InvalidOperationException("Failed to startup Grasshopper");
 
-        new WindowHandle(Instances.DocumentEditor.Handle).Owner = Rhinoceros.MainWindow;
+        ((WindowHandle) Instances.DocumentEditor.Handle).Owner = Rhinoceros.MainWindow;
       }
     }
 

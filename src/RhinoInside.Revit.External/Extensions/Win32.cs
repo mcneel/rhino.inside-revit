@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security;
 using System.Text;
 
@@ -9,13 +10,14 @@ namespace Microsoft.Win32.SafeHandles
   using InteropServices;
 
   #region Kernel32
-  internal class LibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
+  internal sealed class LibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
   {
-    internal LibraryHandle() : base(false) { }
-    public LibraryHandle(IntPtr hInstance) : base(false) => SetHandle(hInstance);
+    private LibraryHandle() : base(false) { }
+    public LibraryHandle(string fileName) : base(true) => SetHandle(Kernel32.LoadLibrary(fileName));
 
-    [System.Security.SecurityCritical]
-    protected override bool ReleaseHandle() => Kernel32.FreeLibrary(this);
+    [SecurityCritical]
+    [ResourceExposure(ResourceScope.Process), ResourceConsumption(ResourceScope.Process)]
+    protected override bool ReleaseHandle() => Kernel32.FreeLibrary(handle);
 
     public static bool operator ==(LibraryHandle x, LibraryHandle y) => x.handle == y.handle;
     public static bool operator !=(LibraryHandle x, LibraryHandle y) => x.handle != y.handle;
@@ -119,16 +121,20 @@ namespace Microsoft.Win32.SafeHandles
     public override int GetHashCode() => (int) handle;
     public override string ToString() => IsInvalid ? "Zero" : $"0x{(ulong)handle:x16}, \"{Name}\"";
 
-    private WindowHandle() : base(IntPtr.Zero, false) { }
-    public WindowHandle(IntPtr hWnd) : base(IntPtr.Zero, false) => SetHandle(hWnd);
+    private WindowHandle() : base(IntPtr.Zero, ownsHandle: false) { }
+    protected WindowHandle(IntPtr handle, bool ownsHandle) : base(IntPtr.Zero, ownsHandle) => SetHandle(handle);
+
+    public static explicit operator WindowHandle(IntPtr handle) => new WindowHandle(handle, ownsHandle: false);
 
     #region SafeHandle
-    protected override bool ReleaseHandle() => User32.DestroyWindow(this);
+    [SecurityCritical]
+    [ResourceExposure(ResourceScope.Machine), ResourceConsumption(ResourceScope.Machine)]
+    protected override bool ReleaseHandle() => User32.DestroyWindow(handle);
     public override bool IsInvalid => !User32.IsWindow(this);
     public bool IsZero => handle == IntPtr.Zero;
     #endregion
 
-    public static WindowHandle Zero { get; } = new WindowHandle();
+    public static WindowHandle Zero => new WindowHandle();
     public IntPtr Handle => handle;
     public string Name
     {
@@ -300,14 +306,16 @@ namespace Microsoft.Win32.SafeHandles
   {
     public override bool IsInvalid => handle == IntPtr.Zero;
 
-    private SafeHookHandle() : base(IntPtr.Zero, false) { }
+    private SafeHookHandle() : base(IntPtr.Zero, ownsHandle: true) { }
 
-    protected sealed override bool ReleaseHandle() => User32.UnhookWindowsHookEx(this);
+    [SecurityCritical]
+    [ResourceExposure(ResourceScope.Process), ResourceConsumption(ResourceScope.Process)]
+    protected sealed override bool ReleaseHandle() => User32.UnhookWindowsHookEx(handle);
   }
 
   internal class Hook : IDisposable
   {
-    SafeHookHandle hHook;
+    readonly SafeHookHandle hHook;
     readonly User32.HookProc hookProc = default;
 
     internal Hook(User32.HookType type)
@@ -345,23 +353,13 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
   using DWORD     = UInt32;
   using UINT      = UInt32;
 
+  using HANDLE    = SafeHandle;
   using HMODULE   = LibraryHandle;
   using HINSTANCE = LibraryHandle;
   using HDC       = IntPtr;
   using HWND      = WindowHandle;
   using HHOOK     = SafeHookHandle;
   using HMENU     = IntPtr;
-
-  internal static class Kernel
-  {
-    internal static class NativeMethods
-    {
-      internal const string KERNEL32 = "KERNEL32";
-
-      [DllImport(KERNEL32, SetLastError = true)]
-      public static extern DWORD GetCurrentThreadId();
-    }
-  }
 
   [SuppressUnmanagedCodeSecurity]
   internal static class Kernel32
@@ -378,11 +376,14 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     public static extern SafeProcessHandle GetCurrentProcess();
 
     [DllImport(KERNEL32, SetLastError = true, CharSet = CharSet.Unicode)]
-    public static extern HINSTANCE LoadLibraryEx(string lpLibFileName, IntPtr hFile, DWORD dwFlags);
+    public static extern IntPtr LoadLibraryEx(string lpLibFileName, IntPtr hFile, DWORD dwFlags);
+
+    [DllImport(KERNEL32, SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern IntPtr LoadLibrary(string lpLibFileName);
 
     [DllImport(KERNEL32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool FreeLibrary(HINSTANCE hLibModule);
+    public static extern bool FreeLibrary(IntPtr hLibModule);
 
     [DllImport(KERNEL32, SetLastError = true, CharSet = CharSet.Unicode)]
     public static extern DWORD GetModuleFileName(HINSTANCE hInstance, StringBuilder lpFilename, DWORD nSize);
@@ -453,7 +454,7 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
 
     [DllImport(USER32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool DestroyWindow(HWND hWnd);
+    public static extern bool DestroyWindow(IntPtr hWnd);
 
     [DllImport(USER32, SetLastError = true)]
     public static extern DWORD GetWindowThreadProcessId(HWND hWnd, IntPtr lpdwProcessId);
@@ -586,12 +587,11 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     public delegate int HookProc(int nCode, IntPtr wParam, IntPtr lParam);
 
     [DllImport(USER32, SetLastError = true)]
-    public static extern SafeHookHandle SetWindowsHookEx(HookType idHook, HookProc lpfn, HINSTANCE hInsdtsance, DWORD dwThreadId);
+    public static extern HHOOK SetWindowsHookEx(HookType idHook, HookProc lpfn, HINSTANCE hInsdtsance, DWORD dwThreadId);
 
     [DllImport(USER32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool UnhookWindowsHookEx(IntPtr hhook);
-    public static bool UnhookWindowsHookEx(SafeHookHandle hhook) => UnhookWindowsHookEx(hhook.DangerousGetHandle());
+    public static extern bool UnhookWindowsHookEx(IntPtr hhook);
 
     [DllImport(USER32, SetLastError = true)]
     public static extern int CallNextHookEx(HHOOK hhook, int nCode, IntPtr wParam, IntPtr lParam);

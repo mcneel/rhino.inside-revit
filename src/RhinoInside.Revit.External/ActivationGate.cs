@@ -68,9 +68,9 @@ namespace RhinoInside.Revit.External
       public readonly ExternalEvent ExternalEvent;
       public readonly HashSet<IntPtr> ExternalWindows = new HashSet<IntPtr>();
 
-      public Gate(IntPtr gate, ExternalEvent externalEvent = default)
+      public Gate(WindowHandle gate, ExternalEvent externalEvent = default)
       {
-        Window = new WindowHandle(gate);
+        Window = gate;
         ExternalEvent = externalEvent ?? CreateActivationEvent();
       }
     }
@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.External
     /// <param name="hWnd">HWND of the host main window.</param>
     public static void SetHostWindow(IntPtr hWnd)
     {
-      var window = new WindowHandle(hWnd);
+      var window = (WindowHandle) hWnd;
 
       if (!window.IsZero)
       {
@@ -114,9 +114,9 @@ namespace RhinoInside.Revit.External
     /// <returns>true on success, false on failure.</returns>
     public static bool AddGateWindow(IntPtr hWnd, ExternalEvent externalEvent = default)
     {
-      using (var window = new WindowHandle(hWnd))
-        if (window.IsInvalid && window.ThreadId == ThreadHandle.CurrentThreadId)
-          throw new ArgumentException("Invalid handle value", nameof(hWnd));
+      var window = (WindowHandle) hWnd;
+      if (window.IsInvalid && window.ThreadId == ThreadHandle.CurrentThreadId)
+        throw new ArgumentException("Invalid handle value", nameof(hWnd));
 
       if (HasGate(hWnd, out var _))
         return false;
@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.External
       if (hook is null)
         hook = new Hook();
 
-      gates.Add(hWnd, new Gate(hWnd, externalEvent));
+      gates.Add(hWnd, new Gate(window, externalEvent));
       return true;
     }
 
@@ -149,7 +149,7 @@ namespace RhinoInside.Revit.External
 
     static bool HasGate(IntPtr hWnd, out Gate gate)
     {
-      for (var window = new WindowHandle(hWnd); !window.IsInvalid; window = window.Owner)
+      for (var window = (WindowHandle)hWnd; !window.IsInvalid; window = window.Owner)
       {
         if (gates.TryGetValue(window.Handle, out gate))
           return true;
@@ -159,14 +159,14 @@ namespace RhinoInside.Revit.External
       return false;
     }
 
-    static bool IsExternalWindow(IntPtr hWnd, out ExternalEvent externalEvent)
+    static bool IsExternalWindow(WindowHandle hWnd, out ExternalEvent externalEvent)
     {
-      for (var window = new WindowHandle(hWnd); !window.IsInvalid; window = window.Owner)
+      for (var window = hWnd; !window.IsInvalid; window = window.Owner)
       {
         if
         (
           gates.TryGetValue(window.Handle, out var gate) &&
-          (window.Handle == hWnd || gate.ExternalWindows.Contains(hWnd))
+          (window == hWnd || gate.ExternalWindows.Contains(hWnd.Handle))
         )
         {
           externalEvent = gate.ExternalEvent;
@@ -181,7 +181,7 @@ namespace RhinoInside.Revit.External
     /// <summary>
     /// Returns true if active window is a gate window or owned by a gate window.
     /// </summary>
-    public static bool IsActive => IsExternalWindow(WindowHandle.ActiveWindow.Handle, out var _);
+    public static bool IsActive => IsExternalWindow(WindowHandle.ActiveWindow, out var _);
 
     [ThreadStatic]
     static bool isOpen = default;
@@ -434,7 +434,7 @@ namespace RhinoInside.Revit.External
           {
             if (IsOpen)
             {
-              var window = new WindowHandle(wParam);
+              var window = (WindowHandle) wParam;
               if (window == HostMainWindow && !window.Enabled)
               {
                 foreach (var gate in gates)
@@ -446,9 +446,10 @@ namespace RhinoInside.Revit.External
             }
             else
             {
-              if (IsExternalWindow(wParam, out var externalEvent))
+              var window = (WindowHandle) wParam;
+              if (IsExternalWindow(window, out var externalEvent))
               {
-                windowToActivate = new WindowHandle(wParam);
+                windowToActivate = window;
 
                 if (externalEvent.IsPending)
                 {

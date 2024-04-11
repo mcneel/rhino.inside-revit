@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.External.UI
           return Result.Failed;
 
         uiControlledApplication = app;
-        HostMainWindow = new WindowHandle(UIHostApplication.Current.MainWindowHandle);
+        HostMainWindow = (WindowHandle) UIHostApplication.Current.MainWindowHandle;
       }
 
       Instances.Add(addInId, this);
@@ -118,7 +118,7 @@ namespace RhinoInside.Revit.External.UI
 
       foreach (var hWnd in ActivationGate.GateWindows)
       {
-        using (var window = new WindowHandle(hWnd))
+        using (var window = (WindowHandle) hWnd)
         {
           window.HideOwnedPopups();
           window.Hide();

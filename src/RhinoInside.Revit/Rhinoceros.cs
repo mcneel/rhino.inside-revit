@@ -53,7 +53,7 @@ namespace RhinoInside.Revit
         //return false;
       }
 
-      var hostMainWindow = new WindowHandle(Core.Host.MainWindowHandle);
+      var hostMainWindow = (WindowHandle) Core.Host.MainWindowHandle;
 
       // Save Revit window status
       bool wasEnabled = hostMainWindow.Enabled;
@@ -127,7 +127,7 @@ namespace RhinoInside.Revit
       FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", "Rhino.Inside ");
       Rhino.Runtime.PythonScript.AddRuntimeAssembly(Assembly.GetExecutingAssembly());
 
-      MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
+      MainWindow = (WindowHandle) RhinoApp.MainWindowHandle();
       MainWindow.ExtendedWindowStyles |= ExtendedWindowStyles.AppWindow;
 
       return External.ActivationGate.AddGateWindow(MainWindow.Handle, Core.ActivationEvent);
