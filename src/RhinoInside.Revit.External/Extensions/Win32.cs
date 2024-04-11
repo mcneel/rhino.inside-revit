@@ -178,6 +178,7 @@ namespace Microsoft.Win32.SafeHandles
     }
     public bool Hide() => User32.ShowWindow(this, 0 /*SW_HIDE*/);
     public bool Show() => User32.ShowWindow(this, 8 /*SW_SHOWNA*/);
+    public bool Minimize(bool minimize) => minimize ? User32.CloseWindow(this) : User32.OpenIcon(this);
     public bool Enabled
     {
       get => User32.IsWindowEnabled(this);
@@ -229,7 +230,7 @@ namespace Microsoft.Win32.SafeHandles
       set => User32.SetWindowLongPtr(this, -20 /*GWL_EXSTYLE*/, (IntPtr) value);
     }
 
-    public bool TryClose() => User32.CloseWindow(this);
+    public bool TryClose() => User32.PostMessage(this, 0x0010 /*WM_CLOSE*/, IntPtr.Zero, IntPtr.Zero);
 
     public void Flash()
     {
@@ -361,6 +362,9 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
   using HHOOK     = SafeHookHandle;
   using HMENU     = IntPtr;
 
+  using WPARAM    = IntPtr;
+  using LPARAM    = IntPtr;
+
   [SuppressUnmanagedCodeSecurity]
   internal static class Kernel32
   {
@@ -463,10 +467,6 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     public static extern IntPtr SetWindowLongPtr(HWND hWnd, int nIndex, IntPtr dwNewLong);
 
     [DllImport(USER32, SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool CloseWindow(HWND hWnd);
-
-    [DllImport(USER32, SetLastError = true)]
     public static extern bool IsWindow(HWND hWnd);
 
     [DllImport(USER32, SetLastError = true)]
@@ -480,6 +480,14 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     [DllImport(USER32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool IsZoomed(HWND hWnd);
+
+    [DllImport(USER32, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool CloseWindow(HWND hWnd);
+
+    [DllImport(USER32, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool OpenIcon(HWND hWnd);
 
     [DllImport(USER32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -547,6 +555,11 @@ namespace Microsoft.Win32.SafeHandles.InteropServices
     [DllImport(USER32, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool FlashWindowEx(ref FLASHWINFO pwfi);
+
+
+    [DllImport(USER32, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool PostMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     #endregion
 
     #region GDI
