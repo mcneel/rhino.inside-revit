@@ -87,7 +87,11 @@ namespace RhinoInside.Revit
         if (_MinimumRhinoVersion is null)
         {
           var referencedRhinoCommonVersion = Assembly.GetExecutingAssembly().GetReferencedAssemblies().Where(x => x.Name == "RhinoCommon").FirstOrDefault().Version;
+#if DEBUG
+          _MinimumRhinoVersion = new Version(referencedRhinoCommonVersion.Major, 0, 0);
+#else
           _MinimumRhinoVersion = new Version(referencedRhinoCommonVersion.Major, referencedRhinoCommonVersion.Minor, 0);
+#endif
         }
 
         return _MinimumRhinoVersion;

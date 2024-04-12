@@ -340,22 +340,14 @@ namespace RhinoInside.Revit.GH
           if (File.Exists(line)) files.Add(line);
           else if (Directory.Exists(line))
           {
-            var folder = new DirectoryInfo(line);
-
-            IEnumerable<FileInfo> assemblyFiles;
-            try { assemblyFiles = folder.EnumerateFiles("*.gha"); }
-            catch (System.IO.DirectoryNotFoundException) { continue; }
-
-            foreach (var assemblyFile in assemblyFiles)
+            try
             {
-              // https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles?view=netframework-4.8
-              // If the specified extension is exactly three characters long,
-              // the method returns files with extensions that begin with the specified extension.
-              // For example, "*.xls" returns both "book.xls" and "book.xlsx"
-              if (assemblyFile.Extension.ToLower() != ".gha") continue;
-
-              files.Add(assemblyFile.FullName);
+              var folder = new DirectoryInfo(line);
+              var assemblyFiles = folder.EnumerateFilesByExtension(".gha");
+              foreach (var assemblyFile in assemblyFiles)
+                files.Add(assemblyFile.FullName);
             }
+            catch { continue; }
           }
         }
       }
@@ -382,17 +374,11 @@ namespace RhinoInside.Revit.GH
         if (!folder.Exists) continue;
 
         IEnumerable<FileInfo> assemblyFiles;
-        try { assemblyFiles = folder.EnumerateFiles("*.gha", SearchOption.AllDirectories); }
+        try { assemblyFiles = folder.EnumerateFilesByExtension(".gha", SearchOption.AllDirectories); }
         catch (System.Security.SecurityException) { continue; }
 
         foreach (var assemblyFile in assemblyFiles)
         {
-          // https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles?view=netframework-4.8
-          // If the specified extension is exactly three characters long,
-          // the method returns files with extensions that begin with the specified extension.
-          // For example, "*.xls" returns both "book.xls" and "book.xlsx"
-          if (assemblyFile.Extension.ToLower() != ".gha") continue;
-
           var key = assemblyFile.FullName.Substring(folder.FullName.Length);
           if (map.Contains(key))
             map.Remove(key);
@@ -401,7 +387,7 @@ namespace RhinoInside.Revit.GH
         }
 
         IEnumerable<FileInfo> linkFiles;
-        try { linkFiles = folder.EnumerateFiles("*.ghlink", SearchOption.TopDirectoryOnly); }
+        try { linkFiles = folder.EnumerateFilesByExtension(".ghlink"); }
         catch (System.Security.SecurityException) { continue; }
 
         foreach (var linkFile in linkFiles)
@@ -495,7 +481,7 @@ namespace RhinoInside.Revit.GH
       GH_ComponentServer.UpdateRibbonUI();
       return true;
     }
-    #endregion
+#endregion
 
     #region Revit Document
     static UnitScale revitUnitScale = UnitScale.Unset;

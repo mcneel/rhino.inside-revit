@@ -193,28 +193,22 @@ namespace RhinoInside.Revit
           try
           {
             // List of assembly folders in priority order.
-            var installFolders = new DirectoryInfo[]
+            var paths = new (DirectoryInfo Directory, SearchOption Options)[]
             {
-              new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)),
+              (new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)), SearchOption.AllDirectories),
 #if NET
-              new DirectoryInfo(Path.Combine(SystemPath, "netcore")),
+              (new DirectoryInfo(Path.Combine(SystemPath, "netcore")), SearchOption.TopDirectoryOnly),
 #endif
-              new DirectoryInfo(SystemPath),
-              new DirectoryInfo(PluginsPath),
+              (new DirectoryInfo(SystemPath), SearchOption.TopDirectoryOnly),
+              (new DirectoryInfo(PluginsPath), SearchOption.AllDirectories),
             };
 
-            foreach (var installFolder in installFolders.Where(x => x.Exists))
+            foreach (var path in paths.Where(x => x.Directory.Exists))
             {
-              foreach (var dll in installFolder.EnumerateFiles("*.dll", SearchOption.AllDirectories))
+              foreach (var dll in path.Directory.EnumerateFilesByExtension(".dll", path.Options))
               {
                 try
                 {
-                  // https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles?view=netframework-4.8
-                  // If the specified extension is exactly three characters long,
-                  // the method returns files with extensions that begin with the specified extension.
-                  // For example, "*.xls" returns both "book.xls" and "book.xlsx"
-                  if (!dll.Extension.Equals(".dll", StringComparison.OrdinalIgnoreCase)) continue;
-
                   var assemblyName = AssemblyName.GetAssemblyName(dll.FullName);
 #if NET
                   assemblyName.CodeBase = new Uri(dll.FullName).ToString();
@@ -392,8 +386,12 @@ namespace RhinoInside.Revit
         }
 
         // Never return an older assembly.
+#if DEBUG
+        Debug.Assert(location.assemblyName.Version >= requested.Version);
+#else
         if (location.assemblyName.Version < requested.Version)
           return default;
+#endif
 
         if (location.Assembly is null)
         {

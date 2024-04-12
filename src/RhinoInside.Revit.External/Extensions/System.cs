@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace System
@@ -126,6 +127,27 @@ namespace System.IO
     }
   }
 #pragma warning restore CA1060 // Move pinvokes to native methods class
+
+  internal static class DirectoryInfoExtension
+  {
+    public static IEnumerable<FileInfo> EnumerateFilesByExtension(this DirectoryInfo value, string extension, SearchOption searchOptions = SearchOption.TopDirectoryOnly)
+    {
+      foreach (var file in value.EnumerateFiles($"*{extension}", searchOptions))
+      {
+#if NETFRAMEWORK
+        if (extension.Length == 3)
+        {
+          // https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles?view=netframework-4.8
+          // If the specified extension is exactly three characters long,
+          // the method returns files with extensions that begin with the specified extension.
+          // For example, "*.xls" returns both "book.xls" and "book.xlsx"
+          if (!file.Extension.Equals(extension, StringComparison.OrdinalIgnoreCase)) continue;
+        }
+#endif
+        yield return file;
+      }
+    }
+  }
 
   internal static class FileInfoExtension
   {
