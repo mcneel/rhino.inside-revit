@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Schema;
@@ -65,15 +66,27 @@ namespace RhinoInside.Revit.AddIn.Deployment
     public string Url { get; set; }
     public bool IsStable { get; set; } = false;
 
-    public ReleaseInfo GetLatestRelease()
+
+    private static async Task<string> GetStringAsync(string uri)
+    {
+#if NET
+      using (var client = new HttpClient())
+        return await client.GetStringAsync(uri);
+#else
+      using (var client = new WebClient())
+        return await client.DownloadStringTaskAsync(uri);
+#endif
+    }
+
+    public async Task<ReleaseInfo> GetLatestReleaseAsync()
     {
       // capture all errors and return null if any
       try
       {
-        var xml = new XmlSerializer(typeof(ReleaseInfo));
-        string releaseInfo = new WebClient().DownloadString(Url);
+        string releaseInfo = await GetStringAsync(Url);
         using (var reader = new StringReader(releaseInfo))
         {
+          var xml = new XmlSerializer(typeof(ReleaseInfo));
           var rinfo = (ReleaseInfo) xml.Deserialize(reader);
           rinfo.Source = this;
           return rinfo;
@@ -143,10 +156,7 @@ namespace RhinoInside.Revit.AddIn.Deployment
       }
     }
 
-    public static async Task<ReleaseInfo> GetReleaseInfoAsync()
-        => await Task.Run(() => ActiveChannel?.GetLatestRelease());
-
-    public static async Task<ReleaseInfo> GetReleaseInfoAsync(UpdateChannel channel)
-        => await Task.Run(() => channel?.GetLatestRelease());
+    public static async Task<ReleaseInfo> GetReleaseInfoAsync() => await ActiveChannel?.GetLatestReleaseAsync();
+    public static async Task<ReleaseInfo> GetReleaseInfoAsync(UpdateChannel channel) => await channel?.GetLatestReleaseAsync();
   }
 }

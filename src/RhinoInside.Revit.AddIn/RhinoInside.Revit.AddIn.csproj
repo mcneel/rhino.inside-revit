@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\*.ico" />
     <EmbeddedResource Include="Resources\*.png" />
     <EmbeddedResource Include="Resources\Ribbon\Grasshopper\*.png" />
     <None Remove="Resources\Ribbon\Grasshopper\*.svg" />
