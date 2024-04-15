@@ -358,13 +358,19 @@ namespace RhinoInside.Revit.GH
 
     static List<string> GetAssembliesList()
     {
+      var defaultAssemblyFolder = new DirectoryInfo(Path.Combine(Folders.DefaultAssemblyFolder, ".")).FullName;
+
+      var commonAssemblyFolder = Folders.DefaultAssemblyFolder;
+      if (defaultAssemblyFolder.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)))
+        commonAssemblyFolder = defaultAssemblyFolder.Replace(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
+
       DirectoryInfo[] DefaultAssemblyFolders =
       {
         // %ProgramData%\Grasshopper\Libraries-Inside-Revit-20XX
-        new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Grasshopper", $"Libraries-{Rhinoceros.SchemeName}")),
+        new DirectoryInfo($"{commonAssemblyFolder}-{Rhinoceros.SchemeName}"),
 
         // %APPDATA%\Grasshopper\Libraries-Inside-Revit-20XX
-        new DirectoryInfo(Folders.DefaultAssemblyFolder.Substring(0, Folders.DefaultAssemblyFolder.Length - 1) + $"-{Rhinoceros.SchemeName}")
+        new DirectoryInfo($"{defaultAssemblyFolder}-{Rhinoceros.SchemeName}"),
       };
 
       var map = new System.Collections.Specialized.OrderedDictionary();
