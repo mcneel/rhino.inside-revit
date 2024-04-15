@@ -278,7 +278,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
 
         // Avoids conflict in case we are going to assign same name...
         if (previousGrid.IsValid())
+        {
+          if (name is null) name = previousGrid.Name;
           previousGrid.Document.Delete(previousGrid.Id);
+        }
       }
 
       if (name is object && grid.Name != name)
