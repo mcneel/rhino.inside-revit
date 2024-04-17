@@ -15,6 +15,10 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.21 RC4" version="v1.21.8872.10624" pre_release=true time="04/17/2024" %}
+
+- Misc Improvements
+
 {% include ltr/release-header.html title="v1.21 RC3" version="v1.21.8858.5078" pre_release=true time="04/02/2024" %}
 
 - Added {% include ltr/comp.html uuid='8c8cec75' %} component.
