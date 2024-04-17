@@ -146,7 +146,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Applies the transformation to the bouding box and returns the result.
+    /// Applies the transformation to a bouding box and returns the result.
     /// </summary>
     /// <param name="transform">The transform to apply.</param>
     /// <param name="value">The box to transform.</param>
@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Applies the transformation to the plane equation and returns the result.
+    /// Applies the transformation to a plane equation and returns the result.
     /// </summary>
     /// <param name="transform">The transform to apply.</param>
     /// <param name="value">The box to transform.</param>
@@ -177,6 +177,73 @@ namespace RhinoInside.Revit.External.DB.Extensions
         transform.OfPoint(equation.Point),
         transform.OfVector(equation.Normal).ToUnitXYZ()
       );
+    }
+
+    /// <summary>
+    /// Applies the transformation to a point and returns the result.
+    /// </summary>
+    /// <param name="transform">The transform to apply.</param>
+    /// <param name="value">The point to transform.</param>
+    /// <returns>The transformed point</returns>
+    /// <remarks>
+    /// Transformation of a point is affected by the translational part of the transformation.
+    /// </remarks>
+    public static Point OfPoint(this Transform transform, Point value) => Point.Create(transform.OfPoint(value.Coord), value.GraphicsStyleId);
+
+    /// <summary>
+    /// Applies the transformation to a curve and returns the result.
+    /// </summary>
+    /// <param name="transform">The transform to apply.</param>
+    /// <param name="value">The curve to transform.</param>
+    /// <returns>The transformed curve</returns>
+    /// <remarks>
+    /// Transformation of a curve is affected by the translational part of the transformation.
+    /// </remarks>
+    public static Curve OfCurve(this Transform transform, Curve value) => value.CreateTransformed(transform);
+
+    /// <summary>
+    /// Applies the transformation to a mesh and returns the result.
+    /// </summary>
+    /// <param name="transform">The transform to apply.</param>
+    /// <param name="value">The mesh to transform.</param>
+    /// <returns>The transformed mesh</returns>
+    /// <remarks>
+    /// Transformation of a mesh is affected by the translational part of the transformation.
+    /// </remarks>
+    public static Mesh OfMesh(this Transform transform, Mesh value) => value.get_Transformed(transform);
+
+    /// <summary>
+    /// Applies the transformation to a solid and returns the result.
+    /// </summary>
+    /// <param name="transform">The transform to apply.</param>
+    /// <param name="value">The solid to transform.</param>
+    /// <returns>The transformed solid</returns>
+    /// <remarks>
+    /// Transformation of a solid is affected by the translational part of the transformation.
+    /// </remarks>
+    public static Solid OfSolid(this Transform transform, Solid value) => SolidUtils.CreateTransformed(value, transform);
+
+    /// <summary>
+    /// Applies the transformation to a geometry and returns the result.
+    /// </summary>
+    /// <param name="transform">The transform to apply.</param>
+    /// <param name="value">The geometry to transform.</param>
+    /// <returns>The transformed geometry</returns>
+    /// <remarks>
+    /// Transformation of a geometry is affected by the translational part of the transformation.
+    /// </remarks>
+    public static GeometryObject OfGeometry(this Transform transform, GeometryObject value)
+    {
+      switch (value)
+      {
+        case Point point: return OfPoint(transform, point);
+        case Curve curve: return OfCurve(transform, curve);
+        case PolyLine pline: return pline.GetTransformed(transform);
+        case Mesh mesh: return OfMesh(transform, mesh);
+        case Solid solid: return OfSolid(transform, solid);
+      }
+
+      throw new NotImplementedException($"{nameof(OfGeometry)} is not implemented for {value.GetType()}.");
     }
   }
 }
