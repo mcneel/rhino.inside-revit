@@ -187,9 +187,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
     {
       if (grid is null) return false;
 
-      return false;
-
-      // TODO : Update the sketch.
+      curve.CombineShortSegments(GeometryDecoder.Tolerance.ShortCurveTolerance);
+      if (!(grid.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, new Curve[] { curve }, Vector3d.ZAxis)))
+        return false;
 
       if (type is object && grid.GetTypeId() != type.Id) grid.ChangeTypeId(type.Id);
       grid.CopyParametersFrom(template, ExcludeUniqueProperties);
@@ -198,14 +198,16 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
 
     ARDB.MultiSegmentGrid Create(ARDB.SketchPlane sketchPlane, Curve curve, ARDB.GridType type, ARDB.MultiSegmentGrid template)
     {
-      var loop = curve.ToCurveLoop();
-      if (!ARDB.MultiSegmentGrid.IsValidCurveLoop(loop))
-        throw new RuntimeArgumentException("Curve", "The Curve should be an open loop consisting of lines and arcs.", curve);
+      using (var loop = curve.ToBoundedCurveLoop())
+      {
+        if (!ARDB.MultiSegmentGrid.IsValidCurveLoop(loop))
+          throw new RuntimeArgumentException("Curve", "The Curve should be an open loop consisting of lines and arcs.", curve);
 
-      var grid = sketchPlane.Document.GetElement(ARDB.MultiSegmentGrid.Create(sketchPlane.Document, type.Id, loop, sketchPlane.Id)) as ARDB.MultiSegmentGrid;
-      grid.CopyParametersFrom(template, ExcludeUniqueProperties);
+        var grid = sketchPlane.Document.GetElement(ARDB.MultiSegmentGrid.Create(sketchPlane.Document, type.Id, loop, sketchPlane.Id)) as ARDB.MultiSegmentGrid;
+        grid.CopyParametersFrom(template, ExcludeUniqueProperties);
 
-      return grid;
+        return grid;
+      }
     }
 
     ARDB.MultiSegmentGrid Reconstruct(ARDB.MultiSegmentGrid grid, ARDB.SketchPlane sketchPlane, Curve curve, Interval extents, ARDB.GridType type, string name, ARDB.MultiSegmentGrid template)
@@ -221,7 +223,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
 
         // Avoids conflict in case we are going to assign same name...
         if (previousGrid.IsValid())
+        {
+          if (name is null) name = previousGrid.Name;
           previousGrid.Document.Delete(previousGrid.Id);
+        }
       }
 
       if (name is object && grid.Name != name)
