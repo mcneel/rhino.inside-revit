@@ -17,7 +17,7 @@
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2022-R8;Platform=x64"/>
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2023-R8;Platform=x64"/>
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2024-R8;Platform=x64"/>
-    <!--<MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2025-R8;Platform=x64"/>-->
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2025-R8;Platform=x64"/>
   </Target>
 
   <Target Name="BuildInstaller">

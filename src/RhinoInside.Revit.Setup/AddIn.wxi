@@ -353,7 +353,6 @@
   <Fragment>
     <ComponentGroup Id="Addins.2025.RhinoInsideRevit">
 
-      <!--
       <Component Id="Revit.2025.opennurbs_private.manifest" Guid="{B8F97EF4-8C01-48B9-AB72-4122A5B40667}" Directory="REVIT2025_INSTALLLOCATION">
         <Condition>Privileged</Condition>
         <File Id="Revit.2025.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
@@ -377,7 +376,6 @@
         <File Id="Addins.2025.R8.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
         <File Id="Addins.2025.R8.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
-      -->
 
     </ComponentGroup>
   </Fragment>
