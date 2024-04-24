@@ -52,6 +52,7 @@ namespace RhinoInside.Revit.GH
             {
               switch (builtInParameter)
               {
+                case ARDB.BuiltInParameter.ELEM_PARTITION_PARAM: return new Types.Workset(parameter.Element.Document, new ARDB.WorksetId(integer));
                 case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) integer);
                 case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) integer);
                 case ARDB.BuiltInParameter.SPACING_LAYOUT_U: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) integer);
