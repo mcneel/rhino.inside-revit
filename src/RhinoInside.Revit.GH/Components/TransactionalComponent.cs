@@ -704,6 +704,14 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
+    public override void ClearData()
+    {
+      base.ClearData();
+
+      if (TrackingMode != TrackingMode.NotApplicable)
+        Message = TrackingMode == TrackingMode.Disabled ? "No Tracking" : string.Empty;
+    }
+
     protected override void BeforeSolveInstance()
     {
       base.BeforeSolveInstance();
