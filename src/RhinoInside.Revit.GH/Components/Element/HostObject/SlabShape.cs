@@ -208,7 +208,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
           {
             try
             {
-              if ((vertex = shape.DrawPoint(new ARDB.XYZ(x, y, elevation))) is null)
+              if ((vertex = shape.AddPoint(new ARDB.XYZ(x, y, elevation))) is null)
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));
               else
                 vertices.Add(xyz, vertex);
@@ -234,7 +234,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
             {
               var from = AddVertex(edge.From);
               var to   = AddVertex(edge.To);
-              if (from is null || to is null || shape.DrawSplitLine(from, to) is null)
+              if (from is null || to is null || shape.AddSplitLine(from, to) is null)
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Some short-creases were skipped.", new LineCurve(edge));
             }
             catch { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to add crease.", new LineCurve(edge)); }
