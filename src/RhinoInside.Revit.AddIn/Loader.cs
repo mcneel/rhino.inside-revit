@@ -126,8 +126,16 @@ namespace RhinoInside.Revit.AddIn
     #endregion
 
     #region IHostedApplication
-    void ERUI.IHostedApplication.InvokeInHostContext(Action action) => Rhinoceros.InvokeInHostContext(action);
-    T ERUI.IHostedApplication.InvokeInHostContext<T>(Func<T> func) => Rhinoceros.InvokeInHostContext(func);
+    void ERUI.IHostedApplication.InvokeInHostContext(Action action)
+    {
+      if (Core.CurrentStatus == Core.Status.Ready) Rhinoceros.InvokeInHostContext(action);
+      else action();
+    }
+    T ERUI.IHostedApplication.InvokeInHostContext<T>(Func<T> func)
+    {
+      if (Core.CurrentStatus == Core.Status.Ready) return Rhinoceros.InvokeInHostContext(func);
+      else return func();
+    }
 
     bool ERUI.IHostedApplication.DoEvents() => Rhinoceros.Run();
     Microsoft.Win32.SafeHandles.WindowHandle ERUI.IHostedApplication.MainWindow => Rhinoceros.MainWindow;
