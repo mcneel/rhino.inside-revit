@@ -187,6 +187,10 @@ namespace RhinoInside.Revit.GH.Types
         idMap.Add(Id, modelContent = attributes.ToModelData() as ModelContent);
         return modelContent;
       }
+      else if (Id == ARDB.LinePatternElement.GetSolidPatternId())
+      {
+        return ModelLinetype.Unset;
+      }
 
       return null;
     }
