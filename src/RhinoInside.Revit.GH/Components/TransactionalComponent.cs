@@ -19,6 +19,7 @@ namespace RhinoInside.Revit.GH.Components
   using Convert.Geometry;
   using ElementTracking;
   using External.DB.Extensions;
+  using Grasshopper.GUI;
 
   class TransactionalComponentFailuresPreprocessor : ARDB.IFailuresPreprocessor
   {
@@ -267,9 +268,31 @@ namespace RhinoInside.Revit.GH.Components
     #endregion
 
     #region Attributes
-    internal new class Attributes : ZuiAttributes
+    internal class TransactionalComponentAttributes : ExpireButtonAttributes
     {
-      public Attributes(TransactionalComponent owner) : base(owner) { }
+      public TransactionalComponentAttributes(TransactionalComponent owner) : base(owner) { }
+      private new TransactionalChainComponent Owner => (TransactionalChainComponent) base.Owner;
+
+      internal static string IssuePrefix => "⏯";
+
+      protected override bool Top => true;
+      protected override string DisplayText => "✅ Continue";
+      protected override bool Visible => Owner.RuntimeMessageLevel == GH_RuntimeMessageLevel.Error &&
+        Owner.RuntimeMessages(GH_RuntimeMessageLevel.Error).Any(x => x.StartsWith(IssuePrefix));
+
+      public override void SetupTooltip(PointF canvasPoint, GH_TooltipDisplayEventArgs e)
+      {
+        if (Visible && ButtonBounds.Contains(new Point((int) Math.Round(canvasPoint.X), (int) Math.Round(canvasPoint.Y))))
+        {
+          e.Title = "Continue";
+          e.Icon = Owner.Icon_24x24;
+          e.Description = "If you don't want to be asked again set component 'Error Mode' to 'Continue'.";
+          e.Text = $"If suitable, a default resolution will be applied.";
+          return;
+        }
+
+        base.SetupTooltip(canvasPoint, e);
+      }
 
       protected override void Render(GH_Canvas canvas, Graphics graphics, GH_CanvasChannel channel)
       {
@@ -325,7 +348,12 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
-    public override void CreateAttributes() => m_attributes = new Attributes(this);
+    public override void CreateAttributes() => m_attributes = new TransactionalComponentAttributes(this);
+
+    protected internal void AddContinuableFailure(string message)
+    {
+      AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{TransactionalComponentAttributes.IssuePrefix} {message}");
+    }
     #endregion
 
     // Setp 1.
@@ -341,7 +369,12 @@ namespace RhinoInside.Revit.GH.Components
     // Override to add handled failures to your component (Order is important).
     protected virtual IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => null;
 
-    public ARDB.FailureProcessingResult FailureProcessingMode { get; set; } = ARDB.FailureProcessingResult.Continue;
+    ARDB.FailureProcessingResult _FailureProcessingMode = ARDB.FailureProcessingResult.Continue;
+    public ARDB.FailureProcessingResult FailureProcessingMode
+    {
+      get => (Attributes as TransactionalComponentAttributes).Pressed ? ARDB.FailureProcessingResult.ProceedWithCommit : _FailureProcessingMode;
+      set => _FailureProcessingMode = value;
+    } 
 
     protected override bool AbortOnContinuableException => FailureProcessingMode > ARDB.FailureProcessingResult.ProceedWithCommit;
 
@@ -945,13 +978,13 @@ namespace RhinoInside.Revit.GH.Components
 
         if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{message}\nSet 'Error Mode' to 'Continue' to use the existing one.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{TransactionalComponentAttributes.IssuePrefix} {message}\nUse 'Continue' to reference the existing one.");
           return null;
         }
 
         if (FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit)
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{message}\nUsing existing.");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{message} Using already existing one.");
           return existing;
         }
 

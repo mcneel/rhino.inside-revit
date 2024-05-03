@@ -524,10 +524,11 @@ namespace RhinoInside.Revit.GH.Components
 
     internal abstract class ExpireButtonAttributes : ZuiAttributes
     {
-      Rectangle ButtonBounds { get; set; }
+      protected Rectangle ButtonBounds { get; private set; }
 
       public bool Pressed { get; private set; } = false;
 
+      protected virtual bool Top  { get; }
       protected abstract string DisplayText { get; }
       protected abstract bool Visible { get; }
 
@@ -540,10 +541,19 @@ namespace RhinoInside.Revit.GH.Components
         if (Visible)
         {
           var newBounds = GH_Convert.ToRectangle(Bounds);
-          newBounds.Height += 22;
-
           var buttonBounds = newBounds;
-          buttonBounds.Y = buttonBounds.Bottom - 22;
+
+          if (Top)
+          {
+            newBounds.Y -= 22;
+            newBounds.Height += 22;
+            buttonBounds.Y = newBounds.Top;
+          }
+          else
+          {
+            buttonBounds.Y = newBounds.Bottom;
+            newBounds.Height += 22;
+          }
           buttonBounds.Height = 22;
           buttonBounds.Inflate(-2, -2);
 
@@ -583,9 +593,12 @@ namespace RhinoInside.Revit.GH.Components
             }
             Owner.ExpireSolution(true);
           }
+          else
+          {
+            Pressed = false;
+            sender.Refresh();
+          }
 
-          Pressed = false;
-          sender.Refresh();
           return GH_ObjectResponse.Release;
         }
 
