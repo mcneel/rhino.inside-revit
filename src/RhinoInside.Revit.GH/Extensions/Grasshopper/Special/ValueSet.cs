@@ -274,6 +274,9 @@ namespace Grasshopper.Special
       switch (value)
       {
         case IGH_ItemDescription item: return item.Name;
+#if RHINO_8
+        case Rhinoceros.ModelData data: return data.DisplayName;
+#endif
         case IGH_Goo goo: return goo.ToString();
       }
 
@@ -287,12 +290,17 @@ namespace Grasshopper.Special
         case IGH_ItemDescription item:
           return item.Identity;
 
+#if RHINO_8
+        case Rhinoceros.ModelContent content:
+          return content.Id.HasValue ? $"{{{content.Id.ToString().Substring(0, 8)}…}}" : string.Empty;
+#endif
+
         case GH_Colour color:
           if (color.Value.IsNamedColor) return color.Value.Name;
           return GH_ColorRGBA.TryGetName(color.Value, out var name) ? name: string.Empty;
 
         case IGH_GeometricGoo geom:
-          return geom.IsReferencedGeometry ? geom.ReferenceID.ToString("B") : string.Empty;
+          return geom.IsReferencedGeometry ? $"{{{geom.ReferenceID.ToString().Substring(0, 8)}…}}" : string.Empty;
 
         case IGH_Goo goo:
           return string.Empty;
@@ -308,11 +316,16 @@ namespace Grasshopper.Special
         case IGH_ItemDescription item:
           return item.Description;
 
+#if RHINO_8
+        case Rhinoceros.Params.IGH_ModelContentData contentData:
+          return contentData.IsReferencedData ? Rhino.RhinoDoc.ActiveDoc?.Name ?? "Untitled.3dm" : string.Empty;
+#endif
+
         case IGH_GeometricGoo geom:
-          return geom.IsReferencedGeometry ? Rhino.RhinoDoc.ActiveDoc?.Name ?? "Untitled.3dm" : value.TypeDescription;
+          return geom.IsReferencedGeometry ? Rhino.RhinoDoc.ActiveDoc?.Name ?? "Untitled.3dm" : string.Empty;
 
         case IGH_Goo goo:
-          return goo.TypeDescription;
+          return string.Empty;
       }
 
       return string.Empty;

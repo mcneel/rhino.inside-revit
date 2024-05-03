@@ -471,6 +471,16 @@ namespace RhinoInside.Revit.GH.Types
             ModelContentName.Combine(Document.GetTitle(), category.CategoryType.ToString(), category.Name);
         };
 
+        // Tags
+        {
+          var root = category.Parent ?? category;
+          if (root.Id.IsBuiltInId())
+          {
+            var disciplines = CategoryDiscipline;
+            attributes.Tags = new ModelTags(Enum.GetValues(typeof(ERDB.CategoryDiscipline)).Cast<ERDB.CategoryDiscipline>().Where(x => x != ERDB.CategoryDiscipline.None && disciplines.HasFlag(x)).Select(x => x.ToString()));
+          }
+        }
+
         // Color
         {
           var lineColor = category.LineColor.ToColor();
