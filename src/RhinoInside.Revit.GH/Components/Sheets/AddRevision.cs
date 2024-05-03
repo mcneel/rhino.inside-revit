@@ -234,7 +234,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       update |= Params.GetData(DA, "Issued To", out string issuedTo);
       update |= Params.GetData(DA, "Issued", out bool? issued);
 
-      if (update) Invoke(this, revision.Value, date, description, issuedBy, issuedTo, issued);
+      if (update && !Invoke(this, revision.Value, date, description, issuedBy, issuedTo, issued)) return;
 
       Params.TrySetData(DA, "Revision", () => revision);
 
@@ -246,7 +246,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       Params.TrySetData(DA, "Issued", () => revision.Issued);
     }
 
-    internal static void Invoke(TransactionalChainComponent component, ARDB.Revision revision, string date, string description, string issuedBy, string issuedTo, bool? issued)
+    internal static bool Invoke(TransactionalChainComponent component, ARDB.Revision revision, string date, string description, string issuedBy, string issuedTo, bool? issued)
     {
       var updateDate = date is object && revision.RevisionDate != date;
       var updateDescription = description is object && revision.Description != description;
@@ -270,7 +270,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
               if (updateDescription) component.AddContinuableFailure($"Can't set 'Revision Description' parameter. Revision '{revision.Description}' is already issued. {{{revision.Id}}}");
               if (updateIssuedBy) component.AddContinuableFailure($"Can't set 'Issued By' parameter. Revision '{revision.Description}' is already issued. {{{revision.Id}}}");
               if (updateIssuedTo) component.AddContinuableFailure($"Can't set 'Issued To' parameter. Revision '{revision.Description}' is already issued. {{{revision.Id}}}");
-              return;
+              return false;
 
             case ARDB.FailureProcessingResult.ProceedWithCommit:
               revision.Issued = false;
@@ -297,7 +297,8 @@ namespace RhinoInside.Revit.GH.Components.Sheets
         if (updateIssuedTo) revision.IssuedTo = issuedTo;
         if (updateIssued) revision.Issued = issued.Value;
       }
+
+      return true;
     }
   }
-
 }
