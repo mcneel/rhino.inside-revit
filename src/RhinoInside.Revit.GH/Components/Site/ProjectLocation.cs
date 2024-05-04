@@ -2,6 +2,7 @@ using System;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.External.DB.Extensions;
+using static RhinoInside.Revit.Diagnostics;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
@@ -29,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Site
           (sender, arg) =>
           {
             if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
-              using (System.Diagnostics.Process.Start($@"https://bing.com/maps/default.aspx?cp={Rhino.RhinoMath.ToDegrees(location.Latitude)}~{Rhino.RhinoMath.ToDegrees(location.Longitude)}&lvl=18")) { }
+              Browser.Start($@"https://bing.com/maps/default.aspx?cp={Rhino.RhinoMath.ToDegrees(location.Latitude)}~{Rhino.RhinoMath.ToDegrees(location.Longitude)}&lvl=18");
           },
           true, false
         );
@@ -40,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Site
           (sender, arg) =>
           {
             if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
-              using (System.Diagnostics.Process.Start($@"https://duckduckgo.com/?q={Rhino.RhinoMath.ToDegrees(location.Latitude)}%2C{Rhino.RhinoMath.ToDegrees(location.Longitude)}&iaxm=maps")) { }
+              Browser.Start($@"https://duckduckgo.com/?q={Rhino.RhinoMath.ToDegrees(location.Latitude)}%2C{Rhino.RhinoMath.ToDegrees(location.Longitude)}&iaxm=maps");
           },
           true, false
         );
@@ -51,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components.Site
           (sender, arg) =>
           {
             if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
-              using (System.Diagnostics.Process.Start($@"https://www.google.com/maps/@{Rhino.RhinoMath.ToDegrees(location.Latitude)},{Rhino.RhinoMath.ToDegrees(location.Longitude)},18z")) { }
+              Browser.Start($@"https://www.google.com/maps/@{Rhino.RhinoMath.ToDegrees(location.Latitude)},{Rhino.RhinoMath.ToDegrees(location.Longitude)},18z");
           },
           true, false
         );
@@ -62,7 +63,7 @@ namespace RhinoInside.Revit.GH.Components.Site
           (sender, arg) =>
           {
             if (activeApp.ActiveUIDocument.Document.SiteLocation is Autodesk.Revit.DB.SiteLocation location)
-              using (System.Diagnostics.Process.Start($@"https://www.openstreetmap.org/?mlat={Rhino.RhinoMath.ToDegrees(location.Latitude)}&mlon={Rhino.RhinoMath.ToDegrees(location.Longitude)}")) { }
+              Browser.Start($@"https://www.openstreetmap.org/?mlat={Rhino.RhinoMath.ToDegrees(location.Latitude)}&mlon={Rhino.RhinoMath.ToDegrees(location.Longitude)}");
           },
           true, false
         );

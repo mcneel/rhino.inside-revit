@@ -252,7 +252,7 @@ namespace RhinoInside.Revit
           switch(taskDialog.Show())
           {
             case ARUI.TaskDialogResult.CommandLink1:
-              using (Process.Start($@"https://knowledge.autodesk.com/support/revit?s=Download%20Updates&v={RevitVersion.Major}&sort=score")) { }
+              Browser.Start($@"https://knowledge.autodesk.com/support/revit?s=Download%20Updates&v={RevitVersion.Major}&sort=score");
               return ARUI.Result.Cancelled;
 
             case ARUI.TaskDialogResult.CommandLink2:
@@ -311,7 +311,7 @@ namespace RhinoInside.Revit
           taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink1, "Download latest Rhino…");
           if (taskDialog.Show() == ARUI.TaskDialogResult.CommandLink1)
           {
-            using (Process.Start($@"https://www.rhino3d.com/download/rhino/{MinimumRhinoVersion.Major}.0/")) { }
+            Browser.Start($@"https://www.rhino3d.com/download/rhino/{MinimumRhinoVersion.Major}.0/");
           }
         }
 
@@ -366,7 +366,7 @@ namespace RhinoInside.Revit
         taskDialog.AddCommandLink(ARUI.TaskDialogCommandLinkId.CommandLink1, "Check for updates…", $"Open {Product} download page");
         if (taskDialog.Show() == ARUI.TaskDialogResult.CommandLink1)
         {
-          using (Process.Start(@"https://www.rhino3d.com/download/rhino.inside-revit/1/latest")) { }
+          Browser.Start(@"https://www.rhino3d.com/download/rhino.inside-revit/1/latest");
         }
       }
 

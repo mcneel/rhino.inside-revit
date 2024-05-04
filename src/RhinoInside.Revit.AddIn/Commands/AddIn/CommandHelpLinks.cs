@@ -1,6 +1,7 @@
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using static RhinoInside.Revit.Diagnostics;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
@@ -41,7 +42,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start($@"https://apidocs.co/apps/revit/{data.Application.Application.VersionNumber}/")) { }
+      Browser.Start($@"https://apidocs.co/apps/revit/{data.Application.Application.VersionNumber}/");
       return Result.Succeeded;
     }
   }
@@ -53,7 +54,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start(@"https://thebuildingcoder.typepad.com/")) { }
+      Browser.Start(@"https://thebuildingcoder.typepad.com/");
       return Result.Succeeded;
     }
   }
@@ -65,7 +66,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
-      using (System.Diagnostics.Process.Start(@"https://developer.rhino3d.com/")) { }
+      Browser.Start(@"https://developer.rhino3d.com/");
       return Result.Succeeded;
     }
   }

@@ -467,7 +467,7 @@ namespace RhinoInside.Revit
               switch (taskDialog.Show())
               {
                 case TaskDialogResult.CommandLink1:
-                  using (Process.Start($@"{Core.WebSite}/reference/known-issues")) { }
+                  Browser.Start($@"{Core.WebSite}reference/known-issues");
                   break;
                 case TaskDialogResult.CommandLink2:
 

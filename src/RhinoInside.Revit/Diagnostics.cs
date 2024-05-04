@@ -22,6 +22,48 @@ namespace RhinoInside.Revit
 {
   static partial class Diagnostics
   {
+    internal static class Browser
+    {
+      public static void Start(string url)
+      {
+        try
+        {
+          Process.Start(new ProcessStartInfo(url)
+          {
+            UseShellExecute = true,
+            WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+          });
+
+          return;
+        }
+        catch{ }
+
+        using
+        (
+          var taskDialog = new TaskDialog("Open Browser")
+          {
+            MainIcon = UIX.TaskDialogIcons.IconWarning,
+            TitleAutoPrefix = true,
+            AllowCancellation = true,
+            MainInstruction = "Unable to found a default web browser",
+            MainContent = string.Empty,
+            ExpandedContent = string.Empty,
+            CommonButtons = TaskDialogCommonButtons.None,
+            DefaultButton = TaskDialogResult.None,
+            FooterText = new Uri(url).Authority
+          }
+        )
+        {
+          taskDialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Copy URL to clipboard", url);
+          taskDialog.DefaultButton = TaskDialogResult.CommandLink1;
+          if (taskDialog.Show() == TaskDialogResult.CommandLink1)
+          {
+            System.Windows.Forms.Clipboard.SetText(url);
+          }
+        }
+      }
+    }
+
     internal static class ErrorReport
     {
       public static string CLRVersion

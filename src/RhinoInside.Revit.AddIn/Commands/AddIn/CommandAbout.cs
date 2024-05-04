@@ -66,13 +66,13 @@ namespace RhinoInside.Revit.AddIn.Commands
         switch (taskDialog.Show())
         {
           case TaskDialogResult.CommandLink1:
-            using (System.Diagnostics.Process.Start(Core.WebSite)) { }
+            Browser.Start(Core.WebSite);
             break;
           case TaskDialogResult.CommandLink2:
-            using (System.Diagnostics.Process.Start($@"https://github.com/mcneel/rhino.inside-revit/blob/{Core.Version.Major}.x/LICENSE")) { }
+            Browser.Start($@"https://github.com/mcneel/rhino.inside-revit/blob/{Core.Version.Major}.x/LICENSE");
             break;
           case TaskDialogResult.CommandLink3:
-            using (System.Diagnostics.Process.Start($@"https://github.com/mcneel/rhino.inside-revit/tree/{Core.Version.Major}.x")) { }
+            Browser.Start($@"https://github.com/mcneel/rhino.inside-revit/tree/{Core.Version.Major}.x");
             break;
         }
       }

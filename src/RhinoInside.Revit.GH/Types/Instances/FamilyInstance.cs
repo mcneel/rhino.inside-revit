@@ -15,6 +15,7 @@ using Grasshopper.Rhinoceros.Model;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using External.DB;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Component")]
@@ -118,24 +119,21 @@ namespace RhinoInside.Revit.GH.Types
 
             using (var geometry = element.GetGeometry(options))
             {
-              if (geometry is ARDB.GeometryElement geometryElement)
+              var transform = element.GetTransform();
+              var location = new Plane(transform.Origin.ToPoint3d(), transform.BasisX.ToVector3d(), transform.BasisY.ToVector3d());
+              var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
+
+              if (ToModelInstanceDefinition(idMap, worldToElement, element, geometry) is ModelInstanceDefinition definition)
               {
-                var transform = element.GetTransform();
-                var location = new Plane(transform.Origin.ToPoint3d(), transform.BasisX.ToVector3d(), transform.BasisY.ToVector3d());
-                var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
+                var elementToWorld = Transform.PlaneToPlane(Plane.WorldXY, location);
+                var attributes = ModelObject.Cast(new GH_InstanceReference(new InstanceReferenceGeometry(Guid.Empty, elementToWorld), definition)).ToAttributes();
+                attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
+                attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
+                attributes.Layer = Category?.ToModelContent(idMap) as ModelLayer;
 
-                if (ToModelInstanceDefinition(idMap, worldToElement, element, geometry) is ModelInstanceDefinition definition)
-                {
-                  var elementToWorld = Transform.PlaneToPlane(Plane.WorldXY, location);
-                  var attributes = ModelObject.Cast(new GH_InstanceReference(new InstanceReferenceGeometry(Guid.Empty, elementToWorld), definition)).ToAttributes();
-                  attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
-                  attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
-                  attributes.Layer = Category?.ToModelContent(idMap) as ModelLayer;
-
-                  modelContent = attributes.ToModelData() as ModelContent;
-                  //idMap.Add(Id, modelContent);
-                  return modelContent;
-                }
+                modelContent = attributes.ToModelData() as ModelContent;
+                //idMap.Add(Id, modelContent);
+                return modelContent;
               }
             }
           }
@@ -453,18 +451,25 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Value is ARDB.FamilySymbol element)
       {
-        using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Fine })
+        var active = element.IsActive;
+        using (var scope = active ? null : element.Document.RollBackScope())
         {
-          using (var context = GeometryDecoder.Context.Push())
+          if (!active)
           {
-            context.Element = element;
-            context.Category = element.Category;
-            context.Material = element.Category?.Material;
+            element.Activate();
+            element.Document.Regenerate();
+          }
 
-            using (var geometry = element.GetGeometry(options))
+          using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Fine })
+          {
+            using (var context = GeometryDecoder.Context.Push())
             {
-              if (geometry is ARDB.GeometryElement geometryElement)
-                return GeometricElement.ToModelInstanceDefinition(idMap, Transform.Identity, element, geometryElement);
+              context.Element = element;
+              context.Category = element.Category;
+              context.Material = element.Category?.Material;
+
+              using (var geometry = element.GetGeometry(options))
+                return GeometricElement.ToModelInstanceDefinition(idMap, Transform.Identity, element, geometry);
             }
           }
         }
