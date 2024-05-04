@@ -11,6 +11,7 @@ namespace RhinoInside.Revit.AddIn.Forms
 {
   using Deployment;
   using Properties;
+  using static Diagnostics;
 
   class AddInOptionsDialog : ModalDialog
   {
@@ -254,13 +255,13 @@ namespace RhinoInside.Revit.AddIn.Forms
     private void DownloadBtn_Click(object sender, EventArgs e)
     {
       if (ReleaseInfo != null)
-        Process.Start(ReleaseInfo.DownloadUrl);
+        Browser.Start(ReleaseInfo.DownloadUrl);
     }
 
     private void ReleaseNotesBtn_Click(object sender, EventArgs e)
     {
       if (ReleaseInfo != null)
-        Process.Start(ReleaseInfo.ReleaseNotesUrl);
+        Browser.Start(ReleaseInfo.ReleaseNotesUrl);
     }
 
     private void UpdateChannelSelector_SelectedIndexChanged(object sender, EventArgs e)
@@ -292,9 +293,9 @@ namespace RhinoInside.Revit.AddIn.Forms
           if (releaseInfo is ReleaseInfo)
           {
             var downloadBtn = new LinkButton { Text = $"v{releaseInfo.Version}" };
-            downloadBtn.Click += (s, e) => Process.Start(releaseInfo.DownloadUrl);
+            downloadBtn.Click += (s, e) => Browser.Start(releaseInfo.DownloadUrl);
             var whatsNewButton = new LinkButton { Text = $"Release Notes" };
-            whatsNewButton.Click += (s, e) => Process.Start(releaseInfo.ReleaseNotesUrl);
+            whatsNewButton.Click += (s, e) => Browser.Start(releaseInfo.ReleaseNotesUrl);
 
             infoTable.Rows.Add(
               new TableRow
