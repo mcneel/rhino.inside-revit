@@ -778,9 +778,7 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(element.Id, out var modelContent))
         return modelContent as ModelInstanceDefinition;
 
-      var geometryElementContent = geometryElement.ToArray();
-      if (geometryElementContent.Length < 1)
-        return null;
+      var geometryElementContent = geometryElement?.ToArray() ?? Array.Empty<ARDB.GeometryObject>();
 
       if
       (
@@ -905,31 +903,28 @@ namespace RhinoInside.Revit.GH.Types
         {
           using (var geometry = element.GetGeometry(options))
           {
-            if (geometry is object)
+            using (var context = GeometryDecoder.Context.Push())
             {
-              using (var context = GeometryDecoder.Context.Push())
+              context.Element = element;
+              context.Category = element.Category;
+              context.Material = element.Category?.Material;
+
+              var location = element.Category is null || element.Category.Parent is object ?
+                Plane.WorldXY :
+                Location;
+
+              var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
+              if (ToModelInstanceDefinition(idMap, worldToElement, element, geometry) is ModelInstanceDefinition definition)
               {
-                context.Element = element;
-                context.Category = element.Category;
-                context.Material = element.Category?.Material;
+                var elementToWorld = Transform.PlaneToPlane(Plane.WorldXY, location);
+                var attributes = ModelObject.Cast(new GH_InstanceReference(new InstanceReferenceGeometry(Guid.Empty, elementToWorld), definition)).ToAttributes();
+                attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
+                attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
+                attributes.Layer = Category.ToModelContent(idMap) as ModelLayer;
 
-                var location = element.Category is null || element.Category.Parent is object ?
-                  Plane.WorldXY :
-                  Location;
-
-                var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
-                if (ToModelInstanceDefinition(idMap, worldToElement, element, geometry) is ModelInstanceDefinition definition)
-                {
-                  var elementToWorld = Transform.PlaneToPlane(Plane.WorldXY, location);
-                  var attributes = ModelObject.Cast(new GH_InstanceReference(new InstanceReferenceGeometry(Guid.Empty, elementToWorld), definition)).ToAttributes();
-                  attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
-                  attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
-                  attributes.Layer = Category.ToModelContent(idMap) as ModelLayer;
-
-                  modelContent = attributes.ToModelData() as ModelContent;
-                  //idMap.Add(Id, modelContent);
-                  return modelContent;
-                }
+                modelContent = attributes.ToModelData() as ModelContent;
+                //idMap.Add(Id, modelContent);
+                return modelContent;
               }
             }
           }
