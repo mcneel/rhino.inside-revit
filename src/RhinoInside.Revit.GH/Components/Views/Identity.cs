@@ -64,24 +64,22 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var view = default(ARDB.View);
-      if (!DA.GetData("View", ref view))
-        return;
+      if (!Params.GetData(DA, "View", out Types.View view)) return;
 
-      if (view.HasViewDiscipline())
-        DA.SetData("Discipline", view.Discipline);
+      if (view.Value.HasViewDiscipline())
+        DA.SetData("Discipline", view.Value.Discipline);
       else
         DA.SetData("Discipline", null);
 
-      Params.TrySetData(DA, "View Family", () => view.GetViewFamily());
-      Params.TrySetData(DA, "View Name", () => view.Name);
-      Params.TrySetData(DA, "Is Dependent", () => view.GetPrimaryViewId() != ARDB.ElementId.InvalidElementId);
-      Params.TrySetData(DA, "View Dependency", () => Types.View.FromElementId(view.Document, view.GetPrimaryViewId()));
-      Params.TrySetData(DA, "Is Template", () => view.IsTemplate);
-      Params.TrySetData(DA, "View Template", () => Types.View.FromElementId(view.Document, view.ViewTemplateId));
-      Params.TrySetData(DA, "Is Assembly", () => view.IsAssemblyView);
-      Params.TrySetData(DA, "Associated Assembly", () => new Types.AssemblyInstance(view.Document, view.AssociatedAssemblyInstanceId));
-      Params.TrySetData(DA, "Is Printable", () => view.CanBePrinted);
+      Params.TrySetData(DA, "View Family", () => view.Value.GetViewFamily());
+      Params.TrySetData(DA, "View Name", () => view.Value.Name);
+      Params.TrySetData(DA, "Is Dependent", () => view.Value.GetPrimaryViewId() != ARDB.ElementId.InvalidElementId);
+      Params.TrySetData(DA, "View Dependency", () => view.GetElement<Types.View>(view.Value.GetPrimaryViewId()));
+      Params.TrySetData(DA, "Is Template", () => view.Value.IsTemplate);
+      Params.TrySetData(DA, "View Template", () => view.GetElement<Types.View>(view.Value.ViewTemplateId));
+      Params.TrySetData(DA, "Is Assembly", () => view.Value.IsAssemblyView);
+      Params.TrySetData(DA, "Associated Assembly", () => view.GetElement<Types.AssemblyInstance>(view.Value.AssociatedAssemblyInstanceId));
+      Params.TrySetData(DA, "Is Printable", () => view.Value.CanBePrinted);
     }
   }
 }
