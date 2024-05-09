@@ -271,7 +271,7 @@ namespace RhinoInside.Revit.GH.Components
     internal class TransactionalComponentAttributes : ExpireButtonAttributes
     {
       public TransactionalComponentAttributes(TransactionalComponent owner) : base(owner) { }
-      private new TransactionalChainComponent Owner => (TransactionalChainComponent) base.Owner;
+      private new TransactionalComponent Owner => (TransactionalComponent) base.Owner;
 
       internal static string IssuePrefix => "⏯";
 
