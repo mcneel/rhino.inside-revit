@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.Convert.Geometry
             writer.Flush();
           }
 
-          using (var sha1 = new SHA1Managed())
+          using (var sha1 = SHA1.Create())
           {
             var buffer = stream.GetBuffer();
             hash = sha1.ComputeHash(buffer);

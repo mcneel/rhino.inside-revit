@@ -117,29 +117,6 @@ namespace RhinoInside.Revit.AddIn.Commands
     }
     #endregion
 
-    #region Ribbon item storage
-    /// <summary>
-    /// Static storage for buttons created by commands.
-    /// Usage is optional for derived classes thru Store and Restore methods
-    /// </summary>
-    private static readonly Dictionary<string, RibbonItem> _buttons = new Dictionary<string, RibbonItem>();
-
-    /// <summary>
-    /// Store given button under given name
-    /// </summary>
-    protected static void StoreButton(string name, RibbonItem button) => _buttons[name] = button;
-
-    /// <summary>
-    /// Restore previously stored button under given name
-    /// </summary>
-    protected static RibbonItem RestoreButton(string name)
-    {
-      if (_buttons.TryGetValue(name, out var button))
-        return button;
-      return null;
-    }
-    #endregion
-
     #region Availability Types
     /// <summary>
     /// Availability for commands that are always available even when there is no document open.

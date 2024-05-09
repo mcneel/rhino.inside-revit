@@ -138,7 +138,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Properties
     public abstract View View { get; }
-    public virtual ViewSheet Sheet => ViewSheet.FromElementId(Document, Value?.OwnerViewId) as ViewSheet;
+    public virtual ViewSheet Sheet => GetElement<ViewSheet>(Value?.OwnerViewId);
 
     protected virtual ARDB.ViewportRotation Rotation => ARDB.ViewportRotation.None;
     #endregion
@@ -288,8 +288,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public override View View => View.FromElementId(Document, Value?.ViewId) as View;
-    public override ViewSheet Sheet => ViewSheet.FromElementId(Document, Value?.SheetId) as ViewSheet;
+    public override View View => GetElement<View>(Value?.ViewId);
+    public override ViewSheet Sheet => GetElement<ViewSheet>(Value?.SheetId);
 
     protected override ARDB.ViewportRotation Rotation => Value?.Rotation ?? ARDB.ViewportRotation.None;
     #endregion
@@ -326,7 +326,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Properties
-    public override View View => View.FromElementId(Document, Value?.ScheduleId) as View;
+    public override View View => GetElement<View>(Value?.ScheduleId);
 
     protected override ARDB.ViewportRotation Rotation => Value?.Rotation ?? ARDB.ViewportRotation.None;
     #endregion
@@ -363,7 +363,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Properties
-    public override View View => View.FromElementId(Document, Value?.ScheduleId) as View;
+    public override View View => GetElement<View>(Value?.ScheduleId);
     #endregion
   }
 }

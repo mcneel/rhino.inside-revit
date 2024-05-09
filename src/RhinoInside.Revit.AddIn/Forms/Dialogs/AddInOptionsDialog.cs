@@ -32,6 +32,19 @@ namespace RhinoInside.Revit.AddIn.Forms
       InitLayout();
     }
 
+    protected override void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        _general?.Dispose(); _general = null;
+        _updates?.Dispose(); _updates = null;
+        _scripts?.Dispose(); _scripts = null;
+        _tabs?.Dispose(); _tabs = null;
+      }
+
+      base.Dispose(disposing);
+    }
+
     public void ActivateGeneralTab() => _tabs.SelectedPage = _general;
     public void ActivateUpdatesTab() => _tabs.SelectedPage = _updates;
     public void ActivateScriptsTab() => _tabs.SelectedPage = _scripts;
@@ -76,12 +89,27 @@ namespace RhinoInside.Revit.AddIn.Forms
   {
     public GeneralPanel() => InitLayout();
 
-    readonly CheckBox _loadOnStartup = new CheckBox { Text = "Start Rhino on startup", ToolTip = "Restart Revit" };
-    readonly CheckBox _isolateSettings = new CheckBox { Text = "Isolate Rhino settings", ToolTip = "Rhino will use a separate set of settings in Revit" };
-    readonly CheckBox _useHostLanguage = new CheckBox { Text = "Use Revit UI language", ToolTip = "Rhino UI will be same language as Revit" };
-    readonly CheckBox _keepUIOnTop = new CheckBox { Text = "Keep UI always on top", ToolTip = "Rhino UI will display always on top of Revit window" };
-    readonly CheckBox _compactTab = new CheckBox { Text = "Compact Revit tabs", ToolTip = "Load into Add-ins tab - Restart Revit" };
-    readonly CheckBox _compactRibbon = new CheckBox { Text = "Compact Ribbon", ToolTip = "Collapse Rhino and Grasshopper panels" };
+    CheckBox _loadOnStartup = new CheckBox { Text = "Start Rhino on startup", ToolTip = "Restart Revit" };
+    CheckBox _isolateSettings = new CheckBox { Text = "Isolate Rhino settings", ToolTip = "Rhino will use a separate set of settings in Revit" };
+    CheckBox _useHostLanguage = new CheckBox { Text = "Use Revit UI language", ToolTip = "Rhino UI will be same language as Revit" };
+    CheckBox _keepUIOnTop = new CheckBox { Text = "Keep UI always on top", ToolTip = "Rhino UI will display always on top of Revit window" };
+    CheckBox _compactTab = new CheckBox { Text = "Compact Revit tabs", ToolTip = "Load into Add-ins tab - Restart Revit" };
+    CheckBox _compactRibbon = new CheckBox { Text = "Compact Ribbon", ToolTip = "Collapse Rhino and Grasshopper panels" };
+
+    protected override void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        _loadOnStartup?.Dispose(); _loadOnStartup = null;
+        _isolateSettings?.Dispose(); _isolateSettings = null;
+        _useHostLanguage?.Dispose(); _useHostLanguage = null;
+        _keepUIOnTop?.Dispose(); _keepUIOnTop = null;
+        _compactTab?.Dispose(); _compactTab = null;
+        _compactRibbon?.Dispose(); _compactRibbon = null;
+      }
+
+      base.Dispose(disposing);
+    }
 
     void InitLayout()
     {
@@ -159,14 +187,14 @@ namespace RhinoInside.Revit.AddIn.Forms
   {
     public UpdatesPanel() => InitLayout();
 
-    readonly CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
-    readonly Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36, VerticalAlignment = VerticalAlignment.Top };
-    readonly DropDown _updateChannelSelector = new DropDown() { Height = 25 };
-    readonly Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
-    readonly Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
-    readonly Panel _prevChannelsInfo = new Panel();
     static readonly Spinner _prevChannelsInfoSpinner = new Spinner { Visible = false, Enabled = true };
-    readonly StackLayout _prevChannelsInfoLabel = new StackLayout
+    CheckBox _checkUpdatesOnStartup = new CheckBox { Text = "Check Updates on Startup" };
+    Label _channelDescription = new Label { Visible = false, Wrap = WrapMode.Word, Height = 36, VerticalAlignment = VerticalAlignment.Top };
+    DropDown _updateChannelSelector = new DropDown() { Height = 25 };
+    Button _releaseNotesBtn = new Button { Text = "Release Notes", Height = 25 };
+    Button _downloadBtn = new Button { Text = "Download Installer", Height = 25 };
+    Panel _prevChannelsInfo = new Panel();
+    StackLayout _prevChannelsInfoLabel = new StackLayout
     {
       Orientation = Orientation.Horizontal,
       Items =
@@ -178,6 +206,22 @@ namespace RhinoInside.Revit.AddIn.Forms
 
     TableRow _releaseInfoPanel = new TableRow();
     internal ReleaseInfo ReleaseInfo = null;
+
+    protected override void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        _checkUpdatesOnStartup?.Dispose(); _checkUpdatesOnStartup = null;
+        _channelDescription?.Dispose(); _channelDescription = null;
+        _updateChannelSelector?.Dispose(); _updateChannelSelector = null;
+        _releaseNotesBtn?.Dispose(); _releaseNotesBtn = null;
+        _downloadBtn?.Dispose(); _downloadBtn = null;
+        _prevChannelsInfo?.Dispose(); _prevChannelsInfo = null;
+        _prevChannelsInfoLabel?.Dispose(); _prevChannelsInfoLabel = null;
+      }
+
+      base.Dispose(disposing);
+    }
 
     void InitLayout()
     {
@@ -409,6 +453,20 @@ namespace RhinoInside.Revit.AddIn.Forms
     ListBox _scriptLocations = new ListBox();
     Button _addButton = new Button { Text = "Add Script Location", Height = 25 };
     Button _delButton = new Button { Text = "Remove Selected", Height = 25, Enabled = false };
+
+    protected override void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        _loadScriptPackagesOnStartup?.Dispose(); _loadScriptPackagesOnStartup = null;
+        _loadScriptsOnStartup?.Dispose(); _loadScriptsOnStartup = null;
+        _scriptLocations?.Dispose(); _scriptLocations = null;
+        _addButton?.Dispose(); _addButton = null;
+        _delButton?.Dispose(); _delButton = null;
+      }
+
+      base.Dispose(disposing);
+    }
 
     void InitLayout()
     {

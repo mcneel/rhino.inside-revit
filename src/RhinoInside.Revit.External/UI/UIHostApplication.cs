@@ -6,21 +6,70 @@ using Autodesk.Revit.UI.Events;
 
 namespace RhinoInside.Revit.External.UI
 {
+  using Autodesk.Revit.ApplicationServices;
   using External.DB.Extensions;
 
   public abstract class UIHostApplication : IDisposable
   {
-    protected internal UIHostApplication() { }
-    public abstract void Dispose();
+    protected internal UIHostApplication(bool disposable) => Disposable = disposable;
 
-    public static implicit operator UIHostApplication(UIApplication value) => new UIHostApplicationUnconstrained(value);
-    public static implicit operator UIHostApplication(UIControlledApplication value) => new UIHostApplicationConstrained(value);
+    #region IDisposable
+#pragma warning disable CA1063 // Implement IDisposable Correctly
+    readonly bool Disposable;
+    protected abstract void Dispose(bool disposing);
+    void IDisposable.Dispose()
+    {
+      if (!Disposable) return;
+
+      Dispose(disposing: true);
+      GC.SuppressFinalize(this);
+    }
+#pragma warning restore CA1063 // Implement IDisposable Correctly
+    #endregion
+
+    public static implicit operator UIHostApplication(UIApplication value) => new UIHostApplicationUnconstrained(value, disposable: true);
+    public static implicit operator UIHostApplication(UIControlledApplication value) => new UIHostApplicationConstrained(value, disposable: true);
 
     public abstract object Value { get; }
     public abstract bool IsValid { get; }
 
     public abstract ApplicationServices.HostServices Services { get; }
     public abstract UIDocument ActiveUIDocument { get; set; }
+
+    #region Runtime
+    internal static UIHostApplication Current;
+
+    internal static bool StartUp(UIControlledApplication app)
+    {
+      if (!ApplicationServices.HostServices.StartUp(app.ControlledApplication))
+        return false;
+
+      Current = new UIHostApplicationConstrained(app, disposable: false);
+      ApplicationServices.HostServices.Current.ApplicationInitialized += Initialized;
+
+      ActivationGate.SetHostWindow(Current.MainWindowHandle);
+      return true;
+    }
+
+    private static void Initialized(object sender, Autodesk.Revit.DB.Events.ApplicationInitializedEventArgs e)
+    {
+      ApplicationServices.HostServices.Current.ApplicationInitialized -= Initialized;
+      Current = new UIHostApplicationUnconstrained(new UIApplication(sender as Application), disposable: false);
+
+      // From now on DB is available
+      //
+    }
+
+    internal static bool Shutdown(UIControlledApplication app)
+    {
+      ActivationGate.SetHostWindow(IntPtr.Zero);
+
+      Current?.Dispose(true);
+      Current = null;
+
+      return ApplicationServices.HostServices.Shutdown(app.ControlledApplication);
+    }
+    #endregion
 
     #region UI
     public abstract IntPtr MainWindowHandle { get; }
@@ -46,8 +95,8 @@ namespace RhinoInside.Revit.External.UI
 
     public abstract RibbonPanel CreateRibbonPanel(Tab tab, string panelName);
     public abstract RibbonPanel CreateRibbonPanel(string tabName, string panelName);
-    public abstract IReadOnlyList<RibbonPanel> GetRibbonPanels(Tab tab);
-    public abstract IReadOnlyList<RibbonPanel> GetRibbonPanels(string tabName);
+    public abstract IReadOnlyDictionary<string, RibbonPanel> GetRibbonPanels(Tab tab);
+    public abstract IReadOnlyDictionary<string, RibbonPanel> GetRibbonPanels(string tabName);
     #endregion
 
     #region AddIns

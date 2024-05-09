@@ -209,7 +209,7 @@ namespace RhinoInside.Revit.GH.Types
       if (element?.IsValid is true)
       {
         if (!Document.IsEquivalent(element.Document))
-          throw new Exceptions.RuntimeArgumentException($"Invalid {typeof(T)} Document", nameof(element));
+          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid {typeof(T)} Document");
 
         return (T) element.Value;
       }
@@ -233,6 +233,14 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    #region ModelContent
+    protected virtual string ElementPath => Nomen;
+
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    internal string ModelPath => $"{Document.GetTitle()}::{ElementPath}";
+    #endregion
+
+    #region Casters
     public override bool CastFrom(object source)
     {
       if (source is IGH_Goo goo)
@@ -306,6 +314,7 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
+    #endregion
 
     #region Version
     public (Guid? Created, Guid? Updated) Version
@@ -435,18 +444,26 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    internal ARDB.BuiltInCategory? BuiltInCategory => Value?.Category.ToBuiltInCategory();
+
     public virtual Category Category
     {
-      get => Value is object ?
-        Value.Category is ARDB.Category category ?
-        Category.FromCategory(category) :
-        new Category() :
-        default;
+      get
+      {
+        if (Value is ARDB.Element element)
+        {
+          return element.Category is ARDB.Category category ?
+          GetElement(Category.FromCategory(category)):
+          new Category();
+        }
+
+        return default;
+      }
     }
 
     public virtual ElementType Type
     {
-      get => ElementType.FromElementId(Document, Value?.GetTypeId()) as ElementType;
+      get => GetElement<ElementType>(Value?.GetTypeId());
       set
       {
         if (value is object && Value is ARDB.Element element)
@@ -476,7 +493,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public Phase CreatedPhase
     {
-      get => Value is ARDB.Element element && element.HasPhases() ? new Phase(element.Document, element.CreatedPhaseId) : default;
+      get => Value is ARDB.Element element && element.HasPhases() ? GetElement(new Phase(element.Document, element.CreatedPhaseId)) : default;
       set
       {
         if (value is object && Value is ARDB.Element element && element.HasPhases())
@@ -495,7 +512,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public Phase DemolishedPhase
     {
-      get => Value is ARDB.Element element && element.HasPhases() ? new Phase(element.Document, element.DemolishedPhaseId) : default;
+      get => Value is ARDB.Element element && element.HasPhases() ? GetElement(new Phase(element.Document, element.DemolishedPhaseId)) : default;
       set
       {
         if (value is object && Value is ARDB.Element element && element.HasPhases())
@@ -509,92 +526,6 @@ namespace RhinoInside.Revit.GH.Types
             element.DemolishedPhaseId = value.Id;
           }
         }
-      }
-    }
-    #endregion
-
-    #region Identity Data
-    public virtual string Description
-    {
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
-      set
-      {
-        if (value is object)
-          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.Update(value);
-      }
-    }
-
-    public string Comments
-    {
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.AsString();
-      set
-      {
-        if (value is object)
-          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Update(value);
-      }
-    }
-
-    public string Manufacturer
-    {
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.AsString();
-      set
-      {
-        if (value is object)
-          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.Update(value);
-      }
-    }
-
-    public string Model
-    {
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MODEL)?.AsString();
-      set
-      {
-        if (value is object)
-          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MODEL)?.Update(value);
-      }
-    }
-
-    public double? Cost
-    {
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_COST)?.AsDouble();
-      set
-      {
-        if (value is object)
-          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_COST)?.Update(value.Value);
-      }
-    }
-
-    public string Url
-    {
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString();
-      set
-      {
-        if (value is object)
-          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.Update(value);
-      }
-    }
-
-    public string Keynote
-    {
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.KEYNOTE_PARAM)?.AsString();
-      set
-      {
-        if (value is object)
-          Value?.get_Parameter(ARDB.BuiltInParameter.KEYNOTE_PARAM)?.Update(value);
-      }
-    }
-
-    public virtual string Mark
-    {
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK) is ARDB.Parameter parameter &&
-        parameter.HasValue ?
-        parameter.AsString() :
-        default;
-
-      set
-      {
-        if (value is object)
-          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.Update(value);
       }
     }
     #endregion

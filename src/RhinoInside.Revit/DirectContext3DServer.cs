@@ -766,22 +766,28 @@ namespace RhinoInside.Revit
 
       public virtual void Dispose()
       {
-        if (IsGeometryDisposable && part.IsEmpty)
-        geometry?.Dispose();        geometry = null;
-        effectInstance?.Dispose();  effectInstance = null;
-        if(linesBuffer != indexLinesBuffer && linesBuffer != indexPointsBuffer)
-        linesBuffer?.Dispose();     linesBuffer = null; linesCount = 0;
-        triangleBuffer?.Dispose();  triangleBuffer = null; triangleCount = 0;
-        vertexFormat?.Dispose();    vertexFormat = null;
-        vertexBuffer?.Dispose();    vertexBuffer = null; vertexCount = 0;
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+      }
+
+      protected virtual void Dispose(bool disposing)
+      {
+        if (disposing)
+        {
+          if (IsGeometryDisposable && part.IsEmpty)
+            geometry?.Dispose(); geometry = null;
+          effectInstance?.Dispose(); effectInstance = null;
+          if (linesBuffer != indexLinesBuffer && linesBuffer != indexPointsBuffer)
+            linesBuffer?.Dispose(); linesBuffer = null; linesCount = 0;
+          triangleBuffer?.Dispose(); triangleBuffer = null; triangleCount = 0;
+          vertexFormat?.Dispose(); vertexFormat = null;
+          vertexBuffer?.Dispose(); vertexBuffer = null; vertexCount = 0;
+        }
       }
 
       public virtual ARDB3D.EffectInstance EffectInstance(ARDB.DisplayStyle displayStyle, bool IsShadingPass)
       {
-        if (effectInstance is null)
-          effectInstance = new ARDB3D.EffectInstance(vertexFormatBits);
-
-        return effectInstance;
+        return effectInstance ??= new ARDB3D.EffectInstance(vertexFormatBits);
       }
 
       public bool Regen()

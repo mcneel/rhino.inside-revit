@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
@@ -8,8 +9,8 @@ namespace RhinoInside.Revit.External.UI
 {
   sealed class UIHostApplicationConstrained : UIHostApplication
   {
-    readonly UIControlledApplication _app;
-    public UIHostApplicationConstrained(UIControlledApplication app)
+    UIControlledApplication _app;
+    public UIHostApplicationConstrained(UIControlledApplication app, bool disposable) : base(disposable)
     {
       _app = app;
 
@@ -17,16 +18,26 @@ namespace RhinoInside.Revit.External.UI
       _app.SelectionChanged += SelectionChangedHandler;
 #endif
     }
-    public override void Dispose()
+    protected override void Dispose(bool disposing)
     {
-#if REVIT_2023
-      _app.SelectionChanged -= SelectionChangedHandler;
+      if (_app is object)
+      {
+        if (disposing)
+        {
+  #if REVIT_2023
+          _app.SelectionChanged -= SelectionChangedHandler;
 #endif
+          //_app.Dispose();
+        }
+
+        _app = null;
+      }
     }
+
     public override object Value => _app;
     public override bool IsValid => true;
 
-    public override ApplicationServices.HostServices Services => new ApplicationServices.HostServicesC(_app.ControlledApplication);
+    public override ApplicationServices.HostServices Services => ApplicationServices.HostServices.Current ??= _app.ControlledApplication;
     public override UIDocument ActiveUIDocument { get => default; set => throw new InvalidOperationException(); }
 
     #region UI
@@ -52,11 +63,11 @@ namespace RhinoInside.Revit.External.UI
     public override RibbonPanel CreateRibbonPanel(string tabName, string panelName) =>
       _app.CreateRibbonPanel(tabName, panelName);
 
-    public override IReadOnlyList<RibbonPanel> GetRibbonPanels(Tab tab) =>
-      _app.GetRibbonPanels(tab);
+    public override IReadOnlyDictionary<string, RibbonPanel> GetRibbonPanels(Tab tab) =>
+      _app.GetRibbonPanels(tab).ToDictionary(x => x.Name);
 
-    public override IReadOnlyList<RibbonPanel> GetRibbonPanels(string tabName) =>
-      _app.GetRibbonPanels(tabName);
+    public override IReadOnlyDictionary<string, RibbonPanel> GetRibbonPanels(string tabName) =>
+      _app.GetRibbonPanels(tabName).ToDictionary(x => x.Name);
     #endregion
 
     #region Addins

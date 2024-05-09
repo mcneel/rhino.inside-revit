@@ -59,7 +59,7 @@
   </Target>
   <Target Name="BeforeBuild">
     <!-- Read the version from the RhinoInside.Revit.dll -->
-    <GetAssemblyIdentity AssemblyFiles="..\RhinoInside.Revit\bin\2024\Release R7\RhinoInside.Revit.dll">
+    <GetAssemblyIdentity AssemblyFiles="..\RhinoInside.Revit\bin\Release-2024-R8\net481\RhinoInside.Revit.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
     </GetAssemblyIdentity>
     <!-- Create the MSBuild properties -->

@@ -13,6 +13,7 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     public static string CommandName => "Toggle\nSolver";
 
+    static PushButton Button;
     static readonly ImageSource SolverOnSmall = LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOn.png", true);
     static readonly ImageSource SolverOnLarge = LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOn.png", false);
     static readonly ImageSource SolverOffSmall = LoadRibbonButtonImage("Ribbon.Grasshopper.SolverOff.png", true);
@@ -39,7 +40,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         // apply a min width to the button so it does not change width
         // when toggling between Enable and Disable on its title
         pushButton.SetMinWidth(50);
-        StoreButton(CommandName, pushButton);
+        Button = pushButton;
       }
 
       AssemblyResolver.References["Grasshopper"].Activated += Grasshopper_AssemblyActivated;
@@ -53,7 +54,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     static void EnableSolutionsChanged(bool EnableSolutions)
     {
-      if (RestoreButton(CommandName) is PushButton button)
+      if (Button is PushButton button)
       {
         if (EnableSolutions)
         {

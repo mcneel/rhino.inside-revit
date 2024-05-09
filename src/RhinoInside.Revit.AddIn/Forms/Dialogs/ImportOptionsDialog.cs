@@ -16,15 +16,15 @@ namespace RhinoInside.Revit.AddIn.Forms
     const string ImportOptions = "ImportOptions";
 
     readonly ARDB.Document Document;
-    readonly ImageView imageView = new ImageView();
-    readonly DropDown fileSelector = new DropDown();
-    readonly Button fileBrowser = new Button() { Text = "…" };
-    readonly DropDown placementSelector = new DropDown();
-    readonly DropDown layersSelector = new DropDown();
-    readonly DropDown categorySelector = new DropDown();
-    readonly DropDown worksetSelector = new DropDown() { Enabled = false };
-    readonly ComboBox familyName = new ComboBox() { AutoComplete = true };
-    readonly ComboBox typeName = new ComboBox() { AutoComplete = true };
+    ImageView imageView = new ImageView();
+    DropDown fileSelector = new DropDown();
+    Button fileBrowser = new Button() { Text = "…" };
+    DropDown placementSelector = new DropDown();
+    DropDown layersSelector = new DropDown();
+    DropDown categorySelector = new DropDown();
+    DropDown worksetSelector = new DropDown() { Enabled = false };
+    ComboBox familyName = new ComboBox() { AutoComplete = true };
+    ComboBox typeName = new ComboBox() { AutoComplete = true };
 
     public string FileName => fileSelector.SelectedKey;
     public ARDB.ImportPlacement Placement => (ARDB.ImportPlacement) Enum.Parse(typeof(ARDB.ImportPlacement), placementSelector.SelectedKey);
@@ -74,6 +74,24 @@ namespace RhinoInside.Revit.AddIn.Forms
         InitLayoutFamily();
       else
         InitLayoutProject();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        imageView?.Dispose(); imageView = null;
+        fileSelector?.Dispose(); fileSelector = null;
+        fileBrowser?.Dispose(); fileBrowser = null;
+        placementSelector?.Dispose(); placementSelector = null;
+        layersSelector?.Dispose(); layersSelector = null;
+        categorySelector?.Dispose(); categorySelector = null;
+        worksetSelector?.Dispose(); worksetSelector = null;
+        familyName?.Dispose(); familyName = null;
+        typeName?.Dispose(); typeName = null;
+      }
+
+      base.Dispose(disposing);
     }
 
     void InitLayoutFamily()

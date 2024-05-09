@@ -52,6 +52,7 @@ namespace RhinoInside.Revit.GH
             {
               switch (builtInParameter)
               {
+                case ARDB.BuiltInParameter.ELEM_PARTITION_PARAM: return new Types.Workset(parameter.Element.Document, new ARDB.WorksetId(integer));
                 case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) integer);
                 case ARDB.BuiltInParameter.AUTO_JOIN_CONDITION_WALL: return new Types.CurtainGridJoinCondition((ERDB.CurtainGridJoinCondition) integer);
                 case ARDB.BuiltInParameter.SPACING_LAYOUT_U: return new Types.CurtainGridLayout((ERDB.CurtainGridLayout) integer);
@@ -105,10 +106,16 @@ namespace RhinoInside.Revit.GH
           {
             switch (builtInElementId)
             {
-              case ARDB.BuiltInParameter.ID_PARAM:          return new GH_String(elementId.ToString("D"));
-              case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:   return new GH_String(elementId.ToString("D"));
-              case ARDB.BuiltInParameter.MULLION_POSITION:  return new Types.MullionPosition(parameter.Element.Document, elementId);
-              case ARDB.BuiltInParameter.MULLION_PROFILE:   return new Types.ProfileType(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.ID_PARAM:                return new GH_String(elementId.ToString("D"));
+              case ARDB.BuiltInParameter.SYMBOL_ID_PARAM:         return new GH_String(elementId.ToString("D"));
+              case ARDB.BuiltInParameter.MULLION_POSITION:        return new Types.MullionPosition(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.MULLION_PROFILE:         return new Types.ProfileType(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.VIEW_UNDERLAY_BOTTOM_ID: return new Types.Level(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.VIEW_UNDERLAY_TOP_ID:    return new Types.Level(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.VIEW_TEMPLATE:           return Types.View.FromElementId(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.WALL_HEIGHT_TYPE:        return new Types.Level(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.PHASE_CREATED:           return new Types.Phase(parameter.Element.Document, elementId);
+              case ARDB.BuiltInParameter.PHASE_DEMOLISHED:        return new Types.Phase(parameter.Element.Document, elementId);
             }
           }
 

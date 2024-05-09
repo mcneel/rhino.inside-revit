@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.GH.Types
             if (parameter?.AsElementId() is ARDB.ElementId categoryId)
             {
               var category = new Category(Document, categoryId);
-              return category.APIObject?.Parent is null ? new Category() : category;
+              return category.APIObject?.Parent is null ? new Category() : GetElement(category);
             }
           }
         }

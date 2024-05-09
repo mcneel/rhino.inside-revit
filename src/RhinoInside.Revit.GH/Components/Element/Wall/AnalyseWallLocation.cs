@@ -111,12 +111,12 @@ namespace RhinoInside.Revit.GH.Components.Walls
       if (!DA.GetData("Wall", ref wall))
         return;
 
-      DA.SetData("Center Curve", wall.GetCenterCurve().ToCurve());
+      DA.SetData("Center Curve", (wall.Location as ARDB.LocationCurve)?.Curve.ToCurve());
       DA.SetData("Location Line", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).AsGoo());
 
       var offsetPlaneNormal = GetOffsetPlaneNormal(wall);
       var offsetValue = GetOffsetForLocationCurve(wall);
-      var locationCurve = OffsetLocationCurve(wall.GetLocationCurve().Curve, offsetValue, offsetPlaneNormal);
+      var locationCurve = OffsetLocationCurve((wall.Location as ARDB.LocationCurve).Curve, offsetValue, offsetPlaneNormal);
       DA.SetData("Offset Value", offsetValue);
       DA.SetData("Location Curve", locationCurve.ToCurve());
     }

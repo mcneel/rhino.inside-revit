@@ -34,7 +34,6 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        StoreButton(CommandName, pushButton);
       }
     }
 

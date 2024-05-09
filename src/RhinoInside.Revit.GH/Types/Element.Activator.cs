@@ -188,18 +188,18 @@ namespace RhinoInside.Revit.GH.Types
       return new Element(element);
     }
 
-    internal static Element FromLinkElement(RevitLinkInstance link, Element element)
+    internal static Element FromLinkElement(ARDB.RevitLinkInstance link, Element element)
     {
-      using (var linkedElementReference = ARDB.Reference.ParseFromStableRepresentation(element.Document, element.ReferenceUniqueId))
+      using (var linkedElementReference = ARDB.Reference.ParseFromStableRepresentation(element.ReferenceDocument, element.ReferenceUniqueId))
       {
-        using (var elementReference = linkedElementReference.CreateLinkReference(link.Value))
+        using (var elementReference = linkedElementReference.CreateLinkReference(link))
         {
           var doc = link.Document;
           element.ReferenceDocumentId = doc.GetPersistentGUID();
           element.ReferenceUniqueId = elementReference.ConvertToPersistentRepresentation(doc);
           element._ReferenceDocument = doc;
           element._ReferenceId = link.Id;
-          element.ReferenceTransform = link.Value.GetTransform().ToTransform();
+          if(element is GraphicalElement) element.ReferenceTransform =  link.GetTransform().ToTransform();
           return element;
         }
       }
@@ -230,23 +230,13 @@ namespace RhinoInside.Revit.GH.Types
       if (id.HostElementId != ARDB.ElementId.InvalidElementId)
         return FromElementId(doc, id.HostElementId);
 
-      if (doc.GetElement(id.LinkInstanceId) is ARDB.RevitLinkInstance link)
+      if
+      (
+        doc.GetElement(id.LinkInstanceId) is ARDB.RevitLinkInstance link &&
+        FromElement(link.GetLinkDocument()?.GetElement(id.LinkedElementId)) is Element element
+      )
       {
-        if (FromElement(link.GetLinkDocument()?.GetElement(id.LinkedElementId)) is Element element)
-        {
-          using (var linkedElementReference = ARDB.Reference.ParseFromStableRepresentation(element.Document, element.ReferenceUniqueId))
-          {
-            using (var elementReference = linkedElementReference.CreateLinkReference(link))
-            {
-              element.ReferenceDocumentId = doc.GetPersistentGUID();
-              element.ReferenceUniqueId = elementReference.ConvertToPersistentRepresentation(doc);
-              element._ReferenceDocument = doc;
-              element._ReferenceId = link.Id;
-              element.ReferenceTransform = link.GetTransform().ToTransform();
-              return element;
-            }
-          }
-        }
+        return FromLinkElement(link, element);
       }
 
       return default;

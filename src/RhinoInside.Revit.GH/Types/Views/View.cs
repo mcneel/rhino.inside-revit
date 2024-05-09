@@ -32,8 +32,14 @@ namespace RhinoInside.Revit.GH.Types
     public new ARDB.View Value => base.Value as ARDB.View;
 
     public View() { }
-    public View(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
-    public View(ARDB.View view) : base(view) { }
+    protected View(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    protected internal View(ARDB.View view) : base(view) { }
+
+    internal static new Element FromElementId(ARDB.Document doc, ARDB.ElementId id)
+    {
+      if (id == ElementIdExtension.Invalid) return new View();
+      return Element.FromElementId(doc, id) as View;
+    }
 
     public override bool CastTo<Q>(out Q target)
     {
@@ -52,6 +58,16 @@ namespace RhinoInside.Revit.GH.Types
 
         return target is object;
       }
+
+#if RHINO_8
+      if (typeof(Q).IsAssignableFrom(typeof(Grasshopper.Rhinoceros.Display.ModelView)))
+      {
+        if (GetViewFrame() is ViewFrame viewFrame)
+          target = (Q) (object) new Grasshopper.Rhinoceros.Display.ModelView(viewFrame.Value, ModelPath);
+
+        return target is object;
+      }
+#endif
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
       {
@@ -154,22 +170,16 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
+    #region ModelContent
+    protected override string ElementPath => Type?.FamilyName is string familyName && familyName.Length > 0 ?
+      $"{familyName}::{base.ElementPath}" : base.ElementPath;
+    #endregion
+
     public override string DisplayName => Value?.Name ?? base.DisplayName;
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    public string FullName
-    {
-      get
-      {
-        if (ViewType is ViewType viewType)
-        {
-          FormattableString formatable = $"{viewType} : {DisplayName}";
-          return formatable.ToString(CultureInfo.CurrentUICulture);
-        }
-
-        return DisplayName;
-      }
-    }
+    public string FullName => Type?.FamilyName is string familyName && familyName.Length > 0 ?
+      $"{familyName} : {base.DisplayName}" : base.DisplayName;
 
     string Family => Value.get_Parameter(ARDB.BuiltInParameter.VIEW_FAMILY).AsString();
 
@@ -177,11 +187,12 @@ namespace RhinoInside.Revit.GH.Types
     public ViewFamily ViewFamily => Value is ARDB.View view ?
       new ViewFamily(view.GetViewFamily()) : default;
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public ViewType ViewType => Value is ARDB.View view ?
       new ViewType(view.ViewType) : default;
 
     public virtual ARDB.ElementId GenLevelId => Value?.GenLevel?.Id;
-    public Level GenLevel => Value?.GenLevel is ARDB.Level genLevel ? new Level(genLevel) : default;
+    public Level GenLevel => GetElement<Level>(Value?.GenLevel);
 
     public double Scale => Value is ARDB.View view ?
       view.Scale == 0 ? 1.0 : (double) view.Scale :
@@ -543,7 +554,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public Phase Phase
     {
-      get => Phase.FromElement(Value.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElement()) as Phase;
+      get => GetElement<Phase>(Value.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElement());
       set
       {
         if (value is object && Value is ARDB.View view)
@@ -556,11 +567,11 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public SketchPlane SketchPlane => SketchPlane.FromElement(Value?.SketchPlane) as SketchPlane;
+    public SketchPlane SketchPlane => GetElement<SketchPlane>(Value?.SketchPlane);
 
-    public Viewport Viewport => Viewport.FromElement(Value?.GetViewport()) as Viewport;
+    public Viewport Viewport => GetElement<Viewport>(Value?.GetViewport());
 
-    public Viewer Viewer => Viewer.FromElement(Value?.GetViewer()) as Viewer;
+    public Viewer Viewer => GetElement<Viewer>(Value?.GetViewer());
     #endregion
 
     #region IGH_BakeAwareElement

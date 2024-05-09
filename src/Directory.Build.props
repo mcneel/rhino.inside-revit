@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- product info -->
   <Import Project="Product.targets"/>
 
@@ -12,78 +12,79 @@
   <!-- only for csproj projects -->
   <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
     <SchemaVersion>2.0</SchemaVersion>
-    <LangVersion>7.3</LangVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <TargetFrameworkProfile />
-    <!-- target -->
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <TargetFramework>net48</TargetFramework>
+
+    <!-- Language -->
+    <LangVersion>8.0</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+
+    <!-- Target -->
     <PlatformTarget>x64</PlatformTarget>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <!-- constants are provided for revit versions that are not supported anymore -->
+    <UseWpf>true</UseWpf>
+    <UseWindowsForms>true</UseWindowsForms>
+    
+    <!-- Constants are provided for revit versions that are not supported anymore -->
     <DefineConstants></DefineConstants>
-    <!-- any unknown config is considered Debug -->
+    
+    <!-- Any unknown config is considered Debug -->
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-    <!-- any unknown platform is considered AnyCPU -->
+    <!-- Any unknown platform is considered AnyCPU -->
     <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+
+    <!-- Warnings -->
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3277;MSB3052</MSBuildWarningsAsMessages>
+
+    <!-- Code Analysis -->
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
-  <!-- build configurations for each revit -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2017'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2017'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2018'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2018'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2019'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2019'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2020'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2020'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2021'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2021'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2022'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2022'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2023'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2023'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|2024'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|2024'"></PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R7|2017'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R7|2017'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R7|2018'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R7|2018'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R7|2019'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R7|2019'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R7|2020'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R7|2020'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R7|2021'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R7|2021'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R7|2022'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R7|2022'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R7|2023'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R7|2023'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R7|2024'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R7|2024'"></PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R8|2017'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R8|2017'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R8|2018'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R8|2018'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R8|2019'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R8|2019'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R8|2020'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R8|2020'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R8|2021'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R8|2021'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R8|2022'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R8|2022'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R8|2023'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R8|2023'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug R8|2024'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release R8|2024'"></PropertyGroup>
+  <!-- Build configurations for each combination Revit-Rhino -->
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
+    <Configurations>
+      Debug-2017-R7;
+      Debug-2018-R7;
+      Debug-2019-R7;
+      Debug-2020-R7;
+      Debug-2021-R7;
+      Debug-2022-R7;
+      Debug-2023-R7;
+      Debug-2024-R7;
+      Debug-2017-R8;
+      Debug-2018-R8;
+      Debug-2019-R8;
+      Debug-2020-R8;
+      Debug-2021-R8;
+      Debug-2022-R8;
+      Debug-2023-R8;
+      Debug-2024-R8;
+      Debug-2025-R8;
+      Release-2017-R7;
+      Release-2018-R7;
+      Release-2019-R7;
+      Release-2020-R7;
+      Release-2021-R7;
+      Release-2022-R7;
+      Release-2023-R7;
+      Release-2024-R7;
+      Release-2017-R8;
+      Release-2018-R8;
+      Release-2019-R8;
+      Release-2020-R8;
+      Release-2021-R8;
+      Release-2022-R8;
+      Release-2023-R8;
+      Release-2024-R8;
+      Release-2025-R8;
+    </Configurations>
+    <MSBuildProjectExtensionsPath>obj\$(Configuration)</MSBuildProjectExtensionsPath>
+  </PropertyGroup>
 
   <!-- dbg vs release build configurations -->
   <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
     <DefineConstants>$(DefineConstants);TRACE;DEBUG</DefineConstants>
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
@@ -92,13 +93,24 @@
 
   <PropertyGroup Condition="$(Configuration.Contains('Release'))">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
     <Optimize>true</Optimize>
     <ConfigurationType>Release</ConfigurationType>
   </PropertyGroup>
 
+  <Target Name="Trace-BuildDate" BeforeTargets="ResolveReferences">
+    <Message Importance="high" Text="Deterministic = $(Deterministic)"/>
+    <Message Importance="high" Text="BuildDate = $(BuildDate)"/>
+    <Message Importance="high" Text="BuildVersion = $(BuildVersion)"/>
+    <Message Importance="high" Text="RevisionVersion = $(RevisionVersion)"/>
+  </Target>
+
+  <Target Name="Trace-TargetFramework" BeforeTargets="ResolveReferences">
+    <Message Importance="high" Text="TargetFramework = $(TargetFramework)"/>
+  </Target>
+
   <!-- shared references -->
-  <ItemGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
+  <ItemGroup Condition="'$(MSBuildProjectExtension)'=='.csproj' And $(TargetFramework.Contains('net481'))">
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -112,5 +124,9 @@
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
+
+  <Target Name="Remove-ProjectExtensions" AfterTargets="Clean" Condition="'$(MSBuildProjectExtension)'=='.csproj'">
+    <RemoveDir Directories="$(MSBuildProjectExtensionsPath)" />
+  </Target>
 
 </Project>

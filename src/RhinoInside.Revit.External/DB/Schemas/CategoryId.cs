@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
     #region IParsable
     public static bool TryParse(string s, IFormatProvider provider, out CategoryId result)
     {
-      if (IsCategoryId(s))
+      if (IsCategoryId(s, empty: true))
       {
         result = new CategoryId(s);
         return true;
@@ -43,27 +43,34 @@ namespace RhinoInside.Revit.External.DB.Schemas
       return result;
     }
 
-    static bool IsCategoryId(string id)
+    static bool IsCategoryId(string id, bool empty)
     {
-      return id == string.Empty || // '<None>'
+      return (empty && id == string.Empty) || // '<None>'
              id.StartsWith("autodesk.revit.category");
     }
     #endregion
 
     public static bool IsCategoryId(DataType value, out CategoryId categoryId)
     {
-      var typeId = value.TypeId;
-      if (IsCategoryId(typeId))
+      switch (value)
       {
-        categoryId = new CategoryId(typeId);
-        return true;
-      }
+        case CategoryId c: categoryId = c; return true;
+        default:
 
-      categoryId = default;
-      return false;
+          var typeId = value.TypeId;
+          if (IsCategoryId(typeId, empty: false))
+          {
+            categoryId = new CategoryId(typeId);
+            return true;
+          }
+
+          categoryId = default;
+          return false;
+      }
     }
 
-    private static readonly HashSet<CategoryId> Values = new HashSet<CategoryId>
+    static HashSet<CategoryId> _Values;
+    private static HashSet<CategoryId> Values => _Values ??= new HashSet<CategoryId>
     (
       typeof(CategoryId).
       GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).
@@ -71,7 +78,8 @@ namespace RhinoInside.Revit.External.DB.Schemas
       Select(x => (CategoryId) x.GetValue(null))
     );
 
-    internal static readonly IReadOnlyDictionary<ARDB.BuiltInCategory, CategoryId> BuiltIn = Values.ToDictionary(k => k.BuiltInCategory);
+    private static IReadOnlyDictionary<ARDB.BuiltInCategory, CategoryId> _BuiltIn;
+    internal static IReadOnlyDictionary<ARDB.BuiltInCategory, CategoryId> BuiltIn => _BuiltIn ??= Values.ToDictionary(k => k.BuiltInCategory);
     public static implicit operator CategoryId(ARDB.BuiltInCategory value) => BuiltIn.TryGetValue(value, out var id) ? id : Empty;
 
     private ARDB.BuiltInCategory BuiltInCategory = default;
@@ -79,8 +87,17 @@ namespace RhinoInside.Revit.External.DB.Schemas
       (value.BuiltInCategory = Values.TryGetValue(value, out var bi) ? bi.BuiltInCategory : ARDB.BuiltInCategory.INVALID);
 
 #if REVIT_2021
-    public static implicit operator CategoryId(ARDB.ForgeTypeId value) => value is null ? null : IsCategoryId(value.TypeId) ? new CategoryId(value.TypeId) : throw new InvalidCastException();
     public static implicit operator ARDB.ForgeTypeId(CategoryId value) => value is null ? null : new ARDB.ForgeTypeId(value.TypeId);
+    public static implicit operator CategoryId(ARDB.ForgeTypeId value)
+    {
+      if (value is null) return null;
+      var typeId = value.TypeId;
+#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
+      return IsCategoryId(typeId, empty: true) ?
+        new CategoryId(typeId) :
+        throw new InvalidCastException($"'{typeId}' is not a valid {typeof(CategoryId)}");
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
+    }
 #endif
   }
 }

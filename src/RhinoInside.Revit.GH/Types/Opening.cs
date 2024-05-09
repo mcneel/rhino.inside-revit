@@ -167,13 +167,11 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region ISketchAccess
-    public Sketch Sketch => Value is ARDB.Opening opening ? new Sketch(opening.GetSketch()) : default;
+    public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());
     #endregion
 
     #region IHostElementAccess
-    public override GraphicalElement HostElement => Value is ARDB.Opening opening ?
-      GetElement<GraphicalElement>(opening.Host) :
-      default;
+    public override GraphicalElement HostElement => GetElement<GraphicalElement>(Value?.Host);
     #endregion
   }
 }

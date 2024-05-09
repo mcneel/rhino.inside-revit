@@ -15,18 +15,24 @@ namespace RhinoInside.Revit.AddIn.Commands
       FileLocation = Path.Combine(Core.SwapFolder, "LinkedScripts");
       Directory.CreateDirectory(FileLocation);
 
+#if NET
+      AssmBuilder = AssemblyBuilder.DefineDynamicAssembly
+      (
+        new AssemblyName { Name = Name, Version = new Version(0, 1) },
+        AssemblyBuilderAccess.Run
+      );
+
+      ModuleBuilder = AssmBuilder.DefineDynamicModule(Name);
+#else
       AssmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly
       (
-        new AssemblyName
-        {
-          Name = Name,
-          Version = new Version(0, 1)
-        },
+        new AssemblyName { Name = Name, Version = new Version(0, 1) },
         AssemblyBuilderAccess.RunAndSave,
         FileLocation
       );
 
       ModuleBuilder = AssmBuilder.DefineDynamicModule(Name, FileName);
+#endif
     }
 
     public string Name { get; private set; }
@@ -39,7 +45,12 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     public void SaveAndLoad()
     {
+#if NET
+      var generator = new Lokad.ILPack.AssemblyGenerator();
+      generator.GenerateAssembly(ModuleBuilder.Assembly, FilePath);
+#else
       AssmBuilder?.Save(FileName);
+#endif
       Assembly.LoadFrom(FilePath);
     }
 

@@ -115,8 +115,7 @@ namespace RhinoInside.Revit.GH.Types
     #region Properties
     public string Number => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_NUMBER)?.AsString();
     public string Name => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_NAME)?.AsString();
-    public Phase Phase => Value is ARDB.SpatialElement element ?
-      Phase.FromElementId(element.Document, element.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE)?.AsElementId()) as Phase : default;
+    public Phase Phase => GetElement<Phase>(Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE)?.AsElementId());
 
     public bool IsPlaced => Value?.Location is object;
     public bool IsEnclosed => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_PERIMETER)?.HasValue == true;

@@ -112,7 +112,10 @@ namespace RhinoInside.Revit.GH.Types
             }
 
             if (element is ARDB.Instance instance)
-              ReferenceTransform = HasReferenceTransform ? ReferenceTransform * instance.GetTransform().ToTransform() : instance.GetTransform().ToTransform();
+            {
+              if (_Reference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_NONE && _Reference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT)
+                ReferenceTransform = HasReferenceTransform ? ReferenceTransform * instance.GetTransform().ToTransform() : instance.GetTransform().ToTransform();
+            }
 
             Document = element?.Document;
             return element?.GetGeometryObjectFromReference(geometryReference);
@@ -241,6 +244,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_PreviewData
     private BoundingBox? _ClippingBox;
+    BoundingBox IGH_PreviewData.ClippingBox => _ClippingBox ??= ClippingBox;
 
     /// <summary>
     /// Not necessarily accurate axis aligned <see cref="Rhino.Geometry.BoundingBox"/> used for display.
@@ -248,7 +252,7 @@ namespace RhinoInside.Revit.GH.Types
     /// <returns>
     /// A finite axis aligned bounding box.
     /// </returns>
-    public BoundingBox ClippingBox => _ClippingBox ?? (_ClippingBox = BoundingBox).Value;
+    protected virtual BoundingBox ClippingBox => BoundingBox;
 
     public virtual void DrawViewportWires(GH_PreviewWireArgs args) { }
     public virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
@@ -274,6 +278,17 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     protected GeometryObject() { }
+    protected GeometryObject(Reference reference) : base(reference)
+    {
+      ReferenceDocumentId = reference.ReferenceDocumentId;
+      ReferenceUniqueId = reference.ReferenceUniqueId;
+
+      _ReferenceDocument = reference.ReferenceDocument;
+      _Reference = reference.GetReference();
+
+      Document = reference.Document;
+    }
+
     protected GeometryObject(ARDB.Document document, ARDB.GeometryObject geometryObject) : base(document, geometryObject) { }
     protected GeometryObject(ARDB.Document document, ARDB.Reference reference)
     {
@@ -377,30 +392,20 @@ namespace RhinoInside.Revit.GH.Types
 
     public GeometryElement() { }
     public GeometryElement(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
-    public GeometryElement(GraphicalElement element) : base(element.ReferenceDocument, element.GetReference())
+    public GeometryElement(GraphicalElement element) : base(element)
     {
       _Element = element;
-      ReferenceTransform = _Element.ReferenceTransform;
     }
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value?.GetBoundingBox()?.ToBox() is Box box)
+      bool identity = xform.IsIdentity;
+      var box = Value?.GetBoundingBox(identity ? null : xform.ToTransform().Inverse);
+      if (!box.IsFinite()) box = Document.GetElement(Id)?.GetBoundingBoxXYZ();
+      if (box.IsFinite() && box.ToBox() is Box bbox)
       {
-        if (HasReferenceTransform) box.Transform(ReferenceTransform);
-        return xform == Transform.Identity ?
-          box.BoundingBox :
-          box.GetBoundingBox(xform);
-      }
-      else if(ReferenceDocument.GetElement(GetReference()) is ARDB.Element element)
-      {
-        if (element.GetBoundingBoxXYZ()?.ToBox() is Box bbox)
-        {
-          if (HasReferenceTransform) bbox.Transform(ReferenceTransform);
-          return xform == Transform.Identity ?
-            bbox.BoundingBox :
-            bbox.GetBoundingBox(xform);
-        }
+        if (HasReferenceTransform) bbox.Transform(ReferenceTransform);
+        return identity ? bbox.BoundingBox : bbox.GetBoundingBox(xform);
       }
 
       return NaN.BoundingBox;

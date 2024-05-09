@@ -1358,7 +1358,7 @@ namespace Rhino.Display
   {
     public static bool BringToFront(this RhinoView view)
     {
-      var viewWindow = new WindowHandle(view.Handle);
+      var viewWindow = (WindowHandle) view.Handle;
       if (!viewWindow.IsZero)
       {
         var topMost = viewWindow;
@@ -1378,7 +1378,7 @@ namespace Rhino.Display
 
     public static bool SetClientSize(this RhinoView view, System.Drawing.Size clientSize)
     {
-      var viewWindow = new WindowHandle(view.Handle);
+      var viewWindow = (WindowHandle) view.Handle;
       if (!viewWindow.IsZero)
       {
         if (view.Floating)

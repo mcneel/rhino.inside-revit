@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
             if (e.GetType() == typeof(Autodesk.Revit.Exceptions.ArgumentException))
               ThrowArgumentException(nameof(point), "Input geometry does not satisfy DirectShape validation criteria.", point);
 
-            throw e;
+            throw;
           }
         }
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"DirectShape geometry is empty. {{{element.Id.ToString("D")}}}");

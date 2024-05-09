@@ -10,6 +10,9 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added suppport for Revit 2025.
+- Implemented casting from `View` to `ModelView` in Rhino 8.
+
 ### RC
 
 - Added 'Issue Revision' component.
