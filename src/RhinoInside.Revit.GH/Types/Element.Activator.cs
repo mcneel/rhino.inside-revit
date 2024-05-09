@@ -163,7 +163,8 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 
           case ARDB.BuiltInCategory.OST_IOSSketchGrid:
-            return new GeometricElement(element);
+            if (SketchPlaneGrid.IsValidElement(element)) return new SketchPlaneGrid(element);
+            break;
 
           case ARDB.BuiltInCategory.OST_IOSArrays:
             return new GraphicalElement(element);

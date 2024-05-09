@@ -12,6 +12,7 @@ group: Deployment & Configs
 
 - Added suppport for Revit 2025.
 - Implemented casting from `View` to `ModelView` in Rhino 8.
+- Added 'View Work Plane' component.
 
 ### RC
 

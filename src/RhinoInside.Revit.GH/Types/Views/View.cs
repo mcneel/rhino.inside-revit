@@ -566,7 +566,20 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public SketchPlane SketchPlane => GetElement<SketchPlane>(Value?.SketchPlane);
+    public SketchPlane SketchPlane
+    {
+      get => GetElement<SketchPlane>(Value?.SketchPlane);
+      set
+      {
+        if (value is object && Value is ARDB.View view)
+        {
+          AssertValidDocument(value, nameof(SketchPlane));
+          InvalidateGraphics();
+
+          view.SketchPlane = value.Value;
+        }
+      }
+    }
 
     public Viewport Viewport => GetElement<Viewport>(Value?.GetViewport());
 
