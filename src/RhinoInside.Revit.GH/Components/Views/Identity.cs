@@ -64,16 +64,16 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "View", out Types.View view)) return;
+      if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
 
       if (view.Value.HasViewDiscipline())
         DA.SetData("Discipline", view.Value.Discipline);
       else
         DA.SetData("Discipline", null);
 
-      Params.TrySetData(DA, "View Family", () => view.Value.GetViewFamily());
-      Params.TrySetData(DA, "View Name", () => view.Value.Name);
-      Params.TrySetData(DA, "Is Dependent", () => view.Value.GetPrimaryViewId() != ARDB.ElementId.InvalidElementId);
+      Params.TrySetData(DA, "View Family", () => view.ViewFamily);
+      Params.TrySetData(DA, "View Name", () => view.Nomen);
+      Params.TrySetData(DA, "Is Dependent", () => view.Value.GetPrimaryViewId() != ElementIdExtension.Invalid);
       Params.TrySetData(DA, "View Dependency", () => view.GetElement<Types.View>(view.Value.GetPrimaryViewId()));
       Params.TrySetData(DA, "Is Template", () => view.Value.IsTemplate);
       Params.TrySetData(DA, "View Template", () => view.GetElement<Types.View>(view.Value.ViewTemplateId));

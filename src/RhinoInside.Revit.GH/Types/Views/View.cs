@@ -171,6 +171,12 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    string Family => Value.get_Parameter(ARDB.BuiltInParameter.VIEW_FAMILY).AsString();
+
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    public ViewFamily ViewFamily => Value is ARDB.View view ?
+      new ViewFamily(view.GetViewFamily()) : default;
+
     public ViewType ViewType => Value is ARDB.View view ?
       new ViewType(view.ViewType) : default;
 
