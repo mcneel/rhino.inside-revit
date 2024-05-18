@@ -2148,6 +2148,18 @@
     "uuid": "221e53a6-54a2-45fb-82b1-220d6e5be884"
   }, 
   {
+    "desc": "Get-Set revision issue status", 
+    "iconsrc": "/static/images/GH/RevisionIssue.png", 
+    "icontag": null, 
+    "panel": "View", 
+    "since": "1.21", 
+    "tab": "Revit", 
+    "title": "Revision Issue", 
+    "typename": "RevisionIssue", 
+    "until": null, 
+    "uuid": "504cb82c-fa96-4506-8f3b-6ade2dfff6f0"
+  }, 
+  {
     "desc": "Given a point and a view, it adds a schedule on a sheet", 
     "iconsrc": "/static/images/GH/AddScheduleSheetInstance.png", 
     "icontag": null, 
@@ -3325,8 +3337,8 @@
   }, 
   {
     "desc": "", 
-    "iconsrc": null, 
-    "icontag": "F", 
+    "iconsrc": "/static/images/GH/FamilyGeometryByMesh.png", 
+    "icontag": null, 
     "panel": "Component", 
     "since": "1.21", 
     "tab": "Revit", 
