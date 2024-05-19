@@ -16,7 +16,7 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.21" version="v" time="05/18/2024" %}
+{% include ltr/release-header.html title="v1.21" version="v1.21.8904.29048" time="05/18/2024" %}
 
 - Added {% include ltr/comp.html uuid='504cb82c' %} component.
 - Includes all changes under 1.21 RC releases listed below
