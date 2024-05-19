@@ -3003,6 +3003,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap FamilyGeometryByMesh {
+            get {
+                object obj = ResourceManager.GetObject("FamilyGeometryByMesh", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap FamilyGeometryOpeningByCurve {
             get {
                 object obj = ResourceManager.GetObject("FamilyGeometryOpeningByCurve", resourceCulture);
@@ -4293,6 +4303,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap RevisionIssue {
+            get {
+                object obj = ResourceManager.GetObject("RevisionIssue", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap RevitFileLocations {
             get {
                 object obj = ResourceManager.GetObject("RevitFileLocations", resourceCulture);
@@ -4893,9 +4913,9 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ViewRangeElevations {
+        internal static System.Drawing.Bitmap ViewRange {
             get {
-                object obj = ResourceManager.GetObject("ViewRangeElevations", resourceCulture);
+                object obj = ResourceManager.GetObject("ViewRange", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
