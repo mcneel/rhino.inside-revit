@@ -10,12 +10,22 @@ namespace RhinoInside.Revit.External.DB.Schemas
   {
     public static new ParameterId Empty { get; } = new ParameterId();
 
-    public override string LocalizedLabel => IsNullOrEmpty(this) ? string.Empty :
+    public override string LocalizedLabel
+    {
+      get
+      {
+        try
+        {
+          return IsNullOrEmpty(this) ? string.Empty :
 #if REVIT_2022
-      Autodesk.Revit.DB.LabelUtils.GetLabelForBuiltInParameter(this);
+          Autodesk.Revit.DB.LabelUtils.GetLabelForBuiltInParameter(this);
 #else
-      Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInParameter) this);
+          Autodesk.Revit.DB.LabelUtils.GetLabelFor((Autodesk.Revit.DB.BuiltInParameter) this);
 #endif
+        }
+        catch { return string.Empty; }
+      }
+    }
 
     public ParameterId() { }
     public ParameterId(string id) : base(id)
