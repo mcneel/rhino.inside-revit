@@ -16,6 +16,11 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.22 RC2" version="v1.22.8906.14842" pre_release=true time="05/21/2024" %}
+
+- Misc Improvements
+
+
 {% include ltr/release-header.html title="v1.22 RC1" version="v1.22.8900.22517" pre_release=true time="05/19/2024" %}
 
 - Added suppport for Revit 2025.
