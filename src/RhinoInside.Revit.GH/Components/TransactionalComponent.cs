@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.Components
         return;
       }
 
-      if (severity == ARDB.FailureSeverity.Warning && FailureDefinitionIdsToFix.Contains(failureId))
+      if (severity == ARDB.FailureSeverity.Warning && FailureDefinitionIdsToFix?.Contains(failureId) is true)
         return;
 
       var level = GH_RuntimeMessageLevel.Remark;
