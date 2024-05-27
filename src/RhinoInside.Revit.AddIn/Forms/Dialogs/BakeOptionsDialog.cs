@@ -17,8 +17,8 @@ namespace RhinoInside.Revit.AddIn.Forms
 
     readonly ARDB.Document Document;
 
-    readonly ComboBox _categorySelector = new ComboBox();
-    readonly ComboBox _worksetSelector = new ComboBox() { Enabled = false };
+    ComboBox _categorySelector = new ComboBox();
+    ComboBox _worksetSelector = new ComboBox() { Enabled = false };
 
     public ARDB.ElementId SelectedCategory { get; private set; } = ARDB.ElementId.InvalidElementId;
     public ARDB.WorksetId SelectedWorkset { get; private set; } = ARDB.WorksetId.InvalidWorksetId;
@@ -31,6 +31,17 @@ namespace RhinoInside.Revit.AddIn.Forms
       DefaultButton.Click += BakeButton_Click;
 
       InitLayout();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        _categorySelector?.Dispose(); _categorySelector = null;
+        _worksetSelector?.Dispose(); _worksetSelector = null;
+      }
+
+      base.Dispose(disposing);
     }
 
     void InitLayout()

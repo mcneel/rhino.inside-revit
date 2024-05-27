@@ -5,7 +5,7 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-	using Numerical;
+  using Numerical;
   struct GeometryObjectEqualityComparer :
     IEqualityComparer<double>,
     IEqualityComparer<UV>,
@@ -634,44 +634,98 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// Retrieves a box that encloses the geometry object.
     /// </summary>
     /// <param name="geometry"></param>
+    /// <param name="xform"></param>
     /// <returns>The geometry bounding box.</returns>
-    public static BoundingBoxXYZ GetBoundingBox(this GeometryObject geometry)
+    public static BoundingBoxXYZ GetBoundingBox(this GeometryObject geometry, Transform coordSystem = null)
     {
+      bool accurate = false;
+      bool accurateElement = true; // Some GeometryElement that contain a GeometryInstance return biger bounding-box when transformed
+      bool accurateInstance = accurate;
+      bool accurateSolid = accurate;
+
       switch (geometry)
       {
         case null:
           return null;
 
         case GeometryElement element:
+        {
+          if (coordSystem is object)
+          {
+            if (accurateElement)
+            {
+              var bbox = BoundingBoxXYZExtension.Empty;
+              bbox.Transform = coordSystem;
+
+              foreach (var e in element)
+              {
+                if (e.Visibility != Visibility.Visible) continue;
+                bbox.Union(e.GetBoundingBox(coordSystem));
+              }
+
+              bbox.Transform = coordSystem;
+              return bbox;
+            }
+            else
+            {
+              var bbox = element.GetTransformed(coordSystem.Inverse).GetBoundingBox();
+              bbox.Transform = coordSystem;
+              return bbox;
+            }
+          }
+
           return element.GetBoundingBox();
+        }
 
         case GeometryInstance instance:
         {
-          var bbox = instance.SymbolGeometry.GetBoundingBox();
-          bbox.Transform = instance.Transform;
-          return bbox;
+          if (coordSystem is object)
+          {
+            if (accurateInstance)
+            {
+              var bbox = instance.GetSymbolGeometry(instance.Transform).GetBoundingBox(coordSystem);
+              bbox.Transform = coordSystem;
+              return bbox;
+            }
+            else
+            {
+              var bbox = instance.GetSymbolGeometry(coordSystem.Inverse * instance.Transform).GetBoundingBox();
+              bbox.Transform = coordSystem;
+              return bbox;
+            }
+          }
+          else
+          {
+            var bbox = instance.SymbolGeometry.GetBoundingBox();
+            bbox.Transform = instance.Transform;
+            return bbox;
+          }
         }
 
         case Point point:
-          return new BoundingBoxXYZ() { Min = point.Coord, Max = point.Coord };
+        {
+          if (XYZExtension.TryGetBoundingBox(new XYZ[] { point.Coord }, out var bbox, coordSystem))
+            return bbox;
+        }
+        break;
 
         case PolyLine polyline:
         {
-          if (XYZExtension.TryGetBoundingBox(polyline.GetCoordinates(), out var bbox))
+          if (XYZExtension.TryGetBoundingBox(polyline.GetCoordinates(), out var bbox, coordSystem))
             return bbox;
         }
         break;
 
         case Curve curve:
         {
-          if (XYZExtension.TryGetBoundingBox(curve.Tessellate(), out var bbox))
+          if (XYZExtension.TryGetBoundingBox(curve.Tessellate(), out var bbox, coordSystem))
             return bbox;
         }
         break;
 
         case Edge edge:
         {
-          if (XYZExtension.TryGetBoundingBox(edge.Tessellate(), out var bbox))
+          if (XYZExtension.TryGetBoundingBox(edge.Tessellate(), out var bbox, coordSystem))
             return bbox;
         }
         break;
@@ -679,21 +733,55 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case Face face:
         {
           using (var mesh = face.Triangulate())
-            if (XYZExtension.TryGetBoundingBox(mesh.Vertices, out var bbox))
+          {
+            if (XYZExtension.TryGetBoundingBox(mesh.Vertices, out var bbox, coordSystem))
               return bbox;
+          }
         }
         break;
 
         case Solid solid:
         {
           if (!solid.Faces.IsEmpty)
+          {
+            if (coordSystem is object)
+            {
+              if (accurateSolid)
+              {
+                var bbox = BoundingBoxXYZExtension.Empty;
+                bbox.Transform = coordSystem;
+
+                foreach (Face face in solid.Faces)
+                  bbox.Union(face.GetBoundingBox(coordSystem));
+
+                bbox.Transform = coordSystem;
+                return bbox;
+              }
+              else
+              {
+                using (var transformed = SolidUtils.CreateTransformed(solid, coordSystem.Inverse))
+                {
+                  var (min, max, transform, bounds) = transformed.GetBoundingBox();
+                  var (minX, minY, minZ) = transform.OfPoint(min);
+                  var (maxX, maxY, maxZ) = transform.OfPoint(max);
+
+                  return new BoundingBoxXYZ()
+                  {
+                    Min = new XYZ(Math.Min(minX, maxX), Math.Min(minY, maxY), Math.Min(minZ, maxZ)),
+                    Max = new XYZ(Math.Max(minX, maxX), Math.Max(minY, maxY), Math.Max(minZ, maxZ)),
+                    Transform = coordSystem
+                  };
+                }
+              }
+            }
             return solid.GetBoundingBox();
+          }
         }
         break;
 
         case Mesh mesh:
         {
-          if (XYZExtension.TryGetBoundingBox(mesh.Vertices, out var bbox))
+          if (XYZExtension.TryGetBoundingBox(mesh.Vertices, out var bbox, coordSystem))
             return bbox;
         }
         break;

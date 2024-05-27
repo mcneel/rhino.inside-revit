@@ -342,7 +342,7 @@ namespace RhinoInside.Revit
           catch (IOException) { }
         }
 
-        subject = Uri.EscapeUriString(subject);
+        subject = Uri.EscapeDataString(subject);
         var mailtoURI = $"mailto:tech@mcneel.com?subject={subject}&body=";
 
         var mailBody = @"Give us any additional info you see fit here..." + Environment.NewLine + Environment.NewLine;
@@ -614,58 +614,13 @@ namespace RhinoInside.Revit
         MiniDumpValidTypeFlags = 0x0003ffff,
       };
 
-      [StructLayout(LayoutKind.Sequential, Pack = 4)]  // Pack=4 is important! So it works also for x64!
-      struct MINIDUMP_EXCEPTION_INFORMATION
-      {
-        public uint ThreadId;
-        public IntPtr ExceptionPointers;
-        [MarshalAs(UnmanagedType.Bool)]
-        public bool ClientPointers;
-      }
-
-      [DllImport("DBGHELP",
-        EntryPoint = "MiniDumpWriteDump",
-        CallingConvention = CallingConvention.StdCall,
-        CharSet = CharSet.Unicode,
-        ExactSpelling = true,
-        SetLastError = true)]
-      [return: MarshalAs(UnmanagedType.Bool)]
-      static extern bool MiniDumpWriteDump
-      (
-        SafeProcessHandle hProcess,
-        uint ProcessId,
-        SafeFileHandle hFile,
-        MINIDUMP_TYPE DumpType,
-        in MINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-        IntPtr UserStreamParam,
-        IntPtr CallbackParam
-      );
-
-      [DllImport("DBGHELP",
-        EntryPoint = "MiniDumpWriteDump",
-        CallingConvention = CallingConvention.StdCall,
-        CharSet = CharSet.Unicode,
-        ExactSpelling = true,
-        SetLastError = true)]
-      [return: MarshalAs(UnmanagedType.Bool)]
-      static extern bool MiniDumpWriteDump
-      (
-        SafeProcessHandle hProcess,
-        uint ProcessId,
-        SafeFileHandle hFile,
-        MINIDUMP_TYPE DumpType,
-        IntPtr ExceptionParam,
-        IntPtr UserStreamParam,
-        IntPtr CallbackParam
-      );
-
       public static bool Write(string fileName) => Write(fileName, MINIDUMP_TYPE.MiniDumpNormal);
 
       public static bool Write(string fileName, MINIDUMP_TYPE DumpType)
       {
         using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None))
         {
-          var ExceptionParam = new MINIDUMP_EXCEPTION_INFORMATION
+          var ExceptionParam = new SafeNativeMethods.MINIDUMP_EXCEPTION_INFORMATION
           {
             ThreadId = GetCurrentThreadId(),
             ExceptionPointers = Marshal.GetExceptionPointers(),
@@ -673,7 +628,7 @@ namespace RhinoInside.Revit
           };
 
           if (ExceptionParam.ExceptionPointers == IntPtr.Zero)
-            return MiniDumpWriteDump
+            return SafeNativeMethods.MiniDumpWriteDump
             (
               GetCurrentProcess(),
               GetCurrentProcessId(),
@@ -684,7 +639,7 @@ namespace RhinoInside.Revit
               IntPtr.Zero
             );
 
-          return MiniDumpWriteDump
+          return SafeNativeMethods.MiniDumpWriteDump
           (
             GetCurrentProcess(),
             GetCurrentProcessId(),
@@ -696,6 +651,56 @@ namespace RhinoInside.Revit
           );
         }
       }
+
+      [SuppressUnmanagedCodeSecurity]
+      static class SafeNativeMethods
+      {
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]  // Pack=4 is important! So it works also for x64!
+        public struct MINIDUMP_EXCEPTION_INFORMATION
+        {
+          public uint ThreadId;
+          public IntPtr ExceptionPointers;
+          [MarshalAs(UnmanagedType.Bool)]
+          public bool ClientPointers;
+        }
+
+        [DllImport("DBGHELP",
+          EntryPoint = "MiniDumpWriteDump",
+          CallingConvention = CallingConvention.StdCall,
+          CharSet = CharSet.Unicode,
+          ExactSpelling = true,
+          SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool MiniDumpWriteDump
+        (
+          SafeProcessHandle hProcess,
+          uint ProcessId,
+          SafeFileHandle hFile,
+          MINIDUMP_TYPE DumpType,
+          in MINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
+          IntPtr UserStreamParam,
+          IntPtr CallbackParam
+        );
+
+        [DllImport("DBGHELP",
+          EntryPoint = "MiniDumpWriteDump",
+          CallingConvention = CallingConvention.StdCall,
+          CharSet = CharSet.Unicode,
+          ExactSpelling = true,
+          SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool MiniDumpWriteDump
+        (
+          SafeProcessHandle hProcess,
+          uint ProcessId,
+          SafeFileHandle hFile,
+          MINIDUMP_TYPE DumpType,
+          IntPtr ExceptionParam,
+          IntPtr UserStreamParam,
+          IntPtr CallbackParam
+        );
+      }
+
     }
 
     internal static class Logger
@@ -940,46 +945,44 @@ namespace RhinoInside.Revit
       #endregion
     }
 
-    [SuppressUnmanagedCodeSecurity]
     internal static class NativeLoader
     {
-      [
-        DllImport("RhinoInside.Revit.Native.dll",
-        EntryPoint = "LdrGetStackTraceFilePath",
-        CharSet = CharSet.Unicode)
-      ]
-      static extern System.IntPtr LdrGetStackTraceFilePath();
-      internal static string GetStackTraceFilePath() => Marshal.PtrToStringUni(LdrGetStackTraceFilePath());
+      internal static string GetStackTraceFilePath() => Marshal.PtrToStringUni(SafeNativeMethods.LdrGetStackTraceFilePath());
+      internal static void SetStackTraceFilePath(string reportFilePath) => SafeNativeMethods.LdrSetStackTraceFilePath(reportFilePath);
+      internal static bool GetReportOnLoad(string moduleName) => SafeNativeMethods.LdrGetReportOnLoad(moduleName);
+      internal static void SetReportOnLoad(string moduleName, bool enable) => SafeNativeMethods.LdrSetReportOnLoad(moduleName, enable);
+      internal static bool IsolateOpenNurbs(IntPtr hHostWnd) => SafeNativeMethods.LdrIsolateOpenNurbs(hHostWnd);
 
-      [
-        DllImport("RhinoInside.Revit.Native.dll",
-        EntryPoint = "LdrSetStackTraceFilePath",
-        CharSet = CharSet.Unicode)
-      ]
-      internal static extern void SetStackTraceFilePath(string reportFilePath);
+      [SuppressUnmanagedCodeSecurity]
+      static class SafeNativeMethods
+      {
+        [DllImport("RhinoInside.Revit.Native.dll",
+         EntryPoint = "LdrGetStackTraceFilePath",
+         CharSet = CharSet.Unicode)]
+        public static extern System.IntPtr LdrGetStackTraceFilePath();
 
-      [
-        DllImport("RhinoInside.Revit.Native.dll",
-        EntryPoint = "LdrGetReportOnLoad",
-        CharSet = CharSet.Unicode)
-      ]
-      [return: MarshalAs(UnmanagedType.Bool)]
-      internal static extern bool GetReportOnLoad(string moduleName);
+        [DllImport("RhinoInside.Revit.Native.dll",
+         EntryPoint = "LdrSetStackTraceFilePath",
+         CharSet = CharSet.Unicode)]
+        public static extern void LdrSetStackTraceFilePath(string reportFilePath);
 
-      [
-        DllImport("RhinoInside.Revit.Native.dll",
-        EntryPoint = "LdrSetReportOnLoad",
-        CharSet = CharSet.Unicode)
-      ]
-      internal static extern void SetReportOnLoad(string moduleName, [MarshalAs(UnmanagedType.Bool)] bool enable);
+        [DllImport("RhinoInside.Revit.Native.dll",
+         EntryPoint = "LdrGetReportOnLoad",
+         CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool LdrGetReportOnLoad(string moduleName);
 
-      [
-        DllImport("RhinoInside.Revit.Native.dll",
-        EntryPoint = "LdrIsolateOpenNurbs",
-        CharSet = CharSet.Unicode)
-      ]
-      [return: MarshalAs(UnmanagedType.Bool)]
-      internal static extern bool IsolateOpenNurbs(IntPtr hHostWnd);
+        [DllImport("RhinoInside.Revit.Native.dll",
+         EntryPoint = "LdrSetReportOnLoad",
+         CharSet = CharSet.Unicode)]
+        public static extern void LdrSetReportOnLoad(string moduleName, [MarshalAs(UnmanagedType.Bool)] bool enable);
+
+        [DllImport("RhinoInside.Revit.Native.dll",
+         EntryPoint = "LdrIsolateOpenNurbs",
+         CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool LdrIsolateOpenNurbs(IntPtr hHostWnd);
+      }
     }
   }
 }

@@ -10,12 +10,9 @@ namespace RhinoInside.Revit.AddIn.Forms
   /// </summary>
   abstract class BaseForm : Form
   {
-    private Autodesk.Revit.UI.UIApplication _uiApp = null;
-
-    public BaseForm(Autodesk.Revit.UI.UIApplication uiApp, Size initialSize)
+    protected BaseForm(Autodesk.Revit.UI.UIApplication uiApp, Size initialSize)
     {
       BaseWindowUtils.SetupWindow(this, uiApp, initialSize);
-      _uiApp = uiApp;
     }
   }
 }

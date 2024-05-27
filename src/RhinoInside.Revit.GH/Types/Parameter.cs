@@ -175,9 +175,9 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.ElementId id: parameterId = id; break;
         case ARDB.Parameter parameter: return SetParameter(parameter);
         case string n:
-          if (ERDB.Schemas.ParameterId.IsParameterId(n))
+          if (ERDB.Schemas.ParameterId.TryParse(n, null, out var pid))
           {
-            parameterId = new ARDB.ElementId(new ERDB.Schemas.ParameterId(n));
+            parameterId = new ARDB.ElementId(pid);
             break;
           }
 
@@ -476,7 +476,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     string description;
-    public override string Description
+    public string Description
     {
       get => description;
       set
@@ -606,7 +606,7 @@ namespace RhinoInside.Revit.GH.Types
     ERDB.Schemas.ParameterGroup group;
     public ERDB.Schemas.ParameterGroup Group
     {
-      get => group ?? (group = Value?.GetDefinition()?.GetGroupType());
+      get => group ??= Value?.GetDefinition()?.GetGroupType();
       set
       {
         if (IsReferencedData)
@@ -622,7 +622,7 @@ namespace RhinoInside.Revit.GH.Types
     bool? visible;
     public bool? Visible
     {
-      get => visible ?? (visible = Value?.GetDefinition()?.Visible);
+      get => visible ??= Value?.GetDefinition()?.Visible;
       set
       {
         if (IsReferencedData) throw new InvalidOperationException();
@@ -971,7 +971,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Parameter Value")]
-  public class ParameterValue : DocumentObject,
+  public sealed class ParameterValue : DocumentObject,
     IEquatable<ParameterValue>,
     IGH_Goo,
     IGH_QuickCast,
@@ -1072,7 +1072,24 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return goo.CastTo(out target);
+      if (goo.CastTo(out target))
+      {
+        return true;
+      }
+
+      if (typeof(IGH_Goo).IsAssignableFrom(typeof(Q)))
+      {
+        if (target is null)
+        {
+          try { target = Activator.CreateInstance<Q>(); }
+          catch { return false; }
+        }
+
+        if (target is IGH_Goo t)
+          return t.CastFrom(goo);
+      }
+
+      return false;
     }
 
     object IGH_Goo.ScriptVariable() => Value.AsGoo() is IGH_Goo goo ? goo.ScriptVariable() : default;

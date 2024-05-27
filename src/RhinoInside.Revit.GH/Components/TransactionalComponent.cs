@@ -737,6 +737,14 @@ namespace RhinoInside.Revit.GH.Components
       }
     }
 
+    public override void ClearData()
+    {
+      base.ClearData();
+
+      if (TrackingMode != TrackingMode.NotApplicable)
+        Message = TrackingMode == TrackingMode.Disabled ? "No Tracking" : string.Empty;
+    }
+
     protected override void BeforeSolveInstance()
     {
       base.BeforeSolveInstance();
@@ -834,12 +842,12 @@ namespace RhinoInside.Revit.GH.Components
             output = input;
           }
         }
-        catch(Exception e)
+        catch
         {
           if (FailureProcessingMode <= ARDB.FailureProcessingResult.ProceedWithCommit)
             output = input;
 
-          throw e;
+          throw;
         }
         finally
         {

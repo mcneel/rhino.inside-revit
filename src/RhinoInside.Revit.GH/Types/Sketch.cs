@@ -153,13 +153,11 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Owner
-    public Element Owner =>
-      Value is ARDB.Sketch sketch ? Element.FromElement(sketch.GetOwner()) : default;
+    public Element Owner => GetElement<Element>(Value?.GetOwner());
     #endregion
 
     #region SketchPlane
-    public SketchPlane SketchPlane =>
-      Value is ARDB.Sketch sketch ? SketchPlane.FromElement(sketch.SketchPlane) as SketchPlane : default;
+    public SketchPlane SketchPlane => GetElement<SketchPlane>(Value?.SketchPlane);
     #endregion
 
     #region Slope Arrow
@@ -172,7 +170,7 @@ namespace RhinoInside.Revit.GH.Types
           var slopeArrow = sketch.GetDependentElements(ERDB.CompoundElementFilter.ElementClassFilter(typeof(ARDB.CurveElement))).
             Select(Document.GetElement).FirstOrDefault(x => x.get_Parameter(ARDB.BuiltInParameter.SPECIFY_SLOPE_OR_OFFSET) is object);
 
-          return CurveElement.FromElement(slopeArrow) as CurveElement;
+          return GetElement<CurveElement>(slopeArrow);
         }
 
         return default;

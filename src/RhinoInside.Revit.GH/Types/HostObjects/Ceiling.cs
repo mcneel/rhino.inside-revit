@@ -40,8 +40,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region ISketchAccess
-    public Sketch Sketch => Value is ARDB.Ceiling ceiling ?
-      new Sketch(ceiling.GetSketch()) : default;
+    public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());
     #endregion
   }
 }

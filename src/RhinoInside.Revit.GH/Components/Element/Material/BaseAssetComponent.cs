@@ -17,19 +17,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
   public abstract class BaseAssetComponent<T>
     : TransactionalChainComponent where T : AppearanceAssetData, new()
   {
-    protected AssetGHComponentAttribute ComponentInfo
-    {
-      get
-      {
-        if (_compInfo is null)
-        {
-          _compInfo = _assetData.GetGHComponentInfo();
-          if (_compInfo is null)
-            throw new Exception("Data type does not have component info");
-        }
-        return _compInfo;
-      }
-    }
+    protected AssetGHComponentAttribute ComponentInfo => _compInfo ??= _assetData.GetGHComponentInfo();
 
     public BaseAssetComponent() : base("", "", "", "Revit", "Material") { }
 

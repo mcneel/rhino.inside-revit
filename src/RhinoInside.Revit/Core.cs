@@ -10,7 +10,6 @@ using ERUI = RhinoInside.Revit.External.UI;
 namespace RhinoInside.Revit
 {
   using static Diagnostics;
-  using External.ApplicationServices.Extensions;
 
   enum CoreStartupMode
   {
@@ -88,7 +87,11 @@ namespace RhinoInside.Revit
         if (_MinimumRhinoVersion is null)
         {
           var referencedRhinoCommonVersion = Assembly.GetExecutingAssembly().GetReferencedAssemblies().Where(x => x.Name == "RhinoCommon").FirstOrDefault().Version;
+#if DEBUG
+          _MinimumRhinoVersion = new Version(referencedRhinoCommonVersion.Major, 0, 0);
+#else
           _MinimumRhinoVersion = new Version(referencedRhinoCommonVersion.Major, referencedRhinoCommonVersion.Minor, 0);
+#endif
         }
 
         return _MinimumRhinoVersion;
@@ -118,12 +121,7 @@ namespace RhinoInside.Revit
     #endregion
 
     #region IExternalApplication
-    static ERUI.UIHostApplication host;
-    internal static ERUI.UIHostApplication Host
-    {
-      get => host;
-      private set { if (!ReferenceEquals(host, value)) { host?.Dispose(); host = value; } }
-    }
+    internal static ERUI.UIHostApplication Host => ERUI.UIHostApplication.Current;
 
     internal static ARUI.Result OnStartup(ARUI.UIControlledApplication uiCtrlApp)
     {
@@ -145,7 +143,6 @@ namespace RhinoInside.Revit
         ErrorReport.OnLoadStackTraceFilePath =
           Path.ChangeExtension(uiCtrlApp.ControlledApplication.RecordingJournalFilename, "log.md");
 
-        External.ActivationGate.SetHostWindow(Host.MainWindowHandle);
         AssemblyResolver.Enabled = true;
 
         // Initialize DB
@@ -157,7 +154,6 @@ namespace RhinoInside.Revit
             if (CurrentStatus < Status.Available) return;
 
             var app = sender as Autodesk.Revit.ApplicationServices.Application;
-            Host = new ARUI.UIApplication(app);
             Convert.Geometry.GeometryTolerance.Internal = new Convert.Geometry.GeometryTolerance
             (
               Numerical.Constant.DefaultTolerance,
@@ -187,15 +183,15 @@ namespace RhinoInside.Revit
         finally
         {
           AssemblyResolver.Enabled = false;
-          External.ActivationGate.SetHostWindow(IntPtr.Zero);
-          Host = null;
         }
       }
     }
     #endregion
 
     #region Version
-#if REVIT_2024
+#if REVIT_2025
+    static readonly Version MinimumRevitVersion = new Version(2025, 0);
+#elif REVIT_2024
     static readonly Version MinimumRevitVersion = new Version(2024, 0);
 #elif REVIT_2023
     static readonly Version MinimumRevitVersion = new Version(2023, 0);
@@ -276,7 +272,6 @@ namespace RhinoInside.Revit
           return ARUI.Result.Failed;
       }
 
-      Host = app;
       return ARUI.Result.Succeeded;
     }
 

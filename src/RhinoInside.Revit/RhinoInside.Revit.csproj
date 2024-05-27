@@ -1,105 +1,38 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <ProjectGuid>{D6C256D4-B518-464F-9E68-CB282202E846}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>RhinoInside.Revit</RootNamespace>
-    <AssemblyName>RhinoInside.Revit</AssemblyName>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <DocumentationFile>$(AssemblyName).xml</DocumentationFile>
-    <TransformOnBuild>true</TransformOnBuild>
-    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="AssemblyResolver.cs" />
-    <Compile Include="Convert\ConversionException.cs" />
-    <Compile Include="Convert\Display\DisplayMaterialConverter.cs" />
-    <Compile Include="Convert\Display\PreviewConverter.cs" />
-    <Compile Include="Convert\DocObjects\ViewportInfoConverter.cs" />
-    <Compile Include="Convert\Geometry\ExtrusionEncoder.cs" />
-    <Compile Include="Convert\Geometry\GeometryCache.cs" />
-    <Compile Include="Convert\Geometry\GeometryDecoder.cs" />
-    <Compile Include="Convert\Geometry\GeometryEncoder.cs" />
-    <Compile Include="Convert\Geometry\GeometryTolerance.cs" />
-    <Compile Include="Convert\Geometry\KnotListEncoder.cs" />
-    <Compile Include="Convert\Geometry\MeshDecoder.cs" />
-    <Compile Include="Convert\Geometry\Raw\RawDecoder.cs" />
-    <Compile Include="Convert\Geometry\MeshEncoder.cs" />
-    <Compile Include="Convert\Geometry\NurbsSplineEncoder.cs" />
-    <Compile Include="Convert\Geometry\Raw\RawEncoder.cs" />
-    <Compile Include="Convert\Geometry\ShapeEncoder.cs" />
-    <Compile Include="Convert\Geometry\SolidDecoder.cs" />
-    <Compile Include="Convert\Geometry\BrepEncoder.cs" />
-    <Compile Include="Convert\Geometry\SubDEncoder.cs" />
-    <Compile Include="Convert\Geometry\UnitConverter.cs" />
-    <Compile Include="Convert\Render\RenderMaterialConverter.cs" />
-    <Compile Include="Convert\Eto.Drawing.cs" />
-    <Compile Include="Convert\System.Collections.Generic.cs" />
-    <Compile Include="Convert\System.Drawing.cs" />
-    <Compile Include="Convert\System.Windows.Media.cs" />
-    <Compile Include="Convert\Units\UnitScale.cs" />
-    <Compile Include="Convert\Units\UnitScaleConverter.cs" />
-    <Compile Include="Core.cs" />
-    <Compile Include="Diagnostics.cs" />
-    <Compile Include="..\Distribution.cs" />
-    <Compile Include="GH\Bake.cs" />
-    <Compile Include="GH\ElementStream.cs" />
-    <Compile Include="GH\Guest.cs" />
-    <Compile Include="GH\Kernel.cs" />
-    <Compile Include="GH\PreviewServer.cs" />
-    <Compile Include="Guest.cs" />
-    <Compile Include="NamespaceDoc.cs" />
-    <Compile Include="Rhinoceros.cs" />
-    <Compile Include="Rhinoceros.DebugLogging.cs" />
-    <Compile Include="Rhinoceros.PreviewServer.cs" />
-    <Compile Include="DirectContext3DServer.cs" />
-    <Compile Include="Operator.cs" />
-    <Compile Include="State.cs" />
-    <Compile Include="Revit.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\ProductInfo.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ProductInfo.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <SubType>Designer</SubType>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>RhinoInside.Revit</CustomToolNamespace>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-    <Content Include="Properties\ProductInfo.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ProductInfo.cs</LastGenOutput>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj">
-      <Project>{1df04e19-3270-4ca3-a6c0-692c52fa5853}</Project>
-      <Name>RhinoInside.Revit.External</Name>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TextTemplating\Microsoft.TextTemplating.targets" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <Import Project="../RevitAPI.targets" />
   <Import Project="../RhinoAPI.targets" />
+
+  <PropertyGroup>
+    <AssemblyName>RhinoInside.Revit</AssemblyName>
+    <RootNamespace>RhinoInside.Revit</RootNamespace>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Distribution.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj" />
+    <ProjectReference Include="..\RhinoInside.Revit.Native\RhinoInside.Revit.Native.vcxproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <RiROutputPath>$(RevitAddinsPath)RhinoInside.Revit\R$(RhinoVersion)\</RiROutputPath>
   </PropertyGroup>
-  <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
-    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Setup\opennurbs_private.manifest;" DestinationFolder="$(RiROutputPath)" />
-    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.dll;$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.pdb" DestinationFolder="$(RiROutputPath)" />
-    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb;$(ProjectDir)$(OutDir)$(TargetName).xml" DestinationFolder="$(RiROutputPath)" />
+
+  <Target Name="DeployResults" AfterTargets="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
+    <Copy SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Setup\opennurbs_private.manifest;" DestinationFolder="$(RiROutputPath)" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.dll;$(ProjectDir)..\RhinoInside.Revit.Native\bin\x64\Debug\RhinoInside.Revit.Native.pdb" DestinationFolder="$(RiROutputPath)" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb;$(ProjectDir)$(OutDir)$(TargetName).xml" DestinationFolder="$(RiROutputPath)" />
   </Target>
+
+  <Target Name="CleanResults" BeforeTargets="BeforeClean" Condition="$(Configuration.Contains('Debug'))">
+    <ItemGroup>
+      <ThisProjectFiles Include="$(RevitAddinsPath)RhinoInside.Revit\$(TargetName).dll;$(RevitAddinsPath)RhinoInside.Revit\$(TargetName).pdb;$(RevitAddinsPath)RhinoInside.Revit\$(TargetName).xml" />
+    </ItemGroup>
+    <Delete Files="@(ThisProjectFiles)" />
+  </Target>
+
 </Project>

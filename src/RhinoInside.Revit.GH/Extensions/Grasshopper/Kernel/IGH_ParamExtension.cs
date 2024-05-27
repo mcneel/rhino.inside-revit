@@ -242,6 +242,7 @@ namespace Grasshopper.Kernel
         {
           var parameters = convertible.ConvertsTo.Distinct().
           Select(x => Instances.ComponentServer.FindObjectByName(x, ignoreWhiteSpace: false, ignoreCapitalisation: false)).
+          OfType<IGH_ObjectProxy>().
           Where(x => x.SDKCompliant && !x.Obsolete && x.Exposure != GH_Exposure.hidden && typeof(IGH_Param).IsAssignableFrom(x.Type));
 
           if (parameters.Any())

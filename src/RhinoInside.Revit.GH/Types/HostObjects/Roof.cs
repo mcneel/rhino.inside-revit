@@ -76,8 +76,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region ISketchAccess
-    public Sketch Sketch => Value is ARDB.RoofBase roof ?
-      new Sketch(roof.GetSketch()) : default;
+    public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());
     #endregion
 
     #region ICurtainGridsAccess

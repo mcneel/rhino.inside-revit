@@ -5,11 +5,16 @@ using ERUI = RhinoInside.Revit.External.UI;
 
 namespace RhinoInside.Revit.AddIn
 {
-  public class Loader : ERUI.ExternalApplication, ERUI.IHostedApplication
+  public sealed class Loader : ERUI.ExternalApplication, ERUI.IHostedApplication
   {
     public Loader() : base(new Guid("02EFF7F0-4921-4FD3-91F6-A87B6BA9BF74")) => Instance = this;
 
-    ~Loader() => Instance = default;
+    protected override void Dispose(bool disposing)
+    {
+      if (!disposing) Instance = null;
+
+      base.Dispose(disposing);
+    }
 
     public static Loader Instance { get; private set; }
 

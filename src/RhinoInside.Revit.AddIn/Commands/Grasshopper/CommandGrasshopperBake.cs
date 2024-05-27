@@ -71,7 +71,6 @@ namespace RhinoInside.Revit.AddIn.Commands
       if (ribbonPanel.AddItem(buttonData) is PushButton bakeButton)
       {
         bakeButton.LongDescription = "Use CTRL key to group resulting elements";
-        StoreButton(CommandName, bakeButton);
       }
     }
 

@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
       Params.TrySetData(DA, "Computation Height", () => level.ComputationHeight);
       Params.TrySetData(DA, "Structural", () => level.IsStructural);
       Params.TrySetData(DA, "Building Story", () => level.IsBuildingStory);
-      Params.TrySetData(DA, "Plan View", () => new Types.View(level.Document, level.Value.FindAssociatedPlanViewId()));
+      Params.TrySetData(DA, "Plan View", () => level.GetElement<Types.View>(level.Value.FindAssociatedPlanViewId()));
     }
   }
 }

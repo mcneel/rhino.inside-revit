@@ -54,8 +54,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region ISketchAccess
-    public Sketch Sketch => Value is ARDB.Toposolid solid ?
-      new Sketch(solid.GetSketch()) : default;
+    public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());
     #endregion
   }
 #endif

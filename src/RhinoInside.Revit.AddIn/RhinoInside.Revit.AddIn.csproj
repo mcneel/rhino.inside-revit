@@ -1,146 +1,46 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <ProjectGuid>{FE5652EC-6C45-46AE-88DD-395DE072AA02}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>RhinoInside.Revit.AddIn</RootNamespace>
-    <AssemblyName>RhinoInside.Revit.AddIn</AssemblyName>
-    <TransformOnBuild>true</TransformOnBuild>
-    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="Commands\AddIn\CommandAbout.cs" />
-    <Compile Include="Commands\AddIn\CommandAddInOptions.cs" />
-    <Compile Include="Commands\AddIn\CommandForums.cs" />
-    <Compile Include="Commands\AddIn\CommandGuides.cs" />
-    <Compile Include="Commands\AddIn\CommandHelpLinks.cs" />
-    <Compile Include="Commands\AddIn\CommandDebug.cs" />
-    <Compile Include="Commands\AddIn\CommandStart.cs" />
-    <Compile Include="Deployment.cs" />
-    <Compile Include="Loader.cs" />
-    <Compile Include="Commands\BaseCommand.cs" />
-    <Compile Include="Forms\BaseForm.cs" />
-    <Compile Include="Forms\BaseWindowUtils.cs" />
-    <Compile Include="Commands\Grasshopper\BaseGrasshopperCommand.cs" />
-    <Compile Include="Commands\Grasshopper\CommandGrasshopper.cs" />
-    <Compile Include="Commands\Grasshopper\CommandGrasshopperBake.cs" />
-    <Compile Include="Commands\Grasshopper\CommandGrasshopperCaptureElements.cs" />
-    <Compile Include="Commands\Grasshopper\CommandGrasshopperFolders.cs" />
-    <Compile Include="Commands\Grasshopper\CommandGrasshopperRecompute.cs" />
-    <Compile Include="Commands\Grasshopper\CommandGrasshopperReleaseElements.cs" />
-    <Compile Include="Commands\Grasshopper\CommandPreviewToggleGroup.cs" />
-    <Compile Include="Commands\Grasshopper\CommandSolverToggle.cs" />
-    <Compile Include="Commands\Grasshopper\GrasshopperPlayerCommand.cs" />
-    <Compile Include="Commands\Grasshopper\LinkedScripts\LinkedScriptAssembly.cs" />
-    <Compile Include="Commands\Grasshopper\LinkedScripts\LinkedScriptCommand.cs" />
-    <Compile Include="Commands\Grasshopper\LinkedScripts\LinkedScripts.cs" />
-    <Compile Include="Commands\Grasshopper\LinkedScripts\Models.cs" />
-    <Compile Include="Commands\Rhinoceros\BaseRhinoCommand.cs" />
-    <Compile Include="Commands\Rhinoceros\CommandImport.cs" />
-    <Compile Include="Commands\Rhinoceros\CommandPackageManager.cs" />
-    <Compile Include="Commands\Rhinoceros\CommandPython.cs" />
-    <Compile Include="Commands\Rhinoceros\CommandScriptEditor.cs" />
-    <Compile Include="Commands\Rhinoceros\CommandRhino.cs" />
-    <Compile Include="Commands\Rhinoceros\CommandRhinoOpenViewport.cs" />
-    <Compile Include="Commands\Rhinoceros\CommandRhinoOptions.cs" />
-    <Compile Include="Commands\Rhinoceros\CommandToggleRhinoPreview.cs" />
-    <Compile Include="Forms\Dialogs\AddInOptionsDialog.cs" />
-    <Compile Include="Forms\Dialogs\BakeOptionsDialog.cs" />
-    <Compile Include="Forms\Dialogs\ImportOptionsDialog.cs" />
-    <Compile Include="Forms\ModalDialog.cs" />
-    <Compile Include="Commands\RibbonHandler.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Options.cs" />
-    <Compile Include="Properties\ProductInfo.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ProductInfo.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <SubType>Designer</SubType>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-    <Content Include="Properties\ProductInfo.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ProductInfo.cs</LastGenOutput>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\About-icon.png" />
-    <EmbeddedResource Include="Resources\ChannelDaily-icon.png" />
-    <EmbeddedResource Include="Resources\ChannelRC-icon.png" />
-    <EmbeddedResource Include="Resources\ChannelStable-icon.png" />
-    <EmbeddedResource Include="Resources\Folder-icon.png" />
-    <EmbeddedResource Include="Resources\Forum-icon.png" />
-    <EmbeddedResource Include="Resources\Grasshopper.png" />
-    <EmbeddedResource Include="Resources\GrasshopperPlayer.png" />
-    <EmbeddedResource Include="Resources\Guides-icon.png" />
-    <EmbeddedResource Include="Resources\Link-icon.png" />
-    <EmbeddedResource Include="Resources\NewRelease.png" />
-    <EmbeddedResource Include="Resources\Options.png" />
-    <EmbeddedResource Include="Resources\Rhino-logo.ico" />
-    <EmbeddedResource Include="Resources\Rhino.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Bake.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\CaptureElements.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFile.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhFolder.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GHSpecialFolder.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\GhxFile.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Preview_Off.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Preview_Shaded.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Preview_Wireframe.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\Recompute.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\ReleaseElements.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOff.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\SolverOn.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Import-3DM.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\OpenViewport.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Off.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Preview_Shaded.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\PackageManager.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\ScriptEditor.png" />
-    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\Python.png" />
-    <EmbeddedResource Include="Resources\RIR-logo.ico" />
-    <EmbeddedResource Include="Resources\RIR-logo.png" />
-    <EmbeddedResource Include="Resources\RIR-WIP-logo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj">
-      <Project>{1df04e19-3270-4ca3-a6c0-692c52fa5853}</Project>
-      <Name>RhinoInside.Revit.External</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\RhinoInside.Revit\RhinoInside.Revit.csproj">
-      <Project>{d6c256d4-b518-464f-9e68-cb282202e846}</Project>
-      <Name>RhinoInside.Revit</Name>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TextTemplating\Microsoft.TextTemplating.targets" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <Import Project="../RevitAPI.targets" />
   <Import Project="../RhinoAPI.targets" />
+
+  <PropertyGroup>
+    <AssemblyName>RhinoInside.Revit.AddIn</AssemblyName>
+    <RootNamespace>RhinoInside.Revit.AddIn</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\*.ico" />
+    <EmbeddedResource Include="Resources\*.png" />
+    <EmbeddedResource Include="Resources\Ribbon\Grasshopper\*.png" />
+    <None Remove="Resources\Ribbon\Grasshopper\*.svg" />
+    <EmbeddedResource Include="Resources\Ribbon\Rhinoceros\*.png" />
+    <None Remove="Resources\Ribbon\Rhinoceros\*.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj" />
+    <ProjectReference Include="..\RhinoInside.Revit\RhinoInside.Revit.csproj" />
+    <PackageReference Include="Lokad.ILPack" Version="0.2.0" GeneratePathProperty="true" />
+  </ItemGroup>
+
   <PropertyGroup>
     <RiROutputPath>$(RevitAddinsPath)RhinoInside.Revit\R$(RhinoVersion)\</RiROutputPath>
   </PropertyGroup>
-  <Target Name="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
-    <Copy UseHardlinksIfPossible="true" SkipUnchangedFiles="true" SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb" DestinationFolder="$(RiROutputPath)" />
+
+  <Target Name="CopyPakages" AfterTargets="BeforeBuild">
+    <Copy SourceFiles="$(PkgLokad_ILPack)\lib\netstandard2.0\Lokad.ILPack.dll" DestinationFolder="$(ProjectDir)$(OutDir)" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" Condition="!$(TargetFramework.Contains('net481'))"/>
   </Target>
-  <Target Name="BeforeClean" Condition="$(Configuration.Contains('Debug'))">
+
+  <Target Name="DeployResults" AfterTargets="AfterBuild" Condition="$(Configuration.Contains('Debug'))">
+    <Copy SourceFiles="$(ProjectDir)$(OutDir)$(TargetFileName);$(ProjectDir)$(OutDir)$(TargetName).pdb" DestinationFolder="$(RiROutputPath)" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(PkgLokad_ILPack)\lib\netstandard2.0\Lokad.ILPack.dll" DestinationFolder="$(RiROutputPath)" UseHardlinksIfPossible="true" SkipUnchangedFiles="true" Condition="!$(TargetFramework.Contains('net481'))" />
+  </Target>
+
+  <Target Name="CleanResults" BeforeTargets="BeforeClean" Condition="$(Configuration.Contains('Debug'))">
     <ItemGroup>
-      <ThisProjectFiles Include="$(RiROutputPath)\$(TargetName).dll;$(RiROutputPath)$(TargetName).pdb;$(RiROutputPath)$(TargetName).xml" />
+      <ThisProjectFiles Include="$(RevitAddinsPath)RhinoInside.Revit\$(TargetName).dll;$(RevitAddinsPath)RhinoInside.Revit\$(TargetName).pdb" />
     </ItemGroup>
     <Delete Files="@(ThisProjectFiles)" />
   </Target>
+
 </Project>

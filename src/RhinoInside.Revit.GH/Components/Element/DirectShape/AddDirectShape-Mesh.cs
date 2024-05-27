@@ -77,7 +77,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
             if (e.GetType() == typeof(Autodesk.Revit.Exceptions.ArgumentException))
               ThrowArgumentException(nameof(mesh), "Input geometry does not satisfy DirectShape validation criteria.", bbox);
 
-            throw e;
+            throw;
           }
         }
         else

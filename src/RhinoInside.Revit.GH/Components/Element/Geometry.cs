@@ -454,7 +454,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var doc)) return;
 
       var scope = default(IDisposable);
-      if (elements.Any(x => (x?.Value as ARDB.FamilySymbol)?.IsActive is false))
+      if (elements.Any(x => x?.Value is ARDB.FamilySymbol { IsActive: false }))
       {
         scope = doc.RollBackScope();
         try
@@ -468,7 +468,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       }
 
       using (scope)
-      using (var options = new ARDB.Options() { DetailLevel = detailLevel ?? ARDB.ViewDetailLevel.Medium, ComputeReferences = true })
+      using (var options = new ARDB.Options() { DetailLevel = detailLevel ?? ARDB.ViewDetailLevel.Medium })
       {
         var _Elements_ = Params.IndexOfOutputParam("Elements");
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");

@@ -3,6 +3,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
+using ERAS = RhinoInside.Revit.External.ApplicationServices;
 using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.ParameterElements
@@ -90,12 +91,12 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     protected override void BeforeSolveInstance()
     {
       // Create Temp Shared Parameters File
-      if (Core.Host.Services.Value is Autodesk.Revit.ApplicationServices.Application app)
+      if (Core.Host.Services is ERAS.HostServices services)
       {
-        UserSharedParametersFilename = app.SharedParametersFilename;
-        app.SharedParametersFilename = System.IO.Path.GetTempFileName() + ".txt";
-        using (System.IO.File.CreateText(app.SharedParametersFilename)) { }
-        DefinitionFile = app.OpenSharedParameterFile();
+        UserSharedParametersFilename = services.SharedParametersFilename;
+        services.SharedParametersFilename = System.IO.Path.GetTempFileName() + ".txt";
+        using (System.IO.File.CreateText(services.SharedParametersFilename)) { }
+        DefinitionFile = services.OpenSharedParameterFile();
       }
 
       base.BeforeSolveInstance();
@@ -106,10 +107,10 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       base.AfterSolveInstance();
 
       // Restore User Shared Parameters File
-      if (Core.Host.Services.Value is Autodesk.Revit.ApplicationServices.Application app)
+      if (Core.Host.Services is ERAS.HostServices services)
       {
-        var tempSharedParametersFilename = app.SharedParametersFilename;
-        app.SharedParametersFilename = UserSharedParametersFilename;
+        var tempSharedParametersFilename = services.SharedParametersFilename;
+        services.SharedParametersFilename = UserSharedParametersFilename;
         UserSharedParametersFilename = default;
 
         using (DefinitionFile) DefinitionFile = default;

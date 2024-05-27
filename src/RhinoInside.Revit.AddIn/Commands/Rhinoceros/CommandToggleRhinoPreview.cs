@@ -10,6 +10,8 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     public static string CommandName => "Toggle\nPreview";
 
+    static PushButton Button;
+
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
 #if REVIT_2018
@@ -23,7 +25,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        StoreButton(CommandName, pushButton);
+        Button = pushButton;
         ButtonSetImages(false);
       }
 
@@ -39,7 +41,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
     static void ButtonSetImages(bool status)
     {
-      if (RestoreButton(CommandName) is PushButton button)
+      if (Button is PushButton button)
       {
         if (status)
         {

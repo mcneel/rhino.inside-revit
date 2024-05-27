@@ -40,7 +40,6 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       if (ribbonPanel.AddItem(buttonData) is PushButton pushButton)
       {
-        StoreButton(CommandName, pushButton);
       }
     }
 
@@ -56,7 +55,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         }
       )
       {
-        switch (openFileDialog.ShowDialog(Revit.MainWindow.Handle))
+        switch (openFileDialog.ShowDialog(Revit.MainWindow))
         {
           case System.Windows.Forms.DialogResult.OK: filePath = openFileDialog.FileName; return Result.Succeeded;
           case System.Windows.Forms.DialogResult.Cancel: filePath = null; return Result.Cancelled;

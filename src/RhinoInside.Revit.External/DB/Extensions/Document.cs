@@ -133,7 +133,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         title = Path.GetFileNameWithoutExtension(doc.Title);
 
       if (doc.IsDetached && title.EndsWith("_detached"))
-        title = title.Substring(0, title.Length - "_detached".Length);        
+        title = title.Substring(0, title.Length - "_detached".Length);
 
       return title;
     }

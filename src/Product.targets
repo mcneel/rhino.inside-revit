@@ -13,17 +13,26 @@ If `ReleaseVersion` contains "wip" the product expires.
   <PropertyGroup>
     <ProductName>Rhino.Inside</ProductName>
     <ProductCompany>Robert McNeel &amp; Associates</ProductCompany>
-    <ProductCopyright>2019-2023 Robert McNeel &amp; Associates.</ProductCopyright>
+    <ProductCopyright>2019-2024 Robert McNeel &amp; Associates.</ProductCopyright>
     <ProductReleaseVersion></ProductReleaseVersion>
     <ProductMetaVersion></ProductMetaVersion>
     <ProductMajorVersion>1</ProductMajorVersion>
-    <ProductMinorVersion>21</ProductMinorVersion>
+    <ProductMinorVersion>23</ProductMinorVersion>
     <!--
     <ProductBuildVersion></ProductBuildVersion>
     <ProductRevisionVersion></ProductRevisionVersion>
     -->
   </PropertyGroup>
+
   <PropertyGroup>
+    <BuildDate Condition="$(BuildDate) == ''">$([System.DateTime]::Now.ToString("o"))</BuildDate>
+
+    <RevisionVersion Condition="$(ProductRevisionVersion) != ''">$(ProductRevisionVersion)</RevisionVersion>
+    <BuildVersion Condition="$(ProductBuildVersion) == ''">$([System.DateTime]::Parse($(BuildDate)).Date.Subtract($([System.DateTime]::Parse('2000-01-01'))).TotalDays)</BuildVersion>
+
+    <BuildVersion Condition="$(ProductBuildVersion) != ''">$(ProductBuildVersion)</BuildVersion>
+    <RevisionVersion Condition="$(ProductRevisionVersion) == ''">$([System.Convert]::ToUInt16($([MSBuild]::Divide($([System.DateTime]::Parse($(BuildDate)).TimeOfDay.TotalSeconds), 2))))</RevisionVersion>
+
     <!-- RiRHexaVersion = $"({~(ProductMajorVersion << 8 | ProductMinorVersion):X}" -->
     <RiRBitwiseVersion>$([MSBuild]::BitwiseNot($([MSBuild]::BitwiseOr($([MSBuild]::Multiply($(ProductMajorVersion), 256)), $(ProductMinorVersion)))))</RiRBitwiseVersion>
     <RiRHexaVersion>$([System.Convert]::ToInt16($(RiRBitwiseVersion)).ToString("X"))</RiRHexaVersion>
@@ -33,6 +42,27 @@ If `ReleaseVersion` contains "wip" the product expires.
     <RiRHexaShortVersion>$([System.Convert]::ToInt16($(RiRBitwiseShortVersion)).ToString("X").SubString(0, 2))</RiRHexaShortVersion>
 
     <RiRAddinFileName>RhinoInside.Revit.addin</RiRAddinFileName>
+  </PropertyGroup>
+
+  <!-- Default values for AssemblyInfo.cs -->
+  <PropertyGroup>
+    <Deterministic>False</Deterministic>
+
+    <Product>$(ProductName)</Product>
+    <Company>$(ProductCompany)</Company>
+    <Copyright>© $(ProductCopyright)</Copyright>
+
+    <AssemblyVersion>$(ProductMajorVersion).$(ProductMinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyVersion>
+    <FileVersion>$(ProductMajorVersion).$(ProductMinorVersion).$(BuildVersion).$(RevisionVersion)</FileVersion>
+
+    <InformationalVersion>$(ProductMajorVersion).$(ProductMinorVersion).$(BuildVersion)$(ProductReleaseVersion)</InformationalVersion>
+    <InformationalVersion Condition="$(ProductReleaseVersion) != ''">$(InformationalVersion)-$(ProductReleaseVersion)</InformationalVersion>
+    <InformationalVersion Condition="$(ProductMetaVersion) != ''">$(InformationalVersion)+$(ProductMetaVersion)</InformationalVersion>
+
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://www.rhino3d.com/inside/revit/$(ProductMajorVersion).0/</PackageProjectUrl>
+
+    <RepositoryUrl>https://github.com/mcneel/rhino.inside-revit</RepositoryUrl>
   </PropertyGroup>
 
 </Project>

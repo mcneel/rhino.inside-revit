@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Autodesk.Revit.UI;
-using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using static RhinoInside.Revit.Diagnostics;
 
@@ -13,12 +12,11 @@ namespace RhinoInside.Revit
 {
   static class AssemblyResolver
   {
-    static readonly string InstallPath = Core.Distribution.InstallPath;
+    static readonly string SystemPath = Path.Combine(Core.Distribution.Path);
+    static readonly string PluginsPath = Path.Combine(Core.Distribution.InstallPath, "Plug-ins");
 
     #region AssemblyReference
-
-    delegate bool InitAssembly();
-    static readonly Dictionary<string, InitAssembly> InternalAssemblies = new Dictionary<string, InitAssembly>()
+    static readonly Dictionary<string, Predicate<Assembly>> InternalAssemblies = new Dictionary<string, Predicate<Assembly>>()
     {
       { "Eto",          Rhinoceros.InitEto },
       { "RhinoCommon",  Rhinoceros.InitRhinoCommon },
@@ -60,7 +58,7 @@ namespace RhinoInside.Revit
 
         bool failed = false;
         if (InternalAssemblies.TryGetValue(assemblyName.Name, out var InitAssembly))
-          failed = !InitAssembly();
+          failed = !InitAssembly(Assembly);
 
         if (failed)
           throw new InvalidOperationException($"Failed to activate {assembly.FullName}");
@@ -90,7 +88,60 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Resolving event
+    public static event ResolveEventHandler Resolving;
+
+#if NET
+    private static Assembly AssemblyResolving(System.Runtime.Loader.AssemblyLoadContext context, AssemblyName name)
+    {
+      if (Resolving?.GetInvocationList() is Delegate[] invocationList)
+      {
+        var args = new ResolveEventArgs(name.FullName, GetRequestingAssembly());
+        foreach (ResolveEventHandler resolver in invocationList)
+        {
+          try
+          {
+            var resolved = resolver(context, args);
+            if (resolved is object) return resolved;
+          }
+          catch { }
+        }
+      }
+
+      return default;
+    }
+
+    private static IntPtr AssemblyResolvingUnmanagedDll(Assembly assembly, string dll)
+    {
+      var assemblyName = assembly.GetName();
+      if (references.TryGetValue(assemblyName.Name, out var assemblyReference) && assemblyReference.assemblyName.CodeBase == assembly.CodeBase)
+      {
+        var lib = System.Runtime.InteropServices.NativeLibrary.Load
+        (
+          Path.Combine(SystemPath, dll),
+          assembly,
+          System.Runtime.InteropServices.DllImportSearchPath.AssemblyDirectory |
+          System.Runtime.InteropServices.DllImportSearchPath.UseDllDirectoryForDependencies |
+          System.Runtime.InteropServices.DllImportSearchPath.System32 |
+          System.Runtime.InteropServices.DllImportSearchPath.SafeDirectories
+        );
+        return lib;
+      }
+
+      return default;
+    }
+#else
     static readonly FieldInfo _AssemblyResolve = typeof(AppDomain).GetField("_AssemblyResolve", BindingFlags.Instance | BindingFlags.NonPublic);
+
+    static Delegate[] InvocationList
+    {
+      get
+      {
+        var domain = AppDomain.CurrentDomain;
+        var assemblyResolve = _AssemblyResolve.GetValue(domain) as ResolveEventHandler;
+        var invocationList = assemblyResolve.GetInvocationList();
+        return invocationList;
+      }
+    }
 
     static Assembly AssemblyResolving(object sender, ResolveEventArgs args)
     {
@@ -109,14 +160,17 @@ namespace RhinoInside.Revit
 
       return default;
     }
-
-    public static event ResolveEventHandler Resolving;
+#endif
     #endregion
 
     static AssemblyResolver()
     {
       // Setup Resolving event
       {
+#if NET
+        System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += AssemblyResolving;
+        System.Runtime.Loader.AssemblyLoadContext.Default.ResolvingUnmanagedDll += AssemblyResolvingUnmanagedDll;
+#else
         var domain = AppDomain.CurrentDomain;
         var assemblyResolve = _AssemblyResolve.GetValue(domain) as ResolveEventHandler;
         var invocationList = assemblyResolve.GetInvocationList();
@@ -128,6 +182,7 @@ namespace RhinoInside.Revit
 
         foreach (var invocation in invocationList)
           domain.AssemblyResolve += invocation as ResolveEventHandler;
+#endif
       }
 
       // Search Rhino stuff
@@ -137,34 +192,30 @@ namespace RhinoInside.Revit
         {
           try
           {
-            var installFolders = new DirectoryInfo[]
+            // List of assembly folders in priority order.
+            var paths = new (DirectoryInfo Directory, SearchOption Options)[]
             {
-              new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)),
-              new DirectoryInfo(InstallPath ?? string.Empty)
+              (new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)), SearchOption.AllDirectories),
+#if NET
+              (new DirectoryInfo(Path.Combine(SystemPath, "netcore")), SearchOption.TopDirectoryOnly),
+#endif
+              (new DirectoryInfo(SystemPath), SearchOption.TopDirectoryOnly),
+              (new DirectoryInfo(PluginsPath), SearchOption.AllDirectories),
             };
 
-            foreach (var installFolder in installFolders.Where(x => x.Exists))
+            foreach (var path in paths.Where(x => x.Directory.Exists))
             {
-              foreach (var dll in installFolder.EnumerateFiles("*.dll", SearchOption.AllDirectories))
+              foreach (var dll in path.Directory.EnumerateFilesByExtension(".dll", path.Options))
               {
                 try
                 {
-                  // https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles?view=netframework-4.8
-                  // If the specified extension is exactly three characters long,
-                  // the method returns files with extensions that begin with the specified extension.
-                  // For example, "*.xls" returns both "book.xls" and "book.xlsx"
-                  if (dll.Extension.ToLower() != ".dll") continue;
-
                   var assemblyName = AssemblyName.GetAssemblyName(dll.FullName);
-                  var assemblyReference = new AssemblyReference(assemblyName);
+#if NET
+                  assemblyName.CodeBase = new Uri(dll.FullName).ToString();
+#endif
 
-                  if (references.TryGetValue(assemblyName.Name, out var location))
-                  {
-                    if (location.assemblyName.Version >= assemblyName.Version) continue;
-                    references.Remove(assemblyName.Name);
-                  }
-
-                  references.Add(assemblyName.Name, assemblyReference);
+                  if (references.ContainsKey(assemblyName.Name)) continue;
+                  references.Add(assemblyName.Name, new AssemblyReference(assemblyName));
                 }
                 catch { }
               }
@@ -191,8 +242,10 @@ namespace RhinoInside.Revit
             NativeLoader.SetReportOnLoad("opennurbs.dll", enable: true);
 
             AppDomain.CurrentDomain.AssemblyLoad += AssemblyLoaded;
+#if !NET
             if (_AssemblyResolve is null) AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
             else
+#endif
             {
               if (External.ActivationGate.IsOpen)
                 ActivationGate_Enter(default, EventArgs.Empty);
@@ -203,8 +256,10 @@ namespace RhinoInside.Revit
           }
           else
           {
+#if !NET
             if (_AssemblyResolve is null) AppDomain.CurrentDomain.AssemblyResolve -= AssemblyResolve;
             else
+#endif
             {
               External.ActivationGate.Exit -= ActivationGate_Exit;
               External.ActivationGate.Enter -= ActivationGate_Enter;
@@ -219,17 +274,6 @@ namespace RhinoInside.Revit
           }
           enabled = value;
         }
-      }
-    }
-
-    static Delegate[] InvocationList
-    {
-      get
-      {
-        var domain = AppDomain.CurrentDomain;
-        var assemblyResolve = _AssemblyResolve.GetValue(domain) as ResolveEventHandler;
-        var invocationList = assemblyResolve.GetInvocationList();
-        return invocationList;
       }
     }
 
@@ -252,6 +296,7 @@ namespace RhinoInside.Revit
 
         internalAssembliesOnly = false;
 
+#if !NET
         if (Logger.Active)
         {
           using (var scope = Logger.LogScope
@@ -299,6 +344,7 @@ namespace RhinoInside.Revit
           }
         }
         else
+#endif
         {
           return ResolveAssembly(args.RequestingAssembly, new AssemblyName(args.Name));
         }
@@ -340,8 +386,12 @@ namespace RhinoInside.Revit
         }
 
         // Never return an older assembly.
+#if DEBUG
+        Debug.Assert(location.assemblyName.Version >= requested.Version);
+#else
         if (location.assemblyName.Version < requested.Version)
           return default;
+#endif
 
         if (location.Assembly is null)
         {
@@ -357,7 +407,11 @@ namespace RhinoInside.Revit
 
           // Load Assembly
           //var assembly =  Assembly.Load(location.assemblyName);
+#if NET
+          var assembly = Assembly.LoadFrom(new Uri(location.assemblyName.CodeBase).LocalPath);
+#else
           var assembly = Assembly.LoadFrom(location.assemblyName.CodeBase);
+#endif
           //var assembly = Assembly.LoadFile(new Uri(location.assemblyName.CodeBase).LocalPath);
 
           Debug.Assert
@@ -476,36 +530,34 @@ namespace RhinoInside.Revit
 
     static Assembly GetRequestingAssembly(ResolveEventArgs args)
     {
-      var requestingAssembly = args.RequestingAssembly;
-      if (requestingAssembly is null)
+      return args.RequestingAssembly ?? GetRequestingAssembly();
+    }
+
+    static Assembly GetRequestingAssembly()
+    {
+      var trace = new StackTrace(1);
+      var frames = trace.GetFrames();
+
+      var callingAssembly = Assembly.GetCallingAssembly();
+
+      // Skip Calling Assembly
+      int f = 0;
+      for (; f < frames.Length; ++f)
       {
-        var trace = new StackTrace(1);
-        var frames = trace.GetFrames();
-
-        var callingAssembly = Assembly.GetCallingAssembly();
-
-        // Skip Calling Assembly
-        int f = 0;
-        for (; f < frames.Length; ++f)
-        {
-          var frameAssembly = frames[f].GetMethod().DeclaringType.Assembly;
-          if (frameAssembly != callingAssembly)
-            break;
-        }
-
-        // Skip mscorlib
-        for (; f < frames.Length; ++f)
-        {
-          var frameAssembly = frames[f].GetMethod().DeclaringType.Assembly;
-          if (frameAssembly != typeof(object).Assembly)
-          {
-            requestingAssembly = frameAssembly;
-            break;
-          }
-        }
+        var frameAssembly = frames[f].GetMethod().DeclaringType.Assembly;
+        if (frameAssembly != callingAssembly)
+          break;
       }
 
-      return requestingAssembly;
+      // Skip mscorlib
+      for (; f < frames.Length; ++f)
+      {
+        var frameAssembly = frames[f].GetMethod().DeclaringType.Assembly;
+        if (frameAssembly != typeof(object).Assembly)
+          return frameAssembly;
+      }
+
+      return null;
     }
     #endregion
   }

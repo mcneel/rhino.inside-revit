@@ -13,6 +13,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Render;
   using Convert.System.Drawing;
+  using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Material")]
   public class Material : Element, Bake.IGH_BakeAwareElement
@@ -207,6 +208,92 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    #region Identity Data
+    public virtual string Description
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
+      set
+      {
+        if (value is object)
+          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.Update(value);
+      }
+    }
+
+    public string Comments
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.AsString();
+      set
+      {
+        if (value is object)
+          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Update(value);
+      }
+    }
+
+    public string Manufacturer
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.AsString();
+      set
+      {
+        if (value is object)
+          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MANUFACTURER)?.Update(value);
+      }
+    }
+
+    public string Model
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MODEL)?.AsString();
+      set
+      {
+        if (value is object)
+          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MODEL)?.Update(value);
+      }
+    }
+
+    public double? Cost
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_COST)?.AsDouble();
+      set
+      {
+        if (value is object)
+          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_COST)?.Update(value.Value);
+      }
+    }
+
+    public string Url
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString();
+      set
+      {
+        if (value is object)
+          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.Update(value);
+      }
+    }
+
+    public string Keynote
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.KEYNOTE_PARAM)?.AsString();
+      set
+      {
+        if (value is object)
+          Value?.get_Parameter(ARDB.BuiltInParameter.KEYNOTE_PARAM)?.Update(value);
+      }
+    }
+
+    public virtual string Mark
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK) is ARDB.Parameter parameter &&
+        parameter.HasValue ?
+        parameter.AsString() :
+        default;
+
+      set
+      {
+        if (value is object)
+          Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.Update(value);
+      }
+    }
+    #endregion
+
     #region Graphics
     public bool? UseRenderAppearanceForShading
     {
@@ -288,7 +375,7 @@ namespace RhinoInside.Revit.GH.Types
 #if REVIT_2019
     public FillPatternElement SurfaceForegroundPattern
     {
-      get => SurfaceForegroundPatternId is ARDB.ElementId id ? new FillPatternElement(Document, id) : default;
+      get => SurfaceForegroundPatternId is ARDB.ElementId id ? GetElement(new FillPatternElement(Document, id)) : default;
       set
       {
         if (value is object && Value is ARDB.Material material && value.Id != material.SurfaceForegroundPatternId)
@@ -324,7 +411,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public FillPatternElement SurfaceBackgroundPattern
     {
-      get => SurfaceBackgroundPatternId is ARDB.ElementId id ? new FillPatternElement(Document, id) : default;
+      get => SurfaceBackgroundPatternId is ARDB.ElementId id ? GetElement(new FillPatternElement(Document, id)) : default;
       set
       {
         if (value is object && Value is ARDB.Material material && value.Id != material.SurfaceBackgroundPatternId)
@@ -360,7 +447,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public FillPatternElement CutForegroundPattern
     {
-      get => CutForegroundPatternId is ARDB.ElementId id ? new FillPatternElement(Document, id) : default;
+      get => CutForegroundPatternId is ARDB.ElementId id ? GetElement(new FillPatternElement(Document, id)) : default;
       set
       {
         if (value is object && Value is ARDB.Material material && value.Id != material.CutForegroundPatternId)
@@ -396,7 +483,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public FillPatternElement CutBackgroundPattern
     {
-      get => CutBackgroundPatternId is ARDB.ElementId id ? new FillPatternElement(Document, id) : default;
+      get => CutBackgroundPatternId is ARDB.ElementId id ? GetElement(new FillPatternElement(Document, id)) : default;
       set
       {
         if (value is object && Value is ARDB.Material material && value.Id != material.CutBackgroundPatternId)
@@ -553,7 +640,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public AppearanceAssetElement AppearanceAsset
     {
-      get => AppearanceAssetId is ARDB.ElementId id ? new AppearanceAssetElement(Document, id) : default;
+      get => AppearanceAssetId is ARDB.ElementId id ? GetElement(new AppearanceAssetElement(Document, id)) : default;
       set
       {
         if (value is object && Value is ARDB.Material material && value.Id != material.AppearanceAssetId)
@@ -576,7 +663,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public StructuralAssetElement StructuralAsset
     {
-      get => StructuralAssetId is ARDB.ElementId id ? new StructuralAssetElement(Document, id) : default;
+      get => StructuralAssetId is ARDB.ElementId id ? GetElement(new StructuralAssetElement(Document, id)) : default;
       set
       {
         if (value is object && Value is ARDB.Material material && value.Id != material.StructuralAssetId)
@@ -599,7 +686,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public ThermalAssetElement ThermalAsset
     {
-      get => ThermalAssetId is ARDB.ElementId id ? new ThermalAssetElement(Document, id) : default;
+      get => ThermalAssetId is ARDB.ElementId id ? GetElement(new ThermalAssetElement(Document, id)) : default;
       set
       {
         if (value is object && Value is ARDB.Material material && value.Id != material.ThermalAssetId)

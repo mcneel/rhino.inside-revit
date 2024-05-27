@@ -221,18 +221,20 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case ARDB.ForgeTypeId f: Value = f; return true;
+          case ARDB.ForgeTypeId f:
+            if (!EDBS.UnitType.IsUnitType(f, out var fid)) return false;
+            Value = fid; return true;
 #else
           case int i: Value = (ARDB.DisplayUnitType) i; return true;
           case ARDB.DisplayUnitType u: Value = u; return true;
 #endif
           case EDBS.DataType s:
-            if (!EDBS.UnitType.IsUnitType(s, out var id)) break;
+            if (!EDBS.UnitType.IsUnitType(s, out var id)) return false;
             Value = id; return true;
 
           case string t:
-            if (!EDBS.UnitType.IsUnitType(t)) break;
-            Value = new EDBS.UnitType(t); return true;
+            if (!EDBS.UnitType.TryParse(t, null, out var tid)) return false;
+            Value = tid; return true;
         }
       }
       catch (ArgumentException) { return false; }
@@ -309,13 +311,13 @@ namespace RhinoInside.Revit.GH.Types
             if (EDBS.DataType.IsNullOrEmpty(s))               { Value = EDBS.DataType.Empty; return true; }
             if (EDBS.SpecType.IsSpecType(s, out var sid))     { Value = sid; return true; }
             if (EDBS.CategoryId.IsCategoryId(s, out var cid)) { Value = cid; return true; }
-            break;
+            return false;
 
           case string t:
             if (string.IsNullOrEmpty(t))                      { Value = EDBS.DataType.Empty; return true; }
-            if (EDBS.SpecType.IsSpecType(t))                  { Value = new EDBS.SpecType(t); return true; }
-            if (EDBS.CategoryId.TryParse(t, null,out var v))  { Value = v; return true; }
-            break;
+            if (EDBS.SpecType.TryParse(t, null, out var vs))  { Value = vs; return true; }
+            if (EDBS.CategoryId.TryParse(t, null, out var vc)){ Value = vc; return true; }
+            return false;
         }
       }
       catch { return false; }
@@ -352,19 +354,20 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case ARDB.ForgeTypeId f: Value = f; return true;
+          case ARDB.ForgeTypeId f:
+            if (!EDBS.ParameterGroup.IsParameterGroup(f, out var fpg)) return false;
+            Value = fpg; return true;
 #else
           case int i: Value = (ARDB.BuiltInParameterGroup) i; return true;
           case ARDB.BuiltInParameterGroup u: Value = u; return true;
 #endif
-          case EDBS.ParameterGroup v: Value = v; return true;
           case EDBS.DataType s:
-            if (!EDBS.ParameterGroup.IsParameterGroup(s.TypeId)) break;
-            Value = new EDBS.ParameterGroup(s.TypeId); return true;
+            if (!EDBS.ParameterGroup.IsParameterGroup(s, out var pg)) return false;
+            Value = pg; return true;
 
           case string t:
-            if (!EDBS.ParameterGroup.IsParameterGroup(t)) break;
-            Value = new EDBS.ParameterGroup(t); return true;
+            if (!EDBS.ParameterGroup.TryParse(t, null, out var tpg)) return false;
+            Value = tpg; return true;
         }
       }
       catch (ArgumentException) { return false; }
@@ -401,19 +404,20 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case ARDB.ForgeTypeId f: Value = f; return true;
+          case ARDB.ForgeTypeId f:
+            if (!EDBS.ParameterId.IsParameterId(f, out var fid)) return false;
+            Value = fid; return true;
 #else
           case int i: Value = (ARDB.BuiltInParameter) i; return true;
           case ARDB.BuiltInParameter u: Value = u; return true;
 #endif
-          case EDBS.ParameterId v: Value = v; return true;
           case EDBS.DataType s:
-            if (!EDBS.ParameterId.IsParameterId(s, out var id)) break;
+            if (!EDBS.ParameterId.IsParameterId(s, out var id)) return false;
             Value = id; return true;
 
           case string t:
-            if (!EDBS.ParameterId.IsParameterId(t)) break;
-            Value = new EDBS.ParameterId(t); return true;
+            if (!EDBS.ParameterId.TryParse(t, null, out var tid)) return false;
+            Value = tid; return true;
         }
       }
       catch (ArgumentException) { return false; }
@@ -446,19 +450,20 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
 #if REVIT_2021
-          case ARDB.ForgeTypeId f: Value = f; return true;
+          case ARDB.ForgeTypeId f:
+            if (!EDBS.CategoryId.IsCategoryId(f, out var fc)) return false;
+            Value = fc; return true;
 #else
           case int i: Value = (ARDB.BuiltInCategory) i; return true;
           case ARDB.BuiltInCategory u: Value = u; return true;
 #endif
-          case EDBS.CategoryId v: Value = v; return true;
           case EDBS.DataType s:
-            Value = EDBS.CategoryId.Parse(s.TypeId, null);
+            if (!EDBS.CategoryId.IsCategoryId(s, out var c)) return false;
             return true;
 
           case string t:
-            Value = EDBS.CategoryId.Parse(t, null);
-            return true;
+            if (!EDBS.CategoryId.TryParse(t, null, out var tc)) return false;
+            Value = tc; return true;
         }
       }
       catch { return false; }

@@ -20,31 +20,67 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public UnitSymbol() { }
     public UnitSymbol(string id) : base(id)
     {
-      if (!IsUnitSymbol(id))
+      if (!IsUnitSymbol(id, empty: true))
         throw new ArgumentException("Invalid argument value", nameof(id));
     }
 
-    public static bool IsUnitSymbol(string id)
+    #region IParsable
+    public static bool TryParse(string s, IFormatProvider provider, out UnitSymbol result)
     {
-      return id.StartsWith("autodesk.unit.symbol");
-    }
-
-    public static bool IsUnitSymbol(DataType value, out UnitSymbol unitSymbol)
-    {
-      var typeId = value.TypeId;
-      if (IsUnitSymbol(typeId))
+      if (IsUnitSymbol(s, empty: true))
       {
-        unitSymbol = new UnitSymbol(typeId);
+        result = new UnitSymbol(s);
         return true;
       }
 
-      unitSymbol = default;
+      result = default;
       return false;
     }
 
+    public static UnitSymbol Parse(string s, IFormatProvider provider)
+    {
+      if (!TryParse(s, provider, out var result)) throw new FormatException($"{nameof(s)} is not in the correct format.");
+      return result;
+    }
+
+    static bool IsUnitSymbol(string id, bool empty)
+    {
+      return (empty && id == string.Empty) || // 'Other'
+              id.StartsWith("autodesk.unit.symbol");
+    }
+    #endregion
+
+    public static bool IsUnitSymbol(DataType value, out UnitSymbol unitSymbol)
+    {
+      switch (value)
+      {
+        case UnitSymbol us: unitSymbol = us; return true;
+        default:
+
+          var typeId = value.TypeId;
+          if (IsUnitSymbol(typeId, empty: false))
+          {
+            unitSymbol = new UnitSymbol(typeId);
+            return true;
+          }
+
+          unitSymbol = default;
+          return false;
+      }
+    }
+
 #if REVIT_2021
-    public static implicit operator UnitSymbol(Autodesk.Revit.DB.ForgeTypeId value) => value is null ? null : new UnitSymbol(value.TypeId);
     public static implicit operator Autodesk.Revit.DB.ForgeTypeId(UnitSymbol value) => value is null ? null : new Autodesk.Revit.DB.ForgeTypeId(value.TypeId);
+    public static implicit operator UnitSymbol(Autodesk.Revit.DB.ForgeTypeId value)
+    {
+      if (value is null) return null;
+      var typeId = value.TypeId;
+#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
+      return IsUnitSymbol(typeId, empty: true) ?
+        new UnitSymbol(typeId) :
+        throw new InvalidCastException($"'{typeId}' is not a valid {typeof(UnitSymbol)}");
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
+    }
 #endif
 
 #if !REVIT_2022

@@ -153,18 +153,24 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return false;
     }
 
-    public static bool IsZeroDiagonal(this BoundingBoxXYZ value, double tolerance = Constant.DefaultTolerance)
+    public static bool IsZero(this BoundingBoxXYZ value, double tolerance = Constant.DefaultTolerance)
     {
       tolerance = Math.Max(tolerance, Constant.Upsilon);
 
-      return Math.Abs(GetDiagonal(value)) < tolerance;
+      return Math.Abs(GetRadius(value)) < tolerance;
     }
 
-    public static double GetDiagonal(this BoundingBoxXYZ value)
+    public static bool IsFinite(this BoundingBoxXYZ value)
+    {
+      if (value is null) return false;
+      return !value.IsEmpty() && !value.IsUniverse();
+    }
+
+    public static double GetRadius(this BoundingBoxXYZ value)
     {
       var (min, max) = value;
-      var diagonal = max - min;
-      var (x, y, z) = diagonal;
+      var radius = (max * 0.5) - (min * 0.5);
+      var (x, y, z) = radius;
 
       if (x == 0.0 && y == 0.0 && z == 0.0) return 0.0;
       if (x < 0.0 && y < 0.0 && z < 0.0) return -Euclidean.Norm(x, y, z);
@@ -215,6 +221,32 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return double.NaN;
     }
 
+    private static int CompareVolumeTo(this BoundingBoxXYZ left, BoundingBoxXYZ right)
+    {
+      var (lX, lY, lZ) = left;
+      var (rX, rY, rZ) = right;
+
+      var lV = lX.Deviation * lY.Deviation * lZ.Deviation;
+      var rV = rX.Deviation * rY.Deviation * rZ.Deviation;
+
+      return lV.CompareTo(rV);
+    }
+
+    private static void CopyFrom(this BoundingBoxXYZ value, BoundingBoxXYZ other)
+    {
+      value.Enabled = other.Enabled;
+      value.Min = other.Min;
+      value.Max = other.Max;
+      value.Transform = other.Transform;
+
+      if (value.Enabled)
+      {
+        for (int bound = BoundsMin; bound <= BoundsMax; ++bound)
+          for (int dim = AxisX; dim <= AxisZ; ++dim)
+            value.set_BoundEnabled(bound, dim, other.get_BoundEnabled(bound, dim));
+      }
+    }
+
     public static BoundingBoxXYZ Clone(this BoundingBoxXYZ value)
     {
       var other = new BoundingBoxXYZ()
@@ -235,21 +267,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return other;
     }
 
-    public static void CopyFrom(this BoundingBoxXYZ value, BoundingBoxXYZ other)
-    {
-      value.Enabled = other.Enabled;
-      value.Min = other.Min;
-      value.Max = other.Max;
-      value.Transform = other.Transform;
-
-      if (value.Enabled)
-      {
-        for (int bound = BoundsMin; bound <= BoundsMax; ++bound)
-          for (int dim = AxisX; dim <= AxisZ; ++dim)
-            value.set_BoundEnabled(bound, dim, other.get_BoundEnabled(bound, dim));
-      }
-    }
-
     public static XYZ Evaluate(this BoundingBoxXYZ value, UnitXYZ xyz)
     {
       if (xyz.IsNaN) return XYZExtension.NaN;
@@ -265,27 +282,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
       );
     }
 
-    public static void Intersection(this BoundingBoxXYZ value, BoundingBoxXYZ other)
+    public static BoundingBoxXYZ MinIntersection(BoundingBoxXYZ left, BoundingBoxXYZ right)
     {
-      if (other.IsUniverse() || value.IsEmpty()) return;
-      if (other.IsEmpty())
-      {
-        value.Enabled = false;
-        value.Min = XYZExtension.MaxValue;
-        value.Max = XYZExtension.MinValue;
-        return;
-      }
+      var A = left.Clone();
+      A.Intersection(right.GetCorners());
 
-      var A = value.Clone();
-      A.Intersection(other.GetCorners());
-      var a = A.GetVolume();
+      var B = right.Clone();
+      B.Intersection(left.GetCorners());
 
-      var B = other.Clone();
-      B.Intersection(value.GetCorners());
-      var b = B.GetVolume();
-
-      value.CopyFrom(a < b ? A : B);
+      return A.CompareVolumeTo(B) > 0 ? B : A;
     }
+
+    public static void Intersection(this BoundingBoxXYZ value, BoundingBoxXYZ other) => value.Intersection(other.GetCorners());
 
     public static void Intersection(this BoundingBoxXYZ value, params XYZ[] xyz)
     {
@@ -325,27 +333,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
-    public static void Union(this BoundingBoxXYZ value, BoundingBoxXYZ other)
+    public static BoundingBoxXYZ MinUnion(BoundingBoxXYZ left, BoundingBoxXYZ right)
     {
-      if (other.IsEmpty() || value.IsUniverse()) return;
-      if (other.IsUniverse())
-      {
-        value.Enabled = false;
-        value.Min = XYZExtension.MinValue;
-        value.Max = XYZExtension.MaxValue;
-        return;
-      }
+      var A = left.Clone();
+      A.Union(right.GetCorners());
 
-      var A = value.Clone();
-      A.Union(other.GetCorners());
-      var a = A.GetVolume();
+      var B = right.Clone();
+      B.Union(left.GetCorners());
 
-      var B = other.Clone();
-      B.Union(value.GetCorners());
-      var b = B.GetVolume();
-
-      value.CopyFrom(a < b ? A : B);
+      return A.CompareVolumeTo(B) > 0 ? B : A;
     }
+
+    public static void Union(this BoundingBoxXYZ value, BoundingBoxXYZ other) => value.Union(other.GetCorners());
 
     public static void Union(this BoundingBoxXYZ value, params XYZ[] xyz)
     {
@@ -429,6 +428,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static XYZ[] GetCorners(this BoundingBoxXYZ value)
     {
+      if (value.IsEmpty()) return Array.Empty<XYZ>();
+
       using (var transform = value.Transform)
       {
         var (X, Y, Z) = value;

@@ -56,7 +56,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           Description = "Detail Component rotation",
           Optional = true,
           AngleParameter = true,
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (

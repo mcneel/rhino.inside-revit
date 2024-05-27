@@ -35,7 +35,7 @@ namespace RhinoInside.Revit
     internal static readonly string SchemeName = $"Inside-Revit-{Core.Host.Services.VersionNumber}";
     internal static string[] StartupLog;
 
-    internal static bool InitEto()
+    internal static bool InitEto(Assembly assembly)
     {
       if (Eto.Forms.Application.Instance is null)
         new Eto.Forms.Application(Eto.Platforms.Wpf).Attach();
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit
       return true;
     }
 
-    internal static bool InitRhinoCommon()
+    internal static bool InitRhinoCommon(Assembly assembly)
     {
       // We should Init Eto before Rhino does it.
       // This should force `AssemblyResolver` to call `InitEto`.
@@ -53,7 +53,7 @@ namespace RhinoInside.Revit
         //return false;
       }
 
-      var hostMainWindow = new WindowHandle(Core.Host.MainWindowHandle);
+      var hostMainWindow = (WindowHandle) Core.Host.MainWindowHandle;
 
       // Save Revit window status
       bool wasEnabled = hostMainWindow.Enabled;
@@ -90,7 +90,9 @@ namespace RhinoInside.Revit
           args.Add($"/language={Core.Host.Services.Language.ToLCID()}");
         }
 
-#if RHINO_8
+#if NET
+        args.Add("/netcore");
+#else
         args.Add("/netfx");
 #endif
         args.Add("/nosplash");
@@ -125,13 +127,13 @@ namespace RhinoInside.Revit
       FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", "Rhino.Inside ");
       Rhino.Runtime.PythonScript.AddRuntimeAssembly(Assembly.GetExecutingAssembly());
 
-      MainWindow = new WindowHandle(RhinoApp.MainWindowHandle());
+      MainWindow = (WindowHandle) RhinoApp.MainWindowHandle();
       MainWindow.ExtendedWindowStyles |= ExtendedWindowStyles.AppWindow;
 
       return External.ActivationGate.AddGateWindow(MainWindow.Handle, Core.ActivationEvent);
     }
 
-    internal static bool InitGrasshopper()
+    internal static bool InitGrasshopper(Assembly assembly)
     {
       var PluginId = new Guid(0xB45A29B1, 0x4343, 0x4035, 0x98, 0x9E, 0x04, 0x4E, 0x85, 0x80, 0xD9, 0xCF);
       return PlugIn.PlugInExists(PluginId, out bool loaded, out bool loadProtected) & (loaded | !loadProtected);

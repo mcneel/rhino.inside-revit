@@ -3,21 +3,21 @@
   </Target>
 
   <Target Name="Compile">
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R7;Platform=2018"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R7;Platform=2019"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R7;Platform=2020"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R7;Platform=2021"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R7;Platform=2022"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R7;Platform=2023"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R7;Platform=2024"/>
-
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R8;Platform=2018"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R8;Platform=2019"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R8;Platform=2020"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R8;Platform=2021"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R8;Platform=2022"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R8;Platform=2023"/>
-    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release R8;Platform=2024"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2018-R7;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2019-R7;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2020-R7;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2021-R7;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2022-R7;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2023-R7;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2024-R7;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2018-R8;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2019-R8;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2020-R8;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2021-R8;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2022-R8;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2023-R8;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2024-R8;Platform=x64"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-2025-R8;Platform=x64"/>
   </Target>
 
   <Target Name="BuildInstaller">

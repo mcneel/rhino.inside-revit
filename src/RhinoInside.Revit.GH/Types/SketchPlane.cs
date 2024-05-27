@@ -8,6 +8,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using ARDB_SketchPlaneGrid = ARDB.Element;
+
   [Kernel.Attributes.Name("Work Plane")]
   public class SketchPlane : GraphicalElement
   {
@@ -73,6 +75,73 @@ namespace RhinoInside.Revit.GH.Types
 
     #region Location
     public override Plane Location => Value?.GetPlane().ToPlane() ?? base.Location;
+    #endregion
+  }
+
+  [Kernel.Attributes.Name("Work Plane Grid")]
+  public class SketchPlaneGrid : GeometricElement
+  {
+    protected override Type ValueType => typeof(ARDB_SketchPlaneGrid);
+    public new ARDB_SketchPlaneGrid Value => base.Value as ARDB_SketchPlaneGrid;
+
+    protected override bool SetValue(ARDB_SketchPlaneGrid element) => IsValidElement(element) && base.SetValue(element);
+    public static new bool IsValidElement(ARDB_SketchPlaneGrid element)
+    {
+      return element.GetType() == typeof(ARDB_SketchPlaneGrid) &&
+             element.Category?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_IOSSketchGrid;
+    }
+
+    public SketchPlaneGrid() : base() { }
+    public SketchPlaneGrid(ARDB_SketchPlaneGrid grid) : base(grid)
+    {
+      if (!IsValidElement(grid))
+        throw new ArgumentException("Invalid Element", nameof(grid));
+    }
+
+    public override bool CastFrom(object source)
+    {
+      var value = source;
+
+      if (source is IGH_Goo goo)
+        value = goo.ScriptVariable();
+
+      if (value is ARDB.View view)
+        return SetValue(view.Document.GetElement(view.GetSketchGridId()));
+
+      return base.CastFrom(source);
+    }
+
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      return base.GetBoundingBox(xform);
+    }
+
+    #region IGH_PreviewData
+    protected override bool GetClippingBox(out BoundingBox clippingBox)
+    {
+      clippingBox = GetBoundingBox(Transform.Identity);
+      return clippingBox.IsValid;
+    }
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      var location = Location;
+      if (!location.IsValid)
+        return;
+
+      base.DrawViewportWires(args);
+    }
+    #endregion
+
+    #region Location
+    public override Plane Location => base.Location;
+    #endregion
+
+    #region Properties
+    public double? GridSpacing
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.SKETCH_GRID_SPACING_PARAM)?.AsDouble() * Revit.ModelUnits;
+    }
     #endregion
   }
 }

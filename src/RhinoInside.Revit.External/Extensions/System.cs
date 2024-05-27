@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace System
@@ -47,16 +48,28 @@ namespace System
 
   static class ArrayExtension
   {
-    public static bool ItemsEqual<T>(this T[] left, T[] right)
+    /// <summary>
+    /// Determines whether two sequences are equivalent by comparing the elements using <see cref="System.Collections.Generic.EqualityComparer{T}.Default"/> comparer.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns>true if the two sequences are equivalent; otherwise, false.</returns>
+    /// <remarks>Empty arrays and null array references are considered equivalent sequences.</remarks>
+    public static bool SequenceEquivalent<T>(this T[] left, T[] right)
     {
-      if (ReferenceEquals(left, right)) return true;
-      if (left is null || right is null) return false;
-      if (left.Length != right.Length) return false;
+#if NET
+      return ((ReadOnlySpan<T>) left).SequenceEqual(right, null);
+#else
+      var leftLength = left?.Length ?? 0;
+      var rightLength = right?.Length ?? 0;
+      if (leftLength != rightLength) return false;
 
-      for(int i=0; i < left.Length; ++i)
-        if (!left[i].Equals(right[i])) return false;
+      for (int i=0; i < leftLength; ++i)
+        if (!Collections.Generic.EqualityComparer<T>.Default.Equals(left[i], right[i])) return false;
 
       return true;
+#endif
     }
   }
 
@@ -81,6 +94,7 @@ namespace System
 
 namespace System.IO
 {
+#pragma warning disable CA1060 // Move pinvokes to native methods class
   static class PathExtension
   {
     public static bool IsFullyQualifiedPath(this string path)
@@ -110,6 +124,28 @@ namespace System.IO
       var builder = new Text.StringBuilder(maxLength + 1);
       PathCompactPathExW(builder, path, maxLength, 0);
       return builder.ToString();
+    }
+  }
+#pragma warning restore CA1060 // Move pinvokes to native methods class
+
+  internal static class DirectoryInfoExtension
+  {
+    public static IEnumerable<FileInfo> EnumerateFilesByExtension(this DirectoryInfo value, string extension, SearchOption searchOptions = SearchOption.TopDirectoryOnly)
+    {
+      foreach (var file in value.EnumerateFiles($"*{extension}", searchOptions))
+      {
+#if NETFRAMEWORK
+        if (extension.Length == 3)
+        {
+          // https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles?view=netframework-4.8
+          // If the specified extension is exactly three characters long,
+          // the method returns files with extensions that begin with the specified extension.
+          // For example, "*.xls" returns both "book.xls" and "book.xlsx"
+          if (!file.Extension.Equals(extension, StringComparison.OrdinalIgnoreCase)) continue;
+        }
+#endif
+        yield return file;
+      }
     }
   }
 

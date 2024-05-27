@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 {
   static class LinkedScripts
   {
-    public static void CreateUI(RibbonHandler ribbon)
+    public static void CreateUI(External.UI.UIHostApplication app)
     {
       // Setup listeners, and in either case, update the packages ui
       // listed for changes in installed packages
@@ -18,14 +18,14 @@ namespace RhinoInside.Revit.AddIn.Commands
       // listen for changes to user-script paths in options
       Properties.AddInOptions.ScriptLocationsChanged += AddInOptions_ScriptLocationsChanged;
 
-      UpdateScriptPkgUI(ribbon);
+      UpdateScriptPkgUI(app);
     }
 
     private static async void AddInOptions_ScriptLocationsChanged(object sender, EventArgs e)
     {
       // wait for Revit to be ready and get uiApp
       var uiApp = await External.ActivationGate.Yield();
-      UpdateScriptPkgUI(new RibbonHandler(uiApp));
+      UpdateScriptPkgUI(uiApp);
     }
 
     private static async void PackageManagerCommand_EndCommand(object sender, Rhino.Commands.CommandEventArgs e)
@@ -34,11 +34,11 @@ namespace RhinoInside.Revit.AddIn.Commands
       {
         // wait for Revit to be ready and get uiApp
         var uiApp = await External.ActivationGate.Yield();
-        UpdateScriptPkgUI(new RibbonHandler(uiApp));
+        UpdateScriptPkgUI(uiApp);
       }
     }
 
-    public static bool CreateUI(ScriptPkg pkg, RibbonHandler ribbon)
+    public static bool CreateUI(ScriptPkg pkg, External.UI.UIHostApplication app)
     {
       // --------------------------------------------------------------------
       // FIND SCRIPTS
@@ -63,47 +63,39 @@ namespace RhinoInside.Revit.AddIn.Commands
       // --------------------------------------------------------------------
       // CREATE UI
       // --------------------------------------------------------------------
-      RibbonPanel panel;
-      try { panel = ribbon.CreateAddinPanel(pkg.Name); }
+      try
+      {
+        var panel = app.CreateRibbonPanel(Command.TabName, pkg.Name);
+
+        // Currently only supporting two levels in the UI:
+        // 1) Pushbuttons on panel for every LinkedScript at the root level
+        // 2) Pulldowns containing pushbuttons for all the LinkedScripts recursively found under their directory
+        // Lets make the pulldowns first so they are first on the panel
+        items.OfType<LinkedItemGroup>().ToList().ForEach((group) =>
+        {
+          var pullDownData = new PulldownButtonData(group.Name, group.Text)
+          {
+            Image = Command.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png", true),
+            LargeImage = Command.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png"),
+            ToolTip = group.Tooltip,
+          };
+          if (panel.AddItem(pullDownData) is PulldownButton pulldown)
+          {
+            ProcessLinkedScripts(group.Items, (script) =>
+            {
+              AddPullDownButton(pulldown, script, lsa);
+            });
+          }
+        });
+
+        // now make pushbuttons
+        foreach(var script in items.OfType<LinkedScript>())
+          AddPanelButton(panel, script, lsa);
+
+      }
       catch { return false; }
 
-      // Currently only supporting two levels in the UI:
-      // 1) Pushbuttons on panel for every LinkedScript at the root level
-      // 2) Pulldowns containing pushbuttons for all the LinkedScripts recursively found under their directory
-      // Lets make the pulldowns first so they are first on the panel
-      items.OfType<LinkedItemGroup>().ToList().ForEach((group) =>
-      {
-        var pullDownData = new PulldownButtonData(group.Name, group.Text)
-        {
-          Image = Command.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png", true),
-          LargeImage = Command.LoadRibbonButtonImage("Ribbon.Grasshopper.GhFolder.png"),
-          ToolTip = group.Tooltip,
-        };
-        if (panel.AddItem(pullDownData) is PulldownButton pulldown)
-        {
-          ProcessLinkedScripts(group.Items, (script) =>
-          {
-            AddPullDownButton(pulldown, script, lsa);
-          });
-        }
-      });
-      // now make pushbuttons
-      items.OfType<LinkedScript>().ToList().ForEach((script) =>
-      {
-        AddPanelButton(panel, script, lsa);
-      });
-
       return true;
-    }
-
-    public static bool HasUI(ScriptPkg pkg, RibbonHandler ribbon)
-    {
-      return ribbon.HasAddinPanel(pkg.Name);
-    }
-
-    public static bool RemoveUI(ScriptPkg pkg, RibbonHandler ribbon)
-    {
-      return ribbon.RemoveAddinPanel(pkg.Name);
     }
 
     private static HashSet<ScriptPkg> _lastState = new HashSet<ScriptPkg>();
@@ -151,7 +143,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       return null;
     }
 
-    internal static void UpdateScriptPkgUI(RibbonHandler ribbon)
+    internal static void UpdateScriptPkgUI(External.UI.UIHostApplication app)
     {
       // determine which packages need to be loaded
       var curState = new HashSet<ScriptPkg>();
@@ -166,6 +158,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       pkgs.UnionWith(_lastState);
 
       // update the package ui
+      var panels = app.GetRibbonPanels(Command.TabName);
       foreach (var pkg in pkgs)
       {
         // skip existing packages
@@ -175,22 +168,23 @@ namespace RhinoInside.Revit.AddIn.Commands
         // create new packages
         else if (curState.Contains(pkg) && !_lastState.Contains(pkg))
         {
-          if (LinkedScripts.HasUI(pkg, ribbon))
+          if (panels.ContainsKey(pkg.Name))
+          {
             TaskDialog.Show
             (
               title: $"{Core.Product}.{Core.Platform}",
               $"Package \"{pkg.Name}\" has been previously loaded in to the Revit UI." +
               "Restart Revit for changes to take effect."
             );
-          else
-            LinkedScripts.CreateUI(pkg, ribbon);
+          }
+          else CreateUI(pkg, app);
         }
 
         // or remove, removed packages
         else if (!curState.Contains(pkg) && _lastState.Contains(pkg))
         {
-          if (LinkedScripts.HasUI(pkg, ribbon))
-            LinkedScripts.RemoveUI(pkg, ribbon);
+          if (panels.TryGetValue(pkg.Name, out var panel))
+            panel.Enabled = false;
         }
       }
 

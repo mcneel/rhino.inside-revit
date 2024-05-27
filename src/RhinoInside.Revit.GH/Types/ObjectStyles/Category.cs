@@ -454,6 +454,10 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region ModelContent
+    protected override string ElementPath => Parent is Category parent ?
+      $"{CategoryType}::{parent.ElementPath}::{base.ElementPath}" :
+      $"{CategoryType}::{base.ElementPath}";
+
 #if RHINO_8
     internal ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
     {
@@ -466,9 +470,7 @@ namespace RhinoInside.Revit.GH.Types
 
         // Path
         {
-          attributes.Path = category.Parent is object ?
-            ModelContentName.Combine(Document.GetTitle(), category.CategoryType.ToString(), category.Parent?.Name, category.Name) :
-            ModelContentName.Combine(Document.GetTitle(), category.CategoryType.ToString(), category.Name);
+          attributes.Path = ModelPath;
         };
 
         // Tags
@@ -560,7 +562,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    private ARDB.BuiltInCategory? BuiltInCategory => Id?.ToBuiltInCategory();
+    private new ARDB.BuiltInCategory? BuiltInCategory => Id?.ToBuiltInCategory();
 
     string _FullName;
     public string FullName => _FullName ?? (APIObject?.FullName() ?? BuiltInCategory?.FullName(localized: true));

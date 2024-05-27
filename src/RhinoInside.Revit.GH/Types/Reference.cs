@@ -193,6 +193,10 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     public Reference() { }
+    protected Reference(Reference reference)
+    {
+      _ReferenceTransform = reference._ReferenceTransform;
+    }
 
     protected Reference(ARDB.Document doc, object value) : base(doc, value) { }
 
@@ -210,7 +214,7 @@ namespace RhinoInside.Revit.GH.Types
       return reference;
     }
 
-    protected internal T GetElement<T>(ARDB.ElementId id) where T : Element
+    protected internal T GetElement<T>(ARDB.ElementId id) where T : Element, new()
     {
       if (id.IsValid())
       {
@@ -220,10 +224,10 @@ namespace RhinoInside.Revit.GH.Types
           Element.FromElementId(Document, id));
       }
 
-      return null;
+      return id == ElementIdExtension.Invalid ? new T() : null;
     }
 
-    protected internal T GetElement<T>(ARDB.LinkElementId id) where T : Element
+    protected internal T GetElement<T>(ARDB.LinkElementId id) where T : Element, new()
     {
       if (id is object)
       {
@@ -254,6 +258,23 @@ namespace RhinoInside.Revit.GH.Types
 
       return null;
     }
+
+    protected internal T GetElement<T>(T element) where T : Element
+    {
+      if (element is object)
+      {
+        if (IsLinked && Document.IsEquivalent(element.Document))
+          return (T) Element.FromLinkElement(ReferenceDocument.GetElement(ReferenceId) as ARDB.RevitLinkInstance, element);
+
+        if (!ReferenceDocument.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid Document");
+
+        return element;
+      }
+
+      return null;
+    }
+
 
     internal T GetElementFromReference<T>(ARDB.Reference reference) where T : Element
     {

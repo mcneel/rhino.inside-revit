@@ -21,7 +21,7 @@ namespace RhinoInside.Revit
         if (result != ARUI.Result.Succeeded)
           return result;
 
-        MainWindow = new WindowHandle(Core.Host.MainWindowHandle);
+        MainWindow = (WindowHandle) Core.Host.MainWindowHandle;
 
         try   { result = Rhinoceros.Startup(); }
         catch { result = ARUI.Result.Failed; }

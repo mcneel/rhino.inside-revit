@@ -384,7 +384,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             case View3D view3D:
               if (view3D.IsSectionBoxActive)
-                clipBox.Intersection(view3D.GetSectionBox());
+                clipBox = BoundingBoxXYZExtension.MinIntersection(clipBox, view3D.GetSectionBox());
               break;
 
             case ViewSection _:
@@ -777,7 +777,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         if (view.get_Parameter(BuiltInParameter.VIEW_PHASE_FILTER) is Parameter viewPhaseFilter && !viewPhaseFilter.IsReadOnly)
         {
-          if (!((viewPhaseFilter.AsElement() as PhaseFilter)?.IsDefault is true))
+          if (!(viewPhaseFilter.AsElement() is PhaseFilter { IsDefault: true }))
           {
             using (var collector = new FilteredElementCollector(view.Document).OfClass(typeof(PhaseFilter)))
             {
