@@ -16,6 +16,10 @@ group: Deployment & Configs
 {% endcapture %}
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.21 (Hotfix)" version="v1.21.8913.17015" time="06/2/2024" %}
+
+- Fixed a bug with Revit transactions
+
 {% include ltr/release-header.html title="v1.22 RC2" version="v1.22.8906.14842" pre_release=true time="05/21/2024" %}
 
 - Misc Improvements
