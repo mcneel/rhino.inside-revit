@@ -503,7 +503,7 @@ namespace RhinoInside.Revit.GH.Types
 
         // Material
         {
-          attributes.Material = Material?.ToModelContent(idMap) as ModelRenderMaterial ?? ModelRenderMaterial.Unset;
+          attributes.Material = Material?.ToModelContent(idMap) as ModelRenderMaterial;
         }
 
         // Some hardcoded tweaks…
