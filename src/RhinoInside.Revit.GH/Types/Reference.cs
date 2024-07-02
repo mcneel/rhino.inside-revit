@@ -266,7 +266,7 @@ namespace RhinoInside.Revit.GH.Types
         if (IsLinked && Document.IsEquivalent(element.Document))
           return (T) Element.FromLinkElement(ReferenceDocument.GetElement(ReferenceId) as ARDB.RevitLinkInstance, element);
 
-        if (!ReferenceDocument.IsEquivalent(element.Document))
+        if (element.Document is object && !ReferenceDocument.IsEquivalent(element.Document))
           throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid Document");
 
         return element;
