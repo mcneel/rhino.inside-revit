@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components
         Vector3d.ZAxis
       );
       curve = Curve.ProjectToPlane(curve, levelPlane);
-      curve = curve.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? curve;
+      curve = curve.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? curve;
 
       // Type
       ChangeElementTypeId(ref railing, type.Value.Id);
