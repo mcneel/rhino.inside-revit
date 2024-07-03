@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.GH.Components
             )
               throw new RuntimeArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.", boundary);
 
-            boundary[index] = loop.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
+            boundary[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
 
             using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
             {

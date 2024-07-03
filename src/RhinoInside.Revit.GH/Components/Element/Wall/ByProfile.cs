@@ -199,7 +199,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           ThrowArgumentException(nameof(profile), "Profile should be a list of planar vertical surfaces.", loop);
 #endif
 
-        loops[index] = loop.Simplify(CurveSimplifyOptions.All, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
+        loops[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
 
         using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
         {
