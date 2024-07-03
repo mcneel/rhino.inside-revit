@@ -13,6 +13,7 @@ group: Deployment & Configs
 ### RC
 
 - Added 'Appearance Asset Identity' component.
+- Renamed 'Add Linear Dimension' component to 'Add Aligned Dimension'.
 
 {% endcapture %}
 

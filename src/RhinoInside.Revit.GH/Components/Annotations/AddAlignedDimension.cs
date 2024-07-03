@@ -11,17 +11,17 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Annotations
 {
   [ComponentVersion(introduced: "1.8", updated: "1.10")]
-  public class AddLinearDimension : ElementTrackerComponent
+  public class AddAlignedDimension : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("DF47C980-EF08-4BBE-A624-C956C07B04EC");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => string.Empty;
 
-    public AddLinearDimension() : base
+    public AddAlignedDimension() : base
     (
-      name: "Add Linear Dimension",
-      nickname: "L-Dim",
-      description: "Given a line, it adds a linear dimension to the given View",
+      name: "Add Aligned Dimension",
+      nickname: "A-Dim",
+      description: "Given a line, it adds an aligned dimension to the given View",
       category: "Revit",
       subCategory: "Annotate"
     )
