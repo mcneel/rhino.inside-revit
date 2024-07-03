@@ -66,6 +66,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
     }
   }
 
+  [ComponentVersion(introduced: "1.0", updated: "1.22")]
   public class ModifyGenericShader
   : ModifyAppearanceAssets<GenericData>
   {

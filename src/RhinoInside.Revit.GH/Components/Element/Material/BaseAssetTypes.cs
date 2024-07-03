@@ -374,18 +374,6 @@ namespace RhinoInside.Revit.GH.Components.Materials
   [AssetGHComponent("Appearance Asset (Generic)", "GA", "Appearance asset of \"Generic\" schema")]
   public class GenericData : ShaderData
   {
-    [NoAPIAssetProp("UIName", typeof(ARDB.Visual.AssetPropertyString))]
-    [AssetGHParameter(typeof(Param_String), "Name", "N", "Asset name", optional: false, modifiable: false)]
-    public override string Name { get; set; }
-
-    [NoAPIAssetProp("description", typeof(ARDB.Visual.AssetPropertyString))]
-    [AssetGHParameter(typeof(Param_String), "Description", "D", "Asset description")]
-    public string Description { get; set; }
-
-    [NoAPIAssetProp("keyword", typeof(ARDB.Visual.AssetPropertyString))]
-    [AssetGHParameter(typeof(Param_String), "Keywords", "KW", "Asset keywords (Separated by :)")]
-    public string Keywords { get; set; }
-
     [APIAssetProp("GenericDiffuse", typeof(ARDB.Visual.AssetPropertyDoubleArray4d), connectable: true)]
     [AssetGHParameter(typeof(Param_ColorRGBA), "Color", "C", "Diffuse color", method: ExtractMethod.ValueOnly)]
     public Rhino.Display.ColorRGBA Color { get; set; } = Rhino.Display.ColorRGBA.Black;
