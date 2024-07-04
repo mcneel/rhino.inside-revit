@@ -10,14 +10,15 @@ group: Deployment & Configs
 
 ### WIP
 
+- - Added 'Add Linear Dimension' in Revit 2025 or above.
+- Added 'Add Radial Dimension' in Revit 2025 or above.
+- Added 'Add Diameter Dimension' in Revit 2025 or above.
+- Added 'Add Arc Length Dimension' in Revit 2025 or above.
+
 ### RC
 
 - Added 'Appearance Asset Identity' component.
 - Renamed 'Add Linear Dimension' component to 'Add Aligned Dimension'.
-- Added 'Add Linear Dimension' in Revit 2025 or above.
-- Added 'Add Radial Dimension' in Revit 2025 or above.
-- Added 'Add Diameter Dimension' in Revit 2025 or above.
-- Added 'Add Arc Length Dimension' in Revit 2025 or above.
 
 {% endcapture %}
 
