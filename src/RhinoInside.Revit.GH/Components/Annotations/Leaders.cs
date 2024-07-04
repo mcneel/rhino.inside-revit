@@ -157,11 +157,13 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (!Params.GetData(DA, "Annotation", out Types.IGH_Annotation annotation, x => x.IsValid)) return;
       else Params.TrySetData(DA, "Annotation", () => annotation);
 
+      var transactionStatus = Autodesk.Revit.DB.TransactionStatus.Uninitialized;
+
       if (annotation is Types.IAnnotationLeadersAccess leaderElement)
       {
         if (Params.GetData(DA, "Leader", out bool? hasLeader))
         {
-          StartTransaction(annotation.Document);
+          transactionStatus = StartTransaction(annotation.Document);
           leaderElement.HasLeader = hasLeader;
         }
 
@@ -169,7 +171,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         {
           if (Params.GetDataList(DA, "End Locations", out IList<Point3d?> endPositions))
           {
-            StartTransaction(annotation.Document);
+            transactionStatus = StartTransaction(annotation.Document);
 
             if (annotation.Value is Autodesk.Revit.DB.TextNote note)
             {
@@ -205,7 +207,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
           if (Params.GetDataList(DA, "Shoulder Locations", out IList<Point3d?> shoulderPositions))
           {
-            StartTransaction(annotation.Document);
+            transactionStatus = StartTransaction(annotation.Document);
+
             foreach (var (leader, shoulder) in leaderElement.Leaders.ZipOrLast(shoulderPositions))
             {
               if (shoulder is null) continue;
@@ -215,13 +218,15 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           }
 
           // Regenerate is necessary here to obtain correct elbow positions.
-          annotation.Document.Regenerate();
+          if (transactionStatus == Autodesk.Revit.DB.TransactionStatus.Started)
+            annotation.Document.Regenerate();
         }
         Params.TrySetData(DA, "Leader", () => leaderElement.HasLeader);
 
         if (Params.GetDataList(DA, "Text Locations", out IList<Point3d?> textPositions))
         {
-          StartTransaction(annotation.Document);
+          transactionStatus = StartTransaction(annotation.Document);
+
           foreach (var (segment, text) in leaderElement.Leaders.ZipOrLast(textPositions))
           {
             if (text is null) continue;
