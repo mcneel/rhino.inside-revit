@@ -13,6 +13,12 @@
     <DefineConstants>$(DefineConstants);RHINO_7;RHINO_8</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(Configuration.Contains('R9'))">
+    <RhinoVersion>9</RhinoVersion>
+    <RhinoApiVersion>9.0.0.0</RhinoApiVersion>
+    <DefineConstants>$(DefineConstants);RHINO_7;RHINO_8;RHINO_9</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="$(RhinoApiVersion) != ''">
     <!-- system -->
     <RhinoDefaultInstallDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\$(RhinoVersion).0\Install', 'Path', null, RegistryView.Registry64))</RhinoDefaultInstallDir>

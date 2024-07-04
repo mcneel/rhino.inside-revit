@@ -51,6 +51,7 @@ namespace RhinoInside.Revit.AddIn
         new Distribution(7),
 #endif
 #if DEBUG
+        new Distribution(9, dev: true),
         new Distribution(8, dev: true),
 #if NETFRAMEWORK
         new Distribution(7, dev: true),
