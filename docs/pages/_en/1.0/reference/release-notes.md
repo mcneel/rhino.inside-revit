@@ -10,10 +10,11 @@ group: Deployment & Configs
 
 ### WIP
 
-- - Added 'Add Linear Dimension' in Revit 2025 or above.
+- Added 'Add Linear Dimension' in Revit 2025 or above.
 - Added 'Add Radial Dimension' in Revit 2025 or above.
 - Added 'Add Diameter Dimension' in Revit 2025 or above.
 - Added 'Add Arc Length Dimension' in Revit 2025 or above.
+- Added TopoSolid by Points in Revit 2024 or above.
 
 ### RC
 

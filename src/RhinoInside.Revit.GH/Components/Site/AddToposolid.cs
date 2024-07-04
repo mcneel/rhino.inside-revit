@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
@@ -12,10 +13,10 @@ namespace RhinoInside.Revit.GH.Components.Site
   using Convert.Geometry;
   using Convert.System.Collections.Generic;
   using External.DB.Extensions;
-  using RhinoInside.Revit.GH.Exceptions;
+  using GH.Exceptions;
 
 #if REVIT_2024
-  [ComponentVersion(introduced: "1.16"), ComponentRevitAPIVersion(min: "2024.0")]
+  [ComponentVersion(introduced: "1.16", updated: "1.23"), ComponentRevitAPIVersion(min: "2024.0")]
   public class AddToposolid : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("1A85EE3C-F045-462C-B6DA-E03F36C41E77");
@@ -53,6 +54,28 @@ namespace RhinoInside.Revit.GH.Components.Site
           Description = "Toposolid boundary profile",
           Access = GH_ParamAccess.list
         }
+      ),
+      new ParamDefinition
+       (
+        new Param_Point
+        {
+          Name = "Points",
+          NickName = "P",
+          Description = "Toposolid points",
+          Optional = true,
+          Access = GH_ParamAccess.list
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+       (
+        new Param_Line
+        {
+          Name = "Creases",
+          NickName = "C",
+          Description = "Toposolid creases",
+          Optional = true,
+          Access = GH_ParamAccess.list
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
        (
@@ -111,6 +134,8 @@ namespace RhinoInside.Revit.GH.Components.Site
         {
           // Input
           if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary)) return null;
+          if (!Params.TryGetDataList(DA, "Points", out IList<Point3d?> points)) return null;
+          if (!Params.TryGetDataList(DA, "Creases", out IList<Line?> creases)) return null;
 
           var boundaryElevation = Interval.Unset;
           {
@@ -167,7 +192,16 @@ namespace RhinoInside.Revit.GH.Components.Site
           );
 
           // Compute
-          toposolid = Reconstruct(toposolid, doc.Value, boundary, toposolidType, baseElevation.Value);
+          toposolid = Reconstruct
+          (
+            toposolid,
+            doc.Value,
+            boundary,
+            points?.Where(x => x.HasValue).Select(x => x.Value).ToArray(),
+            creases?.Where(x => x.HasValue).Select(x => x.Value).ToArray(),
+            toposolidType,
+            baseElevation.Value
+          );
           DA.SetData(_Toposolid_, toposolid);
           return toposolid;
         }
@@ -229,6 +263,8 @@ namespace RhinoInside.Revit.GH.Components.Site
       ARDB.Toposolid toposolid,
       ARDB.Document doc,
       IList<Curve> boundary,
+      IList<Point3d> points,
+      IList<Line> creases,
       ARDB.ToposolidType type,
       ERDB.ElevationElementReference baseElevation
     )
@@ -242,6 +278,18 @@ namespace RhinoInside.Revit.GH.Components.Site
           Create(doc, boundary, type, baseLevel),
           ExcludeUniqueProperties
         );
+      }
+
+      if (toposolid is object)
+      {
+        var host = new Types.Toposolid(toposolid);
+        host.SetSlabShape(points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases);
+
+        foreach (var point in skipedPoints)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));
+
+        foreach (var crease in skipedCreases)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Some invalid creases were skipped.", new LineCurve(crease));
       }
 
       return toposolid;
