@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace RhinoInside.Revit
 {
@@ -12,8 +14,11 @@ namespace RhinoInside.Revit
   {
     class TemporaryPrefixGenerator : ITemporaryPrefixGenerator
     {
-      readonly System.Runtime.Serialization.ObjectIDGenerator Generator = new System.Runtime.Serialization.ObjectIDGenerator();
-      public string PrefixOf(object value) => Generator.GetId(value, out var _).ToString("X16");
+      private readonly ConditionalWeakTable<object, string> Prefixes = new ConditionalWeakTable<object, string>();
+      private long Seed;
+
+      public string PrefixOf(object value) => value is null ? null :
+        Prefixes.GetValue(value, (k) => Interlocked.Increment(ref Seed).ToString("X16"));
     }
 
     public readonly DirectoryInfo Directory;
