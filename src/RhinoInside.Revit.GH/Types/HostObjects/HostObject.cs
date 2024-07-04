@@ -87,7 +87,8 @@ namespace RhinoInside.Revit.GH.Types
         skipedPoints = new List<Point3d>();
         skipedCreases = new List<Line>();
 
-        using (var shape = host.GetSlabShapeEditor())
+        var shape = host.GetSlabShapeEditor();
+        using (shape as IDisposable) // ARDB.SlabShapeEditor is IDisposable since Revit 2023
         {
           shape.ResetSlabShape();
           host.Document.Regenerate();
