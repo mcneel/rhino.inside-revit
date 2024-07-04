@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class AddArcLengthDimension : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("3FD260D4-1E8D-4C03-89D0-3D7256C19520");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary);
     protected override string IconTag => string.Empty;
 
     public AddArcLengthDimension() : base
