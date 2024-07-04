@@ -121,7 +121,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       if (dimension is null) return false;
       if (dimension.OwnerViewId != view.Id) return false;
-      if (type != default && type.Id != dimension.GetTypeId()) return false;
 
       // Arc
       if (!dimension.Curve.AlmostEquals(arc, GeometryTolerance.Internal.VertexTolerance)) return false;
@@ -137,13 +136,17 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           return false;
       }
 
+      if (type is object) dimension.ChangeTypeId(type.Id);
       return true;
     }
 
     ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Arc arc, IList<ARDB.Reference> references, ARDB.DimensionType type)
     {
       if (!Reuse(dimension, view, arc, references, type))
+      {
         dimension = ARDB.AngularDimension.Create(view.Document, view, arc, references, type);
+        if (type is object) dimension.ChangeTypeId(type.Id);
+      }
 
       return dimension;
     }
