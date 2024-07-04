@@ -131,7 +131,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     {
       if (dimension is null) return false;
       if (dimension.OwnerViewId != view.Id) return false;
-      if (type != default && type.Id != dimension.GetTypeId()) return false;
 
       // Line
       if (!dimension.Curve.AlmostEquals(line, GeometryTolerance.Internal.VertexTolerance)) return false;
@@ -147,6 +146,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           return false;
       }
 
+      if (type is object) dimension.ChangeTypeId(type.Id);
       return true;
     }
 
@@ -168,6 +168,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Line line, IList<ARDB.Reference> references, ARDB.DimensionType type)
     {
+      line.MakeUnbound();
+
       if (!Reuse(dimension, view, line, references, type))
         dimension = Create(view, line, references, type);
 
