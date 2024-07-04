@@ -14,6 +14,7 @@ group: Deployment & Configs
 
 - Added 'Appearance Asset Identity' component.
 - Renamed 'Add Linear Dimension' component to 'Add Aligned Dimension'.
+- Fix on 'Host Shape' component when updating.
 
 {% endcapture %}
 

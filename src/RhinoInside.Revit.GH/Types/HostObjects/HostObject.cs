@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
@@ -75,6 +76,86 @@ namespace RhinoInside.Revit.GH.Types
 
         return base.Location;
       }
+    }
+
+    internal bool SetSlabShape(IList<Point3d> points, IList<Line> creases, out IList<Point3d> skipedPoints, out IList<Line> skipedCreases)
+    {
+      if (Value is ARDB.HostObject host)
+      {
+        InvalidateGraphics();
+
+        skipedPoints = new List<Point3d>();
+        skipedCreases = new List<Line>();
+
+        using (var shape = host.GetSlabShapeEditor())
+        {
+          shape.ResetSlabShape();
+          host.Document.Regenerate();
+
+          var bbox = BoundingBox;
+          var elevation = GeometryEncoder.ToInternalLength(bbox.Max.Z);
+
+          shape.Enable();
+          var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>();
+          ARDB.SlabShapeVertex AddVertex(Point3d point)
+          {
+            var x = GeometryEncoder.ToInternalLength(point.X);
+            var y = GeometryEncoder.ToInternalLength(point.Y);
+            var z = GeometryEncoder.ToInternalLength(point.Z);
+
+            var xyz = new Point3d(x, y, z);
+            if (!vertices.TryGetValue(xyz, out var vertex))
+            {
+              try
+              {
+                if ((vertex = shape.AddPoint(new ARDB.XYZ(x, y, elevation))) is object)
+                  vertices.Add(xyz, vertex);
+              }
+              catch { }
+            }
+
+            return vertex?.VertexType == ARDB.SlabShapeVertexType.Invalid ? null : vertex;
+          }
+
+          if (points is object)
+          {
+            foreach (var point in points)
+            {
+              if (AddVertex(point) is null)
+                skipedPoints.Add(point);
+            }
+          }
+
+          if (creases is object)
+          {
+            foreach (var crease in creases)
+            {
+              if (crease.IsValid)
+              {
+                try
+                {
+                  var from = AddVertex(crease.From);
+                  var to = AddVertex(crease.To);
+                  if (from is null || to is null || shape.AddSplitLine(from, to) is null)
+                    skipedCreases.Add(crease);
+                }
+                catch { skipedCreases.Add(crease); }
+              }
+              else skipedCreases.Add(crease);
+            }
+          }
+
+          var bottomUpVertices = vertices.OrderBy(x => x.Key.Z);
+          foreach (var vertex in bottomUpVertices)
+            shape.ModifySubElement(vertex.Value, vertex.Key.Z - elevation);
+        }
+
+        return true;
+      }
+
+      skipedPoints = default;
+      skipedCreases = default;
+      return false;
     }
   }
 
