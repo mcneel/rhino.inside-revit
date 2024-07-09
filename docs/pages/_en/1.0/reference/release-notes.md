@@ -15,6 +15,7 @@ group: Deployment & Configs
 - Added 'Appearance Asset Identity' component.
 - Renamed 'Add Linear Dimension' component to 'Add Aligned Dimension'.
 - Fix on 'Host Shape' component when updating.
+- Fix on 'Element Workset' component when the document is not workshared.
 
 {% endcapture %}
 
