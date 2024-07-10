@@ -86,7 +86,9 @@ collections:
   en:
     output: true
     permalink: /en/:path
-
+  cn:
+    output: true
+    permalink: /cn/:path
 # site versions. ordered from most recent to oldest
 # id: use a valid id for each version. this id is used to retrieve info about
 # the version in liquid tags e.g. {{ site.versions.one.rir_download }}
@@ -127,6 +129,13 @@ defaults:
     values:
       language: en
       authors: ['scott_davidson']
+      
+  - scope:
+      path: ""
+      type: cn
+    values:
+      language: cn     
+  
 
   # set version on pages based on their path
   - scope:
