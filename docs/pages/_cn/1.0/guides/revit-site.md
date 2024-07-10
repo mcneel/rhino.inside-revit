@@ -1,0 +1,32 @@
+---
+title: Site, Topography
+order: 60
+thumbnail: /static/images/guides/revit-site.png
+subtitle: Workflows for Revit Site and Topography
+group: Modeling
+---
+
+## Add Topography (Mesh)
+
+Use the {% include ltr/comp.html uuid='e6ea0a85' %} component to Add Topography (Mesh) in the project.
+
+![]({{ "/static/images/guides/revit-site-add-topo.png" | prepend: site.baseurl }})
+
+## Add BuildingPad
+
+Use the {% include ltr/comp.html uuid='ade71474' %} component to Add BuildingPad in the project.
+
+![]({{ "/static/images/guides/revit-site-add-building-pad.png" | prepend: site.baseurl }})
+
+## Add Topography (Points)
+
+Use the {% include ltr/comp.html uuid='e8d8d05a' %} component to Add Topography (Points) in the project.
+
+![]({{ "/static/images/guides/revit-site-add-topo-points.png" | prepend: site.baseurl }})
+
+## Add Topography Region
+
+Provide a Revit Topography Element and Planar Curves to the {% include ltr/comp.html uuid='0644989d' %} component to Add a Topography Region.
+
+![]({{ "/static/images/guides/revit-topo-addSubRegion.png" | prepend: site.baseurl }})
+
