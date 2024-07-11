@@ -135,8 +135,7 @@ defaults:
       path: ""
       type: cn
     values:
-      language: cn     
-  
+      language: cn
 
   # set version on pages based on their path
   - scope:
