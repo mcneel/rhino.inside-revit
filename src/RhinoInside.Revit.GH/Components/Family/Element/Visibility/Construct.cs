@@ -62,7 +62,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       if (onlyWhenCut)  value |= ERDB.FamilyElementVisibility.OnlyWhenCut;
       if (coarse) value |= ERDB.FamilyElementVisibility.Coarse;
       if (medium) value |= ERDB.FamilyElementVisibility.Medium;
-      if (fine)   value |= ERDB.FamilyElementVisibility.FrontBack;
+      if (fine)   value |= ERDB.FamilyElementVisibility.Fine;
 
       DA.SetData(0, value);
     }

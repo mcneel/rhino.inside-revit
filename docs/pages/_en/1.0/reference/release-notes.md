@@ -22,6 +22,7 @@ group: Deployment & Configs
 - Renamed 'Add Linear Dimension' component to 'Add Aligned Dimension'.
 - Fix on 'Host Shape' component when updating.
 - Fix on 'Element Workset' component when the document is not workshared.
+- Fix on 'Fine' input on 'Construct Visibility' component.
 
 {% endcapture %}
 
