@@ -86,6 +86,7 @@ collections:
   en:
     output: true
     permalink: /en/:path
+    
   cn:
     output: true
     permalink: /cn/:path
