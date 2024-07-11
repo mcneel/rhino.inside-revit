@@ -1,9 +1,6 @@
-getting-started.md
 ---
-
 title: Rhino.Inside.Revit 入门指南
 layout: ltr/page-h2-toc
-
 ---
 
 ## 什么是 {{ site.terms.rir }}
