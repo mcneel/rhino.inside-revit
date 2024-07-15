@@ -18,15 +18,19 @@ group: Deployment & Configs
 
 ### RC
 
-- Added 'Appearance Asset Identity' component.
-- Renamed 'Add Linear Dimension' component to 'Add Aligned Dimension'.
-- Fix on 'Host Shape' component when updating.
-- Fix on 'Element Workset' component when the document is not workshared.
-- Fix on 'Fine' input on 'Construct Visibility' component.
 
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.22" version="v1.22.8962.17228" time="07/15/2024" %}
+
+- Added {% include ltr/comp.html uuid='87171c24' %} component.
+- Added {% include ltr/comp.html uuid='ee672a3f' %} component.
+- Renamed 'Add Linear Dimension' component to {% include ltr/comp.html uuid='df47c980' %} component.
+- Fix on 'Host Shape' component when updating.
+- Fix on 'Element Workset' component when the document is not workshared.
+- Fix on 'Fine' input on 'Construct Visibility' component.
 
 {% include ltr/release-header.html title="v1.22 RC4" version="v1.22.8951.18278" pre_release=true time="07/04/2024" %}
 
@@ -48,7 +52,7 @@ group: Deployment & Configs
 
 - Added suppport for Revit 2025.
 - Implemented casting from `View` to `ModelView` in Rhino 8.
-- Added 'View Work Plane' component.
+- Added {% include ltr/comp.html uuid='81d72c8d' %} component.
 - Misc Improvements
 
 {% include ltr/release-header.html title="v1.21" version="v1.21.8904.29048" time="05/18/2024" %}
