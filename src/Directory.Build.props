@@ -13,6 +13,7 @@
   <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.csproj'">
     <SchemaVersion>2.0</SchemaVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
 
     <!-- Language -->
     <LangVersion>8.0</LangVersion>
