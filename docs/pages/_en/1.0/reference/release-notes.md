@@ -17,7 +17,7 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.23 RC1" version="v1.23.8958.19509" pre_release=true time="07/15/2024" %}
+{% include ltr/release-header.html title="v1.23 RC1" version="v1.23.8962.17381" pre_release=true time="07/15/2024" %}
 
 - Added 'Add Linear Dimension' in Revit 2025 or above.
 - Added 'Add Radial Dimension' in Revit 2025 or above.
