@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.AddIn
         var result = taskDialog.Show();
 
         if (TaskDialogResult.CommandLink1 <= result && result <= TaskDialogResult.CommandLink4)
-          return distributions[result - TaskDialogResult.CommandLink1];
+          return available[result - TaskDialogResult.CommandLink1];
       }
 
       return null;
