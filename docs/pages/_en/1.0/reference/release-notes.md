@@ -17,6 +17,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.23 RC2" version="v1.23.8965.4141" pre_release=true time="07/25/2024" %}
+
+- Miscellaneous Improvements
+
 {% include ltr/release-header.html title="v1.23 RC1" version="v1.23.8962.17381" pre_release=true time="07/15/2024" %}
 
 - Added 'Add Linear Dimension' in Revit 2025 or above.
@@ -36,7 +40,7 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.22 RC4" version="v1.22.8951.18278" pre_release=true time="07/04/2024" %}
 
-- Misc Improvements
+- Miscellaneous Improvements
 
 {% include ltr/release-header.html title="v1.22 RC3" version="v1.22.8913.17329" pre_release=true time="06/02/2024" %}
 
@@ -48,14 +52,14 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.22 RC2" version="v1.22.8906.14842" pre_release=true time="05/21/2024" %}
 
-- Misc Improvements
+- Miscellaneous Improvements
 
 {% include ltr/release-header.html title="v1.22 RC1" version="v1.22.8900.22517" pre_release=true time="05/19/2024" %}
 
 - Added suppport for Revit 2025.
 - Implemented casting from `View` to `ModelView` in Rhino 8.
 - Added {% include ltr/comp.html uuid='81d72c8d' %} component.
-- Misc Improvements
+- Miscellaneous Improvements
 
 {% include ltr/release-header.html title="v1.21" version="v1.21.8904.29048" time="05/18/2024" %}
 
@@ -64,7 +68,7 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.21 RC4" version="v1.21.8872.10624" pre_release=true time="04/17/2024" %}
 
-- Misc Improvements
+- Miscellaneous Improvements
 
 {% include ltr/release-header.html title="v1.21 RC3" version="v1.21.8858.5078" pre_release=true time="04/02/2024" %}
 
@@ -87,7 +91,7 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.21 RC1" version="v1.21.8836.21811" pre_release=true time="03/17/2024" %}
 
-- Misc Fixes and Improvements
+- Miscellaneous Fixes and Improvements
 
 {% include ltr/release-header.html title="v1.20" version="v1.20.8836.21283" time="03/17/2024" %}
 
@@ -99,11 +103,11 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.20 RC2" version="v1.20.8823.22283" pre_release=true time="03/09/2024" %}
 
-- Misc Fixes and Improvements
+- Miscellaneous Fixes and Improvements
 
 {% include ltr/release-header.html title="v1.20 RC1" version="v1.20.8816.29607" pre_release=true time="02/20/2024" %}
 
-- Misc Fixes and Improvements
+- Miscellaneous Fixes and Improvements
 
 {% include ltr/release-header.html title="v1.19" version="v1.19.8816.24975" time="02/20/2024" %}
 
@@ -124,7 +128,7 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.19 RC1" version="v1.19.8780.17135" pre_release=true time="01/15/2024" %}
 
-- Misc Fixes and Improvements
+- Miscellaneous Fixes and Improvements
 
 {% include ltr/release-header.html title="v1.18" version="v1.18.8780.17023" time="01/15/2024" %}
 
@@ -136,7 +140,7 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.18 RC3" version="v1.18.8746.17424" pre_release=true time="12/12/2023" %}
 
-- Misc Fixes and Improvements
+- Miscellaneous Fixes and Improvements
 
 {% include ltr/release-header.html title="v1.18 RC2" version="v1.18.8739.18374" pre_release=true time="12/05/2023" %}
 
@@ -166,7 +170,7 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.17 RC1" version="v1.17.8620.27747" pre_release=true time="08/08/2023" %}
 
-- Misc fixes and improvements
+- Miscellaneous fixes and improvements
 
 {% include ltr/release-header.html title="v1.16" version="v1.16.8620.27325" time="08/08/2023" %}
 
@@ -196,7 +200,7 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.16 RC1" version="v1.16.8596.34292" pre_release=true time="07/15/2023" %}
 
-- Misc fixes and improvements
+- Miscellaneous fixes and improvements
 
 {% include ltr/release-header.html title="v1.15" version="v1.15.8596.34075" time="07/15/2023" %}
 
@@ -219,12 +223,12 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.15 RC1" version="v1.15.8557.7999" pre_release=true time="06/07/2023" %}
 
-- Misc fixes and improvements
+- Miscellaneous fixes and improvements
 
 {% include ltr/release-header.html title="v1.14" version="v1.14.8557.24642" time="06/07/2023" %}
 
 - Includes all changes under 1.14RC releases listed below
-- Misc fixes and improvements
+- Miscellaneous fixes and improvements
 
 {% include ltr/release-header.html title="v1.14 RC4" version="v1.14.8543.20042" pre_release=true time="05/23/2023" %}
 
@@ -258,7 +262,7 @@ group: Deployment & Configs
 - Includes all changes under 1.13RC releases listed below
 - Added {% include ltr/comp.html uuid='e2435930' %} parameter
 - Added {% include ltr/comp.html uuid='4326c4aa' %} parameter
-- Misc fixes and improvements
+- Miscellaneous fixes and improvements
 
 {% include ltr/release-header.html title="v1.13 RC6" version="v1.13.8494.18380" pre_release=true time="04/04/2023" %}
 
