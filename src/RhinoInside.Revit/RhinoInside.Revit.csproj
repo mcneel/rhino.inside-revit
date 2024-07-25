@@ -7,6 +7,7 @@
     <AssemblyName>RhinoInside.Revit</AssemblyName>
     <RootNamespace>RhinoInside.Revit</RootNamespace>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>

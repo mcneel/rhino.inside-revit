@@ -6,6 +6,7 @@
   <PropertyGroup>
     <AssemblyName>RhinoInside.Revit.AddIn</AssemblyName>
     <RootNamespace>RhinoInside.Revit.AddIn</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>

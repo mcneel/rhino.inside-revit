@@ -6,6 +6,7 @@
   <PropertyGroup>
     <AssemblyName>RhinoInside.Revit.External</AssemblyName>
     <RootNamespace>RhinoInside.Revit.External</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
