@@ -11,166 +11,161 @@ ghdef: revit-walls.ghx
 ## Querying Wall Types
 
 {% capture api_note %}
-In Revit API, Wall Types are represented by {% include api_type.html type='Autodesk.Revit.DB.WallType' title='DB.WallType' %}. Walls have three main *System Families* that are represented by {% include api_type.html type='Autodesk.Revit.DB.WallKind' title='DB.WallKind' %} enumeration and could be determined by checking `DB.WallType.Kind`. In {{ site.terms.rir }}, the term *Wall System Family* is used instead for consistency and {% include ltr/comp.html uuid='fe427d04' %} primitive can represent a Wall Type.
+Revit API 中墙体类型由 {% include api_type.html type='Autodesk.Revit.DB.WallType' title='DB.WallType' %}来表示，墙有三个主要的系统族，经由 {% include api_type.html type='Autodesk.Revit.DB.WallKind' title='DB.WallKind' %} 来进行枚举且由 `DB.WallType.Kind来检查与确定，  {{ site.terms.rir }}为了保持一致性，使用了墙体系统族这一术语， {% include ltr/comp.html uuid='fe427d04' %} 可以代表一个墙体类型。
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-Use a combination of {% include ltr/comp.html uuid="d08f7ab1-" %} and {% include ltr/comp.html uuid="7b00f940-" %} components to collect all the wall types in a Revit model:
+可以使用 {% include ltr/comp.html uuid="d08f7ab1-" %} 与 {% include ltr/comp.html uuid="7b00f940-" %} 来查询 Revit 模型中所有有的墙体类型:
 
 ![]({{ "/static/images/guides/revit-walls-querywalltypes.png" | prepend: site.baseurl }})
 
-
-## Querying Walls
+## 查询墙体
 
 {% capture api_note %}
-In Revit API, Walls are represented by {% include api_type.html type='Autodesk.Revit.DB.Wall' title='DB.Wall' %}. The {% include ltr/comp.html uuid='15ad6bf9' %} primitive in {{ site.terms.rir }} represents Walls of all kinds.
+在 Revit 的API 中使用 {% include api_type.html type='Autodesk.Revit.DB.Wall' title='DB.Wall' %}来表达墙体，{{ site.terms.rir }} 中的 {% include ltr/comp.html uuid='15ad6bf9' %} 可以表达所有类型的墙体。
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-### Querying All Walls
+### 查询所有墙体
 
-Use a combination of {% include ltr/comp.html uuid="d08f7ab1-" %} and {% include ltr/comp.html uuid="0f7da57e-" %} components to collect all the wall instances in a Revit model:
+联合 {% include ltr/comp.html uuid="d08f7ab1-" %} 与 {% include ltr/comp.html uuid="0f7da57e-" %} 运算器来查询一个 Revit 模型中所选择的墙体实例:
 
 ![]({{ "/static/images/guides/revit-walls-querywalls.png" | prepend: site.baseurl }})
 
-{% include ltr/warning_note.html note='Note that Revit API will return the individual partial walls on a *Stacked Wall* when using this workflow' %}
+{% include ltr/warning_note.html note='使用上面的流程 Revit API 也会返回 Stacked Wall 上的各部分墙' %}
 
-### By Wall System Family
+### 墙系统族
 
-A better workflow is to collect walls based on the *Wall System Family*. Use the {% include ltr/comp.html uuid="15545e80-" %} component to select any combination of the builtin **Basic**, **Stacked**, or **Curtain** walls in Revit. You can then pass this selection as the input to the {% include ltr/comp.html uuid="118f5744-" %} as shown below:
+建议基于墙系统族的方式来查询基础墙，使用 {% include ltr/comp.html uuid="15545e80-" %} 运算器来挑选Revit 中内置的基础墙、叠层墙或是幕墙或是组合墙，然后输入至 {% include ltr/comp.html uuid="118f5744-" %} 进行查询，结果如下图所示：
 
 ![]({{ "/static/images/guides/revit-walls-querybysystem.png" | prepend: site.baseurl }})
 
-### By Wall Type
+### 墙体类型
 
-You can also collect walls of a specific type very easily using a workflow described in [Data Model: Elements & Instances]({{ site.baseurl }}{% link _en/1.0/guides/revit-elements.md %}#instances)
+墙体类型的查询非常容易，例如 [Data Model: Elements & Instances]({{ site.baseurl }}{% link _en/1.0/guides/revit-elements.md %}#instances) 中介绍过的流程：
 
 ![]({{ "/static/images/guides/revit-walls-querywalltype.png" | prepend: site.baseurl }})
 
+## 墙体类型分析
 
-## Analyzing Wall Types
+### 读取类型参数
 
-### Reading Type Parameters
+一旦你使用上面的一些工作流程完成了墙体类型的筛选，你就可以查询其参数与修改参数。浏览 [Document Model: Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) 详细的介绍如何修改一个图元类型的参数
 
-Once you have filtered out the desired wall type using workflows described above, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) to learn how to edit parameters of an element type.
+### 分析基础墙
 
-### Analyzing Basic Walls
-
-*Basic Walls* are a special *Wall System Family* in Revit. They are constructed from a set of layers that are defined as part of the wall type definition. The also have a series of other unique options e.g. **Wrapping at Inserts**. The {% include ltr/comp.html uuid="00a650ed-" %} component shown here provide a method to analyze the *Basic Wall* types in Revit document:
+基础墙是 Revit 中一种特殊的墙系统族，由一组定义为墙类型的图层构成，也有一些独特的选项，例如 **Wrapping at Inserts** . 使用 {% include ltr/comp.html uuid="00a650ed-" %}  运算器可以显示与分析 Revit 文档中基础墙类型信息：
 
 ![]({{ "/static/images/guides/revit-walls-analyzebasictype.png" | prepend: site.baseurl }})
 
-Some of the outputs on this component (e.g. **Wrapping at Inserts** and **Wrapping at Ends**) return an integer value that corresponds to an enumeration in the Revit API. You can use the {% include ltr/comp.html uuid='141f0da4' %} and {% include ltr/comp.html uuid='c84653dd' %} components (shown above in front of the parameter values panel) to determine which value is set on the parameter and filter the source wall types. The examples below show how this component are used to filter the wall types by *Wrapping* and *Function*:
+有些特定的输出项（例如 **Wrapping at Inserts** 与 **Wrapping at Ends** )会返回一个与Revit API 枚举像对应的整数值， 你可以使用 {% include ltr/comp.html uuid='141f0da4' %} 与 {% include ltr/comp.html uuid='c84653dd' %} （位于上图中参数数值面板前）来确定在参数上设置的值且能给筛选源墙类型， 例如下面示范如何利用这些运算器来进行 *Wrapping* 与 *Function* 筛选：
 
 ![]({{ "/static/images/guides/revit-walls-analyzebasictype-filter.png" | prepend: site.baseurl }})
 
-### Basic Wall Structure
+### 基础墙结构
 
 {% capture api_note %}
-In Revit API, {% include api_type.html type='Autodesk.Revit.DB.CompoundStructure' title='DB.CompoundStructure' %} type represents the structure definition of categories that allow such configuration e.g. *Basic Walls*, *Floors*, *Roofs*, *Compound Ceilings*, etc. The `DB.CompoundStructure` can provide access to individual layers represented by {% include api_type.html type='Autodesk.Revit.DB.CompoundStructureLayer' title='DB.CompoundStructureLayer' %} 
+在 Revit API 中使用 {% include api_type.html type='Autodesk.Revit.DB.CompoundStructure' title='DB.CompoundStructure' %}来表示允许配置类型的结构定义，例如基础墙、地板、屋顶与复合天花板等， `DB.CompoundStructure` 可以访问 {% include api_type.html type='Autodesk.Revit.DB.CompoundStructureLayer' title='DB.CompoundStructureLayer' %} 的每个独立层。
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The {% include ltr/comp.html uuid="00a650ed-" %} component shown above, provides access to the *Compound Structure* definition of the *Basic Wall* type. Use the {% include ltr/comp.html uuid="120090a3-" %} component shown here to extract information on *Compound Structure Layers*. Similar to above, {% include ltr/comp.html uuid='55b31952' %} and {% include ltr/comp.html uuid='8d73d533' %} components are provided to allow value comparison and filtering of the structure layers:
+前面示范了 {% include ltr/comp.html uuid="00a650ed-" %} 运算器如何访问**基础墙** 类型的**复合结构定义** ，也可以使用 {% include ltr/comp.html uuid="120090a3-" %} 运算器来显示与提取 **复合结构定义** ，和上面的比较相似, {% include ltr/comp.html uuid='55b31952' %} 与 {% include ltr/comp.html uuid='8d73d533' %}  运算器可以用来比较与筛选结构图层：
 
 ![]({{ "/static/images/guides/revit-walls-compstruct.png" | prepend: site.baseurl }})
 
-As shown above, layers are ordered from **Exterior** to **Interior**, matching the Revit GUI layer ordering. The example below shows a workflow to access individual layers by their index:
+如上面所示，图层从**外部** 到**内部** 排序，与 Revit GUI 图层结构匹配，下面示范如何以序号索引来访问每一个图层：
 
 ![]({{ "/static/images/guides/revit-walls-compstructlayer.png" | prepend: site.baseurl }})
 
-### Basic Wall Structure Layers
+### 基础墙结构层
 
-Use the {% include ltr/comp.html uuid="6b32703e-" %} component to extract information about each individual *Compound Structure Layer*. {% include ltr/comp.html uuid='439ba763' %} and {% include ltr/comp.html uuid='db470316' %} components are also provide for value comparison:
+使用 {% include ltr/comp.html uuid="6b32703e-" %} 运算器提取每个复合结构层的信息，还可以使用 {% include ltr/comp.html uuid='439ba763' %} 与 {% include ltr/comp.html uuid='db470316' %} 运算器来进行对比：
 
 ![]({{ "/static/images/guides/revit-walls-analyzecompstructlayer.png" | prepend: site.baseurl }})
 
-### Stacked Wall Structure
+### 叠层墙结构
 
-{% include ltr/warning_note.html image='/static/images/guides/revit-walls-stackedwallstruct.png' note='Currently there is no support in Revit API to access *Stacked Wall* structure data. However you can use the *Analyse Stacked Wall* component to extract the embedded *Basic Wall* instances and analyze their structure layers individually' %}
+{% include ltr/warning_note.html image='/static/images/guides/revit-walls-stackedwallstruct.png' note=' 当前的 Revit API 并不支持直接访问叠层墙结构数据， 但你可以使用 Analyse Stacked Wall 运算器来提取内置的 基础墙实例，且能解析每一个图层结构：' %}
 
-## Analyzing Walls
+## 分析墙体
 
-### Reading Instance Parameters
+### 读取实例参数
 
-Once you have filtered out the desired wall instance using workflows described above, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) to learn how to edit parameters of an element.
+如果你使用上面的一些方法筛选到所需的墙体实例，继而可以查询器参数值且可以赋予新的参数值， 浏览 [Document Model: Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) 了解如何编辑一个图元的参数值。
 
-### Common Wall Properties
+### 常见墙体属性
 
-Use the {% include ltr/comp.html uuid="1169ceb6-" %} component shown here, to grab the common properties between all *Wall System Families*. {% include ltr/comp.html uuid='15545e80' %} and {% include ltr/comp.html uuid='1f3053c0' %} components are also provided for value comparison:
+如下图所示使用 {% include ltr/comp.html uuid="1169ceb6-" %} 运算器可以获取所有墙系统族的常见属性， {% include ltr/comp.html uuid='15545e80' %} 与 {% include ltr/comp.html uuid='1f3053c0' %} 运算器还可以对比参数值：
 
 ![]({{ "/static/images/guides/revit-walls-analyzewall.png" | prepend: site.baseurl }})
 
-{% include ltr/api_note.html note="Slant Angle property is only supported on Revit >= 2021" %}
+{% include ltr/api_note.html note="Slant Angle 属性仅在 Revit 2021 或更高的版本上能支持" %}
 
-The example below uses the shared *Wall Structural Usage* value list component to filter for **Shear** walls:
+下面示范如何使用 **Wall Structural Usage 值列表** 运算器来筛选 **Shear** 墙：
 
 ![]({{ "/static/images/guides/revit-walls-analyzewall-filter.png" | prepend: site.baseurl }})
 
-The **Orientation** output parameter is the wall orientation vector:
+输出选项 **Orientation** 用来显示墙的原始向量
 
 ![]({{ "/static/images/guides/revit-walls-analyzewall-orient.png" | prepend: site.baseurl }})
 
 ![]({{ "/static/images/guides/revit-walls-analyzewall-orientvectors.png" | prepend: site.baseurl }})
 
-
-### Wall Location Curve
+### 墙定位线
 
 {% capture api_note %}
-In Revit API, *Location Line* of a *Basic* or *Stacked Wall* is represented by the {% include api_type.html type='Autodesk.Revit.DB.WallLocationLine' title='DB.WallLocationLine' %} enumeration and is stored in `DB.BuiltInParameter.WALL_KEY_REF_PARAM` parameter on the wall instance
+在 Revit API 中使用 {% include api_type.html type='Autodesk.Revit.DB.WallLocationLine' title='DB.WallLocationLine' %} 来枚举一个基础墙或叠层墙的定位线，且其墙体实例中的参数储存在`DB.BuiltInParameter.WALL_KEY_REF_PARAM` 参数中
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-*Basic* and *Stacked Walls* have a concept known as *Location Line*. The location line defines the vertical reference plane for the wall instance. The wall stays fixed on this vertical reference plane when it is flipped or its structure is modified. The {% include ltr/comp.html uuid="4c5260c3-" %} component shown here, can extract information about a wall location line. This component returns the center line curve, location line setting, curve, offset, and offset direction:
+基准墙与叠层墙有一个称之为定位线的概念，用来定义墙体实例的垂直参考平面，当墙被翻转或它的结构被修改时会被维持固定在这个垂直参考平面上。运算器 {% include ltr/comp.html uuid="4c5260c3-" %} 可以提取墙体的定位线信息，它会返回墙体的中心线、位置线设置、位置线、偏移与偏移方向等信息：
 
 ![]({{ "/static/images/guides/revit-walls-walllocation.png" | prepend: site.baseurl }})
 
 ![]({{ "/static/images/guides/revit-walls-walllocationlines.png" | prepend: site.baseurl }})
 
-{% include ltr/comp.html uuid='a4eb9313' %} component is also provided to assist in filtering walls by the **Location Line** value:
+{% include ltr/comp.html uuid='a4eb9313' %} 运算器也提供基于定位线（**Location Line** ）筛选功能：
 
 ![]({{ "/static/images/guides/revit-walls-walllocation-filter.png" | prepend: site.baseurl }})
 
-If you only need the center line of the wall, an easier and more Grasshopper-like method is to pass the Wall elements to a Curve component:
+如果你仅需要提取墙体的中心线，Grasshopper 中最简单的方法是直接使用 Curve 运算器来筛选即可：
 
 ![]({{ "/static/images/guides/revit-walls-convertcurve.png" | prepend: site.baseurl }})
 
+### 墙体截面
 
-### Wall Profile
-
-Use the {% include ltr/comp.html uuid="7ce0bd56-" %} component shown here to extract the profile curves for a *Basic* or *Stacked Wall* element. Note that these profile curves are extracted along the center plane of the wall:
+使用 {% include ltr/comp.html uuid="7ce0bd56-" %} 运算器也可以提取基础墙与叠层墙图元的界面取消， 请注意这些截面曲线会沿着中心平面提取：
 
 ![]({{ "/static/images/guides/revit-walls-profile.png" | prepend: site.baseurl }})
 
 ![]({{ "/static/images/guides/revit-walls-profilelines.png" | prepend: site.baseurl }})
 
+### 墙体几何
 
-### Wall Geometry
-
-You can use the {% include ltr/comp.html uuid="b3bcbf5b-" %} component to grab the basic geometry of a wall instance:
+你可以通过 {% include ltr/comp.html uuid="b3bcbf5b-" %} 运算器来获取一个墙体实例的基础几何内容：
 
 ![]({{ "/static/images/guides/revit-walls-geometry.png" | prepend: site.baseurl }})
 
-### Wall Geometry By Structure
+### 墙体几何结构
 
 {% capture api_note %}
-Normally in Revit API, geometry of an element can be extracted using the `DB.Element.Geometry` property. In case of walls, the extracted geometry does not contain the structural layers of the wall. A [different method described here](https://thebuildingcoder.typepad.com/blog/2011/10/retrieving-detailed-wall-layer-geometry.html), has been used to extract the layer geometry. However this method adds some overhead to the definition runtime due to the temporary transactions that are needed
+通常在 Revit API 中任何一个图元的几何信息都可以使用`DB.Element.Geometry` p来提取，对于墙而言，提取的几何信息并不包括墙体结构层， 这里提供一些临时的快速方法。 浏览  [different method described here](https://thebuildingcoder.typepad.com/blog/2011/10/retrieving-detailed-wall-layer-geometry.html)了解提取几何图层信息的更多方法。
 {% endcapture %}
 {% include ltr/warning_note.html note=api_note %}
 
-Use the {% include ltr/comp.html uuid="3dbaaae8-" %} component shown here to extract the layer geometry of a *Basic Wall* instance:
+ {% include ltr/comp.html uuid="3dbaaae8-" %} 运算器可以用来提取一个基础墙的图层几何信息:
 
 ![]({{ "/static/images/guides/revit-walls-walllayers.png" | prepend: site.baseurl }})
 
-This component can be used with *Stack Walls* as well. The component will extract the structure layers of all the partial *Basic Walls* that are part of the given *Stacked Wall*:
+这个运算器也可以作业于叠层墙，它可以提取给定叠层墙的所有基础墙的结构图层信息：
 
 ![]({{ "/static/images/guides/revit-walls-stackedwalllayers.png" | prepend: site.baseurl }})
 
-A better method is to extract the *Basic Wall* instances first from the *Stacked Wall*, and then use the component to extract their layer geometry. This method would result in a more appropriate data structure that keeps the layer orders intact:
+比较推荐的方法是先从叠层墙抽离基础墙，然后再充基础墙中提取其图层几何图形，这个方法所得到的数据结构能更吻合其图层顺序结构：
 
 ![]({{ "/static/images/guides/revit-walls-everybasicwall.png" | prepend: site.baseurl }})
 
-To keeps the geometry list extracted from layers in identical order as other components that deal with layers, you can sort the geometry list by the distance from the wall orientation vector. This works best with flat walls of course but similar methods can be used to sort the layer geometry on other walls (think of basic walls stacked in a stacked wall instance with different structures):
+为了让图层中提取的几何列表于处理图层的其他运算器保持相同顺序，你可以依据墙体方向向量的距离对几何列表进行排序，这个方法最适合平台的墙体， 也可以使用类似的方法对其他墙体几何进行排序（想象下堆叠在不同结构的叠层墙实例中的基本墙体）：
 
 ![]({{ "/static/images/guides/revit-walls-layersinorder.png" | prepend: site.baseurl }})
 
@@ -178,29 +173,28 @@ To keeps the geometry list extracted from layers in identical order as other com
 
 ![]({{ "/static/images/guides/revit-walls-layersinorder.gif" | prepend: site.baseurl }})
 
-
-### Modifying Profile
+### 修改截面
 
 {% capture api_note %}
-Modifying wall profile curves are not supported by the API at the moment
+当前版本 Revit API 中并不支持修改墙体截面曲线
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-### Creating Stacked Wall Type
+### 创建叠层墙类型
 
-{% include ltr/warning_note.html note='Currently there is no support in Revit API to create new *Stacked Wall* types' %}
+{% include ltr/warning_note.html note='当前版本 Revit API 并不支持创建叠层墙类型' %}
 
-## Creating Walls
+## 创建墙体
 
-### By Base Curve
+### 基于基线
 
-Use the {% include ltr/comp.html uuid='37a8c46f' %} component to create a new wall based on the given curve. In this example the {% include ltr/comp.html uuid='ef607c2a' %} parameter is referencing a series of Revit model lines:
+使用 {% include ltr/comp.html uuid='37a8c46f' %} 运算器可以基于给定的曲线创建新的墙体， 下图中{% include ltr/comp.html uuid='ef607c2a' %}运算器用来从 Revit 模型中抓取一些直线：
 
 ![]({{ "/static/images/guides/revit-walls-bycurve.png" | prepend: site.baseurl }})
 
-### By Profile
+### 基于截面
 
-Use the {% include ltr/comp.html uuid='78b02ae8' %} component to create a new wall based on the given profile curves. Note that the profile must be a closed loop, planar, and __vertical__. In this example we are using the **Join Curves** component from Grasshopper to join the curves. The {% include ltr/comp.html uuid='ef607c2a' %} parameter is referencing a series of Revit model lines that have modeled vertically and on a single plane so we know they are planar:
+使用 {% include ltr/comp.html uuid='78b02ae8' %}运算器基于给定的截面线来创建新的墙体，请注意截面线必须是封闭且与工作平面垂直的平面曲线，下图中使用了 **Join Curve** 运算器来组合拾取到的曲线， {% include ltr/comp.html uuid='ef607c2a' %} 运算器从 Revit 中抓取了一些直线， 这些直线都是与当前工作平面垂直且是处于同一个平面上：
 
 ![]({{ "/static/images/guides/revit-walls-byprofile.png" | prepend: site.baseurl }})
 

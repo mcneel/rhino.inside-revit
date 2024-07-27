@@ -6,65 +6,64 @@ thumbnail: /static/images/guides/revit-to-rhino.png
 group: Essentials
 ---
 
-
 {% capture link_note %}
-This guide covers at sending Revit Elements to Rhino.
+这里将讨论如何把 Rhino 数据无损导入Revit 中
 {% endcapture %}
 {% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-to-rhino.png' %}
 
-There are 3 stages to each of the examples below:
+如何借助 Rhino.Inside.Revit 将 Revit 的图元无损导入至 Rhino ？ 通常需要下面三个步骤
 
-1. Select Revit elements to import.
-1. Extract geometry, categories names or any other needed information about each of the Revit elements.
-2. Baking the geometry and information into Rhino.
+1. 选择准备输出的 Revit 图元；
+2. 提取每个Revit 图元的几何、类别名称或其他需要的信息；
+3. 烘焙几何与信息至Rhino，
 
 ![]({{ "/static/images/guides/revit-view-to-rhino.png" | prepend: site.baseurl }})
 
-The Element Geometry component has a hidden Category output that is useful.  Zoom in on the component and click on the "+" symbol under the Geometry Output to expose the Category output.
+**Element Geometry 运算器** 有一个隐藏的输出选项 Category 非常有用，放大运算器且点击 Geometry 输出项下面的 + 号，就可以调出 Category 输出项。
 
-For baking many plugins can be used to attach information to Rhino objects such as Layer, Object Name, Color, Material, or UserData (Key/Value) information. Popular ones include [Human](https://www.food4rhino.com/en/app/human), [LunchBox](https://www.food4rhino.com/en/app/lunchbox) and [Elefront](https://www.food4rhino.com/en/app/elefront).
+有很多第三方的插件也可以将物件信息烘焙至 Rhino，包括图层、物件名称、颜色、材质或是用户数据（关键值/数值）信息，常用的有 [Human](https://www.food4rhino.com/en/app/human), [LunchBox](https://www.food4rhino.com/en/app/lunchbox) 与 [Elefront](https://www.food4rhino.com/en/app/elefront).
 
 {% include youtube_player.html id="DVzsSyxTQS0" %}
 
-## Selecting what to import
+## 择需要输出的图元
 
-Grasshopper can select objects in Revit in various ways.  Three of the most common are:
+Grasshopper 提供多种方法从 Revit 中选择物件，主要包括下面三个方法；
 
-1. Use a View filter. This can be the the easiest way to bring in what is visible.
-2. Use Category filters, which can be useful in many situations. Although, Category selection can get complicated because Categories are quite broad.
-3. Selecting the elements directly in Revit is simple a straight forward.
+1. 使用视图过滤工具引入可见内容，这可能是最简单的方法。
+2. 大多数情况下可以利用类别过滤工具，虽然使用稍稍有一点复杂，因为类别比较广泛。
+3. 直接在 Revit 中选择图元也是一个很简单直接的方法。
 
-### Visible in View (Recommended)
+### 视图中可见内容 (推荐)
 
-One of the best ways to select Revit objects to import into Rhino is by what is visible in a specific view. Saved in a view is the needed categories, worksets and phase.  Creating a specific view just for importing to Rhino is a good way to store the configuration.  This way the current state of any working view is not a concern.
+选择要导入 Rhino 的 Revit 对象的最佳方法之一是根据特定视图中的可见内容，视图中保存的是所需的类别、工作集和阶段。创建专门用于导入到 Rhino 的特定视图是存储配置的好方法，这样任何工作视图的当前状态都不是问题。
 
 ![]({{ "/static/images/guides/revit-to-rhino-select.png" | prepend: site.baseurl }})
 
-Note in the illustration above:
+关于上面截图的注意事项:
 
-1. The view name "To Rhino" is a 3D view saved in the current project.
-1. {% include ltr/comp.html uuid="df691659-" %} returns the view element, that is used as input into the {% include ltr/comp.html uuid="ac546f16-" %} .
-1. The Filter is used to Query the elements.  The "Limit" input has been hidden by zooming into the component and hitting the "-" button on the component.
-1. Once the Elements are selected, the rest of the definition is the same as the other examples here.
+1. 视图名称 *To Rhino* 是已经在当前项目中保存过的3D视图。
+2. {% include ltr/comp.html uuid="df691659-" %} 返回视图中的图元，作为{% include ltr/comp.html uuid="ac546f16-" %} 运算器的输入。
+3. 使用 *QuareyElements* 来过滤，*L（Limite）* 输入端通过放到运算器然后点击 - 号隐藏了这个输入项。
+4. 选择图元后，其他的一些运算器设置请参考前面的截图。
 
-### Select by Filter
+### 过滤筛选
 
-A popular way of selecting object is by {% include ltr/comp.html uuid="d08f7ab1-" %}. This can be a quick way to get what is needed, but be aware that categories can be quite broad. Often using {% include ltr/comp.html uuid="d08f7ab1-" %} along with additional filters works to filter out the extra elements. For example {% include ltr/comp.html uuid="6804582b-" %} or {% include ltr/comp.html uuid="805c21ee-" %} may be need to be combined with a filter to limit what is selected.
+推荐使用 {% include ltr/comp.html uuid="d08f7ab1-" %}. 来进行筛选，这样可以快速的获取需要的内容，但要注意 Revit 的类别非常多，所以通常使用 {% include ltr/comp.html uuid="d08f7ab1-" %} 都会搭配一些其他的过滤器来选择具体的图元，例如 {% include ltr/comp.html uuid="6804582b-" %} 或 {% include ltr/comp.html uuid="805c21ee-" %} 用来限制选择范围。
 
-Also, when trying to get a lot of different categories the list of categories needed might be extensive.  The list can become quite overwhelming quite quickly.
+另外在尝试获取一些不同类别时，所需要的类别列表就会更丰富，也会造成列表非常庞大…
 
 ![]({{ "/static/images/guides/categories-rir-to-rhino.png" | prepend: site.baseurl }})
 
-### Select Graphic Element
+### 选择图元
 
-The simplest way to get Revit Elements is to use a {% include ltr/comp.html uuid="ef607c2a-" %} to input into the {% include ltr/comp.html uuid="b3bcbf5b-" %}. It will return only the object selected.
+获取 Revit 图元最简单的方法时使用 {% include ltr/comp.html uuid="ef607c2a-" %} + {% include ltr/comp.html uuid="b3bcbf5b-" %}，这样将仅出输出所选择的图元
 
 ![]({{ "/static/images/guides/gh-revit-select-to-rhino.png" | prepend: site.baseurl }})
 
-## Spatial Elements
+## 空间图元
 
-Revit Spatial elements such as rooms and areas can be baked in Rhino. See the [Getting Spatial Element Geometry Guide](https://www.rhino3d.com/inside/revit/1.0/guides/revit-spatial#getting-spatial-element-geometry)
+Revit 空间图元例如房间与区域可以烘焙至 Rhino , 更多详情请浏览  [Getting Spatial Element Geometry Guide](https://www.rhino3d.com/inside/revit/1.0/guides/revit-spatial#getting-spatial-element-geometry)
 
-## Analytical Elements
+## 分析图元
 
-Many Elements in Revit can generate Analytical Elements that can be imported into Rhino. See the [Working with Analytical Models Guide](https://www.rhino3d.com/inside/revit/1.0/guides/revit-struct) for more details.
+Revit 中的很多图元可以建立分析图元且能导入至 Rhino 中，更多详情请浏览  [Working with Analytical Models Guide](https://www.rhino3d.com/inside/revit/1.0/guides/revit-struct) 

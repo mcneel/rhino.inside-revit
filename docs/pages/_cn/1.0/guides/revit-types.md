@@ -8,75 +8,75 @@ thumbnail: /static/images/guides/revit-types.png
 ---
 
 {% capture link_note %}
-When working with Revit or Revit API, we are mostly dealing with Revit **Types** and **Custom Families**. This guide takes you through the various Grasshopper components that help you query and create types and families. For a look at how these elements are organized within Revit, see [Revit: Types & Families]({{ site.baseurl }}{% link _en/1.0/guides/revit-revit.md %}#categories-families--types)
+在与 Revit 或 Revit API 打交道时我们时常需要处理 Revit 的**类型**与自**定义族** , 在这个章节将向你展示如何通过不同的 Grasshopper 运算器来查询与创建不同的**类型** 与**族** 。如果想了解如何在 Revit 中组织图元，请浏览  [Revit: Types & Families]({{ site.baseurl }}{% link _en/1.0/guides/revit-revit.md %}#categories-families--types)
 {% endcapture %}
 {% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-types.png' %}
 
-## Querying Types
+## 查询类型
 
-You can use the combination of a category picker components e.g. {% include ltr/comp.html uuid="af9d949f-" %}, the {% include ltr/comp.html uuid="d08f7ab1-" %} component, and {% include ltr/comp.html uuid="7b00f940-" %} component to collect types in a certain Revit category:
+如果你想统计一个 Revit 族中类型的情况，可以组合一组类别拾取运算器，例如 {% include ltr/comp.html uuid="af9d949f-" %} + {% include ltr/comp.html uuid="d08f7ab1-" %} + {% include ltr/comp.html uuid="7b00f940-" %} 等运算器：
 
 ![]({{ "/static/images/guides/revit-families01.png" | prepend: site.baseurl }})
 
-The {% include ltr/comp.html uuid="7b00f940-" %} component can further filter the list of types:
+还可以给 {% include ltr/comp.html uuid="7b00f940-" %} 运算器增加更多筛选条件：
 
 ![]({{ "/static/images/guides/revit-families02.png" | prepend: site.baseurl }})
 
-### Querying Type Info
+### 查询类型信息
 
-Use the {% include ltr/comp.html uuid='7dea1ba3' %} to access information about that type. Please note that the *Family Name* parameter, returns the *System Family* name for *System Types* and the *Custom Family* name for Custom Types:
+使用 {% include ltr/comp.html uuid='7dea1ba3' %} 运算器来查询 Revit 类型信息，但要注意**族名称**参数，对于**系统类型**与**自定义族**名称下的自定义类型查询会返回**系统族名称** :
 
 ![]({{ "/static/images/guides/revit-families02a.png" | prepend: site.baseurl }})
 
-## Accessing Family of a Type
+## 访问一个类型的族
 
-When querying the custom types that exist in a Revit model, we can find out the custom family definition that contains the logic for each of these types. We are using {% include ltr/comp.html uuid="742836d7" %} component to grab the family of each type being passed into this component. You can download this component, as a Grasshopper user object, from the link below.
+当查询 一个 Revit 模型中的自定义类型时，我们可以找到包含每种类型逻辑的自定义族定义，使用 {% include ltr/comp.html uuid="742836d7" %} 运算器来获取该组件中的每种类型的系列，
 
 ![]({{ "/static/images/guides/revit-families03.png" | prepend: site.baseurl }})
 
-Notice that **Duct Systems** for example, is a system type and therefore have no associated custom family definition. Therefore the {% include ltr/comp.html uuid="742836d7" %} component is returning `null`.
+**注意** ，如果被查询的族类型没有关联自定义族定义， {% include ltr/comp.html uuid="742836d7" %} 运算器会返回一个 `null` 值
 
 ![]({{ "/static/images/guides/revit-families04.png" | prepend: site.baseurl }})
 
-## Choosing A Specific Type
+## 选择特定类型
 
-{% include ltr/comp.html uuid="af9d949f-" %} component allows selecting a specific model category e.g. Walls
+{% include ltr/comp.html uuid="af9d949f-" %} 可以选择一个特定的模型类别，例如 墙（Walls),
 
-You can pass the any of the categories above to the {% include ltr/comp.html uuid="d3fb53d3-9" %} component to select a specific type from that category:
+将其连接至{% include ltr/comp.html uuid="d3fb53d3-9" %} 运算器，然后从族中选择一个指定的类型：
 
 ![]({{ "/static/images/guides/revit-families05.png" | prepend: site.baseurl }})
 
-## Determining Default Types
+## 确定默认类型
 
-When a build tool is launched (e.g. *Place Door*), Revit will automatically select the last-used type for that specific category (e.g. *Doors* for *Place Door* tool). This is called the **Default Type** for that category. This information is helpful when creating elements using the API. Use the {% include ltr/comp.html uuid='d67b341f' %} component to inspect the default types for the provided category:
+当启动构建工具 （例如放置一扇门），Revit 会自动选择上一次使用的指定类别（例如使用放置门工具所选择的门），称之为该类别的**默认类型** ，这对于使用 API 来创建图元很有帮助, 使用 {% include ltr/comp.html uuid='d67b341f' %} 运算器来查看选定类别的默认类型：
 
 ![]({{ "/static/images/guides/revit-types-defaulttype.png" | prepend: site.baseurl }})
 
-In case of families, the script value returned by this component will be the default `DB.FamilySymbol` representing the default type:
+这个运算器在当前这个例子中会返回默认的 `DB.FamilySymbol` ：
 
 ![]({{ "/static/images/guides/revit-types-defaultsymbol.png" | prepend: site.baseurl }})
 
-## Modifying Types
+## 修改类型
 
-Once you have filtered out the desired type, you can query its parameters and apply new values. See [Document Model: Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) to learn how to edit parameters of an element. The element parameter components work on element types as well.
+一旦你筛选到需要的类型，你就可以查询其相关参数且可以修改参数。浏览  [Document Model: Parameters]({{ site.baseurl }}{% link _en/1.0/guides/revit-params.md %}) 了解如何编辑一个图元的参数. 图参数运算器也适用于图元类型。
 
 ![]({{ "/static/images/guides/revit-families06.png" | prepend: site.baseurl }})
 
-## Extracting Type Geometry
+## 提取类别几何
 
-Once you have filtered out the desired type, you can extract the geometry for that element type using the {% include ltr/comp.html uuid="b3bcbf5b-" %} component. The {% include ltr/comp.html uuid="b078e48a-" %} value list component makes it easy to provide correct values for LOD input parameter.
+一旦你筛选到需要的类型，你就可以使用 {% include ltr/comp.html uuid="b3bcbf5b-" %} 来提取图元的几何图形，运算器 {% include ltr/comp.html uuid="b078e48a-" %} 很容易为参数输入正确的 LOD值 
 
 ![]({{ "/static/images/guides/revit-families07.png" | prepend: site.baseurl }})
 
-The {% include ltr/comp.html uuid="b3bcbf5b-" %} component automatically previews the geometry in Rhino window.
+{% include ltr/comp.html uuid="b3bcbf5b-" %} 运算器也会自动的在 Rhino 视窗中预览几何图形
 
 ![]({{ "/static/images/guides/revit-families08.png" | prepend: site.baseurl }})
 
-## Extracting Type Geometry by Category
+## 按照类别提取几何图形
 
 <!-- https://github.com/mcneel/rhino.inside-revit/issues/93 -->
 
-The *Element Geometry By SubCategory* component shared here helps you extract geometry of a family instance alongside information about its subcategory definition inside the family. The example here extracts the geometry from a series of window instances
+从族实例内按照类别来提取几何图形是个比较常见的操作，这里分享一个专用的工具 **Element Geometry By SubCategory** 运算器， 还可以利用它抓取到族内子类别的定义信息，范例如下图所示，
 
 ![]({{ "/static/images/guides/revit-families08a.png" | prepend: site.baseurl }})
 
@@ -84,82 +84,81 @@ The *Element Geometry By SubCategory* component shared here helps you extract ge
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Element Geometry By SubCategory.ghuser' name='Element Geometry By SubCategory' %}
 
-## Creating New Types
+## 创建新的类型
 
-To create new types, you would need to find an existing type, use the {% include ltr/comp.html uuid="5ed7e612-" %} component to duplicate that type with a new name, and adjust the desired properties.
+你也可以基于现有的类型来建立新的类型，例如利用 {% include ltr/comp.html uuid="5ed7e612-" %} 运算器复制一个现有的类型，然后赋予新的名字，调整相关属性值，
 
 ![]({{ "/static/images/guides/revit-families09.png" | prepend: site.baseurl }})
 
-Revit *Project Browser* now displays the new type under *Families*
+Revit 项目浏览器会在族下面显示新的类型
 
-## Removing Types
+## 移除类型
 
-You can use the {% include ltr/comp.html uuid="3ffc2cb2-" %} component to delete types. Remember that deleting types will delete all instances of that type as well. If you don't want this, find the instances and change their types before deleting a type from model.
+如果需要移除类型请使用{% include ltr/comp.html uuid="3ffc2cb2-" %} 运算器， 请注意被删除的类型也会连同其相关实例一起被删除，如果你不希望实例也被删除，请在删除之前找到这些实例，然后修改为其他类型
 
 ![]({{ "/static/images/guides/revit-families09d.png" | prepend: site.baseurl }})
 
-## Loading Families
+## 导入族
 
-Use the {% include ltr/comp.html uuid="0e244846-" %} component to load a new family file into your model.
+你可以使用 {% include ltr/comp.html uuid="0e244846-" %} 运算器导入一个新的族文件至模型
 
 ![]({{ "/static/images/guides/revit-families10.png" | prepend: site.baseurl }})
 
-Revit *Project Browser* now lists the new family under *Families*
+Revit 浏览器现在会在族下面列出新的族*
 
-## Saving Families
+## 保存族
 
-Use the {% include ltr/comp.html uuid="c2b9b045-" %} component to save a family into an external file.
+使用 {% include ltr/comp.html uuid="c2b9b045-" %} 运算器将一个族保存至外部文件
 
 ![]({{ "/static/images/guides/revit-families11.png" | prepend: site.baseurl }})
 
-## Creating New Families
+## 新建族
 
-Under current {{ site.terms.rir }} implementation, you can use the {% include ltr/comp.html uuid='82523911' %} component to generate new Revit families and insert a new geometry into the family. Make sure to assign the correct template file to the component for best results.
+在当前的 {{ site.terms.rir }} 中，可以使用 {% include ltr/comp.html uuid='82523911' %} 运算器建立新的 Revit 族或是将新的几何物件加入至某个选定的族中，请注意，运算器需要赋予正确的模板文件，
 
 ![]({{ "/static/images/guides/revit-families12.png" | prepend: site.baseurl }})
 
-Revit *Project Browser* now lists the new family under *Families*
+Revit 浏览器现在会在族下面列出新的族
 
-You can also pass the **Generic Model** template to the {% include ltr/comp.html uuid='82523911' %} component and set the category manually using the {% include ltr/comp.html uuid="af9d949f-" %} component.
+你也可以继续给 {% include ltr/comp.html uuid='82523911' %} 运算器接入 **Generic Model** 模板，且使用 {% include ltr/comp.html uuid="af9d949f-" %} 运算器手动设置类别
 
 ![]({{ "/static/images/guides/revit-families13.png" | prepend: site.baseurl }})
 
-There are a series of components under the *Revit > Family* panel that will help you generate geometry for Revit families:
+可以利用位于 Revit > Family 面板下的一些运算器来帮助我们建立用于Revit 族的几何
 
 - {% include ltr/comp.html uuid='8a51d5a1' %}
 - {% include ltr/comp.html uuid='f0887ad5' %}
 - {% include ltr/comp.html uuid='6fbb9200' %}
 - {% include ltr/comp.html uuid='72fdc627' %}
 
-The Component Family components above can be edited in Revit, set the visibility, subcategory, and material of elements. For further details see the [Rhino Objects as Loadable Families guide]({{ site.baseurl }}{% link _en/1.0/guides/rhino-to-revit.md%}#rhino-objects-as-loadable-families).
+上面这些运算器可以设置构成新的族的图元的可见性、子类别与材质。更多介绍请浏览 [Rhino Objects as Loadable Families guide]({{ site.baseurl }}{% link _en/1.0/guides/rhino-to-revit.md%}#rhino-objects-as-loadable-families).
 
 ![Creating subcategory]({{ "/static/images/guides/subcategory-rhino-revit-gh.png" | prepend: site.baseurl }})
 
-As shown in the example above, you can use the {% include ltr/comp.html uuid='10ea29d4' %} component to create visibility options for the generated geometry. This components provides all the options available in the native Revit *Visibility/Graphics* editor for family geometries.
+如上面的范例，你可以使用 {% include ltr/comp.html uuid='10ea29d4' %} 运算器来控制待创建几何的可见性，这个运算器提供了所有原生控制Revit族几何物件可见性/图形编辑的选项
 
 ![]({{ "/static/images/guides/revit-families15.png" | prepend: site.baseurl }})
 
-## Editing Families
+## 编辑族
 
-You can use the {% include ltr/comp.html uuid='82523911' %} component to edit existing families as well. Just pass the appropriate template and family name, the new geometry, and the {% include ltr/comp.html uuid='82523911' %} component automatically finds the existing family, replaces the content and reloads the family into the Revit model. Make sure the *OverrideFamily* is set to `True` and *OverrideParameters* is set appropriately to override the family parameters if needed.
+你也可以使用 {% include ltr/comp.html uuid='82523911' %}  运算器类编辑当前的族，只需要接入合适的模板与族名称、新的几何，而且 {% include ltr/comp.html uuid='82523911' %} 运算器会自动找到当前的族，然后代替相关内容且重新导入族只 Revit 模型中，请注意，*OverrideFamily* 需要设置为`True` 且 *OverrideParameters* 设置为根据需要覆盖族参数
 
 ![]({{ "/static/images/guides/revit-families16.png" | prepend: site.baseurl }})
 
-## Creating new Family Templates
+## 建立新的族模板
 
-Revit comes with a series of Revit Family Template (.RFT) files.  These contain the necessary basic defaults to create loadable families for specific categories. Interestingly many of the most popular categories do not have templates built for them.  Examples of these categories would be Walls, Roofs, Floors, Windows, HardScape, etc. It is possible to create family templates and create loadable Families in these popular Categories by following the steps below. A list of Default Templates and Categories that will support customer RFT files is listed in [this spreadsheet](https://docs.google.com/spreadsheets/d/1l8koAQtsz0o9iK80gmpC0HqSAFqpqAb0rKYdXcQkBWE/edit?usp=sharing).
+Revit 附带一系列 Revit 族模板 (.RFT) 文件。这些包含为特定类别创建可载入族所需的基本默认参数。有趣的是，许多最受欢迎的类别都没有为它们构建的模板。这些类别的示例包括墙壁、屋顶、地板、窗户、HardScape 等。按照以下步骤，可以在这些常用的类别中创建族模板并创建可载入族。 [这个电子表格](https://docs.google.com/spreadsheets/d/1l8koAQtsz0o9iK80gmpC0HqSAFqpqAb0rKYdXcQkBWE/edit?usp=sharing) 中列出了支持客户 RFT 文件的默认模板和类别列表。
 
 {% include vimeo_player.html id="726191224" %}
 
-The steps to create a new family template:
+综上所述，创建一个新的族模板步骤如下：
 
- 1. Create in-place component using the needed category.  i.e. Stairs
- 1. Draw an object.
- 1. Group that object
- 1. Right-click on the Group and Save Group.
- 1. Save that file and an RFA file.
- 1. Open the RFA and delete any objects in it.
- 1. Save
- 1. Rename the RFA as an RFT using File Explorer.
- 1. Use the RFT to create a new family in New component family.
-
+1. 利用所需的类别创建一个就地运算器，例如楼梯，
+2. 绘制一个对象，
+3. 群组这些对象，
+4. 右键点击 Group 且 Save Group,
+5. 保存文件为 RFA,
+6. 开启 FRA 文件且删除里面的所有物件，
+7. 保存文件，
+8. 在文件浏览器中重新命名这个 RFA 文件为 RFT 文件，
+9. 在新的运算器族中使用这个 RFT 文件来建立一个新的族。

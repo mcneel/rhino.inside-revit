@@ -8,72 +8,68 @@ group: Containers
 
 <!-- https://github.com/mcneel/rhino.inside-revit/issues/92 -->
 
-## Query Worksets
+## 查询工作集
 
-To get the Worksets in a document us the {% include ltr/comp.html uuid='311316ba' %} component. Right click on the Kind (K) to Expose Picker.
+可以使用 {% include ltr/comp.html uuid='311316ba' %} 运算器获取文件中的工作集，鼠标右键点击 Kind (K) 展开选集
 
 ![]({{ "/static/images/guides/Revit-Worksets-Query.png" | prepend: site.baseurl }})
 
-## Active Workset
+## 活动工作集
 
-To get the Active Workset use the {% include ltr/comp.html uuid='aa467c94' %} component. You can also Set the Active Workset when the input is added via the Zoom UI. 
+利用 {% include ltr/comp.html uuid='aa467c94' %} 运算器可以获取当前活动工作集，你还可以通过 Zoom UI 添加输入时设置活动工作集。
 
 ![]({{ "/static/images/guides/Revit-Worksets-Active.png" | prepend: site.baseurl }})
 
-## Ensure Workset
+## 确保工作集
 
-To make sure that a particular user created Workset is in the document use the {% include ltr/comp.html uuid='a406c6a0' %} component. This is also the way to create a new Workset in the document.
+为了确保文档中特定用户创建的工作集，请使用{% include ltr/comp.html uuid='a406c6a0' %} 运算器。这也是在文档中创建新的工作集的方法。. 
 
 ![]({{ "/static/images/guides/revit-workset-ensure.png" | prepend: site.baseurl }})
 
+## 删除工作集
 
-## Delete Workset
-
-To delete a Workset in the REvit document use the {% include ltr/comp.html uuid='bf1b9be9' %} component.
+请使用 {% include ltr/comp.html uuid='bf1b9be9' %} 运算器删除 Revit 文档中的工作集。
 
 ![]({{ "/static/images/guides/revit-workset-delete.png" | prepend: site.baseurl }})
 
+## 图元工作集
 
-## Element Workset
-
-To Get or Set a Elements Workset use the {% include ltr/comp.html uuid='b441ba8c' %} component.
+使用 {% include ltr/comp.html uuid='b441ba8c' %} 运算器可以获取或设置一个图元工作集
 
 ![]({{ "/static/images/guides/Revit-Worksets-Element.png" | prepend: site.baseurl }})
 
+## 工作集全局可见性
 
-## Workset Global Visibility
-
-To Get or Set the Global Visibility of a Workset with the {% include ltr/comp.html uuid='2922af4a' %} component.
+利用 {% include ltr/comp.html uuid='2922af4a' %} 运算器可以获取或设置全局工作集的可见性
 
 ![]({{ "/static/images/guides/Revit-Worksets-vis-global.png" | prepend: site.baseurl }})
 
-## Workset View Override
+## 工作集视图覆盖
 
-Get-Set workset visibility overrides on the specified View with {% include ltr/comp.html uuid='b062c96e' %} component. To select the particular override option Right Click on Visibility to Expose Picker. 
+利用 {% include ltr/comp.html uuid='b062c96e' %} 运算器可以设置、获取指定的可见性会覆盖指定视图，右键点击 Visibility 展开选取可见性
 
 ![]({{ "/static/images/guides/Revit-Worksets-vis-overrides.png" | prepend: site.baseurl }})
 
+## 工作集标识
 
-## Workset Identity
-
-Workset properties Get-Set access component to workset information with the {% include ltr/comp.html uuid='c33cd128' %} component. To rename a Workset use the ZUI to expose the Name property.
+使用 {% include ltr/comp.html uuid='c33cd128' %} 运算器可以设置工作集属性获取与设置访问属性，如果要重命名工作集请使用 ZUI 来扩展 Name 属性
 
 ![]({{ "/static/images/guides/Revit-Worksets-Identity.png" | prepend: site.baseurl }})
 
-## Element Ownership Information
+## 图元所有权信息
 
-Use the {% include ltr/comp.html uuid='f68f96ec' %} component to get Element Ownership properties.
+使用 {% include ltr/comp.html uuid='f68f96ec' %} 运算器可以获取图元所属属性信息
 
 ![]({{ "/static/images/guides/Revit-Worksets-Ownership.png" | prepend: site.baseurl }})
 
-## Document Worksharing Information
+## 文档工作共享信息
 
-Use the {% include ltr/comp.html uuid='f7d56db0' %} component to Get Document Worksharing properties.
+使用 {% include ltr/comp.html uuid='f7d56db0' %} 运算器可以获取文档工作共享属性
 
 ![]({{ "/static/images/guides/Revit-Worksets-Document.png" | prepend: site.baseurl }})
 
-## Document Server Information
+## 文档服务信息
 
-Us the {% include ltr/comp.html uuid='2577a55b' %} component to get Document Server properties.
+使用 {% include ltr/comp.html uuid='2577a55b' %} 运算器可以获取文档服务属性
 
 ![]({{ "/static/images/guides/Revit-Worksets-Server.png" | prepend: site.baseurl }})

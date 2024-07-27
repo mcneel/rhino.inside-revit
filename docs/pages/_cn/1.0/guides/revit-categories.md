@@ -9,64 +9,70 @@ ghdef:
 ---
 
 {% capture link_note %}
-Categories are the highest-level groups. These categories are built into Revit and loosely organize the components by their function. Categories cannot be removed or added-to in Revit. There are many Categories within Revit organized in various ways.
+
+类别是最高级别的组织，这些类别都内置于 Revit 中，根据各自不同的功能松散的组织各自的组件。无法在 Revit 中删除或添加类别，但提供许多不同的方式组织类别。
 {% endcapture %}
 {% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-categories.png' %}
 
-There are multiple category types in a Revit model:
-  - *Model* categories e.g. *Walls*, *Doors*, *Floors*, *Roofs*, etc.
-  - *Analytical* categories e.g. *Analytical Surfaces*, *Structural Loads*, etc.
-  - *Annotation* categories e.g. *Tags*, *Dimensions*, etc.
-  - *Internal* categories various Tags etc.
+一个 Revit 模型中通常都会存在多组不同的类别:
 
-Model Categories vary in the elements they can contain. Developing and understanding of how commonly used categories will allow is important to using Revit. Categories may or may not contain:
-  - *Directshapes*
-  - *Loadable Families* e.g. *Furniture*, *Generic Model*, *Site* etc.
-  - *System* Families/Types e.g. *Walls*, *Doors*, *Floors*, *Roofs*, etc.
+- 模型类别，例如墙、门、楼板与屋顶等
+- 分析类别，例如表面分析与结构载荷等
+- 注解类别，例如标签、尺寸等
+- 内部类比，例如各种标签.
 
- See [Rhino To Revit]({{ site.baseurl }}{% link _en/1.0/guides/rhino-to-revit.md%}) guide to understand how to add any these element types using Rhino and Grasshopper.
+模型类别可以包含的图元各不相同， 开发和了解常用类别的使用方式对于使用 Revit 很重要，类别可能包含也可能不包含:
 
-## Query Categories
+- Directshapes
 
-There are two main ways to find categories in a document. 
+- 可载入族， 例如家具、通用模型与场地等
 
-Use the {% include ltr/comp.html uuid="d150e40e" %} component to query the document for the main categories and sub-categories that exist in a project. For query can be modified by using the {% include ltr/comp.html uuid="5ffb1339" %} component to filter for only certain categories types or use a Boolean toggle to select main categories or sub-categories.
+- 系统族/类型，例如墙体、门、楼板与屋顶等
+  
+  请 [Rhino To Revit]({{ site.baseurl }}{% link _en/1.0/guides/rhino-to-revit.md%}) 章节来了解如何利用 Rhino 与 Grasshopper 来添加图元。
+
+## 查询类别
+
+有两个主要的方法来查询一个文档中的类别， 
+
+使用{% include ltr/comp.html uuid="d150e40e" %} 运算器来查询一个当前项目文档中的主要类别与子类别，还可以利用 {% include ltr/comp.html uuid="5ffb1339" %} 运算器来进一步的过滤与筛选某些特定的类型或使用一个布尔开关来选择主要的类别或子类别，
 
 ![]({{ "/static/images/guides/gh-query-category.png" | prepend: site.baseurl }})
 
-The second is to use the {% include ltr/comp.html uuid="af9d949f" %}. This selector will list both main categories and built-in sub-categories that exist in every Revit file.  Here this selected category is then run through the {% include ltr/comp.html uuid="d794361e" %} component to output the parts of the category identity
+第二个方法是使用 {% include ltr/comp.html uuid="af9d949f" %}. 这个选取器会列出每个 Revit 文档中所有的主要类别与子类别，可以先选择一个所需要的类别然后通过 {% include ltr/comp.html uuid="d794361e" %} 运算器来输出类别标识的部分
 
 ![]({{ "/static/images/guides/gh-built-in-category.png" | prepend: site.baseurl }})
 
-{% include ltr/bubble_note.html note='The Category selector supports searching. Double-click on the component title and use the name input box to enter an exact name, alternatively you can enter a name pattern. If a pattern is used, the list will be filled up with all the items that match it. Several kind of patterns are supported, the method used depends on the first pattern character see Microsoft.VisualBasic Like Operator;Regular expression, see here as reference' %}
+{% include ltr/bubble_note.html note=' 别选择器支持搜索，双击运算器标题然后在框内输入准备查询类别的名称，如果名称有效则会列出所有与之匹配的类别。支持多模式进行查询，甚至是表达式 ' %}
 
-## Accessing Categories
+## 访问类别
 
- {% include ltr/comp.html uuid="d794361e" %} component can be establish the Parameters Type (Model, Annotation, Analysis) Name and whether it is a Main or Sub-category.
+ {% include ltr/comp.html uuid="d794361e" %} 运算器可以用来建立各种参数类型（模型、注解与分析）名称，包括主类别于子类别。
 
 ![]({{ "/static/images/guides/gh-built-in-category.png" | prepend: site.baseurl }})
 
-A list of Parameters which belong to a Category can be created to assist in making a list of values that can be used to create schedules or set them in a convenient list.  The example below uses the  {% include ltr/comp.html uuid="af9d949f" %} component select the Door Category then to find the Doors in the project in addition to all the Parameters in the Door category with the  {% include ltr/comp.html uuid="189f0a94" %} component.
+可以创建属于某个类别的参数列表，以帮助建立用于创建计划或将其设置于某个适当的列表中。例如下面使用  {% include ltr/comp.html uuid="af9d949f" %} 运算器来选择一个门的类别，然后利用  {% include ltr/comp.html uuid="189f0a94" %} 运算器来查找合格项目中所有门的附加参数，
 
 ![]({{ "/static/images/guides/gh-category-parameter.png" | prepend: site.baseurl }})
 
-Get and set the Graphics styles for a Category thru the {% include ltr/comp.html uuid="ca3c1cf9" %} component.
+通过 {% include ltr/comp.html uuid="ca3c1cf9" %} 运算器来获取与设置一个类别的图形类型
 
 ![]({{ "/static/images/guides/gh-category-graphic-style.png" | prepend: site.baseurl }})
 
-## Extending Categories
-Main Categories are built-in and cannot be edited. Although subcategories can be added within most Categories for further organization and refined control of Elements 
+## 扩展类别
 
-## Sub-Categories
-Use the {% include ltr/comp.html uuid="8de336fb" %} component to add a subcategory.  If the sub-category already exist the component will simply return the existing sub-category.
+主要类别都是被内置且无法被修改，尽管可以在大多数类别中添加子类别以进一步组织和重构控制图元
+
+## 子类别
+
+利用 {% include ltr/comp.html uuid="8de336fb" %} 运算器可以增加一个子类别，如果子类别已经存在这个运算器会间的返回当前已经存在的子类别
 
 ![]({{ "/static/images/guides/gh-sub-category.png" | prepend: site.baseurl }})
 
-Use the {% include ltr/comp.html uuid="4915ab87" %} component to create a list of sub-categories within a specific category.
+使用 {% include ltr/comp.html uuid="4915ab87" %} 运算器来创建一组指定类别的子类别，
 
 ![]({{ "/static/images/guides/gh-category-subcategory.png" | prepend: site.baseurl }})
 
-
-Use the {% include ltr/comp.html uuid="495330db" %} component to Get-Set Element Sub-Categories.
+使用 {% include ltr/comp.html uuid="495330db" %} 运算器来获取-设置图元的子类别
 
 ![]({{ "/static/images/guides/revit-element-subcategory.png" | prepend: site.baseurl }})

@@ -6,39 +6,38 @@ subtitle: Workflows for Revit Sheets
 group: Documentation
 ---
 
-## Query Sheets
+## 查询图纸
 
-Use the {% include ltr/comp.html uuid='97c8cb27' %} component to find all the  query sheets in the project.
+使用 {% include ltr/comp.html uuid='97c8cb27' %} 查询项目中所有的图纸
 
 ![]({{ "/static/images/guides/revit-sheet-query.png" | prepend: site.baseurl }})
 
-## Add Sheet
+## 增加图纸
 
-Use the {% include ltr/comp.html uuid='704d9c1b' %} component to Add Sheet in the project.
+使用{% include ltr/comp.html uuid='704d9c1b' %}  运算器可以在项目中创图纸，
 
 ![]({{ "/static/images/guides/revit-sheet-add.png" | prepend: site.baseurl }})
 
-## Add Sheet (Placeholder)
+## 增加图纸 (占位符)
 
-Use the {% include ltr/comp.html uuid='16f18871' %} component to Add Sheet (Placeholder) in the project.
+使用 {% include ltr/comp.html uuid='16f18871' %} 将占位符表添加至图纸列表
 
 ![]({{ "/static/images/guides/revit-sheet-add-placeholder.png" | prepend: site.baseurl }})
 
-## Add Title Block
+## 创建标题栏
 
-Use the {% include ltr/comp.html uuid='f2f3d866' %} component to Add Title Block in the project.
+可以通过 {% include ltr/comp.html uuid='f2f3d866' %} 运算器在项目中创建标题栏：
 
 ![]({{ "/static/images/guides/revit-sheet-add-title-block.png" | prepend: site.baseurl }})
 
-## Add Viewport
+## 增加视口
 
-Given a Sheet, Point & View not already on a sheet, the {% include ltr/comp.html uuid='493035d3' %} will add a Viewport. 
+利用 {% include ltr/comp.html uuid='493035d3' %} 运算器可以为给定的图纸或图纸上尚未建立的点与视图增加一个视口
 
 ![]({{ "/static/images/guides/revit-view-addViewport.png" | prepend: site.baseurl }})
 
-## Sheet Identity
+## 图纸识别
 
-Use the {% include ltr/comp.html uuid='cadf5fbb' %} component to get the Sheet Identity.
+使用 {% include ltr/comp.html uuid='cadf5fbb' %} 运算器可以获取图纸的相关信息。
 
 ![]({{ "/static/images/guides/revit-sheet-identity.png" | prepend: site.baseurl }})
-

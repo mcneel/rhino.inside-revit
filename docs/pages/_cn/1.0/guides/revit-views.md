@@ -6,82 +6,80 @@ subtitle: Workflows for Revit Views
 group: Documentation
 ---
 
-## Query Views
+## 查询视图
 
-Use the {% include ltr/comp.html uuid='df691659' %} component to Query Views in the project.
+使用 {% include ltr/comp.html uuid='df691659' %}运算器可以查询项目中所有的视图
 
 ![]({{ "/static/images/guides/revit-views-query.pn" | prepend: site.baseurl }})
 
-## Query View Types
+## 查询视图类型
 
-Use the {% include ltr/comp.html uuid='51e306bd' %} component to Query View Types in the project.
+使用 {% include ltr/comp.html uuid='51e306bd' %} 运算器可以查询项目中视图类型：
 
 ![]({{ "/static/images/guides/revit-views-query-types.png" | prepend: site.baseurl }})
 
+## 当前图形视图
 
-## Active Graphical View
-
-Use the {% include ltr/comp.html uuid='7ccf350c' %} component to get the Active Graphical View.
+使用 {% include ltr/comp.html uuid='7ccf350c' %} 运算器可以查询当前的图形视图：
 
 ![]({{ "/static/images/guides/revit-views-active.png" | prepend: site.baseurl }})
 
-## View Identity
+## 视图识别
 
-Use the {% include ltr/comp.html uuid='b0440885' %} component to get the View Identity.
+使用 {% include ltr/comp.html uuid='b0440885' %} 运算器可以查看一个视图的详细数据，
 
 ![]({{ "/static/images/guides/revit-views-identity.png" | prepend: site.baseurl }})
 
-## View Section Box
+## 查看剖面框
 
-Use the {% include ltr/comp.html uuid='45e7e88c' %} component to get the View Section Box.
+使用 {% include ltr/comp.html uuid='45e7e88c' %} 运算器可以查看一个输入视图中的剖面框，
 
 ![]({{ "/static/images/guides/revit-views-section.png" | prepend: site.baseurl }})
 
-## View Extents
+## 查看范围
 
-Use the {% include ltr/comp.html uuid='d4593785' %} component to get the View Extents.
+{% include ltr/comp.html uuid='d4593785' %} 运算器可以用来查看视图范围，
 
 ![]({{ "/static/images/guides/revit-views-extents.png" | prepend: site.baseurl }})
 
-## Add Dependent View
+## 增加关联视图
 
-Use the {% include ltr/comp.html uuid='36842b86' %} component to Add Dependent View in the project.
+在项目中可以使用 {% include ltr/comp.html uuid='36842b86' %} c运算器来增加一个关联视图，
 
 ![]({{ "/static/images/guides/revit-views-dependent.png" | prepend: site.baseurl }})
 
-## Add Ceiling Plan
+## 增加天花板示意图
 
-Use the {% include ltr/comp.html uuid='782d0460' %} component to Add Ceiling Plan in the project.
+项目中可以使用 {% include ltr/comp.html uuid='782d0460' %} 运算器来增加一个天花板示意图，
 
 ![]({{ "/static/images/guides/revit-views-ceiling.png" | prepend: site.baseurl }})
 
-## Add Structural Plan
+## 增加结构示意图
 
-Use the {% include ltr/comp.html uuid='51f9e551' %} component to Add Structural Plan in the project.
+项目中可以使用 {% include ltr/comp.html uuid='51f9e551' %} 运算器来增加一个结构示意图，
 
 ![]({{ "/static/images/guides/revit-views-structural.png" | prepend: site.baseurl }})
 
-## Get Default 3D View
+## 获取默认3D视图
 
-Use the {% include ltr/comp.html uuid='f2277265' %} component to Get the Projects Default 3D View.
+使用 {% include ltr/comp.html uuid='f2277265' %} 运算器可以获取项目的默认3D视图 
 
 ![]({{ "/static/images/guides/revit-view-default3d.png" | prepend: site.baseurl }})
 
-## Add 3D View
+## 增加三维图
 
-Use the {% include ltr/comp.html uuid='f7b775c9' %} component to Add 3D View in the project.
+项目中可以使用 {% include ltr/comp.html uuid='f7b775c9' %} 运算器来增加一个三维图，
 
 ![]({{ "/static/images/guides/revit-views-3d.png" | prepend: site.baseurl }})
 
-## Add Floor Plan
+## 增加平面图
 
-Use the {% include ltr/comp.html uuid='3896729d' %} component to Add Floor Plan in the project.
+项目中可以使用 {% include ltr/comp.html uuid='3896729d' %} 运算器来增加平面图，
 
 ![]({{ "/static/images/guides/revit-views-floorplan.png" | prepend: site.baseurl }})
 
-## Add Drafting View
+## 增加绘图视图
 
-Use the {% include ltr/comp.html uuid='c62d18a8' %} component to Add New Drafting View to the project.
+使用 {% include ltr/comp.html uuid='c62d18a8' %} 运算器可以在项目中创建绘图视图
 
 ![]({{ "/static/images/guides/revit-view-addDrafting.png" | prepend: site.baseurl }})
-

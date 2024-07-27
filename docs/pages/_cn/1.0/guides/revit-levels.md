@@ -6,50 +6,48 @@ subtitle: Workflows for Revit Levels
 group: Modeling
 ---
 
-## Querying Levels
+## 查询标高
 
 {% capture api_note %}
-In Revit API, Levels of all types are represented by the {% include api_type.html type='Autodesk.Revit.DB.Level' title='DB.Level' %}. The {% include ltr/comp.html uuid='3238f8bc' %} primitive in {{ site.terms.rir }} represents a Revel.
-{% endcapture %}
+Revit API 中使用 {% include api_type.html type='Autodesk.Revit.DB.Level' title='DB.Level' %} 来表达所有的标高类型，{{ site.terms.rir }} 中使用 {% include ltr/comp.html uuid='3238f8bc' %} 运算器来表达一个标高。
 {% include ltr/api_note.html note=api_note %}
 
-### Pick Existing Level
+### 选择现有的标高
 
-The {% include ltr/comp.html uuid="bd6a74f3-" %} component provides a searchable list of all project Levels.
+可以使用 {% include ltr/comp.html uuid="bd6a74f3-" %} 运算器来选择项目中的所有标高,
 
 ![]({{ "/static/images/guides/revit-level-picker.png" | prepend: site.baseurl }})
 
-You can also use the Level Parameter to choose an existing level. Right-click the {% include ltr/comp.html uuid="3238f8bc-" %} primitive gives access to various Level functions.
+也可以使用 {% include ltr/comp.html uuid="3238f8bc-" %}  运算器的标高参数来进行筛选，鼠标右键点击{% include ltr/comp.html uuid="3238f8bc-" %}选择不同的标高功能参数即可
 
 ![]({{ "/static/images/guides/revit-level-component-rc.png" | prepend: site.baseurl }})
 
-### Query Levels by Criteria
+### 以条件筛选标高
 
-The {% include ltr/comp.html uuid="87715caf-" %} component allows you to filter a Level by its System properties.
+使用 {% include ltr/comp.html uuid="87715caf-" %} 运算器可以依据标高系统参数来筛选,
 
 ![]({{ "/static/images/guides/revit-level-query.png" | prepend: site.baseurl }})
 
-## Query Level Types
+## 查询标高类型
 
-See [Modifying Types]({{ site.baseurl }}{% link _en/1.0/guides/revit-types.md %}) for getting Level Type Information. 
+请浏览 [Modifying Types]({{ site.baseurl }}{% link _en/1.0/guides/revit-types.md %}) 来了解如何查询标高类型信息
 
-## Analyzing Levels
+## 分析标高
 
-### Level Identity
+### 标高标识
 
-Provided a Level, the {% include ltr/comp.html uuid="e996b34d-" %} component inspects the standard level properties.
+可以使用 {% include ltr/comp.html uuid="e996b34d-" %} 运算器来检查标准标高属性
 
 ![]({{ "/static/images/guides/revit-level-identity.png" | prepend: site.baseurl }})
 
-### Getting Level Plane
+### 获取标高平面
 
-Passing a Level to a Plane component, will extract the XY plane at the levels' elevation.
+可以将 Level 运算器链接至工作平面运算器以获取标高所在高度的XY平面
 
 ![]({{ "/static/images/guides/revit-level-component.png" | prepend: site.baseurl }})
 
-## Creating Levels
+## 创建标高
 
-Given an Elevation the {% include ltr/comp.html uuid="c6dec111-" %} will add a Level to the Project.
+可以使用 {% include ltr/comp.html uuid="c6dec111-" %} 运算器在项目中新增一个标高
 
 ![]({{ "/static/images/guides/revit-level-add.png" | prepend: site.baseurl }})
-

@@ -6,9 +6,10 @@ subtitle: Workflows for Revit Stairs, Ramps, Railings
 group: Modeling
 ---
 
-## Add Railing
+## 新建栏杆
 
-Use the {% include ltr/comp.html uuid='601ac666' %} component to Add Railing in the project.
+利用 {% include ltr/comp.html uuid='601ac666' %}  运算器在项目中新建栏杆
 
 ![]({{ "/static/images/guides/revit-railing-add.png" | prepend: site.baseurl }})
+
 

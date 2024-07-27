@@ -6,39 +6,32 @@ subtitle: Workflows for Revit Groups
 group: Containers
 ---
 
-## Group Elements
+## 图元组
 
-Use the {% include ltr/comp.html uuid='7c7d3739' %} component to Group Elements in the project.
+使用 {% include ltr/comp.html uuid='7c7d3739' %} 运算器可以群组项目中的图元，
 
 ![]({{ "/static/images/guides/revit-group-elements.png" | prepend: site.baseurl }})
 
+## 创建组类型
 
-## Create Group Type
-
-Use the {% include ltr/comp.html uuid='39e42448' %} component to create a new Create Group Type.
+使用 {% include ltr/comp.html uuid='39e42448' %}运算器可以创建一个新的组类型
 
 ![]({{ "/static/images/guides/revit-group-create-group-type.png" | prepend: site.baseurl }})
 
+## 查询组类型
 
-
-## Query Group Types
-
-Use the {% include ltr/comp.html uuid='97e9c6bb' %} component to find all the existing Query Group Types in the project.
+使用 {% include ltr/comp.html uuid='97e9c6bb' %} 运算器可以在项目中查询所有的组类型
 
 ![]({{ "/static/images/guides/revit-group-query-types.png" | prepend: site.baseurl }})
 
+## 增加模型组
 
-
-## Add Model Group
-
-Use the {% include ltr/comp.html uuid='df634530' %} component to add a Add Model Group to the project.
+使用 {% include ltr/comp.html uuid='df634530' %} 运算器可以在项目中增加模型组
 
 ![]({{ "/static/images/guides/revit-group-add-project.png" | prepend: site.baseurl }})
 
+## 增加详图组
 
-
-## Add Detail Group
-
-Use the {% include ltr/comp.html uuid='cc7790a0' %} component to add a Add Detail Group to the project.
+使用 {% include ltr/comp.html uuid='cc7790a0' %} 运算器可以在项目中增加详图组
 
 ![]({{ "/static/images/guides/revit-group-addDetail.png" | prepend: site.baseurl }})

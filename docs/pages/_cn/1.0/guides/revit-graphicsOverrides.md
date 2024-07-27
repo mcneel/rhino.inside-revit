@@ -6,32 +6,32 @@ subtitle: Workflows for Revit Graphical Overrides
 group: Documentation
 ---
 
-## Graphic Overrides
+## 图形替换
 
-Use the {% include ltr/comp.html uuid='bfd4a970' %} to Get & Set Graphics Overrides properties on Elements, Categories or View Filters.
+使用 {% include ltr/comp.html uuid='bfd4a970' %} 运算器可以获取或设置图元、类别或视图过滤的图形体换属性
 
 ![]({{ "/static/images/guides/revit-graphics-override.png" | prepend: site.baseurl }})
 
-## Category Graphic Overrides
+## 类别图形替换
 
-Use the {% include ltr/comp.html uuid='d296f72f' %} to Get & Set Graphics Overrides on Categories in the specified View.
+使用 {% include ltr/comp.html uuid='d296f72f' %} 运算器可以获取或设置指定视图中的类别图形替换
 
 ![]({{ "/static/images/guides/revit-graphics-category-override.png" | prepend: site.baseurl }})
 
-## Filter Graphic Overrides
+## 筛选图形替换
 
-Use the {% include ltr/comp.html uuid='1a137425' %} to Get & Set Filter Graphics Overrides on a View Filter.
+使用 {% include ltr/comp.html uuid='1a137425' %} 运算器可以在视图过滤中获取或设置筛选图形替换
 
 ![]({{ "/static/images/guides/revit-graphics-filter-override.png" | prepend: site.baseurl }})
 
-## Element Graphic Overrides
+## 图元图形替换
 
-Use the {% include ltr/comp.html uuid='6f5e3619' %} to Get & Set Element Graphics Overrides on the specified View.
+使用 {% include ltr/comp.html uuid='6f5e3619' %} 运算器可以提取或设置指定视图中的图元图形替换
 
 ![]({{ "/static/images/guides/revit-graphics-element-override.png" | prepend: site.baseurl }})
 
-## View Filters
+## 视图筛选
 
-Use the {% include ltr/comp.html uuid='61812ade' %} to Get & Set View Filters on to the specified View.
+使用 {% include ltr/comp.html uuid='61812ade' %} 运算器来获取或设置指定视图中的视图筛选
 
 ![]({{ "/static/images/guides/revit-graphics-view-filters.png" | prepend: site.baseurl }})

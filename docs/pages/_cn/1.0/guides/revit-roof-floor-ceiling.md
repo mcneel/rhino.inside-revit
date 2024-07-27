@@ -6,21 +6,20 @@ subtitle: Workflows for Revit Floors, Ceilings, Roofs
 group: Modeling
 ---
 
-## Add Ceiling
+## 添加天花板
 
-Use the {% include ltr/comp.html uuid='a39bbdf2' %} component to Add Ceiling in the project.
+可以在项目中使用 {% include ltr/comp.html uuid='a39bbdf2' %} 运算器来添加天花板，
 
 ![]({{ "/static/images/guides/revit-ceiling-add.png" | prepend: site.baseurl }})
 
-## Add Roof
+## 添加屋顶
 
-Use the {% include ltr/comp.html uuid='198e152b' %} component to Add Roof in the project.
+可以在项目中使用 {% include ltr/comp.html uuid='198e152b' %} 运算器来添加屋顶,
 
 ![]({{ "/static/images/guides/revit-roof-add.png" | prepend: site.baseurl }})
 
-## Add Floor
+## 添加楼板
 
-Use the {% include ltr/comp.html uuid='dc8daf4f' %} component to Add Floor in the project.
+项目中可以使用 {% include ltr/comp.html uuid='dc8daf4f' %} 运算器来添加楼板
 
 ![]({{ "/static/images/guides/revit-floor-add.png" | prepend: site.baseurl }})
-
