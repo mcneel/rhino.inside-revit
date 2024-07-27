@@ -9,25 +9,27 @@ ghdef:
 ---
 
 {% capture link_note %}
-Both Rhino files and Grasshopper definitions can be integrated into {{ site.terms.bim360 }}.  The most recent files will be available to all team members as part of the project. All files will benefit from the backup, versioning and file locking that {{ site.terms.bim360 }} offers. 
+Rhino 与 Grasshopper 文件都可以整合至 {{ site.terms.bim360 }} 中，作为项目的一部分，所有团队成员都可以使用最新的文件，所有文件都支持 {{ site.terms.bim360 }} 所提供的备份、版本控制与文件锁定功能. 
 {% endcapture %}
 {% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-cloud.png' %}
 
-By using the [BIM360 File Locker](https://github.com/eirannejad/BIM360FileLockerForRhino) plugin:
- - Files will lock if currently open, or manually marked as locked by another person
- - Alerts to the lock status will be displayed
- - Files will sync with {{ site.terms.bim360 }} when saved
- - This will work for both Rhino and Grasshopper files
- - The plugin works if using {{ site.terms.rir }}, or running Rhino outside of Revit
+使用 [BIM360 File Locker](https://github.com/eirannejad/BIM360FileLockerForRhino) 可以:
 
-**To install the BIM360Locker plugin from Rhino:**
- 1. Type PackageManager in Rhino
- 1. Search for "BIM360"
- 1. Select the *BIM360FileLocker* plugin from the list
- 1. Click on Install
+- 如果当前文件被打开或被其他人标记为锁定，这个文件会被锁定
+- 会显示锁定状态警报
+- 保存文件后会与 {{ site.terms.bim360 }} 同步
+- 同时支持 Rhino 与 Grasshopper 文件
+- 插件既可以既可以在 {{ site.terms.rir }}内运行，也可以在 Rhino 内运行
 
-For details on install, configuration and use of the {{ site.terms.bim360 }} File Locker for Rhino 23 see the video:
+**安装 BIM360Locker from Rhino 插件:**
+
+1. 在 Rhino 指令行执行 Type PackageManager 指令
+2. 弹出框搜索 "BIM360"
+3. 从搜索结果列表中点选 *BIM360FileLocker* 插件
+4. 点击 **安装** 按钮开始安装
+
+更多关于 {{ site.terms.bim360 }} File Locker for Rhino 插件的安装、设置与调试请查看下面的视频 :
 
 {% include youtube_player.html id="son3aC8kJ2c" %}
 
-[BIM360 File Locker](https://github.com/eirannejad/BIM360FileLockerForRhino) is an Open-Source project by [Ehsan Iran-Nejad](https://github.com/eirannejad)
+[BIM360 File Locker](https://github.com/eirannejad/BIM360FileLockerForRhino) 是由 [Ehsan Iran-Nejad](https://github.com/eirannejad) 主导的开源项目

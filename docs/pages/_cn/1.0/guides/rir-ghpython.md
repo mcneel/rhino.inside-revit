@@ -6,15 +6,15 @@ subtitle: Writing Scripted Components in Python for Revit API
 group: Scripting
 ---
 
-Grasshopper has three scripted components. One for python (IronPython to be specific) programming language and another two for VB.NET and C#. These scripted components allows a user to create custom logic for a Grasshopper component. The component, therefore, can accept a configurable number of input and output connection points.
+Grasshopper 中有三个脚本组件，分别对应 Python(目前只支持IronPython)、VB.NET 和 C# 三种语言，用户可以通过这三个脚本组件编写自己的计算逻辑，这三个组件都可以定义输入和输出接口的数量。
 
 ![]({{ "/static/images/guides/rir-ghpython01.png" | prepend: site.baseurl }})
 
-Since {{ site.terms.rir }} project brings Rhino and Grasshopper into the {{ site.terms.revit }} environment, the scripted components also get access to the Revit API runtime. In this article we will discuss using the python component to create custom components for Revit.
+由于 {{ site.terms.rir }} 将 Rhino 和 Grasshopper 引入到 {{ site.terms.revit }} 环境中，因此这些脚本组件也可以调用 Revit API 的运行时，在这篇文章中，我们将讨论使用 Python 脚本来为 Revit 创建自定义组件。
 
-## Setting Up
+## 设置
 
-When adding a new python component into the Grasshopper definition, you will get the default imports:
+在 Grasshopper 画布上添加一个 python 组件以后，您能够看到一些默认的导入包：
 
 {% highlight python %}
 """Provides a scripting component.
@@ -30,55 +30,66 @@ __version__ = ""
 import rhinoscriptsyntax as rs
 {% endhighlight %}
 
-In order to access the various APIs we need to import them into the script scope first. To access Revit and {{ site.terms.rir }} we need to first import the CLR (Common-Language-Runtime) module in python and use that to add the necessary library references:
+如果要调用其他的一些 API，就需要先把这些包导入到脚本中来，要调用 Revit 和 {{ site.terms.rir }} 我们还需要先导入 CLR (通用语言运行时)模块和其他一些必要的模块:
 
 {% highlight python %}
+
 # Common-Language-Runtime module provided by IronPython
+
 import clr
 
 # add reference to base system types e.g. Enum
+
 clr.AddReference('System.Core')
 
 # add reference to API provided by {{ site.terms.rir }}
+
 clr.AddReference('RhinoInside.Revit')
 
 # add reference to Revit API (two DLLs)
+
 clr.AddReference('RevitAPI') 
 clr.AddReference('RevitAPIUI')
 {% endhighlight %}
 
-Now we can import the namespaces into the script scope:
+现在就可以在脚本中导入这些命名空间了:
 
 {% highlight python %}
+
 # from System.Core DLL
+
 from System import Enum, Action
 
 # {{ site.terms.rir }} API
+
 import RhinoInside
 from RhinoInside.Revit import Revit, Convert
 
 # add extensions methods as well
+
 # this allows calling .ToXXX() convertor methods on Revit objects
+
 clr.ImportExtensions(Convert.Geometry)
 
 # Revit API
+
 from Autodesk.Revit import DB
 from Autodesk.Revit import UI
 {% endhighlight %}
 
-## Custom User Component
+## 自定义组件
 
-Since the imports mentioned above need to be done for every single python component, the process can get tedious. You can setup a template python component with a default script importing all the most frequently used APIs and save that as a *User Component* in Grasshopper:
+每当新建一个 python 组件的时候，都要重新导入所需要的模块，如果您觉得太麻烦，可以把您经常使用的模块设置到一个导入模板并保存在 Grasshopper 的 *用户组件* 中:
 
 ![]({{ "/static/images/guides/rir-ghpython02.png" | prepend: site.baseurl }})
 
 ![]({{ "/static/images/guides/rir-ghpython03.png" | prepend: site.baseurl }})
 
-After the user object has been created, you can easily create a new python component from the user object and it will have the template python script with all your default imports:
+创建用户对象以后，您可以很容易从用户对象中创建一个新的 Python 组件，打开以后，它的 Python 脚本中就已经包含了您设置到模板的所有模块了。
 
 ![]({{ "/static/images/guides/rir-ghpython04.png" | prepend: site.baseurl }})
 
-Here is a template script that covers most of the use cases:
+下面的这个脚本模板适用于大部分情况:
 
 {% highlight python %}
 import clr
@@ -95,17 +106,24 @@ import RhinoInside
 import Grasshopper
 from Grasshopper.Kernel import GH_RuntimeMessageLevel as RML
 from RhinoInside.Revit import Revit, Convert
+
 # add extensions methods as well
+
 # this allows calling .ToXXX() convertor methods on Revit objects
+
 clr.ImportExtensions(Convert.Geometry)
 from Autodesk.Revit import DB
 
 # access to Revit as host
+
 REVIT_VERSION = Revit.ActiveUIApplication.Application.VersionNumber
+
 # access the active document object
+
 doc = Revit.ActiveDBDocument
 
 # a few utility methods
+
 def show_warning(msg):
     ghenv.Component.AddRuntimeMessage(RML.Warning, msg)
 
@@ -116,27 +134,28 @@ def show_remark(msg):
     ghenv.Component.AddRuntimeMessage(RML.Remark, msg)
 
 # write your code here
+
 # ...
+
 {% endhighlight %}
 
-You can download the User Object for this template from this button:
+点击这个按钮可以下载包含这个模板的用户对象:
 
 {% include ltr/download_comp.html archive='/static/ghnodes/GhPython Script.ghuser' name='GhPython Script' %}
 
+## 范例
 
-## Example
-
-This example component will create a sphere of an adjustable radius in Revit and Rhino. It will pass that sphere onto other Grasshopper components through the output and it will create the sphere in Revit and bake into Rhino if the button connected to the input is pressed.
+这个范例演示了在 Revit 和 Rhino 中创建一个可以调整半径的球体。通过输出端可以将这个球体传递给其他 Grashopper 组件，按下连接到输入端的按钮，就可以在 Revit 中创建球体并 Bake 到 Rhino 中
 
 ![]({{ "/static/images/guides/rir-ghpython05.png" | prepend: site.baseurl }})
 
-As you see in the image above, we have renamed the input components and also the input and output parameters on the python components. This is a really good practice and it makes the definition a lot more clear to a new user.
+正如上图所示，我们重新命名了输入组件，也重新命名了 python 组件上的输入和输出端口上的参数名称，它使得定义更加清晰，这对刚开始使用这个组件的用户来说非常的友好。
 
-Once this foundation is ready, then we can continue to create the script.
+准备工作做好以后，就可以继续创建脚本了。
 
-### Creating Sphere Geometry
+### 创建球形几何体
 
-To show how a geometry that is created in Grasshopper, previews in both Rhino and Revit dynamically we will use the script below. This script will create a sphere based on the `Radius` input value:
+我们使用下面的脚本演示在Grasshopper中创建的几何体并在 Rhino 和 Revit 中动态预览，这个脚本将根据`Radius` 端口输入的值创建一个球体:
 
 {% highlight python %}
 import clr
@@ -159,19 +178,19 @@ doc = Revit.ActiveDBDocument
 Sphere = Rhino.Geometry.Sphere(Rhino.Geometry.Point3d.Origin, Radius)
 {% endhighlight %}
 
-The `Sphere()` method is from the `Rhino.Geometry` namespace and is part of the `RhinoCommon` API.
+ `Sphere()`  方法来自于 `Rhino.Geometry` 命名空间，此命名空间是 `RhinoCommon` API中的一部分。
 
-By setting the output to `Sphere` Grasshopper will preview the results in both Rhino and Revit (Grasshopper is smart to know that some geometry is set on the output parameter). It also allows the *Preview* option on the component to be toggled and the sphere geometry to be passed down to the next component.
+设置的输出端口参数是 `Sphere` ，把生成的球体赋值给 `Sphere` 变量以后，Grasshopper 会同时在 Rhino 和 Revit 中显示出预览。(Grasshopper 可以识别到输出参数的几何体并将其显示出来)。可以通过组件上的 *Preview* 选项切换是否显示预览，输出端口的球体也可以传到后续的组件中去。
 
-Now we can change the slider value to adjust the radius. Make sure the slider values are set to a big-enough value to the resulting sphere is visible in your Revit and Rhino models.
+现在就可以调整滑块的数值来更改球体的半径了，滑块的数值变化范围设置的大一些，设置的太小在 Revit 和 Rhino 中预览的时候可能很难观察到变化。
 
-### Baking to Revit and Rhino
+### 烘焙到 Revit 和 Rhino
 
-We can add a custom baking function in this script. This can serve as a template to almost an unlimited number of ways and elements that one might want to create Revit objects from Grasshopper.
+我们可以在脚本中插入自定义的烘焙函数，可以把这个脚本当做一个可以重复使用的模板，每当需要从 Grsshopper 中创建 Revit 物件时就可以用到这个模板。
 
-Because baking objects to Revit can take a long time and many times only should be done once, this bake function will only execute if the `Trigger` input is set to `True` on the component. This way we can decide to bake the object once we are happy with the results.
+因为我们很长时间才需要在 Revit 中执行一次烘焙的操作，因此只有当组件的 `Trigger` 输入端的值为 `True` 时才会去执行烘焙函数，这样我们就可以在需要的时候把结果输出到 Revit。
 
-First, let's create a bake function:
+首先，创建一个烘焙函数:
 
 {% highlight python %}
 def create_geometry(doc):
@@ -181,7 +200,7 @@ def create_geometry(doc):
     # now let's pick the Generic Model category for
     # our baked geometry in Revit
     revit_category = DB.ElementId(DB.BuiltInCategory.OST_GenericModel)
-
+    
     # Finally we can create a DirectShape using Revit API
     # inside the Revit document and add the sphere brep
     # to the DirectShape
@@ -190,18 +209,21 @@ def create_geometry(doc):
     # Rhino Brep to Revit Solid. Then we will add the solid to
     # the directshape using the .AppendShape() method
     ds.AppendShape([brep.ToSolid()])
+
 {% endhighlight %}
 
-Once we are done creating this function, we can modify the script to listen for the trigger and call this function.
+函数创建完成后，修改脚本，让它可以监听 trigger 并调用函数。
 
 {% capture api_note %}
-All changes to the Revit model need to be completed inside a *Transaction*. To facilitate this, {{ site.terms.rir }} provides the `Revit.EnqueueAction` method that will wrap our function inside a transaction and calls when Revit is ready to accept changes to active document. The transaction mechanism is designed to ensure only one Revit Add-in can make changes to the document at any time. To create your own transactions, see [Handling Transactions](#handling-transactions)
+对 Revit 模型的所有更改都需要在 *事务（Transaction）* 中完成，为了更方便一些，{{ site.terms.rir }} 提供了一个`Revit.EnqueueAction` 方法，它将我们编写的方法包裹在一个事务当中，当 Revit 可以对活动的文档进行修改时才调用，事务机制的设计是为了确保任何时候都只有一个 Revit 插件可以对文档进行更改。如果需要创建自己的事务，请参考 [处理事务](#handling-transactions)
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
 {% highlight python %}
 if Trigger:
+
 # create and start the transaction
+
 with DB.Transaction(doc, '<give a descriptive name to your transaction>') as t:
     t.Start()
     # change Revit document here
@@ -210,7 +232,7 @@ with DB.Transaction(doc, '<give a descriptive name to your transaction>') as t:
     t.Commit()
 {% endhighlight %}
 
-And here is the complete sample code:
+完整的范例代码：
 
 {% highlight python %}
 import clr
@@ -250,12 +272,14 @@ if Trigger:
         t.Commit()
 {% endhighlight %}
 
-## Handling Transactions
+## 处理事务
 
-To effectively create new transactions and handle the changes to your model in Grasshopper python components, use the with pattern example below:
+要在 Grasshopper python 组件中有效地创建新的事务并处理对模型的更改，请使用下面的模板示例:
 
 {% highlight python %}
+
 # create and start the transaction
+
 with DB.Transaction(doc, '<give a descriptive name to your transaction>') as t:
     t.Start()
     # change Revit document here
@@ -263,9 +287,9 @@ with DB.Transaction(doc, '<give a descriptive name to your transaction>') as t:
     t.Commit()
 {% endhighlight %}
 
-## Inspecting Revit
+## 查看 Revit 版本
 
-To inspect which version of Revit you are using, use the `REVIT_VERSION` global variable provided in the template script above. See example below:
+在模板中脚本中使用 `REVIT_VERSION` 全局变量可以查看 Revit 的版本，范例如下：
 
 {% highlight python %}
 REVIT_VERSION = Revit.ActiveUIApplication.Application.VersionNumber
@@ -276,66 +300,84 @@ else:
     # do other stuff
 {% endhighlight %}
 
+### 在代码中调用组件
 
-## Node In Code
-
-You can also use the Grasshopper components that you love, inside your code, as functions and therefore create much more complex and powerful scripted components without writing the necessary complicated codes. The Grasshopper components basically become like powerful library functions that help you get your job done and have a smaller script to maintain. Here is what you need to add to use the Grasshopper components in your code. First we need to import the Node-in-Code handle:
+您可以在代码中调用 Grasshopper 的组件，将其当做函数来使用。不需要编写复杂的代码，就可以组成功能更强大的脚本。就像调用库函数一样调用 Grasshopper 组件，可以在完成工作的同时维护更少量的代码。要在代码中使用 Grasshopper 组件首先要使用下面的代码导入组件:
 
 {% highlight python %}
 from Rhino.NodeInCode import Components
 {% endhighlight %}
 
-Now you can access the component, like a function. These function names are prefixed with the name of their Grasshopper plugin to avoid naming conflicts. The example below shows how we can access the {% include ltr/comp.html uuid="3aedba3c-" %} inside the code:
+现在就可以像使用函数一样使用组件了，为了避免命名冲突，这些函数名的前缀是它们的 Grasshopper 插件名。下面的范例演示如何在代码中访问 {% include ltr/comp.html uuid="3aedba3c-" %} 组件:
 
 {% highlight python %}
 Components.NodeInCodeFunctions.RhinoInside_AddMaterial()
 
 # alternatively you can use a finder function to find
+
 # the component by name.
+
 comp = Components.FindComponent("RhinoInside_AddMaterial")
+
 # and call the .Invoke function
+
 comp.Invoke()
 {% endhighlight %}
 
-Now lets put this knowledge into use and create a custom scripted component that imports a Brep geometry into Revit and assigns a material to it. This scripted component effectively combines 3 different Grasshopper components into one. Note that there are obviously easier ways to do the same task, however this is a simple example of how components can be chained together in a script.
+现在结合前面的知识写一个脚本，将一个 Brep 几何体输出到 Revit 并为其赋材质。这个脚本将三个不同的 Grasshopper 组件组合成了一个，请注意，显然有更简单的方法来实现同样的效果，但这只是一个简单的范例，演示如何在脚本中将组件组合在一起。
 
-We will start with the [template script component that we created above](#custom-user-component). Add it to your Grasshopper definition and modify the variable parameters to make it look like this:
+我们将使用 [[上面创建的模板脚本](https://forum.rhino3d.com.cn/t/rhino-inside-revit-4-python/4027#custom-user-component)](#custom-user-component). 在 Grasshopper 中将变量参数修改成这样:
 
 ![]({{ "/static/images/guides/rir-ghpython06.png" | prepend: site.baseurl }})
 
-Let's find our components first, and notify the user if any of them does not exist.
+首先找到要使用的组件，如果组件不存在还需要提醒用户。
 
 {% highlight python %}
+
 # AddMaterial component to create a material
+
 add_material = Components.FindComponent("RhinoInside_AddMaterial")
+
 # and AddGeometryDirectShape to create a DirectShape element in Revit
+
 add_geom_directshape = Components.FindComponent("RhinoInside_AddGeometryDirectShape")
 {% endhighlight %}
 
-Let's also notify the user if any of these components do not exist:
+如果这些组件不存在就提醒用户：
 
 {% highlight python %}
 if not (add_material and add_geom_directshape):
     show_error("One or more of the necessary components are not available as node-in-code")
 {% endhighlight %}
 
-Now let's create the main logic of our script:
+现在创建脚本的主要逻辑：
 
 {% highlight python %}
+
 # create a color object. modify the logic as you wish
+
 color = System.Drawing.Color.FromName("DeepSkyBlue")
 
 # now create the material using the node-in-code
+
 # note that just like the Grasshopper component, the node-in-code also
+
 # takes 3 inputs in the exact same order (top to bottom)
+
 new_materials = add_material.Invoke("Sky Material", True, color)
 
 # and now use the AddGeometryDirectShape node-in-code to
+
 # create the DirectShape element in Revit
+
 # Notes:
-#    - BREP is our input Brep object
-#    - new_materials is a list of new materials so we are grabbing the first element
-#    - get_category is a function that finds a Revit category from its name
+
+# - BREP is our input Brep object
+
+# - new_materials is a list of new materials so we are grabbing the first element
+
+# - get_category is a function that finds a Revit category from its name
+
 ds_elements = add_geom_directshape.Invoke(
     "Custom DS",
     get_category("Walls"),
@@ -344,10 +386,11 @@ ds_elements = add_geom_directshape.Invoke(
     )
 
 # assign the new DirectShape element to output
+
 DS = ds_elements[0]
 {% endhighlight %}
 
-And here is the complete script:
+现在创建脚本的主要逻辑：
 
 {% highlight python %}
 import clr
@@ -361,9 +404,11 @@ import Rhino
 from Grasshopper.Kernel import GH_RuntimeMessageLevel as RML
 
 # bring in the node-in-code handle
+
 from Rhino.NodeInCode import Components
 
 # Revit API
+
 from Autodesk.Revit import DB
 
 from RhinoInside.Revit import Revit
@@ -383,10 +428,12 @@ def get_category(category_name):
         if cat.Name == category_name:
             return cat
 
-
 # AddMaterial component to create a material
+
 add_material = Components.FindComponent("RhinoInside_AddMaterial")
+
 # and AddGeometryDirectShape to create a DirectShape element in Revit
+
 add_geom_directshape = Components.FindComponent("RhinoInside_AddGeometryDirectShape")
 
 if not (add_material and add_geom_directshape):
@@ -395,12 +442,12 @@ if not (add_material and add_geom_directshape):
 if BREP:
     # create a color object. modify the logic as you wish
     color = System.Drawing.Color.FromName("DeepSkyBlue")
-    
+
     # now create the material using the node-in-code
     # note that just like the Grasshopper component, the node-in-code also
     # takes 3 inputs in the exact same order (top to bottom)
     new_material = add_material.Invoke("Sky Material", True, color)
-
+    
     # and now use the AddGeometryDirectShape node-in-code to
     # create the DirectShape element in Revit
     # note that BREP is our input Brep object
@@ -413,13 +460,14 @@ if BREP:
     
     # assign the new DirectShape element to output
     DS = ds_elements[0]
+
 {% endhighlight %}
 
 ![]({{ "/static/images/guides/rir-ghpython07.png" | prepend: site.baseurl }})
 
-## Additional Resources
+## 其他相关内容
 
-Here are a few links to more resources about all the APIs mentioned here:
+这里有一些关于文中用到所有 API 的相关资源的链接：
 
 * [API Docs for Revit, RhinoCommon, Grasshopper and Navisworks](https://apidocs.co/)
 * [The Building Coder for expert guidance in BIM and Revit API](https://thebuildingcoder.typepad.com/)

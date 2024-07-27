@@ -10,57 +10,57 @@ ghdef: revit-curtainwalls.ghx
 
 <!-- Curtain Walls -->
 
-This guide discusses a special case of Wall System Families. Basic familiarity with [Walls (Basic & Stacked)]({{ site.baseurl }}{% link _en/1.0/guides/revit-walls.md %}) greatly helps in understanding the *Curtain Walls* in {{ site.terms.revit }}.
+这一章将讨论一组特殊的墙系统族 - 幕墙， 对 [Walls (Basic & Stacked)]({{ site.baseurl }}{% link _en/1.0/guides/revit-walls.md %}) 基础认知有助于更好的理解 {{ site.terms.revit }} 中的幕墙系统
 
-## Curtain Grids
+## 幕墙网格
 
-*Curtain Walls* are a special *Wall System Family* in {{ site.terms.revit }}. The geometry of these walls is generated based on an underlying UV *Curtain Grid*. The grid configuration is set in the *Curtain Wall Type*:
+**幕墙** 是 {{ site.terms.revit }} 中的一类特殊墙系统族，这些墙的几何形状都是基于底层的UV网格来创建，网格配置是设置在幕墙类型中:
 
 ![]({{ "/static/images/guides/revit-curtains01.jpeg" | prepend: site.baseurl }})
 
-*Curtain Grids* have *Grid Lines* on the U and V axes. In Revit API, the U direction is the vertical axis of the wall, and the V direction is the direction of the wall base curve (U line swept over the V curve):
+**幕墙网格** 分为 U、V两个轴（方向），在 Revit API 中U方向是墙体的垂直轴、V方向是墙体的基先（U线扫过V线且通常相互垂直）：
 
 ![]({{ "/static/images/guides/revit-curtains02.jpeg" | prepend: site.baseurl }})
 
-*Grid Lines*  can form angles other than 90° (Currently only on non-curved curtain walls):
+**网格** 也可以是非90度（在曲面幕墙上比较常见）：
 
 ![]({{ "/static/images/guides/revit-curtains03.jpeg" | prepend: site.baseurl }})
 
-*Curtain Mullions* are attached to each *Grid Lines* segment and are joined based on the configurations set in the *Curtain Wall Type*:
+**幕墙竖梃** 都附加至每个网格段上，且都基于幕墙类型内的设置组合链接：
 
 ![]({{ "/static/images/guides/revit-curtains04.png" | prepend: site.baseurl }})
 
-*Curtain Mullions* are also attached to the vertical and horizontal borders of the wall. Remember that these border lines are part of the wall topology definition and not the *Curtain Grid*. The *Grid* only includes the grid lines created inside the wall boundaries:
+幕墙水平与垂直边框线上也会附加**幕墙竖梃** ，但请注意这些边框线虽然是墙体结构定义的一部分，但并不是墙体网格，墙体网格仅指幕墙边框内的线段；
 
 ![]({{ "/static/images/guides/revit-curtains05.png" | prepend: site.baseurl }})
 
-4-Sided areas created by the grid are called *Grid Cells*:
+由网格构成的四边区域称之为**网格单元** ：
 
 ![]({{ "/static/images/guides/revit-curtains06.png" | prepend: site.baseurl }})
 
- *Curtain Panels* (system families) or *Curtain Panel Family* (special type of flexible families that are designed to be inserted into *Curtain Cells* and act as custom panels) instances can be inserted into these cells to complete the geometry. *Curtain Panels* can be customized to represent solid panels, glass panels, or even empty (!) areas:
+ 可以将幕墙嵌板（系统族）或幕墙族（设计用于插入幕墙单元充当自定义面板的特殊灵活族）实例插入到这些单元中完成几何图形的定义，幕墙嵌板还可以自定义为实心嵌板、模板嵌板，甚至是空置 (!) 区域：
 
 ![]({{ "/static/images/guides/revit-curtains07.jpeg" | prepend: site.baseurl }})
 
-The types of *Curtain Mullions* and *Panels* used for a wall are defined in the Curtain Wall Type and can also be overridden on the wall instance.
+可以在幕墙类型中定义幕墙竖梃与嵌板，也可以直接覆盖在墙体实例。
 
-## Walls vs Systems
+## 墙体 vs 系统
 
-*Curtain Walls* and *Curtain Systems* are almost identical in definition. The only difference is that *Curtain Walls* are vertical and have directionality so the *Grid* configuration is set for **Vertical** and **Horizontal** grid lines. *Curtain Systems* can be created from *Mass* surfaces and thus are not flowing in a certain direction. Hence the *Grid* configurations is set for **Grid 1** and **Grid 2** axes.
+在定义上**幕墙** 与**幕墙系统** 几乎相同，唯一的区别是**幕墙** 是垂直且具有方向性的，因此网格定义设置为水平与垂直的网格线，幕墙系统可以基于大量的曲面来创建尔不会限制下垂的方向，因此其网格配置了 **Grid1** 与 **Grid2** 两个轴向
 
 {% capture api_note %}
-In Revit API, *Curtain Walls* are represented by {% include api_type.html type='Autodesk.Revit.DB.Wall' title='DB.Wall' %} and *Curtain Systems* are represented by {% include api_type.html type='Autodesk.Revit.DB.CurtainSystem' title='DB.CurtainSystem' %}. The {% include ltr/comp.html uuid='15ad6bf9' %} primitive in {{ site.terms.rir }} represents Walls of all kinds. There are also specific primitives that contain data related to Curtain Walls e.g. {% include ltr/comp.html uuid='e94b20e9' %}, {% include ltr/comp.html uuid='7519d945' %}, {% include ltr/comp.html uuid='f25fac7b' %}, etc.
+在 Revit API 中 幕墙由 {% include api_type.html type='Autodesk.Revit.DB.Wall' title='DB.Wall' %} 来表达，幕墙系统由 {% include api_type.html type='Autodesk.Revit.DB.CurtainSystem' title='DB.CurtainSystem' %}表达。 {% include ltr/comp.html uuid='15ad6bf9' %} 在 {{ site.terms.rir }} 中来代表各类墙体，也有一些特定的图元中含有与幕墙相关数据的数据，例如 {% include ltr/comp.html uuid='e94b20e9' %}, {% include ltr/comp.html uuid='7519d945' %}, {% include ltr/comp.html uuid='f25fac7b' %}, 等。
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-## Querying Curtain Walls
+## 查询幕墙
 
-Similar to collecting *Basic* and *Stacked Walls*, the components shown at [Walls (Basic & Stacked)]({{ site.baseurl }}{% link _en/1.0/guides/revit-walls.md %}#by-wall-system-family) section, can help filtering the Curtain Wall instances and types:
+拾取基础墙与叠层墙至 **Wall System Family** 运算器, 可以帮助筛选幕墙类型与类别；
 
 ![]({{ "/static/images/guides/revit-curtainwalls-query.png" | prepend: site.baseurl }})
 
 {% capture bubble_note %}
-As shown in the images below, a combination of category picker, {% include ltr/comp.html uuid="d08f7ab1-" %}, and {% include ltr/comp.html uuid="7b00f940-" %} can be used to filter the *Curtain Panel* and *Curtain Mullion* types and instances in a model. However, the collector does not return anything for *Curtain Grids*. See [Analyzing Curtain Walls](#analyzing-curtain-walls) for better workflows to extract *Panel* and *Mullion* information. As you can see, the *Curtain Grids* graph does not return any results for Grid Types. The Panel and Mullion types can be collected however:
+下面的截图示范如何利用 {% include ltr/comp.html uuid="d08f7ab1-" %} 与 {% include ltr/comp.html uuid="7b00f940-" %} 运算器来过滤模型中幕墙嵌板、幕墙竖梃的类型与实例，当然这个方法不会反馈幕墙网格信息。浏览  [Analyzing Curtain Walls](#analyzing-curtain-walls) 章节了解更好的流程来提取面板与竖梃信息，正如你所看到的，幕墙网格不会返回任何网格类型结果，但可以收集面板与竖梃类型：
 
 &nbsp;
 
@@ -68,7 +68,7 @@ As shown in the images below, a combination of category picker, {% include ltr/c
 
 &nbsp;
 
-And the same for collecting instances:
+选择实例也相同：
 
 &nbsp;
 
@@ -76,25 +76,23 @@ And the same for collecting instances:
 {% endcapture %}
 {% include ltr/bubble_note.html note=bubble_note %}
 
-## Analyzing Curtain Wall Types
+## 分析幕墙类型
 
-Now that we can collect the *Curtain Wall Types*, use the {% include ltr/comp.html uuid='d0874f93' %} shown here to analyze their properties. The {% include ltr/comp.html uuid='c84653dd' %}, {% include ltr/comp.html uuid='cd3e68b2' %}, and {% include ltr/comp.html uuid='9c2d116d' %} components can help filtering based on these values:
+可以使用 {% include ltr/comp.html uuid='d0874f93' %} 对收集的幕墙类型进行属性分析， {% include ltr/comp.html uuid='c84653dd' %}, {% include ltr/comp.html uuid='cd3e68b2' %}, 与 {% include ltr/comp.html uuid='9c2d116d' %} 等运算器可以帮助过滤相关的参数值：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-analyzecwtype.png" | prepend: site.baseurl }})
 
+## 分析幕墙
 
-## Analyzing Curtain Walls
+### 提取幕墙几何
 
-### Extracting Curtain Wall Geometry
-
-The full geometry of a *Curtain Wall* instance can be extracted using the {% include ltr/comp.html uuid="b3bcbf5b-" %} component:
+利用 {% include ltr/comp.html uuid="b3bcbf5b-" %} 运算器可以提取任何一个幕墙的实例的全部几何：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-cwallgeom.png" | prepend: site.baseurl }})
 
 ![]({{ "/static/images/guides/revit-curtainwalls-cwallgeomscap.png" | prepend: site.baseurl }})
 
-
-The {% include ltr/comp.html uuid="3396dbc4-" %} component shown here, can be used to extract bounding geometry of a given *Curtain Wall* instance:
+如下图所示 {% include ltr/comp.html uuid="3396dbc4-" %} 运算器可以提取给定的幕墙实例的边框几何内容：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-cwallboundinggeom.png" | prepend: site.baseurl }})
 
@@ -102,70 +100,69 @@ The {% include ltr/comp.html uuid="3396dbc4-" %} component shown here, can be us
 
 ![]({{ "/static/images/guides/revit-curtainwalls-cwallboundinggeomscap.png" | prepend: site.baseurl }})
 
+### 嵌入幕墙
 
-### Embedded Curtain Walls
-
-*Curtain Walls* can be embedded inside other walls. The {% include ltr/comp.html uuid="734b2dac-" %} component shown above, can provide access the to the parent/host wall (**Host Wall**), embedding the given *Curtain Wall* instance. If *Curtain Wall* is not embedded, `null` is returned:
+幕墙可以嵌入其他墙体内，前面示范过 {% include ltr/comp.html uuid="734b2dac-" %} 运算器可以提供对主墙体的访问，将给定的幕墙嵌入其中，如果没有给定嵌入幕墙会返回  `null` 值：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-analyzecwallhost.png" | prepend: site.baseurl }})
 
-### Extracting Grid
+### 提取网格
 
 {% capture api_note %}
-In Revit API, Curtain Grids are represented by the {% include api_type.html type='Autodesk.Revit.DB.CurtainGrid' title='DB.CurtainGrid' %}
+在 Revit API 中幕墙网格由  {% include api_type.html type='Autodesk.Revit.DB.CurtainGrid' title='DB.CurtainGrid' %} 表达
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The {% include ltr/comp.html uuid="734b2dac-" %} component shown above, can provide access to the *Curtain Grid* of a *Curtain Wall* instance. *Curtain Grid* can be used to extract information about the *Grid*, and access the individual *Cells*, *Mullions*, and *Panels* on the *Curtain Wall*:
+前面示范过 {% include ltr/comp.html uuid="734b2dac-" %} 运算器还可以访问给定幕墙实例的幕墙网格，基于幕墙网格可以获取网格的准确信息，也可以访问每一个幕墙单元、竖梃和嵌板的相关内容：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-analyzecwall.png" | prepend: site.baseurl }})
 
-## Analyzing Curtain Grids
+## 分析幕墙网格
 
-Using the component shown here, the *Curtain Grid* can be further broken down to its properties and hosted elements:
+利用下面这些运算器可以进一步的分解幕墙网格的属性与构成原件：
 
-- **Curtain Cells**: Returns all the individual *Curtain Cells*. Cells are the bounded areas between the grid lines
-- **Curtain Mullions**: Returns all the individual *Curtain Mullions*
-- **Curtain Panels**: Returns all the individual *Curtain Panels* or *Family Instances* (e.g. *Curtain Wall Door*) hosted on the *Curtain Cells*
-- **Curtain Grid Lines**: Returns all the individual *Curtain Grid Lines* along U and V directions and their properties
+- **Curtain Cells**: 返回所有的幕墙单元信息，单元为网格线之间的有界区域
+- **Curtain Mullions**: 返回所有单独的幕墙竖梃信息
+- **Curtain Panels**: 返回所有嵌入在幕墙的幕墙嵌板或系统实例（例如幕墙门）
+- **Curtain Grid Lines**: 返回所有沿网格U与V方向的幕墙网格线及其属性信息
 
 &nbsp;
 
 ![]({{ "/static/images/guides/revit-curtainwalls-analyzecgrid.png" | prepend: site.baseurl }})
 
-## Analyzing Cells
+## 分析单元
 
 {% capture api_note %}
-In Revit API, Curtain Cells are represented by the {% include api_type.html type='Autodesk.Revit.DB.CurtainCell' title='DB.CurtainCell' %}
+在 Revit API 中使用 {% include api_type.html type='Autodesk.Revit.DB.CurtainCell' title='DB.CurtainCell' %} 来表达幕墙单元
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The component shown here, can analyze each curtain cell and extract the cell curves (**Curves**) and the panelized curves (**Planarized Curves**):
+可以使用下面的运算器来分析每个幕墙单元，且能提取单元曲线（**曲线**）与嵌板的曲线（**平直曲线**）：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-analyzecell.png" | prepend: site.baseurl }})
 
-Note the difference between the cell curves and the panelized curves:
+请注意单元曲线（下图左侧）与嵌板曲线（下图右侧）并不相同
 
 ![]({{ "/static/images/guides/revit-curtainwalls-cellvspanelcurves.png" | prepend: site.baseurl }})
 
-As you can see in the image below, the cell curves follow the curvature of the wall, but the panelized curves, are the curves bounding the flat surface that is bounded inside the cell:
+如下图所示单元曲线与墙体曲率一致，但墙板曲线是单元框内的平面曲线：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-curvedcellvspanelcurves.png" | prepend: site.baseurl }})
 
-The panelized curves can be used to create faces. Notice that each cell is marked with its index and they are in order from bottom row to the top row:
+嵌板曲线可用来创建面板，请注意每一个单元都可以标记其自身的序号且是从底行往顶行排序：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-facefrompanelcurves.png" | prepend: site.baseurl }})
 
 ![]({{ "/static/images/guides/revit-curtainwalls-facefrompanelcurvesscap.png" | prepend: site.baseurl }})
 
-## Analyzing Mullions
+## 分析竖梃
 
 {% capture api_note %}
-In Revit API, Curtain Mullions are represented by the {% include api_type.html type='Autodesk.Revit.DB.Mullion' title='DB.Mullion' %}
+ 在 Revit API 中 使用 {% include api_type.html type='Autodesk.Revit.DB.Mullion' title='DB.Mullion' %} 来表达幕墙竖梃
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The geometry for *Curtain Mullions* can be extracted by passing the *Mullions* from {% include ltr/comp.html uuid="734b2dac-" %} component, to the {% include ltr/comp.html uuid="b3bcbf5b-" %} component:
+经由 {% include ltr/comp.html uuid="734b2dac-" %} 运算器来提取给定幕墙的幕墙竖梃，再链接 {% include ltr/comp.html uuid="b3bcbf5b-" %} 运算器提取相关的几何信息：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-mulliongeom.png" | prepend: site.baseurl }})
 
@@ -173,51 +170,51 @@ The geometry for *Curtain Mullions* can be extracted by passing the *Mullions* f
 
 ![]({{ "/static/images/guides/revit-curtainwalls-mulliongeomscap.png" | prepend: site.baseurl }})
 
-The component shown here can be used to extract information about the individual *Curtain Mullions*:
+可以使用下面的这些运算器来提取每一个幕墙竖梃：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-analyzemullion.png" | prepend: site.baseurl }})
 
-The **Axis Curve** output provides the axis curve of the *Mullion*. Notice how the horizontal curves are not intersecting the vertical curves, as the curves follow the join settings for the associated *Mullions*:
+**Axis Curve** 输出端会输出每一个竖梃的轴向曲线，请注意水平线与垂直线相交与否，由竖梃连接设置来决定：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-mullionlines.png" | prepend: site.baseurl }})
 
-The *Mullion* location curve can also be extracted by passing the *Mullion* to a *Curve* component. Note that some of the mullions might have a length of zero and are not visible as geometries on the curtain walls:
+还可以继续接入曲线运算器来提取竖梃的位置曲线，请注意带有零长度的竖梃线，这些线在幕墙上并不可见：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-mulliontocurve.png" | prepend: site.baseurl }})
 
-### Analyzing Mullion Types
+### 分析竖梃类型
 
 {% capture api_note %}
-In Revit API, Curtain Mullion Types are represented by the {% include api_type.html type='Autodesk.Revit.DB.MullionType' title='DB.MullionType' %}
+在 Revit API 中使用  {% include api_type.html type='Autodesk.Revit.DB.MullionType' title='DB.MullionType' %} 来表达幕墙竖梃类型
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The {% include ltr/comp.html uuid="66a9f189-" %} component shown here can be used to analyze the *Mullion Types* extracted by the {% include ltr/comp.html uuid="4eeca86b-" %} component:
+使用 {% include ltr/comp.html uuid="66a9f189-" %} 运算器来分析经由 {% include ltr/comp.html uuid="4eeca86b-" %} 运算器提取的竖梃类型：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-analyzemulliontype.png" | prepend: site.baseurl }})
 
-The {% include ltr/comp.html uuid='4bbe14f2' %} value picker can be used to filter the *Mullions* by their *System Family* e.g. *L Corner Mullions*
+ {% include ltr/comp.html uuid='4bbe14f2' %} 运算器可以依据系统族的值用来筛选竖梃，例如 *L Corner Mullions*
 
 ![]({{ "/static/images/guides/revit-curtainwalls-mulliontypefilter.png" | prepend: site.baseurl }})
 
-## Analyzing Panels
+## 分析嵌板
 
-*Curtain Walls* can host two types of inserts. They can be either *Curtain Panels* or instances of *Custom Families* designed to work with *Curtain Walls* like a *Curtain Wall Door* instance. The components shown here help analyzing the *Curtain Panels*. The family instances can be analyzed using the methods and components provided in [Data Model: Types]({{ site.baseurl }}{% link _en/1.0/guides/revit-types.md %}) and [Data Model: Elements & Instances]({{ site.baseurl }}{% link _en/1.0/guides/revit-elements.md %}#instances) guides.
+幕墙可以承载两种类型的对象，既可以是幕墙嵌板，也可以是设计用于与幕墙一起使用的自定义族实例，例如幕墙门实例。这里的一些运算器可以帮忙来用于分析幕墙嵌板。也可以使用在 [Data Model: Types]({{ site.baseurl }}{% link _en/1.0/guides/revit-types.md %}) 与 [Data Model: Elements & Instances]({{ site.baseurl }}{% link _en/1.0/guides/revit-elements.md %}#instances) 指南中提供的方法和运算器来分析族实例
 
 {% capture api_note %}
-In Revit API, Curtain Panels are represented by the {% include api_type.html type='Autodesk.Revit.DB.Panel' title='DB.Panel' %}
+在 Revit API 中使用  {% include api_type.html type='Autodesk.Revit.DB.Panel' title='DB.Panel' %} 来表达幕墙嵌板
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The geometry for *Curtain Panels* can be extracted by passing the *Panels* from {% include ltr/comp.html uuid="734b2dac-" %} component, to the {% include ltr/comp.html uuid="b3bcbf5b-" %} component:
+使用 {% include ltr/comp.html uuid="734b2dac-" %} 运算器与 {% include ltr/comp.html uuid="b3bcbf5b-" %} 运算器来提取幕墙嵌板的几何物件：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-panelgeom.png" | prepend: site.baseurl }})
 
-Notice how the panels are in order from bottom to top row:
+请注意嵌板的排序是从底部往顶部逐行排序：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-panelgeomscap.png" | prepend: site.baseurl }})
 
-Since the **Panels** output parameter can return both Panels (`DB.Panel`) and Custom Family Instances (`DB.FamilyInstance`), the same workflow can extract the geometry of all these insert types:
+因为 嵌板输出参数可以返回嵌板 (`DB.Panel`) 与自定义族实例 (`DB.FamilyInstance`), 这样也可以提取所有插入类型的几何物件：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-inserttypes.png" | prepend: site.baseurl }})
 
@@ -225,15 +222,15 @@ Since the **Panels** output parameter can return both Panels (`DB.Panel`) and Cu
 
 ![]({{ "/static/images/guides/revit-curtainwalls-inserttypesscap.png" | prepend: site.baseurl }})
 
-However when extracting information about individual *Curtain Panels*:, the **Panels** output needs to be filtered for Panels (`DB.Panel`), otherwise the {% include ltr/comp.html uuid="08507225-" %} will show an error:
+请注意，如果要提取每一个独立的幕墙嵌板，嵌板 (`DB.Panel`) 输出需要进行筛选，否则 {% include ltr/comp.html uuid="08507225-" %} 运算器会报错：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-panelerror.png" | prepend: site.baseurl }})
 
-Use the {% include ltr/comp.html uuid='36180a9e' %} component, in combination with other filter components e.g. ({% include ltr/comp.html uuid='d08f7ab1' %}), to filter for Panels (`DB.Panel`):
+使用 {% include ltr/comp.html uuid='36180a9e' %} 运算器联合其他类似 ({% include ltr/comp.html uuid='d08f7ab1' %}) 过滤运算器来筛选嵌板 (`DB.Panel`):
 
 ![]({{ "/static/images/guides/revit-curtainwalls-panelfilter.png" | prepend: site.baseurl }})
 
-The {% include ltr/comp.html uuid="08507225-" %} component also provides access to the panel base point(**Base Point**) and normal/orientation vectors (**Orientation**):
+使用 {% include ltr/comp.html uuid="08507225-" %} 运算器也会提供访问嵌板的基准点（Base Point)与法线/方向向量（**Orientation**):
 
 ![]({{ "/static/images/guides/revit-curtainwalls-panelbaseorient.png" | prepend: site.baseurl }})
 
@@ -241,51 +238,51 @@ The {% include ltr/comp.html uuid="08507225-" %} component also provides access 
 
 ![]({{ "/static/images/guides/revit-curtainwalls-panelorientvectors.png" | prepend: site.baseurl }})
 
-### Analyzing Panel Types
+### 分析嵌板类型
 
 {% capture api_note %}
-In Revit API, Curtain Panel Types are represented by the {% include api_type.html type='Autodesk.Revit.DB.PanelType' title='DB.PanelType' %}
+在 Revit API 中使用 {% include api_type.html type='Autodesk.Revit.DB.PanelType' title='DB.PanelType' %} 来表达幕墙嵌板类型
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The {% include ltr/comp.html uuid="6f11977f-" %} component shown here can be used to analyze the *Panel Types* extracted by the {% include ltr/comp.html uuid="08507225-" %} component:
+ {% include ltr/comp.html uuid="6f11977f-" %} 运算器可以提取经由 {% include ltr/comp.html uuid="08507225-" %} 运算器抓取的幕墙嵌板的嵌板类型：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-analyzepaneltype.png" | prepend: site.baseurl }})
 
-Note that **Panel Type** output parameter can return a *System Panel Type* (`DB.PanelType`) or a *Custom Family Symbol* (`DB.FamilySymbol`) depending on the type of Panel inserted into the Grid, so we need to filter for panels first:
+注意 Panel Type 输出参数会返回的是一个 *System Panel Type* (`DB.PanelType`) 还是一个 *Custom Family Symbol* (`DB.FamilySymbol`) 这取决于插入至幕墙网格的嵌板的类型，因此我们首先需要筛选嵌板：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-inserttype.png" | prepend: site.baseurl }})
 
-## Analyzing Grid Lines
+## 分析幕墙网格线
 
 {% capture api_note %}
-In Revit API, Curtain Grid Lines are represented by the {% include api_type.html type='Autodesk.Revit.DB.CurtainGridLine' title='DB.CurtainGridLine' %}
+在 Revit API 中使用 {% include api_type.html type='Autodesk.Revit.DB.CurtainGridLine' title='DB.CurtainGridLine' %} 来表达幕墙网格线
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-The curve for *Curtain Grid Lines* can be extracted by passing the *Grid Lines* from {% include ltr/comp.html uuid="d7b5c58e-" %} component, to the *Curve* component:
+ {% include ltr/comp.html uuid="d7b5c58e-" %} 运算器可以提取幕墙网格线，然后接入至 **Curve** 运算器：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-analyzegrid.png" | prepend: site.baseurl }})
 
-The component shown here can be used to extract info about each individual **Curtain Grid Line**:
+进一步的提取还可以提取每一条幕墙**网格直线**：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-analyzegridline.png" | prepend: site.baseurl }})
 
-Notice the difference between the *Curtain Grid Line* curves and segments. The **Curve** output parameter provide access to a single curve for each *Curtain Grid Line* along the U or V axes:
+要注意幕墙网格线与线段的区别，在 Curve 输出选项提供输出每一段幕墙网格U、V轴向线段的选项：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-cgridlinecurve.png" | prepend: site.baseurl }})
 
-Whereas the **Segments** output parameter provides access to all the individual line segments per each *Curtain Grid Line* and it also includes the unused segments outside of the wall boundaries:
+**Segments** 输出端除了输出每条幕墙网格线还包括幕墙边框外未使用的线段：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-cgridlinesegments.png" | prepend: site.baseurl }})
 
-*Curtain Grid Line* curves and segments are shown here:
+幕墙网格线与线段显示如下：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-cgridlinesallegments.png" | prepend: site.baseurl }})
 
-### Extract Associated Mullions and Panels
+### 提取关联竖梃与嵌板
 
-The {% include ltr/comp.html uuid="face5e7d-" %} component also provides the *Mullions* and *Panels* that are associated with each *Grid Line*. Notice that the *Mullions* and *Panels* on the wall borders are not included since they are not part of the *Curtain Grid* definition:
+ {% include ltr/comp.html uuid="face5e7d-" %} 运算器也可以提取与每个幕墙网格线段关联竖梃与嵌板的功能，请注意，不包含边框上的竖梃与嵌板，因为它们不是幕墙网格定义的一部分：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-analyzeassocmullions.png" | prepend: site.baseurl }})
 
@@ -293,46 +290,45 @@ The {% include ltr/comp.html uuid="face5e7d-" %} component also provides the *Mu
 
 ![]({{ "/static/images/guides/revit-curtainwalls-assocmullions.png" | prepend: site.baseurl }})
 
-*Panel* association is slightly different from *Mullions*. Each *Mullion* is associated with a single *Grid Line*, however a single *Panel* (since it has two sides) is associated with a *Grid Line* along the U axis and also another *Grid Line* along the V:
+嵌板关联与竖梃稍有不同，每一个竖梃都关联一个网格线段，但一个嵌板（因为它又两条边）会同时与一条沿着U轴向和V轴向的网格线关联:
 
 ![]({{ "/static/images/guides/revit-curtainwalls-assocmullionspanels.gif" | prepend: site.baseurl }})
 
-## Creating Curtain Walls
+## 创建幕墙
 
-### By Profile
+### 以定义断面
 
-Similar to creating a basic wall based on a profile, you can simply create a curtain wall by passing a *Curtain Wall Type* to the {% include ltr/comp.html uuid='78b02ae8' %} component:
+可以快速的根据一个定义断面来创建一段基础墙体，然后经过 {% include ltr/comp.html uuid='78b02ae8' %} 运算器的 Curtain Wall Type 来创建一个简单的幕墙：
 
 ![]({{ "/static/images/guides/revit-curtainwalls-byprofilescap.png" | prepend: site.baseurl }})
 
-
 <!-- Curtain Systems -->
 
-## Querying Curtain Systems
+## 查询幕墙系统
 
 {% capture api_note %}
-In Revit API, Curtain System Types are represented by {% include api_type.html type='Autodesk.Revit.DB.CurtainSystemType' title='DB.CurtainSystemType' %}. Curtain Systems are represented by {% include api_type.html type='Autodesk.Revit.DB.CurtainSystem' title='DB.CurtainSystem' %} 
-{% endcapture %}
+在 Revit API 中使用 {% include api_type.html type='Autodesk.Revit.DB.CurtainSystemType' title='DB.CurtainSystemType' %}来表达幕墙系统类型，幕墙系统由 {% include api_type.html type='Autodesk.Revit.DB.CurtainSystem' title='DB.CurtainSystem' %} 
+{% endcapture %} 来表达
 {% include ltr/api_note.html note=api_note %}
 
-Curtain System types and instances can be queries using the generic {% include ltr/comp.html uuid='d08f7ab1' %}, {% include ltr/comp.html uuid='7b00f940' %}, and {% include ltr/comp.html uuid='0f7da57e' %} components:
+可以使用 {% include ltr/comp.html uuid='d08f7ab1' %}, {% include ltr/comp.html uuid='7b00f940' %}与 {% include ltr/comp.html uuid='0f7da57e' %} 等运算器来查询幕墙系统类型与实例：
 
 ![]({{ "/static/images/guides/revit-curtainsystems-querytypes.png" | prepend: site.baseurl }})
 
 ![]({{ "/static/images/guides/revit-curtainsystems-query.png" | prepend: site.baseurl }})
 
-## Analyzing Curtain Systems
+## 分析幕墙系统
 
-{% include ltr/comp.html uuid="83d08b81-" %} component shown here can be used to extract information about *Curtain System* types. Note the similarity between the *Curtain System Type* and *Curtain Wall Types*:
+利用 {% include ltr/comp.html uuid="83d08b81-" %} 运算器可以提取幕墙系统类型的所有信息，但要注意**幕墙系统** 与**幕墙系统类型** 的差别：
 
 ![]({{ "/static/images/guides/revit-curtainsystems-analyzetype.png" | prepend: site.baseurl }})
 
-Extracting information from *Curtain System* instances are very similar to Curtain Wall instances. Similar to {% include ltr/comp.html uuid="734b2dac-" %} component, the {% include ltr/comp.html uuid='83d08b81' %} component provides access to the *Curtain Grid* definition:
+从幕墙系统实例中提取信息与幕墙实例非常类似，最简单的的方法是使用 {% include ltr/comp.html uuid="734b2dac-" %} 运算器， {% include ltr/comp.html uuid='83d08b81' %} 运算器可以访问幕墙网格脚本：
 
-{% include ltr/bubble_note.html note='Note that *Curtain Systems* can have multiple *Curtain Grids*, each associated with a single face of the source geometry. These curtain grids have independent boundaries and are generated based on the *Curtain System Type* definition' %}
+{% include ltr/bubble_note.html note='注意幕墙系统可以包含多个幕墙网格，且每个都和源几何关联一个单一的面板，这些幕墙网格都有独立的边框且基于幕墙系统类型脚本来生成' %}
 
 ![]({{ "/static/images/guides/revit-curtainsystems-analyze.png" | prepend: site.baseurl }})
 
-Once you gain access to the *Curtain Grid* definition, you can use the {% include ltr/comp.html uuid="d7b5c58e-" %} to extract information, very similar to grids on *Curtain Walls*:
+一旦建立访问幕墙网格脚本，你就可以通过 {% include ltr/comp.html uuid="d7b5c58e-" %} 来提取信息，这和提取幕墙信息很类似：:
 
 ![]({{ "/static/images/guides/revit-curtainsystems-analyzecgrid.png" | prepend: site.baseurl }})

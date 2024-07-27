@@ -7,54 +7,49 @@ group: Containers
 ghdef: revit-designopts.ghx
 ---
 
-{% include ltr/warning_note.html note='Currently there is very limited support for design options in Revit API' %}
+{% include ltr/warning_note.html note=' 当前在 Revit API 中对设计选项的支持非常少' %}
 
-## Querying Design Options
+## 查询设计选项
 
 {% capture api_note %}
-In Revit API, Design Options are represented by the {% include api_type.html type='Autodesk.Revit.DB.DesignOption' title='DB.DesignOption' %}
+在 Revit API 中使用{% include api_type.html type='Autodesk.Revit.DB.DesignOption' title='DB.DesignOption' %}来表达设计选项
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-
-Use the {% include ltr/comp.html uuid='b6349dda' %} to find the design option that is currently active in Revit UI.
+如果需要在 Revit UI 中查找当前有用的设计选项，请使用 {% include ltr/comp.html uuid='b6349dda' %} 运算器。
 
 ![]({{ "/static/images/guides/revit-designopts-active.png" | prepend: site.baseurl }})
 
-
-Then you can use the {% include ltr/comp.html uuid='677ddf10' %} and {% include ltr/comp.html uuid='01080b5e' %} to inspect the identity of each *Design Option* or *Design Option Set*.
-
+然后你可以联合 {% include ltr/comp.html uuid='677ddf10' %} 与 {% include ltr/comp.html uuid='01080b5e' %} 运算器来检查每个**设计选项**或**设计选项设置**的详细数据，
 
 ![]({{ "/static/images/guides/revit-designopts-identity.png" | prepend: site.baseurl }})
 
 ![]({{ "/static/images/guides/revit-designopts-optsetidentity.png" | prepend: site.baseurl }})
 
-
-To query all the *Design Option Sets* and *Design Options* in a document, use the {% include ltr/comp.html uuid='b31e7605' %} and {% include ltr/comp.html uuid='6804582b' %} components respectively.
+如果需要查询一个文档中所有的 **设计选项** 与 **设计选项设置** ，请使用 {% include ltr/comp.html uuid='b31e7605' %} 与 {% include ltr/comp.html uuid='6804582b' %} 来实现，
 
 ![]({{ "/static/images/guides/revit-designopts-queryoptsets.png" | prepend: site.baseurl }})
 
 ![]({{ "/static/images/guides/revit-designopts-queryopts.png" | prepend: site.baseurl }})
 
-
 {% capture api_note %}
-Notice that the Design Option Set object is a simple `DB.Element` since there is very limited support for design options in Revit API
+请注意**设计选项设置**对象是一个简单的 `DB.Element` ，因为 Revit API 中对设计选项的支持非常有限
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
+## 收集设计选项图元
 
-## Collecting Design Option Elements
-
-You can pass a design option to the {% include ltr/comp.html uuid='1b197e82' %} component to collect the elements belonging to a given design option.
+可以将设计选项链接至 {% include ltr/comp.html uuid='1b197e82' %} 运算器来收集一个给定设计选项的所有图元，
 
 ![]({{ "/static/images/guides/revit-designopts-queryelements.png" | prepend: site.baseurl }})
 
-## Deleting Design Options
+## 删除设计选项
 
 {% capture doptsrem_note %}
-Due to challenges of deleting Design Options, we have not created a workflow yet.
-- Deleting a Design Option, also deletes all the views referencing that design option. A workaround is to read `BuiltInParameter.VIEWER_OPTION_VISIBILITY` parameter of the view object, and if it has a value, meaning it is referencing a design option, set the value to `InvalidElementId` to remove the reference. User must also be notified of which views have been changed.
-- Deleting a Design Option, also deletes all the elements inside the design option. Ideally the user needs to decide if any of the elements need to be relocated before Design Option is removed.
-- Design Options can be deleted using `Document.Delete()`
-{% endcapture %}
-{% include ltr/warning_note.html note=doptsrem_note %}
+删除设计选项是非常具有挑战的事情，所以我们并没有准备提供相关工作流程，且请注意：
+
+- 删除一个设计选项也会删除所有引用该设计选项的所有视图，解决方法是先读取视图对象的 `BuiltInParameter.VIEWER_OPTION_VISIBILITY` 参数，如果它有值则意味着它引用了设计选项, 请将这个值设置为 `InvalidElementId` 以删除其引用，且还要通知用户那些视图已经被修改。
+- 删除一个设计选项也会删除这个设计选项中的所有图元，理想情况下，用户需要在删除设计选项之前决定是否需要重新定位这些图元。
+- 设计选项可使用 `Document.Delete()` 来删除
+  {% endcapture %}
+  {% include ltr/warning_note.html note=doptsrem_note %}

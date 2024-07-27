@@ -6,7 +6,7 @@ subtitle: Workflows for Revit DirectShapes
 group: Modeling
 ---
 
-The DirectShape element store geometric shapes in a Revit document. The geometry can include closed points, lines, solids or meshes. DirectShape is primarily intended for placing elements quickly in a model without the need for a pre-configured family. DirectShape contains some but not all the organizational information of Loadable Family/Types. See the chart below to see if DirectShapes might work for you.
+在 Revit 文档中 DirectShape 图元用于存储几何形状，包括点与封闭的线、实体或是网格。DirectShapes 可以在模型中快速放置非预置族的图元，也可以部分的包含一些可加载族、类型的信息，这里提供一个别表供你参考，
 
 <i class="fa fa-envelope">
 
@@ -125,57 +125,54 @@ The DirectShape element store geometric shapes in a Revit document. The geometry
 </tbody>
 </table>
 
-Some of the options above are grey because to add materials, use the name in a way that can be scheduled additional shared parameters need to be created as these parameters are not built into the default DirectShapes.
+上面的一些选项是灰色的，因为要添加材质，需要使用可以计划的方式来创建额外的共享参数，这些参数都没有内置至默认的 Directshapes 中。
 
 {% include youtube_player.html id="qPDKA6yN-2c" %}
 
-## DirectShape Categories
+## DirectShape 类别
 
-Use the {% include ltr/comp.html uuid='7bafe137' %} component to get the DirectShape Categories.
+使用 {% include ltr/comp.html uuid='7bafe137' %}  运算器来获取 DirectShape 类别,
 
 ![]({{ "/static/images/guides/revit-directshape-categories.png" | prepend: site.baseurl }})
 
-## Add Point DirectShape
+## 增加 Point DirectShape
 
-Use the {% include ltr/comp.html uuid='7a889b89' %} component to Add Point DirectShape in the project.
+可以使用 {% include ltr/comp.html uuid='7a889b89' %} 运算器增加 Point Directshape至项目中，
 
 ![]({{ "/static/images/guides/revit-directshape-addpoint.png" | prepend: site.baseurl }})
 
-## Add Mesh DirectShape
+## 增加 Mesh DirectShape
 
-Use the {% include ltr/comp.html uuid='5542506a' %} component to Add Mesh DirectShape in the project.
+使用 {% include ltr/comp.html uuid='5542506a' %} 运算器来增加 Mesh DirectShape至项目,
 
 ![]({{ "/static/images/guides/revit-directshape-addmesh.png" | prepend: site.baseurl }})
 
-## Add DirectShape
+## 增加 DirectShape
 
-Use the {% include ltr/comp.html uuid='a811efa4' %} component to Add DirectShape in the project.
+使用 {% include ltr/comp.html uuid='a811efa4' %} 运算器在项目中增加 DirectShape,
 
 ![]({{ "/static/images/guides/revit-directshape-adddirectshape.png" | prepend: site.baseurl }})
 
-## Add Geometry DirectShape
+## 增加 Geometry DirectShape
 
-Use the {% include ltr/comp.html uuid='0bfbda45' %} component to Add Geometry DirectShape in the project.
+使用 {% include ltr/comp.html uuid='0bfbda45' %} 在项目中增加 Geometry DirectShape,
 
 ![]({{ "/static/images/guides/revit-directshape-addgeometry.png" | prepend: site.baseurl }})
 
-## Add Curve DirectShape
+## 增加 Curve DirectShape
 
-Use the {% include ltr/comp.html uuid='77f4fbdd' %} component to Add Curve DirectShape in the project.
+使用 {% include ltr/comp.html uuid='77f4fbdd' %} 运算器在项目中增加 Curve DirectShape,
 
 ![]({{ "/static/images/guides/revit-directshape-addcurve.png" | prepend: site.baseurl }})
 
-## Add Brep DirectShape
+## 增加 Brep DirectShape
 
-Use the {% include ltr/comp.html uuid='5ade9ae3' %} component to Add Brep DirectShape in the project.
+使用 {% include ltr/comp.html uuid='5ade9ae3' %}  运算器增加 Brep DirectShape 至项目
 
 ![]({{ "/static/images/guides/revit-directshape-addbrep.png" | prepend: site.baseurl }})
 
-## Add DirectShape Type
+## 增加 DirectShape 类型
 
-Use the {% include ltr/comp.html uuid='25dcfe8e' %} component to Add DirectShape Type in the project.
+使用 {% include ltr/comp.html uuid='25dcfe8e' %} 运算器增加 DirectShape 类型至项目
 
 ![]({{ "/static/images/guides/revit-directshape-addtype.png" | prepend: site.baseurl }})
-
-
-

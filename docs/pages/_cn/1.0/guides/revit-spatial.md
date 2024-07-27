@@ -7,98 +7,91 @@ group: Modeling
 ---
 
 {% capture api_note %}
-In Revit API, Spatial Elements are represented by the {% include api_type.html type='Autodesk.Revit.DB.SpatialElement' title='DB.SpatialElement' %}. This type is then used to create custom spatial types for *Rooms* ({% include api_type.html type='Autodesk.Revit.DB.Architecture.Room' title='DB.Architecture.Room' %}), *Spaces* ({% include api_type.html type='Autodesk.Revit.DB.Mechanical.Space' title='DB.Mechanical.Space' %}), and *Areas* ({% include api_type.html type='Autodesk.Revit.DB.Area' title='DB.Area' %}). `DB.Space` elements can be grouped by *HVAC Zones* ({% include api_type.html type='Autodesk.Revit.DB.Mechanical.Zone' title='DB.Mechanical.Zone' %})
+在 Revit API中使用 {% include api_type.html type='Autodesk.Revit.DB.SpatialElement' title='DB.SpatialElement' %} 来表示，它也可以用于创建自定义空间类，例如 *Rooms* ({% include api_type.html type='Autodesk.Revit.DB.Architecture.Room' title='DB.Architecture.Room' %}), *Spaces* ({% include api_type.html type='Autodesk.Revit.DB.Mechanical.Space' title='DB.Mechanical.Space' %}), 与 *Areas* ({% include api_type.html type='Autodesk.Revit.DB.Area' title='DB.Area' %}). `DB.Space` 可以被 *HVAC Zones* ({% include api_type.html type='Autodesk.Revit.DB.Mechanical.Zone' title='DB.Mechanical.Zone' %}所群组)
 {% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
-## Querying Rooms
+## 查询房间
 
-Use the {% include ltr/comp.html uuid="5ddcb816-" %} component to gather all Rooms or filter by 
-criteria. 
+使用 {% include ltr/comp.html uuid="5ddcb816-" %}运算器可以查询或按照条件过滤所有房间 
 ![]({{ "/static/images/guides/Revit-Spatial-Query-Rooms.png" | prepend: site.baseurl }})
 
-## Add Room Separation Lines
+## 增加房间分割线
 
-The {% include ltr/comp.html uuid="34186815-" %} component will add individual Separation Lines to a view.
+ {% include ltr/comp.html uuid="34186815-" %} 运算器可以向视图添加单独的分割线
 ![]({{ "/static/images/guides/Revit-Spatial-Add-Room-Seperation.png" | prepend: site.baseurl }})
 
-## Add Rooms
+## 增加房间
 
-The {% include ltr/comp.html uuid="de5e832b-" %} component will add Rooms to a view given a location.
+ {% include ltr/comp.html uuid="de5e832b-" %} 运算器可以根据一个视图的给定位置添加房间
 ![]({{ "/static/images/guides/Revit-Spatial-Add-Room.png" | prepend: site.baseurl }})
-
-
 
 &nbsp;
 
+## 查询空间
 
-## Querying Spaces
-
-Use the {% include ltr/comp.html uuid="a1ccf034-" %} to gather all Spaces or filter by 
-criteria. 
+利用 {% include ltr/comp.html uuid="a1ccf034-" %} 运算器可以查询或已经条件筛选空间
 
 ![]({{ "/static/images/guides/Revit-Spatial-Query-Spaces.png" | prepend: site.baseurl }})
 
-## Add Space Separation Lines
+## 增加空间分割线
 
-The {% include ltr/comp.html uuid="dea31165-" %}  component will add individual Space Separation Lines to a view.
+ {% include ltr/comp.html uuid="dea31165-" %}  运算器可以向视图添加独立的空间分割线
 
 ![]({{ "/static/images/guides/Revit-Spatial-Add-Space-Seperation.png" | prepend: site.baseurl }})
 
-## Add Spaces
+## 增加空间
 
-The {% include ltr/comp.html uuid="07711559-" %} component will add Spaces to a view given a location.
+{% include ltr/comp.html uuid="07711559-" %} 运算器可以向一个视图的给定位置增加空间
 
 ![]({{ "/static/images/guides/Revit-Spatial-Add-Space.png" | prepend: site.baseurl }})
 
 &nbsp;
 
-## Querying Area Schemes
+## 查询区域计划
 
-Use the {% include ltr/comp.html uuid="3e2a753b-" %} to get all Area Schemes or filter by Name.
+利用 {% include ltr/comp.html uuid="3e2a753b-" %} 可以查询或依据条件筛选区域计划
 ![]({{ "/static/images/guides/Revit-Spatial-Query-Area-Schemes.png" | prepend: site.baseurl }})
 
-## Querying Areas
+## 查询区域
 
-Use the {% include ltr/comp.html uuid="d1940eb3-" %} to gather all Areas or filter by 
-criteria. 
+使用 {% include ltr/comp.html uuid="d1940eb3-" %} 运算器可以查询或依据条件筛选所有区域
 ![]({{ "/static/images/guides/Revit-Spatial-Query-Areas.png" | prepend: site.baseurl }})
 
-## Add Area Boundary Lines
+## 增加区域边界线
 
-Use the {% include ltr/comp.html uuid="34d68cdc-" %} to add individual Area Boundary Lines
+使用 {% include ltr/comp.html uuid="34d68cdc-" %} 运算器来添加单独的区域边界线
 
 ![]({{ "/static/images/guides/Revit-Spatial-Add-Area-Boundary.png" | prepend: site.baseurl }})
 
-## Add Areas
+## 添加区域
 
-Use the {% include ltr/comp.html uuid="2ee360f3-" %} to add Areas to Views.
+使用 {% include ltr/comp.html uuid="2ee360f3-" %} 向视图添加区域
 
 ![]({{ "/static/images/guides/Revit-Spatial-Add-Area.png" | prepend: site.baseurl }})
 
 &nbsp;
 
-## Analyze Instance Space
+## 分析实例空间
 
-When the Revit option to Room Calculation Point is enabled in a Family (such as doors) the {% include ltr/comp.html uuid="6ac37380-" %} component returns the associated Spatial information. 
+在一个族（例如门）中开启计算房间计算点的 Revit 选项时，利用 {% include ltr/comp.html uuid="6ac37380-" %} 运算器可以返回关联的空间信息
 
 ![]({{ "/static/images/guides/Revit-Spatial-Analyze-Instance-space.png" | prepend: site.baseurl }})
 
+## 空间图元标识
 
-## Spatial Element Identity
-
-Get Spatial Element Properties with the {% include ltr/comp.html uuid="e3d32938-" %} component.
+利用 {% include ltr/comp.html uuid="e3d32938-" %} 运算器可以获取空间图元属性
 
 ![]({{ "/static/images/guides/Revit-Spatial-Spatial-Element-Identity.png" | prepend: site.baseurl }})
 
-## Spatial Element Boundary
+## 空间图元边界
 
-Get Spatial Element Boundary based on its Location Property with the {% include ltr/comp.html uuid="419062df-" %} component.
+利用 {% include ltr/comp.html uuid="419062df-" %} 运算器可以获取空间图元边界
 
 ![]({{ "/static/images/guides/Revit-Spatial-Spatial-Element-Boundary.png" | prepend: site.baseurl }})
 
-## Spatial Element Geometry
+## 空间图元几何
 
-Get Spatial Element Geometry with the {% include ltr/comp.html uuid="a1878f3d-" %} component.
+利用 {% include ltr/comp.html uuid="a1878f3d-" %} 运算器可以获取空间图元几何
 
 ![]({{ "/static/images/guides/Revit-Spatial-Spatial-Element-Geometry.png" | prepend: site.baseurl }})

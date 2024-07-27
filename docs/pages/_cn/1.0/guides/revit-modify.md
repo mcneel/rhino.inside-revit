@@ -6,16 +6,16 @@ subtitle: Workflows for Modifying Revit Elements
 group: Modeling
 ---
 
-## Flip
+## 反转
 
-To check whether an element has been flipped (Revit supports various flip type) use the *Flipped* component shared here.
+可以使用下面分享的 Flipped 运算器来检查一个图元是否被反转（Revit 支持不同的反转类型），
 
 ![]({{ "/static/images/guides/revit-modify01.png" | prepend: site.baseurl }})
 
 {% include ltr/download_comp.html archive='/static/ghnodes/Flipped.ghuser' name='Flipped' %}
 
-### Query Flipped Elements
+### 查询反转过的图元
 
-You can query elements of any category using the collector components, pass them on to the *Flipped* component and filter the results as needed:
+你可以使用收集运算器来查询任何类别的图元，将它们接入至 Flipped 运算器且根据需要的过滤结果：
 
 ![]({{ "/static/images/guides/revit-modify02.png" | prepend: site.baseurl }})

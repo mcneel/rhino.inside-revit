@@ -8,6 +8,6 @@ group: Essentials
 
 ## Rhino On the Side
 
-When working with Rhino, having Rhino open on the side to see the geometry and previews is really valuable. But most of the times the complete Rhino's interface is not necessary. In these cases, you can tear off a Rhino view and keep that on the side instead:
+在 Revit 中使用Rhino时，通常Rhino都会被放置在侧边用来查看与预览几何图像。大多数情况下你可能并不需要完整的 Rhino 界面，如果你仅需要预览模型， 你仅需要打开 Rhino视窗且将其放置才侧边即可
 
 ![]({{ "/static/images/guides/rir-rhino-tornoffview.gif" | prepend: site.baseurl }})

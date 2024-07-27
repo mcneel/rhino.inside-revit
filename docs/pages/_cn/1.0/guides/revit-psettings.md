@@ -6,34 +6,32 @@ subtitle: Workflows for Revit Project Settings
 group: Settings
 ---
 
-## Query Site Locations
+## 查询场地位置
 
-Use the {% include ltr/comp.html uuid='9c352309' %} component to Query Site Locations in the project.
+如果需要查询项目中的场地位置，请使用 {% include ltr/comp.html uuid='9c352309' %} 运算器
 
 ![]({{ "/static/images/guides/revit-site-query-location.png" | prepend: site.baseurl }})
 
-## Site Location Identity
+## 场地位置标识
 
-Use the {% include ltr/comp.html uuid='6820c2dc' %} component to get the Site Location Identity.
+使用 {% include ltr/comp.html uuid='6820c2dc' %} 可以获取场地位置标识，
 
 ![]({{ "/static/images/guides/revit-site-location-identity.png" | prepend: site.baseurl }})
 
-## Project Elevation
+## 项目标高
 
-Use the {% include ltr/comp.html uuid='63f4a581' %} component to get the Project Elevation.
+使用 {% include ltr/comp.html uuid='63f4a581' %} 可以获取项目的高度，
 
 ![]({{ "/static/images/guides/revit-site-project-elevation.png" | prepend: site.baseurl }})
 
-## Project Location
+## 项目位置
 
-Use the {% include ltr/comp.html uuid='b8677884' %} component to get the Project Location.
+使用 {% include ltr/comp.html uuid='b8677884' %} 运算器可以获取项目的位置
 
 ![]({{ "/static/images/guides/revit-site-project-location.png" | prepend: site.baseurl }})
 
-## Query Shared Sites
+## 查询共享场地
 
-Use the {% include ltr/comp.html uuid='62641279' %} component to Query Shared Sites in the project.
+使用 {% include ltr/comp.html uuid='62641279' %} 运算器可以查询项目中的共享场地
 
 ![]({{ "/static/images/guides/revit-site-query-shared.png" | prepend: site.baseurl }})
-
-

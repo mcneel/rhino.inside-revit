@@ -9,131 +9,129 @@ ghdef: revit-params.ghx
 ---
 
 {% capture link_note %}
-In this guide we will take a look at how to read the parameters from a Revit element using Grasshopper. To review how parameters are organized in Revit, see the [Revit Elements:Parameters Guide]({{ site.baseurl }}{% link _en/1.0/guides/revit-revit.md %}#parameters)
+在这一章我们将会讲解如何读取使用 Grasshopper 所建立的 Revit 图元的参数，如果想了解 Revit 中的参数是如何组织的，请浏览  [Revit Elements:Parameters Guide]({{ site.baseurl }}{% link _en/1.0/guides/revit-revit.md %}#parameters)
 {% endcapture %}
 {% include ltr/link_card.html note=link_note thumbnail='/static/images/guides/revit-params.png' %}
 
-## Inspecting Parameters
+## 检查参数
 
-Let's bring a single element into a new Grasshopper definition. We can use the {% include ltr/comp.html uuid='fad33c4b' %} component to inspect the element properties.
+如果你需要检查某一个图元的属性，你可以使用 {% include ltr/comp.html uuid='fad33c4b' %} 来查看
 
 ![]({{ "/static/images/guides/revit-params-inspect.png" | prepend: site.baseurl }})
 
-Now hold {% include ltr/kb_key.html key='Shift' %} and double-click on the {% include ltr/comp.html uuid='fad33c4b' %} component to see a list of all parameters associated with given element.  This will include built-in, project and shared parameters associated with the element.
+现在请按住 {% include ltr/kb_key.html key='Shift' %} 键+鼠标双击 {% include ltr/comp.html uuid='fad33c4b' %} 运算器，这样你可以查看所有和该元素相关的参数列表。
 
 ![]({{ "/static/images/guides/revit-params-inspect-expanded.png" | prepend: site.baseurl }})
 
-You can connect any of these properties, then {% include ltr/kb_key.html key='Ctrl' %} and double-click on the {% include ltr/comp.html uuid='fad33c4b' %} component to collapse it to normal size. The component is smart to keep the connected parameters shown in collapsed mode.
+你可以从输出端连接一些查看运算器来查看相关的属性信息, 例如Panel，然后你可以按住 {% include ltr/kb_key.html key='Ctrl' %}  键 +鼠标双击 {% include ltr/comp.html uuid='fad33c4b' %} 运算器来恢复默认显示大小，输出端有连接其他运算器的端口会被继续保留
 
 ![]({{ "/static/images/guides/revit-params-inspect-collapsed.png" | prepend: site.baseurl }})
 
-To inspect an existing parameter's definition use the {% include ltr/comp.html uuid='3bde5890' %} component:
+要检查现有参数的定义，请使用 {% include ltr/comp.html uuid='3bde5890' %} 运算器：
 
 ![]({{ "/static/images/guides/param-identity.png" | prepend: site.baseurl }})
 
-### Finding an Elements Parameter
+### 查找图元参数
 
-To find a parameter associated with an element, pass the element and parameter name to the  {% include ltr/comp.html uuid='44515a6b' %} component:
+要查找与一个图元相关的参数，请将图元与参数名称接入 {% include ltr/comp.html uuid='44515a6b' %} 运算器来进行查询：
 
 ![]({{ "/static/images/guides/param-find-builtin.png" | prepend: site.baseurl }})
 
-### Parameter Scope
+### 参数范围
 
-Parameters can be attached to the Element Type or singular Instance. Input the {% include ltr/comp.html uuid='ef607c2a' %} directly into the {% include ltr/comp.html uuid='fad33c4b' %} component to inspect both the Instance Parameters.  Get the  {% include ltr/comp.html uuid='fe427d04' %} component into the {% include ltr/comp.html uuid='fad33c4b' %} component to inspect the Type Parameters.  You can see that the available Parameters are different.
+参数可以被附加到图元类型或单个实例，将 {% include ltr/comp.html uuid='ef607c2a' %} 直接接入至 {% include ltr/comp.html uuid='fad33c4b' %} 运算器以检查两个实例参数，将  {% include ltr/comp.html uuid='fe427d04' %}  运算器 链接至 {% include ltr/comp.html uuid='fad33c4b' %} 运算器以获取类型参数，你会发现可用参数的差异。
 
 ![]({{ "/static/images/guides/revit-params-instance-type.png" | prepend: site.baseurl }})
 
-### Finding the Built-In Parameters
+### 查找内置参数
 
-Use the {% include ltr/comp.html uuid='c1d96f56' %} component to reference parameters that are built into Revit.  Double-click on the title to search for part of the name of the parameter.
+可以使用 {% include ltr/comp.html uuid='c1d96f56' %} 运算器来检索 Revit 内建参数，双击标题可以搜索部分参数名称：
 
 ![]({{ "/static/images/guides/revit-params-querybuiltin.png" | prepend: site.baseurl }})
 
-## Reading Parameter Values
+## 读取参数值
 
-A language-safe way to query the values for specific parameter is to use the {% include ltr/comp.html uuid='a550f532' %} parameter from the Revit Parameters panel
+如果你需要查询特定的参数值，建议你使用 Revit Parameters 面板中的 {% include ltr/comp.html uuid='a550f532' %}  运算器：
 
 ![]({{ "/static/images/guides/revit-params-paramkeycomp.png" | prepend: site.baseurl }})
 
-After adding this component to the canvas, you can Right-Click on the component and select the desired parameter
+继续鼠标右键点击这个运算器，然后选择你需要查询的一些参数项
 
 ![]({{ "/static/images/guides/revit-params-paramkey.png" | prepend: site.baseurl }})
 
-The output of this component can be passed to the {% include ltr/comp.html uuid='f568d3e7' %} to query the value
+运算器输出端连接 {% include ltr/comp.html uuid='f568d3e7' %} 来查询 这个值
 
 ![]({{ "/static/images/guides/revit-params-getfromkey.png" | prepend: site.baseurl }})
 
-Another way of reading parameter values is by specifying the parameter name to the {% include ltr/comp.html uuid='f568d3e7' %} component to get the parameter value.
+也可以使用 {% include ltr/comp.html uuid='f568d3e7' %}  以指定参数名的方式来读取这个参数值
 
 ![]({{ "/static/images/guides/revit-params-getfromname.png" | prepend: site.baseurl }})
 
-{% include ltr/locale_note.html note='Since we are specifying the name of parameter in a specific language, the definition will break if opened on a Revit with a different language' %}
+{% include ltr/locale_note.html note='我们是以特定的语言来指定参数名称，因此如果利用不同语言版本的 Revit 打开这个 Grasshopper 脚本文件可能会出现中断错误' %}
 
-When working with Shared parameters, you can also pass the parameter UUID to the component
+使用共享参数时还可以用 UUID的作为查询输入值
 
 ![]({{ "/static/images/guides/revit-params-getfromuuid.png" | prepend: site.baseurl }})
 
-## Setting Parameter Values
+## 设置参数值
 
-Use the same {% include ltr/comp.html uuid='f568d3e7' %} component to set a parameter value on a Revit element. Keep in mind that some parameters are Read-only and their value can not be overridden.
+可以使用 {% include ltr/comp.html uuid='f568d3e7' %} 运算器来设置一个 Revit 图元的参数值，要注意有些参数值为只读而不可以被覆盖
 
 ![]({{ "/static/images/guides/revit-params-setfromname.png" | prepend: site.baseurl }})
 
-Notice that the {% include ltr/comp.html uuid='f568d3e7' %} component is only holding a reference to the Revit element. So when the parameter value is updated by the component, it is updated for all the components that is referencing that same element. This is different from what you might be used to when working with Grasshopper outside of Revit context.
+注意 {% include ltr/comp.html uuid='f568d3e7' %} 运算器仅以一个参照方式引入 Revit 图元，因此当基于这个运算器的参数值被更新时，它会把所有引入的图元运算器参数进行更新，这个操作可能不同于常规的 Grasshopper 运算器。
 
 ![]({{ "/static/images/guides/revit-params-setverify.png" | prepend: site.baseurl }})
 
-## Creating Parameters
+## 创建参数
 
-The components under the *Parameter* panel in Grasshopper, allow you to create new Parameters in Revit.
+创建参数的运算器位于 Grasshopper > Parameter 面板下，可以利用它再 Revit 中建立新的参数，通常流程如下：
 
-The process in creating a few steps process. 
+1. 首先必须定义一个参数，
+2. 然后增加这个参数至文档，
+3. 对于项目参数，需要设置附加类别和组（可选），
+4. 然后进行图元、类型或是全局参数设置。
 
-1. A Parameter definition must first be made.
-2. The Parameter then is added to the document
-3. For Project Parameters, additional Category and Group must be set. (Optional)
-4. Then the value of the Parameter may be set on the Element, Type or Global.
+参数定义可以使用 {% include ltr/comp.html uuid='134b7171' %} c运算器来创建或是直接从一个 [共享参数文件](#Shared_Parameters_File)读取。
 
-Parameter definitions can be created through the {% include ltr/comp.html uuid='134b7171' %} component or be read directly out of a [Shared Parameter File](#Shared_Parameters_File).
-
-Once the definition is created, then the Parameter can be added to the project using the {% include ltr/comp.html uuid='84ab6f3c' %} component. If the scope of the [parameter is Global](#Global_Parameters), then the parameter value can now be set the {% include ltr/comp.html uuid='32e77d86' %} component. [Project Parameters](#Adding_a_Project_parameter) require additional properties to be set before used.
+一旦建立定义，可使用 {% include ltr/comp.html uuid='84ab6f3c' %}  运算器将参数增加至项目，如果是参数范围是针对 [全局参数](#Global_Parameters), 则使用 {% include ltr/comp.html uuid='32e77d86' %}  运算器进行设置参数值，请在使用前设置 [项目参数](#Adding_a_Project_parameter) 的额外属性。
 
 ![]({{ "/static/images/guides/param-global-create.png" | prepend: site.baseurl }})
 
-### Adding a Project parameter
+### 新增项目参数
 
-Project parameters have addition properties beyond a basic Parameter Definition. Project parameters belong to certain Categories and the values can vary across elements.
+相对一个基础参数而言项目参数会有很多额外的属性，项目参数属于某些类别，且起参数值也因图元不同而有所不同。
 
 ![]({{ "/static/images/guides/revit-params-definekeycomp.png" | prepend: site.baseurl }})
 
-Create a new parameter by connecting the parameter name to the {% include ltr/comp.html uuid='134b7171' %} component on the canvas. Then use the {% include ltr/comp.html uuid='8ab856c6' %} and {% include ltr/comp.html uuid='5d331b12' %} to set the parameter type and group inputs. The {% include ltr/comp.html uuid='134b7171' %}  component will create a new parameter definition. This definition can then be passed to {% include ltr/comp.html uuid='84ab6f3c' %} component to actually create the parameter in the Revit project. You can inspect the created parameter using the {% include ltr/comp.html uuid='3bde5890' %} component.
+通过连接参数名至 {% include ltr/comp.html uuid='134b7171' %} 运算器就可以来创建一个新的参数，然后使用 {% include ltr/comp.html uuid='8ab856c6' %} 与 {% include ltr/comp.html uuid='5d331b12' %} 来设置参数类型与输入群组， {% include ltr/comp.html uuid='134b7171' %}  运算器将会建立一个新的参数定义，这个定义可以连接至 {% include ltr/comp.html uuid='84ab6f3c' %} 运算器在 Revit 中创建参数，你也可以使用 {% include ltr/comp.html uuid='3bde5890' %} 来检查你所创建的参数。
 
 ![]({{ "/static/images/guides/revit-params-createshared.png" | prepend: site.baseurl }})
 
-{% include ltr/warning_note.html note='Currently Revit API does not support creating project parameters directly.  So project parameters created by Grasshopper are Shared Project Parameters' %}
+{% include ltr/warning_note.html note='当前 Revit API 并不支持直接创建项目参数，因此需要利用 Grasshopper 的共享项目参数来创建项目参数' %}
 
-Here is the parameter configuration in Shared Parameters:
+下面是共享参数中的参数配置：
 
 ![]({{ "/static/images/guides/revit-params-sharedwindow.png" | prepend: site.baseurl }})
 
-The value of this parameter can later be read or set by passing the parameter name to the {% include ltr/comp.html uuid='f568d3e7' %} component. You can inspect the parameter value using the {% include ltr/comp.html uuid='fad33c4b' %} component, and passing the parameter into {% include ltr/comp.html uuid='3bde5890' %} component:
+可以后续将其参数名连接至 {% include ltr/comp.html uuid='f568d3e7' %} 运算器来读取或设置其参数值，也可以使用 {% include ltr/comp.html uuid='fad33c4b' %} 运算器与 {% include ltr/comp.html uuid='3bde5890' %} 运算器来检查参数值：
 
 ![]({{ "/static/images/guides/revit-params-valueinfo.png" | prepend: site.baseurl }})
 
-## Shared Parameters File
+## 共享参数文件
 
-Using the {% include ltr/comp.html uuid='7844b410' %} component to read the shared parameter file.  This will return the current file path, the groups and the parameter definitions. The file only contains definitions, Parameters must be added to the current project before values can be set. The {% include ltr/comp.html uuid='84ab6f3c' %} component adds the Parameter and {% include ltr/comp.html uuid='f568d3e7' %} component sets the value in the parameter on an element.
+使用 {% include ltr/comp.html uuid='7844b410' %} 运算器来读取共享参数文件，将会返回当前文件的路径、群组与参数定义等。这个文件仅仅包含定义内容，所以必须将参数添加至当前项目中才能后续设置参数值，使用 {% include ltr/comp.html uuid='84ab6f3c' %} 来添加参数且使用 {% include ltr/comp.html uuid='f568d3e7' %} 来设置图元的参数值。
 
 ![]({{ "/static/images/guides/param-shared-file.png" | prepend: site.baseurl }})
 
-## Global Parameters
+## 全局参数
 
-Global parameters must be queried from the current project by using the Global scope into the {% include ltr/comp.html uuid='d82d9fc3' %} component. Then get or set the parameter value using the {% include ltr/comp.html uuid='32e77d86' %} component:
+如果要查询当前项目的全局参数必须使用 {% include ltr/comp.html uuid='d82d9fc3' %} 运算器， {% include ltr/comp.html uuid='32e77d86' %}  运算器可以帮助获取全局参数值：
 
 ![]({{ "/static/images/guides/param-global.png" | prepend: site.baseurl }})
 
-Add Global parameters to a project thru the standard [Add Pararameter Process](#creating-parameters).
+可以使用通用的 [添加参数进程](#creating-parameters) 来为一个项目建立全局参数。
 
-## Parameter Formula
+## 参数公式
 
-Use formulas in dimensions and parameters to drive and control parametric content in a model. The {% include ltr/comp.html uuid='21f9f9c6' %} component can be used to create Parameter Formulas using the syntax as covered in the [Valid Formula Syntax and Abbreviations](https://help.autodesk.com/view/RVT/2024/ENU/?guid=GUID-B37EA687-2BDF-4712-9951-2088B2A8E523)
+使用尺寸与参数中的公式来驱动与控制模型中的参数内容， {% include ltr/comp.html uuid='21f9f9c6' %} 运算器可以使用 [Valid Formula Syntax and Abbreviations](https://help.autodesk.com/view/RVT/2024/ENU/?guid=GUID-B37EA687-2BDF-4712-9951-2088B2A8E523) 中涵盖的语法来创建参数公式。
