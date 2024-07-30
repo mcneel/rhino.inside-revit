@@ -10,6 +10,7 @@ group: Modeling
 
 {% capture api_note %}
 在 Revit API 中用 {% include api_type.html type='Autodesk.Revit.DB.Opening' title='DB.Opening' %} 来表达开口类型，在 {{ site.terms.rir }} 中使用 {% include ltr/comp.html uuid='18d46e90' %} 运算器 来表达
+{% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
 如果需要选择适当的开口类型，可以使用 {% include ltr/comp.html uuid='0f7da57e' %} + {% include ltr/comp.html uuid='d08f7ab1' %} 配合 {% include ltr/comp.html uuid='af9d949f' %} 中过滤且选择 **矩形直墙开口** 或 **矩形弧墙开口** (针对计算不同的直墙与弧墙几何图形而提供的两个类别）与**竖井洞口** ；

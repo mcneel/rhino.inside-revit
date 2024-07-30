@@ -10,6 +10,7 @@ group: Modeling
 
 {% capture api_note %}
 Revit API 中使用 {% include api_type.html type='Autodesk.Revit.DB.Level' title='DB.Level' %} 来表达所有的标高类型，{{ site.terms.rir }} 中使用 {% include ltr/comp.html uuid='3238f8bc' %} 运算器来表达一个标高。
+{% endcapture %}
 {% include ltr/api_note.html note=api_note %}
 
 ### 选择现有的标高
