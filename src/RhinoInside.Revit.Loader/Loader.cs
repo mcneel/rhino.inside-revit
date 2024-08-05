@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.AddIn
             }
           )
           {
-            for (int d = 0; d < 4 && d < available.Length; d++)
+            for (int d = 0; d < 4 && d < Math.Min(available.Length, 4); d++)
             {
               var distribution = available[d];
               taskDialog.AddCommandLink
