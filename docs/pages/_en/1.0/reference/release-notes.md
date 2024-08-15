@@ -17,6 +17,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.23 RC3" version="v1.23.8984.17382" pre_release=true time="08/06/2024" %}
+
+- Update Code-Signing Certificate
+
 {% include ltr/release-header.html title="v1.23 RC2" version="v1.23.8965.4141" pre_release=true time="07/25/2024" %}
 
 - Miscellaneous Improvements
