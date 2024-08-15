@@ -410,18 +410,25 @@ namespace RhinoInside.Revit.External
     #endregion
 
     #region Implementation
+    private static void ActivateWindow()
+    {
+      if (windowToActivate?.IsInvalid == false)
+      {
+        try { WindowHandle.ActiveWindow = windowToActivate; }
+        catch { /* Windows failed to be activated */ }
+        finally { windowToActivate = default; }
+      }
+    }
+    private static async void ActivateWindowAsync()
+    {
+      await System.Threading.Tasks.Task.Yield();
+      ActivateWindow();
+    }
+
     class TryActivateEventHandler : UI.ExternalEventHandler
     {
       public override string GetName() => "RhinoInside.Revit.External.ActivationGate";
-      protected override void Execute(UIApplication app)
-      {
-        if (windowToActivate?.IsInvalid == false)
-        {
-          try { WindowHandle.ActiveWindow = windowToActivate; }
-          catch { /* Windows failed to be activated */ }
-          finally { windowToActivate = default; }
-        }
-      }
+      protected override void Execute(UIApplication app) => ActivateWindow();
     }
 
     class Hook : ComputerBasedTrainingHook
@@ -435,12 +442,31 @@ namespace RhinoInside.Revit.External
             if (IsOpen)
             {
               var window = (WindowHandle) wParam;
-              if (window == HostMainWindow && !window.Enabled)
+              if (!IsExternalWindow(window, out var _))
               {
-                foreach (var gate in gates)
+                if (window == HostMainWindow && !window.Enabled)
                 {
-                  try { gate.Value.Window.BringToFront(); }
-                  catch { }
+                  foreach (var gate in gates)
+                  {
+                    try { gate.Value.Window.BringToFront(); }
+                    catch { }
+                  }
+                }
+                else if(window != (windowToActivate ?? WindowHandle.Zero))
+                {
+                  var isPending = windowToActivate is object;
+                  windowToActivate = window;
+
+                  if (isPending)
+                  {
+                    // HACK : If Rhino is in a Get we should allow it to finish.
+                    if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc && RhinoGet.InGet(rhinoDoc))
+                      WindowHandle.ActiveWindow.Flash();
+                  }
+                  else
+                    ActivateWindowAsync();
+
+                  return 1; // Prevents activation now.
                 }
               }
             }
