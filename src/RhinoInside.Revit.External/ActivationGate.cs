@@ -239,7 +239,7 @@ namespace RhinoInside.Revit.External
 
         if (!wasOpen && IsActive && state as UI.ExternalApplication is null)
         {
-          while (UI.HostedApplication.Active.DoEvents()) { }
+          while (UI.HostedApplication.Active.DoEvents() && windowToActivate is null) { }
         }
 
         return result;
@@ -251,9 +251,14 @@ namespace RhinoInside.Revit.External
 
         if (IsActive && !IsOpen)
         {
-          // Return control to Revit
-          HostMainWindow.Enabled = true;
-          WindowHandle.ActiveWindow = HostMainWindow;
+          try
+          {
+            // Return control to Revit
+            HostMainWindow.Enabled = true;
+            WindowHandle.ActiveWindow = windowToActivate ?? HostMainWindow;
+          }
+          catch { /* Window failed to be activated */ }
+          finally { windowToActivate = default; }
         }
       }
     }
@@ -410,25 +415,18 @@ namespace RhinoInside.Revit.External
     #endregion
 
     #region Implementation
-    private static void ActivateWindow()
-    {
-      if (windowToActivate?.IsInvalid == false)
-      {
-        try { WindowHandle.ActiveWindow = windowToActivate; }
-        catch { /* Windows failed to be activated */ }
-        finally { windowToActivate = default; }
-      }
-    }
-    private static async void ActivateWindowAsync()
-    {
-      await System.Threading.Tasks.Task.Yield();
-      ActivateWindow();
-    }
-
     class TryActivateEventHandler : UI.ExternalEventHandler
     {
       public override string GetName() => "RhinoInside.Revit.External.ActivationGate";
-      protected override void Execute(UIApplication app) => ActivateWindow();
+      protected override void Execute(UIApplication app)
+      {
+        if (windowToActivate?.IsInvalid == false)
+        {
+          try { WindowHandle.ActiveWindow = windowToActivate; }
+          catch { /* Window failed to be activated */ }
+          finally { windowToActivate = default; }
+        }
+      }
     }
 
     class Hook : ComputerBasedTrainingHook
@@ -442,32 +440,16 @@ namespace RhinoInside.Revit.External
             if (IsOpen)
             {
               var window = (WindowHandle) wParam;
-              if (!IsExternalWindow(window, out var _))
+              if (HostMainWindow.Enabled && !IsExternalWindow(window, out var _))
               {
-                if (window == HostMainWindow && !window.Enabled)
+                foreach (var gate in gates)
                 {
-                  foreach (var gate in gates)
-                  {
-                    try { gate.Value.Window.BringToFront(); }
-                    catch { }
-                  }
+                  try { gate.Value.Window.BringToFront(); }
+                  catch { }
                 }
-                else if(window != (windowToActivate ?? WindowHandle.Zero))
-                {
-                  var isPending = windowToActivate is object;
-                  windowToActivate = window;
 
-                  if (isPending)
-                  {
-                    // HACK : If Rhino is in a Get we should allow it to finish.
-                    if (RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc && RhinoGet.InGet(rhinoDoc))
-                      WindowHandle.ActiveWindow.Flash();
-                  }
-                  else
-                    ActivateWindowAsync();
-
-                  return 1; // Prevents activation now.
-                }
+                windowToActivate = window; // Will be activated when our message loop is Idle.
+                return 1; // Prevents activation now.
               }
             }
             else
@@ -488,8 +470,7 @@ namespace RhinoInside.Revit.External
 
                   WindowHandle.ActiveWindow.Flash();
                 }
-                else
-                  externalEvent.Raise();
+                else externalEvent.Raise();
 
                 return 1; // Prevents activation now.
               }

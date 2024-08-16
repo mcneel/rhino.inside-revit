@@ -73,8 +73,12 @@ namespace RhinoInside.Revit.External.UI
     internal override bool IsViewOpen(View view) => OpenViews.Contains(view);
 
     private ISet<View> OpenViews = new HashSet<View>(ElementEqualityComparer.InterDocument);
-    private void UpdateOpenViewsList(object sender, ViewActivatedEventArgs e)
+    private async void UpdateOpenViewsList(object sender, ViewActivatedEventArgs e)
     {
+      OpenViews.Clear();
+
+      // Calling GetOpenViews here is not safe, so we yeld until Idle to do so.
+      await ActivationGate.Yield();
       OpenViews = new HashSet<View>(_app.Application.GetOpenViews(), ElementEqualityComparer.InterDocument);
     }
     #endregion
