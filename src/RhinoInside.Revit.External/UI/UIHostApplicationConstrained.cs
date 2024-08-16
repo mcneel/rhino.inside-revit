@@ -14,9 +14,12 @@ namespace RhinoInside.Revit.External.UI
     {
       _app = app;
 
+      if (!disposable)
+      {
 #if REVIT_2023
-      _app.SelectionChanged += SelectionChangedHandler;
+        _app.SelectionChanged += SelectionChangedHandler;
 #endif
+      }
     }
     protected override void Dispose(bool disposing)
     {
