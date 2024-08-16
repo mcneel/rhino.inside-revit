@@ -251,12 +251,14 @@ namespace RhinoInside.Revit.GH.Types
 
         // RhinoDoc.ActiveDoc.Views.Redraw is synchronous :(
         // better use RhinoView.Redraw that just invalidate the view, the OS will update it when possible
-        foreach (var view in Rhino.RhinoDoc.ActiveDoc.Views)
+        foreach (var view in RhinoDoc.ActiveDoc.Views)
           view.Redraw();
 
         // If there are pending previews to generate enqueue BuildPreviews again
         if (previews.Count > 0)
           Revit.EnqueueReadAction((_, cancel) => BuildPreviews(cancel, previews));
+        else
+          RhinoDoc.ActiveDoc.Views.Redraw();
       }
 
       Preview(GeometricElement element)

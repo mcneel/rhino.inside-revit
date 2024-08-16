@@ -225,7 +225,10 @@ namespace RhinoInside.Revit.GH
     void ActivationGate_Enter(object sender, EventArgs e)
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      {
+        definition.ForcePreview(false);
         definition.Enabled = true;
+      }
 
       if (EnableSolutions.HasValue)
       {
@@ -237,7 +240,10 @@ namespace RhinoInside.Revit.GH
     void ActivationGate_Exit(object sender, EventArgs e)
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      {
         definition.Enabled = false;
+        definition.ForcePreview(true);
+      }
     }
 
     static bool? EnableSolutions;
