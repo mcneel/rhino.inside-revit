@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.External.UI
           _app.SelectionChanged -= SelectionChangedHandler;
 #endif
           _app.ViewActivated -= UpdateOpenViewsList;
-          _app.Dispose();
+          //_app.Dispose();
         }
 
         _app = null;

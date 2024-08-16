@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.External.UI
   using Autodesk.Revit.ApplicationServices;
   using External.DB.Extensions;
 
-  public abstract class UIHostApplication : IDisposable
+  public abstract class UIHostApplication
   {
     protected internal UIHostApplication(bool disposable) => Disposable = disposable;
 
@@ -17,13 +17,6 @@ namespace RhinoInside.Revit.External.UI
 #pragma warning disable CA1063 // Implement IDisposable Correctly
     readonly bool Disposable;
     protected abstract void Dispose(bool disposing);
-    void IDisposable.Dispose()
-    {
-      if (!Disposable) return;
-
-      Dispose(disposing: true);
-      GC.SuppressFinalize(this);
-    }
 #pragma warning restore CA1063 // Implement IDisposable Correctly
     #endregion
 
@@ -37,7 +30,17 @@ namespace RhinoInside.Revit.External.UI
     public abstract UIDocument ActiveUIDocument { get; set; }
 
     #region Runtime
-    internal static UIHostApplication Current;
+    private static UIHostApplication _Current;
+    internal static UIHostApplication Current
+    {
+      get => _Current;
+      set
+      {
+        if (_Current == value) return;
+        _Current?.Dispose(true);
+        _Current = value;
+      }
+    }
 
     internal static bool StartUp(UIControlledApplication app)
     {
