@@ -440,16 +440,19 @@ namespace RhinoInside.Revit.External
             if (IsOpen)
             {
               var window = (WindowHandle) wParam;
-              if (HostMainWindow.Enabled && !IsExternalWindow(window, out var _))
+              if (HostMainWindow != window)
               {
-                foreach (var gate in gates)
+                if (!HostMainWindow.Enabled && !IsExternalWindow(window, out var _))
                 {
-                  try { gate.Value.Window.BringToFront(); }
-                  catch { }
-                }
+                  foreach (var gate in gates)
+                  {
+                    try { gate.Value.Window.BringToFront(); }
+                    catch { }
+                  }
 
-                windowToActivate = window; // Will be activated when our message loop is Idle.
-                return 1; // Prevents activation now.
+                  windowToActivate = window; // Will be activated when our message loop is Idle.
+                  return 1; // Prevents activation now.
+                }
               }
             }
             else

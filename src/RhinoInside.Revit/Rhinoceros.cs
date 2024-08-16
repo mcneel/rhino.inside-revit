@@ -40,10 +40,6 @@ namespace RhinoInside.Revit
       if (Eto.Forms.Application.Instance is null)
         new Eto.Forms.Application(Eto.Platforms.Wpf).Attach();
 
-#if RHINO_8
-      Eto.Wpf.Forms.Controls.TextBoxHandler.EnableNoGCRegionDefault = false;
-#endif
-
       return true;
     }
 

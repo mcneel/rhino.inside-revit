@@ -77,7 +77,7 @@ namespace RhinoInside.Revit.External.UI
     {
       OpenViews.Clear();
 
-      // Calling GetOpenViews here is not safe, so we yeld until Idle to do so.
+      // Calling GetOpenViews here is not safe, so we yield until Idle to do so.
       await ActivationGate.Yield();
       OpenViews = new HashSet<View>(_app.Application.GetOpenViews(), ElementEqualityComparer.InterDocument);
     }
