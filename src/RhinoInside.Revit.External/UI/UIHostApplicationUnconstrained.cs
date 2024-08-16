@@ -13,14 +13,17 @@ namespace RhinoInside.Revit.External.UI
   sealed class UIHostApplicationUnconstrained : UIHostApplication
   {
     UIApplication _app;
-    public UIHostApplicationUnconstrained(UIApplication app, bool disposable) : base(disposable)
+    internal UIHostApplicationUnconstrained(UIApplication app, bool disposable) : base(disposable)
     {
       _app = app;
-      _app.ViewActivated += UpdateOpenViewsList;
+      if (!disposable)
+      {
+        _app.ViewActivated += UpdateOpenViewsList;
 
 #if REVIT_2023
-      _app.SelectionChanged += SelectionChangedHandler;
+        _app.SelectionChanged += SelectionChangedHandler;
 #endif
+      }
     }
 
     protected override void Dispose(bool disposing)

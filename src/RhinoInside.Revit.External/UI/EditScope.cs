@@ -12,12 +12,12 @@ namespace RhinoInside.Revit.External.UI
 {
   internal sealed class EditScope : IDisposable
   {
-    readonly UIHostApplication uiApplication;
+    readonly UIApplication uiApplication;
     readonly WindowHandle activeWindow = WindowHandle.ActiveWindow;
     readonly bool WasExposed = HostedApplication.Active.MainWindow.Visible;
     readonly bool WasEnabled = ExternalApplication.HostMainWindow.Enabled;
 
-    public EditScope(UIHostApplication app)
+    public EditScope(UIApplication app)
     {
       uiApplication = app;
       HostedApplication.Active.MainWindow.HideOwnedPopups();
@@ -27,13 +27,13 @@ namespace RhinoInside.Revit.External.UI
       WindowHandle.ActiveWindow = ExternalApplication.HostMainWindow;
     }
 
-    internal static async void PostCommand(UIHostApplication app, RevitCommandId commandId)
+    internal static async void PostCommand(UIApplication app, RevitCommandId commandId)
     {
       using (var scope = new EditScope(app))
         await scope.ExecuteCommandAsync(commandId);
     }
 
-    internal static async void PostCommand(UIHostApplication app, RevitCommandId commandId, Action continuation)
+    internal static async void PostCommand(UIApplication app, RevitCommandId commandId, Action continuation)
     {
       using (var scope = new EditScope(app))
         await scope.ExecuteCommandAsync(commandId);
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.External.UI
     }
 
     internal CommandAwaitable ExecuteCommandAsync(RevitCommandId commandId) =>
-      new CommandAwaitable(uiApplication.Value as UIApplication, commandId);
+      new CommandAwaitable(uiApplication, commandId);
 
     void IDisposable.Dispose()
     {
