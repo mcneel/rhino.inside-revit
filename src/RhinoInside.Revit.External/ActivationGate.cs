@@ -444,11 +444,11 @@ namespace RhinoInside.Revit.External
               {
                 if (!HostMainWindow.Enabled && !IsExternalWindow(window, out var _))
                 {
-                  foreach (var gate in gates)
-                  {
-                    try { gate.Value.Window.BringToFront(); }
-                    catch { }
-                  }
+                  //foreach (var gate in gates)
+                  //{
+                  //  try { gate.Value.Window.BringToFront(); }
+                  //  catch { }
+                  //}
 
                   windowToActivate = window; // Will be activated when our message loop is Idle.
                   return 1; // Prevents activation now.
