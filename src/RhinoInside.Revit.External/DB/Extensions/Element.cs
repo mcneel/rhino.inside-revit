@@ -48,10 +48,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (ReferenceEquals(self, other))
         return true;
 
-      if (self?.Id != other?.Id)
+      if (!self.IsValidObject || !other.IsValidObject)
         return false;
 
-      if (!self.IsValidObject || !other.IsValidObject)
+      if (self?.Id != other?.Id)
         return false;
 
       return self.Document.Equals(other.Document);
