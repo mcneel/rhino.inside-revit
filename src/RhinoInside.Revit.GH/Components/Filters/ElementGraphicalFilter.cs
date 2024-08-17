@@ -89,7 +89,9 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
       manager.AddParameter(new Parameters.Phase(), "Phase", "P", "Phase to match", GH_ParamAccess.item);
-      manager.AddParameter(new Parameters.Param_Enum<Types.ElementOnPhaseStatus>(), "Status", "S", "Phase status to match", GH_ParamAccess.list);
+      var status = manager.AddParameter(new Parameters.Param_Enum<Types.ElementOnPhaseStatus>(), "Status", "S", "Phase status to match", GH_ParamAccess.list);
+      (Params.Input[status] as Parameters.Param_Enum<Types.ElementOnPhaseStatus>).SetDefaultValues(ARDB.ElementOnPhaseStatus.Existing, ARDB.ElementOnPhaseStatus.New);
+
       base.RegisterInputParams(manager);
     }
 
