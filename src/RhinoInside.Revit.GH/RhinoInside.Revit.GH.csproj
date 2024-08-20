@@ -6,6 +6,7 @@
   <PropertyGroup>
     <AssemblyName>RhinoInside.Revit.GH</AssemblyName>
     <RootNamespace>RhinoInside.Revit.GH</RootNamespace>
+    <NoWarn>IDE0057</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

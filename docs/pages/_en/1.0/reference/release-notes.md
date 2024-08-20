@@ -17,6 +17,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.23" version="v1.23.8998.19322" time="08/20/2024" %}
+
+- Includes all changes under 1.23 RC releases listed below
+
 {% include ltr/release-header.html title="v1.23 RC3" version="v1.23.8984.17382" pre_release=true time="08/06/2024" %}
 
 - Update Code-Signing Certificate
@@ -27,10 +31,10 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.23 RC1" version="v1.23.8962.17381" pre_release=true time="07/15/2024" %}
 
-- Added 'Add Linear Dimension' in Revit 2025 or above.
-- Added 'Add Radial Dimension' in Revit 2025 or above.
-- Added 'Add Diameter Dimension' in Revit 2025 or above.
-- Added 'Add Arc Length Dimension' in Revit 2025 or above.
+- Added {% include ltr/comp.html uuid='414fe2a9' %} in Revit 2025 or above.
+- Added {% include ltr/comp.html uuid='194e7de0' %} in Revit 2025 or above.
+- Added {% include ltr/comp.html uuid='00d46c47' %} in Revit 2025 or above.
+- Added {% include ltr/comp.html uuid='3fd260d4' %} in Revit 2025 or above.
 - Added TopoSolid by Points in Revit 2024 or above.
 
 {% include ltr/release-header.html title="v1.22" version="v1.22.8962.17228" time="07/15/2024" %}
