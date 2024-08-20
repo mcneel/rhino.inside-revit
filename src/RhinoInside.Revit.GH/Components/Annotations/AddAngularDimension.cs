@@ -117,7 +117,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       );
     }
 
-    bool Reuse(ARDB.Dimension dimension, ARDB.View view, ARDB.Arc arc, IList<ARDB.Reference> references, ARDB.DimensionType type)
+    static bool Reuse(ARDB.Dimension dimension, ARDB.View view, ARDB.Arc arc, IList<ARDB.Reference> references, ARDB.DimensionType type)
     {
       if (dimension is null) return false;
       if (dimension.OwnerViewId != view.Id) return false;
@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       return true;
     }
 
-    ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Arc arc, IList<ARDB.Reference> references, ARDB.DimensionType type)
+    static ARDB.Dimension Reconstruct(ARDB.Dimension dimension, ARDB.View view, ARDB.Arc arc, IList<ARDB.Reference> references, ARDB.DimensionType type)
     {
       if (!Reuse(dimension, view, arc, references, type))
       {
