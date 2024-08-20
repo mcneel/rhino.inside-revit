@@ -17,6 +17,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.24 RC1" version="v1.24.8998.19607" pre_release=true time="08/06/2024" %}
+
+- Miscellaneous Improvements
+
 {% include ltr/release-header.html title="v1.23" version="v1.23.8998.19322" time="08/20/2024" %}
 
 - Includes all changes under 1.23 RC releases listed below
