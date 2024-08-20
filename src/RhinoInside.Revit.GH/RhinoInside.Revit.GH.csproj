@@ -6,7 +6,6 @@
   <PropertyGroup>
     <AssemblyName>RhinoInside.Revit.GH</AssemblyName>
     <RootNamespace>RhinoInside.Revit.GH</RootNamespace>
-    <Title>Rhino.Inside for Autodesk Revit</Title>
   </PropertyGroup>
 
   <ItemGroup>
