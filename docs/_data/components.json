@@ -5568,6 +5568,18 @@
     "uuid": "0dbe67e7-7d8e-41f9-85b0-139c0b7f1745"
   }, 
   {
+    "desc": "Given an arc, it adds an arc length dimension to the given View", 
+    "iconsrc": "/static/images/GH/AddArcLengthDimension.png", 
+    "icontag": null, 
+    "panel": "Annotate", 
+    "since": "1.23", 
+    "tab": "Revit", 
+    "title": "Add Arc Length Dimension", 
+    "typename": "AddArcLengthDimension", 
+    "until": null, 
+    "uuid": "3fd260d4-1e8d-4c03-89d0-3d7256c19520"
+  }, 
+  {
     "desc": "Given a point, it adds an area tag to the given Area Plan", 
     "iconsrc": "/static/images/GH/AddAreaTag.png", 
     "icontag": null, 
@@ -5604,6 +5616,18 @@
     "uuid": "5a94ea62-3c27-4e48-b885-c98218264981"
   }, 
   {
+    "desc": "Given an arc referece, it adds a diameter dimension to the given View", 
+    "iconsrc": "/static/images/GH/AddDiameterDimension.png", 
+    "icontag": null, 
+    "panel": "Annotate", 
+    "since": "1.23", 
+    "tab": "Revit", 
+    "title": "Add Diameter Dimension", 
+    "typename": "AddDiameterDimension", 
+    "until": null, 
+    "uuid": "00d46c47-e8ae-4ec2-98f8-77f2542c26f9"
+  }, 
+  {
     "desc": "Given a point, it adds a category tag to the given View", 
     "iconsrc": "/static/images/GH/AddElementTagByCategory.png", 
     "icontag": null, 
@@ -5638,6 +5662,30 @@
     "typename": "AddElementTagByMaterial", 
     "until": null, 
     "uuid": "11424062-b5da-4ba9-8b98-4886829ec67f"
+  }, 
+  {
+    "desc": "Given a line, it adds a linear dimension to the given View", 
+    "iconsrc": "/static/images/GH/AddLinearDimension.png", 
+    "icontag": null, 
+    "panel": "Annotate", 
+    "since": "1.23", 
+    "tab": "Revit", 
+    "title": "Add Linear Dimension", 
+    "typename": "AddLinearDimension", 
+    "until": null, 
+    "uuid": "414fe2a9-74f7-4f73-9833-c04c7a362c9e"
+  }, 
+  {
+    "desc": "Given an arc referece, it adds a radial dimension to the given View", 
+    "iconsrc": "/static/images/GH/AddRadialDimension.png", 
+    "icontag": null, 
+    "panel": "Annotate", 
+    "since": "1.23", 
+    "tab": "Revit", 
+    "title": "Add Radial Dimension", 
+    "typename": "AddRadialDimension", 
+    "until": null, 
+    "uuid": "194e7de0-5049-4bda-a0fd-322c0f62aa47"
   }, 
   {
     "desc": "Given a profile, it adds a region to the given View", 
