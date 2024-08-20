@@ -48,7 +48,9 @@ If `ReleaseVersion` contains "wip" the product expires.
 
     <Product>$(ProductName)</Product>
     <Company>$(ProductCompany)</Company>
+    <Authors>$(ProductCompany)</Authors>
     <Copyright>© $(ProductCopyright)</Copyright>
+    <AssemblyTitle>Rhino.Inside for Autodesk Revit</AssemblyTitle>
 
     <AssemblyVersion>$(ProductMajorVersion).$(ProductMinorVersion).$(BuildVersion).$(RevisionVersion)</AssemblyVersion>
     <FileVersion>$(ProductMajorVersion).$(ProductMinorVersion).$(BuildVersion).$(RevisionVersion)</FileVersion>

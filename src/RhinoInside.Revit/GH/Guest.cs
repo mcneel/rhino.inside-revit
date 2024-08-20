@@ -227,7 +227,7 @@ namespace RhinoInside.Revit.GH
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
       {
         definition.ForcePreview(false);
-        definition.Enabled = true;
+        definition.Enabled = Instances.ActiveCanvas?.Visible is true;
       }
 
       if (EnableSolutions.HasValue)
@@ -242,7 +242,7 @@ namespace RhinoInside.Revit.GH
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
       {
         definition.Enabled = false;
-        definition.ForcePreview(true);
+        definition.ForcePreview(Instances.ActiveCanvas?.Visible is true);
       }
     }
 
