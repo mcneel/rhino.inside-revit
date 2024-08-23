@@ -10,7 +10,7 @@ group: Deployment & Configs
 
 ### WIP
 
-- Implemented baking on 'Section Box'.
+- Implemented baking on 'Scope Box'.
 
 ### RC
 
