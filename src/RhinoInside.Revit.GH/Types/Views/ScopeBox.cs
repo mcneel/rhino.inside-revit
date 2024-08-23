@@ -166,6 +166,7 @@ namespace RhinoInside.Revit.GH.Types
 
         // 2. Check if already exist
         var index = doc.Groups.Find(att.Name);
+        if (index >= 0) guid = doc.Groups.FindIndex(index).Id;
 
         // 3. Update if necessary
         if (index < 0 || overwrite)
@@ -244,13 +245,15 @@ namespace RhinoInside.Revit.GH.Types
             }
 #endif
           }
+
+          if (index >= 0) guid = doc.Groups.FindIndex(index).Id;
         }
 
-        // TODO: Create a V5 Uuid out of the name
-        //guid = new Guid(0, 0, 0, BitConverter.GetBytes((long) index));
-        //idMap.Add(Id, guid);
-
-        return true;
+        if (guid != Guid.Empty)
+        {
+          idMap.Add(Id, guid);
+          return true;
+        }
       }
 
       return false;
