@@ -219,11 +219,11 @@ namespace RhinoInside.Revit.GH.Types
                       ParentLayerId = parent.Id,
                       Name = "Planes",
                       IsVisible = true,
-#if RHINO_8
-                      IsLocked = true
-#else
+//#if RHINO_8
+//                      IsLocked = true
+//#else
                       IsLocked = false
-#endif
+//#endif
                     }
                   );
                   layer = doc.Layers[index];
@@ -231,9 +231,9 @@ namespace RhinoInside.Revit.GH.Types
                 else
                 {
                   planesAtt.LayerIndex = layer.Index;
-#if !RHINO_8
+//#if !RHINO_8
                   if (layer.IsLocked) layer.IsLocked = false; // Allow me to center the planes please!!
-#endif
+//#endif
                 }
 
                 var planes = new (int Name, Plane Plane, Interval U, Interval V)[]
@@ -278,18 +278,18 @@ namespace RhinoInside.Revit.GH.Types
     private static ClippingPlaneObject AddClippingPlane(RhinoDoc document, Plane plane, IEnumerable<Guid> viewportIds, ObjectAttributes attributes)
     {
       var interval = new Interval(-Revit.ModelUnits * 3, +Revit.ModelUnits * 3);
-#if RHINO_8
-      var surface = new PlaneSurface(plane, interval, interval);
-      var clippingSurface = new ClippingPlaneSurface(surface);
+//#if RHINO_8
+//      var surface = new PlaneSurface(plane, interval, interval);
+//      var clippingSurface = new ClippingPlaneSurface(surface);
 
-      foreach (var vport in viewportIds ?? Array.Empty<Guid>())
-        clippingSurface.AddClipViewportId(vport);
+//      foreach (var vport in viewportIds ?? Array.Empty<Guid>())
+//        clippingSurface.AddClipViewportId(vport);
 
-      clippingSurface.ParticipationListsEnabled = true;
-      clippingSurface.SetClipParticipation(Array.Empty<Guid>(), new int[] { attributes.LayerIndex }, true);
-      var id = document.Objects.Add(clippingSurface, attributes);
-      var clippingPlane = document.Objects.Find(id) as ClippingPlaneObject;
-#else
+//      clippingSurface.ParticipationListsEnabled = true;
+//      clippingSurface.SetClipParticipation(Array.Empty<Guid>(), new int[] { attributes.LayerIndex }, true);
+//      var id = document.Objects.Add(clippingSurface, attributes);
+//      var clippingPlane = document.Objects.Find(id) as ClippingPlaneObject;
+//#else
       var id = document.Objects.AddClippingPlane(plane, 3.0 * Revit.ModelUnits, 3.0 * Revit.ModelUnits, viewportIds ?? new Guid[] { Guid.Empty }, attributes);
 
       var clippingPlane = document.Objects.Find(id) as ClippingPlaneObject;
@@ -299,7 +299,7 @@ namespace RhinoInside.Revit.GH.Types
       clippingSurface.Extend(0, interval);
       clippingSurface.Extend(1, interval);
       clippingPlane.CommitChanges();
-#endif
+//#endif
 
       return clippingPlane;
     }
@@ -373,7 +373,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return guid != Guid.Empty;
     }
-
 #endregion
   }
 }
