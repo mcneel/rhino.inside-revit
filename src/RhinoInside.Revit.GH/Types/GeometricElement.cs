@@ -842,7 +842,7 @@ namespace RhinoInside.Revit.GH.Types
             objectAttributes.Display = new ObjectDisplay.Attributes() { Color = ObjectDisplayColor.Value.ByMaterial };
 
             var context = GeometryDecoder.Context.Peek;
-            if (context.FaceMaterialId is object)
+            if (context.FaceMaterialId?.Length > 0)
             {
               bool hasPerFaceMaterials = false;
               for (int f = 1; f < context.FaceMaterialId.Length && !hasPerFaceMaterials; ++f)
