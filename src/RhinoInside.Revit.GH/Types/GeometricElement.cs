@@ -11,6 +11,7 @@ using ARDB = Autodesk.Revit.DB;
 #if RHINO_8
 using Grasshopper.Rhinoceros;
 using Grasshopper.Rhinoceros.Model;
+using Grasshopper.Rhinoceros.Display;
 using Grasshopper.Rhinoceros.Render;
 #endif
 
@@ -781,6 +782,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           GeometryDecoder.UpdateGraphicAttributes(g);
 
+          var shaded = false;
           var geo = default(IGH_GeometricGoo);
           switch (g)
           {
@@ -795,6 +797,7 @@ namespace RhinoInside.Revit.GH.Types
               var meshGeometry = mesh.ToMesh();
               if (!identity) meshGeometry.Transform(transform);
               geo = new GH_Mesh(meshGeometry);
+              shaded = true;
               break;
 
             case ARDB.Solid solid:
@@ -804,6 +807,7 @@ namespace RhinoInside.Revit.GH.Types
               if (solidGeometry.TryGetExtrusion(out var extrusion)) geo = new GH_Extrusion(extrusion);
               else if (solidGeometry.Faces.Count == 1)              geo = new GH_Surface(solidGeometry);
               else                                                  geo = new GH_Brep(solidGeometry);
+              shaded = true;
               break;
 
             case ARDB.Curve curve:
@@ -833,24 +837,29 @@ namespace RhinoInside.Revit.GH.Types
           var objectAttributes = ModelObject.Cast(geo).ToAttributes();
           PeekModelAttributes(idMap, objectAttributes, element.Document);
 
-          var context = GeometryDecoder.Context.Peek;
-          if (context.FaceMaterialId?.Length > 0)
+          if (shaded)
           {
-            if (context.FaceMaterialId[0].IsValid())
-            {
-              var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
-              var faceModelMaterial = faceMaterial.ToModelContent(idMap) as ModelRenderMaterial;
-              objectAttributes.Render = new ObjectRender.Attributes() { Material = faceModelMaterial };
+            objectAttributes.Display = new ObjectDisplay.Attributes() { Color = ObjectDisplayColor.Value.ByMaterial };
 
-            //  if (geo is Brep b)
-            //  {
-            //    foreach (var face in b.Faces)
-            //      face.PerFaceColor = faceMaterial.ObjectColor;
-            //  }
-            //  else if (geo is Mesh m)
-            //  {
-            //    m.VertexColors.SetColors(Enumerable.Repeat(faceMaterial.ObjectColor, m.Vertices.Count).ToArray());
-            //  }
+            var context = GeometryDecoder.Context.Peek;
+            if (context.FaceMaterialId?.Length > 0)
+            {
+              if (context.FaceMaterialId[0].IsValid())
+              {
+                var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
+                var faceModelMaterial = faceMaterial.ToModelContent(idMap) as ModelRenderMaterial;
+                objectAttributes.Render = new ObjectRender.Attributes() { Material = faceModelMaterial };
+
+                //  if (geo is Brep b)
+                //  {
+                //    foreach (var face in b.Faces)
+                //      face.PerFaceColor = faceMaterial.ObjectColor;
+                //  }
+                //  else if (geo is Mesh m)
+                //  {
+                //    m.VertexColors.SetColors(Enumerable.Repeat(faceMaterial.ObjectColor, m.Vertices.Count).ToArray());
+                //  }
+              }
             }
           }
 

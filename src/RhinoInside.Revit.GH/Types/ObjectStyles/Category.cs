@@ -465,8 +465,8 @@ namespace RhinoInside.Revit.GH.Types
 
     #region ModelContent
     protected override string ElementPath => Parent is Category parent ?
-      $"{CategoryType}::{parent.ElementPath}::{base.ElementPath}" :
-      $"{CategoryType}::{base.ElementPath}";
+      $"{CategoryType}::{parent.Nomen}::{Nomen}" :
+      $"{CategoryType}::{Nomen}";
 
 #if RHINO_8
     internal ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
@@ -480,7 +480,7 @@ namespace RhinoInside.Revit.GH.Types
 
         // Path
         {
-          attributes.Path = ModelPath;
+          attributes.Path = $"Revit::{ElementPath}";
         };
 
         // Tags
@@ -493,15 +493,15 @@ namespace RhinoInside.Revit.GH.Types
           }
         }
 
-        // Color
-        {
-          var lineColor = category.LineColor.ToColor();
-          attributes.DisplayColor = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
-        }
-
         // Linetype
         {
           attributes.Linetype = ProjectionLinePattern?.ToModelContent(idMap) as ModelLinetype ?? ModelLinetype.Unset;
+        }
+
+        // LineColor
+        {
+          var lineColor = category.LineColor.ToColor();
+          attributes.DraftingColor = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
         }
 
         // LineWeight
@@ -509,6 +509,16 @@ namespace RhinoInside.Revit.GH.Types
           attributes.LineWeight = category.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_InvisibleLines ?
             -1.0 : // No Plot
             ToLineWeight(ProjectionLineWeight);
+        }
+
+        // Color
+        {
+          var displayColor = category.CategoryType != ARDB.CategoryType.Model ||
+            category.Root().ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Lines ?
+            (System.Drawing.Color) attributes.DraftingColor :
+            new Material(category.Material).ObjectColor;
+
+          attributes.DisplayColor = displayColor.IsEmpty ? System.Drawing.Color.FromArgb(0x7F, 0x7F, 0x7F) : displayColor;
         }
 
         // Material
