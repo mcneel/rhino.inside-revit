@@ -842,23 +842,17 @@ namespace RhinoInside.Revit.GH.Types
             objectAttributes.Display = new ObjectDisplay.Attributes() { Color = ObjectDisplayColor.Value.ByMaterial };
 
             var context = GeometryDecoder.Context.Peek;
-            if (context.FaceMaterialId?.Length > 0)
+            if (context.FaceMaterialId is object)
             {
-              if (context.FaceMaterialId[0].IsValid())
+              bool hasPerFaceMaterials = false;
+              for (int f = 1; f < context.FaceMaterialId.Length && !hasPerFaceMaterials; ++f)
+                hasPerFaceMaterials |= context.FaceMaterialId[f] != context.FaceMaterialId[f - 1];
+
+              if (!hasPerFaceMaterials)
               {
                 var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
                 var faceModelMaterial = faceMaterial.ToModelContent(idMap) as ModelRenderMaterial;
                 objectAttributes.Render = new ObjectRender.Attributes() { Material = faceModelMaterial };
-
-                //  if (geo is Brep b)
-                //  {
-                //    foreach (var face in b.Faces)
-                //      face.PerFaceColor = faceMaterial.ObjectColor;
-                //  }
-                //  else if (geo is Mesh m)
-                //  {
-                //    m.VertexColors.SetColors(Enumerable.Repeat(faceMaterial.ObjectColor, m.Vertices.Count).ToArray());
-                //  }
               }
             }
           }
