@@ -11,12 +11,14 @@ using ARDB = Autodesk.Revit.DB;
 #if RHINO_8
 using Grasshopper.Rhinoceros;
 using Grasshopper.Rhinoceros.Model;
+using Grasshopper.Rhinoceros.Display;
 using Grasshopper.Rhinoceros.Render;
 #endif
 
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Display;
+  using Convert.DocObjects;
   using Convert.Geometry;
   using Convert.System.Drawing;
   using External.DB;
@@ -471,52 +473,9 @@ namespace RhinoInside.Revit.GH.Types
       return attributes;
     }
 
-    /// <summary>
-    /// Decorates instance definition name using "Category::FamilyName::TypeName" when posible.
-    /// </summary>
-    /// <param name="element"></param>
-    /// <param name="description"></param>
-    /// <returns></returns>
-    protected static string GetBakeInstanceDefinitionName(ARDB.Element element, out string description)
+    static System.Drawing.Color NoBlack(System.Drawing.Color value)
     {
-      const string PS = "::";
-      var uniqueId = FullUniqueId.Format(element.Document.GetPersistentGUID(), element.UniqueId);
-
-      var hidden = true;
-      var modelName = element.Document.GetTitle();
-      var familyName = "~";
-      var typeName = "~";
-      var categoryName = element.Category?.FullName();
-      if (string.IsNullOrWhiteSpace(categoryName)) categoryName = "~";
-
-      if (element is ARDB.ElementType type)
-      {
-        if (!string.IsNullOrWhiteSpace(type.FamilyName)) familyName = type.FamilyName;
-        if (!string.IsNullOrWhiteSpace(type.Name)) typeName = type.Name;
-
-        description = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
-        hidden = type.Category?.CategoryType != ARDB.CategoryType.Model;
-      }
-      else if (element.Document.GetElement(element.GetTypeId()) is ARDB.ElementType elementType)
-      {
-        if (!string.IsNullOrWhiteSpace(elementType.FamilyName)) familyName = elementType.FamilyName;
-        if (!string.IsNullOrWhiteSpace(elementType.Name)) typeName = elementType.Name;
-
-        description = elementType.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString() ?? string.Empty;
-        hidden = elementType.Category?.CategoryType != ARDB.CategoryType.Model;
-      }
-      else
-      {
-        description = string.Empty;
-      }
-
-      var name = $"{(hidden ? "*" : "")}{modelName}{PS}{categoryName}{PS}{familyName}{PS}{typeName} {{{uniqueId}}}";
-
-      name = name.Replace(System.Environment.NewLine, "\\r\\n");
-      name = name.Replace("\r", "\\r");
-      name = name.Replace("\n", "\\n");
-
-      return name;
+      return (value.R == 0 && value.G == 0 && value.B == 0) ? System.Drawing.Color.FromArgb(value.A, 1, 1, 1) : value;
     }
 
     protected internal static bool BakeGeometryElement
@@ -557,7 +516,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       // Get a Unique Instance Definition name.
-      var idef_name = GetBakeInstanceDefinitionName(element, out var idef_description);
+      var idef_name = NameConverter.EscapeName(element, out var idef_description);
 
       // 2. Check if already exist
       index = doc.InstanceDefinitions.Find(idef_name)?.Index ?? -1;
@@ -614,9 +573,23 @@ namespace RhinoInside.Revit.GH.Types
                 // Solve baseMaterial
                 var baseMaterial = Rhino.DocObjects.Material.DefaultMaterial;
                 if (geoAtt.MaterialSource == ObjectMaterialSource.MaterialFromLayer)
+                {
                   baseMaterial = doc.Materials[doc.Layers[geoAtt.LayerIndex].RenderMaterialIndex];
+                  var objectColor = new Material(context.Category.Material).ObjectColor;
+                  geoAtt.ColorSource = ObjectColorSource.ColorFromObject;
+                  geoAtt.ObjectColor = NoBlack(baseMaterial.DiffuseColor);
+                }
                 else if (geoAtt.MaterialSource == ObjectMaterialSource.MaterialFromObject)
+                {
                   baseMaterial = doc.Materials[geoAtt.MaterialIndex];
+                  var objectColor = new Material(context.Material).ObjectColor;
+#if RHINO_8
+                  geoAtt.ColorSource = ObjectColorSource.ColorFromMaterial;
+#else
+                  geoAtt.ColorSource = ObjectColorSource.ColorFromObject;
+                  geoAtt.ObjectColor = NoBlack(baseMaterial.DiffuseColor);
+#endif
+                }
 
                 // Create a new material for this brep
                 var brepMaterial = new Rhino.DocObjects.Material(baseMaterial);
@@ -630,7 +603,7 @@ namespace RhinoInside.Revit.GH.Types
                     if (faceMaterial.BakeElement(idMap, false, doc, att, out var materialGuid))
                     {
                       face.MaterialChannelIndex = brepMaterial.MaterialChannelIndexFromId(materialGuid, true);
-                      face.PerFaceColor = faceMaterial.ObjectColor;
+                      face.PerFaceColor = NoBlack(faceMaterial.ObjectColor);
                     }
                   }
                   else
@@ -643,30 +616,29 @@ namespace RhinoInside.Revit.GH.Types
                 geoAtt.MaterialIndex = doc.Materials.Add(brepMaterial);
                 geoAtt.MaterialSource = ObjectMaterialSource.MaterialFromObject;
               }
-              else if (context.FaceMaterialId[0].IsValid())
-              {
-                var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
-
-                if (faceMaterial.BakeElement(idMap, false, doc, att, out var materialGuid))
-                {
-                  geoAtt.MaterialIndex = doc.Materials.FindId(materialGuid).Index;
-                  geoAtt.MaterialSource = ObjectMaterialSource.MaterialFromObject;
-
-                  if (geo is Brep b)
-                  {
-                    foreach (var face in b.Faces)
-                      face.PerFaceColor = faceMaterial.ObjectColor;
-                  }
-                  else if (geo is Mesh m)
-                  {
-                    m.VertexColors.SetColors(Enumerable.Repeat(faceMaterial.ObjectColor, m.Vertices.Count).ToArray());
-                  }
-                }
-              }
               else
               {
-                if (geo is Brep brepFrom && brepFrom.TryGetExtrusion(out var extrusion))
-                  geo = extrusion;
+                if (context.FaceMaterialId[0].IsValid())
+                {
+                  var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
+                  if (faceMaterial.BakeElement(idMap, false, doc, att, out var materialGuid))
+                  {
+                    geoAtt.MaterialIndex = doc.Materials.FindId(materialGuid).Index;
+                    geoAtt.MaterialSource = ObjectMaterialSource.MaterialFromObject;
+#if RHINO_8
+                    geoAtt.ColorSource = ObjectColorSource.ColorFromMaterial;
+#else
+                    geoAtt.ColorSource = ObjectColorSource.ColorFromObject;
+                    geoAtt.ObjectColor = NoBlack(faceMaterial.ObjectColor);
+#endif
+                    if ((geo as Brep)?.TryGetExtrusion(out var extrusion) is true) geo = extrusion;
+                  }
+                }
+                else
+                {
+                  if (geo is Brep brepFrom && brepFrom.TryGetExtrusion(out var extrusion))
+                    geo = extrusion;
+                }
               }
             }
 
@@ -748,7 +720,7 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
-    #endregion
+#endregion
 
     #region ModelContent
 #if RHINO_8
@@ -796,7 +768,7 @@ namespace RhinoInside.Revit.GH.Types
 
       var attributes = new ModelInstanceDefinition.Attributes()
       {
-        Path = GetBakeInstanceDefinitionName(element, out var description),
+        Path = NameConverter.EscapeName(element, out var description),
         Notes = description
       };
 
@@ -810,6 +782,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           GeometryDecoder.UpdateGraphicAttributes(g);
 
+          var shaded = false;
           var geo = default(IGH_GeometricGoo);
           switch (g)
           {
@@ -824,6 +797,7 @@ namespace RhinoInside.Revit.GH.Types
               var meshGeometry = mesh.ToMesh();
               if (!identity) meshGeometry.Transform(transform);
               geo = new GH_Mesh(meshGeometry);
+              shaded = true;
               break;
 
             case ARDB.Solid solid:
@@ -833,6 +807,7 @@ namespace RhinoInside.Revit.GH.Types
               if (solidGeometry.TryGetExtrusion(out var extrusion)) geo = new GH_Extrusion(extrusion);
               else if (solidGeometry.Faces.Count == 1)              geo = new GH_Surface(solidGeometry);
               else                                                  geo = new GH_Brep(solidGeometry);
+              shaded = true;
               break;
 
             case ARDB.Curve curve:
@@ -862,24 +837,23 @@ namespace RhinoInside.Revit.GH.Types
           var objectAttributes = ModelObject.Cast(geo).ToAttributes();
           PeekModelAttributes(idMap, objectAttributes, element.Document);
 
-          var context = GeometryDecoder.Context.Peek;
-          if (context.FaceMaterialId?.Length > 0)
+          if (shaded)
           {
-            if (context.FaceMaterialId[0].IsValid())
-            {
-              var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
-              var faceModelMaterial = faceMaterial.ToModelContent(idMap) as ModelRenderMaterial;
-              objectAttributes.Render = new ObjectRender.Attributes() { Material = faceModelMaterial };
+            objectAttributes.Display = new ObjectDisplay.Attributes() { Color = ObjectDisplayColor.Value.ByMaterial };
 
-            //  if (geo is Brep b)
-            //  {
-            //    foreach (var face in b.Faces)
-            //      face.PerFaceColor = faceMaterial.ObjectColor;
-            //  }
-            //  else if (geo is Mesh m)
-            //  {
-            //    m.VertexColors.SetColors(Enumerable.Repeat(faceMaterial.ObjectColor, m.Vertices.Count).ToArray());
-            //  }
+            var context = GeometryDecoder.Context.Peek;
+            if (context.FaceMaterialId?.Length > 0)
+            {
+              bool hasPerFaceMaterials = false;
+              for (int f = 1; f < context.FaceMaterialId.Length && !hasPerFaceMaterials; ++f)
+                hasPerFaceMaterials |= context.FaceMaterialId[f] != context.FaceMaterialId[f - 1];
+
+              if (!hasPerFaceMaterials)
+              {
+                var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
+                var faceModelMaterial = faceMaterial.ToModelContent(idMap) as ModelRenderMaterial;
+                objectAttributes.Render = new ObjectRender.Attributes() { Material = faceModelMaterial };
+              }
             }
           }
 
@@ -936,7 +910,7 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 #endif
-    #endregion
+#endregion
 
     #region IHostElementAccess
     GraphicalElement IHostElementAccess.HostElement => Value is ARDB.Element element ?

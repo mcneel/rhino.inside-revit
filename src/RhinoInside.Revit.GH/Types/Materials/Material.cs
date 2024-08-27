@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
+using Rhino.Render;
 using ARDB = Autodesk.Revit.DB;
 #if RHINO_8
 using Grasshopper.Rhinoceros;
@@ -109,9 +110,31 @@ namespace RhinoInside.Revit.GH.Types
           {
             if (asset.BakeRenderMaterial(overwrite, doc, material.Name, out var renderMaterialId))
             {
-              if (Rhino.Render.RenderContent.FromId(doc, renderMaterialId) is Rhino.Render.RenderMaterial renderMaterial)
+              if (RenderContent.FromId(doc, renderMaterialId) is RenderMaterial renderMaterial)
               {
-                renderMaterial.SimulateMaterial(ref mat, Rhino.Render.RenderTexture.TextureGeneration.Allow);
+#if RHINO_8
+                try
+                {
+                  renderMaterial.BeginChange(RenderContent.ChangeContexts.Program);
+
+                  if (!material.UseRenderAppearanceForShading)
+                  {
+                    var slot = renderMaterial.TextureChildSlotName(RenderMaterial.StandardChildSlots.Diffuse);
+                    if (!renderMaterial.ChildSlotOn(slot))
+                    {
+                      var diffuse = RenderContent.Create(ContentUuids.SingleColorTextureType, renderMaterial, slot, default, doc) as RenderTexture;
+                      diffuse.Name = material.Name;
+                      diffuse.Fields.Set("color-one", renderMaterial.Fields.GetField(RenderMaterial.BasicMaterialParameterNames.Diffuse).GetValue<Rhino.Display.Color4f>());
+                      renderMaterial.SetChildSlotAmount(slot, 100.0, RenderContent.ChangeContexts.Program);
+                      renderMaterial.SetChildSlotOn(slot, true, RenderContent.ChangeContexts.Program);
+                    }
+                  }
+
+                  renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Diffuse, material.Color.ToColor());
+                }
+                finally { renderMaterial.EndChange(); }
+#endif
+                renderMaterial.SimulateMaterial(ref mat, RenderTexture.TextureGeneration.Allow);
 
                 if (mat.Name != material.Name)
                 {
@@ -176,6 +199,26 @@ namespace RhinoInside.Revit.GH.Types
           Path = material.Name,
           RenderMaterial = material.ToRenderMaterial(Grasshopper.Instances.ActiveRhinoDoc)
         };
+
+#if RHINO_8
+        attributes.RenderMaterial.BeginChange(RenderContent.ChangeContexts.Program);
+
+        if (!material.UseRenderAppearanceForShading)
+        {
+          var slot = attributes.RenderMaterial.TextureChildSlotName(RenderMaterial.StandardChildSlots.Diffuse);
+          if (!attributes.RenderMaterial.ChildSlotOn(slot))
+          {
+            var diffuse = RenderContentType.NewContentFromTypeId(ContentUuids.SingleColorTextureType) as RenderTexture;
+            diffuse.Name = material.Name;
+            diffuse.Fields.Set("color-one", attributes.RenderMaterial.Fields.GetField(RenderMaterial.BasicMaterialParameterNames.Diffuse).GetValue<Rhino.Display.Color4f>());
+            attributes.RenderMaterial.SetChild(diffuse, slot);
+            attributes.RenderMaterial.SetChildSlotAmount(slot, 100.0, RenderContent.ChangeContexts.Program);
+            attributes.RenderMaterial.SetChildSlotOn(slot, true, RenderContent.ChangeContexts.Program);
+          }
+        }
+
+        attributes.RenderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Diffuse, material.Color.ToColor());
+#endif
 
         idMap.Add(Id, modelContent = attributes.ToModelData() as ModelContent);
         return modelContent;
