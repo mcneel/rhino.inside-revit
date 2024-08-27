@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace System
 {
@@ -89,6 +91,103 @@ namespace System
         sourceString.Substring(0, maxLength - 1) + '…' :
         sourceString;
     }
+
+    #region Escaping
+    internal static string Escape(this string value, params char[] forced)
+    {
+      var literal = new StringBuilder(value.Length);
+      foreach (var c in value)
+      {
+        switch (c)
+        {
+          case '\0': literal.Append("\\\0"); break;
+          case '\a': literal.Append("\\\a"); break;
+          case '\b': literal.Append("\\\b"); break;
+          case '\f': literal.Append("\\\f"); break;
+          case '\n': literal.Append("\\\n"); break;
+          case '\r': literal.Append("\\\r"); break;
+          case '\t': literal.Append("\\\t"); break;
+          case '\v': literal.Append("\\\v"); break;
+          case '\\': literal.Append("\\\\"); break;
+          default:
+            if (char.GetUnicodeCategory(c) != UnicodeCategory.Control)
+            {
+              if (forced is object && Array.IndexOf(forced, c) != -1)
+              {
+                literal.Append('\\');
+                literal.Append(c);
+              }
+              else literal.Append(c);
+            }
+            else
+            {
+              literal.Append("\\x");
+
+              var codepoint = (ushort) c;
+              if (codepoint <= byte.MaxValue)
+                literal.Append(codepoint.ToString("x2"));
+              else
+                literal.Append(codepoint.ToString("x4"));
+            }
+            break;
+        }
+      }
+      return literal.ToString();
+    }
+
+    internal static string Unescape(this string value, params char[] allowed)
+    {
+      if (string.IsNullOrEmpty(value)) return value;
+
+      var retval = new StringBuilder(value.Length);
+      for (int i = 0; i < value.Length;)
+      {
+        int j = value.IndexOf('\\', i);
+        if (j < 0 || j == value.Length - 1) j = value.Length;
+        retval.Append(value, i, j - i);
+
+        if (j >= value.Length) break;
+        var c = value[j + 1];
+        switch (c)
+        {
+          case '\\': retval.Append('\\'); break;
+          case '0': retval.Append('\0'); break;
+          case 'a': retval.Append('\a'); break;
+          case 'b': retval.Append('\b'); break;
+          case 'f': retval.Append('\f'); break;
+          case 'n': retval.Append('\n'); break;
+          case 'r': retval.Append('\r'); break;
+          case 't': retval.Append('\t'); break;
+          case 'v': retval.Append('\v'); break;
+          case 'x':
+            int k = 0;
+            const string Hex = "0123456789ABCDEFabcdef";
+            while (k < 4 && j + 2 + k < value.Length && Hex.Contains($"{value[j + 2 + k]}")) ++k;
+
+            if (k > 0 && ushort.TryParse(value.Substring(j + 2, k), NumberStyles.AllowHexSpecifier, null, out var codepoint))
+              retval.Append((char) codepoint);
+            else
+              retval.Append((char)0xFFFD);
+            j += k;
+            break;
+          default:
+            if (allowed is null || Array.IndexOf(allowed, c) != -1)
+              retval.Append(c);
+            else
+              retval.Append((char)0xFFFD);
+            break;
+        }
+        i = j + 2;
+      }
+      return retval.ToString();
+    }
+
+    public static string ToControlEscaped(this string value) => Escape(value, Array.Empty<char>());
+    public static string ToControlUnescaped(this string value) => Unescape(value, Array.Empty<char>());
+
+    internal static string ToStringLiteral(this string value) => Escape(value, '\"');
+    internal static string ToStringVerbatim(this string value) => Unescape(value, '\'', '\"', '?');
+    #endregion
   }
 }
 

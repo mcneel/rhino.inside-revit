@@ -54,13 +54,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class CategoryNaming
   {
-    const char CS = '\\'; // Category Separator
+    const char CS = '|'; // Category Separator
 
     /// <summary>
     /// Return the <paramref name="category"/> full name.
     /// </summary>
     /// <param name="category"></param>
-    /// <remarks>If it is a Subcategory this will be "ParentName\SubcategoryName".</remarks>
+    /// <remarks>If it is a Subcategory this will be "ParentName|SubcategoryName".</remarks>
     /// <returns></returns>
     public static string FullName(this Category category)
     {
@@ -135,10 +135,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Gets the BuiltInCategory value for this category.
+    /// Gets the <see cref="Autodesk.Revit.DB.BuiltInCategory"/> value for this category.
     /// </summary>
     /// <param name="category"></param>
-    /// <returns>BuiltInCategory value for the category or INVALID if the category is not a built-in category.</returns>
+    /// <returns><see cref="Autodesk.Revit.DB.BuiltInCategory"/> value for the category or INVALID if the category is not a built-in category.</returns>
     public static BuiltInCategory ToBuiltInCategory(this Category category)
     {
 #if REVIT_2023
@@ -149,13 +149,22 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     /// <summary>
-    /// Return the <paramref name="category"/> discipline. If it is a subCategory this will be the parent discipline"
+    /// Gets the root <see cref="Autodesk.Revit.DB.Category"/> of the input <paramref name="category"/>.
     /// </summary>
     /// <param name="category"></param>
-    /// <returns></returns>
-    public static CategoryDiscipline CategoryDiscipline(this Category category)
+    /// <returns>The top most <see cref="Autodesk.Revit.DB.Category"/>.</returns>
+    public static Category Root(this Category category)
     {
-      return category.Parent?.CategoryDiscipline() ?? category.ToBuiltInCategory().CategoryDiscipline();
+      while (category?.Parent is object) category = category.Parent;
+      return category;
     }
+
+    /// <summary>
+    /// Gets the <see cref="DB.CategoryDiscipline"/> of the input <paramref name="category"/>.
+    /// </summary>
+    /// <param name="category"></param>
+    /// <remarks>If it is a Subcategory this will be the discipline of the root category.</remarks>
+    /// <returns><see cref="DB.CategoryDiscipline"/> value for the category or None if the category is unknown.</returns>
+    public static CategoryDiscipline CategoryDiscipline(this Category category) => category.Root().ToBuiltInCategory().CategoryDiscipline();
   }
 }

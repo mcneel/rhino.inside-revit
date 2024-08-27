@@ -370,12 +370,6 @@ namespace RhinoInside.Revit.GH.Types
             layer.IsExpanded = false;
           }
 
-          // Color
-          {
-            var lineColor = category.LineColor.ToColor();
-            layer.Color = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
-          }
-
           // Linetype
           {
             var linetypeIndex = -1;
@@ -387,11 +381,27 @@ namespace RhinoInside.Revit.GH.Types
             layer.LinetypeIndex = linetypeIndex;
           }
 
+          // LineColor
+          {
+            var lineColor = category.LineColor.ToColor();
+            layer.PlotColor = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
+          }
+
           // Print Width
           {
             layer.PlotWeight = category.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_InvisibleLines ?
               -1.0 : // No Plot
               ToLineWeight(ProjectionLineWeight);
+          }
+
+          // Color
+          {
+            var displayColor = category.CategoryType != ARDB.CategoryType.Model ||
+              category.Root().ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Lines ?
+              layer.PlotColor :
+              new Material(category.Material).ObjectColor;
+
+            layer.Color = displayColor.IsEmpty ? System.Drawing.Color.FromArgb(0x7F, 0x7F, 0x7F) : displayColor;
           }
 
           // Material

@@ -11,8 +11,8 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using Convert.DocObjects;
   using External.DB.Extensions;
-  using External.DB;
 
   using ARDB_ScopeBox = ARDB.Element;
 
@@ -91,7 +91,7 @@ namespace RhinoInside.Revit.GH.Types
                 }
 
                 var origin = XYZExtension.ComputeMeanPoint(points);
-                if (UnitXYZ.Orthonormalize(-lines[2].Direction, -lines[1].Direction, out var basisX, out var basisY, out var basisZ))
+                if (ERDB.UnitXYZ.Orthonormalize(-lines[2].Direction, -lines[1].Direction, out var basisX, out var basisY, out var basisZ))
                 {
                   var coordSystem = ARDB.Transform.Identity; coordSystem.SetCoordSystem(origin, basisX, basisY, basisZ);
                   if (XYZExtension.TryGetBoundingBox(points, out var bbox, coordSystem))
@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      if (Value is ARDB_ScopeBox)
+      if (Value is ARDB_ScopeBox scopeBox)
       {
         att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
         att.Name = DisplayName;
@@ -165,13 +165,14 @@ namespace RhinoInside.Revit.GH.Types
           att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
 
         // 2. Check if already exist
-        var index = doc.Groups.Find(att.Name);
+        var groupName = NameConverter.EscapeName(scopeBox, out var _);
+        var index = doc.Groups.Find(groupName);
         if (index >= 0) guid = doc.Groups.FindIndex(index).Id;
 
         // 3. Update if necessary
         if (index < 0 || overwrite)
         {
-          if (index < 0) index = doc.Groups.Add(att.Name);
+          if (index < 0) index = doc.Groups.Add(groupName);
           if (overwrite && index >= 0)
           {
             var objects = doc.Objects.FindByGroup(index);
@@ -218,7 +219,7 @@ namespace RhinoInside.Revit.GH.Types
                     {
                       ParentLayerId = parent.Id,
                       Name = "Planes",
-                      IsVisible = true,
+                      IsVisible = false,
 //#if RHINO_8
 //                      IsLocked = true
 //#else
@@ -238,11 +239,11 @@ namespace RhinoInside.Revit.GH.Types
 
                 var planes = new (int Name, Plane Plane, Interval U, Interval V)[]
                 {
-                  (0, new Plane(box.PointAt(0.0, 0.5, 0.5), box.Plane.YAxis, box.Plane.ZAxis), box.Y, box.Z), // left
+                  (0, new Plane(box.PointAt(0.0, 0.5, 0.5),  box.Plane.YAxis, box.Plane.ZAxis), box.Y, box.Z), // left
                   (1, new Plane(box.PointAt(1.0, 0.5, 0.5), -box.Plane.YAxis, box.Plane.ZAxis), box.Y, box.Z), // right
                   (2, new Plane(box.PointAt(0.5, 0.0, 0.5), -box.Plane.XAxis, box.Plane.ZAxis), box.X, box.Z), // front
-                  (3, new Plane(box.PointAt(0.5, 1.0, 0.5), box.Plane.XAxis, box.Plane.ZAxis), box.X, box.Z), // back
-                  (4, new Plane(box.PointAt(0.5, 0.5, 0.0), box.Plane.XAxis, box.Plane.YAxis), box.X, box.Y), // bottom
+                  (3, new Plane(box.PointAt(0.5, 1.0, 0.5),  box.Plane.XAxis, box.Plane.ZAxis), box.X, box.Z), // back
+                  (4, new Plane(box.PointAt(0.5, 0.5, 0.0),  box.Plane.XAxis, box.Plane.YAxis), box.X, box.Y), // bottom
                   (5, new Plane(box.PointAt(0.5, 0.5, 1.0), -box.Plane.XAxis, box.Plane.YAxis), box.X, box.Y)  // top
                 };
 
@@ -373,6 +374,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return guid != Guid.Empty;
     }
-#endregion
+    #endregion
   }
 }
