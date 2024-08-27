@@ -77,7 +77,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       else
       {
         var index = fullName.IndexOf(CS);
-        parent = fullName.Substring(0, index);
+        parent = index < 0 ? string.Empty : fullName.Substring(0, index);
         return fullName.Substring(index + 1, fullName.Length - index - 1);
       }
     }
