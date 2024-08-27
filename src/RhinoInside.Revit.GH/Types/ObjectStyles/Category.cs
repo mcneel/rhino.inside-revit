@@ -554,7 +554,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string Nomen
     {
-      get => FullName?.Split('\\').Last() ?? base.Nomen;
+      get => CategoryNaming.SplitFullName(FullName, out var _) ?? base.Nomen;
       set
       {
         base.Nomen = value;

@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -51,6 +49,37 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return false;
 
       return self.Document().Equals(other.Document());
+    }
+  }
+
+  public static class CategoryNaming
+  {
+    const char CS = '\\'; // Category Separator
+
+    /// <summary>
+    /// Return the <paramref name="category"/> full name.
+    /// </summary>
+    /// <param name="category"></param>
+    /// <remarks>If it is a Subcategory this will be "ParentName\SubcategoryName".</remarks>
+    /// <returns></returns>
+    public static string FullName(this Category category)
+    {
+      return category.Parent is null ? category.Name : $"{category.Parent.Name}{CS}{category.Name}";
+    }
+
+    internal static string SplitFullName(string fullName, out string parent)
+    {
+      if (fullName is null)
+      {
+        parent = null;
+        return null;
+      }
+      else
+      {
+        var index = fullName.IndexOf(CS);
+        parent = fullName.Substring(0, index);
+        return fullName.Substring(index + 1, fullName.Length - index - 1);
+      }
     }
   }
 
@@ -117,16 +146,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #else
       return category.Id.ToBuiltInCategory();
 #endif
-    }
-
-    /// <summary>
-    /// Return the <paramref name="category"/> full name. If it is a subCategory this will be "{ParentName}\{SubcategoryName}"
-    /// </summary>
-    /// <param name="category"></param>
-    /// <returns></returns>
-    public static string FullName(this Category category)
-    {
-      return category.Parent is null ? category.Name : $"{category.Parent.Name}\\{category.Name}";
     }
 
     /// <summary>
