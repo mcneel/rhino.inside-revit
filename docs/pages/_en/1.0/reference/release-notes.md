@@ -10,7 +10,6 @@ group: Deployment & Configs
 
 ### WIP
 
-- Implemented baking on 'Scope Box'.
 
 ### RC
 
@@ -19,7 +18,12 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.24 RC1" version="v1.24.8998.19607" pre_release=true time="08/06/2024" %}
+{% include ltr/release-header.html title="v1.24 RC2" version="v1.24.9005.13660" pre_release=true time="08/27/2024" %}
+
+- Implemented baking on 'Scope Box'.
+- Miscellaneous Improvements
+
+{% include ltr/release-header.html title="v1.24 RC1" version="v1.24.8998.19607" pre_release=true time="08/20/2024" %}
 
 - Miscellaneous Improvements
 
