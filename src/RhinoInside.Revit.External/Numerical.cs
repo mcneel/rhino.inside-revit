@@ -121,6 +121,37 @@ namespace RhinoInside.Revit.Numerical
     {
       return Math.Abs(value);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static double MinMagnitude(double x, double y)
+    {
+#if NET5_0_OR_GREATER
+      return Math.MinMagnitude(x, y);
+#else
+      double ax = Math.Abs(x);
+      double ay = Math.Abs(y);
+
+      return ax < ay ? x :
+             ax == ay ? (IsNegativeZero(x) ? -0.0 : y) :
+             double.IsNaN(ax) ? x : y;
+
+#endif
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static double MaxMagnitude(double x, double y)
+    {
+#if NET5_0_OR_GREATER
+      return Math.MaxMagnitude(x, y);
+#else
+      double ax = Math.Abs(x);
+      double ay = Math.Abs(y);
+
+      return ax > ay ? x :
+             ax == ay ? (IsPositiveZero(x) ? +0.0 : y) :
+             double.IsNaN(ax) ? x : y;
+#endif
+    }
     #endregion
 
     #region Interval
@@ -131,12 +162,10 @@ namespace RhinoInside.Revit.Numerical
     /// <param name="y">The value to compare with <paramref name="x"/>.</param>
     /// <returns><paramref name="x"/> if is less than <paramref name="y"/>; otherwise <paramref name="y"/></returns>
     /// <remarks>
-    /// This requires <see cref="double.NaN"/> inputs to not be propagated back to the caller and for -0.0 to be treated as less than +0.0.
+    /// This requires <see cref="double.NaN"/> inputs to be propagated back to the caller and for -0.0 to be treated as less than +0.0.
     /// </remarks>
-    public static double Min(double x, double y) =>
-      x < y           ? x                              :
-      x == y          ? (IsNegativeZero(x) ? -0.0 : y) :
-      double.IsNaN(y) ? x                         : y  ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static double Min(double x, double y) => Math.Min(x, y);
 
     /// <summary>
     /// Computes the max point of the interval [<paramref name="x"/>, <paramref name="y"/>].
@@ -145,12 +174,10 @@ namespace RhinoInside.Revit.Numerical
     /// <param name="y">The value to compare with <paramref name="x"/>.</param>
     /// <returns><paramref name="x"/> if is grater than <paramref name="y"/>; otherwise <paramref name="y"/></returns>
     /// <remarks>
-    /// This requires <see cref="double.NaN"/> inputs to not be propagated back to the caller and for -0.0 to be treated as less than +0.0.
+    /// This requires <see cref="double.NaN"/> inputs to be propagated back to the caller and for -0.0 to be treated as less than +0.0.
     /// </remarks>
-    public static double Max(double x, double y) =>
-      x > y           ? x                              :
-      x == y          ? (IsPositiveZero(x) ? +0.0 : y) :
-      double.IsNaN(y) ? x                         : y  ;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static double Max(double x, double y) => Math.Max(x, y);
 
     /// <summary>
     /// Computes the mean point of the interval [<paramref name="x"/>, <paramref name="y"/>].
@@ -165,17 +192,17 @@ namespace RhinoInside.Revit.Numerical
     {
       if (x == y) return x;
 
-      var X = Math.Abs(x);
-      var Y = Math.Abs(y);
+      var ax = Math.Abs(x);
+      var ay = Math.Abs(y);
 
       //// Avoids oveflow
-      //if (X <= double.MaxValue / 2 && Y <= double.MaxValue / 2)
+      //if (ax <= double.MaxValue * 0.5 && ay <= double.MaxValue * 0.5)
       //  return (x + y) * 0.5;
 
-      if (X < Constant.Upsilon)
+      if (ax < Constant.Upsilon)
         return x + (y * 0.5);
 
-      if (Y < Constant.Upsilon)
+      if (ay < Constant.Upsilon)
         return (x * 0.5) + y;
 
       return (x * 0.5) + (y * 0.5);
@@ -227,10 +254,51 @@ namespace RhinoInside.Revit.Numerical
     /// <param name="min">The lower bound of the result.</param>
     /// <param name="max">The upper bound of the result.</param>
     /// <returns>Clamped <paramref name="value"/> or <see cref="double.NaN"/> if <paramref name="value"/> equals <see cref="double.NaN"/>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double Clamp(double value, double min, double max)
     {
       return value < min ? min : max < value ? max : value;
     }
+    #endregion
+
+    #region Number
+    /// <summary>
+    /// Computes the min point of the interval [<paramref name="x"/>, <paramref name="y"/>].
+    /// </summary>
+    /// <param name="x">The value to compare with <paramref name="y"/>.</param>
+    /// <param name="y">The value to compare with <paramref name="x"/>.</param>
+    /// <returns><paramref name="x"/> if is less than <paramref name="y"/>; otherwise <paramref name="y"/></returns>
+    /// <remarks>
+    /// This requires <see cref="double.NaN"/> inputs to not be propagated back to the caller and for -0.0 to be treated as less than +0.0.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static double MinNumber(double x, double y) =>
+#if NET5_0_OR_GREATER
+      double.MinNumber(x, y);
+#else
+      x < y           ? x                              :
+      x == y          ? (IsNegativeZero(x) ? -0.0 : y) :
+      double.IsNaN(y) ? x                         : y  ;
+#endif
+
+    /// <summary>
+    /// Computes the max point of the interval [<paramref name="x"/>, <paramref name="y"/>].
+    /// </summary>
+    /// <param name="x">The value to compare with <paramref name="y"/>.</param>
+    /// <param name="y">The value to compare with <paramref name="x"/>.</param>
+    /// <returns><paramref name="x"/> if is grater than <paramref name="y"/>; otherwise <paramref name="y"/></returns>
+    /// <remarks>
+    /// This requires <see cref="double.NaN"/> inputs to not be propagated back to the caller and for -0.0 to be treated as less than +0.0.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static double MaxNumber(double x, double y) =>
+#if NET5_0_OR_GREATER
+      double.MaxNumber(x, y);
+#else
+      x > y           ? x                              :
+      x == y          ? (IsPositiveZero(x) ? +0.0 : y) :
+      double.IsNaN(y) ? x                         : y  ;
+#endif
     #endregion
   }
 

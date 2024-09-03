@@ -237,17 +237,17 @@ namespace RhinoInside.Revit.GH.Components.Views
       {
         case ARDB.View3D view3D:
           if (view3D.IsPerspective)
-            frontOffset = Arithmetic.Min(frontOffset, view3D.CropBox.Max.Z);
+            frontOffset = Arithmetic.MinNumber(frontOffset, view3D.CropBox.Max.Z);
         break;
 
         case ARDB.ViewPlan viewPlan:
           var interval = viewPlan.GetViewRangeInterval();
-          backOffset  = Arithmetic.Max(backOffset,  interval.Left.Bound - view.Origin.Z);
-          frontOffset = Arithmetic.Min(frontOffset, interval.Right.Bound - view.Origin.Z);
+          backOffset  = Arithmetic.MaxNumber(backOffset,  interval.Left.Bound - view.Origin.Z);
+          frontOffset = Arithmetic.MinNumber(frontOffset, interval.Right.Bound - view.Origin.Z);
         break;
 
         case ARDB.ViewSection viewSection:
-          frontOffset = Arithmetic.Min(frontOffset, viewSection.CropBox.Max.Z);
+          frontOffset = Arithmetic.MinNumber(frontOffset, viewSection.CropBox.Max.Z);
           break;
       }
     }
