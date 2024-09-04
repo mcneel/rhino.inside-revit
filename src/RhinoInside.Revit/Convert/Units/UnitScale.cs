@@ -8,6 +8,8 @@ using Rhino.DocObjects;
 
 namespace RhinoInside.Revit.Convert.Units
 {
+  using Numerical;
+
   [DebuggerDisplay("{Antecedent} ∶ {Consequent} ({Quotient})")]
   readonly struct Ratio : IEquatable<Ratio>
   {
@@ -391,10 +393,7 @@ namespace RhinoInside.Revit.Convert.Units
       var den = f * T;
 
       // Multiply value by resulting ratio considering magnitude.
-      if (Math.Abs(num) < Math.Abs(value))
-        return num * (value / den);
-      else
-        return value * (num / den);
+      return Arithmetic.MinMagnitude(num, value) * (Arithmetic.MaxMagnitude(num, value) / den);
     }
 
     public override string ToString() => Name ?? ((UnitSystem) this).ToString();
@@ -458,6 +457,7 @@ namespace RhinoInside.Revit.Convert.Units
           }
 
           doc.ModelSpaceHatchScale *= scaleFactor;
+          doc.Linetypes.LinetypeScale *= scaleFactor;
 
           foreach (var style in doc.DimStyles)
           {

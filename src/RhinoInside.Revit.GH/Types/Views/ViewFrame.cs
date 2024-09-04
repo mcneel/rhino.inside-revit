@@ -436,16 +436,16 @@ namespace RhinoInside.Revit.GH.Types
 
     public Point3d Min => new Point3d
     (
-      Arithmetic.Min( Value.FrustumLeft,   Bound[AxisX].T0),
-      Arithmetic.Min( Value.FrustumBottom, Bound[AxisY].T0),
-      Arithmetic.Min(-Value.FrustumFar,    Bound[AxisZ].T0)
+      Arithmetic.MinNumber( Value.FrustumLeft,   Bound[AxisX].T0),
+      Arithmetic.MinNumber( Value.FrustumBottom, Bound[AxisY].T0),
+      Arithmetic.MinNumber(-Value.FrustumFar,    Bound[AxisZ].T0)
     );
 
     public Point3d Max => new Point3d
     (
-      Arithmetic.Max( Value.FrustumRight,  Bound[AxisX].T1),
-      Arithmetic.Max( Value.FrustumTop,    Bound[AxisY].T1),
-      Arithmetic.Max(-Value.FrustumNear,   Bound[AxisZ].T1)
+      Arithmetic.MaxNumber( Value.FrustumRight,  Bound[AxisX].T1),
+      Arithmetic.MaxNumber( Value.FrustumTop,    Bound[AxisY].T1),
+      Arithmetic.MaxNumber(-Value.FrustumNear,   Bound[AxisZ].T1)
     );
 
     internal ARDB.BoundingBoxXYZ ToBoundingBoxXYZ(bool ensurePositiveY = false)
