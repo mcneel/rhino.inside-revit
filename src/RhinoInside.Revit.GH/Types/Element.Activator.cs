@@ -313,6 +313,7 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.CombinableElement),               (element)=> new CombinableElement     (element as ARDB.CombinableElement) },
       { typeof(ARDB.GeomCombination),                 (element)=> new GeomCombination       (element as ARDB.GeomCombination)   },
       { typeof(ARDB.GenericForm),                     (element)=> new GenericForm           (element as ARDB.GenericForm)       },
+      { typeof(ARDB.ModelText),                       (element)=> new ModelText             (element as ARDB.ModelText)         },
 
       { typeof(ARDB.DatumPlane),                      (element)=> new DatumPlane            (element as ARDB.DatumPlane)        },
       { typeof(ARDB.Level),                           (element)=> new Level                 (element as ARDB.Level)             },
