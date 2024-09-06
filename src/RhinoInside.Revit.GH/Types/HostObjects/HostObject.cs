@@ -91,13 +91,13 @@ namespace RhinoInside.Revit.GH.Types
         using (shape as IDisposable) // ARDB.SlabShapeEditor is IDisposable since Revit 2023
         {
           shape.ResetSlabShape();
+          shape.Enable();
           host.Document.Regenerate();
 
           var bbox = BoundingBox;
           var elevation = GeometryEncoder.ToInternalLength(bbox.Max.Z);
 
-          shape.Enable();
-          var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>();
+          var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>(shape.SlabShapeVertices.Size + points.Count);
           ARDB.SlabShapeVertex AddVertex(Point3d point)
           {
             var x = GeometryEncoder.ToInternalLength(point.X);
