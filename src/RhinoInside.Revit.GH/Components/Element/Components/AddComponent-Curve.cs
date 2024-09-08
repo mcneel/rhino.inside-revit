@@ -173,7 +173,12 @@ namespace RhinoInside.Revit.GH.Components
             {
               if (workPlane is null)
               {
-                if (sketchPlane is null || component is null || sketchPlane.GetDependentElements(ERDB.CompoundElementFilter.ExclusionFilter(component.Id, true)).Count == 0)
+                if (component?.DependsOn(sketchPlane) is true)
+                {
+                  sketchPlane.SetLocation(origin, basisX, basisY);
+                  reference = ARDB.Reference.ParseFromStableRepresentation(sketchPlane.Document, sketchPlane.UniqueId);
+                }
+                else
                 {
                   var extents = new Interval(-1.0 * Revit.ModelUnits, +1.0 * Revit.ModelUnits);
                   var surface = new PlaneSurface(new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d()), extents, extents);
@@ -186,11 +191,6 @@ namespace RhinoInside.Revit.GH.Components
 
                   sketchPlane = ARDB.SketchPlane.Create(doc.Value, reference);
                   notAssociatedElementId = directShape.Id;
-                }
-                else
-                {
-                  sketchPlane.SetLocation(origin, basisX, basisY);
-                  reference = ARDB.Reference.ParseFromStableRepresentation(sketchPlane.Document, sketchPlane.UniqueId);
                 }
 
                 associatedWorkPlane = false;
@@ -328,8 +328,7 @@ namespace RhinoInside.Revit.GH.Components
           var hostElement = component.Document.GetElement(reference);
           if (hostElement is ARDB.SketchPlane sketchPlane)
           {
-            var dependents = sketchPlane.GetDependentElements(ERDB.CompoundElementFilter.ExclusionFilter(component.Id, inverted: true));
-            if (!dependents.Contains(component.Id)) return false;
+            if (!component.DependsOn(sketchPlane)) return false;
           }
           else if (!hostElement.IsEquivalent(component.Host)) return false;
           break;

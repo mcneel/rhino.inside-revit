@@ -19,6 +19,7 @@ group: Deployment & Configs
 - Updated requirements message on Revit 2025.
 - Change on Bake. Now shade-color is applied to the geometry directly.
 - Fix on Brep.TryGetExtrusion extension method.
+- Added `Element.DependsOn` extension method.
 
 {% endcapture %}
 

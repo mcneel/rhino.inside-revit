@@ -292,8 +292,7 @@ namespace RhinoInside.Revit.GH.Components
           var hostElement = component.Document.GetElement(reference);
           if (hostElement is ARDB.SketchPlane sketchPlane)
           {
-            var dependents = sketchPlane.GetDependentElements(ERDB.CompoundElementFilter.ExclusionFilter(component.Id, inverted: true));
-            return dependents.Contains(component.Id);
+            return component.DependsOn(sketchPlane);
           }
 
           if (!hostElement.IsEquivalent(component.Host))

@@ -389,6 +389,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var doc = element.Document;
       return ids.Select(doc.GetElement).OfType<T>().FirstOrDefault();
     }
+
+    public static bool DependsOn(this Element element, Element host)
+    {
+      if (!element.Document.IsEquivalent(host?.Document)) return false;
+      return host?.GetDependentElements(CompoundElementFilter.InclusionFilter(element)).Count == 1;
+    }
     #endregion
 
     #region Nomen
