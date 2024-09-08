@@ -407,7 +407,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public IEnumerable<CurtainCell> CurtainCells => Value is ARDB.CurtainGrid grid ?
       grid.GetCurtainCells().Zip(grid.GetPanelIds(), (Cell, PanelId) => (Cell, PanelId)).
-      Select(x => new CurtainCell(Panel.FromElementId(Document, x.PanelId) as Panel, x.Cell)) :
+      Select(x => new CurtainCell(GeometricElement.FromElementId(Document, x.PanelId) as GeometricElement, x.Cell)) :
       default;
     #endregion
 

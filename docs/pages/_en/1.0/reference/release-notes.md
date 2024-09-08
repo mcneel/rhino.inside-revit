@@ -13,6 +13,12 @@ group: Deployment & Configs
 
 ### RC
 
+- Fix on 'Host Shape' when input points overlap corners.
+- Fixed 'Deconstruct Curtain Grid' when panels are not `FamilyInstance`.
+- Fixed `ModelText.Location` property.
+- Updated requirements message on Revit 2025.
+- Change on Bake. Now shade-color is applied to the geometry directly.
+- Fix on Brep.TryGetExtrusion extension method.
 
 {% endcapture %}
 

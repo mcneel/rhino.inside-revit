@@ -38,6 +38,7 @@ namespace RhinoInside.Revit.GH.Types
   public class MullionPosition : ElementType
   {
     protected override Type ValueType => typeof(ARDB_MullionPosition);
+    public override bool IsValid => base.IsValid || (ReferenceDocument is object && Id.IsValid() && Enum.IsDefined(typeof(External.DB.BuiltInMullionPosition), Id.ToValue()));
 
     public MullionPosition() { }
     public MullionPosition(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
