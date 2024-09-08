@@ -197,7 +197,12 @@ namespace RhinoInside.Revit.GH.Components.Walls
         mullionType.get_Parameter(ARDB.BuiltInParameter.RECT_MULLION_THICK) ??
         mullionType.get_Parameter(ARDB.BuiltInParameter.CUST_MULLION_THICK) ??
         mullionType.get_Parameter(ARDB.BuiltInParameter.TRAP_MULL_WIDTH);
-      DA.SetData("Thickness", thicknessParam.AsGoo());
+      if (thicknessParam is object)
+      {
+        var thickness = thicknessParam.AsGoo() as GH_Number;
+        DA.SetData("Thickness", thickness);
+        DA.SetData("Radius", thickness.Value * 0.5);
+      }
 
       var depth1Param =
         mullionType.get_Parameter(ARDB.BuiltInParameter.RECT_MULLION_WIDTH1) ??
@@ -215,7 +220,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       DA.SetData("Depth 2", depth2Param.AsGoo());
 
       var radiusParam = mullionType.get_Parameter(ARDB.BuiltInParameter.CIRC_MULLION_RADIUS);
-      if (radiusParam != null)
+      if (radiusParam is object)
       {
         var radius = radiusParam.AsGoo() as GH_Number;
         DA.SetData("Radius", radius);

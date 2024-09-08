@@ -128,11 +128,8 @@ namespace RhinoInside.Revit.External.ApplicationServices.Extensions
               return uiDocument.GetOpenUIViews().Select(x => x.ViewId).ToList();
           });
 
-          using (var uiDocument = new Autodesk.Revit.UI.UIDocument(doc))
-          {
-            foreach (var viewId in openViewIds)
-              yield return doc.GetElement(viewId) as View;
-          }
+          foreach (var viewId in openViewIds)
+            yield return doc.GetElement(viewId) as View;
         }
       }
     }

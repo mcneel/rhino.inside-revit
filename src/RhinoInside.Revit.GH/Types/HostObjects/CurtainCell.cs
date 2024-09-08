@@ -15,10 +15,10 @@ namespace RhinoInside.Revit.GH.Types
     IGH_PreviewData
   {
     public new ARDB.CurtainCell Value => base.Value as ARDB.CurtainCell;
-    public Panel Panel { get; private set; }
+    public GeometricElement Panel { get; private set; } // May be Panel, FamilyInstance or Wall
 
     public CurtainCell() : base() { }
-    public CurtainCell(Panel panel, ARDB.CurtainCell value) : base(panel.Document, value)
+    public CurtainCell(GeometricElement panel, ARDB.CurtainCell value) : base(panel.Document, value)
     {
       Panel = panel;
     }
@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Panel is Panel panel)
+        if (Panel is GeometricElement panel)
         {
           var location = panel.Location;
           location = new Plane(location.Origin, location.XAxis, Vector3d.CrossProduct(location.XAxis, location.YAxis));

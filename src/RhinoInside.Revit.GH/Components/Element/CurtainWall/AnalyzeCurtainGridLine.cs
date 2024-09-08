@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     public AnalyzeCurtainGridLine() : base
     (
       name: "Deconstruct Curtain Line",
-      nickname: "D-CL",
+      nickname: "D-CLine",
       description: "Deconstruct given curtain grid line",
       category: "Revit",
       subCategory: "Architecture"

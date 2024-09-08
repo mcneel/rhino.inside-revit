@@ -20,6 +20,8 @@ namespace RhinoInside.Revit.GH.Types
              element.Category?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_ProfileFamilies;
     }
 
+    public override bool IsValid => base.IsValid || (ReferenceDocument is object && Id.IsValid() && Enum.IsDefined(typeof(External.DB.BuiltInProfileType), Id.ToValue()));
+
     public ProfileType() { }
     public ProfileType(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public ProfileType(ARDB_ProfileType profile) : base(profile)

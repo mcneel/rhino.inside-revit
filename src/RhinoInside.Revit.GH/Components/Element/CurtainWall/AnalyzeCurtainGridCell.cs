@@ -13,8 +13,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     public AnalyzeCurtainGridCell() : base
     (
-      name: "Curtain Cell Geometry",
-      nickname: "A-CC",
+      name: "Curtain Cell Profile",
+      nickname: "CC-Profile",
       description: "Deconstruct given curtain grid cell in to geometry",
       category: "Revit",
       subCategory: "Architecture"
