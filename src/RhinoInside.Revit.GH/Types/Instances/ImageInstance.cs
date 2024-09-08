@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using Rhino;
 using Rhino.Geometry;
 using Rhino.Display;
 using Rhino.DocObjects;
@@ -20,7 +22,7 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 
   [Kernel.Attributes.Name("Image")]
-  public class ImageInstance : GraphicalElement
+  public class ImageInstance : GraphicalElement, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB_ImageInstance);
     public new ARDB_ImageInstance Value => base.Value as ARDB_ImageInstance;
@@ -244,6 +246,65 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is ARDB_ImageInstance)
+      {
+        att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
+        att.Name = DisplayName;
+        if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
+          att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+        // 3. Update if necessary
+        if (overwrite)
+        {
+          var imagePath = Type.BitmapFilePath;
+          var plane = Location;
+          plane = new Plane(plane.Origin - (plane.XAxis * Width.Value * 0.5) - (plane.YAxis * Height.Value * 0.5), plane.XAxis, plane.YAxis);
+          guid = doc.Objects.AddPictureFrame(plane, imagePath ?? string.Empty, asMesh: false, Width.Value, Height.Value, selfIllumination: false, embedBitmap: true);
+
+          if (guid != Guid.Empty && doc.Objects.FindId(guid) is RhinoObject picture)
+          {
+            var currentAttributes = picture.Attributes;
+            currentAttributes.Name = att.Name;
+            currentAttributes.LayerIndex = att.LayerIndex;
+            doc.Objects.ModifyAttributes(guid, currentAttributes, quiet: true);
+
+            if (picture.RenderMaterial is Rhino.Render.RenderMaterial renderMaterial)
+            {
+              renderMaterial.BeginChange(Rhino.Render.RenderContent.ChangeContexts.Program);
+              renderMaterial.Name = att.Name;
+              renderMaterial.EndChange();
+            }
+          }
+        }
+
+        if (guid != Guid.Empty)
+        {
+          idMap.Add(Id, guid);
+          return true;
+        }
+      }
+
+      return false;
+    }
+    #endregion
   }
 
   [Kernel.Attributes.Name("Image Type")]
@@ -258,9 +319,10 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void ResetValue()
     {
-      using (_DisplayMaterial) _DisplayMaterial = null;
-      using (_DiffuseTexture) _DiffuseTexture = null;
-      using (_OpacityTexture) _OpacityTexture = null;
+      using (_Bitmap)           _Bitmap = null;
+      using (_DisplayMaterial)  _DisplayMaterial = null;
+      using (_DiffuseTexture)   _DiffuseTexture = null;
+      using (_OpacityTexture)   _OpacityTexture = null;
 
       base.ResetValue();
     }
@@ -279,6 +341,37 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
+    #region Properties
+    System.Drawing.Bitmap _Bitmap;
+    System.Drawing.Bitmap Bitmap => _Bitmap is null ? (_Bitmap = Value?.GetImage()) : _Bitmap;
+
+    internal string BitmapFilePath
+    {
+      get
+      {
+        if (Value is ARDB.ImageType type)
+        {
+          if (Bitmap is System.Drawing.Bitmap bitmap)
+          {
+            var document = Types.Document.FromValue(type.Document);
+            var path = Path.Combine(document.SwapFolder.Directory.FullName, $"{document.SwapFolder.PrefixOf(this)}-Diffuse.png");
+
+            try
+            {
+              bitmap.Save(path);
+              var bitmapFile = new FileInfo(path);
+              bitmapFile.Attributes |= FileAttributes.Temporary;
+              return path;
+            }
+            catch { }
+          }
+        }
+
+        return null;
+      }
+    }
+    #endregion
+
     #region Preview
     Texture _DiffuseTexture;
     Texture _OpacityTexture;
@@ -286,26 +379,22 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (_DiffuseTexture is null)
       {
-        if (Value?.get_Parameter(ARDB.BuiltInParameter.RASTER_SYMBOL_FILENAME)?.AsString() is string imageFilePath)
+        var diffuseFile = new FileInfo(BitmapFilePath);
+        if (diffuseFile.Exists)
         {
-          var imageFile = new FileInfo(imageFilePath);
-          if (imageFile.Exists)
+          _DiffuseTexture = new Texture() { FileName = diffuseFile.FullName };
+
+          var diffuseBitmap = Bitmap;
           {
             var document = Types.Document.FromValue(Document);
-            var diffuseFile = document.SwapFolder.CopyFrom(this, imageFile, "-Diffuse");
-            _DiffuseTexture = new Texture() { FileName = diffuseFile.FullName };
-
-            using (var diffuseBitmap = new System.Drawing.Bitmap(diffuseFile.FullName))
+            var opacityFile = new FileInfo(Path.Combine(document.SwapFolder.Directory.FullName, document.SwapFolder.PrefixOf(this) + "-Opacity" + ".png"));
+            if (ImageBuilder.BuildOpacityMap(diffuseBitmap) is System.Drawing.Bitmap opacityBitmap)
             {
-              var opacityFile = new FileInfo(Path.Combine(document.SwapFolder.Directory.FullName, document.SwapFolder.PrefixOf(this) + "-Opacity" + ".png"));
-              if (ImageBuilder.BuildOpacityMap(diffuseBitmap) is System.Drawing.Bitmap opacityBitmap)
-              {
-                opacityBitmap.Save(opacityFile.FullName, System.Drawing.Imaging.ImageFormat.Png);
-                opacityBitmap.Dispose();
+              opacityBitmap.Save(opacityFile.FullName, System.Drawing.Imaging.ImageFormat.Png);
+              opacityBitmap.Dispose();
 
-                opacityFile.Attributes |= FileAttributes.Temporary;
-                _OpacityTexture = new Texture() { FileName = opacityFile.FullName };
-              }
+              opacityFile.Attributes |= FileAttributes.Temporary;
+              _OpacityTexture = new Texture() { FileName = opacityFile.FullName };
             }
           }
         }

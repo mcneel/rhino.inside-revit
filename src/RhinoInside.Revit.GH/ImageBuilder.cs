@@ -143,47 +143,52 @@ namespace RhinoInside.Revit.GH
 
     public static Drawing.Bitmap BuildOpacityMap(Drawing.Bitmap bitmap)
     {
-      var rectangle = new Drawing.Rectangle(Drawing.Point.Empty, bitmap.Size);
-      var opacity = new Drawing.Bitmap(bitmap.Width, bitmap.Height, Drawing.Imaging.PixelFormat.Format8bppIndexed);
-      var bitmapScanLine = new int[bitmap.Width];
-      var opacityScanLine = new byte[bitmap.Width];
-
-      var bitmapScanData = bitmap.LockBits(rectangle, Drawing.Imaging.ImageLockMode.WriteOnly, Drawing.Imaging.PixelFormat.Format32bppArgb);
-      var opacityScanData = opacity?.LockBits(rectangle, Drawing.Imaging.ImageLockMode.WriteOnly, Drawing.Imaging.PixelFormat.Format8bppIndexed);
-
-      bool isOpaque = true;
-      for (int y = 0; y < rectangle.Height; ++y)
+      if (bitmap.PixelFormat == Drawing.Imaging.PixelFormat.Format32bppArgb)
       {
-        Marshal.Copy(bitmapScanData.Scan0 + (bitmapScanData.Stride * y), bitmapScanLine, 0, rectangle.Width);
-        for (int x = 0; x < rectangle.Width; ++x)
+        var rectangle = new Drawing.Rectangle(Drawing.Point.Empty, bitmap.Size);
+        var opacity = new Drawing.Bitmap(bitmap.Width, bitmap.Height, Drawing.Imaging.PixelFormat.Format8bppIndexed);
+        var bitmapScanLine = new int[bitmap.Width];
+        var opacityScanLine = new byte[bitmap.Width];
+
+        var bitmapScanData = bitmap.LockBits(rectangle, Drawing.Imaging.ImageLockMode.WriteOnly, Drawing.Imaging.PixelFormat.Format32bppArgb);
+        var opacityScanData = opacity?.LockBits(rectangle, Drawing.Imaging.ImageLockMode.WriteOnly, Drawing.Imaging.PixelFormat.Format8bppIndexed);
+
+        bool isOpaque = true;
+        for (int y = 0; y < rectangle.Height; ++y)
         {
-          var color = Drawing.Color.FromArgb(bitmapScanLine[x]);
-          var colorA = color.A;
-          if (colorA != byte.MaxValue) isOpaque = false;
-          opacityScanLine[x] = colorA;
+          Marshal.Copy(bitmapScanData.Scan0 + (bitmapScanData.Stride * y), bitmapScanLine, 0, rectangle.Width);
+          for (int x = 0; x < rectangle.Width; ++x)
+          {
+            var color = Drawing.Color.FromArgb(bitmapScanLine[x]);
+            var colorA = color.A;
+            if (colorA != byte.MaxValue) isOpaque = false;
+            opacityScanLine[x] = colorA;
+          }
+
+          Marshal.Copy(opacityScanLine, 0, opacityScanData.Scan0 + (opacityScanData.Stride * y), rectangle.Width);
         }
 
-        Marshal.Copy(opacityScanLine, 0, opacityScanData.Scan0 + (opacityScanData.Stride * y), rectangle.Width);
+        opacity.UnlockBits(opacityScanData);
+        bitmap.UnlockBits(bitmapScanData);
+
+        if (isOpaque)
+        {
+          opacity.Dispose();
+          opacity = null;
+        }
+        else
+        {
+          var palette = opacity.Palette;
+          for (int i = 0; i < byte.MaxValue; ++i)
+            palette.Entries[i] = Drawing.Color.FromArgb(i, i, i);
+
+          opacity.Palette = palette;
+        }
+
+        return opacity;
       }
 
-      opacity.UnlockBits(opacityScanData);
-      bitmap.UnlockBits(bitmapScanData);
-
-      if (isOpaque)
-      {
-        opacity.Dispose();
-        opacity = null;
-      }
-      else
-      {
-        var palette = opacity.Palette;
-        for (int i = 0; i < byte.MaxValue; ++i)
-          palette.Entries[i] = Drawing.Color.FromArgb(i, i, i);
-
-        opacity.Palette = palette;
-      }
-
-      return opacity;
+      return null;
     }
   }
 }
