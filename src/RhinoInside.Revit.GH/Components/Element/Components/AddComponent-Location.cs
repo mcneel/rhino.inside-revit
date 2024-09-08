@@ -225,8 +225,7 @@ namespace RhinoInside.Revit.GH.Components
           case ARDB.SketchPlane sketchPlane:
 
             // <not associated>
-            var dependents = sketchPlane.GetDependentElements(ERDB.CompoundElementFilter.ExclusionFilter(component.Id, inverted: true));
-            if (dependents.Contains(component.Id)) return true;
+            if (component.DependsOn(sketchPlane)) return true;
 
             // Associated to a Datum or a Face
             var hostElement = sketchPlane.GetHost(out var hostFace);
