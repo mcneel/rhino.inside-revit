@@ -13,6 +13,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   using External.DB.Extensions;
   using Convert.Geometry;
+  using Convert.DocObjects;
   using Convert.System.Drawing;
 
 #if REVIT_2020
@@ -266,32 +267,22 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Value is ARDB_ImageInstance)
       {
-        att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
-        att.Name = DisplayName;
-        if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
-          att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
-
         // 3. Update if necessary
         if (overwrite)
         {
-          var imagePath = Type.BitmapFilePath;
-          var plane = Location;
-          plane = new Plane(plane.Origin - (plane.XAxis * Width.Value * 0.5) - (plane.YAxis * Height.Value * 0.5), plane.XAxis, plane.YAxis);
-          guid = doc.Objects.AddPictureFrame(plane, imagePath ?? string.Empty, asMesh: false, Width.Value, Height.Value, selfIllumination: false, embedBitmap: true);
+          att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
+          att.Name = DisplayName;
+          if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
+            att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
 
-          if (guid != Guid.Empty && doc.Objects.FindId(guid) is RhinoObject picture)
+          var type = Type;
+          if (type.BakeElement(idMap, false, doc, att, out var typeGuid))
           {
-            var currentAttributes = picture.Attributes;
-            currentAttributes.Name = att.Name;
-            currentAttributes.LayerIndex = att.LayerIndex;
-            doc.Objects.ModifyAttributes(guid, currentAttributes, quiet: true);
+            var xform = Transform.PlaneToPlane(Plane.WorldXY, Location) *
+              Transform.Scale(Plane.WorldXY, Width.Value / type.Width.Value, Height.Value / type.Height.Value, 1.0);
 
-            if (picture.RenderMaterial is Rhino.Render.RenderMaterial renderMaterial)
-            {
-              renderMaterial.BeginChange(Rhino.Render.RenderContent.ChangeContexts.Program);
-              renderMaterial.Name = att.Name;
-              renderMaterial.EndChange();
-            }
+            var index = doc.InstanceDefinitions.FindId(typeGuid).Index;
+            guid = doc.Objects.AddInstanceObject(index, xform, att);
           }
         }
 
@@ -308,7 +299,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Image Type")]
-  public class ImageType : ElementType
+  public class ImageType : ElementType, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.ImageType);
     public new ARDB.ImageType Value => base.Value as ARDB.ImageType;
@@ -342,6 +333,24 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Properties
+    public double? Width
+    {
+#if REVIT_2021
+      get => Value?.Width * Revit.ModelUnits;
+#else
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.RASTER_SYMBOL_WIDTH)?.AsDouble() * Revit.ModelUnits;
+#endif
+    }
+
+    public double? Height
+    {
+#if REVIT_2021
+      get => Value?.Height * Revit.ModelUnits;
+#else
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.RASTER_SYMBOL_HEIGHT)?.AsDouble() * Revit.ModelUnits;
+#endif
+    }
+
     System.Drawing.Bitmap _Bitmap;
     System.Drawing.Bitmap Bitmap => _Bitmap is null ? (_Bitmap = Value?.GetImage()) : _Bitmap;
 
@@ -432,6 +441,81 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return material;
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is ARDB.ImageType type)
+      {
+        // Get a Unique Instance Definition name.
+        var idef_name = NameConverter.EscapeName(type, out var idef_description);
+
+        // 2. Check if already exist
+        var index = doc.InstanceDefinitions.Find(idef_name)?.Index ?? -1;
+
+        // 3. Update if necessary
+        if (index < 0 || overwrite)
+        {
+          var geometry = new List<GeometryBase>(1);
+          var attributes = new List<ObjectAttributes>(1);
+
+          var plane = Plane.WorldXY;
+          var width = Width.Value;
+          var height = Height.Value;
+
+          plane = new Plane(plane.Origin - (plane.XAxis * width * 0.5) - (plane.YAxis * height * 0.5), plane.XAxis, plane.YAxis);
+          guid = doc.Objects.AddPictureFrame(plane, BitmapFilePath ?? string.Empty, asMesh: false, width, height, selfIllumination: true, embedBitmap: true);
+
+          if (guid != Guid.Empty && doc.Objects.FindId(guid) is RhinoObject picture)
+          {
+            doc.Objects.Delete(picture);
+
+            var currentAttributes = picture.Attributes;
+            currentAttributes.Name = "Image";
+            if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
+              currentAttributes.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+            if (picture.RenderMaterial is Rhino.Render.RenderMaterial renderMaterial)
+            {
+              renderMaterial.BeginChange(Rhino.Render.RenderContent.ChangeContexts.Program);
+              renderMaterial.Name = Nomen;
+              renderMaterial.FirstChild.Name = renderMaterial.Name;
+              renderMaterial.EndChange();
+            }
+
+            geometry.Add(picture.Geometry);
+            attributes.Add(currentAttributes);
+            if (index < 0) index = doc.InstanceDefinitions.Add(idef_name, idef_description, Point3d.Origin, geometry, attributes);
+            else if (!doc.InstanceDefinitions.ModifyGeometry(index, geometry, attributes)) index = -1;
+          }
+
+        }
+
+        if (index >= 0) guid = doc.InstanceDefinitions[index].Id;
+        if (guid != Guid.Empty)
+        {
+          idMap.Add(Id, guid);
+          return true;
+        }
+      }
+
+      return false;
     }
     #endregion
   }
