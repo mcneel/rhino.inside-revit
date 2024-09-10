@@ -13,6 +13,13 @@ group: Deployment & Configs
 
 ### RC
 
+
+{% endcapture %}
+
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.24 RC3" version="v1.24.9018.17524" pre_release=true time="09/10/2024" %}
+
 - Fix on 'Host Shape' when input points overlap corners.
 - Fixed 'Deconstruct Curtain Grid' when panels are not `FamilyInstance`.
 - Fixed `ModelText.Location` property.
@@ -20,10 +27,6 @@ group: Deployment & Configs
 - Change on Bake. Now shade-color is applied to the geometry directly.
 - Fix on Brep.TryGetExtrusion extension method.
 - Added `Element.DependsOn` extension method.
-
-{% endcapture %}
-
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 {% include ltr/release-header.html title="v1.24 RC2" version="v1.24.9005.13660" pre_release=true time="08/27/2024" %}
 
