@@ -38,7 +38,7 @@ namespace RhinoInside.Revit
     internal static bool InitEto(Assembly assembly)
     {
       if (Eto.Forms.Application.Instance is null)
-        new Eto.Forms.Application(Eto.Platforms.Wpf).Attach();
+        new Eto.Forms.Application(new Eto.Wpf.Platform()).Attach();
 
       return true;
     }
