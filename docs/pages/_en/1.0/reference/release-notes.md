@@ -18,8 +18,9 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.24 RC3" version="v1.24.9018.17524" pre_release=true time="09/10/2024" %}
+{% include ltr/release-header.html title="v1.24 RC3" version="v1.24.9019.19949" pre_release=true time="09/10/2024" %}
 
+- Fixed an issue when an old version of Eto was already loaded [Issue #1028](https://github.com/mcneel/rhino.inside-revit/issues/1028)
 - Fix on 'Host Shape' when input points overlap corners.
 - Fixed 'Deconstruct Curtain Grid' when panels are not `FamilyInstance`.
 - Fixed `ModelText.Location` property.
