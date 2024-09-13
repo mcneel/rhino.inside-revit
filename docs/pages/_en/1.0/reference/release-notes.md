@@ -13,6 +13,7 @@ group: Deployment & Configs
 
 ### RC
 
+- RiR 1.24 requires Rhino 8.11.
 
 {% endcapture %}
 
