@@ -13,11 +13,13 @@ group: Deployment & Configs
 
 ### RC
 
-- RiR 1.24 requires Rhino 8.11.
-
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.24" version="v1.24.9022.17166" time="09/17/2024" %}
+
+- {{ site.terms.rir }} 1.24 requires Rhino 8.11
 
 {% include ltr/release-header.html title="v1.24 RC3" version="v1.24.9019.19949" pre_release=true time="09/10/2024" %}
 
