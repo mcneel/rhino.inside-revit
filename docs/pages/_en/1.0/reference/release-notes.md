@@ -19,6 +19,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.25 RC2" version="v1.25.9029.7487" pre_release=true time="09/24/2024" %}
+
+- {{ site.terms.rir }} now requires Revit 2024.3 and is not supported on earlier Revit 2024 versions. This version of Revit [includes a fix for the schema bug](https://www.autodesk.com/blogs/aec/2024/09/18/revit-2024-3-fixes-schema-issue-now-available/).
+
 {% include ltr/release-header.html title="v1.25 RC1" version="v1.25.9022.17340" pre_release=true time="09/17/2024" %}
 
 - Miscellaneous Improvements
