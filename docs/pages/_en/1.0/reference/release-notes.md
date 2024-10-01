@@ -13,7 +13,6 @@ group: Deployment & Configs
 
 ### RC
 
-- Now RiR requires Revit 2024.3.
 
 {% endcapture %}
 
