@@ -96,6 +96,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations.ReferenceElements
           if ((curve = Curve.ProjectToPlane(curve, plane)) is null)
             throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project Curve into 'Work Plane'", curve);
 
+          if (curve.IsClosed || curve.PointAtStart.DistanceTo(curve.PointAtEnd) < tol.VertexTolerance)
+            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be a non closed one.\nTolerance is {(double)tol.VertexTolerance:N3} {GH_Format.RhinoUnitSymbol()}", curve);
+
           if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
