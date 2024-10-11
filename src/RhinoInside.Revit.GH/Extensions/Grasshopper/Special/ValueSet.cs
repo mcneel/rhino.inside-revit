@@ -235,7 +235,7 @@ namespace Grasshopper.Special
     public virtual DataCulling CullingMask => DataCulling.Nulls | DataCulling.Invalids | DataCulling.Duplicates | DataCulling.Empty;
 
     static readonly Dictionary<Type, Bitmap> TypeIcons = new Dictionary<Type, Bitmap>();
-    protected virtual Bitmap GetItemIcon(IGH_Goo value, Size size)
+    protected virtual Bitmap GetItemIcon(T value, Size size)
     {
       var type = value.GetType();
       if (TypeIcons.TryGetValue(type, out var icon))
