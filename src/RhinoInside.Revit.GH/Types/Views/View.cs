@@ -605,7 +605,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Value is ARDB.View view)
       {
-        var viewName = $"{Type.FamilyName}::{Nomen}";
+        var viewName = ModelPath;
 
         // 2. Check if already exist
         var index = doc.NamedViews.FindByName(viewName);
