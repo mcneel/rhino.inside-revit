@@ -605,8 +605,6 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Value is ARDB.View view)
       {
-        if (view is ARDB.ViewSheet) return false;
-
         var viewName = ModelPath;
 
         // 2. Check if already exist
