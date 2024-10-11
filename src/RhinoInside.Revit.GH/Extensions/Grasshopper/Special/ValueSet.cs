@@ -235,10 +235,10 @@ namespace Grasshopper.Special
     public virtual DataCulling CullingMask => DataCulling.Nulls | DataCulling.Invalids | DataCulling.Duplicates | DataCulling.Empty;
 
     static readonly Dictionary<Type, Bitmap> TypeIcons = new Dictionary<Type, Bitmap>();
-    protected virtual Bitmap GetItemIcon(T value, Size size)
+    protected virtual Bitmap GetItemIcon(IGH_Goo value, Size size)
     {
       var type = value.GetType();
-      if (TypeIcons.TryGetValue(GetType(), out var icon))
+      if (TypeIcons.TryGetValue(type, out var icon))
         return icon;
 
       var bitmap = default(Bitmap);
@@ -251,19 +251,19 @@ namespace Grasshopper.Special
       {
         // Try with a parameter that has the same name.
         var typeName = value.TypeName;
-        var location = value.GetType().Assembly.Location;
-        var proxy = Instances.ComponentServer.ObjectProxies.
+        var assembly = type.Assembly;
+        var proxies = Instances.ComponentServer.ObjectProxies.
           Where
           (
-            x => typeof(IGH_Param).IsAssignableFrom(x.Type) &&
-            string.Equals(x.Desc.Name, typeName, StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(x.Location, location, StringComparison.OrdinalIgnoreCase)
+            x => x.Kind == GH_ObjectType.CompiledObject &&
+            typeof(IGH_Param).IsAssignableFrom(x.Type) &&
+            Equals(x.Type?.Assembly, assembly) &&
+            string.Equals(x.Desc.Name, typeName, StringComparison.OrdinalIgnoreCase)
           ).
           OrderBy(x => !x.SDKCompliant).
-          ThenBy(x => x.Obsolete).
-          FirstOrDefault();
+          ThenBy(x => x.Obsolete);
 
-        bitmap = proxy?.Icon;
+        bitmap = proxies.FirstOrDefault()?.Icon;
       }
 
       return TypeIcons[type] = bitmap;
