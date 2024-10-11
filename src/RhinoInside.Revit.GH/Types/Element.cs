@@ -237,7 +237,7 @@ namespace RhinoInside.Revit.GH.Types
     protected virtual string ElementPath => Nomen;
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    internal string ModelPath => $"{Document.GetTitle()}::{ElementPath}";
+    internal string ModelPath => $"{Document.GetTitle()}::{ElementPath}".ToControlEscaped();
     #endregion
 
     #region Casters
