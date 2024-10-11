@@ -131,13 +131,14 @@ namespace RhinoInside.Revit.GH.Types
       if (typeName.StartsWith("Revit "))
         typeName = typeName.Substring(6);
 
-      var location = GetType().Assembly.Location;
+      var assembly = GetType().Assembly;
       var proxy = Instances.ComponentServer.ObjectProxies.
         Where
         (
-          x => typeof(IGH_Param).IsAssignableFrom(x.Type) &&
-          string.Equals(x.Desc.Name, typeName, StringComparison.OrdinalIgnoreCase) &&
-          string.Equals(x.Location, location, StringComparison.OrdinalIgnoreCase)
+          x => x.Kind == GH_ObjectType.CompiledObject &&
+          typeof(IGH_Param).IsAssignableFrom(x.Type) &&
+          Equals(x.Type?.Assembly, assembly) &&
+          string.Equals(x.Desc.Name, typeName, StringComparison.OrdinalIgnoreCase)
         ).
         OrderBy(x => !x.SDKCompliant).
         ThenBy(x => x.Obsolete).
