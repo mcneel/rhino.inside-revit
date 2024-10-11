@@ -144,6 +144,8 @@ namespace RhinoInside.Revit
       if (!RhinoApp.CanSave)
         return ARUI.Result.Cancelled;
 
+      StartupSettings();
+
       RhinoApp.MainLoop                         += MainLoop;
 
       RhinoDoc.NewDocument                      += OnNewDocument;
@@ -151,33 +153,6 @@ namespace RhinoInside.Revit
 
       Command.BeginCommand                      += BeginCommand;
       Command.EndCommand                        += EndCommand;
-
-      // Alternative to /runscript= Rhino command line option
-      RunScriptAsync
-      (
-        script:   Environment.GetEnvironmentVariable("RhinoInside_RunScript"),
-        activate: Core.StartupMode == CoreStartupMode.OnStartup
-      );
-
-      // Add DefaultRenderAppearancePath to Rhino settings if missing
-      {
-        var DefaultRenderAppearancePath = System.IO.Path.Combine
-        (
-#if REVIT_2024
-          Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles),
-#else
-          Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
-#endif
-          "Autodesk Shared",
-          "Materials",
-          "Textures"
-        );
-
-        if (!Rhino.ApplicationSettings.FileSettings.GetSearchPaths().Any(x => x.Equals(DefaultRenderAppearancePath, StringComparison.OrdinalIgnoreCase)))
-          Rhino.ApplicationSettings.FileSettings.AddSearchPath(DefaultRenderAppearancePath, -1);
-
-        // TODO: Add also AdditionalRenderAppearancePaths content from Revit.ini if missing ??
-      }
 
       // Reset document units
       if (string.IsNullOrEmpty(Rhino.ApplicationSettings.FileSettings.TemplateFile))
@@ -188,6 +163,13 @@ namespace RhinoInside.Revit
 
       // Load Guests
       CheckInGuests();
+
+      // Alternative to /runscript= Rhino command line option
+      RunScriptAsync
+      (
+        script: Environment.GetEnvironmentVariable("RhinoInside_RunScript"),
+        activate: Core.StartupMode == CoreStartupMode.OnStartup
+      );
 
       return ARUI.Result.Succeeded;
     }
@@ -211,6 +193,8 @@ namespace RhinoInside.Revit
 
       RhinoApp.MainLoop                         -= MainLoop;
 
+      ShutdownSettings();
+
       // Unload RhinoCore
       try
       {
@@ -225,6 +209,83 @@ namespace RhinoInside.Revit
 
       return ARUI.Result.Succeeded;
     }
+
+    #region Settings
+    private static readonly string DefaultRenderAppearancePath = System.IO.Path.Combine
+    (
+#if REVIT_2024
+      Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles),
+#else
+      Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
+#endif
+      "Autodesk Shared", "Materials", "Textures"
+    );
+
+    private static readonly string LegacyRenderAppearancePath = System.IO.Path.Combine
+    (
+#if REVIT_2024
+      Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
+#else
+      Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles),
+#endif
+      "Autodesk Shared", "Materials", "Textures"
+    );
+
+    private static readonly HashSet<string> TemporarySearchPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, string> LegacySearchPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+      { DefaultRenderAppearancePath, LegacyRenderAppearancePath }
+    };
+
+    private static void AddSearchPath(string path, bool temporary = true)
+    {
+      var paths = Rhino.ApplicationSettings.FileSettings.GetSearchPaths();
+
+      // If a legacy one is already there this should be before it.
+      var index = LegacySearchPaths.TryGetValue(path, out var legacyPath) ?
+        Array.FindIndex(paths, x => x.Equals(legacyPath, StringComparison.OrdinalIgnoreCase)) : -1;
+
+      // Only add it if is missing.
+      if (Array.FindIndex(paths, x => x.Equals(path, StringComparison.OrdinalIgnoreCase)) < 0)
+      {
+        Rhino.ApplicationSettings.FileSettings.AddSearchPath(path, index);
+        if (temporary) TemporarySearchPaths.Add(path);
+      }
+    }
+    private static void RemoveSearchPath(string path)
+    {
+      if (TemporarySearchPaths.Contains(path))
+        Rhino.ApplicationSettings.FileSettings.DeleteSearchPath(path);
+    }
+
+    private static void StartupSettings()
+    {
+      if (Core.IsolateSettings)
+      {
+        // Add DefaultRenderAppearancePath to Rhino settings if missing
+        {
+          AddSearchPath(DefaultRenderAppearancePath, temporary: false);
+          RemoveSearchPath(LegacyRenderAppearancePath);
+        }
+
+        // TODO: Add also AdditionalRenderAppearancePaths content from Revit.ini if missing ??
+        {
+          //// This list may change on each run so should be temporary
+          //foreach (var path in AdditionalRenderAppearancePaths)
+          //  AddSearchPath(path, temporary: true);
+        }
+      }
+    }
+
+    private static void ShutdownSettings()
+    {
+      if (Core.IsolateSettings)
+      {
+        foreach (var path in TemporarySearchPaths)
+          RemoveSearchPath(path);
+      }
+    }
+    #endregion
 
     internal static WindowHandle MainWindow = WindowHandle.Zero;
 
