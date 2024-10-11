@@ -163,7 +163,11 @@ namespace RhinoInside.Revit
       {
         var DefaultRenderAppearancePath = System.IO.Path.Combine
         (
+#if REVIT_2024
+          Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles),
+#else
           Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
+#endif
           "Autodesk Shared",
           "Materials",
           "Textures"
