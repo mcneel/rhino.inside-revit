@@ -17,6 +17,8 @@ namespace RhinoInside.Revit.GH.Scripting
 {
   public sealed class RhinoInsideRevitPlatform : Platform
   {
+    public static IPlatform Instance { get; } = new RhinoInsideRevitPlatform();
+
     #region Converters
     public static IParamValueConverter ElementIdConverter { get; } = new Converters.ElementIdConverter();
     #endregion
