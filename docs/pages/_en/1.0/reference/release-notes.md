@@ -14,6 +14,7 @@ group: Deployment & Configs
 ### RC
 
 - Now RiR requires Revit 2024.3.
+- Fixed conversion from `Area` to `Surface`. Now resulting surface elevation is Level elevation.
 
 {% endcapture %}
 
