@@ -13,6 +13,7 @@ group: Deployment & Configs
 
 ### RC
 
+- Fixed conversion from `Area` to `Surface`. Now resulting surface elevation is Level elevation.
 
 {% endcapture %}
 
