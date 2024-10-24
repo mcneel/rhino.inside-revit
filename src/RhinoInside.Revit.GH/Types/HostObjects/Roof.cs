@@ -88,12 +88,12 @@ namespace RhinoInside.Revit.GH.Types
         {
           case ARDB.ExtrusionRoof extrusionRoof:
             return extrusionRoof.CurtainGrids is ARDB.CurtainGridSet extrusionGrids ?
-              extrusionGrids.Cast<ARDB.CurtainGrid>().Select((x, i) => new CurtainGrid(this, x, i)).ToArray() :
+              extrusionGrids.Cast<ARDB.CurtainGrid>().Where(x => x.GetCurtainCells().Any(c => !c.CurveLoops.IsEmpty)).Select((x, i) => new CurtainGrid(this, x, i)).ToArray() :
               new CurtainGrid[] { };
 
           case ARDB.FootPrintRoof footPrintRoof:
             return footPrintRoof.CurtainGrids is ARDB.CurtainGridSet footPrintGrids ?
-              footPrintGrids.Cast<ARDB.CurtainGrid>().Select((x, i) => new CurtainGrid(this, x, i)).ToArray() :
+              footPrintGrids.Cast<ARDB.CurtainGrid>().Where(x => x.GetCurtainCells().Any(c => !c.CurveLoops.IsEmpty)).Select((x, i) => new CurtainGrid(this, x, i)).ToArray() :
               new CurtainGrid[] { };
         }
 
