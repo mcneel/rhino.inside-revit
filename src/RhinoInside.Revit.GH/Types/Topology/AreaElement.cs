@@ -14,6 +14,8 @@ namespace RhinoInside.Revit.GH.Types
     public AreaElement() { }
     public AreaElement(ARDB.Area element) : base(element) { }
 
+    protected override double? ComputationOffset => Value is object ? 0.0 : default;
+
     public override BoundingBox GetBoundingBox(Transform xform)
     {
       if (IsPlaced && IsEnclosed)
