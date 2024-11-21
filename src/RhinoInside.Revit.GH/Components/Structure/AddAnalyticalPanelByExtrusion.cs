@@ -22,7 +22,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
   public class AddAnalyticalPanelByExtrusion : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("872CCB2C-E374-4C3F-B7A7-24686AD3911C");
+#if REVIT_2024
     public override GH_Exposure Exposure => GH_Exposure.secondary;
+#else
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
+#endif
     public AddAnalyticalPanelByExtrusion() : base
     (
       name: "Add Analytical Panel By Extrusion",
@@ -266,7 +270,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
       return analyticalPanel;
     }
-# endif
+#endif
   }
 }
 
