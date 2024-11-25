@@ -171,7 +171,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (above is object || value is object || below is object || prefix is object || suffix is object)
       {
         StartTransaction(dim.Document);
-        if (dim.Value.HasOneSegment())
+        if (dim.Value.NumberOfSegments == 0)
         {
           if (above?.Count > 0) dim.Value.Above = above?.Last() ?? string.Empty;
           if (value?.Count > 0) dim.Value.ValueOverride = value?.Last() ?? string.Empty;
@@ -197,7 +197,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       }
 
       var factor = dim.Value.DimensionType.StyleType == DimensionStyleType.Angular ? 1.0 : Revit.ModelUnits;
-      if (dim.Value.HasOneSegment())
+      if (dim.Value.NumberOfSegments == 0)
       {
         Params.TrySetDataList(DA, "Measure", () => new double?[] { dim.Value.Value.HasValue ? dim.Value.Value.Value * factor : default(double?) });
         Params.TrySetDataList(DA, "Above", () => new string[] { dim.Value.Above });
