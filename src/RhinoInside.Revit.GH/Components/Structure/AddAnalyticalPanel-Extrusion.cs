@@ -31,8 +31,8 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
     public AddAnalyticalPanelByExtrusion() : base
     (
-      name: "Add Analytical Panel (Curve)",
-      nickname: "AP-Curve",
+      name: "Add Analytical Panel (Extrusion)",
+      nickname: "AP-Extrusion",
       description: "Given a curve, it adds an analytical panel perpendicular to the provided work plane to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
@@ -68,8 +68,8 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Name = "Height",
           NickName = "T",
           Description = "Analytical panel height",
-          Optional = true,
-        }, ParamRelevance.Secondary
+          Optional = true
+        }, ParamRelevance.Primary
       ),
     };
 
