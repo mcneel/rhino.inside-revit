@@ -4,22 +4,24 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
 #if REVIT_2023
-  using ARDB_Structure_AnalyticalPanel = ARDB.Structure.AnalyticalPanel;
+  using ARDB_AnalyticalPanel = ARDB.Structure.AnalyticalPanel;
 #else
-      using ARDB_Structure_AnalyticalPanel = ARDB.Structure.AnalyticalModelSurface;
+  using ARDB_AnalyticalPanel = ARDB.Structure.AnalyticalModelSurface;
 #endif
 
   using Convert.Geometry;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.27")]
-  public class AddAnalyticalPanelByExtrusion : ElementTrackerComponent
+  [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2024.0")]
+#if DEBUG
+  public
+#endif
+  class AddAnalyticalPanelByExtrusion : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("872CCB2C-E374-4C3F-B7A7-24686AD3911C");
 #if REVIT_2024
@@ -71,12 +73,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
       ),
       new ParamDefinition
       (
-        new Param_Enum<Types.AnalyticalStructuralRole>
+        new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
         {
           Name = "Structural Role",
           NickName = "R",
           Description = "Analytical element structural role",
-          Access = GH_ParamAccess.item,
           Optional = true,
         }.SetDefaultVale(ARDB.Structure.AnalyticalStructuralRole.StructuralRolePanel)
       ),
@@ -87,7 +88,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Name = "Height",
           NickName = "H",
           Description = "Analytical panel extrusion height",
-          Access = GH_ParamAccess.item,
           Optional = true,
         }, ParamRelevance.Secondary
       )
@@ -97,7 +97,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-#if REVIT_2024
       new ParamDefinition
       (
         new Parameters.AnalyticalPanel()
@@ -107,7 +106,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Description = $"Output {_AnalyticalPanel_}",
         }
       )
-#endif
     };
 
     const string _AnalyticalPanel_ = "Analytical Panel";
@@ -126,7 +124,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #if REVIT_2024
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      ReconstructElement<ARDB_Structure_AnalyticalPanel>
+      ReconstructElement<ARDB_AnalyticalPanel>
       (
         doc.Value, _AnalyticalPanel_, analyticalPanel =>
         {
@@ -166,10 +164,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
       );
 #endif
     }
+
 #if REVIT_2024
     bool Reuse
     (
-      ARDB_Structure_AnalyticalPanel analyticalPanel,
+      ARDB_AnalyticalPanel analyticalPanel,
       Curve curve,
       Plane plane,
       ARDB.Structure.AnalyticalStructuralRole structuralRole,
@@ -236,9 +235,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
       return true;
     }
 
-    ARDB_Structure_AnalyticalPanel Create(ARDB.Document doc, Curve curve, Plane plane, ARDB.Structure.AnalyticalStructuralRole structuralRole, double height)
+    ARDB_AnalyticalPanel Create(ARDB.Document doc, Curve curve, Plane plane, ARDB.Structure.AnalyticalStructuralRole structuralRole, double height)
     {
-      ARDB_Structure_AnalyticalPanel analyticalPanel = ARDB_Structure_AnalyticalPanel.Create(
+      ARDB_AnalyticalPanel analyticalPanel = ARDB_AnalyticalPanel.Create(
         doc,
         curve.ToCurve(),
         plane.Normal.ToXYZ() * (1 / Revit.ModelUnits) * height * -1 );
@@ -247,10 +246,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
       return analyticalPanel;
     }
 
-
-    ARDB_Structure_AnalyticalPanel Reconstruct
+    ARDB_AnalyticalPanel Reconstruct
     (
-      ARDB_Structure_AnalyticalPanel analyticalPanel,
+      ARDB_AnalyticalPanel analyticalPanel,
       ARDB.Document doc,
       Curve curve,
       Plane plane,

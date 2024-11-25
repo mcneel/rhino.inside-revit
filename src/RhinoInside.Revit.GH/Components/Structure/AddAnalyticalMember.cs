@@ -5,19 +5,20 @@ using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
-using RhinoInside.Revit.GH.Parameters;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
-
-  #if REVIT_2023
-    using ARDB_Structure_AnalyticalMember = ARDB.Structure.AnalyticalMember;
+#if REVIT_2023
+  using ARDB_AnalyticalMember = ARDB.Structure.AnalyticalMember;
 #else
-      using ARDB_Structure_AnalyticalMember = ARDB.Structure.AnalyticalModelStick;
+  using ARDB_AnalyticalMember = ARDB.Structure.AnalyticalModelStick;
 #endif
 
-  [ComponentVersion(introduced: "1.27")]
-  public class AddAnalyticalMember : ElementTrackerComponent
+  [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
+#if DEBUG
+  public
+#endif
+  class AddAnalyticalMember : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("88AD5522-B3AD-4A67-AB96-3D90249BA215");
 #if REVIT_2023
@@ -61,7 +62,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       ),
       new ParamDefinition
       (
-        new Param_Enum<Types.AnalyticalStructuralRole>
+        new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
         {
           Name = "Structural Role",
           NickName = "R",
@@ -76,7 +77,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-#if REVIT_2023
       new ParamDefinition
       (
         new Parameters.AnalyticalMember()
@@ -86,7 +86,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Description = $"Output {_AnalyticalMember_}",
         }
       )
-#endif
     };
 
     const string _AnalyticalMember_ = "Analytical Member";
@@ -106,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #if REVIT_2023
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      ReconstructElement<ARDB_Structure_AnalyticalMember>
+      ReconstructElement<ARDB_AnalyticalMember>
       (
         doc.Value, _AnalyticalMember_, analyticalMember =>
         {
@@ -134,7 +133,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #if REVIT_2023
     bool Reuse
     (
-      ARDB_Structure_AnalyticalMember analyticalMember,
+      ARDB_AnalyticalMember analyticalMember,
       Curve curve,
       ARDB.Structure.AnalyticalStructuralRole structuralRole
     )
@@ -156,16 +155,16 @@ namespace RhinoInside.Revit.GH.Components.Structure
       return true;
     }
 
-    ARDB_Structure_AnalyticalMember Create(ARDB.Document doc, ARDB.Curve curve, ARDB.Structure.AnalyticalStructuralRole structuralRole)
+    ARDB_AnalyticalMember Create(ARDB.Document doc, ARDB.Curve curve, ARDB.Structure.AnalyticalStructuralRole structuralRole)
     {
-      ARDB_Structure_AnalyticalMember analyticalMember = ARDB_Structure_AnalyticalMember.Create(doc, curve);
+      ARDB_AnalyticalMember analyticalMember = ARDB_AnalyticalMember.Create(doc, curve);
       analyticalMember.StructuralRole = structuralRole;
       return analyticalMember;
     }
 
-    ARDB_Structure_AnalyticalMember Reconstruct
+    ARDB_AnalyticalMember Reconstruct
     (
-      ARDB_Structure_AnalyticalMember analyticalMember,
+      ARDB_AnalyticalMember analyticalMember,
       ARDB.Document doc,
       Curve curve,
       ARDB.Structure.AnalyticalStructuralRole structuralRole
