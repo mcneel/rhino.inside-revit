@@ -15,10 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
 
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-#if DEBUG
-  public
-#endif
-  class AddAnalyticalMember : ElementTrackerComponent
+  public class AddAnalyticalMember : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("88AD5522-B3AD-4A67-AB96-3D90249BA215");
 #if REVIT_2023
@@ -39,7 +36,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      #if REVIT_2023
       new ParamDefinition
       (
         new Parameters.Document()
@@ -60,18 +56,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Access = GH_ParamAccess.item
         }
       ),
-      new ParamDefinition
-      (
-        new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
-        {
-          Name = "Structural Role",
-          NickName = "R",
-          Description = "Analytical member structural role",
-          Access = GH_ParamAccess.item,
-          Optional = true,
-        }.SetDefaultVale(ARDB.Structure.AnalyticalStructuralRole.StructuralRoleMember)
-      )
-#endif
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -113,15 +97,13 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve)) return null;
-          if (!Params.GetData(DA, "Structural Role", out Types.AnalyticalStructuralRole structuralRole)) return null;
 
           // Compute
           analyticalMember = Reconstruct
           (
             analyticalMember,
             doc.Value,
-            curve,
-            structuralRole.Value
+            curve.ToCurve()
           );
 
           DA.SetData(_AnalyticalMember_, analyticalMember);
@@ -130,51 +112,45 @@ namespace RhinoInside.Revit.GH.Components.Structure
       );
 #endif
     }
+
 #if REVIT_2023
     bool Reuse
     (
       ARDB_AnalyticalMember analyticalMember,
-      Curve curve,
-      ARDB.Structure.AnalyticalStructuralRole structuralRole
+      ARDB.Curve curve
     )
     {
       if (analyticalMember is null) return false;
 
-      if ( analyticalMember.StructuralRole != structuralRole)
-        analyticalMember.StructuralRole = structuralRole;
-
-      using (var loc = analyticalMember.GetCurve() as ARDB.Curve)
+      using (var loc = analyticalMember.GetCurve())
       {
-        if (!loc.IsSameKindAs(curve.ToCurve()))
+        if (!loc.IsSameKindAs(curve))
           return false;
 
-        if (!loc.AlmostEquals(curve.ToCurve(), analyticalMember.Document.Application.VertexTolerance))
-          analyticalMember.SetCurve(curve.ToCurve());
+        if (!loc.AlmostEquals(curve, analyticalMember.Document.Application.VertexTolerance))
+          analyticalMember.SetCurve(curve);
       }
 
       return true;
     }
 
-    ARDB_AnalyticalMember Create(ARDB.Document doc, ARDB.Curve curve, ARDB.Structure.AnalyticalStructuralRole structuralRole)
+    ARDB_AnalyticalMember Create(ARDB.Document doc, ARDB.Curve curve)
     {
-      ARDB_AnalyticalMember analyticalMember = ARDB_AnalyticalMember.Create(doc, curve);
-      analyticalMember.StructuralRole = structuralRole;
-      return analyticalMember;
+      return ARDB_AnalyticalMember.Create(doc, curve);
     }
 
     ARDB_AnalyticalMember Reconstruct
     (
       ARDB_AnalyticalMember analyticalMember,
       ARDB.Document doc,
-      Curve curve,
-      ARDB.Structure.AnalyticalStructuralRole structuralRole
+      ARDB.Curve curve
     )
     {
-      if (!Reuse(analyticalMember, curve, structuralRole))
+      if (!Reuse(analyticalMember, curve))
       {
         analyticalMember = analyticalMember.ReplaceElement
         (
-          Create(doc, curve.ToCurve(), structuralRole),
+          Create(doc, curve),
           ExcludeUniqueProperties
         );
         analyticalMember.Document.Regenerate();
