@@ -1,14 +1,14 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using Rhino.Geometry;
-using ARDB = Autodesk.Revit.DB;
-using System.Collections.Generic;
-using RhinoInside.Revit.GH.Exceptions;
+using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
-using System.Linq;
+using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Exceptions;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
   using ARDB_AnalyticalPanel = ARDB.Structure.AnalyticalModelSurface;
 #endif
 
-  [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2024.0")]
+  [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
 #if DEBUG
   public
 #endif
