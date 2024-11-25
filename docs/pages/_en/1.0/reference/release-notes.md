@@ -13,6 +13,8 @@ group: Deployment & Configs
 
 ### RC
 
+- Added 'Dimension Text' component.
+
 
 {% endcapture %}
 
