@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using Rhino.Geometry;
+using RhinoInside.Revit.Convert.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -80,6 +82,55 @@ namespace RhinoInside.Revit.GH.Types
     public AnalyticalSurface() { }
     public AnalyticalSurface(ARDB_Structure_AnalyticalSurfaceBase element) : base(element) { }
 
+    private static ARDB.CurveLoop GetOuterContour(ARDB_Structure_AnalyticalSurfaceBase surface)
+    {
+#if REVIT_2023
+      return surface?.GetOuterContour();
+#else
+      return surface?.GetLoops(ARDB.Structure.AnalyticalLoopType.External).FirstOrDefault();
+#endif
+    }
+
+    public override Curve Curve
+    {
+      get => GetOuterContour(Value)?.ToPolyCurve();
+      set => throw new InvalidOperationException("Curve can not be set for this element.");
+    }
+
+    public override Brep TrimmedSurface
+    {
+      get
+      {
+        if (Value is ARDB_Structure_AnalyticalSurfaceBase)
+        {
+          var loops = new Curve[] { GetOuterContour(Value).ToPolyCurve() };
+          var plane = Location;
+
+          if (loops.Length > 0)
+          {
+            var loopsBox = BoundingBox.Empty;
+            foreach (var loop in loops)
+            {
+              if (loop.ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
+                loop.Reverse();
+
+              loopsBox.Union(loop.GetBoundingBox(plane));
+            }
+
+            var planeSurface = new PlaneSurface
+            (
+              plane,
+              new Interval(loopsBox.Min.X, loopsBox.Max.X),
+              new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
+            );
+
+            return planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
+          }
+        }
+
+        return null;
+      }
+    }
   }
 }
 
@@ -99,5 +150,24 @@ namespace RhinoInside.Revit.GH.Types
 
     public AnalyticalPanel() { }
     public AnalyticalPanel(ARDB_Structure_AnalyticalPanel element) : base(element) { }
+  }
+}
+
+namespace RhinoInside.Revit.GH.Types
+{
+#if REVIT_2023
+  using ARDB_Structure_AnalyticalOpening = ARDB.Structure.AnalyticalOpening;
+#else
+  using ARDB_Structure_AnalyticalOpening = ARDB.Structure.AnalyticalModelSurface;
+#endif
+
+  [Kernel.Attributes.Name("Analytical Opening")]
+  public class AnalyticalOpening : AnalyticalSurface
+  {
+    protected override Type ValueType => typeof(ARDB_Structure_AnalyticalOpening);
+    public new ARDB_Structure_AnalyticalOpening Value => base.Value as ARDB_Structure_AnalyticalOpening;
+
+    public AnalyticalOpening() { }
+    public AnalyticalOpening(ARDB_Structure_AnalyticalOpening element) : base(element) { }
   }
 }
