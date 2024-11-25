@@ -82,9 +82,18 @@ namespace RhinoInside.Revit.GH.Types
     public AnalyticalSurface() { }
     public AnalyticalSurface(ARDB_Structure_AnalyticalSurfaceBase element) : base(element) { }
 
+    private static ARDB.CurveLoop GetOuterContour(ARDB_Structure_AnalyticalSurfaceBase surface)
+    {
+#if REVIT_2023
+      return surface?.GetOuterContour();
+#else
+      return surface?.GetLoops(ARDB.Structure.AnalyticalLoopType.External).FirstOrDefault();
+#endif
+    }
+
     public override Curve Curve
     {
-      get => Value.GetOuterContour().ToPolyCurve();
+      get => GetOuterContour(Value)?.ToPolyCurve();
       set => throw new InvalidOperationException("Curve can not be set for this element.");
     }
 
@@ -94,7 +103,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB_Structure_AnalyticalSurfaceBase)
         {
-          var loops = new Curve[] { Value.GetOuterContour().ToPolyCurve() };
+          var loops = new Curve[] { GetOuterContour(Value).ToPolyCurve() };
           var plane = Location;
 
           if (loops.Length > 0)
