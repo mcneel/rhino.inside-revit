@@ -17,14 +17,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
   using Convert.Geometry;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2024.0")]
+  [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
 #if DEBUG
   public
 #endif
   class AddAnalyticalPanelByExtrusion : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("872CCB2C-E374-4C3F-B7A7-24686AD3911C");
-#if REVIT_2024
+#if REVIT_2023
     public override GH_Exposure Exposure => GH_Exposure.secondary;
 #else
     public override GH_Exposure Exposure => GH_Exposure.hidden;
@@ -42,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-#if REVIT_2024
+#if REVIT_2023
       new ParamDefinition
       (
         new Parameters.Document()
@@ -64,12 +64,13 @@ namespace RhinoInside.Revit.GH.Components.Structure
       ),
       new ParamDefinition
       (
-        new Parameters.SketchPlane()
+        new Param_Number
         {
-          Name = "Work Plane",
-          NickName = "WP",
-          Description = "Work plane of analytical panel.",
-        }
+          Name = "Height",
+          NickName = "H",
+          Description = "Analytical panel extrusion height",
+          Optional = true,
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -80,16 +81,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Description = "Analytical element structural role",
           Optional = true,
         }.SetDefaultVale(ARDB.Structure.AnalyticalStructuralRole.StructuralRolePanel)
-      ),
-      new ParamDefinition
-      (
-        new Param_Number
-        {
-          Name = "Height",
-          NickName = "H",
-          Description = "Analytical panel extrusion height",
-          Optional = true,
-        }, ParamRelevance.Secondary
       )
 #endif
     };
@@ -112,7 +103,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
-#if REVIT_2024
+#if REVIT_2023
       ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS,
       ARDB.BuiltInParameter.ANALYTICAL_ELEMENT_STRUCTURAL_ROLE,
       ARDB.BuiltInParameter.ANALYTICAL_PANEL_THICKNESS
@@ -121,7 +112,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-#if REVIT_2024
+#if REVIT_2023
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
       ReconstructElement<ARDB_AnalyticalPanel>
@@ -131,11 +122,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if (!Params.GetData(DA, "Structural Role", out Types.AnalyticalStructuralRole structuralRole)) return null;
-          if (!Params.TryGetData(DA, "Work Plane", out Types.SketchPlane sketchPlane)) return null;
           if (!Params.TryGetData(DA, "Height", out double? height)) return null;
+          if (!Params.GetData(DA, "Structural Role", out Types.AnalyticalStructuralRole structuralRole)) return null;
 
-          var plane = sketchPlane.Location;
           var tol = GeometryTolerance.Model;
 
           if (curve.IsShort(tol.ShortCurveTolerance))
@@ -144,8 +133,8 @@ namespace RhinoInside.Revit.GH.Components.Structure
           if (curve is NurbsCurve && curve.IsClosed(tol.ShortCurveTolerance * 1.01) && !curve.IsEllipse(tol.VertexTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
-          if ((curve = Curve.ProjectToPlane(curve, plane)) is null)
-            throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project Curve into 'Work Plane'", curve);
+          if (!curve.TryGetPlane(out var plane))
+            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be planar", curve);
 
           // Compute
           analyticalPanel = Reconstruct
@@ -165,7 +154,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
     }
 
-#if REVIT_2024
+#if REVIT_2023
     bool Reuse
     (
       ARDB_AnalyticalPanel analyticalPanel,
