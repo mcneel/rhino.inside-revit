@@ -9,18 +9,20 @@ using System.Collections.Generic;
 using RhinoInside.Revit.GH.Exceptions;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 using System.Linq;
-using RhinoInside.Revit.GH.Parameters;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
-  #if REVIT_2023
-    using ARDB_Structure_AnalyticalPanel = ARDB.Structure.AnalyticalPanel;
+#if REVIT_2023
+  using ARDB_AnalyticalPanel = ARDB.Structure.AnalyticalPanel;
 #else
-      using ARDB_Structure_AnalyticalPanel = ARDB.Structure.AnalyticalModelSurface;
+  using ARDB_AnalyticalPanel = ARDB.Structure.AnalyticalModelSurface;
 #endif
 
-  [ComponentVersion(introduced: "1.27")]
-  public class AddAnalyticalPanelByBoundary : ElementTrackerComponent
+  [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2024.0")]
+#if DEBUG
+  public
+#endif
+  class AddAnalyticalPanelByBoundary : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("BA2D1733-0A7A-463C-BDDC-4262405F4FE6");
 #if REVIT_2023
@@ -42,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      #if REVIT_2023
+#if REVIT_2023
       new ParamDefinition
       (
         new Parameters.Document()
@@ -65,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       ),
       new ParamDefinition
       (
-        new Param_Enum<Types.AnalyticalStructuralRole>
+        new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
         {
           Name = "Structural Role",
           NickName = "R",
@@ -80,7 +82,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-#if REVIT_2023
       new ParamDefinition
       (
         new Parameters.AnalyticalPanel()
@@ -90,7 +91,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Description = $"Output {_AnalyticalPanel_}",
         }
       )
-#endif
     };
 
     const string _AnalyticalPanel_ = "Analytical Panel";
@@ -109,7 +109,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #if REVIT_2023
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
 
-      ReconstructElement<ARDB_Structure_AnalyticalPanel>
+      ReconstructElement<ARDB_AnalyticalPanel>
       (
         doc.Value, _AnalyticalPanel_, analyticalPanel =>
         {
@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #if REVIT_2023
     bool Reuse
     (
-      ARDB_Structure_AnalyticalPanel analyticalPanel,
+      ARDB_AnalyticalPanel analyticalPanel,
       IList<Curve> boundary
     )
     {
@@ -165,22 +165,22 @@ namespace RhinoInside.Revit.GH.Components.Structure
       return true;
     }
 
-    ARDB_Structure_AnalyticalPanel Create(ARDB.Document doc, IList<Curve> boundary)
+    ARDB_AnalyticalPanel Create(ARDB.Document doc, IList<Curve> boundary)
     {
       var curveLoop = boundary.ConvertAll(x => x.ToCurveLoop()).FirstOrDefault();
 
       if (curveLoop is null)
         throw new ArgumentException("Failed to convert boundary curves to CurveLoop.", nameof(boundary));
 
-      ARDB_Structure_AnalyticalPanel analyticalPanel = ARDB_Structure_AnalyticalPanel.Create(doc, curveLoop);
+      ARDB_AnalyticalPanel analyticalPanel = ARDB_AnalyticalPanel.Create(doc, curveLoop);
 
       return analyticalPanel;
     }
 
 
-    ARDB_Structure_AnalyticalPanel Reconstruct
+    ARDB_AnalyticalPanel Reconstruct
     (
-      ARDB_Structure_AnalyticalPanel analyticalPanel,
+      ARDB_AnalyticalPanel analyticalPanel,
       ARDB.Document doc,
       IList<Curve> boundary
     )
