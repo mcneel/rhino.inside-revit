@@ -66,9 +66,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Param_Number
         {
-          Name = "Height",
-          NickName = "H",
-          Description = "Analytical panel extrusion height",
+          Name = "Thickness",
+          NickName = "T",
+          Description = "Analytical panel thickness",
           Optional = true,
         }, ParamRelevance.Secondary
       ),
@@ -122,7 +122,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
-          if (!Params.TryGetData(DA, "Height", out double? height)) return null;
+          if (!Params.TryGetData(DA, "Thickness", out double? thickness)) return null;
           if (!Params.GetData(DA, "Structural Role", out Types.AnalyticalStructuralRole structuralRole)) return null;
 
           var tol = GeometryTolerance.Model;
@@ -144,7 +144,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             curve,
             plane,
             structuralRole.Value,
-            height ?? 3.0
+            thickness ?? 3.0
           );
 
           DA.SetData(_AnalyticalPanel_, analyticalPanel);
@@ -224,12 +224,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
       return true;
     }
 
-    ARDB_AnalyticalPanel Create(ARDB.Document doc, Curve curve, Plane plane, ARDB.Structure.AnalyticalStructuralRole structuralRole, double height)
+    ARDB_AnalyticalPanel Create(ARDB.Document doc, Curve curve, Plane plane, ARDB.Structure.AnalyticalStructuralRole structuralRole, double thickness)
     {
-      ARDB_AnalyticalPanel analyticalPanel = ARDB_AnalyticalPanel.Create(
+      var analyticalPanel = ARDB_AnalyticalPanel.Create
+      (
         doc,
         curve.ToCurve(),
-        plane.Normal.ToXYZ() * (1 / Revit.ModelUnits) * height * -1 );
+        plane.Normal.ToXYZ() * (1 / Revit.ModelUnits) * thickness * -1
+      );
       analyticalPanel.StructuralRole = structuralRole;
 
       return analyticalPanel;
@@ -242,14 +244,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
       Curve curve,
       Plane plane,
       ARDB.Structure.AnalyticalStructuralRole structuralRole,
-      double height
+      double thickness
     )
     {
-      if (!Reuse(analyticalPanel, curve, plane, structuralRole, height))
+      if (!Reuse(analyticalPanel, curve, plane, structuralRole, thickness))
       {
         analyticalPanel = analyticalPanel.ReplaceElement
         (
-          Create(doc, curve, plane, structuralRole, height),
+          Create(doc, curve, plane, structuralRole, thickness),
           ExcludeUniqueProperties
         );
         analyticalPanel.Document.Regenerate();
