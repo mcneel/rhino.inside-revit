@@ -200,14 +200,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
       var openingIds = analyticalPanel.GetAnalyticalOpeningsIds().OrderBy(x => x.ToValue()).ToArray();
       int o = 1;
       for (; o < curveLoop.Length; ++o)
-        CreateOpening(analyticalPanel, curveLoop[o], o - 1 < openingIds.Length ? openingIds[o - 1] : null);
+        Create(analyticalPanel, curveLoop[o], o - 1 < openingIds.Length ? openingIds[o - 1] : null);
 
       analyticalPanel.Document.Delete(openingIds.Skip(o - 1).ToArray());
 
       return true;
     }
 
-    ARDB_AnalyticalOpening CreateOpening(ARDB_AnalyticalPanel panel, ARDB.CurveLoop loop, ARDB.ElementId openingId)
+    ARDB_AnalyticalOpening Create(ARDB_AnalyticalPanel panel, ARDB.CurveLoop loop, ARDB.ElementId openingId)
     {
       ARDB_AnalyticalOpening opening = null;
       if (openingId is object)
