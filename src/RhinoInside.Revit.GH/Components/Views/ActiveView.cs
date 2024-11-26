@@ -5,16 +5,16 @@ using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  public class ViewActive : ZuiComponent
+  public class ActiveView : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("7CCF350C-80CC-42D0-85BA-78544FD59F4A");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "A";
 
-    public ViewActive() : base
+    public ActiveView() : base
     (
       name: "Active View",
-      nickname: "Active",
+      nickname: "A-View",
       description: "Gets the active view",
       category: "Revit",
       subCategory: "View"
@@ -42,6 +42,15 @@ namespace RhinoInside.Revit.GH.Components.Views
     }
 
     #region UI
+    private class ButtonAttributes : ExpireButtonAttributes
+    {
+      public ButtonAttributes(ZuiComponent owner) : base(owner) { }
+      protected override string DisplayText => "Query";
+      protected override bool Visible => Owner.Params.Input.Count == 0;
+    }
+
+    public override void CreateAttributes() => m_attributes = new ButtonAttributes(this);
+
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
