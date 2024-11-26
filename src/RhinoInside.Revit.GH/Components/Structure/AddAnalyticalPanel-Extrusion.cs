@@ -141,7 +141,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             ARDB.Line l    => l.Direction.CrossProduct(l.Direction.PerpVector()),
             ARDB.Arc a     => a.Normal,
             ARDB.Ellipse e => e.Normal,
-            _ => throw new Exceptions.RuntimeArgumentException("Curve", $"Curve shuld be a line, and arc or an ellipse.\nTolerance is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve),
+            _ => throw new Exceptions.RuntimeArgumentException("Curve", $"Curve shuld be a line, an arc or an ellipse.\nTolerance is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve),
           };
 
           // Compute
