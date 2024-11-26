@@ -60,10 +60,20 @@ namespace RhinoInside.Revit.GH.Components.Structure
       ),
       new ParamDefinition
       (
+        new Param_Plane()
+        {
+          Name = "Plane",
+          NickName = "P",
+          Description = "Analytical panel work plane",
+          Optional = true
+        }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
         new Param_Number
         {
           Name = "Height",
-          NickName = "T",
+          NickName = "H",
           Description = "Analytical panel height",
           Optional = true
         }, ParamRelevance.Primary
@@ -104,30 +114,44 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         doc.Value, _AnalyticalPanel_, analyticalPanel =>
         {
-
           // Input
           if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
+          if (!Params.TryGetData(DA, "Plane", out Plane? plane)) return null;
           if (!Params.TryGetData(DA, "Height", out double? height)) return null;
 
           var tol = GeometryTolerance.Model;
+          var normal = default(ARDB.XYZ);
+          if (plane.HasValue)
+          {
+            curve = Curve.ProjectToPlane(curve, plane.Value) ?? curve;
+            normal = plane.Value.Normal.ToXYZ();
+          }
 
           if (curve.IsShort(tol.ShortCurveTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
-          if (curve is NurbsCurve && curve.IsClosed(tol.ShortCurveTolerance * 1.01) && !curve.IsEllipse(tol.VertexTolerance))
+          if (curve.IsClosed(tol.ShortCurveTolerance * 1.01))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
-          if (!curve.TryGetPlane(out var plane))
-            throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be planar", curve);
+          var offset = height / Revit.ModelUnits ?? 10.0;
+          var analyticalCurve = curve.ToCurve();
+
+          normal ??= analyticalCurve switch
+          {
+            ARDB.Line l    => l.Direction.CrossProduct(l.Direction.PerpVector()),
+            ARDB.Arc a     => a.Normal,
+            ARDB.Ellipse e => e.Normal,
+            _ => throw new Exceptions.RuntimeArgumentException("Curve", "Curve shuld be a line, an arc or an ellipse.", curve),
+          };
 
           // Compute
           analyticalPanel = Reconstruct
           (
             analyticalPanel,
             doc.Value,
-            curve,
-            plane,
-            height ?? 3.0
+            analyticalCurve.CreateReversed(),
+            normal,
+            -offset
           );
 
           DA.SetData(_AnalyticalPanel_, analyticalPanel);
@@ -141,91 +165,43 @@ namespace RhinoInside.Revit.GH.Components.Structure
     bool Reuse
     (
       ARDB_AnalyticalPanel analyticalPanel,
-      Curve curve,
-      Plane plane,
-      double height
+      ARDB.Curve curve,
+      ARDB.XYZ normal,
+      double offset
     )
     {
-      var tol = GeometryTolerance.Model;
       if (analyticalPanel is null) return false;
 
-      // Curve
-      var curveLoop = analyticalPanel.GetOuterContour().ToPolyCurve();
-      var currentCurve = Curve.ProjectToPlane(curveLoop, plane).DuplicateSegments();
-
-      if (currentCurve is null)
+      var curveLoop = analyticalPanel.GetOuterContour();
+      if (!curveLoop.HasPlane())
         return false;
 
-      if (!currentCurve[0].ToCurve().IsSameKindAs(curve.ToCurve()))
+      var curves = new ARDB.Curve[] { null, null, curve, null };
+      curves[0] = curve.CreateTransformed(ARDB.Transform.CreateTranslation(normal * offset)).CreateReversed();
+      curves[1] = ARDB.Line.CreateBound(curves[0].GetEndPoint(1), curves[2].GetEndPoint(0));
+      curves[3] = ARDB.Line.CreateBound(curves[2].GetEndPoint(1), curves[0].GetEndPoint(0));
+      curveLoop = ARDB.CurveLoop.Create(curves);
+      if (!curveLoop.HasPlane())
         return false;
 
-      Curve reversedCurve = currentCurve[0].DuplicateCurve();
-      reversedCurve.Reverse();
-      if (!currentCurve[0].ToCurve().AlmostEquals(curve.ToCurve(), analyticalPanel.Document.Application.VertexTolerance) &&
-        !reversedCurve.ToCurve().AlmostEquals(curve.ToCurve(), analyticalPanel.Document.Application.VertexTolerance)
-        )
-        return false;
-
-      // Height
-      if (!curveLoop.TryGetPolyline(out var profile))
-        return false;
-
-      foreach (var edge in profile.GetSegments())
-      {
-        if (edge.Direction.IsParallelTo(plane.Normal, tol.DefaultTolerance) > 0 &&
-            Math.Abs(Math.Abs(height) - Math.Abs(edge.Length)) > tol.DefaultTolerance)
-        {
-          return false;
-        }
-      }
-
-      // Plane
-      if (!curveLoop.TryGetPlane(out var currentPlane, tol.VertexTolerance))
-        return false;
-
-      if (!(Math.Abs(currentPlane.Normal * plane.Normal) < tol.DefaultTolerance))
-        return false;
-
-      var mainCurve = profile.GetSegments()
-                             .ToList()
-                             .Select(x => x.ToNurbsCurve().IsInPlane(plane, tol.DefaultTolerance))
-                             .Count();
-
-      if (profile.GetSegments()
-                 .ToList()
-                 .Select(x => x.ToNurbsCurve().IsInPlane(plane, tol.DefaultTolerance))
-                 .Count() != 1)
-      {
-        return false;
-      }
-
+      analyticalPanel.SetOuterContour(curveLoop);
       return true;
-    }
-
-    ARDB_AnalyticalPanel Create(ARDB.Document doc, Curve curve, Plane plane, double height)
-    {
-      return ARDB_AnalyticalPanel.Create
-      (
-        doc,
-        curve.ToCurve(),
-        plane.Normal.ToXYZ() * (1 / Revit.ModelUnits) * height * -1
-      );
     }
 
     ARDB_AnalyticalPanel Reconstruct
     (
       ARDB_AnalyticalPanel analyticalPanel,
       ARDB.Document doc,
-      Curve curve,
-      Plane plane,
-      double height
+      ARDB.Curve curve,
+      ARDB.XYZ normal,
+      double offset
     )
     {
-      if (!Reuse(analyticalPanel, curve, plane, height))
+      if (!Reuse(analyticalPanel, curve, normal, offset))
       {
         analyticalPanel = analyticalPanel.ReplaceElement
         (
-          Create(doc, curve, plane, height),
+          ARDB_AnalyticalPanel.Create(doc, curve, normal * offset),
           ExcludeUniqueProperties
         );
       }
