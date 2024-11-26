@@ -3,13 +3,13 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Documents
 {
-  public class DocumentActive : ZuiComponent
+  public class ActiveDocument : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("EE033516-C1DC-4C72-8FCD-F85F38A0F267");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "A";
 
-    public DocumentActive() : base
+    public ActiveDocument() : base
     (
       "Active Document", "A-Document",
       "Gets the active document",

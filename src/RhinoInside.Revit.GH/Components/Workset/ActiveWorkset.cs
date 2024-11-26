@@ -5,16 +5,16 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Worksets
 {
   [ComponentVersion(introduced: "1.2")]
-  public class WorksetActive : TransactionalChainComponent
+  public class ActiveWorkset : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("AA467C94-D400-4F4A-80BF-DEFB309A4C52");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => "A";
 
-    public WorksetActive() : base
+    public ActiveWorkset() : base
     (
       name: "Active Workset",
-      nickname: "AWorkset",
+      nickname: "A-Workset",
       description: "Gets the active workset",
       category: "Revit",
       subCategory: "Document"

@@ -5,13 +5,13 @@ using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  public class ViewActive : ZuiComponent
+  public class ActiveView : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("7CCF350C-80CC-42D0-85BA-78544FD59F4A");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "A";
 
-    public ViewActive() : base
+    public ActiveView() : base
     (
       name: "Active View",
       nickname: "A-View",

@@ -7,13 +7,13 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
 {
   using External.UI.Extensions;
 
-  public class DesignOptionActive : ZuiComponent
+  public class ActiveDesignOption : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("B6349DDA-4486-44EB-9AF7-3D13404A3F3E");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "A";
 
-    public DesignOptionActive() : base
+    public ActiveDesignOption() : base
     (
       name: "Active Design Option",
       nickname: "A-DOption",
