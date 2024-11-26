@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               break;
 
             case ARDB.FamilyHostingBehavior.Wall:
-              if (!(host is ARDB.Wall)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Wall.");
+              if (!(host is ARDB.Wall) && !(host is ARDB.FaceWall)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Wall.");
               break;
 
             case ARDB.FamilyHostingBehavior.Floor:
