@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override Curve Curve
     {
-      get => Value.IsSingleCurve() == true ? Value.GetCurve().ToCurve() : default;
+      get => Value?.IsSingleCurve() is true ? Value.GetCurve().ToCurve() : default;
       set => throw new InvalidOperationException("Curve can not be set for this element.");
     }
   }
@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.GH.Types
     public AnalyticalSurface() { }
     public AnalyticalSurface(ARDB_Structure_AnalyticalSurfaceBase element) : base(element) { }
 
-    private static ARDB.CurveLoop GetOuterContour(ARDB_Structure_AnalyticalSurfaceBase surface)
+    protected static ARDB.CurveLoop GetOuterContour(ARDB_Structure_AnalyticalSurfaceBase surface)
     {
 #if REVIT_2023
       return surface?.GetOuterContour();
@@ -91,40 +91,16 @@ namespace RhinoInside.Revit.GH.Types
 #endif
     }
 
-    public override Curve Curve
-    {
-      get => GetOuterContour(Value)?.ToPolyCurve();
-      set => throw new InvalidOperationException("Curve can not be set for this element.");
-    }
-
     public override Brep TrimmedSurface
     {
       get
       {
         if (Value is ARDB_Structure_AnalyticalSurfaceBase)
         {
-          var loops = new Curve[] { GetOuterContour(Value).ToPolyCurve() };
-          var plane = Location;
-
-          if (loops.Length > 0)
+          using (var options = new ARDB.Options())
           {
-            var loopsBox = BoundingBox.Empty;
-            foreach (var loop in loops)
-            {
-              if (loop.ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
-                loop.Reverse();
-
-              loopsBox.Union(loop.GetBoundingBox(plane));
-            }
-
-            var planeSurface = new PlaneSurface
-            (
-              plane,
-              new Interval(loopsBox.Min.X, loopsBox.Max.X),
-              new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
-            );
-
-            return planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
+            var geometry = Value.get_Geometry(options);
+            return geometry.OfType<ARDB.Solid>().FirstOrDefault().ToBrep();
           }
         }
 
@@ -169,5 +145,40 @@ namespace RhinoInside.Revit.GH.Types
 
     public AnalyticalOpening() { }
     public AnalyticalOpening(ARDB_Structure_AnalyticalOpening element) : base(element) { }
+
+    public override Brep TrimmedSurface
+    {
+      get
+      {
+        if (Value is ARDB_Structure_AnalyticalOpening)
+        {
+          var loops = new Curve[] { GetOuterContour(Value).ToPolyCurve() };
+          var plane = Location;
+
+          if (loops.Length > 0)
+          {
+            var loopsBox = BoundingBox.Empty;
+            foreach (var loop in loops)
+            {
+              if (loop.ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
+                loop.Reverse();
+
+              loopsBox.Union(loop.GetBoundingBox(plane));
+            }
+
+            var planeSurface = new PlaneSurface
+            (
+              plane,
+              new Interval(loopsBox.Min.X, loopsBox.Max.X),
+              new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
+            );
+
+            return planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
+          }
+        }
+
+        return null;
+      }
+    }
   }
 }
