@@ -14,6 +14,7 @@ group: Deployment & Configs
 ### RC
 
 - Added 'Dimension Text' component.
+- Added 'Datum Bubbles' component.
 - Minimum Revit 2023 is 2023.1.
 
 {% endcapture %}
