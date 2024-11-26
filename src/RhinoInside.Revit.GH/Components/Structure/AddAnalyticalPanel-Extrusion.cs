@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       ),
       new ParamDefinition
       (
-        new Param_Curve()
+        new Param_Plane()
         {
           Name = "Plane",
           NickName = "P",
