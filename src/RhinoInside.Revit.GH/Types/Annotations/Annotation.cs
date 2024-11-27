@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Types
 
   interface IAnnotationLeadersAccess
   {
-    bool? HasLeaders { get; set; }
+    bool? HasLeader { get; set; }
 
     /// <summary>
     /// Returns an array of geometric references to which the dimension is attached.

@@ -25,8 +25,8 @@ namespace RhinoInside.Revit.GH.Types
     public abstract GeometryObject[] References { get; }
     #endregion
 
-    #region IAnnotationLeadersAcces
-    public abstract bool? HasLeaders { get; set; }
+    #region IAnnotationLeadersAccess
+    public abstract bool? HasLeader { get; set; }
     public abstract AnnotationLeader[] Leaders { get; }
     #endregion
   }
@@ -65,8 +65,8 @@ namespace RhinoInside.Revit.GH.Types
       ToArray();
     #endregion
 
-    #region IAnnotationLeadersAcces
-    public override bool? HasLeaders
+    #region IAnnotationLeadersAccess
+    public override bool? HasLeader
     {
       get => Value?.HasLeader;
       set

@@ -85,8 +85,8 @@ namespace RhinoInside.Revit.GH.Types
       ToArray();
     #endregion
 
-    #region IAnnotationLeadersAcces
-    public virtual bool? HasLeaders
+    #region IAnnotationLeadersAccess
+    public virtual bool? HasLeader
     {
       get => Value?.GetHasLeader();
       set
@@ -375,7 +375,7 @@ namespace RhinoInside.Revit.GH.Types
               }
             }
 
-            if (HasLeaders is true && leader.LeaderCurve is Curve leaderCurve)
+            if (HasLeader is true && leader.LeaderCurve is Curve leaderCurve)
             {
               args.Pipeline.DrawCurve(leaderCurve, args.Color, args.Thickness);
               if (leaderTickMark is object)
