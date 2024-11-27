@@ -727,4 +727,29 @@ namespace RhinoInside.Revit.GH.Types
       { (int) ARDB.ModelUpdatesStatus.UpdatedInCentral,   "Updated In Central" },
     };
   }
+#if REVIT_2023
+  [
+    ComponentVersion(introduced: "1.27"),
+    ComponentGuid("84CCF256-95C2-4D9B-BFCD-303567FDF89B"),
+    Name("Analytical Structural Role"),
+    Description("Represents analytical structural roles"),
+  ]
+  public class AnalyticalStructuralRole : GH_Enum<ARDB.Structure.AnalyticalStructuralRole>
+  {
+    public override bool IsEmpty => Value == ARDB.Structure.AnalyticalStructuralRole.Unset;
+    public AnalyticalStructuralRole() : base() { }
+    public AnalyticalStructuralRole(ARDB.Structure.AnalyticalStructuralRole value) : base(value) { }
+    public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
+    {
+      { (int) ARDB.Structure.AnalyticalStructuralRole.Unset,                 "Unset" },
+      { (int) ARDB.Structure.AnalyticalStructuralRole.StructuralRoleBeam,    "Beam" },
+      { (int) ARDB.Structure.AnalyticalStructuralRole.StructuralRoleColumn,  "Column" },
+      { (int) ARDB.Structure.AnalyticalStructuralRole.StructuralRoleMember,  "Member" },
+      { (int) ARDB.Structure.AnalyticalStructuralRole.StructuralRoleGirder,  "Girder" },
+      { (int) ARDB.Structure.AnalyticalStructuralRole.StructuralRoleFloor,   "Floor" },
+      { (int) ARDB.Structure.AnalyticalStructuralRole.StructuralRoleWall,    "Wall" },
+      { (int) ARDB.Structure.AnalyticalStructuralRole.StructuralRolePanel,   "Panel" },
+    };
+  }
+#endif
 }

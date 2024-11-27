@@ -1,34 +1,45 @@
 using System;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
 
 namespace RhinoInside.Revit.GH.Components.Documents
 {
-  public class DocumentActive : Component
+  public class ActiveDocument : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("EE033516-C1DC-4C72-8FCD-F85F38A0F267");
     public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "A";
 
-    public DocumentActive() : base
+    public ActiveDocument() : base
     (
-      "Active Document", "Active",
+      "Active Document", "A-Document",
       "Gets the active document",
       "Revit", "Document"
     )
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager) { }
+    protected override ParamDefinition[] Inputs => Array.Empty<ParamDefinition>();
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(new Parameters.Document(), "Active Document", "Active Document", string.Empty, GH_ParamAccess.item);
-    }
+      ParamDefinition.Create<Parameters.Document>("Active Document", "D", "Active document", GH_ParamAccess.item)
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (Parameters.Document.TryGetDocumentOrCurrent(this, default, default, out var Document))
         DA.SetData("Active Document", Document);
     }
+
+    #region UI
+    private class ButtonAttributes : ExpireButtonAttributes
+    {
+      public ButtonAttributes(ZuiComponent owner) : base(owner) { }
+      protected override string DisplayText => "Query";
+      protected override bool Visible => Owner.Params.Input.Count == 0;
+    }
+
+    public override void CreateAttributes() => m_attributes = new ButtonAttributes(this);
+    #endregion
   }
 }

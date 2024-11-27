@@ -669,6 +669,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             else
             {
               var bbox = element.GetTransformed(coordSystem.Inverse).GetBoundingBox();
+              if (bbox.IsNegative()) bbox = BoundingBoxXYZExtension.Empty;
               bbox.Transform = coordSystem;
               return bbox;
             }
@@ -690,6 +691,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             else
             {
               var bbox = instance.GetSymbolGeometry(coordSystem.Inverse * instance.Transform).GetBoundingBox();
+              if (bbox.IsNegative()) bbox = BoundingBoxXYZExtension.Empty;
               bbox.Transform = coordSystem;
               return bbox;
             }
@@ -697,6 +699,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           else
           {
             var bbox = instance.SymbolGeometry.GetBoundingBox();
+            if (bbox.IsNegative()) bbox = BoundingBoxXYZExtension.Empty;
             bbox.Transform = instance.Transform;
             return bbox;
           }
@@ -744,11 +747,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           if (!solid.Faces.IsEmpty)
           {
+            var bbox = BoundingBoxXYZExtension.Empty;
             if (coordSystem is object)
             {
               if (accurateSolid)
               {
-                var bbox = BoundingBoxXYZExtension.Empty;
                 bbox.Transform = coordSystem;
 
                 foreach (Face face in solid.Faces)
@@ -761,7 +764,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
               {
                 using (var transformed = SolidUtils.CreateTransformed(solid, coordSystem.Inverse))
                 {
-                  var (min, max, transform, bounds) = transformed.GetBoundingBox();
+                  bbox = transformed.GetBoundingBox();
+                  if (bbox.IsNegative()) bbox = BoundingBoxXYZExtension.Empty;
+
+                  var (min, max, transform, bounds) = bbox;
                   var (minX, minY, minZ) = transform.OfPoint(min);
                   var (maxX, maxY, maxZ) = transform.OfPoint(max);
 
@@ -774,7 +780,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
                 }
               }
             }
-            return solid.GetBoundingBox();
+
+            bbox = solid.GetBoundingBox();
+            if (bbox.IsNegative()) bbox = BoundingBoxXYZExtension.Empty;
+            return bbox;
           }
         }
         break;

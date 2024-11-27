@@ -17,7 +17,7 @@ If `ReleaseVersion` contains "wip" the product expires.
     <ProductReleaseVersion></ProductReleaseVersion>
     <ProductMetaVersion></ProductMetaVersion>
     <ProductMajorVersion>1</ProductMajorVersion>
-    <ProductMinorVersion>26</ProductMinorVersion>
+    <ProductMinorVersion>28</ProductMinorVersion>
     <ProductBuildVersion Condition="$(Configuration.Contains('Debug'))">0</ProductBuildVersion>
     <ProductRevisionVersion Condition="$(Configuration.Contains('Debug'))">0</ProductRevisionVersion>
   </PropertyGroup>

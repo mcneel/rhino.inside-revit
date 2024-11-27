@@ -864,6 +864,30 @@
     "uuid": "cec912fa-c0d3-47c2-a3a6-52a8b8ea4476"
   }, 
   {
+    "desc": "Contains a collection of Revit analytical members", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Revit Elements", 
+    "since": "1.27", 
+    "tab": "Params", 
+    "title": "Analytical Member", 
+    "typename": "AnalyticalMember", 
+    "until": null, 
+    "uuid": "0a7b685c-98e9-4684-a441-54c7b9192fdc"
+  }, 
+  {
+    "desc": "Contains a collection of Revit analytical panels", 
+    "iconsrc": "/static/images/GH/AnalyticalPanel.png", 
+    "icontag": null, 
+    "panel": "Revit Elements", 
+    "since": "1.27", 
+    "tab": "Params", 
+    "title": "Analytical Panel", 
+    "typename": "AnalyticalPanel", 
+    "until": null, 
+    "uuid": "04b8eac3-e81f-4d14-a65b-eb867ef2577e"
+  }, 
+  {
     "desc": "Contains a collection of Revit Beam System elements", 
     "iconsrc": "/static/images/GH/BeamSystem.png", 
     "icontag": null, 
@@ -1906,6 +1930,42 @@
     "typename": "SpatialElementIdentity", 
     "until": null, 
     "uuid": "e3d32938-0e10-4b93-a40d-0781d8842ece"
+  }, 
+  {
+    "desc": "Given its location curve, it adds an analytical member to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddAnalyticalMember.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Add Analytical Member", 
+    "typename": "AddAnalyticalMember", 
+    "until": null, 
+    "uuid": "88ad5522-b3ad-4a67-ab96-3d90249ba215"
+  }, 
+  {
+    "desc": "Given its boundary, it adds an analytical panel to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddAnalyticalPanelByBoundary.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Add Analytical Panel By Boundary", 
+    "typename": "AddAnalyticalPanelByBoundary", 
+    "until": null, 
+    "uuid": "ba2d1733-0a7a-463c-bddc-4262405f4fe6"
+  }, 
+  {
+    "desc": "Given a curve, it adds an analytical panel perpendicular to the provided work plane to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddAnalyticalPanelByExtrusion.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Add Analytical Panel By Extrusion", 
+    "typename": "AddAnalyticalPanelByExtrusion", 
+    "until": null, 
+    "uuid": "872ccb2c-e374-4c3f-b7a7-24686ad3911c"
   }, 
   {
     "desc": "Given its profile curves, it adds a beam system to the active Revit document", 
@@ -5262,7 +5322,7 @@
     "panel": "Architecture", 
     "since": null, 
     "tab": "Revit", 
-    "title": "Curtain Cell Geometry", 
+    "title": "Curtain Cell Profile", 
     "typename": "AnalyzeCurtainGridCell", 
     "until": null, 
     "uuid": "fc7d5729-7d27-453a-a4a2-0e150c749083"

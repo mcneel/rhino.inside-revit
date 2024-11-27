@@ -7,13 +7,52 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
 {
   using External.UI.Extensions;
 
-  public class DesignOptionActive : ZuiComponent
+  public class ActiveDesignOption : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("B6349DDA-4486-44EB-9AF7-3D13404A3F3E");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "A";
 
+    public ActiveDesignOption() : base
+    (
+      name: "Active Design Option",
+      nickname: "A-DOption",
+      description: "Gets the active Design Option",
+      category: "Revit",
+      subCategory: "Document"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      ParamDefinition.Create<Parameters.Element>("Active Design Option", "O", "Active design option", GH_ParamAccess.item)
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+        return;
+
+      var option = new Types.DesignOption(doc, ARDB.DesignOption.GetActiveDesignOptionId(doc));
+      DA.SetData("Active Design Option", option);
+    }
+
     #region UI
+    private class ButtonAttributes : ExpireButtonAttributes
+    {
+      public ButtonAttributes(ZuiComponent owner) : base(owner) { }
+      protected override string DisplayText => "Query";
+      protected override bool Visible => Owner.Params.Input.Count == 0;
+    }
+    public override void CreateAttributes() => m_attributes = new ButtonAttributes(this);
+
     protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalComponentMenuItems(menu);
@@ -43,36 +82,5 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
       }
     }
     #endregion
-
-    public DesignOptionActive() : base
-    (
-      name: "Active Design Option",
-      nickname: "ADsgnOpt",
-      description: "Gets the active Design Option",
-      category: "Revit",
-      subCategory: "Document"
-    )
-    { }
-
-    protected override ParamDefinition[] Inputs => inputs;
-    static readonly ParamDefinition[] inputs =
-    {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-    };
-
-    protected override ParamDefinition[] Outputs => outputs;
-    static readonly ParamDefinition[] outputs =
-    {
-      ParamDefinition.Create<Parameters.Element>("Active Design Option", "O", "Active design option", GH_ParamAccess.item)
-    };
-
-    protected override void TrySolveInstance(IGH_DataAccess DA)
-    {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
-      var option = new Types.DesignOption(doc, ARDB.DesignOption.GetActiveDesignOptionId(doc));
-      DA.SetData("Active Design Option", option);
-    }
   }
 }

@@ -544,7 +544,8 @@ namespace RhinoInside.Revit
       int f = 0;
       for (; f < frames.Length; ++f)
       {
-        var frameAssembly = frames[f].GetMethod().DeclaringType.Assembly;
+        var method = frames[f].GetMethod();
+        var frameAssembly = method.DeclaringType?.Assembly ?? method.Module?.Assembly;
         if (frameAssembly != callingAssembly)
           break;
       }
@@ -552,7 +553,8 @@ namespace RhinoInside.Revit
       // Skip mscorlib
       for (; f < frames.Length; ++f)
       {
-        var frameAssembly = frames[f].GetMethod().DeclaringType.Assembly;
+        var method = frames[f].GetMethod();
+        var frameAssembly = method.DeclaringType?.Assembly ?? method.Module?.Assembly;
         if (frameAssembly != typeof(object).Assembly)
           return frameAssembly;
       }

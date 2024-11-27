@@ -58,8 +58,7 @@ namespace RhinoInside.Revit.GH.Types
               var tol = GeometryTolerance.Model;
               var plane = Location;
               {
-                var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
-                plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
+                plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationOffset.Value);
               }
 
               var segments = spatial.GetBoundarySegments(options);
@@ -84,8 +83,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           var plane = Location;
           {
-            var ComputationHeight = Value.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
-            plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationHeight);
+            plane.Origin = new Point3d(plane.OriginX, plane.OriginY, plane.OriginZ + ComputationOffset.Value);
           }
 
           var loopsBox = BoundingBox.Empty;
@@ -119,6 +117,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public bool IsPlaced => Value?.Location is object;
     public bool IsEnclosed => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_PERIMETER)?.HasValue == true;
+
+    protected virtual double? ComputationOffset => Value?.get_Parameter(ARDB.BuiltInParameter.ROOM_COMPUTATION_HEIGHT).AsDouble() * Revit.ModelUnits;
 
     public double? Perimeter
     {

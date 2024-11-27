@@ -954,57 +954,80 @@ namespace RhinoInside.Revit.GH
 
     void ActiveDefinition_SolutionStart(object sender, GH_SolutionEventArgs e)
     {
-      // Expire objects that contain elements modified by Grasshopper.
-      while (DocumentChangedEvent.changeQueue.Count > 0)
+      if (e.Document is GH_Document document)
       {
-        var change = DocumentChangedEvent.changeQueue.Dequeue();
+        // Expire objects that contain elements modified by Grasshopper.
+        while (DocumentChangedEvent.changeQueue.Count > 0)
+        {
+          var change = DocumentChangedEvent.changeQueue.Dequeue();
 
-        foreach (var obj in change.ExpiredObjects)
-          obj.ExpireSolution(false);
+          foreach (var obj in change.ExpiredObjects)
+            obj.ExpireSolution(false);
+        }
+
+        GeometryCache.StartKeepAliveRegion();
+        ActiveDocumentStack.Push(e.Document);
+        if (document.Enabled) StartTransactionGroups();
+        else if (Instances.ActiveCanvas?.Document == document)
+        {
+          if (PendingSolution is object) PendingSolution = document;
+          else
+          {
+            PendingSolution = document;
+            Revit.EnqueueIdlingAction(() =>
+            {
+              if (PendingSolution?.Enabled is true)
+                PendingSolution.NewSolution(expireAllObjects: false);
+
+              PendingSolution = null;
+            });
+          }
+        }
       }
-
-      GeometryCache.StartKeepAliveRegion();
-      ActiveDocumentStack.Push(e.Document);
-      StartTransactionGroups();
     }
+
+    private static GH_Document PendingSolution;
 
     void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e)
     {
-      if (ActiveDocumentStack.Peek() != e.Document)
-        throw new InvalidOperationException();
-
-      CommitTransactionGroups();
-      ActiveDocumentStack.Pop();
-      GeometryCache.EndKeepAliveRegion();
-
-      // Warn the user about objects that contain elements modified by Grasshopper.
+      if (e.Document is GH_Document document)
       {
-        var expiredObjectsCount = 0;
-        foreach (var change in DocumentChangedEvent.changeQueue)
-        {
-          if (e.Document == change.Definition)
-            expiredObjectsCount += change.ExpiredObjects.Count;
+        if (ActiveDocumentStack.Peek() != e.Document)
+          throw new InvalidOperationException();
 
-          foreach (var obj in change.ExpiredObjects)
-            obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "This object will be expired because it contains obsolete Revit elements.");
-        }
-        if (expiredObjectsCount > 0)
+        if (document.Enabled) CommitTransactionGroups();
+        ActiveDocumentStack.Pop();
+        GeometryCache.EndKeepAliveRegion();
+
+        // Warn the user about objects that contain elements modified by Grasshopper.
         {
-          Instances.DocumentEditor.SetStatusBarEvent
-          (
-            new GH_RuntimeMessage
+          var expiredObjectsCount = 0;
+          foreach (var change in DocumentChangedEvent.changeQueue)
+          {
+            if (e.Document == change.Definition)
+              expiredObjectsCount += change.ExpiredObjects.Count;
+
+            foreach (var obj in change.ExpiredObjects)
+              obj.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "This object will be expired because it contains obsolete Revit elements.");
+          }
+          if (expiredObjectsCount > 0)
+          {
+            Instances.DocumentEditor.SetStatusBarEvent
             (
-              expiredObjectsCount == 1 ?
-              $"An object will be expired because contains obsolete Revit elements." :
-              $"{expiredObjectsCount} objects will be expired because contain obsolete Revit elements.",
-              GH_RuntimeMessageLevel.Remark,
-              "Rhino.Inside"
-            )
-          );
+              new GH_RuntimeMessage
+              (
+                expiredObjectsCount == 1 ?
+                $"An object will be expired because contains obsolete Revit elements." :
+                $"{expiredObjectsCount} objects will be expired because contain obsolete Revit elements.",
+                GH_RuntimeMessageLevel.Remark,
+                "Rhino.Inside"
+              )
+            );
+          }
         }
-      }
 
-      ModelUnitScale = UnitScale.GetModelScale(RhinoDoc.ActiveDoc);
+        ModelUnitScale = UnitScale.GetModelScale(RhinoDoc.ActiveDoc);
+      }
     }
     #endregion
   }

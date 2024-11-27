@@ -3,12 +3,10 @@ on: workflow_dispatch
 
 jobs:
   build_docs:
-    runs-on: windows-2019
+    runs-on: windows-latest
     steps:
       - name: prep repository
         uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.API_TOKEN_GITHUB }}
 
       - name: prep msbuild
         uses: microsoft/setup-msbuild@v1

@@ -19,6 +19,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if REVIT_2024
         case Toposolid topo:    return topo.SketchId;
 #endif
+#if REVIT_2023
+        case AnalyticalPanel panel: return panel.SketchId;
+#endif
 
 #if REVIT_2022
         case Ceiling ceiling:   return ceiling.SketchId;

@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
   public class AddFoundationIsolated : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("C1C7CDBB-EE50-40FC-A398-E01465EC65EB");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public AddFoundationIsolated() : base
     (
@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               break;
 
             case ARDB.FamilyHostingBehavior.Wall:
-              if (!(host is ARDB.Wall)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Wall.");
+              if (!(host is ARDB.Wall) && !(host is ARDB.FaceWall)) throw new Exceptions.RuntimeArgumentException("Type", $"Type '{type.Name}' instances should be hosted on a Wall.");
               break;
 
             case ARDB.FamilyHostingBehavior.Floor:

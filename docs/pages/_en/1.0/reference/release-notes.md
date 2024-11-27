@@ -13,10 +13,47 @@ group: Deployment & Configs
 
 ### RC
 
+- Added 'Dimension Text' component.
+- Added 'Datum Bubbles' component.
+- Minimum Revit 2023 is 2023.1.
 
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.27 RC1" version="v1.27.9090.24663" pre_release=true time="11/20/2024" %}
+
+- Added {% include ltr/comp.html uuid='88ad5522' %}
+- Added {% include ltr/comp.html uuid='ba2d1733' %}
+- Added {% include ltr/comp.html uuid='872ccb2c' %}
+- Miscellaneous Improvements
+
+{% include ltr/release-header.html title="v1.26" version="v1.26.9083.18516" ime="11/20/2024" %}
+
+- Includes all changes under 1.26 RC releases listed below
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.26 RC2" version="v1.26.9083.17651" pre_release=true time="11/06/2024" %}
+
+- Now Grasshopper con compute solutions when expired on background.
+This enables:
+  - File parameters that are synchronized.
+  - Trigger component when is in timer mode.
+  - Potentially any NewSolution() called while Grasshopper is not active.
+- Miscellaneous Improvements
+
+{% include ltr/release-header.html title="v1.26 RC1" version="v1.26.9063.16158" pre_release=true time="11/06/2024" %}
+
+- Miscellaneous Improvements
+
+{% include ltr/release-header.html title="v1.25" version="v1.25.9063.15948" ime="11/06/2024" %}
+
+- Fixed conversion from `Area` to `Surface`. Now resulting surface elevation is Level elevation.
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.25 RC4" version="v1.25.9050.23387" pre_release=true time="10/15/2024" %}
+
+- Miscellaneous improvements and bug fixes
 
 {% include ltr/release-header.html title="v1.25 RC3" version="v1.25.9040.16511" pre_release=true time="10/01/2024" %}
 

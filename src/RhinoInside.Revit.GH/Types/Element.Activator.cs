@@ -376,6 +376,8 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Structure.AnalyticalElement),     (element)=> new AnalyticalElement     (element as ARDB.Structure.AnalyticalElement) },
       { typeof(ARDB.Structure.AnalyticalMember),      (element)=> new AnalyticalMember      (element as ARDB.Structure.AnalyticalMember) },
       { typeof(ARDB.Structure.AnalyticalSurfaceBase), (element)=> new AnalyticalSurface     (element as ARDB.Structure.AnalyticalSurfaceBase) },
+      { typeof(ARDB.Structure.AnalyticalPanel),       (element)=> new AnalyticalSurface     (element as ARDB.Structure.AnalyticalPanel) },
+      { typeof(ARDB.Structure.AnalyticalOpening),     (element)=> new AnalyticalSurface     (element as ARDB.Structure.AnalyticalOpening) },
 #else
       { typeof(ARDB.Structure.AnalyticalModel),       (element)=> new AnalyticalElement     (element as ARDB.Structure.AnalyticalModel) },
       { typeof(ARDB.Structure.AnalyticalModelStick),  (element)=> new AnalyticalMember      (element as ARDB.Structure.AnalyticalModelStick) },

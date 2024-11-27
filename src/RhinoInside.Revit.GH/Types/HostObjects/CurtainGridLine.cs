@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Curve Curve => Value?.AllSegmentCurves is ARDB.CurveArray segments ? Curve.JoinCurves(segments.ToCurveMany())[0] : default;
+    public override Curve Curve => Value?.AllSegmentCurves is ARDB.CurveArray segments ? Curve.JoinCurves(segments.ToCurveMany()).FirstOrDefault() : default;
     #endregion
   }
 }

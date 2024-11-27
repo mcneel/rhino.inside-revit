@@ -135,12 +135,12 @@
     <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
     <SaveComponentCacheCapacity>100</SaveComponentCacheCapacity>
     <DocumentationSources Condition="$(Configuration.Contains('Debug'))">
-      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\x64\Debug $(RevitVersion)\RhinoInside.Revit.xml" />
-      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\x64\Debug $(RevitVersion)\RhinoInside.Revit.dll" />
+      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\Debug-$(RevitVersion)-R8\net481\RhinoInside.Revit.xml" />
+      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\Debug-$(RevitVersion)-R8\net481\RhinoInside.Revit.dll" />
     </DocumentationSources>
     <DocumentationSources Condition="$(Configuration.Contains('Release'))">
-      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\x64\Release $(RevitVersion)\RhinoInside.Revit.xml" />
-      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\x64\Release $(RevitVersion)\RhinoInside.Revit.dll" />
+      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\Release-$(RevitVersion)-R8\net481\RhinoInside.Revit.xml" />
+      <DocumentationSource sourceFile="..\RhinoInside.Revit\bin\Release-$(RevitVersion)-R8\net481\RhinoInside.Revit.dll" />
     </DocumentationSources>
     <HelpTitle>Rhino.Inside.Revit API</HelpTitle>
     <!-- Needs to be set by build script -->

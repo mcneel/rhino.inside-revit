@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
   public class AddFoundationSlab : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("83E76F44-2738-46F0-A2A2-AA609C5F6E98");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
 
     public AddFoundationSlab() : base
     (
