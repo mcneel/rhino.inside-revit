@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Types
         (
           Value is ARDB.SpotDimension spot &&
           spot.SpotDimensionType.StyleType != ARDB.DimensionStyleType.SpotSlope && 
-          HasLeader == true
+          HasLeaders == true
         )
         {
           if (spot.LeaderHasShoulder)

@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IAnnotationLeadersAcces
-    public override bool? HasLeader
+    public override bool? HasLeaders
     {
       get => Value?.HasLeader;
       set
@@ -68,8 +68,8 @@ namespace RhinoInside.Revit.GH.Types
 
       public override bool Visible
       {
-        get => tag.HasLeader is true;
-        set { tag.HasLeader = value; tag.InvalidateGraphics(); }
+        get => tag.HasLeaders is true;
+        set { tag.HasLeaders = value; tag.InvalidateGraphics(); }
       }
 
 #if REVIT_2018

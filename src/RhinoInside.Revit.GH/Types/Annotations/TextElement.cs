@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region IAnnotationLeadersAccess
-    public bool? HasLeader
+    public bool? HasLeaders
     {
       get => Value is ARDB.TextNote note && note.LeaderCount > 0;
       set
@@ -258,7 +258,7 @@ namespace RhinoInside.Revit.GH.Types
           args.Pipeline.DrawPatternedPolyline(Box.GetCorners().Take(4), args.Color, 0x00003333, args.Thickness, close: true);
         }
 
-        if (HasLeader is true)
+        if (HasLeaders is true)
         {
           var dpi = args.Pipeline.DpiScale;
           var arrowSize = (int) Math.Round(2.0 * Grasshopper.CentralSettings.PreviewPointRadius * dpi);

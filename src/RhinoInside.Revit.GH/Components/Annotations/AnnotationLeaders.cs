@@ -164,10 +164,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         if (Params.GetData(DA, "Leader", out bool? hasLeader))
         {
           transactionStatus = StartTransaction(annotation.Document);
-          leaderElement.HasLeader = hasLeader;
+          leaderElement.HasLeaders = hasLeader;
         }
 
-        if (leaderElement.HasLeader is true || hasLeader is true)
+        if (leaderElement.HasLeaders is true || hasLeader is true)
         {
           if (Params.GetDataList(DA, "End Locations", out IList<Point3d?> endPositions))
           {
@@ -200,7 +200,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             {
               if (end is null) continue;
               if (leader is null) continue;
-              leaderElement.HasLeader = true;
+              leaderElement.HasLeaders = true;
               leader.EndPosition = end.Value;
             }
           }
@@ -221,7 +221,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (transactionStatus == Autodesk.Revit.DB.TransactionStatus.Started)
             annotation.Document.Regenerate();
         }
-        Params.TrySetData(DA, "Leader", () => leaderElement.HasLeader);
+        Params.TrySetData(DA, "Leader", () => leaderElement.HasLeaders);
 
         if (Params.GetDataList(DA, "Text Locations", out IList<Point3d?> textPositions))
         {
@@ -246,7 +246,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           () => leaders.Select(x => x.HeadPosition)
         );
 
-        if (leaderElement.HasLeader is true)
+        if (leaderElement.HasLeaders is true)
         {
           Params.TrySetDataList
           (
