@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Types
       ToArray();
     #endregion
 
-    #region IAnnotationLeadersAcces
+    #region IAnnotationLeadersAccess
     public virtual bool? HasLeader
     {
       get => Value?.GetHasLeader();

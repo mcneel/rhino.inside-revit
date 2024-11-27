@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 #if REVIT_2021
       return dimension.HasLeader;
 #else
-      return dimension.get_Parameter(BuiltInParameter.DIM_LEADER).AsBoolean();      
+      return dimension.get_Parameter(BuiltInParameter.DIM_LEADER).AsBoolean();
 #endif
     }
 
