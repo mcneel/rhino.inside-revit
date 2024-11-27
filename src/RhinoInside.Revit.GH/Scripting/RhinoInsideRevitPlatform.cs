@@ -94,6 +94,25 @@ namespace RhinoInside.Revit.GH.Scripting
       }
     }
 
+    public override IEnumerable<CompileGuard> GetCompileGuards(BuildKind buildKind)
+    {
+      const int FIRST_RHINOCODE_SUPPORTED_REVIT = 2018;
+      var revitVersion = new Version(Revit.ActiveDBApplication.SubVersionNumber);
+
+      // this creates 'flexible' guards for major versions starting from Revit FIRST_RHINOCODE_SUPPORTED_REVIT
+      // Example: REVIT_2018_OR_GREATER, REVIT_2019_OR_GREATER
+      foreach (int nextMajor in Enumerable.Range(FIRST_RHINOCODE_SUPPORTED_REVIT,
+                                                 revitVersion.Major + 1 - FIRST_RHINOCODE_SUPPORTED_REVIT))
+      {
+        yield return new CompileGuard($"REVIT_{nextMajor}_OR_GREATER", true);
+      }
+
+      // this creates 'specific' guards that are only available on this Revit version
+      // Example: REVIT_2025_1, REVIT_2025
+      yield return new CompileGuard($"REVIT_{revitVersion.Major}_{revitVersion.Minor}", true);
+      yield return new CompileGuard($"REVIT_{revitVersion.Major}", true);
+    }
+
     public override IDebugControls CreateDebugControls()
     {
       // This is not used for now.
