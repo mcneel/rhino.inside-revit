@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Rhino.Geometry;
-using RhinoInside.Revit.Convert.Geometry;
+using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -43,6 +43,24 @@ namespace RhinoInside.Revit.GH.Types
       get => Value?.IsSingleCurve() is true ? Value.GetCurve().ToCurve() : default;
       set => throw new InvalidOperationException("Curve can not be set for this element.");
     }
+
+    #region IGH_PreviewData
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      base.DrawViewportWires(args);
+
+      if (args.Color == System.Drawing.Color.FromArgb(args.Color.A, GH_Document.DefaultSelectedPreviewColour))
+      {
+        var location = Location;
+        if (location.IsValid)
+        {
+          args.Pipeline.DrawDirectionArrow(location.Origin, location.XAxis, System.Drawing.Color.DarkRed);
+          args.Pipeline.DrawDirectionArrow(location.Origin, location.YAxis, System.Drawing.Color.DarkGreen);
+          args.Pipeline.DrawDirectionArrow(location.Origin, location.ZAxis, System.Drawing.Color.DarkBlue);
+        }
+      }
+    }
+    #endregion
   }
 }
 
@@ -67,6 +85,8 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+
 #if REVIT_2023
   using ARDB_Structure_AnalyticalSurfaceBase = ARDB.Structure.AnalyticalSurfaceBase;
 #else
@@ -131,6 +151,8 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+
 #if REVIT_2023
   using ARDB_Structure_AnalyticalOpening = ARDB.Structure.AnalyticalOpening;
 #else

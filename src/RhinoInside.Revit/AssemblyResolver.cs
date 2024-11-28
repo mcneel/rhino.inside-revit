@@ -42,7 +42,7 @@ namespace RhinoInside.Revit
       {
         add
         {
-          if (Assembly is object) value?.Invoke(AppDomain.CurrentDomain, new AssemblyLoadEventArgs(Assembly));
+          if (Assembly is object) value?.SafeInvoke(AppDomain.CurrentDomain, new AssemblyLoadEventArgs(Assembly));
           else activated += value;
         }
 
@@ -58,7 +58,10 @@ namespace RhinoInside.Revit
 
         bool failed = false;
         if (InternalAssemblies.TryGetValue(assemblyName.Name, out var InitAssembly))
-          failed = !InitAssembly(Assembly);
+        {
+          using (SynchronizationContextGuard.Current)
+            failed = !InitAssembly(Assembly);
+        }
 
         if (failed)
           throw new InvalidOperationException($"Failed to activate {assembly.FullName}");
@@ -562,5 +565,18 @@ namespace RhinoInside.Revit
       return null;
     }
     #endregion
+  }
+
+  struct SynchronizationContextGuard : IDisposable
+  {
+    public static SynchronizationContextGuard Current => new SynchronizationContextGuard(System.Threading.SynchronizationContext.Current);
+
+    readonly System.Threading.SynchronizationContext Previous;
+    private SynchronizationContextGuard(System.Threading.SynchronizationContext context) => Previous = context;
+    readonly void IDisposable.Dispose()
+    {
+      if (Previous != null && System.Threading.SynchronizationContext.Current != Previous)
+        System.Threading.SynchronizationContext.SetSynchronizationContext(Previous);
+    }
   }
 }

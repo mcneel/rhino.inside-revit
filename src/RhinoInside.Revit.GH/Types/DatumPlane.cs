@@ -834,10 +834,18 @@ namespace RhinoInside.Revit.GH.Types
         args.Pipeline.DrawPoint
         (
           referencePoint.Position.ToPoint3d(),
-          Grasshopper.CentralSettings.PreviewPointStyle,
+          Rhino.Display.PointStyle.RoundControlPoint,
           Grasshopper.CentralSettings.PreviewPointRadius,
           args.Color
         );
+
+        //if (args.Color == System.Drawing.Color.FromArgb(args.Color.A, GH_Document.DefaultSelectedPreviewColour))
+        //{
+        //  var location = Location;
+        //  args.Pipeline.DrawDirectionArrow(location.Origin, location.XAxis, System.Drawing.Color.DarkRed);
+        //  args.Pipeline.DrawDirectionArrow(location.Origin, location.YAxis, System.Drawing.Color.DarkGreen);
+        //  args.Pipeline.DrawDirectionArrow(location.Origin, location.ZAxis, System.Drawing.Color.DarkBlue);
+        //}
       }
     }
     #endregion
