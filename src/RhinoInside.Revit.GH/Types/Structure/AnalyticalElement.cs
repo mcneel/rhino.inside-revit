@@ -85,6 +85,8 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+
 #if REVIT_2023
   using ARDB_Structure_AnalyticalSurfaceBase = ARDB.Structure.AnalyticalSurfaceBase;
 #else
@@ -149,6 +151,8 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+
 #if REVIT_2023
   using ARDB_Structure_AnalyticalOpening = ARDB.Structure.AnalyticalOpening;
 #else
