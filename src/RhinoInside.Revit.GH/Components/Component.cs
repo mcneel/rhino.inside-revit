@@ -558,19 +558,25 @@ namespace RhinoInside.Revit.GH.Components
             case GH_RuntimeMessageLevel.Error:    color = SD.Color.HotPink; break;
           }
 
-          // If geometry is smaller than a point diameter we show it as a point
-          if (error.BoundingBox.Diagonal.Length * pixelsPerUnits < pointRadius * 2.0)
+          if (error.Geometry is Point point)
           {
-            args.Display.DrawPoint(center, Rhino.Display.PointStyle.RoundControlPoint, color, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
+            args.Display.DrawPoint(point.Location, Grasshopper.CentralSettings.PreviewPointStyle, color, color, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
           }
-          else switch (error.Geometry)
+          else
           {
-            case Point point:               args.Display.DrawPoint(point.Location, Rhino.Display.PointStyle.X, color, SD.Color.White, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false); break;
-            case Curve curve:               args.Display.DrawCurve(curve, color, curveThickness); break;
-            case Surface surface:           args.Display.DrawSurface(surface, color, curveThickness); break;
-            case Brep brep:                 args.Display.DrawBrepWires(brep, color, curveThickness); break;
-            case Mesh mesh:                 args.Display.DrawMeshWires(mesh, color, curveThickness); break;
-            case AnnotationBase annotation: args.Display.DrawAnnotation(annotation, color); break;
+            // If geometry is smaller than a pixel diameter we show it as a point
+            if (error.BoundingBox.Diagonal.Length * pixelsPerUnits < pointRadius * 2.0)
+            {
+              args.Display.DrawPoint(center, Rhino.Display.PointStyle.Clover, color, SD.Color.Orange, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
+            }
+            else switch (error.Geometry)
+            {
+              case Curve curve:               args.Display.DrawCurve(curve, color, curveThickness); break;
+              case Surface surface:           args.Display.DrawSurface(surface, color, curveThickness); break;
+              case Brep brep:                 args.Display.DrawBrepWires(brep, color, curveThickness); break;
+              case Mesh mesh:                 args.Display.DrawMeshWires(mesh, color, curveThickness); break;
+              case AnnotationBase annotation: args.Display.DrawAnnotation(annotation, color); break;
+            }
           }
         }
       }
