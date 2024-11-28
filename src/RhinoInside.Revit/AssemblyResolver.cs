@@ -42,7 +42,7 @@ namespace RhinoInside.Revit
       {
         add
         {
-          if (Assembly is object) value?.Invoke(AppDomain.CurrentDomain, new AssemblyLoadEventArgs(Assembly));
+          if (Assembly is object) value?.SafeInvoke(AppDomain.CurrentDomain, new AssemblyLoadEventArgs(Assembly));
           else activated += value;
         }
 

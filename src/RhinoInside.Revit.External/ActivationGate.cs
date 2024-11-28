@@ -200,24 +200,25 @@ namespace RhinoInside.Revit.External
         if (isOpen == value)
           return;
 
+        if (HostMainWindow.ThreadId != ThreadHandle.CurrentThreadId)
+          return;
+
         if (isOpen == false)
         {
           if (TopState as UI.ExternalApplication is null)
           {
             var args = new CanOpenEventArgs();
-            canOpen?.Invoke(TopState, args);
+            canOpen?.SafeInvoke(TopState, args);
             if (!args.CanOpen)
               throw new CancelException();
           }
 
           isOpen = true;
-          try { enter?.Invoke(TopState, EventArgs.Empty); }
-          catch { }
+          enter?.SafeInvoke(TopState);
         }
         else
         {
-          try { exit?.Invoke(TopState, EventArgs.Empty); }
-          catch { }
+          exit?.SafeInvoke(TopState);
           isOpen = false;
         }
       }

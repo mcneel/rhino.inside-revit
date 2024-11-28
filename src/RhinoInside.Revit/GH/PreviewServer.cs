@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH
 
         var previous = _PreviewMode;
         _PreviewMode = value;
-        PreviewModeChanged?.Invoke(default, previous);
+        PreviewModeChanged?.SafeInvoke(default, previous);
       }
     }
 
