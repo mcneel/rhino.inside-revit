@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.External.DB
     {
       x = u;
       y = v;
-      z = (UnitXYZ) CrossProduct(x, y);
+      z = CrossProduct(x, y).ToUnitXYZ();
       if (z.IsNaN) return false;
 
       y = (UnitXYZ) CrossProduct(z, x);
