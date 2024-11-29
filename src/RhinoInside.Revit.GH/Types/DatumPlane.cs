@@ -839,13 +839,26 @@ namespace RhinoInside.Revit.GH.Types
           args.Color
         );
 
-        //if (args.Color == System.Drawing.Color.FromArgb(args.Color.A, GH_Document.DefaultSelectedPreviewColour))
-        //{
-        //  var location = Location;
-        //  args.Pipeline.DrawDirectionArrow(location.Origin, location.XAxis, System.Drawing.Color.DarkRed);
-        //  args.Pipeline.DrawDirectionArrow(location.Origin, location.YAxis, System.Drawing.Color.DarkGreen);
-        //  args.Pipeline.DrawDirectionArrow(location.Origin, location.ZAxis, System.Drawing.Color.DarkBlue);
-        //}
+        var showPlanes = Value.CoordinatePlaneVisibility;
+        if
+        (
+          showPlanes == ARDB.CoordinatePlaneVisibility.Always ||
+          (showPlanes == ARDB.CoordinatePlaneVisibility.WhenSelected && args.Color == System.Drawing.Color.FromArgb(args.Color.A, GH_Document.DefaultSelectedPreviewColour)))
+        {
+          var xyId = new string[]
+          {
+             Value.GetCoordinatePlaneReferenceYZ().ConvertToStableRepresentation(Document),
+             Value.GetCoordinatePlaneReferenceXZ().ConvertToStableRepresentation(Document),
+             Value.GetCoordinatePlaneReferenceXY().ConvertToStableRepresentation(Document)
+          };
+          var location = Location;
+          //if (!Value.ShowNormalReferencePlaneOnly)
+          {
+            args.Pipeline.DrawDirectionArrow(location.Origin, location.XAxis, System.Drawing.Color.DarkRed);
+            args.Pipeline.DrawDirectionArrow(location.Origin, location.YAxis, System.Drawing.Color.DarkGreen);
+          }
+          args.Pipeline.DrawDirectionArrow(location.Origin, location.ZAxis, System.Drawing.Color.DarkBlue);
+        }
       }
     }
     #endregion
