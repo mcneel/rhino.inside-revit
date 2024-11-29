@@ -576,6 +576,10 @@ namespace RhinoInside.Revit.GH.Components
               case Brep brep:                 args.Display.DrawBrepWires(brep, color, curveThickness); break;
               case Mesh mesh:                 args.Display.DrawMeshWires(mesh, color, curveThickness); break;
               case AnnotationBase annotation: args.Display.DrawAnnotation(annotation, color); break;
+              case PointCloud cloud:
+                  foreach(var pt in cloud.GetPoints())
+                    args.Display.DrawPoint(pt, Grasshopper.CentralSettings.PreviewPointStyle, color, color, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
+                  break;
             }
           }
         }

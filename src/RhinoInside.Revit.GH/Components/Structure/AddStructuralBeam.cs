@@ -121,8 +121,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
           if (!curve.TryGetPlane(out var plane, tol.VertexTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
-          if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
-            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
+          {
+            var discontinuities = curve.Discontinuities(Continuity.C1_continuous, Math.Cos(tol.AngleTolerance)).ToArray();
+            if (discontinuities.Length > 0) throw new Exceptions.RuntimeArgumentException
+            (
+              "Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°",
+              new PointCloud(discontinuities.Select(x => curve.PointAt(x)))
+            );
+          }
 
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
           type.AssertPlacementType(ARDB.FamilyPlacementType.CurveDrivenStructural);

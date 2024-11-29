@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -99,8 +100,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations.ReferenceElements
           if (curve.IsClosed || curve.PointAtStart.DistanceTo(curve.PointAtEnd) < tol.VertexTolerance)
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be a non closed one.\nTolerance is {(double)tol.VertexTolerance:N3} {GH_Format.RhinoUnitSymbol()}", curve);
 
-          if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
-            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
+          {
+            var discontinuities = curve.Discontinuities(Continuity.C1_continuous, Math.Cos(tol.AngleTolerance)).ToArray();
+            if (discontinuities.Length > 0) throw new Exceptions.RuntimeArgumentException
+            (
+              "Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°",
+              new PointCloud(discontinuities.Select(x => curve.PointAt(x)))
+            );
+          }
 
           // Compute
           referenceLine = Reconstruct(referenceLine, sketchPlane.Document, curve.ToCurve(), sketchPlane.Value);
