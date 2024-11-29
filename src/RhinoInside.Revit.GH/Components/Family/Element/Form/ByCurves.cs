@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       IList<Rhino.Geometry.Curve> profiles
     )
     {
-      if (!document.IsFamilyDocument || document.OwnerFamily.FamilyCategoryId.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_Mass)
+      if (!document.IsFamilyDocument || !document.OwnerFamily.IsConceptualMassFamily)
         throw new Exceptions.RuntimeArgumentException("Document", "This component can run only on a Mass Family document");
 
       var planes = new List<Rhino.Geometry.Plane>();
