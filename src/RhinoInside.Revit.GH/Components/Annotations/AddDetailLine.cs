@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -78,8 +79,13 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (!view.Value.IsAnnotationView())
             throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
 
-          var viewPlane = view.DetailPlane;
+          var plane = view.DetailPlane;
           var tol = GeometryTolerance.Model;
+
+          if (Curve.ProjectToPlane(curve.ToNurbsCurve(), plane) is Curve projectedCurve)
+            curve = projectedCurve;
+          else
+            throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project 'Curve' into view plane", curve);
 
           if (curve.IsShort(tol.ShortCurveTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
@@ -87,23 +93,17 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (curve is NurbsCurve && curve.IsClosed(tol.ShortCurveTolerance * 1.01) && !curve.IsEllipse(tol.VertexTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
-          if (Curve.ProjectToPlane(curve.ToNurbsCurve(), viewPlane) is Curve projectedCurve)
-            curve = projectedCurve;
-          else
-            throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project Curve into view plane", curve);
-
-          if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
-            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
+          {
+            var discontinuities = curve.Discontinuities(Continuity.C1_continuous, Math.Cos(tol.AngleTolerance)).ToArray();
+            if (discontinuities.Length > 0) throw new Exceptions.RuntimeArgumentException
+            (
+              "Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°",
+              new PointCloud(discontinuities.Select(x => curve.PointAt(x)))
+            );
+          }
 
           // Compute
-          try
-          {
-            detailCurve = Reconstruct(detailCurve, view.Value, curve.ToCurve());
-          }
-          catch (Convert.ConversionException e)
-          {
-            throw new Exceptions.RuntimeArgumentException("Curve", e.Message, curve);
-          }
+          detailCurve = Reconstruct(detailCurve, view.Value, curve.ToCurve());
 
           DA.SetData(_DetailLine_, detailCurve);
           return detailCurve;
