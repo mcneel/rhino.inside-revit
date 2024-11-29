@@ -567,7 +567,7 @@ namespace RhinoInside.Revit.GH.Components
             // If geometry is smaller than a pixel diameter we show it as a point
             if (error.BoundingBox.Diagonal.Length * pixelsPerUnits < pointRadius * 2.0)
             {
-              args.Display.DrawPoint(center, Rhino.Display.PointStyle.Clover, color, SD.Color.Orange, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
+              args.Display.DrawPoint(center, Rhino.Display.PointStyle.Clover, SD.Color.White, color, pointRadius, dpi, pointRadius * 0.5f, 0.0f, true, false);
             }
             else switch (error.Geometry)
             {
