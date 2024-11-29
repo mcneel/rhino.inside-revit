@@ -87,17 +87,23 @@ namespace RhinoInside.Revit.GH.Components.Annotations
           if (curve is NurbsCurve && curve.IsClosed(tol.ShortCurveTolerance * 1.01) && !curve.IsEllipse(tol.VertexTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
-          if (!curve.IsParallelToPlane(viewPlane, tol.VertexTolerance, tol.AngleTolerance))
-            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to view plane.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
-
-          if ((curve = Curve.ProjectToPlane(curve, viewPlane)) is null)
+          if (Curve.ProjectToPlane(curve.ToNurbsCurve(), viewPlane) is Curve projectedCurve)
+            curve = projectedCurve;
+          else
             throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project Curve into view plane", curve);
 
           if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
           // Compute
-          detailCurve = Reconstruct(detailCurve, view.Value, curve.ToCurve());
+          try
+          {
+            detailCurve = Reconstruct(detailCurve, view.Value, curve.ToCurve());
+          }
+          catch (Convert.ConversionException e)
+          {
+            throw new Exceptions.RuntimeArgumentException("Curve", e.Message, curve);
+          }
 
           DA.SetData(_DetailLine_, detailCurve);
           return detailCurve;
