@@ -100,15 +100,20 @@ namespace RhinoInside.Revit.External.DB
       }
     }
 
-    public static bool Orthonormalize(XYZ u, XYZ v, out UnitXYZ x, out UnitXYZ y, out UnitXYZ z)
+    public static bool Orthonormalize(UnitXYZ u, UnitXYZ v, out UnitXYZ x, out UnitXYZ y, out UnitXYZ z)
     {
-      x = u.ToUnitXYZ();
-      y = v.ToUnitXYZ();
-      z = CrossProduct(x, y).ToUnitXYZ();
+      x = u;
+      y = v;
+      z = (UnitXYZ) CrossProduct(x, y);
       if (z.IsNaN) return false;
 
       y = (UnitXYZ) CrossProduct(z, x);
       return true;
+    }
+
+    public static bool Orthonormalize(XYZ u, XYZ v, out UnitXYZ x, out UnitXYZ y, out UnitXYZ z)
+    {
+      return Orthonormalize(u.ToUnitXYZ(), v.ToUnitXYZ(), out x, out y, out z);
     }
 
     public double AngleTo(UnitXYZ other)
