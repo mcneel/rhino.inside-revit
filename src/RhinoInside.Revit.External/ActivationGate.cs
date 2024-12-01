@@ -200,28 +200,36 @@ namespace RhinoInside.Revit.External
         if (isOpen == value)
           return;
 
+        if (HostMainWindow.ThreadId != ThreadHandle.CurrentThreadId)
+          return;
+
         if (isOpen == false)
         {
+          InternalSynchronizationContext = System.Threading.SynchronizationContext.Current;
+
           if (TopState as UI.ExternalApplication is null)
           {
             var args = new CanOpenEventArgs();
-            canOpen?.Invoke(TopState, args);
+            canOpen?.SafeInvoke(TopState, args);
             if (!args.CanOpen)
               throw new CancelException();
           }
 
           isOpen = true;
-          try { enter?.Invoke(TopState, EventArgs.Empty); }
-          catch { }
+          enter?.SafeInvoke(TopState);
         }
         else
         {
-          try { exit?.Invoke(TopState, EventArgs.Empty); }
-          catch { }
+          exit?.SafeInvoke(TopState);
           isOpen = false;
+
+          if (InternalSynchronizationContext != System.Threading.SynchronizationContext.Current)
+            System.Threading.SynchronizationContext.SetSynchronizationContext(InternalSynchronizationContext);
         }
       }
     }
+
+    private static System.Threading.SynchronizationContext InternalSynchronizationContext;
 
     internal static void Open(Action action, object state = default) =>
       Open(() => { action.Invoke(); return System.Reflection.Missing.Value; }, state);

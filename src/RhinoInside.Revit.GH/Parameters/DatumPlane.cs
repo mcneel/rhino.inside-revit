@@ -362,4 +362,20 @@ namespace RhinoInside.Revit.GH.Parameters
     }
     #endregion
   }
+
+  [ComponentVersion(introduced: "1.27")]
+  public class ReferencePoint : GraphicalElement<Types.ReferencePoint, ARDB.ReferencePoint>
+  {
+    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
+    public override Guid ComponentGuid => new Guid("5483B924-702C-4B87-8EE8-A0250A61C2E4");
+
+    public ReferencePoint() : base("Reference Point", "Reference Point", "Contains a collection of Revit reference point elements", "Params", "Revit") { }
+
+    #region UI
+    protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
+    (
+      new string[] { "Point", "Plane" }
+    );
+    #endregion
+  }
 }

@@ -290,22 +290,24 @@ namespace RhinoInside.Revit
     internal static WindowHandle MainWindow = WindowHandle.Zero;
 
     static bool idlePending = true;
-    internal static void RaiseIdle() => core.RaiseIdle();
+    internal static void RaiseIdle() { using (SynchronizationContextGuard.Current) core.RaiseIdle(); }
+    internal static bool DoIdle()    { using (SynchronizationContextGuard.Current) return core.DoIdle(); }
+    internal static bool DoEvents()  { using (SynchronizationContextGuard.Current) return core.DoEvents(); }
 
     internal static bool Run()
     {
       if (idlePending)
       {
         Revit.ActiveDBApplication?.PurgeReleasedAPIObjects();
-        idlePending = core.DoIdle();
+        idlePending = DoIdle();
       }
 
-      var active = core.DoEvents();
+      var active = DoEvents();
       if (active)
         idlePending = true;
 
       if (Revit.ProcessIdleActions())
-        core.RaiseIdle();
+        RaiseIdle();
 
       return active;
     }
@@ -375,8 +377,11 @@ namespace RhinoInside.Revit
         var checkInArgs = new CheckInArgs();
         try
         {
-          guestInfo.Guest = Activator.CreateInstance(guestInfo.ClassType) as IGuest;
-          guestInfo.CheckInResult = guestInfo.Guest.EntryPoint(default, checkInArgs);
+          using (SynchronizationContextGuard.Current)
+          {
+            guestInfo.Guest = Activator.CreateInstance(guestInfo.ClassType) as IGuest;
+            guestInfo.CheckInResult = guestInfo.Guest.EntryPoint(default, checkInArgs);
+          }
         }
         catch (Exception e)
         {

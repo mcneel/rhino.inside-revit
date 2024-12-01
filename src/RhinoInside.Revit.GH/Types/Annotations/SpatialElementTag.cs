@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Types
     public override ARDB.ElementId LevelId => Value?.View.GenLevel.Id;
     #endregion
 
-    #region IAnnotationLeadersAcces
+    #region IAnnotationLeadersAccess
     public override bool? HasLeader
     {
       get => Value?.HasLeader;

@@ -516,6 +516,8 @@ namespace RhinoInside.Revit.Numerical
   {
     public static readonly Tolerance Default = new Tolerance(Constant.DefaultTolerance);
 
+    public override string ToString() => Value.ToString();
+
     /// <summary>
     /// Maximum absolute error.
     /// </summary>

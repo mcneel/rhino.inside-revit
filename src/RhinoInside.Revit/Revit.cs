@@ -77,7 +77,7 @@ namespace RhinoInside.Revit
       if (document.Equals(ActiveDBDocument))
         CancelReadActions();
 
-      DocumentChanged?.Invoke(sender, args);
+      DocumentChanged?.SafeInvoke(sender, args);
     }
 
     #region Idling Actions
@@ -123,10 +123,7 @@ namespace RhinoInside.Revit
       lock (idlingActions)
       {
         while (idlingActions.Count > 0)
-        {
-          try { idlingActions.Dequeue().Invoke(); }
-          catch (Exception e) { Debug.Fail(e.Source, e.Message); }
-        }
+          idlingActions.Dequeue().SafeInvoke();
       }
 
       return pendingIdleActions;
@@ -155,8 +152,7 @@ namespace RhinoInside.Revit
               return true; // there is pending work to do
 
             stopWatch.Start();
-            try { docReadActions.Dequeue().Invoke(ActiveDBDocument, cancel); }
-            catch (Exception e) { Debug.Fail(e.Source, e.Message); }
+            docReadActions.Dequeue().SafeInvoke(ActiveDBDocument, cancel);
             stopWatch.Stop();
           }
         }

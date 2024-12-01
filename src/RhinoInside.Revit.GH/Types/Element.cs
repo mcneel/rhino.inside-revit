@@ -43,7 +43,18 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    public override string DisplayName => Nomen ?? (IsReferencedData ? string.Empty : "<None>");
+    public override string DisplayName
+    {
+      get
+      {
+        var displayName = Nomen ?? (IsReferencedData ? string.Empty : "<None>");
+        if (!string.IsNullOrEmpty(displayName)) return displayName;
+        if (Value?.Category is ARDB.Category category)
+          return $"<{category.ToBuiltInCategory().Name(localized: false).TrimEnd('s')}>";
+
+        return displayName;
+      }
+    }
 
     public new ARDB.Element Value
     {

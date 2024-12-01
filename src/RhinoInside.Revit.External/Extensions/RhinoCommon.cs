@@ -872,6 +872,31 @@ namespace Rhino.Geometry
 
       return false;
     }
+
+    public static IEnumerable<double> Discontinuities(this Curve curve, Continuity continuity, params double[] continuityTolerance)
+    {
+      double tol1, tol2;
+      switch (continuityTolerance?.Length ?? 0)
+      {
+        case 0:
+          tol1 = Math.Cos(RhinoMath.ToRadians(0.1));
+          tol2 = RhinoMath.SqrtEpsilon;
+          break;
+        case 1:
+          tol1 = continuityTolerance[0];
+          tol2 = RhinoMath.SqrtEpsilon;
+          break;
+        default:
+          tol1 = continuityTolerance[0];
+          tol2 = continuityTolerance[1];
+          break;
+      }
+
+      var domain = curve.Domain;
+      var t = domain.T0;
+      while (curve.GetNextDiscontinuity(continuity, t, domain.T1, tol1, tol2, out t))
+        yield return t;
+    }
   }
 
   static class SurfaceExtension

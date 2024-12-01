@@ -301,7 +301,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
       }
 
-      return true;
+      return UnitXYZ.Orthonormalize(basisX, basisY, out basisX, out basisY, out var _);
     }
 
     public static bool TryGetLocation(this PolyLine curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)

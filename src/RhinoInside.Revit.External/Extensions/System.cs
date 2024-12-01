@@ -189,6 +189,57 @@ namespace System
     internal static string ToStringVerbatim(this string value) => Unescape(value, '\'', '\"', '?');
     #endregion
   }
+
+  static class EventHandlerExtenion
+  {
+    #region Events
+    /// <summary>
+    /// Safetly invokes (catching exceptions) the method represented by the provided <paramref name="handler"/>.
+    /// </summary>
+    /// <param name="handler">Event handler</param>
+    /// <param name="sender">Event sender</param>
+    /// <remarks>All handlers will be called even one of it throws an exception.</remarks>
+    public static void SafeInvoke(this EventHandler handler, object sender = null)
+    {
+      foreach (var h in handler.GetInvocationList())
+      {
+        try { h.DynamicInvoke(sender, EventArgs.Empty); }
+        catch (Exception ex) { Diagnostics.Debug.Fail((ex.InnerException ?? ex).Source, (ex.InnerException ?? ex).Message); }
+      }
+    }
+
+    /// <summary>
+    /// Safetly invokes (catching exceptions) the method represented by the provided <paramref name="handler"/>.
+    /// </summary>
+    /// <param name="handler">Event handler</param>
+    /// <param name="sender">Event sender</param>
+    /// <param name="args">Event arguments</param>
+    /// <remarks>All handlers will be called even one of it throws an exception.</remarks>
+    internal static void SafeInvoke<TEventArgs>(this EventHandler<TEventArgs> handler, object sender, TEventArgs args)
+    {
+      foreach (var h in handler.GetInvocationList())
+      {
+        try { h.DynamicInvoke(sender, args); }
+        catch (Exception ex) { Diagnostics.Debug.Fail((ex.InnerException ?? ex).Source, (ex.InnerException ?? ex).Message); }
+      }
+    }
+
+    /// <summary>
+    /// Safetly invokes (catching exceptions) the method represented by the provided <paramref name="handler"/>.
+    /// </summary>
+    /// <param name="handler">Event handler</param>
+    /// <param name="args">Event arguments</param>
+    /// <remarks>All handlers will be called even one of it throws an exception.</remarks>
+    public static void SafeInvoke<TDelegate>(this TDelegate handler, params object[] args) where TDelegate : Delegate
+    {
+      foreach (var h in handler.GetInvocationList())
+      {
+        try { h.DynamicInvoke(args); }
+        catch (Exception ex) { Diagnostics.Debug.Fail((ex.InnerException ?? ex).Source, (ex.InnerException ?? ex).Message); }
+      }
+    }
+    #endregion
+  }
 }
 
 namespace System.IO

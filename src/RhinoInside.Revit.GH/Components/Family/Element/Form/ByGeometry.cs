@@ -73,31 +73,34 @@ namespace RhinoInside.Revit.GH.Components.Families
             }
           }
         }
-        else if (brep.TryGetExtrusion(out var extrusion) && (extrusion.CapCount == 2 || !extrusion.IsClosed(0)))
+        else if (document.OwnerFamily.IsConceptualMassFamily)
         {
-          using (var sketchPlane = ARDB.SketchPlane.Create(document, extrusion.GetProfilePlane(0.0).ToPlane()))
-          using (var referenceArray = new ARDB.ReferenceArray())
+          if (brep.TryGetExtrusion(out var extrusion) && (extrusion.CapCount == 2 || !extrusion.IsClosed(0)))
           {
-            try
+            using (var sketchPlane = ARDB.SketchPlane.Create(document, extrusion.GetProfilePlane(0.0).ToPlane()))
+            using (var referenceArray = new ARDB.ReferenceArray())
             {
-              foreach (var curve in extrusion.Profile3d(new ComponentIndex(ComponentIndexType.ExtrusionBottomProfile, 0)).ToCurveMany())
-                referenceArray.Append(new ARDB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
+              try
+              {
+                foreach (var curve in extrusion.Profile3d(new ComponentIndex(ComponentIndexType.ExtrusionBottomProfile, 0)).ToCurveMany())
+                  referenceArray.Append(new ARDB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
-              ReplaceElement
-              (
-                ref form,
-                document.FamilyCreate.NewExtrusionForm
+                ReplaceElement
                 (
-                  !cutting,
-                  referenceArray,
-                  extrusion.PathLineCurve().Line.Direction.ToXYZ(GeometryEncoder.ModelScaleFactor)
-                )
-              );
-              return;
-            }
-            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
-            {
-              document.Delete(referenceArray.OfType<ARDB.Reference>().Select(x => x.ElementId).ToArray());
+                  ref form,
+                  document.FamilyCreate.NewExtrusionForm
+                  (
+                    !cutting,
+                    referenceArray,
+                    extrusion.PathLineCurve().Line.Direction.ToXYZ(GeometryEncoder.ModelScaleFactor)
+                  )
+                );
+                return;
+              }
+              catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+              {
+                document.Delete(referenceArray.OfType<ARDB.Reference>().Select(x => x.ElementId).ToArray());
+              }
             }
           }
         }

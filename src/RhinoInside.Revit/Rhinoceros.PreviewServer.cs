@@ -82,7 +82,7 @@ namespace RhinoInside.Revit
             document = value;
             if (value != null) Start();
 
-            ActiveDocumentChanged?.Invoke(null, EventArgs.Empty);
+            ActiveDocumentChanged?.SafeInvoke();
           }
         }
       }

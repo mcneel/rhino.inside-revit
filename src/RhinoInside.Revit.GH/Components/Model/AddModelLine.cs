@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -95,6 +96,11 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
           var plane = sketchPlane.Location;
           var tol = GeometryTolerance.Model;
 
+          if (Curve.ProjectToPlane(curve.ToNurbsCurve(), plane) is Curve projectedCurve)
+            curve = projectedCurve;
+          else
+            throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project 'Curve' into 'Work Plane'", curve);
+
           if (curve.IsShort(tol.ShortCurveTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
@@ -104,11 +110,14 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
           if (!curve.IsParallelToPlane(plane, tol.VertexTolerance, tol.AngleTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to work plane.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
-          if ((curve = Curve.ProjectToPlane(curve, plane)) is null)
-            throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project Curve into 'Work Plane'", curve);
-
-          if (curve.GetNextDiscontinuity(Continuity.C1_continuous, curve.Domain.Min, curve.Domain.Max, Math.Cos(tol.AngleTolerance), Rhino.RhinoMath.SqrtEpsilon, out var _))
-            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
+          {
+            var discontinuities = curve.Discontinuities(Continuity.C1_continuous, Math.Cos(tol.AngleTolerance)).ToArray();
+            if (discontinuities.Length > 0) throw new Exceptions.RuntimeArgumentException
+            (
+              "Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°",
+              new PointCloud(discontinuities.Select(x => curve.PointAt(x)))
+            );
+          }
 
           // Compute
           modelLine = Reconstruct(modelLine, sketchPlane.Document, curve.ToCurve(), sketchPlane.Value);
