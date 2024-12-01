@@ -13,13 +13,16 @@ group: Deployment & Configs
 
 ### RC
 
-- Added 'Dimension Text' component.
-- Added 'Datum Bubbles' component.
-- Minimum Revit 2023 is 2023.1.
 
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.27 RC2" version="v1.27.9101.27850" pre_release=true time="12/01/2024" %}
+
+- Added {% include ltr/comp.html uuid='7b229f5e' %}
+- Added {% include ltr/comp.html uuid='198ca8b8' %}
+- Minimum Revit 2023 is 2023.1
 
 {% include ltr/release-header.html title="v1.27 RC1" version="v1.27.9090.24663" pre_release=true time="11/20/2024" %}
 
