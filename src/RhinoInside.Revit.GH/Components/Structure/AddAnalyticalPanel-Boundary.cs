@@ -39,6 +39,10 @@ namespace RhinoInside.Revit.GH.Components.Structure
     )
     { }
 
+    protected AddAnalyticalPanelByBoundary(string name, string nickname, string description, string category, string subCategory)
+    : base(name, nickname, description, category, subCategory)
+    { }
+
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
@@ -240,7 +244,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       return panel;
     }
 
-    ARDB_AnalyticalPanel Reconstruct
+    protected ARDB_AnalyticalPanel Reconstruct
     (
       ARDB_AnalyticalPanel analyticalPanel,
       ARDB.Document doc,

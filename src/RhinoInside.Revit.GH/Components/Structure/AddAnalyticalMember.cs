@@ -23,6 +23,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #else
     public override GH_Exposure Exposure => GH_Exposure.hidden;
 #endif
+
     public AddAnalyticalMember() : base
     (
       name: "Add Analytical Member",
@@ -32,7 +33,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
       subCategory: "Structure"
     )
     { }
-    
+
+    protected AddAnalyticalMember(string name, string nickname, string description, string category, string subCategory)
+    : base(name, nickname, description, category, subCategory)
+    { }
+
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
@@ -139,7 +144,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       return ARDB_AnalyticalMember.Create(doc, curve);
     }
 
-    ARDB_AnalyticalMember Reconstruct
+    protected ARDB_AnalyticalMember Reconstruct
     (
       ARDB_AnalyticalMember analyticalMember,
       ARDB.Document doc,

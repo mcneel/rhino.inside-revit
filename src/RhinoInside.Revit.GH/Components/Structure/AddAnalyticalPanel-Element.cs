@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using RhinoInside.Revit.GH.Types;
 using System.Linq;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
+using Autodesk.Revit.DB;
+using RhinoInside.Revit.GH.Exceptions;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
@@ -23,7 +25,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
 
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-  public class AddAnalyticalPanelByElement : ElementTrackerComponent
+  public class AddAnalyticalPanelByElement : AddAnalyticalPanelByBoundary
   {
     public override Guid ComponentGuid => new Guid("F2228146-1A4B-42BB-AA90-5EBE35F70160");
 #if REVIT_2023
@@ -81,14 +83,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
     };
 
     const string _AnalyticalPanel_ = "Analytical Panel";
-    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
-    {
-#if REVIT_2023
-      ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS,
-      ARDB.BuiltInParameter.ANALYTICAL_ELEMENT_STRUCTURAL_ROLE,
-      ARDB.BuiltInParameter.ANALYTICAL_PANEL_THICKNESS
-#endif
-    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -104,9 +98,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
           // Input
           if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return null;
 
-          //Compute
+          // Check input
           bool isAnalyticalPanel = false;
-          IList<Curve> boundary = null;
+          Brep boundary = null;
           switch (element)
           {
             case Types.FamilyInstance familyInstance:
@@ -115,39 +109,79 @@ namespace RhinoInside.Revit.GH.Components.Structure
               {
                 case ARDB.Structure.StructuralType.Footing:
                   isAnalyticalPanel = true;
-                  //boundary = familyInstance.
-
-                  var g = familyInstance.Value;
-                  break;
-
-                case ARDB.Structure.StructuralType.UnknownFraming:
-                  this.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"This element has an unknown framing type: {element.Id}");
-                  break;
-
-                case ARDB.Structure.StructuralType.NonStructural:
-                default:
-                  this.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"This element is non structural: {element.Id}");
+                  boundary = familyInstance.TrimmedSurface;
                   break;
               }
               break;
 
-            case ISketchAccess sketchAccess when element is Types.Wall:
+            case Types.Wall wall:
               isAnalyticalPanel = true;
-              //boundary = element.Surface.ToBrep().Loops;
+              boundary = wall.TrimmedSurface;
               break;
 
-            case ISketchAccess sketchAccess:
+            case Types.Floor floor:
               isAnalyticalPanel = true;
-              boundary = sketchAccess.Sketch.Profiles.ToList();
+              boundary = floor.Sketch.TrimmedSurface;
               break;
 
             default:
-              this.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"The element is not valid to create an analytical panel: {element.Id}";
               break;
           }
 
+          if (boundary.Faces.Count != 1)
+            throw new RuntimeArgumentException("Boundary", "Boundary surface should have only one face.", boundary);
+
+          if (!boundary.Faces[0].TryGetPlane(out var _, tol.VertexTolerance))
+            throw new RuntimeArgumentException("Boundary", "Boundary surface should be planar.", boundary);
+
+          var loops = boundary.Loops.Where(x => x.LoopType == BrepLoopType.Outer).Select(x => x.To3dCurve()).ToArray();
+
+          var boundaryPlane = default(Rhino.Geometry.Plane);
+          var maxArea = 0.0;
+          for (int index = 0; index < loops.Length; ++index)
+          {
+            var loop = loops[index];
+            var plane = default(Rhino.Geometry.Plane);
+            if (loop is null || loop.IsShort(tol.ShortCurveTolerance))
+              throw new RuntimeArgumentException("Boundary", $"Loop {index} is too short.\nTolerance is {tol.ShortCurveTolerance}", loop);
+
+            if (!loop.IsClosed(tol.VertexTolerance) || !loop.TryGetPlane(out plane, tol.VertexTolerance))
+              throw new RuntimeArgumentException("Boundary", $"Loop {index} should be closed and planar.\nTolerance is {tol.VertexTolerance}", loop);
+
+            loops[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
+
+            using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
+            {
+              if (properties is null)
+                throw new RuntimeArgumentException("Boundary", "Failed to compute loop Area.", loop);
+
+              if (properties.Area > maxArea)
+              {
+                maxArea = properties.Area;
+                var orientation = loop.ClosedCurveOrientation(plane);
+
+                if (orientation == CurveOrientation.CounterClockwise)
+                  plane.Flip();
+
+                boundaryPlane = plane;
+              }
+              else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0 || Math.Abs(plane.DistanceTo(boundaryPlane.Origin)) > GeometryTolerance.Internal.DefaultTolerance)
+              {
+                throw new RuntimeArgumentException("Boundary", "Loops should be a list of coplanar curves.", loops);
+              }
+            }
+          }
+
+          // Compute
           if (isAnalyticalPanel)
-            analyticalPanel = Create(doc.Value, boundary);
+          {
+            analyticalPanel = Reconstruct
+            (
+              analyticalPanel,
+              doc.Value,
+              loops
+            );
+          }
 
           DA.SetData(_AnalyticalPanel_, analyticalPanel);
           return analyticalPanel;
@@ -155,24 +189,5 @@ namespace RhinoInside.Revit.GH.Components.Structure
       );
 #endif
     }
-
-#if REVIT_2023
-    private ARDB_AnalyticalPanel Create(ARDB.Document doc, IList<Curve> boundary)
-    {
-      if (boundary.Count < 1) return null;
-
-      var curveLoop = boundary.ConvertAll(x => x.ToBoundedCurveLoop());
-
-      if (curveLoop is null)
-        throw new ArgumentException("Failed to convert boundary curves to CurveLoop.", nameof(boundary));
-
-      var panel = ARDB_AnalyticalPanel.Create(doc, curveLoop[0]);
-
-      for (int b = 1; b < boundary.Count; ++b)
-        ARDB_AnalyticalOpening.Create(doc, curveLoop[b], panel.Id);
-
-      return panel;
-    }
-#endif
   }
 }
