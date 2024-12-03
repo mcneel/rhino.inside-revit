@@ -225,7 +225,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override void SetCurve(Curve curve, bool keepJoins = false)
     {
-      if (curve is object && Value is ARDB.FamilyInstance instance && curve is object)
+      if (curve is object && Value is ARDB.FamilyInstance instance)
       {
         if (instance.Location is ARDB.LocationCurve locationCurve)
         {

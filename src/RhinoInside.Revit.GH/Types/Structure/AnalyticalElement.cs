@@ -66,6 +66,9 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
 #if REVIT_2023
   using ARDB_Structure_AnalyticalMember = ARDB.Structure.AnalyticalMember;
 #else
@@ -80,6 +83,23 @@ namespace RhinoInside.Revit.GH.Types
 
     public AnalyticalMember() { }
     public AnalyticalMember(ARDB_Structure_AnalyticalMember element) : base(element) { }
+
+    #region Location
+#if REVIT_2023
+    public override void SetCurve(Curve curve, bool keepJoins = false)
+    {
+      if (curve is object && Value is ARDB_Structure_AnalyticalMember member)
+      {
+        var newCurve = curve.ToCurve();
+        if (!member.GetCurve().AlmostEquals(newCurve, GeometryTolerance.Internal.VertexTolerance))
+        {
+          member.SetCurve(newCurve);
+          InvalidateGraphics();
+        }
+      }
+    }
+#endif
+    #endregion
   }
 }
 
