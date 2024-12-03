@@ -483,7 +483,7 @@ namespace Rhino.Geometry
           Where(face => face.FaceIndex != startFace.Face.FaceIndex && face.FaceIndex != endFace.Face.FaceIndex).
           Any(face => !startFace.ProjectionDegenartesToCurve(face.UnderlyingSurface()))
         )
-          return false;
+          continue;
 
         // We use the orginal OuterLoop as profile not the NURBS version of it
         // to keep the structure as much as possible
