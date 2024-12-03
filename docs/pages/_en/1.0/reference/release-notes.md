@@ -10,7 +10,6 @@ group: Deployment & Configs
 
 ### WIP
 
-- Added {% include ltr/comp.html uuid='7b229f5e' %}
 
 ### RC
 
@@ -21,6 +20,7 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.27 RC2" version="v1.27.9101.27850" pre_release=true time="12/01/2024" %}
 
+- Added {% include ltr/comp.html uuid='7b229f5e' %}
 - Added {% include ltr/comp.html uuid='198ca8b8' %}
 - Minimum Revit 2023 is 2023.1
 
