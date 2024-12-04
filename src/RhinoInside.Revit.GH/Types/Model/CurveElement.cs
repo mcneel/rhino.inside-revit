@@ -93,6 +93,7 @@ namespace RhinoInside.Revit.GH.Types
         var attributes = ModelObject.Cast(new GH_Curve(curve.GeometryCurve.ToCurve())).ToAttributes();
         //attributes.Name = DisplayName;
         attributes.Layer = Category.ToModelContent(idMap) as ModelLayer;
+        attributes.Frame = Location;
 
         modelContent = attributes.ToModelData() as ModelContent;
         //idMap.Add(Id, modelContent);

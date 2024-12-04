@@ -897,6 +897,7 @@ namespace RhinoInside.Revit.GH.Types
                 attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
                 attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
                 attributes.Layer = Category.ToModelContent(idMap) as ModelLayer;
+                attributes.Frame = Location;
 
                 modelContent = attributes.ToModelData() as ModelContent;
                 //idMap.Add(Id, modelContent);
