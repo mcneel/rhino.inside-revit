@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.Convert.Geometry;
@@ -9,7 +10,6 @@ using RhinoInside.Revit.GH.Parameters;
 using Autodesk.Revit.DB.Structure;
 using System.Collections.Generic;
 using RhinoInside.Revit.GH.Types;
-using System.Linq;
 using RhinoInside.Revit.Convert.System.Collections.Generic;
 using Autodesk.Revit.DB;
 using RhinoInside.Revit.GH.Exceptions;
@@ -103,17 +103,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Brep boundary = null;
           switch (element)
           {
-            case Types.FamilyInstance familyInstance:
-
-              switch (familyInstance.Value.StructuralType)
-              {
-                case ARDB.Structure.StructuralType.Footing:
-                  isAnalyticalPanel = true;
-                  boundary = familyInstance.TrimmedSurface;
-                  break;
-              }
-              break;
-
             case Types.Wall wall:
               isAnalyticalPanel = true;
               boundary = wall.TrimmedSurface;

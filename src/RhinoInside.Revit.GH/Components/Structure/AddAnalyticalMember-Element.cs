@@ -95,9 +95,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
           bool isAnalyticalMember = false;
           switch (element)
           {
-            case Types.FamilyInstance familyInstance:
+            case Types.StructuralMember member:
 
-              switch (familyInstance.Value.StructuralType)
+              switch (member.Value.StructuralType)
               {
                 case ARDB.Structure.StructuralType.Beam:
                 case ARDB.Structure.StructuralType.Brace:
