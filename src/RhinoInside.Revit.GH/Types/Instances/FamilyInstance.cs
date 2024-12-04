@@ -328,7 +328,19 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.FamilyInstance instance)
         {
           var host = GetElement<GraphicalElement>(instance.Host);
-          return instance.HostFace is ARDB.Reference hostFace ? host?.GetElementFromReference<GraphicalElement>(hostFace) : host;
+          host = instance.HostFace is ARDB.Reference hostFace ? host?.GetElementFromReference<GraphicalElement>(hostFace) : host;
+          if (host is object) return host;
+
+          switch ((Type.Value as ARDB.FamilySymbol).Family?.FamilyPlacementType)
+          {
+            case ARDB.FamilyPlacementType.OneLevelBased:
+            case ARDB.FamilyPlacementType.OneLevelBasedHosted:
+            case ARDB.FamilyPlacementType.TwoLevelsBased:
+              return Level;
+
+            case ARDB.FamilyPlacementType.ViewBased:
+              return OwnerView.Viewer;
+          }
         }
 
         return default;
