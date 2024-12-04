@@ -1,13 +1,7 @@
 using System;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
-using RhinoInside.Revit.GH.Parameters;
-using Autodesk.Revit.DB.Structure;
-using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
@@ -18,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
 
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-  public class AddAnalyticalMemberByElement : AddAnalyticalMember
+  public class AddAnalyticalMemberByElement : BaseAnalyticalComponent
   {
     public override Guid ComponentGuid => new Guid("C9512B48-977F-48B5-91F1-C3C55AC12F3F");
 #if REVIT_2023
@@ -104,18 +98,10 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 case ARDB.Structure.StructuralType.Column:
                   isAnalyticalMember = true;
                   break;
-
-                //case ARDB.Structure.StructuralType.Footing:
-                //case ARDB.Structure.StructuralType.UnknownFraming:
-                //case ARDB.Structure.StructuralType.NonStructural:
-                //default:
-                //  this.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"This element is non structural: {element.Id}");
-                //  break;
               }
               break;
 
             default:
-              //this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"The element is not valid to create an analytical member: {element.Id}");
               break;
           }
 

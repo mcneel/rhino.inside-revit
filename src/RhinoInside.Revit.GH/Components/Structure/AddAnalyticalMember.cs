@@ -2,7 +2,6 @@ using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
@@ -32,10 +31,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
       category: "Revit",
       subCategory: "Structure"
     )
-    { }
-
-    protected AddAnalyticalMember(string name, string nickname, string description, string category, string subCategory)
-    : base(name, nickname, description, category, subCategory)
     { }
 
     protected override ParamDefinition[] Inputs => inputs;
@@ -78,6 +73,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     };
 
     const string _AnalyticalMember_ = "Analytical Member";
+
 //    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
 //    {
 //#if REVIT_2023

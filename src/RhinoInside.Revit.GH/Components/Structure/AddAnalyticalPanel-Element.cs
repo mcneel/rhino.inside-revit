@@ -1,17 +1,10 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
-using RhinoInside.Revit.GH.Parameters;
-using Autodesk.Revit.DB.Structure;
-using System.Collections.Generic;
-using RhinoInside.Revit.GH.Types;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
-using Autodesk.Revit.DB;
 using RhinoInside.Revit.GH.Exceptions;
 
 namespace RhinoInside.Revit.GH.Components.Structure
@@ -25,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
 
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-  public class AddAnalyticalPanelByElement : AddAnalyticalPanelByBoundary
+  public class AddAnalyticalPanelByElement : BaseAnalyticalComponent
   {
     public override Guid ComponentGuid => new Guid("F2228146-1A4B-42BB-AA90-5EBE35F70160");
 #if REVIT_2023
