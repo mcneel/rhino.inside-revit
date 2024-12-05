@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Access = GH_ParamAccess.item
         }
       ),
-
+#if REVIT_2023
       new ParamDefinition
       (
         new Param_Enum<Types.AnalyticalStructuralRole>
@@ -68,6 +68,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Access = GH_ParamAccess.item
         }
       ),
+#endif
     };
 
     protected override ParamDefinition[] Outputs => outputs;
