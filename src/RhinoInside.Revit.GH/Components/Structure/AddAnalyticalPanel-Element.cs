@@ -107,8 +107,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
               break;
 
             default:
+              this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Element with id {element.Id} is not supported for creating an analytical element");
               break;
           }
+
+          if (!isAnalyticalPanel) return null;
 
           if (boundary.Faces.Count != 1)
             throw new RuntimeArgumentException("Boundary", "Boundary surface should have only one face.", boundary);
@@ -154,17 +157,13 @@ namespace RhinoInside.Revit.GH.Components.Structure
             }
           }
 
-          // Compute
-          if (isAnalyticalPanel)
-          {
-            analyticalPanel = Reconstruct
-            (
-              analyticalPanel,
-              doc.Value,
-              loops
-            );
-          }
-
+          analyticalPanel = Reconstruct
+          (
+            analyticalPanel,
+            doc.Value,
+            loops
+          );
+          
           DA.SetData(_AnalyticalPanel_, analyticalPanel);
           return analyticalPanel;
         }

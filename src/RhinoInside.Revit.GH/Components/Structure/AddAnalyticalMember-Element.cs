@@ -85,7 +85,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           // Input
           if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return null;
 
-          //Compute
           bool isAnalyticalMember = false;
           switch (element)
           {
@@ -102,19 +101,19 @@ namespace RhinoInside.Revit.GH.Components.Structure
               break;
 
             default:
+              this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Element with id {element.Id} is not supported for creating an analytical element");
               break;
           }
 
+          if (!isAnalyticalMember) return null;
+
           // Compute
-          if (isAnalyticalMember)
-          {
-            analyticalMember = Reconstruct
-            (
-              analyticalMember,
-              doc.Value,
-              element.Curve.ToCurve()
-            );
-          }
+          analyticalMember = Reconstruct
+          (
+            analyticalMember,
+            doc.Value,
+            element.Curve.ToCurve()
+          );
           
           DA.SetData(_AnalyticalMember_, analyticalMember);
           return analyticalMember;
