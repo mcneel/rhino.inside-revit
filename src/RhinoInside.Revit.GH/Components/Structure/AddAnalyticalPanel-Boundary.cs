@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.System.Collections.Generic;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.Exceptions;
 using ARDB = Autodesk.Revit.DB;
@@ -21,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
 
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-  public class AddAnalyticalPanelByBoundary : ElementTrackerComponent
+  public class AddAnalyticalPanelByBoundary : BaseAnalyticalComponent
   {
     public override Guid ComponentGuid => new Guid("BA2D1733-0A7A-463C-BDDC-4262405F4FE6");
 #if REVIT_2023
@@ -97,14 +95,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     const string _AnalyticalPanel_ = "Analytical Panel";
 
-    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
-    {
-#if REVIT_2023
-      ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS,
-      ARDB.BuiltInParameter.ANALYTICAL_ELEMENT_STRUCTURAL_ROLE,
-      ARDB.BuiltInParameter.ANALYTICAL_PANEL_THICKNESS
-#endif
-    };
+//    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+//    {
+//#if REVIT_2023
+//      ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS,
+//      ARDB.BuiltInParameter.ANALYTICAL_ELEMENT_STRUCTURAL_ROLE,
+//      ARDB.BuiltInParameter.ANALYTICAL_PANEL_THICKNESS
+//#endif
+//    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -183,81 +181,81 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
     }
 
-#if REVIT_2023
-    bool Reuse
-    (
-      ARDB_AnalyticalPanel analyticalPanel,
-      IList<Curve> boundary
-    )
-    {
-      if (analyticalPanel is null) return false;
-      if (analyticalPanel.GetOuterContour() is null) return false;
-      if (boundary.Count < 1) return false;
+//#if REVIT_2023
+//    bool Reuse
+//    (
+//      ARDB_AnalyticalPanel analyticalPanel,
+//      IList<Curve> boundary
+//    )
+//    {
+//      if (analyticalPanel is null) return false;
+//      if (analyticalPanel.GetOuterContour() is null) return false;
+//      if (boundary.Count < 1) return false;
 
-      var curveLoop = boundary.ConvertAll(x => x.ToBoundedCurveLoop());
-      analyticalPanel.SetOuterContour(curveLoop[0]);
+//      var curveLoop = boundary.ConvertAll(x => x.ToBoundedCurveLoop());
+//      analyticalPanel.SetOuterContour(curveLoop[0]);
 
-      var openingIds = analyticalPanel.GetAnalyticalOpeningsIds().OrderBy(x => x.ToValue()).ToArray();
-      int o = 1;
-      for (; o < curveLoop.Length; ++o)
-        Create(analyticalPanel, curveLoop[o], o - 1 < openingIds.Length ? openingIds[o - 1] : null);
+//      var openingIds = analyticalPanel.GetAnalyticalOpeningsIds().OrderBy(x => x.ToValue()).ToArray();
+//      int o = 1;
+//      for (; o < curveLoop.Length; ++o)
+//        Create(analyticalPanel, curveLoop[o], o - 1 < openingIds.Length ? openingIds[o - 1] : null);
 
-      analyticalPanel.Document.Delete(openingIds.Skip(o - 1).ToArray());
+//      analyticalPanel.Document.Delete(openingIds.Skip(o - 1).ToArray());
 
-      return true;
-    }
+//      return true;
+//    }
 
-    ARDB_AnalyticalOpening Create(ARDB_AnalyticalPanel panel, ARDB.CurveLoop loop, ARDB.ElementId openingId)
-    {
-      ARDB_AnalyticalOpening opening = null;
-      if (openingId is object)
-      {
-        opening = panel.Document.GetElement(openingId) as ARDB_AnalyticalOpening;
-        opening.SetOuterContour(loop);
-      }
-      else
-      {
-        opening = ARDB_AnalyticalOpening.Create(panel.Document, loop, panel.Id);
-      }
+//    ARDB_AnalyticalOpening Create(ARDB_AnalyticalPanel panel, ARDB.CurveLoop loop, ARDB.ElementId openingId)
+//    {
+//      ARDB_AnalyticalOpening opening = null;
+//      if (openingId is object)
+//      {
+//        opening = panel.Document.GetElement(openingId) as ARDB_AnalyticalOpening;
+//        opening.SetOuterContour(loop);
+//      }
+//      else
+//      {
+//        opening = ARDB_AnalyticalOpening.Create(panel.Document, loop, panel.Id);
+//      }
 
-      return opening;
-    }
+//      return opening;
+//    }
 
-    ARDB_AnalyticalPanel Create(ARDB.Document doc, IList<Curve> boundary)
-    {
-      if (boundary.Count < 1) return null;
+//    ARDB_AnalyticalPanel Create(ARDB.Document doc, IList<Curve> boundary)
+//    {
+//      if (boundary.Count < 1) return null;
 
-      var curveLoop = boundary.ConvertAll(x => x.ToBoundedCurveLoop());
+//      var curveLoop = boundary.ConvertAll(x => x.ToBoundedCurveLoop());
 
-      if (curveLoop is null)
-        throw new ArgumentException("Failed to convert boundary curves to CurveLoop.", nameof(boundary));
+//      if (curveLoop is null)
+//        throw new ArgumentException("Failed to convert boundary curves to CurveLoop.", nameof(boundary));
 
-      var panel = ARDB_AnalyticalPanel.Create(doc, curveLoop[0]);
+//      var panel = ARDB_AnalyticalPanel.Create(doc, curveLoop[0]);
 
-      for (int b = 1; b < boundary.Count; ++b)
-        ARDB_AnalyticalOpening.Create(doc, curveLoop[b], panel.Id);
+//      for (int b = 1; b < boundary.Count; ++b)
+//        ARDB_AnalyticalOpening.Create(doc, curveLoop[b], panel.Id);
 
-      return panel;
-    }
+//      return panel;
+//    }
 
-    ARDB_AnalyticalPanel Reconstruct
-    (
-      ARDB_AnalyticalPanel analyticalPanel,
-      ARDB.Document doc,
-      IList<Curve> boundary
-    )
-    {
-      if (!Reuse(analyticalPanel, boundary))
-      {
-        analyticalPanel = analyticalPanel.ReplaceElement
-        (
-          Create(doc, boundary),
-          ExcludeUniqueProperties
-        );
-      }
+//    protected ARDB_AnalyticalPanel Reconstruct
+//    (
+//      ARDB_AnalyticalPanel analyticalPanel,
+//      ARDB.Document doc,
+//      IList<Curve> boundary
+//    )
+//    {
+//      if (!Reuse(analyticalPanel, boundary))
+//      {
+//        analyticalPanel = analyticalPanel.ReplaceElement
+//        (
+//          Create(doc, boundary),
+//          ExcludeUniqueProperties
+//        );
+//      }
 
-      return analyticalPanel;
-    }
-#endif
+//      return analyticalPanel;
+//    }
+//#endif
   }
 }

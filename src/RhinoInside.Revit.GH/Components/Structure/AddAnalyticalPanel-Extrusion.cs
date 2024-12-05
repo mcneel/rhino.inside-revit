@@ -1,9 +1,7 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Structure
@@ -18,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-  public class AddAnalyticalPanelByExtrusion : ElementTrackerComponent
+  public class AddAnalyticalPanelByExtrusion : BaseAnalyticalComponent
   {
     public override Guid ComponentGuid => new Guid("872CCB2C-E374-4C3F-B7A7-24686AD3911C");
 #if REVIT_2023
@@ -96,14 +94,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     const string _AnalyticalPanel_ = "Analytical Panel";
 
-    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
-    {
-#if REVIT_2023
-      ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS,
-      ARDB.BuiltInParameter.ANALYTICAL_ELEMENT_STRUCTURAL_ROLE,
-      ARDB.BuiltInParameter.ANALYTICAL_PANEL_THICKNESS
-#endif
-    };
+//    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+//    {
+//#if REVIT_2023
+//      ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS,
+//      ARDB.BuiltInParameter.ANALYTICAL_ELEMENT_STRUCTURAL_ROLE,
+//      ARDB.BuiltInParameter.ANALYTICAL_PANEL_THICKNESS
+//#endif
+//    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -161,54 +159,54 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
     }
 
-#if REVIT_2023
-    bool Reuse
-    (
-      ARDB_AnalyticalPanel analyticalPanel,
-      ARDB.Curve curve,
-      ARDB.XYZ normal,
-      double offset
-    )
-    {
-      if (analyticalPanel is null) return false;
+//#if REVIT_2023
+//    bool Reuse
+//    (
+//      ARDB_AnalyticalPanel analyticalPanel,
+//      ARDB.Curve curve,
+//      ARDB.XYZ normal,
+//      double offset
+//    )
+//    {
+//      if (analyticalPanel is null) return false;
 
-      var curveLoop = analyticalPanel.GetOuterContour();
-      if (!curveLoop.HasPlane())
-        return false;
+//      var curveLoop = analyticalPanel.GetOuterContour();
+//      if (!curveLoop.HasPlane())
+//        return false;
 
-      var curves = new ARDB.Curve[] { null, null, curve, null };
-      curves[0] = curve.CreateTransformed(ARDB.Transform.CreateTranslation(normal * offset)).CreateReversed();
-      curves[1] = ARDB.Line.CreateBound(curves[0].GetEndPoint(1), curves[2].GetEndPoint(0));
-      curves[3] = ARDB.Line.CreateBound(curves[2].GetEndPoint(1), curves[0].GetEndPoint(0));
-      curveLoop = ARDB.CurveLoop.Create(curves);
-      if (!curveLoop.HasPlane())
-        return false;
+//      var curves = new ARDB.Curve[] { null, null, curve, null };
+//      curves[0] = curve.CreateTransformed(ARDB.Transform.CreateTranslation(normal * offset)).CreateReversed();
+//      curves[1] = ARDB.Line.CreateBound(curves[0].GetEndPoint(1), curves[2].GetEndPoint(0));
+//      curves[3] = ARDB.Line.CreateBound(curves[2].GetEndPoint(1), curves[0].GetEndPoint(0));
+//      curveLoop = ARDB.CurveLoop.Create(curves);
+//      if (!curveLoop.HasPlane())
+//        return false;
 
-      analyticalPanel.SetOuterContour(curveLoop);
-      return true;
-    }
+//      analyticalPanel.SetOuterContour(curveLoop);
+//      return true;
+//    }
 
-    ARDB_AnalyticalPanel Reconstruct
-    (
-      ARDB_AnalyticalPanel analyticalPanel,
-      ARDB.Document doc,
-      ARDB.Curve curve,
-      ARDB.XYZ normal,
-      double offset
-    )
-    {
-      if (!Reuse(analyticalPanel, curve, normal, offset))
-      {
-        analyticalPanel = analyticalPanel.ReplaceElement
-        (
-          ARDB_AnalyticalPanel.Create(doc, curve, normal * offset),
-          ExcludeUniqueProperties
-        );
-      }
+//    ARDB_AnalyticalPanel Reconstruct
+//    (
+//      ARDB_AnalyticalPanel analyticalPanel,
+//      ARDB.Document doc,
+//      ARDB.Curve curve,
+//      ARDB.XYZ normal,
+//      double offset
+//    )
+//    {
+//      if (!Reuse(analyticalPanel, curve, normal, offset))
+//      {
+//        analyticalPanel = analyticalPanel.ReplaceElement
+//        (
+//          ARDB_AnalyticalPanel.Create(doc, curve, normal * offset),
+//          ExcludeUniqueProperties
+//        );
+//      }
 
-      return analyticalPanel;
-    }
-#endif
+//      return analyticalPanel;
+//    }
+//#endif
   }
 }
 
