@@ -250,20 +250,24 @@ namespace System.IO
     public static bool IsFullyQualifiedPath(this string path)
     {
       if (path == null) return false;
-      if (path.Length < 2) return false;
-      if (IsDirectorySeparator(path[0]))
-        return path[1] == '?' || IsDirectorySeparator(path[1]);
 
-      return
-      (
-        (path.Length >= 3) &&
-        (path[1] == Path.VolumeSeparatorChar) &&
-        IsDirectorySeparator(path[2]) &&
-        IsValidDriveChar(path[0])
-      );
+#if NET5_0_OR_GREATER
+      return Path.IsPathFullyQualified(path);
+#else
+      if (path.Length < 2) return false;
+
+      return IsDirectorySeparator(path[0]) ?
+        IsDirectorySeparator(path[1]) :
+        (
+          path.Length >= 3 &&
+          path[1] == Path.VolumeSeparatorChar &&
+          IsDirectorySeparator(path[2]) &&
+          IsValidDriveChar(path[0])
+        );
 
       bool IsValidDriveChar(char value) => ('A' <= value && value <= 'Z') || ('a' <= value && value <= 'z');
       bool IsDirectorySeparator(char c) => c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar;
+#endif
     }
 
     [DllImport("SHLWAPI", CharSet = CharSet.Unicode)]
