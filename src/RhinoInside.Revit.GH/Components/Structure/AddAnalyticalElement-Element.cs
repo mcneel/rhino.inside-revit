@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
@@ -32,7 +33,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     (
       name: "Add Analytical Element (Element)",
       nickname: "AE-Element",
-      description: "Given an element, it extract its analytical element to the active Revit document",
+      description: "Given an element, it extracts its analytical element to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
     )
@@ -128,6 +129,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
       // Checking input
       var tol = GeometryTolerance.Model;
       Brep boundary = null;
+      var thickness = 0.0;
+      ElementId typeId = default;
+      ElementId materialId = default;
       AnalyticalStructuralRole structuralRole = AnalyticalStructuralRole.Unset;
       switch (element)
       {
@@ -137,12 +141,18 @@ namespace RhinoInside.Revit.GH.Components.Structure
           {
             case ARDB.Structure.StructuralType.Beam:
               structuralRole = AnalyticalStructuralRole.StructuralRoleBeam;
+              typeId = member.Value.GetTypeId();
+              materialId = member.Value.StructuralMaterialId;
               break;
             case ARDB.Structure.StructuralType.Brace:
               structuralRole = AnalyticalStructuralRole.StructuralRoleGirder;
+              typeId = member.Value.GetTypeId();
+              materialId = member.Value.StructuralMaterialId;
               break;
             case ARDB.Structure.StructuralType.Column:
               structuralRole = AnalyticalStructuralRole.StructuralRoleColumn;
+              typeId = member.Value.GetTypeId();
+              materialId = member.Value.StructuralMaterialId;
               break;
           }
 
@@ -151,11 +161,13 @@ namespace RhinoInside.Revit.GH.Components.Structure
         case Types.Wall wall:
           boundary = wall.TrimmedSurface;
           structuralRole = AnalyticalStructuralRole.StructuralRoleWall;
+          thickness = wall.Value.Width;
           break;
 
         case Types.Floor floor:
           boundary = floor.Sketch.TrimmedSurface;
           structuralRole = AnalyticalStructuralRole.StructuralRoleFloor;
+          thickness = floor.Value.get_Parameter(BuiltInParameter.FLOOR_ATTR_THICKNESS_PARAM).AsDouble();
           break;
       }
 
@@ -178,6 +190,8 @@ namespace RhinoInside.Revit.GH.Components.Structure
               );
 
               analyticalMember.StructuralRole = structuralRole;
+              analyticalMember.SectionTypeId = typeId;
+              analyticalMember.MaterialId = materialId;
               DA.SetData(_AnalyticalMemberBeam_, analyticalMember);
               return analyticalMember;
             }
@@ -196,6 +210,8 @@ namespace RhinoInside.Revit.GH.Components.Structure
               );
 
               analyticalMember.StructuralRole = structuralRole;
+              analyticalMember.SectionTypeId = typeId;
+              analyticalMember.MaterialId = materialId;
               DA.SetData(_AnalyticalMemberColumn_, analyticalMember);
               return analyticalMember;
             }
@@ -214,6 +230,8 @@ namespace RhinoInside.Revit.GH.Components.Structure
               );
 
               analyticalMember.StructuralRole = structuralRole;
+              analyticalMember.SectionTypeId = typeId;
+              analyticalMember.MaterialId = materialId;
               DA.SetData(_AnalyticalMemberBrace_, analyticalMember);
               return analyticalMember;
             }
@@ -277,6 +295,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             );
 
             analyticalPanel.StructuralRole = structuralRole;
+            analyticalPanel.Thickness = thickness;
             DA.SetData(_AnalyticalPanelFloor_, analyticalPanel);
             return analyticalPanel;
           }
@@ -339,6 +358,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             );
 
             analyticalPanel.StructuralRole = structuralRole;
+            analyticalPanel.Thickness = thickness;
             DA.SetData(_AnalyticalPanelWall_, analyticalPanel);
             return analyticalPanel;
           }
