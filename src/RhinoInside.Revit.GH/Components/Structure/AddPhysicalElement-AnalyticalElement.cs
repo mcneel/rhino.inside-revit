@@ -28,19 +28,19 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
 
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-  public class AddElementByAnalyticalElement : ElementTrackerComponent
+  public class AddPhysicalElementByAnalyticalElement : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("A373CE1F-16B3-46C0-B278-A1073D6ED1EF");
 #if REVIT_2023
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 #else
     public override GH_Exposure Exposure => GH_Exposure.hidden;
 #endif
-    public AddElementByAnalyticalElement() : base
+    public AddPhysicalElementByAnalyticalElement() : base
     (
-      name: "Add Element (Analytical Element)",
-      nickname: "Add Element",
-      description: "Given an analytical element, it adds a graphical element to the active Revit document",
+      name: "Add Physical Element (Analytical Element)",
+      nickname: "PE-Analytical",
+      description: "Given an analytical element, it adds a physical element to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
     )
@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         new Parameters.AnalyticalElement()
         {
           Name = "Analytical Element",
-          NickName = "AE",
+          NickName = "A",
           Description = "Analytical element",
           Access = GH_ParamAccess.item
         }
@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       )
     };
 
-    const string _Element_ = "Element";
+    const string _Element_ = "Physical Element";
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         case AnalyticalStructuralRole.Unset:
         case AnalyticalStructuralRole.StructuralRolePanel:
         case AnalyticalStructuralRole.StructuralRoleMember:
-          this.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Analytical element with id {analyticalElement.Id} does not match any valid structural role: {analyticalElement.Value.StructuralRole}");
+          this.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Analytical element does not match any valid structural role: {analyticalElement.Id}");
           return;
 
         case AnalyticalStructuralRole.StructuralRoleFloor:

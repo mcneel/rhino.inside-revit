@@ -21,19 +21,19 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
 
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-  public class AddAnalyticalElementByElement : BaseAnalyticalComponent
+  public class AddAnalyticalElementByPhysicalElement : BaseAnalyticalComponent
   {
     public override Guid ComponentGuid => new Guid("AC26C810-2043-4666-B16E-8484D9DCF7DE");
 #if REVIT_2023
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
 #else
     public override GH_Exposure Exposure => GH_Exposure.hidden;
 #endif
-    public AddAnalyticalElementByElement() : base
+    public AddAnalyticalElementByPhysicalElement() : base
     (
-      name: "Add Analytical Element (Element)",
+      name: "Add Analytical Element (Physical Element)",
       nickname: "AE-Element",
-      description: "Given an element, it extracts its analytical element to the active Revit document",
+      description: "Given a physical element, it extracts its analytical element to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
     )
@@ -56,9 +56,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.GraphicalElement()
         {
-          Name = "Element",
-          NickName = "E",
-          Description = "Graphical element",
+          Name = "Physical Element",
+          NickName = "P",
+          Description = "Physical element",
           Access = GH_ParamAccess.item
         }
       ),
@@ -69,62 +69,22 @@ namespace RhinoInside.Revit.GH.Components.Structure
     {
       new ParamDefinition
       (
-        new Parameters.AnalyticalMember()
-        {
-          Name = _AnalyticalMemberBeam_,
-          NickName = "AM-Beam",
-          Description = $"Output {_AnalyticalMemberBeam_}",
-        }
-      ),
-      new ParamDefinition
-      (
-        new Parameters.AnalyticalMember()
-        {
-          Name = _AnalyticalMemberColumn_,
-          NickName = "AM-Column",
-          Description = $"Output {_AnalyticalMemberColumn_}",
-        }
-      ),
-      new ParamDefinition
-      (
-        new Parameters.AnalyticalMember()
-        {
-          Name = _AnalyticalMemberBrace_,
-          NickName = "AM-Brace",
-          Description = $"Output {_AnalyticalMemberBrace_}",
-        }
-      ),
-      new ParamDefinition
-      (
-        new Parameters.AnalyticalPanel()
-        {
-          Name = _AnalyticalPanelFloor_,
-          NickName = "AP-Floor",
-          Description = $"Output {_AnalyticalPanelFloor_}",
-        }
-      ),
-      new ParamDefinition
-      (
-        new Parameters.AnalyticalPanel()
-        {
-          Name = _AnalyticalPanelWall_,
-          NickName = "AP-Wall",
-          Description = $"Output {_AnalyticalPanelWall_}",
-        }
+        new Parameters.AnalyticalElement()
+          {
+            Name = _AnalyticalElement_,
+            NickName = _AnalyticalElement_.Substring(0,1),
+            Description = $"Output {_AnalyticalElement_}",
+          }
       )
     };
 
-    const string _AnalyticalMemberBeam_ = "Analytical Member (Beam)";
-    const string _AnalyticalMemberColumn_ = "Analytical Member (Column)";
-    const string _AnalyticalMemberBrace_ = "Analytical Member (Brace)";
-    const string _AnalyticalPanelFloor_ = "Analytical Panel (Floor)";
-    const string _AnalyticalPanelWall_ = "Analytical Panel (Wall)";
+    const string _AnalyticalElement_ = "Analytical Element";
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
 #if REVIT_2023
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
-      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
+      if (!Params.GetData(DA, "Physical Element", out Types.GraphicalElement element)) return;
 
       // Checking input
       var tol = GeometryTolerance.Model;
@@ -175,12 +135,12 @@ namespace RhinoInside.Revit.GH.Components.Structure
       switch (structuralRole)
       {
         case AnalyticalStructuralRole.Unset:
-          this.AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element with id {element.Id} is not supported for creating an analytical element");
+          this.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Physical element is not supported for creating an analytical element: {element.Id}");
           return;
         case AnalyticalStructuralRole.StructuralRoleBeam:
           ReconstructElement<ARDB_AnalyticalMember>
           (
-            doc.Value, _AnalyticalMemberBeam_, analyticalMember =>
+            doc.Value, _AnalyticalElement_, analyticalMember =>
             {
               analyticalMember = Reconstruct
               (
@@ -192,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               analyticalMember.StructuralRole = structuralRole;
               analyticalMember.SectionTypeId = typeId;
               analyticalMember.MaterialId = materialId;
-              DA.SetData(_AnalyticalMemberBeam_, analyticalMember);
+              DA.SetData(_AnalyticalElement_, analyticalMember);
               return analyticalMember;
             }
           );
@@ -200,7 +160,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         case AnalyticalStructuralRole.StructuralRoleColumn:
           ReconstructElement<ARDB_AnalyticalMember>
           (
-            doc.Value, _AnalyticalMemberColumn_, analyticalMember =>
+            doc.Value, _AnalyticalElement_, analyticalMember =>
             {
               analyticalMember = Reconstruct
               (
@@ -212,7 +172,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               analyticalMember.StructuralRole = structuralRole;
               analyticalMember.SectionTypeId = typeId;
               analyticalMember.MaterialId = materialId;
-              DA.SetData(_AnalyticalMemberColumn_, analyticalMember);
+              DA.SetData(_AnalyticalElement_, analyticalMember);
               return analyticalMember;
             }
           );
@@ -220,7 +180,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         case AnalyticalStructuralRole.StructuralRoleGirder:
           ReconstructElement<ARDB_AnalyticalMember>
           (
-            doc.Value, _AnalyticalMemberBrace_, analyticalMember =>
+            doc.Value, _AnalyticalElement_, analyticalMember =>
             {
               analyticalMember = Reconstruct
               (
@@ -232,7 +192,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               analyticalMember.StructuralRole = structuralRole;
               analyticalMember.SectionTypeId = typeId;
               analyticalMember.MaterialId = materialId;
-              DA.SetData(_AnalyticalMemberBrace_, analyticalMember);
+              DA.SetData(_AnalyticalElement_, analyticalMember);
               return analyticalMember;
             }
           );
@@ -241,7 +201,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         case AnalyticalStructuralRole.StructuralRoleFloor:
           ReconstructElement<ARDB_AnalyticalPanel>
         (
-          doc.Value, _AnalyticalPanelFloor_, analyticalPanel =>
+          doc.Value, _AnalyticalElement_, analyticalPanel =>
           {
             if (boundary.Faces.Count != 1)
               throw new RuntimeArgumentException("Boundary", "Boundary surface should have only one face.", boundary);
@@ -296,7 +256,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
             analyticalPanel.StructuralRole = structuralRole;
             analyticalPanel.Thickness = thickness;
-            DA.SetData(_AnalyticalPanelFloor_, analyticalPanel);
+            DA.SetData(_AnalyticalElement_, analyticalPanel);
             return analyticalPanel;
           }
         );
@@ -304,7 +264,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         case AnalyticalStructuralRole.StructuralRoleWall:
           ReconstructElement<ARDB_AnalyticalPanel>
         (
-          doc.Value, _AnalyticalPanelWall_, analyticalPanel =>
+          doc.Value, _AnalyticalElement_, analyticalPanel =>
           {
             if (boundary.Faces.Count != 1)
               throw new RuntimeArgumentException("Boundary", "Boundary surface should have only one face.", boundary);
@@ -359,7 +319,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
             analyticalPanel.StructuralRole = structuralRole;
             analyticalPanel.Thickness = thickness;
-            DA.SetData(_AnalyticalPanelWall_, analyticalPanel);
+            DA.SetData(_AnalyticalElement_, analyticalPanel);
             return analyticalPanel;
           }
         );
