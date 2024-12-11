@@ -110,7 +110,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               var panel = analyticalElement.Value as ARDB_AnalyticalPanel;
 
               if (panel.Thickness == 0.0)
-                throw new RuntimeArgumentException($"No floor type found with the same thickness as the analytical panel {analyticalElement.Id}");
+                throw new RuntimeArgumentException($"No floor type found with the same thickness as the analytical panel: {analyticalElement.Id}");
 
               var boundary = new List<Curve> { panel.GetOuterContour().ToCurve() };
               foreach (var loop in boundary)
@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 .ToList();
 
               if (floorTypes.Count == 0)
-                throw new RuntimeArgumentException($"No floor type found with the same thickness as the analytical panel {analyticalElement.Id}");
+                throw new RuntimeArgumentException($"No floor type found with the same thickness as the analytical panel: {analyticalElement.Id}");
 
               // Compute
               floor = Reconstruct
@@ -166,7 +166,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
               // Getting the curve from the analytical member
               if (analyticalPanel.Thickness == 0.0)
-                throw new RuntimeArgumentException($"No wall type found with the same thickness as the analytical panel {analyticalElement.Id}");
+                throw new RuntimeArgumentException($"No wall type found with the same thickness as the analytical panel: {analyticalElement.Id}");
 
               // Geting the boundary
               var boundary = new List<Curve> { analyticalPanel.GetOuterContour().ToCurve() };
@@ -216,7 +216,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 .ToList();
 
               if (wallTypes.Count == 0)
-                throw new RuntimeArgumentException($"No wall type found with the same thickness as the analytical panel {analyticalElement.Id}");
+                throw new RuntimeArgumentException($"No wall type found with the same thickness as the analytical panel:  {analyticalElement.Id}");
 
               // Getting the ref levels
               var bbox = boundary[0].GetBoundingBox(accurate: true);
@@ -277,7 +277,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
               // Getting the type
               if (!(doc.Value.GetElement(analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
-                throw new RuntimeArgumentException($"No section type found in this analytical member to create a structural element:{analyticalMember.Id}");
+                throw new RuntimeArgumentException($"No section type found in this analytical member to create a structural element: {analyticalMember.Id}");
 
               // Getting the top and base levels
               var bbox = curve.GetBoundingBox(accurate: true);
@@ -325,7 +325,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
               // Getting the type
               if (!(doc.Value.GetElement(analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
-                throw new RuntimeArgumentException($"No section type found in this analytical member to create a structural element:{analyticalMember.Id}");
+                throw new RuntimeArgumentException($"No section type found in this analytical member to create a structural element: {analyticalMember.Id}");
 
               // Finding the reference level
               var bbox = curve.GetBoundingBox(accurate: true);
@@ -367,7 +367,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
               // Getting the type
               if (!(doc.Value.GetElement(analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
-                throw new RuntimeArgumentException($"No section type found in this analytical member to create a structural element:{analyticalMember.Id}");
+                throw new RuntimeArgumentException($"No section type found in this analytical member to create a structural element: {analyticalMember.Id}");
 
               // Finding the reference level
               var bbox = curve.GetBoundingBox(accurate: true);
