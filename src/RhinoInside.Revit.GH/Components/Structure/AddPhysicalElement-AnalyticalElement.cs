@@ -129,7 +129,10 @@ namespace RhinoInside.Revit.GH.Components.Structure
               var floorTypes = collector
                 .OfCategory(ARDB.BuiltInCategory.OST_Floors)
                 .WhereElementIsElementType()
-                .Where(t => t.get_Parameter(ARDB.BuiltInParameter.FLOOR_ATTR_DEFAULT_THICKNESS_PARAM).AsDouble() == panel.Thickness)
+                .Where(t => Rhino.RhinoMath.EpsilonEquals(
+                                    t.get_Parameter(ARDB.BuiltInParameter.FLOOR_ATTR_DEFAULT_THICKNESS_PARAM).AsDouble(),
+                                    panel.Thickness,
+                                    tol.DefaultTolerance))
                 .Select(t => t)
                 .Cast<ARDB.FloorType>()
                 .ToList();
@@ -212,7 +215,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 .WhereElementIsElementType()
                 .Select(t => t)
                 .Cast<ARDB.WallType>()
-                .Where(t => t.Width == analyticalPanel.Thickness)
+                .Where(t => Rhino.RhinoMath.EpsilonEquals(t.Width, analyticalPanel.Thickness, tol.DefaultTolerance))
                 .ToList();
 
               if (wallTypes.Count == 0)
