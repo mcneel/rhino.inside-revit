@@ -450,8 +450,9 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       bool enableSolutions = Guest.DocumentChangedEvent.EnableSolutions;
       Guest.DocumentChangedEvent.EnableSolutions = false;
-      var enabledCanvas = Grasshopper.Instances.ActiveCanvas.Enabled;
-      Grasshopper.Instances.ActiveCanvas.Enabled = false;
+      var editor = Grasshopper.Instances.DocumentEditor;
+      var modifiersEnabled = Grasshopper.Instances.ActiveCanvas.ModifiersEnabled;
+      if (modifiersEnabled) editor.DisableUI();
 
       try
       {
@@ -478,7 +479,7 @@ namespace RhinoInside.Revit.GH.Parameters
       }
       finally
       {
-        Grasshopper.Instances.ActiveCanvas.Enabled = enabledCanvas;
+        if (modifiersEnabled) editor.EnableUI();
         Guest.DocumentChangedEvent.EnableSolutions = enableSolutions;
       }
     }
