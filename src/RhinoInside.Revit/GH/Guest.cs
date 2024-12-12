@@ -790,8 +790,8 @@ namespace RhinoInside.Revit.GH
       if (e.Document.Context != GH_DocumentContext.Loaded)
         return;
 
-      var canvas = sender as GH_Canvas;
-      var canvasModifiersEnabled = canvas?.ModifiersEnabled;
+      var canvas = Instances.ActiveCanvas;
+      var canvasModifiersEnabled = canvas?.ModifiersEnabled is true;
 
       var grasshopperDocument = e.Document;
       var grasshopperDocumentEnabled = grasshopperDocument?.Enabled;
@@ -848,7 +848,7 @@ namespace RhinoInside.Revit.GH
       var transactionGroups = new Queue<(ARDB.Document Document, ARDB.TransactionGroup Group)>();
       try
       {
-        if (canvasModifiersEnabled.HasValue) canvas.ModifiersEnabled = false;
+        if (canvasModifiersEnabled) Instances.DocumentEditor.DisableUI();
         if (grasshopperDocumentEnabled.HasValue) grasshopperDocument.Enabled = false;
 
         var revitDocuments = Revit.ActiveDBApplication.Documents.Cast<ARDB.Document>();
@@ -939,7 +939,7 @@ namespace RhinoInside.Revit.GH
           }
         }
 
-        if (canvasModifiersEnabled.HasValue) canvas.ModifiersEnabled = canvasModifiersEnabled.Value;
+        if (canvasModifiersEnabled) Instances.DocumentEditor.EnableUI();
         if (grasshopperDocumentEnabled.HasValue) grasshopperDocument.Enabled = grasshopperDocumentEnabled.Value;
 
         ShowEditor();
