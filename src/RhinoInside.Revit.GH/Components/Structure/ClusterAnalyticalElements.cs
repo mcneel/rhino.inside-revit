@@ -47,8 +47,8 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     static ParamDefinition[] BuildOutputs()
     {
-#if REVIT_2023
       var list = new List<ParamDefinition>();
+#if REVIT_2023
       var values = Enum.GetValues(typeof(ARDB.Structure.AnalyticalStructuralRole)).
       Cast<ARDB.Structure.AnalyticalStructuralRole>().
       Select
@@ -90,8 +90,8 @@ namespace RhinoInside.Revit.GH.Components.Views
 
         list.Add(new ParamDefinition(param, ParamRelevance.Primary));
       }
-      return list.ToArray();
 #endif
+      return list.ToArray();
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
