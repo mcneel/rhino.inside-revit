@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     bool Reuse(ARDB.Structure.BoundaryConditions bConditions, Types.GeometryCurve curve)
     {
       if (bConditions is null) return false;
-      if (!bConditions.GetCurve().IsSameKindAs(curve.Value) || !bConditions.GetCurve().AlmostEquals(curve.Value))
+      if (!(bConditions.GetCurve().IsSameKindAs(curve.Value) && bConditions.GetCurve().AlmostEquals(curve.Value)))
         return false;
       return true;
     }

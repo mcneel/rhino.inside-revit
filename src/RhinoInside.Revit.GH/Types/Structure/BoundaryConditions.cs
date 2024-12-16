@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
     public new ARDB.Structure.BoundaryConditions Value => base.Value as ARDB.Structure.BoundaryConditions;
 
     public BoundaryConditions() { }
-    public BoundaryConditions(ARDB.Structure.BoundaryConditions beamSystem) : base(beamSystem) { }
+    public BoundaryConditions(ARDB.Structure.BoundaryConditions boundaryConditions) : base(boundaryConditions) { }
   }
 }
 

@@ -100,13 +100,16 @@ namespace RhinoInside.Revit.GH.Components.Structure
       var loopA = bConditions.GetLoops().First();
       var loopB = GeometryEncoder.ToCurveLoop( face.PolySurface.Faces.First().OuterLoop.To3dCurve() );
 
-      //var similar = face.Value.AlmostEquals(loop);
+      for (int i = 0; i < loopA.Count(); i++)
+      {
+        if (!(loopA.ElementAt(i).IsSameKindAs(loopB.ElementAt(i)) &&
+          loopA.ElementAt(i).AlmostEquals(loopB.ElementAt(i))))
+        {
+          return false;
+        }
+      }
 
-
-      // Solve this
-
-
-      return false;
+      return true;
     }
 
     ARDB.Structure.BoundaryConditions Create(ARDB.Document doc, Types.GeometryFace face)
