@@ -63,6 +63,21 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
+    public AnalyticalStructuralRole StructuralRole
+    {
+#if REVIT_2023
+      get => Value is ARDB_Structure_AnalyticalElement element ? new AnalyticalStructuralRole(element.StructuralRole) : null;
+      set
+      {
+        if(Value is ARDB_Structure_AnalyticalElement element && element.StructuralRole != value.Value)
+          element.StructuralRole = value.Value;
+      }
+#else
+      get => null;
+      set => throw new Exceptions.RuntimeErrorException($"The element does not allow setting the property '{StructuralRole}'.");
+#endif
+    }
+
     public AnalyzeAs AnalyzeAs
     {
 #if REVIT_2023
