@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 namespace RhinoInside.Revit.GH.Components.Structure
 {
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-  public class AnalyticalElementStructuralRole : TransactionalChainComponent
+  public class AnalyticalElementIdentity : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("6844CF5E-8015-457E-AC7E-0E58C6B80A82");
 #if REVIT_2023
@@ -12,11 +12,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #else
     public override GH_Exposure Exposure => GH_Exposure.hidden;
 #endif
-    public AnalyticalElementStructuralRole() : base
+
+    protected override string IconTag => "ID";
+
+    public AnalyticalElementIdentity() : base
     (
-      name: "Element Structural Role",
-      nickname: "AE-Role",
-      description: "Given an analytical element from the Revit document, this component sets its structural role",
+      name: "Analytical Element Identity",
+      nickname: "AE-Identity",
+      description: "Analytical Element Data.",
       category: "Revit",
       subCategory: "Structure"
     )
