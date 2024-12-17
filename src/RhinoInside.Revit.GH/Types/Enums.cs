@@ -751,5 +751,31 @@ namespace RhinoInside.Revit.GH.Types
       { (int) ARDB.Structure.AnalyticalStructuralRole.StructuralRolePanel,   "Panel" },
     };
   }
+
+  [
+    ComponentVersion(introduced: "1.27"),
+    ComponentGuid("358F814E-A783-4811-907A-859BA2735386"),
+    Name("Structural Analyze As"),
+    Description("Represents analytical functions"),
+  ]
+  public class AnalyzeAs : GH_Enum<ARDB.Structure.AnalyzeAs>
+  {
+    public override bool IsEmpty => Value == ARDB.Structure.AnalyzeAs.NotForAnalysis;
+    public AnalyzeAs() : base() { }
+    public AnalyzeAs(ARDB.Structure.AnalyzeAs value) : base(value) { }
+    public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
+    {
+      { (int) ARDB.Structure.AnalyzeAs.Hanger,                  "Hanger" },
+      { (int) ARDB.Structure.AnalyzeAs.Gravity,                 "Gravity" },
+      { (int) ARDB.Structure.AnalyzeAs.Lateral,                 "Lateral" },
+      { (int) ARDB.Structure.AnalyzeAs.SlabOneWay,              "Slab one way" },
+      { (int) ARDB.Structure.AnalyzeAs.Mat,                     "Foundation" },
+      { (int) ARDB.Structure.AnalyzeAs.SlabOnGrade,             "Slab on grade" },
+      { (int) ARDB.Structure.AnalyzeAs.NotForAnalysis,          "Not for analysis" },
+      { (int) ARDB.Structure.AnalyzeAs.NotApplicable,           "Not applicable" },
+      { (int) ARDB.Structure.AnalyzeAs.SlabTwoWay,              "Slab two way" },
+      { (int) ARDB.Structure.AnalyzeAs.GravityLateral,          "Gravity lateral" },
+    };
+  }
 #endif
 }

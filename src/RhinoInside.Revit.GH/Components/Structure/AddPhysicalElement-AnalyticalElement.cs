@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
   {
     public override Guid ComponentGuid => new Guid("A373CE1F-16B3-46C0-B278-A1073D6ED1EF");
 #if REVIT_2023
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 #else
     public override GH_Exposure Exposure => GH_Exposure.hidden;
 #endif

@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     public override Guid ComponentGuid => new Guid("22C30D64-60CA-4EF9-9C2D-412B8D38A008");
 
 #if REVIT_2023
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 #else
     public override GH_Exposure Exposure => GH_Exposure.hidden;
 #endif
@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     public ClusterAnalyticalElements() : base
     (
       name: "Cluster Analytical Elements (Role)",
-      nickname: "AE-Role",
+      nickname: "C-Analytical",
       description: "Split a list of analytical elements into separate clusters by their structural role",
       category: "Revit",
       subCategory: "Structure"
