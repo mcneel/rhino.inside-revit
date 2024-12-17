@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class LinePatternElement : Element<Types.LinePatternElement, ARDB.LinePatternElement>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
     public override Guid ComponentGuid => new Guid("EB5AB657-AE01-42F0-BF98-071DA6D7A2D2");
 
     public LinePatternElement() : base

@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class GeometryObject : GeometryObject<Types.IGH_GeometryObject>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("7A41402E-7B6C-4523-9B57-E8485713F461");
     public GeometryObject() : base("Geometry", "Geometry", "Contains a collection of Revit geometry", "Params", "Revit") { }
     protected override string IconTag => string.Empty;
@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public class GeometryPoint : GeometryObject<Types.GeometryPoint>,
     ARUI.Selection.ISelectionFilter
   {
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("BC1B160A-DC04-4139-AB7D-1AECBDE7FF88");
     public GeometryPoint() : base("Point", "Point", "Contains a collection of Revit points", "Params", "Revit") { }
 
@@ -205,7 +205,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public class GeometryCurve : GeometryObject<Types.GeometryCurve>,
     ARUI.Selection.ISelectionFilter
   {
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("B79FD0FD-63AE-4776-A0A7-6392A3A58B0D");
     public GeometryCurve() : base("Curve", "Curve", "Contains a collection of Revit curves", "Params", "Revit") { }
 
@@ -266,7 +266,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public class GeometryFace : GeometryObject<Types.GeometryFace>,
     ARUI.Selection.ISelectionFilter
   {
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     public override Guid ComponentGuid => new Guid("759700ED-BC79-4986-A6AB-84921A7C9293");
     public GeometryFace() : base("Face", "Face", "Contains a collection of Revit faces", "Params", "Revit") { }
 
