@@ -727,7 +727,7 @@ namespace RhinoInside.Revit.GH.Types
       { (int) ARDB.ModelUpdatesStatus.UpdatedInCentral,   "Updated In Central" },
     };
   }
-#if REVIT_2023
+
   [
     ComponentVersion(introduced: "1.27"),
     ComponentGuid("84CCF256-95C2-4D9B-BFCD-303567FDF89B"),
@@ -751,7 +751,6 @@ namespace RhinoInside.Revit.GH.Types
       { (int) ARDB.Structure.AnalyticalStructuralRole.StructuralRolePanel,   "Panel" },
     };
   }
-#endif
 
   [
     ComponentVersion(introduced: "1.27"),

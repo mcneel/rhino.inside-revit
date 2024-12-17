@@ -32,7 +32,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           NickName = "AE",
         }
       ),
-#if REVIT_2023
       new ParamDefinition
       (
         new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
@@ -41,9 +40,13 @@ namespace RhinoInside.Revit.GH.Components.Structure
           NickName = "SR",
           Description = "Structural Role to apply to the analytical element",
           Optional = true,
-        }, ParamRelevance.Primary
-      ),
+        },
+#if REVIT_2023
+        ParamRelevance.Primary
+#else
+        ParamRelevance.Occasional
 #endif
+      ),
       new ParamDefinition
       (
         new Parameters.Param_Enum<Types.AnalyzeAs>
@@ -67,7 +70,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           NickName = "AE",
         }
       ),
-#if REVIT_2023
       new ParamDefinition
       (
         new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
@@ -75,9 +77,13 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Name = _StructuralRole_,
           NickName = "SR",
           Description = "Structural Role applied to the analytical element",
-        }, ParamRelevance.Primary
-      ),
+        },
+#if REVIT_2023
+        ParamRelevance.Primary
+#else
+        ParamRelevance.Occasional
 #endif
+      ),
       new ParamDefinition
       (
         new Parameters.Param_Enum<Types.AnalyzeAs>
