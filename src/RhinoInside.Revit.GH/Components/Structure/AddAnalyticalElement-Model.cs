@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     (
       name: "Add Analytical Element (Model)",
       nickname: "ME-Analytical",
-      description: "Given a model element, it extracts its analytical element to the active Revit document",
+      description: "Given a model element, it adds an analytical element representation to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
     )
