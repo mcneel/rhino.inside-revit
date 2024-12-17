@@ -105,18 +105,16 @@ namespace RhinoInside.Revit.GH.Components.Structure
       if (!Params.GetData(DA, _AnalyticalElement_, out Types.AnalyticalElement element)) return;
       else Params.TrySetData(DA, _AnalyticalElement_, () => element);
 
-#if REVIT_2023
       if (!Params.TryGetData(DA, _StructuralRole_, out Types.AnalyticalStructuralRole structuralRole)) return;
+      if (!Params.TryGetData(DA, _AnalyzeAs_, out Types.AnalyzeAs analyzeAs)) return;
 
       if (structuralRole is object)
       {
         StartTransaction(element.Document);
-        element.Value.StructuralRole = structuralRole.Value;
+        element.StructuralRole = structuralRole;
       }
-      Params.TrySetData(DA, _StructuralRole_, () => element.Value.StructuralRole);
-#endif
+      Params.TrySetData(DA, _StructuralRole_, () => element.StructuralRole);
 
-      if (!Params.TryGetData(DA, _AnalyzeAs_, out Types.AnalyzeAs analyzeAs)) return;
       if (analyzeAs is object)
       {
         StartTransaction(element.Document);
