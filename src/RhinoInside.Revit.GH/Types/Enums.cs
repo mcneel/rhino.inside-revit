@@ -751,6 +751,7 @@ namespace RhinoInside.Revit.GH.Types
       { (int) ARDB.Structure.AnalyticalStructuralRole.StructuralRolePanel,   "Panel" },
     };
   }
+#endif
 
   [
     ComponentVersion(introduced: "1.27"),
@@ -777,5 +778,4 @@ namespace RhinoInside.Revit.GH.Types
       { (int) ARDB.Structure.AnalyzeAs.GravityLateral,          "Gravity lateral" },
     };
   }
-#endif
 }

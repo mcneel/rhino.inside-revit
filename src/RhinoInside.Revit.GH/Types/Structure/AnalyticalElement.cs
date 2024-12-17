@@ -61,6 +61,27 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
+
+    #region Properties
+    public AnalyzeAs AnalyzeAs
+    {
+#if REVIT_2023
+      get => Value is ARDB_Structure_AnalyticalElement element ? new AnalyzeAs(element.AnalyzeAs) : null;
+      set
+      {
+        if(Value is ARDB_Structure_AnalyticalElement element && element.AnalyzeAs != value.Value)
+          element.AnalyzeAs = value.Value;
+      }
+#else
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS) is ARDB.Parameter parameter ? new AnalyzeAs(parameter.AsEnum<ARDB.Structure.AnalyzeAs>()) : null;
+      set
+      {
+        if (Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS) is ARDB.Parameter parameter && parameter.AsEnum<ARDB.Structure.AnalyzeAs>() != value.Value)
+          parameter.Set(value.Value);
+      }
+#endif
+    }
+    #endregion
   }
 }
 
