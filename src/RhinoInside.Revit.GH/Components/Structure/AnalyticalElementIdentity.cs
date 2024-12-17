@@ -3,20 +3,19 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
-  [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-  public class AnalyticalElementStructuralRole : TransactionalChainComponent
+  [ComponentVersion(introduced: "1.27")]
+  public class AnalyticalElementIdentity : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("6844CF5E-8015-457E-AC7E-0E58C6B80A82");
-#if REVIT_2023
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
-#else
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
-#endif
-    public AnalyticalElementStructuralRole() : base
+
+    protected override string IconTag => "ID";
+
+    public AnalyticalElementIdentity() : base
     (
-      name: "Element Structural Role",
-      nickname: "AE-Role",
-      description: "Given an analytical element from the Revit document, this component sets its structural role",
+      name: "Analytical Element Identity",
+      nickname: "AE-Identity",
+      description: "Analytical Element Data.",
       category: "Revit",
       subCategory: "Structure"
     )
@@ -33,7 +32,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           NickName = "AE",
         }
       ),
-#if REVIT_2023
       new ParamDefinition
       (
         new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
@@ -42,7 +40,12 @@ namespace RhinoInside.Revit.GH.Components.Structure
           NickName = "SR",
           Description = "Structural Role to apply to the analytical element",
           Optional = true,
-        }, ParamRelevance.Primary
+        },
+#if REVIT_2023
+        ParamRelevance.Primary
+#else
+        ParamRelevance.Occasional
+#endif
       ),
       new ParamDefinition
       (
@@ -54,7 +57,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Optional = true,
         }, ParamRelevance.Primary
       ),
-#endif
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -68,7 +70,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           NickName = "AE",
         }
       ),
-#if REVIT_2023
       new ParamDefinition
       (
         new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
@@ -76,7 +77,12 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Name = _StructuralRole_,
           NickName = "SR",
           Description = "Structural Role applied to the analytical element",
-        }, ParamRelevance.Primary
+        },
+#if REVIT_2023
+        ParamRelevance.Primary
+#else
+        ParamRelevance.Occasional
+#endif
       ),
       new ParamDefinition
       (
@@ -87,7 +93,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Description = "Structural analysis function to applied to the analytical element",
         }, ParamRelevance.Primary
       ),
-#endif
     };
 
     const string _AnalyticalElement_ = "Analytical Element";
@@ -102,23 +107,22 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
 #if REVIT_2023
       if (!Params.TryGetData(DA, _StructuralRole_, out Types.AnalyticalStructuralRole structuralRole)) return;
-      if (!Params.TryGetData(DA, _AnalyzeAs_, out Types.AnalyzeAs analyzeAs)) return;
 
       if (structuralRole is object)
       {
         StartTransaction(element.Document);
         element.Value.StructuralRole = structuralRole.Value;
       }
+      Params.TrySetData(DA, _StructuralRole_, () => element.Value.StructuralRole);
+#endif
 
+      if (!Params.TryGetData(DA, _AnalyzeAs_, out Types.AnalyzeAs analyzeAs)) return;
       if (analyzeAs is object)
       {
         StartTransaction(element.Document);
-        element.Value.AnalyzeAs = analyzeAs.Value;
+        element.AnalyzeAs = analyzeAs;
       }
-
-      Params.TrySetData(DA, _StructuralRole_, () => element.Value.StructuralRole);
-      Params.TrySetData(DA, _AnalyzeAs_, () => element.Value.AnalyzeAs);
-#endif
+      Params.TrySetData(DA, _AnalyzeAs_, () => element.AnalyzeAs);
     }
   }
 }

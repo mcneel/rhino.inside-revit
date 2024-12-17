@@ -11,10 +11,11 @@ group: Deployment & Configs
 ### WIP
 
 - Added 'Reference Point' parameter.
-- Added 'Add Analytical Element (Model)'
-- Added 'Add Model Element (Analytical)'
+- Added 'Query Analytical Element'
+- Added 'Analytical Element Identity'
 - Added 'Cluster Analytical Elements (Role)'
-- Added 'Element Structural Role'
+- Added 'Add Analytical Element'
+- Added 'Add Model Element'
 - Added 'Add Boundary Conditions (Point)'
 - Added 'Add Boundary Conditions (Line)'
 - Added 'Add Boundary Conditions (Area)'
