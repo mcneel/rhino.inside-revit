@@ -7,7 +7,10 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Structural Member")]
-  public class StructuralMember : FamilyInstance
+  public interface IGH_StructuralMember : IGH_FamilyInstance { }
+
+  [Kernel.Attributes.Name("Structural Member")]
+  public class StructuralMember : FamilyInstance, IGH_StructuralMember
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
