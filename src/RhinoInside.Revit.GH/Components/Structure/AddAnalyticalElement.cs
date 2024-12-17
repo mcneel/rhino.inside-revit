@@ -19,9 +19,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
   using ARDB_AnalyticalOpening = ARDB.Structure.AnalyticalModelSurface;
 #endif
 
-  public abstract class BaseAnalyticalComponent : ElementTrackerComponent
+  public abstract class AddAnalyticalElement : ElementTrackerComponent
   {
-    protected BaseAnalyticalComponent(string name, string nickname, string description, string category, string subCategory)
+    protected AddAnalyticalElement(string name, string nickname, string description, string category, string subCategory)
       : base(name, nickname, description, category, subCategory)
     { }
 
@@ -221,6 +221,4 @@ namespace RhinoInside.Revit.GH.Components.Structure
     #endregion
 
   }
-
-
 }
