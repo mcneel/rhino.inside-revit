@@ -89,7 +89,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     {
       new ParamDefinition
       (
-        new Parameters.FamilyInstance()
+        new Parameters.StructuralInstance()
         {
           Name = _Column_,
           NickName = _Column_.Substring(0, 1),

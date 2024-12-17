@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     {
       new ParamDefinition
       (
-        new Parameters.FamilyInstance()
+        new Parameters.StructuralInstance()
         {
           Name = _Beam_,
           NickName = _Beam_.Substring(0, 1),

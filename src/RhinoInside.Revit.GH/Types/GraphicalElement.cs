@@ -786,7 +786,7 @@ namespace RhinoInside.Revit.GH.Types
           return ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, end);
 
         case ARDB.FamilyInstance instance:
-          if (StructuralMember.IsStructuralFraming(instance))
+          if (StructuralInstance.IsStructuralFraming(instance))
             return ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(instance, end);
 
           break;
@@ -808,7 +808,7 @@ namespace RhinoInside.Revit.GH.Types
             return;
 
           case ARDB.FamilyInstance instance:
-            if (StructuralMember.IsStructuralFraming(instance))
+            if (StructuralInstance.IsStructuralFraming(instance))
             {
               if (allow.Value) ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(instance, end);
               else ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(instance, end);
