@@ -13,8 +13,9 @@ namespace RhinoInside.Revit.GH.Parameters
   [ComponentVersion(introduced: "1.16")]
   public class AnalyticalElement : GraphicalElement<Types.AnalyticalElement, ARDB_AnalyticalElement>
   {
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
     public override Guid ComponentGuid => new Guid("CEC912FA-C0D3-47C2-A3A6-52A8B8EA4476");
+    protected override string IconTag => "AE";
 
     public AnalyticalElement() : base("Analytical Element", "Analytical Element", "Contains a collection of Revit analytical elements", "Params", "Revit Elements") { }
 

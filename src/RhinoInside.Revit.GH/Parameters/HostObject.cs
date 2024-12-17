@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class HostObjectType : ElementType<Types.IGH_HostObjectType, ARDB.HostObjAttributes>
   {
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("708AB072-878E-41ED-9B8C-AAB0E1D85A53");
 
     public HostObjectType() : base("Host Type", "HostType", "Contains a collection of Revit host types", "Params", "Revit Elements") { }

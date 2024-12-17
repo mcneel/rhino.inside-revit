@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class FillPatternElement : Element<Types.FillPatternElement, ARDB.FillPatternElement>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
     public override Guid ComponentGuid => new Guid("EFDDB3D7-CF2A-4972-B1C4-29374BB89149");
 
     public FillPatternElement() : base

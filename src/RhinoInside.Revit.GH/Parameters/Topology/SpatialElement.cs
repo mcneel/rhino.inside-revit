@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class SpatialElement : GraphicalElement<Types.SpatialElement, ARDB.SpatialElement>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("8774ACF3-7B77-474F-B12B-03D4CBBC3C15");
     protected override string IconTag => string.Empty;
 
