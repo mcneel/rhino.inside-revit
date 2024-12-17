@@ -29,9 +29,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
     public AddAnalyticalElementByModel() : base
     (
-      name: "Add Analytical Element (Model)",
+      name: "Add Analytical Element",
       nickname: "ME-Analytical",
-      description: "Given a model element, it extracts its analytical element to the active Revit document",
+      description: "Given a model element, it adds an analytical element representation to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
     )
@@ -92,28 +92,39 @@ namespace RhinoInside.Revit.GH.Components.Structure
       var structuralRole = ARDB.Structure.AnalyticalStructuralRole.Unset;
       switch (element)
       {
-        case Types.StructuralMember member:
-
-          switch (member.Value.StructuralType)
+        case Types.StructuralInstance structural:
+        {
+          if (Types.StructuralInstance.IsStructuralFraming(structural.Value))
           {
-            case ARDB.Structure.StructuralType.Beam:
-              structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleBeam;
-              typeId = member.Value.GetTypeId();
-              materialId = member.Value.StructuralMaterialId;
-              break;
-            case ARDB.Structure.StructuralType.Brace:
-              structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleGirder;
-              typeId = member.Value.GetTypeId();
-              materialId = member.Value.StructuralMaterialId;
-              break;
-            case ARDB.Structure.StructuralType.Column:
-              structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleColumn;
-              typeId = member.Value.GetTypeId();
-              materialId = member.Value.StructuralMaterialId;
-              break;
-          }
+            switch (structural)
+            {
+              case Types.StructuralBeam beam:
+                structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleBeam;
+                typeId = beam.Value.GetTypeId();
+                materialId = beam.Value.StructuralMaterialId;
+                break;
 
-          break;
+              case Types.StructuralBrace brace:
+                structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleGirder;
+                typeId = brace.Value.GetTypeId();
+                materialId = brace.Value.StructuralMaterialId;
+                break;
+
+              case Types.StructuralColumn column:
+                structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleColumn;
+                typeId = column.Value.GetTypeId();
+                materialId = column.Value.StructuralMaterialId;
+                break;
+
+              case Types.StructuralFraming framing:
+                structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleMember;
+                typeId = framing.Value.GetTypeId();
+                materialId = framing.Value.StructuralMaterialId;
+                break;
+            }
+          }
+        }
+        break;
 
         case Types.Wall wall:
           boundary = wall.TrimmedSurface;
@@ -140,13 +151,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           (
             doc.Value, _AnalyticalElement_, analyticalMember =>
             {
-              analyticalMember = Reconstruct
-              (
-                analyticalMember,
-                doc.Value,
-                element.Curve.ToCurve()
-              );
-
+              analyticalMember = Reconstruct(analyticalMember, doc.Value, element.Curve.ToCurve());
               analyticalMember.StructuralRole = structuralRole;
               analyticalMember.SectionTypeId = typeId;
               analyticalMember.MaterialId = materialId;
@@ -160,13 +165,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           (
             doc.Value, _AnalyticalElement_, analyticalMember =>
             {
-              analyticalMember = Reconstruct
-              (
-                analyticalMember,
-                doc.Value,
-                element.Curve.ToCurve()
-              );
-
+              analyticalMember = Reconstruct(analyticalMember, doc.Value, element.Curve.ToCurve());
               analyticalMember.StructuralRole = structuralRole;
               analyticalMember.SectionTypeId = typeId;
               analyticalMember.MaterialId = materialId;
@@ -180,13 +179,22 @@ namespace RhinoInside.Revit.GH.Components.Structure
           (
             doc.Value, _AnalyticalElement_, analyticalMember =>
             {
-              analyticalMember = Reconstruct
-              (
-                analyticalMember,
-                doc.Value,
-                element.Curve.ToCurve()
-              );
+              analyticalMember = Reconstruct(analyticalMember, doc.Value, element.Curve.ToCurve());
+              analyticalMember.StructuralRole = structuralRole;
+              analyticalMember.SectionTypeId = typeId;
+              analyticalMember.MaterialId = materialId;
+              DA.SetData(_AnalyticalElement_, analyticalMember);
+              return analyticalMember;
+            }
+          );
+          break;
 
+        case ARDB.Structure.AnalyticalStructuralRole.StructuralRoleMember:
+          ReconstructElement<ARDB_AnalyticalMember>
+          (
+            doc.Value, _AnalyticalElement_, analyticalMember =>
+            {
+              analyticalMember = Reconstruct(analyticalMember, doc.Value, element.Curve.ToCurve());
               analyticalMember.StructuralRole = structuralRole;
               analyticalMember.SectionTypeId = typeId;
               analyticalMember.MaterialId = materialId;

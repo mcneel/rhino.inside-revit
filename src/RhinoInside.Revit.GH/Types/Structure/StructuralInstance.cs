@@ -6,8 +6,11 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using External.DB.Extensions;
 
-  [Kernel.Attributes.Name("Structural Member")]
-  public class StructuralMember : FamilyInstance
+  [Kernel.Attributes.Name("Structural Component")]
+  public interface IGH_StructuralInstance : IGH_FamilyInstance { }
+
+  [Kernel.Attributes.Name("Structural Component")]
+  public class StructuralInstance : FamilyInstance, IGH_StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
@@ -15,8 +18,8 @@ namespace RhinoInside.Revit.GH.Types
       return ((element as ARDB.FamilyInstance)?.StructuralType) != ARDB.Structure.StructuralType.NonStructural;
     }
 
-    public StructuralMember() { }
-    public StructuralMember(ARDB.FamilyInstance value) : base(value) { }
+    public StructuralInstance() { }
+    public StructuralInstance(ARDB.FamilyInstance value) : base(value) { }
 
     #region Joins
     public static bool IsStructuralFraming(ARDB.FamilyInstance frame) =>
@@ -109,7 +112,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Beam")]
-  public class StructuralBeam : StructuralMember
+  public class StructuralBeam : StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
@@ -156,7 +159,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Brace")]
-  public class StructuralBrace : StructuralMember
+  public class StructuralBrace : StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
@@ -169,7 +172,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Column")]
-  public class StructuralColumn : StructuralMember
+  public class StructuralColumn : StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
@@ -217,7 +220,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Foundation")]
-  public class StructuralFooting : StructuralMember
+  public class StructuralFooting : StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
@@ -230,7 +233,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Framing")]
-  public class StructuralFraming : StructuralMember
+  public class StructuralFraming : StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)

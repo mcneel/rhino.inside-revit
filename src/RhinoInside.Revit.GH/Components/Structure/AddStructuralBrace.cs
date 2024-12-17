@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     {
       new ParamDefinition
       (
-        new Parameters.FamilyInstance()
+        new Parameters.StructuralInstance()
         {
           Name = _Brace,
           NickName = _Brace.Substring(0, 1),
