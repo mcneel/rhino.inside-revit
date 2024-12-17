@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           (
             doc.Value, _ModelElement_, floor =>
             {
-              var tol = GeometryTolerance.Internal;
+              var tol = GeometryTolerance.Model;
               var panel = analyticalElement.Value as ARDB_AnalyticalPanel;
 
               if (panel.Thickness == 0.0)
@@ -129,14 +129,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
               var floorType = collector.
                 OfCategory(ARDB.BuiltInCategory.OST_Floors).
                 WhereElementIsElementType().
-                Where(t => Rhino.RhinoMath.EpsilonEquals
+                Where(t => GeometryTolerance.Internal.DefaultTolerance.Equals
                 (
                   t.get_Parameter(ARDB.BuiltInParameter.FLOOR_ATTR_DEFAULT_THICKNESS_PARAM).AsDouble(),
-                  panel.Thickness,
-                  tol.DefaultTolerance)
-                ).
+                  panel.Thickness
+                )).
                 Cast<ARDB.FloorType>().
                 FirstOrDefault();
+
 
               if (floorType is null)
                 throw new RuntimeException($"No floor type found with the same thickness as the analytical panel. {{{analyticalElement.Id}}}");
