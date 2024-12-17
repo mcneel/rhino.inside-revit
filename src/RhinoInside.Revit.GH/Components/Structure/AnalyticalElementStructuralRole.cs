@@ -29,9 +29,8 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.AnalyticalElement()
         {
-          Name = "Analytical Element",
+          Name = _AnalyticalElement_,
           NickName = "AE",
-          Description = "Analytical element to set the structural role",
         }
       ),
 #if REVIT_2023
@@ -39,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
         {
-          Name = "Structural Role",
+          Name = _StructuralRole_,
           NickName = "SR",
           Description = "Structural Role to apply to the analytical element",
           Optional = true,
@@ -49,7 +48,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.Param_Enum<Types.AnalyzeAs>
         {
-          Name = "Analyze As",
+          Name = _AnalyzeAs_,
           NickName = "AS",
           Description = "Structural analysis function to apply to the analytical element",
           Optional = true,
@@ -66,8 +65,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         new Parameters.AnalyticalElement()
         {
           Name = _AnalyticalElement_,
-          NickName = _AnalyticalElement_.Substring(0, 1),
-          Description = $"Output {_AnalyticalElement_}",
+          NickName = "AE",
         }
       ),
 #if REVIT_2023
@@ -75,7 +73,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
         {
-          Name = "Structural Role",
+          Name = _StructuralRole_,
           NickName = "SR",
           Description = "Structural Role applied to the analytical element",
         }, ParamRelevance.Primary
@@ -84,7 +82,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.Param_Enum<Types.AnalyzeAs>
         {
-          Name = "Analyze As",
+          Name = _AnalyzeAs_,
           NickName = "AS",
           Description = "Structural analysis function to applied to the analytical element",
         }, ParamRelevance.Primary

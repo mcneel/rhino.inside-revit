@@ -38,8 +38,8 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
     public AddPhysicalElementByAnalyticalElement() : base
     (
-      name: "Add Physical Element (Analytical Element)",
-      nickname: "PE-Analytical",
+      name: "Add Model Element (Analytical)",
+      nickname: "AE-Model",
       description: "Given an analytical element, it adds a physical element to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         new Parameters.AnalyticalElement()
         {
           Name = "Analytical Element",
-          NickName = "A",
+          NickName = "AE",
           Description = "Analytical element",
           Access = GH_ParamAccess.item
         }
@@ -78,14 +78,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.GraphicalElement()
         {
-          Name = _Element_,
-          NickName = _Element_.Substring(0, 1),
-          Description = $"Output {_Element_}",
+          Name = _ModelElement_,
+          NickName = "ME",
+          Description = $"Output {_ModelElement_}",
         }
       )
     };
 
-    const string _Element_ = "Physical Element";
+    const string _ModelElement_ = "Model Element";
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -98,19 +98,19 @@ namespace RhinoInside.Revit.GH.Components.Structure
         case AnalyticalStructuralRole.Unset:
         case AnalyticalStructuralRole.StructuralRolePanel:
         case AnalyticalStructuralRole.StructuralRoleMember:
-          this.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Analytical element does not match any valid structural role: {analyticalElement.Id}");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Analytical element does not match any valid structural role. {{{analyticalElement.Id}}}");
           return;
 
         case AnalyticalStructuralRole.StructuralRoleFloor:
           ReconstructElement<ARDB.Floor>
           (
-            doc.Value, _Element_, floor =>
+            doc.Value, _ModelElement_, floor =>
             {
-              var tol = GeometryTolerance.Model;
+              var tol = GeometryTolerance.Internal;
               var panel = analyticalElement.Value as ARDB_AnalyticalPanel;
 
               if (panel.Thickness == 0.0)
-                throw new RuntimeArgumentException($"No floor type found with the same thickness as the analytical panel: {analyticalElement.Id}");
+                throw new RuntimeException($"No floor type found with the same thickness as the analytical panel. {{{analyticalElement.Id}}}");
 
               var boundary = new List<Curve> { panel.GetOuterContour().ToCurve() };
               foreach (var loop in boundary)
@@ -126,19 +126,20 @@ namespace RhinoInside.Revit.GH.Components.Structure
               }
 
               ARDB.FilteredElementCollector collector = new ARDB.FilteredElementCollector(doc.Value);
-              var floorTypes = collector
-                .OfCategory(ARDB.BuiltInCategory.OST_Floors)
-                .WhereElementIsElementType()
-                .Where(t => Rhino.RhinoMath.EpsilonEquals(
-                                    t.get_Parameter(ARDB.BuiltInParameter.FLOOR_ATTR_DEFAULT_THICKNESS_PARAM).AsDouble(),
-                                    panel.Thickness,
-                                    tol.DefaultTolerance))
-                .Select(t => t)
-                .Cast<ARDB.FloorType>()
-                .ToList();
+              var floorType = collector.
+                OfCategory(ARDB.BuiltInCategory.OST_Floors).
+                WhereElementIsElementType().
+                Where(t => Rhino.RhinoMath.EpsilonEquals
+                (
+                  t.get_Parameter(ARDB.BuiltInParameter.FLOOR_ATTR_DEFAULT_THICKNESS_PARAM).AsDouble(),
+                  panel.Thickness,
+                  tol.DefaultTolerance)
+                ).
+                Cast<ARDB.FloorType>().
+                FirstOrDefault();
 
-              if (floorTypes.Count == 0)
-                throw new RuntimeArgumentException($"No floor type found with the same thickness as the analytical panel: {analyticalElement.Id}");
+              if (floorType is null)
+                throw new RuntimeException($"No floor type found with the same thickness as the analytical panel. {{{analyticalElement.Id}}}");
 
               // Compute
               floor = Reconstruct
@@ -146,12 +147,12 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 floor,
                 doc.Value,
                 boundary,
-                floorTypes.First(),
+                floorType,
                 doc.Value.GetElement(panel.LevelId) as ARDB.Level,
                 true
               );
 
-              DA.SetData(_Element_, floor);
+              DA.SetData(_ModelElement_, floor);
               return floor;
             }
           );
@@ -160,7 +161,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         case AnalyticalStructuralRole.StructuralRoleWall:
           ReconstructElement<ARDB.Wall>
           (
-            doc.Value, _Element_, wall =>
+            doc.Value, _ModelElement_, wall =>
             {
               var tol = GeometryTolerance.Model;
               var boundaryPlane = default(Rhino.Geometry.Plane);
@@ -169,7 +170,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
               // Getting the curve from the analytical member
               if (analyticalPanel.Thickness == 0.0)
-                throw new RuntimeArgumentException($"No wall type found with the same thickness as the analytical panel: {analyticalElement.Id}");
+                throw new RuntimeException($"No wall type found with the same thickness as the analytical panel: {analyticalElement.Id}");
 
               // Geting the boundary
               var boundary = new List<Curve> { analyticalPanel.GetOuterContour().ToCurve() };
@@ -210,16 +211,15 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
               // Geting the wall type
               ARDB.FilteredElementCollector collector = new ARDB.FilteredElementCollector(doc.Value);
-              var wallTypes = collector
+              var wallType = collector
                 .OfCategory(ARDB.BuiltInCategory.OST_Walls)
                 .WhereElementIsElementType()
-                .Select(t => t)
                 .Cast<ARDB.WallType>()
                 .Where(t => Rhino.RhinoMath.EpsilonEquals(t.Width, analyticalPanel.Thickness, tol.DefaultTolerance))
-                .ToList();
+                .FirstOrDefault();
 
-              if (wallTypes.Count == 0)
-                throw new RuntimeArgumentException($"No wall type found with the same thickness as the analytical panel:  {analyticalElement.Id}");
+              if (wallType is null)
+                throw new RuntimeException($"No wall type found with the same thickness as the analytical panel:  {analyticalElement.Id}");
 
               // Getting the ref levels
               var bbox = boundary[0].GetBoundingBox(accurate: true);
@@ -246,13 +246,13 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 wall,
                 doc.Value,
                 boundary,
-                wallTypes.First(),
+                wallType,
                 baseLevel.Value as ARDB.Level,
                 angle,
                 true
               );
 
-              DA.SetData(_Element_, wall);
+              DA.SetData(_ModelElement_, wall);
               return wall;
             }
           );
@@ -261,7 +261,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         case AnalyticalStructuralRole.StructuralRoleColumn:
           ReconstructElement<ARDB.FamilyInstance>
           (
-            doc.Value, _Element_, column =>
+            doc.Value, _ModelElement_, column =>
             {
               var tol = GeometryTolerance.Model;
               var analyticalMember = analyticalElement.Value as ARDB_AnalyticalMember;
@@ -280,7 +280,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
               // Getting the type
               if (!(doc.Value.GetElement(analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
-                throw new RuntimeArgumentException($"No section type found in this analytical member to create a structural element: {analyticalMember.Id}");
+                throw new RuntimeException($"No section type found in this analytical member to create a structural element: {analyticalMember.Id}");
 
               // Getting the top and base levels
               var bbox = curve.GetBoundingBox(accurate: true);
@@ -303,7 +303,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 topLevel.Value as ARDB.Level
               );
 
-              DA.SetData(_Element_, column);
+              DA.SetData(_ModelElement_, column);
               return column;
             }
           );
@@ -312,7 +312,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         case AnalyticalStructuralRole.StructuralRoleGirder:
           ReconstructElement<ARDB.FamilyInstance>
           (
-            doc.Value, _Element_, brace =>
+            doc.Value, _ModelElement_, brace =>
             {
               var tol = GeometryTolerance.Model;
               var analyticalMember = analyticalElement.Value as ARDB_AnalyticalMember;
@@ -328,7 +328,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
               // Getting the type
               if (!(doc.Value.GetElement(analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
-                throw new RuntimeArgumentException($"No section type found in this analytical member to create a structural element: {analyticalMember.Id}");
+                throw new RuntimeException($"No section type found in this analytical member to create a structural element. {{{analyticalMember.Id}}}");
 
               // Finding the reference level
               var bbox = curve.GetBoundingBox(accurate: true);
@@ -340,7 +340,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               // Compute
               brace = Reconstruct(brace, doc.Value, line.ToLine(), type, refLevel.Value as ARDB.Level);
 
-              DA.SetData(_Element_, brace);
+              DA.SetData(_ModelElement_, brace);
               return brace;
             }
           );
@@ -348,7 +348,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         case AnalyticalStructuralRole.StructuralRoleBeam:
           ReconstructElement<ARDB.FamilyInstance>
           (
-            doc.Value, _Element_, beam =>
+            doc.Value, _ModelElement_, beam =>
             {
               var tol = GeometryTolerance.Model;
               var analyticalMember = analyticalElement.Value as ARDB_AnalyticalMember;
@@ -370,7 +370,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
               // Getting the type
               if (!(doc.Value.GetElement(analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
-                throw new RuntimeArgumentException($"No section type found in this analytical member to create a structural element: {analyticalMember.Id}");
+                throw new RuntimeException($"No section type found in this analytical member to create a structural element. {{{analyticalMember.Id}}}");
 
               // Finding the reference level
               var bbox = curve.GetBoundingBox(accurate: true);
@@ -390,7 +390,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 refLevel.Value as ARDB.Level
               );
 
-              DA.SetData(_Element_, beam);
+              DA.SetData(_ModelElement_, beam);
               return beam;
             }
           );

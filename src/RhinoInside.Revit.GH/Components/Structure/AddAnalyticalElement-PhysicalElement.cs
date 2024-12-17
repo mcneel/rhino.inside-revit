@@ -1,7 +1,5 @@
 using System;
 using System.Linq;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Structure;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
@@ -31,9 +29,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
     public AddAnalyticalElementByPhysicalElement() : base
     (
-      name: "Add Analytical Element (Physical Element)",
-      nickname: "AE-Element",
-      description: "Given a physical element, it extracts its analytical element to the active Revit document",
+      name: "Add Analytical Element (Model)",
+      nickname: "ME-Analytical",
+      description: "Given a model element, it extracts its analytical element to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
     )
@@ -56,10 +54,9 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.GraphicalElement()
         {
-          Name = "Physical Element",
-          NickName = "P",
-          Description = "Physical element",
-          Access = GH_ParamAccess.item
+          Name = "Model Element",
+          NickName = "ME",
+          Description = "Model element",
         }
       ),
     };
@@ -72,7 +69,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         new Parameters.AnalyticalElement()
           {
             Name = _AnalyticalElement_,
-            NickName = _AnalyticalElement_.Substring(0,1),
+            NickName = "AE",
             Description = $"Output {_AnalyticalElement_}",
           }
       )
@@ -84,15 +81,15 @@ namespace RhinoInside.Revit.GH.Components.Structure
     {
 #if REVIT_2023
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
-      if (!Params.GetData(DA, "Physical Element", out Types.GraphicalElement element)) return;
+      if (!Params.GetData(DA, "Model Element", out Types.GraphicalElement element)) return;
 
       // Checking input
       var tol = GeometryTolerance.Model;
       Brep boundary = null;
       var thickness = 0.0;
-      ElementId typeId = default;
-      ElementId materialId = default;
-      AnalyticalStructuralRole structuralRole = AnalyticalStructuralRole.Unset;
+      ARDB.ElementId typeId = default;
+      ARDB.ElementId materialId = default;
+      var structuralRole = ARDB.Structure.AnalyticalStructuralRole.Unset;
       switch (element)
       {
         case Types.StructuralMember member:
@@ -100,17 +97,17 @@ namespace RhinoInside.Revit.GH.Components.Structure
           switch (member.Value.StructuralType)
           {
             case ARDB.Structure.StructuralType.Beam:
-              structuralRole = AnalyticalStructuralRole.StructuralRoleBeam;
+              structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleBeam;
               typeId = member.Value.GetTypeId();
               materialId = member.Value.StructuralMaterialId;
               break;
             case ARDB.Structure.StructuralType.Brace:
-              structuralRole = AnalyticalStructuralRole.StructuralRoleGirder;
+              structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleGirder;
               typeId = member.Value.GetTypeId();
               materialId = member.Value.StructuralMaterialId;
               break;
             case ARDB.Structure.StructuralType.Column:
-              structuralRole = AnalyticalStructuralRole.StructuralRoleColumn;
+              structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleColumn;
               typeId = member.Value.GetTypeId();
               materialId = member.Value.StructuralMaterialId;
               break;
@@ -120,24 +117,25 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
         case Types.Wall wall:
           boundary = wall.TrimmedSurface;
-          structuralRole = AnalyticalStructuralRole.StructuralRoleWall;
+          structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleWall;
           thickness = wall.Value.Width;
           break;
 
         case Types.Floor floor:
           boundary = floor.Sketch.TrimmedSurface;
-          structuralRole = AnalyticalStructuralRole.StructuralRoleFloor;
-          thickness = floor.Value.get_Parameter(BuiltInParameter.FLOOR_ATTR_THICKNESS_PARAM).AsDouble();
+          structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleFloor;
+          thickness = floor.Value.get_Parameter(ARDB.BuiltInParameter.FLOOR_ATTR_THICKNESS_PARAM).AsDouble();
           break;
       }
 
       // Compute
       switch (structuralRole)
       {
-        case AnalyticalStructuralRole.Unset:
-          this.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Physical element is not supported for creating an analytical element: {element.Id}");
+        case ARDB.Structure.AnalyticalStructuralRole.Unset:
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Physical element is not supported for creating an analytical element. {{{element.Id}}}");
           return;
-        case AnalyticalStructuralRole.StructuralRoleBeam:
+
+        case ARDB.Structure.AnalyticalStructuralRole.StructuralRoleBeam:
           ReconstructElement<ARDB_AnalyticalMember>
           (
             doc.Value, _AnalyticalElement_, analyticalMember =>
@@ -157,7 +155,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             }
           );
           break;
-        case AnalyticalStructuralRole.StructuralRoleColumn:
+        case ARDB.Structure.AnalyticalStructuralRole.StructuralRoleColumn:
           ReconstructElement<ARDB_AnalyticalMember>
           (
             doc.Value, _AnalyticalElement_, analyticalMember =>
@@ -177,7 +175,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             }
           );
           break;
-        case AnalyticalStructuralRole.StructuralRoleGirder:
+        case ARDB.Structure.AnalyticalStructuralRole.StructuralRoleGirder:
           ReconstructElement<ARDB_AnalyticalMember>
           (
             doc.Value, _AnalyticalElement_, analyticalMember =>
@@ -198,131 +196,131 @@ namespace RhinoInside.Revit.GH.Components.Structure
           );
           break;
 
-        case AnalyticalStructuralRole.StructuralRoleFloor:
+        case ARDB.Structure.AnalyticalStructuralRole.StructuralRoleFloor:
           ReconstructElement<ARDB_AnalyticalPanel>
-        (
-          doc.Value, _AnalyticalElement_, analyticalPanel =>
-          {
-            if (boundary.Faces.Count != 1)
-              throw new RuntimeArgumentException("Boundary", "Boundary surface should have only one face.", boundary);
-
-            if (!boundary.Faces[0].TryGetPlane(out var _, tol.VertexTolerance))
-              throw new RuntimeArgumentException("Boundary", "Boundary surface should be planar.", boundary);
-
-            var loops = boundary.Loops.Where(x => x.LoopType == BrepLoopType.Outer).Select(x => x.To3dCurve()).ToArray();
-
-            var boundaryPlane = default(Rhino.Geometry.Plane);
-            var maxArea = 0.0;
-            for (int index = 0; index < loops.Length; ++index)
+          (
+            doc.Value, _AnalyticalElement_, analyticalPanel =>
             {
-              var loop = loops[index];
-              var plane = default(Rhino.Geometry.Plane);
-              if (loop is null || loop.IsShort(tol.ShortCurveTolerance))
-                throw new RuntimeArgumentException("Boundary", $"Loop {index} is too short.\nTolerance is {tol.ShortCurveTolerance}", loop);
+              if (boundary.Faces.Count != 1)
+                throw new RuntimeArgumentException("Boundary", "Boundary surface should have only one face.", boundary);
 
-              if (!loop.IsClosed(tol.VertexTolerance) || !loop.TryGetPlane(out plane, tol.VertexTolerance))
-                throw new RuntimeArgumentException("Boundary", $"Loop {index} should be closed and planar.\nTolerance is {tol.VertexTolerance}", loop);
+              if (!boundary.Faces[0].TryGetPlane(out var _, tol.VertexTolerance))
+                throw new RuntimeArgumentException("Boundary", "Boundary surface should be planar.", boundary);
 
-              loops[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
+              var loops = boundary.Loops.Where(x => x.LoopType == BrepLoopType.Outer).Select(x => x.To3dCurve()).ToArray();
 
-              using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
+              var boundaryPlane = default(Rhino.Geometry.Plane);
+              var maxArea = 0.0;
+              for (int index = 0; index < loops.Length; ++index)
               {
-                if (properties is null)
-                  throw new RuntimeArgumentException("Boundary", "Failed to compute loop Area.", loop);
+                var loop = loops[index];
+                var plane = default(Rhino.Geometry.Plane);
+                if (loop is null || loop.IsShort(tol.ShortCurveTolerance))
+                  throw new RuntimeArgumentException("Boundary", $"Loop {index} is too short.\nTolerance is {tol.ShortCurveTolerance}", loop);
 
-                if (properties.Area > maxArea)
+                if (!loop.IsClosed(tol.VertexTolerance) || !loop.TryGetPlane(out plane, tol.VertexTolerance))
+                  throw new RuntimeArgumentException("Boundary", $"Loop {index} should be closed and planar.\nTolerance is {tol.VertexTolerance}", loop);
+
+                loops[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
+
+                using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
                 {
-                  maxArea = properties.Area;
-                  var orientation = loop.ClosedCurveOrientation(plane);
+                  if (properties is null)
+                    throw new RuntimeArgumentException("Boundary", "Failed to compute loop Area.", loop);
 
-                  if (orientation == CurveOrientation.CounterClockwise)
-                    plane.Flip();
+                  if (properties.Area > maxArea)
+                  {
+                    maxArea = properties.Area;
+                    var orientation = loop.ClosedCurveOrientation(plane);
 
-                  boundaryPlane = plane;
-                }
-                else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0 || Math.Abs(plane.DistanceTo(boundaryPlane.Origin)) > GeometryTolerance.Internal.DefaultTolerance)
-                {
-                  throw new RuntimeArgumentException("Boundary", "Loops should be a list of coplanar curves.", loops);
+                    if (orientation == CurveOrientation.CounterClockwise)
+                      plane.Flip();
+
+                    boundaryPlane = plane;
+                  }
+                  else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0 || Math.Abs(plane.DistanceTo(boundaryPlane.Origin)) > GeometryTolerance.Internal.DefaultTolerance)
+                  {
+                    throw new RuntimeArgumentException("Boundary", "Loops should be a list of coplanar curves.", loops);
+                  }
                 }
               }
+
+              analyticalPanel = Reconstruct
+              (
+                analyticalPanel,
+                doc.Value,
+                loops
+              );
+
+              analyticalPanel.StructuralRole = structuralRole;
+              analyticalPanel.Thickness = thickness;
+              DA.SetData(_AnalyticalElement_, analyticalPanel);
+              return analyticalPanel;
             }
-
-            analyticalPanel = Reconstruct
-            (
-              analyticalPanel,
-              doc.Value,
-              loops
-            );
-
-            analyticalPanel.StructuralRole = structuralRole;
-            analyticalPanel.Thickness = thickness;
-            DA.SetData(_AnalyticalElement_, analyticalPanel);
-            return analyticalPanel;
-          }
-        );
+          );
           break;
-        case AnalyticalStructuralRole.StructuralRoleWall:
+        case ARDB.Structure.AnalyticalStructuralRole.StructuralRoleWall:
           ReconstructElement<ARDB_AnalyticalPanel>
-        (
-          doc.Value, _AnalyticalElement_, analyticalPanel =>
-          {
-            if (boundary.Faces.Count != 1)
-              throw new RuntimeArgumentException("Boundary", "Boundary surface should have only one face.", boundary);
-
-            if (!boundary.Faces[0].TryGetPlane(out var _, tol.VertexTolerance))
-              throw new RuntimeArgumentException("Boundary", "Boundary surface should be planar.", boundary);
-
-            var loops = boundary.Loops.Where(x => x.LoopType == BrepLoopType.Outer).Select(x => x.To3dCurve()).ToArray();
-
-            var boundaryPlane = default(Rhino.Geometry.Plane);
-            var maxArea = 0.0;
-            for (int index = 0; index < loops.Length; ++index)
+          (
+            doc.Value, _AnalyticalElement_, analyticalPanel =>
             {
-              var loop = loops[index];
-              var plane = default(Rhino.Geometry.Plane);
-              if (loop is null || loop.IsShort(tol.ShortCurveTolerance))
-                throw new RuntimeArgumentException("Boundary", $"Loop {index} is too short.\nTolerance is {tol.ShortCurveTolerance}", loop);
+              if (boundary.Faces.Count != 1)
+                throw new RuntimeArgumentException("Boundary", "Boundary surface should have only one face.", boundary);
 
-              if (!loop.IsClosed(tol.VertexTolerance) || !loop.TryGetPlane(out plane, tol.VertexTolerance))
-                throw new RuntimeArgumentException("Boundary", $"Loop {index} should be closed and planar.\nTolerance is {tol.VertexTolerance}", loop);
+              if (!boundary.Faces[0].TryGetPlane(out var _, tol.VertexTolerance))
+                throw new RuntimeArgumentException("Boundary", "Boundary surface should be planar.", boundary);
 
-              loops[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
+              var loops = boundary.Loops.Where(x => x.LoopType == BrepLoopType.Outer).Select(x => x.To3dCurve()).ToArray();
 
-              using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
+              var boundaryPlane = default(Rhino.Geometry.Plane);
+              var maxArea = 0.0;
+              for (int index = 0; index < loops.Length; ++index)
               {
-                if (properties is null)
-                  throw new RuntimeArgumentException("Boundary", "Failed to compute loop Area.", loop);
+                var loop = loops[index];
+                var plane = default(Rhino.Geometry.Plane);
+                if (loop is null || loop.IsShort(tol.ShortCurveTolerance))
+                  throw new RuntimeArgumentException("Boundary", $"Loop {index} is too short.\nTolerance is {tol.ShortCurveTolerance}", loop);
 
-                if (properties.Area > maxArea)
+                if (!loop.IsClosed(tol.VertexTolerance) || !loop.TryGetPlane(out plane, tol.VertexTolerance))
+                  throw new RuntimeArgumentException("Boundary", $"Loop {index} should be closed and planar.\nTolerance is {tol.VertexTolerance}", loop);
+
+                loops[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
+
+                using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
                 {
-                  maxArea = properties.Area;
-                  var orientation = loop.ClosedCurveOrientation(plane);
+                  if (properties is null)
+                    throw new RuntimeArgumentException("Boundary", "Failed to compute loop Area.", loop);
 
-                  if (orientation == CurveOrientation.CounterClockwise)
-                    plane.Flip();
+                  if (properties.Area > maxArea)
+                  {
+                    maxArea = properties.Area;
+                    var orientation = loop.ClosedCurveOrientation(plane);
 
-                  boundaryPlane = plane;
-                }
-                else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0 || Math.Abs(plane.DistanceTo(boundaryPlane.Origin)) > GeometryTolerance.Internal.DefaultTolerance)
-                {
-                  throw new RuntimeArgumentException("Boundary", "Loops should be a list of coplanar curves.", loops);
+                    if (orientation == CurveOrientation.CounterClockwise)
+                      plane.Flip();
+
+                    boundaryPlane = plane;
+                  }
+                  else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0 || Math.Abs(plane.DistanceTo(boundaryPlane.Origin)) > GeometryTolerance.Internal.DefaultTolerance)
+                  {
+                    throw new RuntimeArgumentException("Boundary", "Loops should be a list of coplanar curves.", loops);
+                  }
                 }
               }
+
+              analyticalPanel = Reconstruct
+              (
+                analyticalPanel,
+                doc.Value,
+                loops
+              );
+
+              analyticalPanel.StructuralRole = structuralRole;
+              analyticalPanel.Thickness = thickness;
+              DA.SetData(_AnalyticalElement_, analyticalPanel);
+              return analyticalPanel;
             }
-
-            analyticalPanel = Reconstruct
-            (
-              analyticalPanel,
-              doc.Value,
-              loops
-            );
-
-            analyticalPanel.StructuralRole = structuralRole;
-            analyticalPanel.Thickness = thickness;
-            DA.SetData(_AnalyticalElement_, analyticalPanel);
-            return analyticalPanel;
-          }
-        );
+          );
           break;
       }
 #endif
