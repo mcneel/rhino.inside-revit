@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
 
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-  public class AddAnalyticalPanelByBoundary : BaseAnalyticalComponent
+  public class AddAnalyticalPanelByBoundary : AddAnalyticalElement
   {
     public override Guid ComponentGuid => new Guid("BA2D1733-0A7A-463C-BDDC-4262405F4FE6");
 #if REVIT_2023

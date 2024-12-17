@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #endif
 
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
-  public class AddAnalyticalElementByPhysicalElement : BaseAnalyticalComponent
+  public class AddAnalyticalElementByModel : AddAnalyticalElement
   {
     public override Guid ComponentGuid => new Guid("AC26C810-2043-4666-B16E-8484D9DCF7DE");
 #if REVIT_2023
@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #else
     public override GH_Exposure Exposure => GH_Exposure.hidden;
 #endif
-    public AddAnalyticalElementByPhysicalElement() : base
+    public AddAnalyticalElementByModel() : base
     (
       name: "Add Analytical Element (Model)",
       nickname: "ME-Analytical",

@@ -4,7 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Views
+namespace RhinoInside.Revit.GH.Components.Structure
 {
   [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
   public class ClusterAnalyticalElements : ZuiComponent
