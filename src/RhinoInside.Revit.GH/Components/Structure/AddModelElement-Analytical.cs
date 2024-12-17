@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     (
       name: "Add Model Element (Analytical)",
       nickname: "AE-Model",
-      description: "Given an analytical element, it adds a physical element to the active Revit document",
+      description: "Given an analytical element, it adds a model element to the active Revit document",
       category: "Revit",
       subCategory: "Structure"
     )
