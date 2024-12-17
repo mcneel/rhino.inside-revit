@@ -133,8 +133,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Create(doc, point),
           ExcludeUniqueProperties
         );
-
-        bConditions.Document.Regenerate();
       }
       return bConditions;
     }

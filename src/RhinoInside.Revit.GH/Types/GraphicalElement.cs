@@ -96,6 +96,7 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.SpatialElementTag _:      return true;
         case ARDB.IndependentTag _:         return true;
 
+        case ARDB.Structure.BoundaryConditions _: return true;
 #if REVIT_2023
         case ARDB.Structure.AnalyticalElement _: return true;
 #else

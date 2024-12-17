@@ -124,8 +124,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Create(doc, curve),
           ExcludeUniqueProperties
         );
-
-        bConditions.Document.Regenerate();
       }
       return bConditions;
     }
