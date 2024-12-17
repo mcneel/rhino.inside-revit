@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     public ClusterViewsByType() : base
     (
       name: "Cluster Views (Family)",
-      nickname: "Views By Family",
+      nickname: "C-Views",
       description: "Split a list of views into separate clusters by their family",
       category: "Revit",
       subCategory: "View"
