@@ -703,10 +703,8 @@ namespace RhinoInside.Revit.GH
 
     internal void StartTransactionGroups()
     {
-      var now = DateTime.Now.ToString(System.Globalization.CultureInfo.CurrentUICulture);
-      var name = ActiveDocumentStack.Peek().DisplayName;
-
-      StartTransactionGroups($"Grasshopper {now}: {name.TripleDot(16)}", true);
+      var name = ActiveDocumentStack.Peek().GetTransactionName();
+      StartTransactionGroups(name, true);
     }
 
     internal void StartTransactionGroups(string name, bool forcedModal)
