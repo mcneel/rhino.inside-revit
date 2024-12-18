@@ -411,7 +411,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         {
           using (var transGroup = new TransactionGroup(app.ActiveUIDocument.Document))
           {
-            transGroup.Start(Path.GetFileNameWithoutExtension(definition.Properties.ProjectFileName));
+            transGroup.Start(definition.GetTransactionName());
 
             definition.NewSolution(expireAllObjects: true);
 
@@ -550,7 +550,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     //        {
     //          using (var transGroup = new TransactionGroup(app.ActiveUIDocument.Document))
     //          {
-    //            transGroup.Start(Path.GetFileNameWithoutExtension(definition.Properties.ProjectFileName));
+    //            transGroup.Start(definition.GetTransactionName());
 
     //            GH_Document.EnableSolutions = true;
     //            definition.Enabled = true;
