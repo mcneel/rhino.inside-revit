@@ -227,7 +227,7 @@ namespace RhinoInside.Revit.GH
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
       {
         definition.ForcePreview(false);
-        definition.Enabled = Instances.ActiveCanvas?.Visible is true;
+        definition.Enabled = Instances.ActiveCanvas?.Visible is true || definition.Properties.KeepOpen;
       }
 
       if (EnableSolutions.HasValue)
@@ -242,7 +242,7 @@ namespace RhinoInside.Revit.GH
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
       {
         definition.Enabled = false;
-        definition.ForcePreview(Instances.ActiveCanvas?.Visible is true);
+        definition.ForcePreview(Instances.ActiveCanvas?.Visible is true || definition.Properties.KeepOpen);
       }
     }
 
@@ -253,7 +253,7 @@ namespace RhinoInside.Revit.GH
 
       // If we don't disable the solutions Grasshopper will
       // evaluate doc before notifiy us the document is being active.
-      if (GH_Document.EnableSolutions)
+      if (GH_Document.EnableSolutions && !External.ActivationGate.IsOpen)
       {
         GH_Document.EnableSolutions = false;
         EnableSolutions = true;
@@ -504,11 +504,13 @@ namespace RhinoInside.Revit.GH
       private set => modelUnitScale = value;
     }
 
-    void DocumentEditor_Activated(object sender, EventArgs e)
+    void DocumentEditor_Activated(object sender, EventArgs e) => AuditUnits(Revit.ActiveUIDocument?.Document);
+
+    internal static void AuditUnits(ARDB.Document document)
     {
       var revitUS = UnitScale.Unset;
 
-      if (Revit.ActiveUIDocument?.Document is ARDB.Document revitDoc)
+      if (document is ARDB.Document revitDoc)
       {
         var units = revitDoc.GetUnits();
         revitUS = units.ToUnitScale(out var _);
@@ -537,12 +539,6 @@ namespace RhinoInside.Revit.GH
       {
         e.NewDocument.SolutionStart += ActiveDefinition_SolutionStart;
         e.NewDocument.SolutionEnd += ActiveDefinition_SolutionEnd;
-      }
-
-      if (EnableSolutions.HasValue)
-      {
-        GH_Document.EnableSolutions = EnableSolutions.Value;
-        EnableSolutions = null;
       }
     }
     #endregion
