@@ -371,7 +371,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       public RunInCommandContextGuard(GH_Document document)
       {
         Document = document;
-        RhinoDocument = document.RhinoDocument;
+        RhinoDocument = document.RhinoDocument();
         DocumentWasModified = document.IsModified;
         DocumentWasEnabled = document.Enabled;
         SolverWasEnabled = GH_Document.EnableSolutions;
@@ -403,7 +403,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     )
     {
       if (definition is null) return Result.Failed;
-      if (definition.RhinoDocument is object && !definition.RhinoDocument.Equals(RhinoDoc.ActiveDoc)) return Result.Failed;
+      if (definition.RhinoDocument() is RhinoDoc rhinoDocument && rhinoDocument != RhinoDoc.ActiveDoc) return Result.Failed;
 
       try
       {
