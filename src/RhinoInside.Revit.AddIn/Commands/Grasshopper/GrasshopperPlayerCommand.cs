@@ -505,7 +505,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
         var m = default(string);
         var result = Execute(app, view, journalData, document, ref m);
-        if (!document.Properties.KeepOpen || result != Result.Succeeded)
+        if (!document.KeepOpen() || result != Result.Succeeded)
         {
           if (!remotePanelVisible) Instances.HideRemotePanel();
           if (!wasOpen) Instances.DocumentServer.RemoveDocument(document);

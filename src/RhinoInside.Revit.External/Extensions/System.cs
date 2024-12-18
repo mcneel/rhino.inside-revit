@@ -5,7 +5,7 @@ using System.Text;
 
 namespace System
 {
-  static class EnumExtensions
+  static class EnumExtension
   {
     public static T WithFlag<T>(this T @enum, T flag, bool value) where T : struct, Enum
     {
@@ -190,7 +190,7 @@ namespace System
     #endregion
   }
 
-  static class EventHandlerExtenion
+  static class EventHandlerExtension
   {
     #region Events
     /// <summary>
