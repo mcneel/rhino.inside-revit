@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       TryGetDocumentOrCurrent(component, DA, name, out var doc);
       var settings = ARDB.Structure.StructuralSettings.GetStructuralSettings(doc?.Value);
-      hasSymbols = settings.BoundaryConditionFamilySymbolFixed.Value != -1;
+      hasSymbols = settings.BoundaryConditionFamilySymbolFixed != ARDB.ElementId.InvalidElementId;
       return settings;
     }
 
