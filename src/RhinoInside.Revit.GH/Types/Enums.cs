@@ -777,4 +777,22 @@ namespace RhinoInside.Revit.GH.Types
       { (int) ARDB.Structure.AnalyzeAs.GravityLateral,          "Gravity lateral" },
     };
   }
+
+  [
+  ComponentVersion(introduced: "1.27"),
+  ComponentGuid("13D4AF7E-AB1E-4628-91A6-C6A523898334"),
+  Name("Boundary Conditions Type"),
+  Description("Represents boundary conditions type"),
+]
+  public class BoundaryConditionsType : GH_Enum<ARDB.Structure.BoundaryConditionsType>
+  {
+    public BoundaryConditionsType() : base() { }
+    public BoundaryConditionsType(ARDB.Structure.BoundaryConditionsType value) : base(value) { }
+    public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
+    {
+      { (int) ARDB.Structure.BoundaryConditionsType.Point,      "Point" },
+      { (int) ARDB.Structure.BoundaryConditionsType.Line,       "Line" },
+      { (int) ARDB.Structure.BoundaryConditionsType.Area,       "Area" },
+    };
+  }
 }
