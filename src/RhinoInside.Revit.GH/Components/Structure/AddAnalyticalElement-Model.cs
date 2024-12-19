@@ -143,7 +143,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       switch (structuralRole)
       {
         case ARDB.Structure.AnalyticalStructuralRole.Unset:
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Physical element is not supported for creating an analytical element. {{{element.Id}}}");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Model element is not supported for creating an analytical element. {{{element.Id}}}");
           return;
 
         case ARDB.Structure.AnalyticalStructuralRole.StructuralRoleBeam:

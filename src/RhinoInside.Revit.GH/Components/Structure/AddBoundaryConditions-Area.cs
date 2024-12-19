@@ -1,11 +1,10 @@
 using System;
+using System.Linq;
+using Autodesk.Revit.DB.Structure;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Structure;
-using System.Linq;
-using Rhino.Geometry;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
@@ -67,12 +66,17 @@ namespace RhinoInside.Revit.GH.Components.Structure
     const string _BoundaryConditions_ = "Boundary Conditions";
     static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
-
+      ARDB.BuiltInParameter.BOUNDARY_DIRECTION_X,
+      ARDB.BuiltInParameter.BOUNDARY_DIRECTION_Y,
+      ARDB.BuiltInParameter.BOUNDARY_DIRECTION_Z,
+      ARDB.BuiltInParameter.LOAD_USE_LOCAL_COORDINATE_SYSTEM
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      Parameters.Document.GetStructuralSettings(this, DA, "Document", out var hasSymbols);
+      if (!hasSymbols) this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Document does not have symbols for Boundary Conditions representation.");
 
       ReconstructElement<ARDB.Structure.BoundaryConditions>
       (

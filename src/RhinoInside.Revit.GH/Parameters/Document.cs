@@ -74,6 +74,14 @@ namespace RhinoInside.Revit.GH.Parameters
       return document is object;
     }
 
+    public static ARDB.Structure.StructuralSettings GetStructuralSettings(IGH_Component component, IGH_DataAccess DA, string name, out bool hasSymbols)
+    {
+      TryGetDocumentOrCurrent(component, DA, name, out var doc);
+      var settings = ARDB.Structure.StructuralSettings.GetStructuralSettings(doc?.Value);
+      hasSymbols = settings.BoundaryConditionFamilySymbolFixed != ARDB.ElementId.InvalidElementId;
+      return settings;
+    }
+
     #region UI
     protected override GH_GetterResult Prompt_Singular(ref Types.IGH_Document value) => GH_GetterResult.cancel;
     protected override GH_GetterResult Prompt_Plural(ref List<Types.IGH_Document> values) => GH_GetterResult.cancel;
