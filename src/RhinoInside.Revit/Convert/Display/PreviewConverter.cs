@@ -27,16 +27,16 @@ namespace RhinoInside.Revit.Convert.Display
     #region GetPreviewMaterials
     internal static Dictionary<ARDB.Material, Mesh> ZipByMaterial
     (
-      ARDB.Material[] materialElements,
-      Mesh[] meshes,
+      IList<ARDB.Material> materialElements,
+      IList<Mesh> meshes,
       Mesh outMesh = default
     )
     {
       if (materialElements is null || meshes is null) return null;
 
-      var dictionary = new Dictionary<ARDB.Material, Mesh>(External.DB.Extensions.ElementEqualityComparer.SameDocument);
+      var dictionary = new Dictionary<ARDB.Material, Mesh>(ElementEqualityComparer.SameDocument);
 
-      for (int index = 0; index < materialElements.Length && index < meshes.Length; ++index)
+      for (int index = 0; index < materialElements.Count && index < meshes.Count; ++index)
       {
         if (materialElements[index] is null)
         {
