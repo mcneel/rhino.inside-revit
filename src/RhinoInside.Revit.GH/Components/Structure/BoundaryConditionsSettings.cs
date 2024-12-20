@@ -182,24 +182,21 @@ namespace RhinoInside.Revit.GH.Components.Structure
         StartTransaction(doc.Value);
         settings.BoundaryConditionFamilySymbolPinned = pinnedSymbol.Id;
       }
-      Params.TrySetData(DA, "Pinned",
-          () => doc.Value.GetElement(settings.BoundaryConditionFamilySymbolPinned) as ARDB.FamilySymbol);
+      Params.TrySetData(DA, _Pinned_, () => Types.FamilySymbol.FromElementId(doc.Value, settings.BoundaryConditionFamilySymbolPinned));
 
       if (rollerSymbol is object)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionFamilySymbolRoller = rollerSymbol.Id;
       }
-      Params.TrySetData(DA, "Roller",
-          () => doc.Value.GetElement(settings.BoundaryConditionFamilySymbolRoller) as ARDB.FamilySymbol);
+      Params.TrySetData(DA, _Roller_, () => Types.FamilySymbol.FromElementId(doc.Value, settings.BoundaryConditionFamilySymbolRoller));
 
       if (userSymbol is object)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionFamilySymbolUserDefined = userSymbol.Id;
       }
-      Params.TrySetData(DA, "User",
-          () => doc.Value.GetElement(settings.BoundaryConditionFamilySymbolUserDefined) as ARDB.FamilySymbol);
+      Params.TrySetData(DA, _User_, () => Types.FamilySymbol.FromElementId(doc.Value, settings.BoundaryConditionFamilySymbolUserDefined));
     }
   }
 }
