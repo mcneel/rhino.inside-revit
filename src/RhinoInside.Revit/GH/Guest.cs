@@ -53,48 +53,48 @@ namespace RhinoInside.Revit.GH
 
     GuestResult OnCheckIn(CheckInArgs options)
     {
-      Instances.CanvasCreated += EditorLoaded;
+      Instances.CanvasCreated += Grasshopper_CanvasCreated;
 
       // Register PreviewServer
       previewServer = new PreviewServer();
       previewServer.Register();
 
-      Revit.DocumentChanged += OnDocumentChanged;
+      Revit.DocumentChanged += Revit_DocumentChanged;
 
       External.ActivationGate.Enter += ActivationGate_Enter;
       External.ActivationGate.Exit  += ActivationGate_Exit;
 
-      RhinoDoc.BeginOpenDocument                += BeginOpenDocument;
-      RhinoDoc.EndOpenDocumentInitialViewUpdate += EndOpenDocumentInitialViewUpdate;
-      Rhino.Commands.Command.EndCommand         += RhinoCommand_EndCommand;
+      RhinoDoc.BeginOpenDocument                += Rhino_BeginOpenDocument;
+      RhinoDoc.EndOpenDocumentInitialViewUpdate += Rhino_EndOpenDocument;
+      Rhino.Commands.Command.EndCommand         += Rhino_EndCommand;
 
       Instances.CanvasCreatedEventHandler Canvas_Created = default;
       Instances.CanvasCreated += Canvas_Created = (canvas) =>
       {
         Instances.CanvasCreated            -= Canvas_Created;
-        Instances.DocumentEditor.Activated += DocumentEditor_Activated;
-        canvas.DocumentChanged             += ActiveCanvas_DocumentChanged;
-        canvas.KeyDown                     += ActiveCanvas_KeyDown;
+        Instances.DocumentEditor.Activated += Grasshopper_Activated;
+        canvas.DocumentChanged             += Grasshopper_DocumentChanged;
+        canvas.KeyDown                     += Grasshopper_KeyDown;
       };
 
       Instances.CanvasDestroyedEventHandler Canvas_Destroyed = default;
       Instances.CanvasDestroyed += Canvas_Destroyed = (canvas) =>
       {
-        canvas.KeyDown                     -= ActiveCanvas_KeyDown;
-        canvas.DocumentChanged             -= ActiveCanvas_DocumentChanged;
-        Instances.DocumentEditor.Activated -= DocumentEditor_Activated;
+        canvas.KeyDown                     -= Grasshopper_KeyDown;
+        canvas.DocumentChanged             -= Grasshopper_DocumentChanged;
+        Instances.DocumentEditor.Activated -= Grasshopper_Activated;
         Instances.CanvasDestroyed          -= Canvas_Destroyed;
       };
 
-      Instances.DocumentServer.DocumentAdded += DocumentServer_DocumentAdded;
-      Instances.DocumentServer.DocumentRemoved += DocumentServer_DocumentRemoved;
+      Instances.DocumentServer.DocumentAdded += Grasshopper_DocumentAdded;
+      Instances.DocumentServer.DocumentRemoved += Grasshopper_DocumentRemoved;
 
       return GuestResult.Succeeded;
     }
 
-    private void EditorLoaded(GH_Canvas canvas)
+    private void Grasshopper_CanvasCreated(GH_Canvas canvas)
     {
-      Instances.CanvasCreated += EditorLoaded;
+      Instances.CanvasCreated -= Grasshopper_CanvasCreated;
 
       var message = string.Empty;
       try
@@ -119,16 +119,16 @@ namespace RhinoInside.Revit.GH
 
     GuestResult OnCheckOut(CheckOutArgs options)
     {
-      Instances.DocumentServer.DocumentAdded -= DocumentServer_DocumentAdded;
+      Instances.DocumentServer.DocumentAdded -= Grasshopper_DocumentAdded;
 
-      Rhino.Commands.Command.EndCommand         -= RhinoCommand_EndCommand;
-      RhinoDoc.EndOpenDocumentInitialViewUpdate -= EndOpenDocumentInitialViewUpdate;
-      RhinoDoc.BeginOpenDocument                -= BeginOpenDocument;
+      Rhino.Commands.Command.EndCommand         -= Rhino_EndCommand;
+      RhinoDoc.EndOpenDocumentInitialViewUpdate -= Rhino_EndOpenDocument;
+      RhinoDoc.BeginOpenDocument                -= Rhino_BeginOpenDocument;
 
       External.ActivationGate.Exit  -= ActivationGate_Exit;
       External.ActivationGate.Enter -= ActivationGate_Enter;
 
-      Revit.DocumentChanged -= OnDocumentChanged;
+      Revit.DocumentChanged -= Revit_DocumentChanged;
 
       // Unregister PreviewServer
       previewServer?.Unregister();
@@ -247,9 +247,11 @@ namespace RhinoInside.Revit.GH
     }
 
     static bool? EnableSolutions;
-    private void DocumentServer_DocumentAdded(GH_DocumentServer sender, GH_Document doc)
+    private void Grasshopper_DocumentAdded(GH_DocumentServer sender, GH_Document doc)
     {
-      doc.ObjectsDeleted += Doc_ObjectsDeleted;
+      doc.SolutionStart += Grasshopper_SolutionStart;
+      doc.ObjectsDeleted += Grasshopper_ObjectsDeleted;
+      doc.SolutionEnd += Grasshopper_SolutionEnd;
 
       // If we don't disable the solutions Grasshopper will
       // evaluate doc before notifiy us the document is being active.
@@ -260,13 +262,17 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    private void DocumentServer_DocumentRemoved(GH_DocumentServer sender, GH_Document doc)
+    private void Grasshopper_DocumentRemoved(GH_DocumentServer sender, GH_Document doc)
     {
-      doc.ObjectsDeleted -= Doc_ObjectsDeleted;
+      if (PendingSolution == doc) PendingSolution = null;
+
+      doc.SolutionEnd -= Grasshopper_SolutionEnd;
+      doc.ObjectsDeleted -= Grasshopper_ObjectsDeleted;
+      doc.SolutionStart -= Grasshopper_SolutionStart;
     }
 
     bool activeDefinitionWasEnabled = false;
-    void BeginOpenDocument(object sender, DocumentOpenEventArgs e)
+    void Rhino_BeginOpenDocument(object sender, DocumentOpenEventArgs e)
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
       {
@@ -275,7 +281,7 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    void EndOpenDocumentInitialViewUpdate(object sender, DocumentOpenEventArgs e)
+    void Rhino_EndOpenDocument(object sender, DocumentOpenEventArgs e)
     {
       if (Instances.ActiveCanvas?.Document is GH_Document definition)
       {
@@ -284,7 +290,7 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    private void RhinoCommand_EndCommand(object sender, Rhino.Commands.CommandEventArgs args)
+    private void Rhino_EndCommand(object sender, Rhino.Commands.CommandEventArgs args)
     {
       if (args.CommandEnglishName == "GrasshopperBake")
       {
@@ -504,7 +510,8 @@ namespace RhinoInside.Revit.GH
       private set => modelUnitScale = value;
     }
 
-    void DocumentEditor_Activated(object sender, EventArgs e) => AuditUnits(Revit.ActiveUIDocument?.Document);
+    void Grasshopper_Activated(object sender, EventArgs e) => AuditUnits(Revit.ActiveUIDocument?.Document);
+    void Grasshopper_DocumentChanged(GH_Canvas sender, GH_CanvasDocumentChangedEventArgs e) { }
 
     internal static void AuditUnits(ARDB.Document document)
     {
@@ -526,25 +533,10 @@ namespace RhinoInside.Revit.GH
         }
       }
     }
-
-    void ActiveCanvas_DocumentChanged(GH_Canvas sender, GH_CanvasDocumentChangedEventArgs e)
-    {
-      if (e.OldDocument is object)
-      {
-        e.OldDocument.SolutionEnd -= ActiveDefinition_SolutionEnd;
-        e.OldDocument.SolutionStart -= ActiveDefinition_SolutionStart;
-      }
-
-      if (e.NewDocument is object)
-      {
-        e.NewDocument.SolutionStart += ActiveDefinition_SolutionStart;
-        e.NewDocument.SolutionEnd += ActiveDefinition_SolutionEnd;
-      }
-    }
     #endregion
 
     #region Revit Document Changed
-    void OnDocumentChanged(object sender, ARDB.Events.DocumentChangedEventArgs e)
+    void Revit_DocumentChanged(object sender, ARDB.Events.DocumentChangedEventArgs e)
     {
 #if DEBUG
       var transactions = e.GetTransactionNames();
@@ -759,7 +751,7 @@ namespace RhinoInside.Revit.GH
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void ActiveCanvas_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+    private void Grasshopper_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
     {
       if (sender is GH_Canvas canvas && canvas.Document is GH_Document document)
       {
@@ -777,7 +769,7 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    private void Doc_ObjectsDeleted(object sender, GH_DocObjectEventArgs e) => ObjectsDeleted(sender, (e.Document, e.Objects));
+    private void Grasshopper_ObjectsDeleted(object sender, GH_DocObjectEventArgs e) => ObjectsDeleted(sender, (e.Document, e.Objects));
 
     internal async void ObjectsDeleted(object sender, (GH_Document Document, IReadOnlyCollection<IGH_DocumentObject> Objects) e)
     {
@@ -946,7 +938,7 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    void ActiveDefinition_SolutionStart(object sender, GH_SolutionEventArgs e)
+    void Grasshopper_SolutionStart(object sender, GH_SolutionEventArgs e)
     {
       if (e.Document is GH_Document document)
       {
@@ -959,9 +951,12 @@ namespace RhinoInside.Revit.GH
             obj.ExpireSolution(false);
         }
 
-        GeometryCache.StartKeepAliveRegion();
+        if (ActiveDocumentStack.Count == 0) GeometryCache.StartKeepAliveRegion();
         ActiveDocumentStack.Push(e.Document);
-        if (document.Enabled) StartTransactionGroups();
+        if (document.Enabled)
+        {
+          if (ActiveDocumentStack.Count == 1) StartTransactionGroups();
+        }
         else if (Instances.ActiveCanvas?.Document == document)
         {
           if (PendingSolution is object) PendingSolution = document;
@@ -982,16 +977,19 @@ namespace RhinoInside.Revit.GH
 
     private static GH_Document PendingSolution;
 
-    void ActiveDefinition_SolutionEnd(object sender, GH_SolutionEventArgs e)
+    void Grasshopper_SolutionEnd(object sender, GH_SolutionEventArgs e)
     {
       if (e.Document is GH_Document document)
       {
         if (ActiveDocumentStack.Peek() != e.Document)
           throw new InvalidOperationException();
 
-        if (document.Enabled) CommitTransactionGroups();
+        if (document.Enabled)
+        {
+          if (ActiveDocumentStack.Count == 1) CommitTransactionGroups();
+        }
         ActiveDocumentStack.Pop();
-        GeometryCache.EndKeepAliveRegion();
+        if (ActiveDocumentStack.Count == 0) GeometryCache.EndKeepAliveRegion();
 
         // Warn the user about objects that contain elements modified by Grasshopper.
         {
