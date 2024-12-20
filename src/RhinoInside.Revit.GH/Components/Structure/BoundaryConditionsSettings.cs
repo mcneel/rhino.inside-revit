@@ -92,10 +92,10 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.Element
         {
-          Name = _BoundaryConditionsSettings_,
-          NickName = "BCS",
+          Name = _StructuralSettings_,
+          NickName = "SS",
           Description = "Structural Settings element.",
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -144,7 +144,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       )
     };
 
-    const string _BoundaryConditionsSettings_ = "Boundary Conditions Settings";
+    const string _StructuralSettings_ = "Structural Settings";
     const string _Spacing_ = "Spacing";
     const string _Fixed_ = "Fixed";
     const string _Pinned_ = "Pinned";
@@ -155,7 +155,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Parameters.Document.TryGetStructuralSettings(doc, out var settings)) return;
-      if (!Params.TrySetData(DA, _BoundaryConditionsSettings_, () => settings)) return;
+      if (!Params.TrySetData(DA, _StructuralSettings_, () => settings)) return;
 
       if (!Params.TryGetData(DA, _Fixed_, out Types.FamilySymbol fixedSymbol)) return;
       if (!Params.TryGetData(DA, _Pinned_, out Types.FamilySymbol pinnedSymbol)) return;
