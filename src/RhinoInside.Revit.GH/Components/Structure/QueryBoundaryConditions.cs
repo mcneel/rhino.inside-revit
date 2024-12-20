@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   public class QueryBoundaryConditions : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("F8C6588F-4131-4692-A43D-CC4E34F88AB4");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.obscure;
 
     private ARDB.ElementFilter _ElementFilter = new ARDB.ElementClassFilter(typeof(ARDB.Structure.BoundaryConditions));
     protected override ARDB.ElementFilter ElementFilter => _ElementFilter;

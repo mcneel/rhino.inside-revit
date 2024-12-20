@@ -1,21 +1,21 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.GH.Exceptions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
   [ComponentVersion(introduced: "1.27")]
-  public class StructuralSettings : TransactionalChainComponent
+  public class BoundaryConditionsSettings : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("B5144C5D-F374-4786-99A7-6A579ED2FD59");
+    public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.obscure;
 
-    public StructuralSettings() : base
+    public BoundaryConditionsSettings() : base
     (
-      name: "Structural Settings",
-      nickname: "SS",
-      description: "Main structural settings associated with a Revit document.",
+      name: "Boundary Conditions Settings",
+      nickname: "BCS",
+      description: "Boundary conditions settings associated with a Revit document.",
       category: "Revit",
       subCategory: "Structure"
     )
@@ -31,7 +31,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Name = "Document",
           NickName = "DOC",
           Description = "Document",
-          Optional = true
         }, ParamRelevance.Occasional
       ),
       new ParamDefinition
@@ -91,6 +90,15 @@ namespace RhinoInside.Revit.GH.Components.Structure
     {
       new ParamDefinition
       (
+        new Parameters.Element
+        {
+          Name = _StructuralSettings_,
+          NickName = "SS",
+          Description = "Structural Settings element.",
+        }, ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
         new Param_Number
         {
           Name = _Spacing_,
@@ -136,6 +144,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       )
     };
 
+    const string _StructuralSettings_ = "Structural Settings";
     const string _Spacing_ = "Spacing";
     const string _Fixed_ = "Fixed";
     const string _Pinned_ = "Pinned";
@@ -145,7 +154,8 @@ namespace RhinoInside.Revit.GH.Components.Structure
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
-      var settings = Parameters.Document.GetStructuralSettings(this, DA, "Document", out var hasSymbols);
+      if (!Parameters.Document.TryGetStructuralSettings(doc, out var settings)) return;
+      else Params.TrySetData(DA, _StructuralSettings_, () => settings);
 
       if (!Params.TryGetData(DA, _Fixed_, out Types.FamilySymbol fixedSymbol)) return;
       if (!Params.TryGetData(DA, _Pinned_, out Types.FamilySymbol pinnedSymbol)) return;
@@ -153,43 +163,40 @@ namespace RhinoInside.Revit.GH.Components.Structure
       if (!Params.TryGetData(DA, _User_, out Types.FamilySymbol userSymbol)) return;
 
       if (!Params.TryGetData(DA, _Spacing_, out double? spacing)) return;
-      if (spacing.HasValue)
+      if (spacing.HasValue && settings.BoundaryConditionAreaAndLineSymbolSpacing != spacing.Value / Revit.ModelUnits)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionAreaAndLineSymbolSpacing = spacing.Value / Revit.ModelUnits;
       }
       Params.TrySetData(DA, _Spacing_, () => settings.BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits);
 
-      if (fixedSymbol is object)
+      if (fixedSymbol is object && settings.BoundaryConditionFamilySymbolFixed != fixedSymbol.Id)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionFamilySymbolFixed = fixedSymbol.Id;
       }
       Params.TrySetData(DA, _Fixed_, () => Types.FamilySymbol.FromElementId(doc.Value, settings.BoundaryConditionFamilySymbolFixed));
 
-      if (pinnedSymbol is object)
+      if (pinnedSymbol is object && settings.BoundaryConditionFamilySymbolPinned != pinnedSymbol.Id)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionFamilySymbolPinned = pinnedSymbol.Id;
       }
-      Params.TrySetData(DA, "Pinned",
-          () => doc.Value.GetElement(settings.BoundaryConditionFamilySymbolPinned) as ARDB.FamilySymbol);
+      Params.TrySetData(DA, _Pinned_, () => Types.FamilySymbol.FromElementId(doc.Value, settings.BoundaryConditionFamilySymbolPinned));
 
-      if (rollerSymbol is object)
+      if (rollerSymbol is object && settings.BoundaryConditionFamilySymbolRoller != rollerSymbol.Id)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionFamilySymbolRoller = rollerSymbol.Id;
       }
-      Params.TrySetData(DA, "Roller",
-          () => doc.Value.GetElement(settings.BoundaryConditionFamilySymbolRoller) as ARDB.FamilySymbol);
+      Params.TrySetData(DA, _Roller_, () => Types.FamilySymbol.FromElementId(doc.Value, settings.BoundaryConditionFamilySymbolRoller));
 
-      if (userSymbol is object)
+      if (userSymbol is object && settings.BoundaryConditionFamilySymbolUserDefined != userSymbol.Id)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionFamilySymbolUserDefined = userSymbol.Id;
       }
-      Params.TrySetData(DA, "User",
-          () => doc.Value.GetElement(settings.BoundaryConditionFamilySymbolUserDefined) as ARDB.FamilySymbol);
+      Params.TrySetData(DA, _User_, () => Types.FamilySymbol.FromElementId(doc.Value, settings.BoundaryConditionFamilySymbolUserDefined));
     }
   }
 }
