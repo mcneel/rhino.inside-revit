@@ -163,35 +163,35 @@ namespace RhinoInside.Revit.GH.Components.Structure
       if (!Params.TryGetData(DA, _User_, out Types.FamilySymbol userSymbol)) return;
 
       if (!Params.TryGetData(DA, _Spacing_, out double? spacing)) return;
-      if (spacing.HasValue)
+      if (spacing.HasValue && settings.BoundaryConditionAreaAndLineSymbolSpacing != spacing.Value / Revit.ModelUnits)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionAreaAndLineSymbolSpacing = spacing.Value / Revit.ModelUnits;
       }
       Params.TrySetData(DA, _Spacing_, () => settings.BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits);
 
-      if (fixedSymbol is object)
+      if (fixedSymbol is object && settings.BoundaryConditionFamilySymbolFixed != fixedSymbol.Id)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionFamilySymbolFixed = fixedSymbol.Id;
       }
       Params.TrySetData(DA, _Fixed_, () => Types.FamilySymbol.FromElementId(doc.Value, settings.BoundaryConditionFamilySymbolFixed));
 
-      if (pinnedSymbol is object)
+      if (pinnedSymbol is object && settings.BoundaryConditionFamilySymbolPinned != pinnedSymbol.Id)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionFamilySymbolPinned = pinnedSymbol.Id;
       }
       Params.TrySetData(DA, _Pinned_, () => Types.FamilySymbol.FromElementId(doc.Value, settings.BoundaryConditionFamilySymbolPinned));
 
-      if (rollerSymbol is object)
+      if (rollerSymbol is object && settings.BoundaryConditionFamilySymbolRoller != rollerSymbol.Id)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionFamilySymbolRoller = rollerSymbol.Id;
       }
       Params.TrySetData(DA, _Roller_, () => Types.FamilySymbol.FromElementId(doc.Value, settings.BoundaryConditionFamilySymbolRoller));
 
-      if (userSymbol is object)
+      if (userSymbol is object && settings.BoundaryConditionFamilySymbolUserDefined != userSymbol.Id)
       {
         StartTransaction(doc.Value);
         settings.BoundaryConditionFamilySymbolUserDefined = userSymbol.Id;
