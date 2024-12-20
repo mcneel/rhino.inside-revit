@@ -155,7 +155,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
       if (!Parameters.Document.TryGetStructuralSettings(doc, out var settings)) return;
-      if (!Params.TrySetData(DA, _StructuralSettings_, () => settings)) return;
+      else Params.TrySetData(DA, _StructuralSettings_, () => settings);
 
       if (!Params.TryGetData(DA, _Fixed_, out Types.FamilySymbol fixedSymbol)) return;
       if (!Params.TryGetData(DA, _Pinned_, out Types.FamilySymbol pinnedSymbol)) return;
