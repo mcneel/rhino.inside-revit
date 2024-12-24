@@ -26,6 +26,15 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.28 RC1" version="v1.28.9121.7332" pre_release=true time="12/21/2024" %}
+
+- Miscellaneous Improvements
+
+{% include ltr/release-header.html title="v1.27" version="v1.27.9121.7152" time="12/21/2024" %}
+
+- Includes all changes under 1.27 RC releases listed below
+- Miscellaneous improvements and bug fixes
+
 {% include ltr/release-header.html title="v1.27 RC2" version="v1.27.9101.27850" pre_release=true time="12/01/2024" %}
 
 - Added {% include ltr/comp.html uuid='7b229f5e' %}

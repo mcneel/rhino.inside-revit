@@ -74,12 +74,20 @@ namespace RhinoInside.Revit.GH.Parameters
       return document is object;
     }
 
-    public static ARDB.Structure.StructuralSettings GetStructuralSettings(IGH_Component component, IGH_DataAccess DA, string name, out bool hasSymbols)
+    internal static bool TryGetStructuralSettings(Types.Document document, out ARDB.Structure.StructuralSettings settings)
     {
-      TryGetDocumentOrCurrent(component, DA, name, out var doc);
-      var settings = ARDB.Structure.StructuralSettings.GetStructuralSettings(doc?.Value);
-      hasSymbols = settings.BoundaryConditionFamilySymbolFixed != ARDB.ElementId.InvalidElementId;
-      return settings;
+      try
+      {
+        if (document?.Value is ARDB.Document doc)
+        {
+          settings = ARDB.Structure.StructuralSettings.GetStructuralSettings(doc);
+          return settings.BoundaryConditionFamilySymbolFixed.IsValid();
+        }
+      }
+      catch { }
+
+      settings = null;
+      return false;
     }
 
     #region UI

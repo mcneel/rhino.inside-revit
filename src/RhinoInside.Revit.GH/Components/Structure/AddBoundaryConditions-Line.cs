@@ -77,8 +77,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
-      Parameters.Document.GetStructuralSettings(this, DA, "Document", out var hasSymbols);
-      if (!hasSymbols) this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Document does not have symbols for Boundary Conditions representation.");
+      if (!Parameters.Document.TryGetStructuralSettings(doc, out var settings) || !settings.BoundaryConditionFamilySymbolFixed.IsValid())
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Document does not have symbols for Boundary Conditions representation.");
+        return;
+      }
 
       ReconstructElement<ARDB.Structure.BoundaryConditions>
       (
