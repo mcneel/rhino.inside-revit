@@ -74,6 +74,7 @@ namespace RhinoInside.Revit.GH
 #if REVIT_2023
                 case ARDB.BuiltInParameter.ANALYTICAL_ELEMENT_STRUCTURAL_ROLE: return new Types.AnalyticalStructuralRole((ARDB.Structure.AnalyticalStructuralRole) integer);
 #endif
+                case ARDB.BuiltInParameter.BOUNDARY_PARAM_PRESET: return new Types.BoundaryConditionsState((ARDB.Structure.BoundaryConditionsState) integer);
               }
 
               if (builtInParameter.IsColor())
