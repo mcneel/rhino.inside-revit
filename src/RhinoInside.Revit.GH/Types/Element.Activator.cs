@@ -388,6 +388,9 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Structure.LineLoad),              (element)=> new LineLoad              (element as ARDB.Structure.LineLoad) },
       { typeof(ARDB.Structure.AreaLoad),              (element)=> new AreaLoad              (element as ARDB.Structure.AreaLoad) },
       { typeof(ARDB.Structure.BoundaryConditions),    (element)=> new BoundaryConditions    (element as ARDB.Structure.BoundaryConditions) },
+      //{ typeof(PointBoundaryConditions),              (element)=> new PointBoundaryConditions (element as ARDB.Structure.BoundaryConditions) },
+      //{ typeof(LineBoundaryConditions),               (element)=> new LineBoundaryConditions  (element as ARDB.Structure.BoundaryConditions) },
+      //{ typeof(AreaBoundaryConditions),               (element)=> new AreaBoundaryConditions  (element as ARDB.Structure.BoundaryConditions) },
     };
   }
 }
