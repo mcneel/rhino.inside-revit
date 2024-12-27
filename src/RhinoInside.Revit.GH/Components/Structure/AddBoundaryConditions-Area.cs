@@ -4,6 +4,7 @@ using Autodesk.Revit.DB.Structure;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
+using RhinoInside.Revit.GH.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Structure
@@ -95,6 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           );
 
           DA.SetData(_BoundaryConditions_, boundaryConditions);
+          //DA.SetData(_BoundaryConditions_, new AreaBoundaryConditions(boundaryConditions));
           return boundaryConditions;
         }
       );
