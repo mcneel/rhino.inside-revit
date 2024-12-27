@@ -127,7 +127,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
       using (var geometryCurve = roomSeparator.GeometryCurve)
       {
-        using (var projectedCurve = Curve.ProjectToPlane(curve, levelPlane).ToCurve())
+        using (var projectedCurve = curve.ProjectToPlane(levelPlane).ToCurve())
         {
           if (!projectedCurve.IsSameKindAs(geometryCurve)) return false;
           if (!projectedCurve.AlmostEquals(geometryCurve, GeometryTolerance.Internal.VertexTolerance))
@@ -143,7 +143,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       if (view.GenLevel is ARDB.Level level)
       {
         using (var sketchPlane = level.GetSketchPlane(ensureSketchPlane: true))
-        using (var projectedCurve = Curve.ProjectToPlane(curve, sketchPlane.GetPlane().ToPlane()))
+        using (var projectedCurve = curve.ProjectToPlane(sketchPlane.GetPlane().ToPlane()))
         using (var curveArray = new ARDB.CurveArray())
         {
           curveArray.Append(projectedCurve.ToCurve());
