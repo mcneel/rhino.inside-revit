@@ -150,7 +150,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
             var tol = GeometryTolerance.Model;
             var axisPlane = sketchPlane.Location;
 
-            curve = Curve.ProjectToPlane(curve, axisPlane);
+            curve = curve.ProjectToPlane(axisPlane);
             if (curve is null) throw new RuntimeArgumentException("Curve", "Failed to project Curve on to Work Plane.", curve);
 
             curve = curve.ToArcsAndLines(tol.VertexTolerance, 10.0 * tol.AngleTolerance, tol.ShortCurveTolerance, 0.0);

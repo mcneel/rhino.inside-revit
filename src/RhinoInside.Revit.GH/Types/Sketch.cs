@@ -223,7 +223,7 @@ namespace RhinoInside.Revit.GH.Types
       var pi = 0;
       foreach (var boundary in boundaries)
       {
-        var profile = Curve.ProjectToPlane(boundary, plane);
+        var profile = boundary.ProjectToPlane(plane);
 
         if
         (

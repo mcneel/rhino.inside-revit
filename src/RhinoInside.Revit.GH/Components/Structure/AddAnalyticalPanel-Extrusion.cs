@@ -121,7 +121,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           var normal = default(ARDB.XYZ);
           if (plane.HasValue)
           {
-            curve = Curve.ProjectToPlane(curve, plane.Value) ?? curve;
+            curve = curve.ProjectToPlane(plane.Value) ?? curve;
             normal = plane.Value.Normal.ToXYZ();
           }
 

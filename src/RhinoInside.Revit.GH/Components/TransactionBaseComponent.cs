@@ -263,7 +263,7 @@ namespace RhinoInside.Revit.GH.Components
     #region Geometry Conversion
     public static bool TryGetCurveAtPlane(Curve curve, Plane plane, out ARDB.Curve projected)
     {
-      if (Curve.ProjectToPlane(curve, plane) is Curve p)
+      if (curve.ProjectToPlane(plane) is Curve p)
       {
         var tol = GeometryTolerance.Model;
 
