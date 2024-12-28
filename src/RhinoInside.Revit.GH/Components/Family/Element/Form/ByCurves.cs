@@ -11,12 +11,12 @@ namespace RhinoInside.Revit.GH.Components.Families
   using External.DB.Extensions;
   using ERDB = External.DB;
 
-  public class FormByCurves : ReconstructElementComponent
+  public class AddMassLoft : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("42631B6E-505E-4091-981A-E7605AE5A1FF");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public FormByCurves() : base
+    public AddMassLoft() : base
     (
       name: "Add Mass Loft",
       nickname: "MassLoft",

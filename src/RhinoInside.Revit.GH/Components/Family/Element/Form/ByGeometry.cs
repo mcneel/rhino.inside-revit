@@ -12,12 +12,12 @@ namespace RhinoInside.Revit.GH.Components.Families
   using Kernel.Attributes;
   using ERDB = External.DB;
 
-  public class FormByGeometry : ReconstructElementComponent
+  public class AddForm : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("D2FDF2A0-1E48-4075-814A-685D91A6CD94");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public FormByGeometry() : base
+    public AddForm() : base
     (
       name: "Add Form",
       nickname: "Form",
