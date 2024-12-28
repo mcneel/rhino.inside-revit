@@ -752,12 +752,13 @@ namespace RhinoInside.Revit.GH.Types
                     geoAtt.ColorSource = ObjectColorSource.ColorFromObject;
                     geoAtt.ObjectColor = NoBlack(faceMaterial.ObjectColor);
 #endif
-                    if ((geo as Brep)?.TryGetExtrusion(out var extrusion) is true) geo = extrusion;
+                    if ((geo as Brep)?.TryGetExtrusion(out var extrusion) is true)
+                      geo = extrusion;
                   }
                 }
                 else
                 {
-                  if (geo is Brep brepFrom && brepFrom.TryGetExtrusion(out var extrusion))
+                  if ((geo as Brep)?.TryGetExtrusion(out var extrusion) is true)
                     geo = extrusion;
                 }
               }
@@ -841,11 +842,10 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
-#endregion
+    #endregion
 
     #region ModelContent
 #if RHINO_8
-
     static void PeekModelAttributes(IDictionary<ARDB.ElementId, ModelContent> idMap, ModelObject.Attributes attributes, ARDB.Document document)
     {
       var context = GeometryDecoder.Context.Peek;
@@ -1032,7 +1032,7 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 #endif
-#endregion
+    #endregion
 
     #region IHostElementAccess
     GraphicalElement IHostElementAccess.HostElement => HostElement;

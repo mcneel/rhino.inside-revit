@@ -10,13 +10,14 @@ namespace RhinoInside.Revit.GH.Components.Families
   using Convert.Geometry;
   using External.DB.Extensions;
   using Kernel.Attributes;
+  using ERDB = External.DB;
 
-  public class FormByGeometry : ReconstructElementComponent
+  public class AddForm : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("D2FDF2A0-1E48-4075-814A-685D91A6CD94");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public FormByGeometry() : base
+    public AddForm() : base
     (
       name: "Add Form",
       nickname: "Form",
@@ -25,6 +26,16 @@ namespace RhinoInside.Revit.GH.Components.Families
       subCategory: "Component"
     )
     { }
+
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      ARDB.BuiltInParameter.IS_VISIBLE_PARAM,
+      ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM,
+      ARDB.BuiltInParameter.MATERIAL_ID_PARAM,
+      ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY,
+      ARDB.BuiltInParameter.ELEMENT_IS_CUTTING,
+      ARDB.BuiltInParameter.OFFSETFACES_SHOW_SHAPE_HANDLES,
+    };
 
     void ReconstructFormByGeometry
     (
@@ -55,52 +66,19 @@ namespace RhinoInside.Revit.GH.Components.Families
               foreach (var curve in brep.Faces[0].OuterLoop.To3dCurve().ToCurveMany())
                 referenceArray.Append(new ARDB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
-              ReplaceElement
-              (
-                ref form,
-                document.FamilyCreate.NewFormByCap
-                (
-                  !cutting,
-                  referenceArray
-                )
-              );
+              ReplaceElement(ref form, document.FamilyCreate.NewFormByCap(!cutting, referenceArray), ExcludeUniqueProperties);
 
+              form.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM)?.Update(true);
+              form.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(ERDB.FamilyElementVisibility.DefaultModel);
+              form.get_Parameter(ARDB.BuiltInParameter.MATERIAL_ID_PARAM)?.Update(ElementIdExtension.Invalid);
+              form.get_Parameter(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY)?.Update(ElementIdExtension.Invalid);
+              form.get_Parameter(ARDB.BuiltInParameter.ELEMENT_IS_CUTTING)?.Update(0);
+              form.get_Parameter(ARDB.BuiltInParameter.OFFSETFACES_SHOW_SHAPE_HANDLES)?.Update(true);
               return;
             }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException)
             {
               document.Delete(referenceArray.OfType<ARDB.Reference>().Select(x => x.ElementId).ToArray());
-            }
-          }
-        }
-        else if (document.OwnerFamily.IsConceptualMassFamily)
-        {
-          if (brep.TryGetExtrusion(out var extrusion) && (extrusion.CapCount == 2 || !extrusion.IsClosed(0)))
-          {
-            using (var sketchPlane = ARDB.SketchPlane.Create(document, extrusion.GetProfilePlane(0.0).ToPlane()))
-            using (var referenceArray = new ARDB.ReferenceArray())
-            {
-              try
-              {
-                foreach (var curve in extrusion.Profile3d(new ComponentIndex(ComponentIndexType.ExtrusionBottomProfile, 0)).ToCurveMany())
-                  referenceArray.Append(new ARDB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
-
-                ReplaceElement
-                (
-                  ref form,
-                  document.FamilyCreate.NewExtrusionForm
-                  (
-                    !cutting,
-                    referenceArray,
-                    extrusion.PathLineCurve().Line.Direction.ToXYZ(GeometryEncoder.ModelScaleFactor)
-                  )
-                );
-                return;
-              }
-              catch (Autodesk.Revit.Exceptions.InvalidOperationException)
-              {
-                document.Delete(referenceArray.OfType<ARDB.Reference>().Select(x => x.ElementId).ToArray());
-              }
             }
           }
         }
@@ -112,22 +90,19 @@ namespace RhinoInside.Revit.GH.Components.Families
         ctx.RuntimeMessage = (severity, message, invalidGeometry) =>
           AddGeometryConversionError((GH_RuntimeMessageLevel) severity, message, invalidGeometry);
 
-        var solid = brep.ToSolid();
-        if (solid != null)
+        if (brep.ToSolid() is ARDB.Solid solid)
         {
           if (form is ARDB.FreeFormElement freeFormElement)
-          {
             freeFormElement.UpdateSolidGeometry(solid);
-          }
           else
-          {
-            ReplaceElement(ref form, ARDB.FreeFormElement.Create(document, solid));
+            ReplaceElement(ref form, ARDB.FreeFormElement.Create(document, solid), ExcludeUniqueProperties);
 
-            if (document.OwnerFamily.IsConceptualMassFamily)
-              form.get_Parameter(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY).Update(new ARDB.ElementId(ARDB.BuiltInCategory.OST_MassForm));
-          }
-
-          form.get_Parameter(ARDB.BuiltInParameter.ELEMENT_IS_CUTTING)?.Update(cutting ? 1 : 0);
+          form.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM)?.Update(true);
+          form.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(ERDB.FamilyElementVisibility.DefaultModel);
+          form.get_Parameter(ARDB.BuiltInParameter.MATERIAL_ID_PARAM)?.Update(ElementIdExtension.Invalid);
+          form.get_Parameter(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY)?.Update(ElementIdExtension.Invalid);
+          form.get_Parameter(ARDB.BuiltInParameter.ELEMENT_IS_CUTTING)?.Update(0);
+          form.get_Parameter(ARDB.BuiltInParameter.OFFSETFACES_SHOW_SHAPE_HANDLES)?.Update(true);
         }
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to convert Brep to Form");
       }
