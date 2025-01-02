@@ -11,7 +11,7 @@ group: Deployment & Configs
 ### WIP
 
 - Added 'Reference Point' parameter.
-- Added 'Query Analytical Element'
+- Added 'Query Analytical Elements'
 - Added 'Analytical Element Identity'
 - Added 'Cluster Analytical Elements (Role)'
 - Added 'Add Analytical Element'
