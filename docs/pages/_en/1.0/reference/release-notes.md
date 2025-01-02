@@ -22,6 +22,8 @@ group: Deployment & Configs
 
 ### RC
 
+- Fix on 'Add Symbol' component when updating element location.
+
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
