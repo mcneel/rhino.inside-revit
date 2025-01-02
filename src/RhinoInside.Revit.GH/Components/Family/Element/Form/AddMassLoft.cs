@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       ARDB.BuiltInParameter.OFFSETFACES_SHOW_SHAPE_HANDLES,
     };
 
-    void ReconstructFormByCurves
+    void ReconstructAddMassLoft
     (
       [Optional, NickName("DOC")]
       ARDB.Document document,
