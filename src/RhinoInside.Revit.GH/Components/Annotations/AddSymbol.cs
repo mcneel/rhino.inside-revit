@@ -142,17 +142,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (detail is null) return false;
 
       if (detail.OwnerViewId != view.Id) return false;
-      if (detail.GetTypeId() != type.Id)
-      {
-        if (ARDB.Element.IsValidType(detail.Document, new ARDB.ElementId[] { detail.Id }, type.Id))
-        {
-          if (detail.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
-            detail = detail.Document.GetElement(id) as ARDB.AnnotationSymbol;
-        }
-        else return false;
-      }
+      if (detail.GetTypeId() != type.Id) detail.ChangeTypeId(type.Id);
 
-      return false;
+      return true;
     }
 
     ARDB.AnnotationSymbol Create(ARDB.View view, ARDB.XYZ point, ARDB.AnnotationSymbolType type)
