@@ -795,23 +795,4 @@ namespace RhinoInside.Revit.GH.Types
       { (int) ARDB.Structure.BoundaryConditionsType.Area,       "Area" },
     };
   }
-
-  [
-  ComponentVersion(introduced: "1.28"),
-  ComponentGuid("4244E344-8F5F-4DE7-9ED2-3F031EA91405"),
-  Name("Boundary Conditions State"),
-  Description("Represents boundary conditions state"),
-  ]
-  public class BoundaryConditionsState : GH_Enum<ARDB.Structure.BoundaryConditionsState>
-  {
-    public BoundaryConditionsState() : base() { }
-    public BoundaryConditionsState(ARDB.Structure.BoundaryConditionsState value) : base(value) { }
-    public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
-    {
-      { (int) ARDB.Structure.BoundaryConditionsState.Fixed,         "Fixed" },
-      { (int) ARDB.Structure.BoundaryConditionsState.Pinned,        "Pinned" },
-      { (int) ARDB.Structure.BoundaryConditionsState.Roller,        "Roller" },
-      { (int) ARDB.Structure.BoundaryConditionsState.User,          "User" },
-    };
-  }
 }

@@ -96,8 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             curve
           );
 
-          DA.SetData(_BoundaryConditions_, boundaryConditions);
-          //DA.SetData(_BoundaryConditions_, new LineBoundaryConditions(boundaryConditions));
+          DA.SetData(_BoundaryConditions_, new LineBoundaryConditions(boundaryConditions));
           return boundaryConditions;
         }
       );

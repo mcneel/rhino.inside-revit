@@ -95,8 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             face
           );
 
-          DA.SetData(_BoundaryConditions_, boundaryConditions);
-          //DA.SetData(_BoundaryConditions_, new AreaBoundaryConditions(boundaryConditions));
+          DA.SetData(_BoundaryConditions_, new AreaBoundaryConditions(boundaryConditions));
           return boundaryConditions;
         }
       );
