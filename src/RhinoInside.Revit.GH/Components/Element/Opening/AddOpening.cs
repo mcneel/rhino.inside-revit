@@ -155,7 +155,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
         {
           var hostPlane = sketch.SketchPlane.GetPlane().ToPlane();
           normal = hostPlane.Normal;
-          boundary = boundary.Select(x => Curve.ProjectToPlane(x, hostPlane)).ToArray();
+          boundary = boundary.Select(x => x.ProjectToPlane(hostPlane)).ToArray();
         }
       }
 

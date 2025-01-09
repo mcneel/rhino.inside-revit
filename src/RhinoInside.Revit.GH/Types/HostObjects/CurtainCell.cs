@@ -159,7 +159,7 @@ namespace RhinoInside.Revit.GH.Types
           var curves = new List<Curve>();
           foreach (var loop in planarCurves)
           {
-            var curve = Curve.ProjectToPlane(loop, plane);
+            var curve = loop.ProjectToPlane(plane);
             bbox.Union(curve.GetBoundingBox(plane));
             curves.Add(curve);
           }

@@ -97,7 +97,7 @@ namespace RhinoInside.Revit.GH.Types
           var bbox = BoundingBox;
           var elevation = GeometryEncoder.ToInternalLength(bbox.Max.Z);
 
-          var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>(shape.SlabShapeVertices.Size + points.Count);
+          var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>(shape.SlabShapeVertices.Size + (points?.Count ?? 0) + (creases?.Count ?? 0));
           ARDB.SlabShapeVertex AddVertex(Point3d point)
           {
             var x = GeometryEncoder.ToInternalLength(point.X);

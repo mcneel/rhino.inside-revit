@@ -9,13 +9,14 @@ namespace RhinoInside.Revit.GH.Components.Families
   using Convert.Geometry;
   using Kernel.Attributes;
   using External.DB.Extensions;
+  using ERDB = External.DB;
 
-  public class FormByCurves : ReconstructElementComponent
+  public class AddMassLoft : ReconstructElementComponent
   {
     public override Guid ComponentGuid => new Guid("42631B6E-505E-4091-981A-E7605AE5A1FF");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    public FormByCurves() : base
+    public AddMassLoft() : base
     (
       name: "Add Mass Loft",
       nickname: "MassLoft",
@@ -25,7 +26,17 @@ namespace RhinoInside.Revit.GH.Components.Families
     )
     { }
 
-    void ReconstructFormByCurves
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
+      ARDB.BuiltInParameter.IS_VISIBLE_PARAM,
+      ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM,
+      ARDB.BuiltInParameter.MATERIAL_ID_PARAM,
+      ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY,
+      ARDB.BuiltInParameter.ELEMENT_IS_CUTTING,
+      ARDB.BuiltInParameter.OFFSETFACES_SHOW_SHAPE_HANDLES,
+    };
+
+    void ReconstructAddMassLoft
     (
       [Optional, NickName("DOC")]
       ARDB.Document document,
@@ -60,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           foreach (var curve in profile.ToCurveMany())
             referenceArray.Append(new ARDB.Reference(document.FamilyCreate.NewModelCurve(curve, sketchPlane)));
 
-          ReplaceElement(ref form, document.FamilyCreate.NewFormByCap(true, referenceArray));
+          ReplaceElement(ref form, document.FamilyCreate.NewFormByCap(true, referenceArray), ExcludeUniqueProperties);
         }
       }
       else
@@ -81,9 +92,16 @@ namespace RhinoInside.Revit.GH.Components.Families
             }
           }
 
-          ReplaceElement(ref form, document.FamilyCreate.NewLoftForm(true, referenceArrayArray));
+          ReplaceElement(ref form, document.FamilyCreate.NewLoftForm(true, referenceArrayArray), ExcludeUniqueProperties);
         }
       }
+
+      form.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM)?.Update(true);
+      form.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(ERDB.FamilyElementVisibility.DefaultModel);
+      form.get_Parameter(ARDB.BuiltInParameter.MATERIAL_ID_PARAM)?.Update(ElementIdExtension.Invalid);
+      form.get_Parameter(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY)?.Update(ElementIdExtension.Invalid);
+      form.get_Parameter(ARDB.BuiltInParameter.ELEMENT_IS_CUTTING)?.Update(0);
+      form.get_Parameter(ARDB.BuiltInParameter.OFFSETFACES_SHOW_SHAPE_HANDLES)?.Update(true);
     }
   }
 }

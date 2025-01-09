@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.GH.Types
               var segments = spatial.GetBoundarySegments(options);
               _Boundaries = segments.Select
               (
-                loop => Curve.JoinCurves(loop.Select(x => Curve.ProjectToPlane(x.GetCurve().ToCurve(), plane)), tol.VertexTolerance, preserveDirection: false)[0]
+                loop => Curve.JoinCurves(loop.Select(x => x.GetCurve().ToCurve().ProjectToPlane(plane)), tol.VertexTolerance, preserveDirection: false)[0]
               ).ToArray();
             }
           }

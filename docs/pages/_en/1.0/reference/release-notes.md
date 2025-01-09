@@ -28,6 +28,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.28 RC2" version="v1.28.9133.21774" pre_release=true time="01/07/2025" %}
+
+- Fix on {% include ltr/comp.html uuid='2beb60ba' %} component when updating element location.
+
 {% include ltr/release-header.html title="v1.28 RC1" version="v1.28.9121.7332" pre_release=true time="12/21/2024" %}
 
 - Miscellaneous Improvements

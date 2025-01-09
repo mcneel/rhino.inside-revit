@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 is3D = true;
 
               if (!boundary[i].IsInPlane(sketchPlane.Location, tol.VertexTolerance))
-                boundary[i] = Curve.ProjectToPlane(boundary[i], sketchPlane.Location);
+                boundary[i] = boundary[i].ProjectToPlane(sketchPlane.Location);
 
               boundaryElevation = Interval.FromUnion(boundaryElevation, new Interval(sketchPlane.Location.OriginZ, sketchPlane.Location.OriginZ));
             }

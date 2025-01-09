@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
                   foreach (var profile in profiles.OfType<Curve>())
                   {
-                    var loop = Curve.ProjectToPlane(profile, projectionPlane);
+                    var loop = profile.ProjectToPlane(projectionPlane);
 
                     var segments = loop.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
                       polyCurve.DuplicateSegments() : new Curve[] { loop };

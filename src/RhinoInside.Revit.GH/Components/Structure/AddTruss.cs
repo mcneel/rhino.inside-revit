@@ -110,7 +110,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           var tol = GeometryTolerance.Model;
           var plane = sketchPlane.Location;
 
-          if (Curve.ProjectToPlane(curve.ToNurbsCurve(), plane) is Curve projectedCurve)
+          if (curve.ProjectToPlane(plane) is Curve projectedCurve)
             curve = projectedCurve;
           else
             throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project 'Curve' into 'Work Plane'", curve);

@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.ReferenceElements
           if (!curve.IsParallelToPlane(plane, tol.VertexTolerance, tol.AngleTolerance))
             throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be planar and parallel to view plane.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
-          if ((curve = Curve.ProjectToPlane(curve, plane)) is null)
+          if ((curve = curve.ProjectToPlane(plane)) is null)
             throw new Exceptions.RuntimeArgumentException("Curve", "Failed to project Curve into 'Work Plane'", curve);
 
           if (curve.IsClosed || curve.PointAtStart.DistanceTo(curve.PointAtEnd) < tol.VertexTolerance)

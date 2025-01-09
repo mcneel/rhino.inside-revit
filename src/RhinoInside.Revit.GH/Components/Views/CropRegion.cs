@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         if (Params.GetData(DA, "Crop Region", out Curve cropRegion))
         {
           var viewLocation = view.Location;
-          var curveLoop = Curve.ProjectToPlane(cropRegion, viewLocation)?.ToCurveLoop();
+          var curveLoop = cropRegion.ProjectToPlane(viewLocation)?.ToCurveLoop();
           if (curveLoop is null || !cropManager.IsCropRegionShapeValid(curveLoop))
           {
             AddRuntimeMessage

@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
               throw new Exceptions.RuntimeArgumentException("Boundary", "Curve should be a valid planar, closed curve and perperdicular to the input view.", loop);
           }
 
-          loops = loops.Select(x => Curve.ProjectToPlane(x, viewPlane)).ToArray();
+          loops = loops.Select(x => x.ProjectToPlane(viewPlane)).ToArray();
 
           if (revision is null)
           {

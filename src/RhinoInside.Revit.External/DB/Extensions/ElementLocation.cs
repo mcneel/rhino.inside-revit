@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         // Set Origin
         {
           var translation = newOrigin - origin;
-          if (translation.IsZeroLength())
+          if (!translation.IsZeroLength())
           {
             if (element.Pinned) element.Pinned = false;
             modified = true;

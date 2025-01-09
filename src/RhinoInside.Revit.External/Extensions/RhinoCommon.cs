@@ -314,7 +314,7 @@ namespace Rhino.Geometry
 
       public NurbsCurve Loop
       {
-        get { if (Plane.IsValid && loop is null) loop = Curve.ProjectToPlane(Face.OuterLoop.To3dCurve()?.ToNurbsCurve(), Plane) as NurbsCurve; return loop; }
+        get { if (Plane.IsValid && loop is null) loop = Face.OuterLoop.To3dCurve()?.ToNurbsCurve().ProjectToPlane(Plane) as NurbsCurve; return loop; }
       }
       public Point3d Centroid
       {
@@ -896,6 +896,40 @@ namespace Rhino.Geometry
       var t = domain.T0;
       while (curve.GetNextDiscontinuity(continuity, t, domain.T1, tol1, tol2, out t))
         yield return t;
+    }
+
+    public static Curve ProjectToPlane(this Curve curve, Plane plane)
+    {
+      switch (curve)
+      {
+        case null:
+          return null;
+
+        case LineCurve line:
+          line = line.DuplicateCurve() as LineCurve;
+          line.SetStartPoint(plane.ClosestPoint(line.PointAtStart));
+          line.SetEndPoint(plane.ClosestPoint(line.PointAtEnd));
+          return line;
+
+        case PolylineCurve polyline:
+          polyline = polyline.DuplicateCurve() as PolylineCurve;
+          for(int p = 0; p < polyline.PointCount; ++p)
+            polyline.SetPoint(p, plane.ClosestPoint(polyline.Point(p)));
+          return polyline;
+
+        case ArcCurve arc:
+
+          if (arc.Arc.Plane.Normal.EpsilonEquals(plane.Normal, RhinoMath.Epsilon))
+          {
+            arc = arc.DuplicateCurve() as ArcCurve;
+            arc.Translate(plane.ClosestPoint(arc.Arc.Plane.Origin) - arc.Arc.Plane.Origin);
+            return arc;
+          }
+          else return Curve.ProjectToPlane(curve?.ToNurbsCurve(), plane);
+
+        default:
+          return Curve.ProjectToPlane(curve?.ToNurbsCurve(), plane);
+      }
     }
   }
 
