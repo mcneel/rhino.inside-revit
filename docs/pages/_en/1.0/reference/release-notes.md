@@ -10,18 +10,6 @@ group: Deployment & Configs
 
 ### WIP
 
-- Added 'Reference Point' parameter.
-- Added 'Add Boundary Conditions (Point)'
-- Added 'Add Boundary Conditions (Line)'
-- Added 'Add Boundary Conditions (Area)'
-- Added 'Boundary Conditions Settings'
-- Added 'Query Boundary Conditions'
-- Added 'Add Analytical Element' 
-- Added 'Add Model Element'
-- Added 'Analytical Element Identity'
-- Added 'Cluster Analytical Elements (Role)'
-- Added 'Query Analytical Elements'
-
 ### RC
 
 {% endcapture %}
@@ -30,17 +18,17 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.29 RC1" version="v1.29.9140.19217" pre_release=true time="01/27/2025" %}
 
-- Added 'Reference Point' parameter.
-- Added 'Add Boundary Conditions (Point)'
-- Added 'Add Boundary Conditions (Line)'
-- Added 'Add Boundary Conditions (Area)'
-- Added 'Boundary Conditions Settings'
-- Added 'Query Boundary Conditions'
-- Added 'Add Analytical Element' 
-- Added 'Add Model Element'
-- Added 'Analytical Element Identity'
-- Added 'Cluster Analytical Elements (Role)'
-- Added 'Query Analytical Elements'
+- Added {% include ltr/comp.html uuid='5483b924' %}
+- Added {% include ltr/comp.html uuid='a353b981' %}
+- Added {% include ltr/comp.html uuid='647ac069' %}
+- Added {% include ltr/comp.html uuid='8c0ff24b' %}
+- Added {% include ltr/comp.html uuid='b5144c5d' %}
+- Added {% include ltr/comp.html uuid='f8c6588f' %}
+- Added {% include ltr/comp.html uuid='ac26c810' %}
+- Added {% include ltr/comp.html uuid='a373ce1f' %}
+- Added {% include ltr/comp.html uuid='6844cf5e' %}
+- Added {% include ltr/comp.html uuid='22c30d64' %}
+- Added {% include ltr/comp.html uuid='1d518ebf' %}
 - Miscellaneous Improvements
 
 {% include ltr/release-header.html title="v1.28" version="v1.28.9138.27861" time="01/27/2025" %}
