@@ -28,6 +28,21 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.29 RC1" version="v1.29.9140.19217" pre_release=true time="01/27/2025" %}
+
+- Added 'Reference Point' parameter.
+- Added 'Add Boundary Conditions (Point)'
+- Added 'Add Boundary Conditions (Line)'
+- Added 'Add Boundary Conditions (Area)'
+- Added 'Boundary Conditions Settings'
+- Added 'Query Boundary Conditions'
+- Added 'Add Analytical Element' 
+- Added 'Add Model Element'
+- Added 'Analytical Element Identity'
+- Added 'Cluster Analytical Elements (Role)'
+- Added 'Query Analytical Elements'
+- Miscellaneous Improvements
+
 {% include ltr/release-header.html title="v1.28" version="v1.28.9138.27861" time="01/27/2025" %}
 
 - Includes all changes under 1.28 RC releases listed below
