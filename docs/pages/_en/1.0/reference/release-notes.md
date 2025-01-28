@@ -10,18 +10,6 @@ group: Deployment & Configs
 
 ### WIP
 
-- Added 'Reference Point' parameter.
-- Added 'Add Boundary Conditions (Point)'
-- Added 'Add Boundary Conditions (Line)'
-- Added 'Add Boundary Conditions (Area)'
-- Added 'Boundary Conditions Settings'
-- Added 'Query Boundary Conditions'
-- Added 'Add Analytical Element' 
-- Added 'Add Model Element'
-- Added 'Analytical Element Identity'
-- Added 'Cluster Analytical Elements (Role)'
-- Added 'Query Analytical Elements'
-
 ### RC
 
 {% endcapture %}
