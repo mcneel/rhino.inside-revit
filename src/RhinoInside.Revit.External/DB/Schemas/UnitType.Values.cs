@@ -262,6 +262,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static UnitType RiseDividedBy12Inches => new UnitType("autodesk.unit.unit:riseDividedBy12Inches-1.0.1");
     public static UnitType RiseDividedBy1Foot => new UnitType("autodesk.unit.unit:riseDividedBy1Foot-1.0.1");
     public static UnitType Seconds => new UnitType("autodesk.unit.unit:seconds-1.0.0");
+    public static UnitType Shaku => new UnitType("autodesk.unit.unit:shaku-1.0.0");
     public static UnitType SlopeDegrees => new UnitType("autodesk.unit.unit:slopeDegrees-1.0.0");
     public static UnitType SquareCentimeters => new UnitType("autodesk.unit.unit:squareCentimeters-1.0.1");
     public static UnitType SquareCentimetersPerMeter => new UnitType("autodesk.unit.unit:squareCentimetersPerMeter-1.0.1");
