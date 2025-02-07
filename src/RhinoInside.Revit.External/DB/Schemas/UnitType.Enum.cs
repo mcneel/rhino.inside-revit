@@ -320,6 +320,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { LitersPerHour, 250 }, // DUT_LITERS_PER_HOUR
       { RatioTo1, 251 }, // DUT_RATIO_TO_1
       { UsSurveyFeet, 605 }, // DUT_DECIMAL_US_SURVEY_FEET
+      { Shaku, 701 }, // DUT_SHAKU
     };
   }
 }

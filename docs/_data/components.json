@@ -567,7 +567,7 @@
     "desc": "Contains a collection of Revit 1D appearance asset properties", 
     "iconsrc": "/static/images/GH/AssetPropertyDouble1DMap.png", 
     "icontag": null, 
-    "panel": "Revit", 
+    "panel": "Revit Elements", 
     "since": null, 
     "tab": "Params", 
     "title": "Asset Property Double 1D Map", 
@@ -579,7 +579,7 @@
     "desc": "Contains a collection of Revit 4D appearance asset properties", 
     "iconsrc": "/static/images/GH/AssetPropertyDouble4DMap.png", 
     "icontag": null, 
-    "panel": "Revit", 
+    "panel": "Revit Elements", 
     "since": null, 
     "tab": "Params", 
     "title": "Asset Property Double 4D Map", 
@@ -922,6 +922,30 @@
     "typename": "BeamSystem", 
     "until": null, 
     "uuid": "45cd3655-4658-4c35-99fb-9975a1128ddf"
+  }, 
+  {
+    "desc": "Contains a collection of Revit Boundary Conditions", 
+    "iconsrc": "/static/images/GH/BoundaryConditions.png", 
+    "icontag": null, 
+    "panel": "Revit Elements", 
+    "since": "1.27", 
+    "tab": "Params", 
+    "title": "Boundary Conditions", 
+    "typename": "BoundaryConditions", 
+    "until": null, 
+    "uuid": "dee191f4-9d73-46c7-9bd0-ebbbd5b8d4a6"
+  }, 
+  {
+    "desc": "Contains a collection of Revit Structural Component elements", 
+    "iconsrc": null, 
+    "icontag": "S", 
+    "panel": "Revit Elements", 
+    "since": "1.27", 
+    "tab": "Params", 
+    "title": "Structural Component", 
+    "typename": "StructuralInstance", 
+    "until": null, 
+    "uuid": "54c68928-f012-42b0-94dc-dc9fc00fae31"
   }, 
   {
     "desc": "Contains a collection of Revit Truss elements", 
@@ -1872,6 +1896,18 @@
     "uuid": "e3d32938-0e10-4b93-a40d-0781d8842ece"
   }, 
   {
+    "desc": "Given a model element, it adds an analytical element representation to the active Revit document", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Add Analytical Element", 
+    "typename": "AddAnalyticalElementByModel", 
+    "until": null, 
+    "uuid": "ac26c810-2043-4666-b16e-8484d9dcf7de"
+  }, 
+  {
     "desc": "Given its location curve, it adds an analytical member to the active Revit document", 
     "iconsrc": "/static/images/GH/AddAnalyticalMember.png", 
     "icontag": null, 
@@ -1920,6 +1956,42 @@
     "uuid": "5e6ee9a3-3aa0-4186-9e5e-30081a56abee"
   }, 
   {
+    "desc": "Given a referenced face, this component adds area boundary conditions to the analytical model", 
+    "iconsrc": "/static/images/GH/AddAreaBoundaryConditions.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Add Boundary Conditions (Area)", 
+    "typename": "AddAreaBoundaryConditions", 
+    "until": null, 
+    "uuid": "8c0ff24b-b5d7-40aa-bd4e-1dff9326de86"
+  }, 
+  {
+    "desc": "Given a referenced curve, this component adds line boundary conditions to the analytical model", 
+    "iconsrc": "/static/images/GH/AddLineBoundaryConditions.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Add Boundary Conditions (Line)", 
+    "typename": "AddLineBoundaryConditions", 
+    "until": null, 
+    "uuid": "647ac069-abf4-454f-bfc5-8559f2980877"
+  }, 
+  {
+    "desc": "Given a reference point, this component adds a point boundary conditions to the analytical model", 
+    "iconsrc": "/static/images/GH/AddPointBoundaryConditions.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Add Boundary Conditions (Point)", 
+    "typename": "AddPointBoundaryConditions", 
+    "until": null, 
+    "uuid": "a353b981-96d0-4cf7-9dc7-28d8297f0253"
+  }, 
+  {
     "desc": "Given its Location, it adds a structural foundation element to the active Revit document", 
     "iconsrc": "/static/images/GH/AddFoundationIsolated.png", 
     "icontag": null, 
@@ -1954,6 +2026,18 @@
     "typename": "AddFoundationWall", 
     "until": null, 
     "uuid": "9ff1c32f-4855-4f32-95ca-accb4aa564de"
+  }, 
+  {
+    "desc": "Given an analytical element, it adds a model element representation to the active Revit document", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Add Model Element", 
+    "typename": "AddModelElementByAnalytical", 
+    "until": null, 
+    "uuid": "a373ce1f-16b3-46c0-b278-a1073d6ed1ef"
   }, 
   {
     "desc": "Given its Axis, it adds a beam element to the active Revit document", 
@@ -2002,6 +2086,42 @@
     "typename": "AddTruss", 
     "until": null, 
     "uuid": "c0b04dc7-9ad5-4e49-9043-17cb06076132"
+  }, 
+  {
+    "desc": "Analytical Element Data", 
+    "iconsrc": null, 
+    "icontag": "A", 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Analytical Element Identity", 
+    "typename": "AnalyticalElementIdentity", 
+    "until": null, 
+    "uuid": "6844cf5e-8015-457e-ac7e-0e58c6b80a82"
+  }, 
+  {
+    "desc": "Boundary conditions settings associated with a Revit document", 
+    "iconsrc": "/static/images/GH/BoundaryConditionsSettings.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Boundary Conditions Settings", 
+    "typename": "BoundaryConditionsSettings", 
+    "until": null, 
+    "uuid": "b5144c5d-f374-4786-99a7-6a579ed2fd59"
+  }, 
+  {
+    "desc": "Split a list of analytical elements into separate clusters by their structural role", 
+    "iconsrc": null, 
+    "icontag": "C", 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Cluster Analytical Elements (Role)", 
+    "typename": "ClusterAnalyticalElements", 
+    "until": null, 
+    "uuid": "22c30d64-60ca-4ef9-9c2d-412b8d38a008"
   }, 
   {
     "desc": "Given a set of contour Curves, it adds a BuildingPad element to the active Revit document", 
@@ -4930,6 +5050,30 @@
     "typename": "QueryWalls", 
     "until": null, 
     "uuid": "118f5744-292f-4bec-9213-8073219d8563"
+  }, 
+  {
+    "desc": "Get all document analytical elements", 
+    "iconsrc": null, 
+    "icontag": "Q", 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Query Analytical Elements", 
+    "typename": "QueryAnalyticalElements", 
+    "until": null, 
+    "uuid": "1d518ebf-d75d-4d9c-b962-9907352df89a"
+  }, 
+  {
+    "desc": "Get all document boundary conditions", 
+    "iconsrc": "/static/images/GH/QueryBoundaryConditions.png", 
+    "icontag": null, 
+    "panel": "Structure", 
+    "since": "1.27", 
+    "tab": "Revit", 
+    "title": "Query Boundary Conditions", 
+    "typename": "QueryBoundaryConditions", 
+    "until": null, 
+    "uuid": "f8c6588f-4131-4692-a43d-cc4e34f88ab4"
   }, 
   {
     "desc": "Get-Set workset global visibility", 

@@ -40,6 +40,7 @@ namespace RhinoInside.Revit.Convert.Units
       if (value == DBXS.UnitType.Feet) return UnitScale.Feet;
       if (value == DBXS.UnitType.FeetFractionalInches) return UnitScale.Feet;
       if (value == DBXS.UnitType.UsSurveyFeet) return UnitScale.UsSurveyFeet;
+      if (value == DBXS.UnitType.Shaku) return UnitScale.Shaku;
 
       Debug.Fail($"{value} conversion is not implemented");
       return UnitScale.Unset;
