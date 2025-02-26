@@ -24,6 +24,62 @@ namespace RhinoInside.Revit.AddIn.Commands
   using Convert.Geometry;
   using External.DB.Extensions;
 
+  /// <summary>
+  /// If you are here looking for a way to call Grasshopper Player from your Revit AddIn.
+  /// Please copy just the following `GrasshopperPlayer` type on your project.
+  /// </summary>
+  /// <example>
+  /// if (GrasshopperPlayer.IsAvailable)
+  /// {
+  ///   var result = GrasshopperPlayer.Play("C:\Grasshopper-Definition.gh", data.Application, data.View, out var message);
+  /// }
+  /// </example>
+  static class GrasshopperPlayer
+  {
+    private static System.Reflection.Assembly _RhinoInsideRevitAddIn;
+    private static System.Reflection.Assembly RhinoInsideRevitAddIn => _RhinoInsideRevitAddIn ??=
+      AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.StartsWith("RhinoInside.Revit.AddIn,"));
+
+    private static Type _CommandGrasshopperPlayer;
+    private static Type CommandGrasshopperPlayer => _CommandGrasshopperPlayer ??=
+      RhinoInsideRevitAddIn?.DefinedTypes.FirstOrDefault(x => x.FullName == "RhinoInside.Revit.AddIn.Commands.CommandGrasshopperPlayer");
+
+    private static System.Reflection.MethodInfo _Execute;
+    private static System.Reflection.MethodInfo Execute => _Execute ??= CommandGrasshopperPlayer?.GetMethod
+      (
+        "Execute", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.InvokeMethod, default,
+        new Type[]
+        {
+          typeof(Autodesk.Revit.UI.UIApplication),
+          typeof(Autodesk.Revit.DB.View),
+          typeof(System.Collections.Generic.IDictionary<string, string>),
+          typeof(string),
+          typeof(string).MakeByRefType()
+        },
+        default
+      );
+
+    public static bool IsAvailable => Execute is object;
+
+    public static Autodesk.Revit.UI.Result Play(string filePath, UIApplication app, View view, out string message)
+    {
+      message = string.Empty;
+      return (Autodesk.Revit.UI.Result) Execute.Invoke
+      (
+        null, System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.InvokeMethod, default,
+        new object[]
+        {
+          app,
+          view,
+          new System.Collections.Generic.Dictionary<string, string>(),
+          filePath,
+          message
+        },
+        default
+      );
+    }
+  }
+
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPlayer : GrasshopperCommand
   {
