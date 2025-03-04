@@ -41,8 +41,14 @@ namespace RhinoInside.Revit.AddIn.Commands
       AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.StartsWith("RhinoInside.Revit.AddIn,"));
 
     private static Type _CommandGrasshopperPlayer;
-    private static Type CommandGrasshopperPlayer => _CommandGrasshopperPlayer ??=
-      RhinoInsideRevitAddIn?.DefinedTypes.FirstOrDefault(x => x.FullName == "RhinoInside.Revit.AddIn.Commands.CommandGrasshopperPlayer");
+    private static Type CommandGrasshopperPlayer =>_CommandGrasshopperPlayer ??=
+      GetAvailableTypes(RhinoInsideRevitAddIn).FirstOrDefault(x => x.FullName == "RhinoInside.Revit.AddIn.Commands.CommandGrasshopperPlayer");
+
+    private static IEnumerable<Type> GetAvailableTypes(System.Reflection.Assembly assembly)
+    {
+      try { return assembly?.DefinedTypes; }
+      catch (System.Reflection.ReflectionTypeLoadException e) { return e.Types.OfType<Type>(); }
+    }
 
     private static System.Reflection.MethodInfo _Execute;
     private static System.Reflection.MethodInfo Execute => _Execute ??= CommandGrasshopperPlayer?.GetMethod
