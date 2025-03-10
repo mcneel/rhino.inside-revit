@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       // CREATE ASSEMBLY
       // --------------------------------------------------------------------
       // generate assembly containing script command types
-      var lsa = new LinkedScriptAssembly();
+      var lsa = new LinkedScriptAssemblyBuilder();
 
       // create types for all the scripts in the structure
       ProcessLinkedScripts(items, (script) =>
@@ -203,7 +203,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       });
     }
 
-    internal static void AddPullDownButton(PulldownButton pulldown, LinkedScript script, LinkedScriptAssembly lsa)
+    internal static void AddPullDownButton(PulldownButton pulldown, LinkedScript script, LinkedScriptAssemblyBuilder lsa)
     {
       if (pulldown.AddPushButton(NewScriptButton(script, lsa.FilePath)) is PushButton pushButton)
       {
@@ -211,7 +211,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    internal static void AddPanelButton(RibbonPanel panel, LinkedScript script, LinkedScriptAssembly lsa)
+    internal static void AddPanelButton(RibbonPanel panel, LinkedScript script, LinkedScriptAssemblyBuilder lsa)
     {
       if (panel.AddItem(NewScriptButton(script, lsa.FilePath)) is PushButton pushButton)
       {
@@ -234,14 +234,18 @@ namespace RhinoInside.Revit.AddIn.Commands
         Image = GetScriptIcon(script, small: true),
         LargeImage = GetScriptIcon(script, small: false),
         ToolTip = script.Description ?? "Launch script in Grasshopper player",
-        LongDescription = $"Script Path: {script.ScriptPath}",
+        LongDescription = $"Path: {script.ScriptPath}",
       };
     }
 
-    internal static ImageSource GetScriptIcon(LinkedScript script, bool small = false)
+    private static ImageSource GetScriptIcon(LinkedScript script, bool small)
     {
       return script.GetScriptIcon(small) ??
-        Command.LoadRibbonButtonImage($"Ribbon.Grasshopper.{script.ScriptType}.png", small);
+      (
+        string.Equals(Path.GetExtension(script.ScriptPath), ".ghx", StringComparison.OrdinalIgnoreCase) ?
+        Command.LoadRibbonButtonImage($"Ribbon.Grasshopper.GhxFile.png", small):
+        Command.LoadRibbonButtonImage($"Ribbon.Grasshopper.GhFile.png", small)
+     );
     }
   }
 }

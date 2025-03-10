@@ -11,11 +11,11 @@ namespace RhinoInside.Revit.AddIn.Commands
   public abstract class GrasshopperCommand : RhinoCommand
   {
     protected static readonly Guid PlugInId = new Guid(0xB45A29B1, 0x4343, 0x4035, 0x98, 0x9E, 0x04, 0x4E, 0x85, 0x80, 0xD9, 0xCF);
-
-    public GrasshopperCommand()
+    static bool _Loaded = false;
+    protected override void EnsureRuntimeAvailable()
     {
-      if (!PlugIn.LoadPlugIn(PlugInId, true, true))
-        throw new InvalidOperationException("Failed to load Grasshopper");
+      if (!_Loaded && !PlugIn.LoadPlugIn(PlugInId, true, true)) throw new External.FailException("Failed to load Grasshopper.");
+      _Loaded = true;
     }
 
     /// <summary>
