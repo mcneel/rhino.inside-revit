@@ -9,15 +9,6 @@ using System.Windows.Media;
 namespace RhinoInside.Revit.AddIn.Commands
 {
   /// <summary>
-  /// Types of scripts that can be executed
-  /// </summary>
-  public enum ScriptType
-  {
-    GhFile = 0,
-    GhxFile,
-  }
-
-  /// <summary>
   /// Generic linked item
   /// </summary>
   public abstract class LinkedItem
@@ -62,7 +53,6 @@ namespace RhinoInside.Revit.AddIn.Commands
   /// </summary>
   public class LinkedScript : LinkedItem
   {
-    public ScriptType ScriptType { get; set; }
     public string ScriptPath { get; set; }
     public Type ScriptCommandType { get; set; }
 
@@ -92,9 +82,8 @@ namespace RhinoInside.Revit.AddIn.Commands
 
           return new LinkedScript
           {
-            ScriptType = ext == ".gh" ? ScriptType.GhFile : ScriptType.GhxFile,
-            ScriptPath = scriptPath,
             Name = Path.GetFileNameWithoutExtension(scriptPath),
+            ScriptPath = scriptPath,
             Description = description,
             IconImageData = iconImageData,
           };

@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.External.UI
       var _exception = default(Exception);
       var _message = message;
 
-      try { return ActivationGate.Open(() => Execute(data, ref _message, elements), this); }
+      try { return ActivationGate.Open(() => { EnsureRuntimeAvailable(); return Execute(data, ref _message, elements); }, this); }
       catch (CancelException e) { _message = e.Message; return Result.Cancelled; }
       catch (FailException e) { _message = e.Message; return Result.Failed; }
       catch (Autodesk.Revit.Exceptions.ApplicationException e) { _message = e.Message; return Result.Failed; }
@@ -30,6 +30,8 @@ namespace RhinoInside.Revit.External.UI
 
       return Result.Failed;
     }
+
+    protected virtual void EnsureRuntimeAvailable() { }
 
     protected virtual bool CatchException(Exception e, UIApplication app) =>
       ExternalApplication.InvokeCatchException(app, e, this);

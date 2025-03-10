@@ -6,9 +6,9 @@ using Autodesk.Revit.Attributes;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
-  public class LinkedScriptAssembly
+  public class LinkedScriptAssemblyBuilder
   {
-    public LinkedScriptAssembly()
+    public LinkedScriptAssemblyBuilder()
     {
       Name = Guid.NewGuid().ToString();
       FileName = $"{Name}.dll";
@@ -35,15 +35,15 @@ namespace RhinoInside.Revit.AddIn.Commands
 #endif
     }
 
-    public string Name { get; private set; }
-    public string FileLocation { get; private set; }
-    public string FileName { get; private set; }
+    public string Name { get; }
+    public string FileLocation { get; }
+    public string FileName { get; }
     public string FilePath => Path.Combine(FileLocation, FileName);
 
-    public AssemblyBuilder AssmBuilder { get; private set; }
-    public ModuleBuilder ModuleBuilder { get; private set; }
+    readonly AssemblyBuilder AssmBuilder;
+    readonly ModuleBuilder ModuleBuilder;
 
-    public void SaveAndLoad()
+    public Assembly SaveAndLoad()
     {
 #if NET
       var generator = new Lokad.ILPack.AssemblyGenerator();
@@ -51,46 +51,56 @@ namespace RhinoInside.Revit.AddIn.Commands
 #else
       AssmBuilder?.Save(FileName);
 #endif
-      Assembly.LoadFrom(FilePath);
+      return Assembly.LoadFrom(FilePath);
     }
 
     public Type MakeScriptCommandType(LinkedScript script)
     {
-      var typeBuilder = ModuleBuilder.DefineType(
+      var typeBuilder = ModuleBuilder.DefineType
+      (
         $"LinkedScriptCmd-{Guid.NewGuid()}",
         TypeAttributes.Public | TypeAttributes.Class,
-        typeof(LinkedScriptCommand)
-        );
+        typeof(GrasshopperScriptCommand)
+      );
 
       // Transaction(TransactionMode.Manual)
-      typeBuilder.SetCustomAttribute(
-        new CustomAttributeBuilder(
-                  typeof(TransactionAttribute).GetConstructor(new Type[] { typeof(TransactionMode) }),
-                  new object[] { TransactionMode.Manual }
-      ));
+      typeBuilder.SetCustomAttribute
+      (
+        new CustomAttributeBuilder
+        (
+          typeof(TransactionAttribute).GetConstructor(new Type[] { typeof(TransactionMode) }),
+          new object[] { TransactionMode.Manual }
+        )
+      );
 
-      //  Regeneration(RegenerationOption.Manual)
-      typeBuilder.SetCustomAttribute(
-        new CustomAttributeBuilder(
+      // Regeneration(RegenerationOption.Manual)
+      typeBuilder.SetCustomAttribute
+      (
+        new CustomAttributeBuilder
+        (
           typeof(RegenerationAttribute).GetConstructor(new Type[] { typeof(RegenerationOption) }),
           new object[] { RegenerationOption.Manual }
-      ));
+        )
+      );
 
       // get GrasshopperScriptCommand(string scriptPath) const
-      var ghScriptCmdConst = typeof(LinkedScriptCommand).GetConstructor(new Type[] {
-        typeof(int),        // "scriptType"
-        typeof(string)      // "scriptPath"
-      });
-      // define a base contructor
-      var baseConst = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[] { });
-      var gen = baseConst.GetILGenerator();
-      gen.Emit(OpCodes.Ldarg_0);                // load "this" onto stack
-                                                // load "scriptType"
-      gen.Emit(OpCodes.Ldc_I4, (int) script.ScriptType);
-      // load "scriptPath"
-      gen.Emit(OpCodes.Ldstr, script.ScriptPath);
+      var baseConst = typeof(GrasshopperScriptCommand).GetConstructor
+      (
+        BindingFlags.Instance | BindingFlags.NonPublic, default,
+        new Type[]
+        {
+          typeof(string) // "scriptPath"
+        },
+        null
+      );
 
-      gen.Emit(OpCodes.Call, ghScriptCmdConst); // call script command constructor with values loaded to stack
+      // define a base contructor
+      var defaultConst = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
+      var gen = defaultConst.GetILGenerator();
+      gen.Emit(OpCodes.Ldarg_0);                // load "this" onto stack
+      gen.Emit(OpCodes.Ldstr, script.ScriptPath);// load "scriptPath"
+
+      gen.Emit(OpCodes.Call, baseConst); // call script command constructor with values loaded to stack
       gen.Emit(OpCodes.Nop);                    // add a few NOPs
       gen.Emit(OpCodes.Ret);                    // return
 

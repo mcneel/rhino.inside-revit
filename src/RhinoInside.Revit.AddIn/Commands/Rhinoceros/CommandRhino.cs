@@ -46,11 +46,9 @@ namespace RhinoInside.Revit.AddIn.Commands
   {
     protected static readonly Guid PlugInId = new Guid("02BF604D-799C-4CC2-830E-8D72F21B14B7");
     static bool _Loaded = false;
-    protected RhinoBuiltInCommand()
+    protected override void EnsureRuntimeAvailable()
     {
-      if (!_Loaded && !PlugIn.LoadPlugIn(PlugInId, true, true))
-        throw new Exception("Failed to startup Commands");
-
+      if (!_Loaded && !PlugIn.LoadPlugIn(PlugInId, true, true)) throw new External.FailException("Failed to load Commands.");
       _Loaded = true;
     }
 
