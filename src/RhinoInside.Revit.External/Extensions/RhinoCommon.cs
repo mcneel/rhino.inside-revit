@@ -906,29 +906,43 @@ namespace Rhino.Geometry
           return null;
 
         case LineCurve line:
-          line = line.DuplicateCurve() as LineCurve;
-          line.SetStartPoint(plane.ClosestPoint(line.PointAtStart));
-          line.SetEndPoint(plane.ClosestPoint(line.PointAtEnd));
-          return line;
+          var from = plane.ClosestPoint(line.PointAtStart);
+          var to = plane.ClosestPoint(line.PointAtEnd);
+          return new LineCurve(new Line(from, to)) { Domain = curve.Domain };
 
         case PolylineCurve polyline:
-          polyline = polyline.DuplicateCurve() as PolylineCurve;
-          for(int p = 0; p < polyline.PointCount; ++p)
-            polyline.SetPoint(p, plane.ClosestPoint(polyline.Point(p)));
-          return polyline;
+          var points = new Point3d[polyline.PointCount];
+          for (int p = 0; p < points.Length; ++p)
+            points[p] = plane.ClosestPoint(polyline.Point(p));
+          return new PolylineCurve(points) { Domain = curve.Domain };
 
         case ArcCurve arc:
 
-          if (arc.Arc.Plane.Normal.EpsilonEquals(plane.Normal, RhinoMath.Epsilon))
+          var arcArc = arc.Arc;
+          if (arcArc.Plane.Normal.EpsilonEquals(plane.Normal, RhinoMath.ZeroTolerance))
           {
-            arc = arc.DuplicateCurve() as ArcCurve;
-            arc.Translate(plane.ClosestPoint(arc.Arc.Plane.Origin) - arc.Arc.Plane.Origin);
-            return arc;
+            var origin = plane.ClosestPoint(arcArc.Plane.Origin);
+            arcArc.Plane = new Plane
+            (
+              origin,
+              plane.ClosestPoint(arcArc.Plane.Origin + arcArc.Plane.XAxis) - origin,
+              plane.ClosestPoint(arcArc.Plane.Origin + arcArc.Plane.YAxis) - origin
+            );
+            return new ArcCurve(arcArc) { Domain = curve.Domain };
           }
-          else return Curve.ProjectToPlane(curve?.ToNurbsCurve(), plane);
+          else return Curve.ProjectToPlane(curve.ToNurbsCurve(), plane);
+
+        case PolyCurve polycurve:
+
+          var poly = new PolyCurve();
+          for (var s = 0; s < polycurve.SegmentCount; ++s)
+            poly.AppendSegment(ProjectToPlane(polycurve.SegmentCurve(s), plane));
+
+          poly.Domain = curve.Domain;
+          return poly;
 
         default:
-          return Curve.ProjectToPlane(curve?.ToNurbsCurve(), plane);
+          return Curve.ProjectToPlane(curve.ToNurbsCurve(), plane);
       }
     }
   }
