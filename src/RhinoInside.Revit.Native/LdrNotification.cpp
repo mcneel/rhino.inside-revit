@@ -139,7 +139,7 @@ class LdrDllTracker
       stream.imbue(std::locale::classic());
 
       TCHAR ModuleName[2048]{};
-      if (MixedGetModuleFileName(CallStack[num], ModuleName, _countof(ModuleName)))
+      if (CallStack[num] && MixedGetModuleFileName(CallStack[num], ModuleName, _countof(ModuleName)))
         stream << ModuleName;
 
       stream << "!" << CallStack[num] << "()" << std::endl;

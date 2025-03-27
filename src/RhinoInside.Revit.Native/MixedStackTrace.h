@@ -12,7 +12,7 @@ EXTERN_C
 DWORD STDAPICALLTYPE
 MixedGetModuleFileName(
   _In_ LPVOID lpv,
-  _Out_writes_(nSize) LPTSTR lpFilename,
+  _Out_writes_to_(nSize, ((return < nSize) ? (return +1) : nSize)) LPTSTR lpFilename,
   _In_ DWORD nSize
 );
 
