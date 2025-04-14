@@ -289,7 +289,7 @@ namespace RhinoInside.Revit.Convert.Units
     public static readonly UnitScale LightYears        = new UnitScale(UnitSystem.LightYears);
 
     internal static readonly UnitScale UsSurveyFeet    = new UnitScale("US Survey Feet", (1_200.0, 3_937.0));
-    public static readonly UnitScale Shaku             = new UnitScale("Shaku", new Ratio(0.30303));
+    internal static readonly UnitScale Shaku           = new UnitScale("Shaku",          (   10.0,    33.0));
     internal static readonly UnitScale Internal        = Feet;
     #endregion
 
