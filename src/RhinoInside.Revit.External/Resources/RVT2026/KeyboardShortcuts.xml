@@ -4,12 +4,6 @@
   <ShortcutItem CommandId="CustomCtrl_%PanelParts%Split" Shortcuts="PL" />
   <ShortcutItem CommandId="CustomCtrl_%panelReinforcement%Reinforcement" Shortcuts="RF" />
   <ShortcutItem CommandId="Dialog_BuildingSystems_PanelScheduleCircuitDlgbar:Control_BuildingSystems_CircuitsRenumber" Shortcuts="RI" />
-  <ShortcutItem CommandId="Dialog_Revit_TextRtfUi:Control_Revit_TextAllCaps" Shortcuts="Ctrl+Shift+A" />
-  <ShortcutItem CommandId="Dialog_Revit_TextRtfUi:Control_Revit_TextBold" Shortcuts="Ctrl+B" />
-  <ShortcutItem CommandId="Dialog_Revit_TextRtfUi:Control_Revit_TextItalic" Shortcuts="Ctrl+I" />
-  <ShortcutItem CommandId="Dialog_Revit_TextRtfUi:Control_Revit_TextSubscript" Shortcuts="Ctrl+=" />
-  <ShortcutItem CommandId="Dialog_Revit_TextRtfUi:Control_Revit_TextSuperscript" Shortcuts="Ctrl+Shift+=" />
-  <ShortcutItem CommandId="Dialog_Revit_TextRtfUi:Control_Revit_TextUnderline" Shortcuts="Ctrl+U" />
   <ShortcutItem CommandId="ID_ACTIVATE_CONTEXTUAL_TAB" Shortcuts="Ctrl+`" />
   <ShortcutItem CommandId="ID_ALIGN" Shortcuts="AL" />
   <ShortcutItem CommandId="ID_ANNOTATIONS_DIMENSION_ALIGNED" Shortcuts="DI" />
@@ -53,8 +47,8 @@
   <ShortcutItem CommandId="ID_IMAGE_WIREFRAME" Shortcuts="WF" />
   <ShortcutItem CommandId="ID_KEYBOARD_SHORTCUT_DIALOG" Shortcuts="KS" />
   <ShortcutItem CommandId="ID_LOCK_ELEMENTS" Shortcuts="PN" />
-  <ShortcutItem CommandId="ID_MEP_CREATE_SYSTEM_ZONE" Shortcuts="SZ" />
   <ShortcutItem CommandId="ID_MEP_FABRICATION_SETTINGS" Shortcuts="FS" />
+  <ShortcutItem CommandId="ID_MEP_SYSTEM_ZONE_BY_SKETCH" Shortcuts="SZ" />
   <ShortcutItem CommandId="ID_MOVE_GROUP_MEMBER_TO_PROJECT" Shortcuts="MP" />
   <ShortcutItem CommandId="ID_NAVBAR_3DCONTROLLER_2D" Shortcuts="32" />
   <ShortcutItem CommandId="ID_NAVBAR_3DCONTROLLER_FLY" Shortcuts="3F" />
@@ -117,7 +111,6 @@
   <ShortcutItem CommandId="ID_RBS_SYSTEM_NAVIGATOR" Shortcuts="Fn9" />
   <ShortcutItem CommandId="ID_RBS_VIEW_PANEL_SCHEDULE" Shortcuts="PS" />
   <ShortcutItem CommandId="ID_REPEAT_LASTCOMMAND" Shortcuts="RC" />
-  <ShortcutItem CommandId="ID_REPLACE_GROUP_WITH_LINK" Shortcuts="LG" />
   <ShortcutItem CommandId="ID_RESTORE_ALL_EXCLUDED" Shortcuts="RA" />
   <ShortcutItem CommandId="ID_SCHEDULE_VIEW_ZOOM_IN" Shortcuts="Ctrl+=" />
   <ShortcutItem CommandId="ID_SEL_ALL_IN_PRJ" Shortcuts="SA" />
@@ -126,6 +119,7 @@
   <ShortcutItem CommandId="ID_SETTINGS_SNAPS_NOOVERRIDE" Shortcuts="SS" />
   <ShortcutItem CommandId="ID_SETTINGS_SUNANDSHADOWSSETTINGS" Shortcuts="SU" />
   <ShortcutItem CommandId="ID_SETTINGS_UNITS" Shortcuts="UN" />
+  <ShortcutItem CommandId="ID_SITE_BOOLEAN_PERTURBATION_UI" Shortcuts="BP" />
   <ShortcutItem CommandId="ID_SNAP_MIDBETWEEN2POINTS" Shortcuts="S2" />
   <ShortcutItem CommandId="ID_SNAP_OVERRIDE_CENTER" Shortcuts="SC" />
   <ShortcutItem CommandId="ID_SNAP_OVERRIDE_CLOSE" Shortcuts="SZ" />
@@ -150,11 +144,18 @@
   <ShortcutItem CommandId="ID_STRUCT_JUST_DBAR_CARDINAL" Shortcuts="JP" />
   <ShortcutItem CommandId="ID_STRUCT_JUST_DBAR_OFFSET_Y" Shortcuts="JY" />
   <ShortcutItem CommandId="ID_STRUCT_JUST_DBAR_OFFSET_Z" Shortcuts="JZ" />
+  <ShortcutItem CommandId="ID_SWITCH_ARG_VIEW" Shortcuts="Fn3" />
   <ShortcutItem CommandId="ID_TEMPHIDE_HIDE" Shortcuts="HH" />
   <ShortcutItem CommandId="ID_TEMPHIDE_HIDECAT" Shortcuts="HC" />
   <ShortcutItem CommandId="ID_TEMPHIDE_ISOLATE" Shortcuts="HI" />
   <ShortcutItem CommandId="ID_TEMPHIDE_ISOLATECAT" Shortcuts="IC" />
   <ShortcutItem CommandId="ID_TEMPHIDE_RESET" Shortcuts="HR" />
+  <ShortcutItem CommandId="ID_TEXT_ALL_CAPS" Shortcuts="Ctrl+Shift+A" />
+  <ShortcutItem CommandId="ID_TEXT_BOLD" Shortcuts="Ctrl+B" />
+  <ShortcutItem CommandId="ID_TEXT_ITALIC" Shortcuts="Ctrl+I" />
+  <ShortcutItem CommandId="ID_TEXT_SUBSCRIPT" Shortcuts="Ctrl+=" />
+  <ShortcutItem CommandId="ID_TEXT_SUPERSCRIPT" Shortcuts="Ctrl+Shift+=" />
+  <ShortcutItem CommandId="ID_TEXT_UNDERLINE" Shortcuts="Ctrl+U" />
   <ShortcutItem CommandId="ID_TEXTEDITOR_CLOSE" Shortcuts="Ctrl+Q" />
   <ShortcutItem CommandId="ID_THIN_LINES" Shortcuts="TL" />
   <ShortcutItem CommandId="ID_TOGGLE_ACTIVATE_CONTROLS" Shortcuts="AC" />
@@ -167,6 +168,8 @@
   <ShortcutItem CommandId="ID_TOGGLE_REBAR_TOGGLE_BI_DIRECTIONAL_KEYSHORTCUT" Shortcuts="LH" />
   <ShortcutItem CommandId="ID_TOGGLE_REBAR_VISIBILITY" Shortcuts="TV" />
   <ShortcutItem CommandId="ID_TOGGLE_REVEAL_CONSTRAINTS" Shortcuts="CX" />
+  <ShortcutItem CommandId="ID_TOGGLE_SMOOTH_TOPOSOLID" Shortcuts="TS" />
+  <ShortcutItem CommandId="ID_TOGGLE_SNAP_TO_SSE_POINTS_LINES" Shortcuts="SG" />
   <ShortcutItem CommandId="ID_TRIM_EXTEND_CORNER" Shortcuts="TR" />
   <ShortcutItem CommandId="ID_UNCOPING" Shortcuts="RC" />
   <ShortcutItem CommandId="ID_UNLOCK_ELEMENTS" Shortcuts="UP" />
@@ -175,13 +178,9 @@
   <ShortcutItem CommandId="ID_VIEW_FRAME_REVEALHIDDEN" Shortcuts="RH" />
   <ShortcutItem CommandId="ID_VIEW_HIDE_CATEGORY" Shortcuts="VH" />
   <ShortcutItem CommandId="ID_VIEW_HIDE_ELEMENTS" Shortcuts="EH" />
-  <ShortcutItem CommandId="ID_VIEW_OVERRIDE_CATEGORY_GHOST" Shortcuts="VOG" />
   <ShortcutItem CommandId="ID_VIEW_OVERRIDE_CATEGORY_HALFTONE" Shortcuts="VOH" />
-  <ShortcutItem CommandId="ID_VIEW_OVERRIDE_CATEGORY_TRANSPARENT" Shortcuts="VOT" />
   <ShortcutItem CommandId="ID_VIEW_OVERRIDE_ELEMENTS" Shortcuts="EOD" />
-  <ShortcutItem CommandId="ID_VIEW_OVERRIDE_ELEMENTS_GHOST" Shortcuts="EOG" />
   <ShortcutItem CommandId="ID_VIEW_OVERRIDE_ELEMENTS_HALFTONE" Shortcuts="EOH" />
-  <ShortcutItem CommandId="ID_VIEW_OVERRIDE_ELEMENTS_TRANSPARENT" Shortcuts="EOT" />
   <ShortcutItem CommandId="ID_VIEW_TAB" Shortcuts="TW" />
   <ShortcutItem CommandId="ID_VIEW_UNHIDE_BY_CATEGORY" Shortcuts="VU" />
   <ShortcutItem CommandId="ID_VIEW_UNHIDE_ELEMENTS" Shortcuts="EU" />
