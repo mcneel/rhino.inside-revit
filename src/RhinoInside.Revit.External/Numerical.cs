@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.Numerical
     public const double MinTolerance = 0D;
 
     /// <summary>
-    /// Tolerance value used when tolerance parameter is omited.
+    /// Tolerance value used when tolerance parameter is omitted.
     /// </summary>
     public const double DefaultTolerance = 1e-9;
 
