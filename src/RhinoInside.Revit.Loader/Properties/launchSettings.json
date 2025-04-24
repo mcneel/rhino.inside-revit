@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Revit": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Autodesk\\Revit $(RevitVersion)\\Revit.exe",
+      "nativeDebugging": false
+    }
+  }
+}
