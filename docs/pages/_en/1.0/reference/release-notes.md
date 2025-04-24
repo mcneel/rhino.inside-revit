@@ -10,6 +10,8 @@ group: Deployment & Configs
 
 ### WIP
 
+- Updated setup to install on Revit 2026
+
 ### RC
 
 {% endcapture %}
