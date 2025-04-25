@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Autodesk.Revit.UI;
 using Eto.Drawing;
 using Eto.Forms;
+using ARUI = Autodesk.Revit.UI;
 
 namespace RhinoInside.Revit.AddIn.Forms
 {
+  using System.IO;
   using Deployment;
   using Properties;
   using static Diagnostics;
@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.AddIn.Forms
     private TabPage _scripts;
     private TabControl _tabs;
 
-    public AddInOptionsDialog(UIApplication uiApp) : base(uiApp, initialSize: new Size(470, 450))
+    public AddInOptionsDialog(ARUI.UIApplication uiApp) : base(uiApp, initialSize: new Size(470, 450))
     {
       Title = "Options";
       DefaultButton.Click += OkButton_Click;
@@ -89,6 +89,7 @@ namespace RhinoInside.Revit.AddIn.Forms
   {
     public GeneralPanel() => InitLayout();
 
+    DropDown _rhinoVersion = new DropDown { ToolTip = "Rhino Version" };
     CheckBox _loadOnStartup = new CheckBox { Text = "Start Rhino on startup", ToolTip = "Restart Revit" };
     CheckBox _isolateSettings = new CheckBox { Text = "Isolate Rhino settings", ToolTip = "Rhino will use a separate set of settings in Revit" };
     CheckBox _useHostLanguage = new CheckBox { Text = "Use Revit UI language", ToolTip = "Rhino UI will be same language as Revit" };
@@ -100,6 +101,7 @@ namespace RhinoInside.Revit.AddIn.Forms
     {
       if (disposing)
       {
+        _rhinoVersion?.Dispose(); _rhinoVersion = null;
         _loadOnStartup?.Dispose(); _loadOnStartup = null;
         _isolateSettings?.Dispose(); _isolateSettings = null;
         _useHostLanguage?.Dispose(); _useHostLanguage = null;
@@ -111,8 +113,50 @@ namespace RhinoInside.Revit.AddIn.Forms
       base.Dispose(disposing);
     }
 
+    private static IEnumerable<Distribution> SupportedDistributions
+    {
+      get
+      {
+        var assembly = Assembly.GetExecutingAssembly();
+        var directory = Path.Combine(Path.GetDirectoryName(assembly.Location), "..");
+
+        return Distribution.Available.Where(x => Directory.Exists(Path.Combine(directory, $"R{x.MajorVersion}")));
+      }
+    }
+
+    void InitRhinoVersion()
+    {
+      _rhinoVersion.Items.Add(new ListItem() { Key = string.Empty, Text = "Ask on startup" });
+      foreach (var distribution in SupportedDistributions)
+      {
+        _rhinoVersion.Items.Add(new ListItem() { Key = distribution.RegistryKey, Text = distribution.Version });
+      }
+      if (_rhinoVersion.Items.Count == 2)
+      {
+        _rhinoVersion.SelectedIndex = 1;
+        _rhinoVersion.Enabled = false;
+      }
+      else
+      {
+        _rhinoVersion.SelectedIndex = 0;
+
+        if (!string.IsNullOrEmpty(Distribution.DefaultKey))
+        {
+          for (int i = 1; i < _rhinoVersion.Items.Count; ++i)
+          {
+            if (_rhinoVersion.Items[i].Key == Core.Distribution.RegistryKey)
+            {
+              _rhinoVersion.SelectedIndex = i;
+              break;
+            }
+          }
+        }
+      }
+    }
+
     void InitLayout()
     {
+      InitRhinoVersion();
       _loadOnStartup.Checked = AddInOptions.Current.LoadOnStartup;
       _isolateSettings.Checked = AddInOptions.Current.IsolateSettings;
       _useHostLanguage.Checked = AddInOptions.Current.UseHostLanguage;
@@ -135,6 +179,7 @@ namespace RhinoInside.Revit.AddIn.Forms
               Padding = new Padding(5),
               Rows =
               {
+                new TableRow(new Label() { Text = "Rhino Version"}, _rhinoVersion),
                 _loadOnStartup,
                 _isolateSettings,
                 _useHostLanguage,
@@ -163,6 +208,9 @@ namespace RhinoInside.Revit.AddIn.Forms
 
     internal void ApplyChanges()
     {
+      if (_rhinoVersion.Enabled && _rhinoVersion.SelectedIndex >= 0)
+        Distribution.DefaultKey = _rhinoVersion.Items[_rhinoVersion.SelectedIndex].Key;
+
       if (_loadOnStartup.Checked.HasValue)
         AddInOptions.Current.LoadOnStartup = _loadOnStartup.Checked.Value;
 

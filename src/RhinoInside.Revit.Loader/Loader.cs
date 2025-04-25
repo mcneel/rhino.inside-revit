@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -31,7 +32,11 @@ namespace RhinoInside.Revit.AddIn
 
           Distribution.CurrentKey = distribution.RegistryKey;
         }
-        catch { }
+        catch
+        {
+          // If it fails to load fallback asking the user next time.
+          Distribution.DefaultKey = string.Empty;
+        }
       }
 
       return _ExternalApplication?.OnStartup(controlledApplication) ?? Result.Cancelled;
@@ -42,28 +47,29 @@ namespace RhinoInside.Revit.AddIn
       return _ExternalApplication?.OnShutdown(controlledApplication) ?? Result.Cancelled;
     }
 
+    private static IEnumerable<Distribution> SupportedDistributions
+    {
+      get
+      {
+        var assembly = Assembly.GetExecutingAssembly();
+        var directory = Path.GetDirectoryName(assembly.Location);
+
+        return Distribution.Available.Where(x => Directory.Exists(Path.Combine(directory, $"R{x.MajorVersion}")));
+      }
+    }
+
     static Distribution PickDistribution()
     {
-      var distributions = new Distribution[]
-      {
-        new Distribution(8),
-#if NETFRAMEWORK
-        new Distribution(7),
-#endif
-#if DEBUG
-        new Distribution(9, dev: true),
-        new Distribution(8, dev: true),
-#if NETFRAMEWORK
-        new Distribution(7, dev: true),
-#endif
-#endif
-      };
+      var distributions = SupportedDistributions;
 
       var minVersion = distributions.OrderBy(x => x.MajorVersion).Select(x => x.MajorVersion).FirstOrDefault();
       if (minVersion > default(int))
       {
-        var currentKey = Distribution.CurrentKey;
-        var available = distributions.Where(x => x.Available && (currentKey is null || x.RegistryKey == currentKey)).ToArray();
+        var currentKey = Distribution.CurrentKey ?? Distribution.DefaultKey;
+
+        var available = distributions.Where(x => currentKey is null || x.RegistryKey == currentKey).ToArray();
+        if (available.Length == 0)
+          available = distributions.ToArray();
 
         switch (available.Length)
         {
