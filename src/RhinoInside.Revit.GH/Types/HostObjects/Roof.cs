@@ -39,10 +39,13 @@ namespace RhinoInside.Revit.GH.Types
         switch (Value)
         {
           case ARDB.ExtrusionRoof extrusionRoof:
-            return extrusionRoof.get_Parameter(ARDB.BuiltInParameter.ROOF_CONSTRAINT_OFFSET_PARAM).AsDouble() * Revit.ModelUnits;
+            return extrusionRoof.get_Parameter(ARDB.BuiltInParameter.ROOF_CONSTRAINT_OFFSET_PARAM)?.AsDouble() * Revit.ModelUnits;
 
           case ARDB.FootPrintRoof footPrintRoof:
-            return footPrintRoof.get_Parameter(ARDB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM).AsDouble() * Revit.ModelUnits;
+            return footPrintRoof.get_Parameter(ARDB.BuiltInParameter.ROOF_LEVEL_OFFSET_PARAM)?.AsDouble() * Revit.ModelUnits;
+
+          case ARDB.RoofBase baseRoof:
+            return baseRoof.get_Parameter(ARDB.BuiltInParameter.FACEROOF_OFFSET_PARAM)?.AsDouble() * Revit.ModelUnits;
         }
 
         return default;
@@ -54,18 +57,28 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if(Sketch is Sketch sketch)
+        if (Sketch is Sketch sketch && sketch.IsValid)
         {
           var plane = sketch.ProfilesPlane;
 
           var center = plane.Origin;
-          center.Z = Level.Elevation + LevelOffset.Value;
+          center.Z = Level.Elevation + LevelOffset ?? 0.0;
 
           var xAxis = plane.XAxis;
           var yAxis = plane.YAxis;
 
           if (Value is ARDB.ExtrusionRoof)
             yAxis = plane.ZAxis;
+
+          return new Plane(center, xAxis, yAxis);
+        }
+        else
+        {
+          var center = BoundingBox.Center;
+          center.Z = Level.Elevation + LevelOffset ?? 0.0;
+
+          var xAxis = Vector3d.XAxis;
+          var yAxis = Vector3d.YAxis;
 
           return new Plane(center, xAxis, yAxis);
         }
