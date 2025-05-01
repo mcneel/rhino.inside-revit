@@ -100,14 +100,14 @@ namespace System
       {
         switch (c)
         {
-          case '\0': literal.Append("\\\0"); break;
-          case '\a': literal.Append("\\\a"); break;
-          case '\b': literal.Append("\\\b"); break;
-          case '\f': literal.Append("\\\f"); break;
-          case '\n': literal.Append("\\\n"); break;
-          case '\r': literal.Append("\\\r"); break;
-          case '\t': literal.Append("\\\t"); break;
-          case '\v': literal.Append("\\\v"); break;
+          case '\0': literal.Append("\\0"); break;
+          case '\a': literal.Append("\\a"); break;
+          case '\b': literal.Append("\\b"); break;
+          case '\f': literal.Append("\\f"); break;
+          case '\n': literal.Append("\\n"); break;
+          case '\r': literal.Append("\\r"); break;
+          case '\t': literal.Append("\\t"); break;
+          case '\v': literal.Append("\\v"); break;
           case '\\': literal.Append("\\\\"); break;
           default:
             if (char.GetUnicodeCategory(c) != UnicodeCategory.Control)
