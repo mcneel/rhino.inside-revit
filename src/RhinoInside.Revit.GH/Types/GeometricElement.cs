@@ -771,6 +771,8 @@ namespace RhinoInside.Revit.GH.Types
 
         if (index < 0) index = doc.InstanceDefinitions.Add(idef_name, idef_description, Point3d.Origin, geometry, attributes);
         else if (!doc.InstanceDefinitions.ModifyGeometry(index, geometry, attributes)) index = -1;
+
+        if (index >= 0) idMap[element.Id] = doc.InstanceDefinitions[index].Id;
       }
 
       return index >= 0;
@@ -789,8 +791,7 @@ namespace RhinoInside.Revit.GH.Types
     )
     {
       // 1. Check if is already cloned
-      if (idMap.TryGetValue(Id, out guid))
-        return true;
+      guid = Guid.Empty;
 
       // 3. Update if necessary
       if (Value is ARDB.Element element)
@@ -831,10 +832,7 @@ namespace RhinoInside.Revit.GH.Types
               }
 
               if (guid != Guid.Empty)
-              {
-                idMap.Add(Id, guid);
                 return true;
-              }
             }
           }
         }
