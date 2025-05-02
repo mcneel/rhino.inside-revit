@@ -299,6 +299,8 @@ namespace RhinoInside.Revit.Convert.Geometry
         }
       }
 
+      extrusion?.Dispose();
+
       // Try using ARDB.BRepBuilder
       {
         var raw = ToRawBrep(brep, factor);

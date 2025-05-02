@@ -314,7 +314,7 @@ namespace Rhino.Geometry
 
       public NurbsCurve Loop
       {
-        get { if (Plane.IsValid && loop is null) loop = Face.OuterLoop.To3dCurve()?.ToNurbsCurve().ProjectToPlane(Plane) as NurbsCurve; return loop; }
+        get { if (Plane.IsValid && loop is null) loop = Face.OuterLoop?.To3dCurve()?.ToNurbsCurve().ProjectToPlane(Plane) as NurbsCurve; return loop; }
       }
       public Point3d Centroid
       {
