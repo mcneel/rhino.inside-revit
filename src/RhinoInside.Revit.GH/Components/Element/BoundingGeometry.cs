@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       var slantParam = wall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL);
       if (slantParam is ARDB.Parameter)
       {
-        // and calculate the cuvre offset at the top based on the curve slant angle
+        // and calculate the curve offset at the top based on the curve slant angle
         //     O = top offset distance
         // ---------
         //  \      |
@@ -115,16 +115,16 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       // transform to where the wall base is
       baseCurve.Translate(0, 0, baseElevation);
 
-      // create the base curves on boths sides
+      // create the base curves on both sides
       var side1BottomCurve = baseCurve.Offset(offsetPlane, thickness / 2.0, 0.1, CurveOffsetCornerStyle.None)[0];
       var side2BottomCurve = baseCurve.Offset(offsetPlane, thickness / -2.0, 0.1, CurveOffsetCornerStyle.None)[0];
 
       // create top curves, by moving a duplicate of base curves to top
       var fromPoint = side1BottomCurve.PointAtStart;
       var side1TopCurve = side1BottomCurve.DuplicateCurve();
-      side1TopCurve.Translate(0, 0, fromPoint.Z + height);
+      side1TopCurve.Translate(0, 0, height);
       var side2TopCurve = side2BottomCurve.DuplicateCurve();
-      side2TopCurve.Translate(0, 0, fromPoint.Z + height);
+      side2TopCurve.Translate(0, 0, height);
 
       // offset the top curves to get the slanted wall top curves, based on the previously calculated offset distance
       if (topOffset > 0)
