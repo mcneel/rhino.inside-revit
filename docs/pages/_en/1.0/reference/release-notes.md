@@ -10,7 +10,11 @@ group: Deployment & Configs
 
 ### WIP
 
-- Updated setup to install on Revit 2026
+- Updated setup to install on Revit 2026.
+- Added Rhino version selector into the Options dialog.
+- Fixed a geometry conversion issue when a family name contains "invalid" characters.
+- Fixed an issue on Roofs by surface when baking.
+- Fixed 'Element Bounding Geometry' when used with curtain walls.
 
 ### RC
 
