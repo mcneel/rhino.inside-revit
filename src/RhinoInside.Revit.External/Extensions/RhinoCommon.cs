@@ -314,7 +314,7 @@ namespace Rhino.Geometry
 
       public NurbsCurve Loop
       {
-        get { if (Plane.IsValid && loop is null) loop = Face.OuterLoop.To3dCurve()?.ToNurbsCurve().ProjectToPlane(Plane) as NurbsCurve; return loop; }
+        get { if (Plane.IsValid && loop is null) loop = Face.OuterLoop?.To3dCurve()?.ToNurbsCurve().ProjectToPlane(Plane) as NurbsCurve; return loop; }
       }
       public Point3d Centroid
       {
@@ -403,7 +403,7 @@ namespace Rhino.Geometry
                         ToArray();
 
       // A capped Extrusion converted to Brep has wall surfaces in face[0] to face[N-3], caps are face[N-2] and face[N-1]
-      // I iterate in reverse order to be optimisitc, maybe brep comes from an Extrusion.ToBrep() call
+      // I iterate in reverse order to be optimistic, maybe brep comes from an Extrusion.ToBrep() call
       for (int f = planarFaces.Length - 1; f > 0; --f)
       {
         var planeF = planarFaces[f].Plane;
