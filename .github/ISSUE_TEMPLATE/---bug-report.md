@@ -12,7 +12,7 @@ assignees: ''
 **Versions**
 
 > Rhino.Inside: 1.??
-> Rhino: 7.??
+> Rhino: 8.??
 > Revit: 20??.??
 
 **Describe the bug**
