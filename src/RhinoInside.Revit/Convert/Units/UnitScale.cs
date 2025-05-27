@@ -409,7 +409,7 @@ namespace RhinoInside.Revit.Convert.Units
     #region RhinoDoc Interop
     internal static UnitScale GetUnitScale(RhinoDoc doc, ActiveSpace space)
     {
-      if (doc is null) return None;
+      if (doc is null) return Millimeters;
       if (space == ActiveSpace.None)
         space = doc.Views.ModelSpaceIsActive ? ActiveSpace.ModelSpace : ActiveSpace.PageSpace;
 
