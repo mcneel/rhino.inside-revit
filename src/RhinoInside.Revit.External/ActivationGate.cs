@@ -206,7 +206,9 @@ namespace RhinoInside.Revit.External
         if (isOpen == false)
         {
           InternalSynchronizationContext = System.Threading.SynchronizationContext.Current;
-          InternalCultureInfo = System.Globalization.CultureInfo.CurrentCulture;
+//#if RHINO_8
+//          InternalCultureInfo = System.Globalization.CultureInfo.CurrentCulture;
+//#endif
 
           if (TopState as UI.ExternalApplication is null)
           {
@@ -223,9 +225,10 @@ namespace RhinoInside.Revit.External
         {
           exit?.SafeInvoke(TopState);
           isOpen = false;
-
-          if (InternalCultureInfo.LCID != System.Globalization.CultureInfo.CurrentCulture.LCID)
-            System.Globalization.CultureInfo.CurrentCulture = InternalCultureInfo;
+//#if RHINO_8
+//          if (InternalCultureInfo.LCID != System.Globalization.CultureInfo.CurrentCulture.LCID)
+//            System.Globalization.CultureInfo.CurrentCulture = InternalCultureInfo;
+//#endif
 
           if (InternalSynchronizationContext != System.Threading.SynchronizationContext.Current)
             System.Threading.SynchronizationContext.SetSynchronizationContext(InternalSynchronizationContext);

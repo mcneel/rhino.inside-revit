@@ -285,11 +285,11 @@ namespace RhinoInside.Revit.Convert.Units
     public static readonly UnitScale PrinterPicas      = new UnitScale(UnitSystem.PrinterPicas);
 
     public static readonly UnitScale AstronomicalUnits = new UnitScale(UnitSystem.AstronomicalUnits);
-    public static readonly UnitScale Parsecs           = new UnitScale(UnitSystem.Parsecs);
     public static readonly UnitScale LightYears        = new UnitScale(UnitSystem.LightYears);
+    public static readonly UnitScale Parsecs           = new UnitScale(UnitSystem.Parsecs);
 
-    internal static readonly UnitScale UsSurveyFeet    = new UnitScale("US Survey Feet", (1_200.0, 3_937.0));
-    internal static readonly UnitScale Shaku           = new UnitScale("Shaku",          (   10.0,    33.0));
+    internal static readonly UnitScale UsSurveyFeet    = new UnitScale("US survey feet", (1_200.0, 3_937.0));
+    internal static readonly UnitScale Shaku           = new UnitScale("shaku",          (   10.0,    33.0));
     internal static readonly UnitScale Internal        = Feet;
     #endregion
 
@@ -397,7 +397,7 @@ namespace RhinoInside.Revit.Convert.Units
       return Arithmetic.MinMagnitude(num, value) * (Arithmetic.MaxMagnitude(num, value) / den);
     }
 
-    public override string ToString() => Name ?? ((UnitSystem) this).ToString();
+    public override string ToString() => Name ?? ((UnitSystem) this).ToString().ToLowerInvariant();
 
     public void Deconstruct(out UnitSystem unitSystem, out double metersPerUnit, out string name)
     {
