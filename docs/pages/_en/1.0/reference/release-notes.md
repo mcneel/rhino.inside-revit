@@ -16,6 +16,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.32 RC2" version="v1.32.9278.16388" pre_release=true time="05/29/2025" %}
+
+- Miscellaneous improvements and bug fixes
+
 {% include ltr/release-header.html title="v1.32 RC1" version="v1.32.9253.11783" pre_release=true time="05/13/2025" %}
 
 - Updated setup to install on Revit 2026.
