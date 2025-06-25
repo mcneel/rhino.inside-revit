@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.System.Collections.Generic;
 
   [Kernel.Attributes.Name("Compound Structure")]
-  public class CompoundStructure : ValueObject
+  public sealed class CompoundStructure : ValueObject
   {
     #region DocumentObject
     public override string DisplayName
@@ -274,7 +274,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Compound Structure Layer")]
-  public class CompoundStructureLayer : ValueObject, ICloneable
+  public sealed class CompoundStructureLayer : ValueObject, ICloneable
   {
     #region DocumentObject
     public override string DisplayName

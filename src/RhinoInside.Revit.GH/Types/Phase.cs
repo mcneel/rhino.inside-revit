@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Phase")]
-  public class Phase : Element
+  public sealed class Phase : Element
   {
     protected override Type ValueType => typeof(ARDB.Phase);
     public new ARDB.Phase Value => base.Value as ARDB.Phase;

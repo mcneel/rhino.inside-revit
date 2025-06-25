@@ -82,8 +82,6 @@ namespace RhinoInside.Revit.GH.Types
 
           return new Plane(center, xAxis, yAxis);
         }
-
-        return base.Location;
       }
     }
     #endregion

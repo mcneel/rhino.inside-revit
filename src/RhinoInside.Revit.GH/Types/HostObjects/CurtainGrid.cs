@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Curtain Grid")]
-  public class CurtainGrid : DocumentObject,
+  public sealed class CurtainGrid : DocumentObject,
     IGH_GeometricGoo,
     IGH_PreviewData,
     IHostElementAccess

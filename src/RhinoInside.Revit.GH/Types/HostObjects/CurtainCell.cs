@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Curtain Cell")]
-  public class CurtainCell : DocumentObject,
+  public sealed class CurtainCell : DocumentObject,
     IGH_PreviewData
   {
     public new ARDB.CurtainCell Value => base.Value as ARDB.CurtainCell;
