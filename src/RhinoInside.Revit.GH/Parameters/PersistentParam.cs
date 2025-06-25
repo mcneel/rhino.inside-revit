@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public override bool Write(GH_IWriter writer)
     {
-      RequiresPersistenDataConstructor();
+      RequiresPersistentDataConstructor();
 
       if (!base.Write(writer))
         return false;
@@ -114,7 +114,7 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     [Conditional("DEBUG")]
-    void RequiresPersistenDataConstructor()
+    void RequiresPersistentDataConstructor()
     {
       var set = new HashSet<string>();
       var errors = new List<string>();
