@@ -27,15 +27,15 @@ namespace RhinoInside.Revit.AddIn.Commands
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   public class CommandImport : RhinoCommand
   {
-    public static string CommandName => "Import\n3DM";
+    public static string CommandName => "Import\nFile";
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<Availability>>
       (
         name: CommandName,
-        iconName: "Ribbon.Rhinoceros.Import-3DM.png",
-        tooltip: "Imports geometry from 3DM file into active Revit model or family",
+        iconName: "Ribbon.Rhinoceros.Import.png",
+        tooltip: "Imports geometry from file into active Revit model or family",
         url : "reference/rir-interface#rhinoceros-panel"
       );
 
@@ -460,7 +460,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       return Array.Empty<ARDB.GeometryObject>();
     }
 
-    static Result Import3DMFileToProject
+    static Result ImportFileToProject
     (
       ARDB.Document doc,
       string filePath,
@@ -773,7 +773,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    static Result Import3DMFileToFamily
+    static Result ImportFileToFamily
     (
       ARDB.Document doc,
       string filePath,
@@ -844,14 +844,31 @@ namespace RhinoInside.Revit.AddIn.Commands
     {
       try
       {
-        var model = Rhino.RhinoDoc.OpenHeadless(filePath);
-        var modelUnits = UnitScale.GetModelScale(model);
-        if (modelUnits == UnitScale.None)
-          throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.ModelUnitSystem}.");
+        var model = Rhino.RhinoDoc.CreateHeadless(null);
+        try
+        {
+          var revitTol = GeometryTolerance.Internal;
+          model.ModelUnitSystem = Rhino.UnitSystem.Millimeters;
+          model.ModelAngleToleranceRadians = revitTol.AngleTolerance;
+          model.ModelDistanceDisplayPrecision = 3;
+          model.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, UnitScale.GetModelScale(model));
 
-        scaleFactor = UnitScale.Convert(1.0, modelUnits, UnitScale.Internal);
-        if (!(Numerical.Constant.Delta < scaleFactor && scaleFactor < double.PositiveInfinity))
-          throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.ModelUnitSystem}.");
+          if (!model.Import(filePath, null))
+            throw new External.FailException($"Failed to open '{Path.GetFileName(filePath)}'.");
+
+          var modelUnits = UnitScale.GetModelScale(model);
+          if (modelUnits == UnitScale.None)
+            throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.ModelUnitSystem}.");
+
+          scaleFactor = UnitScale.Convert(1.0, modelUnits, UnitScale.Internal);
+          if (!(Numerical.Constant.Delta < scaleFactor && scaleFactor < double.PositiveInfinity))
+            throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.ModelUnitSystem}.");
+        }
+        catch
+        {
+          scaleFactor = double.NaN;
+          model.Dispose();
+        }
 
         return model;
       }
@@ -874,7 +891,7 @@ namespace RhinoInside.Revit.AddIn.Commands
           case DialogResult.Ok:
             if (doc.IsFamilyDocument)
             {
-              return Import3DMFileToFamily
+              return ImportFileToFamily
               (
                 doc,
                 options.FileName,
@@ -890,7 +907,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                 return Result.Failed;
               }
 
-              return Import3DMFileToProject
+              return ImportFileToProject
               (
                 doc,
                 options.FileName,
