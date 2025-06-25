@@ -5,7 +5,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// <summary>
   /// Represents an Autodesk.Revit.DB.DisplayUnitType
   /// </summary>
-  public partial class UnitType : DataType
+  public sealed partial class UnitType : DataType
   {
     public static new UnitType Empty { get; } = new UnitType();
     public static UnitType Custom { get; } = new UnitType("autodesk.unit.unit:custom-1.0.0");

@@ -12,7 +12,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Point Cloud")]
-  public class PointCloudInstance : Instance
+  public sealed class PointCloudInstance : Instance
   {
     protected override Type ValueType => typeof(ARDB.PointCloudInstance);
     public new ARDB.PointCloudInstance Value => base.Value as ARDB.PointCloudInstance;

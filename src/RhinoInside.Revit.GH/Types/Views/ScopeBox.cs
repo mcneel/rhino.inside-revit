@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
   using ARDB_ScopeBox = ARDB.Element;
 
   [Kernel.Attributes.Name("Scope Box")]
-  public class ScopeBox : GraphicalElement, Bake.IGH_BakeAwareElement
+  public sealed class ScopeBox : GraphicalElement, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB_ScopeBox);
     public new ARDB_ScopeBox Value => base.Value as ARDB_ScopeBox;

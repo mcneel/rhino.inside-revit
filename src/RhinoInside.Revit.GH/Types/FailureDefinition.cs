@@ -11,7 +11,7 @@ using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class FailureDefinition : GH_Goo<Guid>,
+  public sealed class FailureDefinition : GH_Goo<Guid>,
     IEquatable<FailureDefinition>,
     IGH_ItemDescription,
     IGH_QuickCast,

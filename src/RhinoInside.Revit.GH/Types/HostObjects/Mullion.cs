@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Mullion")]
-  public class Mullion : FamilyInstance
+  public sealed class Mullion : FamilyInstance
   {
     protected override Type ValueType => typeof(ARDB.Mullion);
     public new ARDB.Mullion Value => base.Value as ARDB.Mullion;
@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Mullion Type")]
-  public class MullionType : FamilySymbol
+  public sealed class MullionType : FamilySymbol
   {
     protected override Type ValueType => typeof(ARDB.MullionType);
     public new ARDB.MullionType Value => base.Value as ARDB.MullionType;
@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Types
   using ARDB_MullionPosition = ARDB.ElementType;
 
   [Kernel.Attributes.Name("Mullion Position")]
-  public class MullionPosition : ElementType
+  public sealed class MullionPosition : ElementType
   {
     protected override Type ValueType => typeof(ARDB_MullionPosition);
     public override bool IsValid => base.IsValid || (ReferenceDocument is object && Id.IsValid() && Enum.IsDefined(typeof(External.DB.BuiltInMullionPosition), Id.ToValue()));

@@ -4,7 +4,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Direct Shape")]
-  public class DirectShape : GeometricElement
+  public sealed class DirectShape : GeometricElement
   {
     protected override Type ValueType => typeof(ARDB.DirectShape);
     public new ARDB.DirectShape Value => base.Value as ARDB.DirectShape;
@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Direct Shape Type")]
-  public class DirectShapeType : ElementType
+  public sealed class DirectShapeType : ElementType
   {
     protected override Type ValueType => typeof(ARDB.DirectShapeType);
     public new ARDB.DirectShapeType Value => base.Value as ARDB.DirectShapeType;

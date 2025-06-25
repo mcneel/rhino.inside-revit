@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_Family : IGH_Element { }
 
   [Kernel.Attributes.Name("Family")]
-  public class Family : Element, IGH_Family
+  public sealed class Family : Element, IGH_Family
   {
     protected override Type ValueType => typeof(ARDB.Family);
     public new ARDB.Family Value => base.Value as ARDB.Family;

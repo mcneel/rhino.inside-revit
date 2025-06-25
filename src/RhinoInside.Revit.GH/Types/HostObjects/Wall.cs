@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Types
   using RhinoInside.Revit.External.DB;
 
   [Kernel.Attributes.Name("Wall")]
-  public class Wall : HostObject,
+  public sealed class Wall : HostObject,
     ISketchAccess,
     ICurtainGridsAccess
   {
@@ -297,7 +297,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Wall Sweep")]
-  public class WallSweep : HostObject, IHostElementAccess
+  public sealed class WallSweep : HostObject, IHostElementAccess
   {
     protected override Type ValueType => typeof(ARDB.WallSweep);
     public new ARDB.WallSweep Value => base.Value as ARDB.WallSweep;
