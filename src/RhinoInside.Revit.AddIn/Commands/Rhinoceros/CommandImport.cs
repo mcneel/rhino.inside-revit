@@ -845,8 +845,11 @@ namespace RhinoInside.Revit.AddIn.Commands
       try
       {
         var model = Rhino.RhinoDoc.OpenHeadless(filePath);
-        scaleFactor = UnitScale.Convert(1.0, (UnitScale) model.ModelUnitSystem, UnitScale.Internal);
+        var modelUnits = UnitScale.GetModelScale(model);
+        if (modelUnits == UnitScale.None)
+          throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.ModelUnitSystem}.");
 
+        scaleFactor = UnitScale.Convert(1.0, modelUnits, UnitScale.Internal);
         if (!(Numerical.Constant.Delta < scaleFactor && scaleFactor < double.PositiveInfinity))
           throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.ModelUnitSystem}.");
 
