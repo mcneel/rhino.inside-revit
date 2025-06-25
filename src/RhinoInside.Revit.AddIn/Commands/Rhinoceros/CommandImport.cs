@@ -809,9 +809,9 @@ namespace RhinoInside.Revit.AddIn.Commands
                 var freeEnd = (plane.Origin + plane.XAxis).ToXYZ(scaleFactor);
                 var cutVec = plane.YAxis.ToXYZ();
 
-                var refrencePlane = doc.FamilyCreate.NewReferencePlane(bubbleEnd, freeEnd, cutVec, view3D);
-                refrencePlane.Name = cplane.Name;
-                refrencePlane.Maximize3DExtents();
+                var referencePlane = doc.FamilyCreate.NewReferencePlane(bubbleEnd, freeEnd, cutVec, view3D);
+                referencePlane.Name = cplane.Name;
+                referencePlane.Maximize3DExtents();
               }
             }
 
@@ -845,8 +845,11 @@ namespace RhinoInside.Revit.AddIn.Commands
       try
       {
         var model = Rhino.RhinoDoc.OpenHeadless(filePath);
-        scaleFactor = UnitScale.Convert(1.0, (UnitScale) model.ModelUnitSystem, UnitScale.Internal);
+        var modelUnits = UnitScale.GetModelScale(model);
+        if (modelUnits == UnitScale.None)
+          throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.ModelUnitSystem}.");
 
+        scaleFactor = UnitScale.Convert(1.0, modelUnits, UnitScale.Internal);
         if (!(Numerical.Constant.Delta < scaleFactor && scaleFactor < double.PositiveInfinity))
           throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.ModelUnitSystem}.");
 
