@@ -809,9 +809,9 @@ namespace RhinoInside.Revit.AddIn.Commands
                 var freeEnd = (plane.Origin + plane.XAxis).ToXYZ(scaleFactor);
                 var cutVec = plane.YAxis.ToXYZ();
 
-                var refrencePlane = doc.FamilyCreate.NewReferencePlane(bubbleEnd, freeEnd, cutVec, view3D);
-                refrencePlane.Name = cplane.Name;
-                refrencePlane.Maximize3DExtents();
+                var referencePlane = doc.FamilyCreate.NewReferencePlane(bubbleEnd, freeEnd, cutVec, view3D);
+                referencePlane.Name = cplane.Name;
+                referencePlane.Maximize3DExtents();
               }
             }
 
