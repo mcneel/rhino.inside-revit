@@ -853,7 +853,7 @@ namespace RhinoInside.Revit.AddIn.Commands
           model.ModelDistanceDisplayPrecision = 3;
           model.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, UnitScale.GetModelScale(model));
 
-          if (!model.Import(filePath, null))
+          if (!model.Import(filePath))
             throw new External.FailException($"Failed to open '{Path.GetFileName(filePath)}'.");
 
           var modelUnits = UnitScale.GetModelScale(model);
