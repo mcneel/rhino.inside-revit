@@ -31,17 +31,21 @@ namespace RhinoInside.Revit.GH.Types
           {
             var center = Point3d.Origin;
             var count = 0;
-            foreach (var curveArray in sketch.Profile.Cast<ARDB.CurveArray>())
+            try
             {
-              foreach (var curve in curveArray.Cast<ARDB.Curve>())
+              foreach (var curveArray in sketch.Profile.Cast<ARDB.CurveArray>())
               {
-                count++;
-                center += curve.Evaluate(0.0, normalized: true).ToPoint3d();
-                count++;
-                center += curve.Evaluate(1.0, normalized: true).ToPoint3d();
+                foreach (var curve in curveArray.Cast<ARDB.Curve>())
+                {
+                  count++;
+                  center += curve.Evaluate(0.0, normalized: true).ToPoint3d();
+                  count++;
+                  center += curve.Evaluate(1.0, normalized: true).ToPoint3d();
+                }
               }
+              center /= count;
             }
-            center /= count;
+            catch { }
 
             var hostLevelId = host.LevelId;
             if (hostLevelId == ARDB.ElementId.InvalidElementId)
@@ -51,7 +55,7 @@ namespace RhinoInside.Revit.GH.Types
               center.Z = level.GetElevation() * Revit.ModelUnits;
 
             var plane = sketch.SketchPlane.GetPlane().ToPlane();
-            var origin = center;
+            var origin = count == 0 ? plane.Origin : center;
             var xAxis = plane.XAxis;
             var yAxis = plane.YAxis;
 

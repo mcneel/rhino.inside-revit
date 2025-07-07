@@ -345,23 +345,23 @@ namespace RhinoInside.Revit.GH.Types
       base.ResetValue();
     }
 
-    public override Plane Location
-    {
-      get
-      {
-        //if (Curve is Curve curve)
-        //{
-        //  var start = curve.PointAtStart;
-        //  var end = curve.PointAtEnd;
-        //  var axis = end - start;
-        //  var origin = start + (axis * 0.5);
-        //  var perp = axis.PerpVector();
-        //  return new Plane(origin, axis, perp);
-        //}
+    //public override Plane Location
+    //{
+    //  get
+    //  {
+    //    if (Curve is Curve curve)
+    //    {
+    //      var start = curve.PointAtStart;
+    //      var end = curve.PointAtEnd;
+    //      var axis = end - start;
+    //      var origin = start + (axis * 0.5);
+    //      var perp = axis.PerpVector();
+    //      return new Plane(origin, axis, perp);
+    //    }
 
-        return base.Location;
-      }
-    }
+    //    return base.Location;
+    //  }
+    //}
 
     //public override Curve Curve
     //{
@@ -371,7 +371,7 @@ namespace RhinoInside.Revit.GH.Types
     //    {
     //      var hostIds = Value.GetHostIds();
     //      var runs = new List<Curve>(hostIds.Count);
-    //      foreach(var wall in hostIds.Select(x => Wall.FromElementId(Document, x) as Wall))
+    //      foreach (var wall in hostIds.Select(x => Wall.FromElementId(Document, x) as Wall))
     //      {
     //        var surface = wall.Surface;
     //        var direction0 = info.IsVertical ? 1 : 0;
@@ -388,7 +388,7 @@ namespace RhinoInside.Revit.GH.Types
 
     //          case ARDB.DistanceMeasuredFrom.Top:
     //            if (info.IsVertical) t = /*domain1.T1 - */info.Distance;
-    //            else t = domain1.T1 - info.Distance * Revit.ModelUnits;
+    //            else t = domain1.T1 + info.Distance * Revit.ModelUnits;
     //            break;
     //        }
 
@@ -402,7 +402,7 @@ namespace RhinoInside.Revit.GH.Types
 
     //          switch (info.WallSweepType)
     //          {
-    //            case ARDB.WallSweepType.Sweep:  direction= +1.0; break;
+    //            case ARDB.WallSweepType.Sweep:  direction = +1.0; break;
     //            case ARDB.WallSweepType.Reveal: direction = -1.0; break;
     //          }
 
@@ -416,7 +416,7 @@ namespace RhinoInside.Revit.GH.Types
 
     //          if (info.IsVertical)
     //          {
-    //            var point = iso.PointAt(iso.Domain.Mid);
+    //            var point = iso.PointAtMid;
     //            surface.ClosestPoint(point, out var u, out var v);
     //            var normal = surface.NormalAt(u, v);
     //            normal.Unitize();
@@ -424,7 +424,7 @@ namespace RhinoInside.Revit.GH.Types
     //          }
     //          else
     //          {
-    //            var point = iso.PointAt(iso.Domain.Mid);
+    //            var point = iso.PointAtMid;
     //            surface.ClosestPoint(point, out var u, out var v);
     //            surface.FrameAt(u, v, out var frame);
 
@@ -436,7 +436,7 @@ namespace RhinoInside.Revit.GH.Types
     //            //  CurveOffsetCornerStyle.None
     //            //)[0];
 
-    //            iso = iso.ToCurve().CreateOffset(offset, XYZExtension.BasisZ).ToCurve();
+    //            iso = iso.ToCurve().CreateOffset(offset, UnitXYZ.BasisZ).ToCurve();
     //          }
     //        }
 
