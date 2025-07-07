@@ -1004,10 +1004,7 @@ namespace RhinoInside.Revit.GH.Types
               context.Category = element.Category;
               context.Material = element.Category?.Material;
 
-              var location = element.Category is null || element.Category.Parent is object ?
-                Plane.WorldXY :
-                Location;
-
+              var location = Location;
               var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
               if (ToModelInstanceDefinition(idMap, worldToElement, element, geometry) is ModelInstanceDefinition definition)
               {
@@ -1016,7 +1013,7 @@ namespace RhinoInside.Revit.GH.Types
                 attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
                 attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
                 attributes.Layer = Category.ToModelContent(idMap) as ModelLayer;
-                attributes.Frame = Location;
+                attributes.Frame = location;
 
                 modelContent = attributes.ToModelData() as ModelContent;
                 //idMap.Add(Id, modelContent);

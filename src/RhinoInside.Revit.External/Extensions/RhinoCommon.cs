@@ -841,7 +841,7 @@ namespace Rhino.Geometry
         t0 = t;
         var domain = curve.Domain;
 
-        var below = t == domain.T1 ?
+        var below = t == domain.T0 ?
           curve.DerivativeAt(domain.T1, 2) :
           curve.DerivativeAt(t, 2, CurveEvaluationSide.Below);
 
