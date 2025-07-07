@@ -47,17 +47,17 @@ namespace RhinoInside.Revit.GH.Types
             }
             catch { }
 
+            var plane = sketch.SketchPlane.GetPlane().ToPlane();
+            var origin = count == 0 ? plane.Origin : center;
+            var xAxis = plane.XAxis;
+            var yAxis = plane.YAxis;
+
             var hostLevelId = host.LevelId;
             if (hostLevelId == ARDB.ElementId.InvalidElementId)
               hostLevelId = host.get_Parameter(ARDB.BuiltInParameter.ROOF_CONSTRAINT_LEVEL_PARAM)?.AsElementId() ?? hostLevelId;
 
             if (host.Document.GetElement(hostLevelId) is ARDB.Level level)
-              center.Z = level.GetElevation() * Revit.ModelUnits;
-
-            var plane = sketch.SketchPlane.GetPlane().ToPlane();
-            var origin = count == 0 ? plane.Origin : center;
-            var xAxis = plane.XAxis;
-            var yAxis = plane.YAxis;
+              origin.Z = level.GetElevation() * Revit.ModelUnits;
 
             if (host is ARDB.Wall)
             {
