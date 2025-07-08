@@ -20,7 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj" />
     <ProjectReference Include="..\RhinoInside.Revit\RhinoInside.Revit.csproj" />
-    <PackageReference Include="Lokad.ILPack" Version="0.3.0" GeneratePathProperty="true" />
+    <PackageReference Include="Lokad.ILPack" Version="0.2.0" GeneratePathProperty="true" />
   </ItemGroup>
 
   <PropertyGroup>
