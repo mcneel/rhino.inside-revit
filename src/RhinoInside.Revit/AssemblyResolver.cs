@@ -104,7 +104,7 @@ namespace RhinoInside.Revit
     {
       if (Resolving?.GetInvocationList() is Delegate[] invocationList)
       {
-        var args = new ResolveEventArgs(name.FullName, GetRequestingAssembly());
+        var args = new ResolveEventArgs(name.FullName, null);
         foreach (ResolveEventHandler resolver in invocationList)
         {
           try
@@ -386,7 +386,7 @@ namespace RhinoInside.Revit
       // AppDomain.AssemblyResolve may be called from any thread.
       lock (references)
       {
-        // Look up if Rhino deplois something for us…
+        // Look up if Rhino deploy something for us…
         if (!references.TryGetValue(requested.Name, out var location))
         {
           // Probe with loaded Assemblies if full name coincides.
@@ -566,6 +566,7 @@ namespace RhinoInside.Revit
       for (; f < frames.Length; ++f)
       {
         var method = frames[f].GetMethod();
+        if (method is null) continue;
         var frameAssembly = method.DeclaringType?.Assembly ?? method.Module?.Assembly;
         if (frameAssembly != callingAssembly)
           break;
@@ -575,6 +576,7 @@ namespace RhinoInside.Revit
       for (; f < frames.Length; ++f)
       {
         var method = frames[f].GetMethod();
+        if (method is null) continue;
         var frameAssembly = method.DeclaringType?.Assembly ?? method.Module?.Assembly;
         if (frameAssembly != typeof(object).Assembly)
           return frameAssembly;
