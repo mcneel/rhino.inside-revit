@@ -51,8 +51,12 @@ namespace RhinoInside.Revit
 
       internal void Activate(Assembly assembly)
       {
+#pragma warning disable SYSLIB0044 // Type or member is obsolete
+#pragma warning disable SYSLIB0012 // Type or member is obsolete
         if (!assembly.CodeBase.Equals(assemblyName.CodeBase, StringComparison.OrdinalIgnoreCase))
           return;
+#pragma warning restore SYSLIB0012 // Type or member is obsolete
+#pragma warning restore SYSLIB0044 // Type or member is obsolete
 
         Assembly = assembly;
 
@@ -82,7 +86,9 @@ namespace RhinoInside.Revit
 
       public override string ToString()
       {
+#pragma warning disable SYSLIB0044 // Type or member is obsolete
         return $"Activated={Assembly is object}, CodeBase={assemblyName.CodeBase}";
+#pragma warning restore SYSLIB0044 // Type or member is obsolete
       }
     }
 
@@ -98,7 +104,7 @@ namespace RhinoInside.Revit
     {
       if (Resolving?.GetInvocationList() is Delegate[] invocationList)
       {
-        var args = new ResolveEventArgs(name.FullName, GetRequestingAssembly());
+        var args = new ResolveEventArgs(name.FullName, null);
         foreach (ResolveEventHandler resolver in invocationList)
         {
           try
@@ -116,6 +122,8 @@ namespace RhinoInside.Revit
     private static IntPtr AssemblyResolvingUnmanagedDll(Assembly assembly, string dll)
     {
       var assemblyName = assembly.GetName();
+#pragma warning disable SYSLIB0044 // Type or member is obsolete
+#pragma warning disable SYSLIB0012 // Type or member is obsolete
       if (references.TryGetValue(assemblyName.Name, out var assemblyReference) && assemblyReference.assemblyName.CodeBase == assembly.CodeBase)
       {
         var lib = System.Runtime.InteropServices.NativeLibrary.Load
@@ -129,6 +137,8 @@ namespace RhinoInside.Revit
         );
         return lib;
       }
+#pragma warning restore SYSLIB0012 // Type or member is obsolete
+#pragma warning restore SYSLIB0044 // Type or member is obsolete
 
       return default;
     }
@@ -214,7 +224,9 @@ namespace RhinoInside.Revit
                 {
                   var assemblyName = AssemblyName.GetAssemblyName(dll.FullName);
 #if NET
+#pragma warning disable SYSLIB0044 // Type or member is obsolete
                   assemblyName.CodeBase = new Uri(dll.FullName).ToString();
+#pragma warning restore SYSLIB0044 // Type or member is obsolete
 #endif
 
                   if (references.ContainsKey(assemblyName.Name)) continue;
@@ -374,7 +386,7 @@ namespace RhinoInside.Revit
       // AppDomain.AssemblyResolve may be called from any thread.
       lock (references)
       {
-        // Look up if Rhino deplois something for us…
+        // Look up if Rhino deploy something for us…
         if (!references.TryGetValue(requested.Name, out var location))
         {
           // Probe with loaded Assemblies if full name coincides.
@@ -408,6 +420,9 @@ namespace RhinoInside.Revit
           if (!AssemblyCanLoad(requested))
             return default;
 
+#pragma warning disable SYSLIB0044 // Type or member is obsolete
+#pragma warning disable SYSLIB0012 // Type or member is obsolete
+
           // Load Assembly
           //var assembly =  Assembly.Load(location.assemblyName);
 #if NET
@@ -419,7 +434,7 @@ namespace RhinoInside.Revit
 
           Debug.Assert
           (
-            assembly.CodeBase.ToLowerInvariant() == location.assemblyName.CodeBase.ToLowerInvariant(),
+            assembly.CodeBase.Equals(location.assemblyName.CodeBase, StringComparison.OrdinalIgnoreCase),
             $"Expected = {location.assemblyName.CodeBase}" + Environment.NewLine +
             $"Loaded = {assembly.CodeBase}"
           );
@@ -430,6 +445,9 @@ namespace RhinoInside.Revit
           try { location.Activate(assembly); }
           catch { }
         }
+
+#pragma warning restore SYSLIB0012 // Type or member is obsolete
+#pragma warning restore SYSLIB0044 // Type or member is obsolete
 
         return location.Assembly;
       }
@@ -548,6 +566,7 @@ namespace RhinoInside.Revit
       for (; f < frames.Length; ++f)
       {
         var method = frames[f].GetMethod();
+        if (method is null) continue;
         var frameAssembly = method.DeclaringType?.Assembly ?? method.Module?.Assembly;
         if (frameAssembly != callingAssembly)
           break;
@@ -557,6 +576,7 @@ namespace RhinoInside.Revit
       for (; f < frames.Length; ++f)
       {
         var method = frames[f].GetMethod();
+        if (method is null) continue;
         var frameAssembly = method.DeclaringType?.Assembly ?? method.Module?.Assembly;
         if (frameAssembly != typeof(object).Assembly)
           return frameAssembly;
