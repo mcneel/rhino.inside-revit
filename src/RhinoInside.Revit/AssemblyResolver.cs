@@ -386,7 +386,7 @@ namespace RhinoInside.Revit
       // AppDomain.AssemblyResolve may be called from any thread.
       lock (references)
       {
-        // Look up if Rhino deplois something for us…
+        // Look up if Rhino deploy something for us…
         if (!references.TryGetValue(requested.Name, out var location))
         {
           // Probe with loaded Assemblies if full name coincides.
