@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Level")]
-  public class Level : DatumPlane, Bake.IGH_BakeAwareElement
+  public sealed class Level : DatumPlane, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.Level);
     public new ARDB.Level Value => base.Value as ARDB.Level;
@@ -215,7 +215,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Grid")]
-  public class Grid : DatumPlane, Bake.IGH_BakeAwareElement
+  public sealed class Grid : DatumPlane, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.Grid);
     public new ARDB.Grid Value => base.Value as ARDB.Grid;
@@ -461,7 +461,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Multi-Grid")]
-  public class MultiSegmentGrid : GraphicalElement, Bake.IGH_BakeAwareElement
+  public sealed class MultiSegmentGrid : GraphicalElement, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.MultiSegmentGrid);
     public new ARDB.MultiSegmentGrid Value => base.Value as ARDB.MultiSegmentGrid;
@@ -664,7 +664,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Reference Plane")]
-  public class ReferencePlane : DatumPlane, Bake.IGH_BakeAwareElement
+  public sealed class ReferencePlane : DatumPlane, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.ReferencePlane);
     public new ARDB.ReferencePlane Value => base.Value as ARDB.ReferencePlane;
@@ -818,7 +818,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Reference Point")]
-  public class ReferencePoint : GraphicalElement, Bake.IGH_BakeAwareElement
+  public sealed class ReferencePoint : GraphicalElement, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.ReferencePoint);
     public new ARDB.ReferencePoint Value => base.Value as ARDB.ReferencePoint;

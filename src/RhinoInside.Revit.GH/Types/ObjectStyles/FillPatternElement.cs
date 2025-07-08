@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Units;
 
   [Kernel.Attributes.Name("Fill Pattern")]
-  public class FillPatternElement : Element, Bake.IGH_BakeAwareElement
+  public sealed class FillPatternElement : Element, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.FillPatternElement);
     public new ARDB.FillPatternElement Value => base.Value as ARDB.FillPatternElement;

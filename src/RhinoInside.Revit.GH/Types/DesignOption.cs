@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Design Option Set")]
-  public class DesignOptionSet : Element
+  public sealed class DesignOptionSet : Element
   {
     protected override bool SetValue(ARDB.Element element) =>
       IsValidElement(element) && base.SetValue(element);
@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Design Option")]
-  public class DesignOption : Element
+  public sealed class DesignOption : Element
   {
     protected override Type ValueType => typeof(ARDB.DesignOption);
     public new ARDB.DesignOption Value => base.Value as ARDB.DesignOption;

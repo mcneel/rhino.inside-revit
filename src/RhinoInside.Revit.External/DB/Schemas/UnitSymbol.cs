@@ -5,7 +5,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// <summary>
   /// Represents an Autodesk.Revit.DB.UnitSymbolType
   /// </summary>
-  public partial class UnitSymbol : DataType
+  public sealed partial class UnitSymbol : DataType
   {
     public static new UnitSymbol Empty { get; } = new UnitSymbol();
     public static UnitSymbol Custom { get; } = new UnitSymbol("autodesk.unit.symbol:custom-1.0.0");
