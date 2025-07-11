@@ -58,7 +58,7 @@ namespace RhinoInside.Revit
           taskDialog.DefaultButton = TaskDialogResult.CommandLink1;
           if (taskDialog.Show() == TaskDialogResult.CommandLink1)
           {
-            System.Windows.Forms.Clipboard.SetText(url);
+            Clipboard.SetText(url);
           }
         }
       }
@@ -366,7 +366,17 @@ namespace RhinoInside.Revit
 
         mailBody = Uri.EscapeDataString(mailBody);
 
-        using (Process.Start(mailtoURI + mailBody)) { }
+        try
+        {
+          var startInfo = new ProcessStartInfo(mailtoURI + mailBody)
+          {
+            UseShellExecute = true,
+            WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+          };
+
+          using (Process.Start(startInfo)) { }
+        }
+        catch { }
       }
 
       public static Result ShowLoadError()
