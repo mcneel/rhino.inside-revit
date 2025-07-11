@@ -16,7 +16,7 @@ namespace RhinoInside.Revit
     static readonly string PluginsPath = Path.Combine(Core.Distribution.InstallPath, "Plug-ins");
 
     #region AssemblyReference
-    static readonly Dictionary<string, Predicate<Assembly>> InternalAssemblies = new Dictionary<string, Predicate<Assembly>>()
+    static readonly Dictionary<string, Predicate<Assembly>> SharedAssemblies = new Dictionary<string, Predicate<Assembly>>()
     {
       { "Eto",          Rhinoceros.InitEto },
       { "RhinoCommon",  Rhinoceros.InitRhinoCommon },
@@ -61,7 +61,7 @@ namespace RhinoInside.Revit
         Assembly = assembly;
 
         bool failed = false;
-        if (InternalAssemblies.TryGetValue(assemblyName.Name, out var InitAssembly))
+        if (SharedAssemblies.TryGetValue(assemblyName.Name, out var InitAssembly))
         {
           using (SynchronizationContextGuard.Current)
             failed = !InitAssembly(Assembly);
@@ -96,108 +96,16 @@ namespace RhinoInside.Revit
     public static IReadOnlyDictionary<string, AssemblyReference> References => references;
     #endregion
 
-    #region Resolving event
-    public static event ResolveEventHandler Resolving;
-
-#if NET
-    private static Assembly AssemblyResolving(System.Runtime.Loader.AssemblyLoadContext context, AssemblyName name)
+    #region Load context
+    static readonly InternalLoadContext InternalContext = new InternalLoadContext();
+    class InternalLoadContext : System.Runtime.Loader.AssemblyLoadContext
     {
-      if (Resolving?.GetInvocationList() is Delegate[] invocationList)
-      {
-        var args = new ResolveEventArgs(name.FullName, null);
-        foreach (ResolveEventHandler resolver in invocationList)
-        {
-          try
-          {
-            var resolved = resolver(context, args);
-            if (resolved is object) return resolved;
-          }
-          catch { }
-        }
-      }
-
-      return default;
+      public InternalLoadContext() : base("Rhino.Inside") { }
     }
-
-    private static IntPtr AssemblyResolvingUnmanagedDll(Assembly assembly, string dll)
-    {
-      var assemblyName = assembly.GetName();
-#pragma warning disable SYSLIB0044 // Type or member is obsolete
-#pragma warning disable SYSLIB0012 // Type or member is obsolete
-      if (references.TryGetValue(assemblyName.Name, out var assemblyReference) && assemblyReference.assemblyName.CodeBase == assembly.CodeBase)
-      {
-        var lib = System.Runtime.InteropServices.NativeLibrary.Load
-        (
-          Path.Combine(SystemPath, dll),
-          assembly,
-          System.Runtime.InteropServices.DllImportSearchPath.AssemblyDirectory |
-          System.Runtime.InteropServices.DllImportSearchPath.UseDllDirectoryForDependencies |
-          System.Runtime.InteropServices.DllImportSearchPath.System32 |
-          System.Runtime.InteropServices.DllImportSearchPath.SafeDirectories
-        );
-        return lib;
-      }
-#pragma warning restore SYSLIB0012 // Type or member is obsolete
-#pragma warning restore SYSLIB0044 // Type or member is obsolete
-
-      return default;
-    }
-#else
-    static readonly FieldInfo _AssemblyResolve = typeof(AppDomain).GetField("_AssemblyResolve", BindingFlags.Instance | BindingFlags.NonPublic);
-
-    static Delegate[] InvocationList
-    {
-      get
-      {
-        var domain = AppDomain.CurrentDomain;
-        var assemblyResolve = _AssemblyResolve.GetValue(domain) as ResolveEventHandler;
-        var invocationList = assemblyResolve.GetInvocationList();
-        return invocationList;
-      }
-    }
-
-    static Assembly AssemblyResolving(object sender, ResolveEventArgs args)
-    {
-      if (Resolving?.GetInvocationList() is Delegate[] invocationList)
-      {
-        foreach (ResolveEventHandler resolver in invocationList)
-        {
-          try
-          {
-            var resolved = resolver(sender, args);
-            if (resolved is object) return resolved;
-          }
-          catch { }
-        }
-      }
-
-      return default;
-    }
-#endif
     #endregion
 
     static AssemblyResolver()
     {
-      // Setup Resolving event
-      {
-#if NET
-        System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += AssemblyResolving;
-        System.Runtime.Loader.AssemblyLoadContext.Default.ResolvingUnmanagedDll += AssemblyResolvingUnmanagedDll;
-#else
-        var domain = AppDomain.CurrentDomain;
-        var assemblyResolve = _AssemblyResolve.GetValue(domain) as ResolveEventHandler;
-        var invocationList = assemblyResolve.GetInvocationList();
-
-        foreach (var invocation in invocationList)
-          domain.AssemblyResolve -= invocation as ResolveEventHandler;
-
-        domain.AssemblyResolve += AssemblyResolving;
-
-        foreach (var invocation in invocationList)
-          domain.AssemblyResolve += invocation as ResolveEventHandler;
-#endif
-      }
-
       // Search Rhino stuff
       System.Threading.Tasks.Task.Run(() =>
       {
@@ -222,7 +130,7 @@ namespace RhinoInside.Revit
               {
                 try
                 {
-                  var assemblyName = AssemblyName.GetAssemblyName(dll.FullName);
+                  var assemblyName = System.Runtime.Loader.AssemblyLoadContext.GetAssemblyName(dll.FullName);
 #if NET
 #pragma warning disable SYSLIB0044 // Type or member is obsolete
                   assemblyName.CodeBase = new Uri(dll.FullName).ToString();
@@ -240,7 +148,14 @@ namespace RhinoInside.Revit
         }
       });
 
-      Resolving += AssemblyResolve;
+      // Setup Resolving event
+      {
+        InternalContext.Resolving += ResolveInternalAssembly;
+        InternalContext.ResolvingUnmanagedDll += ResolveUnmanagedDll;
+#if NET
+        System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += ResolveSharedAssembly;
+#endif
+      }
     }
 
     static bool enabled;
@@ -257,10 +172,6 @@ namespace RhinoInside.Revit
             NativeLoader.SetReportOnLoad("opennurbs.dll", enable: true);
 
             AppDomain.CurrentDomain.AssemblyLoad += AssemblyLoaded;
-#if !NET
-            if (_AssemblyResolve is null) AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
-            else
-#endif
             {
               if (External.ActivationGate.IsOpen)
                 ActivationGate_Enter(default, EventArgs.Empty);
@@ -271,10 +182,6 @@ namespace RhinoInside.Revit
           }
           else
           {
-#if !NET
-            if (_AssemblyResolve is null) AppDomain.CurrentDomain.AssemblyResolve -= AssemblyResolve;
-            else
-#endif
             {
               External.ActivationGate.Exit -= ActivationGate_Exit;
               External.ActivationGate.Enter -= ActivationGate_Enter;
@@ -293,84 +200,104 @@ namespace RhinoInside.Revit
     }
 
     static readonly uint InternalThreadId = ThreadHandle.CurrentThreadId;
-    static bool InternalAssembliesOnly = true;
-    static void ActivationGate_Enter(object sender, EventArgs e) => InternalAssembliesOnly = false;
-    static void ActivationGate_Exit(object sender, EventArgs e) => InternalAssembliesOnly = true;
+    static bool SharedAssembliesOnly = true;
+    static void ActivationGate_Enter(object sender, EventArgs e) => SharedAssembliesOnly = false;
+    static void ActivationGate_Exit(object sender, EventArgs e) => SharedAssembliesOnly = true;
 
-    static Assembly AssemblyResolve(object sender, ResolveEventArgs args)
+    static Assembly ResolveSharedAssembly(System.Runtime.Loader.AssemblyLoadContext loadContext, AssemblyName assemblyName)
     {
-      var assemblyName = new AssemblyName(args.Name);
       if (assemblyName.Name.EndsWith(".resources", StringComparison.OrdinalIgnoreCase))
         return default;
 
-      var internalAssembliesOnly = InternalAssembliesOnly;
+      var internalAssembliesOnly = SharedAssembliesOnly;
       try
       {
-        if (InternalAssembliesOnly && !IsInternalReference(args))
+        if (SharedAssembliesOnly && !IsSharedReference(assemblyName))
           return default;
 
         internalAssembliesOnly = false;
 
-#if !NET
-        if (Logger.Active)
+        return ResolveAssembly(InternalContext, assemblyName);
+      }
+      finally
+      {
+        SharedAssembliesOnly = internalAssembliesOnly;
+      }
+    }
+
+    static Assembly ResolveInternalAssembly(System.Runtime.Loader.AssemblyLoadContext loadContext, AssemblyName assemblyName)
+    {
+      if (assemblyName.Name.EndsWith(".resources", StringComparison.OrdinalIgnoreCase))
+        return default;
+
+      var sharedAssembliesOnly = SharedAssembliesOnly;
+      try
+      {
+        if (SharedAssembliesOnly && !IsSharedReference(assemblyName))
+          return default;
+
+        sharedAssembliesOnly = false;
+
+//#if !NET
+//        if (Logger.Active)
+//        {
+//          using (var scope = Logger.LogScope
+//          (
+//            "AppDomain.AssemblyResolve",
+//            $"Requesting Assembly = {GetRequestingAssembly().FullName}",
+//            $"Requires = '{assemblyName}'"
+//          ))
+//          {
+//            var resolved = default(Assembly);
+//            foreach (ResolveEventHandler resolver in InvocationList)
+//            {
+//              var type = MethodInfo.GetCurrentMethod().DeclaringType;
+//              var info = type.GetMethod(nameof(AssemblyResolving), BindingFlags.NonPublic | BindingFlags.Static);
+//              if (resolver.Method == info)
+//              {
+//                resolved = ResolveAssembly(loadContext, assemblyName);
+//              }
+//              else
+//              {
+//                try { resolved = resolver(sender, args); }
+//                catch (Exception) { }
+//              }
+
+//              if (resolved is object)
+//              {
+//                scope.Log
+//                (
+//                  resolved.FullName == args.Name ?
+//                  Logger.Severity.Succeded :
+//                  Logger.Severity.Information,
+//                  $"Resolved",
+//                  $"Resolver = '{resolver.Method.DeclaringType.Assembly}'",
+//                  $"Got = '{resolved.FullName}'",
+//                  $"Location = '{resolved.Location}'"
+//                );
+//                break;
+//              }
+//            }
+
+//            if (resolved is null)
+//              scope.LogWarning("Not Resolved");
+
+//            return resolved;
+//          }
+//        }
+//        else
+//#endif
         {
-          using (var scope = Logger.LogScope
-          (
-            "AppDomain.AssemblyResolve",
-            $"Requesting Assembly = {GetRequestingAssembly(args).FullName}",
-            $"Requires = '{args.Name}'"
-          ))
-          {
-            var resolved = default(Assembly);
-            foreach (ResolveEventHandler resolver in InvocationList)
-            {
-              var type = MethodInfo.GetCurrentMethod().DeclaringType;
-              var info = type.GetMethod(nameof(AssemblyResolving), BindingFlags.NonPublic | BindingFlags.Static);
-              if (resolver.Method == info)
-              {
-                resolved = ResolveAssembly(args.RequestingAssembly, new AssemblyName(args.Name));
-              }
-              else
-              {
-                try { resolved = resolver(sender, args); }
-                catch (Exception) { }
-              }
-
-              if (resolved is object)
-              {
-                scope.Log
-                (
-                  resolved.FullName == args.Name ?
-                  Logger.Severity.Succeded :
-                  Logger.Severity.Information,
-                  $"Resolved",
-                  $"Resolver = '{resolver.Method.DeclaringType.Assembly}'",
-                  $"Got = '{resolved.FullName}'",
-                  $"Location = '{resolved.Location}'"
-                );
-                break;
-              }
-            }
-
-            if (resolved is null)
-              scope.LogWarning("Not Resolved");
-
-            return resolved;
-          }
-        }
-        else
-#endif
-        {
-          return ResolveAssembly(args.RequestingAssembly, new AssemblyName(args.Name));
+          return ResolveAssembly(loadContext, assemblyName);
         }
       }
       finally
       {
-        InternalAssembliesOnly = internalAssembliesOnly;
+        SharedAssembliesOnly = sharedAssembliesOnly;
       }
     }
 
-    static Assembly ResolveAssembly(Assembly requestingAssembly, AssemblyName requested)
+    static Assembly ResolveAssembly(System.Runtime.Loader.AssemblyLoadContext loadContext, AssemblyName requested)
     {
       if (Core.CurrentStatus < Core.Status.Available)
         return default;
@@ -383,15 +310,15 @@ namespace RhinoInside.Revit
           return requested.Version > executingAssemblyName.Version ? default : executingAssembly;
       }
 
-      // AppDomain.AssemblyResolve may be called from any thread.
+      // ResolveAssembly may be called from any thread.
       lock (references)
       {
         // Look up if Rhino deploy something for us…
         if (!references.TryGetValue(requested.Name, out var location))
         {
           // Probe with loaded Assemblies if full name coincides.
-          var domainAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-          foreach (var assembly in domainAssemblies)
+          var assemblies = loadContext.Assemblies;
+          foreach (var assembly in assemblies)
           {
             if (assembly.FullName == requested.FullName)
               return assembly;
@@ -411,7 +338,7 @@ namespace RhinoInside.Revit
         if (location.Assembly is null)
         {
           // Never load an Internal assembly from an other thread than the UI thread.
-          if (ThreadHandle.CurrentThreadId != InternalThreadId && InternalAssemblies.ContainsKey(location.assemblyName.Name))
+          if (ThreadHandle.CurrentThreadId != InternalThreadId && SharedAssemblies.ContainsKey(location.assemblyName.Name))
             return default;
 
           // Remove it to not try again if it fails and avoid recursion.
@@ -422,15 +349,13 @@ namespace RhinoInside.Revit
 
 #pragma warning disable SYSLIB0044 // Type or member is obsolete
 #pragma warning disable SYSLIB0012 // Type or member is obsolete
-
-          // Load Assembly
-          //var assembly =  Assembly.Load(location.assemblyName);
 #if NET
-          var assembly = Assembly.LoadFrom(new Uri(location.assemblyName.CodeBase).LocalPath);
+          var assemblyPath = new Uri(location.assemblyName.CodeBase).LocalPath;
 #else
-          var assembly = Assembly.LoadFrom(location.assemblyName.CodeBase);
+          var assemblyPath = location.assemblyName.CodeBase;
 #endif
-          //var assembly = Assembly.LoadFile(new Uri(location.assemblyName.CodeBase).LocalPath);
+          // Load Assembly
+          var assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
 
           Debug.Assert
           (
@@ -438,6 +363,8 @@ namespace RhinoInside.Revit
             $"Expected = {location.assemblyName.CodeBase}" + Environment.NewLine +
             $"Loaded = {assembly.CodeBase}"
           );
+#pragma warning restore SYSLIB0012 // Type or member is obsolete
+#pragma warning restore SYSLIB0044 // Type or member is obsolete
 
           // Add again loaded assembly
           references.Add(requested.Name, location);
@@ -446,11 +373,42 @@ namespace RhinoInside.Revit
           catch { }
         }
 
-#pragma warning restore SYSLIB0012 // Type or member is obsolete
-#pragma warning restore SYSLIB0044 // Type or member is obsolete
 
         return location.Assembly;
       }
+    }
+
+    static IntPtr ResolveUnmanagedDll(Assembly assembly, string dll)
+    {
+#if NET
+      if (!Path.IsPathFullyQualified(dll))
+      {
+        var assemblyName = assembly.GetName();
+#pragma warning disable SYSLIB0044 // Type or member is obsolete
+#pragma warning disable SYSLIB0012 // Type or member is obsolete
+        if (references.TryGetValue(assemblyName.Name, out var assemblyReference) && assemblyReference.assemblyName.CodeBase == assembly.CodeBase)
+        {
+          try
+          {
+            var lib = System.Runtime.InteropServices.NativeLibrary.Load
+            (
+              $"{Path.Combine(SystemPath, dll)}.dll",
+              assembly,
+              System.Runtime.InteropServices.DllImportSearchPath.AssemblyDirectory |
+              System.Runtime.InteropServices.DllImportSearchPath.UseDllDirectoryForDependencies |
+              System.Runtime.InteropServices.DllImportSearchPath.System32 |
+              System.Runtime.InteropServices.DllImportSearchPath.SafeDirectories
+            );
+            return lib;
+          }
+          catch { }
+        }
+#pragma warning restore SYSLIB0012 // Type or member is obsolete
+#pragma warning restore SYSLIB0044 // Type or member is obsolete
+      }
+#endif
+
+      return IntPtr.Zero;
     }
 
     static bool AssemblyCanLoad(AssemblyName assemblyName)
@@ -536,22 +494,16 @@ namespace RhinoInside.Revit
     }
 
     #region Utils
-    static bool IsInternalReference(ResolveEventArgs args)
+    static bool IsSharedReference(AssemblyName assembly)
     {
-      var assembly = new AssemblyName(args.Name);
       if
       (
-        InternalAssemblies.ContainsKey(assembly.Name) &&
-        GetRequestingAssembly(args) is Assembly requestingAssembly
+        SharedAssemblies.ContainsKey(assembly.Name) &&
+        GetRequestingAssembly() is Assembly requestingAssembly
       )
-        return requestingAssembly.GetReferencedAssemblies().Any(x => InternalAssemblies.ContainsKey(x.Name));
+        return requestingAssembly.GetReferencedAssemblies().Any(x => SharedAssemblies.ContainsKey(x.Name));
 
       return false;
-    }
-
-    static Assembly GetRequestingAssembly(ResolveEventArgs args)
-    {
-      return args.RequestingAssembly ?? GetRequestingAssembly();
     }
 
     static Assembly GetRequestingAssembly()
@@ -600,3 +552,80 @@ namespace RhinoInside.Revit
     }
   }
 }
+
+#if !NET
+namespace System.Runtime.Loader
+{
+  class AssemblyLoadContext
+  {
+    private readonly AppDomain AppDomain;
+
+    public static readonly AssemblyLoadContext Default = new AssemblyLoadContext(AppDomain.CurrentDomain);
+    public static IEnumerable<AssemblyLoadContext> All => new AssemblyLoadContext[] { Default };
+    public IEnumerable<Assembly> Assemblies => AppDomain.GetAssemblies();
+
+    public override string ToString() => $"\"{Name}\" {GetType()} #{AppDomain.Id}";
+
+    public string Name { get; }
+    public bool IsCollectible => !AppDomain.IsDefaultAppDomain();
+
+    public event Func<AssemblyLoadContext, AssemblyName, Assembly> Resolving;
+    public event Func<Assembly, string, IntPtr> ResolvingUnmanagedDll;
+
+    private AssemblyLoadContext(AppDomain appDomain)
+    {
+      AppDomain = appDomain;
+      Name = AppDomain.FriendlyName;
+    }
+
+    public AssemblyLoadContext() : this(default, default) { }
+    public AssemblyLoadContext(bool isCollectible) : this(default, isCollectible) { }
+    public AssemblyLoadContext(string name, bool isCollectible = false)
+    {
+      if (isCollectible && AppDomain.CurrentDomain.IsDefaultAppDomain()) throw new NotSupportedException();
+
+      AppDomain = AppDomain.CurrentDomain;
+      Name = name;
+
+      var domain = AppDomain.CurrentDomain;
+      var assemblyResolve = _AssemblyResolve.GetValue(domain) as ResolveEventHandler;
+      var invocationList = assemblyResolve.GetInvocationList();
+
+      foreach (var invocation in invocationList)
+        domain.AssemblyResolve -= invocation as ResolveEventHandler;
+
+      domain.AssemblyResolve += AssemblyResolving;
+
+      foreach (var invocation in invocationList)
+        domain.AssemblyResolve += invocation as ResolveEventHandler;
+    }
+
+    public static AssemblyName GetAssemblyName(string assemblyPath) => AssemblyName.GetAssemblyName(assemblyPath);
+    public Assembly LoadFromAssemblyName(AssemblyName assemblyName) => AppDomain.Load(assemblyName);
+    public Assembly LoadFromAssemblyPath(string assemblyPath) => Assembly.LoadFrom(assemblyPath);
+
+    protected virtual Assembly Load(AssemblyName assemblyName) => null;
+    protected virtual IntPtr LoadUnmanagedDll(string unmanagedDllName) => IntPtr.Zero;
+
+    static readonly FieldInfo _AssemblyResolve = typeof(AppDomain).GetField("_AssemblyResolve", BindingFlags.Instance | BindingFlags.NonPublic);
+    Assembly AssemblyResolving(object sender, ResolveEventArgs args)
+    {
+      if (Resolving?.GetInvocationList() is Delegate[] invocationList)
+      {
+        var assemblyName = new AssemblyName(args.Name);
+        foreach (Func<AssemblyLoadContext, AssemblyName, Assembly> resolver in invocationList)
+        {
+          try
+          {
+            var resolved = resolver(this, assemblyName);
+            if (resolved is object) return resolved;
+          }
+          catch { }
+        }
+      }
+
+      return default;
+    }
+  }
+}
+#endif
