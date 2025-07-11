@@ -4,7 +4,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Structural Asset")]
-  public class StructuralAssetElement : Element
+  public sealed class StructuralAssetElement : Element
   {
     protected override Type ValueType => typeof(ARDB.PropertySetElement);
     public new ARDB.PropertySetElement Value => base.Value as ARDB.PropertySetElement;

@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Ceiling")]
-  public class Ceiling : HostObject, ISketchAccess
+  public sealed class Ceiling : HostObject, ISketchAccess
   {
     protected override Type ValueType => typeof(ARDB.Ceiling);
     public new ARDB.Ceiling Value => base.Value as ARDB.Ceiling;

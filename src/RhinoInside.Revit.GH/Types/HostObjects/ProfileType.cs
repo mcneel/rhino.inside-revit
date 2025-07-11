@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
   using ARDB_ProfileType  = ARDB.FamilySymbol;
 
   [Kernel.Attributes.Name("Profile Type")]
-  public class ProfileType : FamilySymbol
+  public sealed class ProfileType : FamilySymbol
   {
     protected override Type ValueType => typeof(ARDB_ProfileType);
     public new ARDB_ProfileType Value => base.Value as ARDB_ProfileType;

@@ -16,8 +16,8 @@ namespace RhinoInside.Revit.Convert.Units
     public static readonly Ratio MinValue = new Ratio(double.MinValue);
     public static readonly Ratio MaxValue = new Ratio(double.MaxValue);
     public static readonly Ratio Epsilon = new Ratio(double.Epsilon);
-    public static readonly Ratio NegativeInfinity = new Ratio(-1.0, 0.0);
-    public static readonly Ratio PositiveInfinity = new Ratio(+1.0, 0.0);
+    public static readonly Ratio NegativeInfinity = new Ratio(double.NegativeInfinity);
+    public static readonly Ratio PositiveInfinity = new Ratio(double.PositiveInfinity);
     public static readonly Ratio NaN = default;
 
     public static bool IsNegative(Ratio ratio) => IsNegative(ratio.Quotient);
@@ -226,7 +226,7 @@ namespace RhinoInside.Revit.Convert.Units
     #region BuiltIn Ratios
     static readonly Ratio[] metersPerUnitRatio          = new Ratio[]
     {
-      (                      0,                        1 ), // None,
+      (                     -1,                       -1 ), // None,
       (                      1,                1_000_000 ), // Microns,
       (                      1,                    1_000 ), // Millimeters,
       (                      1,                      100 ), // Centimeters,
@@ -354,31 +354,33 @@ namespace RhinoInside.Revit.Convert.Units
     public override bool Equals(object other) => other is UnitScale scale && Equals(scale);
     public bool Equals(UnitScale other) => this == other;
 
-    public override int GetHashCode() => BitConverter.DoubleToInt64Bits(Ratio.Quotient).GetHashCode();
+    public override int GetHashCode() => Ratio.Antecedent.GetHashCode() ^ Ratio.Consequent.GetHashCode();
 
     public static bool operator ==(UnitScale left, UnitScale right) =>
       left.Name == right.Name &&
-      BitConverter.DoubleToInt64Bits(left.Ratio.Quotient) ==
-      BitConverter.DoubleToInt64Bits(right.Ratio.Quotient);
+      left.Ratio.Antecedent == right.Ratio.Antecedent &
+      left.Ratio.Consequent == right.Ratio.Consequent;
 
     public static bool operator !=(UnitScale left, UnitScale right) =>
       left.Name != right.Name ||
-      BitConverter.DoubleToInt64Bits(left.Ratio.Quotient) !=
-      BitConverter.DoubleToInt64Bits(right.Ratio.Quotient);
+      left.Ratio.Antecedent != right.Ratio.Antecedent ||
+      left.Ratio.Consequent != right.Ratio.Consequent;
     #endregion
 
     public static UnitScale operator *(UnitScale left, UnitScale right) =>
-      right == None || left == None ? None :
+      left == None ? right :
+      right == None ? left :
       new UnitScale(left.Ratio * right.Ratio);
 
     public static UnitScale operator /(UnitScale left, UnitScale right) =>
-      right == None || left == None ? None :
+      left == None ? new UnitScale(Ratio.Reciprocal(right.Ratio)) :
+      right == None ? new UnitScale(Ratio.Reciprocal(left.Ratio)) :
       new UnitScale(left.Ratio / right.Ratio);
 
-    public static double operator *(double value, UnitScale scale) => scale == None ? value * 1.0 : value * scale.Ratio;
-    public static double operator /(double value, UnitScale scale) => scale == None ? value / 1.0 : value / scale.Ratio;
-    public static double operator *(UnitScale scale, double value) => scale == None ? value * 1.0 : scale.Ratio * value;
-    public static double operator /(UnitScale scale, double value) => scale == None ? 1.0 / value : scale.Ratio / value;
+    public static double operator *(double value, UnitScale scale) => value * scale.Ratio;
+    public static double operator /(double value, UnitScale scale) => value / scale.Ratio;
+    public static double operator *(UnitScale scale, double value) => scale.Ratio * value;
+    public static double operator /(UnitScale scale, double value) => scale.Ratio / value;
 
     public static double Convert(double value, UnitScale from, UnitScale to)
     {
@@ -392,9 +394,15 @@ namespace RhinoInside.Revit.Convert.Units
       // F ⨯ Reciprocal(T)
       var num = F * t;
       var den = f * T;
+      var val = Math.Abs(value);
 
       // Multiply value by resulting ratio considering magnitude.
-      return Arithmetic.MinMagnitude(num, value) * (Arithmetic.MaxMagnitude(num, value) / den);
+      if (val < den && num < den)
+        return Arithmetic.MaxMagnitude(num, value) * (Arithmetic.MinMagnitude(num, value) / den);
+      else if (val > den && num > den)
+        return Arithmetic.MinMagnitude(num, value) * (Arithmetic.MaxMagnitude(num, value) / den);
+
+      return (value * num) / den;
     }
 
     public override string ToString() => Name ?? ((UnitSystem) this).ToString().ToLowerInvariant();

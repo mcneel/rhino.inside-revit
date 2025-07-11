@@ -10,7 +10,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
-  public class ElementInspect : Component, IGH_VariableParameterComponent
+  public sealed class ElementInspect : Component, IGH_VariableParameterComponent
   {
     public override Guid ComponentGuid => new Guid("FAD33C4B-A7C3-479B-B309-8F5363B25599");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;

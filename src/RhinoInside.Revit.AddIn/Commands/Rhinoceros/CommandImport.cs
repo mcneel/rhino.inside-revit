@@ -15,7 +15,6 @@ using Autodesk.Revit.Utility;
 #endif
 
 using Rhino.Geometry;
-using Rhino.FileIO;
 using Rhino.DocObjects;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Drawing;
@@ -28,15 +27,15 @@ namespace RhinoInside.Revit.AddIn.Commands
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   public class CommandImport : RhinoCommand
   {
-    public static string CommandName => "Import\n3DM";
+    public static string CommandName => "Import\nFile";
 
     public static void CreateUI(RibbonPanel ribbonPanel)
     {
       var buttonData = NewPushButtonData<CommandImport, NeedsActiveDocument<Availability>>
       (
         name: CommandName,
-        iconName: "Ribbon.Rhinoceros.Import-3DM.png",
-        tooltip: "Imports geometry from 3DM file into active Revit model or family",
+        iconName: "Ribbon.Rhinoceros.Import.png",
+        tooltip: "Imports geometry from file into active Revit model or family",
         url : "reference/rir-interface#rhinoceros-panel"
       );
 
@@ -56,7 +55,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     static ARDB.ElementId ImportLayer
     (
       ARDB.Document doc,
-      File3dm model,
+      Rhino.RhinoDoc model,
       Layer layer,
       Dictionary<string, ARDB.Category> categories,
       Dictionary<string, ARDB.Material> materials
@@ -78,7 +77,7 @@ namespace RhinoInside.Revit.AddIn.Commands
             {
               subCategory.LineColor = layer.Color.ToColor();
 
-              var modelMaterial = layer.RenderMaterialIndex >= 0 ? model.AllMaterials.FindIndex(layer.RenderMaterialIndex) : default;
+              var modelMaterial = layer.RenderMaterialIndex >= 0 ? model.Materials.FindIndex(layer.RenderMaterialIndex) : default;
               if (modelMaterial is object)
               {
                 if (doc.GetElement(ImportMaterial(doc, modelMaterial, materials)) is ARDB.Material material)
@@ -338,7 +337,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     static ARDB.ElementId ImportBlock
     (
       ImportContext context,
-      File3dm model,
+      Rhino.RhinoDoc model,
       InstanceDefinition block
     )
     {
@@ -357,12 +356,12 @@ namespace RhinoInside.Revit.AddIn.Commands
     }
     #endregion
 
-    static Point3d ImportPlacement(File3dm model, ARDB.ImportPlacement placement)
+    static Point3d ImportPlacement(Rhino.RhinoDoc model, ARDB.ImportPlacement placement)
     {
       switch (placement)
       {
         case ARDB.ImportPlacement.Site:
-          return model.Settings.ModelBasepoint;
+          return model.ModelBasepoint;
 
         case ARDB.ImportPlacement.Origin:
           return Point3d.Origin;
@@ -401,7 +400,7 @@ namespace RhinoInside.Revit.AddIn.Commands
     static IList<ARDB.GeometryObject> ImportObject
     (
       ARDB.Document doc,
-      File3dm model,
+      Rhino.RhinoDoc model,
       GeometryBase geometry,
       ObjectAttributes attributes,
       Dictionary<string, ARDB.Material> materials,
@@ -410,7 +409,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       bool visibleLayersOnly
     )
     {
-      var layer = model.AllLayers.FindIndex(attributes.LayerIndex);
+      var layer = model.Layers.FindIndex(attributes.LayerIndex);
       if (visibleLayersOnly || layer?.IsVisible == true)
       {
         using (var ctx = GeometryEncoder.Context.Push(doc))
@@ -419,14 +418,14 @@ namespace RhinoInside.Revit.AddIn.Commands
           {
             case ObjectMaterialSource.MaterialFromObject:
               {
-                var modelMaterial = attributes.MaterialIndex < 0 ? Material.DefaultMaterial : model.AllMaterials.FindIndex(attributes.MaterialIndex);
+                var modelMaterial = attributes.MaterialIndex < 0 ? Material.DefaultMaterial : model.Materials.FindIndex(attributes.MaterialIndex);
                 ctx.MaterialId = ImportMaterial(doc, modelMaterial, materials);
                 break;
               }
             case ObjectMaterialSource.MaterialFromLayer:
               {
-                var modelLayer = model.AllLayers.FindIndex(attributes.LayerIndex);
-                var modelMaterial = modelLayer.RenderMaterialIndex < 0 ? Material.DefaultMaterial : model.AllMaterials.FindIndex(modelLayer.RenderMaterialIndex);
+                var modelLayer = model.Layers.FindIndex(attributes.LayerIndex);
+                var modelMaterial = modelLayer.RenderMaterialIndex < 0 ? Material.DefaultMaterial : model.Materials.FindIndex(modelLayer.RenderMaterialIndex);
                 ctx.MaterialId = ImportMaterial(doc, modelMaterial, materials);
                 break;
               }
@@ -437,7 +436,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
           if (geometry is InstanceReferenceGeometry instance)
           {
-            if (model.AllInstanceDefinitions.FindId(instance.ParentIdefId) is InstanceDefinitionGeometry definition)
+            if (model.InstanceDefinitions.FindId(instance.ParentIdefId) is InstanceDefinitionGeometry definition)
             {
               var definitionId = definition.Id.ToString();
               var library = ARDB.DirectShapeLibrary.GetDirectShapeLibrary(doc);
@@ -445,7 +444,7 @@ namespace RhinoInside.Revit.AddIn.Commands
               {
                 var GNodes = definition.GetObjectIds(). // Get idef object ids
                   Select(x => model.Objects.FindId(x)). // Find object instance
-                  OfType<File3dmObject>().              // Skip missing objects
+                  OfType<RhinoObject>().              // Skip missing objects
                   SelectMany(x => ImportObject(doc, model, x.Geometry, x.Attributes, materials, scaleFactor, Vector3d.Zero, visibleLayersOnly));
 
                 library.AddDefinition(definitionId, GNodes.ToArray());
@@ -461,7 +460,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       return Array.Empty<ARDB.GeometryObject>();
     }
 
-    static Result Import3DMFileToProject
+    static Result ImportFileToProject
     (
       ARDB.Document doc,
       string filePath,
@@ -520,7 +519,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                 if (!obj.Attributes.Visible)
                   continue;
 
-                if (visibleLayersOnly && model.AllLayers.FindIndex(obj.Attributes.LayerIndex)?.IsVisible != true)
+                if (visibleLayersOnly && model.Layers.FindIndex(obj.Attributes.LayerIndex)?.IsVisible != true)
                   continue;
 
                 var geometryList = ImportObject
@@ -531,7 +530,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                   obj.Attributes,
                   materials,
                   scaleFactor,
-                  Point3d.Origin - model.Settings.ModelBasepoint,
+                  Point3d.Origin - model.ModelBasepoint,
                   visibleLayersOnly
                 ).ToArray();
 
@@ -549,7 +548,7 @@ namespace RhinoInside.Revit.AddIn.Commands
               if (!library.ContainsType(type.UniqueId))
                 library.AddDefinitionType(type.UniqueId, type.Id);
 
-              var transform = ARDB.Transform.CreateTranslation(model.Settings.ModelBasepoint.ToXYZ(scaleFactor));
+              var transform = ARDB.Transform.CreateTranslation(model.ModelBasepoint.ToXYZ(scaleFactor));
               ds.SetShape(ARDB.DirectShape.CreateGeometryInstance(doc, type.UniqueId, transform));
 
               if (doc.IsWorkshared)
@@ -627,9 +626,9 @@ namespace RhinoInside.Revit.AddIn.Commands
     (
       ImportContext context,
       List<ARDB.ElementId> elements,
-      File3dm model,
+      Rhino.RhinoDoc model,
       ObjectAttributes parentAttributes,
-      IEnumerable<File3dmObject> objects
+      IEnumerable<RhinoObject> objects
     )
     {
       foreach (var obj in objects)
@@ -637,7 +636,7 @@ namespace RhinoInside.Revit.AddIn.Commands
         if (!obj.Attributes.Visible)
           continue;
 
-        var layer = model.AllLayers.FindIndex(obj.Attributes.LayerIndex);
+        var layer = model.Layers.FindIndex(obj.Attributes.LayerIndex);
         if (context.VisibleLayersOnly && layer?.IsVisible != true)
           continue;
 
@@ -647,7 +646,7 @@ namespace RhinoInside.Revit.AddIn.Commands
           case null: continue;
           case InstanceReferenceGeometry instance:
 
-            if (model.AllInstanceDefinitions.FindId(instance.ParentIdefId) is InstanceDefinitionGeometry definition)
+            if (model.InstanceDefinitions.FindId(instance.ParentIdefId) is InstanceDefinitionGeometry definition)
             {
               var attributes = obj.Attributes.Duplicate();
 
@@ -755,7 +754,7 @@ namespace RhinoInside.Revit.AddIn.Commands
                       break;
                   }
 
-                  if (model.AllMaterials.FindIndex(materialIndex) is Material material)
+                  if (model.Materials.FindIndex(materialIndex) is Material material)
                   {
                     var categoryId = ImportMaterial(context.Document, material, context.Materials);
                     if (categoryId != ARDB.ElementId.InvalidElementId)
@@ -774,7 +773,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
-    static Result Import3DMFileToFamily
+    static Result ImportFileToFamily
     (
       ARDB.Document doc,
       string filePath,
@@ -803,16 +802,16 @@ namespace RhinoInside.Revit.AddIn.Commands
 
             if (view3D is object)
             {
-              foreach (var cplane in model.AllNamedConstructionPlanes)
+              foreach (var cplane in model.NamedConstructionPlanes)
               {
                 var plane = cplane.Plane;
                 var bubbleEnd = plane.Origin.ToXYZ(scaleFactor);
                 var freeEnd = (plane.Origin + plane.XAxis).ToXYZ(scaleFactor);
                 var cutVec = plane.YAxis.ToXYZ();
 
-                var refrencePlane = doc.FamilyCreate.NewReferencePlane(bubbleEnd, freeEnd, cutVec, view3D);
-                refrencePlane.Name = cplane.Name;
-                refrencePlane.Maximize3DExtents();
+                var referencePlane = doc.FamilyCreate.NewReferencePlane(bubbleEnd, freeEnd, cutVec, view3D);
+                referencePlane.Name = cplane.Name;
+                referencePlane.Maximize3DExtents();
               }
             }
 
@@ -841,15 +840,35 @@ namespace RhinoInside.Revit.AddIn.Commands
     }
     #endregion
 
-    static File3dm OpenModel(string filePath, out double scaleFactor)
+    static Rhino.RhinoDoc OpenModel(string filePath, out double scaleFactor)
     {
       try
       {
-        var model = File3dm.Read(filePath);
-        scaleFactor = UnitScale.Convert(1.0, (UnitScale) model.Settings.ModelUnitSystem, UnitScale.Internal);
+        var model = Rhino.RhinoDoc.CreateHeadless(null);
+        try
+        {
+          var revitTol = GeometryTolerance.Internal;
+          model.ModelUnitSystem = Rhino.UnitSystem.Millimeters;
+          model.ModelAngleToleranceRadians = revitTol.AngleTolerance;
+          model.ModelDistanceDisplayPrecision = 3;
+          model.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, UnitScale.GetModelScale(model));
 
-        if (!(Numerical.Constant.Delta < scaleFactor && scaleFactor < double.PositiveInfinity))
-          throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.Settings.ModelUnitSystem}.");
+          if (!model.Import(filePath))
+            throw new External.FailException($"Failed to open '{Path.GetFileName(filePath)}'.");
+
+          var modelUnits = UnitScale.GetModelScale(model);
+          if (modelUnits == UnitScale.None)
+            throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.ModelUnitSystem}.");
+
+          scaleFactor = UnitScale.Convert(1.0, modelUnits, UnitScale.Internal);
+          if (!(Numerical.Constant.Delta < scaleFactor && scaleFactor < double.PositiveInfinity))
+            throw new External.FailException($"Model '{Path.GetFileName(filePath)}' has an unsupported model unit system.\n - Model Unit System = {model.ModelUnitSystem}.");
+        }
+        catch
+        {
+          scaleFactor = double.NaN;
+          model.Dispose();
+        }
 
         return model;
       }
@@ -861,7 +880,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       var doc = data.Application.ActiveUIDocument.Document;
       if(!doc.IsFamilyDocument && !ARDB.DirectShape.IsSupportedDocument(doc))
       {
-        message = "Active document doesnt't support DirectShape functionality.";
+        message = "Active document doesn't support DirectShape functionality.";
         return Result.Failed;
       }
 
@@ -872,7 +891,7 @@ namespace RhinoInside.Revit.AddIn.Commands
           case DialogResult.Ok:
             if (doc.IsFamilyDocument)
             {
-              return Import3DMFileToFamily
+              return ImportFileToFamily
               (
                 doc,
                 options.FileName,
@@ -884,11 +903,11 @@ namespace RhinoInside.Revit.AddIn.Commands
             {
               if (!ARDB.DirectShape.IsValidCategoryId(options.CategoryId, doc))
               {
-                message = "DirectShape functionality doesnt't support selected category on the active document.";
+                message = "DirectShape functionality doesn't support selected category on the active document.";
                 return Result.Failed;
               }
 
-              return Import3DMFileToProject
+              return ImportFileToProject
               (
                 doc,
                 options.FileName,
