@@ -2,7 +2,7 @@
 name: "\U0001F41E Bug report"
 about: Create a report to help us improve
 title: ''
-labels: bug
+labels: user-bug
 assignees: ''
 
 ---
@@ -12,7 +12,7 @@ assignees: ''
 **Versions**
 
 > Rhino.Inside: 1.??
-> Rhino: 7.??
+> Rhino: 8.??
 > Revit: 20??.??
 
 **Describe the bug**

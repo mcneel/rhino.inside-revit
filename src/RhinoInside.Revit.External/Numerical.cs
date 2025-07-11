@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.Numerical
     /// <remarks>
     /// Same as DBL_EPSILON = 2.2204460492503131e-16
     /// </remarks>
-    public const double Delta = double.MaxValue * double.Epsilon / 4.0;
+    public const double Delta = 1.0 + (double.MaxValue * double.Epsilon / 4.0) - 1.0;
   }
 
   /// <summary>

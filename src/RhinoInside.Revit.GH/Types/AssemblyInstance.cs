@@ -8,7 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Assembly")]
-  public class AssemblyInstance : GraphicalElement
+  public sealed class AssemblyInstance : GraphicalElement
   {
     protected override Type ValueType => typeof(ARDB.AssemblyInstance);
     public new ARDB.AssemblyInstance Value => base.Value as ARDB.AssemblyInstance;
