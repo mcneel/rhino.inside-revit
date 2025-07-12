@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Line Pattern")]
-  public class LinePatternElement : Element, Bake.IGH_BakeAwareElement
+  public sealed class LinePatternElement : Element, Bake.IGH_BakeAwareElement
   {
     #region IGH_Goo
     public override bool IsValid => (Id?.TryGetBuiltInLinePattern(out var _) == true) || base.IsValid;
