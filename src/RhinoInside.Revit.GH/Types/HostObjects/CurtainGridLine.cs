@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Curtain Grid Line")]
-  public class CurtainGridLine : HostObject
+  public sealed class CurtainGridLine : HostObject
   {
     protected override Type ValueType => typeof(ARDB.CurtainGridLine);
     public new ARDB.CurtainGridLine Value => base.Value as ARDB.CurtainGridLine;

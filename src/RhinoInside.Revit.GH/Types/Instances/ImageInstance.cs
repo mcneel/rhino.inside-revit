@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 
   [Kernel.Attributes.Name("Image")]
-  public class ImageInstance : GraphicalElement, Bake.IGH_BakeAwareElement
+  public sealed class ImageInstance : GraphicalElement, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB_ImageInstance);
     public new ARDB_ImageInstance Value => base.Value as ARDB_ImageInstance;
@@ -295,7 +295,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Image Type")]
-  public class ImageType : ElementType, Bake.IGH_BakeAwareElement
+  public sealed class ImageType : ElementType, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.ImageType);
     public new ARDB.ImageType Value => base.Value as ARDB.ImageType;

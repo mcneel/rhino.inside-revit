@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// <summary>
   /// Represents an Autodesk.Revit.DB.BuiltInParameter
   /// </summary>
-  public partial class ParameterId : DataType
+  public sealed partial class ParameterId : DataType
   {
     public static new ParameterId Empty { get; } = new ParameterId();
 

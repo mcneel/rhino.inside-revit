@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Sketch")]
-  public class Sketch : GraphicalElement
+  public sealed class Sketch : GraphicalElement
   {
     protected override Type ValueType => typeof(ARDB.Sketch);
     public new ARDB.Sketch Value => base.Value as ARDB.Sketch;

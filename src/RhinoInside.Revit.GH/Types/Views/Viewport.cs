@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Viewport")]
-  public class Viewport : ViewInstance
+  public sealed class Viewport : ViewInstance
   {
     protected override Type ValueType => typeof(ARDB.Viewport);
     public new ARDB.Viewport Value => base.Value as ARDB.Viewport;
@@ -296,7 +296,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Schedule Graphics")]
-  public class ScheduleSheetInstance : ViewInstance
+  public sealed class ScheduleSheetInstance : ViewInstance
   {
     protected override Type ValueType => typeof(ARDB.ScheduleSheetInstance);
     public new ARDB.ScheduleSheetInstance Value => base.Value as ARDB.ScheduleSheetInstance;
@@ -333,7 +333,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Schedule Graphics")]
-  public class PanelScheduleSheetInstance : ViewInstance
+  public sealed class PanelScheduleSheetInstance : ViewInstance
   {
     protected override Type ValueType => typeof(ARDB.Electrical.PanelScheduleSheetInstance);
     public new ARDB.Electrical.PanelScheduleSheetInstance Value => base.Value as ARDB.Electrical.PanelScheduleSheetInstance;

@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// <summary>
   /// Represents an Autodesk.Revit.DB.UnitType
   /// </summary>
-  public partial class SpecType : DataType
+  public sealed partial class SpecType : DataType
   {
     public static new SpecType Empty { get; } = new SpecType();
     public static SpecType Custom { get; } = new SpecType("autodesk.spec:custom-1.0.0");
