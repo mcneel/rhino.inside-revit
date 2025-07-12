@@ -141,7 +141,7 @@ namespace RhinoInside.Revit
 
     internal static ARUI.Result Startup()
     {
-      if (Core.CurrentStatus != Core.Status.Ready)
+      if (Core.CurrentStatus < Core.Status.Available)
         return ARUI.Result.Failed;
 
       if (!RhinoApp.CanSave)
