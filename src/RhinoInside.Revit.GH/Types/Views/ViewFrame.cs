@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using static External.DB.Extensions.BoundingBoxXYZExtension;
 
-  public class ViewFrame : GH_GeometricGoo<ViewportInfo>, IGH_PreviewData
+  public sealed class ViewFrame : GH_GeometricGoo<ViewportInfo>, IGH_PreviewData
   {
     public ViewFrame() { }
     public ViewFrame(ViewportInfo info) : base(info) { }

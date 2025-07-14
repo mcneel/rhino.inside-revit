@@ -31,29 +31,33 @@ namespace RhinoInside.Revit.GH.Types
           {
             var center = Point3d.Origin;
             var count = 0;
-            foreach (var curveArray in sketch.Profile.Cast<ARDB.CurveArray>())
+            try
             {
-              foreach (var curve in curveArray.Cast<ARDB.Curve>())
+              foreach (var curveArray in sketch.Profile.Cast<ARDB.CurveArray>())
               {
-                count++;
-                center += curve.Evaluate(0.0, normalized: true).ToPoint3d();
-                count++;
-                center += curve.Evaluate(1.0, normalized: true).ToPoint3d();
+                foreach (var curve in curveArray.Cast<ARDB.Curve>())
+                {
+                  count++;
+                  center += curve.Evaluate(0.0, normalized: true).ToPoint3d();
+                  count++;
+                  center += curve.Evaluate(1.0, normalized: true).ToPoint3d();
+                }
               }
+              center /= count;
             }
-            center /= count;
+            catch { }
+
+            var plane = sketch.SketchPlane.GetPlane().ToPlane();
+            var origin = count == 0 ? plane.Origin : center;
+            var xAxis = plane.XAxis;
+            var yAxis = plane.YAxis;
 
             var hostLevelId = host.LevelId;
             if (hostLevelId == ARDB.ElementId.InvalidElementId)
               hostLevelId = host.get_Parameter(ARDB.BuiltInParameter.ROOF_CONSTRAINT_LEVEL_PARAM)?.AsElementId() ?? hostLevelId;
 
             if (host.Document.GetElement(hostLevelId) is ARDB.Level level)
-              center.Z = level.GetElevation() * Revit.ModelUnits;
-
-            var plane = sketch.SketchPlane.GetPlane().ToPlane();
-            var origin = center;
-            var xAxis = plane.XAxis;
-            var yAxis = plane.YAxis;
+              origin.Z = level.GetElevation() * Revit.ModelUnits;
 
             if (host is ARDB.Wall)
             {

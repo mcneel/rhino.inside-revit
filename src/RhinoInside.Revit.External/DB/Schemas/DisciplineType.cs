@@ -5,7 +5,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// <summary>
   /// Represents a Revit parameter discipline
   /// </summary>
-  public partial class DisciplineType : DataType
+  public sealed partial class DisciplineType : DataType
   {
     public static new DisciplineType Empty { get; } = new DisciplineType();
 
