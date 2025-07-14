@@ -89,11 +89,12 @@ namespace RhinoInside.Revit
 
     static void AssemblyLoaded(object sender, AssemblyLoadEventArgs args)
     {
-      if (args.LoadedAssembly.ReflectionOnly) return;
+      var loadedAssembly = args.LoadedAssembly;
+      if (loadedAssembly.ReflectionOnly || loadedAssembly.IsDynamic) return;
 
-      var assemblyName = args.LoadedAssembly.GetName();
+      var assemblyName = loadedAssembly.GetName();
       if (references.TryGetValue(assemblyName.Name, out var location))
-        location.Activate(args.LoadedAssembly);
+        location.Activate(loadedAssembly);
     }
     #endregion
 
@@ -125,11 +126,14 @@ namespace RhinoInside.Revit
         if (requested.Name.EndsWith(".resources", StringComparison.OrdinalIgnoreCase))
           return default;
 
+        var location = default(AssemblyReference);
+        var loadedAssembly = default(Assembly);
+
         // ResolveAssembly may be called from any thread.
         lock (references)
         {
           // Look up if Rhino deploy something for us…
-          if (!references.TryGetValue(requested.Name, out var location))
+          if (!references.TryGetValue(requested.Name, out location))
           {
             // Probe with loaded Assemblies if full name coincides.
             foreach (var assembly in Assemblies)
@@ -166,29 +170,32 @@ namespace RhinoInside.Revit
 #if NET
             var assemblyPath = new Uri(location.assemblyName.CodeBase).LocalPath;
 #else
-          var assemblyPath = location.assemblyName.CodeBase;
+            var assemblyPath = location.assemblyName.CodeBase;
 #endif
             // Load Assembly
-            var assembly = LoadFromAssemblyPath(assemblyPath);
+            loadedAssembly = LoadFromAssemblyPath(assemblyPath);
 
             Debug.Assert
             (
-              assembly.CodeBase.Equals(location.assemblyName.CodeBase, StringComparison.OrdinalIgnoreCase),
+              loadedAssembly.CodeBase.Equals(location.assemblyName.CodeBase, StringComparison.OrdinalIgnoreCase),
               $"Expected = {location.assemblyName.CodeBase}" + Environment.NewLine +
-              $"Loaded = {assembly.CodeBase}"
+              $"Loaded = {loadedAssembly.CodeBase}"
             );
 #pragma warning restore SYSLIB0012 // Type or member is obsolete
 #pragma warning restore SYSLIB0044 // Type or member is obsolete
 
             // Add again loaded assembly
             references.Add(requested.Name, location);
-
-            try { location.Activate(assembly); }
-            catch { }
           }
-
-          return location.Assembly;
         }
+
+        if (loadedAssembly is object)
+        {
+          try { location.Activate(loadedAssembly); }
+          catch { }
+        }
+
+        return location.Assembly;
       }
 
 #if NET
@@ -390,11 +397,19 @@ namespace RhinoInside.Revit
         {
           try
           {
+            var architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
+
             // List of assembly folders in priority order.
             var paths = new (DirectoryInfo Directory, SearchOption Options)[]
             {
               (new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)), SearchOption.AllDirectories),
 #if NET
+              (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", $"win-{architecture}", "native")), SearchOption.TopDirectoryOnly),
+              (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", "win", "native")), SearchOption.TopDirectoryOnly),
+              (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", $"win-{architecture}", "lib", "net8.0")), SearchOption.TopDirectoryOnly),
+              (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", "win", "lib", "net8.0")), SearchOption.TopDirectoryOnly),
+              (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", $"win-{architecture}", "lib", "net7.0")), SearchOption.TopDirectoryOnly),
+              (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", "win", "lib", "net7.0")), SearchOption.TopDirectoryOnly),
               (new DirectoryInfo(Path.Combine(SystemPath, "netcore")), SearchOption.TopDirectoryOnly),
 #endif
               (new DirectoryInfo(SystemPath), SearchOption.TopDirectoryOnly),
@@ -408,13 +423,13 @@ namespace RhinoInside.Revit
                 try
                 {
                   var assemblyName = System.Runtime.Loader.AssemblyLoadContext.GetAssemblyName(dll.FullName);
+                  if (references.ContainsKey(assemblyName.Name)) continue;
+
 #if NET
 #pragma warning disable SYSLIB0044 // Type or member is obsolete
                   assemblyName.CodeBase = new Uri(dll.FullName).ToString();
 #pragma warning restore SYSLIB0044 // Type or member is obsolete
 #endif
-
-                  if (references.ContainsKey(assemblyName.Name)) continue;
                   references.Add(assemblyName.Name, new AssemblyReference(assemblyName));
                 }
                 catch { }
