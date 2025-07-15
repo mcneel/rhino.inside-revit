@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Types
   using RhinoInside.Revit.Convert.Units;
 
   [Kernel.Attributes.Name("Shared Site")]
-  public class ProjectLocation : Instance, Bake.IGH_BakeAwareElement
+  public sealed class ProjectLocation : Instance, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.ProjectLocation);
     public new ARDB.ProjectLocation Value => base.Value as ARDB.ProjectLocation;
@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Site Location")]
-  public class SiteLocation : ElementType, Bake.IGH_BakeAwareElement
+  public sealed class SiteLocation : ElementType, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.SiteLocation);
     public new ARDB.SiteLocation Value => base.Value as ARDB.SiteLocation;

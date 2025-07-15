@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Floor")]
-  public class Floor : HostObject, ISketchAccess
+  public sealed class Floor : HostObject, ISketchAccess
   {
     protected override Type ValueType => typeof(ARDB.Floor);
     public new ARDB.Floor Value => base.Value as ARDB.Floor;

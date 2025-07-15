@@ -3,7 +3,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Panel")]
-  public class Panel : FamilyInstance
+  public sealed class Panel : FamilyInstance
   {
     static readonly ARDB.ElementId CurtainWallPanelsId = new ARDB.ElementId(ARDB.BuiltInCategory.OST_CurtainWallPanels);
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
@@ -62,7 +62,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Panel Type")]
-  public class PanelType : FamilySymbol
+  public sealed class PanelType : FamilySymbol
   {
     static readonly ARDB.ElementId CurtainWallPanelsId = new ARDB.ElementId(ARDB.BuiltInCategory.OST_CurtainWallPanels);
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);

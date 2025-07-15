@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Material")]
-  public class Material : Element, Bake.IGH_BakeAwareElement
+  public sealed class Material : Element, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.Material);
     public new ARDB.Material Value => base.Value as ARDB.Material;
@@ -252,7 +252,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Identity Data
-    public virtual string Description
+    public string Description
     {
       get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_DESCRIPTION)?.AsString();
       set
@@ -322,7 +322,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public virtual string Mark
+    public string Mark
     {
       get => Value?.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK) is ARDB.Parameter parameter &&
         parameter.HasValue ?

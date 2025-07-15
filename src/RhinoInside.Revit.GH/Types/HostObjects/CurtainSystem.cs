@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   using Rhino;
 
   [Kernel.Attributes.Name("Curtain System")]
-  public class CurtainSystem : HostObject, ICurtainGridsAccess
+  public sealed class CurtainSystem : HostObject, ICurtainGridsAccess
   {
     protected override Type ValueType => typeof(ARDB.CurtainSystem);
     public new ARDB.CurtainSystem Value => base.Value as ARDB.CurtainSystem;

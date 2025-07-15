@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// <summary>
   /// Represents an Autodesk.Revit.DB.BuiltInCategory
   /// </summary>
-  public partial class CategoryId : DataType
+  public sealed partial class CategoryId : DataType
   {
     public static new CategoryId Empty { get; } = new CategoryId(ARDB.BuiltInCategory.INVALID, string.Empty);
 

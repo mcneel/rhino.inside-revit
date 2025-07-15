@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Types
   public interface IGH_BasePoint : IGH_GraphicalElement { }
 
   [Kernel.Attributes.Name("Base Point")]
-  public class BasePoint : GraphicalElement, IGH_BasePoint, Bake.IGH_BakeAwareElement
+  public sealed class BasePoint : GraphicalElement, IGH_BasePoint, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.BasePoint);
     public new ARDB.BasePoint Value => base.Value as ARDB.BasePoint;
@@ -173,7 +173,7 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 
   [Kernel.Attributes.Name("Internal Origin")]
-  public class InternalOrigin : GraphicalElement, IGH_BasePoint
+  public sealed class InternalOrigin : GraphicalElement, IGH_BasePoint
   {
     protected override Type ValueType => typeof(ARDB_InternalOrigin);
     public new ARDB_InternalOrigin Value => base.Value as ARDB_InternalOrigin;
