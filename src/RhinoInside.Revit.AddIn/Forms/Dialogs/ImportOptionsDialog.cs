@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.AddIn.Forms
 
     public ImportOptionsDialog(Autodesk.Revit.UI.UIApplication uiApp) : base(uiApp, initialSize: new Size(400, -1))
     {
-      Title = "Import 3DM";
+      Title = "Import File";
       Document = uiApp.ActiveUIDocument?.Document;
       DefaultButton.Enabled = false;
       DefaultButton.Text = "Import";
@@ -325,7 +325,48 @@ namespace RhinoInside.Revit.AddIn.Forms
     {
       var open = new OpenFileDialog()
       {
-        Filters = { "Rhino 3D models (*.3dm)|*.3dm" }
+        Filters =
+        {
+          @"Rhino 3D models (*.3dm)|*.3dm",
+#if RHINO_8
+          @"3D Studio (*.3ds)|*.3ds",
+          @"3MF (*.3mf)|*.3mf",
+          @"Adobe Illustrator (*.ai)|*.ai",
+          @"AMF (*.amf)|*.amf",
+          @"AutoCAD Drawing (*.dwg)|*.dwg",
+          @"AutoCAD Drawing Exchange (*.dxf)|*.dxf",
+          @"DirectX (*.x)|*.x",
+          @"E57 (*.e57)|*.e57",
+          @"Encapsulated PostScript (*.eps)|*.eps",
+          @"Geometry OFF (*.off)|*.off",
+          @"glTF binary file (*.glb)|*.glb",
+          @"glTF text file (*.gltf)|*.gltf",
+          @"GTS *.gts)|*.gts",
+          @"IGES (*.igs)|*.igs",
+          @"Lightwave (*.lwo)|*.lwo",
+          @"MicroStation (*.dgn)|*.dgn",
+          @"MotionBuilder (*.fbx)|*.fbx",
+          @"Open Inventor (*.iv)|*.iv",
+          @"Recon M (*.m)|*.m",
+          @"OBJ (*.obj)|*.obj",
+          @"PDF (*.pdf)|*.pdf",
+          @"Points (*.pts)|*.pts",
+          @"Polygon (*.ply)|*.ply",
+          @"Raw triangles (*.raw)|*.raw",
+          @"NextEngine Scan (*.scn)|*.scn",
+          @"Scalable Vector Graphics (*.svg)|*.svg",
+          @"SketchUp (*.skp)|*.skp",
+          @"SLC  (*.slc)|*.slc",
+          @"SolidWorks (*.sldprt)|*.sldprt",
+          @"SolidWorks (*.sldasm)|*.sldasm",
+          @"STEP (*.stp)|*.stp",
+          @"STEP (*.step)|*.step",
+          @"STL (*.stl)|*.stl",
+          @"VDA (*.vda)|*.vda",
+          @"VRML (*.vrml)|*.vrml",
+          @"WAMIT (*.gdf)|*.gdf"
+#endif
+        }
       };
 
       if (open.ShowDialog(this) != DialogResult.Ok)

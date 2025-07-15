@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Types
   using ARDB_SectionBox = ARDB.Element;
 
   [Kernel.Attributes.Name("Section Box")]
-  public class SectionBox : GraphicalElement
+  public sealed class SectionBox : GraphicalElement
   {
     protected override Type ValueType => typeof(ARDB_SectionBox);
     public new ARDB_SectionBox Value => base.Value as ARDB_SectionBox;

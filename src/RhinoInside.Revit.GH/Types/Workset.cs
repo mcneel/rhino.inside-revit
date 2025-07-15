@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Workset")]
-  public class Workset : ReferenceObject,
+  public sealed class Workset : ReferenceObject,
     IGH_ItemDescription
   {
     #region System.Object
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Types
       return Document?.GetWorksetTable()?.GetWorkset(Id);
     }
 
-    protected void SetValue(ARDB.Document doc, ARDB.WorksetId id)
+    void SetValue(ARDB.Document doc, ARDB.WorksetId id)
     {
       ResetValue();
 
@@ -152,13 +152,12 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    protected new class Proxy : ReferenceObject.Proxy
+    new class Proxy : ReferenceObject.Proxy
     {
-      protected new readonly Workset owner;
       public Proxy(Workset o) : base(o) { }
 
       [System.ComponentModel.Description("Element is built in Revit.")]
-      public bool IsBuiltIn => owner.IsReferencedData && owner.Id.IntegerValue < 0;
+      public bool IsBuiltIn => owner.IsReferencedData && (owner as Workset).Id.IntegerValue < 0;
     }
 
     public override IGH_GooProxy EmitProxy() => new Proxy(this);

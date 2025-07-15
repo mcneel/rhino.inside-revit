@@ -940,6 +940,7 @@ namespace RhinoInside.Revit
     {
       Exposed = true;
       MainWindow.BringToFront();
+      AuditUnits(RhinoDoc.ActiveDoc, allowNoScale: true);
     }
 
     internal static async void ShowAsync()

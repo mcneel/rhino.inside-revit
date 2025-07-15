@@ -4,7 +4,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Thermal Asset")]
-  public class ThermalAssetElement : Element
+  public sealed class ThermalAssetElement : Element
   {
     protected override Type ValueType => typeof(ARDB.PropertySetElement);
     public new ARDB.PropertySetElement Value => base.Value as ARDB.PropertySetElement;

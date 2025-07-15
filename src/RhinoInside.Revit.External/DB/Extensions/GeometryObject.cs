@@ -618,8 +618,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         case Solid solid:
           if (!solid.Faces.IsEmpty)
-            return TryGetLocation(solid.Faces.get_Item(0), out origin, out basisX, out basisY);
-
+          {
+            solid.GetBoundingBox().Transform.GetCoordSystem(out origin, out basisX, out basisY, out var _);
+            return true;
+          }
           break;
 
         case Mesh mesh:
