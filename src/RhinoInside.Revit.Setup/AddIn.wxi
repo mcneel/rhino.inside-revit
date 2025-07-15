@@ -49,11 +49,13 @@
         <Directory Id="APPLICATIONFOLDER2025" Name="2025">
           <Directory Id="INSTALLFOLDER_2025" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2025_R8" Name="R8" />
+            <Directory Id="INSTALLFOLDER_2025_R9" Name="R9" />
           </Directory>
         </Directory>
         <Directory Id="APPLICATIONFOLDER2026" Name="2026">
           <Directory Id="INSTALLFOLDER_2026" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2026_R8" Name="R8" />
+            <Directory Id="INSTALLFOLDER_2026_R9" Name="R9" />
           </Directory>
         </Directory>
       </Directory>
@@ -394,6 +396,17 @@
         <File Id="Addins.2025.R8.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
+      <Component Id="Addins.2025.R9.RhinoInsideRevit" Guid="{88096EA1-75BB-4AD0-B03D-1FCD2F6AA845}" Directory="INSTALLFOLDER_2025_R9">
+        <File Id="Addins.2025.R9.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\$(var.Configuration)-2025-R9\net8.0-windows\RhinoInside.Revit.dll"/>
+        <File Id="Addins.2025.R9.RhinoInside.Revit.xml" Source="..\RhinoInside.Revit\bin\$(var.Configuration)-2025-R9\net8.0-windows\RhinoInside.Revit.xml"/>
+        <File Id="Addins.2025.R9.RhinoInside.Revit.External.dll" Source="..\RhinoInside.Revit.External\bin\$(var.Configuration)-2025-R9\net8.0-windows\RhinoInside.Revit.External.dll"/>
+        <File Id="Addins.2025.R9.RhinoInside.Revit.AddIn.dll" Source="..\RhinoInside.Revit.AddIn\bin\$(var.Configuration)-2025-R9\net8.0-windows\RhinoInside.Revit.AddIn.dll"/>
+        <File Id="Addins.2025.R9.Lokad.ILPack.dll" Source="..\RhinoInside.Revit.AddIn\bin\$(var.Configuration)-2025-R9\net8.0-windows\Lokad.ILPack.dll"/>
+        <File Id="Addins.2025.R9.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\$(var.Configuration)-2025-R9\net8.0-windows\RhinoInside.Revit.GH.gha"/>
+        <File Id="Addins.2025.R9.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+        <File Id="Addins.2025.R9.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
+      </Component>
+
     </ComponentGroup>
   </Fragment>
 
@@ -422,6 +435,17 @@
         <File Id="Addins.2026.R8.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\$(var.Configuration)-2026-R8\net8.0-windows\RhinoInside.Revit.GH.gha"/>
         <File Id="Addins.2026.R8.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
         <File Id="Addins.2026.R8.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
+      </Component>
+
+      <Component Id="Addins.2026.R9.RhinoInsideRevit" Guid="{6C4A6642-54F4-4A05-8AAA-23309D080757}" Directory="INSTALLFOLDER_2026_R9">
+        <File Id="Addins.2026.R9.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\$(var.Configuration)-2026-R9\net8.0-windows\RhinoInside.Revit.dll"/>
+        <File Id="Addins.2026.R9.RhinoInside.Revit.xml" Source="..\RhinoInside.Revit\bin\$(var.Configuration)-2026-R9\net8.0-windows\RhinoInside.Revit.xml"/>
+        <File Id="Addins.2026.R9.RhinoInside.Revit.External.dll" Source="..\RhinoInside.Revit.External\bin\$(var.Configuration)-2026-R9\net8.0-windows\RhinoInside.Revit.External.dll"/>
+        <File Id="Addins.2026.R9.RhinoInside.Revit.AddIn.dll" Source="..\RhinoInside.Revit.AddIn\bin\$(var.Configuration)-2026-R9\net8.0-windows\RhinoInside.Revit.AddIn.dll"/>
+        <File Id="Addins.2026.R9.Lokad.ILPack.dll" Source="..\RhinoInside.Revit.AddIn\bin\$(var.Configuration)-2026-R9\net8.0-windows\Lokad.ILPack.dll"/>
+        <File Id="Addins.2026.R9.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\$(var.Configuration)-2026-R9\net8.0-windows\RhinoInside.Revit.GH.gha"/>
+        <File Id="Addins.2026.R9.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+        <File Id="Addins.2026.R9.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
     </ComponentGroup>

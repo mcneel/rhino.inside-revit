@@ -15,7 +15,7 @@
 
   <PropertyGroup Condition="$(Configuration.Contains('R9'))">
     <RhinoVersion>9</RhinoVersion>
-    <RhinoApiVersion>9.0.0.0</RhinoApiVersion>
+    <RhinoApiVersion>9.0.0.0-*</RhinoApiVersion>
     <DefineConstants>$(DefineConstants);RHINO_7;RHINO_8;RHINO_9</DefineConstants>
   </PropertyGroup>
 
