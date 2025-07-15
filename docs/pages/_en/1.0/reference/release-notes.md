@@ -12,7 +12,7 @@ group: Deployment & Configs
 - Now Import command also works with other file types than 3DM.
 
 ### RC
-- Now Rhino 8.20 is required.
+- Now Rhino 8.21 is required.
 
 {% endcapture %}
 
