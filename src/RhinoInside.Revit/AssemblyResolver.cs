@@ -149,13 +149,13 @@ namespace RhinoInside.Revit
 #if DEBUG
           Debug.Assert(location.assemblyName.Version >= requested.Version);
 #else
-        if (location.assemblyName.Version < requested.Version)
-          return default;
+          if (location.assemblyName.Version < requested.Version)
+            return default;
 #endif
 
           if (location.Assembly is null)
           {
-            // Never load an Internal assembly from an other thread than the UI thread.
+            // Never load an External assembly from an other thread than the UI thread.
             if (ThreadHandle.CurrentThreadId != ExternalThreadId && ExternalReferences.ContainsKey(location.assemblyName.Name))
               return default;
 
@@ -189,13 +189,16 @@ namespace RhinoInside.Revit
           }
         }
 
-        if (loadedAssembly is object)
+        lock (location)
         {
-          try { location.Activate(loadedAssembly); }
-          catch { }
-        }
+          if (loadedAssembly is object)
+          {
+              try { location.Activate(loadedAssembly); }
+              catch { }
+          }
 
-        return location.Assembly;
+          return location.Assembly;
+        }
       }
 
 #if NET
