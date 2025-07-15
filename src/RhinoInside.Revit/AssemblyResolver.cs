@@ -145,14 +145,8 @@ namespace RhinoInside.Revit
             return default;
           }
 
-          // Never return an older assembly.
-#if DEBUG
-          Debug.Assert(location.assemblyName.Version >= requested.Version);
-#else
-          if (location.assemblyName.Version < requested.Version)
-            return default;
-#endif
-
+#pragma warning disable SYSLIB0044 // Type or member is obsolete
+#pragma warning disable SYSLIB0012 // Type or member is obsolete
           if (location.Assembly is null)
           {
             // Never load an External assembly from an other thread than the UI thread.
@@ -165,24 +159,27 @@ namespace RhinoInside.Revit
             if (!AssemblyCanLoad(requested))
               return default;
 
-#pragma warning disable SYSLIB0044 // Type or member is obsolete
-#pragma warning disable SYSLIB0012 // Type or member is obsolete
+            // Load Assembly
 #if NET
             var assemblyPath = new Uri(location.assemblyName.CodeBase).LocalPath;
+            if
+            (
+              (requested.Name.Equals("System", StringComparison.OrdinalIgnoreCase)  ||
+              requested.Name.StartsWith("System.", StringComparison.OrdinalIgnoreCase)) &&
+              $"{Path.GetDirectoryName(assemblyPath)}\\".Equals(SystemPath, StringComparison.OrdinalIgnoreCase)
+            )
+            {
+              loadedAssembly = ExternalContext.LoadFromAssemblyName(new AssemblyName(requested.Name));
+            }
 #else
             var assemblyPath = location.assemblyName.CodeBase;
 #endif
-            // Load Assembly
-            loadedAssembly = LoadFromAssemblyPath(assemblyPath);
-
-            Debug.Assert
-            (
-              loadedAssembly.CodeBase.Equals(location.assemblyName.CodeBase, StringComparison.OrdinalIgnoreCase),
-              $"Expected = {location.assemblyName.CodeBase}" + Environment.NewLine +
-              $"Loaded = {loadedAssembly.CodeBase}"
-            );
-#pragma warning restore SYSLIB0012 // Type or member is obsolete
-#pragma warning restore SYSLIB0044 // Type or member is obsolete
+            if (loadedAssembly is null)
+            {
+              // Never return an older assembly.
+              if (location.assemblyName.Version >= requested.Version)
+                loadedAssembly = LoadFromAssemblyPath(assemblyPath);
+            }
 
             // Add again loaded assembly
             references.Add(requested.Name, location);
@@ -193,12 +190,22 @@ namespace RhinoInside.Revit
         {
           if (loadedAssembly is object)
           {
-              try { location.Activate(loadedAssembly); }
-              catch { }
+            if (!loadedAssembly.CodeBase.Equals(location.assemblyName.CodeBase, StringComparison.OrdinalIgnoreCase))
+              Logger.LogWarning
+              (
+                $"Unexpected Assembly CodeBase",
+                $"Expected = {location.assemblyName.CodeBase}",
+                $"CodeBase = {loadedAssembly.CodeBase}"
+              );
+
+            try { location.Activate(loadedAssembly); }
+            catch { }
           }
 
           return location.Assembly;
         }
+#pragma warning restore SYSLIB0012 // Type or member is obsolete
+#pragma warning restore SYSLIB0044 // Type or member is obsolete
       }
 
 #if NET
@@ -405,7 +412,6 @@ namespace RhinoInside.Revit
             // List of assembly folders in priority order.
             var paths = new (DirectoryInfo Directory, SearchOption Options)[]
             {
-              (new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)), SearchOption.AllDirectories),
 #if NET
               (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", $"win-{architecture}", "native")), SearchOption.TopDirectoryOnly),
               (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", "win", "native")), SearchOption.TopDirectoryOnly),
@@ -416,7 +422,7 @@ namespace RhinoInside.Revit
               (new DirectoryInfo(Path.Combine(SystemPath, "netcore")), SearchOption.TopDirectoryOnly),
 #endif
               (new DirectoryInfo(SystemPath), SearchOption.TopDirectoryOnly),
-              (new DirectoryInfo(PluginsPath), SearchOption.AllDirectories),
+              (new DirectoryInfo(Path.Combine(PluginsPath, "Grasshopper")), SearchOption.TopDirectoryOnly),
             };
 
             foreach (var path in paths.Where(x => x.Directory.Exists))
