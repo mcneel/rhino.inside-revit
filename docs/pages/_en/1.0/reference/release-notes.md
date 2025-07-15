@@ -9,12 +9,22 @@ group: Deployment & Configs
 {% capture rc_release_notes %}
 
 ### WIP
+- Now Import command also works with other file types than 3DM.
 
 ### RC
+- Now Rhino 8.21 is required.
 
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.32 RC3" version="v1.32.9320.16107" pre_release=true time="07/09/2025" %}
+
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.32 RC2" version="v1.32.9278.16388" pre_release=true time="05/29/2025" %}
+
+- Miscellaneous improvements and bug fixes
 
 {% include ltr/release-header.html title="v1.32 RC1" version="v1.32.9253.11783" pre_release=true time="05/13/2025" %}
 

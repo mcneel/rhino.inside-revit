@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Graphic Overrides")]
-  public class OverrideGraphicSettings : ValueObject, ICloneable
+  public sealed class OverrideGraphicSettings : ValueObject, ICloneable
   {
     #region DocumentObject
     public override string DisplayName

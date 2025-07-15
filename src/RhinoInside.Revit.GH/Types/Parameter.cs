@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Parameter")]
-  public class ParameterKey : Element,
+  public sealed class ParameterKey : Element,
     IEquatable<ParameterKey>,
     IGH_ItemDescription,
     IGH_Goo
@@ -895,7 +895,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Parameter
-    protected bool SetParameter(ARDB.Parameter parameter)
+    private bool SetParameter(ARDB.Parameter parameter)
     {
       SetValue(parameter.Element.Document, parameter.Id);
       if (parameter.Definition is ARDB.InternalDefinition definition)
