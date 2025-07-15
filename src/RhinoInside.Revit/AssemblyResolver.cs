@@ -43,14 +43,14 @@ namespace RhinoInside.Revit
 
       internal void Activate(Assembly assembly)
       {
+        Assembly = assembly;
+
 #pragma warning disable SYSLIB0044 // Type or member is obsolete
 #pragma warning disable SYSLIB0012 // Type or member is obsolete
         if (!assembly.CodeBase.Equals(assemblyName.CodeBase, StringComparison.OrdinalIgnoreCase))
           return;
 #pragma warning restore SYSLIB0012 // Type or member is obsolete
 #pragma warning restore SYSLIB0044 // Type or member is obsolete
-
-        Assembly = assembly;
 
         bool failed = false;
         if (ExternalReferences.TryGetValue(assemblyName.Name, out var InitAssembly))
@@ -166,7 +166,8 @@ namespace RhinoInside.Revit
             (
               (requested.Name.Equals("System", StringComparison.OrdinalIgnoreCase)  ||
               requested.Name.StartsWith("System.", StringComparison.OrdinalIgnoreCase)) &&
-              $"{Path.GetDirectoryName(assemblyPath)}\\".Equals(SystemPath, StringComparison.OrdinalIgnoreCase)
+              ($"{Path.GetDirectoryName(assemblyPath)}\\".Equals(SystemPath, StringComparison.OrdinalIgnoreCase) ||
+              Path.GetDirectoryName(assemblyPath).Equals(Path.Combine(SystemPath, "netcore"), StringComparison.OrdinalIgnoreCase))
             )
             {
               loadedAssembly = ExternalContext.LoadFromAssemblyName(new AssemblyName(requested.Name));
