@@ -5,6 +5,7 @@ using Autodesk.Revit.DB.Visual;
 #else
 using Autodesk.Revit.Utility;
 #endif
+using Rhino.Render;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
@@ -13,6 +14,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Materials
 {
   using Convert.System.Drawing;
+  using Convert.Render;
   using External.DB.Extensions;
   using GH.ElementTracking;
   using External.ApplicationServices.Extensions;
@@ -236,29 +238,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
       using (var editScope = new AppearanceAssetEditScope(assetElement.Document))
       {
         var asset = editScope.Start(assetElement.Id);
-
-        if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Diffuse, out Rhino.Display.Color4f diffuse))
-        {
-          var generic_diffuse = asset.FindByName(Generic.GenericDiffuse) as AssetPropertyDoubleArray4d;
-          generic_diffuse.SetValueAsDoubles(new double[] { diffuse.R, diffuse.G, diffuse.B, diffuse.A });
-        }
-
-        if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Transparency, out double transparency))
-        {
-          var generic_transparency = asset.FindByName(Generic.GenericTransparency) as AssetPropertyDouble;
-          generic_transparency.Value = transparency;
-
-          if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.TransparencyColor, out Rhino.Display.Color4f transparencyColor))
-          {
-            diffuse = diffuse.BlendTo((float) transparency, transparencyColor);
-
-            var generic_diffuse = asset.FindByName(Generic.GenericDiffuse) as AssetPropertyDoubleArray4d;
-            generic_diffuse.SetValueAsDoubles(new double[] { diffuse.R, diffuse.G, diffuse.B, diffuse.A });
-          }
-        }
-
-        // TODO: Convert more fields
-
+        asset.SetProperties(mat);
         editScope.Commit(false);
       }
 

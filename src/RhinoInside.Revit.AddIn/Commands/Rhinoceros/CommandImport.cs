@@ -19,6 +19,7 @@ using Rhino.DocObjects;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.Convert.System.Drawing;
 using RhinoInside.Revit.Convert.Units;
+using RhinoInside.Revit.Convert.Render;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.External.DB.Schemas;
 
@@ -209,8 +210,8 @@ namespace RhinoInside.Revit.AddIn.Commands
 
             if (mat.SmellsLikeMetal || mat.SmellsLikeTexturedMetal)
             {
-              var generic_self_illum_luminance = editableAsset.FindByName(Generic.GenericIsMetal) as AssetPropertyBoolean;
-              generic_self_illum_luminance.Value = true;
+              var generic_is_metal = editableAsset.FindByName(Generic.GenericIsMetal) as AssetPropertyBoolean;
+              generic_is_metal.Value = true;
             }
 
             if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Diffuse, out Rhino.Display.Color4f diffuse))
@@ -281,6 +282,27 @@ namespace RhinoInside.Revit.AddIn.Commands
               var generic_self_illum_luminance = editableAsset.FindByName(Generic.GenericSelfIllumLuminance) as AssetPropertyDouble;
               generic_self_illum_luminance.Value = self_illum ? 200000 : 0.0;
             }
+
+            if (mat.ChildSlotOn("bitmap-texture"))
+            {
+              editableAsset.SetProperty(Generic.GenericDiffuse, mat.FindChild("bitmap-texture") as Rhino.Render.RenderTexture);
+              editableAsset.SetProperty(Generic.GenericDiffuseImageFade, mat.ChildSlotAmount("bitmap-texture") * 0.01);
+            }
+            else editableAsset.SetProperty(Generic.GenericDiffuse, default(Rhino.Render.RenderTexture));
+
+            if (mat.ChildSlotOn("transparency-texture"))
+            {
+              editableAsset.SetProperty(Generic.GenericTransparency, mat.FindChild("transparency-texture") as Rhino.Render.RenderTexture);
+              editableAsset.SetProperty(Generic.GenericTransparencyImageFade, mat.ChildSlotAmount("transparency-texture") * 0.01);
+            }
+            else editableAsset.SetProperty(Generic.GenericTransparency, default(Rhino.Render.RenderTexture));
+
+            if (mat.ChildSlotOn("bump-texture"))
+            {
+              editableAsset.SetProperty(Generic.GenericBumpMap, mat.FindChild("bump-texture") as Rhino.Render.RenderTexture);
+              editableAsset.SetProperty(Generic.GenericBumpAmount, mat.ChildSlotAmount("bump-texture") * 0.01);
+            }
+            else editableAsset.SetProperty(Generic.GenericBumpMap, default(Rhino.Render.RenderTexture));
 
             editScope.Commit(false);
           }
