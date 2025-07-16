@@ -1661,6 +1661,171 @@ namespace RhinoInside.Revit.Convert.Render
       }
     }
 #endif
+
+    #region Asset
+    internal static void SetProperties(this Asset asset, RenderMaterial material)
+    {
+      var mat = material.TypeId == ContentUuids.BasicMaterialType ? material :
+               (RenderContentType.NewContentFromTypeId(ContentUuids.BasicMaterialType) as RenderMaterial);
+
+      {
+        if (material.TypeId != ContentUuids.BasicMaterialType)
+          mat.MatchData(material);
+
+        if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Diffuse, out Rhino.Display.Color4f diffuse))
+          asset.SetProperty(Generic.GenericDiffuse, diffuse);
+
+        if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.ReflectivityColor, out Rhino.Display.Color4f reflectivityColor))
+        {
+          if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Reflectivity, out double reflectivityFactor))
+          {
+            asset.SetProperty(Generic.GenericIsMetal, reflectivityColor.L * reflectivityFactor < (2.0 / 3.0));
+            if (mat.Fields.TryGetValue("fresnel-enabled", out bool fresnel_enabled) && !fresnel_enabled)
+            {
+              diffuse = diffuse.BlendTo((float) (reflectivityFactor * 0.5), reflectivityColor);
+              asset.SetProperty(Generic.GenericDiffuse, diffuse);
+            }
+          }
+        }
+
+        if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Ior, out double ior))
+          asset.SetProperty(Generic.GenericRefractionIndex, ior);
+
+        if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Shine, out double shine))
+          asset.SetProperty(Generic.GenericGlossiness, shine);
+
+        if (mat.Fields.TryGetValue("polish-amount", out double polish))
+          asset.SetProperty(Generic.GenericReflectivityAt0deg, polish * 0.5);
+
+        if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Reflectivity, out double reflectivity))
+          asset.SetProperty(Generic.GenericReflectivityAt90deg, reflectivity * 0.5);
+
+        if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Transparency, out double transparency))
+        {
+          var generic_transparency = asset.FindByName(Generic.GenericTransparency) as AssetPropertyDouble;
+          generic_transparency.Value = transparency;
+
+          if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.TransparencyColor, out Rhino.Display.Color4f transparencyColor))
+            asset.SetProperty(Generic.GenericDiffuse, diffuse.BlendTo((float) transparency, transparencyColor));
+        }
+
+        if (mat.Fields.TryGetValue("disable-lighting", out bool disable_lighting) && disable_lighting)
+          asset.SetProperty(Generic.GenericSelfIllumLuminance, 10_000.0);
+        else
+          asset.SetProperty(Generic.GenericSelfIllumLuminance, 0.0);
+
+        if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Emission, out Rhino.Display.Color4f emissionColor))
+          asset.SetProperty(Generic.GenericSelfIllumFilterMap, emissionColor);
+
+        if (mat.ChildSlotOn("bitmap-texture"))
+        {
+          asset.SetProperty(Generic.GenericDiffuse, mat.FindChild("bitmap-texture") as RenderTexture);
+          asset.SetProperty(Generic.GenericDiffuseImageFade, mat.ChildSlotAmount("bitmap-texture") * 0.01);
+        }
+        else asset.SetProperty(Generic.GenericDiffuse, default(RenderTexture));
+
+        if (mat.ChildSlotOn("transparency-texture"))
+        {
+          asset.SetProperty(Generic.GenericTransparency, mat.FindChild("transparency-texture") as RenderTexture);
+          asset.SetProperty(Generic.GenericTransparencyImageFade, mat.ChildSlotAmount("transparency-texture") * 0.01);
+        }
+        else asset.SetProperty(Generic.GenericTransparency, default(RenderTexture));
+
+        if (mat.ChildSlotOn("bump-texture"))
+        {
+          asset.SetProperty(Generic.GenericBumpMap, mat.FindChild("bump-texture") as RenderTexture);
+          asset.SetProperty(Generic.GenericBumpAmount, mat.ChildSlotAmount("bump-texture") * 0.01);
+        }
+        else asset.SetProperty(Generic.GenericBumpMap, default(RenderTexture));
+      }
+
+      if (!ReferenceEquals(material, mat))
+        mat.Dispose();
+    }
+
+    internal static void SetProperty(this Asset asset, string name, bool value)
+    {
+      using (var property = asset.FindByName(name) as AssetPropertyBoolean)
+      {
+        property.RemoveConnectedAsset();
+        property.Value = value;
+      }
+    }
+
+    internal static void SetProperty(this Asset asset, string name, int value)
+    {
+      using (var property = asset.FindByName(name) as AssetPropertyInteger)
+      {
+        property.RemoveConnectedAsset();
+        property.Value = value;
+      }
+    }
+
+    internal static void SetProperty(this Asset asset, string name, double value)
+    {
+      using (var property = asset.FindByName(name))
+      {
+        property.RemoveConnectedAsset();
+        switch (property)
+        {
+          case AssetPropertyFloat floatProperty:
+            floatProperty.Value = (float) value;
+            break;
+
+          case AssetPropertyDouble doubleProperty:
+            doubleProperty.Value = value;
+            break;
+        }
+      }
+    }
+
+    internal static void SetProperty(this Asset asset, string name, Color4f value)
+    {
+      using (var property = asset.FindByName(name) as AssetPropertyDoubleArray4d)
+      {
+        property.RemoveConnectedAsset();
+        property.SetValueAsDoubles(new double[] { value.R, value.G, value.B, value.A });
+      }
+    }
+
+    internal static void SetProperty(this Asset asset, string name, string value)
+    {
+      using (var property = asset.FindByName(name) as AssetPropertyString)
+      {
+        property.RemoveConnectedAsset();
+        property.Value = value;
+      }
+    }
+
+    internal static void SetProperty(this Asset asset, string name, RenderTexture value)
+    {
+      using (var property = asset.FindByName(name) as AssetPropertyDoubleArray4d)
+      {
+        if (property is object)
+        {
+          property.RemoveConnectedAsset();
+
+          if (value is object)
+          {
+            if (value.TypeId == ContentUuids.SimpleBitmapTextureType)
+            {
+              property.AddConnectedAsset("UnifiedBitmap");
+              var bitmap = property.GetSingleConnectedAsset();
+
+              bitmap.SetProperty(UnifiedBitmap.UnifiedbitmapBitmap, value.Filename);
+            }
+            else if (value.TypeId == ContentUuids.BitmapTextureType)
+            {
+              property.AddConnectedAsset("UnifiedBitmap");
+              var bitmap = property.GetSingleConnectedAsset();
+
+              bitmap.SetProperty(UnifiedBitmap.UnifiedbitmapBitmap, value.Filename);
+            }
+          }
+        }
+      }
+    }
+    #endregion
 #endif
   }
 }
