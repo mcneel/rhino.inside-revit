@@ -314,7 +314,7 @@ namespace Rhino.Geometry
 
       public NurbsCurve Loop
       {
-        get { if (Plane.IsValid && loop is null) loop = Curve.ProjectToPlane(Face.OuterLoop.To3dCurve()?.ToNurbsCurve(), Plane) as NurbsCurve; return loop; }
+        get { if (Plane.IsValid && loop is null) loop = Face.OuterLoop?.To3dCurve()?.ToNurbsCurve().ProjectToPlane(Plane) as NurbsCurve; return loop; }
       }
       public Point3d Centroid
       {
@@ -403,7 +403,7 @@ namespace Rhino.Geometry
                         ToArray();
 
       // A capped Extrusion converted to Brep has wall surfaces in face[0] to face[N-3], caps are face[N-2] and face[N-1]
-      // I iterate in reverse order to be optimisitc, maybe brep comes from an Extrusion.ToBrep() call
+      // I iterate in reverse order to be optimistic, maybe brep comes from an Extrusion.ToBrep() call
       for (int f = planarFaces.Length - 1; f > 0; --f)
       {
         var planeF = planarFaces[f].Plane;
@@ -483,7 +483,7 @@ namespace Rhino.Geometry
           Where(face => face.FaceIndex != startFace.Face.FaceIndex && face.FaceIndex != endFace.Face.FaceIndex).
           Any(face => !startFace.ProjectionDegenartesToCurve(face.UnderlyingSurface()))
         )
-          return false;
+          continue;
 
         // We use the orginal OuterLoop as profile not the NURBS version of it
         // to keep the structure as much as possible
@@ -841,7 +841,7 @@ namespace Rhino.Geometry
         t0 = t;
         var domain = curve.Domain;
 
-        var below = t == domain.T1 ?
+        var below = t == domain.T0 ?
           curve.DerivativeAt(domain.T1, 2) :
           curve.DerivativeAt(t, 2, CurveEvaluationSide.Below);
 
@@ -896,6 +896,54 @@ namespace Rhino.Geometry
       var t = domain.T0;
       while (curve.GetNextDiscontinuity(continuity, t, domain.T1, tol1, tol2, out t))
         yield return t;
+    }
+
+    public static Curve ProjectToPlane(this Curve curve, Plane plane)
+    {
+      switch (curve)
+      {
+        case null:
+          return null;
+
+        case LineCurve line:
+          var from = plane.ClosestPoint(line.PointAtStart);
+          var to = plane.ClosestPoint(line.PointAtEnd);
+          return new LineCurve(new Line(from, to)) { Domain = curve.Domain };
+
+        case PolylineCurve polyline:
+          var points = new Point3d[polyline.PointCount];
+          for (int p = 0; p < points.Length; ++p)
+            points[p] = plane.ClosestPoint(polyline.Point(p));
+          return new PolylineCurve(points) { Domain = curve.Domain };
+
+        case ArcCurve arc:
+
+          var arcArc = arc.Arc;
+          if (arcArc.Plane.Normal.EpsilonEquals(plane.Normal, RhinoMath.ZeroTolerance))
+          {
+            var origin = plane.ClosestPoint(arcArc.Plane.Origin);
+            arcArc.Plane = new Plane
+            (
+              origin,
+              plane.ClosestPoint(arcArc.Plane.Origin + arcArc.Plane.XAxis) - origin,
+              plane.ClosestPoint(arcArc.Plane.Origin + arcArc.Plane.YAxis) - origin
+            );
+            return new ArcCurve(arcArc) { Domain = curve.Domain };
+          }
+          else return Curve.ProjectToPlane(curve.ToNurbsCurve(), plane);
+
+        case PolyCurve polycurve:
+
+          var poly = new PolyCurve();
+          for (var s = 0; s < polycurve.SegmentCount; ++s)
+            poly.AppendSegment(ProjectToPlane(polycurve.SegmentCurve(s), plane));
+
+          poly.Domain = curve.Domain;
+          return poly;
+
+        default:
+          return Curve.ProjectToPlane(curve.ToNurbsCurve(), plane);
+      }
     }
   }
 

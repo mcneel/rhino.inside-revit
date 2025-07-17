@@ -34,6 +34,13 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
     {
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
 
+      // Check if is view specific
+      if (element.ViewSpecific is true && element.OwnerView is Types.View view)
+      {
+        DA.SetData("Host", view.Viewer);
+        return;
+      }
+
       // Ask first to Element, maybe it knows its Host
       if (element is Types.IHostElementAccess access)
       {

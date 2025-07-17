@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Curtain Cell")]
-  public class CurtainCell : DocumentObject,
+  public sealed class CurtainCell : DocumentObject,
     IGH_PreviewData
   {
     public new ARDB.CurtainCell Value => base.Value as ARDB.CurtainCell;
@@ -159,7 +159,7 @@ namespace RhinoInside.Revit.GH.Types
           var curves = new List<Curve>();
           foreach (var loop in planarCurves)
           {
-            var curve = Curve.ProjectToPlane(loop, plane);
+            var curve = loop.ProjectToPlane(plane);
             bbox.Union(curve.GetBoundingBox(plane));
             curves.Add(curve);
           }

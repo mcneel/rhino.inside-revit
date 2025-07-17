@@ -5,22 +5,86 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Windows.Forms.Interop;
 using System.Windows.Input;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using GH_IO.Serialization;
+using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
+using Grasshopper.Plugin;
 using Microsoft.Win32.SafeHandles;
+using Rhino;
 
 namespace RhinoInside.Revit.AddIn.Commands
 {
   using Convert.Geometry;
   using External.DB.Extensions;
+
+  /// <summary>
+  /// If you are here looking for a way to call Grasshopper Player from your Revit AddIn.
+  /// Please copy just the following `GrasshopperPlayer` type on your project.
+  /// </summary>
+  /// <example>
+  /// if (GrasshopperPlayer.IsAvailable)
+  /// {
+  ///   var result = GrasshopperPlayer.Play("C:\Grasshopper-Definition.gh", data.Application, data.View, out var message);
+  /// }
+  /// </example>
+  static class GrasshopperPlayer
+  {
+    private static System.Reflection.Assembly _RhinoInsideRevitAddIn;
+    private static System.Reflection.Assembly RhinoInsideRevitAddIn => _RhinoInsideRevitAddIn ??=
+      AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.StartsWith("RhinoInside.Revit.AddIn,"));
+
+    private static Type _CommandGrasshopperPlayer;
+    private static Type CommandGrasshopperPlayer =>_CommandGrasshopperPlayer ??=
+      GetAvailableTypes(RhinoInsideRevitAddIn).FirstOrDefault(x => x.FullName == "RhinoInside.Revit.AddIn.Commands.CommandGrasshopperPlayer");
+
+    private static IEnumerable<Type> GetAvailableTypes(System.Reflection.Assembly assembly)
+    {
+      try { return assembly?.DefinedTypes; }
+      catch (System.Reflection.ReflectionTypeLoadException e) { return e.Types.OfType<Type>(); }
+    }
+
+    private static System.Reflection.MethodInfo _Execute;
+    private static System.Reflection.MethodInfo Execute => _Execute ??= CommandGrasshopperPlayer?.GetMethod
+      (
+        "Execute", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.InvokeMethod, default,
+        new Type[]
+        {
+          typeof(Autodesk.Revit.UI.UIApplication),
+          typeof(Autodesk.Revit.DB.View),
+          typeof(System.Collections.Generic.IDictionary<string, string>),
+          typeof(string),
+          typeof(string).MakeByRefType()
+        },
+        default
+      );
+
+    public static bool IsAvailable => Execute is object;
+
+    public static Autodesk.Revit.UI.Result Play(string filePath, UIApplication app, View view, out string message)
+    {
+      message = string.Empty;
+      return (Autodesk.Revit.UI.Result) Execute.Invoke
+      (
+        null, System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.InvokeMethod, default,
+        new object[]
+        {
+          app,
+          view,
+          new System.Collections.Generic.Dictionary<string, string>(),
+          filePath,
+          message
+        },
+        default
+      );
+    }
+  }
 
   [Transaction(TransactionMode.Manual), Regeneration(RegenerationOption.Manual)]
   class CommandGrasshopperPlayer : GrasshopperCommand
@@ -95,6 +159,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
     }
 
+    #region Prompt
     internal static IList<IGH_Param> GetInputParams(GH_Document definition)
     {
       var inputs = new List<IGH_Param>();
@@ -342,6 +407,7 @@ namespace RhinoInside.Revit.AddIn.Commands
 
       return null;
     }
+    #endregion
 
     public override Result Execute(ExternalCommandData data, ref string message, ElementSet elements)
     {
@@ -352,6 +418,82 @@ namespace RhinoInside.Revit.AddIn.Commands
       }
 
       return result;
+    }
+
+    private struct RunInCommandContextGuard : IDisposable
+    {
+      public readonly GH_Document Document;
+      private readonly bool DocumentWasModified;
+      private readonly bool DocumentWasEnabled;
+      private readonly bool SolverWasEnabled;
+
+      private readonly RhinoDoc RhinoDocument;
+      private readonly uint UndoRecord;
+
+      public RunInCommandContextGuard(GH_Document document)
+      {
+        Document = document;
+        RhinoDocument = document.RhinoDocument();
+        DocumentWasModified = document.IsModified;
+        DocumentWasEnabled = document.Enabled;
+        SolverWasEnabled = GH_Document.EnableSolutions;
+
+        GH_Document.EnableSolutions = true;
+        document.Enabled = true;
+
+        var urName = File.Exists(document.FilePath) ? Path.GetFileNameWithoutExtension(document.FilePath).Replace("-", " ") : "unnamed";
+        UndoRecord = RhinoDocument?.BeginUndoRecord(urName) ?? 0;
+      }
+
+      void IDisposable.Dispose()
+      {
+        RhinoDocument?.EndUndoRecord(UndoRecord);
+
+        Document.IsModified = DocumentWasModified;
+        Document.Enabled = DocumentWasEnabled;
+        GH_Document.EnableSolutions = SolverWasEnabled;
+      }
+    }
+
+    internal static Result Execute
+    (
+      UIApplication app,
+      View view,
+      IDictionary<string, string> journalData,
+      GH_Document definition,
+      ref string message
+    )
+    {
+      if (definition is null) return Result.Failed;
+      if (definition.RhinoDocument() is RhinoDoc rhinoDocument && rhinoDocument != RhinoDoc.ActiveDoc) return Result.Failed;
+
+      try
+      {
+        using (new RunInCommandContextGuard(definition))
+        {
+          using (var transGroup = new TransactionGroup(app.ActiveUIDocument.Document))
+          {
+            transGroup.Start(definition.GetTransactionName());
+
+            definition.NewSolution(expireAllObjects: true);
+
+            if (definition.SolutionState == GH_ProcessStep.Aborted)
+            {
+              message = $"Solution aborted by user after ~{definition.SolutionSpan.TotalSeconds} seconds";
+              return Result.Cancelled;
+            }
+
+            transGroup.Assimilate();
+          }
+        }
+      }
+      catch (Exception e)
+      {
+        message = e.Message;
+        return Result.Failed;
+      }
+
+      return Result.Succeeded;
     }
 
     public static Result Execute
@@ -367,74 +509,164 @@ namespace RhinoInside.Revit.AddIn.Commands
       {
         // Load Grasshopper window in case the user has not did it before.
         // This enables definitions that relay on Grasshopper window like those that show UI.
-        GH.Guest.LoadEditor();
+        var script = new GH_RhinoScriptInterface();
+        script.DisableBanner();
+        script.LoadEditor();
 
-        var result = ReadFromFile(filePath, out var definition);
-        if (result == Result.Succeeded)
+        var remotePanelVisible = Instances.IsRemotePanelVisible;
+        var editorWasEnabled = Instances.ActiveCanvas.ModifiersEnabled;
+        var editorWasVisible = Instances.DocumentEditor.Visible;
+
+        if (editorWasVisible)
         {
-          using (definition)
+          Instances.DocumentEditor.FadeOut();
+        }
+        if (editorWasEnabled) Instances.DocumentEditor.DisableUI();
+
+        var index = Instances.DocumentServer.IndexOf(filePath);
+        var wasOpen = index >= 0;
+        var document = default(GH_Document);
+        {
+          if (wasOpen)
           {
-            bool enableSolutions = GH_Document.EnableSolutions;
-            var currentCulture = Thread.CurrentThread.CurrentCulture;
-            try
-            {
-              using (var transGroup = new TransactionGroup(app.ActiveUIDocument.Document))
-              {
-                transGroup.Start(Path.GetFileNameWithoutExtension(definition.Properties.ProjectFileName));
+            document = Instances.DocumentServer[index];
+            document.ExpireSolution();
+          }
+          else
+          {
+            var io = new GH_DocumentIO();
+            if (!io.Open(filePath)) return (Result.Failed, default);
+            document = io.Document;
 
-                GH_Document.EnableSolutions = true;
-                definition.Enabled = true;
-                definition.ExpireSolution();
-
-                var inputs = GetInputParams(definition);
-                result = PromptForInputs(app.ActiveUIDocument, inputs, out var values);
-                if (result != Result.Succeeded)
-                  return (result, default);
-
-                // Update input volatile data values
-                foreach (var value in values)
-                  value.Key.AddVolatileDataList(new Grasshopper.Kernel.Data.GH_Path(0), value.Value);
-
-                Grasshopper.Instances.EnforceInvariantCulture();
-                using (var modal = new ModalScope())
-                {
-                  definition.NewSolution(false, GH_SolutionMode.Silent);
-
-                  do
-                  {
-                    if (modal.Run(false, false) == Result.Failed)
-                      return (Result.Failed, default);
-
-                  } while (definition.ScheduleDelay >= GH_Document.ScheduleRecursive);
-                }
-                Thread.CurrentThread.CurrentCulture = currentCulture;
-
-                if (definition.SolutionState == GH_ProcessStep.Aborted)
-                {
-                  return (Result.Cancelled, $"Solution aborted by user after ~{ definition.SolutionSpan.TotalSeconds} seconds");
-                }
-
-                transGroup.Assimilate();
-              }
-            }
-            catch (Exception e)
-            {
-              return (Result.Failed, e.Message);
-            }
-            finally
-            {
-              Thread.CurrentThread.CurrentCulture = currentCulture;
-              GH_Document.EnableSolutions = enableSolutions;
-            }
+            Instances.DocumentServer.AddDocument(document);
           }
         }
 
-        return (result, default);
-      }, default);
+        // Synchronize units.
+        GH.Guest.AuditUnits(view.Document);
+
+        // Activate the document without computing it
+        if (Instances.ActiveCanvas.Document != document)
+        {
+          var enableSolutions = GH_Document.EnableSolutions;
+          try
+          {
+            GH_Document.EnableSolutions = false;
+            Instances.ActiveCanvas.Document = document;
+            document.Enabled = false;
+            if (!wasOpen) document.IsModified = false;
+          }
+          finally
+          {
+            GH_Document.EnableSolutions = enableSolutions;
+            document.Enabled = true;
+          }
+        }
+
+        if (document.RemotePanelLayout.Count > 0) Instances.ShowRemotePanel();
+
+        var m = default(string);
+        var result = Execute(app, view, journalData, document, ref m);
+        if (!document.KeepOpen() || result != Result.Succeeded)
+        {
+          if (!remotePanelVisible) Instances.HideRemotePanel();
+          if (!wasOpen) Instances.DocumentServer.RemoveDocument(document);
+        }
+
+        if (editorWasEnabled) Instances.DocumentEditor.EnableUI();
+        if (editorWasVisible)
+        {
+          Instances.DocumentEditor.FadeIn();
+        }
+
+        return (result, m);
+      });
 
       message = msg;
       return res;
     }
+
+    //public static Result Execute
+    //(
+    //  UIApplication app,
+    //  View view,
+    //  IDictionary<string, string> journalData,
+    //  string filePath,
+    //  ref string message
+    //)
+    //{
+    //  var (res, msg) = External.ActivationGate.Open(() =>
+    //  {
+    //    // Load Grasshopper window in case the user has not did it before.
+    //    // This enables definitions that relay on Grasshopper window like those that show UI.
+    //    GH.Guest.LoadEditor();
+
+    //    var result = ReadFromFile(filePath, out var definition);
+    //    if (result == Result.Succeeded)
+    //    {
+    //      using (definition)
+    //      {
+    //        bool enableSolutions = GH_Document.EnableSolutions;
+    //        var currentCulture = Thread.CurrentThread.CurrentCulture;
+    //        try
+    //        {
+    //          using (var transGroup = new TransactionGroup(app.ActiveUIDocument.Document))
+    //          {
+    //            transGroup.Start(definition.GetTransactionName());
+
+    //            GH_Document.EnableSolutions = true;
+    //            definition.Enabled = true;
+    //            definition.ExpireSolution();
+
+    //            var inputs = GetInputParams(definition);
+    //            result = PromptForInputs(app.ActiveUIDocument, inputs, out var values);
+    //            if (result != Result.Succeeded)
+    //              return (result, default);
+
+    //            // Update input volatile data values
+    //            foreach (var value in values)
+    //              value.Key.AddVolatileDataList(new Grasshopper.Kernel.Data.GH_Path(0), value.Value);
+
+    //            Grasshopper.Instances.EnforceInvariantCulture();
+    //            using (var modal = new ModalScope())
+    //            {
+    //              definition.NewSolution(false, GH_SolutionMode.Silent);
+
+    //              do
+    //              {
+    //                if (modal.Run(false, false) == Result.Failed)
+    //                  return (Result.Failed, default);
+
+    //              } while (definition.ScheduleDelay >= GH_Document.ScheduleRecursive);
+    //            }
+    //            Thread.CurrentThread.CurrentCulture = currentCulture;
+
+    //            if (definition.SolutionState == GH_ProcessStep.Aborted)
+    //            {
+    //              return (Result.Cancelled, $"Solution aborted by user after ~{ definition.SolutionSpan.TotalSeconds} seconds");
+    //            }
+
+    //            transGroup.Assimilate();
+    //          }
+    //        }
+    //        catch (Exception e)
+    //        {
+    //          return (Result.Failed, e.Message);
+    //        }
+    //        finally
+    //        {
+    //          Thread.CurrentThread.CurrentCulture = currentCulture;
+    //          GH_Document.EnableSolutions = enableSolutions;
+    //        }
+    //      }
+    //    }
+
+    //    return (result, default);
+    //  }, default);
+
+    //  message = msg;
+    //  return res;
+    //}
   }
 
   /// <summary>

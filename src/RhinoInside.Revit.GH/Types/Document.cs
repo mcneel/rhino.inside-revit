@@ -724,6 +724,15 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Elements
+
+    internal T GetElement<T>(ARDB.ElementId id) where T : Element, new()
+    {
+      if (Value is ARDB.Document document && id.IsValid())
+        return (T) Element.FromElementId(document, id);
+
+      return id == ElementIdExtension.Invalid ? new T() : null;
+    }
+
     public Element GetNamesakeElement(Element element)
     {
       if (element is object)

@@ -123,7 +123,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
   public class GraphicsStyle : Element<Types.GraphicsStyle, ARDB.GraphicsStyle>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
     public override Guid ComponentGuid => new Guid("833E6207-BA60-4C6B-AB8B-96FDA0F91822");
 
     public GraphicsStyle() : base("Line Style", "Line Style", "Contains a collection of Revit line styles", "Params", "Revit Elements") { }

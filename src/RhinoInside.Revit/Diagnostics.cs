@@ -58,7 +58,7 @@ namespace RhinoInside.Revit
           taskDialog.DefaultButton = TaskDialogResult.CommandLink1;
           if (taskDialog.Show() == TaskDialogResult.CommandLink1)
           {
-            System.Windows.Forms.Clipboard.SetText(url);
+            Clipboard.SetText(url);
           }
         }
       }
@@ -366,7 +366,17 @@ namespace RhinoInside.Revit
 
         mailBody = Uri.EscapeDataString(mailBody);
 
-        using (Process.Start(mailtoURI + mailBody)) { }
+        try
+        {
+          var startInfo = new ProcessStartInfo(mailtoURI + mailBody)
+          {
+            UseShellExecute = true,
+            WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+          };
+
+          using (Process.Start(startInfo)) { }
+        }
+        catch { }
       }
 
       public static Result ShowLoadError()
@@ -874,7 +884,7 @@ namespace RhinoInside.Revit
         Warning = -1, // '⚠'
         Trace = 0,
         Information = +1, // 'ℹ'
-        Succeded = +2, // '✔️'
+        Succeeded = +2, // '✔️'
         Return = +3, // '⤶'
       }
 
@@ -886,7 +896,7 @@ namespace RhinoInside.Revit
           case Severity.Critical: return "⛔";
           case Severity.Warning: return "⚠️";
           case Severity.Error: return "❌";
-          case Severity.Succeded: return "✔️";
+          case Severity.Succeeded: return "✔️";
           case Severity.Information: return "ℹ️";
           case Severity.Return: return "⤶";
         }
@@ -908,7 +918,7 @@ namespace RhinoInside.Revit
         Log(Entry.Next(), EntryRole.Main, Severity.Information, name, details);
 
       public static void LogSucceded([CallerMemberName] string name = "", params string[] details) =>
-        Log(Entry.Next(), EntryRole.Main, Severity.Succeded, name, details);
+        Log(Entry.Next(), EntryRole.Main, Severity.Succeeded, name, details);
 
       public static void LogWarning([CallerMemberName] string name = "", params string[] details) =>
         Log(Entry.Next(), EntryRole.Main, Severity.Warning, name, details);

@@ -46,8 +46,7 @@ namespace RhinoInside.Revit.GH.Types
     )
     {
       // 1. Check if is already cloned
-      if (idMap.TryGetValue(Id, out guid))
-        return true;
+      guid = Guid.Empty;
 
       // 3. Update if necessary
       if (Value is ARDB.FamilyInstance element)
@@ -87,10 +86,7 @@ namespace RhinoInside.Revit.GH.Types
               }
 
               if (guid != Guid.Empty)
-              {
-                idMap.Add(Id, guid);
                 return true;
-              }
             }
           }
         }
@@ -130,6 +126,7 @@ namespace RhinoInside.Revit.GH.Types
                 attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
                 attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
                 attributes.Layer = Category?.ToModelContent(idMap) as ModelLayer;
+                attributes.Frame = Location;
 
                 modelContent = attributes.ToModelData() as ModelContent;
                 //idMap.Add(Id, modelContent);
@@ -225,7 +222,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override void SetCurve(Curve curve, bool keepJoins = false)
     {
-      if (curve is object && Value is ARDB.FamilyInstance instance && curve is object)
+      if (curve is object && Value is ARDB.FamilyInstance instance)
       {
         if (instance.Location is ARDB.LocationCurve locationCurve)
         {
@@ -328,7 +325,19 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.FamilyInstance instance)
         {
           var host = GetElement<GraphicalElement>(instance.Host);
-          return instance.HostFace is ARDB.Reference hostFace ? host?.GetElementFromReference<GraphicalElement>(hostFace) : host;
+          host = instance.HostFace is ARDB.Reference hostFace ? host?.GetElementFromReference<GraphicalElement>(hostFace) : host;
+          if (host is object) return host;
+
+          switch ((Type.Value as ARDB.FamilySymbol).Family?.FamilyPlacementType)
+          {
+            case ARDB.FamilyPlacementType.OneLevelBased:
+            case ARDB.FamilyPlacementType.OneLevelBasedHosted:
+            case ARDB.FamilyPlacementType.TwoLevelsBased:
+              return Level;
+
+            case ARDB.FamilyPlacementType.ViewBased:
+              return OwnerView.Viewer;
+          }
         }
 
         return default;

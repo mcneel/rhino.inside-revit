@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
   [ComponentVersion(introduced: "1.12")]
   public class Annotation : GraphicalElement<Types.IGH_Annotation, ARDB.Element>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("35D2829E-1F8E-494D-8D93-A4D2A7351729");
     protected override string IconTag => string.Empty;
 

@@ -141,6 +141,9 @@ namespace RhinoInside.Revit
 
     internal static ARUI.Result Startup()
     {
+      if (Core.CurrentStatus < Core.Status.Available)
+        return ARUI.Result.Failed;
+
       if (!RhinoApp.CanSave)
         return ARUI.Result.Cancelled;
 
@@ -937,6 +940,7 @@ namespace RhinoInside.Revit
     {
       Exposed = true;
       MainWindow.BringToFront();
+      AuditUnits(RhinoDoc.ActiveDoc, allowNoScale: true);
     }
 
     internal static async void ShowAsync()

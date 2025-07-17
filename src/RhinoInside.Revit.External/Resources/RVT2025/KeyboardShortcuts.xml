@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Shortcuts>
-  <ShortcutItem CommandId="CustomCtrl_%CustomCtrl_%Rhino.Inside%More%CommandStart" Shortcuts="R#Ctrl+R" />
   <ShortcutItem CommandId="CustomCtrl_%PanelConfiguration%Configuration" Shortcuts="CFG" />
   <ShortcutItem CommandId="CustomCtrl_%PanelParts%Split" Shortcuts="PL" />
   <ShortcutItem CommandId="CustomCtrl_%panelReinforcement%Reinforcement" Shortcuts="RF" />

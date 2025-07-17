@@ -96,6 +96,7 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.SpatialElementTag _:      return true;
         case ARDB.IndependentTag _:         return true;
 
+        case ARDB.Structure.BoundaryConditions _: return true;
 #if REVIT_2023
         case ARDB.Structure.AnalyticalElement _: return true;
 #else
@@ -786,7 +787,7 @@ namespace RhinoInside.Revit.GH.Types
           return ARDB.WallUtils.IsWallJoinAllowedAtEnd(wall, end);
 
         case ARDB.FamilyInstance instance:
-          if (StructuralMember.IsStructuralFraming(instance))
+          if (StructuralInstance.IsStructuralFraming(instance))
             return ARDB.Structure.StructuralFramingUtils.IsJoinAllowedAtEnd(instance, end);
 
           break;
@@ -808,7 +809,7 @@ namespace RhinoInside.Revit.GH.Types
             return;
 
           case ARDB.FamilyInstance instance:
-            if (StructuralMember.IsStructuralFraming(instance))
+            if (StructuralInstance.IsStructuralFraming(instance))
             {
               if (allow.Value) ARDB.Structure.StructuralFramingUtils.AllowJoinAtEnd(instance, end);
               else ARDB.Structure.StructuralFramingUtils.DisallowJoinAtEnd(instance, end);

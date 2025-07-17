@@ -141,7 +141,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           (
             revision,
             doc.Value,
-            description, date,
+            date, description,
             issuedBy, issuedTo,
             issued,
             ARDB.RevisionVisibility.CloudAndTagVisible
@@ -159,8 +159,8 @@ namespace RhinoInside.Revit.GH.Components.Sheets
     (
       ARDB.Revision revision,
       ARDB.Document document,
-      string description,
       string date,
+      string description,
       string issuedBy,
       string issuedTo,
       bool? issued,
@@ -170,7 +170,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       if (revision is null)
         revision = ARDB.Revision.Create(document);
 
-      RevisionIssue.Invoke(this, revision, description, date, issuedBy, issuedTo, issued);
+      RevisionIssue.Invoke(this, revision, date, description, issuedBy, issuedTo, issued);
 
       if (visibility is object && visibility.Value != revision.Visibility)
         revision.Visibility = visibility.Value;

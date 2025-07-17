@@ -5,6 +5,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino;
+using Rhino.Display;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
@@ -20,7 +21,6 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Display;
   using Convert.DocObjects;
   using Convert.Geometry;
-  using Convert.System.Drawing;
   using External.DB;
   using External.DB.Extensions;
 
@@ -85,6 +85,46 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Preview
+    internal static void BuildPreview
+    (
+      ARDB.Element element, MeshingParameters meshingParameters, ARDB.ViewDetailLevel detailLevel,
+      out ARDB.View view, List<ARDB.Material> materials, List<Mesh> meshes, List<Curve> wires
+    )
+    {
+      bool voidGeometry = element is ARDB.GenericForm form && !form.IsSolid;
+
+      using
+      (
+        var options = element.ViewSpecific ?
+        new ARDB.Options() { View = element.Document.GetElement(element.OwnerViewId) as ARDB.View, IncludeNonVisibleObjects = voidGeometry } :
+        new ARDB.Options() { DetailLevel = detailLevel == ARDB.ViewDetailLevel.Undefined ? ARDB.ViewDetailLevel.Medium : detailLevel, IncludeNonVisibleObjects = voidGeometry }
+      )
+      {
+        view = options.View;
+        using (var geometry = element?.GetGeometry(options))
+        {
+          if (geometry is null)
+          {
+            materials = null;
+            meshes = null;
+            wires = null;
+          }
+          else
+          {
+            wires.AddRange(geometry.GetPreviewWires().Where(x => x is object));
+            if (!voidGeometry)
+            {
+              var categoryMaterial = element.Category?.Material;
+              var elementMaterial = geometry.MaterialElement ?? categoryMaterial;
+
+              meshes?.AddRange(geometry.GetPreviewMeshes(element.Document, meshingParameters));
+              materials?.AddRange(geometry.GetPreviewMaterials(element.Document, elementMaterial));
+            }
+          }
+        }
+      }
+    }
+
     internal static void BuildPreview
     (
       ARDB.Element element, MeshingParameters meshingParameters, ARDB.ViewDetailLevel detailLevel,
@@ -168,44 +208,109 @@ namespace RhinoInside.Revit.GH.Types
       readonly BoundingBox clippingBox;
       public readonly MeshingParameters MeshingParameters;
       public Rhino.Display.DisplayMaterial[] materials;
-      static readonly Rhino.Display.DisplayMaterial[] empty_materials = Array.Empty<Rhino.Display.DisplayMaterial>();
       public Mesh[] meshes;
-      static readonly Mesh[] empty_meshes = Array.Empty<Mesh>();
       public Curve[] wires;
-      static readonly Curve[] empty_wires = Array.Empty<Curve>();
-
+      public Curve[] highlights;
       static List<Preview> previewsQueue;
 
       void Build()
       {
         if (!geometricElement.IsValid || !clippingBox.IsValid)
         {
-          materials = empty_materials;
-          meshes = empty_meshes;
-          wires = empty_wires;
+          materials = Array.Empty<DisplayMaterial>();
+          meshes = Array.Empty<Mesh>();
+          wires = Array.Empty<Curve>();
+          highlights = Array.Empty<Curve>();
         }
-        else if (meshes is null && wires is null && materials is null)
+        else if (meshes is null && wires is null && materials is null && highlights is null)
         {
           var element = geometricElement.Document.GetElement(geometricElement.Id);
           if (element is null)
             return;
 
-          BuildPreview(element, MeshingParameters, ARDB.ViewDetailLevel.Undefined, out var materialElements, out meshes, out wires);
+          var elementMaterials = new List<ARDB.Material>();
+          var elementMeshes = new List<Mesh>();
+          var elementWires = new List<Curve>();
+          var elementHighlight = new List<Curve>();
+          BuildPreview(element, MeshingParameters, ARDB.ViewDetailLevel.Undefined, out var elementView, default, elementMeshes, elementWires);
 
-          // Combine meshes of same material for display performance
-          if (meshes is object && materialElements is object)
+          //if (element.Location is ARDB.LocationCurve elementCurve)
+          //  elementHighlight.Add(elementCurve.Curve.ToCurve());
+
+          // Extract dependents preview
           {
-            var outMesh = new Mesh();
-            var dictionary = PreviewConverter.ZipByMaterial(materialElements, meshes, outMesh);
-            if (outMesh.Faces.Count > 0)
+            var dependents = new List<ARDB.ElementId>();
+            switch (element)
             {
-              materials = dictionary.Keys.Select(DisplayMaterialConverter.ToDisplayMaterial).Concat(Enumerable.Repeat(new Rhino.Display.DisplayMaterial(), 1)).ToArray();
-              meshes = dictionary.Values.Concat(Enumerable.Repeat(outMesh, 1)).ToArray();
+              case ARDB.FamilyInstance instance:
+                dependents.AddRange(instance.GetSubComponentIds());
+                break;
+
+              case ARDB.Wall wall:
+                if (wall.IsStackedWall) dependents.AddRange(wall.GetStackedWallMemberIds());
+                if (wall.CurtainGrid is ARDB.CurtainGrid grid) dependents.AddRange(grid.GetMullionIds().Concat(grid.GetPanelIds()));
+                break;
+
+              case ARDB.BeamSystem beamSystem:
+                dependents.AddRange(beamSystem.GetBeamIds());
+                break;
+
+              case ARDB.Architecture.Railing railing:
+                if (railing.TopRail.IsValid()) dependents.Add(railing.TopRail);
+                dependents.AddRange(railing.GetHandRails());
+                break;
+
+              default:
+                if (elementWires.Count == 0 && elementMeshes.Count == 0 && element.get_BoundingBox(elementView) is ARDB.BoundingBoxXYZ)
+                  dependents.AddRange(element.GetDependentElements(CompoundElementFilter.ElementHasBoundingBoxFilter));
+                break;
+            }
+
+            //if (element is ARDB.HostObject hostObject)
+            //  dependents.AddRange(hostObject.FindInserts(false, false, false, false));
+
+            foreach (var dependent in dependents.Select(element.Document.GetElement))
+              BuildPreview(dependent, MeshingParameters, ARDB.ViewDetailLevel.Undefined, out var _, null, null, elementHighlight);
+          }
+
+          // Optimize for display
+          {
+            wires = elementWires.ToArray();
+            highlights = elementHighlight.ToArray();
+
+            foreach (var elementMesh in elementMeshes)
+              elementMesh.Normals.ComputeNormals();
+
+            // Combine meshes of same material for display performance
+            if (elementMeshes.Count > 0 && elementMeshes.Count == elementMaterials.Count)
+            {
+              var outMesh = new Mesh();
+              var dictionary = PreviewConverter.ZipByMaterial(elementMaterials, elementMeshes, outMesh);
+              if (outMesh.Faces.Count > 0)
+              {
+                var pairs = dictionary;//.OrderBy(x => x.Key.Transparency).ToList();
+                materials = pairs.Select(x => DisplayMaterialConverter.ToDisplayMaterial(x.Key)).Concat(Enumerable.Repeat(new DisplayMaterial(), 1)).ToArray();
+                meshes = pairs.Select(x => x.Value).Concat(Enumerable.Repeat(outMesh, 1)).ToArray();
+              }
+              else
+              {
+                var pairs = dictionary;//.OrderBy(x => x.Key.Transparency).ToList();
+                materials = pairs.Select(x => DisplayMaterialConverter.ToDisplayMaterial(x.Key)).ToArray();
+                meshes = pairs.Select(x => x.Value).ToArray();
+              }
             }
             else
             {
-              materials = dictionary.Keys.Select(DisplayMaterialConverter.ToDisplayMaterial).ToArray();
-              meshes = dictionary.Values.ToArray();
+              materials = Array.Empty<DisplayMaterial>();
+              if (elementMeshes.Count > 1)
+              {
+                var combined = new Mesh();
+                foreach (var mesh in elementMeshes)
+                  combined.Append(mesh);
+
+                meshes = new Mesh[] { combined };
+              }
+              else meshes = elementMeshes.ToArray();
             }
           }
         }
@@ -300,6 +405,14 @@ namespace RhinoInside.Revit.GH.Types
 
           wires = null;
         }
+
+        if (highlights is object)
+        {
+          foreach (var highlight in highlights)
+            highlight.Dispose();
+
+          highlights = null;
+        }
       }
     }
 
@@ -334,6 +447,8 @@ namespace RhinoInside.Revit.GH.Types
     public Mesh[] TryGetPreviewMeshes() => GeometryPreview.meshes;
 
     public Curve[] TryGetPreviewWires() => GeometryPreview.wires;
+
+    public Curve[] TryGetPreviewHighlights() => GeometryPreview.highlights;
     #endregion
 
     #region IGH_PreviewData
@@ -347,46 +462,55 @@ namespace RhinoInside.Revit.GH.Types
         return;
 
       var material = args.Material;
-      var element = Value;
-      if (element is null)
-      {
-        const int factor = 3;
+      //var element = Value;
+      //if (element is null)
+      //{
+      //  const int factor = 3;
 
-        // Erased element
-        material = new Rhino.Display.DisplayMaterial(material)
-        {
-          Diffuse = System.Drawing.Color.FromArgb(20, 20, 20),
-          Emission = System.Drawing.Color.FromArgb(material.Emission.R / factor, material.Emission.G / factor, material.Emission.B / factor),
-          Shine = 0.0,
-        };
-      }
-      else if (!element.Pinned)
-      {
-        if (args.Pipeline.DisplayPipelineAttributes.ShadingEnabled)
-        {
-          // Unpinned element
-          if (args.Pipeline.DisplayPipelineAttributes.UseAssignedObjectMaterial)
-          {
-            var materials = TryGetPreviewMaterials();
+      //  // Erased element
+      //  material = new Rhino.Display.DisplayMaterial(material)
+      //  {
+      //    Diffuse = System.Drawing.Color.FromArgb(20, 20, 20),
+      //    Emission = System.Drawing.Color.FromArgb(material.Emission.R / factor, material.Emission.G / factor, material.Emission.B / factor),
+      //    Shine = 0.0,
+      //  };
+      //}
+      //else if (!element.Pinned)
+      //{
+      //  if (args.Pipeline.DisplayPipelineAttributes.ShadingEnabled)
+      //  {
+      //    // Unpinned element
+      //    if (args.Pipeline.DisplayPipelineAttributes.UseAssignedObjectMaterial)
+      //    {
+      //      var materials = TryGetPreviewMaterials();
 
-            for (int m = 0; m < meshes.Length; ++m)
-              args.Pipeline.DrawMeshShaded(meshes[m], materials[m]);
+      //      for (int m = 0; m < meshes.Length; ++m)
+      //        args.Pipeline.DrawMeshShaded(meshes[m], materials[m]);
 
-            return;
-          }
-          else
-          {
-            material = new Rhino.Display.DisplayMaterial(material)
-            {
-              Diffuse = element.Category?.LineColor.ToColor() ?? System.Drawing.Color.White,
-              Transparency = 0.0
-            };
+      //      return;
+      //    }
+      //    else
+      //    {
+      //      material = new Rhino.Display.DisplayMaterial(material)
+      //      {
+      //        Diffuse = element.Category?.LineColor.ToColor() ?? System.Drawing.Color.White,
+      //        Transparency = 0.0
+      //      };
 
-            if (material.Diffuse == System.Drawing.Color.Black)
-              material.Diffuse = System.Drawing.Color.White;
-          }
-        }
-      }
+      //      if (material.Diffuse == System.Drawing.Color.Black)
+      //        material.Diffuse = System.Drawing.Color.White;
+
+      //      var materials = TryGetPreviewMaterials();
+      //      for (int m = 0; m < meshes.Length; ++m)
+      //      {
+      //        material.Transparency = materials[m].Transparency;
+      //        args.Pipeline.DrawMeshShaded(meshes[m], material);
+      //      }
+
+      //      return;
+      //    }
+      //  }
+      //}
 
       foreach (var mesh in meshes)
         args.Pipeline.DrawMeshShaded(mesh, material);
@@ -397,49 +521,46 @@ namespace RhinoInside.Revit.GH.Types
       if (!IsValid)
         return;
 
-      if (!args.Pipeline.DisplayPipelineAttributes.ShowSurfaceEdges && args.Thickness <= 1)
-        return;
-
-      int thickness = 1; //args.Thickness;
-
+      var thickness = args.Thickness * args.Pipeline.DpiScale;
       var color = args.Color;
-      var element = Value;
-      if (element is null)
+
+      var drawBox = true;
+      var higlights = TryGetPreviewHighlights();
+      if (higlights is object && higlights.Length > 0)
       {
-        // Erased element
-        const int factor = 3;
-        color = System.Drawing.Color.FromArgb(args.Color.R / factor, args.Color.G / factor, args.Color.B / factor);
-      }
-      else if (!element.Pinned)
-      {
-        // Unpinned element
-        if (args.Thickness <= 1 && args.Pipeline.DisplayPipelineAttributes.UseAssignedObjectMaterial)
-          color = System.Drawing.Color.Black;
+        drawBox = false;
+        DrawWires(args.Pipeline, higlights, System.Drawing.Color.FromArgb(100, color), thickness/*, 5.0f*/);
       }
 
       var wires = TryGetPreviewWires();
       if (wires is object && wires.Length > 0)
       {
-        foreach (var wire in wires)
-          args.Pipeline.DrawCurve(wire, color, thickness);
+        drawBox = false;
+        DrawWires(args.Pipeline, wires, color, thickness);
       }
-      else
+
+      if (drawBox) base.DrawViewportWires(args);
+    }
+
+    private static void DrawWires(DisplayPipeline pipeline, IEnumerable<Curve> wires, System.Drawing.Color color, float thickness, float? pattern = default)
+    {
+#if RHINO_8
+      var pen = new DisplayPen()
       {
-        var meshes = TryGetPreviewMeshes();
-        if (meshes is object)
-        {
-          if (meshes.Length == 0)
-          {
-            base.DrawViewportWires(args);
-          }
-          else if (Grasshopper.CentralSettings.PreviewMeshEdges)
-          {
-            foreach (var mesh in meshes)
-              args.Pipeline.DrawMeshWires(mesh, color, thickness);
-          }
-        }
-        else base.DrawViewportWires(args);
-      }
+        Color = color,
+        Thickness = thickness,
+        ThicknessSpace = CoordinateSystem.Screen,
+        PatternLengthInWorldUnits = false,
+      };
+
+      if (pattern.HasValue) pen.SetPattern(new float[] { pattern.Value, pattern.Value });
+
+      foreach (var wire in wires)
+        pipeline.DrawCurve(wire, pen);
+#else
+      foreach (var wire in wires)
+        pipeline.DrawCurve(wire, color, (int) Math.Round(thickness));
+#endif
     }
     #endregion
 
@@ -631,12 +752,13 @@ namespace RhinoInside.Revit.GH.Types
                     geoAtt.ColorSource = ObjectColorSource.ColorFromObject;
                     geoAtt.ObjectColor = NoBlack(faceMaterial.ObjectColor);
 #endif
-                    if ((geo as Brep)?.TryGetExtrusion(out var extrusion) is true) geo = extrusion;
+                    if ((geo as Brep)?.TryGetExtrusion(out var extrusion) is true)
+                      geo = extrusion;
                   }
                 }
                 else
                 {
-                  if (geo is Brep brepFrom && brepFrom.TryGetExtrusion(out var extrusion))
+                  if ((geo as Brep)?.TryGetExtrusion(out var extrusion) is true)
                     geo = extrusion;
                 }
               }
@@ -649,6 +771,8 @@ namespace RhinoInside.Revit.GH.Types
 
         if (index < 0) index = doc.InstanceDefinitions.Add(idef_name, idef_description, Point3d.Origin, geometry, attributes);
         else if (!doc.InstanceDefinitions.ModifyGeometry(index, geometry, attributes)) index = -1;
+
+        if (index >= 0) idMap[element.Id] = doc.InstanceDefinitions[index].Id;
       }
 
       return index >= 0;
@@ -667,8 +791,7 @@ namespace RhinoInside.Revit.GH.Types
     )
     {
       // 1. Check if is already cloned
-      if (idMap.TryGetValue(Id, out guid))
-        return true;
+      guid = Guid.Empty;
 
       // 3. Update if necessary
       if (Value is ARDB.Element element)
@@ -709,10 +832,7 @@ namespace RhinoInside.Revit.GH.Types
               }
 
               if (guid != Guid.Empty)
-              {
-                idMap.Add(Id, guid);
                 return true;
-              }
             }
           }
         }
@@ -720,11 +840,10 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
-#endregion
+    #endregion
 
     #region ModelContent
 #if RHINO_8
-
     static void PeekModelAttributes(IDictionary<ARDB.ElementId, ModelContent> idMap, ModelObject.Attributes attributes, ARDB.Document document)
     {
       var context = GeometryDecoder.Context.Peek;
@@ -885,10 +1004,7 @@ namespace RhinoInside.Revit.GH.Types
               context.Category = element.Category;
               context.Material = element.Category?.Material;
 
-              var location = element.Category is null || element.Category.Parent is object ?
-                Plane.WorldXY :
-                Location;
-
+              var location = Location;
               var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
               if (ToModelInstanceDefinition(idMap, worldToElement, element, geometry) is ModelInstanceDefinition definition)
               {
@@ -897,6 +1013,7 @@ namespace RhinoInside.Revit.GH.Types
                 attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
                 attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
                 attributes.Layer = Category.ToModelContent(idMap) as ModelLayer;
+                attributes.Frame = location;
 
                 modelContent = attributes.ToModelData() as ModelContent;
                 //idMap.Add(Id, modelContent);
@@ -910,13 +1027,10 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 #endif
-#endregion
+    #endregion
 
     #region IHostElementAccess
-    GraphicalElement IHostElementAccess.HostElement => Value is ARDB.Element element ?
-      element.ViewSpecific ? OwnerView?.Viewer :
-      HostElement :
-      default;
+    GraphicalElement IHostElementAccess.HostElement => HostElement;
 
     public virtual GraphicalElement HostElement => Value is ARDB.Element element ?
       GetElement<GraphicalElement>(element.LevelId) :

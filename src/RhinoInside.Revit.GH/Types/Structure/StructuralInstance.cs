@@ -6,8 +6,11 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using External.DB.Extensions;
 
-  [Kernel.Attributes.Name("Structural Member")]
-  public class StructuralMember : FamilyInstance
+  [Kernel.Attributes.Name("Structural Component")]
+  public interface IGH_StructuralInstance : IGH_FamilyInstance { }
+
+  [Kernel.Attributes.Name("Structural Component")]
+  public class StructuralInstance : FamilyInstance, IGH_StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
@@ -15,8 +18,8 @@ namespace RhinoInside.Revit.GH.Types
       return ((element as ARDB.FamilyInstance)?.StructuralType) != ARDB.Structure.StructuralType.NonStructural;
     }
 
-    public StructuralMember() { }
-    public StructuralMember(ARDB.FamilyInstance value) : base(value) { }
+    public StructuralInstance() { }
+    public StructuralInstance(ARDB.FamilyInstance value) : base(value) { }
 
     #region Joins
     public static bool IsStructuralFraming(ARDB.FamilyInstance frame) =>
@@ -68,10 +71,48 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
+
+    #region Location
+    //public override Surface Surface
+    //{
+    //  get
+    //  {
+    //    if (Value is ARDB.FamilyInstance instance && instance.Location is ARDB.LocationPoint location)
+    //    {
+    //      if (instance.Symbol.Family.FamilyPlacementType == ARDB.FamilyPlacementType.OneLevelBased)
+    //      {
+    //        var origin = location.Point;
+    //        var uDim = instance.Symbol.GetStructuralSection().GetBoundarySize().U * Revit.ModelUnits;
+    //        var vDim = instance.Symbol.GetStructuralSection().GetBoundarySize().V * Revit.ModelUnits;
+
+    //        // Convert Revit's basis vectors to Rhino vectors
+    //        var transform = instance.GetTransform();
+    //        var basisX = transform.BasisX.ToVector3d();
+    //        var basisY = transform.BasisY.ToVector3d();
+
+    //        var halfUDim = uDim / 2.0;
+    //        var halfVDim = vDim / 2.0;
+
+    //        // Calculate the four corner points
+    //        var pt0 = origin.ToPoint3d() - basisX * halfUDim - basisY * halfVDim; // Lower-left corner
+    //        var pt1 = origin.ToPoint3d() + basisX * halfUDim - basisY * halfVDim; // Lower-right corner
+    //        var pt2 = origin.ToPoint3d() + basisX * halfUDim + basisY * halfVDim; // Upper-right corner
+    //        var pt3 = origin.ToPoint3d() - basisX * halfUDim + basisY * halfVDim; // Upper-left corner
+
+    //        // Create the NurbsSurface from the four corner points
+    //        var nurbsSurface = NurbsSurface.CreateFromCorners(pt0, pt1, pt2, pt3);
+    //        return nurbsSurface;
+    //      }
+    //    }
+
+    //    return base.Surface;
+    //  }
+    //}
+    #endregion
   }
 
   [Kernel.Attributes.Name("Structural Beam")]
-  public class StructuralBeam : StructuralMember
+  public class StructuralBeam : StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
@@ -118,7 +159,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Brace")]
-  public class StructuralBrace : StructuralMember
+  public class StructuralBrace : StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
@@ -131,7 +172,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Column")]
-  public class StructuralColumn : StructuralMember
+  public class StructuralColumn : StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
@@ -179,7 +220,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Foundation")]
-  public class StructuralFooting : StructuralMember
+  public class StructuralFooting : StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
@@ -192,7 +233,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Framing")]
-  public class StructuralFraming : StructuralMember
+  public class StructuralFraming : StructuralInstance
   {
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)

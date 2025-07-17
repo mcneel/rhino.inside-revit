@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Sketch")]
-  public class Sketch : GraphicalElement
+  public sealed class Sketch : GraphicalElement
   {
     protected override Type ValueType => typeof(ARDB.Sketch);
     public new ARDB.Sketch Value => base.Value as ARDB.Sketch;
@@ -223,7 +223,7 @@ namespace RhinoInside.Revit.GH.Types
       var pi = 0;
       foreach (var boundary in boundaries)
       {
-        var profile = Curve.ProjectToPlane(boundary, plane);
+        var profile = boundary.ProjectToPlane(plane);
 
         if
         (

@@ -10,17 +10,94 @@ group: Deployment & Configs
 
 ### WIP
 
-- Added 'Reference Point' parameter.
-
 ### RC
-
-- Added 'Dimension Text' component.
-- Added 'Datum Bubbles' component.
-- Minimum Revit 2023 is 2023.1.
 
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.33 RC1" version="v1.33.9328.12948" pre_release=true time="07/16/2025" %}
+
+- Import command now works with file types other than 3DM.
+- Added Rhino 9 to the installer.
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.32" version="v1.32.9327.20567" time="07/16/2025" %}
+
+- Rhino 8.21 is now the minimum required Rhino version.
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.32 RC3" version="v1.32.9320.16107" pre_release=true time="07/09/2025" %}
+
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.32 RC2" version="v1.32.9278.16388" pre_release=true time="05/29/2025" %}
+
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.32 RC1" version="v1.32.9253.11783" pre_release=true time="05/13/2025" %}
+
+- Updated setup to install on Revit 2026.
+- Added Rhino version selector into the Options dialog.
+- Fixed a geometry conversion issue when a family name contains "invalid" characters.
+- Fixed an issue on Roofs by surface when baking.
+- Fixed 'Element Bounding Geometry' when used with curtain walls.
+
+{% include ltr/release-header.html title="v1.31" version="v1.31.9214.19602" time="05/13/2025" %}
+
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.31 RC1" version="v1.31.9200.11351" pre_release=true time="03/24/2025" %}
+
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.30 RC1" version="v1.30.9186.28099" pre_release=true time="02/24/2025" %}
+
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.29" version="v1.29.9186.27799"  time="02/24/2025" %}
+
+- Includes all changes under 1.29 RC releases listed below
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.29 RC1" version="v1.29.9140.19217" pre_release=true time="01/27/2025" %}
+
+- Added {% include ltr/comp.html uuid='5483b924' %}
+- Added {% include ltr/comp.html uuid='a353b981' %}
+- Added {% include ltr/comp.html uuid='647ac069' %}
+- Added {% include ltr/comp.html uuid='8c0ff24b' %}
+- Added {% include ltr/comp.html uuid='b5144c5d' %}
+- Added {% include ltr/comp.html uuid='f8c6588f' %}
+- Added {% include ltr/comp.html uuid='ac26c810' %}
+- Added {% include ltr/comp.html uuid='a373ce1f' %}
+- Added {% include ltr/comp.html uuid='6844cf5e' %}
+- Added {% include ltr/comp.html uuid='22c30d64' %}
+- Added {% include ltr/comp.html uuid='1d518ebf' %}
+- Miscellaneous Improvements
+
+{% include ltr/release-header.html title="v1.28" version="v1.28.9138.27861" time="01/27/2025" %}
+
+- Includes all changes under 1.28 RC releases listed below
+- Miscellaneous improvements and bug fixes
+- 
+{% include ltr/release-header.html title="v1.28 RC2" version="v1.28.9133.21774" pre_release=true time="01/07/2025" %}
+
+- Fix on {% include ltr/comp.html uuid='2beb60ba' %} component when updating element location.
+
+{% include ltr/release-header.html title="v1.28 RC1" version="v1.28.9121.7332" pre_release=true time="12/21/2024" %}
+
+- Miscellaneous Improvements
+
+{% include ltr/release-header.html title="v1.27" version="v1.27.9121.7152" time="12/21/2024" %}
+
+- Includes all changes under 1.27 RC releases listed below
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.27 RC2" version="v1.27.9101.27850" pre_release=true time="12/01/2024" %}
+
+- Added {% include ltr/comp.html uuid='7b229f5e' %}
+- Added {% include ltr/comp.html uuid='198ca8b8' %}
+- Minimum Revit 2023 is 2023.1
 
 {% include ltr/release-header.html title="v1.27 RC1" version="v1.27.9090.24663" pre_release=true time="11/20/2024" %}
 

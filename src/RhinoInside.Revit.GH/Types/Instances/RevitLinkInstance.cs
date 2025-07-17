@@ -4,7 +4,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Linked Model")]
-  public class RevitLinkInstance : Instance
+  public sealed class RevitLinkInstance : Instance
   {
     protected override Type ValueType => typeof(ARDB.RevitLinkInstance);
     public new ARDB.RevitLinkInstance Value => base.Value as ARDB.RevitLinkInstance;

@@ -22,7 +22,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Category")]
-  public class Category : Element, Bake.IGH_BakeAwareElement
+  public sealed class Category : Element, Bake.IGH_BakeAwareElement
   {
     #region IGH_Goo
     public override bool IsValid => (Id?.TryGetBuiltInCategory(out var _) == true) || base.IsValid;
@@ -764,7 +764,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Line Style")]
-  public class GraphicsStyle : Element
+  public sealed class GraphicsStyle : Element
   {
     protected override Type ValueType => typeof(ARDB.GraphicsStyle);
     public new ARDB.GraphicsStyle Value => base.Value as ARDB.GraphicsStyle;

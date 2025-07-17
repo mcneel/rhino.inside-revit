@@ -61,11 +61,50 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
+
+    #region Properties
+    public AnalyticalStructuralRole StructuralRole
+    {
+#if REVIT_2023
+      get => Value is ARDB_Structure_AnalyticalElement element ? new AnalyticalStructuralRole(element.StructuralRole) : null;
+      set
+      {
+        if(Value is ARDB_Structure_AnalyticalElement element && element.StructuralRole != value.Value)
+          element.StructuralRole = value.Value;
+      }
+#else
+      get => null;
+      set => throw new Exceptions.RuntimeErrorException($"The element does not allow setting the property '{StructuralRole}'.");
+#endif
+    }
+
+    public AnalyzeAs AnalyzeAs
+    {
+#if REVIT_2023
+      get => Value is ARDB_Structure_AnalyticalElement element ? new AnalyzeAs(element.AnalyzeAs) : null;
+      set
+      {
+        if(Value is ARDB_Structure_AnalyticalElement element && element.AnalyzeAs != value.Value)
+          element.AnalyzeAs = value.Value;
+      }
+#else
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS) is ARDB.Parameter parameter ? new AnalyzeAs(parameter.AsEnum<ARDB.Structure.AnalyzeAs>()) : null;
+      set
+      {
+        if (Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS) is ARDB.Parameter parameter && parameter.AsEnum<ARDB.Structure.AnalyzeAs>() != value.Value)
+          parameter.Set(value.Value);
+      }
+#endif
+    }
+    #endregion
   }
 }
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
 #if REVIT_2023
   using ARDB_Structure_AnalyticalMember = ARDB.Structure.AnalyticalMember;
 #else
@@ -80,6 +119,23 @@ namespace RhinoInside.Revit.GH.Types
 
     public AnalyticalMember() { }
     public AnalyticalMember(ARDB_Structure_AnalyticalMember element) : base(element) { }
+
+    #region Location
+#if REVIT_2023
+    public override void SetCurve(Curve curve, bool keepJoins = false)
+    {
+      if (curve is object && Value is ARDB_Structure_AnalyticalMember member)
+      {
+        var newCurve = curve.ToCurve();
+        if (!member.GetCurve().AlmostEquals(newCurve, GeometryTolerance.Internal.VertexTolerance))
+        {
+          member.SetCurve(newCurve);
+          InvalidateGraphics();
+        }
+      }
+    }
+#endif
+    #endregion
   }
 }
 

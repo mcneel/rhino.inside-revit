@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
   public class DimensionText : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("7B229F5E-850B-486A-8B27-DF2FB17B45F1");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.hidden;
     protected override string IconTag => string.Empty;
 
     public DimensionText() : base

@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     public ClusterViewsByType() : base
     (
       name: "Cluster Views (Family)",
-      nickname: "Views By Family",
+      nickname: "C-Views",
       description: "Split a list of views into separate clusters by their family",
       category: "Revit",
       subCategory: "View"
@@ -59,22 +59,32 @@ namespace RhinoInside.Revit.GH.Components.Views
           case ARDB.ViewType.ProjectBrowser:
           case ARDB.ViewType.SystemBrowser:
             continue;
-          case ARDB.ViewType.ThreeD:          param = new Parameters.View3D(); break;
-          case ARDB.ViewType.Walkthrough:     param = new Parameters.View3D(); break;
-          case ARDB.ViewType.FloorPlan:       param = new Parameters.FloorPlan(); break;
-          case ARDB.ViewType.CeilingPlan:     param = new Parameters.CeilingPlan(); break;
-          case ARDB.ViewType.AreaPlan:        param = new Parameters.AreaPlan(); break;
-          case ARDB.ViewType.EngineeringPlan: param = new Parameters.StructuralPlan(); break;
-          case ARDB.ViewType.DrawingSheet:    param = new Parameters.ViewSheet(); break;
-          case ARDB.ViewType.Section:         param = new Parameters.SectionView(); break;
-          case ARDB.ViewType.Elevation:       param = new Parameters.ElevationView(); break;
-          case ARDB.ViewType.Detail:          param = new Parameters.DetailView(); break;
-          case ARDB.ViewType.DraftingView:    param = new Parameters.ViewDrafting(); break;
-          default:                            param = new Parameters.View(); break;
+          case ARDB.ViewType.ThreeD:                param = new Parameters.View3D() {NickName = "3D" }; break;
+          case ARDB.ViewType.AreaPlan:              param = new Parameters.AreaPlan() { NickName = "AP" }; ; break;
+          case ARDB.ViewType.CeilingPlan:           param = new Parameters.CeilingPlan() { NickName = "CP" }; break;
+          case ARDB.ViewType.ColumnSchedule:        param = new Parameters.View() { NickName = "CS" }; break;
+          case ARDB.ViewType.CostReport:            param = new Parameters.View() { NickName = "CR" }; break;
+          case ARDB.ViewType.Detail:                param = new Parameters.DetailView() { NickName = "DE" }; break;
+          case ARDB.ViewType.DraftingView:          param = new Parameters.ViewDrafting() { NickName = "DR" }; break;
+          case ARDB.ViewType.Elevation:             param = new Parameters.ElevationView() { NickName = "EL" }; break;
+          case ARDB.ViewType.FloorPlan:             param = new Parameters.FloorPlan() { NickName = "FP" }; ; break;
+          case ARDB.ViewType.Legend:                param = new Parameters.View() { NickName = "LE" }; break;
+          case ARDB.ViewType.LoadsReport:           param = new Parameters.View() { NickName = "LR" }; break;
+          case ARDB.ViewType.PanelSchedule:         param = new Parameters.View() { NickName = "PS" }; break;
+          case ARDB.ViewType.PresureLossReport:     param = new Parameters.View() { NickName = "PLR" }; break;
+          case ARDB.ViewType.Rendering:             param = new Parameters.View() { NickName = "R" }; break;
+          case ARDB.ViewType.Report:                param = new Parameters.View() { NickName = "RT" }; break;
+          case ARDB.ViewType.Section:               param = new Parameters.SectionView() { NickName = "SE" }; break;
+          case ARDB.ViewType.DrawingSheet:          param = new Parameters.ViewSheet() { NickName = "SH" }; break;
+          case ARDB.ViewType.EngineeringPlan:       param = new Parameters.StructuralPlan() { NickName = "SP" }; break;
+#if REVIT_2021
+          case ARDB.ViewType.SystemsAnalysisReport: param = new Parameters.View() { NickName = "SAR" }; break;
+#endif
+          case ARDB.ViewType.Walkthrough:           param = new Parameters.View3D() { NickName = "W" }; break;
+          default:                                  param = new Parameters.View() { NickName = value.Name.Substring(0, 1) }; break;
         }
 
         param.Name = value.Name;
-        param.NickName = value.Name.Substring(0, 1);
         param.Description = $"Views of type \"{value.Name}\"";
         param.Access = GH_ParamAccess.list;
 

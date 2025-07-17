@@ -69,9 +69,11 @@ namespace RhinoInside.Revit.GH
                 case ARDB.BuiltInParameter.VIEW_DETAIL_LEVEL: return new Types.ViewDetailLevel((ARDB.ViewDetailLevel) integer);
                 case ARDB.BuiltInParameter.VIEW_DISCIPLINE: return new Types.ViewDiscipline((ARDB.ViewDiscipline) integer);
                 case ARDB.BuiltInParameter.HOST_SSE_CURVED_EDGE_CONDITION_PARAM: return new Types.SlabShapeEditCurvedEdgeCondition((ERDB.SlabShapeEditCurvedEdgeCondition) integer);
-                  #if REVIT_2023
+                case ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS: return new Types.AnalyzeAs((ARDB.Structure.AnalyzeAs) integer);
+                case ARDB.BuiltInParameter.BOUNDARY_CONDITIONS_TYPE: return new Types.BoundaryConditionsType((ARDB.Structure.BoundaryConditionsType) integer);
+#if REVIT_2023
                 case ARDB.BuiltInParameter.ANALYTICAL_ELEMENT_STRUCTURAL_ROLE: return new Types.AnalyticalStructuralRole((ARDB.Structure.AnalyticalStructuralRole) integer);
-                  #endif
+#endif
               }
 
               if (builtInParameter.IsColor())

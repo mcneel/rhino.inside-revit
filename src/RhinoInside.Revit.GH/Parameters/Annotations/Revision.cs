@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class Revision : Element<Types.Revision, ARDB.Revision>
   {
-    public override GH_Exposure Exposure => GH_Exposure.secondary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.obscure;
     public override Guid ComponentGuid => new Guid("82A7462C-67EC-43EB-A520-F35E2360DC43");
 
     public Revision() : base

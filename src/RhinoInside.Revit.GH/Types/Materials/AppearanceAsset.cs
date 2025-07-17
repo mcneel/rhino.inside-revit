@@ -11,7 +11,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Appearance Asset")]
-  public class AppearanceAssetElement : Element, Bake.IGH_BakeAwareElement
+  public sealed class AppearanceAssetElement : Element, Bake.IGH_BakeAwareElement
   {
     protected override Type ValueType => typeof(ARDB.AppearanceAssetElement);
     public new ARDB.AppearanceAssetElement Value => base.Value as ARDB.AppearanceAssetElement;

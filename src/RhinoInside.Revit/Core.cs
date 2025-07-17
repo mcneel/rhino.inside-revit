@@ -189,25 +189,6 @@ namespace RhinoInside.Revit
     #endregion
 
     #region Version
-#if REVIT_2025
-    static readonly Version MinimumRevitVersion = new Version(2025, 0);
-#elif REVIT_2024
-    static readonly Version MinimumRevitVersion = new Version(2024, 3);
-#elif REVIT_2023
-    static readonly Version MinimumRevitVersion = new Version(2023, 1);
-#elif REVIT_2022
-    static readonly Version MinimumRevitVersion = new Version(2022, 1);
-#elif REVIT_2021
-    static readonly Version MinimumRevitVersion = new Version(2021, 1);
-#elif REVIT_2020
-    static readonly Version MinimumRevitVersion = new Version(2020, 0);
-#elif REVIT_2019
-    static readonly Version MinimumRevitVersion = new Version(2019, 1);
-#elif REVIT_2018
-    static readonly Version MinimumRevitVersion = new Version(2018, 2);
-#elif REVIT_2017
-    static readonly Version MinimumRevitVersion = new Version(2017, 0);
-#endif
 
     static ARUI.Result Startup(ERUI.UIHostApplication app)
     {
@@ -216,13 +197,13 @@ namespace RhinoInside.Revit
 
       // Check if Revit.exe is a supported version
       var RevitVersion = new Version(app.Services.SubVersionNumber);
-      if (RevitVersion.Major != MinimumRevitVersion.Major)
+      if (RevitVersion.Major != Distribution.MinimumRevitVersion.Major)
       {
-        app.Services.WriteJournalComment($"Expected Revit version is ({MinimumRevitVersion}) or above!!", timeStamp: false);
+        app.Services.WriteJournalComment($"Expected Revit version is ({Distribution.MinimumRevitVersion}) or above!!", timeStamp: false);
         return ARUI.Result.Cancelled;
       }
 
-      if (RevitVersion < MinimumRevitVersion)
+      if (RevitVersion < Distribution.MinimumRevitVersion)
       {
         using
         (
@@ -232,7 +213,7 @@ namespace RhinoInside.Revit
             MainIcon = ERUI.TaskDialogIcons.IconWarning,
             AllowCancellation = true,
             MainInstruction = "Unsupported Revit version",
-            MainContent = $"Please update Revit to version {MinimumRevitVersion} or higher.",
+            MainContent = $"Please update Revit to version {Distribution.MinimumRevitVersion} or higher.",
             ExpandedContent =
             (Distribution.VersionInfo is null ? "Rhino\n" :
             $"{Distribution.VersionInfo.ProductName} {Distribution.VersionInfo.ProductMajorPart}\n") +
@@ -256,7 +237,7 @@ namespace RhinoInside.Revit
               return ARUI.Result.Cancelled;
 
             case ARUI.TaskDialogResult.CommandLink2:
-              app.Services.WriteJournalComment($"Minimum Revit version is ({MinimumRevitVersion}) or above!!", timeStamp: false);
+              app.Services.WriteJournalComment($"Minimum Revit version is ({Distribution.MinimumRevitVersion}) or above!!", timeStamp: false);
               break;
 
             default:

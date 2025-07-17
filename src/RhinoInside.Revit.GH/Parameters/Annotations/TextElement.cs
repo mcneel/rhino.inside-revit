@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class TextElement : GraphicalElement<Types.TextElement, ARDB.TextElement>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.senary;
     public override Guid ComponentGuid => new Guid("E2435930-2F95-4277-BA10-B1E3A660F9DA");
 
     public TextElement() : base

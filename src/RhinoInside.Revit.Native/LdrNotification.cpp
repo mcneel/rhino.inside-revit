@@ -139,7 +139,7 @@ class LdrDllTracker
       stream.imbue(std::locale::classic());
 
       TCHAR ModuleName[2048]{};
-      if (MixedGetModuleFileName(CallStack[num], ModuleName, _countof(ModuleName)))
+      if (CallStack[num] && MixedGetModuleFileName(CallStack[num], ModuleName, _countof(ModuleName)))
         stream << ModuleName;
 
       stream << "!" << CallStack[num] << "()" << std::endl;
@@ -300,7 +300,7 @@ BOOL STDAPICALLTYPE LdrIsolateOpenNurbs(HWND hHostWnd)
     return TRUE;
 
   TCHAR ManifestFileName[MAX_PATH] {};
-  const DWORD ModuleFileNameLength = GetModuleFileName(NULL, ManifestFileName, (DWORD)std::size(ManifestFileName));
+  const DWORD ModuleFileNameLength = SearchPath(nullptr, L"opennurbs.dll", nullptr, (DWORD)std::size(ManifestFileName), ManifestFileName, nullptr);
   if (ModuleFileNameLength && ModuleFileNameLength < std::size(ManifestFileName))
   {
     if (LPTSTR FileName = std::max(_tcsrchr(ManifestFileName, '/'), _tcsrchr(ManifestFileName, '\\')))

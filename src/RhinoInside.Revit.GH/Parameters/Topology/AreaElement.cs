@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
   [ComponentVersion(introduced: "1.7")]
   public class AreaElement : GraphicalElement<Types.AreaElement, ARDB.Area>
   {
-    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.obscure;
+    public override GH_Exposure Exposure => GH_Exposure.senary;
     public override Guid ComponentGuid => new Guid("66AAAE96-BA85-4DC7-A188-AC213FAD3176");
 
     public AreaElement() : base

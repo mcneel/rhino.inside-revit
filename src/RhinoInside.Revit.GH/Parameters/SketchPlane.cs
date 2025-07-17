@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public class SketchPlane : GraphicalElement<Types.SketchPlane, Autodesk.Revit.DB.SketchPlane>
   {
     public override Guid ComponentGuid => new Guid("93BF1F61-69AD-433F-A202-352C14E4CED8");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     public SketchPlane() : base("Work Plane", "Work Plane", "Contains a collection of Revit work plane elements", "Params", "Revit") { }
   }

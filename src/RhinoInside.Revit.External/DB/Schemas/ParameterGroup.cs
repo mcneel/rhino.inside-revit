@@ -5,7 +5,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
   /// <summary>
   /// Represents an Autodesk.Revit.DB.BuiltInParameterGroup
   /// </summary>
-  public partial class ParameterGroup : DataType
+  public sealed partial class ParameterGroup : DataType
   {
     public static new ParameterGroup Empty { get; } = new ParameterGroup();
 
