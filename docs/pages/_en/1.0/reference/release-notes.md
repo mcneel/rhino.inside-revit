@@ -16,6 +16,11 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.32" version="v1.32.9327.20567" time="07/16/2025" %}
+
+- Rhino 8.21 is now the minimum required Rhino version.
+- Miscellaneous improvements and bug fixes
+
 {% include ltr/release-header.html title="v1.32 RC3" version="v1.32.9320.16107" pre_release=true time="07/09/2025" %}
 
 - Miscellaneous improvements and bug fixes
