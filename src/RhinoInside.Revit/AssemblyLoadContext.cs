@@ -94,7 +94,7 @@ namespace System.Runtime.Loader
       lock (AllContexts)
       {
         AllContexts.Add(this);
-        Id = AllContexts.Count;
+        Id = AllContexts.Count - 1;
       }
     }
 
