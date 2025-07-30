@@ -9,6 +9,10 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(Configuration.Contains('Release'))">
+    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\Distribution.cs" />
   </ItemGroup>

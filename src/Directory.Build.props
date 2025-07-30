@@ -38,6 +38,8 @@
 
     <!-- Code Analysis -->
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+
+    <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <!-- Build configurations for each combination Revit-Rhino -->
