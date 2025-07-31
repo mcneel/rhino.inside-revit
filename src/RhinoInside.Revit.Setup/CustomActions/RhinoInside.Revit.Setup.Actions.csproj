@@ -43,9 +43,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="Properties\CustomAction.config" />
+    <Compile Include="ValidateInstallLocations.cs" />
+    <Compile Include="WIPExpirationDateWarning.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(WixCATargetsPath)" Condition=" '$(WixCATargetsPath)' != '' " />
