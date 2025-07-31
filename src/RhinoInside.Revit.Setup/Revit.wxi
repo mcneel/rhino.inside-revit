@@ -66,45 +66,16 @@
     </Property>
 
     <InstallUISequence>
-      <Custom Action="ValidateRevitInstallLocation" After="AppSearch"/>
+      <Custom Action="ValidateRevitInstallLocations" After="AppSearch"/>
     </InstallUISequence>
 
     <InstallExecuteSequence>
-      <Custom Action="ValidateRevitInstallLocation" After="AppSearch"/>
+      <Custom Action="ValidateRevitInstallLocations" After="AppSearch"/>
     </InstallExecuteSequence>
 
-    <CustomAction Id="ValidateRevitInstallLocation" Script="vbscript" Execute="immediate" Return="check" >
-      <![CDATA[
-      Sub ValidateInstallLocation(LocationProperty)
-        InstallLocation = Session.Property(LocationProperty)
-
-        ' If InstallLocation is relative we assume is under "%PROGRAMFILES%\Autodesk"
-        If Mid(InstallLocation, 2, 2) <> ":\" Then
-          ProgramFilesFolder = Session.Property("ProgramFiles64Folder")
-          InstallLocation = ProgramFilesFolder & "Autodesk\" & InstallLocation
-        End If
-
-        ' If Revit.exe is not at InstallLocation we assume Revit is not installed
-        If Session.Installer.FileAttributes(InstallLocation & "Revit.exe") = -1 Then
-          Session.Property(LocationProperty) = ""
-        Else
-          Session.Property(LocationProperty) = InstallLocation
-        End If
-      End Sub
-
-      If Session.EvaluateCondition("Installed") = 0 Then
-        ValidateInstallLocation("REVIT2018_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2019_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2020_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2021_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2022_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2023_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2024_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2025_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2026_INSTALLLOCATION")
-      End If
-      ]]>
-    </CustomAction>
+    <CustomAction Id="ValidateRevitInstallLocations"
+                  BinaryKey="CustomActions" DllEntry="ValidateInstallLocations"
+                  Execute="immediate" Return="check" />
 
     <DirectoryRef Id="TARGETDIR">
       <Directory Id="ProgramFiles64Folder">
