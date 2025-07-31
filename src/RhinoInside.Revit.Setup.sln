@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		ProductInfo.xml = ProductInfo.xml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhinoInside.Revit.Setup.Actions", "RhinoInside.Revit.Setup\CustomActions\RhinoInside.Revit.Setup.Actions.csproj", "{BDC88979-6D70-4AE8-9DBC-F34D3D46E3C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -20,6 +22,9 @@ Global
 		{25D80B8C-F993-445C-993F-A39C8772F40B}.Debug|x64.Build.0 = Debug|x64
 		{25D80B8C-F993-445C-993F-A39C8772F40B}.Release|x64.ActiveCfg = Release|x64
 		{25D80B8C-F993-445C-993F-A39C8772F40B}.Release|x64.Build.0 = Release|x64
+		{BDC88979-6D70-4AE8-9DBC-F34D3D46E3C2}.Debug|x64.ActiveCfg = Debug|x64
+		{BDC88979-6D70-4AE8-9DBC-F34D3D46E3C2}.Release|x64.ActiveCfg = Release|x64
+		{BDC88979-6D70-4AE8-9DBC-F34D3D46E3C2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
