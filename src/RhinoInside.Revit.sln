@@ -6,6 +6,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 		..\docs\pages\_en\1.0\reference\release-notes.md = ..\docs\pages\_en\1.0\reference\release-notes.md
+		Rhino.Inside.Revit.nuspec = Rhino.Inside.Revit.nuspec
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RhinoInside.Revit.Native", "RhinoInside.Revit.Native\RhinoInside.Revit.Native.vcxproj", "{CE1818BB-B141-47BC-A253-F855FC4123CF}"
