@@ -1779,6 +1779,20 @@ namespace RhinoInside.Revit.Convert.Render
       }
     }
 
+    internal static void SetProperty(this Asset asset, string name, double value, UnitScale units)
+    {
+      using (var property = asset.FindByName(name))
+      {
+        property.RemoveConnectedAsset();
+        switch (property)
+        {
+          case AssetPropertyDistance distanceProperty:
+            distanceProperty.Value = ARDB.UnitUtils.Convert(value * units, DBXS.UnitType.Meters, distanceProperty.GetUnitTypeId());
+            break;
+        }
+      }
+    }
+
     internal static void SetProperty(this Asset asset, string name, Color4f value)
     {
       using (var property = asset.FindByName(name) as AssetPropertyDoubleArray4d)
@@ -1807,19 +1821,36 @@ namespace RhinoInside.Revit.Convert.Render
 
           if (value is object)
           {
-            if (value.TypeId == ContentUuids.SimpleBitmapTextureType)
+            var schema = string.Empty;
+            if (value.TypeId == ContentUuids.SimpleBitmapTextureType || value.TypeId == ContentUuids.BitmapTextureType)
+              schema = "UnifiedBitmap";
+
+            if (schema == "UnifiedBitmap")
             {
-              property.AddConnectedAsset("UnifiedBitmap");
+              var modelScale = value.DocumentOwner is RhinoDoc rhinoDoc ? UnitScale.GetModelScale(rhinoDoc) : UnitScale.Meters;
+
+              property.AddConnectedAsset(schema);
               var bitmap = property.GetSingleConnectedAsset();
 
-              bitmap.SetProperty(UnifiedBitmap.UnifiedbitmapBitmap, value.Filename);
-            }
-            else if (value.TypeId == ContentUuids.BitmapTextureType)
-            {
-              property.AddConnectedAsset("UnifiedBitmap");
-              var bitmap = property.GetSingleConnectedAsset();
+              var offset = value.GetOffset();
+              bitmap.SetProperty(UnifiedBitmap.TextureRealWorldOffsetX, offset.X, modelScale);
+              bitmap.SetProperty(UnifiedBitmap.TextureRealWorldOffsetY, offset.Y, modelScale);
 
-              bitmap.SetProperty(UnifiedBitmap.UnifiedbitmapBitmap, value.Filename);
+              var repeat = value.GetRepeat();
+              bitmap.SetProperty(UnifiedBitmap.TextureRealWorldScaleX, 1.0 / repeat.X, modelScale);
+              bitmap.SetProperty(UnifiedBitmap.TextureRealWorldScaleY, 1.0 / repeat.Y, modelScale);
+
+              var rotation = value.GetRotation();
+              bitmap.SetProperty(UnifiedBitmap.TextureWAngle, RhinoMath.ToDegrees(rotation.Z));
+
+              if (File.Exists(value.Filename))
+                bitmap.SetProperty(UnifiedBitmap.UnifiedbitmapBitmap, value.Filename);
+
+              if (value.Fields.TryGetValue("rdk-texture-adjust-invert", out bool inverted))
+                bitmap.SetProperty(UnifiedBitmap.UnifiedbitmapInvert, inverted);
+
+              if (value.Fields.TryGetValue("rdk-texture-adjust-multiplier", out double multiplier))
+                bitmap.SetProperty(UnifiedBitmap.UnifiedbitmapRGBAmount, multiplier);
             }
           }
         }
